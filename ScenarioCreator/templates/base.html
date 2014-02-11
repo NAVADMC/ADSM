@@ -3,11 +3,15 @@
 <head>
     <title></title>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/spreadmodel.css" />
     <script src="{{ STATIC_URL }}js/jquery-2.1.0.min.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
 </head>
 <body>
-{% block content %}
+<header>
+    <h1 class="filename">Filename</h1>
+</header>
+{% block main %}
 
 {% endblock %}
 </body>
