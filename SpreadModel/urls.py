@@ -6,7 +6,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'SpreadModel.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
+    url(r'^setup/', include('ScenarioCreator.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
 )
