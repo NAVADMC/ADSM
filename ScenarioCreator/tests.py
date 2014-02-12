@@ -19,3 +19,12 @@ class CreatorTest(TestCase):
         #"exit_condition":...
         self.assertEqual(r.status_code, 200)
         self.assertEqual(Scenario.objects.count(), length +1)
+
+    def test_edit_scenario(self):
+        r = self.client.post('/setup/new/', {'description':'words', "naadsm_version":'3.2.19', "language":'en',
+                                             "num_runs":'10', "num_days":'40', 'scenario_name':'sample'})#TODO complete top level spec
+        r = self.client.get('/setup/1/')
+        r = self.client.post('/setup/1/', {'description':'Updated Description', "naadsm_version":'3.2.19', "language":'en',
+                                             "num_runs":'10', "num_days":'40', 'scenario_name':'sample'})
+        self.assertEqual(Scenario.objects.get(pk=1).description, 'Updated Description')
+
