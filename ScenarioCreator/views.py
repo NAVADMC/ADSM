@@ -7,5 +7,8 @@ def start_window(request):
     return render(request, 'ScenarioCreator/index.html', context)
 
 def new_scenario(request):
-    context = {'form': ScenarioForm()}
+    initialized_form = ScenarioForm(request.POST or None)
+    if initialized_form.is_valid():
+        initialized_form.save(); #write to database
+    context = {'form': initialized_form}
     return render(request, 'ScenarioCreator/new.html', context)
