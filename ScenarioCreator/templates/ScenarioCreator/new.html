@@ -1,6 +1,9 @@
 {% extends 'ScenarioCreator/scenarioBase.html' %}
+{% load floppyforms %}
+
 {% block content %}
 <h1>Create a new scenario</h1>
-    {{ form.as_p }}
-
+    <form action="" method="post">
+        {% form form using "floppyforms/layouts/bootstrap.html" %}
+    </form>
 {% endblock %}
