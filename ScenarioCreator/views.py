@@ -8,6 +8,7 @@ def start_window(request):
     context = {'motd':'Remember your quotes!'}
     return render(request, 'ScenarioCreator/index.html', context)
 
+
 def new_scenario(request):
     initialized_form = ScenarioForm(request.POST or None)
     if initialized_form.is_valid():
@@ -15,7 +16,6 @@ def new_scenario(request):
     context = {'form': initialized_form}
     context['title'] = "Create a new scenario"
     return render(request, 'ScenarioCreator/new.html', context)
-
 
 
 def edit_scenario(request, primary_key):
