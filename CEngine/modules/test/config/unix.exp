@@ -1,0 +1,697 @@
+#
+# Set up some global variables.  These variables could be set on the command
+# line, so we set them only if they don't already exist.
+#
+if ![info exists prompt] then {
+	set prompt "> "
+}
+
+if ![info exists floatpat] then {
+	set floatpat "\[+-\]?\[0-9\]+(?:.\[0-9\]+)?(?:\[eE\]\[+-\]\[0-9\]+)?"
+}
+
+if ![info exists epsilon] then {
+	set epsilon 0.0005
+}
+
+
+
+#
+# fcmp -- compares two floating-point numbers.
+#
+# Parameters:
+#   a,b  the numbers to compare
+#   tol  the tolerance
+# Returns:
+#   0 if they are approximately equal; otherwise, returns -1 if a < b, +1 if
+#   a > b.
+#
+proc fcmp { a b tol } {
+	return [exec [file join test fcmp] $a $b $tol]
+}
+
+
+
+#
+# Regular expressions for matching the simulation output.
+#
+# A C-style variable name: a letter followed by zero or more letters, numbers,
+# underscores, or dashes.
+#
+set varnamepat "\[a-zA-Z\]\[a-zA-Z0-9_-\]*"
+#
+# A variable value: a floating-point number.
+#
+set varvaluepat "(?:(?:$floatpat))"
+#|(?:\{\[^\}\]\})
+#
+# A complete output variable: name=value.
+#
+set varpat "(?:$varnamepat=$varvaluepat)"
+set rowpat "node 0 run 0\[\\n\\r \]+\[0-9 \]*($varpat *)*"
+set rowspat "(?:$rowpat\[\\n\\r \]*)+"
+#
+# A line of a table of reporting variables.
+#
+set tablelinepat "\[^,\]+(,\[^,\]*)*"
+set tablelinespat "Run,Day(,\[^,\]*)*\[\\n\\r \]*($tablelinepat\[\\n\\r \]*)+"
+
+
+
+#
+# Herd state names
+#
+set state_name { Susceptible Latent InfectiousSubclinical \
+  InfectiousClinical NaturallyImmune VaccineImmune Destroyed }
+
+
+
+#
+# Turns the simulation output into a Tcl list.  For example, the output
+#
+# node 0 run 0
+# 0 1 3 4
+# node 0 run 0
+# 0 1 6 4
+#
+# will be returned as { {0 1 3 4} {0 1 6 4} }.
+#
+proc simoutput_string_to_list { s } {
+	set result {}
+	# Get rid of carriage returns and any trailing newlines.
+	regsub -all {[\r]} [string trim $s] "" s
+	# Get rid of the node/run lines.
+	regsub -all {node 0 run 0\n} $s "" s
+	set s [split $s "\n"]
+	for {set i 0} {$i < [llength $s]} {incr i} {
+		lappend result [split [string trim [lindex $s $i]] " "]
+	}
+	return $result
+}
+
+
+
+#
+# Turns simulation output in table form into a Tcl list.  For example, the
+# output
+#
+# Run,Day,x,y:a,y:b
+# 1,1,1,2,3
+# 1,2,4,5,6
+#
+# will be returned as { {x 1 4} {y:a 2 5} {y:b 3 6} }
+#
+proc simvaroutput_string_to_list { s } {
+  global varnamepat
+  global varvaluepat
+
+  set result {}
+	#
+	# Get rid of carriage returns and any trailing newlines.
+	#
+	regsub -all {[\r]} [string trim $s] "" s
+	#
+	# Split on newlines.
+	#
+	set s [split $s "\n"]
+	#
+	# Get the variable names from the header line.  The variable names start in
+	# position 2, they are preceded by "Run" and "Day".
+	#
+	set header_line [lindex $s 0]
+	set varnames [split $header_line ","]
+  set varnames [lrange $varnames 2 [llength $varnames]]
+
+	for {set i 0} {$i < [llength $varnames]} {incr i} {
+		set varname [lindex $varnames $i]
+
+		set values [list $varname]
+		for {set j 1} {$j < [llength $s]} {incr j} {
+			set line [lindex $s $j]
+
+			set columns [split $line ","]
+			#
+			# Get the value for the variable we're currently interested in.  The +2
+			# is needed to skip the "Run" and "Day" columns.
+			#
+			set value [lindex $columns [expr $i + 2]]
+			lappend values $value
+		}
+
+		lappend result $values
+	}
+
+	return $result
+}
+
+
+
+#
+# progress_test -- tests that the correct sequence of herd states is output
+#   from a simulation.
+#
+# Parameters:
+#   params   parameter file name
+#   herds    herds file name
+#   answer   the correct sequence of states
+#   test     a name to report in passes/fails (default = "progress")
+# Returns:
+#   nothing
+#
+proc progress_test { params herds answer {test "progress"} } {
+	global prompt
+	global rowspat
+	global state_name
+	global verbose
+
+	set true_ndays [llength $answer]
+	set true_nherds [llength [lindex $answer 0]]
+	send "$herds $params\n"
+	expect {
+		-re "($rowspat).*$prompt$" {
+			set output [simoutput_string_to_list $expect_out(1,string)]
+
+			#
+			# Check that the output has the correct number of days and herds.
+			#
+			set ndays [llength $output]
+			if { $ndays != $true_ndays } {
+				fail "$test output should have $true_ndays days, not $ndays"
+				return
+			}
+			set nherds [llength [lindex $output 0]]
+			if { $nherds != $true_nherds } {
+				fail "$test output should have $true_nherds herds, not $nherds"
+				return
+			}
+			
+			#
+			# Check that individual states are correct.
+			#
+			for {set day 0} {$day < $true_ndays} {incr day} {
+				for {set herd 0} {$herd < $true_nherds} {incr herd} {
+					set true_state [lindex [lindex $answer $day] $herd]
+					set state [lindex $state_name [lindex [lindex $output $day] $herd]]
+					if { [string compare $true_state $state] != 0 } {
+						fail "$test on day $day herd $herd should be in state $true_state, not $state"
+						return
+					}
+				}
+			}
+		}
+		-re "No such file.*$prompt$" {
+		  fail "$test pre-generated output file not found"
+		}
+	}
+
+	pass $test
+}
+
+
+
+#
+# stochastic_progress_test -- when a test cannot be done deterministically, 
+#   this function will run a test many times and check that all possible
+#   correct sequences of herd states are output from a simulation, with the
+#   expected frequencies.
+#
+# Parameters:
+#   params       parameter file name
+#   herds        herds file name
+#   answer       a list of (frequency, sequence of states) lists
+#   test         a name to report in passes/fails (default = "stochastic_progress")
+#   iterations   (default = 100)
+#   tol          (default = 0.05)
+# Returns:
+#   nothing
+#
+proc stochastic_progress_test { params herds answer {test "stochastic_progress"} {iterations 100} {tol 0.05}} {
+	global prompt
+	global rowspat
+	global state_name
+	global epsilon
+	global verbose
+
+	set noutcomes [llength $answer]
+	set first_outcome [lindex $answer 0]
+	set true_nherds [llength [lindex $first_outcome 1]]
+
+	set true_freq []
+	for {set i 0} {$i < $noutcomes} {incr i} {
+		lappend true_freq [lindex [lindex $answer $i] 0]
+	}
+
+	#
+	# Initialize a list of counts -- how many times each possible outcome
+	# occurs.
+	#	
+	set freq []
+	for {set i 0} {$i < $noutcomes} {incr i} {
+		lappend freq 0	
+	}
+	
+	for {set i 0} {$i < $iterations} {incr i} {
+		send "stochastic $herds $params\n"
+		expect {
+			-re "($rowspat).*$prompt$" {
+				set output [simoutput_string_to_list $expect_out(1,string)]
+
+				#
+				# Check that the output has the correct number of herds.
+				#
+				set nherds [llength [lindex $output 0]]
+				if { $nherds != $true_nherds } {
+					fail "$test output should have $true_nherds herds, not $nherds"
+					return
+				}
+				set ndays [llength $output]
+
+				#
+				# Check that the sequence of states matches one of the possible
+				# outcomes.
+				#
+				set errors []
+				for {set j 0} {$j < $noutcomes} {incr j} {
+					set true_states [lindex $answer $j]
+					set error ""
+
+					#
+					# Check that the output has the correct number of days.
+					#
+					set true_ndays [expr [llength $true_states] - 1]
+					if { $ndays != $true_ndays } {
+						set error "in outcome [expr $j + 1] output should have $true_ndays days, not $ndays"
+					} else {
+						for {set day 0} {$day < $true_ndays} {incr day} {
+							for {set herd 0} {$herd < $true_nherds} {incr herd} {
+								set true_state [lindex [lindex $true_states [expr $day + 1]] $herd]
+								set state [lindex $state_name [lindex [lindex $output $day] $herd]]
+								if { [string compare $true_state $state] != 0 } {
+									set error "in outcome [expr $j + 1] on day $day herd $herd should be in state $true_state, not $state"
+									break
+								}
+							}
+							#
+							# If there was an error in the inner (herd) loop, abort
+							# the outer (day) loop too.
+							#
+							if { [string compare $error ""] != 0 } {
+								break
+							}
+						}
+					}
+					#
+					# If the output matched this possible outcome, increment
+					# the frequency count.  Otherwise, go on to compare the
+					# output to the next possible outcome.
+					#
+					if { [string compare $error ""] == 0 } {
+						set count [lindex $freq $j]
+						set freq [lreplace $freq $j $j [expr $count + 1]]
+						break
+					} else {
+						lappend errors $error
+					}
+				}
+				
+				#
+				# At this point the output has either matched one of the
+				# possible outcomes (in which case $error == "") or the output
+				# failed to match any possible outcome (in which case $error !=
+				# "", and the list $errors contains messages explaining how the
+				# output differed from each possible outcome).
+				#
+				if { [string compare $error ""] != 0 } {
+					fail "$test the output did not match any possible outcome\noutput was $output\nerrors are $errors"
+					return
+				}
+			}
+		}
+	}
+
+	#
+	# At the point the output from every iteration has matched one of the
+	# possible outcomes.  Now we have to check that the frequencies of each
+	# outcome roughly match what is expected.
+	#
+	for {set i 0} {$i < $noutcomes} {incr i} {
+		set count [lindex $freq $i]
+		set freq [lreplace $freq $i $i [expr 1.0 * $count / $iterations]]
+	}
+	note "expected freq = $true_freq"
+	note "actual freq = $freq"
+	for {set i 0} {$i < $noutcomes} {incr i} {
+		if { [fcmp [lindex $freq $i] [lindex $true_freq $i] $epsilon] != 0 } {
+			fail "$test outcome [expr $i + 1] should occur with frequency [lindex $true_freq $i], not [lindex $freq $i]"
+			return
+		}
+	}
+	pass $test
+}
+
+
+
+#
+# get_varnames -- returns just the variable names from a list of output
+#   variables and their values.  For example, this output:
+#
+# Run,Day,x,y:a,y:b
+# 1,1,1,2,3
+# 1,2,4,5,6
+#
+# would be sent to this function as: { {x 1 4} {y:a 2 5} {y:b 3 6} }
+#
+# and then this function would return: { x y:a y:b }
+#
+# In a stochastic setting, the incoming list has a frequency in it too:
+# { 0.5 {x 1 4} {y:a 2 5} {y:b 3 6} }
+# so this function ignores items that are just numbers.
+#
+proc get_varnames { answer } {
+	set varnames []
+	foreach varname_plus_output $answer {
+		if {![string is double $varname_plus_output]} {
+			lappend varnames [lindex $varname_plus_output 0]
+		}
+	}
+	return $varnames
+}
+
+
+
+#
+# is_subset -- checks whether list a is a subset of list b, that is, whether
+#   every item in a is also in b.
+#
+# Parameters:
+#   a            list a, the (possible) subset
+#   b            list b
+# Returns:
+#   1 if a is a subset of b.
+#
+proc is_subset { a b } {
+	set result 1
+	foreach a_item $a {
+		if { [lsearch -exact $b $a_item] == -1 } {
+			set result 0
+			break
+		}
+	}
+	return $result
+}
+
+
+
+#
+# set_difference
+#
+# Parameters:
+#   a            list a
+#   b            list b, the items to subtract from a
+# Returns:
+#   a - b
+#
+proc set_difference { a b } {
+	set result []
+	foreach a_item $a {
+		if { [lsearch -exact $b $a_item] == -1 } {
+			lappend result $a_item
+		}
+	}
+	return $result
+}
+
+
+
+#
+# variable_test -- tests that an output variable has the correct value.
+#
+# Parameters:
+#   params       parameter file name
+#   herds        herds file name
+#   answer       a list of (variable name, sequence of values) lists
+#   test         a name to report in passes/fails (default = "variable")
+# Returns:
+#   nothing
+#
+proc variable_test { params herds answer {test "variable"}} {
+	global prompt
+	global tablelinespat
+	global epsilon
+	global verbose
+
+	set true_nvars [llength $answer]
+	set true_ndays [expr [llength [lindex $answer 0]] - 1]
+	send "variables $herds $params\n"
+	expect {
+		-re "($tablelinespat).*$prompt$" {
+			set output [simvaroutput_string_to_list $expect_out(1,string)]
+
+			#
+			# Check that the output has the correct variables and number of days.
+			#
+			if { ![is_subset [get_varnames $answer] [get_varnames $output]] } {
+				set missing [set_difference [get_varnames $answer] [get_varnames $output]]
+				fail "$test output missing variable(s) $missing"
+				return
+			}
+			set ndays [expr [llength [lindex $output 0]] - 1]
+			if { $ndays != $true_ndays } {
+				fail "$test output should have $true_ndays days, not $ndays"
+				return
+			}
+			
+			#
+			# Check that individual values are correct.
+			#
+			set nvars [llength $output]
+			for {set varnum 0} {$varnum < $true_nvars} {incr varnum} {
+				set varname [lindex [lindex $answer $varnum] 0]
+				#
+				# Find the variable in the simulation output corresponding to this one.
+				#
+				for {set j 0} {$j < $nvars} {incr j} {
+					if { [string compare $varname [lindex [lindex $output $j] 0]] == 0 } {
+						# found it
+						break
+					}
+				}
+				if { $j == $nvars } {
+					fail "$test output should contain a variable named $varname"
+					return
+				}
+				for {set day 0} {$day < $true_ndays} {incr day} {
+					set true_value [lindex [lindex $answer $varnum] [expr $day + 1]]
+					set value [lindex [lindex $output $j] [expr $day + 1]]
+					if { [fcmp $value $true_value $epsilon] != 0 } {
+						fail "$test on day $day variable $varname should have value $true_value, not $value"
+						return
+					}
+				}
+			}
+	  }
+  }
+
+  pass $test
+}
+
+
+
+#
+# stochastic_variable_test -- when a test cannot be done deterministically, 
+#   this function will run a test many times and check that all possible
+#   correct sequences of variable values are output from a simulation, with the
+#   expected frequencies.
+#
+# Parameters:
+#   params       parameter file name
+#   herds        herds file name
+#   answer       a list of (frequency, (variable name, sequence of values)) lists
+#   test         a name to report in passes/fails (default = "stochastic_variable")
+#   iterations   (default = 100)
+#   tol          (default = 0.05)
+# Returns:
+#   nothing
+#
+proc stochastic_variable_test { params herds answer {test "stochastic_variable"} {iterations 100} {tol 0.05}} {
+	global prompt
+	global tablelinespat
+	global epsilon
+	global verbose
+
+	set noutcomes [llength $answer]
+	set first_outcome [lindex $answer 0]
+	set true_nvars [expr [llength $first_outcome] - 1]
+
+	set true_freq []
+	for {set i 0} {$i < $noutcomes} {incr i} {
+		lappend true_freq [lindex [lindex $answer $i] 0]
+	}
+
+	#
+	# Initialize a list of counts -- how many times each possible outcome
+	# occurs.
+	#	
+	set freq []
+	for {set i 0} {$i < $noutcomes} {incr i} {
+		lappend freq 0	
+	}
+	
+	for {set i 0} {$i < $iterations} {incr i} {
+		send "stochastic variables $herds $params\n"
+		expect {
+			-re "($tablelinespat).*$prompt$" {
+				set output [simvaroutput_string_to_list $expect_out(1,string)]
+
+				#
+				# Check that the output has the correct variables.
+				#
+				if { ![is_subset [get_varnames [lindex $answer 0]] [get_varnames $output]] } {
+					set missing [set_difference [get_varnames [lindex $answer 0]] [get_varnames $output]]
+					fail "$test output missing variable(s) $missing"
+					return
+				}
+				set nvars [llength $output]
+				set ndays [expr [llength [lindex $output 0]] - 1]
+
+				#
+				# Check that the sequence of states matches one of the possible
+				# outcomes.
+				#
+				set errors []
+				for {set j 0} {$j < $noutcomes} {incr j} {
+					set true_values [lindex $answer $j]
+					set error ""
+
+					#
+					# Check that the output has the correct number of days.
+					#
+					set true_ndays [expr [llength [lindex $true_values 1]] - 1]
+					if { $ndays != $true_ndays } {
+						set error "in outcome [expr $j + 1] output should have $true_ndays days, not $ndays"
+					} else {
+						#
+						# Check that individual values are correct.
+						#
+						for {set varnum 0} {$varnum < $true_nvars} {incr varnum} {
+							set varname [lindex [lindex $true_values [expr $varnum + 1]] 0]
+							#
+							# Find the variable in the simulation output corresponding to this one.
+							#
+							for {set k 0} {$k < $nvars} {incr k} {
+								if { [string compare $varname [lindex [lindex $output $k] 0]] == 0 } {
+									# found it
+									break
+								}
+							}
+							if { $k == $nvars } {
+								set error "$test output should contain a variable named $varname"
+								break
+							}
+						
+							for {set day 0} {$day < $true_ndays} {incr day} {
+								set true_value [lindex [lindex $true_values [expr $varnum + 1]] [expr $day + 1]]
+								set value [lindex [lindex $output $k] [expr $day + 1]]
+								if { [fcmp $value $true_value $epsilon] != 0 } {
+									set error "in outcome [expr $j + 1] on day $day variable $varname should have value $true_value, not $value"
+									break
+								}
+							}
+							#
+							# If there was an error in the inner (day) loop, abort
+							# the outer (variable name) loop too.
+							#
+							if { [string compare $error ""] != 0 } {
+								break
+							}
+						}
+					}
+					#
+					# If the output matched this possible outcome, increment
+					# the frequency count.  Otherwise, go on to compare the
+					# output to the next possible outcome.
+					#
+					if { [string compare $error ""] == 0 } {
+						set count [lindex $freq $j]
+						set freq [lreplace $freq $j $j [expr $count + 1]]
+						break
+					} else {
+						lappend errors $error
+					}
+				}
+				
+				#
+				# At this point the output has either matched one of the
+				# possible outcomes (in which case $error == "") or the output
+				# failed to match any possible outcome (in which case $error !=
+				# "", and the list $errors contains messages explaining how the
+				# output differed from each possible outcome).
+				#
+				if { [string compare $error ""] != 0 } {
+					fail "$test the output did not match any possible outcome\noutput was $output\nerrors are $errors"
+					return
+				}
+			}
+		}
+	}
+
+	#
+	# At the point the output from every iteration has matched one of the
+	# possible outcomes.  Now we have to check that the frequencies of each
+	# outcome roughly match what is expected.
+	#
+	for {set i 0} {$i < $noutcomes} {incr i} {
+		set count [lindex $freq $i]
+		set freq [lreplace $freq $i $i [expr 1.0 * $count / $iterations]]
+	}
+	note "expected freq = $true_freq"
+	note "actual freq = $freq"
+	for {set i 0} {$i < $noutcomes} {incr i} {
+		if { [fcmp [lindex $freq $i] [lindex $true_freq $i] $epsilon] != 0 } {
+			fail "$test outcome [expr $i + 1] should occur with frequency [lindex $true_freq $i], not [lindex $freq $i]"
+			return
+		}
+	}
+	pass $test
+}
+
+
+
+#
+# shell_load -- loads the program
+#
+proc shell_load { arg } {
+	#
+}
+
+
+
+#
+# shell_exit -- quit and cleanup
+#
+proc shell_exit {} {
+	#
+}
+
+
+
+proc shell_start {} {
+	global SHELL
+	global prompt
+	global spawn_id
+	global verbose
+	
+	if { $verbose > 1 } {
+		send_user "starting $SHELL\n"
+	}
+	spawn $SHELL
+	expect {
+		-re "No such file.*" { perror "Can't start $SHELL"; exit 1 }
+		-re "$prompt$" { }
+		timeout { perror "Failed to spawn $SHELL (timeout)"; exit 1 }
+	}
+}
+
+
+
+shell_start

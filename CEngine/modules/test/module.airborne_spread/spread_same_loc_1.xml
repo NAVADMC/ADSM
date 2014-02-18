@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naadsm:disease-simulation
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xdf="http://xml.gsfc.nasa.gov/XDF">
+  <description>Specs for a sample simulation run.</description>
+  <num-days>10</num-days>
+  <num-runs>1</num-runs>
+
+  <models>
+
+    <disease-model production-type="Beef Cattle">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>2</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <disease-model production-type="Pigs">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <!-- The parameters below give a 0.505 probability of infection for herds
+      10 km apart. -->
+    <airborne-spread-model from-production-type="Beef Cattle" to-production-type="Beef Cattle">
+      <prob-spread-1km>0.808</prob-spread-1km>
+      <wind-direction-start>
+        <value>0</value>
+        <units><xdf:unit>degree</xdf:unit></units>
+      </wind-direction-start>
+      <wind-direction-end>
+        <value>360</value>
+        <units><xdf:unit>degree</xdf:unit></units>
+      </wind-direction-end>
+      <max-spread>
+	<value>25</value>
+	<units>
+	  <xdf:unit>km</xdf:unit>
+	</units>
+      </max-spread>
+    </airborne-spread-model>
+
+    <!-- Note no parameters for spread from beef cattle to pigs. -->
+
+    <conflict-resolver></conflict-resolver>
+
+  </models>
+
+  <output>
+    <variable-name>all-units-states</variable-name>
+    <frequency>daily</frequency>
+  </output>
+
+</naadsm:disease-simulation>

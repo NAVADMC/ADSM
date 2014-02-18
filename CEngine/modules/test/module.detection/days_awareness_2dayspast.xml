@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naadsm:disease-simulation
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xdf="http://xml.gsfc.nasa.gov/XDF">
+  <description>Specs for a sample simulation run.</description>
+  <num-days>10</num-days>
+  <num-runs>1</num-runs>
+
+  <models>
+
+    <disease-model production-type="Beef Cattle">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>5</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <disease-model production-type="Pigs">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>5</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <!-- The probability of detecting a diseased cattle herd vs. days clinical
+      is a constant 1.0.  The probability of detecting vs. days since the 1st
+      detection is 0.55 on "day 0" (the baseline before 1st detection) and "day
+      1" (the day after the 1st detection), and rises to 1.0 on the next day
+      and later.
+    -->
+    <detection-model production-type="Beef Cattle">
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>0.55</value>
+        <value>1</value> <value>0.55</value>
+        <value>2</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <!-- The probability of detecting a diseased pig herd vs. days clinical is
+      a constant 0.6.  The probability of detecting vs. days since the 1st
+      detection is 0.55 on "day 0" (the baseline before 1st detection) and "day
+      1" (the day after the 1st detection), and rises to 1.0 on the next day
+      and later.
+    -->
+    <detection-model production-type="Pigs">
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>0.6</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>0.55</value>
+        <value>1</value> <value>0.55</value>
+        <value>2</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <resources-and-implementation-of-controls-model>
+      <!-- The authorities can begin a destruction program immediately. -->
+      <destruction-program-delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>	
+      </destruction-program-delay>
+      <destruction-capacity>
+        <value>0</value> <value>1000</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </destruction-capacity>
+      <destruction-priority-order>
+        reason,production type,time waiting
+      </destruction-priority-order>
+      <!-- Vaccination isn't used in this scenario. -->
+      <vaccination-program-delay>1</vaccination-program-delay>
+      <vaccination-capacity>
+        <value>0</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </vaccination-capacity>
+      <vaccination-priority-order>
+        reason,production type,time waiting
+      </vaccination-priority-order>
+    </resources-and-implementation-of-controls-model>
+
+    <!-- The herd will be destroyed when the infection is confirmed. -->
+    <basic-destruction-model production-type="Beef Cattle">
+      <priority>1</priority>
+    </basic-destruction-model>
+
+    <!-- The herd will be destroyed when the infection is confirmed. -->
+    <basic-destruction-model production-type="Pigs">
+      <priority>2</priority>
+    </basic-destruction-model>
+
+    <conflict-resolver></conflict-resolver>
+
+  </models>
+
+  <output>
+    <variable-name>all-units-states</variable-name>
+    <frequency>daily</frequency>
+  </output>
+
+</naadsm:disease-simulation>

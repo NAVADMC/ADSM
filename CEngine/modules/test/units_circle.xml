@@ -1,0 +1,132 @@
+<herds>
+  <herd>
+    <id>0</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <id>1</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0.00778834</latitude>
+      <longitude>0.0044966</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>2</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0.0044966</latitude>
+      <longitude>0.00778834</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>3</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.0089932</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>4</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>-0.0044966</latitude>
+      <longitude>0.00778834</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>5</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>-0.00778834</latitude>
+      <longitude>0.0044966</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>6</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>-0.0089932</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>7</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>-0.00778834</latitude>
+      <longitude>-0.0044966</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>8</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>-0.0044966</latitude>
+      <longitude>-0.00778834</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>9</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>-0.0089932</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>10</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0.0044966</latitude>
+      <longitude>-0.00778834</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>11</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0.00778834</latitude>
+      <longitude>-0.0044966</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>12</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0.0089932</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+</herds>

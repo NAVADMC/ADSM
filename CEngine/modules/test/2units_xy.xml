@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<herds>
+  <spatial_reference>
+    <PROJ4>+ellps=WGS84 +units=km +lon_0=0.00 +proj=cea</PROJ4>
+  </spatial_reference>
+  <herd>
+    <id>0</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <x>0</x>
+      <y>0</y>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <id>1</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <x>0</x>
+      <y>10</y>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+</herds>

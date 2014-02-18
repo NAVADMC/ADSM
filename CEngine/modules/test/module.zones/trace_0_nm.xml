@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naadsm:disease-simulation
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xdf="http://xml.gsfc.nasa.gov/XDF">
+  <description>Specs for a sample simulation run.</description>
+  <num-days>10</num-days>
+  <num-runs>1</num-runs>
+
+  <models>
+
+    <zone-model>
+      <name>High risk</name>
+      <level>1</level>
+      <radius>
+        <value>2</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+    </zone-model>
+
+    <zone-model>
+      <name>Background</name>
+      <radius>
+        <value>0</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+    </zone-model>
+
+    <disease-model production-type="Beef Cattle,Pigs,Sheep">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>2</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <!-- The parameters below will give 1 animal shipment per day, to a herd 10
+      km away. -->
+    <contact-spread-model from-production-type="Sheep" to-production-type="Beef Cattle" contact-type="direct">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>10</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <prob-infect>1.0</prob-infect>
+      <movement-control>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>true</latent-units-can-infect>
+      <subclinical-units-can-infect>true</subclinical-units-can-infect>
+    </contact-spread-model>
+
+    <contact-spread-model from-production-type="Sheep" to-production-type="Pigs" contact-type="direct">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>10</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <prob-infect>1.0</prob-infect>
+      <movement-control>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>true</latent-units-can-infect>
+      <subclinical-units-can-infect>true</subclinical-units-can-infect>
+    </contact-spread-model>
+
+    <!-- With both probabilities at 1.0, a diseased sheep herd will be detected
+      the instant it shows clinical signs. -->
+    <detection-model production-type="Sheep">
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <!-- Diseased cattle and pig herds will not be detected. -->
+
+    <resources-and-implementation-of-controls-model>
+      <!-- The authorities can begin a destruction program immediately. -->
+      <destruction-program-delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>	
+      </destruction-program-delay>
+      <!-- "Unlimited" destruction capacity. -->
+      <destruction-capacity>
+        <value>0</value> <value>1000</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </destruction-capacity>
+      <destruction-priority-order>
+        reason,production type,time waiting
+      </destruction-priority-order>
+      <!-- Vaccination isn't used in this scenario. -->
+      <vaccination-program-delay>1</vaccination-program-delay>
+      <vaccination-capacity>
+        <value>0</value> <value>1000</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </vaccination-capacity>
+      <vaccination-priority-order>
+        reason,production type,time waiting
+      </vaccination-priority-order>
+    </resources-and-implementation-of-controls-model>
+
+    <quarantine-model>
+    </quarantine-model>
+
+    <!-- The herd will be destroyed when the infection is confirmed. -->
+    <basic-destruction-model production-type="Pigs">
+      <priority>1</priority>
+    </basic-destruction-model>
+
+    <basic-destruction-model production-type="Beef Cattle">
+      <priority>2</priority>
+    </basic-destruction-model>
+
+    <basic-destruction-model production-type="Sheep">
+      <priority>3</priority>
+    </basic-destruction-model>
+
+    <!-- Record all direct contacts. -->
+    <contact-recorder-model contact-type="direct">
+      <trace-period>
+        <value>7</value>
+	<units><xdf:unit>day</xdf:unit></units>
+      </trace-period>
+      <trace-success>1.0</trace-success>
+    </contact-recorder-model>
+
+    <!-- Whenever a detection happens, trace out direct contacts. -->
+    <trace-model contact-type="direct" direction="out">
+      <trace-period>
+        <value>7</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </trace-period>
+    </trace-model>
+
+    <trace-destruction-model production-type="Pigs" contact-type="direct" direction="out">
+      <priority>4</priority>
+    </trace-destruction-model>
+
+    <trace-destruction-model production-type="Beef Cattle" contact-type="direct" direction="out">
+      <priority>5</priority>
+    </trace-destruction-model>
+
+    <trace-destruction-model production-type="Sheep" contact-type="direct" direction="out">
+      <priority>6</priority>
+    </trace-destruction-model>
+
+    <!-- Detection of either cattle or pig units causes a zone focus to be
+       established. -->
+    <trace-zone-focus-model production-type="Beef Cattle" contact-type="direct">
+    </trace-zone-focus-model>
+
+    <trace-zone-focus-model production-type="Pigs" contact-type="direct">
+    </trace-zone-focus-model>
+
+    <conflict-resolver></conflict-resolver>
+
+  </models>
+
+  <output>
+    <variable-name>all-units-states</variable-name>
+    <frequency>daily</frequency>
+  </output>
+
+</naadsm:disease-simulation>

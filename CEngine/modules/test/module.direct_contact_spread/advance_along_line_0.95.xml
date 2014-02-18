@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naadsm:disease-simulation
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xdf="http://xml.gsfc.nasa.gov/XDF">
+  <description>Advance or stop, p advance = 0.95</description>
+  <num-days>32767</num-days>
+  <num-runs>1000</num-runs>
+
+  <!--
+    This scenario tests the probability of infection given exposure.  There is
+    a long line of herds, and every 2 days the infection either advances along
+    that line, or stops.
+
+    The infectious period lasts only 1 day, so the infected herd gets 1 chance
+    to pass the infection along.  Fast detection and quarantine is set up so
+    that the shipments cannot "backtrack" along the line.
+
+    The expected number of infections by direct contact is 0.95/(1-0.95)=19.
+  -->
+
+  <models>
+
+    <disease-model production-type="A">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>5</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <!-- The parameters below will give 1 animal shipment per day, to a herd 1
+      km away. -->
+    <contact-spread-model from-production-type="A" to-production-type="A" contact-type="direct">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>1</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <!-- Shipping is instantaneous. -->
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <prob-infect>0.95</prob-infect>
+      <movement-control>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>false</latent-units-can-infect>
+      <subclinical-units-can-infect>true</subclinical-units-can-infect>
+    </contact-spread-model>
+
+    <infection-monitor>
+      <output>
+        <variable-name>cumulative-num-units-infected</variable-name>
+	<frequency>once</frequency>
+      </output>
+    </infection-monitor>
+
+    <!-- Use detection to prevent backtracking. -->
+    <detection-model production-type="A">
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <resources-and-implementation-of-controls-model>
+      <!-- No destruction  -->
+      <destruction-program-delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>	
+      </destruction-program-delay>
+      <destruction-capacity>
+        <value>0</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </destruction-capacity>
+      <destruction-priority-order>
+        time waiting,reason,production type
+      </destruction-priority-order>
+      <!-- No vaccination -->
+      <vaccination-program-delay>1</vaccination-program-delay>
+      <vaccination-capacity>
+        <value>0</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </vaccination-capacity>
+      <vaccination-priority-order>
+        time waiting,reason,production type
+      </vaccination-priority-order>
+    </resources-and-implementation-of-controls-model>
+
+    <quarantine-model>
+    </quarantine-model>
+
+    <conflict-resolver></conflict-resolver>
+
+  </models>
+
+</naadsm:disease-simulation>

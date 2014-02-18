@@ -1,0 +1,2327 @@
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>0 km radius (diseased unit only)</short-name>
+
+  <description>
+    Test a scenario with 0 km radius ring destruction.  Only the diseased unit
+    should be destroyed.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>24 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>16units_square</population-file>
+
+  <parameter-file>radius_0</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+    
+    The authorities can begin a destruction program immediately.  The
+    authorities can destroy an unlimited/very large number of units each day.
+    
+    There is no spread or vaccination.
+  </parameter-description>
+
+  <output>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Destroyed</td>           <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>0.5 km radius</short-name>
+
+  <description>
+    Run again, but with 0.5 km radius ring destruction.  The closest units are
+    1 km away, so again only the diseased unit should be destroyed.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>24 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>16units_square</population-file>
+
+  <parameter-file>radius_0.5</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+    
+    The authorities can begin a destruction program immediately.  The
+    authorities can destroy an unlimited/very large number of units each day.
+    
+    There is no spread or vaccination.
+  </parameter-description>
+
+  <output>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Destroyed</td>           <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>1 km radius</short-name>
+
+  <description>
+    Run again, but with 1 km radius ring destruction.  Units 2, 5, 7, and 10
+    should be destroyed.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>24 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>16units_square</population-file>
+
+  <parameter-file>radius_1</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+    
+    The authorities can begin a destruction program immediately.  The
+    authorities can destroy an unlimited/very large number of units each day.
+    
+    There is no spread or vaccination.
+  </parameter-description>
+
+  <output>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Destroyed</td>    <td>Susceptible</td>  <td>Susceptible</td>  <td>Destroyed</td>    <td>Destroyed</td>           <td>Destroyed</td>    <td>Susceptible</td>  <td>Susceptible</td>  <td>Destroyed</td>    <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>2.5 km radius</short-name>
+
+  <description>
+    Run again, but with 2.5 km radius ring destruction.  All units except 12
+    should be destroyed.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>24 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>16units_square</population-file>
+
+  <parameter-file>radius_2.5</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+    
+    The authorities can begin a destruction program immediately.  The
+    authorities can destroy an unlimited/very large number of units each day.
+    
+    There is no spread or vaccination.
+  </parameter-description>
+
+  <output>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>    <td>Destroyed</td>    <td>Destroyed</td>    <td>Destroyed</td>    <td>Destroyed</td>    <td>Destroyed</td>    <td>Destroyed</td>           <td>Destroyed</td>    <td>Destroyed</td>    <td>Destroyed</td>    <td>Destroyed</td>    <td>Destroyed</td>    <td>Susceptible</td>  <td>Destroyed</td>    <td>Destroyed</td>    <td>Destroyed</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>unchecked spread 1 km</short-name>
+
+  <description>
+    Test a scenario where the disease is spreading.  Use airborne spread with
+    infection certain at 1 km but prevent spread farther than 1 km.
+
+    In this first test there is no destruction, to confirm that spread acts as
+    we expect.  The disease should spread every second day because of the 1 day
+    latent period.  It should spread outward in a ring; the immunity period
+    should prevent spread back inward.  So:
+    
+    units 2, 5, 7, and 10 should become infected on day 2
+
+    units 1, 3, 4, 9, 11, and 14 should become infected on day 4
+    
+    units 0, 8, 13, and 16 should become infected on day 6
+
+    unit 12 should become infected on day 8    
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>24 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>16units_square</population-file>
+
+  <parameter-file>spread</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 3 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+
+    The probability of airborne spread at 1 km is 0.505, and the maximum
+    distance of airborne spread is 25 km.
+
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>         <td>Susceptible</td>         <td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>         <td>Latent</td>              <td>InfectiousClinical</td>  <td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>         <td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>         <td>Susceptible</td>         <td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>         <td>Latent</td>              <td>InfectiousClinical</td>  <td>Latent</td>              <td>Latent</td>              <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Latent</td>              <td>InfectiousClinical</td>  <td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>         <td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>Susceptible</td>         <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>Latent</td>              <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>Latent</td>              <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Latent</td>              <td>InfectiousClinical</td>  <td>Latent</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>Susceptible</td>         <td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>Susceptible</td>         <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>Susceptible</td>         <td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>Latent</td>              <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>Susceptible</td>         <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>Susceptible</td>         <td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>Susceptible</td>         <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>Susceptible</td>         <td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>NaturallyImmune</td>     <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>Susceptible</td>         <td>NaturallyImmune</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>NaturallyImmune</td>     <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>Susceptible</td>         <td>NaturallyImmune</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>spread 1 km + 1 km radius destruction</short-name>
+
+  <description>
+    Run again, but with 1 km ring destruction.  This should prevent spread.
+    The first wave of infections (units 2, 5, 7, and 10) will be latent (not
+    yet able to spread the disease) on the day that the index unit (6) is
+    destroyed.  So units 2, 5, 7 and 10 will be destroyed before they can go
+    infectious.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>24 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>16units_square</population-file>
+
+  <parameter-file>spread_radius_1</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 3 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+
+    The probability of airborne spread at 1 km is 0.505, and the maximum
+    distance of airborne spread is 25 km.
+    
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+    
+    The authorities can begin a destruction program immediately.  The
+    authorities can destroy an unlimited/very large number of units each day.
+    
+    There is no vaccination.
+  </parameter-description>
+
+  <output>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>       <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>       <td>InfectiousClinical</td>  <td>Latent</td>       <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>       <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Destroyed</td>    <td>Susceptible</td>  <td>Susceptible</td>  <td>Destroyed</td>    <td>Destroyed</td>           <td>Destroyed</td>    <td>Susceptible</td>  <td>Susceptible</td>  <td>Destroyed</td>    <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>spread 1 km + 1 day delay + 1 km radius destruction</short-name>
+
+  <description>
+    Run again, but with a 1 day delay for setting up a destruction program.
+    The delay will allow the first wave cases (units 2, 5, 7, and 10) to become
+    infectious for a day and start a second wave.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>24 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>16units_square</population-file>
+
+  <parameter-file>spread_delay_1_radius_1</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 3 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+
+    The probability of airborne spread at 1 km is 0.505, and the maximum
+    distance of airborne spread is 25 km.
+    
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+    
+    The authorities require 1 day to set up a destruction program before
+    beginning.  The authorities can destroy an unlimited/very large number of
+    units each day.
+    
+    There is no vaccination.
+  </parameter-description>
+
+  <output>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>              <td>InfectiousClinical</td>  <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Latent</td>       <td>Destroyed</td>           <td>Latent</td>       <td>Latent</td>       <td>Destroyed</td>           <td>Destroyed</td>           <td>Destroyed</td>           <td>Susceptible</td>  <td>Latent</td>       <td>Destroyed</td>           <td>Latent</td>       <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>       <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Destroyed</td>    <td>Destroyed</td>           <td>Destroyed</td>    <td>Destroyed</td>    <td>Destroyed</td>           <td>Destroyed</td>           <td>Destroyed</td>           <td>Susceptible</td>  <td>Destroyed</td>    <td>Destroyed</td>           <td>Destroyed</td>    <td>Susceptible</td>  <td>Susceptible</td>  <td>Destroyed</td>    <td>Susceptible</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>spread 1 km + 2 day delay + 1 km radius destruction</short-name>
+
+  <description>
+    Run again, but with a 2 day delay for setting up a destruction program.
+    The delay will allow the first wave cases (units 2, 5, 7, and 10) to become
+    infectious for a day and start a second wave.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>24 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>16units_square</population-file>
+
+  <parameter-file>spread_delay_2_radius_1</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 3 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+
+    The probability of airborne spread at 1 km is 0.505, and the maximum
+    distance of airborne spread is 25 km.
+    
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+    
+    The authorities require 2 days to set up a destruction program before
+    beginning.  The authorities can destroy an unlimited/very large number of
+    units each day.
+    
+    There is no vaccination.
+  </parameter-description>
+
+  <output>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>              <td>InfectiousClinical</td>  <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Latent</td>       <td>InfectiousClinical</td>  <td>Latent</td>       <td>Latent</td>       <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Latent</td>       <td>InfectiousClinical</td>  <td>Latent</td>       <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>       <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>  <td>Destroyed</td>    <td>Destroyed</td>           <td>Destroyed</td>    <td>Destroyed</td>    <td>Destroyed</td>           <td>Destroyed</td>           <td>Destroyed</td>           <td>Susceptible</td>  <td>Destroyed</td>    <td>Destroyed</td>           <td>Destroyed</td>    <td>Susceptible</td>  <td>Susceptible</td>  <td>Destroyed</td>    <td>Susceptible</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>none trigger, none destroyed</short-name>
+
+  <description>
+    Test that production types that trigger destruction rings and production
+    types that are destroyed can be specified independently.  In this baseline
+    scenario, no production types trigger destruction rings and no production
+    types are destroyed.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 Dec 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>6units_2</population-file>
+
+  <parameter-file>none_trigger_none_dest</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting diseased units vs. the number of days they
+    have been showing clinical signs is fixed at 1. The probability of
+    detecting diseased units vs. the number of days since a public announcement
+    of an outbreak is also fixed at 1.
+
+    The authorities will destroy units that are detected as diseased.  The
+    authorities can begin a destruction program immediately.  The authorities
+    can destroy an unlimited/very large number of units each day.  There is no
+    vaccination.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (cattle) and 1 (pigs) will be latent.
+     - On day 2 units 0 and 1 will be Infectious Clinical.  They will be
+       detected and marked for destruction.
+     - On day 3 units 0 and 1 will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>           <td>Destroyed</td>           <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>cattle trigger, cattle destroyed</short-name>
+
+  <description>
+    Test that production types that trigger destruction rings and production
+    types that are destroyed can be specified independently.  In this scenario,
+    only cattle units detected as diseased trigger destruction rings, and only
+    cattle units in the rings are destroyed.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 Dec 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>6units_2</population-file>
+
+  <parameter-file>cattle_trigger_cattle_dest</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting diseased units vs. the number of days they
+    have been showing clinical signs is fixed at 1. The probability of
+    detecting diseased units vs. the number of days since a public announcement
+    of an outbreak is also fixed at 1.
+
+    The authorities will destroy units that are detected as diseased.  The
+    authorities can begin a destruction program immediately.  The authorities
+    can destroy an unlimited/very large number of units each day.  The
+    authorities will destroy cattle within 1.5 km of a detected cattle unit.
+    There is no vaccination.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (cattle) and 1 (pigs) will be latent.
+     - On day 2 units 0 and 1 will be Infectious Clinical.  They will be
+       detected and marked for destruction.  Unit 2 will be marked for
+       destruction because it is a cattle unit within 1.5 km of a detected
+       cattle unit.
+     - On day 3 units 0, 1, and 2 will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>           <td>Destroyed</td>           <td>Destroyed</td>    <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>cattle trigger, pigs destroyed</short-name>
+
+  <description>
+    Test that production types that trigger destruction rings and production
+    types that are destroyed can be specified independently.  In this scenario,
+    only cattle units detected as diseased trigger destruction rings, and only
+    pig units in the rings are destroyed.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 Dec 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>6units_2</population-file>
+
+  <parameter-file>cattle_trigger_pigs_dest</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting diseased units vs. the number of days they
+    have been showing clinical signs is fixed at 1. The probability of
+    detecting diseased units vs. the number of days since a public announcement
+    of an outbreak is also fixed at 1.
+
+    The authorities will destroy units that are detected as diseased.  The
+    authorities can begin a destruction program immediately.  The authorities
+    can destroy an unlimited/very large number of units each day.  The
+    authorities will destroy pigs within 1.5 km of a detected cattle unit.
+    There is no vaccination.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (cattle) and 1 (pigs) will be latent.
+     - On day 2 units 0 and 1 will be Infectious Clinical.  They will be
+       detected and marked for destruction.  Unit 3 will be marked for
+       destruction because it is a pig unit within 1.5 km of a detected cattle
+       unit.
+     - On day 3 units 0, 1, and 3 will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>           <td>Destroyed</td>           <td>Susceptible</td>  <td>Destroyed</td>    <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>cattle trigger, both destroyed</short-name>
+
+  <description>
+    Test that production types that trigger destruction rings and production
+    types that are destroyed can be specified independently.  In this scenario,
+    only cattle units detected as diseased trigger destruction rings, but both
+    cattle and pig units in the rings are destroyed.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 Dec 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>6units_2</population-file>
+
+  <parameter-file>cattle_trigger_both_dest</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting diseased units vs. the number of days they
+    have been showing clinical signs is fixed at 1. The probability of
+    detecting diseased units vs. the number of days since a public announcement
+    of an outbreak is also fixed at 1.
+
+    The authorities will destroy units that are detected as diseased.  The
+    authorities can begin a destruction program immediately.  The authorities
+    can destroy an unlimited/very large number of units each day.  The
+    authorities will destroy cattle and pigs within 1.5 km of a detected cattle
+    unit.  There is no vaccination.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (cattle) and 1 (pigs) will be latent.
+     - On day 2 units 0 and 1 will be Infectious Clinical.  They will be
+       detected and marked for destruction.  Units 2 and 3 will be marked for
+       destruction because they are cattle and pig units, respectively, within
+       1.5 km of a detected cattle unit.
+     - On day 3 units 0, 1, 2, and 3 will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>           <td>Destroyed</td>           <td>Destroyed</td>    <td>Destroyed</td>    <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>pigs trigger, cattle destroyed</short-name>
+
+  <description>
+    Test that production types that trigger destruction rings and production
+    types that are destroyed can be specified independently.  In this scenario,
+    only pig units detected as diseased trigger destruction rings, and only
+    cattle units in the rings are destroyed.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 Dec 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>6units_2</population-file>
+
+  <parameter-file>pigs_trigger_cattle_dest</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting diseased units vs. the number of days they
+    have been showing clinical signs is fixed at 1. The probability of
+    detecting diseased units vs. the number of days since a public announcement
+    of an outbreak is also fixed at 1.
+
+    The authorities will destroy units that are detected as diseased.  The
+    authorities can begin a destruction program immediately.  The authorities
+    can destroy an unlimited/very large number of units each day.  The
+    authorities will destroy cattle within 1.5 km of a detected pig unit.
+    There is no vaccination.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (cattle) and 1 (pigs) will be latent.
+     - On day 2 units 0 and 1 will be Infectious Clinical.  They will be
+       detected and marked for destruction.  Unit 4 will be marked for
+       destruction because it is a cattle unit within 1.5 km of a detected pig
+       unit.
+     - On day 3 units 0, 1, and 4 will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>           <td>Destroyed</td>           <td>Susceptible</td>  <td>Susceptible</td>  <td>Destroyed</td>    <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>pigs trigger, pigs destroyed</short-name>
+
+  <description>
+    Test that production types that trigger destruction rings and production
+    types that are destroyed can be specified independently.  In this scenario,
+    only pig units detected as diseased trigger destruction rings, and only pig
+    units in the rings are destroyed.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 Dec 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>6units_2</population-file>
+
+  <parameter-file>pigs_trigger_pigs_dest</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting diseased units vs. the number of days they
+    have been showing clinical signs is fixed at 1. The probability of
+    detecting diseased units vs. the number of days since a public announcement
+    of an outbreak is also fixed at 1.
+
+    The authorities will destroy units that are detected as diseased.  The
+    authorities can begin a destruction program immediately.  The authorities
+    can destroy an unlimited/very large number of units each day.  The
+    authorities will destroy pigs within 1.5 km of a detected pig unit.  There
+    is no vaccination.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (cattle) and 1 (pigs) will be latent.
+     - On day 2 units 0 and 1 will be Infectious Clinical.  They will be
+       detected and marked for destruction.  Unit 5 will be marked for
+       destruction because it is a pig unit within 1.5 km of a detected pig
+       unit.
+     - On day 3 units 0, 1, and 5 will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>           <td>Destroyed</td>           <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Destroyed</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>pigs trigger, both destroyed</short-name>
+
+  <description>
+    Test that production types that trigger destruction rings and production
+    types that are destroyed can be specified independently.  In this scenario,
+    only pig units detected as diseased trigger destruction rings, but both
+    cattle and pig units in the rings are destroyed.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 Dec 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>6units_2</population-file>
+
+  <parameter-file>pigs_trigger_both_dest</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting diseased units vs. the number of days they
+    have been showing clinical signs is fixed at 1. The probability of
+    detecting diseased units vs. the number of days since a public announcement
+    of an outbreak is also fixed at 1.
+
+    The authorities will destroy units that are detected as diseased.  The
+    authorities can begin a destruction program immediately.  The authorities
+    can destroy an unlimited/very large number of units each day.  The
+    authorities will destroy cattle and pigs within 1.5 km of a detected pig
+    unit.  There is no vaccination.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (cattle) and 1 (pigs) will be latent.
+     - On day 2 units 0 and 1 will be Infectious Clinical.  They will be
+       detected and marked for destruction.  Units 4 and 5 will be marked for
+       destruction because they are cattle and pig units, respectively, within
+       1.5 km of a detected pig unit.
+     - On day 3 units 0, 1, 4, and 5 will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>    <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>    <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>    <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>           <td>Destroyed</td>           <td>Susceptible</td>  <td>Susceptible</td>  <td>Destroyed</td>      <td>Destroyed</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>both trigger, cattle destroyed</short-name>
+
+  <description>
+    Test that production types that trigger destruction rings and production
+    types that are destroyed can be specified independently.  In this scenario,
+    cattle and pig units detected as diseased trigger destruction rings, but
+    only cattle units in the rings are destroyed.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 Dec 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>6units_2</population-file>
+
+  <parameter-file>both_trigger_cattle_dest</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting diseased units vs. the number of days they
+    have been showing clinical signs is fixed at 1. The probability of
+    detecting diseased units vs. the number of days since a public announcement
+    of an outbreak is also fixed at 1.
+
+    The authorities will destroy units that are detected as diseased.  The
+    authorities can begin a destruction program immediately.  The authorities
+    can destroy an unlimited/very large number of units each day.  The
+    authorities will destroy cattle within 1.5 km of a detected cattle or pig
+    unit.  There is no vaccination.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (cattle) and 1 (pigs) will be latent.
+     - On day 2 units 0 and 1 will be Infectious Clinical.  They will be
+       detected and marked for destruction.  Units 2 and 4 will be marked for
+       destruction because they are cattle units within 1.5 km of a detected
+       cattle and pig unit, respectively.
+     - On day 3 units 0, 1, 2, and 4 will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>           <td>Destroyed</td>           <td>Destroyed</td>    <td>Susceptible</td>  <td>Destroyed</td>    <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>both trigger, pigs destroyed</short-name>
+
+  <description>
+    Test that production types that trigger destruction rings and production
+    types that are destroyed can be specified independently.  In this scenario,
+    cattle and pig units detected as diseased trigger destruction rings, but
+    only pig units in the rings are destroyed.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 Dec 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>6units_2</population-file>
+
+  <parameter-file>both_trigger_pigs_dest</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting diseased units vs. the number of days they
+    have been showing clinical signs is fixed at 1. The probability of
+    detecting diseased units vs. the number of days since a public announcement
+    of an outbreak is also fixed at 1.
+
+    The authorities will destroy units that are detected as diseased.  The
+    authorities can begin a destruction program immediately.  The authorities
+    can destroy an unlimited/very large number of units each day.  The
+    authorities will destroy pigs within 1.5 km of a detected cattle or pig
+    unit.  There is no vaccination.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (cattle) and 1 (pigs) will be latent.
+     - On day 2 units 0 and 1 will be Infectious Clinical.  They will be
+       detected and marked for destruction.  Units 3 and 5 will be marked for
+       destruction because they are pig units within 1.5 km of a detected
+       cattle and pig unit, respectively.
+     - On day 3 units 0, 1, 3, and 5 will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>           <td>Destroyed</td>           <td>Susceptible</td>  <td>Destroyed</td>    <td>Susceptible</td>  <td>Destroyed</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>both trigger, both destroyed</short-name>
+
+  <description>
+    Test that production types that trigger destruction rings and production
+    types that are destroyed can be specified independently.  In this scenario,
+    cattle and pig units detected as diseased trigger destruction rings, and
+    both cattle and pig units in the rings are destroyed.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 Dec 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>6units_2</population-file>
+
+  <parameter-file>both_trigger_both_dest</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting diseased units vs. the number of days they
+    have been showing clinical signs is fixed at 1. The probability of
+    detecting diseased units vs. the number of days since a public announcement
+    of an outbreak is also fixed at 1.
+
+    The authorities will destroy units that are detected as diseased.  The
+    authorities can begin a destruction program immediately.  The authorities
+    can destroy an unlimited/very large number of units each day.  The
+    authorities will destroy cattle and pigs within 1.5 km of a detected
+    cattle or pig unit.  There is no vaccination.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (cattle) and 1 (pigs) will be latent.
+     - On day 2 units 0 and 1 will be Infectious Clinical.  They will be
+       detected and marked for destruction.  Units 2, 3, 4 and 5 will be marked
+       for destruction because they are a cattle unit within 1.5 km of a
+       detected cattle unit (2), a pig unit within 1.5 km of a detected cattle
+       unit (3), a cattle unit within 1.5 km of a detected pig unit (4), and a
+       pig unit within 1.5 km of a detected pig unit (5).
+     - On day 3 units 0, 1, 2, 3, 4, and 5 will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>           <td>Destroyed</td>           <td>Destroyed</td>    <td>Destroyed</td>    <td>Destroyed</td>    <td>Destroyed</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>size destruction rings by production type 1</short-name>
+
+  <description>
+    Test that the radius of a destruction ring can be set by the production
+    type that triggered the ring.  In this scenario, detection of a diseased
+    cattle unit triggers a small destruction ring.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 Dec 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>6units_2</population-file>
+
+  <parameter-file>trigger_small_ring</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting diseased cattle units vs. the number of days
+    they have been showing clinical signs is fixed at 1. The probability of
+    detecting diseased cattle units vs. the number of days since a public
+    announcement of an outbreak is also fixed at 1.  The probability of
+    detecting diseased pig units is 0.
+
+    The authorities can begin a destruction program immediately.  The
+    authorities will destroy units that are detected as diseased.  The
+    authorities will destroy cattle and pigs within 1.5 km of a detected cattle
+    unit, or within 2.5 km of a detected pig unit.  The authorities can
+    destroy 1 unit per day.  The priorities for destruction are: reason (basic
+    &gt; ring) &gt; time waiting &gt; production type (cattle &gt; pigs).
+
+    There is no vaccination.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (cattle) and 1 (pigs) will be latent.
+     - On day 2 units 0 and 1 will be Infectious Clinical.  Unit 0 (cattle)
+       will be detected and marked for destruction.  Units 2 and 3 will be
+       marked for destruction because they are within 1.5 km of a detected
+       cattle unit.
+     - On day 3 unit 0 will be destroyed because detected units have priority
+       over units in destruction rings.
+     - On day 4 unit 2 will be destroyed because among units in destruction
+       rings, cattle have priority over pigs.
+     - On day 5 unit 3 will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>           <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>           <td>NaturallyImmune</td>     <td>Destroyed</td>    <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>           <td>NaturallyImmune</td>     <td>Destroyed</td>    <td>Destroyed</td>    <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>size destruction rings by production type 2</short-name>
+
+  <description>
+    Test that the radius of a destruction ring can be set by the production
+    type that triggered the ring.  In this scenario, detection of a diseased
+    pig unit triggers a large destruction ring.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 Dec 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>6units_2</population-file>
+
+  <parameter-file>trigger_large_ring</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting diseased pig units vs. the number of days they
+    have been showing clinical signs is fixed at 1. The probability of
+    detecting diseased pig units vs. the number of days since a public
+    announcement of an outbreak is also fixed at 1.  The probability of
+    detecting diseased cattle units is 0.
+
+    The authorities can begin a destruction program immediately.  The
+    authorities will destroy units that are detected as diseased.  The
+    authorities will destroy cattle and pigs within 1.5 km of a detected cattle
+    unit, or within 2.5 km of a detected pig unit.  The authorities can
+    destroy 4 units per day.  The priorities for destruction are: reason (basic
+    &gt; ring) &gt; time waiting &gt; production type (cattle &gt; pigs).
+
+    There is no vaccination.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (cattle) and 1 (pigs) will be latent.
+     - On day 2 units 0 and 1 will be Infectious Clinical.  Unit 1 (pigs) will
+       be detected and marked for destruction.  Units 0, 2, 3, 4 and 5 will be
+       marked for destruction because they are within 2.5 km of a detected pig
+       unit.
+     - On day 3 unit 1 will be destroyed because detected units have top
+       priority.  Units 0, 2 and 4 will be destroyed because among units in
+       destruction, cattle have priority over pigs.
+     - On day 4 units 3 and 5 will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>           <td>Destroyed</td>           <td>Destroyed</td>    <td>Susceptible</td>  <td>Destroyed</td>    <td>Susceptible</td></tr>
+    <tr><td>Destroyed</td>           <td>Destroyed</td>           <td>Destroyed</td>    <td>Destroyed</td>    <td>Destroyed</td>    <td>Destroyed</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>quarantine waiting units 1</short-name>
+
+  <description>
+    Test that units that are marked for destruction are quarantined until the
+    destruction can happen.  In this test and the following one, there are
+    three units of different production types:
+
+    0-&gt;1  2
+
+    Units 0 and 2 are infected; the middle unit 1 is not.  Unit 0 will try to
+    ship to unit 1.  Whether the shipment (and infection) happens will depend
+    on whether unit 1 is quarantined.  Unit 1 can be quarantined if unit 2 is
+    detected and a destruction ring is drawn around unit 2.
+
+    In this baseline scenario, unit 2 is detected, but the destruction ring is
+    too small to include unit 1.  Unit 1 is not marked for destruction, and so
+    unit 1 is not quarantined.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>25 Jan 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_pigs_sheep_infected</population-file>
+
+  <parameter-file>quarantine_waiting_0</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 5 days.
+
+    The movement rate from sheep units to cattle units is fixed at 1 shipment
+    each day.  The distance of shipments is fixed at 10 km.  The movement rate
+    multiplier is 0 until the public is aware of the outbreak, then it
+    immediately goes to 1.  (This is the opposite of what one might expect from
+    movement controls; its purpose here is to make sure any contact we see
+    between cattle units happens after the creation of destruction rings, not
+    before.)  There are no shipments between any other pairs of production
+    types.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    The probability of detecting diseased pig units vs. the number of days they
+    have been showing clinical signs is fixed at 1. The probability of
+    detecting diseased pig units vs. the number of days since a public
+    announcement of an outbreak is also fixed at 1.  Other production types are
+    not detected.
+
+    The authorities require 3 days to set up a destruction program before
+    beginning.  The authorities will destroy units that are detected as
+    diseased.  Units within 5 km of a detected pig unit will also be destroyed.
+    The authorities can destroy an unlimited/very large number of units each
+    day.
+
+    There is no vaccination.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (sheep) and 2 (pigs) will be latent.  There will be no
+       shipments because the movement rate multiplier is 0.
+     - On day 2 units 0 and 2 will be Infectious Clinical.  Unit 2 (pigs) will
+       be detected and marked for destruction.  The 5 km radius destruction
+       ring drawn around unit 2 will not be large enough to cover unit 1.
+     - On day 3 (1 day after the first detection) the movement rate multiplier
+       will be 1.  Unit 0 (sheep) will ship to and infect unit 1 (cattle).
+       The destruction program will not be ready for 3 more days.
+     - On day 4 unit 1 will be Latent.  The destruction program will not be
+       ready for 2 more days.
+     - On day 5 nothing new will happen.  The destruction program will not be
+       ready for 1 more day.
+     - On day 6 the destruction program will be ready to begin.  Unit 2 will be
+       destroyed.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Latent</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>NaturallyImmune</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>NaturallyImmune</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>Destroyed</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>Destroyed</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>quarantine waiting units 2</short-name>
+
+  <description>
+    Test that units that are marked for destruction are quarantined until the
+    destruction can happen.  In this test and the following one, there are
+    three units of different production types:
+
+    0-&gt;1  2
+
+    Units 0 and 2 are infected; the middle unit 1 is not.  Unit 0 will try to
+    ship to unit 1.  Whether the shipment (and infection) happens will depend
+    on whether unit 1 is quarantined.  Unit 1 can be quarantined if unit 2 is
+    detected and a destruction ring is drawn around unit 2.
+
+    In the baseline scenario above, unit 2 was detected, but the destruction
+    ring was too small to include unit 1.  In this scenario, the destruction
+    ring is large enough to include unit 1.  Unit 1 is quarantined and marked
+    for destruction.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>25 Jan 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_pigs_sheep_infected</population-file>
+
+  <parameter-file>quarantine_waiting_1</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 5 days.
+
+    The movement rate from sheep units to cattle units is fixed at 1 shipment
+    each day.  The distance of shipments is fixed at 10 km.  The movement rate
+    multiplier is 0 until the public is aware of the outbreak, then it
+    immediately goes to 1.  (This is the opposite of what one might expect from
+    movement controls; its purpose here is to make sure any contact we see
+    between cattle units happens after the creation of destruction rings, not
+    before.)  There are no shipments between any other pairs of production
+    types.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    The probability of detecting diseased pig units vs. the number of days they
+    have been showing clinical signs is fixed at 1. The probability of
+    detecting diseased pig units vs. the number of days since a public
+    announcement of an outbreak is also fixed at 1.  Other production types are
+    not detected.
+
+    The authorities require 3 days to set up a destruction program before
+    beginning.  The authorities will destroy units that are detected as
+    diseased.  Units within 15 km of a detected pig unit will also be
+    destroyed.  The authorities can destroy an unlimited/very large number of
+    units each day.
+
+    There is no vaccination.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (sheep) and 2 (pigs) will be latent.  There will be no
+       shipments because the movement rate multiplier is 0.
+     - On day 2 units 0 and 2 will be Infectious Clinical.  Unit 2 (pigs) will
+       be detected and marked for destruction.  The 15 km radius destruction
+       ring drawn around unit 2 will not be large enough to cover unit 1, so
+       unit 1 will be quarantined (effective day 3) and marked for destruction.
+     - On day 3 (1 day after the first detection) the movement rate multiplier
+       will be 1.  Unit 0 (sheep) will attempt to ship to unit 1 but will be
+       blocked by the quarantine.  The destruction program will not be ready
+       for 3 more days.
+     - On day 4 nothing new will happen.  The destruction program will not be
+       ready for 2 more days.
+     - On day 5 nothing new will happen.  The destruction program will not be
+       ready for 1 more day.
+     - On day 6 the destruction program will be ready to begin.  Units 1 and 2
+       will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Latent</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>NaturallyImmune</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>NaturallyImmune</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Destroyed</td>    <td>Destroyed</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>early exit 1</short-name>
+
+  <description>
+    Test that the simulation's early-exit rules are followed with respect to
+    units waiting for destruction.
+    
+    In early exit tests 1-3, there are two units.  Unit 0 is infected.  On day
+    1 unit 0 is detected and unit 1 is marked for destruction.  Different
+    effects can be observed when a) there are resources to destroy unit 1
+    immediately, b) there are no resources to destroy unit 1 at first, but
+    resources eventually come on-line, or c) there are never resources to
+    destroy unit 1.
+
+    In this scenario, there are resources to destroy unit 1 immediately.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>21 Feb 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>early_exit_1</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 3 days, clinical signs
+    accompany infectiousness immediately, and natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting a diseased unit vs. the number of days the
+    animals have been showing clinical signs is fixed at 1. The probability of
+    detecting a diseased unit vs. the number of days since a public
+    announcement of an outbreak is also fixed at 1.
+
+    The authorities can begin a destruction program immediately.  The
+    authorities will destroy units within 10 km of a detected unit.  The
+    authorities can destroy an unlimited/very large number of units each day.
+
+    What should happen:
+     - On day 1 unit 0 will be latent.
+     - On day 2 unit 1 will be Infectious Clinical.  It will be detected, and
+       unit 1 will be marked for destruction because it is within 10 km of a
+       detected unit.
+     - On day 3 unit 1 will be destroyed.
+     - On day 4 nothing new will happen.
+     - On day 5 unit 0 will no longer be infectious.  Because there are no
+       infectious units left and nothing left to do, the simulation can end.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Destroyed</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Destroyed</td></tr>
+    <!-- No infectious units, simulation stops. -->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>early exit 2</short-name>
+
+  <description>
+    Test that the simulation's early-exit rules are followed with respect to
+    units waiting for destruction.
+    
+    In early exit tests 1-3, there are two units.  Unit 0 is infected.  On day
+    1 unit 0 is detected and unit 1 is marked for destruction.  Different
+    effects can be observed when a) there are resources to destroy unit 1
+    immediately, b) there are no resources to destroy unit 1 at first, but
+    resources eventually come on-line, or c) there are never resources to
+    destroy unit 1.
+
+    In this scenario, there are no resources to destroy unit 1 at first, but
+    resources eventually come on-line.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>21 Feb 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>early_exit_2</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 3 days, clinical signs
+    accompany infectiousness immediately, and natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting a diseased unit vs. the number of days the
+    animals have been showing clinical signs is fixed at 1. The probability of
+    detecting a diseased unit vs. the number of days since a public
+    announcement of an outbreak is also fixed at 1.
+
+    The authorities can begin a destruction program immediately.  The
+    authorities will destroy units within 10 km of a detected unit.  On the
+    first 4 days that destructions could occur, the destruction capacity will
+    be zero.  The next day and forward, the destruction capacity is 1 unit per
+    day.
+
+    What should happen:
+     - On day 1 unit 0 will be latent.
+     - On day 2 unit 1 will be Infectious Clinical.  It will be detected, and
+       unit 1 will be marked for destruction because it is within 10 km of a
+       detected unit.
+     - Day 3 is the first day that destructions could happen, but there will be
+       no destruction capacity for 4 days.
+     - On day 4 there will be no destruction capacity for another 3 days.
+     - On day 5 unit 0 will no longer be infectious.  However, the simulation
+       will keep going because there are still destruction tasks to be done.
+       There will be no destruction capacity for another 2 days.
+     - On day 6 there will be no destruction capacity for another 1 day.
+     - On day 7 unit 1 will be destroyed.
+     - On day 8 unit 1's state will show as Destroyed.  Because there are no
+       infectious units left and nothing left to do, the simulation can end.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>         <td>Destroyed</td></tr>
+    <!-- No infectious units, simulation stops. -->
+  </output>
+</deterministic-test>
+
+<variable-test>
+  <category>ring_destruction</category>
+  <short-name>early exit 2, check end of disease and outbreak</short-name>
+
+  <description>
+    Test that the end of active disease and the end of the outbreak (which
+    includes all control actions) are properly reported.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>17 June 2009</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>early_exit_2_disease_outbreak_end</parameter-file>
+
+  <parameter-description>
+    The parameters are identical to "early exit 2" above.
+
+    What should happen:
+     - On day 1 unit 0 will be latent.
+     - On day 2 unit 1 will be Infectious Clinical.  It will be detected, and
+       unit 1 will be marked for destruction because it is within 10 km of a
+       detected unit.
+     - Day 3 is the first day that destructions could happen, but there will be
+       no destruction capacity for 4 days.
+     - On day 4 there will be no destruction capacity for another 3 days.
+     - On day 5 unit 0 will no longer be infectious.  The end of the active
+       disease phase will be filled in as day 4.  The simulation will keep
+       going because there are still destruction tasks to be done.  There will
+       be no destruction capacity for another 2 days.
+     - On day 6 there will be no destruction capacity for another 1 day.
+     - On day 7 unit 1 will be destroyed.
+     - On day 8 unit 1's state will show as Destroyed.  Because there are no
+       infectious units left and nothing left to do, the simulation can end.
+       The end of the outbreak will be filled in as day 7.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>diseaseDuration</td>
+      <td>outbreakDuration</td>
+    </tr>
+    <tr> <td></td>  <td></td></tr>
+    <tr> <td></td>  <td></td></tr>
+    <tr> <td></td>  <td></td></tr>
+    <tr> <td></td>  <td></td></tr>
+    <tr><td>4</td>  <td></td></tr>
+    <tr><td>4</td>  <td></td></tr>
+    <tr><td>4</td>  <td></td></tr>
+    <tr><td>4</td> <td>7</td></tr>
+  </output>
+</variable-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>early exit 3</short-name>
+
+  <description>
+    Test that the simulation's early-exit rules are followed with respect to
+    units waiting for destruction.
+    
+    In early exit tests 1-3, there are two units.  Unit 0 is infected.  On day
+    1 unit 0 is detected and unit 1 is marked for destruction.  Different
+    effects can be observed when a) there are resources to destroy unit 1
+    immediately, b) there are no resources to destroy unit 1 at first, but
+    resources eventually come on-line, or c) there are never resources to
+    destroy unit 1.
+
+    In this scenario, there are never resources to destroy unit 1.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>21 Feb 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>early_exit_3</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 3 days, clinical signs
+    accompany infectiousness immediately, and natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting a diseased unit vs. the number of days the
+    animals have been showing clinical signs is fixed at 1. The probability of
+    detecting a diseased unit vs. the number of days since a public
+    announcement of an outbreak is also fixed at 1.
+
+    The authorities can begin a destruction program immediately.  The
+    authorities will destroy units within 10 km of a detected unit.  The
+    authorities can destroy zero units each day.
+
+    What should happen:
+     - On day 1 unit 0 will be latent.
+     - On day 2 unit 1 will be Infectious Clinical.  It will be detected, and
+       unit 1 will be marked for destruction because it is within 10 km of a
+       detected unit.
+     - On day 3 nothing new will happen.
+     - On day 4 nothing new will happen.
+     - On day 5 unit 0 will no longer be infectious.  Because there are no
+       infectious units left and nothing left to do, the simulation can end.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td></tr>
+    <!-- No infectious units, simulation stops. -->
+  </output>
+</deterministic-test>
+
+<variable-test>
+  <category>ring_destruction</category>
+  <short-name>early exit 3, check end of disease and outbreak</short-name>
+
+  <description>
+    Test that the end of active disease and the end of the outbreak (which
+    includes all control actions) are properly reported.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>17 June 2009</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>early_exit_3_disease_outbreak_end</parameter-file>
+
+  <parameter-description>
+    The parameters are identical to "early exit 3" above.
+
+    What should happen:
+     - On day 1 unit 0 will be latent.
+     - On day 2 unit 1 will be Infectious Clinical.  It will be detected, and
+       unit 1 will be marked for destruction because it is within 10 km of a
+       detected unit.
+     - On day 3 nothing new will happen.
+     - On day 4 nothing new will happen.
+     - On day 5 unit 0 will no longer be infectious.  The end of the active
+       disease phase will be filled in as day 4.  There are units awaiting
+       destruction, but there will never be resources to destroy them, so the
+       end of the outbreak will be filled in as day 4, and the simulation can
+       end.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>diseaseDuration</td>
+      <td>outbreakDuration</td>
+    </tr>
+    <tr> <td></td>  <td></td></tr>
+    <tr> <td></td>  <td></td></tr>
+    <tr> <td></td>  <td></td></tr>
+    <tr> <td></td>  <td></td></tr>
+    <tr><td>4</td> <td>4</td></tr>
+  </output>
+</variable-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>early exit 4</short-name>
+
+  <description>
+    Test that the simulation's early-exit rules are followed with respect to
+    units waiting for destruction.
+    
+    In early exit tests 4-6, there are three units.  Unit 0 is infected.  On
+    day 1 unit 0 is detected and units 1 and 2 are marked for destruction.
+    Different effects can be observed when a) there are resources to destroy
+    both units, b) there are resources to destroy one unit, then later there
+    are resources to destroy the other, or c) there are resources to destroy
+    one unit, but never resources to destroy the other.
+
+    In this scenario, there are resources to destroy both units.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>22 Feb 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_sheep_infected</population-file>
+
+  <parameter-file>early_exit_4</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting a diseased unit vs. the number of days the
+    animals have been showing clinical signs is fixed at 1. The probability of
+    detecting a diseased unit vs. the number of days since a public
+    announcement of an outbreak is also fixed at 1.
+
+    The authorities can begin a destruction program immediately.  The
+    authorities will destroy units within 20 km of a detected unit.  On the
+    first 4 days that destructions could occur, the destruction capacity will
+    be zero.  The next day and forward, the destruction capacity is 2 units per
+    day.
+
+    What should happen:
+     - On day 1 unit 0 will be latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected, and
+       units 1 and 2 will be marked for destruction because they are within 20
+       km of a detected unit.
+     - Day 3 is the first day that destructions could happen, but there will be
+       no destruction capacity for 4 days.
+     - On day 4 there will be no destruction capacity for another 3 days.
+     - On day 5 unit 0 will no longer be infectious.  However, the simulation
+       will keep going because there are still destruction tasks to be done.
+       There will be no destruction capacity for another 2 days.
+     - On day 6 there will be no destruction capacity for another 1 day.
+     - On day 7 units 1 and 2 will be destroyed.
+     - On day 8 units 1 and 2 will show as Destroyed.  Because there are no
+       infectious units left and nothing left to do, the simulation can end.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>         <td>Destroyed</td>    <td>Destroyed</td></tr>
+    <!-- No infectious units, simulation stops. -->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>early exit 5</short-name>
+
+  <description>
+    Test that the simulation's early-exit rules are followed with respect to
+    units waiting for destruction.
+    
+    In early exit tests 4-6, there are three units.  Unit 0 is infected.  On
+    day 1 unit 0 is detected and units 1 and 2 are marked for destruction.
+    Different effects can be observed when a) there are resources to destroy
+    both units, b) there are resources to destroy one unit, then later there
+    are resources to destroy the other, or c) there are resources to destroy
+    one unit, but never resources to destroy the other.
+
+    In this scenario, there are resources to destroy one unit, then later there
+    are resources to destroy the other.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>22 Feb 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_sheep_infected</population-file>
+
+  <parameter-file>early_exit_5</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting a diseased unit vs. the number of days the
+    animals have been showing clinical signs is fixed at 1. The probability of
+    detecting a diseased unit vs. the number of days since a public
+    announcement of an outbreak is also fixed at 1.
+
+    The authorities can begin a destruction program immediately.  The
+    authorities will destroy units within 20 km of a detected unit.  On the
+    first 4 days that destructions could occur, the destruction capacity will
+    be zero.  The next day, the destruction capacity is 1 unit.  Another day of
+    zero capacity follows, then on the next day and forward the destruction
+    capacity is 1 unit per day.  Cattle have priority over pigs.
+
+    What should happen:
+     - On day 1 unit 0 will be latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected, and
+       units 1 and 2 will be marked for destruction because they are within 20
+       km of a detected unit.
+     - Day 3 is the first day that destructions could happen, but there will be
+       no destruction capacity for 4 days.
+     - On day 4 there will be no destruction capacity for another 3 days.
+     - On day 5 unit 0 will no longer be infectious.  However, the simulation
+       will keep going because there are still destruction tasks to be done.
+       There will be no destruction capacity for another 2 days.
+     - On day 6 there will be no destruction capacity for another 1 day.
+     - On day 7 there is capacity to destroy 1 unit.  Unit 1 will be chosen
+       because cattle have priority over pigs.
+     - On day 8 unit 1's state will show as Destroyed.  There is no capacity to
+       destroy on day 8.
+     - On day 9 there is capacity to destroy 1 unit.  Unit 2 will be destroyed.
+     - On day 10 unit 2's state will show as Destroyed.  Because there are no
+       infectious units left and nothing left to do, the simulation can end.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>         <td>Destroyed</td>    <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>         <td>Destroyed</td>    <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>         <td>Destroyed</td>    <td>Destroyed</td></tr>
+    <!-- No infectious units, simulation stops. -->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_destruction</category>
+  <short-name>early exit 6</short-name>
+
+  <description>
+    Test that the simulation's early-exit rules are followed with respect to
+    units waiting for destruction.
+    
+    In early exit tests 4-6, there are three units.  Unit 0 is infected.  On
+    day 1 unit 0 is detected and units 1 and 2 are marked for destruction.
+    Different effects can be observed when a) there are resources to destroy
+    both units, b) there are resources to destroy one unit, then later there
+    are resources to destroy the other, or c) there are resources to destroy
+    one unit, but never resources to destroy the other.
+
+    In this scenario, there are resources to destroy one unit, but never
+    resources to destroy the other.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>22 Feb 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_sheep_infected</population-file>
+
+  <parameter-file>early_exit_6</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 3 days, clinical signs accompany infectiousness immediately, and
+    natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting a diseased unit vs. the number of days the
+    animals have been showing clinical signs is fixed at 1. The probability of
+    detecting a diseased unit vs. the number of days since a public
+    announcement of an outbreak is also fixed at 1.
+
+    The authorities can begin a destruction program immediately.  The
+    authorities will destroy units within 20 km of a detected unit.  On the
+    first 4 days that destructions could occur, the destruction capacity will
+    be zero.  The next day, the destruction capacity is 1 unit.  All subsequent
+    days have zero capacity.  Cattle have priority over pigs.
+
+    What should happen:
+     - On day 1 unit 0 will be latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected, and
+       units 1 and 2 will be marked for destruction because they are within 20
+       km of a detected unit.
+     - Day 3 is the first day that destructions could happen, but there will be
+       no destruction capacity for 4 days.
+     - On day 4 there will be no destruction capacity for another 3 days.
+     - On day 5 unit 0 will no longer be infectious.  However, the simulation
+       will keep going because there are still destruction tasks to be done.
+       There will be no destruction capacity for another 2 days.
+     - On day 6 there will be no destruction capacity for another 1 day.
+     - On day 7 there is capacity to destroy 1 unit.  Unit 1 will be chosen
+       because cattle have priority over pigs.
+     - On day 8 unit 1's state will show as Destroyed.  Because there are no
+       infectious units left and nothing left to do, the simulation can end.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>         <td>Destroyed</td>    <td>Susceptible</td></tr>
+    <!-- No infectious units, simulation stops. -->
+  </output>
+</deterministic-test>
+
+<variable-test>
+  <category>ring_destruction</category>
+  <short-name>ring at equator</short-name>
+
+  <description>
+    This is one of a set of 6 scenarios to check that the ring is drawn
+    correctly at all latitudes, and with and without the R-tree index.  In this
+    scenario, the ring is at the equator and the R-tree is not used.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>14 May 2007</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>no_rtree_lat0</population-file>
+
+  <parameter-file>lat_and_rtree</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 2 days,
+    and immunity lasts 3 days.
+
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+
+    When a diseased unit is detected, that unit and all units within 1 km will
+    be destroyed.  The authorities can begin a destruction program immediately,
+    and they can destroy an unlimited/very large number of units each day.
+
+    There is no spread or vaccination.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected.  Unit
+       0 and the 46 units around it will be marked for destruction.
+     - On day 3 those units will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>desnUAll</td>
+      <td>desnUIni</td>
+      <td>desnUDet</td>
+      <td>desnURing</td>
+      <td>desnUA</td>
+      <td>desnUIniA</td>
+      <td>desnUDetA</td>
+      <td>desnURingA</td>
+    </tr>
+    <!--   Total     Initially    Detected       Ring      Prodtype A  Initially/A  Detected/A     Ring/A    -->
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr><td>47</td>  <td>0</td>  <td>1</td>  <td>46</td>  <td>47</td>   <td>0</td>  <td>1</td>  <td>46</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_destruction</category>
+  <short-name>ring at lat 45</short-name>
+
+  <description>
+    This is one of a set of 6 scenarios to check that the ring is drawn
+    correctly at all latitudes, and with and without the R-tree index.  In this
+    scenario, the ring is at the 45th parallel and the R-tree is not used.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>14 May 2007</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>no_rtree_lat45</population-file>
+
+  <parameter-file>lat_and_rtree</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 2 days,
+    and immunity lasts 3 days.
+
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+
+    When a diseased unit is detected, that unit and all units within 1 km will
+    be destroyed.  The authorities can begin a destruction program immediately,
+    and they can destroy an unlimited/very large number of units each day.
+
+    There is no spread or vaccination.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected.  Unit
+       0 and the 46 units around it will be marked for destruction.
+     - On day 3 those units will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>desnUAll</td>
+      <td>desnUIni</td>
+      <td>desnUDet</td>
+      <td>desnURing</td>
+      <td>desnUA</td>
+      <td>desnUIniA</td>
+      <td>desnUDetA</td>
+      <td>desnURingA</td>
+    </tr>
+    <!--   Total     Initially    Detected       Ring      Prodtype A  Initially/A  Detected/A     Ring/A    -->
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr><td>47</td>  <td>0</td>  <td>1</td>  <td>46</td>  <td>47</td>   <td>0</td>  <td>1</td>  <td>46</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_destruction</category>
+  <short-name>ring at lat -45</short-name>
+
+  <description>
+    This is one of a set of 6 scenarios to check that the ring is drawn
+    correctly at all latitudes, and with and without the R-tree index.  In this
+    scenario, the ring is at the -45th parallel (southern hemisphere) and the
+    R-tree is not used.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 May 2008</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>no_rtree_lat-45</population-file>
+
+  <parameter-file>lat_and_rtree</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 2 days,
+    and immunity lasts 3 days.
+
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+
+    When a diseased unit is detected, that unit and all units within 1 km will
+    be destroyed.  The authorities can begin a destruction program immediately,
+    and they can destroy an unlimited/very large number of units each day.
+
+    There is no spread or vaccination.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected.  Unit
+       0 and the 46 units around it will be marked for destruction.
+     - On day 3 those units will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>desnUAll</td>
+      <td>desnUIni</td>
+      <td>desnUDet</td>
+      <td>desnURing</td>
+      <td>desnUA</td>
+      <td>desnUIniA</td>
+      <td>desnUDetA</td>
+      <td>desnURingA</td>
+    </tr>
+    <!--   Total     Initially    Detected       Ring      Prodtype A  Initially/A  Detected/A     Ring/A    -->
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr><td>47</td>  <td>0</td>  <td>1</td>  <td>46</td>  <td>47</td>   <td>0</td>  <td>1</td>  <td>46</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_destruction</category>
+  <short-name>ring at equator, using R-tree</short-name>
+
+  <description>
+    This is one of a set of 6 scenarios to check that the ring is drawn
+    correctly at all latitudes, and with and without the R-tree index.  In this
+    scenario, the ring is at the equator and the R-tree is used.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>14 May 2007</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>rtree_lat0</population-file>
+
+  <parameter-file>lat_and_rtree</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 2 days,
+    and immunity lasts 3 days.
+
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+
+    When a diseased unit is detected, that unit and all units within 1 km will
+    be destroyed.  The authorities can begin a destruction program immediately,
+    and they can destroy an unlimited/very large number of units each day.
+
+    There is no spread or vaccination.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected.  Unit
+       0 and the 46 units around it will be marked for destruction.
+     - On day 3 those units will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>desnUAll</td>
+      <td>desnUIni</td>
+      <td>desnUDet</td>
+      <td>desnURing</td>
+      <td>desnUA</td>
+      <td>desnUIniA</td>
+      <td>desnUDetA</td>
+      <td>desnURingA</td>
+    </tr>
+    <!--   Total     Initially    Detected       Ring      Prodtype A  Initially/A  Detected/A     Ring/A    -->
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr><td>47</td>  <td>0</td>  <td>1</td>  <td>46</td>  <td>47</td>   <td>0</td>  <td>1</td>  <td>46</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_destruction</category>
+  <short-name>ring at lat 45, using R-tree</short-name>
+
+  <description>
+    This is one of a set of 6 scenarios to check that the ring is drawn
+    correctly at all latitudes, and with and without the R-tree index.  In this
+    scenario, the ring is at the 45th parallel and the R-tree is used.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>14 May 2007</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>rtree_lat45</population-file>
+
+  <parameter-file>lat_and_rtree</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 2 days,
+    and immunity lasts 3 days.
+
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+
+    When a diseased unit is detected, that unit and all units within 1 km will
+    be destroyed.  The authorities can begin a destruction program immediately,
+    and they can destroy an unlimited/very large number of units each day.
+
+    There is no spread or vaccination.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected.  Unit
+       0 and the 46 units around it will be marked for destruction.
+     - On day 3 those units will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>desnUAll</td>
+      <td>desnUIni</td>
+      <td>desnUDet</td>
+      <td>desnURing</td>
+      <td>desnUA</td>
+      <td>desnUIniA</td>
+      <td>desnUDetA</td>
+      <td>desnURingA</td>
+    </tr>
+    <!--   Total     Initially    Detected       Ring      Prodtype A  Initially/A  Detected/A     Ring/A    -->
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr><td>47</td>  <td>0</td>  <td>1</td>  <td>46</td>  <td>47</td>   <td>0</td>  <td>1</td>  <td>46</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_destruction</category>
+  <short-name>ring at lat -45, using R-tree</short-name>
+
+  <description>
+    This is one of a set of 6 scenarios to check that the ring is drawn
+    correctly at all latitudes, and with and without the R-tree index.  In this
+    scenario, the ring is at the -45th parallel (southern hemisphere) and the
+    R-tree is used.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 May 2008</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>rtree_lat-45</population-file>
+
+  <parameter-file>lat_and_rtree</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 2 days,
+    and immunity lasts 3 days.
+
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+
+    When a diseased unit is detected, that unit and all units within 1 km will
+    be destroyed.  The authorities can begin a destruction program immediately,
+    and they can destroy an unlimited/very large number of units each day.
+
+    There is no spread or vaccination.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected.  Unit
+       0 and the 46 units around it will be marked for destruction.
+     - On day 3 those units will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>desnUAll</td>
+      <td>desnUIni</td>
+      <td>desnUDet</td>
+      <td>desnURing</td>
+      <td>desnUA</td>
+      <td>desnUIniA</td>
+      <td>desnUDetA</td>
+      <td>desnURingA</td>
+    </tr>
+    <!--   Total     Initially    Detected       Ring      Prodtype A  Initially/A  Detected/A     Ring/A    -->
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr><td>47</td>  <td>0</td>  <td>1</td>  <td>46</td>  <td>47</td>   <td>0</td>  <td>1</td>  <td>46</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_destruction</category>
+  <short-name>ring at lat 45, units' locations in projected coordinates</short-name>
+
+  <description>
+    This test is identical to "ring at lat 45" above, but the units' locations
+    are in projected coordinates instead of latitude and longitude.  The units
+    are away from the equator so the Albers Equal Area conic can be used
+    (instead of the cylindrical projection it turns into when the units are all
+    near the equator).  The population file also demonstrates the use of a "latitude
+    of false origin" to set at which latitude "y" = 0.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>12 August 2009</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>no_rtree_lat45_xy</population-file>
+
+  <parameter-file>lat_and_rtree</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 2 days,
+    and immunity lasts 3 days.
+
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+
+    When a diseased unit is detected, that unit and all units within 1 km will
+    be destroyed.  The authorities can begin a destruction program immediately,
+    and they can destroy an unlimited/very large number of units each day.
+
+    There is no spread or vaccination.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected.  Unit
+       0 and the 46 units around it will be marked for destruction.
+     - On day 3 those units will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>desnUAll</td>
+      <td>desnUIni</td>
+      <td>desnUDet</td>
+      <td>desnURing</td>
+      <td>desnUA</td>
+      <td>desnUIniA</td>
+      <td>desnUDetA</td>
+      <td>desnURingA</td>
+    </tr>
+    <!--   Total     Initially    Detected       Ring      Prodtype A  Initially/A  Detected/A     Ring/A    -->
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr><td>47</td>  <td>0</td>  <td>1</td>  <td>46</td>  <td>47</td>   <td>0</td>  <td>1</td>  <td>46</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_destruction</category>
+  <short-name>ring at lat 45, using R-tree, units' locations in projected coordinates</short-name>
+
+  <description>
+    This test is identical to "ring at lat 45, using R-tree" above, but the
+    units' locations are in projected coordinates instead of latitude and
+    longitude.  The units are away from the equator so the Albers Equal Area
+    conic can be used (instead of the cylindrical projection it turns into when
+    the units are all near the equator).  The population file also demonstrates the
+    use of a "latitude of false origin" to set at which latitude "y" = 0.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>12 August 2009</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>rtree_lat45_xy</population-file>
+
+  <parameter-file>lat_and_rtree</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 2 days,
+    and immunity lasts 3 days.
+
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+
+    When a diseased unit is detected, that unit and all units within 1 km will
+    be destroyed.  The authorities can begin a destruction program immediately,
+    and they can destroy an unlimited/very large number of units each day.
+
+    There is no spread or vaccination.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected.  Unit
+       0 and the 46 units around it will be marked for destruction.
+     - On day 3 those units will be destroyed.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>desnUAll</td>
+      <td>desnUIni</td>
+      <td>desnUDet</td>
+      <td>desnURing</td>
+      <td>desnUA</td>
+      <td>desnUIniA</td>
+      <td>desnUDetA</td>
+      <td>desnURingA</td>
+    </tr>
+    <!--   Total     Initially    Detected       Ring      Prodtype A  Initially/A  Detected/A     Ring/A    -->
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+    <tr><td>47</td>  <td>0</td>  <td>1</td>  <td>46</td>  <td>47</td>   <td>0</td>  <td>1</td>  <td>46</td></tr>
+    <tr> <td>0</td>  <td>0</td>  <td>0</td>   <td>0</td>   <td>0</td>   <td>0</td>  <td>0</td>   <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_destruction</category>
+  <short-name>initially destroyed unit is not first destruction</short-name>
+
+  <description>
+    This scenario tests whether an initially destroyed unit is counted as the
+    first destruction in a simulation (it should not be).
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>9 Sep 2009</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>2units_1_start_destroyed</population-file>
+
+  <parameter-file>initially_destroyed</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 2 days,
+    and immunity lasts 3 days.
+
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+
+    When a diseased unit is detected, it will be destroyed.  The authorities
+    can begin a destruction program immediately, and they can destroy an
+    unlimited/very large number of units each day.
+
+    There is no spread or vaccination.
+
+    What should happen:
+     - On day 1 unit 0 will be Latent.  Unit 1 will already be Destroyed, and
+       we will count 1 destroyed unit (initially destroyed units are counted
+       and reported) but we will not count it as the first destruction during
+       the simulation.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected and
+       marked for destruction.
+     - On day 3 unit 0 will be destroyed, and that will count as the first
+       destruction during the simulation.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>desnUAll</td>
+      <td>firstDestruction</td>
+    </tr>
+    <tr><td>0</td>   <td></td></tr>
+    <tr><td>0</td>   <td></td></tr>
+    <tr><td>1</td>  <td>3</td></tr>
+    <tr><td>0</td>  <td>3</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_destruction</category>
+  <short-name>initially destroyed unit does not count toward average wait time</short-name>
+
+  <description>
+    This scenario tests whether an initially destroyed unit counts toward the
+    average wait time calculation (it should not).
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>29 October 2009</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>3units_1_start_destroyed</population-file>
+
+  <parameter-file>initially_destroyed_avg_wait</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 1 day,
+    and immunity lasts 3 days.
+
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+
+    The authorities will destroy units within 10 km of a detected unit.  The
+    authorities can destroy 1 unit each day, starting 2 days after the 1st
+    detection.
+
+    There is no spread or vaccination.
+
+    What should happen:
+     - On day 1 unit 2 will be Latent.  Unit 0 will already be vaccine immune.
+     - On day 2 unit 2 will be Infectious Clinical.  It will be detected and
+       unit 1 will be marked for destruction because it is within 10 km.
+     - On day 4 unit 1 will be destroyed, and the average wait time should be 2
+       (1 unit committed to destroy on day 2, destroyed on day 4).  The
+       initially destroyed unit, which did not wait at all, should not lower
+       that number.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>firstDestruction</td>
+      <td>deswUTimeAvg</td>
+    </tr>
+    <tr><td></td>    <td></td></tr>
+    <tr><td></td>    <td></td></tr>
+    <tr><td></td>    <td></td></tr>
+    <tr><td>4</td>  <td>2</td></tr>
+    <tr><td>4</td>  <td>2</td></tr>
+  </output>
+</variable-test>

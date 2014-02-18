@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naadsm:disease-simulation
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xdf="http://xml.gsfc.nasa.gov/XDF">
+  <description>Specs for a sample simulation run.</description>
+  <num-days>5</num-days>
+  <num-runs>100</num-runs>
+
+  <models>
+
+    <!--
+      This file is for testing the summary table output filter.  There is a 50%
+      chance of detecting the single diseased herd.  If it is detected, it will
+      be destroyed and both the "days to first detection" and "time to end of
+      outbreak" outputs will have meaningful (non-null) values.  If the herd is
+      not detected, the simulation will end with herds still infectious, and
+      neither output will have a meaningful value (they will both be null).
+    -->
+
+    <disease-model production-type="Beef Cattle">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>5</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <!-- A diseased herd has a 50% chance of being detected on the first day it
+      shows clinical signs.  On subsequent days the probability is zero.  The
+      parameter is set this way to make the test simple - there is exactly a
+      50% chance of the herd being detected in one run of simulation, no matter
+      how many days the clinical period lasts. -->
+    <detection-model production-type="Beef Cattle">
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>0.5</value>
+        <value>1</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <detection-monitor>
+      <output>
+        <variable-name>time-to-first-detection</variable-name>
+	<frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>cumulative-num-units-detected</variable-name>
+	<frequency>daily</frequency>
+      </output>
+    </detection-monitor>
+
+    <resources-and-implementation-of-controls-model>
+      <!-- The authorities can begin a destruction program immediately. -->
+      <destruction-program-delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>	
+      </destruction-program-delay>
+      <destruction-capacity>
+        <value>0</value> <value>1000</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </destruction-capacity>
+      <destruction-priority-order>
+        reason,production type,time waiting
+      </destruction-priority-order>
+
+      <!-- Vaccination isn't used in this scenario. -->
+      <vaccination-program-delay>1</vaccination-program-delay>
+      <vaccination-capacity>
+        <value>0</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </vaccination-capacity>
+      <vaccination-priority-order>
+        reason,production type,time waiting
+      </vaccination-priority-order>
+    </resources-and-implementation-of-controls-model>
+
+    <!-- The herd will be destroyed when the infection is confirmed. -->
+    <basic-destruction-model production-type="Beef Cattle">
+      <priority>1</priority>
+    </basic-destruction-model>
+
+    <conflict-resolver></conflict-resolver>
+
+  </models>
+
+  <output>
+    <variable-name>time-to-end-of-outbreak</variable-name>
+    <frequency>daily</frequency>
+  </output>
+
+</naadsm:disease-simulation>

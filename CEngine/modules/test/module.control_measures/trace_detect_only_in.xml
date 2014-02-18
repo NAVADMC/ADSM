@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naadsm:disease-simulation
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xdf="http://xml.gsfc.nasa.gov/XDF">
+  <description>Specs for a sample simulation run.</description>
+  <num-days>8</num-days>
+  <num-runs>1</num-runs>
+
+  <models>
+
+    <disease-model production-type="A">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>7</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>7</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <disease-model production-type="B">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>7</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>7</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <disease-model production-type="C">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>2</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>5</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>7</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <disease-model production-type="D">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>7</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>7</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <contact-spread-model from-production-type="A" to-production-type="C" contact-type="direct">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>10</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <prob-infect>1.0</prob-infect>
+      <!-- Movement stops when the public is aware of an outbreak. -->
+      <movement-control>
+        <value>0</value> <value>1</value>
+        <value>1</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>false</latent-units-can-infect>
+    </contact-spread-model>
+
+    <contact-spread-model from-production-type="B" to-production-type="C" contact-type="indirect">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>10</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <prob-infect>1.0</prob-infect>
+      <!-- Movement stops when the public is aware of an outbreak. -->
+      <movement-control>
+        <value>0</value> <value>1</value>
+        <value>1</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>false</latent-units-can-infect>
+    </contact-spread-model>
+
+    <contact-spread-model from-production-type="C" to-production-type="D" contact-type="direct">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>10</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <prob-infect>1.0</prob-infect>
+      <!-- Movement stops when the public is aware of an outbreak. -->
+      <movement-control>
+        <value>0</value> <value>1</value>
+        <value>1</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>false</latent-units-can-infect>
+    </contact-spread-model>
+
+    <contact-spread-model from-production-type="C" to-production-type="D" contact-type="indirect">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>12</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <prob-infect>1.0</prob-infect>
+      <!-- Movement stops when the public is aware of an outbreak. -->
+      <movement-control>
+        <value>0</value> <value>1</value>
+        <value>1</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>false</latent-units-can-infect>
+    </contact-spread-model>
+ 
+    <!-- Diseased units of type "C" will be detected on their first day showing
+      clinical signs. -->
+    <detection-model production-type="C">
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>1</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <!-- With fixed "random" numbers of 0.5, this probability of detection for
+      diseased units of type "A", "B", and "D" is too low for detection to
+      occur. -->
+    <detection-model production-type="A">
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>0.33</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <detection-model production-type="B">
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>0.33</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <detection-model production-type="D">
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>0.33</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <resources-and-implementation-of-controls-model>
+      <!-- "Unlimited" destruction capacity. -->
+      <destruction-program-delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>	
+      </destruction-program-delay>
+      <destruction-capacity>
+        <value>0</value> <value>1000</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </destruction-capacity>
+      <destruction-priority-order>
+        reason,production type,time waiting
+      </destruction-priority-order>
+
+      <!-- No vaccination. -->
+      <vaccination-program-delay>1</vaccination-program-delay>
+      <vaccination-capacity>
+        <value>0</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </vaccination-capacity>
+      <vaccination-priority-order>
+        reason,production type,time waiting
+      </vaccination-priority-order>
+    </resources-and-implementation-of-controls-model>
+
+    <!-- Destruction: 4 production types x 1 reason = 4 priorities.
+      reason > production type > time waiting
+       1 = basic, A
+       2 = basic, B
+       3 = basic, C
+       4 = basic, D
+    -->
+
+    <basic-destruction-model production-type="A">
+      <priority>1</priority>
+    </basic-destruction-model>
+
+    <basic-destruction-model production-type="B">
+      <priority>2</priority>
+    </basic-destruction-model>
+
+    <basic-destruction-model production-type="C">
+      <priority>3</priority>
+    </basic-destruction-model>
+
+    <basic-destruction-model production-type="D">
+      <priority>4</priority>
+    </basic-destruction-model>
+    
+    <!-- Record direct and indirect contacts.  When a trace is requested, there
+      is no delay to retrieve records.  Because the production type is
+      unspecified, it is taken to apply to all production types. -->
+    <contact-recorder-model contact-type="direct">
+      <trace-period>
+        <value>14</value>
+	<units><xdf:unit>day</xdf:unit></units>
+      </trace-period>
+      <trace-success>1</trace-success>
+      <trace-delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </trace-delay>
+    </contact-recorder-model>
+
+    <contact-recorder-model contact-type="indirect">
+      <trace-period>
+        <value>14</value>
+	<units><xdf:unit>day</xdf:unit></units>
+      </trace-period>
+      <trace-success>1</trace-success>
+      <trace-delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </trace-delay>
+    </contact-recorder-model>
+
+    <!-- When a diseased unit of type "C" is detected, trace all contacts,
+      direct and indirect, out and in. -->
+    <trace-model production-type="C" contact-type="direct" direction="out">
+      <trace-period>
+        <value>14</value>
+	<units><xdf:unit>day</xdf:unit></units>
+      </trace-period>
+    </trace-model>
+
+    <trace-model production-type="C" contact-type="indirect" direction="out">
+      <trace-period>
+        <value>14</value>
+	<units><xdf:unit>day</xdf:unit></units>
+      </trace-period>
+    </trace-model>
+
+    <trace-model production-type="C" contact-type="direct" direction="in">
+      <trace-period>
+        <value>14</value>
+	<units><xdf:unit>day</xdf:unit></units>
+      </trace-period>
+    </trace-model>
+
+    <trace-model production-type="C" contact-type="indirect" direction="in">
+      <trace-period>
+        <value>14</value>
+	<units><xdf:unit>day</xdf:unit></units>
+      </trace-period>
+    </trace-model>
+
+    <!-- Units found by trace are quarantined and visually examined. -->
+    <trace-quarantine-model contact-type="direct" direction="out">
+    </trace-quarantine-model>
+
+    <trace-quarantine-model contact-type="indirect" direction="out">
+    </trace-quarantine-model>
+
+    <trace-quarantine-model contact-type="direct" direction="in">
+    </trace-quarantine-model>
+
+    <trace-quarantine-model contact-type="indirect" direction="in">
+    </trace-quarantine-model>
+
+    <trace-exam-model contact-type="direct" direction="out">
+      <detection-multiplier>1</detection-multiplier>
+    </trace-exam-model>
+
+    <trace-exam-model contact-type="indirect" direction="out">
+      <detection-multiplier>1</detection-multiplier>
+    </trace-exam-model>
+
+    <trace-exam-model contact-type="direct" direction="in">
+      <detection-multiplier>2</detection-multiplier>
+    </trace-exam-model>
+
+    <trace-exam-model contact-type="indirect" direction="in">
+      <detection-multiplier>2</detection-multiplier>
+    </trace-exam-model>
+
+    <conflict-resolver></conflict-resolver>
+
+  </models>
+
+  <output>
+    <variable-name>all-units-states</variable-name>
+    <frequency>daily</frequency>
+  </output>
+
+</naadsm:disease-simulation>

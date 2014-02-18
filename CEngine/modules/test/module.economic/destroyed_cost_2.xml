@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naadsm:disease-simulation
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xdf="http://xml.gsfc.nasa.gov/XDF">
+  <description>Specs for a sample simulation run.</description>
+  <num-days>25</num-days>
+  <num-runs>1</num-runs>
+
+  <models>
+
+    <disease-model>
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <!-- With both probabilities at 1.0, a diseased unit will be detected the
+      instant it shows clinical signs. -->
+    <detection-model>
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <resources-and-implementation-of-controls-model>
+      <destruction-program-delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>	
+      </destruction-program-delay>
+      <destruction-capacity>
+        <value>0</value> <value>1</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </destruction-capacity>
+      <destruction-priority-order>
+        reason,production type,time waiting
+      </destruction-priority-order>
+      <vaccination-program-delay>1</vaccination-program-delay>
+      <!-- No vaccination capacity for the first 10 days. -->
+      <vaccination-capacity>
+        <value>0</value> <value>0</value>
+        <value>9</value> <value>0</value>
+        <value>10</value> <value>1000</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </vaccination-capacity>
+      <vaccination-priority-order>
+        reason,production type,time waiting
+      </vaccination-priority-order>
+    </resources-and-implementation-of-controls-model>
+
+    <!-- Other herds within 5 km of a detection will be vaccinated. -->
+    <ring-vaccination-model to-production-type="C,D,E,F,G">
+      <priority>1</priority>
+      <radius>
+        <value>5</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+      <min-time-between-vaccinations>
+        <value>31</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </min-time-between-vaccinations>      
+    </ring-vaccination-model>
+
+    <!-- Other herds within 5 km of a detection will be destroyed. -->
+    <ring-destruction-model to-production-type="C">
+      <priority>1</priority>
+      <radius>
+        <value>5</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+    </ring-destruction-model>
+
+    <ring-destruction-model to-production-type="D">
+      <priority>2</priority>
+      <radius>
+        <value>5</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+    </ring-destruction-model>
+
+    <ring-destruction-model to-production-type="E">
+      <priority>3</priority>
+      <radius>
+        <value>5</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+    </ring-destruction-model>
+
+    <ring-destruction-model to-production-type="F">
+      <priority>4</priority>
+      <radius>
+        <value>5</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+    </ring-destruction-model>
+
+    <ring-destruction-model to-production-type="G">
+      <priority>5</priority>
+      <radius>
+        <value>5</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+    </ring-destruction-model>
+
+    <vaccine-model>
+      <delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <immunity-period>
+        <point>5</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </vaccine-model>
+
+    <destruction-monitor>
+      <output>
+        <variable-name>desnU</variable-name>
+        <frequency>daily</frequency>
+      </output>
+    </destruction-monitor>G
+
+    <economic-model production-type="A,B">
+      <vaccination-fixed>
+        <value>1</value>
+        <units>USD</units>
+      </vaccination-fixed>
+      <vaccination>
+        <value>2</value>
+        <units>USD</units>
+      </vaccination>
+      <baseline-vaccination-capacity>1000</baseline-vaccination-capacity>
+      <additional-vaccination>
+        <value>3</value>
+        <units>USD</units>
+      </additional-vaccination>
+      <appraisal>
+        <value>4</value>
+        <units>USD</units>
+      </appraisal>
+      <euthanasia>
+        <value>5</value>
+        <units>USD</units>
+      </euthanasia>
+      <indemnification>
+        <value>6</value>
+        <units>USD</units>
+      </indemnification>
+      <carcass-disposal>
+        <value>7</value>
+        <units>USD</units>
+      </carcass-disposal>
+      <cleaning-disinfecting>
+        <value>8</value>
+        <units>USD</units>
+      </cleaning-disinfecting>
+      <!--
+      <output>
+        <variable-name>appraisal-cost</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>cleaning-and-disinfecting-cost</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>euthanasia-cost</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>indemnification-cost</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>carcass-disposal-cost</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>total-cost</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      -->
+      <output>
+        <variable-name>destrAppraisal</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>destrCleaning</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>destrEuthanasia</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>destrIndemnification</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>destrDisposal</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>destrSubtotal</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>costsTotal</variable-name>
+        <frequency>daily</frequency>
+      </output>
+    </economic-model>
+
+    <economic-model production-type="C">
+      <vaccination-fixed>
+        <value>11</value>
+        <units>USD</units>
+      </vaccination-fixed>
+      <vaccination>
+        <value>12</value>
+        <units>USD</units>
+      </vaccination>
+      <baseline-vaccination-capacity>1000</baseline-vaccination-capacity>
+      <additional-vaccination>
+        <value>13</value>
+        <units>USD</units>
+      </additional-vaccination>
+      <appraisal>
+        <value>14</value>
+        <units>USD</units>
+      </appraisal>
+      <euthanasia>
+        <value>15</value>
+        <units>USD</units>
+      </euthanasia>
+      <indemnification>
+        <value>16</value>
+        <units>USD</units>
+      </indemnification>
+      <carcass-disposal>
+        <value>17</value>
+        <units>USD</units>
+      </carcass-disposal>
+      <cleaning-disinfecting>
+        <value>18</value>
+        <units>USD</units>
+      </cleaning-disinfecting>
+    </economic-model>
+
+    <economic-model production-type="D,G">
+      <vaccination-fixed>
+        <value>21</value>
+        <units>USD</units>
+      </vaccination-fixed>
+      <vaccination>
+        <value>22</value>
+        <units>USD</units>
+      </vaccination>
+      <baseline-vaccination-capacity>1000</baseline-vaccination-capacity>
+      <additional-vaccination>
+        <value>23</value>
+        <units>USD</units>
+      </additional-vaccination>
+      <appraisal>
+        <value>24</value>
+        <units>USD</units>
+      </appraisal>
+      <euthanasia>
+        <value>25</value>
+        <units>USD</units>
+      </euthanasia>
+      <indemnification>
+        <value>26</value>
+        <units>USD</units>
+      </indemnification>
+      <carcass-disposal>
+        <value>27</value>
+        <units>USD</units>
+      </carcass-disposal>
+      <cleaning-disinfecting>
+        <value>28</value>
+        <units>USD</units>
+      </cleaning-disinfecting>
+    </economic-model>
+
+    <economic-model production-type="E">
+      <vaccination-fixed>
+        <value>31</value>
+        <units>USD</units>
+      </vaccination-fixed>
+      <vaccination>
+        <value>32</value>
+        <units>USD</units>
+      </vaccination>
+      <baseline-vaccination-capacity>1000</baseline-vaccination-capacity>
+      <additional-vaccination>
+        <value>33</value>
+        <units>USD</units>
+      </additional-vaccination>
+      <appraisal>
+        <value>34</value>
+        <units>USD</units>
+      </appraisal>
+      <euthanasia>
+        <value>35</value>
+        <units>USD</units>
+      </euthanasia>
+      <indemnification>
+        <value>36</value>
+        <units>USD</units>
+      </indemnification>
+      <carcass-disposal>
+        <value>37</value>
+        <units>USD</units>
+      </carcass-disposal>
+      <cleaning-disinfecting>
+        <value>38</value>
+        <units>USD</units>
+      </cleaning-disinfecting>
+    </economic-model>
+
+    <economic-model production-type="F">
+      <vaccination-fixed>
+        <value>41</value>
+        <units>USD</units>
+      </vaccination-fixed>
+      <vaccination>
+        <value>42</value>
+        <units>USD</units>
+      </vaccination>
+      <baseline-vaccination-capacity>1000</baseline-vaccination-capacity>
+      <additional-vaccination>
+        <value>43</value>
+        <units>USD</units>
+      </additional-vaccination>
+      <appraisal>
+        <value>44</value>
+        <units>USD</units>
+      </appraisal>
+      <euthanasia>
+        <value>45</value>
+        <units>USD</units>
+      </euthanasia>
+      <indemnification>
+        <value>46</value>
+        <units>USD</units>
+      </indemnification>
+      <carcass-disposal>
+        <value>47</value>
+        <units>USD</units>
+      </carcass-disposal>
+      <cleaning-disinfecting>
+        <value>48</value>
+        <units>USD</units>
+      </cleaning-disinfecting>
+    </economic-model>
+
+    <conflict-resolver></conflict-resolver>
+
+  </models>
+
+</naadsm:disease-simulation>

@@ -1,0 +1,23 @@
+<herds>
+  <herd>
+    <id>0</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <id>1</id>
+    <production-type>Pigs</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0.0898315</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>VaccineImmune</status>
+    <days-left-in-status>1</days-left-in-status>
+  </herd>
+</herds>

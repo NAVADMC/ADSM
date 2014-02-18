@@ -1,0 +1,58 @@
+<herds>
+  <herd>
+    <production-type>Pigs</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <production-type>Pigs</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0.00898315</latitude>
+      <longitude>0.00898315</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <production-type>Pigs</production-type>
+    <size>25</size>
+    <location>
+      <latitude>-0.00898315</latitude>
+      <longitude>0.00898315</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <production-type>Pigs</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.0179663</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <id>Cattle herd inside donut</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.00898315</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <id>Cattle herd outside donut</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.0269495</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+</herds>

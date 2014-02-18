@@ -61,6 +61,9 @@
 #include "ring_vaccination_model.h"
 #include "test_model.h"
 #include "test_monitor.h"
+#include "trace_back_destruction_model.h"
+#include "trace_back_monitor.h"
+#include "trace_back_zone_focus_model.h"
 #include "trace_destruction_model.h"
 #include "trace_exam_model.h"
 #include "trace_model.h"
@@ -118,6 +121,9 @@ struct model_load_info_t model_list[] = {
   {"ring-vaccination-model", (void*)&ring_vaccination_model_new, ring_vaccination_model_is_singleton},
   {"test-model", (void*)&test_model_new, NULL},
   {"test-monitor", (void*)&test_monitor_new, NULL},
+  {"trace-back-destruction-model", (void*)&trace_back_destruction_model_new, NULL},
+  {"trace-back-monitor", (void*)&trace_back_monitor_new, NULL},
+  {"trace-back-zone-focus-model", (void*)&trace_back_zone_focus_model_new, NULL},
   {"trace-destruction-model", (void*)&trace_destruction_model_new, NULL},
   {"trace-exam-model", (void*)&trace_exam_model_new, NULL},
   {"trace-model", (void*)&trace_model_new, NULL},
