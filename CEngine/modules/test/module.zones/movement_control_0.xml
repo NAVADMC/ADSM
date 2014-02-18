@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naadsm:disease-simulation
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xdf="http://xml.gsfc.nasa.gov/XDF">
+  <description>Specs for a sample simulation run.</description>
+  <num-days>20</num-days>
+  <num-runs>1</num-runs>
+
+  <models>
+
+    <zone-model>
+      <name>High risk</name>
+      <level>1</level>
+      <radius>
+        <value>15</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+    </zone-model>
+
+    <zone-model>
+      <name>Disease free</name>
+      <radius>
+        <value>0</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+    </zone-model>
+
+    <zone-monitor>
+      <output>
+        <variable-name>num-separate-areas</variable-name>
+        <frequency>daily</frequency>
+      </output>
+    </zone-monitor>
+
+    <disease-model production-type="Beef Cattle">
+      <latent-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>5</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>4</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <disease-model production-type="Pigs">
+      <latent-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>5</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>4</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <!-- The parameters below will give 2 shipments per day, to a unit 10 km
+      away. -->
+    <contact-spread-model from-production-type="Beef Cattle" to-production-type="Pigs" contact-type="direct">
+      <fixed-movement-rate>
+        <value>2</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>10</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <!-- Shipping is instantaneous. -->
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <!-- Contact always produces infection. -->
+      <prob-infect>1.0</prob-infect>
+      <!-- No movement slowdown outside of zones. -->
+      <movement-control>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>true</latent-units-can-infect>
+      <subclinical-units-can-infect>true</subclinical-units-can-infect>
+    </contact-spread-model>
+
+    <!-- With both probabilities at 1.0, a diseased pig herd will be detected
+      the instant it shows clinical signs. -->
+    <detection-model production-type="Pigs">
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <resources-and-implementation-of-controls-model>
+      <!-- Destruction isn't used in this scenario. -->
+      <destruction-program-delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>	
+      </destruction-program-delay>
+      <destruction-capacity>
+        <value>0</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </destruction-capacity>
+      <destruction-priority-order>
+        reason,production type,time waiting
+      </destruction-priority-order>
+
+      <!-- Vaccination isn't used in this scenario. -->
+      <vaccination-program-delay>0</vaccination-program-delay>
+      <vaccination-capacity>
+        <value>0</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </vaccination-capacity>
+      <vaccination-priority-order>
+        reason,production type,time waiting
+      </vaccination-priority-order>
+    </resources-and-implementation-of-controls-model>
+
+    <!-- When a diseased pig unit is detected, a zone focus will be added
+      around it. -->
+    <basic-zone-focus-model production-type="Pigs">
+    </basic-zone-focus-model>
+
+    <exposure-monitor>
+      <output>
+	<variable-name>expnU</variable-name>
+	<frequency>daily</frequency>
+      </output>
+    </exposure-monitor>
+
+    <conflict-resolver></conflict-resolver>
+
+  </models>
+
+</naadsm:disease-simulation>

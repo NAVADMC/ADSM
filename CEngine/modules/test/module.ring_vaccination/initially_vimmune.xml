@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naadsm:disease-simulation
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xdf="http://xml.gsfc.nasa.gov/XDF">
+  <description>Specs for a sample simulation run.</description>
+  <num-days>10</num-days>
+  <num-runs>1</num-runs>
+
+  <models>
+
+    <disease-model production-type="Beef Cattle,Pigs">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>2</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <detection-model production-type="Beef Cattle,Pigs">
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <resources-and-implementation-of-controls-model>
+      <!-- No destruction. -->
+      <destruction-program-delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>	
+      </destruction-program-delay>
+      <destruction-capacity>
+        <value>0</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </destruction-capacity>
+      <destruction-priority-order>
+        production type,reason,time waiting
+      </destruction-priority-order>
+      <!-- "Unlimited" vaccination capacity. -->
+      <vaccination-program-delay>1</vaccination-program-delay>
+      <vaccination-capacity>
+        <value>0</value> <value>1000</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </vaccination-capacity>
+      <vaccination-priority-order>
+        production type,reason,time waiting
+      </vaccination-priority-order>
+    </resources-and-implementation-of-controls-model>
+
+    <ring-vaccination-model from-production-type="Beef Cattle" to-production-type="Beef Cattle">
+      <priority>1</priority>
+      <radius>
+        <value>10</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+      <min-time-between-vaccinations>
+        <value>31</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </min-time-between-vaccinations>      
+    </ring-vaccination-model>
+
+    <ring-vaccination-model from-production-type="Pigs" to-production-type="Beef Cattle">
+      <priority>1</priority>
+      <radius>
+        <value>10</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+      <min-time-between-vaccinations>
+        <value>31</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </min-time-between-vaccinations>      
+    </ring-vaccination-model>
+
+    <ring-vaccination-model from-production-type="Beef Cattle" to-production-type="Pigs">
+      <priority>2</priority>
+      <radius>
+        <value>10</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+      <min-time-between-vaccinations>
+        <value>31</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </min-time-between-vaccinations>      
+    </ring-vaccination-model>
+
+    <ring-vaccination-model from-production-type="Pigs" to-production-type="Pigs">
+      <priority>2</priority>
+      <radius>
+        <value>10</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+      <min-time-between-vaccinations>
+        <value>31</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </min-time-between-vaccinations>      
+    </ring-vaccination-model>
+
+    <vaccine-model production-type="Beef Cattle,Pigs">
+      <delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <immunity-period>
+        <point>5</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </vaccine-model>
+
+    <vaccination-monitor>
+      <output>
+        <variable-name>vacnU</variable-name>
+        <broken-down>no</broken-down>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>firstVaccination</variable-name>
+        <broken-down>no</broken-down>
+        <frequency>daily</frequency>
+      </output>
+    </vaccination-monitor>
+
+    <conflict-resolver></conflict-resolver>
+
+  </models>
+
+</naadsm:disease-simulation>

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naadsm:disease-simulation
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xdf="http://xml.gsfc.nasa.gov/XDF">
+  <description>Specs for a sample simulation run.</description>
+  <num-days>7</num-days>
+  <num-runs>1</num-runs>
+
+  <models>
+
+    <disease-model production-type="Cattle">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>10</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>5</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <disease-model production-type="Pigs">
+      <latent-period>
+        <point>2</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>10</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>5</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <disease-model production-type="Sheep,Goats">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <!-- With both probabilities at 1.0, diseased units will be detected the
+      instant they show clinical signs. -->
+    <detection-model>
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <resources-and-implementation-of-controls-model>
+      <!-- Destruction isn't used in this scenario. -->
+      <destruction-program-delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>	
+      </destruction-program-delay>
+      <destruction-capacity>
+        <value>0</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </destruction-capacity>
+      <destruction-priority-order>
+        production type,reason,time waiting
+      </destruction-priority-order>
+      <!-- The authorities can vaccinate 1 herd per day, starting 3 days after
+        the first detection. -->
+      <vaccination-capacity>
+        <value>0</value> <value>0</value>
+        <value>1</value> <value>0</value>
+        <value>2</value> <value>1</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </vaccination-capacity>
+      <vaccination-priority-order>
+        time waiting,production type,reason
+      </vaccination-priority-order>
+    </resources-and-implementation-of-controls-model>
+
+    <!-- Other herds within 1 km will be vaccinated. -->
+    <ring-vaccination-model production-type="Goats">
+      <priority>1</priority>
+      <radius>
+        <value>1</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+      <min-time-between-vaccinations>
+        <value>31</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </min-time-between-vaccinations>      
+    </ring-vaccination-model>
+
+    <ring-vaccination-model production-type="Sheep">
+      <priority>2</priority>
+      <radius>
+        <value>1</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+      <min-time-between-vaccinations>
+        <value>31</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </min-time-between-vaccinations>      
+    </ring-vaccination-model>
+
+    <ring-vaccination-model production-type="Cattle">
+      <priority>3</priority>
+      <radius>
+        <value>1</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+      <min-time-between-vaccinations>
+        <value>31</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </min-time-between-vaccinations>      
+    </ring-vaccination-model>
+
+    <ring-vaccination-model production-type="Pigs">
+      <priority>4</priority>
+      <radius>
+        <value>1</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+      <min-time-between-vaccinations>
+        <value>31</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </min-time-between-vaccinations>      
+    </ring-vaccination-model>
+
+    <vaccine-model production-type="Sheep,Goats">
+      <delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <immunity-period>
+        <point>5</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </vaccine-model>
+
+    <conflict-resolver></conflict-resolver>
+
+  </models>
+
+  <output>
+    <variable-name>all-units-states</variable-name>
+    <frequency>daily</frequency>
+  </output>
+
+</naadsm:disease-simulation>

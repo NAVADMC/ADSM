@@ -1,0 +1,471 @@
+#
+# Set up some global variables.  These variables could be set on the command
+# line, so we set them only if they don't already exist.
+#
+if ![info exists prompt] then {
+	set prompt "> "
+}
+
+if ![info exists floatpat] then {
+	set floatpat "\[+-\]?\[0-9\]+(?:.\[0-9\]+)?(?:\[eE\]\[+-\]\[0-9\]+)?"
+}
+
+if ![info exists intpat] then {
+	set intpat "-?\[0-9\]*"
+}
+
+if ![info exists epsilon] then {
+	set epsilon 0.0001
+}
+
+
+
+#
+# fcmp -- compares two floating-point numbers.
+#
+# Parameters:
+#   a,b  the numbers to compare
+#   tol  the tolerance
+# Returns:
+#   0 if they are approximately equal; otherwise, returns -1 if a < b, +1 if
+#   a > b.
+#
+proc fcmp { a b tol } {
+	return [exec [file join test fcmp] $a $b $tol]
+}
+
+
+
+#
+# pdf_test -- tests the probability density function.
+#
+# Parameters:
+#   xvalues
+#   pvalues
+#   test          a name to report in passes/fails.  Individual tests will be
+#                 named $test_at_x.  (default = "pdf")
+# Returns:
+#   nothing
+#
+proc pdf_test { xvalues pvalues {test pdf} } {
+	global prompt
+	global floatpat
+	global epsilon
+
+	for {set i 0} {$i < [llength $xvalues]} {incr i} {
+		set x [lindex $xvalues $i]
+		set true_answer [lindex $pvalues $i]
+		set test_name $test
+		append test_name "_at_$x"
+		send "pdf ($x)\n"
+		expect {
+			-re "($floatpat)\[\\n\\r\]+$prompt$" {
+				set answer $expect_out(1,string)
+				if { [fcmp $answer $true_answer $epsilon] == 0 } {
+					pass $test_name
+				} else {
+					fail "$test_name pdf($x) = $true_answer, not $answer"
+				}			
+			}
+		}
+	}
+}
+
+
+
+#
+# cdf_test -- tests cumulative distribution function and its inverse.
+#
+# Parameters:
+#   xvalues
+#   areavalues
+#   test          a name to report in passes/fails.  Individual tests will be
+#                 named $test_at_x and $test_inverse_at_x.  (default = "cdf")
+#   avoid         a list of area values for which the inverse function should
+#                 *not* be tested.
+# Returns:
+#   nothing
+#
+proc cdf_test { xvalues areavalues {test cdf} {avoid {}} } {
+	global prompt
+	global floatpat
+	global epsilon
+
+	for {set i 0} {$i < [llength $xvalues]} {incr i} {
+		set x [lindex $xvalues $i]
+		set area [lindex $areavalues $i]
+		set test_name $test
+		append test_name "_at_$x"
+		send "cdf ($x)\n"
+		expect {
+			-re "($floatpat)\[\\n\\r\]+$prompt$" {
+				set answer $expect_out(1,string)
+				if { [fcmp $answer $area $epsilon] == 0 } {
+					pass $test_name
+				} else {
+					fail "$test_name cdf($x) = $area, not $answer"
+				}			
+			}
+		}
+		if { $area > 0 && $area < 1 && [lsearch -exact $avoid $area] < 0 } {
+			set test_name $test
+			append test_name "_inverse_at_$area"
+			send "invcdf ($area)\n"
+			expect {
+				-re "($floatpat)\[\\n\\r\]+$prompt$" {
+					set answer $expect_out(1,string)
+					if { [fcmp $answer $x $epsilon] == 0 } {
+						pass $test_name
+					} else {
+						fail "$test_name inverse_cdf($area) = $x, not $answer"
+					}			
+				}
+			}
+		}
+	}
+}
+
+
+
+#
+# random_number_test -- samples from a distribution and checks whether the
+#   results match what is expected.
+#
+# Parameters:
+#   true_answer          an array of values giving the probability with which
+#                        samples should fall in a series of "buckets"
+#   histogram_low_bound  the number at which the series of "buckets" begins,
+#                        e.g., if histogram_low_bound = -3 and true_answer is
+#                        a 6-element array, then the values in true_answer
+#                        mean:
+#                        probability of a sample in [-3,-2)
+#                             "      "  "   "    "  [-2,-1)
+#                             "      "  "   "    "  [-1, 0)
+#                             "      "  "   "    "  [ 0, 1)
+#                             "      "  "   "    "  [ 1, 2)
+#                             "      "  "   "    "  [ 2, 3)
+#   test                 a name to report in pass/fail.  (default = "random")
+#   iterations           (default = 1,000,000)
+#   tol                  (default = 0.05)
+# Returns:
+#   nothing
+#
+proc random_number_test { true_answer histogram_low_bound {test random} {iterations 1000000} {tol 0.05}} {
+	global floatpat
+	global prompt
+
+	set histogram_high_bound [expr $histogram_low_bound + [llength $true_answer]]
+	send "sample ($iterations,$histogram_low_bound,$histogram_high_bound)\n"
+	expect {
+		-re "($floatpat\(?: $floatpat\)*)\[\\n\\r\]+$prompt$" {
+			set answer [split $expect_out(1,string) " "]
+			set correct 1
+			for {set i 0} {$i < [llength $true_answer]} {incr i} {
+				if { [fcmp [lindex $answer $i] [lindex $true_answer $i] $tol] != 0 } {
+					set correct 0
+					break
+				}
+			}
+			if { $correct == 1 } {
+				pass $test
+			} else {
+				fail "$test one of the values \($answer\) deviates too greatly from expected"
+			}
+		}	
+	}
+}
+
+
+
+#
+# statistics_test -- tests the probability density function statistics.
+#
+# Parameters:
+#   min
+#   max
+#   mean
+#   variance
+#   test          a name to report in passes/fails.  Individual tests will be
+#                 named $test_at_x.  (default = "statistics")
+# Returns:
+#   nothing
+#
+proc statistics_test { min max mean variance {test statistics} } {
+	global prompt
+	global floatpat
+	global intpat
+	global epsilon
+
+
+ 	set test_name $test
+	append test_name "_at_min"
+	send "has_min ()\n"
+	expect {
+		-re "($intpat)\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+			if { $answer != 0 } {
+				set true_answer $min
+				send "min ()\n"
+				expect {
+					-re "($floatpat)\[\\n\\r\]+$prompt$" {
+						set answer $expect_out(1,string)
+						if { [fcmp $answer $true_answer $epsilon] == 0 } {
+							pass $test_name
+						} else {
+							fail "$test_name min() = $true_answer, not $answer"
+						}			
+					}
+				}
+			}
+		}
+	}
+
+ 	set test_name $test
+	append test_name "_at_max"
+	send "has_max ()\n"
+	expect {
+		-re "($intpat)\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+			if { $answer != 0 } {
+				set true_answer $max
+				send "max ()\n"
+				expect {
+					-re "($floatpat)\[\\n\\r\]+$prompt$" {
+						set answer $expect_out(1,string)
+						if { [fcmp $answer $true_answer $epsilon] == 0 } {
+							pass $test_name
+						} else {
+							fail "$test_name max() = $true_answer, not $answer"
+						}			
+					}
+				}
+			}
+		}
+	}
+
+ 	set test_name $test
+	append test_name "_at_mean"
+	send "has_mean ()\n"
+	expect {
+		-re "($intpat)\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+			if { $answer != 0 } {
+				set true_answer $mean
+				send "mean ()\n"
+				expect {
+					-re "($floatpat)\[\\n\\r\]+$prompt$" {
+						set answer $expect_out(1,string)
+						if { [fcmp $answer $true_answer $epsilon] == 0 } {
+							pass $test_name
+						} else {
+							fail "$test_name mean() = $true_answer, not $answer"
+						}			
+					}
+				}
+			}
+		}
+	}
+
+ 	set test_name $test
+	append test_name "_at_variance"
+	send "has_variance ()\n"
+	expect {
+		-re "($intpat)\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+			if { $answer != 0 } {
+				set true_answer $variance
+				send "variance ()\n"
+				expect {
+					-re "($floatpat)\[\\n\\r\]+$prompt$" {
+						set answer $expect_out(1,string)
+						if { [fcmp $answer $true_answer $epsilon] == 0 } {
+							pass $test_name
+						} else {
+							fail "$test_name variance() = $true_answer, not $answer"
+						}			
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
+#
+# sample_statistics_test -- tests the probability density function statistics.
+#
+# Parameters:
+#   test          a name to report in passes/fails.  Individual tests will be
+#                 named $test_at_x.  (default = "sample_statistics")
+#   iterations    (default = 1,000,000)
+#   tol           (default = 0.05)
+# Returns:
+#   nothing
+#
+proc sample_statistics_test { {test sample_statistics} {iterations 1000000} {tol 0.05} } {
+	global prompt
+	global floatpat
+	global intpat
+	global epsilon
+
+
+ 	set test_name $test
+	append test_name "_at_min"
+	send "has_min ()\n"
+	expect {
+		-re "($intpat)\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+			if { $answer != 0 } {
+				send "sample_min ($iterations)\n"
+				expect {
+					-re "($floatpat)\[\\n\\r\]+$prompt$" {
+						set min $expect_out(1,string)
+					}
+				}
+				set true_answer $min
+				send "min ()\n"
+				expect {
+					-re "($floatpat)\[\\n\\r\]+$prompt$" {
+						set answer $expect_out(1,string)
+						if { $answer <= $true_answer } {
+							pass $test_name
+						} else {
+							fail "$test_name min() = $true_answer, not $answer"
+						}			
+					}
+				}
+			}
+		}
+	}
+
+ 	set test_name $test
+	append test_name "_at_max"
+	send "has_max ()\n"
+	expect {
+		-re "($intpat)\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+			if { $answer != 0 } {
+				send "sample_max ($iterations)\n"
+				expect {
+					-re "($floatpat)\[\\n\\r\]+$prompt$" {
+						set max $expect_out(1,string)
+					}
+				}
+				set true_answer $max
+				send "max ()\n"
+				expect {
+					-re "($floatpat)\[\\n\\r\]+$prompt$" {
+						set answer $expect_out(1,string)
+						if { $answer >= $true_answer } {
+							pass $test_name
+						} else {
+							fail "$test_name max() = $true_answer, not $answer"
+						}			
+					}
+				}
+			}
+		}
+	}
+
+ 	set test_name $test
+	append test_name "_at_mean"
+	send "has_mean ()\n"
+	expect {
+		-re "($intpat)\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+			if { $answer != 0 } {
+				send "sample_mean ($iterations)\n"
+				expect {
+					-re "($floatpat)\[\\n\\r\]+$prompt$" {
+						set mean $expect_out(1,string)
+					}
+				}
+				set true_answer $mean
+				send "mean ()\n"
+				expect {
+					-re "($floatpat)\[\\n\\r\]+$prompt$" {
+						set answer $expect_out(1,string)
+						if { [fcmp $answer $true_answer $tol] == 0 } {
+							pass $test_name
+						} else {
+							fail "$test_name mean() = $true_answer, not $answer"
+						}			
+					}
+				}
+			}
+		}
+	}
+
+ 	set test_name $test
+	append test_name "_at_variance"
+	send "has_variance ()\n"
+	expect {
+		-re "($intpat)\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+			if { $answer != 0 } {
+				send "sample_variance ($iterations)\n"
+				expect {
+					-re "($floatpat)\[\\n\\r\]+$prompt$" {
+						set variance $expect_out(1,string)
+					}
+				}
+				set true_answer $variance
+				send "variance ()\n"
+				expect {
+					-re "($floatpat)\[\\n\\r\]+$prompt$" {
+						set answer $expect_out(1,string)
+						if { [fcmp $answer $true_answer $tol] == 0 } {
+							pass $test_name
+						} else {
+							fail "$test_name variance() = $true_answer, not $answer"
+						}			
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
+#
+# shell_load -- loads the program
+#
+proc shell_load { arg } {
+	#
+}
+
+
+
+#
+# shell_exit -- quit and cleanup
+#
+proc shell_exit {} {
+	#
+}
+
+
+
+proc shell_start {} {
+	global SHELL
+	global prompt
+	global floatpat
+	global epsilon
+	global spawn_id
+	global verbose
+	
+	if { $verbose > 1 } {
+		send_user "starting $SHELL\n"
+	}
+	spawn $SHELL
+	expect {
+		-re "No such file.*" { perror "Can't start $SHELL"; exit 1 }
+		-re "$prompt$" { }
+		timeout { perror "Failed to spawn $SHELL (timeout)"; exit 1 }
+	}
+}
+
+
+
+shell_start

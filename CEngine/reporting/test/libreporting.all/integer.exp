@@ -1,0 +1,79 @@
+set timeout 3
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+
+
+#
+# Test creating a simple integer variable.
+#
+set test "integer_1"
+send "variable (\"x\",daily,t)\n"
+expect {
+	-re "$prompt$" { }
+}
+set true_value 1
+send "set ($true_value)\n"
+expect {
+  -re "($floatpat)\[\\n\\r\]+$prompt$" {
+		set value $expect_out(1,string)
+		if { [fcmp $value $true_value $epsilon] != 0 } {
+			fail "$test initial value should be $true_value, not $value"
+		} else {
+			pass "$test"
+		}
+	}
+}
+
+
+
+#
+# Test adding to and subtracting from the simple integer variable.
+#
+set test "integer_1_add"
+set added 2
+set true_value [expr $true_value + $added]
+send "add ($added)\n"
+expect {
+  -re "($floatpat)\[\\n\\r\]+$prompt$" {
+		set value $expect_out(1,string)
+		if { [fcmp $value $true_value $epsilon] != 0 } {
+			fail "$test after adding $added value should be $true_value, not $value"
+		} else {
+			pass "$test"
+		}
+	}
+}
+set test "integer_1_subtract"
+set subtracted 3
+set true_value [expr $true_value - $subtracted]
+send "subtract ($subtracted)\n"
+expect {
+  -re "($floatpat)\[\\n\\r\]+$prompt$" {
+		set value $expect_out(1,string)
+		if { [fcmp $value $true_value $epsilon] != 0 } {
+			fail "$test after subtracting $subtracted value should be $true_value, not $value"
+		} else {
+			pass "$test"
+		}
+	}
+}

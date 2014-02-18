@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="US-ASCII" ?>
+<herds>
+  <herd>
+    <id>0 aeiou</id>
+    <production-type>aeiou</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <id>1 cCnN</id>
+    <production-type>cCnN</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0.0898315</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+</herds>

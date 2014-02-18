@@ -1,0 +1,185 @@
+set timeout 10
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+#
+# Regular expressions for matching the printed representation of a histogram
+# distribution.  These regexps get ugly, because the text to match really does
+# contain square brackets and parens.  So where, for example, a square bracket
+# must occur in the text, the regexp contains
+#
+#   \\\[
+#
+# When Tcl interprets the quoted string below, it collapses the two backslashes
+# to one backslash, and collapses the \[ to a single [ character.  Then the
+# regexp interpreter sees \[, a literal square bracket, as opposed to [, a
+# square bracket that is meaningful in regexp syntax.  Yeesh!
+#
+set binpat "bin #\[0-9\]+ \\\[($floatpat),($floatpat)\\\) ($floatpat)"
+set binpat_nogroups "bin #\[0-9\]+ \\\[$floatpat,$floatpat\\\) $floatpat"
+set binspat "(?:$binpat_nogroups\[\\n\\r \]*)+"
+
+
+
+#
+# Turns the text representation of histogram bins into a Tcl list.  For
+# example, the text string
+#
+# bin #0 [0,1) 3
+# bin #1 [1,2) 4
+#
+# will be returned as { {0 1 3} {1 2 4} }.
+#
+proc bins_string_to_list { s } {
+	global binpat
+
+	set result {}
+	# Get rid of carriage returns.
+	regsub -all {\r} $s "" s
+	set s [split $s "\n"]
+	for {set i 0} {$i < [llength $s]} {incr i} {
+		regexp $binpat [string trim [lindex $s $i]] match low high value
+		lappend result [list $low $high $value]
+	}
+	return $result
+}
+
+
+
+#
+# Returns an empty string if successful, an error string otherwise.
+#
+proc check_creation { params answer_name } {
+	global epsilon
+	# array passed by reference
+	upvar $answer_name answer
+
+	set true_low [lindex $params 0]
+	set true_high [lindex $params 1]
+	set true_values [lrange $params 2 end]
+	set true_nbins [llength $true_values]
+
+	#
+	# Check that the histogram has the correct number of bins.
+	#
+	set nbins $answer(1,string)
+	if { $nbins != $true_nbins } {
+		return "number of bins should be $true_nbins, not $nbins"
+	}
+
+	set bins [bins_string_to_list $answer(2,string)]
+
+	#
+	# Check that the low and high bounds are correct.
+	#
+	set low [lindex [lindex $bins 0] 0]
+	if { [fcmp $low $true_low $epsilon] != 0 } {
+		return "low bound should be $true_low, not $low"
+	}
+	
+	set high [lindex [lindex $bins [expr $nbins - 1]] 1]
+	if { [fcmp $high $true_high $epsilon] != 0 } {
+		return "high bound should be $true_high, not $high"
+	}
+
+	#
+	# Check that individual bin values are correct.  If they did not already
+	# sum to 1, they should have been scaled.
+	#
+	set sum 0.0
+	foreach value $true_values {
+		set sum [expr $sum + $value]
+	}
+	
+	for {set i 0} {$i < [llength $bins]} {incr i} {
+		set true_value [expr [lindex $true_values $i] / $sum]
+		set value [lindex [lindex $bins $i] 2]
+		if { [fcmp $true_value $value $epsilon] != 0 } {
+			return "bin #$i should contain $true_value, not $value"
+		}
+	}
+	
+	return ""
+}
+
+
+
+#
+# Test that the parameters are set correctly when a histogram distribution is
+# created.
+#
+set test "create"
+set low 0
+set high 3
+set params [list $low $high 2 5 3]
+send "histogram ([join $params ,])\n"
+expect {
+	-re "<histogram probability distribution\[\\n\\r\]+ (\[0-9\]+) bins\[\\n\\r\]+ ($binspat)>.*$prompt$" {
+		set error [check_creation $params expect_out]
+		if { [string compare $error ""] != 0 } {
+			fail "$test $error"
+		} else {
+			pass $test
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.
+#
+set xvalues {-1 0 0.5 1 1.5 2 2.75 3 4}
+set answers {0 0.2 0.2 0.5 0.5 0.3 0.3 0 0}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.
+#
+set xvalues {-1 0 0.5 1 1.5 2 2.75 3 4}
+set answers {0 0 0.1 0.2 0.45 0.7 0.925 1 1}
+cdf_test $xvalues $answers
+
+
+
+#
+# Test random number generation.
+#
+set true_answer {0 0.2 0.5 0.3 0}
+random_number_test $true_answer -1
+
+
+
+#
+# Test statistics.
+#
+#set min
+#set max
+#set mean 
+#set variance
+#statistics_test $min $max $mean $variance
+sample_statistics_test
+
+
+

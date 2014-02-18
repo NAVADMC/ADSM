@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naadsm:disease-simulation
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xdf="http://xml.gsfc.nasa.gov/XDF">
+  <description>Specs for a sample simulation run.</description>
+  <num-days>3</num-days>
+  <num-runs>1</num-runs>
+
+  <models>
+
+    <disease-model>
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <contact-spread-model from-production-type="Sheep" to-production-type="Beef Cattle" contact-type="direct">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>10</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <prob-infect>0</prob-infect>
+      <!-- Movement stops the day after an outbreak is known. -->
+      <movement-control>
+        <value>0</value> <value>1.0</value>
+        <value>1</value> <value>0.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>false</latent-units-can-infect>
+    </contact-spread-model>
+
+    <contact-spread-model from-production-type="Pigs" to-production-type="Sheep" contact-type="direct">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>10</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <prob-infect>0</prob-infect>
+      <!-- Movement stops the day after an outbreak is known. -->
+      <movement-control>
+        <value>0</value> <value>1.0</value>
+        <value>1</value> <value>0.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>false</latent-units-can-infect>
+    </contact-spread-model>
+
+    <!-- Diseased units will be detected on their second day showing
+      clinical signs. -->
+    <detection-model>
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>0.33</value>
+        <value>1</value> <value>0.66</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <resources-and-implementation-of-controls-model>
+      <!-- No destruction. -->
+      <destruction-program-delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </destruction-program-delay>
+      <destruction-capacity>
+        <value>0</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </destruction-capacity>
+      <destruction-priority-order>
+        reason,production type,time waiting
+      </destruction-priority-order>
+
+      <!-- No vaccination. -->
+      <vaccination-program-delay>1</vaccination-program-delay>
+      <vaccination-capacity>
+        <value>0</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </vaccination-capacity>
+      <vaccination-priority-order>
+        reason,production type,time waiting
+      </vaccination-priority-order>
+    </resources-and-implementation-of-controls-model>
+
+    <!-- Record direct contacts.  When a trace is requested, there is no delay
+      to retrieve records.  Because the production type is unspecified, it is
+      taken to apply to all production types. -->
+    <contact-recorder-model contact-type="direct">
+      <trace-period>
+        <value>14</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </trace-period>
+      <trace-success>1</trace-success>
+      <trace-delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </trace-delay>
+    </contact-recorder-model>
+
+    <!-- When a diseased unit is detected, trace out direct contacts. -->
+    <trace-model contact-type="direct" direction="out">
+      <trace-period>
+        <value>14</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </trace-period>
+    </trace-model>
+
+    <!-- Units found by trace out are quarantined and visually examined. -->
+    <trace-quarantine-model contact-type="direct" direction="out">
+    </trace-quarantine-model>
+
+    <trace-exam-model contact-type="direct" direction="out">
+      <detection-multiplier>2</detection-multiplier>
+      <test-if-no-signs>false</test-if-no-signs>
+    </trace-exam-model>
+
+    <test-model>
+      <delay>
+        <point>2</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <sensitivity>1</sensitivity>
+      <specificity>1</specificity>
+    </test-model>
+
+    <exposure-monitor>
+      <output>
+        <variable-name>expnU</variable-name>
+        <frequency>daily</frequency>
+      </output>
+    </exposure-monitor>
+
+    <detection-monitor>
+      <output>
+        <variable-name>detnU</variable-name>
+        <frequency>daily</frequency>
+      </output>
+    </detection-monitor>
+
+    <trace-monitor>
+      <output>
+        <variable-name>trnUp</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>trnU</variable-name>
+        <frequency>daily</frequency>
+      </output>
+    </trace-monitor>
+
+    <exam-monitor>
+      <output>
+        <variable-name>exmnU</variable-name>
+        <frequency>daily</frequency>
+      </output>
+    </exam-monitor>
+
+    <conflict-resolver />
+
+  </models>
+
+</naadsm:disease-simulation>

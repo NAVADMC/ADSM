@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naadsm:disease-simulation
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xdf="http://xml.gsfc.nasa.gov/XDF">
+  <description>Specs for a sample simulation run.</description>
+  <num-days>4</num-days>
+  <num-runs>1</num-runs>
+
+  <!--
+    This scenario tests for a "drift" effect in the contact spread code.  The
+    algorithm (as of 3.1.15) allows a potential recipient unit whose distance
+    to the source unit is within 10 m of the current best match to be
+    considered as "the same" as the current best match.  This creates a
+    possibility for the current best match to "drift" away from the true best
+    10 m at a time.
+    
+    Run this scenario with a low fixed "random" number like 0.1 so that "r"
+    will come out below the threshold for a few replacement tests.
+    That is, the first time we encounter a potential recipient the "same"
+    distance from the source as the current best match, there's a 1 in 2 (0.5)
+    chance the new unit will be chosen.  r=0.1 < 0.5, so the current best match
+    will be replaced.  Then there's a 1 in 3, 1 in 4, 1 in 5, etc. chance of
+    replacing the current best match.  With r=0.1 the algorithm will keep on
+    choosing to replace the current best match.
+  -->
+
+  <models>
+
+    <disease-model production-type="Beef Cattle">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <contact-spread-model from-production-type="Beef Cattle" to-production-type="Beef Cattle" contact-type="direct">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>1</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <!-- Shipping is instantaneous. -->
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <!-- Contact always produces infection. -->
+      <prob-infect>1.0</prob-infect>
+      <!-- Movement is unaffected by public knowledge of an outbreak. -->
+      <movement-control>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>true</latent-units-can-infect>
+      <subclinical-units-can-infect>true</subclinical-units-can-infect>
+    </contact-spread-model>
+
+    <conflict-resolver></conflict-resolver>
+
+  </models>
+
+  <output>
+    <variable-name>all-units-states</variable-name>
+    <frequency>daily</frequency>
+  </output>
+
+</naadsm:disease-simulation>

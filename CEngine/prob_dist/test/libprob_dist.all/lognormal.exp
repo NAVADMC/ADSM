@@ -1,0 +1,94 @@
+set timeout 10
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+
+		fail "$test (timeout)"
+	}
+}
+
+#
+# Test that the parameters are set correctly when a lognormal distribution is
+# created.
+#
+set test "create"
+set true_zeta 0.0
+set true_sigma 1.0
+send "lognormal ($true_zeta,$true_sigma)\n"
+expect {
+	-re "<lognormal probability distribution\[\\n\\r\]+ zeta=($floatpat) sigma=($floatpat)>.*$prompt$" {
+		set zeta $expect_out(1,string)
+		if { [fcmp $zeta $true_zeta $epsilon] != 0 } {
+			fail "$test zeta should be $true_zeta, not $zeta"
+		} else {
+			set sigma $expect_out(2,string)
+			if { [fcmp $sigma $true_sigma $epsilon] != 0 } {
+				fail "$test sigma should be $true_sigma, not $sigma"
+			} else {
+				pass "$test"
+			}
+
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.  "Correct" values hand-calculated
+# using formulas in "A Compendium of Common Probability Distributions".
+#
+set xvalues {-1 0 0.5 1 2 3 4 5 6}
+set answers {0 0 0.627496 0.398942 0.156874 0.0727283 0.0381535 0.0218507 0.0133545}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.  "Correct" values
+# hand-calculated using the formula from mathworld.com, since the cumulative
+# distribution functions given in "A Compendium of Common Probability
+# Distributions" and "A Concise Summary of @RISK Probability Distribution
+# Functions" both produce clearly nonsensical values.
+#
+set xvalues {-1 0 0.5 1 2 3 4 5 6}
+set answers {0 0 0.244109 0.5 0.755891 0.864031 0.917171 0.946240 0.963414}
+cdf_test $xvalues $answers "cdf"
+
+
+
+#
+# Test random number generation.
+#
+set true_answer {0 0.5 0.255891 0.108140 0.0531401, 0.0290682, 0.0171746}
+random_number_test $true_answer -1
+
+
+
+#
+# Test statistics.
+#
+#set min
+#set max
+#set mean 
+#set variance
+#statistics_test $min $max $mean $variance
+sample_statistics_test
+
+
+

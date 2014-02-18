@@ -1,0 +1,145 @@
+set timeout 10
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+#
+# Test that the parameters are set correctly when a Pareto distribution is
+# created.
+#
+set test "create"
+set true_theta 1.0
+set true_a 1.0
+send "pareto ($true_theta,$true_a)\n"
+expect {
+	-re "<Pareto probability distribution\[\\n\\r\]+ theta=($floatpat) a=($floatpat)>.*$prompt$" {
+		set theta $expect_out(1,string)
+		if { [fcmp $theta $true_theta $epsilon] != 0 } {
+			fail "$test theta should be $true_theta, not $theta"
+		} else {
+			set a $expect_out(2,string)
+			if { [fcmp $a $true_a $epsilon] != 0 } {
+				fail "$test a should be $true_a, not $a"
+			} else {
+				pass "$test"
+			}
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.  "Correct" values hand-calculated
+# using formulas in "A Concise Summary of @RISK Probability Distribution
+# Functions".
+#
+set xvalues {-1 0 1 2 3 4 5 6 7 8}
+set answers {0 0 1.0 0.25 0.11111 0.0625 0.04 0.027778 0.020408 0.015625 }
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.  "Correct" values
+# hand-calculated using formulas in "A Concise Summary of @RISK Probability
+# Distribution Functions".
+#
+set xvalues {-1 0 1 2 3 4 5 6 7 8}
+set answers {0 0 0 0.5 0.66667 0.75 0.8 0.83333 0.85714 0.875 }
+cdf_test $xvalues $answers "cdf"
+
+
+
+#
+# Test random number generation.  This distribution has an infinite right tail
+# but only the first dozen numbers are included below.
+#
+set true_answer {0 0 0.5 0.16667 0.83333 0.05 0.033333 0.023810 0.017857 0.013889 0.011111 0.0090909 0.0075758 0.0064103 }
+random_number_test $true_answer -1
+
+
+
+#
+# Create another Pareto distribution with different parameters.  This time
+# shape > 1.
+#
+set test "create"
+set true_theta 4.0
+set true_a 1.0
+send "pareto ($true_theta,$true_a)\n"
+expect {
+	-re "<Pareto probability distribution\[\\n\\r\]+ theta=($floatpat) a=($floatpat)>.*$prompt$" {
+		set theta $expect_out(1,string)
+		if { [fcmp $theta $true_theta $epsilon] != 0 } {
+			fail "$test theta should be $true_theta, not $theta"
+		} else {
+			set location $expect_out(2,string)
+			if { [fcmp $a $true_a $epsilon] != 0 } {
+				fail "$test a should be $true_a, not $a"
+			} else {
+				pass "$test"
+			}
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.
+#
+set xvalues {-1 0 1 2 3 4 5 6 7 8}
+set answers {0 0 4 0.125 0.016461 0.0039063 0.00128 0.0005144 0.000238 0.00012207 }
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.
+#
+set xvalues {-1 0 1 2 3 4 5 6 7 8}
+set answers {0 0 0 0.93750 0.98765 0.996094 0.998400 0.999228 0.999584 0.999756 }
+cdf_test $xvalues $answers "cdf"
+
+
+
+#
+# Test random number generation.  This distribution has an infinite right tail
+# but the numbers below only go until the value drops below 1 in 10000.
+#
+set true_answer {0 0 0.93750 0.050154 0.0084394 0.0023062 0.00082840 0.00035511 0.00017235 }
+random_number_test $true_answer -1
+
+
+
+#
+# Test statistics.
+#
+#set min
+#set max
+#set mean 
+#set variance
+#statistics_test $min $max $mean $variance
+sample_statistics_test
+
+
+

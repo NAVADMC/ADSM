@@ -1,0 +1,190 @@
+set timeout 3
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+#
+# Test destroying a susceptible herd.  For this first test, allow one day to
+# pass before destroying the herd.
+#
+set test "destroy_1"
+send "reset\n"
+expect {
+	-re "$prompt$" { }
+}
+send "herd (\"beef\",25,0,0)\n"
+expect {
+	-re "$prompt$" { }
+}
+set error [progression_test [list "Susceptible"]]
+if { [string compare $error ""] == 0 } {
+	send "destroy (0)\n"
+	expect {
+		-re "$prompt$" { }
+	}
+	set error [progression_test [list "Destroyed" "Destroyed"]]
+}
+if { [string compare $error ""] == 0 } {
+	pass "$test"
+} else {
+	fail "$test $error"
+}
+
+#
+# Test that healthy herds end up in the "Destroyed" state when destroyed.
+#
+set test "destroy_healthy_herd_1"
+send "reset\n"
+expect {
+	-re "$prompt$" { }
+}
+send "herd (\"beef\",25,0,0)\n"
+expect {
+	-re "$prompt$" { }
+}
+send "vaccinate (0,1,2)\n"
+expect {
+	-re "$prompt$" { }
+}
+set error [progression_test [list "Susceptible" "Vaccine Immune"]]
+if { [string compare $error ""] == 0 } {
+	send "destroy (0)\n"
+	expect {
+		-re "$prompt$" { }
+	}
+	set error [progression_test [list "Destroyed" "Destroyed" "Destroyed" "Destroyed" "Destroyed"]]
+}
+if { [string compare $error ""] == 0 } {
+	pass "$test"
+} else {
+	fail "$test $error"
+}
+
+set test "destroy_healthy_herd_2"
+send "reset\n"
+expect {
+	-re "$prompt$" { }
+}
+send "herd (\"beef\",25,0,0)\n"
+expect {
+	-re "$prompt$" { }
+}
+send "infect (0,1,0,1,2)\n"
+expect {
+	-re "$prompt$" { }
+}
+set error [progression_test [list "Latent" "Infectious Clinical" "Naturally Immune"]]
+if { [string compare $error ""] == 0 } {
+	send "destroy (0)\n"
+	expect {
+		-re "$prompt$" { }
+	}
+	set error [progression_test [list "Destroyed" "Destroyed" "Destroyed" "Destroyed" "Destroyed"]]
+}
+if { [string compare $error ""] == 0 } {
+	pass "$test"
+} else {
+	fail "$test $error"
+}
+
+#
+# Test that diseased herds end up in the "Destroyed" state when destroyed.
+#
+set test "destroy_diseased_herd_1"
+send "reset\n"
+expect {
+	-re "$prompt$" { }
+}
+send "herd (\"beef\",25,0,0)\n"
+expect {
+	-re "$prompt$" { }
+}
+send "infect (0,2,1,1,1)\n"
+expect {
+	-re "$prompt$" { }
+}
+set error [progression_test [list "Latent"]]
+if { [string compare $error ""] == 0 } {
+	send "destroy (0)\n"
+	expect {
+		-re "$prompt$" { }
+	}
+	set error [progression_test [list "Destroyed" "Destroyed" "Destroyed" "Destroyed" "Destroyed"]]
+}
+if { [string compare $error ""] == 0 } {
+	pass "$test"
+} else {
+	fail "$test $error"
+}
+
+set test "destroy_diseased_herd_2"
+send "reset\n"
+expect {
+	-re "$prompt$" { }
+}
+send "herd (\"beef\",25,0,0)\n"
+expect {
+	-re "$prompt$" { }
+}
+send "infect (0,1,2,1,1)\n"
+expect {
+	-re "$prompt$" { }
+}
+set error [progression_test [list "Latent" "Infectious Subclinical"]]
+if { [string compare $error ""] == 0 } {
+	send "destroy (0)\n"
+	expect {
+		-re "$prompt$" { }
+	}
+	set error [progression_test [list "Destroyed" "Destroyed" "Destroyed" "Destroyed" "Destroyed"]]
+}
+if { [string compare $error ""] == 0 } {
+	pass "$test"
+} else {
+	fail "$test $error"
+}
+
+set test "destroy_diseased_herd_3"
+send "reset\n"
+expect {
+	-re "$prompt$" { }
+}
+send "herd (\"beef\",25,0,0)\n"
+expect {
+	-re "$prompt$" { }
+}
+send "infect (0,1,1,2,1)\n"
+expect {
+	-re "$prompt$" { }
+}
+set error [progression_test [list "Latent" "Infectious Subclinical" "Infectious Clinical"]]
+if { [string compare $error ""] == 0 } {
+	send "destroy (0)\n"
+	expect {
+		-re "$prompt$" { }
+	}
+	set error [progression_test [list "Destroyed" "Destroyed" "Destroyed" "Destroyed" "Destroyed"]]
+}
+if { [string compare $error ""] == 0 } {
+	pass "$test"
+} else {
+	fail "$test $error"
+}

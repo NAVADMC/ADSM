@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naadsm:disease-simulation
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xdf="http://xml.gsfc.nasa.gov/XDF">
+  <description>Specs for a sample simulation run.</description>
+  <num-days>25</num-days>
+  <num-runs>1</num-runs>
+
+  <models>
+
+    <disease-model production-type="A,B,C,D,E,F,G">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <!-- Direct contacts -->
+    <contact-spread-model from-production-type="A" to-production-type="B" contact-type="direct">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>1</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <!-- Shipping is instantaneous. -->
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+       <!-- Contact always produces infection. -->
+      <prob-infect>1.0</prob-infect>
+      <!-- Movement is unaffected by public knowledge of an outbreak. -->
+      <movement-control>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>false</latent-units-can-infect>
+    </contact-spread-model>
+
+    <contact-spread-model from-production-type="B" to-production-type="C" contact-type="direct">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>1</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <prob-infect>1.0</prob-infect>
+      <movement-control>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>false</latent-units-can-infect>
+    </contact-spread-model>
+
+    <contact-spread-model from-production-type="C" to-production-type="D" contact-type="direct">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>1</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <prob-infect>1.0</prob-infect>
+      <movement-control>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>false</latent-units-can-infect>
+    </contact-spread-model>
+
+    <contact-spread-model from-production-type="C" to-production-type="E" contact-type="direct">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>1</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <prob-infect>1.0</prob-infect>
+      <movement-control>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>false</latent-units-can-infect>
+    </contact-spread-model>
+
+    <contact-spread-model from-production-type="D" to-production-type="F" contact-type="direct">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>1</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <prob-infect>1.0</prob-infect>
+      <movement-control>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>false</latent-units-can-infect>
+    </contact-spread-model>
+
+    <contact-spread-model from-production-type="E" to-production-type="G" contact-type="direct">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>1</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <delay>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <prob-infect>1.0</prob-infect>
+      <movement-control>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>false</latent-units-can-infect>
+    </contact-spread-model>
+
+    <!-- With both probabilities at 1.0, a unit of type "C" will be detected
+      the instant it shows clinical signs. -->
+    <detection-model production-type="C">
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <resources-and-implementation-of-controls-model>
+      <!-- The authorities can begin a destruction program immediately. -->
+      <destruction-program-delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>	
+      </destruction-program-delay>
+      <!-- An "unlimited" number of units can be destroyed per day. -->
+      <destruction-capacity>
+        <value>0</value> <value>1000</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </destruction-capacity>
+      <destruction-priority-order>
+        time waiting,reason,production type
+      </destruction-priority-order>
+
+      <!-- Vaccination isn't used in this scenario. -->
+      <vaccination-program-delay>1</vaccination-program-delay>
+      <vaccination-capacity>
+        <value>0</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </vaccination-capacity>
+      <vaccination-priority-order>
+        time waiting,reason,production type
+      </vaccination-priority-order>
+    </resources-and-implementation-of-controls-model>
+
+    <!-- Destruction: 7 production types x 3 reasons = 21 priorities.
+      time waiting > reason > production type
+       1 = basic, prod type A
+       2 = basic, prod type B
+       3 = basic, prod type C
+       4 = basic, prod type D
+       5 = basic, prod type E
+       6 = basic, prod type F
+       7 = basic, prod type G
+       8 = trace in direct, prod type A
+       9 = trace in direct, prod type B
+      10 = trace in direct, prod type C
+      11 = trace in direct, prod type D
+      12 = trace in direct, prod type E
+      13 = trace in direct, prod type F
+      14 = trace in direct, prod type G
+      15 = trace out direct, prod type A
+      16 = trace out direct, prod type B
+      17 = trace out direct, prod type C
+      18 = trace out direct, prod type D
+      19 = trace out direct, prod type E
+      20 = trace out direct, prod type F
+      21 = trace out direct, prod type G
+    -->
+
+    <!-- The unit will be destroyed when the infection is confirmed. -->
+    <basic-destruction-model production-type="A">
+      <priority>1</priority>
+    </basic-destruction-model>
+
+    <basic-destruction-model production-type="B">
+      <priority>2</priority>
+    </basic-destruction-model>
+
+    <basic-destruction-model production-type="C">
+      <priority>3</priority>
+    </basic-destruction-model>
+
+    <basic-destruction-model production-type="D">
+      <priority>4</priority>
+    </basic-destruction-model>
+
+    <basic-destruction-model production-type="E">
+      <priority>5</priority>
+    </basic-destruction-model>
+
+    <basic-destruction-model production-type="F">
+      <priority>6</priority>
+    </basic-destruction-model>
+
+    <basic-destruction-model production-type="G">
+      <priority>6</priority>
+    </basic-destruction-model>
+
+    <!-- Record all direct contacts -->
+    <contact-recorder-model contact-type="direct">
+      <trace-period>
+        <value>7</value>
+	<units><xdf:unit>day</xdf:unit></units>
+      </trace-period>
+      <trace-success>0</trace-success>
+    </contact-recorder-model>
+
+<!--
+    <trace-model contact-type="direct" direction="in">
+      <trace-period>
+        <value>7</value>
+	<units><xdf:unit>day</xdf:unit></units>
+      </trace-period>
+    </trace-model>
+
+    <trace-model contact-type="direct" direction="out">
+      <trace-period>
+        <value>7</value>
+	<units><xdf:unit>day</xdf:unit></units>
+      </trace-period>
+    </trace-model>
+-->
+
+    <trace-destruction-model production-type="A" contact-type="direct" direction="in">
+      <priority>8</priority>
+    </trace-destruction-model>
+
+    <trace-destruction-model production-type="B" contact-type="direct" direction="in">
+      <priority>9</priority>
+    </trace-destruction-model>
+
+    <trace-destruction-model production-type="C" contact-type="direct" direction="in">
+      <priority>10</priority>
+    </trace-destruction-model>
+
+    <trace-destruction-model production-type="D" contact-type="direct" direction="in">
+      <priority>11</priority>
+    </trace-destruction-model>
+
+    <trace-destruction-model production-type="E" contact-type="direct" direction="in">
+      <priority>12</priority>
+    </trace-destruction-model>
+
+    <trace-destruction-model production-type="F" contact-type="direct" direction="in">
+      <priority>13</priority>
+    </trace-destruction-model>
+
+    <trace-destruction-model production-type="G" contact-type="direct" direction="in">
+      <priority>14</priority>
+    </trace-destruction-model>
+
+    <trace-destruction-model production-type="A" contact-type="direct" direction="out">
+      <priority>15</priority>
+    </trace-destruction-model>
+
+    <trace-destruction-model production-type="B" contact-type="direct" direction="out">
+      <priority>16</priority>
+    </trace-destruction-model>
+
+    <trace-destruction-model production-type="C" contact-type="direct" direction="out">
+      <priority>17</priority>
+    </trace-destruction-model>
+
+    <trace-destruction-model production-type="D" contact-type="direct" direction="out">
+      <priority>18</priority>
+    </trace-destruction-model>
+
+    <trace-destruction-model production-type="E" contact-type="direct" direction="out">
+      <priority>19</priority>
+    </trace-destruction-model>
+
+    <trace-destruction-model production-type="F" contact-type="direct" direction="out">
+      <priority>20</priority>
+    </trace-destruction-model>
+
+    <trace-destruction-model production-type="G" contact-type="direct" direction="out">
+      <priority>21</priority>
+    </trace-destruction-model>
+
+    <conflict-resolver></conflict-resolver>
+
+  </models>
+
+  <output>
+    <variable-name>all-units-states</variable-name>
+    <frequency>daily</frequency>
+  </output>
+
+</naadsm:disease-simulation>

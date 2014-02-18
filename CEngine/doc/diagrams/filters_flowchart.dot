@@ -1,0 +1,128 @@
+digraph G {
+	node [fontname=Helvetica];
+	concentrate=true;
+
+	/* Programs.  They appear as rectangles. */
+	{
+		node [shape=box];
+		sim;
+		table_filter;
+		full_table_filter;
+		exposures_table_filter;
+		apparent_events_table_filter;
+		state_table_filter;
+		graphpy [label="graph.py"];
+		extractcols [label="extract_columns.py"];
+		xml2shp;
+		weekly_gis_filter;
+		weekly_gis_zones_filter;
+		summary_gis_filter;
+		shp2png;
+		shp2png2;
+	}
+
+	/* Show the parallel processing part in a section surrounded by a
+	 * dotted line. */
+	subgraph cluster0 {
+		label="in parallel";
+		fontname="Helvetica";
+		labeljust=l;
+		style=dashed;
+		node [shape=polygon,sides=4,skew=0.2];
+		log0 [label="sharcspread_JID_0.log",style=filled];
+		log1 [label="sharcspread_JID_1.log",style=filled];
+		logn [label="sharcspread_JID_n.log",style=filled];
+		errfile [label="sharcspread_JID.err"];	
+	}
+
+	/* Files.  They appear as parallelograms. */
+	{
+		node [shape=polygon,sides=4,skew=0.2];
+
+		/* The two input files are shaded orange-ish. */
+		{
+			node [style=filled,fillcolor=goldenrod];
+			herds;
+			parameters;
+		}
+
+		mainlog [label="sharcspread_JID.log",style=filled];
+
+		/* Tables supplied to the user are shaded blue. */
+		{
+			node [style=filled,fillcolor=mediumslateblue];
+			summary_table [label="summary table"];
+			full_table [label="full table"];
+			inf_exp_table [label="infections/exposures table"];
+			inf_table [label="infections table"];
+			apparent_table [label="apparent events table"];
+		}
+
+		/* Graphs and images supplied to the user are shaded green. */
+		{
+			node [style=filled,fillcolor=mediumseagreen];
+			states_plot [label="herd states plot"];
+			states_disease_plot [label="herd states plot\n(disease states only)"];
+			actual_epidemic_daily_plot [label="actual epidemic plot\n(daily)"];
+			actual_epidemic_cumul_plot [label="actual epidemic plot\n(cumulative)"];
+			apparent_epidemic_daily_plot [label="apparent epidemic plot\n(daily)"];
+			apparent_epidemic_cumul_plot [label="apparent epidemic plot\n(cumulative)"];
+			r0_plot [label="R0 plot"];
+			last_day_plot [label="last day plot"];
+			avg_fraction_infected_plot [label="average fraction\ninfected plot"];
+			avg_fraction_destroyed_plot [label="average fraction\ndestroyed plot"];
+		}
+		/* Arcview GIS files supplied to the user are shaded purple. */
+		{
+			node [style=filled,fillcolor=mediumorchid];
+			herd_shapefile [label="herd shapefile"];
+			weekly_snapshots [label="weekly snapshots"];
+			weekly_zone_snapshots [label="weekly zone snapshots"];
+			summary_shapefile [label="summary grid shapefile"];
+		}
+
+		/* Temporary files are shaded grey. */
+		state_table [label="herd states table",style=filled];
+		zone_table [label="zone table",style=filled];
+	}
+
+	/* Process flow. */
+	{ herds ; parameters } -> sim;
+
+	{
+		edge [sametail=outofsim];
+		sim -> { log0 ; log1 ; logn; errfile };
+	}
+	{
+		edge [samehead=intomainlog];
+		{ log0 ; log1; logn } -> mainlog;
+	}
+
+	mainlog -> table_filter -> summary_table;
+	mainlog -> full_table_filter -> full_table;
+	{ mainlog ; herds } -> exposures_table_filter -> inf_exp_table;
+	{ mainlog ; herds } -> exposures_table_filter -> inf_table;
+	{ mainlog ; herds } -> apparent_events_table_filter -> apparent_table;
+	mainlog -> state_table_filter -> state_table;
+	
+	full_table -> graphpy -> states_plot;
+	full_table -> graphpy -> states_disease_plot;
+	full_table -> graphpy -> actual_epidemic_daily_plot;
+	full_table -> graphpy -> actual_epidemic_cumul_plot;
+	full_table -> graphpy -> apparent_epidemic_daily_plot;
+	full_table -> graphpy -> apparent_epidemic_cumul_plot;
+	full_table -> graphpy -> r0_plot;
+	
+	herds -> xml2shp -> herd_shapefile;
+
+	{ herd_shapefile ; state_table } -> weekly_gis_filter -> weekly_snapshots;
+	{ weekly_snapshots ; weekly_zone_snapshots } -> shp2png -> last_day_plot;
+
+	{ herds ; state_table } -> summary_gis_filter -> summary_shapefile;	
+
+	summary_shapefile -> shp2png2 -> avg_fraction_infected_plot;
+	summary_shapefile -> shp2png2 -> avg_fraction_destroyed_plot;
+	
+	full_table -> extractcols -> zone_table;
+	zone_table -> weekly_gis_zones_filter -> weekly_zone_snapshots;
+}

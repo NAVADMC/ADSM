@@ -1,0 +1,205 @@
+set timeout 3
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+#
+# Test that the progression of an infection works correctly.
+#
+set test "infect_1"
+send "reset\n"
+expect {
+	-re "$prompt$" { }
+}
+send "herd (\"beef\",1,0,0)\n"
+expect {
+	-re "$prompt$" { }
+}
+send "infect (0,1,2,3,2)\n"
+expect {
+	-re "$prompt$" { }
+}
+set error [progression_test [list \
+  "Latent" \
+  "Infectious Subclinical" \
+  "Infectious Subclinical" \
+  "Infectious Clinical" \
+  "Infectious Clinical" \
+  "Infectious Clinical" \
+  "Naturally Immune" \
+  "Naturally Immune" \
+  "Susceptible" \
+  "Susceptible" \
+  "Susceptible"]]
+if { [string compare $error ""] == 0 } {
+	pass "$test"
+} else {
+	fail "$test $error"
+}
+
+#
+# Test the progression when one or more stages takes 0 days.
+#
+set test "infect_with_skipped_states_1"
+send "reset\n"
+expect {
+	-re "$prompt$" { }
+}
+send "herd (\"beef\",1,0,0)\n"
+expect {
+	-re "$prompt$" { }
+}
+send "infect (0,1,0,3,2)\n"
+expect {
+	-re "$prompt$" { }
+}
+set error [progression_test [list \
+  "Latent" \
+  "Infectious Clinical" \
+  "Infectious Clinical" \
+  "Infectious Clinical" \
+  "Naturally Immune" \
+  "Naturally Immune" \
+  "Susceptible" \
+  "Susceptible" \
+  "Susceptible"]]
+if { [string compare $error ""] == 0 } {
+	pass "$test"
+} else {
+	fail "$test $error"
+}
+
+#
+# Test that you cannot infect a dead herd.
+#
+set test "infect_dead_herd"
+send "reset\n"
+expect {
+	-re "$prompt$" { }
+}
+send "herd (\"beef\",1,0,0)\n"
+expect {
+	-re "$prompt$" { }
+}
+send "destroy (0)\n"
+expect {
+	-re "$prompt$" { }
+}
+set error [progression_test [list "Destroyed"]]
+if { [string compare $error ""] == 0 } {
+	send "infect (0,2,0,1,1)\n"
+	expect {
+		-re "$prompt$" { }
+	}
+	set error [progression_test [list "Destroyed" "Destroyed" "Destroyed" "Destroyed" "Destroyed"]]
+}
+if { [string compare $error ""] == 0 } {
+	pass "$test"
+} else {
+	fail "$test $error"
+}
+
+#
+# Test that you cannot infect an immune herd.
+#
+set test "infect_immune_herd_1"
+send "reset\n"
+expect {
+	-re "$prompt$" { }
+}
+send "herd (\"beef\",1,0,0)\n"
+expect {
+	-re "$prompt$" { }
+}
+send "infect (0,1,0,1,2)\n"
+expect {
+	-re "$prompt$" { }
+}
+set error [progression_test [list "Latent" "Infectious Clinical" "Naturally Immune"]]
+if { [string compare $error ""] == 0 } {
+	send "infect (0,2,0,1,1)\n"
+	expect {
+		-re "$prompt$" { }
+	}
+	set error [progression_test [list "Naturally Immune" "Susceptible" "Susceptible" "Susceptible" "Susceptible" "Susceptible"]]
+}
+if { [string compare $error ""] == 0 } {
+	pass "$test"
+} else {
+	fail "$test $error"
+}
+
+set test "infect_immune_herd_2"
+send "reset\n"
+expect {
+	-re "$prompt$" { }
+}
+send "herd (\"beef\",1,0,0)\n"
+expect {
+	-re "$prompt$" { }
+}
+send "vaccinate (0,0,2)\n"
+expect {
+	-re "$prompt$" { }
+}
+set error [progression_test [list "Vaccine Immune"]]
+if { [string compare $error ""] == 0 } {
+	send "infect (0,2,0,1,1)\n"
+	expect {
+		-re "$prompt$" { }
+	}
+	set error [progression_test [list "Vaccine Immune" "Susceptible" "Susceptible" "Susceptible" "Susceptible" "Susceptible"]]
+}
+if { [string compare $error ""] == 0 } {
+	pass "$test"
+} else {
+	fail "$test $error"
+}
+
+#
+# Test that you cannot double-infect a herd.
+#
+set test "infect_infected_herd_1"
+send "reset\n"
+expect {
+	-re "$prompt$" { }
+}
+send "herd (\"beef\",1,0,0)\n"
+expect {
+	-re "$prompt$" { }
+}
+send "infect (0,2,0,1,1)\n"
+expect {
+	-re "$prompt$" { }
+}
+set error [progression_test [list "Latent"]]
+if { [string compare $error ""] == 0 } {
+	send "infect (0,4,0,1,1)\n"
+	expect {
+		-re "$prompt$" { }
+	}
+	set error [progression_test [list "Latent" "Infectious Clinical" "Naturally Immune" "Susceptible" "Susceptible" "Susceptible" "Susceptible" "Susceptible"]]
+}
+if { [string compare $error ""] == 0 } {
+	pass "$test"
+} else {
+	fail "$test $error"
+}

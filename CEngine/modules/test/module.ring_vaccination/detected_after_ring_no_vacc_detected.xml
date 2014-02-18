@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naadsm:disease-simulation
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xdf="http://xml.gsfc.nasa.gov/XDF">
+  <description>Specs for a sample simulation run.</description>
+  <num-days>9</num-days>
+  <num-runs>1</num-runs>
+
+  <models>
+
+    <disease-model production-type="A,B,C">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <disease-model production-type="D">
+      <latent-period>
+        <point>2</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <disease-model production-type="E">
+      <latent-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <disease-model production-type="F">
+      <latent-period>
+        <point>4</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <disease-model production-type="G">
+      <latent-period>
+        <point>5</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <!-- With all herds equal-sized, HerdSizeFactor=1.  The value of
+      prob-spread-1km that will give a probability of infection p is then
+      p ^ (1 / distance between herds).  The parameters below give a 0.505
+      probability of infection for herds 5 km apart. -->
+    <airborne-spread-exponential-model from-production-type="A" to-production-type="C,D,E,F,G">
+      <prob-spread-1km>0.8723</prob-spread-1km>
+      <wind-direction-start>
+        <value>0</value>
+        <units><xdf:unit>degree</xdf:unit></units>
+      </wind-direction-start>
+      <wind-direction-end>
+        <value>360</value>
+        <units><xdf:unit>degree</xdf:unit></units>
+      </wind-direction-end>
+    </airborne-spread-exponential-model>
+
+    <!-- With both probabilities at 1.0, a diseased unit will be detected the
+      instant it shows clinical signs. -->
+    <detection-model>
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <resources-and-implementation-of-controls-model>
+      <destruction-program-delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>	
+      </destruction-program-delay>
+      <destruction-capacity>
+        <value>0</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </destruction-capacity>
+      <destruction-priority-order>
+        reason,production type,time waiting
+      </destruction-priority-order>
+      <vaccination-program-delay>1</vaccination-program-delay>
+      <!-- No vaccination capacity for the first 10 days. -->
+      <vaccination-capacity>
+        <value>0</value> <value>0</value>
+        <value>9</value> <value>0</value>
+        <value>10</value> <value>1000</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </vaccination-capacity>
+      <vaccination-priority-order>
+        reason,production type,time waiting
+      </vaccination-priority-order>
+    </resources-and-implementation-of-controls-model>
+
+    <!-- Other herds within 5 km of an infected unit of type "A" will be
+      vaccinated. -->
+    <ring-vaccination-model from-production-type="A" to-production-type="C,D,E,F,G">
+      <priority>1</priority>
+      <radius>
+        <value>5</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+      <min-time-between-vaccinations>
+        <value>31</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </min-time-between-vaccinations>      
+      <vaccinate-detected-units>false</vaccinate-detected-units>
+    </ring-vaccination-model>
+
+    <vaccine-model>
+      <delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <immunity-period>
+        <point>5</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </vaccine-model>
+
+    <detection-monitor>
+      <output>
+	<variable-name>detnU</variable-name>
+	<frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>firstDetection</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>lastDetection</variable-name>
+        <frequency>daily</frequency>
+      </output>
+    </detection-monitor>
+
+    <vaccination-list-monitor>
+      <output>
+        <variable-name>vacwU</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>vacwUMax</variable-name>
+        <frequency>daily</frequency>
+      </output>
+      <output>
+        <variable-name>vacwUMaxDay</variable-name>
+        <frequency>daily</frequency>
+      </output>
+    </vaccination-list-monitor>
+
+    <vaccination-monitor>
+      <output>
+	<variable-name>vaccU</variable-name>
+	<frequency>daily</frequency>
+      </output>
+    </vaccination-monitor>
+
+    <conflict-resolver></conflict-resolver>
+
+  </models>
+
+</naadsm:disease-simulation>

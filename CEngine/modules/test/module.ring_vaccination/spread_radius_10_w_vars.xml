@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<naadsm:disease-simulation
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xdf="http://xml.gsfc.nasa.gov/XDF">
+  <description>Specs for a sample simulation run.</description>
+  <num-days>3</num-days>
+  <num-runs>1</num-runs>
+
+  <models>
+
+    <disease-model production-type="Beef Cattle">
+      <latent-period>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </latent-period>
+      <infectious-subclinical-period>
+        <point>0</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-subclinical-period>
+      <infectious-clinical-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </infectious-clinical-period>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </disease-model>
+
+    <!-- The parameters below will give 1 animal shipment per day, to a herd 10
+      km away. -->
+    <contact-spread-model from-production-type="Beef Cattle" to-production-type="Beef Cattle" contact-type="direct">
+      <fixed-movement-rate>
+        <value>1</value>
+        <units><xdf:unit power="-1">day</xdf:unit></units>
+      </fixed-movement-rate>
+      <distance>
+        <point>10</point>
+        <units><xdf:unit>km</xdf:unit></units>
+      </distance>
+      <!-- Shipping takes 1 day. -->
+      <delay>
+        <point>1</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <!-- Contact always produces infection. -->
+      <prob-infect>1.0</prob-infect>
+      <!-- Movement is unaffected by public knowledge of an outbreak. -->
+      <movement-control>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </movement-control>
+      <latent-units-can-infect>false</latent-units-can-infect>
+      <subclinical-units-can-infect>true</subclinical-units-can-infect>
+    </contact-spread-model>
+
+    <!-- With both probabilities at 1.0, a diseased herd will be detected the
+      instant it shows clinical signs. -->
+    <detection-model production-type="Beef Cattle">
+      <prob-report-vs-time-clinical>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-clinical>
+      <prob-report-vs-time-since-outbreak>
+        <value>0</value> <value>1.0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unitless /></units>
+      </prob-report-vs-time-since-outbreak>
+    </detection-model>
+
+    <resources-and-implementation-of-controls-model>
+      <!-- Destruction isn't used in this scenario. -->
+      <destruction-program-delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>	
+      </destruction-program-delay>
+      <destruction-capacity>
+        <value>0</value> <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </destruction-capacity>
+      <destruction-priority-order>
+        time waiting,reason,production type
+      </destruction-priority-order>
+      <!-- Vaccination will begin as soon as an infected herd is detected -->
+      <vaccination-program-delay>1</vaccination-program-delay>
+      <!-- "Unlimited" vaccination capacity. -->
+      <vaccination-capacity>
+        <value>0</value> <value>1000</value>
+        <units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
+      </vaccination-capacity>
+      <vaccination-priority-order>
+        time waiting,reason,production type
+      </vaccination-priority-order>
+    </resources-and-implementation-of-controls-model>
+
+    <!-- Other herds within 10 km will be vaccinated. -->
+    <ring-vaccination-model production-type="Beef Cattle">
+      <priority>1</priority>
+      <radius>
+        <value>10.0</value>
+        <units><xdf:unit>km</xdf:unit></units>
+      </radius>
+      <min-time-between-vaccinations>
+        <value>31</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </min-time-between-vaccinations>      
+    </ring-vaccination-model>
+
+    <vaccine-model production-type="Beef Cattle">
+      <delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <immunity-period>
+        <point>3</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </vaccine-model>
+
+    <exposure-monitor>
+      <output>
+	<variable-name>expnU</variable-name>
+	<frequency>daily</frequency>
+      </output>
+    </exposure-monitor>
+
+    <infection-monitor>
+      <ratio-period>
+	<value>14</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </ratio-period>
+      <output>
+	<variable-name>infnU</variable-name>
+	<frequency>daily</frequency>
+      </output>
+    </infection-monitor>
+
+    <vaccination-monitor>
+      <output>
+        <variable-name>vacnU</variable-name>
+        <frequency>daily</frequency>
+      </output>
+    </vaccination-monitor>
+
+    <conflict-resolver></conflict-resolver>
+
+  </models>
+
+</naadsm:disease-simulation>

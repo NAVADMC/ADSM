@@ -1,0 +1,32 @@
+<herds>
+  <herd>
+    <id>0</id>
+    <production-type>Cattle</production-type>
+    <size>10</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>-0.0449158</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <id>1</id>
+    <production-type>Pigs</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.0449158</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <id>2</id>
+    <production-type>Sheep</production-type>
+    <size>50</size>
+    <location>
+      <latitude>0.0777964</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+</herds>
