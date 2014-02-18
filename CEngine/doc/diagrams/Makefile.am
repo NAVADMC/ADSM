@@ -110,7 +110,6 @@ dist_noinst_DATA = state-transition.png \
   no_rtree_contact_spread.png \
   rtree_contact_spread.png \
   1000units_line.png \
-  complexity.png \
   speedup.png \
   uncontrolled_example.png \
   rtree_benefit.png \
@@ -339,8 +338,6 @@ no_rtree_contact_spread_png_SOURCES = $(top_srcdir)/models/test/no_rtree_contact
 rtree_contact_spread_png_SOURCES = $(top_srcdir)/models/test/rtree_contact_spread.xml
 
 1000units_line_png_SOURCES = $(top_srcdir)/models/test/1000units_line.xml
-
-complexity_png_SOURCES = complexity.gnuplot
 
 speedup_png_SOURCES = speedup.gnuplot
 
