@@ -1,0 +1,214 @@
+set timeout 10
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+
+
+#
+# Turns the text representation of points into a Tcl list.  For example, the
+# text string
+#
+# (0,1), (2,3)
+#
+# will be returned as {0 1 2 3}.
+#
+proc tuples_string_to_list { s } {
+	regsub -all {[\(\) ]} $s "" s
+	return [split $s ","]
+}
+
+
+
+#
+# Test that the parameters are set correctly when a piecewise distribution is
+# created.
+#
+set test "create"
+set params {0 0 1 0.5 2 0.5 3 0}
+send "piecewise ([join $params ,])\n"
+expect {
+	-re "<piecewise probability distribution\[\\n\\r\]+ points={(.*)}\[\\n\\r\]+ cumulative={.*}>.*$prompt$" {
+		set points [tuples_string_to_list $expect_out(1,string)]
+		set correct 1
+		for {set i 0} {$i < [llength $points]} {incr i} {
+			set answer [lindex $points $i]
+			set true_answer [lindex $params $i]
+			if { [fcmp $answer $true_answer $epsilon] != 0 } {
+				set correct 0
+				break
+			}
+		}
+		if { $correct == 1 } {
+			pass "$test"
+		} else {
+			set bad_point [expr $i / 2]
+			note $bad_point
+			fail "$test point $bad_point should be ([lindex $params [expr $bad_point * 2]],[lindex $params [expr $bad_point * 2 + 1]]), not ([lindex $points [expr $bad_point * 2]],[lindex $points [expr $bad_point * 2 + 1]])"
+		}
+	}
+}
+
+
+
+#
+# If only 1 point is provided, a point distribution should be returned.  Test
+# that this is the case.
+#
+set test "create_single_point"
+send "piecewise (1,1)\n"
+expect {
+	-re "<point probability distribution\[\\n\\r\]+ value=($floatpat)>.*$prompt$" {
+		set point $expect_out(1,string)
+		if { [fcmp $point 1 $epsilon] == 0 } {
+			pass "$test"
+		} else {
+			fail "$test value should be 1, not $point"
+		}
+	}
+}
+
+
+
+#
+# If the area under the curve is not 1, the points should be adjusted to make
+# it so.  Test that the parameters are set correctly in this case.
+#
+set test "create_area_not_1"
+set params {0 0 1 1 2 1 3 0}
+set adjusted_params {0 0 1 0.5 2 0.5 3 0}
+send "piecewise ([join $params ","])\n"
+expect {
+	-re "<piecewise probability distribution\[\\n\\r\]+ points={(.*)}\[\\n\\r\]+ cumulative={.*}>.*$prompt$" {
+		set points [tuples_string_to_list $expect_out(1,string)]
+		set correct 1
+		for {set i 0} {$i < [llength $points]} {incr i} {
+			set answer [lindex $points $i]
+			set true_answer [lindex $adjusted_params $i]
+			if { [fcmp $answer $true_answer $epsilon] != 0 } {
+				set correct 0
+				break
+			}
+		}
+		if { $correct == 1 } {
+			pass "$test"
+		} else {
+			set bad_point [expr $i / 2]
+			note $bad_point
+			fail "$test point $bad_point should be ([lindex $adjusted_params [expr $bad_point * 2]],[lindex $adjusted_params [expr $bad_point * 2 + 1]]), not ([lindex $points [expr $bad_point * 2]],[lindex $points [expr $bad_point * 2 + 1]])"
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.
+#
+set xvalues {-1 0 0.5 1 1.5 2 2.75 3 4}
+set answers {0 0 0.25 0.5 0.5 0.5 0.125 0 0}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.
+#
+set xvalues {-1 0 0.707107 1 1.5 1.75 2 3 4}
+set answers {0 0 0.125 0.25 0.5 0.625 0.75 1 1}
+cdf_test $xvalues $answers
+
+
+
+#
+# Test random number generation.
+#
+set true_answer {0 0.25 0.5 0.25 0}
+random_number_test $true_answer -1
+
+
+
+#
+# Test a distribution that has a section where the line lies flat at p=0.
+#
+set test "create_with_zero_range"
+set params {0 0 1 0.5 2 0 3 0 4 0.5 5 0}
+send "piecewise ([join $params ","])\n"
+expect {
+	-re "<piecewise probability distribution\[\\n\\r\]+ points={(.*)}\[\\n\\r\]+ cumulative={.*}>.*$prompt$" {
+		set points [tuples_string_to_list $expect_out(1,string)]
+		set correct 1
+		for {set i 0} {$i < [llength $points]} {incr i} {
+			set answer [lindex $points $i]
+			set true_answer [lindex $params $i]
+			if { [fcmp $answer $true_answer $epsilon] != 0 } {
+				set correct 0
+				break
+			}
+		}
+		if { $correct == 1 } {
+			pass "$test"
+		} else {
+			set bad_point [expr $i / 2]
+			note $bad_point
+			fail "$test point $bad_point should be ([lindex $params [expr $bad_point * 2]],[lindex $params [expr $bad_point * 2 + 1]]), not ([lindex $points [expr $bad_point * 2]],[lindex $points [expr $bad_point * 2 + 1]])"
+		}
+	}
+}
+
+#
+# Test the probability density function.
+#
+set xvalues {-1 0 0.5 1 1.5 2 2.5 3 3.75 4 5}
+set answers {0 0 0.25 0.5 0.25 0 0 0 0.375 0.5 0}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.
+#
+set xvalues {-1 0 1 2 2.5 3 4 5 6}
+set answers {0 0 0.25 0.5 0.5 0.5 0.75 1 1}
+cdf_test $xvalues $answers cdf {0.5}
+
+
+
+#
+# Test random number generation.
+#
+set true_answer {0 0.25 0.25 0 0.25 0.25 0}
+random_number_test $true_answer -1 random_2
+
+
+
+#
+# Test statistics.
+#
+#set min
+#set max
+#set mean
+#set variance
+#statistics_test $min $max $mean $variance
+sample_statistics_test
+
+
+

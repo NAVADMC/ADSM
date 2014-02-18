@@ -1,0 +1,84 @@
+set timeout 10
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+#
+# Test that the parameters are set correctly when an exponential distribution
+# is created.
+#
+set test "create"
+set true_mean 1.0
+send "exponential ($true_mean)\n"
+expect {
+	-re "<exponential probability distribution\[\\n\\r\]+ mean=($floatpat)>.*$prompt$" {
+		set mean $expect_out(1,string)
+		if { [fcmp $mean $true_mean $epsilon] != 0 } {
+			fail "$test mean should be $true_mean, not $mean"
+		} else {
+			pass "$test"
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.  "Correct" values hand-calculated
+# using formulas in "A Compendium of Common Probability Distributions".
+#
+set xvalues {-2 -1 0 1 2 3 4 5 6 7 8}
+set answers {0 0 1 0.367879 0.135335 0.0497871 0.0183156 0.00673795 0.00247875 0.000911882 0.000335463}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.  "Correct" values
+# hand-calculated using formulas in "A Compendium of Common Probability
+# Distributions".
+#
+set xvalues {-2 -1 0 1 2 3 4 5 6 7 8}
+set answers {0 0 0 0.632121 0.864665 0.950213 0.981684 0.993262 0.997521 0.999088 0.999665}
+cdf_test $xvalues $answers "cdf"
+
+
+
+#
+# Test random number generation.
+#
+set true_answer {0 0.632121 0.232544 0.0855482 0.0314714 0.0115777 0.00425919 0.00156687}
+random_number_test $true_answer -1
+
+
+
+#
+# Test statistics.
+#
+#set min
+#set max
+#set mean 
+#set variance
+#statistics_test $min $max $mean $variance
+sample_statistics_test
+
+
+

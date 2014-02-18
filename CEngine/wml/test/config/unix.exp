@@ -1,0 +1,167 @@
+#
+# Set up some global variables.  These variables could be set on the command
+# line, so we set them only if they don't already exist.
+#
+if ![info exists prompt] then {
+	set prompt "> "
+}
+
+
+
+#
+# Regular expressions for matching the output.
+#
+set rowpat "\[0-9\]+(?: \[0-9\]+)*"
+
+
+
+#
+# Turns an output string of point indices into a Tcl list.  For example, the
+# output
+#
+# 0 1 3 4
+#
+# will be returned as {0 1 3 4}.
+#
+proc point_indices_to_list { s } {
+	# Get rid of carriage returns and any trailing newlines.
+	regsub -all {[\r]} [string trim $s] "" s
+	set result [split $s " "]
+	return $result
+}
+
+
+
+#
+# hull_test -- tests the convex hull function.
+#
+# Parameters:
+#   points        points to find a convex hull for, as { x0 y0 x1 y1 ... }
+#   answer        the indices of the points on the correct hull, in clockwise
+#                 order
+#   test          a name to report in passes/fails (default = "hull")
+# Returns:
+#   nothing
+#
+proc hull_test { points answer {test "hull"} } {
+	global prompt
+	global rowpat
+
+	set true_npoints [llength $answer]
+	send "pointset ([join $points ,])\n"
+	expect {
+		-re "$prompt$" { }
+	}
+	send "hull\n"
+	expect {
+		-re "($rowpat)\[\\n\\r\]+$prompt$" {
+			set hull [point_indices_to_list $expect_out(1,string)]
+			
+			#
+			# Check that the hull has the correct number of points.
+			#
+			set npoints [llength $hull]
+			if { $npoints != $true_npoints } {
+				fail "$test: hull should have $true_npoints points, not $npoints"
+				return
+			}
+
+			# 
+			# Check the individual points on the hull.
+			#
+			# Start checking from the first point in the list returned from the
+			# hull algorithm.  We don't care which point the algorithm picked
+			# as the "start", but it should be one that is really on the hull.
+			#
+			set i 0
+			set point [lindex $hull $i]
+			set match_pos [lsearch -exact $answer $point]
+			if { $match_pos == -1 } {
+				fail "$test: point #$i is not on the hull"
+				return
+			}
+			
+			#
+			# We don't care whether the hull algorithm returned the points in
+			# in clockwise or counter-clockwise order.  Try matching against
+			# the correct hull in forward order first.
+			#
+			set error ""
+			set j $match_pos
+			for {set i 1} {$i < [llength $hull]} {incr i} {
+				incr j
+				if { $j >= [llength $answer]} {
+					set j 0
+				}
+				set true_point [lindex $answer $j]
+				set point [lindex $hull $i]
+				if { $point != $true_point } {
+					set error "in clockwise order point #$true_point (not #$point) should follow #[lindex $hull [expr $i - 1]]"
+					break
+				}
+			}
+
+			#
+			# If that didn't match, try reverse order.
+			#
+			if { [string compare $error ""] != 0 } {
+				set j $match_pos
+				for {set i 1} {$i < [llength $hull]} {incr i} {
+					set j [expr $j - 1]
+					if { $j < 0 } {
+						set j [expr [llength $answer] - 1]
+					}
+					set true_point [lindex $answer $j]
+					set point [lindex $hull $i]
+					if { $point != $true_point } {
+						fail "test: $error, and in counter-clockwise order point #$true_point (not #$point) should follow #[lindex $hull [expr $i - 1]]"
+						return
+					}
+				}
+			}
+		}
+	}
+	
+	pass $test
+}
+
+
+
+#
+# shell_load -- loads the program
+#
+proc shell_load { arg } {
+	#
+}
+
+
+
+#
+# shell_exit -- quit and cleanup
+#
+proc shell_exit {} {
+	#
+}
+
+
+
+proc shell_start {} {
+	global SHELL
+	global prompt
+	global spawn_id
+	global verbose
+	
+	if { $verbose > 1 } {
+		send_user "starting $SHELL\n"
+	}
+	spawn $SHELL
+	expect {
+		-re "No such file.*" { perror "Can't start $SHELL"; exit 1 }
+		-re "$prompt$" { }
+		timeout { perror "Failed to spawn $SHELL (timeout)"; exit 1 }
+	}
+}
+
+
+
+shell_start

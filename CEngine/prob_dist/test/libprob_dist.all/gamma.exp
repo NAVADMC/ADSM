@@ -1,0 +1,142 @@
+set timeout 10
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+#
+# Test that the parameters are set correctly when a gamma distribution is
+# created.
+#
+set test "create"
+set true_alpha 2.0
+set true_beta 1.0
+send "gamma ($true_alpha,$true_beta)\n"
+expect {
+	-re "<gamma probability distribution\[\\n\\r\]+ alpha=($floatpat) beta=($floatpat)>.*$prompt$" {
+		set alpha $expect_out(1,string)
+		if { [fcmp $alpha $true_alpha $epsilon] != 0 } {
+			fail "$test alpha should be $true_alpha, not $alpha"
+		} else {
+			set beta $expect_out(2,string)
+			if { [fcmp $beta $true_beta $epsilon] != 0 } {
+				fail "$test beta should be $true_beta, not $beta"
+			} else {
+				pass "$test"
+			}
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.  "Correct" values hand-calculated
+# using formulas in "A Compendium of Common Probability Distributions".
+#
+set xvalues {-1 0 0.5 1 2 3 4 5 6}
+set answers {0 0 0.303265 0.367879 0.270671 0.149361 0.073263 0.033690 0.014873}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function.  "Correct" values hand-calculated
+# using formulas on mathworld.com.
+#
+set xvalues {-1 0 0.5 1 2 3 4 5 6}
+set answers {0 0 0.090204 0.264241 0.593994 0.800852 0.908422 0.959572 0.982649}
+cdf_test $xvalues $answers "cdf" $answers
+
+
+
+#
+# Test random number generation.
+#
+set true_answer {0 0.264241 0.329753 0.206858 0.107570 0.051151 0.023076}
+random_number_test $true_answer -1
+
+
+
+#
+# Create another gamma distribution.
+#
+set test "create2"
+set true_alpha 1.0
+set true_beta 1.0
+send "gamma ($true_alpha,$true_beta)\n"
+expect {
+	-re "<gamma probability distribution\[\\n\\r\]+ alpha=($floatpat) beta=($floatpat)>.*$prompt$" {
+		set alpha $expect_out(1,string)
+		if { [fcmp $alpha $true_alpha $epsilon] != 0 } {
+			fail "$test alpha should be $true_alpha, not $alpha"
+		} else {
+			set beta $expect_out(2,string)
+			if { [fcmp $beta $true_beta $epsilon] != 0 } {
+				fail "$test beta should be $true_beta, not $beta"
+			} else {
+				pass "$test"
+			}
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.  "Correct" values hand-calculated
+# using formulas in "A Compendium of Common Probability Distributions".
+#
+set xvalues {-1 0 0.5 1 2 3 4 5 6}
+set answers {0 1 0.606531  0.367879 0.135335 0.049787 0.018316 0.006738 0.002479}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function.  "Correct" values hand-calculated
+# using formulas on mathworld.com.
+#
+set xvalues {-1 0 0.5 1 2 3 4 5 6}
+set answers {0 0 0.393469 0.632121 0.864665 0.950213 0.981684 0.993262 0.997521}
+cdf_test $xvalues $answers "cdf" $answers
+
+
+
+#
+# Test random number generation.
+#
+set true_answer {0 0.632121 0.232544 0.085548 0.031471 0.011578 0.004259}
+random_number_test $true_answer -1
+
+
+
+#
+# Test statistics.
+#
+#set min
+#set max
+#set mean 
+#set variance
+#statistics_test $min $max $mean $variance
+sample_statistics_test
+
+
+
