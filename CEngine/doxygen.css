@@ -167,3 +167,6 @@ INPUT.search { font-size: 75%;
 }
 TD.tiny      { font-size: 75%;
 }
+TABLE.testcase { border-collapse: collapse; border: 1px solid black; }
+TABLE.testcase TH { border: 1px solid black; padding: 0.5ex; }
+TABLE.testcase TD { border: 1px solid black; padding: 0.5ex; }

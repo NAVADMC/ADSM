@@ -14,6 +14,8 @@ __date__ = "December 2003"
 
 import sys
 import xml.dom.minidom
+import operator
+import string
 
 OUTPUT_ENCODING = "iso-8859-1" # to match output from the simulator
 
@@ -27,6 +29,37 @@ def getText (element):
 		if node.nodeType == node.TEXT_NODE:
 			text += node.data
 	return text.strip()
+
+
+
+def all (X):
+	"""Returns true if all items in a sequence are true."""
+	if len(X) == 0:
+		return False
+	return reduce (operator.__and__, map (lambda x:not not x, X))
+
+
+
+def rowToStates (row, state_code):
+	"""Returns an array of state names given a row of <td> elements from the
+	input file.  Accepts 1-letter codes (e.g. "S"), long names (e.g.
+	"Susceptible"), and strings of 1-letter codes (e.g. "SLCND")."""
+	states = []
+	for cell in row.getElementsByTagName ("td"):
+		state = getText (cell)
+		if state in state_code.values():
+			states.append (state) # this is a valid long name
+		elif state_code.has_key(state):
+			states.append (state_code[state]) # convert 1-letter code to long name
+		else:
+			# Break into chars, see if each is a valid 1-letter code
+			nospaces = state.replace(' ','')
+			if all([char in state_code.keys() for char in nospaces]):
+				states += [state_code[char] for char in nospaces]
+			else:
+				raise ValueError, ('"%s" is not a recognized state' % state)
+	# end of loop over <td> elements
+	return states
 
 
 
@@ -66,7 +99,7 @@ expect_after {
 	  'D': 'Destroyed'
 	}
 
-	# Print the deterministic herd-state tests.
+	# Print the deterministic unit-state tests.
 	tests = doc.getElementsByTagName ("deterministic-test")
 	for test in tests:
 		description = getText (test.getElementsByTagName ("description")[0])
@@ -89,13 +122,7 @@ expect_after {
 		table = test.getElementsByTagName ("output")[0]
 		print 'set states {'
 		for row in table.getElementsByTagName ("tr"):
-			print '  {',
-			for cell in row.getElementsByTagName ("td"):
-				state = getText (cell)
-				if state_code.has_key(state):
-					state = state_code[state]
-				print state,
-			print '}'
+			print '  {', string.join (rowToStates (row, state_code)), '}'
 		print '}'
 
 		shortName = getText (test.getElementsByTagName ("short-name")[0])
@@ -126,13 +153,7 @@ expect_after {
 		for table in tables:
 			print '  {', table.getAttribute ("probability")
 			for row in table.getElementsByTagName ("tr"):
-				print '    {',
-				for cell in row.getElementsByTagName ("td"):
-					state = getText (cell)
-					if state_code.has_key(state):
-						state = state_code[state]
-					print state,
-				print '}'
+				print '  {', string.join (rowToStates (row, state_code)), '}'
 			print '  }'
 		print '}'
 

@@ -16,6 +16,7 @@ import re
 import sys
 import time
 import xml.dom.minidom
+import operator
 from sets import Set
 from string import upper, join
 from warnings import warn
@@ -80,6 +81,37 @@ def getUnitNames (filename):
 	except IOError:
 		names = None
 	return names
+
+
+
+def all (X):
+	"""Returns true if all items in a sequence are true."""
+	if len(X) == 0:
+		return False
+	return reduce (operator.__and__, map (lambda x:not not x, X))
+
+
+
+def rowToStates (row, state_code):
+	"""Returns an array of state codes given a row of <td> elements from the
+	input file.  Accepts 1-letter codes (e.g. "S"), long names (e.g.
+	"Susceptible"), and strings of 1-letter codes (e.g. "SLCND")."""
+	states = []
+	for cell in row.getElementsByTagName ("td"):
+		state = getText (cell)
+		if state in state_code.values():
+			states.append (state) # this is a valid 1-letter code
+		elif state_code.has_key(state):
+			states.append (state_code[state]) # convert long name to short
+		else:
+			# Break into chars, see if each is a valid 1-letter code
+			nospaces = state.replace(' ','')
+			if all([char in state_code.values() for char in nospaces]):
+				states += [char for char in nospaces]
+			else:
+				raise ValueError, ('"%s" is not a recognized state' % state)
+	# end of loop over <td> elements
+	return states
 
 
 
@@ -249,7 +281,10 @@ def main ():
 				print ' * %s' % line.strip().encode(OUTPUT_ENCODING, "replace")
 			print ' *'
 
-			paramFileName = getText (test.getElementsByTagName ("parameter-file")[0])
+			try:
+				paramFileName = getText (test.getElementsByTagName ("parameter-file")[0])
+			except IndexError:
+				raise Exception, ("Missing parameter file name for test %s/%s" % (category, shortName))
 			print ' * See the <a href="test-xml-%s-%s.html">parameters as XML</a>.' \
 			  % (category, paramFileName.replace('.','_8'))
 			# The replace above deals with an odd behavior of Doxygen: if you
@@ -259,7 +294,10 @@ def main ():
 			# Doxygen will use "_8" in place of the period.
 			print ' *'
 
-			populationFileName = getText (test.getElementsByTagName ("population-file")[0])
+			try:
+				populationFileName = getText (test.getElementsByTagName ("population-file")[0])
+			except IndexError:
+				raise Exception, ("Missing population file name for test %s/%s" % (category, shortName))
 			if not unitNames.has_key (populationFileName):
 				unitNames[populationFileName] = getUnitNames (populationFileName + ".xml")
 			diagrams = test.getElementsByTagName ("diagram")
@@ -279,7 +317,7 @@ def main ():
 					noutcomes += 1
 					print ' * Possible outcome #%i (expected frequency %s):' % (noutcomes, probability)
 					print ' *'
-				print ' * <table>'
+				print ' * <table class="testcase">'
 				print ' *   <tr>'
 				print ' *     <th>Day</th>',
 				rows = table.getElementsByTagName ("tr")
@@ -288,7 +326,7 @@ def main ():
 					names = unitNames[populationFileName]
 					if not names:
 						# Find out how many units there are.
-						nunits = len (rows[0].getElementsByTagName ("td"))
+						nunits = len (rowToStates(rows[0], state_code))
 						names = [str(n) for n in range(nunits)]
 					print '<th>Unit %s</th>' % names[0]
 					for name in names[1:]:
@@ -305,18 +343,16 @@ def main ():
 					print ' *   <tr>'
 					day += 1
 					print (' *     <td>%i</td>' % day),
-					for cell in row.getElementsByTagName ("td"):
-						if testtype == "deterministic-test" or testtype == "stochastic-test":
-							state = getText (cell)
-							if state_code.has_key(state):
-								state = state_code[state] # convert long name to short
+					if testtype == "deterministic-test" or testtype == "stochastic-test":
+						for state in rowToStates (row, state_code):
 							background_color = getColor (state)
 							if getIntensity (background_color) > 0.5:
 								text_color = 'black'
 							else:
 								text_color = 'white'
 							print ('<td style="background-color:#%02x%02x%02x;color:%s">%s</td>' % (background_color+(text_color,state))),
-						elif testtype == "variable-test" or testtype == "stochastic-variable-test":
+					elif testtype == "variable-test" or testtype == "stochastic-variable-test":
+						for cell in row.getElementsByTagName ("td"):
 							value = getText (cell) or "&nbsp;"
 							print ('<td>%s</td>' % value),
 					print '\n *   </tr>'
