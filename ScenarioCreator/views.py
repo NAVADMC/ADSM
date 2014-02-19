@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 
 from ScenarioCreator.forms import ScenarioForm
-from ScenarioCreator.models import Scenario
+from ScenarioCreator.models import Ingeneral
 
 
 def start_window(request):
@@ -19,7 +19,7 @@ def new_scenario(request):
 
 
 def edit_scenario(request, primary_key):
-    scenario = get_object_or_404(Scenario, pk=primary_key)
+    scenario = get_object_or_404(Ingeneral, pk=primary_key)
     form = ScenarioForm(request.POST or None, instance=scenario)
     if request.method == 'POST' and form.is_valid():
         form.save(); #write to database
