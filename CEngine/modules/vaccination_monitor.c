@@ -62,7 +62,6 @@ EVT_event_type_t events_listened_for[] =
 typedef struct
 {
   GPtrArray *production_types;
-  RPT_reporting_t *vaccinations;
   RPT_reporting_t *vaccination_occurred;
   RPT_reporting_t *first_vaccination;
   RPT_reporting_t *first_vaccination_by_reason;
@@ -84,7 +83,6 @@ typedef struct
   RPT_reporting_t *cumul_num_animals_vaccinated_by_reason;
   RPT_reporting_t *cumul_num_animals_vaccinated_by_prodtype;
   RPT_reporting_t *cumul_num_animals_vaccinated_by_reason_and_prodtype;
-  GString *target;              /* a temporary string used repeatedly. */
   gboolean reasons_declared;
   gboolean first_day;
 }
@@ -149,7 +147,6 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, EVT_new_day_event_t * e
   /* Zero the daily counts. */
   if (event->day > 1)
     {
-      RPT_reporting_zero (local_data->vaccinations);
       RPT_reporting_zero (local_data->num_units_vaccinated);
       RPT_reporting_zero (local_data->num_units_vaccinated_by_reason);
       RPT_reporting_zero (local_data->num_units_vaccinated_by_prodtype);
@@ -210,7 +207,6 @@ handle_declaration_of_vaccination_reasons_event (struct spreadmodel_model_t_ *se
   for (i = 0; i < n; i++)
     {
       reason = (char *) g_ptr_array_index (event->reasons, i);
-      RPT_reporting_append_text1 (local_data->vaccinations, "", reason);
       /* Two function calls for the first_vaccination variable: one to
        * establish the type of the sub-variable (it's an integer), and one to
        * clear it to "null" (it has no meaningful value until a vaccination
@@ -259,8 +255,6 @@ handle_vaccination_event (struct spreadmodel_model_t_ *self, EVT_vaccination_eve
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
-  char *peek;
-  gboolean first_of_cause;
   const char *drill_down_list[3] = { NULL, NULL, NULL };
   UNT_control_t update;
   
@@ -270,11 +264,6 @@ handle_vaccination_event (struct spreadmodel_model_t_ *self, EVT_vaccination_eve
   
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
-
-  peek = RPT_reporting_get_text1 (local_data->vaccinations, event->reason);
-  first_of_cause = (peek == NULL) || (strlen (peek) == 0);
-
-  g_string_printf (local_data->target, first_of_cause ? "%u" : ",%u", unit->index);
 
   update.unit_index = unit->index;
   update.day_commitment_made = event->day_commitment_made;
@@ -297,8 +286,6 @@ handle_vaccination_event (struct spreadmodel_model_t_ *self, EVT_vaccination_eve
       spreadmodel_vaccinate_unit (update);
     }
 #endif  
-
-  RPT_reporting_append_text1 (local_data->vaccinations, local_data->target->str, event->reason);
 
   drill_down_list[0] = event->reason;
   drill_down_list[1] = unit->production_type_name;
@@ -416,7 +403,6 @@ reset (struct spreadmodel_model_t_ *self)
 #endif
 
   local_data = (local_data_t *) (self->model_data);
-  RPT_reporting_zero (local_data->vaccinations);
   RPT_reporting_zero (local_data->vaccination_occurred);
   RPT_reporting_set_null (local_data->first_vaccination, NULL);
   RPT_reporting_set_null (local_data->first_vaccination_by_reason, NULL);
@@ -568,7 +554,6 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  RPT_free_reporting (local_data->vaccinations);
   RPT_free_reporting (local_data->vaccination_occurred);
   RPT_free_reporting (local_data->first_vaccination);
   RPT_free_reporting (local_data->first_vaccination_by_reason);
@@ -590,8 +575,6 @@ local_free (struct spreadmodel_model_t_ *self)
   RPT_free_reporting (local_data->cumul_num_animals_vaccinated_by_reason);
   RPT_free_reporting (local_data->cumul_num_animals_vaccinated_by_prodtype);
   RPT_free_reporting (local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype);
-
-  g_string_free (local_data->target, TRUE);
 
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
@@ -649,7 +632,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   /* Make sure the right XML subtree was sent. */
   g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
 
-  local_data->vaccinations = RPT_new_reporting ("vaccinations", RPT_group, RPT_never);
   local_data->vaccination_occurred =
     RPT_new_reporting ("vaccOccurred", RPT_integer, RPT_never);
   local_data->first_vaccination =
@@ -692,7 +674,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
     RPT_new_reporting ("vaccA", RPT_group, RPT_never);
   local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype =
     RPT_new_reporting ("vaccA", RPT_group, RPT_never);
-  g_ptr_array_add (self->outputs, local_data->vaccinations);
   g_ptr_array_add (self->outputs, local_data->vaccination_occurred);
   g_ptr_array_add (self->outputs, local_data->first_vaccination);
   g_ptr_array_add (self->outputs, local_data->first_vaccination_by_reason);
@@ -732,11 +713,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
       broken_down = broken_down || (g_strstr_len (variable_name, -1, "-by-") != NULL); 
       /* Starting at version 3.2 we accept either the old, verbose output
        * variable names or the new shorter ones. */
-      if (strcmp (variable_name, "vaccinations") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->vaccinations, freq);
-        }
-      else if (strcmp (variable_name, "vaccOccurred") == 0)
+      if (strcmp (variable_name, "vaccOccurred") == 0)
         {
           RPT_reporting_set_frequency (local_data->vaccination_occurred, freq);
         }
@@ -822,7 +799,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
       RPT_reporting_add_integer (local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype, 0, drill_down_list);
     }
 
-  local_data->target = g_string_new (NULL);
   local_data->reasons_declared = FALSE;
   local_data->first_day = TRUE;
 

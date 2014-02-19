@@ -37,6 +37,9 @@
 #define handle_before_any_simulations_event apparent_events_table_writer_handle_before_any_simulations_event
 #define handle_before_each_simulation_event apparent_events_table_writer_handle_before_each_simulation_event
 #define handle_detection_event apparent_events_table_writer_handle_detection_event
+#define handle_exam_event apparent_events_table_writer_handle_exam_event
+#define handle_attempt_to_trace_event apparent_events_table_writer_handle_attempt_to_trace_event
+#define handle_trace_result_event apparent_events_table_writer_handle_trace_result_event
 #define handle_vaccination_event apparent_events_table_writer_handle_vaccination_event
 #define handle_destruction_event apparent_events_table_writer_handle_destruction_event
 
@@ -62,9 +65,17 @@
 
 
 
-#define NEVENTS_LISTENED_FOR 5
-EVT_event_type_t events_listened_for[] = { EVT_BeforeAnySimulations,
-  EVT_BeforeEachSimulation, EVT_Detection, EVT_Vaccination, EVT_Destruction };
+#define NEVENTS_LISTENED_FOR 8
+EVT_event_type_t events_listened_for[] = {
+  EVT_BeforeAnySimulations,
+  EVT_BeforeEachSimulation,
+  EVT_Detection,
+  EVT_Exam,
+  EVT_AttemptToTrace,
+  EVT_TraceResult,
+  EVT_Vaccination,
+  EVT_Destruction
+};
 
 
 
@@ -183,6 +194,167 @@ handle_detection_event (struct spreadmodel_model_t_ *self,
 
 #if DEBUG
   g_debug ("----- EXIT handle_detection_event (%s)", MODEL_NAME);
+#endif
+  return;
+}
+
+
+
+/**
+ * Responds to an exam event by writing a table row.
+ *
+ * @param self this module.
+ * @param event an exam event.
+ * @param zones the list of zones.
+ */
+void
+handle_exam_event (struct spreadmodel_model_t_ *self,
+                   EVT_exam_event_t * event,
+                   ZON_zone_list_t *zones)
+{
+  local_data_t *local_data;
+  ZON_zone_fragment_t *zone, *background_zone;
+
+#if DEBUG
+  g_debug ("----- ENTER handle_exam_event (%s)", MODEL_NAME);
+#endif
+
+  local_data = (local_data_t *) (self->model_data);
+
+  zone = zones->membership[event->unit->index];
+  background_zone = ZON_zone_list_get_background (zones);
+
+  /* The data fields are: run, day, type, reason, ID, production type, size,
+   * latitude, longitude, zone. */
+  fprintf (local_data->stream,
+           "%i,%i,Exam,%s,%s,%s,%u,%g,%g,%s\n",
+           local_data->run_number,
+           event->day,
+           SPREADMODEL_control_reason_abbrev[event->reason],
+           event->unit->official_id,
+           event->unit->production_type_name,
+           event->unit->size,
+           event->unit->latitude,
+           event->unit->longitude,
+           ZON_same_zone (zone, background_zone) ? "" : zone->parent->name);
+
+#if DEBUG
+  g_debug ("----- EXIT handle_exam_event (%s)", MODEL_NAME);
+#endif
+  return;
+}
+
+
+
+/**
+ * Responds to an attempt to trace event by writing a table row.
+ *
+ * @param self this module.
+ * @param event an attempt to trace event.
+ * @param zones the list of zones.
+ */
+void
+handle_attempt_to_trace_event (struct spreadmodel_model_t_ *self,
+                               EVT_attempt_to_trace_event_t * event,
+                               ZON_zone_list_t *zones)
+{
+  local_data_t *local_data;
+  ZON_zone_fragment_t *zone, *background_zone;
+
+#if DEBUG
+  g_debug ("----- ENTER handle_attempt_to_trace_event (%s)", MODEL_NAME);
+#endif
+
+  local_data = (local_data_t *) (self->model_data);
+
+  zone = zones->membership[event->unit->index];
+  background_zone = ZON_zone_list_get_background (zones);
+
+  /* The data fields are: run, day, type, reason, ID, production type, size,
+   * latitude, longitude, zone. */
+  fprintf (local_data->stream,
+           "%i,%i,TraceInitiated,%s%s,%s,%s,%u,%g,%g,%s\n",
+           local_data->run_number,
+           event->day,
+           SPREADMODEL_contact_type_abbrev[event->contact_type],
+           SPREADMODEL_trace_direction_abbrev[event->direction],
+           event->unit->official_id,
+           event->unit->production_type_name,
+           event->unit->size,
+           event->unit->latitude,
+           event->unit->longitude,
+           ZON_same_zone (zone, background_zone) ? "" : zone->parent->name);
+
+#if DEBUG
+  g_debug ("----- EXIT handle_attempt_to_trace_event (%s)", MODEL_NAME);
+#endif
+  return;
+}
+
+
+
+/**
+ * Responds to a trace result event by writing a table row.
+ *
+ * @param self this module.
+ * @param event a trace result event.
+ * @param zones the list of zones.
+ */
+void
+handle_trace_result_event (struct spreadmodel_model_t_ *self,
+                           EVT_trace_result_event_t * event,
+                           ZON_zone_list_t *zones)
+{
+  local_data_t *local_data;
+  ZON_zone_fragment_t *zone, *background_zone;
+  UNT_unit_t *identified_unit, *originating_unit;
+  char *preposition = NULL;
+
+#if DEBUG
+  g_debug ("----- ENTER handle_trace_result_event (%s)", MODEL_NAME);
+#endif
+
+  local_data = (local_data_t *) (self->model_data);
+
+  /* If this is a trace forward/out, then the "identified unit" is the
+   * recipient of the exposure. If this is a trace back/in, then the
+   * "identified unit" is the source of the exposure.  */
+  if (event->direction == SPREADMODEL_TraceForwardOrOut)
+    {
+      originating_unit = event->exposing_unit;
+      identified_unit = event->exposed_unit;
+      preposition = "From";
+    }
+  else if (event->direction == SPREADMODEL_TraceBackOrIn)
+    {
+      originating_unit = event->exposed_unit;
+      identified_unit = event->exposing_unit;
+      preposition = "To";
+    }
+  else
+    g_assert_not_reached();
+
+  zone = zones->membership[event->exposed_unit->index];
+  background_zone = ZON_zone_list_get_background (zones);
+
+  /* The data fields are: run, day, type, reason, ID, production type, size,
+   * latitude, longitude, zone. */
+  fprintf (local_data->stream,
+           "%i,%i,TraceFound,%s%s%s,%s,%s,%u,%g,%g,%s\n",
+           local_data->run_number,
+           event->day,
+           SPREADMODEL_contact_type_abbrev[event->contact_type],
+           preposition,
+           originating_unit->official_id,
+           identified_unit->official_id,
+           identified_unit->production_type_name,
+           identified_unit->size,
+           identified_unit->latitude,
+           identified_unit->longitude,
+           ZON_same_zone (zone, background_zone) ? "" : zone->parent->name);
+
+#if DEBUG
+  g_debug ("----- EXIT handle_trace_result_event (%s)", MODEL_NAME);
 #endif
   return;
 }
@@ -309,6 +481,15 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
       break;
     case EVT_Detection:
       handle_detection_event (self, &(event->u.detection), zones);
+      break;
+    case EVT_Exam:
+      handle_exam_event (self, &(event->u.exam), zones);
+      break;
+    case EVT_AttemptToTrace:
+      handle_attempt_to_trace_event (self, &(event->u.attempt_to_trace), zones);
+      break;
+    case EVT_TraceResult:
+      handle_trace_result_event (self, &(event->u.trace_result), zones);
       break;
     case EVT_Vaccination:
       handle_vaccination_event (self, &(event->u.vaccination), zones);

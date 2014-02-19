@@ -62,7 +62,6 @@ EVT_event_type_t events_listened_for[] =
 typedef struct
 {
   GPtrArray *production_types;
-  RPT_reporting_t *destructions;
   RPT_reporting_t *destruction_occurred;
   RPT_reporting_t *first_destruction;
   RPT_reporting_t *first_destruction_by_reason;
@@ -84,7 +83,6 @@ typedef struct
   RPT_reporting_t *cumul_num_animals_destroyed_by_reason;
   RPT_reporting_t *cumul_num_animals_destroyed_by_prodtype;
   RPT_reporting_t *cumul_num_animals_destroyed_by_reason_and_prodtype;
-  GString *target;              /* a temporary string used repeatedly. */
   gboolean reasons_declared;
   gboolean first_day;
 }
@@ -149,7 +147,6 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, EVT_new_day_event_t * e
   /* Zero the daily counts. */
   if (event->day > 1)
     {
-      RPT_reporting_zero (local_data->destructions);
       RPT_reporting_zero (local_data->num_units_destroyed);
       RPT_reporting_zero (local_data->num_units_destroyed_by_reason);
       RPT_reporting_zero (local_data->num_units_destroyed_by_prodtype);
@@ -210,7 +207,6 @@ handle_declaration_of_destruction_reasons_event (struct spreadmodel_model_t_ *se
   for (i = 0; i < n; i++)
     {
       reason = (char *) g_ptr_array_index (event->reasons, i);
-      RPT_reporting_append_text1 (local_data->destructions, "", reason);
       /* Two function calls for the first_destruction variable: one to
        * establish the type of the sub-variable (it's an integer), and one to
        * clear it to "null" (it has no meaningful value until a destruction
@@ -259,8 +255,6 @@ handle_destruction_event (struct spreadmodel_model_t_ *self, EVT_destruction_eve
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
-  char *peek;
-  gboolean first_of_cause;
   const char *drill_down_list[3] = { NULL, NULL, NULL };
   UNT_control_t update;
 
@@ -270,12 +264,6 @@ handle_destruction_event (struct spreadmodel_model_t_ *self, EVT_destruction_eve
 
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
-
-  peek = RPT_reporting_get_text1 (local_data->destructions, event->reason);
-  first_of_cause = (peek == NULL) || (strlen (peek) == 0);
-
-  g_string_printf (local_data->target, first_of_cause ? "%u" : ",%u", unit->index);
-  RPT_reporting_append_text1 (local_data->destructions, local_data->target->str, event->reason);
 
   update.unit_index = unit->index;
   update.day_commitment_made = event->day_commitment_made;
@@ -424,7 +412,6 @@ reset (struct spreadmodel_model_t_ *self)
 #endif
 
   local_data = (local_data_t *) (self->model_data);
-  RPT_reporting_zero (local_data->destructions);
   RPT_reporting_zero (local_data->destruction_occurred);
   RPT_reporting_set_null (local_data->first_destruction, NULL);
   RPT_reporting_set_null (local_data->first_destruction_by_reason, NULL);
@@ -576,7 +563,6 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  RPT_free_reporting (local_data->destructions);
   RPT_free_reporting (local_data->destruction_occurred);
   RPT_free_reporting (local_data->first_destruction);
   RPT_free_reporting (local_data->first_destruction_by_reason);
@@ -598,8 +584,6 @@ local_free (struct spreadmodel_model_t_ *self)
   RPT_free_reporting (local_data->cumul_num_animals_destroyed_by_reason);
   RPT_free_reporting (local_data->cumul_num_animals_destroyed_by_prodtype);
   RPT_free_reporting (local_data->cumul_num_animals_destroyed_by_reason_and_prodtype);
-
-  g_string_free (local_data->target, TRUE);
 
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
@@ -657,7 +641,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   /* Make sure the right XML subtree was sent. */
   g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
 
-  local_data->destructions = RPT_new_reporting ("destructions", RPT_group, RPT_never);
   local_data->destruction_occurred =
     RPT_new_reporting ("destrOccurred", RPT_integer, RPT_never);
   local_data->first_destruction =
@@ -700,7 +683,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
     RPT_new_reporting ("descA", RPT_group, RPT_never);
   local_data->cumul_num_animals_destroyed_by_reason_and_prodtype =
     RPT_new_reporting ("descA", RPT_group, RPT_never);
-  g_ptr_array_add (self->outputs, local_data->destructions);
   g_ptr_array_add (self->outputs, local_data->destruction_occurred);
   g_ptr_array_add (self->outputs, local_data->first_destruction);
   g_ptr_array_add (self->outputs, local_data->first_destruction_by_reason);
@@ -740,11 +722,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
       broken_down = broken_down || (g_strstr_len (variable_name, -1, "-by-") != NULL); 
       /* Starting at version 3.2 we accept either the old, verbose output
        * variable names or the new shorter ones. */
-      if (strcmp (variable_name, "destructions") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->destructions, freq);
-        }
-      else if (strcmp (variable_name, "destrOccurred") == 0)
+      if (strcmp (variable_name, "destrOccurred") == 0)
         {
           RPT_reporting_set_frequency (local_data->destruction_occurred, freq);
         }
@@ -830,7 +808,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
       RPT_reporting_add_integer (local_data->cumul_num_animals_destroyed_by_reason_and_prodtype, 0, drill_down_list);
     }
 
-  local_data->target = g_string_new (NULL);
   local_data->reasons_declared = FALSE;
   local_data->first_day = TRUE;
 

@@ -75,7 +75,6 @@ count_and_means_t;
 typedef struct
 {
   GPtrArray *production_types;
-  RPT_reporting_t *detections;
   RPT_reporting_t *detection_occurred;
   RPT_reporting_t *first_detection;
   RPT_reporting_t *first_detection_by_means;
@@ -102,7 +101,6 @@ typedef struct
   RPT_reporting_t *cumul_nanimals_detected_by_means;
   RPT_reporting_t *cumul_nanimals_detected_by_prodtype;
   RPT_reporting_t *cumul_nanimals_detected_by_means_and_prodtype;
-  GString *target;              /* a temporary string used repeatedly. */
   GHashTable *detected; /**< A table for tracking detections of unique units.
     If a unit has been detected, it will be in the.  The key is the unit
     (UNT_unit_t *), and the associated value is irrelevant. */
@@ -173,7 +171,6 @@ handle_new_day_event (struct spreadmodel_model_t_ *self)
   local_data = (local_data_t *) (self->model_data);
 
   /* Zero the daily counts. */
-  RPT_reporting_zero (local_data->detections);
   RPT_reporting_zero (local_data->nunits_detected);
   RPT_reporting_zero (local_data->nunits_detected_by_means);
   RPT_reporting_zero (local_data->nunits_detected_by_prodtype);
@@ -224,8 +221,6 @@ handle_detection_event (struct spreadmodel_model_t_ *self, EVT_detection_event_t
   local_data_t *local_data;
   UNT_unit_t *unit;
   const char *means;
-  char *peek;
-  gboolean first_of_means;
   const char *drill_down_list[3] = { NULL, NULL, NULL };
   UNT_detect_t detection;
   gpointer p;
@@ -239,11 +234,6 @@ handle_detection_event (struct spreadmodel_model_t_ *self, EVT_detection_event_t
   unit = event->unit;
 
   means = SPREADMODEL_detection_reason_abbrev[event->means];
-  peek = RPT_reporting_get_text1 (local_data->detections, means);
-  first_of_means = (peek == NULL) || (strlen (peek) == 0);
-
-  g_string_printf (local_data->target, first_of_means ? "%u" : ",%u", unit->index);
-  RPT_reporting_append_text1 (local_data->detections, local_data->target->str, means);
 
   detection.unit_index = unit->index;
   detection.reason = event->means;
@@ -639,7 +629,6 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  RPT_free_reporting (local_data->detections);
   RPT_free_reporting (local_data->detection_occurred);
   RPT_free_reporting (local_data->first_detection);
   RPT_free_reporting (local_data->first_detection_by_means);
@@ -666,8 +655,6 @@ local_free (struct spreadmodel_model_t_ *self)
   RPT_free_reporting (local_data->cumul_nanimals_detected_by_means);
   RPT_free_reporting (local_data->cumul_nanimals_detected_by_prodtype);
   RPT_free_reporting (local_data->cumul_nanimals_detected_by_means_and_prodtype);
-
-  g_string_free (local_data->target, TRUE);
 
   g_hash_table_destroy (local_data->detected);
   g_hash_table_destroy (local_data->detected_today);
@@ -730,7 +717,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   /* Make sure the right XML subtree was sent. */
   g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
 
-  local_data->detections = RPT_new_reporting ("detections", RPT_group, RPT_never);
   local_data->detection_occurred =
     RPT_new_reporting ("detOccurred", RPT_integer, RPT_never);
   local_data->first_detection =
@@ -783,7 +769,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
     RPT_new_reporting ("detcA", RPT_group, RPT_never);
   local_data->cumul_nanimals_detected_by_means_and_prodtype =
     RPT_new_reporting ("detcA", RPT_group, RPT_never);
-  g_ptr_array_add (self->outputs, local_data->detections);
   g_ptr_array_add (self->outputs, local_data->detection_occurred);
   g_ptr_array_add (self->outputs, local_data->first_detection);
   g_ptr_array_add (self->outputs, local_data->first_detection_by_means);
@@ -828,11 +813,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
       broken_down = broken_down || (g_strstr_len (variable_name, -1, "-by-") != NULL); 
       /* Starting at version 3.2 we accept either the old, verbose output
        * variable names or the new shorter ones. */
-      if (strcmp (variable_name, "detections") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->detections, freq);
-        }
-      else if (strcmp (variable_name, "detOccurred") == 0)
+      if (strcmp (variable_name, "detOccurred") == 0)
         {
           RPT_reporting_set_frequency (local_data->detection_occurred, freq);
         }
@@ -927,7 +908,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
       if ((SPREADMODEL_detection_reason)i == SPREADMODEL_DetectionReasonUnspecified)
         continue;
       means = SPREADMODEL_detection_reason_abbrev[i];
-      RPT_reporting_append_text1 (local_data->detections, "", means);
       /* Two function calls for the first_detection and last_detection
        * variables: one to establish the type of the sub-variables (they are
        * integers), and one to clear them to "null" (they have no meaningful
@@ -962,8 +942,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
                                      drill_down_list);
         }
     }
-
-  local_data->target = g_string_new (NULL);
 
   /* Initialize a table to track detections of unique units. */
   local_data->detected = g_hash_table_new (g_direct_hash, g_direct_equal);
