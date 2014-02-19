@@ -78,6 +78,7 @@ spreadmodel_SOURCES = cli.c main_loop.c module_loader.c module_loader.h module.h
   $(top_srcdir)/modules/exam_monitor.c $(top_srcdir)/modules/exam_monitor.h \
   $(top_srcdir)/modules/test_monitor.c $(top_srcdir)/modules/test_monitor.h \
   $(top_srcdir)/modules/full_table_writer.c $(top_srcdir)/modules/full_table_writer.h \
+  $(top_srcdir)/modules/exposures_table_writer.c $(top_srcdir)/modules/exposures_table_writer.h \
   $(top_srcdir)/modules/apparent_events_table_writer.c $(top_srcdir)/modules/apparent_events_table_writer.h
 if USE_SC_GUILIB
   spreadmodel_SOURCES += $(top_srcdir)/sc_guilib/production_type_data.c \

@@ -60,7 +60,6 @@ EVT_event_type_t events_listened_for[] = { EVT_BeforeAnySimulations, EVT_NewDay,
 typedef struct
 {
   GPtrArray *production_types;
-  RPT_reporting_t *exposures;
   RPT_reporting_t *num_units_exposed;
   RPT_reporting_t *num_units_exposed_by_cause;
   RPT_reporting_t *num_units_exposed_by_prodtype;
@@ -79,7 +78,6 @@ typedef struct
   RPT_reporting_t *cumul_num_animals_exposed_by_cause_and_prodtype;
   RPT_reporting_t *num_adequate_exposures;
   RPT_reporting_t *cumul_num_adequate_exposures;
-  GString *source_and_target;
 }
 local_data_t;
 
@@ -139,7 +137,6 @@ handle_new_day_event (struct spreadmodel_model_t_ *self)
   local_data = (local_data_t *) (self->model_data);
 
   /* Zero the daily counts. */
-  RPT_reporting_zero (local_data->exposures);
   RPT_reporting_zero (local_data->num_units_exposed);
   RPT_reporting_zero (local_data->num_units_exposed_by_cause);
   RPT_reporting_zero (local_data->num_units_exposed_by_prodtype);
@@ -169,8 +166,6 @@ handle_exposure_event (struct spreadmodel_model_t_ *self, EVT_exposure_event_t *
   local_data_t *local_data;
   UNT_unit_t *exposing_unit, *exposed_unit;
   const char *cause;
-  char *peek;
-  gboolean first_of_cause;
   const char *drill_down_list[3] = { NULL, NULL, NULL };
   UNT_expose_t update;
   
@@ -182,16 +177,7 @@ handle_exposure_event (struct spreadmodel_model_t_ *self, EVT_exposure_event_t *
   exposing_unit = event->exposing_unit;
   exposed_unit = event->exposed_unit;
 
-  /* Update the text string that lists exposed unit indices. */
   cause = SPREADMODEL_contact_type_abbrev[event->contact_type];
-  peek = RPT_reporting_get_text1 (local_data->exposures, cause);
-  first_of_cause = (peek == NULL) || (strlen (peek) == 0);
-
-  g_string_printf (local_data->source_and_target,
-                   first_of_cause ? "%u->%u" : ",%u->%u",
-                   event->exposing_unit->index, event->exposed_unit->index);
-  RPT_reporting_append_text1 (local_data->exposures, local_data->source_and_target->str,
-                              cause);
                                 
   update.src_index = exposing_unit->index;
   update.src_state = (SPREADMODEL_disease_state) exposing_unit->state;
@@ -469,7 +455,6 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  RPT_free_reporting (local_data->exposures);
   RPT_free_reporting (local_data->num_units_exposed);
   RPT_free_reporting (local_data->num_units_exposed_by_cause);
   RPT_free_reporting (local_data->num_units_exposed_by_prodtype);
@@ -488,8 +473,6 @@ local_free (struct spreadmodel_model_t_ *self)
   RPT_free_reporting (local_data->cumul_num_animals_exposed_by_cause_and_prodtype);
   RPT_free_reporting (local_data->num_adequate_exposures);
   RPT_free_reporting (local_data->cumul_num_adequate_exposures);
-
-  g_string_free (local_data->source_and_target, TRUE);
 
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
@@ -546,7 +529,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   /* Make sure the right XML subtree was sent. */
   g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
 
-  local_data->exposures = RPT_new_reporting ("exposures", RPT_group, RPT_never);
   local_data->num_units_exposed =
     RPT_new_reporting ("expnUAll", RPT_integer, RPT_never);
   local_data->num_units_exposed_by_cause =
@@ -583,7 +565,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
     RPT_new_reporting ("adqnUAll", RPT_integer, RPT_never);
   local_data->cumul_num_adequate_exposures =
     RPT_new_reporting ("adqcUAll", RPT_integer, RPT_never);
-  g_ptr_array_add (self->outputs, local_data->exposures);
   g_ptr_array_add (self->outputs, local_data->num_units_exposed);
   g_ptr_array_add (self->outputs, local_data->num_units_exposed_by_cause);
   g_ptr_array_add (self->outputs, local_data->num_units_exposed_by_prodtype);
@@ -620,12 +601,8 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
       broken_down = broken_down || (g_strstr_len (variable_name, -1, "-by-") != NULL); 
       /* Starting at version 3.2 we accept either the old, verbose output
        * variable names or the new shorter ones. */
-      if (strcmp (variable_name, "exposures") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->exposures, freq);
-        }
-      else if (strcmp (variable_name, "expnU") == 0
-               || strncmp (variable_name, "num-units-exposed", 17) == 0)
+      if (strcmp (variable_name, "expnU") == 0
+          || strncmp (variable_name, "num-units-exposed", 17) == 0)
         {
           RPT_reporting_set_frequency (local_data->num_units_exposed, freq);
           if (broken_down)
@@ -700,7 +677,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
           || (SPREADMODEL_contact_type)i == SPREADMODEL_InitiallyInfected)
         continue;
       cause = SPREADMODEL_contact_type_abbrev[i];
-      RPT_reporting_append_text1 (local_data->exposures, "", cause);
       RPT_reporting_add_integer1 (local_data->num_units_exposed_by_cause, 0, cause);
       RPT_reporting_add_integer1 (local_data->cumul_num_units_exposed_by_cause, 0, cause);
       RPT_reporting_add_integer1 (local_data->num_animals_exposed_by_cause, 0, cause);
@@ -718,8 +694,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
                                      drill_down_list);
         }
     }
-
-  local_data->source_and_target = g_string_new (NULL);
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

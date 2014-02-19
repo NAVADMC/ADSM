@@ -86,7 +86,6 @@ EVT_event_type_t events_listened_for[] =
 typedef struct
 {
   GPtrArray *production_types;
-  RPT_reporting_t *infections;
   RPT_reporting_t *num_units_infected;
   RPT_reporting_t *num_units_infected_by_cause;
   RPT_reporting_t *num_units_infected_by_prodtype;
@@ -119,7 +118,6 @@ typedef struct
     back at the beginning and starting to overwrite old values every
     nrecent_days * 2 days. */
   unsigned int numerator, denominator;
-  GString *source_and_target;   /* a temporary string used repeatedly. */
 }
 local_data_t;
 
@@ -187,7 +185,6 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, EVT_new_day_event_t * e
   /* Zero the daily counts. */
   if (event->day > 1)
     {
-      RPT_reporting_zero (local_data->infections);
       RPT_reporting_zero (local_data->num_units_infected);
       RPT_reporting_zero (local_data->num_units_infected_by_cause);
       RPT_reporting_zero (local_data->num_units_infected_by_prodtype);
@@ -321,8 +318,6 @@ handle_infection_event (struct spreadmodel_model_t_ *self, EVT_infection_event_t
   local_data_t *local_data;
   UNT_unit_t *infecting_unit, *infected_unit;
   const char *cause;
-  char *peek;
-  gboolean first_of_cause;
   const char *drill_down_list[3] = { NULL, NULL, NULL };
   unsigned int count;
   UNT_infect_t update;
@@ -338,21 +333,7 @@ handle_infection_event (struct spreadmodel_model_t_ *self, EVT_infection_event_t
   infecting_unit = event->infecting_unit;
   infected_unit = event->infected_unit;
 
-  /* Update the text string that lists infected unit indices. */
   cause = SPREADMODEL_contact_type_abbrev[event->contact_type];
-  peek = RPT_reporting_get_text1 (local_data->infections, cause);
-  first_of_cause = (peek == NULL) || (strlen (peek) == 0);
-
-  if (infecting_unit == NULL)
-    g_string_printf (local_data->source_and_target,
-                     first_of_cause ? "%u" : ",%u", infected_unit->index);
-  else
-    g_string_printf (local_data->source_and_target,
-                     first_of_cause ? "%u->%u" : ",%u->%u",
-                     infecting_unit->index, infected_unit->index);
-
-  RPT_reporting_append_text1 (local_data->infections, local_data->source_and_target->str,
-                              cause);
 
   update.unit_index = infected_unit->index;
   update.infection_source_type = event->contact_type;
@@ -680,7 +661,6 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  RPT_free_reporting (local_data->infections);
   RPT_free_reporting (local_data->num_units_infected);
   RPT_free_reporting (local_data->num_units_infected_by_cause);
   RPT_free_reporting (local_data->num_units_infected_by_prodtype);
@@ -701,7 +681,6 @@ local_free (struct spreadmodel_model_t_ *self)
   RPT_free_reporting (local_data->first_det_a_inf);
   RPT_free_reporting (local_data->ratio);
 
-  g_string_free (local_data->source_and_target, TRUE);
   g_free (local_data->nrecent_infections);
 
   g_free (local_data);
@@ -780,7 +759,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
       local_data->nrecent_days = 14;
     }
 
-  local_data->infections = RPT_new_reporting ("infections", RPT_group, RPT_never);
   local_data->num_units_infected =
     RPT_new_reporting ("infnUAll", RPT_integer, RPT_never);
   local_data->num_units_infected_by_cause =
@@ -818,7 +796,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   local_data->first_det_a_inf =
     RPT_new_reporting ("firstDetAInfAll", RPT_integer, RPT_never);
   local_data->ratio = RPT_new_reporting ("ratio", RPT_real, RPT_never);
-  g_ptr_array_add (self->outputs, local_data->infections);
   g_ptr_array_add (self->outputs, local_data->num_units_infected);
   g_ptr_array_add (self->outputs, local_data->num_units_infected_by_cause);
   g_ptr_array_add (self->outputs, local_data->num_units_infected_by_prodtype);
@@ -856,12 +833,8 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
       broken_down = broken_down || (g_strstr_len (variable_name, -1, "-by-") != NULL); 
       /* Starting at version 3.2 we accept either the old, verbose output
        * variable names or the new shorter ones. */
-      if (strcmp (variable_name, "infections") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->infections, freq);
-        }
-      else if (strcmp (variable_name, "infnU") == 0
-               || strncmp (variable_name, "num-units-infected", 18) == 0)
+      if (strcmp (variable_name, "infnU") == 0
+          || strncmp (variable_name, "num-units-infected", 18) == 0)
         {
           RPT_reporting_set_frequency (local_data->num_units_infected, freq);
           if (broken_down)
@@ -939,7 +912,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
       if ((SPREADMODEL_contact_type)i == SPREADMODEL_UnspecifiedInfectionType)
         continue;
       cause = SPREADMODEL_contact_type_abbrev[i]; 
-      RPT_reporting_append_text1 (local_data->infections, "", cause);
       RPT_reporting_add_integer1 (local_data->num_units_infected_by_cause, 0, cause);
       RPT_reporting_add_integer1 (local_data->cumul_num_units_infected_by_cause, 0, cause);
       RPT_reporting_add_integer1 (local_data->num_animals_infected_by_cause, 0, cause);
@@ -954,8 +926,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
           RPT_reporting_add_integer (local_data->cumul_num_animals_infected_by_cause_and_prodtype, 0, drill_down_list);
         }
     }
-
-  local_data->source_and_target = g_string_new (NULL);
 
   /* A list to store the number of new infections on each day for the recent
    * past. */

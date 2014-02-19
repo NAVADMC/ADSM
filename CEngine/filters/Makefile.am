@@ -10,7 +10,6 @@ AM_YFLAGS = -d -v
 bin_PROGRAMS = \
   table_filter \
   full_table_filter \
-  exposures_table_filter \
   state_table_filter \
   xml2shp \
   weekly_gis_filter \
@@ -22,22 +21,6 @@ table_filter_SOURCES = table.y scanner.l $(top_srcdir)/reporting/reporting.c
 table_filter_LDADD = @GLIB_LIBS@ @GSL_LIBS@
 full_table_filter_SOURCES = full_table.y scanner.l $(top_srcdir)/reporting/reporting.c
 full_table_filter_LDADD = @GLIB_LIBS@ @GSL_LIBS@
-exposures_table_filter_SOURCES = exposures_table.y scanner.l \
-  $(top_srcdir)/unit/unit.c \
-  $(top_srcdir)/rel_chart/rel_chart.c \
-  $(top_srcdir)/reporting/reporting.c \
-  $(top_srcdir)/replace/replace.c
-if USE_SC_GUILIB
-  exposures_table_filter_SOURCES += $(top_srcdir)/general/general.c \
-    $(top_srcdir)/zone/zone.c \
-    $(top_srcdir)/sc_guilib/production_type_data.c \
-    $(top_srcdir)/sc_guilib/sc_guilib_outputs.c \
-    $(top_srcdir)/sc_guilib/sc_database.c
-endif
-exposures_table_filter_LDADD = @GLIB_LIBS@ @GSL_LIBS@
-if HAVE_MPI
-exposures_table_filter_LDADD += @MPI_LIBS@
-endif
 state_table_filter_SOURCES = state_table.y scanner.l
 state_table_filter_LDADD = @GLIB_LIBS@
 xml2shp_SOURCES = xml2shp.c \
@@ -93,5 +76,9 @@ shp2png2_LDADD = -lshp -lgd @GLIB_LIBS@
 weekly_gis_zones_filter_SOURCES = weekly_gis_zones.y scanner.l
 weekly_gis_zones_filter_LDADD = -lshp @GLIB_LIBS@
 
-CLEANFILES = exposures_table.c exposures_table.h \
-  exposures_table.output
+CLEANFILES = scanner.c table.c table.h table.output \
+  full_table.c full_table.h full_table.output \
+  state_table.c state_table.h state_table.output \
+  weekly_gis.c weekly_gis.h weekly_gis.output \
+  summary_gis.c summary_gis.h summary_gis.output \
+  weekly_gis_zones.c weekly_gis_zones.h weekly_gis_zones.output

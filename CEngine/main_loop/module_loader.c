@@ -53,6 +53,7 @@
 #include "economic_model.h"
 #include "exam_monitor.h"
 #include "exposure_monitor.h"
+#include "exposures_table_writer.h"
 #include "full_table_writer.h"
 #include "infection_monitor.h"
 #include "quarantine_model.h"
@@ -110,6 +111,9 @@ struct model_load_info_t model_list[] = {
   {"economic-model", (void*)&economic_model_new, economic_model_is_singleton},
   {"exam-monitor", (void*)&exam_monitor_new, NULL},
   {"exposure-monitor", (void*)&exposure_monitor_new, NULL},
+  #ifndef WIN_DLL
+    {"exposures-table-writer", (void*)&exposures_table_writer_new, exposures_table_writer_is_singleton},
+  #endif
   #ifndef WIN_DLL
     {"full-table-writer", (void*)&full_table_writer_new, full_table_writer_is_singleton},
   #endif
