@@ -853,12 +853,11 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
   local_data_t *local_data = NULL;
   param_block_t *param_block = NULL;
   scew_element const *e;
-  scew_element **ee;
-  unsigned int noutputs;
+  scew_list *ee, *iter;
   RPT_reporting_t *output;
   const XML_Char *variable_name;
   gboolean success;
-  int i, j;
+  int i;
   char *tmp, *name;
   int level;
   double radius;
@@ -948,26 +947,26 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
   g_ptr_array_add (self->outputs, param_block->cumul_num_holes_filled);
 
   /* Set the reporting frequency for the output variables. */
-  ee = scew_element_list (params, "output", &noutputs);
+  ee = scew_element_list_by_name (params, "output");
 #if DEBUG
-  g_debug ("%i output variables", noutputs);
+  g_debug ("%i output variables", scew_list_size(ee));
 #endif
-  for (i = 0; i < noutputs; i++)
+  for (iter = ee; iter != NULL; iter = scew_list_next(iter))
     {
       GString * long_variable_name = g_string_new (NULL);
 
-      e = ee[i];
+      e = (scew_element *) scew_list_data (iter);
       variable_name = scew_element_contents (scew_element_by_name (e, "variable-name"));
       g_string_printf (long_variable_name, "%s-%s", name, variable_name);
       /* Do the outputs include a variable with this name? */
-      for (j = 0; j < self->outputs->len; j++)
+      for (i = 0; i < self->outputs->len; i++)
         {
-          output = (RPT_reporting_t *) g_ptr_array_index (self->outputs, j);
+          output = (RPT_reporting_t *) g_ptr_array_index (self->outputs, i);
           if ((strcmp (output->name, variable_name) == 0) ||
               (strcmp (output->name, long_variable_name->str) == 0))
             break;
         }
-      if (j == self->outputs->len)
+      if (i == self->outputs->len)
         g_warning ("no output variable named \"%s\", ignoring", variable_name);
       else
         {
@@ -982,7 +981,7 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
 
       g_string_free(long_variable_name, TRUE);
     }
-  free (ee);
+  scew_list_free (ee);
 
   /* Add the zone object to the zone list. */
   ZON_zone_list_append (local_data->zones, param_block->zone);

@@ -774,7 +774,7 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
    * combinations, these parameters apply to. */
   production_type =
     spreadmodel_read_prodtype_attribute (params, "production-type", local_data->production_types);
-  if (scew_attribute_by_name (params, "zone") != NULL)
+  if (scew_element_attribute_by_name (params, "zone") != NULL)
     zone = spreadmodel_read_zone_attribute (params, local_data->zones);
   else
     zone = NULL;

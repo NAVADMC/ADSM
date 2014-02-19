@@ -516,7 +516,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
 #endif
   /* Temporary support for older parameter files that only had a
    * "production-type" attribute and implied "from-any" functionality. */
-  attr = scew_attribute_by_name (params, "production-type");
+  attr = scew_element_attribute_by_name (params, "production-type");
   if (attr != NULL)
     local_data->to_production_type =
       spreadmodel_read_prodtype_attribute (params, "production-type", units->production_type_names);

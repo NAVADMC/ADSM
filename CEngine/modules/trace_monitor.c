@@ -602,8 +602,8 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projections,
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element *e, **ee;
-  unsigned int n;
+  scew_element *e;
+  scew_list *ee, *iter;
   const XML_Char *variable_name;
   RPT_frequency_t freq;
   gboolean success;
@@ -736,13 +736,13 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projections,
   g_ptr_array_add (self->outputs, local_data->cumul_nanimals_traced_by_contacttype_and_prodtype);
 
   /* Set the reporting frequency for the output variables. */
-  ee = scew_element_list (params, "output", &n);
+  ee = scew_element_list_by_name (params, "output");
 #if DEBUG
-  g_debug ("%u output variables", n);
+  g_debug ("%u output variables", scew_list_size(ee));
 #endif
-  for (i = 0; i < n; i++)
+  for (iter = ee; iter != NULL; iter = scew_list_next(iter))
     {
-      e = ee[i];
+      e = (scew_element *) scew_list_data (iter);
       variable_name = scew_element_contents (scew_element_by_name (e, "variable-name"));
       freq = RPT_string_to_frequency (scew_element_contents
                                       (scew_element_by_name (e, "frequency")));
@@ -839,7 +839,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projections,
       else
         g_warning ("no output variable named \"%s\", ignoring", variable_name);        
     }
-  free (ee);
+  scew_list_free (ee);
 
   /* Initialize the categories in the output variables. */
   local_data->production_types = units->production_type_names;

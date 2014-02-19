@@ -297,7 +297,8 @@ PAR_get_piecewise_PDF( scew_element* const fn_element )
   scew_element* e;
   double x, y, *xy;
   unsigned int npoints;
-  scew_element **ee;
+  scew_list *ee;
+  scew_list *iter;
   scew_element *ve, *xe, *ye;
   gboolean had_error;
                       
@@ -347,7 +348,8 @@ PAR_get_piecewise_PDF( scew_element* const fn_element )
   if( old_style_xml )
     {
       /* This is Neil's original piecewise parsing function. */    
-      ee = scew_element_list (fn_element, "value", &npoints);
+      ee = scew_element_list_by_name (fn_element, "value");
+      npoints = scew_list_size (ee);
       #if DEBUG
         g_debug ("%u points", npoints);
       #endif
@@ -356,23 +358,26 @@ PAR_get_piecewise_PDF( scew_element* const fn_element )
       xy = g_new (double, 2 * npoints);
       
       errno = 0;
-      for (i = 0; i < npoints; i++)
+      for (i = 0, iter = ee; iter != NULL; i++, iter = scew_list_next(iter))
         {
-          x = strtod (scew_element_contents (ee[i]), NULL);
+          xe = (scew_element *) scew_list_data (iter);
+          x = strtod (scew_element_contents (xe), NULL);
           g_assert (errno != ERANGE);
           xy[2 * i] = x;
         }
-      free (ee);
-      ee = scew_element_list (fn_element, "p", &npoints);
-      for (i = 0; i < npoints; i++)
+      scew_list_free (ee);
+      ee = scew_element_list_by_name (fn_element, "p");
+      npoints = scew_list_size (ee);
+      for (i = 0, iter = ee; iter != NULL; i++, iter = scew_list_next(iter))
         {
-          y = strtod (scew_element_contents (ee[i]), NULL);
+          ye = (scew_element *) scew_list_data (iter);
+          y = strtod (scew_element_contents (ye), NULL);
           g_assert (errno != ERANGE);
           xy[2 * i + 1] = y;
         }
       dist = PDF_new_piecewise_dist (npoints, xy);
       g_free (xy);
-      free (ee);
+      scew_list_free (ee);
     }
   else /* if new-style xml */
     {
@@ -462,10 +467,12 @@ PAR_get_histogram_PDF( scew_element* const fn_element )
 
   if( old_style_xml ) 
     {
-      scew_element **ee;
+      scew_list *ee, *iter;
+      scew_element *xe;
       double x;
 
-      ee = scew_element_list (fn_element, "x0", &nbins);
+      ee = scew_element_list_by_name (fn_element, "x0");
+      nbins = scew_list_size (ee);
       #if DEBUG
         g_debug ("%u bins", nbins);
       #endif
@@ -475,35 +482,40 @@ PAR_get_histogram_PDF( scew_element* const fn_element )
       /* Copy the range values from the DOM tree into an array. */
       range = g_new (double, nbins + 1);
       errno = 0;
-      for (i = 0; i < nbins; i++)
+      for (i = 0, iter = ee; iter != NULL; i++, iter = scew_list_next(iter))
         {
-          x = strtod (scew_element_contents (ee[i]), NULL);
+          xe = (scew_element *) scew_list_data (iter);
+          x = strtod (scew_element_contents (xe), NULL);
           g_assert (errno != ERANGE);
           range[i] = x;
         }
-      free (ee);
+      scew_list_free (ee);
       /* Get the final upper bound of the histogram. */
-      ee = scew_element_list (fn_element, "x1", &nbins2);
+      ee = scew_element_list_by_name (fn_element, "x1");
+      nbins2 = scew_list_size (ee);
       g_assert (nbins2 == nbins);
-      x = strtod (scew_element_contents (ee[nbins-1]), NULL);
+      xe = (scew_element *) scew_list_data (scew_list_last (ee));
+      x = strtod (scew_element_contents (xe), NULL);
       g_assert (errno != ERANGE);
       range[nbins] = x;
       /* FIXME: should we check that the upper limit of one bin really is the
        * lower limit of the next one up? */
-      free (ee);
+      scew_list_free (ee);
       gsl_histogram_set_ranges (h, range, nbins+1);
 
       /* The upper and lower limits of each bin have been established.  Now
        * fill in the counts in the bins. */
-      ee = scew_element_list (fn_element, "p", &nbins2);
+      ee = scew_element_list_by_name (fn_element, "p");
+      nbins2 = scew_list_size (ee);
       g_assert (nbins2 == nbins);
-      for (i = 0; i < nbins; i++)
+      for (i = 0, iter = ee; iter != NULL; i++, iter = scew_list_next(iter))
         {
-          x = strtod (scew_element_contents (ee[i]), NULL);
+          xe = (scew_element *) scew_list_data (iter);
+          x = strtod (scew_element_contents (xe), NULL);
           g_assert (errno != ERANGE);
           gsl_histogram_accumulate (h, (range[i]+range[i+1])/2.0, x);
         }
-      free (ee);
+      scew_list_free (ee);
       g_free(range);
 
       /* Last step, take the histogram given by the user, which may contain
@@ -983,11 +995,10 @@ REL_chart_t *
 PAR_get_relationship_chart (PAR_parameter_t * param)
 {
   REL_chart_t *chart;
-  scew_element **ee;
+  scew_list *ee, *iter;
   unsigned int npoints;
   double *x, *y;
   unsigned int i, j;
-  unsigned int index;
   double value;
   scew_element *fn_element;
   gboolean old_style_xml;
@@ -1008,8 +1019,12 @@ PAR_get_relationship_chart (PAR_parameter_t * param)
   /* Parse XML, once we know what style it is. */
   /*-------------------------------------------*/
   if( old_style_xml )
-    {    
-      ee = scew_element_list (param, "value", &npoints);
+    {
+      gboolean xvalue;
+      scew_element *e;
+
+      ee = scew_element_list_by_name (param, "value");
+      npoints = scew_list_size (ee);
       npoints /= 2;
       #if DEBUG
         g_debug ("%u points", npoints);
@@ -1019,21 +1034,25 @@ PAR_get_relationship_chart (PAR_parameter_t * param)
       x = g_new (double, npoints);
       y = g_new (double, npoints);
     
-      index = 0;
-      for (i = 0; i < npoints; i++)
+      i = 0;
+      xvalue = TRUE;
+      for (iter = ee; iter != NULL; iter = scew_list_next(iter))
         {
           errno = 0;
-          value = strtod (scew_element_contents (ee[index++]), NULL);
+          e = (scew_element *) scew_list_data (iter);
+          value = strtod (scew_element_contents (e), NULL);
           g_assert (errno != ERANGE);
-          x[i] = value;
-          value = strtod (scew_element_contents (ee[index++]), NULL);
-          g_assert (errno != ERANGE);
-          y[i] = value;
+          /* The list of elements alternates x,y,x,y... */
+          if (xvalue)
+            x[i] = value;
+          else
+            y[i++] = value;
+          xvalue = !xvalue;
         }
       chart = REL_new_chart (x, y, npoints);
       g_free (y);
       g_free (x);
-      free (ee);
+      scew_list_free (ee);
     }
   else /* Parse new-style XML */
     {

@@ -57,7 +57,7 @@ spreadmodel_read_prodtype_attribute (const scew_element * params,
   nprod_types = production_type_names->len;
   flags = g_new0 (gboolean, nprod_types);
 
-  attr = scew_attribute_by_name (params, attr_name);
+  attr = scew_element_attribute_by_name (params, attr_name);
   /* If the "production-type" attribute is missing, assume the parameters apply
    * to all production types. */
   if (attr == NULL)
@@ -128,7 +128,7 @@ spreadmodel_read_zone_attribute (const scew_element * params, ZON_zone_list_t * 
   nzones = ZON_zone_list_length (zones);
   flags = g_new0 (gboolean, nzones);
 
-  attr = scew_attribute_by_name (params, "zone");
+  attr = scew_element_attribute_by_name (params, "zone");
   /* If the "zone" attribute is missing, assume the parameters apply in all
    * zones. */
   if (attr == NULL)

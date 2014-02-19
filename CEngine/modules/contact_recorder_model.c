@@ -762,7 +762,7 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
   local_data = (local_data_t *) (self->model_data);
 
   /* Find out whether these parameters are for direct or indirect contact. */
-  attr = scew_attribute_by_name (params, "contact-type");
+  attr = scew_element_attribute_by_name (params, "contact-type");
   g_assert (attr != NULL);
   attr_text = scew_attribute_value (attr);
   if (strcmp (attr_text, "direct") == 0)

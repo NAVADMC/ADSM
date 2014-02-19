@@ -246,11 +246,14 @@ spreadmodel_load_modules (const char *parameter_file, UNT_unit_list_t * units,
                           spreadmodel_model_t *** models, GPtrArray * outputs,
                           guint *_exit_conditions )
 {
-  scew_parser *parser;          /* to read the parameter file */
+  scew_reader *reader;          /* to read the parameter file */
+  scew_parser *parser;          /* to parse the parameter file */
   scew_error err;               /* parser error code */
+  scew_tree *tree;              /* parameter tree */
   scew_element *params;         /* root of the parameter tree */
   scew_element *e;              /* a subtree of the parameter tree */
-  scew_element **ee;            /* a list of subtrees */
+  scew_list *ee;                /* a list of subtrees */
+  scew_list *iter;
   scew_element *model_spec;     /* a subtree for a model */
   const char *model_name;       /* name of a model */
   struct model_load_info_t *model_load_info;
@@ -265,7 +268,6 @@ spreadmodel_load_modules (const char *parameter_file, UNT_unit_list_t * units,
   int nmodels;
   int nloaded = 0;
   int i, j;                     /* loop counters */
-  unsigned int noutputs = 0;
   RPT_reporting_t *output;
   const XML_Char *variable_name;
   unsigned int nzones;
@@ -288,7 +290,10 @@ spreadmodel_load_modules (const char *parameter_file, UNT_unit_list_t * units,
       g_error ("parameter file \"%s\" not found", parameter_file);
     }
 
-  if (scew_parser_load_file (parser, parameter_file) != 1)
+  reader = scew_reader_file_create (parameter_file);
+  g_assert (reader != NULL);
+  tree = scew_parser_load (parser, reader);
+  if (tree == NULL)
     {
       err = scew_error_code ();
       if (err == scew_error_expat)
@@ -299,8 +304,10 @@ spreadmodel_load_modules (const char *parameter_file, UNT_unit_list_t * units,
         g_error ("parameter file \"%s\" could not be parsed: %s", parameter_file,
                  scew_error_string (err));
     }
+  scew_reader_close (reader);
+  scew_reader_free (reader);
 
-  params = scew_tree_root (scew_parser_tree (parser));
+  params = scew_tree_root (tree);
 
   g_assert (params != NULL);
 
@@ -415,13 +422,13 @@ spreadmodel_load_modules (const char *parameter_file, UNT_unit_list_t * units,
   g_hash_table_destroy (singletons);
 
   /* Set the reporting frequency for the output variables. */
-  ee = scew_element_list (params, "output", &noutputs);
+  ee = scew_element_list_by_name (params, "output");
 #if DEBUG
-  g_debug ("%i output variables", noutputs);
+  g_debug ("%i output variables", scew_list_size (ee));
 #endif
-  for (i = 0; i < noutputs; i++)
+  for (iter = ee; iter != NULL; iter = scew_list_next(iter))
     {
-      e = ee[i];
+      e = (scew_element *) scew_list_data (iter);
       variable_name = scew_element_contents (scew_element_by_name (e, "variable-name"));
       /* Starting at version 3.2 we accept either the old, verbose output
        * variable names or the new shorter ones.  These lines are a kludge to
@@ -453,7 +460,7 @@ spreadmodel_load_modules (const char *parameter_file, UNT_unit_list_t * units,
 #endif
         }
     }
-  free (ee);
+  scew_list_free (ee);
 
   /* Make sure the zones' surveillance level numbers start at 1 and are
    * consecutive, because we're going to use them as list indices later. */

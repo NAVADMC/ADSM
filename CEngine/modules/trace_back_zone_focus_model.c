@@ -382,7 +382,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
 #if DEBUG
   g_debug ("setting contact type");
 #endif
-  attr = scew_attribute_by_name (params, "contact-type");
+  attr = scew_element_attribute_by_name (params, "contact-type");
   g_assert (attr != NULL);
   attr_text = scew_attribute_value (attr);
   if (strcmp (attr_text, "direct") == 0)

@@ -722,7 +722,8 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
   local_data_t *local_data = (local_data_t *) (self->model_data);
   unsigned int nzones = ZON_zone_list_length (local_data->zones);
   unsigned int nprod_types = local_data->production_types->len;
-  scew_element *e, **ee;
+  scew_element *e;
+  scew_list *ee, *iter;
   gboolean success;
   gboolean has_destruction_cost_params = FALSE;
   gboolean has_vaccination_cost_params = FALSE;
@@ -733,7 +734,6 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
   gboolean *production_type = NULL;
   gboolean *zone = NULL;
   unsigned int i, j;
-  unsigned int noutputs;
   RPT_reporting_t *output;
   const XML_Char *variable_name;
 
@@ -955,13 +955,13 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
     }
 
   /* Set the reporting frequency for the output variables. */
-  ee = scew_element_list (params, "output", &noutputs);
+  ee = scew_element_list_by_name (params, "output");
 #if DEBUG
-  g_debug ("%i output variables", noutputs);
+  g_debug ("%i output variables", scew_list_size(ee));
 #endif
-  for (i = 0; i < noutputs; i++)
+  for (iter = ee; iter != NULL; iter = scew_list_next(iter))
     {
-      e = ee[i];
+      e = (scew_element *) scew_list_data (iter);
       variable_name = scew_element_contents (scew_element_by_name (e, "variable-name"));
       /* Do the outputs include a variable with this name? */
       for (j = 0; j < self->outputs->len; j++)
@@ -983,11 +983,11 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
 #endif
         }
     }
-  free (ee);
+  scew_list_free (ee);
 
   /* Read zone and production type attributes to determine which
    * entries should be filled in. */
-  if (scew_attribute_by_name (params, "zone") != NULL)
+  if (scew_element_attribute_by_name (params, "zone") != NULL)
     zone = spreadmodel_read_zone_attribute (params, local_data->zones);
   else
     zone = NULL;

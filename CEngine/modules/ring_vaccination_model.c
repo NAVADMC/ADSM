@@ -607,7 +607,7 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
     spreadmodel_read_prodtype_attribute (params, "from-production-type", local_data->production_types);
   /* Temporary support for older parameter files that only had a
    * "production-type" attribute and implied "from-any" functionality. */
-  attr = scew_attribute_by_name (params, "production-type");
+  attr = scew_element_attribute_by_name (params, "production-type");
   if (attr != NULL)
     to_production_type =
       spreadmodel_read_prodtype_attribute (params, "production-type", local_data->production_types);

@@ -1584,7 +1584,7 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
   local_data = (local_data_t *) (self->model_data);
 
   /* Find out whether these parameters are for direct or indirect contact. */
-  attr = scew_attribute_by_name (params, "contact-type");
+  attr = scew_element_attribute_by_name (params, "contact-type");
   g_assert (attr != NULL);
   attr_text = scew_attribute_value (attr);
   if (strcmp (attr_text, "direct") == 0)
@@ -1718,7 +1718,7 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
     spreadmodel_read_prodtype_attribute (params, "from-production-type", local_data->production_types);
   to_production_type =
     spreadmodel_read_prodtype_attribute (params, "to-production-type", local_data->production_types);
-  if (scew_attribute_by_name (params, "zone") != NULL)
+  if (scew_element_attribute_by_name (params, "zone") != NULL)
     zone = spreadmodel_read_zone_attribute (params, local_data->zones);
   else
     zone = NULL;

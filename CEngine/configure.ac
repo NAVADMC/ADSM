@@ -110,7 +110,7 @@ case "X${ac_cv_with_mpi}" in
     ;;
   esac
 
-PKG_CHECK_MODULES(SCEW,scew >= 0.3.1,,AC_MSG_ERROR(cannot continue without SCEW))
+PKG_CHECK_MODULES(SCEW,scew >= 1.0.0,,AC_MSG_ERROR(cannot continue without SCEW))
 AC_SUBST(SCEW_CFLAGS)
 AC_SUBST(SCEW_LIBS)
 
