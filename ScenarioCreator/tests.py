@@ -4,9 +4,9 @@ from django.test import TestCase
 from ScenarioCreator.models import Ingeneral
 
 updatedPost = {'description': 'Updated Description', "naadsm_version": '3.2.19', "language": 'en', "num_runs": '10',
-     "num_days": '40', 'scenario_name': 'sample'}
+               "num_days": '40', 'scenario_name': 'sample'}
 standardPost = {'description': 'words', "naadsm_version": '3.2.19', "language": 'en', "num_runs": '10',
-                        "num_days": '40', 'scenario_name': 'sample'}
+                "num_days": '40', 'scenario_name': 'sample'}
 
 class CreatorTest(TestCase):
     def test_index_page(self):
