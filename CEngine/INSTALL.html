@@ -156,7 +156,28 @@ div.optionText {
 									style="color: rgb(32, 74, 135);" href="#cygwin">Cygwin</a>)</li>
 							</ul>
 
+							<ul>
+								<li dir="ltr">Windows XP as a DLL joined with a Windows
+								user interface, [ DLL compiled using <a
+									style="color: rgb(32, 74, 135);" href="#mingw">MinGW</a> ]</li>
+							</ul>
 
+							<ul>
+								<li dir="ltr">Windows 7 as a DLL joined with a Windows
+								user interface, [ DLL compiled using <a
+									style="color: rgb(32, 74, 135);" href="#mingw">MinGW</a> ]</li>
+							</ul>
+
+							<ul>
+								<li dir="ltr">Known and tested parallel, i.e. <a
+									style="color: rgb(32, 74, 135);" href="#mpi">MPI</a>,
+								compatibility on MS-Windows:
+								<ul>
+									<li dir="ltr"><a style="color: rgb(32, 74, 135);"
+										href="#mpich2">MPICH2</a></li>
+								</ul>
+								</li>
+							</ul>
 							<br />
 							<li><u><a style="color: rgb(32, 74, 135);" href="#linux">Linux</a>
 							[single CPU, SMP, and HPC systems]</u></li>
@@ -168,6 +189,18 @@ div.optionText {
 									href="#linux">Linux</a> XC 3.1 [See SHARCNET below]</li>
 
 								<br />
+								<li>Known and tested parallel, i.e <a
+									style="color: rgb(32, 74, 135);" href="#mpi">MPI</a> ,
+								compatibility on <a style="color: rgb(32, 74, 135);"
+									href="#linux">Linux</a> :</li>
+								<ul>
+									<li dir="ltr"><a style="color: rgb(32, 74, 135);"
+										href="#mpich">MPICH</a></li>
+									<li dir="ltr"><a style="color: rgb(32, 74, 135);"
+										href="#lam/mpi">LAM/MPI</a></li>
+									<li dir="ltr"><a style="color: rgb(32, 74, 135);"
+										href="#open-mpi">open-MPI</a></li>
+								</ul>
 							</ul>
 							<table>
 								<tr>
@@ -322,6 +355,9 @@ div.optionText {
 								<div class="cautionText">If you need to compile a missing
 								package, be sure to always compile it with the same
 								compiler/linker combination as you intend to use with SpreadModel.
+								Also, be sure to enable any features such as <a
+									style="color: rgb(32, 74, 135);" href="#mpi">MPI</a> for those
+								same packages, which you also intend to enable for SpreadModel.
 								This is especially important on parallel machines and
 								other such "super computer" systems! Note: For systems running
 								64bit OS versions: Also be sure to install missing libraries
@@ -355,7 +391,7 @@ div.optionText {
 								href="http://savannah.nongnu.org/download/scew/">http://savannah.nongnu.org/download/scew/</a></li>
 							<br />
 							<li>R-Tree library <a style="color: rgb(52, 101, 164);"
-								href="http://www.SpreadModel.org/opensource/rtree/">http://www.SpreadModel.org/opensource/rtree/</a></li>
+								href="http://www.naadsm.org/opensource/rtree/">http://www.naadsm.org/opensource/rtree/</a></li>
 							<br />
 							<li>GPC (General Polygon Clipper) 2.32 <a
 								style="color: rgb(52, 101, 164);"
@@ -383,6 +419,15 @@ div.optionText {
 
 						<b>Optional software</b><br />
 						<ul>
+							<li><a style="color: rgb(32, 74, 135);" href="#mpi">MPI</a>
+							: In order to use <a style="color: rgb(32, 74, 135);" href="#mpi">MPI</a>
+							you must have some version/implementation of <a
+								style="color: rgb(32, 74, 135);" href="#mpi">MPI</a> also
+							installed on your machine, such as <a
+								style="color: rgb(32, 74, 135);" href="#mpich">mpich</a> , <a
+								style="color: rgb(32, 74, 135);" href="#lam/mpi">lam/mpi</a> ,
+							or <a style="color: rgb(32, 74, 135);" href="#open-mpi">open-MPI</a></li>
+							<br />
 							<li><a style="color: rgb(32, 74, 135);" href="#dia">Dia</a>
 							:&nbsp; Version 0.94 is needed to compile some portions of the
 							documentation.</li>
@@ -483,6 +528,41 @@ div.optionText {
 										style="color: rgb(52, 101, 164);" href="/usr/local">/usr/local</a>
 									path. In these cases it is advisable to specify a path, which
 									the user has write access to, such as their "home" path.</div>
+									</td>
+								</tr>
+							</table>
+							</li>
+							<br />
+							<li><a style="color: rgb(32, 74, 135);" href="#mpi">MPI</a>:<br />
+							<table>
+								<tr>
+									<td valign="top" align="left" width="130pt">
+									<div class="configOption">--with-mpi=PATH&nbsp;</div>
+									</td>
+									<td>
+									<div class="optionText">Specifies the location of the
+									system's MPI library and header file. The library is assumed to
+									be named PATH/lib/libmpi.xxx and the header file is assumed to
+									be named PATH/include/mpi.h. You can use the
+									`--with-mpi-cflags' and `--with-mpi-libs' options instead for
+									finer control, e.g., --with-mpi-cflags=-I/usr/lib/mpi/include
+									--with-mpi-libs="-L/usr/lib/mpi/lib -lmpi" The default is to
+									compile without MPI support.
+									<table>
+										<tr>
+											<td valign="top" align="left">
+											<div class="cautionNote">Note:&nbsp;</div>
+											</td>
+											<td>
+											<div class="cautionText">If your system contains MPI
+											support, but you do not wish to use it, also be sure to not
+											compile the SPRNG libraries with MPI support, and if you do
+											intend to use MPI, also be sure that SPRNG has been compiled
+											with MPI support.</div>
+											</td>
+										</tr>
+									</table>
+									</div>
 									</td>
 								</tr>
 							</table>
@@ -695,7 +775,7 @@ div.optionText {
 								and the Dev-C++ project file has been updated to reflect your
 								system, run the compilation in Dev-C++. There will be a few
 								warnings, but there should not be any errors. When the
-								compilation is complete, you will have a SpreadModel.dll file located in
+								compilation is complete, you will have a spreadmodel.dll file located in
 								the DLL directory. Copy and paste this file into your SpreadModel GUI
 								program file directory and run the GUI as you normally would. If
 								the GUI produces an error about the version of the DLL, you have
@@ -788,9 +868,13 @@ div.optionText {
 						testing framework is available on your system, you may run the
 						regression test suite.<br />
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;After compiling, change directory to
-						the `test' directory and type `make check' to test that
+						the `modules' directory and type `make check' to test that
 						SpreadModel is working. It will run the tests and output a report
-						file named "tests.sum".<br />
+						file named "module.sum". (Note that "make check" will run a copy of
+						SpreadModel built without <a style="color: rgb(32, 74, 135);"
+							href="#mpi">MPI</a> , so it will run just on the node you're
+						logged into -- you don't need to worry about how to submit it to
+						your cluster's job-control system.)<br />
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Up to 10 of the tests may fail with
 						an error message like "outcome 1 should occur with frequency 0.5,
 						not 0.6". These are not necessarily cause for alarm! They're from
@@ -804,7 +888,7 @@ div.optionText {
 						that takes a long time, and if you don't know it's happening you
 						may look at the testing and think it has locked up. If you want to
 						run the stochastic tests with enough iterations to get proper
-						results, open the file test/config/unix.exp in a text
+						results, open the file modules/test/config/unix.exp in a text
 						editor and find the function "stochastic_progress_test" (search
 						for the line that begins with "proc stochastic_progress_test").
 						Edit the part that says "{iterations 100}", replacing 100 with a
@@ -847,12 +931,12 @@ div.optionText {
 						all installations of SpreadModel except the MS-Windows
 						DLL, which has no main() entry point, as it is not a standalone
 						program.<br />
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Running "SpreadModel --help" from the
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Running "spreadmodel --help" from the
 						command line will give you a basic list of these command line
 						options. They are as follows:<br />
 						<br />
 						<div class="configOption">Usage: <br />
-						%SpreadModel [OPTIONS] &lt;scenario-file.xml&gt; <br />
+						%spreadmodel [OPTIONS] &lt;scenario.xml&gt; <br />
 						<br />
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Where [OPTIONS] are:<br />
 						</div>
@@ -949,7 +1033,7 @@ div.optionText {
 							</tr>
 							<tr>
 								<td valign="top" align="left" width="40%">
-								<div class="optionText">&lt;scenario-file.xml&gt</div>
+								<div class="optionText">&lt;scenario.xml&gt;</div>
 								</td>
 								<td valign="top" align="left" width="60%">
 								<div class="optionText">This mandatory parameter to
@@ -1034,7 +1118,7 @@ div.optionText {
 						<br />
 
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;These commands are used at the site
-						of the first spreadmodel installation, in Guelph, Ontario, on
+						of the first SpreadModel installation, in Guelph, Ontario, on
 						SHARCNet machines. The intention is to provide outputs in a format
 						that is familiar to users of the Windows version of SpreadModel. You
 						can of course customize the commands to produce different outputs.
@@ -1094,44 +1178,30 @@ div.optionText {
 						<br />
 						<p />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;When the job completes, the
 						working directory contains 1 output file per CPU, named: <br/>
-						SpreadModel_1000_0.log, SpreadModel_1000_1.log, etc. <br/>
+						spreadmodel_1000_0.log, spreadmodel_1000_1.log, etc. <br/>
 												
 						<p/>Issue the commands:<br/>
-            <div class="cautionText">cat SpreadModel_1000_*.log &gt; 1000.log rm SpreadModel_1000_*.log<br/>
+            <div class="cautionText">cat spreadmodel_1000_*.log &gt;1000.log<br/>rm spreadmodel_1000_*.log<br/>
 						in order to get all	the output in one file. That way the outputs from each node aren't
 						interleaved.</div><br/>
 						<p/>Next, to make some spreadsheets:<br/>
 						<div class="cautionText">
-						bin/full_table_filter &lt; 1000.log &gt; 1000_full_table.txt
-						bin/table_filter &lt; 1000.log &gt; 1000_summary.txt
-						bin/exposures_table_filter population.xml &lt; 1000.log &gt;
-						1000_exposures.txt bin/apparent_events_table_filter population.xml
-						&lt; 1000.log &gt; 1000_apparent_events.txt bin/state_table_filter
-						&lt; 1000.log &gt; 1000_states.txt </div><br/>
+						bin/full_table_filter &lt; 1000.log &gt; 1000_full_table.csv<br/>
+						bin/table_filter &lt; 1000.log &gt; 1000_summary.csv<br/>
+						bin/exposures_table_filter population.xml &lt; 1000.log &gt; 1000_exposures.csv<br/>
+						bin/apparent_events_table_filter population.xml &lt; 1000.log &gt; 1000_apparent_events.csv<br/>
+						bin/state_table_filter &lt; 1000.log &gt; 1000_states.csv</div><br/>
 						<p/>These files are all in comma-separated value format.<br/>
 						<p/>Next, graphs (these require gnuplot and
 						python on your system): <br/>
-						<div class="cautionText">bin/graph.py --epsfile 1000_states.eps
-						--right-y "tsdU"
-						&lt; 1000_full_table.txt<br/>
-						bin/graph.py --epsfile
-						1000_states_disease.eps --exclude
-						"Susc,Imm,Dest"
-						"tsdU" &lt; 1000_full_table.txt<br/>
-						bin/graph.py
-						--epsfile 1000_epidemic_daily.eps "infnU...$" &lt;
-						1000_full_table.txt<br/>
-						bin/graph.py --epsfile 1000_epidemic_cumul.eps
-						"infcU...$"
-						&lt; 1000_full_table.txt <br/>
-						bin/graph.py --epsfile
-						1000_apparent_epidemic_daily.eps "detnUClin$" &lt;
-						1000_full_table.txt <br/>
-						bin/graph.py --epsfile
-						1000_apparent_epidemic_cumul.eps
-						"detcUClin$" &lt; 1000_full_table.txt</div><br/> 
+						<div class="cautionText">bin/graph.py --epsfile 1000_states.eps --right-y "tsdU" &lt; 1000_full_table.csv<br/>
+						bin/graph.py --epsfile 1000_states_disease.eps --exclude "Susc,Imm,Dest" "tsdU" &lt; 1000_full_table.csv<br/>
+						bin/graph.py --epsfile 1000_epidemic_daily.eps "infnU...$" &lt; 1000_full_table.csv<br/>
+						bin/graph.py --epsfile 1000_epidemic_cumul.eps "infcU...$" &lt; 1000_full_table.csv<br/>
+						bin/graph.py --epsfile 1000_apparent_epidemic_daily.eps "detnUClin$" &lt; 1000_full_table.csv<br/>
+						bin/graph.py --epsfile 1000_apparent_epidemic_cumul.eps "detcUClin$" &lt; 1000_full_table.csv</div><br/> 
 						<p/>The graphs come out in eps format, but if you have the "convert"
-						executable on your system from the open source imagemagick
+						executable on your system from the open source ImageMagick
 						package, you can quickly turn those into something more easily
 						viewable. Running convert with the option "-density 150x150" makes
 						easy-to-read png files.<br/>
@@ -1141,10 +1211,10 @@ div.optionText {
 						variables in those grid squares:<br/>
 						<div class="cautionText">bin/xml2shp population.xml 1000</div>
 						<div class="optionText">(that outputs a template arcview file, 1000.shp/shx/dbf)</div><br/>
-						<div class="cautionText">bin/weekly_gis_filter 1000.shp &lt; 1000_states.txt</div><div class="optionText">(that outputs
+						<div class="cautionText">bin/weekly_gis_filter 1000.shp &lt; 1000_states.csv</div><div class="optionText">(that outputs
 						a series of files named 1000_dayNNNN.shp/shx/dbf)<br/><br/>
 						<div class="cautionText">bin/summary_gis_filter population.xml 1000_summary.shp &lt;
-						1000_states.txt</div><div class="optionText">(that outputs an arcview file,
+						1000_states.csv</div><div class="optionText">(that outputs an arcview file,
 						1000_summary.shp/shx/dbf) <br/>
 						<p/>Create an image file of the final day
 						(say for example the final day was day 365): <br/><div class="cautionText">bin/shp2png
