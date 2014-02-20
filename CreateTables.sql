@@ -137,11 +137,7 @@ wind_direction_end		int
 
 create table	ingeneral (
 ingeneralid			text,  ----pk
-language varchar(12) not null default 'English'
-    check (language in ('English', 'Spanish')),
--- language			text,
-Frequency varchar(200)
-  CONSTRAINT chk_Frequency CHECK (Frequency IN ('Daily', 'Weekly', 'Monthly', 'Yearly')),
+language			text,
 scenario_description			text,
 iterations			int,
 days				int,
