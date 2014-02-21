@@ -86,6 +86,7 @@ typedef enum
 }
 UNT_state_t;
 extern const char *UNT_state_name[];
+extern const char UNT_state_letter[];
 
 
 typedef enum

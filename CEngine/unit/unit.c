@@ -119,6 +119,16 @@ const char *UNT_state_name[] = {
   "Susc", "Lat", "Subc", "Clin", "NImm", "VImm", "Dest", NULL
 };
 
+/**
+ * Single-letter codes for the possible states (with respect to a disease) for
+ * a unit, terminated with a NULL sentinel.
+ *
+ * @sa UNT_state_t
+ */
+const char UNT_state_letter[] = {
+  'S', 'L', 'B', 'C', 'N', 'V', 'D', '\0'
+};
+
 
 
 /**

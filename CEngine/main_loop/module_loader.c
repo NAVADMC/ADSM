@@ -60,6 +60,7 @@
 #include "resources_and_implementation_of_controls_model.h"
 #include "ring_destruction_model.h"
 #include "ring_vaccination_model.h"
+#include "state_table_writer.h"
 #include "test_model.h"
 #include "test_monitor.h"
 #include "trace_back_destruction_model.h"
@@ -123,6 +124,9 @@ struct model_load_info_t model_list[] = {
     (void*)&resources_and_implementation_of_controls_model_new, NULL},
   {"ring-destruction-model", (void*)&ring_destruction_model_new, NULL},
   {"ring-vaccination-model", (void*)&ring_vaccination_model_new, ring_vaccination_model_is_singleton},
+  #ifndef WIN_DLL
+    {"state-table-writer", (void*)&state_table_writer_new, state_table_writer_is_singleton},
+  #endif
   {"test-model", (void*)&test_model_new, NULL},
   {"test-monitor", (void*)&test_monitor_new, NULL},
   {"trace-back-destruction-model", (void*)&trace_back_destruction_model_new, NULL},
