@@ -40,7 +40,7 @@
 #define handle_declaration_of_outputs_event full_table_writer_handle_declaration_of_outputs_event
 #define handle_before_each_simulation_event full_table_writer_handle_before_each_simulation_event
 #define handle_new_day_event full_table_writer_handle_new_day_event
-#define handle_end_of_day_event full_table_writer_handle_end_of_day_event
+#define handle_end_of_day2_event full_table_writer_handle_end_of_day2_event
 #define events_created full_table_writer_events_created
 
 #include "module.h"
@@ -78,7 +78,7 @@ double round (double x);
 
 #define NEVENTS_LISTENED_FOR 5
 EVT_event_type_t events_listened_for[] = { EVT_BeforeAnySimulations,
-  EVT_DeclarationOfOutputs, EVT_BeforeEachSimulation, EVT_NewDay, EVT_EndOfDay };
+  EVT_DeclarationOfOutputs, EVT_BeforeEachSimulation, EVT_NewDay, EVT_EndOfDay2 };
 
 
 
@@ -308,8 +308,8 @@ handle_new_day_event (struct spreadmodel_model_t_ * self, EVT_new_day_event_t * 
  * @param event an end of day event.
  */
 void
-handle_end_of_day_event (struct spreadmodel_model_t_ * self,
-                         EVT_end_of_day_event_t * event)
+handle_end_of_day2_event (struct spreadmodel_model_t_ * self,
+                          EVT_end_of_day2_event_t * event)
 {
   local_data_t *local_data;
   unsigned int i,j;
@@ -319,7 +319,7 @@ handle_end_of_day_event (struct spreadmodel_model_t_ * self,
   char *value;
 
 #if DEBUG
-  g_debug ("----- ENTER handle_end_of_day_event (%s)", MODEL_NAME);
+  g_debug ("----- ENTER handle_end_of_day2_event (%s)", MODEL_NAME);
 #endif
 
   local_data = (local_data_t *) (self->model_data);
@@ -367,7 +367,7 @@ handle_end_of_day_event (struct spreadmodel_model_t_ * self,
     }
 
 #if DEBUG
-  g_debug ("----- EXIT handle_end_of_day_event (%s)", MODEL_NAME);
+  g_debug ("----- EXIT handle_end_of_day2_event (%s)", MODEL_NAME);
 #endif
   return;
 }
@@ -406,8 +406,8 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day));
       break;
-    case EVT_EndOfDay:
-      handle_end_of_day_event (self, &(event->u.end_of_day));
+    case EVT_EndOfDay2:
+      handle_end_of_day2_event (self, &(event->u.end_of_day2));
       break;
     default:
       g_error

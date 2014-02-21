@@ -71,6 +71,7 @@ typedef enum
   EVT_CommitmentToVaccinate, EVT_VaccinationCanceled,
   EVT_Vaccination, EVT_RequestForDestruction, EVT_CommitmentToDestroy,
   EVT_Destruction, EVT_RequestForZoneFocus, EVT_EndOfDay,
+  EVT_EndOfDay2,
   EVT_LastDay,
   EVT_Midnight,
   EVT_NEVENT_TYPES
@@ -446,6 +447,24 @@ EVT_end_of_day_event_t;
 
 
 /**
+ * An "end of day 2" event.  Only the full table writer module should ever
+ * respond to this event.  This is a kludge added to make sure the infection
+ * events announced from the conflict resolver module are counted before the
+ * full table writer writes the day's output variable values.
+ */
+typedef struct
+{
+  int day; /**< day of the simulation */
+  gboolean done; /**< indicates whether the simulation is done or not.  The
+    decision as to whether the simulation is "done" may depend on the maximum
+    number of days being reached, the first detection being reached, the
+    absence of disease, or other exit conditions. */
+}
+EVT_end_of_day2_event_t;
+
+
+
+/**
  * A "last day" event.  This event is specifically for alerting modules to
  * compute the values of output variables that were only requested for the last
  * day of output.
@@ -501,6 +520,7 @@ typedef struct
     EVT_destruction_event_t destruction;
     EVT_request_for_zone_focus_event_t request_for_zone_focus;
     EVT_end_of_day_event_t end_of_day;
+    EVT_end_of_day2_event_t end_of_day2;
     EVT_last_day_event_t last_day;
     EVT_midnight_event_t midnight;
   }
@@ -595,6 +615,7 @@ EVT_event_t *EVT_new_destruction_event (UNT_unit_t *, int day, char *reason,
 EVT_event_t *EVT_new_request_for_zone_focus_event (UNT_unit_t *,
                                                    int day, char *reason);
 EVT_event_t *EVT_new_end_of_day_event (int day, gboolean done);
+EVT_event_t *EVT_new_end_of_day2_event (int day, gboolean done);
 EVT_event_t *EVT_new_last_day_event (int day);
 EVT_event_t *EVT_new_midnight_event (int day);
 

@@ -1467,6 +1467,7 @@ run_sim_main (const char *population_file,
               spreadmodel_create_event (manager, EVT_new_last_day_event (day), units, zones, rng);
             }
           g_ptr_array_foreach (reporting_vars, build_report, &build_report_args);
+          spreadmodel_create_event (manager, EVT_new_end_of_day2_event (day, early_exit), units, zones, rng);
 
 /* The DLL shouldn't output anything directly to the console.  Strange things happen... */
 #ifndef SILENT_MODE
