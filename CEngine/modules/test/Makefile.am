@@ -39,7 +39,6 @@ noinst_PROGRAMS = minispreadmodel shell shell2 fcmp
 
 minispreadmodel_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/main_loop.c \
   $(top_srcdir)/main_loop/module_loader.c $(top_srcdir)/main_loop/module_loader.h \
-  $(top_srcdir)/main_loop/module.h \
   $(top_srcdir)/main_loop/event_manager.c $(top_srcdir)/main_loop/event_manager.h \
   $(top_srcdir)/main_loop/parameter.c $(top_srcdir)/main_loop/parameter.h \
   $(top_srcdir)/main_loop/spreadmodel.c $(top_srcdir)/main_loop/spreadmodel.h \
@@ -56,6 +55,7 @@ minispreadmodel_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/
   $(top_srcdir)/spatial_search/ch2d.c $(top_srcdir)/spatial_search/ch2d.h \
   $(top_srcdir)/zone/zone.c $(top_srcdir)/zone/zone.h \
   $(top_srcdir)/wml/wml.c $(top_srcdir)/wml/wml.h \
+  $(top_srcdir)/modules/module.h $(top_srcdir)/modules/module.c \
   $(top_srcdir)/modules/module_util.c $(top_srcdir)/modules/module_util.h \
   $(top_srcdir)/modules/conflict_resolver.c $(top_srcdir)/modules/conflict_resolver.h \
   $(top_srcdir)/modules/disease_model.c $(top_srcdir)/modules/disease_model.h \

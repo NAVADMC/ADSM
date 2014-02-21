@@ -18,10 +18,8 @@
 #ifndef MODULE_UTIL_H
 #define MODULE_UTIL_H
 
-#include "unit.h"
-#include "zone.h"
-#include <glib.h>
-#include <scew/scew.h>
+
+#include "module.h"
 
 
 

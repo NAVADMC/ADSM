@@ -91,12 +91,9 @@
 #define run contact_spread_model_run
 #define reset contact_spread_model_reset
 #define events_listened_for contact_spread_model_events_listened_for
-#define is_listening_for contact_spread_model_is_listening_for
 #define has_pending_actions contact_spread_model_has_pending_actions
 #define has_pending_infections contact_spread_model_has_pending_infections
 #define to_string contact_spread_model_to_string
-#define local_printf contact_spread_model_printf
-#define local_fprintf contact_spread_model_fprintf
 #define local_free contact_spread_model_free
 #define handle_new_day_event contact_spread_model_handle_new_day_event
 #define handle_public_announcement_event contact_spread_model_handle_public_announcement_event
@@ -1255,26 +1252,6 @@ reset (struct spreadmodel_model_t_ *self)
 
 
 /**
- * Reports whether this model is listening for a given event type.
- *
- * @param self the model.
- * @param event_type an event type.
- * @return TRUE if the model is listening for the event type.
- */
-gboolean
-is_listening_for (struct spreadmodel_model_t_ *self, EVT_event_type_t event_type)
-{
-  int i;
-
-  for (i = 0; i < self->nevents_listened_for; i++)
-    if (self->events_listened_for[i] == event_type)
-      return TRUE;
-  return FALSE;
-}
-
-
-
-/**
  * Reports whether this model has any pending actions to carry out.
  *
  * @param self the model.
@@ -1405,56 +1382,6 @@ to_string (struct spreadmodel_model_t_ *self)
   chararray = s->str;
   g_string_free (s, FALSE);
   return chararray;
-}
-
-
-
-/**
- * Prints this model to a stream.
- *
- * @param stream a stream to write to.
- * @param self the model.
- * @return the number of characters printed (not including the trailing '\\0').
- */
-int
-local_fprintf (FILE * stream, struct spreadmodel_model_t_ *self)
-{
-  char *s;
-  int nchars_written;
-
-#if DEBUG
-  g_debug ("----- ENTER fprintf (%s)", MODEL_NAME);
-#endif
-  s = to_string (self);
-  nchars_written = fprintf (stream, "%s", s);
-  free (s);
-#if DEBUG
-  g_debug ("----- EXIT fprintf (%s)", MODEL_NAME);
-#endif
-  return nchars_written;
-}
-
-
-
-/**
- * Prints this model.
- *
- * @param self the model.
- * @return the number of characters printed (not including the trailing '\\0').
- */
-int
-local_printf (struct spreadmodel_model_t_ *self)
-{
-  int nchars_written;
-
-#if DEBUG
-  g_debug ("----- ENTER printf (%s)", MODEL_NAME);
-#endif
-  nchars_written = local_fprintf (stdout, self);
-#if DEBUG
-  g_debug ("----- EXIT printf (%s)", MODEL_NAME);
-#endif
-  return nchars_written;
 }
 
 
@@ -1871,12 +1798,12 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->set_params = set_params;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = is_listening_for;
+  self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = has_pending_actions;
   self->has_pending_infections = has_pending_infections;
   self->to_string = to_string;
-  self->printf = local_printf;
-  self->fprintf = local_fprintf;
+  self->printf = spreadmodel_model_printf;
+  self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
   /* local_data->param_block holds two 2D arrays of parameter blocks, where

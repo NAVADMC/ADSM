@@ -23,7 +23,7 @@ if HAVE_MPI
 endif
 
 bin_PROGRAMS = spreadmodel
-spreadmodel_SOURCES = cli.c main_loop.c module_loader.c module_loader.h module.h \
+spreadmodel_SOURCES = cli.c main_loop.c module_loader.c module_loader.h \
   event_manager.c event_manager.h \
   parameter.c parameter.h \
   spreadmodel.c spreadmodel.h \
@@ -40,6 +40,7 @@ spreadmodel_SOURCES = cli.c main_loop.c module_loader.c module_loader.h module.h
   $(top_srcdir)/spatial_search/ch2d.c $(top_srcdir)/spatial_search/ch2d.h \
   $(top_srcdir)/zone/zone.c $(top_srcdir)/zone/zone.h \
   $(top_srcdir)/wml/wml.c $(top_srcdir)/wml/wml.h \
+  $(top_srcdir)/modules/module.h $(top_srcdir)/modules/module.c \
   $(top_srcdir)/modules/module_util.c $(top_srcdir)/modules/module_util.h \
   $(top_srcdir)/modules/conflict_resolver.c $(top_srcdir)/modules/conflict_resolver.h \
   $(top_srcdir)/modules/disease_model.c $(top_srcdir)/modules/disease_model.h \

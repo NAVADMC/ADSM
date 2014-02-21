@@ -25,12 +25,7 @@
 #define run infection_monitor_run
 #define reset infection_monitor_reset
 #define events_listened_for infection_monitor_events_listened_for
-#define is_listening_for infection_monitor_is_listening_for
-#define has_pending_actions infection_monitor_has_pending_actions
-#define has_pending_infections infection_monitor_has_pending_infections
 #define to_string infection_monitor_to_string
-#define local_printf infection_monitor_printf
-#define local_fprintf infection_monitor_fprintf
 #define local_free infection_monitor_free
 #define handle_before_any_simulations_event infection_monitor_handle_before_any_simulations_event
 #define handle_new_day_event infection_monitor_handle_new_day_event
@@ -538,54 +533,6 @@ reset (struct spreadmodel_model_t_ *self)
 
 
 /**
- * Reports whether this model is listening for a given event type.
- *
- * @param self the model.
- * @param event_type an event type.
- * @return TRUE if the model is listening for the event type.
- */
-gboolean
-is_listening_for (struct spreadmodel_model_t_ *self, EVT_event_type_t event_type)
-{
-  int i;
-
-  for (i = 0; i < self->nevents_listened_for; i++)
-    if (self->events_listened_for[i] == event_type)
-      return TRUE;
-  return FALSE;
-}
-
-
-
-/**
- * Reports whether this model has any pending actions to carry out.
- *
- * @param self the model.
- * @return TRUE if the model has pending actions.
- */
-gboolean
-has_pending_actions (struct spreadmodel_model_t_ * self)
-{
-  return FALSE;
-}
-
-
-
-/**
- * Reports whether this model has any pending infections to cause.
- *
- * @param self the model.
- * @return TRUE if the model has pending infections.
- */
-gboolean
-has_pending_infections (struct spreadmodel_model_t_ * self)
-{
-  return FALSE;
-}
-
-
-
-/**
  * Returns a text representation of this model.
  *
  * @param self the model.
@@ -606,41 +553,6 @@ to_string (struct spreadmodel_model_t_ *self)
   chararray = s->str;
   g_string_free (s, FALSE);
   return chararray;
-}
-
-
-
-/**
- * Prints this model to a stream.
- *
- * @param stream a stream to write to.
- * @param self the model.
- * @return the number of characters printed (not including the trailing '\\0').
- */
-int
-local_fprintf (FILE * stream, struct spreadmodel_model_t_ *self)
-{
-  char *s;
-  int nchars_written;
-
-  s = to_string (self);
-  nchars_written = fprintf (stream, "%s", s);
-  free (s);
-  return nchars_written;
-}
-
-
-
-/**
- * Prints this model.
- *
- * @param self the model.
- * @return the number of characters printed (not including the trailing '\\0').
- */
-int
-local_printf (struct spreadmodel_model_t_ *self)
-{
-  return local_fprintf (stdout, self);
 }
 
 
@@ -727,12 +639,12 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = is_listening_for;
-  self->has_pending_actions = has_pending_actions;
-  self->has_pending_infections = has_pending_infections;
+  self->is_listening_for = spreadmodel_model_is_listening_for;
+  self->has_pending_actions = spreadmodel_model_answer_no;
+  self->has_pending_infections = spreadmodel_model_answer_no;
   self->to_string = to_string;
-  self->printf = local_printf;
-  self->fprintf = local_fprintf;
+  self->printf = spreadmodel_model_printf;
+  self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
   /* Make sure the right XML subtree was sent. */

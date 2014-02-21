@@ -77,9 +77,6 @@
  *   School of Computer Science, University of Guelph<br>
  *   Guelph, ON N1G 2W1<br>
  *   CANADA
- * @date March 2003
- *
- * Copyright &copy; University of Guelph, 2003-2009
  * 
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -180,7 +177,7 @@ typedef int (*spreadmodel_model_fprintf_t) (FILE *, struct spreadmodel_model_t_ 
 
 
 
-/** A sub-model. */
+/** A simulator module. */
 typedef struct spreadmodel_model_t_
 {
   char *name; /**< A short name for the model. */
@@ -202,5 +199,12 @@ typedef struct spreadmodel_model_t_
   spreadmodel_model_free_t free; /**< A function that frees the model. */
 }
 spreadmodel_model_t;
+
+/* Some methods that tend to be the same for most of the modules. */
+gboolean spreadmodel_model_is_listening_for (struct spreadmodel_model_t_ *, EVT_event_type_t);
+char *spreadmodel_model_to_string_default (struct spreadmodel_model_t_ *);
+int spreadmodel_model_fprintf (FILE *, struct spreadmodel_model_t_ *);
+int spreadmodel_model_printf (struct spreadmodel_model_t_ *);
+gboolean spreadmodel_model_answer_no (struct spreadmodel_model_t_ *);
 
 #endif /* !MODULE_H */
