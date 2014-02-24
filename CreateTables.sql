@@ -40,20 +40,17 @@ user_defined_4		text
 
 
 create table dynablob	(
-dynblob_id		text 	primary key 	not null,
 zone_perimeters		text
 );
 
 -- the code tables are lookups, not provided to user
 create table readallcodes (
---_code_id		int	primary key 	not null,
 _code			text			not null,
 _code_type		text			not null,
 _code_description	text			not null
 );
 
 create table readallcodetypes	(
---_code_type_id		int	primary key 	not null,
 _code_type		text			not null,
 _code_type_description	text			not null
 );
@@ -185,7 +182,6 @@ wind_direction_end		int
 
 
 create table inzone (
-zoneid			int	primary key 	not null,
 zone_description	text	not null,
 zone_radius		real	not null
 );
@@ -290,7 +286,7 @@ test_direct_back			int,
 test_indirect_back			int,
 test_specificity			real,
 test_sensitivity			real,
-testdelaypdfid				int,
+_testdelaypdfid				int,
 vaccinate_restrospective_days		int
 );
 

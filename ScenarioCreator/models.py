@@ -261,10 +261,12 @@ class Inzoneproductiontypepair(models.Model):
     zone_detection_multiplier = models.FloatField(blank=True, null=True)
     cost_surv_per_animal_day = models.FloatField(blank=True, null=True)
 
+
 class Readallcodes(models.Model):
     _code = models.TextField() # Field renamed because it started with '_'.
     _code_type = models.TextField() # Field renamed because it started with '_'.
     _code_description = models.TextField() # Field renamed because it started with '_'.
+
 
 class Readallcodetypes(models.Model):
     _code_type = models.TextField() # Field renamed because it started with '_'.
