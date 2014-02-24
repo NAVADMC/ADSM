@@ -353,13 +353,10 @@
       <detection-multiplier>2</detection-multiplier>
     </trace-exam-model>
 
-    <conflict-resolver />
+    <conflict-resolver></conflict-resolver>
+
+    <state-table-writer />
 
   </models>
-
-  <output>
-    <variable-name>all-units-states</variable-name>
-    <frequency>daily</frequency>
-  </output>
 
 </naadsm:disease-simulation>

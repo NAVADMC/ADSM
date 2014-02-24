@@ -56,12 +56,19 @@
         <units><xdf:unit>day</xdf:unit></units>
         <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
       </destruction-capacity>
+      <destruction-priority-order>
+        reason,production type,time waiting
+      </destruction-priority-order>
       <!-- Vaccination isn't used in this scenario. -->
+      <vaccination-program-delay>1</vaccination-program-delay>
       <vaccination-capacity>
         <value>0</value> <value>1000</value>
         <units><xdf:unit>day</xdf:unit></units>
         <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
       </vaccination-capacity>
+      <vaccination-priority-order>
+        reason,production type,time waiting
+      </vaccination-priority-order>
     </resources-and-implementation-of-controls-model>
 
     <!-- The herd will be destroyed when the infection is confirmed. -->
@@ -77,6 +84,8 @@
     </destruction-monitor>
 
     <conflict-resolver></conflict-resolver>
+
+    <full-table-writer />
 
   </models>
 

@@ -70,11 +70,8 @@
 
     <!-- Note no parameters for spread from beef cattle to beef cattle. -->
 
-  </models>
+    <state-table-writer />
 
-  <output>
-    <variable-name>all-units-states</variable-name>
-    <frequency>daily</frequency>
-  </output>
+  </models>
 
 </naadsm:disease-simulation>

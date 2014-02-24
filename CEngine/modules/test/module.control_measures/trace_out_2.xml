@@ -166,11 +166,8 @@
 
     <conflict-resolver></conflict-resolver>
 
-  </models>
+    <state-table-writer />
 
-  <output>
-    <variable-name>all-units-states</variable-name>
-    <frequency>daily</frequency>
-  </output>
+  </models>
 
 </naadsm:disease-simulation>

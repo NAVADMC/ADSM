@@ -121,13 +121,10 @@
       <subclinical-units-can-infect>true</subclinical-units-can-infect>
     </contact-spread-model>
 
-    <conflict-resolver />
+    <conflict-resolver></conflict-resolver>
+
+    <state-table-writer />
 
   </models>
-
-  <output>
-    <variable-name>all-units-states</variable-name>
-    <frequency>daily</frequency>
-  </output>
 
 </naadsm:disease-simulation>

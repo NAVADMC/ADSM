@@ -111,6 +111,8 @@
 
     <conflict-resolver></conflict-resolver>
 
+    <full-table-writer />
+
   </models>
 
 </naadsm:disease-simulation>

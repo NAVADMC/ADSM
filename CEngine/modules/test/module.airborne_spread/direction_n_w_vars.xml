@@ -67,10 +67,7 @@
 
     <conflict-resolver></conflict-resolver>
 
-    <full-table-writer>
-      <filename>direction_n_w_vars_full_table</filename>
-    </full-table-writer>
-    
+    <full-table-writer />
 
   </models>
 

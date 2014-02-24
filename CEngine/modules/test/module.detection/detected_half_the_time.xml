@@ -100,6 +100,8 @@
 
     <conflict-resolver></conflict-resolver>
 
+    <full-table-writer />
+
   </models>
 
   <output>
