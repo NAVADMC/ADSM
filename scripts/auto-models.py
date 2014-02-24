@@ -32,13 +32,13 @@ class Dynaherd(models.Model):
     days_in_initial_state = models.IntegerField()
     days_left_in_initial_state = models.IntegerField()
     initial_size = models.IntegerField()
-    _final_state_code = models.TextField(blank=True) # Field renamed because it started with '_'.
-    _final_control_state_code = models.TextField(blank=True) # Field renamed because it started with '_'.
-    _final_detection_state_code = models.TextField(blank=True) # Field renamed because it started with '_'.
-    _cum_infected = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
-    _cum_detected = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
-    _cum_destroyed = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
-    _cum_vaccinated = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
+    _final_state_code = models.TextField(blank=True)
+    _final_control_state_code = models.TextField(blank=True)
+    _final_detection_state_code = models.TextField(blank=True)
+    _cum_infected = models.IntegerField(blank=True, null=True)
+    _cum_detected = models.IntegerField(blank=True, null=True)
+    _cum_destroyed = models.IntegerField(blank=True, null=True)
+    _cum_vaccinated = models.IntegerField(blank=True, null=True)
     user_defined_1 = models.TextField(blank=True)
     user_defined_2 = models.TextField(blank=True)
     user_defined_3 = models.TextField(blank=True)
@@ -48,7 +48,7 @@ class Dynaherd(models.Model):
 class Inchart(models.Model):
     fieldname = models.TextField(blank=True)
     chart_name = models.TextField()
-    _ispdf = models.IntegerField() # Field renamed because it started with '_'.
+    _ispdf = models.IntegerField()
     chart_type = models.TextField(blank=True)
     mean = models.FloatField(blank=True, null=True)
     std_dev = models.FloatField(blank=True, null=True)
@@ -72,14 +72,14 @@ class Inchart(models.Model):
     s = models.IntegerField(blank=True, null=True)
     x_axis_units = models.TextField(blank=True)
     y_axis_units = models.TextField(blank=True)
-    _notes = models.TextField(blank=True) # Field renamed because it started with '_'.
+    _notes = models.TextField(blank=True)
 
 
 class Inchartdetail(models.Model):
-    _chartid = models.IntegerField() # Field renamed because it started with '_'.
-    _pointorder = models.IntegerField() # Field renamed because it started with '_'.
-    _x = models.FloatField() # Field renamed because it started with '_'.
-    _y = models.FloatField() # Field renamed because it started with '_'.
+    _chartid = models.IntegerField()
+    _pointorder = models.IntegerField()
+    _x = models.FloatField()
+    _y = models.FloatField()
 
 
 class Incontrolglobal(models.Model):
@@ -89,17 +89,17 @@ class Incontrolglobal(models.Model):
     include_tracing_testing = models.IntegerField()
     include_destruction = models.IntegerField()
     destruction_delay = models.IntegerField(blank=True, null=True)
-    _destrcapacityrelid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
+    _destrcapacityrelid = models.IntegerField(blank=True, null=True)
     destruction_priority_order = models.TextField(blank=True)
     destrucion_reason_order = models.TextField(blank=True)
     include_vaccination = models.IntegerField()
     vaccincation_detected_units_before_start = models.IntegerField(blank=True, null=True)
-    _vacccapacityrelid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
+    _vacccapacityrelid = models.IntegerField(blank=True, null=True)
     vaccination_priority_order = models.TextField(blank=True)
     include_zones = models.IntegerField()
     vaccination_retrospective_days = models.IntegerField(blank=True, null=True)
-    _vacccapacitystartrelid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
-    _vacccapacityrestartrelid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
+    _vacccapacitystartrelid = models.IntegerField(blank=True, null=True)
+    _vacccapacityrestartrelid = models.IntegerField(blank=True, null=True)
 
 
 class Incontrolplan(models.Model):
@@ -112,8 +112,8 @@ class Incontrolsproductiontype(models.Model):
     production_type_id = models.IntegerField(unique=True)
     use_disease_transition = models.IntegerField(blank=True, null=True)
     use_detection = models.IntegerField(blank=True, null=True)
-    _detprobobsvstimeclinicalrelid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
-    _detprobreportvsfirstdetectionrelid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
+    _detprobobsvstimeclinicalrelid = models.IntegerField(blank=True, null=True)
+    _detprobreportvsfirstdetectionrelid = models.IntegerField(blank=True, null=True)
     trace_direct_forward = models.IntegerField(blank=True, null=True)
     trace_direct_back = models.IntegerField(blank=True, null=True)
     trace_direct_success = models.FloatField(blank=True, null=True)
@@ -122,7 +122,7 @@ class Incontrolsproductiontype(models.Model):
     trace_indirect_back = models.IntegerField(blank=True, null=True)
     trace_indirect_success = models.FloatField(blank=True, null=True)
     trace_indirect_trace_period = models.IntegerField(blank=True, null=True)
-    _tracedelaypdfid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
+    _tracedelaypdfid = models.IntegerField(blank=True, null=True)
     use_destruction = models.IntegerField(blank=True, null=True)
     destruction_is_ring_trigger = models.IntegerField(blank=True, null=True)
     destruction_ring_radius = models.FloatField(blank=True, null=True)
@@ -136,7 +136,7 @@ class Incontrolsproductiontype(models.Model):
     vaccination_min_time_between = models.IntegerField(blank=True, null=True)
     vaccinate_detected = models.IntegerField(blank=True, null=True)
     days_to_immunity = models.IntegerField(blank=True, null=True)
-    _vaccimmuneperiodpdfid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
+    _vaccimmuneperiodpdfid = models.IntegerField(blank=True, null=True)
     vaccinate_ring = models.IntegerField(blank=True, null=True)
     vaccinate_ring_radius = models.FloatField(blank=True, null=True)
     vaccination_priority = models.IntegerField(blank=True, null=True)
@@ -176,17 +176,17 @@ class Indiseaseglobal(models.Model):
 
 
 class Indiseaseproductiontype(models.Model):
-    _production_type_id = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
+    _production_type_id = models.IntegerField(blank=True, null=True)
     use_disease_transition = models.IntegerField(blank=True, null=True)
-    _dislatentperiodpdfid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
-    _dissubclinicalperiodpdfid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
-    _disclinicalperiodpdfid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
-    _disimmuneperiodpdfid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
-    _disprevalencerelid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
+    _dislatentperiodpdfid = models.IntegerField(blank=True, null=True)
+    _dissubclinicalperiodpdfid = models.IntegerField(blank=True, null=True)
+    _disclinicalperiodpdfid = models.IntegerField(blank=True, null=True)
+    _disimmuneperiodpdfid = models.IntegerField(blank=True, null=True)
+    _disprevalencerelid = models.IntegerField(blank=True, null=True)
 
 
 class Indiseasespread(models.Model):
-    _productiontypepairid = models.IntegerField(unique=True) # Field renamed because it started with '_'.
+    _productiontypepairid = models.IntegerField(unique=True)
     spread_method_code = models.TextField(blank=True)
     latent_can_infect = models.IntegerField(blank=True, null=True)
     subclinical_can_infect = models.IntegerField(blank=True, null=True)
@@ -194,9 +194,9 @@ class Indiseasespread(models.Model):
     use_fixed_contact_rate = models.IntegerField(blank=True, null=True)
     fixed_contact_rate = models.FloatField(blank=True, null=True)
     infection_probability = models.FloatField(blank=True, null=True)
-    _distancepdfid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
-    _movementcontrolrelid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
-    _transportdelaypdfid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
+    _distancepdfid = models.IntegerField(blank=True, null=True)
+    _movementcontrolrelid = models.IntegerField(blank=True, null=True)
+    _transportdelaypdfid = models.IntegerField(blank=True, null=True)
     probability_airborne_spread_1km = models.FloatField(blank=True, null=True)
     max_distance_airborne_spread = models.FloatField(blank=True, null=True)
     wind_direction_start = models.IntegerField(blank=True, null=True)
@@ -235,14 +235,14 @@ class Inproductiontype(models.Model):
 
 
 class Inproductiontypepair(models.Model):
-    _sourceproductiontypeid = models.IntegerField() # Field renamed because it started with '_'.
-    _destproductiontypeid = models.IntegerField() # Field renamed because it started with '_'.
+    _sourceproductiontypeid = models.IntegerField()
+    _destproductiontypeid = models.IntegerField()
     use_direct_contact = models.IntegerField()
-    _directcontactspreadid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
+    _directcontactspreadid = models.IntegerField(blank=True, null=True)
     use_indirect_contact = models.IntegerField()
-    _indirectcontactspreadid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
+    _indirectcontactspreadid = models.IntegerField(blank=True, null=True)
     use_airborne_spread = models.IntegerField()
-    _airbornecontactspreadid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
+    _airbornecontactspreadid = models.IntegerField(blank=True, null=True)
 
 
 class Inzone(models.Model):
@@ -251,22 +251,24 @@ class Inzone(models.Model):
 
 
 class Inzoneproductiontypepair(models.Model):
-    _zoneid = models.IntegerField() # Field renamed because it started with '_'.
-    _production_type_id = models.IntegerField() # Field renamed because it started with '_'.
+    _zoneid = models.IntegerField()
+    _production_type_id = models.IntegerField()
     use_directmovement_control = models.IntegerField()
-    _zonedirectmovementrelid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
+    _zonedirectmovementrelid = models.IntegerField(blank=True, null=True)
     use_indirect_movement_control = models.IntegerField()
-    _zoneindirectmovementrelid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
+    _zoneindirectmovementrelid = models.IntegerField(blank=True, null=True)
     use_detection_multiplier = models.IntegerField()
     zone_detection_multiplier = models.FloatField(blank=True, null=True)
     cost_surv_per_animal_day = models.FloatField(blank=True, null=True)
 
+
 class Readallcodes(models.Model):
-    _code = models.TextField() # Field renamed because it started with '_'.
-    _code_type = models.TextField() # Field renamed because it started with '_'.
-    _code_description = models.TextField() # Field renamed because it started with '_'.
+    _code = models.TextField()
+    _code_type = models.TextField()
+    _code_description = models.TextField()
+
 
 class Readallcodetypes(models.Model):
-    _code_type = models.TextField() # Field renamed because it started with '_'.
-    _code_type_description = models.TextField() # Field renamed because it started with '_'.
+    _code_type = models.TextField()
+    _code_type_description = models.TextField()
 

@@ -1,4 +1,4 @@
-__author__ = 'Josiah'
+__author__ = 'Josiah Seaman'
 
 
 def lowercase_a_file(filename):
@@ -16,8 +16,20 @@ def lowercase_a_file(filename):
     #     print(text, end='')
 
 
+def hide_fields(filename):
+    edited_lines = []
+    with open(filename, 'r') as models_file:
+        for line in models_file:
+            if line.lstrip()[0] == '_':
+                index = line.find('(') + 1
+                edited_lines.append( line[:index] + 'editable=false, ' + line[index:] )
+            else:
+                edited_lines.append(line)
+
+    open(filename, 'w').write(edited_lines)
 
 
 
 if __name__ == '__init__':
-    lowercase_a_file('CreateDjangoInputTables.txt')
+    # lowercase_a_file('CreateDjangoInputTables.txt')
+    hide_fields('auto-models.py')
