@@ -45,6 +45,7 @@
  */
 const char *EVT_event_type_name[] = {
   "BeforeAnySimulations",
+  "OutputDirectory",
   "BeforeEachSimulation",
   "DeclarationOfVaccinationReasons",
   "DeclarationOfVaccineDelay",
@@ -91,6 +92,48 @@ char *
 EVT_before_any_simulations_event_to_string (void)
 {
   return g_strdup ("<Before any simulations event>");
+}
+
+
+
+/**
+ * Creates a new "output directory" event.
+ *
+ * @param output_dir a path (absolute or relative) to the output directory.
+ *   The path is copied and can be freed after this event is created.
+ * @return a pointer to a newly-created EVT_event_t structure.
+ */
+EVT_event_t *
+EVT_new_output_dir_event (char *output_dir)
+{
+  EVT_event_t *event;
+
+  event = g_new (EVT_event_t, 1);
+  event->type = EVT_OutputDirectory;
+  event->u.output_dir.output_dir = g_strdup(output_dir);
+  return event;
+}
+
+
+
+/**
+ * Returns a text representation of an "output directory" event.
+ *
+ * @param event an "output directory" event.
+ * @return a string.
+ */
+char *
+EVT_output_dir_event_to_string (EVT_output_dir_event_t * event)
+{
+  GString *s;
+  char *chararray;
+
+  s = g_string_new (NULL);
+  g_string_sprintf (s, "<Output directory event dir=\"%s\">", event->output_dir);
+  /* don't return the wrapper object */
+  chararray = s->str;
+  g_string_free (s, FALSE);
+  return chararray;
 }
 
 
@@ -1495,6 +1538,9 @@ EVT_free_event (EVT_event_t * event)
     case EVT_Midnight:
       /* No dynamically-allocated parts to free. */
       break;
+    case EVT_OutputDirectory:
+      g_free (event->u.output_dir.output_dir);
+      break;
     case EVT_DeclarationOfVaccinationReasons:
       /* Note that we do not free the C strings in the array of vaccination
        * reasons, because we assume they are static strings. */
@@ -1627,6 +1673,9 @@ EVT_event_to_string (EVT_event_t * event)
     {
     case EVT_BeforeAnySimulations:
       s = EVT_before_any_simulations_event_to_string ();
+      break;
+    case EVT_OutputDirectory:
+      s = EVT_output_dir_event_to_string (&(event->u.output_dir));
       break;
     case EVT_BeforeEachSimulation:
       s = EVT_before_each_simulation_event_to_string ();

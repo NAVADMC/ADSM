@@ -27,6 +27,7 @@
 #define events_listened_for exposures_table_writer_events_listened_for
 #define to_string exposures_table_writer_to_string
 #define local_free exposures_table_writer_free
+#define handle_output_dir_event exposures_table_writer_handle_output_dir_event
 #define handle_before_any_simulations_event exposures_table_writer_handle_before_any_simulations_event
 #define handle_before_each_simulation_event exposures_table_writer_handle_before_each_simulation_event
 #define handle_exposure_event exposures_table_writer_handle_exposure_event
@@ -54,8 +55,9 @@
 
 
 
-#define NEVENTS_LISTENED_FOR 4
+#define NEVENTS_LISTENED_FOR 5
 EVT_event_type_t events_listened_for[] = {
+  EVT_OutputDirectory,
   EVT_BeforeAnySimulations,
   EVT_BeforeEachSimulation,
   EVT_Exposure,
@@ -73,6 +75,43 @@ typedef struct
   int run_number;
 }
 local_data_t;
+
+
+
+/**
+ * Responds to an "output directory" event by prepending the directory to the
+ * its output filename.
+ *
+ * @param self this module.
+ * @param event an output directory event.
+ */
+void
+handle_output_dir_event (struct spreadmodel_model_t_ * self,
+                         EVT_output_dir_event_t *event)
+{
+  local_data_t *local_data;
+  char *tmp;
+
+#if DEBUG
+  g_debug ("----- ENTER handle_output_dir_event (%s)", MODEL_NAME);
+#endif
+
+  local_data = (local_data_t *) (self->model_data);
+  if (local_data->stream_is_stdout == FALSE)
+    {
+      tmp = local_data->filename;
+      local_data->filename = g_build_filename (event->output_dir, tmp, NULL);
+      g_free (tmp);
+      #if DEBUG
+        g_debug ("filename is now %s", local_data->filename);
+      #endif
+    }
+
+#if DEBUG
+  g_debug ("----- EXIT handle_output_dir_event (%s)", MODEL_NAME);
+#endif
+  return;
+}
 
 
 
@@ -264,6 +303,9 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
 
   switch (event->type)
     {
+    case EVT_OutputDirectory:
+      handle_output_dir_event (self, &(event->u.output_dir));
+      break;
     case EVT_BeforeAnySimulations:
       handle_before_any_simulations_event (self);
       break;

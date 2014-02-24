@@ -239,13 +239,13 @@ UNT_zone_t;
 DLL_API void
 run_sim_main (const char *population_file,
               const char *parameter_file,
-              const char *output_file,
+              const char *output_dir,
               double fixed_rng_value, int verbosity, int seed, char *production_type_file);
 #else
 DLL_API void
 run_sim_main (const char *population_file,
               const char *parameter_file,
-              const char *output_file,
+              const char *output_dir,
               double fixed_rng_value, int verbosity, int seed);
 #endif
 

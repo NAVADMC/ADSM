@@ -36,7 +36,7 @@ main (int argc, char *argv[])
 #ifdef USE_SC_GUILIB
   const char *production_type_file = NULL;
 #endif
-  const char *output_file = NULL;
+  const char *output_dir = NULL;
   double fixed_rng_value = -1;
   int seed = -1;
   GError *option_error = NULL;
@@ -44,7 +44,7 @@ main (int argc, char *argv[])
   GOptionEntry options[] = {
     { "population-file", 'p', 0, G_OPTION_ARG_FILENAME, &population_file, "Population file", NULL },
     { "verbosity", 'V', 0, G_OPTION_ARG_INT, &verbosity, "Message verbosity level (0 = simulation output only, 1 = all debugging output)", NULL },
-    { "output-file", 'o', 0, G_OPTION_ARG_FILENAME, &output_file, "Output file", NULL },
+    { "output-dir", 'o', 0, G_OPTION_ARG_FILENAME, &output_dir, "Output directory", NULL },
     { "fixed-random-value", 'r', 0, G_OPTION_ARG_DOUBLE, &fixed_rng_value, "Fixed number to use instead of random numbers", NULL },
     { "rng-seed", 's', 0, G_OPTION_ARG_INT, &seed, "Seed used to initialize the random number generator", NULL },
 #ifdef USE_SC_GUILIB
@@ -96,7 +96,7 @@ main (int argc, char *argv[])
 #ifdef USE_SC_GUILIB
   run_sim_main ((char *)population_file,
                 (char *)parameter_file,
-                (char *)output_file,
+                (char *)output_dir,
                 fixed_rng_value,
                 verbosity,
                 seed,
@@ -104,7 +104,7 @@ main (int argc, char *argv[])
 #else
   run_sim_main ((char *)population_file,
                 (char *)parameter_file,
-                (char *)output_file,
+                (char *)output_dir,
                 fixed_rng_value,
                 verbosity,
                 seed);

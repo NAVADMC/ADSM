@@ -549,64 +549,6 @@ extern gboolean use_fixed_poisson;
 extern double poisson_fix;
 
 
-/**
- * Global variable for a file output stream.  Needed for redirecting messages
- * sent through g_print().
- */
-FILE *output_stream;
-
-
-
-/**
- * A print handler that outputs to an open file pointer.
- */
-void
-file_gprint (const gchar * string)
-{
-  fprintf (output_stream, "%s", string);
-}
-
-
-
-/**
- * Modify a provided output file name.  If the program is compiled without MPI
- * support, this just returns a string copy of <i>filename</i>.  If the program
- * is compiled with MPI support, this inserts the node number just before the
- * file extension, or at the end of the filename if there is no file extension.
- */
-char *
-make_expanded_filename (const char *filename)
-{
-#if HAVE_MPI && !CANCEL_MPI
-  GString *s;
-  char *last_dot;
-  char *chararray;
-
-  s = g_string_new (NULL);
-  last_dot = rindex (filename, '.');
-  if (last_dot == NULL)
-    {
-      /* No file extension; just append the MPI node number. */
-      g_string_printf (s, "%s%i", filename, me.rank);
-    }
-  else
-    {
-      /* Insert the MPI node number just before the extension. */
-      g_string_insert_len (s, -1, filename, last_dot - filename);
-      g_string_append_printf (s, "%i", me.rank);
-      g_string_insert_len (s, -1, last_dot, strlen (filename) - (last_dot - filename));
-    }
-
-  /* don't return the wrapper object */
-  chararray = s->str;
-  g_string_free (s, FALSE);
-  return chararray;
-#else
-  return g_strdup (filename);
-#endif
-}
-
-
 
 /**
  * A log handler that simply discards messages.  "Info" and "debug" level
@@ -725,12 +667,12 @@ default_projection (UNT_unit_list_t * units)
 DLL_API void
 run_sim_main (const char *population_file,
               const char *parameter_file,
-              const char *output_file, double fixed_rng_value, int verbosity, int seed, char *production_type_file)
+              const char *output_dir, double fixed_rng_value, int verbosity, int seed, char *production_type_file)
 #else
 DLL_API void
 run_sim_main (const char *population_file,
               const char *parameter_file,
-              const char *output_file, double fixed_rng_value, int verbosity, int seed)
+              const char *output_dir, double fixed_rng_value, int verbosity, int seed)
 #endif
 {
   unsigned int ndays, nruns, day, run;
@@ -774,19 +716,6 @@ run_sim_main (const char *population_file,
   /* _scenario.version defined as 50 chars wide in general.h */
   g_snprintf( _scenario.version, 50, "Version: %s, Spec: %s", current_version(), specification_version() );
 #endif
-
-  /* Open a file for output, if specified; if not, use stdout. */
-  if (output_file)
-    {
-      output_file = make_expanded_filename (output_file);
-      output_stream = fopen (output_file, "w");
-      if (output_stream == NULL)
-        {
-          /* FIXME: use errno to provide a more helpful message. */
-          g_error ("Could not open file \"%s\" for writing.", output_file);
-        }
-      g_set_print_handler (file_gprint);
-    }
 
   /* This line prints a Byte Order Mark (BOM) that indicates that the output is
    * in UTF-8.  Not currently used. */
@@ -1012,6 +941,8 @@ run_sim_main (const char *population_file,
 #endif
 */
 
+  if (output_dir != NULL)
+    spreadmodel_create_event (manager, EVT_new_output_dir_event((char *)output_dir), units, zones, rng);
   spreadmodel_create_event (manager, EVT_new_declaration_of_outputs_event(reporting_vars), units, zones, rng);
 
   /* Begin the loop over the specified number of iterations. */
@@ -1381,8 +1312,6 @@ run_sim_main (const char *population_file,
   RAN_free_generator (rng);
   ZON_free_zone_list (zones);
   UNT_free_unit_list (units);
-  if (output_stream != NULL)
-    fclose (output_stream);
 
   return;
 }

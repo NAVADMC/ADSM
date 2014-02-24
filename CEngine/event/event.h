@@ -60,6 +60,7 @@
 typedef enum
 {
   EVT_BeforeAnySimulations,
+  EVT_OutputDirectory,
   EVT_BeforeEachSimulation,
   EVT_DeclarationOfVaccinationReasons,
   EVT_DeclarationOfVaccineDelay,
@@ -91,6 +92,18 @@ typedef struct
   int dummy; /**< to avoid a "struct has no members" warning */
 }
 EVT_before_any_simulations_event_t;
+
+
+
+/**
+ * An "output directory" event.  This event signals modules that produce file
+ * output to write to a specific directory.
+ */
+typedef struct
+{
+  char *output_dir;
+}
+EVT_output_dir_event_t;
 
 
 
@@ -495,6 +508,7 @@ typedef struct
   union
   {
     EVT_before_any_simulations_event_t before_any_simulations;
+    EVT_output_dir_event_t output_dir;
     EVT_before_each_simulation_event_t before_each_simulation;
     EVT_declaration_of_vaccination_reasons_event_t declaration_of_vaccination_reasons;
     EVT_declaration_of_vaccine_delay_event_t declaration_of_vaccine_delay;
@@ -541,6 +555,7 @@ typedef struct
 
 /* Prototypes. */
 EVT_event_t *EVT_new_before_any_simulations_event (void);
+EVT_event_t *EVT_new_output_dir_event (char *);
 EVT_event_t *EVT_new_before_each_simulation_event (void);
 EVT_event_t *EVT_new_declaration_of_vaccination_reasons_event (GPtrArray * reasons);
 EVT_event_t *EVT_new_declaration_of_vaccine_delay_event (UNT_production_type_t,
