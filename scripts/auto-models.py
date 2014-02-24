@@ -204,7 +204,7 @@ class Indiseasespread(models.Model):
 
 
 class Ingeneral(models.Model):
-    languages = models.TextField(blank=True)
+    language = models.TextField(blank=True)
     scenario_description = models.TextField(blank=True)
     iterations = models.IntegerField(blank=True, null=True)
     days = models.IntegerField(blank=True, null=True)
@@ -262,12 +262,10 @@ class Inzoneproductiontypepair(models.Model):
     zone_detection_multiplier = models.FloatField(blank=True, null=True)
     cost_surv_per_animal_day = models.FloatField(blank=True, null=True)
 
-
 class Readallcodes(models.Model):
     _code = models.TextField(db_column='_code') # Field renamed because it started with '_'.
     _code_type = models.TextField(db_column='_code_type') # Field renamed because it started with '_'.
     _code_description = models.TextField(db_column='_code_description') # Field renamed because it started with '_'.
-
 
 class Readallcodetypes(models.Model):
     _code_type = models.TextField(db_column='_code_type') # Field renamed because it started with '_'.
