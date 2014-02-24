@@ -55,7 +55,7 @@ _code_description	text			not null
 create table readallcodetypes	(
 --_code_type_id		int	primary key 	not null,
 _code_type		text			not null,
-_code_description	text			not null
+_code_type_description	text			not null
 );
 
 create table inchart (
@@ -272,7 +272,7 @@ cost_destroy_disposal_per_animal	real,
 cost_vaccinate_setup_per_unit		real,
 cost_vaccinate_threshold		int,
 cost_vaccinate_baseline_per_animal	real,
-cost_vvaccinate_additional_per_animal	real,
+cost_vaccinate_additional_per_animal	real,
 zone_detection_is_trigger		int,
 zone_direct_trace_is_trigger		int,
 zone_indirect_trace_is_trigger		int,

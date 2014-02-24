@@ -7,7 +7,7 @@
 #
 # Also note: You'll have to insert the output of 'django-admin.py sqlcustom [appname]'
 # into your database.
-# Search:  db_column='[^ ']*',  to remove column names
+# Search:  db_column='[^']*',  to remove column names
 from __future__ import unicode_literals
 
 from django.db import models
@@ -48,7 +48,7 @@ class Dynaherd(models.Model):
 class Inchart(models.Model):
     fieldname = models.TextField(blank=True)
     chart_name = models.TextField()
-    _ispdf = models.IntegerField(db_column='_ispdf') # Field renamed because it started with '_'.
+    _ispdf = models.IntegerField() # Field renamed because it started with '_'.
     chart_type = models.TextField(blank=True)
     mean = models.FloatField(blank=True, null=True)
     std_dev = models.FloatField(blank=True, null=True)
@@ -76,10 +76,10 @@ class Inchart(models.Model):
 
 
 class Inchartdetail(models.Model):
-    _chartid = models.IntegerField(db_column='_chartid') # Field renamed because it started with '_'.
-    _pointorder = models.IntegerField(db_column='_pointorder') # Field renamed because it started with '_'.
-    _x = models.FloatField(db_column='_x') # Field renamed because it started with '_'.
-    _y = models.FloatField(db_column='_y') # Field renamed because it started with '_'.
+    _chartid = models.IntegerField() # Field renamed because it started with '_'.
+    _pointorder = models.IntegerField() # Field renamed because it started with '_'.
+    _x = models.FloatField() # Field renamed because it started with '_'.
+    _y = models.FloatField() # Field renamed because it started with '_'.
 
 
 class Incontrolglobal(models.Model):
@@ -148,7 +148,7 @@ class Incontrolsproductiontype(models.Model):
     cost_vaccinate_setup_per_unit = models.FloatField(blank=True, null=True)
     cost_vaccinate_threshold = models.IntegerField(blank=True, null=True)
     cost_vaccinate_baseline_per_animal = models.FloatField(blank=True, null=True)
-    cost_vvaccinate_additional_per_animal = models.FloatField(blank=True, null=True)
+    cost_vaccinate_additional_per_animal = models.FloatField(blank=True, null=True)
     zone_detection_is_trigger = models.IntegerField(blank=True, null=True)
     zone_direct_trace_is_trigger = models.IntegerField(blank=True, null=True)
     zone_indirect_trace_is_trigger = models.IntegerField(blank=True, null=True)
@@ -166,7 +166,7 @@ class Incontrolsproductiontype(models.Model):
     test_indirect_back = models.IntegerField(blank=True, null=True)
     test_specificity = models.FloatField(blank=True, null=True)
     test_sensitivity = models.FloatField(blank=True, null=True)
-    testdelaypdfid = models.IntegerField(blank=True, null=True)
+    _testdelaypdfid = models.IntegerField(blank=True, null=True)
     vaccinate_restrospective_days = models.IntegerField(blank=True, null=True)
 
 
@@ -235,8 +235,8 @@ class Inproductiontype(models.Model):
 
 
 class Inproductiontypepair(models.Model):
-    _sourceproductiontypeid = models.IntegerField(db_column='_sourceproductiontypeid') # Field renamed because it started with '_'.
-    _destproductiontypeid = models.IntegerField(db_column='_destproductiontypeid') # Field renamed because it started with '_'.
+    _sourceproductiontypeid = models.IntegerField() # Field renamed because it started with '_'.
+    _destproductiontypeid = models.IntegerField() # Field renamed because it started with '_'.
     use_direct_contact = models.IntegerField()
     _directcontactspreadid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
     use_indirect_contact = models.IntegerField()
@@ -246,14 +246,13 @@ class Inproductiontypepair(models.Model):
 
 
 class Inzone(models.Model):
-    zoneid = models.IntegerField(unique=True)
     zone_description = models.TextField()
     zone_radius = models.FloatField()
 
 
 class Inzoneproductiontypepair(models.Model):
-    _zoneid = models.IntegerField(db_column='_zoneid') # Field renamed because it started with '_'.
-    _production_type_id = models.IntegerField(db_column='_production_type_id') # Field renamed because it started with '_'.
+    _zoneid = models.IntegerField() # Field renamed because it started with '_'.
+    _production_type_id = models.IntegerField() # Field renamed because it started with '_'.
     use_directmovement_control = models.IntegerField()
     _zonedirectmovementrelid = models.IntegerField(blank=True, null=True) # Field renamed because it started with '_'.
     use_indirect_movement_control = models.IntegerField()
@@ -263,11 +262,11 @@ class Inzoneproductiontypepair(models.Model):
     cost_surv_per_animal_day = models.FloatField(blank=True, null=True)
 
 class Readallcodes(models.Model):
-    _code = models.TextField(db_column='_code') # Field renamed because it started with '_'.
-    _code_type = models.TextField(db_column='_code_type') # Field renamed because it started with '_'.
-    _code_description = models.TextField(db_column='_code_description') # Field renamed because it started with '_'.
+    _code = models.TextField() # Field renamed because it started with '_'.
+    _code_type = models.TextField() # Field renamed because it started with '_'.
+    _code_description = models.TextField() # Field renamed because it started with '_'.
 
 class Readallcodetypes(models.Model):
-    _code_type = models.TextField(db_column='_code_type') # Field renamed because it started with '_'.
-    _code_description = models.TextField(db_column='_code_description') # Field renamed because it started with '_'.
+    _code_type = models.TextField() # Field renamed because it started with '_'.
+    _code_type_description = models.TextField() # Field renamed because it started with '_'.
 
