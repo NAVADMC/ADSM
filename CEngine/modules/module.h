@@ -104,7 +104,7 @@ struct spreadmodel_model_t_;
  * Type of a function that returns whether a model is a singleton (only one
  * instance should ever exist in memory) or not.
  */
-typedef gboolean (*spreadmodel_model_is_singleton_t) (void);
+typedef gboolean (*spreadmodel_model_is_singleton_t) (struct spreadmodel_model_t_ *);
 
 
 
@@ -185,6 +185,8 @@ typedef struct spreadmodel_model_t_
   unsigned int nevents_listened_for; /**< Length of events_listened_for. */
   GPtrArray *outputs; /**< A list of the model's output variables. */
   void *model_data; /**< Specialized information for the particular model. */
+  spreadmodel_model_is_singleton_t is_singleton; /**< A function that reports
+    whether the module is a singleton or not. */
   spreadmodel_model_set_params_t set_params; /**< A function that sets parameters
     for the model. */
   spreadmodel_model_run_t run; /**< A function that runs the model. */
@@ -205,6 +207,7 @@ gboolean spreadmodel_model_is_listening_for (struct spreadmodel_model_t_ *, EVT_
 char *spreadmodel_model_to_string_default (struct spreadmodel_model_t_ *);
 int spreadmodel_model_fprintf (FILE *, struct spreadmodel_model_t_ *);
 int spreadmodel_model_printf (struct spreadmodel_model_t_ *);
+gboolean spreadmodel_model_answer_yes (struct spreadmodel_model_t_ *);
 gboolean spreadmodel_model_answer_no (struct spreadmodel_model_t_ *);
 
 #endif /* !MODULE_H */

@@ -404,8 +404,10 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
+  self->set_params = NULL;
   self->run = run;
   self->reset = reset;
+  self->is_singleton = spreadmodel_model_answer_yes;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = spreadmodel_model_answer_no;
   self->has_pending_infections = spreadmodel_model_answer_no;

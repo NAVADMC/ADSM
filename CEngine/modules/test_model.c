@@ -26,7 +26,6 @@
 #endif
 
 /* To avoid name clashes when multiple modules have the same interface. */
-#define is_singleton test_model_is_singleton
 #define new test_model_new
 #define run test_model_run
 #define reset test_model_reset
@@ -609,17 +608,6 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 /**
- * Returns whether this model is a singleton or not.
- */
-gboolean
-is_singleton (void)
-{
-  return FALSE;
-}
-
-
-
-/**
  * Returns a new test model.
  */
 spreadmodel_model_t *
@@ -645,6 +633,7 @@ new (scew_element * params, UNT_unit_list_t *units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
+  self->is_singleton = spreadmodel_model_answer_no;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = has_pending_actions;
   self->has_pending_infections = spreadmodel_model_answer_no;

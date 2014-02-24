@@ -64,7 +64,6 @@
 #endif
 
 /* To avoid name clashes when multiple modules have the same interface. */
-#define is_singleton detection_model_is_singleton
 #define new detection_model_new
 #define set_params detection_model_set_params
 #define run detection_model_run
@@ -597,17 +596,6 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 /**
- * Returns whether this model is a singleton or not.
- */
-gboolean
-is_singleton (void)
-{
-  return TRUE;
-}
-
-
-
-/**
  * Adds a set of parameters to a detection model.
  */
 void
@@ -795,6 +783,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->set_params = set_params;
   self->run = run;
   self->reset = reset;
+  self->is_singleton = spreadmodel_model_answer_yes;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = spreadmodel_model_answer_no;
   self->has_pending_infections = spreadmodel_model_answer_no;

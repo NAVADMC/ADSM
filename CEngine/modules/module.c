@@ -99,6 +99,22 @@ spreadmodel_model_printf (struct spreadmodel_model_t_ *self)
 
 
 /**
+ * Returns TRUE. Useful for filling in the function pointers for yes/no
+ * questions that a module can answer, such as whether the module has pending
+ * actions.
+ *
+ * @param self the module.
+ * @return TRUE.
+ */
+gboolean
+spreadmodel_model_answer_yes (struct spreadmodel_model_t_ * self)
+{
+  return TRUE;
+}
+
+
+
+/**
  * Returns FALSE. Useful for filling in the function pointers for yes/no
  * questions that a module can answer, such as whether the module has pending
  * actions.

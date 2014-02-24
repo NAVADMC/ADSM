@@ -17,6 +17,5 @@
 
 spreadmodel_model_t *state_table_writer_new (scew_element * params,UNT_unit_list_t *,
                                              projPJ, ZON_zone_list_t *);
-gboolean state_table_writer_is_singleton (void);
 
 #endif

@@ -21,5 +21,5 @@
 
 spreadmodel_model_t *contact_spread_model_new (scew_element * params, UNT_unit_list_t *,
                                                projPJ, ZON_zone_list_t *);
-gboolean contact_spread_model_is_singleton (void);
+
 #endif

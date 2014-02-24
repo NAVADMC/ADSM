@@ -86,63 +86,59 @@ struct model_load_info_t
 {
   const char *model_name;
   spreadmodel_model_new_t model_instantiation_fn;
-  spreadmodel_model_is_singleton_t model_singleton_fn;
 };
 
 
 struct model_load_info_t model_list[] = {
-  {"airborne-spread-model", (void*)&airborne_spread_model_new,
-    airborne_spread_model_is_singleton},
-  {"airborne-spread-exponential-model", (void*)&airborne_spread_exponential_model_new,
-    airborne_spread_exponential_model_is_singleton},
+  {"airborne-spread-model", (void*)&airborne_spread_model_new},
+  {"airborne-spread-exponential-model", (void*)&airborne_spread_exponential_model_new},
   #ifndef WIN_DLL
-    {"apparent-events-table-writer", (void*)&apparent_events_table_writer_new, apparent_events_table_writer_is_singleton},
+    {"apparent-events-table-writer", (void*)&apparent_events_table_writer_new},
   #endif
-  {"basic-destruction-model", (void*)&basic_destruction_model_new, NULL},
-  {"basic-zone-focus-model", (void*)&basic_zone_focus_model_new, NULL},     
-  {"conflict-resolver", (void*)&conflict_resolver_new, NULL},
-  {"contact-recorder-model", (void*)&contact_recorder_model_new,
-    contact_recorder_model_is_singleton},
-  {"contact-spread-model", (void*)&contact_spread_model_new, contact_spread_model_is_singleton},
-  {"destruction-list-monitor", (void*)&destruction_list_monitor_new, NULL},
-  {"destruction-monitor", (void*)&destruction_monitor_new, NULL},
-  {"detection-model", (void*)&detection_model_new, detection_model_is_singleton},
-  {"detection-monitor", (void*)&detection_monitor_new, NULL},
-  {"disease-model", (void*)&disease_model_new, NULL},
-  {"economic-model", (void*)&economic_model_new, economic_model_is_singleton},
-  {"exam-monitor", (void*)&exam_monitor_new, NULL},
-  {"exposure-monitor", (void*)&exposure_monitor_new, NULL},
+  {"basic-destruction-model", (void*)&basic_destruction_model_new},
+  {"basic-zone-focus-model", (void*)&basic_zone_focus_model_new},     
+  {"conflict-resolver", (void*)&conflict_resolver_new},
+  {"contact-recorder-model", (void*)&contact_recorder_model_new},
+  {"contact-spread-model", (void*)&contact_spread_model_new},
+  {"destruction-list-monitor", (void*)&destruction_list_monitor_new},
+  {"destruction-monitor", (void*)&destruction_monitor_new},
+  {"detection-model", (void*)&detection_model_new},
+  {"detection-monitor", (void*)&detection_monitor_new},
+  {"disease-model", (void*)&disease_model_new},
+  {"economic-model", (void*)&economic_model_new},
+  {"exam-monitor", (void*)&exam_monitor_new},
+  {"exposure-monitor", (void*)&exposure_monitor_new},
   #ifndef WIN_DLL
-    {"exposures-table-writer", (void*)&exposures_table_writer_new, exposures_table_writer_is_singleton},
+    {"exposures-table-writer", (void*)&exposures_table_writer_new},
   #endif
   #ifndef WIN_DLL
-    {"full-table-writer", (void*)&full_table_writer_new, full_table_writer_is_singleton},
+    {"full-table-writer", (void*)&full_table_writer_new},
   #endif
-  {"infection-monitor", (void*)&infection_monitor_new, NULL},
-  {"quarantine-model", (void*)&quarantine_model_new, NULL},
+  {"infection-monitor", (void*)&infection_monitor_new},
+  {"quarantine-model", (void*)&quarantine_model_new},
   {"resources-and-implementation-of-controls-model",
-    (void*)&resources_and_implementation_of_controls_model_new, NULL},
-  {"ring-destruction-model", (void*)&ring_destruction_model_new, NULL},
-  {"ring-vaccination-model", (void*)&ring_vaccination_model_new, ring_vaccination_model_is_singleton},
+    (void*)&resources_and_implementation_of_controls_model_new},
+  {"ring-destruction-model", (void*)&ring_destruction_model_new},
+  {"ring-vaccination-model", (void*)&ring_vaccination_model_new},
   #ifndef WIN_DLL
-    {"state-table-writer", (void*)&state_table_writer_new, state_table_writer_is_singleton},
+    {"state-table-writer", (void*)&state_table_writer_new},
   #endif
-  {"test-model", (void*)&test_model_new, NULL},
-  {"test-monitor", (void*)&test_monitor_new, NULL},
-  {"trace-back-destruction-model", (void*)&trace_back_destruction_model_new, NULL},
-  {"trace-back-monitor", (void*)&trace_back_monitor_new, NULL},
-  {"trace-back-zone-focus-model", (void*)&trace_back_zone_focus_model_new, NULL},
-  {"trace-destruction-model", (void*)&trace_destruction_model_new, NULL},
-  {"trace-exam-model", (void*)&trace_exam_model_new, NULL},
-  {"trace-model", (void*)&trace_model_new, NULL},
-  {"trace-monitor", (void*)&trace_monitor_new, NULL},
-  {"trace-quarantine-model", (void*)&trace_quarantine_model_new, NULL},
-  {"trace-zone-focus-model", (void*)&trace_zone_focus_model_new, NULL},
-  {"vaccination-list-monitor", (void*)&vaccination_list_monitor_new, NULL},
-  {"vaccination-monitor", (void*)&vaccination_monitor_new, NULL},
-  {"vaccine-model", (void*)&vaccine_model_new, NULL},
-  {"zone-model", (void*)&zone_model_new, zone_model_is_singleton},
-  {"zone-monitor", (void*)&zone_monitor_new, NULL}    
+  {"test-model", (void*)&test_model_new},
+  {"test-monitor", (void*)&test_monitor_new},
+  {"trace-back-destruction-model", (void*)&trace_back_destruction_model_new},
+  {"trace-back-monitor", (void*)&trace_back_monitor_new},
+  {"trace-back-zone-focus-model", (void*)&trace_back_zone_focus_model_new},
+  {"trace-destruction-model", (void*)&trace_destruction_model_new},
+  {"trace-exam-model", (void*)&trace_exam_model_new},
+  {"trace-model", (void*)&trace_model_new},
+  {"trace-monitor", (void*)&trace_monitor_new},
+  {"trace-quarantine-model", (void*)&trace_quarantine_model_new},
+  {"trace-zone-focus-model", (void*)&trace_zone_focus_model_new},
+  {"vaccination-list-monitor", (void*)&vaccination_list_monitor_new},
+  {"vaccination-monitor", (void*)&vaccination_monitor_new},
+  {"vaccine-model", (void*)&vaccine_model_new},
+  {"zone-model", (void*)&zone_model_new},
+  {"zone-monitor", (void*)&zone_monitor_new}    
 };
 
 int model_list_count = (sizeof (model_list) / sizeof (struct model_load_info_t));
@@ -265,8 +261,6 @@ spreadmodel_load_modules (const char *parameter_file, UNT_unit_list_t * units,
   scew_element *model_spec;     /* a subtree for a model */
   const char *model_name;       /* name of a model */
   struct model_load_info_t *model_load_info;
-  spreadmodel_model_is_singleton_t model_is_singleton_fn;
-  gboolean singleton;
   GHashTable *singletons;       /* stores the "singleton" modules (for which
                                    there can be only one instance).  Keys are
                                    model names (char *) and data are pointers
@@ -372,24 +366,13 @@ spreadmodel_load_modules (const char *parameter_file, UNT_unit_list_t * units,
         g_debug ("Model = <%p>", model_load_info);
       #endif
 
-      /* If this is a "singleton" module (only one instance of it can exist),
-       * check whether there is already an instance.  If so, pass the
-       * parameters to the existing instance.  If not, create a new instance. */
-      model_is_singleton_fn = model_load_info->model_singleton_fn;
-      singleton = (model_is_singleton_fn != NULL && model_is_singleton_fn () == TRUE);
-
-
-      #if DEBUG
-        g_debug ("module %s a singleton", singleton ? "is" : "is not");
-      #endif
-      model = NULL;
-      if (singleton)
-        model = (spreadmodel_model_t *) g_hash_table_lookup (singletons, model_name);
-
+      /* If there is already an instance of this kind of module, and this kind
+       * of module is a "singleton" module (only one instance of it can exist),
+       * then pass the parameters to the existing instance.  Otherwise, create
+       * a new instance. */
+      model = g_hash_table_lookup (singletons, model_name);
       if (model != NULL)
         {
-          /* Send the additional parameters to the already-instantiated
-           * model. */
           #if DEBUG
             g_debug ("adding parameters to existing instance");
           #endif
@@ -412,7 +395,7 @@ spreadmodel_load_modules (const char *parameter_file, UNT_unit_list_t * units,
 
           (*models)[nloaded++] = model;
 
-          if (singleton)
+          if (model->is_singleton(model))
             g_hash_table_insert (singletons, (gpointer) model_name, (gpointer) model);
 
         } /* end of case where a new model instance is created */
