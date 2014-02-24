@@ -533,13 +533,13 @@ RPT_reporting_value_to_string (RPT_reporting_t * reporting, char *format)
 
   s = g_string_new (NULL);
   /* Represent an output variable that is null (has no meaningful value yet)
-   * by empty braces, except in the case of a group variable that has sub-
+   * by an empty string, except in the case of a group variable that has sub-
    * categories.  We'll handle that case below. */
   if (RPT_reporting_is_null (reporting, NULL)
       && (reporting->type != RPT_group
           || g_datalist_is_empty ((GData **) (&reporting->data))))
     {
-      g_string_printf (s, "{}");
+      g_string_printf (s, "");
     }
   else
     switch (reporting->type)

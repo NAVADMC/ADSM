@@ -21,23 +21,6 @@ case "X${ac_cv_enable_debug}" in
     ;;
   esac
 
-ac_cv_enable_silent_mode=no
-
-AC_ARG_ENABLE([silent_mode],
-  AC_HELP_STRING([--enable-silent-mode], [provide for disabling the normal standard output result data]),
-  [ac_cv_enable_silent_mode=${enable_silent_mode}],
-  AC_CACHE_CHECK([whether enable-silent-mode was specified], ac_cv_enable_silent_mode,
-    ac_cv_enable_silent_mode=yes)
-) # end of AC_ARG_ENABLE silent_mode  
-case "X${ac_cv_enable_silent_mode}" in
-  Xyes|X )
-{
-    AC_DEFINE(SILENT_MODE,1,[Define to 1 to remove standard output result data, other than SQL statements.])} ;;
-  * )
-    ;;
-  esac
-
-
 ac_cv_enable_sc_guilib=no
 
 AC_ARG_ENABLE([sc_guilib],

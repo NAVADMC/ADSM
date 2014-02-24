@@ -41,21 +41,21 @@ def all (X):
 
 
 def rowToStates (row, state_code):
-	"""Returns an array of state names given a row of <td> elements from the
+	"""Returns an array of state codes given a row of <td> elements from the
 	input file.  Accepts 1-letter codes (e.g. "S"), long names (e.g.
 	"Susceptible"), and strings of 1-letter codes (e.g. "SLCND")."""
 	states = []
 	for cell in row.getElementsByTagName ("td"):
 		state = getText (cell)
 		if state in state_code.values():
-			states.append (state) # this is a valid long name
+			states.append (state) # this is a valid 1-letter code
 		elif state_code.has_key(state):
-			states.append (state_code[state]) # convert 1-letter code to long name
+			states.append (state_code[state]) # convert long name to 1-letter code
 		else:
 			# Break into chars, see if each is a valid 1-letter code
 			nospaces = state.replace(' ','')
-			if all([char in state_code.keys() for char in nospaces]):
-				states += [state_code[char] for char in nospaces]
+			if all([char in state_code.values() for char in nospaces]):
+				states += [char for char in nospaces]
 			else:
 				raise ValueError, ('"%s" is not a recognized state' % state)
 	# end of loop over <td> elements
@@ -90,13 +90,13 @@ expect_after {
 }"""
 
 	state_code = {
-	  'S': 'Susceptible',
-	  'L': 'Latent',
-	  'B': 'InfectiousSubclinical',
-	  'C': 'InfectiousClinical',
-	  'N': 'NaturallyImmune',
-	  'V': 'VaccineImmune',
-	  'D': 'Destroyed'
+	  'Susceptible': 'S', # map long names to short ones
+	  'Latent': 'L',
+	  'InfectiousSubclinical': 'B',
+	  'InfectiousClinical': 'C',
+	  'NaturallyImmune': 'N',
+	  'VaccineImmune': 'V',
+	  'Destroyed': 'D'
 	}
 
 	# Print the deterministic unit-state tests.

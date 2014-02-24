@@ -305,8 +305,6 @@ int UNT_printf_unit_list (UNT_unit_list_t *);
 int UNT_fprintf_unit_list (FILE *, UNT_unit_list_t *);
 char *UNT_unit_list_summary_to_string (UNT_unit_list_t *);
 char *UNT_unit_list_prevalence_to_string (UNT_unit_list_t *, unsigned int day);
-int UNT_printf_unit_list_summary (UNT_unit_list_t *);
-int UNT_fprintf_unit_list_summary (FILE *, UNT_unit_list_t *);
 
 UNT_unit_t *UNT_new_unit (UNT_production_type_t, char *production_type_name,
                           unsigned int size, double x, double y);

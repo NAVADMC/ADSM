@@ -9,8 +9,6 @@ AM_YFLAGS = -d -v
 
 bin_PROGRAMS = \
   table_filter \
-  full_table_filter \
-  state_table_filter \
   xml2shp \
   weekly_gis_filter \
   summary_gis_filter \
@@ -19,10 +17,6 @@ bin_PROGRAMS = \
   weekly_gis_zones_filter
 table_filter_SOURCES = table.y scanner.l $(top_srcdir)/reporting/reporting.c
 table_filter_LDADD = @GLIB_LIBS@ @GSL_LIBS@
-full_table_filter_SOURCES = full_table.y scanner.l $(top_srcdir)/reporting/reporting.c
-full_table_filter_LDADD = @GLIB_LIBS@ @GSL_LIBS@
-state_table_filter_SOURCES = state_table.y scanner.l
-state_table_filter_LDADD = @GLIB_LIBS@
 xml2shp_SOURCES = xml2shp.c \
   $(top_srcdir)/unit/unit.c \
   $(top_srcdir)/rel_chart/rel_chart.c \
@@ -77,8 +71,6 @@ weekly_gis_zones_filter_SOURCES = weekly_gis_zones.y scanner.l
 weekly_gis_zones_filter_LDADD = -lshp @GLIB_LIBS@
 
 CLEANFILES = scanner.c table.c table.h table.output \
-  full_table.c full_table.h full_table.output \
-  state_table.c state_table.h state_table.output \
   weekly_gis.c weekly_gis.h weekly_gis.output \
   summary_gis.c summary_gis.h summary_gis.output \
   weekly_gis_zones.c weekly_gis_zones.h weekly_gis_zones.output

@@ -1975,56 +1975,6 @@ UNT_unit_list_prevalence_to_string (UNT_unit_list_t * units, unsigned int day)
 }
 
 
-/**
- * Prints the state of each unit.
- *
- * @param units a unit list.
- * @return the number of characters written.
- */
-int
-UNT_printf_unit_list_summary (UNT_unit_list_t * units)
-{
-  int nchars_written;
-
-  g_debug ("----- ENTER UNT_printf_unit_list_summary");
-
-  nchars_written = UNT_fprintf_unit_list_summary (stdout, units);
-
-  g_debug ("----- EXIT UNT_printf_unit_list_summary");
-
-  return nchars_written;
-}
-
-
-
-/**
- * Prints the state of each unit to a stream.
- *
- * @param stream an output stream to write to.  If NULL, defaults to stdout.
- * @param units a unit list.
- * @return the number of characters written.
- */
-int
-UNT_fprintf_unit_list_summary (FILE * stream, UNT_unit_list_t * units)
-{
-  char *s;
-  int nchars_written;
-
-  g_debug ("----- ENTER UNT_fprintf_unit_list_summary");
-
-  if (!stream)
-    stream = stdout;
-
-  s = UNT_unit_list_summary_to_string (units);
-  nchars_written = fprintf (stream, "%s", s);
-  free (s);
-
-  g_debug ("----- EXIT UNT_fprintf_unit_list_summary");
-
-  return nchars_written;
-}
-
-
 
 /**
  * Resets a unit to alive, Susceptible, and not quarantined.

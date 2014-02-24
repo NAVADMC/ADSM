@@ -187,93 +187,6 @@
  * @image html contact_proof.png "Figure 7. Searching out to distance 2d.  m is midway between B and C; x is the distance from B to m and from m to C.  See text for a proof that C will always be to the left of 2d."
  */
 
-/** @page bnf BNF grammar for simulator output
- * The simulator's output is not intended to be human-friendly.  Instead, it is
- * intended to be compact and easy to process or "filter" into any number of
- * human-friendly formats.
- *
- * Below is a grammar for the output in Backus-Naur form (BNF).  This grammar
- * can be used with a parser generator like YACC to construct programs to
- * process the simulator output.  (In fact, the filter programs included with
- * the simulator, like full_table.c and exposures_table.c, do exactly that.)
- *
- * output_lines ::= output_line { output_line }
- *
- * output_line ::= tracking_line data_line
- *
- * tracking_line ::= <b>node</b> <b>integer</b> <b>run</b> <b>integer</b>
- *
- * data_line ::= state_codes vars | state_codes | vars | @
- *
- * state_codes ::= <b>integer</b> { <b>integer</b> }
- *
- * vars ::= var { var }
- *
- * var ::= <b>varname</b> "=" value
- *
- * value ::= <b>integer</b> | <b>float</b> | <b>string</b> | <b>polygon</b> "(" ")" | <b>polygon</b> "(" contours ")" | "{" "}" | "{" subvars "}"
- *
- * subvars ::= subvar { "," subvar }
- *
- * subvar ::= <b>string</b> ":" value
- *
- * contours ::= contour { contour }
- *
- * contour ::= "(" coords ")"
- *
- * coords ::= coord { "," coord }
- *
- * coord ::= <b>float</b> <b>float</b>
- *
- * <b>varname</b>, <b>float</b>, <b>integer</b>, and <b>string</b> are
- * terminals in the rules above because they are more convenient to write as
- * regular expressions.  (And more useful in that form too, if you write a
- * YACC parser with Lex scanner to process this grammar.)  Those symbols are
- * defined as:
- *
- * <b>varname</b> = [A-Za-z][A-Za-z0-9_-]*
- *
- * <b>float</b> = [+-]?[0-9]+(\.[0-9]+)([eE][+-][0-9]+)?
- *
- * <b>integer</b> = [+-]?[0-9]+
- *
- * <b>string</b> = '[^']*'
- *
- * The decimal point in the float is "escaped" with a backslash to indicate
- * that it is a literal period, not a regular expression metacharacter.  Note
- * that there is no allowance for a single-quote inside a string as defined
- * here.
- *
- * The state codes are:
- * <table>
- *   <tr><td>0</td><td>Susceptible</td></tr>
- *   <tr><td>1</td><td>Latent</td></tr>
- *   <tr><td>2</td><td>Infectious subclinical</td></tr>
- *   <tr><td>3</td><td>Infectious clinical</td></tr>
- *   <tr><td>4</td><td>Naturally immune</td></tr>
- *   <tr><td>5</td><td>Vaccine immune</td></tr>
- *   <tr><td>6</td><td>Destroyed</td></tr>
- * </table>
- *
- * \section example Example output
- *
- * Below is an example of the simulator output.  It consists of one Monte Carlo
- * trial (run 0) run on one CPU (node 0).  There are 3 units; 2 are initially
- * infected, and on day 2 they infect the unit in the middle.  (This test
- * checks that when 2 units both infect a third, the infection is not
- * double-counted.)
- *
- * \verbatim
-node 0 run 0
-1 0 1 num-units-infected={'airborne spread':0,'initially infected':2}
-node 0 run 0
-3 0 3 num-units-infected={'airborne spread':1,'initially infected':0}
-node 0 run 0
-4 1 4 num-units-infected={'airborne spread':0,'initially infected':0} \endverbatim
- *
- * @sa <a href="filters.html">Output filters</a>
- */
-
 /** @page licenses Licenses of libraries and components
  * The table below lists terms and conditions on supporting libraries used by
  * this software.
@@ -808,62 +721,6 @@ default_projection (UNT_unit_list_t * units)
 
 
 
-/**
- * A structure for use with the function build_report, below.
- */
-typedef struct
-{
-  GString *string;
-  unsigned int day;
-  gboolean include_all_names;
-  gboolean include_all_values;
-}
-build_report_args_t;
-
-
-
-/**
- * This function is meant to be used with the foreach function of a GLib
- * Pointer Array, specifically, the Pointer Array used to store output
- * variables.  It appends strings of the form " variable=value" to a GString.
- *
- * @param data an output variable, cast to a gpointer.
- * @param user_data a pointer to a build_report_t structure, cast to a
- *   gpointer.
- */
-void
-build_report (gpointer data, gpointer user_data)
-{
-  RPT_reporting_t *reporting;
-  build_report_args_t *build_report_args;
-  char *substring;
-
-  substring = NULL;
-  reporting = (RPT_reporting_t *) data;
-  build_report_args = (build_report_args_t *) user_data;
-  if (RPT_reporting_due (reporting, build_report_args->day))
-    {
-      substring = RPT_reporting_value_to_string (reporting, NULL);
-      g_string_append_printf (build_report_args->string, " %s=%s", reporting->name, substring);
-    }
-  else if (build_report_args->include_all_values && reporting->frequency != RPT_never)
-    {
-      substring = RPT_reporting_value_to_string (reporting, NULL);
-      g_string_append_printf (build_report_args->string, " %s=%s", reporting->name, substring);
-    }
-  else if (build_report_args->include_all_names && reporting->frequency != RPT_never)
-    {
-      substring = RPT_reporting_value_to_string (reporting, "{}");
-      g_string_append_printf (build_report_args->string, " %s=%s", reporting->name, substring);
-    }
-
-  if (substring != NULL)
-    {
-      g_free (substring);
-    }
-}
-
-
 #ifdef USE_SC_GUILIB
 DLL_API void
 run_sim_main (const char *population_file,
@@ -878,7 +735,6 @@ run_sim_main (const char *population_file,
 {
   unsigned int ndays, nruns, day, run;
   double prevalence_num, prevalence_denom;
-  RPT_reporting_t *show_unit_states;
   RPT_reporting_t *num_units_in_state;
   RPT_reporting_t *num_units_in_state_by_prodtype;
   RPT_reporting_t *num_animals_in_state;
@@ -906,10 +762,6 @@ run_sim_main (const char *population_file,
     pending_actions, pending_infections, disease_end_recorded,
     stop_on_disease_end, early_exit;
   time_t start_time, finish_time;
-  build_report_args_t build_report_args;
-  char *summary;
-  GString *s;
-  char *prev_summary;
   guint exit_conditions = 0;
   double m_total_time, total_processor_time;
   unsigned long total_runs;
@@ -1017,14 +869,6 @@ run_sim_main (const char *population_file,
       g_error ("no units in file %s", population_file);
     }
 
-#ifdef FIX_ME                   /* FIXME: this block causes a crash on Windows */
-#if DEBUG
-  summary = UNT_unit_list_to_string (units);
-  g_debug ("\n%s", summary);
-  free (summary);
-#endif
-#endif
-
   /* Project the unit locations onto a flat map, if they aren't already. */
   if (units->projection == NULL)
     {
@@ -1040,11 +884,8 @@ run_sim_main (const char *population_file,
     }
   spatial_search_prepare (units->spatial_index);
 
-  s = g_string_new (NULL);
-
   /* Initialize the reporting variables, and bundle them together so they can
    * easily be sent to a function for initialization. */
-  show_unit_states = RPT_new_reporting ("all-units-states", RPT_integer, RPT_never);
   num_units_in_state = RPT_new_reporting ("tsdU", RPT_group, RPT_never);
   num_units_in_state_by_prodtype =
     RPT_new_reporting ("num-units-in-each-state-by-production-type", RPT_group, RPT_never);
@@ -1072,7 +913,6 @@ run_sim_main (const char *population_file,
   version = RPT_new_reporting ("version", RPT_text, RPT_never);
   RPT_reporting_set_text (version, PACKAGE_VERSION, NULL);
   reporting_vars = g_ptr_array_new ();
-  g_ptr_array_add (reporting_vars, show_unit_states);
   g_ptr_array_add (reporting_vars, num_units_in_state);
   g_ptr_array_add (reporting_vars, num_units_in_state_by_prodtype);
   g_ptr_array_add (reporting_vars, num_animals_in_state);
@@ -1106,11 +946,6 @@ run_sim_main (const char *population_file,
                  RPT_frequency_name[clock_time->frequency]);
       RPT_reporting_set_frequency (clock_time, RPT_once);
     }
-
-  /* Now that the reporting frequency of show_unit_states has been set from the
-   * simulation parameters, remove that variable from the list of reporting
-   * variables, because it is treated specially. */
-  g_ptr_array_remove (reporting_vars, show_unit_states);
 
 #if HAVE_MPI && !CANCEL_MPI
   /* Increase the number of runs to divide evenly by the number of processors,
@@ -1153,8 +988,6 @@ run_sim_main (const char *population_file,
 
   manager = spreadmodel_new_event_manager (models, nmodels);
 
-  build_report_args.string = s;
-
   /* Determine whether each iteration should end when the active disease phase ends. */
   stop_on_disease_end = (0 != get_stop_on_disease_end( exit_conditions ) );
 
@@ -1179,6 +1012,7 @@ run_sim_main (const char *population_file,
 #endif
 */
 
+  spreadmodel_create_event (manager, EVT_new_declaration_of_outputs_event(reporting_vars), units, zones, rng);
 
   /* Begin the loop over the specified number of iterations. */
   spreadmodel_create_event (manager, EVT_new_before_any_simulations_event(), units, zones, rng);
@@ -1439,57 +1273,24 @@ run_sim_main (const char *population_file,
             }
 
 
-          /* Build the daily output string.  Start with the special case
-           * variable that tells whether to output the state of every unit. */
-#ifndef SILENT_MODE
-#ifndef WIN_DLL
-          if (RPT_reporting_due (show_unit_states, day - 1)
-              || (early_exit && show_unit_states->frequency != RPT_never))
-            {
-              summary = UNT_unit_list_summary_to_string (units);
-              g_string_printf (s, "%s", summary);
-              g_free (summary);
-            }
-          else
-#endif
-#endif
-            g_string_truncate (s, 0);
-
-          /* For the other output variables, append text in the format
-           * variable-name=value to the output string. */
-          build_report_args.day = day - 1;
-          build_report_args.include_all_values = (early_exit || day == ndays);
-          build_report_args.include_all_names = (day == 1);
-          if (build_report_args.include_all_values)
+          if (early_exit || day == ndays)
             {
               finish_time = time (NULL);
               RPT_reporting_set_real (clock_time, (double) (finish_time - start_time), NULL);
               spreadmodel_create_event (manager, EVT_new_last_day_event (day), units, zones, rng);
             }
-          g_ptr_array_foreach (reporting_vars, build_report, &build_report_args);
           spreadmodel_create_event (manager, EVT_new_end_of_day2_event (day, early_exit), units, zones, rng);
-
-/* The DLL shouldn't output anything directly to the console.  Strange things happen... */
-#ifndef SILENT_MODE
-#ifndef WIN_DLL
-#if HAVE_MPI && !CANCEL_MPI
-          g_print ("node %i run %u\n%s\n", me.rank, run, s->str);
-#else
-          g_print ("node 0 run %u\n%s\n", run, s->str);
-#endif
-#endif
-#endif
 
           if (NULL != spreadmodel_show_all_prevalences)
             {
-              prev_summary = UNT_unit_list_prevalence_to_string (units, day);
+              char *prev_summary = UNT_unit_list_prevalence_to_string (units, day);
               spreadmodel_show_all_prevalences (prev_summary);
               free (prev_summary);
             }
 
           if (NULL != spreadmodel_show_all_states)
             {
-              summary = UNT_unit_list_summary_to_string (units);
+              char *summary = UNT_unit_list_summary_to_string (units);
               spreadmodel_show_all_states (summary);
               free (summary);
             }
@@ -1566,7 +1367,6 @@ run_sim_main (const char *population_file,
 #endif
 
   /* Clean up. */
-  RPT_free_reporting (show_unit_states);
   RPT_free_reporting (num_units_in_state);
   RPT_free_reporting (num_units_in_state_by_prodtype);
   RPT_free_reporting (num_animals_in_state);
@@ -1576,8 +1376,6 @@ run_sim_main (const char *population_file,
   RPT_free_reporting (last_day_of_outbreak);
   RPT_free_reporting (clock_time);
   RPT_free_reporting (version);
-  g_ptr_array_free (reporting_vars, TRUE);
-  g_string_free (s, TRUE);
   spreadmodel_free_event_manager (manager);
   spreadmodel_unload_modules (nmodels, models);
   RAN_free_generator (rng);
