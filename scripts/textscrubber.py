@@ -31,8 +31,19 @@ def hide_fields(filename):
     open(filename, 'w').writelines(edited_lines)
 
 
+def switch_to_boolean_field(filename):
+    lines = ['', '']
+    lines = open(filename, 'r').readlines()
+    for index, line in enumerate(lines):
+        if line.lstrip().find('use_') == 0:  # field name starts with 'use_'
+            field_name = line.split()[0]
+            line_ending = line[line.find('(')+1 : ]  # starting after the first paren til the end
+            lines[index] = field_name + " = models.BooleanField(default=False, " + line_ending
+
+    open(filename, 'w').writelines(lines)
 
 if __name__ == '__main__':
     print("Running from: ", os.getcwd())
     # lowercase_a_file('CreateDjangoInputTables.txt')
     hide_fields('auto-models.py')
+    switch_to_boolean_field('auto-models.py')

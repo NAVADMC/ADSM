@@ -204,14 +204,14 @@ class Indiseasespread(models.Model):
 
 
 class Ingeneral(models.Model):
-    language = models.TextField(blank=True)
+    language = models.TextField(editable=False, blank=True)
     scenario_description = models.TextField(blank=True)
     iterations = models.IntegerField(blank=True, null=True)
     days = models.IntegerField(blank=True, null=True)
     sim_stop_reason = models.TextField(blank=True)
     include_contact_spread = models.IntegerField(blank=True, null=True)
     include_airborne_spread = models.IntegerField(blank=True, null=True)
-    use_airborne_exponential_decay = models.IntegerField(blank=True, null=True)
+    use_airborne_exponential_decay = models.BooleanField(default=False, )
     use_within_herd_prevalence = models.IntegerField(blank=True, null=True)
     cost_track_destruction = models.IntegerField(blank=True, null=True)
     cost_track_vaccination = models.IntegerField(blank=True, null=True)
