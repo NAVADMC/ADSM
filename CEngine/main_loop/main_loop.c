@@ -496,13 +496,6 @@
 #include "sc_spreadmodel_outputs.h"
 #endif
 
-#ifdef TORRINGTON
-  #include "herd-randomizer.h"
-#endif
-#ifdef WHEATLAND
-  #include "herd-randomizer.h"
-#endif
-
 #if HAVE_MPI && !CANCEL_MPI
 #  include "mpix.h"
 #endif
@@ -999,20 +992,6 @@ run_sim_main (const char *population_file,
 
       /* Reset all zones. */
       ZON_zone_list_reset (zones);
-
-#ifdef TORRINGTON
-      /* Randomize initial states for all units, if desired.
-         Note that this function selects the indicated number
-         of initially infected units from each production type separately.*/
-      randomize_initial_states( units, rng );
-#endif 
-
-#ifdef WHEATLAND
-      /* Randomize initial states for all units, if desired.
-         Note that this function selects the indicated number of
-         initially infected units randomly from the entire population. */
-      randomize_initial_states( units, rng );
-#endif
 
       active_infections_yesterday = TRUE;
       pending_actions = TRUE;

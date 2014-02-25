@@ -77,18 +77,8 @@ current_version (void)
    * Also don't forget to update the version number in configure.in */ 
   i = 0;
 
-  #ifdef TORRINGTON
-    ++i;
-    ret_val = "3.2.18-TORRINGTON";
-  #endif
-
-#ifdef WHEATLAND
-  ++i;
-  ret_val = "3.2.18-WHEATLAND";
-#endif
-
   if( 0 == i ) {
-    ret_val = "3.2.18";
+    ret_val = "3.2.19";
   }
   else if( 1 == i ) {
     /* All is right with the world: do nothing. */
