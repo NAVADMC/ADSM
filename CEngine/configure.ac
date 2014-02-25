@@ -71,8 +71,6 @@ AC_CHECK_LIB(expat,XML_Parse,,AC_MSG_ERROR(cannot continue without expat))
 
 AC_CHECK_LIB(m,pow,,AC_MSG_ERROR(cannot continue without math library))
 
-AC_CHECK_LIB(rtree,RTreeNewIndex,,AC_MSG_ERROR(cannot continue without R-tree library))
-
 AC_CHECK_LIB(shp,SHPCreate,,AC_MSG_ERROR(cannot continue without Shapefile library))
 
 AC_CHECK_LIB(gpcl,gpc_polygon_clip,,AC_MSG_ERROR(cannot continue without General Polygon Clipping (GPC) library))

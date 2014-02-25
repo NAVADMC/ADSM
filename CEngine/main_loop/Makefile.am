@@ -37,6 +37,7 @@ spreadmodel_SOURCES = cli.c main_loop.c module_loader.c module_loader.h \
   $(top_srcdir)/reporting/reporting.c $(top_srcdir)/reporting/reporting.h \
   $(top_srcdir)/rng/rng.c $(top_srcdir)/rng/rng.h \
   $(top_srcdir)/spatial_search/spatial_search.c $(top_srcdir)/spatial_search/spatial_search.h \
+  $(top_srcdir)/spatial_search/rTreeIndex.c $(top_srcdir)/spatial_search/rTreeIndex.h \
   $(top_srcdir)/spatial_search/ch2d.c $(top_srcdir)/spatial_search/ch2d.h \
   $(top_srcdir)/zone/zone.c $(top_srcdir)/zone/zone.h \
   $(top_srcdir)/wml/wml.c $(top_srcdir)/wml/wml.h \
