@@ -21,7 +21,6 @@ class Dbschemaversion(models.Model):
 
 
 class Dynablob(models.Model):
-    dynblob_id = models.TextField(unique=True)
     zone_perimeters = models.TextField(blank=True)
 
 
