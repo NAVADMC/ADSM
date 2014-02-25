@@ -1,3 +1,5 @@
+import re
+
 __author__ = 'Josiah Seaman'
 
 import os
@@ -18,23 +20,30 @@ def lowercase_a_file(filename):
     #     print(text, end='')
 
 
-def hide_fields(filename):
-    edited_lines = []
-    included_fields = []
+def hide_fields(filename, output_filename):
+    form_lines = []
+    excluded_fields = []
+    model_ = ''
     with open(filename, 'r') as models_file:
-        for line in models_file:
-            if line[:4] == '    ' and line.lstrip() and line.lstrip()[0] != '_':  # field indentation and first char not _
+        for line_number, line in enumerate(models_file):
+            if line.startswith('class'):
+                model_ = re.split('\W+', line)[1]  # line.split()[1].split(sep='(')[0]
+            if line.lstrip() and line.lstrip()[0] == '_':  # field indentation and starts with _
                 index = line.find('=')
-                print('Including: ', line)
-                included_fields.append(line[:index].strip())
-            if not line.strip() and included_fields:  # empty line, end of class
-                print('Printing ' + str(included_fields))
-                edited_lines.append('    class Meta:\n')
-                edited_lines.append('        fields = ' + str(included_fields) + "\n")
-                included_fields = []
-            edited_lines.append(line)
+                print('Excluding: ', line)
+                excluded_fields.append(line[:index].strip())
+            if not line.strip() and model_:  # empty line, end of class
+                print('Printing ' + str(excluded_fields))
+                form_lines.append('class ' + model_ + 'Form(ModelForm):')
+                form_lines.append('    class Meta:')
+                form_lines.append('        model = ' + model_)
+                if excluded_fields:
+                    form_lines.append('        exclude = ' + str(excluded_fields))
+                form_lines.append('\n')
+                excluded_fields = []
+                model_ = ''
 
-    open(filename, 'w').writelines(edited_lines)
+    open(output_filename, 'w').write('\n'.join(form_lines))
 
 
 def switch_to_boolean_field(filename):
@@ -52,5 +61,5 @@ def switch_to_boolean_field(filename):
 if __name__ == '__main__':
     print("Running from: ", os.getcwd())
     # lowercase_a_file('CreateDjangoInputTables.txt')
-    hide_fields('auto-models.py')
+    hide_fields('auto-models.py', 'auto-forms.py')
     # switch_to_boolean_field('auto-models.py')

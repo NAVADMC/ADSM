@@ -1,11 +1,3 @@
-from ScenarioCreator.models import *
-from floppyforms import ModelForm
-
-# class ScenarioForm(ModelForm):
-#     class Meta:
-#         model = Ingeneral
-
-
 class DbschemaversionForm(ModelForm):
     class Meta:
         model = Dbschemaversion
