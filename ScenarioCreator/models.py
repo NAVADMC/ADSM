@@ -8,6 +8,10 @@
 # Also note: You'll have to insert the output of 'django-admin.py sqlcustom [appname]'
 # into your database.
 # Changes made in ScenarioCreator/models.py propagate to the script output
+
+# TextField is more costly than CharField.  Only use TextField for descriptions or urls.
+# CharFields are max=255 characters and are presented as a single text line in forms.
+# TextFields are unlimited and presented as giant text boxes in forms.
 # Search:  db_column='[^']*',  to remove column names
 from __future__ import unicode_literals
 
@@ -15,27 +19,27 @@ from django.db import models
 
 
 class Dbschemaversion(models.Model):
-    version_number = models.TextField(unique=True)
-    version_application = models.TextField()
-    version_date = models.TextField()
+    version_number = models.CharField(unique=True)
+    version_application = models.CharField()
+    version_date = models.CharField()
     version_info_url = models.TextField(blank=True)
     version_id = models.IntegerField(blank=True, null=True)
 
 
 class Dynablob(models.Model):
-    zone_perimeters = models.TextField(blank=True)
+    zone_perimeters = models.CharField(blank=True)
 
 
 class Dynaherd(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
-    initial_state_code = models.TextField()
+    initial_state_code = models.CharField()
     days_in_initial_state = models.IntegerField()
     days_left_in_initial_state = models.IntegerField()
     initial_size = models.IntegerField()
-    _final_state_code = models.TextField(blank=True)
-    _final_control_state_code = models.TextField(blank=True)
-    _final_detection_state_code = models.TextField(blank=True)
+    _final_state_code = models.CharField(blank=True)
+    _final_control_state_code = models.CharField(blank=True)
+    _final_detection_state_code = models.CharField(blank=True)
     _cum_infected = models.IntegerField(blank=True, null=True)
     _cum_detected = models.IntegerField(blank=True, null=True)
     _cum_destroyed = models.IntegerField(blank=True, null=True)
@@ -47,10 +51,10 @@ class Dynaherd(models.Model):
 
 
 class Inchart(models.Model):
-    field_name = models.TextField(blank=True)
-    chart_name = models.TextField()
+    field_name = models.CharField(blank=True)
+    chart_name = models.CharField()
     _ispdf = models.BooleanField()
-    chart_type = models.TextField(blank=True)
+    chart_type = models.CharField(blank=True)
     mean = models.FloatField(blank=True, null=True)
     std_dev = models.FloatField(blank=True, null=True)
     min = models.FloatField(blank=True, null=True)
@@ -71,8 +75,8 @@ class Inchart(models.Model):
     theta = models.FloatField(blank=True, null=True)
     a = models.FloatField(blank=True, null=True)
     s = models.IntegerField(blank=True, null=True)
-    x_axis_units = models.TextField(blank=True)
-    y_axis_units = models.TextField(blank=True)
+    x_axis_units = models.CharField(blank=True)
+    y_axis_units = models.CharField(blank=True)
     _notes = models.TextField(blank=True)
 
 
@@ -91,12 +95,12 @@ class Incontrolglobal(models.Model):
     include_destruction = models.BooleanField(default=False, )
     destruction_delay = models.IntegerField(blank=True, null=True)
     _destrcapacityrelid = models.IntegerField(blank=True, null=True)
-    destruction_priority_order = models.TextField(blank=True)
-    destrucion_reason_order = models.TextField(blank=True)
+    destruction_priority_order = models.CharField(blank=True)
+    destrucion_reason_order = models.CharField(blank=True)
     include_vaccination = models.BooleanField(default=False, )
     vaccincation_detected_units_before_start = models.IntegerField(blank=True, null=True)
     _vacccapacityrelid = models.IntegerField(blank=True, null=True)
-    vaccination_priority_order = models.TextField(blank=True)
+    vaccination_priority_order = models.CharField(blank=True)
     include_zones = models.BooleanField(default=False, )
     vaccination_retrospective_days = models.IntegerField(blank=True, null=True)
     _vacccapacitystartrelid = models.IntegerField(blank=True, null=True)
@@ -104,9 +108,9 @@ class Incontrolglobal(models.Model):
 
 
 class Incontrolplan(models.Model):
-    control_plan_name = models.TextField()
+    control_plan_name = models.CharField()
     control_plan_description = models.TextField(blank=True)
-    control_plan_group = models.TextField(blank=True)
+    control_plan_group = models.CharField(blank=True)
 
 
 class Incontrolsproductiontype(models.Model):
@@ -172,7 +176,7 @@ class Incontrolsproductiontype(models.Model):
 
 
 class Indiseaseglobal(models.Model):
-    disease_name = models.TextField(blank=True)
+    disease_name = models.CharField(blank=True)
     disease_description = models.TextField(blank=True)
 
 
@@ -188,7 +192,7 @@ class Indiseaseproductiontype(models.Model):
 
 class Indiseasespread(models.Model):
     _productiontypepairid = models.IntegerField(unique=True)
-    spread_method_code = models.TextField(blank=True)
+    spread_method_code = models.CharField(blank=True)
     latent_can_infect = models.IntegerField(blank=True, null=True)
     subclinical_can_infect = models.IntegerField(blank=True, null=True)
     mean_contact_rate = models.FloatField(blank=True, null=True)
@@ -205,11 +209,11 @@ class Indiseasespread(models.Model):
 
 
 class Ingeneral(models.Model):
-    language = models.TextField(blank=True)
+    language = models.CharField(blank=True)
     scenario_description = models.TextField(blank=True)
     iterations = models.IntegerField(blank=True, null=True)
     days = models.IntegerField(blank=True, null=True)
-    sim_stop_reason = models.TextField(blank=True)
+    sim_stop_reason = models.CharField(blank=True)
     include_contact_spread = models.BooleanField(default=False, )
     include_airborne_spread = models.BooleanField(default=False, )
     use_airborne_exponential_decay = models.BooleanField(default=False, )
@@ -222,16 +226,16 @@ class Ingeneral(models.Model):
     save_all_daily_outputs = models.BooleanField(default=False, )
     save_daily_outputs_for_iterations = models.BooleanField(default=False, )
     write_daily_states_file = models.IntegerField(blank=True, null=True)
-    daily_states_filename = models.TextField(blank=True)
+    daily_states_filename = models.CharField(blank=True)
     save_daily_events = models.BooleanField(default=False, )
     save_daily_exposures = models.BooleanField(default=False, )
     save_iteration_outputs_for_herds = models.BooleanField(default=False, )
     write_map_output = models.IntegerField(blank=True, null=True)
-    map_directory = models.TextField(blank=True)
+    map_directory = models.CharField(blank=True)
 
 
 class Inproductiontype(models.Model):
-    production_type_name = models.TextField()
+    production_type_name = models.CharField()
     production_type_description = models.TextField(blank=True) # This field type is a guess.
 
 
@@ -264,12 +268,12 @@ class Inzoneproductiontypepair(models.Model):
 
 
 class Readallcodes(models.Model):
-    _code = models.TextField()
-    _code_type = models.TextField()
+    _code = models.CharField()
+    _code_type = models.CharField()
     _code_description = models.TextField()
 
 
 class Readallcodetypes(models.Model):
-    _code_type = models.TextField()
+    _code_type = models.CharField()
     _code_type_description = models.TextField()
 
