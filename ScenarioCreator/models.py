@@ -176,7 +176,7 @@ class Incontrolsproductiontype(models.Model):
 
 
 class Indiseaseglobal(models.Model):
-    disease_name = models.CharField(max_length=255, blank=True)
+    disease_name = models.TextField(blank=True)
     disease_description = models.TextField(blank=True)
 
 
@@ -209,7 +209,7 @@ class Indiseasespread(models.Model):
 
 
 class Ingeneral(models.Model):
-    language = models.CharField(max_length=255, blank=True)
+    language = models.TextField(blank=True)
     scenario_description = models.TextField(blank=True)
     iterations = models.IntegerField(blank=True, null=True)
     days = models.IntegerField(blank=True, null=True)
