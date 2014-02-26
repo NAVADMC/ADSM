@@ -45,7 +45,7 @@ class Dynaherd(models.Model):
 
 
 class Inchart(models.Model):
-    fieldname = models.TextField(blank=True)
+    field_name = models.TextField(blank=True)
     chart_name = models.TextField()
     _ispdf = models.BooleanField()
     chart_type = models.TextField(blank=True)
@@ -69,8 +69,8 @@ class Inchart(models.Model):
     theta = models.FloatField(blank=True, null=True)
     a = models.FloatField(blank=True, null=True)
     s = models.IntegerField(blank=True, null=True)
-    x_axis_units = models.TextField(blank=True)
-    y_axis_units = models.TextField(blank=True)
+    x_axis_units = models.CharField(blank=True)
+    y_axis_units = models.CharField(blank=True)
     _notes = models.TextField(blank=True)
 
 
