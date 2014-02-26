@@ -45,7 +45,7 @@ class Dynaherd(models.Model):
 
 
 class Inchart(models.Model):
-    fieldname = models.TextField(blank=True)
+    field_name = models.TextField(blank=True)
     chart_name = models.TextField()
     _ispdf = models.BooleanField()
     chart_type = models.TextField(blank=True)

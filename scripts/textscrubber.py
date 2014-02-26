@@ -50,7 +50,9 @@ def switch_to_boolean_fields(filename):
     lines = open(filename, 'r').readlines()
     for index, line in enumerate(lines):
         field_name = line.split()[0] if line.split() else ''
-        if field_name.find('use_') != -1 or field_name.find('save_') != -1 :  # field name starts with 'use_' or 'save_'
+        boolean_prefixes = ['save_', 'use_', 'include_']
+        if any( map(lambda prefix: field_name.find(prefix) != -1, boolean_prefixes)):  # field name starts with 'use_' or 'save_'
+            print(field_name)
             line_ending = line[line.find('(') + 1:]  # starting after the first paren til the end
             line_ending = line_ending.replace('blank=True, null=True', '')
             lines[index] = '    ' + field_name + " = models.BooleanField(default=False, " + line_ending
