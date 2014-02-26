@@ -45,9 +45,9 @@ class Dynaherd(models.Model):
 
 
 class Inchart(models.Model):
-    fieldname = models.TextField(blank=True)
+    field_name = models.TextField(blank=True)
     chart_name = models.TextField()
-    _ispdf = models.IntegerField()
+    _ispdf = models.BooleanField()
     chart_type = models.TextField(blank=True)
     mean = models.FloatField(blank=True, null=True)
     std_dev = models.FloatField(blank=True, null=True)
@@ -69,8 +69,8 @@ class Inchart(models.Model):
     theta = models.FloatField(blank=True, null=True)
     a = models.FloatField(blank=True, null=True)
     s = models.IntegerField(blank=True, null=True)
-    x_axis_units = models.TextField(blank=True)
-    y_axis_units = models.TextField(blank=True)
+    x_axis_units = models.CharField(blank=True)
+    y_axis_units = models.CharField(blank=True)
     _notes = models.TextField(blank=True)
 
 
@@ -109,8 +109,8 @@ class Incontrolplan(models.Model):
 
 class Incontrolsproductiontype(models.Model):
     production_type_id = models.IntegerField(unique=True)
-    use_disease_transition = models.IntegerField(blank=True, null=True)
-    use_detection = models.IntegerField(blank=True, null=True)
+    use_disease_transition = models.BooleanField(default=False, )
+    use_detection = models.BooleanField(default=False, )
     _detprobobsvstimeclinicalrelid = models.IntegerField(blank=True, null=True)
     _detprobreportvsfirstdetectionrelid = models.IntegerField(blank=True, null=True)
     trace_direct_forward = models.IntegerField(blank=True, null=True)
@@ -122,7 +122,7 @@ class Incontrolsproductiontype(models.Model):
     trace_indirect_success = models.FloatField(blank=True, null=True)
     trace_indirect_trace_period = models.IntegerField(blank=True, null=True)
     _tracedelaypdfid = models.IntegerField(blank=True, null=True)
-    use_destruction = models.IntegerField(blank=True, null=True)
+    use_destruction = models.BooleanField(default=False, )
     destruction_is_ring_trigger = models.IntegerField(blank=True, null=True)
     destruction_ring_radius = models.FloatField(blank=True, null=True)
     destruction_is_ring_target = models.IntegerField(blank=True, null=True)
@@ -131,7 +131,7 @@ class Incontrolsproductiontype(models.Model):
     destroy_direct_back_traces = models.IntegerField(blank=True, null=True)
     destroy_indirect_back_traces = models.IntegerField(blank=True, null=True)
     destruction_priority = models.IntegerField(blank=True, null=True)
-    use_vaccination = models.IntegerField(blank=True, null=True)
+    use_vaccination = models.BooleanField(default=False, )
     vaccination_min_time_between = models.IntegerField(blank=True, null=True)
     vaccinate_detected = models.IntegerField(blank=True, null=True)
     days_to_immunity = models.IntegerField(blank=True, null=True)
@@ -176,7 +176,7 @@ class Indiseaseglobal(models.Model):
 
 class Indiseaseproductiontype(models.Model):
     _production_type_id = models.IntegerField(blank=True, null=True)
-    use_disease_transition = models.IntegerField(blank=True, null=True)
+    use_disease_transition = models.BooleanField(default=False, )
     _dislatentperiodpdfid = models.IntegerField(blank=True, null=True)
     _dissubclinicalperiodpdfid = models.IntegerField(blank=True, null=True)
     _disclinicalperiodpdfid = models.IntegerField(blank=True, null=True)
@@ -190,7 +190,7 @@ class Indiseasespread(models.Model):
     latent_can_infect = models.IntegerField(blank=True, null=True)
     subclinical_can_infect = models.IntegerField(blank=True, null=True)
     mean_contact_rate = models.FloatField(blank=True, null=True)
-    use_fixed_contact_rate = models.IntegerField(blank=True, null=True)
+    use_fixed_contact_rate = models.BooleanField(default=False, )
     fixed_contact_rate = models.FloatField(blank=True, null=True)
     infection_probability = models.FloatField(blank=True, null=True)
     _distancepdfid = models.IntegerField(blank=True, null=True)
@@ -210,20 +210,20 @@ class Ingeneral(models.Model):
     sim_stop_reason = models.TextField(blank=True)
     include_contact_spread = models.IntegerField(blank=True, null=True)
     include_airborne_spread = models.IntegerField(blank=True, null=True)
-    use_airborne_exponential_decay = models.IntegerField(blank=True, null=True)
-    use_within_herd_prevalence = models.IntegerField(blank=True, null=True)
+    use_airborne_exponential_decay = models.BooleanField(default=False, )
+    use_within_herd_prevalence = models.BooleanField(default=False, )
     cost_track_destruction = models.IntegerField(blank=True, null=True)
     cost_track_vaccination = models.IntegerField(blank=True, null=True)
     cost_track_zone_surveillance = models.IntegerField(blank=True, null=True)
-    use_fixed_random_seed = models.IntegerField(blank=True, null=True)
+    use_fixed_random_seed = models.BooleanField(default=False, )
     random_seed = models.IntegerField(blank=True, null=True)
-    save_all_daily_outputs = models.IntegerField(blank=True, null=True)
-    save_daily_outputs_for_iterations = models.IntegerField(blank=True, null=True)
+    save_all_daily_outputs = models.BooleanField(default=False, )
+    save_daily_outputs_for_iterations = models.BooleanField(default=False, )
     write_daily_states_file = models.IntegerField(blank=True, null=True)
     daily_states_filename = models.TextField(blank=True)
-    save_daily_events = models.IntegerField(blank=True, null=True)
-    save_daily_exposures = models.IntegerField(blank=True, null=True)
-    save_iteration_outputs_for_herds = models.IntegerField(blank=True, null=True)
+    save_daily_events = models.BooleanField(default=False, )
+    save_daily_exposures = models.BooleanField(default=False, )
+    save_iteration_outputs_for_herds = models.BooleanField(default=False, )
     write_map_output = models.IntegerField(blank=True, null=True)
     map_directory = models.TextField(blank=True)
 
@@ -236,11 +236,11 @@ class Inproductiontype(models.Model):
 class Inproductiontypepair(models.Model):
     _sourceproductiontypeid = models.IntegerField()
     _destproductiontypeid = models.IntegerField()
-    use_direct_contact = models.IntegerField()
+    use_direct_contact = models.BooleanField(default=False, )
     _directcontactspreadid = models.IntegerField(blank=True, null=True)
-    use_indirect_contact = models.IntegerField()
+    use_indirect_contact = models.BooleanField(default=False, )
     _indirectcontactspreadid = models.IntegerField(blank=True, null=True)
-    use_airborne_spread = models.IntegerField()
+    use_airborne_spread = models.BooleanField(default=False, )
     _airbornecontactspreadid = models.IntegerField(blank=True, null=True)
 
 
@@ -252,11 +252,11 @@ class Inzone(models.Model):
 class Inzoneproductiontypepair(models.Model):
     _zoneid = models.IntegerField()
     _production_type_id = models.IntegerField()
-    use_directmovement_control = models.IntegerField()
+    use_directmovement_control = models.BooleanField(default=False, )
     _zonedirectmovementrelid = models.IntegerField(blank=True, null=True)
-    use_indirect_movement_control = models.IntegerField()
+    use_indirect_movement_control = models.BooleanField(default=False, )
     _zoneindirectmovementrelid = models.IntegerField(blank=True, null=True)
-    use_detection_multiplier = models.IntegerField()
+    use_detection_multiplier = models.BooleanField(default=False, )
     zone_detection_multiplier = models.FloatField(blank=True, null=True)
     cost_surv_per_animal_day = models.FloatField(blank=True, null=True)
 
