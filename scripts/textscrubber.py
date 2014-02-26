@@ -57,12 +57,12 @@ def switch_to_boolean_fields(filename):
             line_ending = line_ending.replace('blank=True, null=True', '')
             lines[index] = '    ' + field_name + " = models.BooleanField(default=False, " + line_ending
 
-    open(filename.replace('.py','')+'-out.py', 'w').writelines(lines)
+    open('auto-' + filename[filename.rfind('/')+1:], 'w').writelines(lines)
 
 
 if __name__ == '__main__':
     #Step #1:  Search:  db_column='[^']*', in models.py to remove column names
     print("Running from: ", os.getcwd())
     # lowercase_a_file('CreateDjangoOutputTables.sql')
-    # generate_forms_with_hidden_fields('auto-models.py', 'auto-forms.py')
-    switch_to_boolean_fields('auto-models.py')
+    # generate_forms_with_hidden_fields('../ScenarioCreator/models.py', 'auto-forms.py')
+    switch_to_boolean_fields('../ScenarioCreator/models.py')

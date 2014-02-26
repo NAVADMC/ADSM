@@ -7,10 +7,12 @@
 #
 # Also note: You'll have to insert the output of 'django-admin.py sqlcustom [appname]'
 # into your database.
+# Changes made in ScenarioCreator/models.py propagate to the script output
 # Search:  db_column='[^']*',  to remove column names
 from __future__ import unicode_literals
 
 from django.db import models
+
 
 class Dbschemaversion(models.Model):
     version_number = models.TextField(unique=True)
