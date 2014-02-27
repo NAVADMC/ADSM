@@ -46,23 +46,28 @@ def generate_forms_with_hidden_fields(filename, output_filename):
     open(output_filename, 'w').write('\n'.join(form_lines))
 
 
-def switch_to_boolean_fields(filename):
+def switch_to_boolean_fields(filename, output_filename):
     lines = open(filename, 'r').readlines()
     for index, line in enumerate(lines):
-        field_name = line.split()[0] if line.split() else ''
-        boolean_prefixes = ['save_', 'use_', 'include_']
+        field_name = line[:line.find('=')] if line.find('=') != -1 else ''
+        boolean_prefixes = [' trace_', ' destroy_', '_can_', ' vaccinate_', '_is_', ' exam_', ' test_', '_track_', ' write_']  # ['save_', 'use_', 'include_']
         if any( map(lambda prefix: field_name.find(prefix) != -1, boolean_prefixes)):  # field name starts with 'use_' or 'save_'
+            if line.find('BooleanField') != -1:
+                print(field_name)
+                continue  # no need to edit this line
+            if line.find('IntegerField') == -1:
+                continue  # this is a false positive because BooleanFields would already be Integer to start with
             print(field_name)
             line_ending = line[line.find('(') + 1:]  # starting after the first paren til the end
             line_ending = line_ending.replace('blank=True, null=True', '')
-            lines[index] = '    ' + field_name + " = models.BooleanField(default=False, " + line_ending
+            lines[index] = field_name + " = models.BooleanField(default=False, " + line_ending
 
-    open('auto-' + filename[filename.rfind('/')+1:], 'w').writelines(lines)
+    open(output_filename, 'w').writelines(lines)
 
 
 if __name__ == '__main__':
     #Step #1:  Search:  db_column='[^']*', in models.py to remove column names
     print("Running from: ", os.getcwd())
     # lowercase_a_file('CreateDjangoOutputTables.sql')
-    generate_forms_with_hidden_fields('../ScenarioCreator/models.py', 'auto-forms.py')
-    # switch_to_boolean_fields('../ScenarioCreator/models.py')
+    # generate_forms_with_hidden_fields('../ScenarioCreator/models.py', 'auto-forms.py')
+    switch_to_boolean_fields('../ScenarioCreator/models.py', 'auto-models.py')

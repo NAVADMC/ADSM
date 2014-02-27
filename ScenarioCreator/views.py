@@ -9,7 +9,7 @@ def start_window(request):
 
 
 def new_scenario(request):
-    initialized_form = IngeneralForm(request.POST or None)
+    initialized_form = InGeneralForm(request.POST or None)
     if initialized_form.is_valid():
         initialized_form.save();  # write to database
     context = {'form': initialized_form}
@@ -18,8 +18,8 @@ def new_scenario(request):
 
 
 def edit_scenario(request, primary_key):
-    scenario = get_object_or_404(Ingeneral, pk=primary_key)
-    form = DynaherdForm(request.POST or None, instance=scenario)
+    scenario = get_object_or_404(InGeneral, pk=primary_key)
+    form = DynamicHerdForm(request.POST or None, instance=scenario)
     if request.method == 'POST' and form.is_valid():
         form.save(); #write to database
     context = {'form': form}
