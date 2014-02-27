@@ -12,9 +12,9 @@ class DynamicBlobForm(ModelForm):
         model = DynamicBlob
 
 
-class DynamicHerdForm(ModelForm):
+class DynamicUnitForm(ModelForm):
     class Meta:
-        model = DynamicHerd
+        model = DynamicUnit
         exclude = ['_final_state_code', '_final_control_state_code', '_final_detection_state_code', '_cum_infected', '_cum_detected', '_cum_destroyed', '_cum_vaccinated']
 
 

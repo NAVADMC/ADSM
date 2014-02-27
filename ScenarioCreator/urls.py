@@ -4,7 +4,7 @@ from django.conf.urls import patterns, url
 urlpatterns = patterns('',
                        url('^$', "ScenarioCreator.views.start_window"),
                        url('^new/$', "ScenarioCreator.views.new_scenario"),
-                       url('^herd/new/$', "ScenarioCreator.views.new_herd"),
+                       url('^unit/new/$', "ScenarioCreator.views.new_unit"),
                        url('^(?P<primary_key>\d+)/$', "ScenarioCreator.views.edit_scenario"),
                        )
 

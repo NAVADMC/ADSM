@@ -18,8 +18,8 @@ def new_form(request, formClass, title):
 def new_scenario(request):
     return new_form(request, InGeneralForm, "Create a new scenario")
 
-def new_herd(request):
-    return new_form(request, DynamicHerdForm, "Create a new Herd")
+def new_unit(request):
+    return new_form(request, DynamicUnitForm, "Create a new Unit")
 
 def edit_scenario(request, primary_key):
     scenario = get_object_or_404(InGeneral, pk=primary_key)

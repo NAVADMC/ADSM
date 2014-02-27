@@ -29,7 +29,7 @@ class DynamicBlob(models.Model):
     zone_perimeters = models.CharField(max_length=255, blank=True)
 
 
-class DynamicHerd(models.Model):
+class DynamicUnit(models.Model):
     latitude = LatitudeField()
     longitude = LongitudeField()
     initial_state_code = models.CharField(max_length=255, )
@@ -89,7 +89,7 @@ class InChartDetail(models.Model):
 class InControlGlobal(models.Model):
     include_detection = models.BooleanField(default=False, )
     include_tracing = models.BooleanField(default=False, )
-    include_tracing_herd_exam = models.BooleanField(default=False, )
+    include_tracing_unit_exam = models.BooleanField(default=False, )
     include_tracing_testing = models.BooleanField(default=False, )
     include_destruction = models.BooleanField(default=False, )
     destruction_delay = models.IntegerField(blank=True, null=True)
@@ -220,7 +220,7 @@ class InGeneral(models.Model):
     include_contact_spread = models.BooleanField(default=False, )
     include_airborne_spread = models.BooleanField(default=False, )
     use_airborne_exponential_decay = models.BooleanField(default=False, )
-    use_within_herd_prevalence = models.BooleanField(default=False, )
+    use_within_unit_prevalence = models.BooleanField(default=False, )
     cost_track_destruction = models.BooleanField(default=False, )
     cost_track_vaccination = models.BooleanField(default=False, )
     cost_track_zone_surveillance = models.BooleanField(default=False, )
@@ -234,7 +234,7 @@ class InGeneral(models.Model):
     daily_states_filename = models.CharField(max_length=255, blank=True)
     save_daily_events = models.BooleanField(default=False, )
     save_daily_exposures = models.BooleanField(default=False, )
-    save_iteration_outputs_for_herds = models.BooleanField(default=False, )
+    save_iteration_outputs_for_units = models.BooleanField(default=False, )
     write_map_output = models.BooleanField(default=False, )
     map_directory = models.CharField(max_length=255, blank=True)
 
