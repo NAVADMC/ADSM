@@ -229,7 +229,7 @@ class InGeneral(models.Model):
     random_seed = models.IntegerField(blank=True, null=True)
     ## Outputs requested:
     save_all_daily_outputs = models.BooleanField(default=False, )
-    save_daily_outputs_for_iterations = models.BooleanField(default=False, )
+    save_daily_outputs_for_iterations = models.BooleanField(default=False, )  # This is possibly an IntegerField
     write_daily_states_file = models.BooleanField(default=False,
       help_text='The number of units in each state.  This variable always reports the counts on the day of reporting, regardless of whether it is reported daily, weekly, or at some other interval.  This variable is needed to create a plot of the states over time.')
     daily_states_filename = models.CharField(max_length=255, blank=True)
