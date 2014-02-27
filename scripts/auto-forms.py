@@ -1,100 +1,100 @@
-class DbschemaversionForm(ModelForm):
+class DbSchemaVersionForm(ModelForm):
     class Meta:
-        model = Dbschemaversion
+        model = DbSchemaVersion
 
 
-class DynablobForm(ModelForm):
+class DynamicBlobForm(ModelForm):
     class Meta:
-        model = Dynablob
+        model = DynamicBlob
 
 
-class DynaherdForm(ModelForm):
+class DynamicHerdForm(ModelForm):
     class Meta:
-        model = Dynaherd
+        model = DynamicHerd
         exclude = ['_final_state_code', '_final_control_state_code', '_final_detection_state_code', '_cum_infected', '_cum_detected', '_cum_destroyed', '_cum_vaccinated']
 
 
-class InchartForm(ModelForm):
+class InChartForm(ModelForm):
     class Meta:
-        model = Inchart
+        model = InChart
         exclude = ['_ispdf', '_notes']
 
 
-class InchartdetailForm(ModelForm):
+class InChartDetailForm(ModelForm):
     class Meta:
-        model = Inchartdetail
+        model = InChartDetail
         exclude = ['_chartid', '_pointorder', '_x', '_y']
 
 
-class IncontrolglobalForm(ModelForm):
+class InControlGlobalForm(ModelForm):
     class Meta:
-        model = Incontrolglobal
+        model = InControlGlobal
         exclude = ['_destrcapacityrelid', '_vacccapacityrelid', '_vacccapacitystartrelid', '_vacccapacityrestartrelid']
 
 
-class IncontrolplanForm(ModelForm):
+class InControlPlanForm(ModelForm):
     class Meta:
-        model = Incontrolplan
+        model = InControlPlan
 
 
-class IncontrolsproductiontypeForm(ModelForm):
+class InControlsProductionTypeForm(ModelForm):
     class Meta:
-        model = Incontrolsproductiontype
+        model = InControlsProductionType
         exclude = ['_detprobobsvstimeclinicalrelid', '_detprobreportvsfirstdetectionrelid', '_tracedelaypdfid', '_vaccimmuneperiodpdfid', '_testdelaypdfid']
 
 
-class IndiseaseglobalForm(ModelForm):
+class InDiseaseGlobalForm(ModelForm):
     class Meta:
-        model = Indiseaseglobal
+        model = InDiseaseGlobal
 
 
-class IndiseaseproductiontypeForm(ModelForm):
+class InDiseaseProductionTypeForm(ModelForm):
     class Meta:
-        model = Indiseaseproductiontype
+        model = InDiseaseProductionType
         exclude = ['_production_type_id', '_dislatentperiodpdfid', '_dissubclinicalperiodpdfid', '_disclinicalperiodpdfid', '_disimmuneperiodpdfid', '_disprevalencerelid']
 
 
-class IndiseasespreadForm(ModelForm):
+class InDiseaseSpreadForm(ModelForm):
     class Meta:
-        model = Indiseasespread
+        model = InDiseaseSpread
         exclude = ['_productiontypepairid', '_distancepdfid', '_movementcontrolrelid', '_transportdelaypdfid']
 
 
-class IngeneralForm(ModelForm):
+class InGeneralForm(ModelForm):
     class Meta:
-        model = Ingeneral
+        model = InGeneral
 
 
-class InproductiontypeForm(ModelForm):
+class InProductionTypeForm(ModelForm):
     class Meta:
-        model = Inproductiontype
+        model = InProductionType
 
 
-class InproductiontypepairForm(ModelForm):
+class InProductionTypePairForm(ModelForm):
     class Meta:
-        model = Inproductiontypepair
+        model = InProductionTypePair
         exclude = ['_sourceproductiontypeid', '_destproductiontypeid', '_directcontactspreadid', '_indirectcontactspreadid', '_airbornecontactspreadid']
 
 
-class InzoneForm(ModelForm):
+class InZoneForm(ModelForm):
     class Meta:
-        model = Inzone
+        model = InZone
 
 
-class InzoneproductiontypepairForm(ModelForm):
+class InZoneProductionTypePairForm(ModelForm):
     class Meta:
-        model = Inzoneproductiontypepair
+        model = InZoneProductionTypePair
         exclude = ['_zoneid', '_production_type_id', '_zonedirectmovementrelid', '_zoneindirectmovementrelid']
 
 
-class ReadallcodesForm(ModelForm):
+class ReadAllCodesForm(ModelForm):
     class Meta:
-        model = Readallcodes
+        model = ReadAllCodes
         exclude = ['_code', '_code_type', '_code_description']
 
 
-class ReadallcodetypesForm(ModelForm):
+class ReadAllCodeTypesForm(ModelForm):
     class Meta:
-        model = Readallcodetypes
+        model = ReadAllCodeTypes
         exclude = ['_code_type', '_code_type_description']
 

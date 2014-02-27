@@ -18,7 +18,11 @@ from __future__ import unicode_literals
 from django.db import models
 
 
-class Dbschemaversion(models.Model):
+def chc(choice_list):
+    return tuple((x, x) for x in choice_list)
+
+
+class DbSchemaVersion(models.Model):
     version_number = models.CharField(max_length=255, unique=True)
     version_application = models.CharField(max_length=255, )
     version_date = models.CharField(max_length=255, )
@@ -26,11 +30,11 @@ class Dbschemaversion(models.Model):
     version_id = models.IntegerField(blank=True, null=True)
 
 
-class Dynablob(models.Model):
+class DynamicBlob(models.Model):
     zone_perimeters = models.CharField(max_length=255, blank=True)
 
 
-class Dynaherd(models.Model):
+class DynamicHerd(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     initial_state_code = models.CharField(max_length=255, )
@@ -50,7 +54,7 @@ class Dynaherd(models.Model):
     user_defined_4 = models.TextField(blank=True)
 
 
-class Inchart(models.Model):
+class InChart(models.Model):
     field_name = models.CharField(max_length=255, blank=True)
     chart_name = models.CharField(max_length=255, )
     _ispdf = models.BooleanField()
@@ -80,14 +84,14 @@ class Inchart(models.Model):
     _notes = models.TextField(blank=True)
 
 
-class Inchartdetail(models.Model):
+class InChartDetail(models.Model):
     _chartid = models.IntegerField()
     _pointorder = models.IntegerField()
     _x = models.FloatField()
     _y = models.FloatField()
 
 
-class Incontrolglobal(models.Model):
+class InControlGlobal(models.Model):
     include_detection = models.BooleanField(default=False, )
     include_tracing = models.BooleanField(default=False, )
     include_tracing_herd_exam = models.BooleanField(default=False, )
@@ -107,15 +111,14 @@ class Incontrolglobal(models.Model):
     _vacccapacityrestartrelid = models.IntegerField(blank=True, null=True)
 
 
-class Incontrolplan(models.Model):
+class InControlPlan(models.Model):
     control_plan_name = models.CharField(max_length=255, )
     control_plan_description = models.TextField(blank=True)
     control_plan_group = models.CharField(max_length=255, blank=True)
 
 
-class Incontrolsproductiontype(models.Model):
+class InControlsProductionType(models.Model):
     production_type_id = models.IntegerField(unique=True)
-    use_disease_transition = models.BooleanField(default=False, )
     use_detection = models.BooleanField(default=False, )
     _detprobobsvstimeclinicalrelid = models.IntegerField(blank=True, null=True)
     _detprobreportvsfirstdetectionrelid = models.IntegerField(blank=True, null=True)
@@ -175,12 +178,12 @@ class Incontrolsproductiontype(models.Model):
     vaccinate_restrospective_days = models.IntegerField(blank=True, null=True)
 
 
-class Indiseaseglobal(models.Model):
+class InDiseaseGlobal(models.Model):
     disease_name = models.TextField(blank=True)
     disease_description = models.TextField(blank=True)
 
 
-class Indiseaseproductiontype(models.Model):
+class InDiseaseProductionType(models.Model):
     _production_type_id = models.IntegerField(blank=True, null=True)
     use_disease_transition = models.BooleanField(default=False, )
     _dislatentperiodpdfid = models.IntegerField(blank=True, null=True)
@@ -190,7 +193,7 @@ class Indiseaseproductiontype(models.Model):
     _disprevalencerelid = models.IntegerField(blank=True, null=True)
 
 
-class Indiseasespread(models.Model):
+class InDiseaseSpread(models.Model):
     _productiontypepairid = models.IntegerField(unique=True)
     spread_method_code = models.CharField(max_length=255, blank=True)
     latent_can_infect = models.IntegerField(blank=True, null=True)
@@ -208,8 +211,8 @@ class Indiseasespread(models.Model):
     wind_direction_end = models.IntegerField(blank=True, null=True)
 
 
-class Ingeneral(models.Model):
-    language = models.TextField(blank=True)
+class InGeneral(models.Model):
+    language = models.CharField(choices=(('en',"English"), ('es',"Spanish")), max_length=255, blank=True)
     scenario_description = models.TextField(blank=True)
     iterations = models.IntegerField(blank=True, null=True)
     days = models.IntegerField(blank=True, null=True)
@@ -225,7 +228,7 @@ class Ingeneral(models.Model):
     random_seed = models.IntegerField(blank=True, null=True)
     save_all_daily_outputs = models.BooleanField(default=False, )
     save_daily_outputs_for_iterations = models.BooleanField(default=False, )
-    write_daily_states_file = models.IntegerField(blank=True, null=True)
+    write_daily_states_file = models.BooleanField(default=False, )
     daily_states_filename = models.CharField(max_length=255, blank=True)
     save_daily_events = models.BooleanField(default=False, )
     save_daily_exposures = models.BooleanField(default=False, )
@@ -234,12 +237,12 @@ class Ingeneral(models.Model):
     map_directory = models.CharField(max_length=255, blank=True)
 
 
-class Inproductiontype(models.Model):
+class InProductionType(models.Model):
     production_type_name = models.CharField(max_length=255, )
     production_type_description = models.TextField(blank=True) # This field type is a guess.
 
 
-class Inproductiontypepair(models.Model):
+class InProductionTypePair(models.Model):
     _sourceproductiontypeid = models.IntegerField()
     _destproductiontypeid = models.IntegerField()
     use_direct_contact = models.BooleanField(default=False, )
@@ -250,12 +253,12 @@ class Inproductiontypepair(models.Model):
     _airbornecontactspreadid = models.IntegerField(blank=True, null=True)
 
 
-class Inzone(models.Model):
+class InZone(models.Model):
     zone_description = models.TextField()
     zone_radius = models.FloatField()
 
 
-class Inzoneproductiontypepair(models.Model):
+class InZoneProductionTypePair(models.Model):
     _zoneid = models.IntegerField()
     _production_type_id = models.IntegerField()
     use_directmovement_control = models.BooleanField(default=False, )
@@ -267,13 +270,13 @@ class Inzoneproductiontypepair(models.Model):
     cost_surv_per_animal_day = models.FloatField(blank=True, null=True)
 
 
-class Readallcodes(models.Model):
+class ReadAllCodes(models.Model):
     _code = models.CharField(max_length=255, )
     _code_type = models.CharField(max_length=255, )
     _code_description = models.TextField()
 
 
-class Readallcodetypes(models.Model):
+class ReadAllCodeTypes(models.Model):
     _code_type = models.CharField(max_length=255, )
     _code_type_description = models.TextField()
 
