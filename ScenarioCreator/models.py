@@ -2,11 +2,7 @@
 # You'll have to do the following manually to clean this up:
 #   * Rearrange models' order
 #   * Make sure each model has one field with primary_key=True
-#   * Remove `managed = False` lines for those models you wish to give write DB access
-# Feel free to rename the models, but don't rename db_table values or field names.
-#
-# Also note: You'll have to insert the output of 'django-admin.py sqlcustom [appname]'
-# into your database.
+
 # Changes made in ScenarioCreator/models.py propagate to the script output
 
 # TextField is more costly than CharField.  Only use TextField for descriptions or urls.
@@ -233,7 +229,7 @@ class InGeneral(models.Model):
     save_daily_events = models.BooleanField(default=False, )
     save_daily_exposures = models.BooleanField(default=False, )
     save_iteration_outputs_for_herds = models.BooleanField(default=False, )
-    write_map_output = models.IntegerField(blank=True, null=True)
+    write_map_output = models.BooleanField(default=False, )
     map_directory = models.CharField(max_length=255, blank=True)
 
 
