@@ -209,10 +209,15 @@ class InDiseaseSpread(models.Model):
 
 class InGeneral(models.Model):
     language = models.CharField(choices=(('en',"English"), ('es',"Spanish")), max_length=255, blank=True)
-    scenario_description = models.TextField(blank=True)
-    iterations = models.IntegerField(blank=True, null=True)
-    days = models.IntegerField(blank=True, null=True)
-    sim_stop_reason = models.CharField(max_length=255, blank=True)
+    scenario_description = models.TextField(blank=True,
+                                            help_text='A short description of the scenario being simulated.')
+    iterations = models.IntegerField(blank=True, null=True,
+                                     help_text='The number of simulations to run.')
+    days = models.IntegerField(blank=True, null=True,
+                               help_text='The maximum number of days in a simulation run. A simulation run may end earlier, if there are no latent or infectious animals and no module has pending actions to complete.')
+    sim_stop_reason = models.CharField(max_length=255, blank=True,
+        choices=(('disease-end','Simulation will stop when there are no more latent or infectious units.'),
+                 ('first-detection','Simulation will stop when the first detection occurs.')))
     include_contact_spread = models.BooleanField(default=False, )
     include_airborne_spread = models.BooleanField(default=False, )
     use_airborne_exponential_decay = models.BooleanField(default=False, )
@@ -222,9 +227,11 @@ class InGeneral(models.Model):
     cost_track_zone_surveillance = models.IntegerField(blank=True, null=True)
     use_fixed_random_seed = models.BooleanField(default=False, )
     random_seed = models.IntegerField(blank=True, null=True)
+    ## Outputs requested:
     save_all_daily_outputs = models.BooleanField(default=False, )
     save_daily_outputs_for_iterations = models.BooleanField(default=False, )
-    write_daily_states_file = models.BooleanField(default=False, )
+    write_daily_states_file = models.BooleanField(default=False,
+      help_text='The number of units in each state.  This variable always reports the counts on the day of reporting, regardless of whether it is reported daily, weekly, or at some other interval.  This variable is needed to create a plot of the states over time.')
     daily_states_filename = models.CharField(max_length=255, blank=True)
     save_daily_events = models.BooleanField(default=False, )
     save_daily_exposures = models.BooleanField(default=False, )
