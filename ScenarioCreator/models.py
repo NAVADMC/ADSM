@@ -9,10 +9,9 @@
 # CharFields are max=255 characters and are presented as a single text line in forms.
 # TextFields are unlimited and presented as giant text boxes in forms.
 # Search:  db_column='[^']*',  to remove column names
-from __future__ import unicode_literals
 
 from django.db import models
-
+from django_extras.db.models import PercentField, LatitudeField, LongitudeField
 
 def chc(choice_list):
     return tuple((x, x) for x in choice_list)
@@ -31,8 +30,8 @@ class DynamicBlob(models.Model):
 
 
 class DynamicHerd(models.Model):
-    latitude = models.FloatField()
-    longitude = models.FloatField()
+    latitude = LatitudeField()
+    longitude = LongitudeField()
     initial_state_code = models.CharField(max_length=255, )
     days_in_initial_state = models.IntegerField()
     days_left_in_initial_state = models.IntegerField()
@@ -95,7 +94,7 @@ class InControlGlobal(models.Model):
     include_destruction = models.BooleanField(default=False, )
     destruction_delay = models.IntegerField(blank=True, null=True)
     _destrcapacityrelid = models.IntegerField(blank=True, null=True)
-    destruction_priority_order = models.CharField(max_length=255, blank=True)
+    destruction_priority_order = models.CharField(max_length=255, blank=True)  # These are an odd legacy.  Leave it for now
     destrucion_reason_order = models.CharField(max_length=255, blank=True)
     include_vaccination = models.BooleanField(default=False, )
     vaccincation_detected_units_before_start = models.IntegerField(blank=True, null=True)
@@ -120,11 +119,11 @@ class InControlsProductionType(models.Model):
     _detprobreportvsfirstdetectionrelid = models.IntegerField(blank=True, null=True)
     trace_direct_forward = models.BooleanField(default=False, )
     trace_direct_back = models.BooleanField(default=False, )
-    trace_direct_success = models.FloatField(blank=True, null=True)
+    trace_direct_success = PercentField(blank=True, null=True)
     trace_direct_trace_period = models.BooleanField(default=False, )
     trace_indirect_forward = models.BooleanField(default=False, )
     trace_indirect_back = models.BooleanField(default=False, )
-    trace_indirect_success = models.FloatField(blank=True, null=True)
+    trace_indirect_success = PercentField(blank=True, null=True)
     trace_indirect_trace_period = models.BooleanField(default=False, )
     _tracedelaypdfid = models.IntegerField(blank=True, null=True)
     use_destruction = models.BooleanField(default=False, )
@@ -229,9 +228,9 @@ class InGeneral(models.Model):
     random_seed = models.IntegerField(blank=True, null=True)
     ## Outputs requested:
     save_all_daily_outputs = models.BooleanField(default=False, )
-    save_daily_outputs_for_iterations = models.BooleanField(default=False, )  # This is possibly an IntegerField
+    maximum_iterations_for_daily_output = models.IntegerField(default=3, )
     write_daily_states_file = models.BooleanField(default=False,
-      help_text='The number of units in each state.  This variable always reports the counts on the day of reporting, regardless of whether it is reported daily, weekly, or at some other interval.  This variable is needed to create a plot of the states over time.')
+      help_text='The number of units in each state.  This always reports the counts on the day of reporting, regardless of whether it is reported daily, weekly, or at some other interval.  This variable is needed to create a plot of the states over time.')
     daily_states_filename = models.CharField(max_length=255, blank=True)
     save_daily_events = models.BooleanField(default=False, )
     save_daily_exposures = models.BooleanField(default=False, )
