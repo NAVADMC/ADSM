@@ -53,7 +53,7 @@ class DynamicHerd(models.Model):
 class InChart(models.Model):
     field_name = models.CharField(max_length=255, blank=True)
     chart_name = models.CharField(max_length=255, )
-    _ispdf = models.BooleanField()
+    _ispdf = models.BooleanField(default=False, )
     chart_type = models.CharField(max_length=255, blank=True)
     mean = models.FloatField(blank=True, null=True)
     std_dev = models.FloatField(blank=True, null=True)
@@ -230,7 +230,7 @@ class InGeneral(models.Model):
     ## Outputs requested:
     save_all_daily_outputs = models.BooleanField(default=False, )
     save_daily_outputs_for_iterations = models.BooleanField(default=False, )
-    write_daily_states_file = models.BooleanField(default=False, 
+    write_daily_states_file = models.BooleanField(default=False,
       help_text='The number of units in each state.  This variable always reports the counts on the day of reporting, regardless of whether it is reported daily, weekly, or at some other interval.  This variable is needed to create a plot of the states over time.')
     daily_states_filename = models.CharField(max_length=255, blank=True)
     save_daily_events = models.BooleanField(default=False, )

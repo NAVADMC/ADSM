@@ -19,7 +19,7 @@ def new_scenario(request):
 
 def edit_scenario(request, primary_key):
     scenario = get_object_or_404(InGeneral, pk=primary_key)
-    form = DynamicHerdForm(request.POST or None, instance=scenario)
+    form = InGeneralForm(request.POST or None, instance=scenario)
     if request.method == 'POST' and form.is_valid():
         form.save(); #write to database
     context = {'form': form}
