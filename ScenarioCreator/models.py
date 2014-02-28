@@ -27,11 +27,11 @@ class DbSchemaVersion(models.Model):
 
 
 class DynamicBlob(models.Model):
-    zone_perimeters = models.CharField(max_length=255, blank=True)
+    zone_perimeters = models.CharField(max_length=255, blank=True)  # polygons?
 
 
 class DynamicUnit(models.Model):
-    #ProductionType?
+    production_type = models.ForeignKey('InProductionType')
     latitude = LatitudeField()
     longitude = LongitudeField()
     initial_state_code = models.CharField(max_length=255,
@@ -90,12 +90,12 @@ class InChart(models.Model):
     s = models.IntegerField(blank=True, null=True)
     x_axis_units = models.CharField(max_length=255, default="Days")
     y_axis_units = models.CharField(max_length=255, blank=True)
-    _notes = models.TextField(blank=True, null=True)
+    _notes = models.TextField(blank=True, null=True)  # Why is this hidden?
 
 
 class InChartDetail(models.Model):
-    _chart_id = models.IntegerField()
-    _point_order = models.IntegerField()
+    chart = models.ForeignKey('InChart')
+    _point_order = models.IntegerField()  # Shouldn't this be a list or TextField?
     _x = models.FloatField()
     _y = models.FloatField()
 
@@ -127,7 +127,7 @@ class InControlPlan(models.Model):
 
 
 class InControlsProductionType(models.Model):
-    production_type_id = models.IntegerField(unique=True)
+    production_type = models.ForeignKey('InProductionType')
     use_detection = models.BooleanField(default=False, )
     _detection_probability_for_observed_time_in_clinical_relid = models.IntegerField(blank=True, null=True)
     _detection_probability_report_vs_first_detection_relid = models.IntegerField(blank=True, null=True)
@@ -139,7 +139,7 @@ class InControlsProductionType(models.Model):
     trace_indirect_back = models.BooleanField(default=False, )
     trace_indirect_success = PercentField(blank=True, null=True)
     trace_indirect_trace_period = models.BooleanField(default=False, )
-    _trace_delay_pdfid = models.IntegerField(blank=True, null=True)
+    trace_delay = models.ForeignKey('InChart')
     use_destruction = models.BooleanField(default=False, )
     destruction_is_ring_trigger = models.BooleanField(default=False, )
     destruction_ring_radius = models.FloatField(blank=True, null=True)
@@ -153,7 +153,7 @@ class InControlsProductionType(models.Model):
     vaccination_min_time_between = models.IntegerField(blank=True, null=True)
     vaccinate_detected = models.BooleanField(default=False, )
     days_to_immunity = models.IntegerField(blank=True, null=True)
-    _vaccine_immune_period_pdfid = models.IntegerField(blank=True, null=True)
+    vaccine_immune_period = models.ForeignKey('InChart')
     vaccinate_ring = models.BooleanField(default=False, )
     vaccination_ring_radius = models.FloatField(blank=True, null=True)
     vaccination_priority = models.IntegerField(blank=True, null=True)
@@ -183,7 +183,7 @@ class InControlsProductionType(models.Model):
     test_indirect_back = models.BooleanField(default=False, )
     test_specificity = models.FloatField(blank=True, null=True)
     test_sensitivity = models.FloatField(blank=True, null=True)
-    _test_delay_pdfid = models.IntegerField(blank=True, null=True)
+    test_delay = models.ForeignKey('InChart')
     vaccinate_restrospective_days = models.BooleanField(default=False, )
 
 
@@ -193,12 +193,12 @@ class InDiseaseGlobal(models.Model):
 
 
 class InDiseaseProductionType(models.Model):
-    _production_type_id = models.IntegerField(blank=True, null=True)
+    production_type = models.ForeignKey('InProductionType')
     use_disease_transition = models.BooleanField(default=False, )
-    _disease_latent_period_pdfid = models.IntegerField(blank=True, null=True)  # TODO: All of these should be ForeignKeys
-    _disease_subclinical_period_pdfid = models.IntegerField(blank=True, null=True)
-    _disease_clinical_period_pdfid = models.IntegerField(blank=True, null=True)
-    _disease_immune_period_pdfid = models.IntegerField(blank=True, null=True)
+    disease_latent_period = models.ForeignKey('InChart')  # TODO: All of these should be ForeignKeys
+    disease_subclinical_period = models.ForeignKey('InChart')
+    disease_clinical_period = models.ForeignKey('InChart')
+    disease_immune_period = models.ForeignKey('InChart')
     _disease_prevalence_relid = models.IntegerField(blank=True, null=True)
 
 
@@ -211,9 +211,9 @@ class InDiseaseSpread(models.Model):
     use_fixed_contact_rate = models.BooleanField(default=False, )
     fixed_contact_rate = models.FloatField(blank=True, null=True)
     infection_probability = models.FloatField(blank=True, null=True)
-    _distance_pdfid = models.IntegerField(blank=True, null=True)
+    distance = models.ForeignKey('InChart')
     _movement_control_relid = models.IntegerField(blank=True, null=True)
-    _transport_delay_pdfid = models.IntegerField(blank=True, null=True)
+    transport_delay = models.ForeignKey('InChart')
     probability_airborne_spread_1km = models.FloatField(blank=True, null=True)
     max_distance_airborne_spread = models.FloatField(blank=True, null=True)
     wind_direction_start = models.IntegerField(blank=True, null=True)
@@ -261,12 +261,9 @@ class InProductionType(models.Model):
 class InProductionTypePair(models.Model):
     source_production_type = models.ForeignKey(InProductionType, related_name='used_as_sources')
     destination_production_type = models.ForeignKey(InProductionType, related_name='used_as_destinations')
-    use_direct_contact = models.BooleanField(default=False, )
-    _direct_contact_spread_id = models.IntegerField(blank=True, null=True)
-    use_indirect_contact = models.BooleanField(default=False, )
-    _indirect_contact_spread_id = models.IntegerField(blank=True, null=True)
-    use_airborne_spread = models.BooleanField(default=False, )
-    _airborne_contact_spread_id = models.IntegerField(blank=True, null=True)
+    direct_contact_spread_model = models.ForeignKey(InDiseaseSpread, blank=True, null=True)  # These can be blank, so no check box necessary
+    indirect_contact_spread_model = models.ForeignKey(InDiseaseSpread, blank=True, null=True)  # These can be blank, so no check box necessary
+    airborne_contact_spread_model = models.ForeignKey(InDiseaseSpread, blank=True, null=True)  # These can be blank, so no check box necessary
 
 
 class InZone(models.Model):
@@ -275,8 +272,8 @@ class InZone(models.Model):
 
 
 class InZoneProductionTypePair(models.Model):
-    _zone_id = models.IntegerField()
-    _production_type_id = models.IntegerField()
+    zone = models.ForeignKey(InZone)
+    production_type = models.ForeignKey('InProductionType')   # TODO: shouldn't this be a ProductionTypePair?
     use_directmovement_control = models.BooleanField(default=False, )
     _zone_direct_movement_relid = models.IntegerField(blank=True, null=True)
     use_indirect_movement_control = models.BooleanField(default=False, )
