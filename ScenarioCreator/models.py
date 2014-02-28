@@ -30,11 +30,19 @@ class DynamicBlob(models.Model):
 
 
 class DynamicUnit(models.Model):
+    #ProductionType?
     latitude = LatitudeField()
     longitude = LongitudeField()
-    initial_state_code = models.CharField(max_length=255, )
-    days_in_initial_state = models.IntegerField()
-    days_left_in_initial_state = models.IntegerField()
+    initial_state_code = models.CharField(max_length=255,
+                                          choices=(('L', 'Latent'),
+                                                   ('S', 'Susceptible'),
+                                                   ('B', 'Subclinical'),
+                                                   ('C', 'Clinical'),
+                                                   ('N', 'Naturally Immune'),
+                                                   ('V', 'Vaccine Immune'),
+                                                   ('D', 'Destroyed')))
+    days_in_initial_state = models.IntegerField(blank=True, null=True)
+    days_left_in_initial_state = models.IntegerField(blank=True, null=True)
     initial_size = models.IntegerField()
     _final_state_code = models.CharField(max_length=255, blank=True)
     _final_control_state_code = models.CharField(max_length=255, blank=True)
@@ -50,10 +58,15 @@ class DynamicUnit(models.Model):
 
 
 class InChart(models.Model):
-    field_name = models.CharField(max_length=255, blank=True)
+    field_name = models.CharField(max_length=255, )
     chart_name = models.CharField(max_length=255, )
-    _ispdf = models.BooleanField(default=False, )
-    chart_type = models.CharField(max_length=255, blank=True)
+    _ispdf = models.BooleanField(default=True, )  # Set by the way the user enters the screen
+    chart_type = models.CharField(max_length=255, blank=True,
+                                  choices=chc("Point", "Uniform", "Triangular", "Piecewise", "Histogram", "Gaussian",
+                                              "Poisson", "Beta", "Gamma", "Weibull", "Exponential", "Pearson5",
+                                              "Logistic",
+                                              "LogLogistic", "Lognormal", "NegativeBinomial", "Pareto", "Bernoulli",
+                                              "Binomial", "Discrete Uniform", "Hypergeometric", "Inverse Gaussian"))
     mean = models.FloatField(blank=True, null=True)
     std_dev = models.FloatField(blank=True, null=True)
     min = models.FloatField(blank=True, null=True)
@@ -64,7 +77,7 @@ class InChart(models.Model):
     beta = models.FloatField(blank=True, null=True)
     location = models.FloatField(blank=True, null=True)
     scale = models.FloatField(blank=True, null=True)
-    shape = models.FloatField(blank=True, null=True)
+    shape = models.FloatField(blank=True, null=True)  # or should this be the chart_type list of PDF functions?
     n = models.IntegerField(blank=True, null=True)
     p = models.FloatField(blank=True, null=True)
     m = models.IntegerField(blank=True, null=True)
@@ -74,9 +87,9 @@ class InChart(models.Model):
     theta = models.FloatField(blank=True, null=True)
     a = models.FloatField(blank=True, null=True)
     s = models.IntegerField(blank=True, null=True)
-    x_axis_units = models.CharField(max_length=255, blank=True)
+    x_axis_units = models.CharField(max_length=255, default="Days")
     y_axis_units = models.CharField(max_length=255, blank=True)
-    _notes = models.TextField(blank=True)
+    _notes = models.TextField(blank=True, null=True)
 
 
 class InChartDetail(models.Model):
@@ -181,7 +194,7 @@ class InDiseaseGlobal(models.Model):
 class InDiseaseProductionType(models.Model):
     _production_type_id = models.IntegerField(blank=True, null=True)
     use_disease_transition = models.BooleanField(default=False, )
-    _dislatentperiodpdfid = models.IntegerField(blank=True, null=True)
+    _dislatentperiodpdfid = models.IntegerField(blank=True, null=True)  # TODO: All of these should be ForeignKeys
     _dissubclinicalperiodpdfid = models.IntegerField(blank=True, null=True)
     _disclinicalperiodpdfid = models.IntegerField(blank=True, null=True)
     _disimmuneperiodpdfid = models.IntegerField(blank=True, null=True)
@@ -189,7 +202,7 @@ class InDiseaseProductionType(models.Model):
 
 
 class InDiseaseSpread(models.Model):
-    _productiontypepairid = models.IntegerField(unique=True)
+    _productiontypepairid = models.IntegerField(unique=True)#ForeignKey(InProductionType)
     spread_method_code = models.CharField(max_length=255, blank=True)
     latent_can_infect = models.BooleanField(default=False, )
     subclinical_can_infect = models.BooleanField(default=False, )
