@@ -26,7 +26,7 @@ class InChartForm(ModelForm):
 
 class InChartDetailForm(ModelForm):
     class Meta:
-        model = InChartDetail
+        model = EquationPoint
         exclude = ['_chartid', '_pointorder', '_x', '_y']
 
 

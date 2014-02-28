@@ -58,14 +58,21 @@ class DynamicUnit(models.Model):
     user_defined_4 = models.TextField(blank=True)
 
 '''InChart is an equation model that defines either a Probability Distribution Function (pdf) or
- a relational function (relid) depending on the value of _ispdf.  There are a large number of fields
- in this model because different chart_type use different parameters.  Parameters are all listed as
- optional because they are frequently unused.  A second layer of validation will be necessary for
- required parameters per chart_type.'''
+ a relational function (relid) depending on which child class is used.  '''
 class InChart(models.Model):
     chart_name = models.CharField(max_length=255, )
     # field_name = models.CharField(max_length=255, )  # I don't think this is necessary
-    _ispdf = models.BooleanField(default=True, )  # Set by the way the user enters the screen
+    x_axis_units = models.CharField(max_length=255, default="Days")
+    y_axis_units = models.CharField(max_length=255, blank=True)
+    _notes = models.TextField(blank=True, null=True)  # Why is this hidden?
+    class Meta:
+        abstract = True
+
+
+'''There are a large number of fields in this model because different chart_type use different
+parameters.  Parameters are all listed as optional because they are frequently unused.  A second
+layer of validation will be necessary for required parameters per chart_type.'''
+class ProbabilityEquation(InChart):
     chart_type = models.CharField(max_length=255, blank=True,
                                   choices=chc("Point", "Uniform", "Triangular", "Piecewise", "Histogram", "Gaussian",
                                               "Poisson", "Beta", "Gamma", "Weibull", "Exponential", "Pearson5",
@@ -92,14 +99,15 @@ class InChart(models.Model):
     theta = models.FloatField(blank=True, null=True)
     a = models.FloatField(blank=True, null=True)
     s = models.IntegerField(blank=True, null=True)
-    x_axis_units = models.CharField(max_length=255, default="Days")
-    y_axis_units = models.CharField(max_length=255, blank=True)
-    _notes = models.TextField(blank=True, null=True)  # Why is this hidden?
 
 
-class InChartDetail(models.Model):
-    chart = models.ForeignKey('InChart')
-    _point_order = models.IntegerField()  # Shouldn't this be a list or TextField?
+class RelationalEquation(InChart):
+    pass  # Inherited fields
+
+
+class EquationPoint(models.Model):
+    chart = models.ForeignKey(RelationalEquation)
+    _point_order = models.IntegerField()
     _x = models.FloatField()
     _y = models.FloatField()
 
@@ -111,17 +119,17 @@ class InControlGlobal(models.Model):
     include_tracing_testing = models.BooleanField(default=False, )
     include_destruction = models.BooleanField(default=False, )  # TODO: restrict ForeignKey presence based on boolean include
     destruction_delay = models.IntegerField(blank=True, null=True)
-    destruction_capacity_relid = models.ForeignKey('InChart', limit_choices_to={'_ispdf':False}, related_name='+', blank=True, null=True)
+    destruction_capacity_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
     destruction_priority_order = models.CharField(max_length=255, blank=True)  # These are an odd legacy.  Leave it for now
     destrucion_reason_order = models.CharField(max_length=255, blank=True)
     include_vaccination = models.BooleanField(default=False, )
     vaccincation_detected_units_before_start = models.IntegerField(blank=True, null=True)
-    vaccination_capacity_relid = models.ForeignKey('InChart', limit_choices_to={'_ispdf':False}, related_name='+', blank=True, null=True)
+    vaccination_capacity_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
     vaccination_priority_order = models.CharField(max_length=255, blank=True)
     include_zones = models.BooleanField(default=False, )
     vaccination_retrospective_days = models.IntegerField(blank=True, null=True)
-    vaccination_capacity_start_relid = models.ForeignKey('InChart', limit_choices_to={'_ispdf':False}, related_name='+', blank=True, null=True)
-    vaccination_capacity_restart_relid = models.ForeignKey('InChart', limit_choices_to={'_ispdf':False}, related_name='+', blank=True, null=True)
+    vaccination_capacity_start_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
+    vaccination_capacity_restart_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
 
 
 class InControlPlan(models.Model):
@@ -133,8 +141,8 @@ class InControlPlan(models.Model):
 class InControlsProductionType(models.Model):
     production_type = models.ForeignKey('InProductionType')
     use_detection = models.BooleanField(default=False, )
-    detection_probability_for_observed_time_in_clinical_relid = models.ForeignKey('InChart', limit_choices_to={'_ispdf':False}, related_name='+', blank=True, null=True)
-    detection_probability_report_vs_first_detection_relid = models.ForeignKey('InChart', limit_choices_to={'_ispdf':False}, related_name='+', blank=True, null=True)
+    detection_probability_for_observed_time_in_clinical_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
+    detection_probability_report_vs_first_detection_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
     trace_direct_forward = models.BooleanField(default=False, )
     trace_direct_back = models.BooleanField(default=False, )
     trace_direct_success = PercentField(blank=True, null=True)
@@ -143,7 +151,7 @@ class InControlsProductionType(models.Model):
     trace_indirect_back = models.BooleanField(default=False, )
     trace_indirect_success = PercentField(blank=True, null=True)
     trace_indirect_trace_period = models.BooleanField(default=False, )
-    trace_delay_pdf = models.ForeignKey('InChart', limit_choices_to={'_ispdf':True}, related_name='+')
+    trace_delay_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
     use_destruction = models.BooleanField(default=False, )
     destruction_is_ring_trigger = models.BooleanField(default=False, )
     destruction_ring_radius = models.FloatField(blank=True, null=True)
@@ -157,7 +165,7 @@ class InControlsProductionType(models.Model):
     vaccination_min_time_between = models.IntegerField(blank=True, null=True)
     vaccinate_detected = models.BooleanField(default=False, )
     days_to_immunity = models.IntegerField(blank=True, null=True)
-    vaccine_immune_period_pdf = models.ForeignKey('InChart', limit_choices_to={'_ispdf':True}, related_name='+')
+    vaccine_immune_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
     vaccinate_ring = models.BooleanField(default=False, )
     vaccination_ring_radius = models.FloatField(blank=True, null=True)
     vaccination_priority = models.IntegerField(blank=True, null=True)
@@ -187,7 +195,7 @@ class InControlsProductionType(models.Model):
     test_indirect_back = models.BooleanField(default=False, )
     test_specificity = models.FloatField(blank=True, null=True)
     test_sensitivity = models.FloatField(blank=True, null=True)
-    test_delay_pdf = models.ForeignKey('InChart', limit_choices_to={'_ispdf':True}, related_name='+')
+    test_delay_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
     vaccinate_restrospective_days = models.BooleanField(default=False, )
 
 
@@ -199,11 +207,11 @@ class InDiseaseGlobal(models.Model):
 class InDiseaseProductionType(models.Model):
     production_type = models.ForeignKey('InProductionType')
     use_disease_transition = models.BooleanField(default=False, )
-    disease_latent_period_pdf = models.ForeignKey('InChart', limit_choices_to={'_ispdf':True}, related_name='+')
-    disease_subclinical_period_pdf = models.ForeignKey('InChart', limit_choices_to={'_ispdf':True}, related_name='+')
-    disease_clinical_period_pdf = models.ForeignKey('InChart', limit_choices_to={'_ispdf':True}, related_name='+')
-    disease_immune_period_pdf = models.ForeignKey('InChart', limit_choices_to={'_ispdf':True}, related_name='+')
-    disease_prevalence_relid = models.ForeignKey('InChart', limit_choices_to={'_ispdf':False}, related_name='+')
+    disease_latent_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
+    disease_subclinical_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
+    disease_clinical_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
+    disease_immune_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
+    disease_prevalence_relid = models.ForeignKey(RelationalEquation, related_name='+')
 
 
 class InDiseaseSpread(models.Model):
@@ -215,9 +223,9 @@ class InDiseaseSpread(models.Model):
     use_fixed_contact_rate = models.BooleanField(default=False, )
     fixed_contact_rate = models.FloatField(blank=True, null=True)
     infection_probability = models.FloatField(blank=True, null=True)
-    distance_pdf = models.ForeignKey('InChart', limit_choices_to={'_ispdf':True}, related_name='+')
-    movement_control_relid = models.ForeignKey('InChart', limit_choices_to={'_ispdf':False}, related_name='+')  # TODO: I don't think this should be in Disease
-    transport_delay_pdf = models.ForeignKey('InChart', limit_choices_to={'_ispdf':True}, related_name='+')
+    distance_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
+    movement_control_relid = models.ForeignKey(RelationalEquation, related_name='+')  # TODO: I don't think this should be in Disease
+    transport_delay_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
     probability_airborne_spread_1km = models.FloatField(blank=True, null=True)
     max_distance_airborne_spread = models.FloatField(blank=True, null=True)
     wind_direction_start = models.IntegerField(blank=True, null=True)
@@ -278,8 +286,8 @@ class InZone(models.Model):
 class InZoneProductionTypePair(models.Model):
     zone = models.ForeignKey(InZone)
     production_type_pair = models.ForeignKey('InProductionTypePair')
-    zone_indirect_movement_relid = models.ForeignKey('InChart', limit_choices_to={'_ispdf':False}, related_name='+', blank=True, null=True)  # This can be blank
-    zone_direct_movement_relid = models.ForeignKey('InChart', limit_choices_to={'_ispdf':False}, related_name='+', blank=True, null=True)  # This can be blank
+    zone_indirect_movement_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)  # This can be blank
+    zone_direct_movement_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)  # This can be blank
     use_detection_multiplier = models.BooleanField(default=False, )
     zone_detection_multiplier = models.FloatField(blank=True, null=True)
     cost_surv_per_animal_day = models.FloatField(blank=True, null=True)
