@@ -13,7 +13,8 @@
 from django.db import models
 from django_extras.db.models import PercentField, LatitudeField, LongitudeField
 
-def chc(choice_list):
+
+def chc(*choice_list):
     return tuple((x, x) for x in choice_list)
 
 
@@ -202,7 +203,7 @@ class InDiseaseProductionType(models.Model):
 
 
 class InDiseaseSpread(models.Model):
-    _production_type_pair_id = models.IntegerField(unique=True)#ForeignKey(InProductionType)
+    production_type_pair = models.ForeignKey('InProductionTypePair')
     spread_method_code = models.CharField(max_length=255, blank=True)
     latent_can_infect = models.BooleanField(default=False, )
     subclinical_can_infect = models.BooleanField(default=False, )
@@ -258,8 +259,8 @@ class InProductionType(models.Model):
 
 
 class InProductionTypePair(models.Model):
-    _source_production_type_id = models.IntegerField()
-    _destination_production_type_id = models.IntegerField()
+    source_production_type = models.ForeignKey(InProductionType, related_name='used_as_sources')
+    destination_production_type = models.ForeignKey(InProductionType, related_name='used_as_destinations')
     use_direct_contact = models.BooleanField(default=False, )
     _direct_contact_spread_id = models.IntegerField(blank=True, null=True)
     use_indirect_contact = models.BooleanField(default=False, )

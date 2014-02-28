@@ -51,7 +51,7 @@ def switch_to_boolean_fields(filename, output_filename):
     for index, line in enumerate(lines):
         field_name = line[:line.find('=')] if line.find('=') != -1 else ''
         boolean_prefixes = [' trace_', ' destroy_', '_can_', ' vaccinate_', '_is_', ' exam_', ' test_', '_track_', ' write_']  # ['save_', 'use_', 'include_']
-        if any( map(lambda prefix: field_name.find(prefix) != -1, boolean_prefixes)):  # field name starts with 'use_' or 'save_'
+        if any(map(lambda prefix: field_name.find(prefix) != -1, boolean_prefixes)):  # field name starts with 'use_' or 'save_'
             if line.find('BooleanField') != -1:
                 print(field_name)
                 continue  # no need to edit this line
@@ -64,6 +64,21 @@ def switch_to_boolean_fields(filename, output_filename):
 
     open(output_filename, 'w').writelines(lines)
 
+def createForeignKeys(filename, output_filename):
+    'id = models.ForeignKey()'
+    lines = open(filename, 'r').readlines()
+    for index, line in enumerate(lines):
+        field_name = line[:line.find('=')] if line.find('=') != -1 else ''
+        field_name = '' if field_name[:4] != '    ' or field_name[4] == ' ' else field_name  #checking for proper indent
+        id_index = line.find('id = ')
+        if line[4] == '_' and id_index != -1:
+            newline = field_name[:field_name.rfind('_')].replace('_', '', 1)  # slice out first and last _
+            newline += ' = models.ForeignKey()'
+            lines[index] = newline
+
+
+
+    open(output_filename, 'w').writelines(lines)
 
 if __name__ == '__main__':
     #Step #1:  Search:  db_column='[^']*', in models.py to remove column names
