@@ -80,9 +80,23 @@ def createForeignKeys(filename, output_filename):
 
     open(output_filename, 'w').writelines(lines)
 
+
+def generate_urls_from_models(input_file, output_filename):
+    lines = open(input_file, 'r').readlines()
+    edited_lines = []
+    for line in lines:
+        if 'class' in line[:5]:
+            model_name = re.split('\W+', line)[1]
+            edited_lines.append("url('^" + model_name + "/new/$', 'ScenarioCreator.views.new_entry'),")
+            edited_lines.append("url('^" + model_name + "/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),\n")
+
+    open(output_filename, 'w').write('\n'.join(edited_lines))
+
+
 if __name__ == '__main__':
     #Step #1:  Search:  db_column='[^']*', in models.py to remove column names
     print("Running from: ", os.getcwd())
     # lowercase_a_file('CreateDjangoOutputTables.sql')
-    generate_forms_with_hidden_fields('../ScenarioCreator/models.py', 'auto-forms.py')
+    # generate_forms_with_hidden_fields('../ScenarioCreator/models.py', 'auto-forms.py')
     # switch_to_boolean_fields('../ScenarioCreator/models.py', 'auto-models.py')
+    generate_urls_from_models('../ScenarioCreator/models.py', 'auto-urls.py')
