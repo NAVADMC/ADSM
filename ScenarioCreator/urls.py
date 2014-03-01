@@ -5,8 +5,8 @@ from ScenarioCreator.models import *
 from ScenarioCreator.forms import *
 
 urlpatterns = patterns('',
-                       # url('^$', "ScenarioCreator.views.start_window"),
-                       # url('^new/$', "ScenarioCreator.views.new_entry", form=InGeneralForm),
+                       url('^$', "ScenarioCreator.views.new_scenario"),
+                       url('^new/$', "ScenarioCreator.views.new_scenario",),
 
                        url('^DynamicUnit/new/$', "ScenarioCreator.views.new_entry"),
                        url('^DynamicUnit/(?P<primary_key>\d+)/$', "ScenarioCreator.views.edit_entry"),

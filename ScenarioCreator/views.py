@@ -13,17 +13,27 @@ def new_form(request, formClass, title):
     return render(request, 'ScenarioCreator/new.html', context)
 
 
+def new_scenario(request):
+    return new_form(request, InGeneralForm, "Starting a new Scenario")
+
+
+def get_model_name_and_form(request):
+    model_name = re.split('\W+', request.path)[2]  # Second word in the URL
+    form = globals()[model_name + 'Form']  # depends on naming convention
+    return model_name, form
+
+
 def new_entry(request):
-    model_name = re.split('\W+', request.path)[2]  # Second word
-    form = globals()[model_name+'Form']
+    model_name, form = get_model_name_and_form(request)
     return new_form(request, form, "Create a new " + model_name)
 
 
-def edit_entry(request, primary_key, model):
-    scenario = get_object_or_404(model, pk=primary_key)
-    form = InGeneralForm(request.POST or None, instance=scenario)
+def edit_entry(request, primary_key):
+    model_name, form_class = get_model_name_and_form(request)
+    model = get_object_or_404(form_class.Meta.model, pk=primary_key)
+    form = form_class(request.POST or None, instance=model)
     if request.method == 'POST' and form.is_valid():
         form.save();  #write to database
     context = {'form': form,
-               'title': "Edit a " + model.__class__.__name__}
+               'title': "Edit a " + model_name}
     return render(request, 'ScenarioCreator/new.html', context)
