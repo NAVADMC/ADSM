@@ -224,7 +224,8 @@ class InDiseaseSpread(models.Model):
     fixed_contact_rate = models.FloatField(blank=True, null=True)
     infection_probability = models.FloatField(blank=True, null=True)
     distance_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
-    movement_control_relid = models.ForeignKey(RelationalEquation, related_name='+')  # TODO: I don't think this should be in Disease
+        # This is in Disease because of simulation restrictions
+    movement_control_relid = models.ForeignKey(RelationalEquation, related_name='+')
     transport_delay_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
     probability_airborne_spread_1km = models.FloatField(blank=True, null=True)
     max_distance_airborne_spread = models.FloatField(blank=True, null=True)
