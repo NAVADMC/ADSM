@@ -89,7 +89,6 @@ int yylex(void);
 int yyerror (char const *s);
 char errmsg[BUFFERSIZE];
 
-gpc_polygon *gpc_new_polygon (void);
 void g_free_as_GFunc (gpointer data, gpointer user_data);
 %}
 
@@ -353,24 +352,6 @@ silent_log_handler (const gchar * log_domain, GLogLevelFlags log_level,
                     const gchar * message, gpointer user_data)
 {
   ;
-}
-
-
-
-/**
- * Creates a new, empty polygon object.
- */
-gpc_polygon *
-gpc_new_polygon (void)
-{
-  gpc_polygon *poly;
-
-  poly = g_new (gpc_polygon, 1);
-  poly->num_contours = 0;
-  poly->hole = NULL;
-  poly->contour = NULL;
-
-  return poly;
 }
 
 

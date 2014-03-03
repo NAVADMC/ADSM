@@ -730,26 +730,6 @@ ZON_fprintf_zone (FILE * stream, ZON_zone_t * zone)
 
 
 /**
- * Creates a new, initialized GPC polygon.
- *
- * @return a polygon with no contours.
- */
-gpc_polygon *
-gpc_new_polygon (void)
-{
-  gpc_polygon *poly;
-
-  poly = (gpc_polygon *) malloc (sizeof(gpc_polygon));
-  g_assert (poly != NULL);
-  poly->num_contours = 0;
-  poly->hole = NULL;
-  poly->contour = NULL;
-  return poly;
-}
-
-
-
-/**
  * Returns a deep copy of a GPC contour.
  *
  * @param contour a contour.

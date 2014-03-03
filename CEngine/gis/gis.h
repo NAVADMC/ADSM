@@ -55,4 +55,7 @@ gboolean GIS_point_in_contour (gpc_vertex_list * poly, float x, float y);
 double GIS_polygon_area (gpc_polygon * poly);
 double GIS_polygon_perimeter (gpc_polygon * poly);
 
+/* Helper functions for working with GPC polygons. */
+gpc_polygon *gpc_new_polygon (void);
+
 #endif /* !GIS_H */
