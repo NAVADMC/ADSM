@@ -1,5 +1,5 @@
 from django.db import models
-from ScenarioCreator.models import InProductionType, InZone
+from ScenarioCreator.models import InProductionType, InZone, DynamicUnit
 
 
 class Outdailybyproductiontype(models.Model):
@@ -179,7 +179,7 @@ class Outdailyevents(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     day = models.IntegerField(blank=True, null=True)
     event = models.IntegerField(blank=True, null=True)
-    herd_id = models.IntegerField(blank=True, null=True)
+    unit = models.ForeignKey(DynamicUnit)
     zone = models.ForeignKey(InZone)
     event_code = models.CharField(max_length=255, blank=True)
     new_state_code = models.CharField(max_length=255, blank=True)
@@ -191,14 +191,14 @@ class Outdailyexposures(models.Model):
     day = models.IntegerField(blank=True, null=True)
     exposure = models.IntegerField(blank=True, null=True)
     initiated_day = models.IntegerField(blank=True, null=True)
-    exposed_herd_id = models.IntegerField(blank=True, null=True)
+    exposed_unit = models.ForeignKey(DynamicUnit)
     exposed_zone = models.ForeignKey(InZone)
-    exposing_herd_id = models.IntegerField(blank=True, null=True)
+    exposing_unit = models.ForeignKey(DynamicUnit)
     exposing_zone = models.ForeignKey(InZone)
     spread_method_code = models.CharField(max_length=255, blank=True)
     is_adequate = models.IntegerField(blank=True, null=True)
-    exposing_herd_status_code = models.CharField(max_length=255, blank=True)
-    exposed_herd_status_code = models.CharField(max_length=255, blank=True)
+    exposing_unit_status_code = models.CharField(max_length=255, blank=True)
+    exposed_unit_status_code = models.CharField(max_length=255, blank=True)
 
 
 class Outepidemiccurves(models.Model):
@@ -241,9 +241,9 @@ class Outiteration(models.Model):
     vac_wait_unit_time_avg = models.FloatField(blank=True, null=True)
 
 
-class Outiterationbyherd(models.Model):
+class Outiterationbyunit(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
-    herd_id = models.IntegerField(blank=True, null=True)
+    unit = models.ForeignKey(DynamicUnit)
     last_status_code = models.CharField(max_length=255, blank=True)
     last_status_day = models.IntegerField(blank=True, null=True)
     last_control_state_code = models.CharField(max_length=255, blank=True)
