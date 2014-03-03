@@ -196,7 +196,7 @@ class OutDailyExposures(models.Model):
     exposing_unit = models.ForeignKey(DynamicUnit, related_name='events_where_unit_exposed_others')
     exposing_zone = models.ForeignKey(InZone, related_name='events_that_exposed_others')
     spread_method_code = models.CharField(max_length=255, blank=True)
-    is_adequate = models.NullBooleanField()
+    is_adequate = models.NullBooleanField(blank=True, null=True)  # Changed Booleans to NullBooleans so as not to restrict output
     exposing_unit_status_code = models.CharField(max_length=255, blank=True)
     exposed_unit_status_code = models.CharField(max_length=255, blank=True)
 
@@ -222,11 +222,11 @@ class OutGeneral(models.Model):
 
 class OutIteration(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
-    disease_ended = models.NullBooleanField()
+    disease_ended = models.NullBooleanField(blank=True, null=True)  # Changed Booleans to NullBooleans so as not to restrict output
     disease_end_day = models.IntegerField(blank=True, null=True)
-    outbreak_ended = models.NullBooleanField()
+    outbreak_ended = models.NullBooleanField(blank=True, null=True)  # Changed Booleans to NullBooleans so as not to restrict output
     outbreak_end_day = models.IntegerField(blank=True, null=True)
-    zone_foci_created = models.NullBooleanField()
+    zone_foci_created = models.NullBooleanField(blank=True, null=True)  # Changed Booleans to NullBooleans so as not to restrict output
     destroy_wait_unit_max = models.IntegerField(blank=True, null=True)
     destroy_wait_unit_max_day = models.IntegerField(blank=True, null=True)
     destroy_wait_animal_max = models.FloatField(blank=True, null=True)
