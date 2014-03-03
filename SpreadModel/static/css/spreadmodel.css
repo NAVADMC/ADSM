@@ -19,7 +19,7 @@ body>nav {
     top: 50px;
     bottom: 0;
     left: 0;
-    width: 200px;
+    width: 210px;
     overflow: auto;
     /*background-color: #DDD;*/
 }
@@ -27,14 +27,18 @@ body>nav {
 body>section {
     margin-top: 50px;
     padding-top: 0px;
-    margin-left: 200px;
+    margin-left: 210px;
     padding-left: 20px;
 }
-
-
-#setupMenu, #setupMenu ul {
+#setupMenu {
     list-style: none;
     padding-left: 0;
+}
+
+#setupMenu ul {
+    list-style: none;
+    padding-left: 0;
+    margin-left: 12px;
 }
 
 #setupMenu a {
@@ -42,15 +46,18 @@ body>section {
     display:block;
     text-decoration: none;
     background-color: #EEE;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
     line-height: 36px;
     padding-left: 5px;
 }
 
 #setupMenu ul a {
+    font-size: 16px;
+}
+
+#setupMenu ul ul a {
     font-size: 14px;
-    margin-left: 10px;
 }
 
 #setupMenu a:hover {
