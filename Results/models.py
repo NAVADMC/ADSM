@@ -196,7 +196,7 @@ class OutDailyExposures(models.Model):
     exposing_unit = models.ForeignKey(DynamicUnit)
     exposing_zone = models.ForeignKey(InZone)
     spread_method_code = models.CharField(max_length=255, blank=True)
-    is_adequate = models.IntegerField(blank=True, null=True)
+    is_adequate = models.BooleanField(blank=True, null=True)
     exposing_unit_status_code = models.CharField(max_length=255, blank=True)
     exposed_unit_status_code = models.CharField(max_length=255, blank=True)
 
@@ -214,19 +214,19 @@ class OutEpidemicCurves(models.Model):
 
 
 class OutGeneral(models.Model):
-    simulation_start_time = models.CharField(max_length=255, blank=True)
-    simulation_end_time = models.CharField(max_length=255, blank=True)
+    simulation_start_time = models.DateTimeField(max_length=255, blank=True)
+    simulation_end_time = models.DateTimeField(max_length=255, blank=True)
     completed_iterations = models.IntegerField(blank=True, null=True)
     version = models.CharField(max_length=255, blank=True)
 
 
 class OutIteration(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
-    disease_ended = models.IntegerField(blank=True, null=True)
+    disease_ended = models.BooleanField(blank=True, null=True)
     disease_end_day = models.IntegerField(blank=True, null=True)
-    outbreak_ended = models.IntegerField(blank=True, null=True)
+    outbreak_ended = models.BooleanField(blank=True, null=True)
     outbreak_end_day = models.IntegerField(blank=True, null=True)
-    zone_foci_created = models.IntegerField(blank=True, null=True)
+    zone_foci_created = models.BooleanField(blank=True, null=True)
     destroy_wait_unit_max = models.IntegerField(blank=True, null=True)
     destroy_wait_unit_max_day = models.IntegerField(blank=True, null=True)
     destroy_wait_animal_max = models.FloatField(blank=True, null=True)
