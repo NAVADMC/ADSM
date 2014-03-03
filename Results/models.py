@@ -2,7 +2,7 @@ from django.db import models
 from ScenarioCreator.models import InProductionType, InZone, DynamicUnit
 
 
-class Outdailybyproductiontype(models.Model):
+class OutDailyByProductionType(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     production_type = models.ForeignKey(InProductionType)
     day = models.IntegerField(blank=True, null=True)
@@ -156,7 +156,7 @@ class Outdailybyproductiontype(models.Model):
     zone_cum_foci = models.IntegerField(blank=True, null=True)
 
 
-class Outdailybyzone(models.Model):
+class OutDailyByZone(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     day = models.IntegerField(blank=True, null=True)
     zone = models.ForeignKey(InZone)
@@ -164,7 +164,7 @@ class Outdailybyzone(models.Model):
     zone_perimeter = models.FloatField(blank=True, null=True)
 
 
-class Outdailybyzoneandproductiontype(models.Model):
+class OutDailyByzoneAndProductionType(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     day = models.IntegerField(blank=True, null=True)
     zone = models.ForeignKey(InZone)
@@ -175,7 +175,7 @@ class Outdailybyzoneandproductiontype(models.Model):
     animals_in_zone = models.IntegerField(blank=True, null=True)
 
 
-class Outdailyevents(models.Model):
+class OutDailyEvents(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     day = models.IntegerField(blank=True, null=True)
     event = models.IntegerField(blank=True, null=True)
@@ -186,7 +186,7 @@ class Outdailyevents(models.Model):
     test_result_code = models.CharField(max_length=255, blank=True)
 
 
-class Outdailyexposures(models.Model):
+class OutDailyExposures(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     day = models.IntegerField(blank=True, null=True)
     exposure = models.IntegerField(blank=True, null=True)
@@ -201,7 +201,7 @@ class Outdailyexposures(models.Model):
     exposed_unit_status_code = models.CharField(max_length=255, blank=True)
 
 
-class Outepidemiccurves(models.Model):
+class OutEpidemicCurves(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     day = models.IntegerField(blank=True, null=True)
     production_type = models.ForeignKey(InProductionType)
@@ -213,14 +213,14 @@ class Outepidemiccurves(models.Model):
     apparent_infectious_units = models.IntegerField(blank=True, null=True)
 
 
-class Outgeneral(models.Model):
+class OutGeneral(models.Model):
     simulation_start_time = models.CharField(max_length=255, blank=True)
     simulation_end_time = models.CharField(max_length=255, blank=True)
     completed_iterations = models.IntegerField(blank=True, null=True)
     version = models.CharField(max_length=255, blank=True)
 
 
-class Outiteration(models.Model):
+class OutIteration(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     disease_ended = models.IntegerField(blank=True, null=True)
     disease_end_day = models.IntegerField(blank=True, null=True)
@@ -241,7 +241,7 @@ class Outiteration(models.Model):
     vac_wait_unit_time_avg = models.FloatField(blank=True, null=True)
 
 
-class Outiterationbyunit(models.Model):
+class OutIterationByUnit(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     unit = models.ForeignKey(DynamicUnit)
     last_status_code = models.CharField(max_length=255, blank=True)
@@ -250,7 +250,7 @@ class Outiterationbyunit(models.Model):
     last_control_state_day = models.IntegerField(blank=True, null=True)
 
 
-class Outiterationbyproductiontype(models.Model):
+class OutIterationByProductionType(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     production_type = models.ForeignKey(InProductionType)
     transition_state_cum_unit_susceptible = models.IntegerField(blank=True, null=True)
@@ -368,7 +368,7 @@ class Outiterationbyproductiontype(models.Model):
     last_detection = models.IntegerField(blank=True, null=True)
 
 
-class Outiterationbyzone(models.Model):
+class OutIterationByZone(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     zone = models.ForeignKey(InZone)
     max_zone_area = models.FloatField(blank=True, null=True)
@@ -379,7 +379,7 @@ class Outiterationbyzone(models.Model):
     final_zone_perimeter = models.FloatField(blank=True, null=True)
 
 
-class Outiterationbyzoneandproductiontype(models.Model):
+class OutIterationByZoneAndProductionType(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     zone = models.ForeignKey(InZone)
     production_type = models.ForeignKey(InProductionType)
@@ -388,7 +388,7 @@ class Outiterationbyzoneandproductiontype(models.Model):
     cost_surveillance = models.FloatField(blank=True, null=True)
 
 
-class Outiterationcosts(models.Model):
+class OutIterationCosts(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     production_type = models.ForeignKey(InProductionType)
     destroy_appraisal = models.FloatField(blank=True, null=True)
