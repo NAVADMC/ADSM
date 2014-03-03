@@ -4,6 +4,23 @@ __author__ = 'Josiah Seaman'
 
 import os
 
+"""Databases were originally created using a SQL DDL provided by Missy.  The process is:
+textscrubber.lower_case_a_file('createTables.sql')
+Terminal:
+sqlite3.exe results.db < scripts/CreateDjangoOutputTables.sql
+python manage.py inspectdb > Results/models.py
+Manually delete all the lines that look like this:
+    class Meta:
+        managed = False
+        db_table = 'outiterationbyzoneandproductiontype'
+Search/Replace:
+    TextField(   ->  CharField(max_length=255,
+    description = CharField(max_length=255,  ->   description = TextField(
+
+Search: "id =" these should be ForeignKeys.  You have to do these manually since they
+ require judgement calls.  Example: distance_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
+"""
+
 
 def lowercase_a_file(filename):
     file = open(filename, 'r')
