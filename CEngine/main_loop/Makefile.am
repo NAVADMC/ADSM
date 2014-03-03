@@ -22,8 +22,9 @@ if HAVE_MPI
   AM_CPPFLAGS += @MPI_CFLAGS@
 endif
 
-bin_PROGRAMS = spreadmodel
-spreadmodel_SOURCES = cli.c main_loop.c module_loader.c module_loader.h \
+include_HEADERS = spreadmodel.h
+lib_LIBRARIES = libspreadmodel.a
+libspreadmodel_a_SOURCES = main_loop.c module_loader.c module_loader.h \
   event_manager.c event_manager.h \
   parameter.c parameter.h \
   spreadmodel.c spreadmodel.h \
@@ -85,17 +86,20 @@ spreadmodel_SOURCES = cli.c main_loop.c module_loader.c module_loader.h \
   $(top_srcdir)/modules/apparent_events_table_writer.c $(top_srcdir)/modules/apparent_events_table_writer.h \
   $(top_srcdir)/modules/summary_gis_writer.c $(top_srcdir)/modules/summary_gis_writer.h
 if USE_SC_GUILIB
-  spreadmodel_SOURCES += $(top_srcdir)/sc_guilib/production_type_data.c \
+  libspreadmodel_a_SOURCES += $(top_srcdir)/sc_guilib/production_type_data.c \
     $(top_srcdir)/sc_guilib/production_type_data.h \
     $(top_srcdir)/sc_guilib/sc_guilib_outputs.c \
     $(top_srcdir)/sc_guilib/sc_guilib_outputs.h \
     $(top_srcdir)/sc_guilib/sc_database.c \
     $(top_srcdir)/sc_guilib/sc_database.h
 endif
+
+bin_PROGRAMS = spreadmodel
+spreadmodel_SOURCES = cli.c
 if HAVE_MPI
   spreadmodel_SOURCES += mpix.c mpix.h
 endif
-spreadmodel_LDADD = @LEXLIB@ @GLIB_LIBS@ @GSL_LIBS@ @SCEW_LIBS@
+spreadmodel_LDADD = libspreadmodel.a @LEXLIB@ @GLIB_LIBS@ @GSL_LIBS@ @SCEW_LIBS@
 if HAVE_MPI
   spreadmodel_LDADD += @MPI_LIBS@
 endif

@@ -3,6 +3,7 @@ AC_INIT(spreadmodel, 3.2.19b)
 AC_CONFIG_SRCDIR(main_loop/main_loop.c)
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(config.h)
+AC_PROG_RANLIB
 
 dnl Adds command-line options.
 
