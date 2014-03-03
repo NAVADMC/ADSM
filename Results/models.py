@@ -1,9 +1,10 @@
 from django.db import models
+from ScenarioCreator.models import InProductionType
 
 
 class Outdailybyproductiontype(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
-    field_productiontypeid = models.IntegerField(db_column='_productiontypeid', blank=True, null=True) # Field renamed because it started with '_'.
+    production_type = models.ForeignKey(InProductionType)
     day = models.IntegerField(blank=True, null=True)
     transition_state_daily_unit_susceptible = models.IntegerField(blank=True, null=True)
     transition_state_daily_animal_susceptible = models.IntegerField(blank=True, null=True)
@@ -167,7 +168,7 @@ class Outdailybyzoneandproductiontype(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     day = models.IntegerField(blank=True, null=True)
     zone_id = models.IntegerField(blank=True, null=True)
-    production_type_id = models.IntegerField(blank=True, null=True)
+    production_type = models.ForeignKey(InProductionType)
     unit_days_in_zone = models.IntegerField(blank=True, null=True)
     animal_days_in_zone = models.IntegerField(blank=True, null=True)
     units_in_zone = models.IntegerField(blank=True, null=True)
@@ -203,7 +204,7 @@ class Outdailyexposures(models.Model):
 class Outepidemiccurves(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     day = models.IntegerField(blank=True, null=True)
-    production_type_id = models.IntegerField(blank=True, null=True)
+    production_type = models.ForeignKey(InProductionType)
     infected_units = models.IntegerField(blank=True, null=True)
     infected_animals = models.IntegerField(blank=True, null=True)
     detected_units = models.IntegerField(blank=True, null=True)
@@ -252,7 +253,7 @@ class Outiterationbyherd(models.Model):
 
 class Outiterationbyproductiontype(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
-    production_type_id = models.IntegerField(blank=True, null=True)
+    production_type = models.ForeignKey(InProductionType)
     transition_state_cum_unit_susceptible = models.IntegerField(blank=True, null=True)
     transition_state_cum_animal_susceptible = models.IntegerField(blank=True, null=True)
     transition_state_cum_unit_latent = models.IntegerField(blank=True, null=True)
@@ -382,7 +383,7 @@ class Outiterationbyzone(models.Model):
 class Outiterationbyzoneandproductiontype(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     zone_id = models.IntegerField(blank=True, null=True)
-    production_type_id = models.IntegerField(blank=True, null=True)
+    production_type = models.ForeignKey(InProductionType)
     unit_days_in_zone = models.IntegerField(blank=True, null=True)
     animal_days_in_zone = models.IntegerField(blank=True, null=True)
     cost_surveillance = models.FloatField(blank=True, null=True)
@@ -390,7 +391,7 @@ class Outiterationbyzoneandproductiontype(models.Model):
 
 class Outiterationcosts(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
-    production_type_id = models.IntegerField(blank=True, null=True)
+    production_type = models.ForeignKey(InProductionType)
     destroy_appraisal = models.FloatField(blank=True, null=True)
     destroy_cleaning = models.FloatField(blank=True, null=True)
     destroy_euthanasia = models.FloatField(blank=True, null=True)
