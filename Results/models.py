@@ -1,5 +1,5 @@
 from django.db import models
-from ScenarioCreator.models import InProductionType
+from ScenarioCreator.models import InProductionType, InZone
 
 
 class Outdailybyproductiontype(models.Model):
@@ -159,7 +159,7 @@ class Outdailybyproductiontype(models.Model):
 class Outdailybyzone(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     day = models.IntegerField(blank=True, null=True)
-    zone_id = models.IntegerField(blank=True, null=True)
+    zone = models.ForeignKey(InZone)
     zone_area = models.FloatField(blank=True, null=True)
     zone_perimeter = models.FloatField(blank=True, null=True)
 
@@ -167,7 +167,7 @@ class Outdailybyzone(models.Model):
 class Outdailybyzoneandproductiontype(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     day = models.IntegerField(blank=True, null=True)
-    zone_id = models.IntegerField(blank=True, null=True)
+    zone = models.ForeignKey(InZone)
     production_type = models.ForeignKey(InProductionType)
     unit_days_in_zone = models.IntegerField(blank=True, null=True)
     animal_days_in_zone = models.IntegerField(blank=True, null=True)
@@ -180,7 +180,7 @@ class Outdailyevents(models.Model):
     day = models.IntegerField(blank=True, null=True)
     event = models.IntegerField(blank=True, null=True)
     herd_id = models.IntegerField(blank=True, null=True)
-    zone_id = models.IntegerField(blank=True, null=True)
+    zone = models.ForeignKey(InZone)
     event_code = models.CharField(max_length=255, blank=True)
     new_state_code = models.CharField(max_length=255, blank=True)
     test_result_code = models.CharField(max_length=255, blank=True)
@@ -192,9 +192,9 @@ class Outdailyexposures(models.Model):
     exposure = models.IntegerField(blank=True, null=True)
     initiated_day = models.IntegerField(blank=True, null=True)
     exposed_herd_id = models.IntegerField(blank=True, null=True)
-    exposed_zone_id = models.IntegerField(blank=True, null=True)
+    exposed_zone = models.ForeignKey(InZone)
     exposing_herd_id = models.IntegerField(blank=True, null=True)
-    exposing_zone_id = models.IntegerField(blank=True, null=True)
+    exposing_zone = models.ForeignKey(InZone)
     spread_method_code = models.CharField(max_length=255, blank=True)
     is_adequate = models.IntegerField(blank=True, null=True)
     exposing_herd_status_code = models.CharField(max_length=255, blank=True)
@@ -214,7 +214,6 @@ class Outepidemiccurves(models.Model):
 
 
 class Outgeneral(models.Model):
-    out_general_id = models.CharField(max_length=255, blank=True)
     simulation_start_time = models.CharField(max_length=255, blank=True)
     simulation_end_time = models.CharField(max_length=255, blank=True)
     completed_iterations = models.IntegerField(blank=True, null=True)
@@ -371,7 +370,7 @@ class Outiterationbyproductiontype(models.Model):
 
 class Outiterationbyzone(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
-    zone_id = models.IntegerField(blank=True, null=True)
+    zone = models.ForeignKey(InZone)
     max_zone_area = models.FloatField(blank=True, null=True)
     max_zone_area_day = models.IntegerField(blank=True, null=True)
     final_zone_area = models.FloatField(blank=True, null=True)
@@ -382,7 +381,7 @@ class Outiterationbyzone(models.Model):
 
 class Outiterationbyzoneandproductiontype(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
-    zone_id = models.IntegerField(blank=True, null=True)
+    zone = models.ForeignKey(InZone)
     production_type = models.ForeignKey(InProductionType)
     unit_days_in_zone = models.IntegerField(blank=True, null=True)
     animal_days_in_zone = models.IntegerField(blank=True, null=True)
