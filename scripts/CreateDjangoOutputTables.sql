@@ -351,22 +351,22 @@ destroy_cum_animal_ind_back	int,
 destroy_cum_unit_ring		int,
 destroy_cum_animal_ring		int,
 destroy_wait_unit_max		int,
-destroy_wait_animal_max		real
+destroy_wait_animal_max		real,
 destroy_wait_unit_max_day	int,
 destroy_wait_animal_max_day	int,
 destroy_wait_unit_time_max	int,
-destroy_wait_unit_time_avg	real
-destroy_wait_unit_days_in_queue	real
-destroy_wait_animal_days_in_queue	real
+destroy_wait_unit_time_avg	real,
+destroy_wait_unit_days_in_queue	real,
+destroy_wait_animal_days_in_queue	real,
 vac_cum_unit_initial		int,
 vac_cum_animal_initial		int,
 vac_cum_unit_ring		int,
-vac_cum_animal_ring		int, --
+vac_cum_animal_ring		int,
 vac_wait_unit_max		int,
-vac_wait_animal_max		real  -- 
+vac_wait_animal_max		real,
 vac_wait_unit_max_day		int,
 vac_wait_animal_max_day		int,
-vac_wait_unit_time_max		real
+vac_wait_unit_time_max		real,
 vac_wait_unit_time_avg		int,
 zonc_foci			int,
 first_detection			int,
