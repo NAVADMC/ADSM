@@ -164,7 +164,7 @@ class OutDailyByZone(models.Model):
     zone_perimeter = models.FloatField(blank=True, null=True)
 
 
-class OutDailyByzoneAndProductionType(models.Model):
+class OutDailyByZoneAndProductionType(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
     day = models.IntegerField(blank=True, null=True)
     zone = models.ForeignKey(InZone)
@@ -191,12 +191,12 @@ class OutDailyExposures(models.Model):
     day = models.IntegerField(blank=True, null=True)
     exposure = models.IntegerField(blank=True, null=True)
     initiated_day = models.IntegerField(blank=True, null=True)
-    exposed_unit = models.ForeignKey(DynamicUnit)
-    exposed_zone = models.ForeignKey(InZone)
-    exposing_unit = models.ForeignKey(DynamicUnit)
-    exposing_zone = models.ForeignKey(InZone)
+    exposed_unit = models.ForeignKey(DynamicUnit, related_name='events_where_unit_was_exposed')
+    exposed_zone = models.ForeignKey(InZone, related_name='events_that_exposed_this_zone')
+    exposing_unit = models.ForeignKey(DynamicUnit, related_name='events_where_unit_exposed_others')
+    exposing_zone = models.ForeignKey(InZone, related_name='events_that_exposed_others')
     spread_method_code = models.CharField(max_length=255, blank=True)
-    is_adequate = models.BooleanField(blank=True, null=True)
+    is_adequate = models.NullBooleanField()
     exposing_unit_status_code = models.CharField(max_length=255, blank=True)
     exposed_unit_status_code = models.CharField(max_length=255, blank=True)
 
@@ -222,11 +222,11 @@ class OutGeneral(models.Model):
 
 class OutIteration(models.Model):
     iteration = models.IntegerField(blank=True, null=True)
-    disease_ended = models.BooleanField(blank=True, null=True)
+    disease_ended = models.NullBooleanField()
     disease_end_day = models.IntegerField(blank=True, null=True)
-    outbreak_ended = models.BooleanField(blank=True, null=True)
+    outbreak_ended = models.NullBooleanField()
     outbreak_end_day = models.IntegerField(blank=True, null=True)
-    zone_foci_created = models.BooleanField(blank=True, null=True)
+    zone_foci_created = models.NullBooleanField()
     destroy_wait_unit_max = models.IntegerField(blank=True, null=True)
     destroy_wait_unit_max_day = models.IntegerField(blank=True, null=True)
     destroy_wait_animal_max = models.FloatField(blank=True, null=True)
