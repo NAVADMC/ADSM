@@ -3,15 +3,24 @@
 {% block main %}
     <nav>
         <ul id="setupMenu">
+            <li><a href="/setup/InGeneral/new/">Scenario Settings</a>
             <li><a href="#">Population</a>
-                <ul><li><a href="#">Production Types</a></li>
-                    <li><a href="#">Locations</a></li></ul></li>
-            <li><a href="#">Disease</a></li>
-            <li><a href="#">Disease Spread</a></li>
-            <li><a href="#">Zones</a></li>
-            <li><a href="#">Destruction</a></li>
-            <li><a href="#">Vaccination</a></li>
-            <li><a href="#">Tracing</a></li>
+                <ul><li><a href="/setup/InProductionType/new/">Production Types</a></li>
+                    <li><a href="/setup/DynamicUnits/new/">Farm Locations</a></li>
+                    <li><a href="/setup/InProductionTypePair/new/">Animal Pair Interactions</a></li>
+                </ul></li>
+            <li><a href="/setup/InDiseaseGlobal/new/">Disease</a>
+                <ul><li><a href="/setup/InDiseaseSpread/new/">Disease Spread</a></li>
+                    <li><a href="/setup/InDiseaseProductionType/new/">Disease Reaction</a></li>
+                </ul></li>
+            <li><a href="/setup/InControlGlobal/new/">Controls</a>
+                <ul><li><a href="/setup/InZone/new/">Zones</a>
+                        <ul><li><a href="/setup/InZoneProductionTypePair/new/">Zone Spread Interaction</a></li></ul></li>
+                    <li><a href="/setup/InControlPlan/new/">Control Plan</a>
+                        <ul><li><a href="/setup/InControlsProductionType/new/">Destruction</a></li>
+                            <li><a href="/setup/InControlsProductionType/new/">Vaccination</a></li>
+                            <li><a href="/setup/InControlsProductionType/new/">Tracing</a></li></ul></li>
+                </ul></li>
         </ul>
     </nav>
 <section>
