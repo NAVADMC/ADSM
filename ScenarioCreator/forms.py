@@ -90,9 +90,9 @@ class InZoneForm(ModelForm):
         model = InZone
 
 
-class InZoneProductionTypePairForm(ModelForm):
+class InZoneProductionTypeForm(ModelForm):
     class Meta:
-        model = InZoneProductionTypePair
+        model = InZoneProductionType
 
 
 class ReadAllCodesForm(ModelForm):

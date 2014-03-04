@@ -4,8 +4,8 @@ import re
 from ScenarioCreator.forms import *
 
 
-def new_form(request, formClass, title):
-    initialized_form = formClass(request.POST or None)
+def new_form(request, form_class, title):
+    initialized_form = form_class(request.POST or None)
     if initialized_form.is_valid():
         initialized_form.save()  # write to database
     context = {'form': initialized_form,
@@ -33,7 +33,7 @@ def edit_entry(request, primary_key):
     model = get_object_or_404(form_class.Meta.model, pk=primary_key)
     form = form_class(request.POST or None, instance=model)
     if request.method == 'POST' and form.is_valid():
-        form.save();  #write to database
+        form.save()  # write to database
     context = {'form': form,
                'title': "Edit a " + model_name}
     return render(request, 'ScenarioCreator/new.html', context)

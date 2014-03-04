@@ -49,8 +49,8 @@ url('^InProductionTypePair/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_
 url('^InZone/new/$', 'ScenarioCreator.views.new_entry'),
 url('^InZone/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
-url('^InZoneProductionTypePair/new/$', 'ScenarioCreator.views.new_entry'),
-url('^InZoneProductionTypePair/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+url('^InZoneProductionType/new/$', 'ScenarioCreator.views.new_entry'),
+url('^InZoneProductionType/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
 url('^ReadAllCodes/new/$', 'ScenarioCreator.views.new_entry'),
 url('^ReadAllCodes/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),

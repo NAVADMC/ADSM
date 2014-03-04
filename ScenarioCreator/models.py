@@ -94,8 +94,6 @@ class ProbabilityEquation(InChart):
     p = models.FloatField(blank=True, null=True)
     m = models.IntegerField(blank=True, null=True)
     d = models.IntegerField(blank=True, null=True)
-    dmin = models.IntegerField(blank=True, null=True)
-    dmax = models.IntegerField(blank=True, null=True)
     theta = models.FloatField(blank=True, null=True)
     a = models.FloatField(blank=True, null=True)
     s = models.IntegerField(blank=True, null=True)
@@ -113,23 +111,20 @@ class EquationPoint(models.Model):
 
 
 class InControlGlobal(models.Model):
-    include_detection = models.BooleanField(default=False, )
-    include_tracing = models.BooleanField(default=False, )
-    include_tracing_unit_exam = models.BooleanField(default=False, )
-    include_tracing_testing = models.BooleanField(default=False, )
-    include_destruction = models.BooleanField(default=False, )  # TODO: restrict ForeignKey presence based on boolean include
+    _include_detection = models.BooleanField(default=False, )
+    _include_tracing = models.BooleanField(default=False, )
+    _include_tracing_unit_exam = models.BooleanField(default=False, )
+    _include_tracing_testing = models.BooleanField(default=False, )
+    _include_destruction = models.BooleanField(default=False, )  # TODO: restrict ForeignKey presence based on boolean include
+    _include_vaccination = models.BooleanField(default=False, )
+    _include_zones = models.BooleanField(default=False, )
     destruction_delay = models.IntegerField(blank=True, null=True)
     destruction_capacity_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
     destruction_priority_order = models.CharField(max_length=255, blank=True)  # These are an odd legacy.  Leave it for now
     destrucion_reason_order = models.CharField(max_length=255, blank=True)
-    include_vaccination = models.BooleanField(default=False, )
     vaccincation_detected_units_before_start = models.IntegerField(blank=True, null=True)
     vaccination_capacity_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
     vaccination_priority_order = models.CharField(max_length=255, blank=True)
-    include_zones = models.BooleanField(default=False, )
-    vaccination_retrospective_days = models.IntegerField(blank=True, null=True)
-    vaccination_capacity_start_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
-    vaccination_capacity_restart_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
 
 
 class InControlPlan(models.Model):
@@ -284,7 +279,7 @@ class InZone(models.Model):
     zone_radius = models.FloatField()
 
 
-class InZoneProductionTypePair(models.Model):
+class InZoneProductionType(models.Model):
     zone = models.ForeignKey(InZone)
     production_type_pair = models.ForeignKey('InProductionTypePair')
     zone_indirect_movement_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)  # This can be blank
