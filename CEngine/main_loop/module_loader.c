@@ -76,6 +76,7 @@
 #include "vaccination_monitor.h"
 #include "vaccination_list_monitor.h"
 #include "vaccine_model.h"
+#include "weekly_gis_writer.h"
 #include "zone_model.h"
 #include "zone_monitor.h"
 
@@ -141,6 +142,9 @@ struct model_load_info_t model_list[] = {
   {"vaccination-list-monitor", (void*)&vaccination_list_monitor_new},
   {"vaccination-monitor", (void*)&vaccination_monitor_new},
   {"vaccine-model", (void*)&vaccine_model_new},
+  #ifndef WIN_DLL
+    {"weekly-gis-writer", (void*)&weekly_gis_writer_new},
+  #endif
   {"zone-model", (void*)&zone_model_new},
   {"zone-monitor", (void*)&zone_monitor_new}    
 };
