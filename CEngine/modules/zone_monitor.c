@@ -66,7 +66,6 @@ typedef struct
   int nzones;
   projPJ projection; /* The map projection used to convert the units' latitudes
     and longitudes to x-y coordinates */
-  RPT_reporting_t *shape;
   RPT_reporting_t *area;
   RPT_reporting_t *max_area;
   RPT_reporting_t *max_area_day;
@@ -84,50 +83,6 @@ typedef struct
   RPT_reporting_t *num_animal_days_by_prodtype;
 }
 local_data_t;
-
-
-
-/**
- * Creates a representation of a polygon in OpenGIS Well-Known Text (WKT)
- * format.
- */
-GString *
-polygon_to_wkt (gpc_polygon * poly, projPJ projection)
-{
-  GString *s;
-  int num_contours, num_vertices;
-  int i, j;
-  gpc_vertex_list *contour;
-  gpc_vertex *vertex;
-  projUV p;
-
-  s = g_string_new ("POLYGON(");
-  num_contours = poly->num_contours;
-  for (i = 0; i < num_contours; i++)
-    {
-      g_string_append_c (s, '(');
-      contour = &(poly->contour[i]);
-      num_vertices = contour->num_vertices;
-      for (j = 0; j < num_vertices; j++)
-        {
-          vertex = &(contour->vertex[j]);
-          p.u = vertex->x;
-          p.v = vertex->y;
-          p = pj_inv (p, projection);
-          g_string_append_printf (s, "%g %g,", p.u * RAD_TO_DEG, p.v * RAD_TO_DEG);
-        }
-      /* Repeat the initial point to close the contour, as required by the
-       * WKT format. */
-      vertex = &(contour->vertex[0]);
-      p.u = vertex->x;
-      p.v = vertex->y;
-      p = pj_inv (p, projection);
-      g_string_append_printf (s, "%g %g)", p.u * RAD_TO_DEG, p.v * RAD_TO_DEG);
-    }
-  g_string_append_c (s, ')');
-
-  return s;
-}
 
 
 
@@ -181,10 +136,9 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units
                       ZON_zone_list_t * zones, EVT_new_day_event_t * event)
 {
   local_data_t *local_data;
-  gboolean shape_due, area_due, perimeter_due, num_areas_due, num_units_due;
+  gboolean area_due, perimeter_due, num_areas_due, num_units_due;
   int i;
   ZON_zone_t *zone, *next_smaller_zone;
-  GString *s;
   double area;
   double perimeter;
   unsigned int nunits;
@@ -197,7 +151,6 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units
 
   local_data = (local_data_t *) (self->model_data);
 
-  shape_due = RPT_reporting_due (local_data->shape, event->day);
   area_due = local_data->area->frequency == RPT_daily
              || local_data->max_area_day->frequency != RPT_never;
   perimeter_due = local_data->perimeter->frequency == RPT_daily
@@ -209,14 +162,6 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units
   for (i = 0; i < local_data->nzones - 1; i++)
     {
       zone = ZON_zone_list_get (zones, i);
-
-      if (shape_due)
-        {
-          s = polygon_to_wkt (zone->poly, local_data->projection);
-          RPT_reporting_set_text1 (local_data->shape, s->str, zone->name);
-          /* The string was copied so it can be freed. */
-          g_string_free (s, TRUE);
-        }
 
       if (area_due)
         {
@@ -339,10 +284,9 @@ handle_last_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * unit
                        ZON_zone_list_t * zones, EVT_last_day_event_t * event)
 {
   local_data_t *local_data;
-  gboolean skip_shape, skip_area, skip_perimeter, skip_num_areas, skip_num_units;
+  gboolean skip_area, skip_perimeter, skip_num_areas, skip_num_units;
   int i;
   ZON_zone_t *zone, *next_smaller_zone;
-  GString *s;
   double area;
   double perimeter;
   unsigned int nunits;
@@ -358,8 +302,6 @@ handle_last_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * unit
   /* Some of the output variables are computationally intensive.  If they're
    * reported "never", or if they were already computed today by
    * handle_new_day_event, don't bother to compute them. */
-  skip_shape = local_data->shape->frequency == RPT_never
-    || RPT_reporting_due (local_data->shape, event->day);
   skip_area = local_data->final_area->frequency == RPT_never
     && local_data->area->frequency == RPT_never
     && local_data->max_area->frequency == RPT_never;
@@ -379,14 +321,6 @@ handle_last_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * unit
   for (i = 0; i < local_data->nzones - 1; i++)
     {
       zone = ZON_zone_list_get (zones, i);
-
-      if (!skip_shape)
-        {
-          s = polygon_to_wkt (zone->poly, local_data->projection);
-          RPT_reporting_set_text1 (local_data->shape, s->str, zone->name);
-          /* The string was copied so it can be freed. */
-          g_string_free (s, TRUE);
-        }
 
       if (!skip_area)
         {
@@ -527,7 +461,6 @@ reset (struct spreadmodel_model_t_ *self)
 
   local_data = (local_data_t *) (self->model_data);
   /* RPT_reporting_zero preserves sub-cateogories but sets all numbers to 0. */
-  RPT_reporting_zero (local_data->shape);
   RPT_reporting_zero (local_data->area);
   RPT_reporting_zero (local_data->max_area);
   RPT_reporting_set_null (local_data->max_area_day, NULL);
@@ -567,7 +500,6 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  RPT_free_reporting (local_data->shape);
   RPT_free_reporting (local_data->area);
   RPT_free_reporting (local_data->max_area);
   RPT_free_reporting (local_data->max_area_day);
@@ -641,7 +573,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   /* Make sure the right XML subtree was sent. */
   g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
 
-  local_data->shape = RPT_new_reporting ("zoneShape", RPT_group, RPT_never);
   local_data->area = RPT_new_reporting ("zoneArea", RPT_group, RPT_never);
   local_data->max_area = RPT_new_reporting ("maxZoneArea", RPT_group, RPT_never);
   local_data->max_area_day = RPT_new_reporting ("maxZoneAreaDay", RPT_group, RPT_never);
@@ -658,7 +589,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   local_data->num_unit_days_by_prodtype = RPT_new_reporting ("unitDaysInZone", RPT_group, RPT_never);
   local_data->num_animal_days = RPT_new_reporting ("animalDaysInZone", RPT_group, RPT_never);
   local_data->num_animal_days_by_prodtype = RPT_new_reporting ("animalDaysInZone", RPT_group, RPT_never);
-  g_ptr_array_add (self->outputs, local_data->shape);
   g_ptr_array_add (self->outputs, local_data->area);
   g_ptr_array_add (self->outputs, local_data->max_area);
   g_ptr_array_add (self->outputs, local_data->max_area_day);
@@ -692,12 +622,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
       broken_down = broken_down || (g_strstr_len (variable_name, -1, "-by-") != NULL); 
       /* Starting at version 3.2 we accept either the old, verbose output
        * variable names or the new shorter ones. */
-      if (strcmp (variable_name, "zoneShape") == 0
-          || strcmp (variable_name, "zone-shape") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->shape, freq);
-        }
-      else if (strcmp (variable_name, "zoneArea") == 0
+      if (strcmp (variable_name, "zoneArea") == 0
                || strcmp (variable_name, "zone-area") == 0)
         {
           RPT_reporting_set_frequency (local_data->area, freq);
@@ -770,7 +695,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
 
       if (i < local_data->nzones - 1)
         {
-          RPT_reporting_set_text1 (local_data->shape, "", zone->name);
           RPT_reporting_set_real1 (local_data->area, 0, zone->name);
           RPT_reporting_set_real1 (local_data->max_area, 0, zone->name);
           RPT_reporting_set_integer1 (local_data->max_area_day, 0, zone->name);
