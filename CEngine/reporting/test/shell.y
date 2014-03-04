@@ -209,49 +209,6 @@ set_command:
       free (s);
       fflush (stdout);
     }
-  | SET LPAREN STRING RPAREN
-    {
-      /* Text, no subcategories. */
-      char *s;
-
-      RPT_free_reporting (current_variable);
-      current_variable = RPT_new_reporting (tentative_name, RPT_text, tentative_freq);
-      RPT_reporting_set_text (current_variable, $3, NULL);
-      free ($3);
-      s = RPT_reporting_value_to_string (current_variable, NULL);
-      printf ("%s\n%s", s, PROMPT);
-      free (s);
-      fflush (stdout);
-    }
-  | SET LPAREN STRING COMMA string_list RPAREN
-    {
-      /* Text, with subcategories. */
-      char **drill_down_list, **p, *s;
-      GSList *iter;
-
-      RPT_free_reporting (current_variable);
-
-      /* Copy the subcategories into an array. */
-      drill_down_list = g_new (char *, g_slist_length ($5) + 1);
-      for (iter = $5, p = drill_down_list; iter != NULL; iter = g_slist_next (iter))
-	{
-	  *p++ = (char *)(iter->data);
-	}
-      /* Terminate the array with a null pointer. */
-      *p = NULL;
-
-      /* Create and set the variable, then free the argument list. */
-      current_variable = RPT_new_reporting (tentative_name, RPT_group, tentative_freq);
-      RPT_reporting_set_text (current_variable, $3, (const char **) drill_down_list);
-      g_slist_foreach ($5, g_free_as_GFunc, NULL);
-      g_slist_free ($5);
-      g_free (drill_down_list);
-
-      s = RPT_reporting_value_to_string (current_variable, NULL);
-      printf ("%s\n%s", s, PROMPT);
-      free (s);
-      fflush (stdout);
-    }
   ;
 
 add_command:
@@ -292,20 +249,6 @@ add_command:
       g_slist_free ($5);
       g_free (drill_down_list);
 
-      s = RPT_reporting_value_to_string (current_variable, NULL);
-      printf ("%s\n%s", s, PROMPT);
-      free (s);
-      fflush (stdout);
-    }
-  | ADD LPAREN STRING RPAREN
-    {
-      /* Text, no subcategories. */
-      char *s;
-
-      if (current_variable == NULL)
-	current_variable = RPT_new_reporting (tentative_name, RPT_integer, tentative_freq);
-      RPT_reporting_append_text (current_variable, $3, NULL);
-      free ($3);
       s = RPT_reporting_value_to_string (current_variable, NULL);
       printf ("%s\n%s", s, PROMPT);
       free (s);
@@ -390,9 +333,6 @@ get_command :
 	  break;
 	case RPT_real:
 	  printf ("%g", RPT_reporting_get_real (current_variable, (const char **) drill_down_list));
-	  break;
-	case RPT_text:
-	  printf ("%s", RPT_reporting_get_text (current_variable, (const char **) drill_down_list));
 	  break;
     case RPT_group:
     case RPT_unknown_type:

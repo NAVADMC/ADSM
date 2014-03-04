@@ -40,7 +40,7 @@
  * @sa RPT_type_t
  */
 const char *RPT_type_name[] = {
-  "integer", "real", "text", "group", "unknown_type", NULL
+  "integer", "real", "group", "unknown_type", NULL
 };
 
 
@@ -99,9 +99,6 @@ RPT_new_reporting (const char *name, RPT_type_t type, RPT_frequency_t frequency)
       break;
     case RPT_real:
       reporting->data = g_new0 (double, 1);
-      break;
-    case RPT_text:
-      reporting->data = g_string_new ("");
       break;
     case RPT_group:
       g_datalist_init ((GData **) (&reporting->data));
@@ -554,17 +551,6 @@ RPT_reporting_value_to_string (RPT_reporting_t * reporting, char *format)
           format = "%g";
         g_string_printf (s, format, *((double *) reporting->data));
         break;
-      case RPT_text:
-        if (format == NULL)
-          format = "'%s'";
-        /* A kludge so that zone polygons are not in single quotes and therefore
-         * don't count as strings when the output filters are parsing the output.
-         * lex has a fixed-size buffer for a single token so unlimited-size
-         * strings aren't good. */
-        if (strncmp (((GString *) reporting->data)->str, "POLYGON", 7) == 0)
-          format = "%s";
-        g_string_printf (s, format, ((GString *) reporting->data)->str);
-        break;
       case RPT_group:
         g_string_append_c (s, '{');
         to_pass.strings = g_ptr_array_new ();
@@ -666,9 +652,6 @@ RPT_free_reporting (RPT_reporting_t * reporting)
         case RPT_integer:
         case RPT_real:
           g_free (reporting->data);
-          break;
-        case RPT_text:
-          g_string_free ((GString *) reporting->data, TRUE);
           break;
         case RPT_group:
           g_datalist_clear ((GData **) (&reporting->data));
@@ -1265,283 +1248,6 @@ RPT_reporting_get_real1 (RPT_reporting_t * reporting, const char *subelement_nam
 
 
 /**
- * Sets the value of a text output variable.
- *
- * @param reporting an output variable.
- * @param value the new value.  The text is copied so the original string can
- *   be freed after calling this function.
- * @param subelement_name a null-terminated array of strings used to "drill
- *   down" through group output variables.  If NULL, <i>reporting</i> is
- *   assumed to be a text output variable.
- */
-void
-RPT_reporting_set_text (RPT_reporting_t * reporting, char *value, const char **subelement_name)
-{
-  GData **group;
-  RPT_reporting_t *subelement;
-
-  if (subelement_name == NULL || subelement_name[0] == NULL)
-    {
-      g_assert (reporting->type == RPT_text);
-      g_string_printf ((GString *) reporting->data, "%s", value);
-    }
-  else
-    {
-      if (reporting->type != RPT_group)
-        g_error ("Attempting to drill down to subelement \"%s\" of variable \"%s\", but \"%s\" is type %s, not group",
-                 subelement_name[0], reporting->name, reporting->name,
-                 RPT_type_name[reporting->type]);
-      group = (GData **) (&reporting->data);
-      subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name[0]));
-      /* If there isn't already a subelement by this name, create one. */
-      if (subelement == NULL)
-        {
-          if (subelement_name[1] == NULL)
-            /* The current subelement name is the last one in the list; the
-             * next output variable down will be a text variable. */
-            subelement = RPT_new_reporting (subelement_name[0], RPT_text,
-                                            reporting->frequency);
-          else
-            /* There are more subelement names in the list; the next output
-             * variable down will be another group variable. */
-            subelement = RPT_new_reporting (subelement_name[0], RPT_group,
-                                            reporting->frequency);
-          g_datalist_set_data_full (group, subelement_name[0], subelement,
-                                    RPT_free_reporting_as_GDestroyNotify);
-        }
-      RPT_reporting_set_text (subelement, value, &(subelement_name[1]));
-    }
-
-  reporting->is_null=FALSE;
-  return;
-}
-
-
-
-/**
- * Sets the value of a text output variable (alternate version for group
- * variables only 1 level deep).
- *
- * @param reporting an output variable.
- * @param value the new value.  The text is copied so the original string can
- *   be freed after calling this function. 
- * @param subelement_name a string used to choose one element from a group
- *   output variable.  If NULL, <i>reporting</i> is assumed to be a text output
- *   variable.
- */
-void
-RPT_reporting_set_text1 (RPT_reporting_t * reporting, char *value, const char *subelement_name)
-{
-  GData **group;
-  RPT_reporting_t *subelement;
-
-  if (subelement_name == NULL)
-    {
-      g_assert (reporting->type == RPT_text);
-      g_string_printf ((GString *) reporting->data, "%s", value);
-    }
-  else
-    {
-      if (reporting->type != RPT_group)
-        g_error ("Attempting to drill down to subelement \"%s\" of variable \"%s\", but \"%s\" is type %s, not group",
-                 subelement_name[0], reporting->name, reporting->name,
-                 RPT_type_name[reporting->type]);
-      group = (GData **) (&reporting->data);
-      subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name));
-      /* If there isn't already a subelement by this name, create one. */
-      if (subelement == NULL)
-        {
-          subelement = RPT_new_reporting (subelement_name, RPT_text,
-                                          reporting->frequency);
-          g_datalist_set_data_full (group, subelement_name, subelement,
-                                    RPT_free_reporting_as_GDestroyNotify);
-        }
-      RPT_reporting_set_text (subelement, value, NULL);
-    }
-
-  reporting->is_null=FALSE;
-  return;
-}
-
-
-
-/**
- * Appends to a text output variable.
- *
- * @param reporting an output variable.
- * @param value the text to append. 
- * @param subelement_name a null-terminated array of strings used to "drill
- *   down" through group output variables.  If NULL, <i>reporting</i> is
- *   assumed to be a text output variable.
- */
-void
-RPT_reporting_append_text (RPT_reporting_t * reporting, char *value, const char **subelement_name)
-{
-  GData **group;
-  RPT_reporting_t *subelement;
-
-  if (subelement_name == NULL || subelement_name[0] == NULL)
-    {
-      g_assert (reporting->type == RPT_text);
-      g_string_append_printf ((GString *) reporting->data, "%s", value);
-    }
-  else
-    {
-      if (reporting->type != RPT_group)
-        g_error ("Attempting to drill down to subelement \"%s\" of variable \"%s\", but \"%s\" is type %s, not group",
-                 subelement_name[0], reporting->name, reporting->name,
-                 RPT_type_name[reporting->type]);
-      group = (GData **) (&reporting->data);
-      subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name[0]));
-      /* If there isn't already a subelement by this name, create one. */
-      if (subelement == NULL)
-        {
-          if (subelement_name[1] == NULL)
-            /* The current subelement name is the last one in the list; the
-             * next output variable down will be a text variable. */
-            subelement = RPT_new_reporting (subelement_name[0], RPT_text,
-                                            reporting->frequency);
-          else
-            /* There are more subelement names in the list; the next output
-             * variable down will be another group variable. */
-            subelement = RPT_new_reporting (subelement_name[0], RPT_group,
-                                            reporting->frequency);
-          g_datalist_set_data_full (group, subelement_name[0], subelement,
-                                    RPT_free_reporting_as_GDestroyNotify);
-        }
-      RPT_reporting_append_text (subelement, value, &(subelement_name[1]));
-    }
-
-  reporting->is_null=FALSE;
-  return;
-}
-
-
-
-/**
- * Appends to a text output variable (alternate version for group variables
- * only 1 level deep).
- *
- * @param reporting an output variable.
- * @param value the text to append.
- * @param subelement_name a string used to choose one element from a group
- *   output variable.  If NULL, <i>reporting</i> is assumed to be a text output
- *   variable.
- */
-void
-RPT_reporting_append_text1 (RPT_reporting_t * reporting, char *value, const char *subelement_name)
-{
-  GData **group;
-  RPT_reporting_t *subelement;
-
-  if (subelement_name == NULL)
-    {
-      g_assert (reporting->type == RPT_text);
-      g_string_append_printf ((GString *) reporting->data, "%s", value);
-    }
-  else
-    {
-      if (reporting->type != RPT_group)
-        g_error ("Attempting to drill down to subelement \"%s\" of variable \"%s\", but \"%s\" is type %s, not group",
-                 subelement_name[0], reporting->name, reporting->name,
-                 RPT_type_name[reporting->type]);
-      group = (GData **) (&reporting->data);
-      subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name));
-      /* If there isn't already a subelement by this name, create one. */
-      if (subelement == NULL)
-        {
-          subelement = RPT_new_reporting (subelement_name, RPT_text,
-                                          reporting->frequency);
-          g_datalist_set_data_full (group, subelement_name, subelement,
-                                    RPT_free_reporting_as_GDestroyNotify);
-        }
-      RPT_reporting_append_text (subelement, value, NULL);
-    }
-
-  reporting->is_null=FALSE;
-  return;
-}
-
-
-
-/**
- * Retrieves the value of a text output variable.
- *
- * @param reporting an output variable.
- * @param subelement_name a null-terminated array of strings used to "drill
- *   down" through group output variables.  If NULL, <i>reporting</i> is
- *   assumed to be a text output variable.
- * @returns the value, or NULL if a non-existent subelement was specified.
- */
-char *
-RPT_reporting_get_text (RPT_reporting_t * reporting, const char **subelement_name)
-{
-  GData **group;
-  RPT_reporting_t *subelement;
-  char *value = NULL;
-
-  if (subelement_name == NULL || subelement_name[0] == NULL)
-    {
-      g_assert (reporting->type == RPT_text);
-      value = ((GString *) reporting->data)->str;
-    }
-  else
-    {
-      if (reporting->type != RPT_group)
-        g_error ("Attempting to drill down to subelement \"%s\" of variable \"%s\", but \"%s\" is type %s, not group",
-                 subelement_name[0], reporting->name, reporting->name,
-                 RPT_type_name[reporting->type]);
-      group = (GData **) (&reporting->data);
-      subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name[0]));
-      if (subelement != NULL)
-        value = RPT_reporting_get_text (subelement, &(subelement_name[1]));
-    }
-
-  return value;
-}
-
-
-
-/**
- * Retrieves the value of a text output variable (alternate version for group
- * variables only 1 level deep).
- *
- * @param reporting an output variable.
- * @param subelement_name a string used to choose one element from a group
- *   output variable.  If NULL, <i>reporting</i> is assumed to be a text output
- *   variable.
- * @returns the value, or NULL if a non-existent subelement was specified.
- */
-char *
-RPT_reporting_get_text1 (RPT_reporting_t * reporting, const char *subelement_name)
-{
-  GData **group;
-  RPT_reporting_t *subelement;
-  char *value = NULL;
-
-  if (subelement_name == NULL)
-    {
-      g_assert (reporting->type == RPT_text);
-      value = ((GString *) reporting->data)->str;
-    }
-  else
-    {
-      if (reporting->type != RPT_group)
-        g_error ("Attempting to drill down to subelement \"%s\" of variable \"%s\", but \"%s\" is type %s, not group",
-                 subelement_name[0], reporting->name, reporting->name,
-                 RPT_type_name[reporting->type]);
-      group = (GData **) (&reporting->data);
-      subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name));
-      if (subelement != NULL)
-        value = RPT_reporting_get_text (subelement, NULL);
-    }
-
-  return value;
-}
-
-
-
-/**
  * Wraps RPT_reporting_set_null so that it can be used with the foreach
  * function of a GLib Keyed Data List, specifically, the Keyed Data List used
  * in "group" output variables.
@@ -1603,8 +1309,8 @@ RPT_reporting_set_null (RPT_reporting_t * reporting, const char **subelement_nam
         {
           if (subelement_name[1] == NULL)
             /* The current subelement name is the last one in the list; the
-             * next output variable down will be a text variable. */
-            subelement = RPT_new_reporting (subelement_name[0], RPT_text,
+             * next output variable down will be an integer variable. */
+            subelement = RPT_new_reporting (subelement_name[0], RPT_integer,
                                             reporting->frequency);
           else
             /* There are more subelement names in the list; the next output
@@ -1655,7 +1361,7 @@ RPT_reporting_set_null1 (RPT_reporting_t * reporting, const char *subelement_nam
       /* If there isn't already a subelement by this name, create one. */
       if (subelement == NULL)
         {
-          subelement = RPT_new_reporting (subelement_name, RPT_text,
+          subelement = RPT_new_reporting (subelement_name, RPT_integer,
                                           reporting->frequency);
           g_datalist_set_data_full (group, subelement_name, subelement,
                                     RPT_free_reporting_as_GDestroyNotify);
@@ -1780,9 +1486,9 @@ RPT_reporting_splice (RPT_reporting_t * reporting, RPT_reporting_t * subvar)
 
 /**
  * Resets an output variable.  Integer and real output variables are set to 0.
- * Text variables are set to an empty string.  Group output variables have all
- * sub-variables cleared.  Contrast this with RPT_reporting_zero(), which sets
- * sub-variables to 0/empty string rather than removing them entirely.
+ * Group output variables have all sub-variables cleared.  Contrast this with
+ * RPT_reporting_zero(), which sets sub-variables to 0 rather than removing
+ * them entirely.
  *
  * @sa RPT_reporting_zero
  *
@@ -1802,9 +1508,6 @@ RPT_reporting_reset (RPT_reporting_t * reporting)
       break;
     case RPT_real:
       *((double *) reporting->data) = 0;
-      break;
-    case RPT_text:
-      g_string_truncate ((GString *) reporting->data, 0);
       break;
     case RPT_group:
       g_datalist_clear ((GData **) (&reporting->data));
@@ -1849,10 +1552,9 @@ RPT_reporting_zero_as_GDataForeachFunc (GQuark key_id, gpointer data, gpointer u
 
 /**
  * Zeroes an output variable.  Integer and real output variables are set to 0.
- * Text variables are set to an empty string.  Group output variables have all
- * sub-variables (and sub-sub-variables, etc.) set to 0/empty string.  Contrast
- * this with RPT_reporting_reset(), which removes sub-variables entirely rather
- * than setting them to 0/empty string.
+ * Group output variables have all sub-variables (and sub-sub-variables, etc.)
+ * set to 0.  Contrast this with RPT_reporting_reset(), which removes
+ * sub-variables entirely rather than setting them to 0.
  *
  * @sa RPT_reporting_reset
  *
@@ -1872,9 +1574,6 @@ RPT_reporting_zero (RPT_reporting_t * reporting)
       break;
     case RPT_real:
       *((double *) reporting->data) = 0;
-      break;
-    case RPT_text:
-      g_string_truncate ((GString *) reporting->data, 0);
       break;
     case RPT_group:
       g_datalist_foreach ((GData **) (&reporting->data),
@@ -2063,11 +1762,6 @@ RPT_clone_reporting (RPT_reporting_t * original)
           break;
         case RPT_real:
           RPT_reporting_set_real (copy, RPT_reporting_get_real (original, NULL), NULL);
-          break;
-        case RPT_text:
-          RPT_reporting_set_text (copy, RPT_reporting_get_text (original, NULL), NULL);
-          /* This is safe to do since RPT_reporting_set_text makes a new copy
-           * of the text it is passed. */
           break;
         case RPT_group:
           g_datalist_foreach ((GData **) (&original->data), deep_copy, copy);
