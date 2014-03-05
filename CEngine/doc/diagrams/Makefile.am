@@ -158,7 +158,6 @@ dist_noinst_DATA = state-transition.png \
   prevalence_day4.png \
   16units_1_zone.png \
   16units_2_zones.png \
-  filters_flowchart.png \
   7units_w_ring.png \
   6units_2_w_ring.png \
   6units_2_w_ring2.png \
@@ -434,8 +433,6 @@ prevalence_day4_png_SOURCES = prevalence_day4.gnuplot
 16units_1_zone_png_SOURCES = 16units_1_zone.gnuplot
 
 16units_2_zones_png_SOURCES = 16units_2_zones.gnuplot
-
-filters_flowchart_png_SOURCES = filters_flowchart.dot
 
 7units_w_ring_png_SOURCES = 7units_w_ring.gnuplot
 

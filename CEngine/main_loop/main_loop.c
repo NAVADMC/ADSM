@@ -108,8 +108,7 @@
  *     running the configure script.
  *   <li>
  *     It is assumed that text in the input XML may contain accented characters.
- *     The text is converted to ISO-8859-1 inside the simulator, because the
- *     output filters cannot handle multi-byte character encodings.
+ *     The text is converted to ISO-8859-1 inside the simulator.
  *   <li>
  *     Comments are marked up for the auto-documentation tool
  *     <a href="http://www.doxygen.org/">Doxygen</a>, whose lovely output you
@@ -557,6 +556,36 @@ silent_log_handler (const gchar * log_domain, GLogLevelFlags log_level,
 
 
 /**
+ * Pull apart the program's version number, available in the constant
+ * PACKAGE_VERSION, into major, minor, and release numbers.
+ */
+static void
+split_version (const char *version, RPT_reporting_t *split)
+{
+  gchar **tokens;
+  gchar **iter;
+  guint i;
+  long num;
+  
+  tokens = g_strsplit (version, ".", 3);
+  for (iter = tokens, i = 0; *iter != NULL; iter++, i++)
+    {
+      num = strtol (*iter, NULL, 10);
+      if (i == 0)
+        RPT_reporting_set_integer1 (split, num, "major");
+      else if (i == 1)
+        RPT_reporting_set_integer1 (split, num, "minor");
+      else
+        RPT_reporting_set_integer1 (split, num, "release");
+    }
+  g_strfreev (tokens);
+
+  return;	
+}
+
+ 
+
+/**
  * Create a default map projection to use if no preferred one is supplied.
  *
  * Side effects: after this function runs, the unit list will have a bounding
@@ -832,8 +861,8 @@ run_sim_main (const char *population_file,
   last_day_of_outbreak =
     RPT_new_reporting ("outbreakDuration", RPT_integer, RPT_never);
   clock_time = RPT_new_reporting ("clock-time", RPT_real, RPT_never);
-  version = RPT_new_reporting ("version", RPT_text, RPT_never);
-  RPT_reporting_set_text (version, PACKAGE_VERSION, NULL);
+  version = RPT_new_reporting ("version", RPT_group, RPT_never);
+  split_version (PACKAGE_VERSION, version);
   reporting_vars = g_ptr_array_new ();
   g_ptr_array_add (reporting_vars, num_units_in_state);
   g_ptr_array_add (reporting_vars, num_units_in_state_by_prodtype);
@@ -1189,7 +1218,7 @@ run_sim_main (const char *population_file,
               RPT_reporting_set_real (clock_time, (double) (finish_time - start_time), NULL);
               spreadmodel_create_event (manager, EVT_new_last_day_event (day), units, zones, rng);
             }
-          spreadmodel_create_event (manager, EVT_new_end_of_day2_event (day, early_exit), units, zones, rng);
+          spreadmodel_create_event (manager, EVT_new_end_of_day2_event (day, early_exit || day == ndays), units, zones, rng);
 
           if (NULL != spreadmodel_show_all_prevalences)
             {

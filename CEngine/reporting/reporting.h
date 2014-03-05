@@ -25,18 +25,11 @@
 
 
 /**
- * Number of types of output variables.
- *
- * @sa RPT_type_t
- */
-#define RPT_NTYPES 5
-
-/**
  * Types of output variables.
  */
 typedef enum
 {
-  RPT_integer, RPT_real, RPT_text, RPT_group, RPT_unknown_type
+  RPT_integer, RPT_real, RPT_group, RPT_unknown_type, RPT_NTYPES
 }
 RPT_type_t;
 extern const char *RPT_type_name[];
@@ -71,7 +64,7 @@ typedef struct
     quotes ('), double quotes ("), newlines, or carriage returns. */
   RPT_type_t type; /**< The type of variable.  For variables with categories,
     this will be RPT_group; use RPT_reporting_get_type() to find the base type
-    (RPT_integer, RPT_real, or RPT_text) of the variable. */
+    (RPT_integer or RPT_real) of the variable. */
   RPT_frequency_t frequency; /**< How frequently the variable is reported. */
   int days;
   gboolean is_null; /**< If TRUE, this variable has no meaningful value.  Used
@@ -103,8 +96,6 @@ void RPT_reporting_set_integer (RPT_reporting_t *, long, const char **);
 void RPT_reporting_set_integer1 (RPT_reporting_t *, long, const char *);
 void RPT_reporting_set_real (RPT_reporting_t *, double, const char **);
 void RPT_reporting_set_real1 (RPT_reporting_t *, double, const char *);
-void RPT_reporting_set_text (RPT_reporting_t *, char *text, const char **);
-void RPT_reporting_set_text1 (RPT_reporting_t *, char *text, const char *);
 void RPT_reporting_set_null (RPT_reporting_t *, const char **);
 void RPT_reporting_set_null1 (RPT_reporting_t *, const char *);
 void RPT_reporting_add_integer (RPT_reporting_t *, long, const char **);
@@ -115,8 +106,6 @@ void RPT_reporting_add_real1 (RPT_reporting_t *, double, const char *);
 #define RPT_reporting_sub_integer1(R,I,C) RPT_reporting_add_integer1(R,-(I),C)
 #define RPT_reporting_sub_real(R,I,C) RPT_reporting_add_real(R,-(I),C)
 #define RPT_reporting_sub_real1(R,I,C) RPT_reporting_add_real1(R,-(I),C)
-void RPT_reporting_append_text (RPT_reporting_t *, char *text, const char **);
-void RPT_reporting_append_text1 (RPT_reporting_t *, char *text, const char *);
 void RPT_reporting_splice (RPT_reporting_t *, RPT_reporting_t *);
 void RPT_reporting_reset (RPT_reporting_t *);
 void RPT_reporting_zero (RPT_reporting_t *);
@@ -126,12 +115,25 @@ long RPT_reporting_get_integer (RPT_reporting_t *, const char **);
 long RPT_reporting_get_integer1 (RPT_reporting_t *, const char *);
 double RPT_reporting_get_real (RPT_reporting_t *, const char **);
 double RPT_reporting_get_real1 (RPT_reporting_t *, const char *);
-char *RPT_reporting_get_text (RPT_reporting_t *, const char **);
-char *RPT_reporting_get_text1 (RPT_reporting_t *, const char *);
 
 RPT_frequency_t RPT_string_to_frequency (const char *);
 gboolean RPT_reporting_due (RPT_reporting_t *, unsigned int day);
 RPT_type_t RPT_reporting_get_type (RPT_reporting_t *);
 RPT_reporting_t *RPT_clone_reporting (RPT_reporting_t *);
+
+/**
+ * A struct used to deliver a "flattened" version of an output variable.
+ */
+typedef struct
+{
+  char *name;
+  RPT_reporting_t *reporting;
+}
+RPT_reporting_flattened_t;
+
+GArray *RPT_reporting_flatten (RPT_reporting_t *);
+void RPT_free_flattened_reporting (GArray *);
+
+char *camelcase (char *, gboolean capitalize_first);
 
 #endif /* !REPORTING_H */

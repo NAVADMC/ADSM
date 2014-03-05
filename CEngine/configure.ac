@@ -133,7 +133,6 @@ AC_OUTPUT(Makefile \
   modules/test/module.ring_vaccination/Makefile \
   modules/test/module.zones/Makefile \
   modules/test/module.economic/Makefile \
-  filters/Makefile \
   dll/Makefile \
   doc/Makefile \
   doc/diagrams/Makefile)

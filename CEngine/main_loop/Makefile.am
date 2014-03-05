@@ -80,10 +80,12 @@ libspreadmodel_a_SOURCES = main_loop.c module_loader.c module_loader.h \
   $(top_srcdir)/modules/zone_monitor.c $(top_srcdir)/modules/zone_monitor.h \
   $(top_srcdir)/modules/exam_monitor.c $(top_srcdir)/modules/exam_monitor.h \
   $(top_srcdir)/modules/test_monitor.c $(top_srcdir)/modules/test_monitor.h \
+  $(top_srcdir)/modules/table_writer.c $(top_srcdir)/modules/table_writer.h \
   $(top_srcdir)/modules/full_table_writer.c $(top_srcdir)/modules/full_table_writer.h \
   $(top_srcdir)/modules/state_table_writer.c $(top_srcdir)/modules/state_table_writer.h \
   $(top_srcdir)/modules/exposures_table_writer.c $(top_srcdir)/modules/exposures_table_writer.h \
   $(top_srcdir)/modules/apparent_events_table_writer.c $(top_srcdir)/modules/apparent_events_table_writer.h \
+  $(top_srcdir)/modules/weekly_gis_writer.c $(top_srcdir)/modules/weekly_gis_writer.h \
   $(top_srcdir)/modules/summary_gis_writer.c $(top_srcdir)/modules/summary_gis_writer.h
 if USE_SC_GUILIB
   libspreadmodel_a_SOURCES += $(top_srcdir)/sc_guilib/production_type_data.c \
