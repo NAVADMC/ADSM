@@ -12,7 +12,6 @@ SUBDIRS = wml \
   reporting \
   modules \
   main_loop \
-  filters \
   dll \
   doc
 mandir= $(exec_prefix)/man
