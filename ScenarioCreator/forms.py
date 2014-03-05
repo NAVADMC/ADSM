@@ -1,5 +1,9 @@
 from ScenarioCreator.models import *
-from floppyforms import ModelForm
+from floppyforms import ModelForm, Select, CharField
+
+
+class ForeignKeyCreationSelector(Select):
+    template_name = 'floppyforms/model_select.html'
 
 
 class DbSchemaVersionForm(ModelForm):
@@ -85,6 +89,7 @@ class InProductionTypeForm(ModelForm):
 class InProductionTypePairForm(ModelForm):
     class Meta:
         model = InProductionTypePair
+        widgets = {'source_production_type':ForeignKeyCreationSelector}
 
 
 class InZoneForm(ModelForm):
