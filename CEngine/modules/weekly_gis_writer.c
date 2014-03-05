@@ -439,7 +439,7 @@ write_zones_shapefile (local_data_t *local_data,
       shape_id = SHPWriteObject (shape_file, -1, shape);
       DBFWriteStringAttribute (dbf_file, shape_id, name_field, zone->name);
       #if DEBUG
-        g_debug ("wrote shape for \"%s\" zone", zone_name);
+        g_debug ("wrote shape for \"%s\" zone", zone->name);
       #endif
 
       SHPDestroyObject (shape);
