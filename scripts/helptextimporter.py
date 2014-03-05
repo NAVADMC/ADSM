@@ -7,7 +7,7 @@ def is_field(line):
     return line[:4] == '    ' and line[4] != ' ' and 'class ' not in line and '=' in line
 
 def valid_doc_field(row):
-    return row[0] and row[1] and row[2] and row[4]
+    return row[0] and row[1] and row[2]
 
 def scrub_field(field=''):
     return field.lower().strip().replace('_', '').replace('id', '')
@@ -34,7 +34,7 @@ def insert_help_text_to_models(input_file, documentation_file, output_file):
             if scrub_field(name) in doc_fields:
                 help_text = doc_fields[scrub_field(name)]
                 code[index] = indentation + name + ftype + params + " \n" + \
-                              indentation*2 + "help_text='" + help_text + "'" + end
+                              indentation*2 + "help_text='" + help_text + "', " + end
             else:
                 print(name)
 
