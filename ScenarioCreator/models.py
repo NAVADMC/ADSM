@@ -38,7 +38,7 @@ class DynamicBlob(models.Model):
 
 class DynamicUnit(models.Model):
     production_type = models.ForeignKey('InProductionType',
-        help_text='The identifier of the production type that these outputs apply to.', )
+        help_text='The production type that these outputs apply to.', )
     latitude = LatitudeField(
         help_text='The latitude used to georeference this unit.', )
     longitude = LongitudeField(
@@ -172,30 +172,36 @@ class InControlGlobal(models.Model):
         help_text='Indicates if zones will be modeled.', )
     destruction_delay = models.IntegerField(blank=True, null=True,
         help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
-    destruction_capacity_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
+    destruction_capacity_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True,
+        help_text="The relational function used to define the daily destruction capacity.", )
     destruction_priority_order = models.CharField(max_length=255, blank=True,
         help_text='A string that identifies the primary priority order for destruction.', )  # These are an odd legacy.  Leave it for now
     destrucion_reason_order = models.CharField(max_length=255, blank=True,
         help_text='A string that identifies the primary priority order for destruction.', )
-    trigger_vaccincation_after_detected_units_count = models.IntegerField(blank=True, null=True)
-    vaccination_capacity_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
+    trigger_vaccincation_after_detected_units_count = models.IntegerField(blank=True, null=True,
+        help_text='The number of clinical units which must be detected before the initiation of a vaccination program.', )
+    vaccination_capacity_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True,
+        help_text='Identifier of the relational fucntion used to define the daily vaccination capacity.', )
     vaccination_priority_order = models.CharField(max_length=255, blank=True,
         help_text='A string that identifies the primary priority order for vaccination.', )
 
 
 class InControlPlan(models.Model):
-    control_plan_name = models.CharField(max_length=255, )
-    control_plan_description = models.TextField(blank=True)
+    control_plan_name = models.CharField(max_length=255,
+                                         help_text='Name your Protocol so you can recognize it later.', )
+    notes = models.TextField(blank=True, )
     control_plan_group = models.CharField(max_length=255, blank=True)
 
 
 class InControlsProductionType(models.Model):
     production_type = models.ForeignKey('InProductionType',
-        help_text='The identifier of the production type that these outputs apply to.', )
+        help_text='The production type that these outputs apply to.', )
     use_detection = models.BooleanField(default=False,
         help_text='Indicates if disease detection will be modeled for units of this production type.', )
-    detection_probability_for_observed_time_in_clinical_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
-    detection_probability_report_vs_first_detection_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
+    detection_probability_for_observed_time_in_clinical_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True,
+        help_text='Identifier of the relational function used to define the probability of observing clinical signs in units of this production type.', )
+    detection_probability_report_vs_first_detection_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True,
+        help_text='Identifier of the relational function used to define the probability of reportin clinical signs in units of this production type.')
     trace_direct_forward = models.BooleanField(default=False,
         help_text='Indicator that trace forward will be conducted for direct contacts where the reported unit was the source of contact and was of this production type.', )
     trace_direct_back = models.BooleanField(default=False,
@@ -240,10 +246,12 @@ class InControlsProductionType(models.Model):
         help_text='Indicates if units of this production type will be subject to vaccination if infected and detected.', )
     days_to_immunity = models.IntegerField(blank=True, null=True,
         help_text='The number of days required for the onset of vaccine immunity in a newly vaccinated unit of this type.', )
-    vaccine_immune_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
+    vaccine_immune_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
+        help_text='Defines the vaccine immune period for units of this production type.', )
     vaccinate_ring = models.BooleanField(default=False,
         help_text='Indicates if detection of a clinical unit of this type will trigger a vaccination ring.', )
-    vaccination_ring_radius = models.FloatField(blank=True, null=True)
+    vaccination_ring_radius = models.FloatField(blank=True, null=True,
+        help_text='Radius in kilometers of the vaccination ring.', )
     vaccination_priority = models.IntegerField(blank=True, null=True,
         help_text='The vacination priority of this production type relative to other production types.  A  lower number indicates a higher priority.', )
     cost_destroy_appraisal_per_unit = MoneyField(default=0.0,
@@ -262,7 +270,8 @@ class InControlsProductionType(models.Model):
         help_text='The number of animals of this type that can be vaccinated before the cost of vaccination increases.', )
     cost_vaccinate_baseline_per_animal = MoneyField(default=0.0,
         help_text='The baseline cost of vaccination for each vaccinated animal of this type. This cost applies to all vaccinations before the threshold is set in costVaccThershold is met. ', )
-    cost_vaccinate_additional_per_animal = MoneyField(default=0.0)
+    cost_vaccinate_additional_per_animal = MoneyField(default=0.0,
+        help_text='The additional cost of vaccination for each vaccinated animal of this type after the threshold is exceeded.', )
     zone_detection_is_trigger = models.BooleanField(default=False,
         help_text='Indicator if detection of infected units of this production type will trigger a zone focus.', )
     zone_direct_trace_is_trigger = models.BooleanField(default=False,
@@ -299,7 +308,8 @@ class InControlsProductionType(models.Model):
         help_text='Test Sensitivity for units of this production type', )
     test_delay_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
         help_text='Identifier of the function that describes the delay in obtaining test results.', )
-    vaccinate_restrospective_days = models.BooleanField(default=False, )
+    vaccinate_retrospective_days = models.BooleanField(default=False,
+        help_text='Number of days in retrospect that should be used to determine which herds to vaccinate.', )
 
 
 class InDiseaseGlobal(models.Model):
@@ -309,14 +319,19 @@ class InDiseaseGlobal(models.Model):
 
 class InDiseaseProductionType(models.Model):
     production_type = models.ForeignKey('InProductionType',
-        help_text='The identifier of the production type that these outputs apply to.', )
+        help_text='The production type that these outputs apply to.', )
     use_disease_transition = models.BooleanField(default=False,
         help_text='Indicates if units of this production type will undergo disease transition.', )
-    disease_latent_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
-    disease_subclinical_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
-    disease_clinical_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
-    disease_immune_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+')
-    disease_prevalence_relid = models.ForeignKey(RelationalEquation, related_name='+')
+    disease_latent_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
+        help_text='Defines the latent period for units of this production type.', )
+    disease_subclinical_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
+        help_text='Defines the subclinical period for units of this production type.', )
+    disease_clinical_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
+        help_text='Defines the clinical period for units of this production type.', )
+    disease_immune_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
+        help_text='Defines the natural immune period for units of this production type.', )
+    disease_prevalence_relid = models.ForeignKey(RelationalEquation, related_name='+',
+        help_text='Defines the prevelance for units of this production type.', )
 
 
 class InDiseaseSpread(models.Model):
@@ -337,7 +352,7 @@ class InDiseaseSpread(models.Model):
     infection_probability = models.FloatField(blank=True, null=True,
         help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
     distance_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
-        help_text='Identifier of the probability density function used to define the sipment distances for direct and indirect contact models.', )
+        help_text='Defines the sipment distances for direct and indirect contact models.', )
         # This is in Disease because of simulation restrictions
     movement_control_relid = models.ForeignKey(RelationalEquation, related_name='+',
         help_text='Identifier of the relational function used to define movement control effects for the indicated production types combinations.', )
@@ -387,7 +402,8 @@ class InGeneral(models.Model):
     ## Outputs requested:
     save_all_daily_outputs = models.BooleanField(default=False,
         help_text='Indicates if daily outputs should be stored for every iteration.', )
-    maximum_iterations_for_daily_output = models.IntegerField(default=3, )
+    maximum_iterations_for_daily_output = models.IntegerField(default=3,
+        help_text='The number of iterations for which daily outputs should be stored The minimum value is 3.', )
     write_daily_states_file = models.BooleanField(default=False,
         help_text='Indicates if a plain text file with the state of each unit on each day of each iteration should be written.', )
     daily_states_filename = models.CharField(max_length=255, blank=True,
@@ -406,16 +422,20 @@ class InGeneral(models.Model):
 
 class InProductionType(models.Model):
     production_type_name = models.CharField(max_length=255, )
-    production_type_description = models.TextField(blank=True) # This field type is a guess.
+    production_type_description = models.TextField(blank=True)
 
 
 class InProductionTypePair(models.Model):
     source_production_type = models.ForeignKey(InProductionType, related_name='used_as_sources',
-        help_text='The identifier of the production type that will be the recipient type for this production type combination.', )
-    destination_production_type = models.ForeignKey(InProductionType, related_name='used_as_destinations')
-    direct_contact_spread_model = models.ForeignKey(InDiseaseSpread,   related_name='direct_spread_pair', blank=True, null=True)  # These can be blank, so no check box necessary
-    indirect_contact_spread_model = models.ForeignKey(InDiseaseSpread, related_name='indirect_spread_pair', blank=True, null=True)  # These can be blank, so no check box necessary
-    airborne_contact_spread_model = models.ForeignKey(InDiseaseSpread, related_name='airborne_spread_pair', blank=True, null=True)  # These can be blank, so no check box necessary
+        help_text='The identifier of the production type that will be the source type for this production type combination.', )
+    destination_production_type = models.ForeignKey(InProductionType, related_name='used_as_destinations',
+        help_text='The production type that will be the recipient type for this production type combination.', )
+    direct_contact_spread_model = models.ForeignKey(InDiseaseSpread,   related_name='direct_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+        help_text='Identifier of the disease spread mechanism used to model spread by direct contact between these types.', )
+    indirect_contact_spread_model = models.ForeignKey(InDiseaseSpread, related_name='indirect_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+        help_text='Identifier of the disease spread mechanism used to model spread by indirect contact between these types.', )
+    airborne_contact_spread_model = models.ForeignKey(InDiseaseSpread, related_name='airborne_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+        help_text='Identifier of the disease spread mechanism used to model spread by airbornespread between these types.', )
 
 
 class InZone(models.Model):
@@ -429,7 +449,7 @@ class InZoneProductionType(models.Model):
     zone = models.ForeignKey(InZone,
         help_text='Identifier of the zone for which this event occurred.', )
     production_type = models.ForeignKey('InProductionType',
-        help_text='The identifier of the production type that these outputs apply to.', )
+        help_text='The production type that these outputs apply to.', )
     zone_indirect_movement_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True,
         help_text='Identifier of the function the describes indirect movement rate.', )
     zone_direct_movement_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True,

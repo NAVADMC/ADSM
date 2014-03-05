@@ -688,7 +688,8 @@ class OutIterationByProductionType(models.Model):
         help_text='Maximum number of days spent in queue for vaccination by any single unit over the course of the iteration', )
     vac_wait_unit_time_avg = models.IntegerField(blank=True, null=True,
         help_text='Average number of days spent in queue for vaccination by each unit that was vaccinated over the course of the iteration', )
-    zone_foci = models.IntegerField(blank=True, null=True)
+    zone_foci = models.IntegerField(blank=True, null=True,
+        help_text='Total number of new zone foci created around units of the indicated type over the course of an iteration',)
     first_detection = models.IntegerField(blank=True, null=True,
         help_text='Day of first detection of an infected unit in the specified iteration', )
     first_det_unit_inf = models.IntegerField(blank=True, null=True,
