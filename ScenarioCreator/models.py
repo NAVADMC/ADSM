@@ -11,7 +11,7 @@
 # Search:  db_column='[^']*',  to remove column names
 
 from django.db import models
-from django_extras.db.models import PercentField, LatitudeField, LongitudeField
+from django_extras.db.models import PercentField, LatitudeField, LongitudeField, MoneyField
 
 
 def chc(*choice_list):
@@ -164,15 +164,15 @@ class InControlsProductionType(models.Model):
     vaccinate_ring = models.BooleanField(default=False, )
     vaccination_ring_radius = models.FloatField(blank=True, null=True)
     vaccination_priority = models.IntegerField(blank=True, null=True)
-    cost_destroy_appraisal_per_unit = models.FloatField(blank=True, null=True)
-    cost_destroy_cleaning_per_unit = models.FloatField(blank=True, null=True)
-    cost_destroy_euthanasia_per_animal = models.FloatField(blank=True, null=True)
-    cost_destroy_indemnification_per_animal = models.FloatField(blank=True, null=True)
-    cost_destroy_disposal_per_animal = models.FloatField(blank=True, null=True)
-    cost_vaccinate_setup_per_unit = models.FloatField(blank=True, null=True)
+    cost_destroy_appraisal_per_unit = MoneyField(default=0.0)
+    cost_destroy_cleaning_per_unit = MoneyField(default=0.0)
+    cost_destroy_euthanasia_per_animal = MoneyField(default=0.0)
+    cost_destroy_indemnification_per_animal = MoneyField(default=0.0)
+    cost_destroy_disposal_per_animal = MoneyField(default=0.0)
+    cost_vaccinate_setup_per_unit = MoneyField(default=0.0)
     cost_vaccinate_threshold = models.IntegerField(blank=True, null=True)
-    cost_vaccinate_baseline_per_animal = models.FloatField(blank=True, null=True)
-    cost_vaccinate_additional_per_animal = models.FloatField(blank=True, null=True)
+    cost_vaccinate_baseline_per_animal = MoneyField(default=0.0)
+    cost_vaccinate_additional_per_animal = MoneyField(default=0.0)
     zone_detection_is_trigger = models.BooleanField(default=False, )
     zone_direct_trace_is_trigger = models.BooleanField(default=False, )
     zone_indirect_trace_is_trigger = models.BooleanField(default=False, )
@@ -282,11 +282,10 @@ class InZone(models.Model):
 class InZoneProductionType(models.Model):
     zone = models.ForeignKey(InZone)
     production_type = models.ForeignKey('InProductionType')
-    zone_indirect_movement_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)  # This can be blank
-    zone_direct_movement_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)  # This can be blank
-    use_detection_multiplier = models.BooleanField(default=False, )
-    zone_detection_multiplier = models.FloatField(blank=True, null=True)
-    cost_surv_per_animal_day = models.FloatField(blank=True, null=True)
+    zone_indirect_movement_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
+    zone_direct_movement_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
+    zone_detection_multiplier = models.FloatField(default=1.0)
+    cost_surv_per_animal_day = MoneyField(default=0.0)
 
 
 class ReadAllCodes(models.Model):
