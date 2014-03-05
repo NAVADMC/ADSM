@@ -39,6 +39,7 @@ class EquationPointForm(ModelForm):
 class InControlGlobalForm(ModelForm):
     class Meta:
         model = InControlGlobal
+        exclude = ['_include_detection', '_include_tracing', '_include_tracing_unit_exam', '_include_tracing_testing', '_include_destruction', '_include_vaccination', '_include_zones']
 
 
 class InControlPlanForm(ModelForm):
@@ -86,9 +87,9 @@ class InZoneForm(ModelForm):
         model = InZone
 
 
-class InZoneProductionTypePairForm(ModelForm):
+class InZoneProductionTypeForm(ModelForm):
     class Meta:
-        model = InZoneProductionTypePair
+        model = InZoneProductionType
 
 
 class ReadAllCodesForm(ModelForm):

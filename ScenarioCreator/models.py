@@ -122,7 +122,7 @@ class InControlGlobal(models.Model):
     destruction_capacity_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
     destruction_priority_order = models.CharField(max_length=255, blank=True)  # These are an odd legacy.  Leave it for now
     destrucion_reason_order = models.CharField(max_length=255, blank=True)
-    vaccincation_detected_units_before_start = models.IntegerField(blank=True, null=True)
+    trigger_vaccincation_after_detected_units_count = models.IntegerField(blank=True, null=True)
     vaccination_capacity_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)
     vaccination_priority_order = models.CharField(max_length=255, blank=True)
 
@@ -281,7 +281,7 @@ class InZone(models.Model):
 
 class InZoneProductionType(models.Model):
     zone = models.ForeignKey(InZone)
-    production_type_pair = models.ForeignKey('InProductionTypePair')
+    production_type = models.ForeignKey('InProductionType')
     zone_indirect_movement_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)  # This can be blank
     zone_direct_movement_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True)  # This can be blank
     use_detection_multiplier = models.BooleanField(default=False, )

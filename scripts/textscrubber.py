@@ -114,6 +114,6 @@ if __name__ == '__main__':
     #Step #1:  Search:  db_column='[^']*', in models.py to remove column names
     print("Running from: ", os.getcwd())
     # lowercase_a_file('CreateDjangoOutputTables.sql')
-    # generate_forms_with_hidden_fields('../ScenarioCreator/models.py', 'auto-forms.py')
+    generate_forms_with_hidden_fields('../ScenarioCreator/models.py', 'auto-forms.py')
     # switch_to_boolean_fields('../ScenarioCreator/models.py', 'auto-models.py')
-    generate_urls_from_models('../ScenarioCreator/models.py', 'auto-urls.py')
+    # generate_urls_from_models('../ScenarioCreator/models.py', 'auto-urls.py')
