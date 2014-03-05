@@ -121,4 +121,19 @@ gboolean RPT_reporting_due (RPT_reporting_t *, unsigned int day);
 RPT_type_t RPT_reporting_get_type (RPT_reporting_t *);
 RPT_reporting_t *RPT_clone_reporting (RPT_reporting_t *);
 
+/**
+ * A struct used to deliver a "flattened" version of an output variable.
+ */
+typedef struct
+{
+  char *name;
+  RPT_reporting_t *reporting;
+}
+RPT_reporting_flattened_t;
+
+GArray *RPT_reporting_flatten (RPT_reporting_t *);
+void RPT_free_flattened_reporting (GArray *);
+
+char *camelcase (char *, gboolean capitalize_first);
+
 #endif /* !REPORTING_H */

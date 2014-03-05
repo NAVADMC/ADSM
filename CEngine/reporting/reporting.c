@@ -1779,4 +1779,227 @@ RPT_clone_reporting (RPT_reporting_t * original)
   return copy;
 }
 
+
+
+/**
+ * A struct for use with the function RPT_reporting_flatten() below.
+ */
+typedef struct
+{
+  GString *name_so_far; /* Should be NULL for the top-level call. */
+  GArray *flattened;
+}
+RPT_reporting_flatten_args_t;
+
+
+ 
+/**
+ * This is the recursive part of the function RPT_reporting_flatten().  This
+ * function is typed as a GDataForeachFunc so that it can easily be called
+ * recursively on the sub-variables.
+ *
+ * @param key_id use 0.
+ * @param data an output variable (RPT_reporting_t *), cast to a gpointer.
+ * @param user_data a pointer to an RPT_reporting_flatten_args_t struct, cast
+ *   to a gpointer.
+ */
+static void
+RPT_reporting_flatten_recursive (GQuark key_id, gpointer data, gpointer user_data)
+{
+  RPT_reporting_t *reporting;
+  RPT_reporting_flatten_args_t *incoming_args;
+  RPT_reporting_flatten_args_t outgoing_args;
+  GString *name_so_far;
+  GArray *flattened;
+  GString *name;
+  char *camel;
+
+  /* Unpack the incoming function parameters. */
+  reporting = (RPT_reporting_t *) data;
+  incoming_args = (RPT_reporting_flatten_args_t *) user_data;
+  name_so_far = incoming_args->name_so_far;
+  flattened = incoming_args->flattened;
+
+  /* Find the variable's name. */
+  if (name_so_far == NULL)
+    name = g_string_new (reporting->name);
+  else
+    {
+      name = g_string_new (name_so_far->str);
+      camel = camelcase (reporting->name, /* capitalize first = */ TRUE); 
+      g_string_append_printf (name, "%s", camel);
+      g_free (camel);
+    }
+  #if DEBUG
+    g_debug ("name = \"%s\"", name->str);
+  #endif
+
+  if (reporting->type == RPT_group)
+    {
+      outgoing_args.name_so_far = name;
+      outgoing_args.flattened = flattened;
+      #if DEBUG
+        g_debug ("doing recursive call");
+      #endif
+      g_datalist_foreach ((GData **) (&reporting->data), RPT_reporting_flatten_recursive, &outgoing_args);
+      g_string_free (name, TRUE);
+    }
+  else
+    {
+      RPT_reporting_flattened_t new_item;
+      #if DEBUG
+        g_debug ("found leaf output variable");
+      #endif
+      new_item.name = name->str;
+      g_string_free (name, FALSE);
+      new_item.reporting = reporting;
+      g_array_append_val (flattened, new_item);
+    }
+  return;
+}
+
+
+
+/**
+ * Produce a "flattened" version of an output variable.
+ *
+ * Conceptually, this function turns this:
+ *   infnU
+ *   - Dir
+ *     - Cattle=1
+ *     - Sheep=2
+ *   - Ind
+ *     - Cattle=3
+ *     - Sheep=4
+ *   - Air
+ *     - Cattle=5
+ *     - Sheep=6
+ * into this:
+ *   infnUDirCattle=1, infnUDirSheep=2, infnUIndCattle=3, infnUIndSheep=4,
+ *   infnUAirCattle=5, infnUAirSheep=6
+ *
+ * The data structure returned from this function contains pointers into the
+ * output variable, so the output variable must not be freed while this data
+ * structure is in use.
+ *
+ * @param reporting an output variable.
+ * @return a newly-allocated GArray in which each item is an RPT_reporting_flattened_t
+ *   struct.  Each of those structs contains a fully expanded variable name
+ *   (e.g. "infnUDirCattle") and a pointer to the sub-variable.  The sub-variable
+ *   is guaranteed to be a base type (i.e. not group).  The GArray should be
+ *   freed with RPT_free_flattened_reporting().
+ */
+GArray *
+RPT_reporting_flatten (RPT_reporting_t * reporting)
+{
+  GArray *flattened;
+  RPT_reporting_flatten_args_t args;
+ 
+  #if DEBUG
+    g_debug ("----- ENTER RPT_reporting_flatten");
+  #endif
+  flattened = g_array_new (/* zero-terminated = */ FALSE,
+                           /* clear = */ FALSE,
+                           sizeof (RPT_reporting_flattened_t));
+
+  /* This function is just a tiny function that sets up the return value (a
+   * GArray) and then calls a recursive function, RPT_reporting_flatten_recursive(),
+   * to do the actual work.
+   *
+   * The reason for having this tiny function is to present a more understandable
+   * function prototype to the outside world. */
+  args.name_so_far = NULL;
+  args.flattened = flattened;
+  RPT_reporting_flatten_recursive (0, (gpointer) reporting, (gpointer) (&args));
+
+  #if DEBUG
+  {
+    GString *s;
+    guint i;
+    s = g_string_new (NULL);
+    for (i = 0; i < flattened->len; i++)
+      {
+        g_string_append_printf (s, "%s%s",
+                                i == 0 ? "" : ", ",
+                                g_array_index (flattened, RPT_reporting_flattened_t, i).name);
+      }
+    g_debug ("Names found = %s", s->str);
+    g_string_free (s, TRUE);
+  }
+  #endif
+
+  #if DEBUG
+    g_debug ("----- EXIT RPT_reporting_flatten");
+  #endif
+  return flattened;
+}
+
+
+
+/**
+ * Frees the data structure returned by RPT_reporting_flatten.
+ */
+void
+RPT_free_flattened_reporting (GArray *flattened)
+{
+  guint i;
+  RPT_reporting_flattened_t *item;
+
+  if (flattened != NULL)
+    {
+      for (i = 0; i < flattened->len; i++)
+        {
+          item = &g_array_index (flattened, RPT_reporting_flattened_t, i);
+          g_free (item->name);
+          /* Do not free the output variable field (item->reporting), that was
+           * not allocated by us. */
+        }
+      g_array_free (flattened, /* free_segment = */ TRUE);
+    }
+  return;
+}
+
+
+
+/**
+ * Returns a copy of the given text, transformed into CamelCase.
+ *
+ * @param text the original text.
+ * @param capitalize_first if TRUE, the first character of the text will be
+ *   capitalized.
+ * @return a newly-allocated string.  If the "text" parameter is NULL, the
+ *   return value will also be NULL.
+ */
+char *
+camelcase (char *text, gboolean capitalize_first)
+{
+  char *newtext; /* Address of the newly-allocated CamelCase string. */
+  char *newchar; /* Pointer to the current character of the new string, as we
+    are building it. */
+  gboolean last_was_space;
+
+  newtext = NULL;
+  if (text != NULL)
+    {
+      newtext = g_new (char, strlen(text)+1); /* +1 to leave room for the '\0' at the end */
+      last_was_space = capitalize_first;
+      for (newchar = newtext; *text != '\0'; text++)
+        {
+          if (g_ascii_isspace (*text))
+            {
+              last_was_space = TRUE;
+              continue;
+            }
+          if (last_was_space && g_ascii_islower(*text))
+            *newchar++ = g_ascii_toupper (*text);
+          else
+            *newchar++ = *text;
+          last_was_space = FALSE;
+        }
+      /* End the new string with a null character. */
+      *newchar = '\0';
+    }
+  return newtext;
+}
+
 /* end of file reporting.c */

@@ -1219,7 +1219,7 @@ run_sim_main (const char *population_file,
               RPT_reporting_set_real (clock_time, (double) (finish_time - start_time), NULL);
               spreadmodel_create_event (manager, EVT_new_last_day_event (day), units, zones, rng);
             }
-          spreadmodel_create_event (manager, EVT_new_end_of_day2_event (day, early_exit), units, zones, rng);
+          spreadmodel_create_event (manager, EVT_new_end_of_day2_event (day, early_exit || day == ndays), units, zones, rng);
 
           if (NULL != spreadmodel_show_all_prevalences)
             {

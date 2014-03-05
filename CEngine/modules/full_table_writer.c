@@ -36,7 +36,6 @@
 #define handle_before_each_simulation_event full_table_writer_handle_before_each_simulation_event
 #define handle_new_day_event full_table_writer_handle_new_day_event
 #define handle_end_of_day2_event full_table_writer_handle_end_of_day2_event
-#define events_created full_table_writer_events_created
 
 #include "module.h"
 #include "module_util.h"
@@ -89,49 +88,6 @@ typedef struct
   gboolean printed_header;
 }
 local_data_t;
-
-
-
-/**
- * Returns a copy of the given text, transformed into CamelCase.
- *
- * @param text the original text.
- * @param capitalize_first if TRUE, the first character of the text will be
- *   capitalized.
- * @return a newly-allocated string.  If the "text" parameter is NULL, the
- *   return value will also be NULL.
- */
-char *
-camelcase (char *text, gboolean capitalize_first)
-{
-  char *newtext; /* Address of the newly-allocated CamelCase string. */
-  char *newchar; /* Pointer to the current character of the new string, as we
-    are building it. */
-  gboolean last_was_space;
-
-  newtext = NULL;
-  if (text != NULL)
-    {
-      newtext = g_new (char, strlen(text)+1); /* +1 to leave room for the '\0' at the end */
-      last_was_space = capitalize_first;
-      for (newchar = newtext; *text != '\0'; text++)
-        {
-          if (g_ascii_isspace (*text))
-            {
-              last_was_space = TRUE;
-              continue;
-            }
-          if (last_was_space && g_ascii_islower(*text))
-            *newchar++ = g_ascii_toupper (*text);
-          else
-            *newchar++ = *text;
-          last_was_space = FALSE;
-        }
-      /* End the new string with a null character. */
-      *newchar = '\0';
-    }
-  return newtext;
-}
 
 
 

@@ -8,14 +8,9 @@ AM_CPPFLAGS = -I.. -I$(top_srcdir)/main_loop -I$(top_srcdir)/unit -I$(top_srcdir
 AM_YFLAGS = -d -v
 
 bin_PROGRAMS = \
-  table_filter \
   shp2png \
   shp2png2
-table_filter_SOURCES = table.y scanner.l $(top_srcdir)/reporting/reporting.c
-table_filter_LDADD = @GLIB_LIBS@ @GSL_LIBS@
 shp2png_SOURCES = shp2png.c
 shp2png_LDADD = -lshp -lgd @GLIB_LIBS@
 shp2png2_SOURCES = shp2png2.c
 shp2png2_LDADD = -lshp -lgd @GLIB_LIBS@
-
-CLEANFILES = scanner.c table.c table.h table.output

@@ -62,6 +62,7 @@
 #include "ring_vaccination_model.h"
 #include "state_table_writer.h"
 #include "summary_gis_writer.h"
+#include "table_writer.h"
 #include "test_model.h"
 #include "test_monitor.h"
 #include "trace_back_destruction_model.h"
@@ -127,6 +128,9 @@ struct model_load_info_t model_list[] = {
   #endif
   #ifndef WIN_DLL
     {"summary-gis-writer", (void*)&summary_gis_writer_new},
+  #endif
+  #ifndef WIN_DLL
+    {"table-writer", (void*)&table_writer_new},
   #endif
   {"test-model", (void*)&test_model_new},
   {"test-monitor", (void*)&test_monitor_new},
