@@ -54,7 +54,8 @@ def add_if_foreign_key(foreign_keys, line):
         foreign_keys.append(entry)
     return foreign_keys
 
-
+"""This generator assumes that there are no blank lines before the end of the class model definition.
+ This means that if you def functions inside your class there must not be any blank lines between them."""
 def generate_forms_with_hidden_fields_and_ForeignKeys(filename, output_filename):
     form_lines = []
     excluded_fields = []

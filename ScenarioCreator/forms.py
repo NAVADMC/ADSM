@@ -8,8 +8,6 @@ class Add_or_Select(Select):
     # def get_context(self, name, value, attrs=None, choices=()):
     #     context = super(Add_or_Select, self).get_context(name, value, attrs=None, choices=())
     #     context['attrs']['data-new-item-url'] = '/%s/new/' %
-
-
 class DbSchemaVersionForm(ModelForm):
     class Meta:
         model = DbSchemaVersion
@@ -57,16 +55,18 @@ class InControlGlobalForm(ModelForm):
                    'vaccination_capacity_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'})}
 
 
-class InControlPlanForm(ModelForm):
+class ProtocolAssignmentForm(ModelForm):
     class Meta:
-        model = InControlPlan
-
-
-class InControlsProductionTypeForm(ModelForm):
-    class Meta:
-        model = InControlsProductionType
+        model = ProtocolAssignment
         widgets = {'production_type':Add_or_Select(attrs={'data-new-item-url': '/setup/InProductionType/new/'}),
-                   'detection_probability_for_observed_time_in_clinical_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'}),
+                   'control_protocol':Add_or_Select(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'}),
+                   'master_plan':Add_or_Select(attrs={'data-new-item-url': '/setup/InControlGlobal/new/'})}
+
+
+class ControlProtocolForm(ModelForm):
+    class Meta:
+        model = ControlProtocol
+        widgets = {'detection_probability_for_observed_time_in_clinical_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'}),
                    'detection_probability_report_vs_first_detection_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'}),
                    'trace_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'}),
                    'vaccine_immune_period_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'}),

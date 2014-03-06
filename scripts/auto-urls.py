@@ -22,11 +22,11 @@ url('^EquationPoint/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry')
 url('^InControlGlobal/new/$', 'ScenarioCreator.views.new_entry'),
 url('^InControlGlobal/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
-url('^InControlPlan/new/$', 'ScenarioCreator.views.new_entry'),
-url('^InControlPlan/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+url('^ProtocolAssignment/new/$', 'ScenarioCreator.views.new_entry'),
+url('^ProtocolAssignment/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
-url('^InControlsProductionType/new/$', 'ScenarioCreator.views.new_entry'),
-url('^InControlsProductionType/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+url('^ControlProtocol/new/$', 'ScenarioCreator.views.new_entry'),
+url('^ControlProtocol/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
 url('^InDiseaseGlobal/new/$', 'ScenarioCreator.views.new_entry'),
 url('^InDiseaseGlobal/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
