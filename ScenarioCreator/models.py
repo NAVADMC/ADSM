@@ -149,9 +149,9 @@ class RelationalEquation(InChart):
 class EquationPoint(models.Model):
     chart = models.ForeignKey(RelationalEquation)
     _point_order = models.IntegerField()
-    _x = models.FloatField(
+    x = models.FloatField(
         help_text='The x value of the point.', )
-    _y = models.FloatField(
+    y = models.FloatField(
         help_text='The y value of the point.', )
 
 

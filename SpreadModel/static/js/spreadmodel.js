@@ -10,9 +10,14 @@ var modelModal = {
     show: function(model, selectInput) {
         var modal = this.template.clone();
         modal.attr('id', model+'_modal');
-        // do stuff to modal
-        $('body').append(modal)
-        modal.modal('show')
+        $.get(selectInput.attr('data-new-item-url'), function(newForm){
+            $newForm = $($.parseHTML(newForm));
+            modal.find('.modal-title').html($newForm.find('h1:not(.filename)').html());
+            modal.find('.modal-body').html($newForm.find('form'));
+            $('body').append(modal);
+            modal.modal('show');
+        })
+
         },
     template: $('<div class="modal fade">\
                   <div class="modal-dialog">\
