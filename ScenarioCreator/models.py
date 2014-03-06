@@ -87,7 +87,7 @@ class InChart(models.Model):
         help_text='Specifies the descriptive units for the x axis in relational functions.', )
     y_axis_units = models.CharField(max_length=255, blank=True,
         help_text='Specifies the descriptive units for the x axis in probability density and relational functions.', )
-    _notes = models.TextField(blank=True, null=True,
+    notes = models.TextField(blank=True, null=True,
         help_text='', )  # Why is this hidden?
     class Meta:
         abstract = True
@@ -165,7 +165,7 @@ class InControlGlobal(models.Model):
     _include_tracing_testing = models.BooleanField(default=False,
         help_text='Indicates if tracing using unit examination in any production type will be modeled.', )
     _include_destruction = models.BooleanField(default=False,
-        help_text='Indicates if destruction of units in any production type will be modeled.', )  # TODO: restrict ForeignKey presence based on boolean include
+        help_text='Indicates if destruction of units in any production type will be modeled.', )
     _include_vaccination = models.BooleanField(default=False,
         help_text='A string that identifies the secondary priority order for destruction.', )
     _include_zones = models.BooleanField(default=False,
