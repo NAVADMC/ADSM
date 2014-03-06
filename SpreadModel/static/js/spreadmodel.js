@@ -13,8 +13,15 @@ var modelModal = {
         return $.post(url, $form.serialize(), callback);
     },
 
-    update_contents: function(data){
+    update_contents: function(data, status, xhr, dataType){
         console.log(data);
+        if('json' === dataType) {
+            if (data['status']=='success') {
+
+            }
+        } else {
+
+        }
     },
 
     show: function(model, selectInput) {

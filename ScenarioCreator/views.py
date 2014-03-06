@@ -1,4 +1,6 @@
-from django.shortcuts import render, get_object_or_404
+import json
+from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404, redirect
 import re
 
 from ScenarioCreator.forms import *
@@ -7,7 +9,13 @@ from ScenarioCreator.forms import *
 def new_form(request, form_class, title):
     initialized_form = form_class(request.POST or None)
     if initialized_form.is_valid():
-        initialized_form.save()  # write to database
+        model_instance = initialized_form.save()  # write to database
+        model_title = model_instance.__class__.__name__
+        if request.is_ajax():
+            return HttpResponse(json.dumps({'pk':model_instance.pk, 'title': str(model_instance),
+                                            'model': model_title, 'status': 'success'}),
+                                content_type="application/json")
+        return redirect('/setup/%s/%i/' % (model_title, model_instance.pk))
     context = {'form': initialized_form,
                'title': title}
     return render(request, 'ScenarioCreator/new.html', context)
