@@ -140,7 +140,7 @@ handle_before_any_simulations_event (struct spreadmodel_model_t_ * self)
                    MODEL_NAME, strerror(errno), local_data->filename);
         }
     }
-  fprintf (local_data->stream, "Run,Day,Type,Reason,Source ID,Production type,Lat,Lon,Recipient ID,Production type,Lat,Lon\n");
+  fprintf (local_data->stream, "Run,Day,Type,Reason,Source ID,Production type,Lat,Lon,Zone,Recipient ID,Production type,Lat,Lon,Zone\n");
   fflush (local_data->stream);
 
   /* This count will be incremented for each new simulation. */
@@ -182,12 +182,15 @@ handle_before_each_simulation_event (struct spreadmodel_model_t_ * self)
  *
  * @param self this module.
  * @param event an exposure event.
+ * @param zones the list of zones.
  */
 void
 handle_exposure_event (struct spreadmodel_model_t_ *self,
-                       EVT_exposure_event_t * event)
+                       EVT_exposure_event_t * event,
+                       ZON_zone_list_t *zones)
 {
   local_data_t *local_data;
+  ZON_zone_fragment_t *exposing_unit_zone, *exposed_unit_zone, *background_zone;
 
 #if DEBUG
   g_debug ("----- ENTER handle_exposure_event (%s)", MODEL_NAME);
@@ -200,33 +203,43 @@ handle_exposure_event (struct spreadmodel_model_t_ *self,
 
   if (event->traceable || event->adequate)
     {
+      background_zone = ZON_zone_list_get_background (zones);
+      exposed_unit_zone = zones->membership[event->exposed_unit->index];
+
       /* The data fields are: run, day, type, reason, source ID, source production
-       * type, source latitude, source longitude, recipient ID, recipient
-       * production type, recipient latitude, recipient longitude. */
+       * type, source latitude, source longitude, source zone, recipient ID,
+       * recipient production type, recipient latitude, recipient longitude,
+       * recipient zone. */
       if (event->exposing_unit == NULL)
         fprintf (local_data->stream,
-                 "%i,%i,Exposure,%s,,,,,%s,%s,%g,%g\n",
+                 "%i,%i,Exposure,%s,,,,,,%s,%s,%g,%g,%s\n",
                  local_data->run_number,
                  event->day,
                  SPREADMODEL_contact_type_abbrev[event->contact_type],
                  event->exposed_unit->official_id,
                  event->exposed_unit->production_type_name,
                  event->exposed_unit->latitude,
-                 event->exposed_unit->longitude);
+                 event->exposed_unit->longitude,
+                 ZON_same_zone (exposed_unit_zone, background_zone) ? "" : exposed_unit_zone->parent->name);
       else
-        fprintf (local_data->stream,
-                 "%i,%i,Exposure,%s,%s,%s,%g,%g,%s,%s,%g,%g\n",
-                 local_data->run_number,
-                 event->day,
-                 SPREADMODEL_contact_type_abbrev[event->contact_type],
-                 event->exposing_unit->official_id,
-                 event->exposing_unit->production_type_name,
-                 event->exposing_unit->latitude,
-                 event->exposing_unit->longitude,
-                 event->exposed_unit->official_id,
-                 event->exposed_unit->production_type_name,
-                 event->exposed_unit->latitude,
-                 event->exposed_unit->longitude);
+        {
+          exposing_unit_zone = zones->membership[event->exposing_unit->index];
+          fprintf (local_data->stream,
+                   "%i,%i,Exposure,%s,%s,%s,%g,%g,%s,%s,%s,%g,%g,%s\n",
+                   local_data->run_number,
+                   event->day,
+                   SPREADMODEL_contact_type_abbrev[event->contact_type],
+                   event->exposing_unit->official_id,
+                   event->exposing_unit->production_type_name,
+                   event->exposing_unit->latitude,
+                   event->exposing_unit->longitude,
+                   ZON_same_zone (exposing_unit_zone, background_zone) ? "" : exposing_unit_zone->parent->name,
+                   event->exposed_unit->official_id,
+                   event->exposed_unit->production_type_name,
+                   event->exposed_unit->latitude,
+                   event->exposed_unit->longitude,
+                   ZON_same_zone (exposed_unit_zone, background_zone) ? "" : exposed_unit_zone->parent->name);
+        }
     }
 
 #if DEBUG
@@ -242,13 +255,16 @@ handle_exposure_event (struct spreadmodel_model_t_ *self,
  *
  * @param self this module.
  * @param event an infection event.
+ * @param zones the list of zones.
  */
 void
 handle_infection_event (struct spreadmodel_model_t_ *self,
-                        EVT_infection_event_t * event)
+                        EVT_infection_event_t * event,
+                        ZON_zone_list_t *zones)
 {
   local_data_t *local_data;
   const char *reason;
+  ZON_zone_fragment_t *zone, *background_zone;
 
 #if DEBUG
   g_debug ("----- ENTER handle_infection_event (%s)", MODEL_NAME);
@@ -261,18 +277,23 @@ handle_infection_event (struct spreadmodel_model_t_ *self,
   else
     reason = "";
 
+  zone = zones->membership[event->infected_unit->index];
+  background_zone = ZON_zone_list_get_background (zones);
+
   /* The data fields are: run, day, type, reason, source ID, source production
-   * type, source latitude, source longitude, recipient ID, recipient
-   * production type, recipient latitude, recipient longitude. */
+   * type, source latitude, source longitude, source zone, recipient ID,
+   * recipient production type, recipient latitude, recipient longitude,
+   * recipient zone. */
   fprintf (local_data->stream,
-           "%i,%i,Infection,%s,,,,,%s,%s,%g,%g\n",
+           "%i,%i,Infection,%s,,,,,,%s,%s,%g,%g,%s\n",
            local_data->run_number,
            event->day,
            reason,
            event->infected_unit->official_id,
            event->infected_unit->production_type_name,
            event->infected_unit->latitude,
-           event->infected_unit->longitude);
+           event->infected_unit->longitude,
+           ZON_same_zone (zone, background_zone) ? "" : zone->parent->name);
 
 #if DEBUG
   g_debug ("----- EXIT handle_infection_event (%s)", MODEL_NAME);
@@ -312,10 +333,10 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
       handle_before_each_simulation_event (self);
       break;
     case EVT_Exposure:
-      handle_exposure_event (self, &(event->u.exposure));
+      handle_exposure_event (self, &(event->u.exposure), zones);
       break;
     case EVT_Infection:
-      handle_infection_event (self, &(event->u.infection));
+      handle_infection_event (self, &(event->u.infection), zones);
       break;
     default:
       g_error
