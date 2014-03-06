@@ -4,7 +4,8 @@ import csv
 
 
 def is_field(line):
-    return line[:4] == '    ' and line[4] not in ' #' and 'class ' not in line and '=' in line
+    return line[:4] == '    ' and line[4] not in ' #' and 'class ' not in line and \
+           '=' in line and 'def ' not in line
 
 def valid_doc_field(row):
     return row[0] and row[1] and row[2]

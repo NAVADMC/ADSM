@@ -76,6 +76,9 @@ class DynamicUnit(models.Model):
     user_defined_2 = models.TextField(blank=True)
     user_defined_3 = models.TextField(blank=True)
     user_defined_4 = models.TextField(blank=True)
+    def __str__(self):
+        return "Unit(%s: (%s, %s)" % (self.production_type, self.latitude, self.longitude)
+
 
 '''InChart is an equation model that defines either a Probability Distribution Function (pdf) or
  a relational function (relid) depending on which child class is used.  '''
@@ -91,6 +94,8 @@ class InChart(models.Model):
         help_text='', )  # Why is this hidden?
     class Meta:
         abstract = True
+    def __str__(self):
+        return self.chart_name
 
 
 '''There are a large number of fields in this model because different chart_type use different
@@ -153,6 +158,8 @@ class EquationPoint(models.Model):
         help_text='The x value of the point.', )
     y = models.FloatField(
         help_text='The y value of the point.', )
+    def __str__(self):
+        return 'Point(%s, %s)' % (self.x, self.y)
 
 
 class InControlGlobal(models.Model):
@@ -184,6 +191,8 @@ class InControlGlobal(models.Model):
         help_text='Relational fucntion used to define the daily vaccination capacity.', )
     vaccination_priority_order = models.CharField(max_length=255, blank=True,
         help_text='A string that identifies the primary priority order for vaccination.', )
+    def __str__(self):
+        return "Global Control Capabilities"
 
 
 class InControlPlan(models.Model):
@@ -191,6 +200,8 @@ class InControlPlan(models.Model):
                                          help_text='Name your Protocol so you can recognize it later.', )
     notes = models.TextField(blank=True, )
     control_plan_group = models.CharField(max_length=255, blank=True)
+    def __str__(self):
+        return "Protocol: %s" % (self.control_plan_name, )
 
 
 class InControlsProductionType(models.Model):
@@ -310,11 +321,15 @@ class InControlsProductionType(models.Model):
         help_text='Function that describes the delay in obtaining test results.', )
     vaccinate_retrospective_days = models.BooleanField(default=False,
         help_text='Number of days in retrospect that should be used to determine which herds to vaccinate.', )
+    def __str__(self):
+        return "Protocol Settings"
 
 
 class InDiseaseGlobal(models.Model):
     disease_name = models.TextField(blank=True)
     disease_description = models.TextField(blank=True)
+    def __str__(self):
+        return self.disease_name
 
 
 class InDiseaseProductionType(models.Model):
@@ -332,6 +347,8 @@ class InDiseaseProductionType(models.Model):
         help_text='Defines the natural immune period for units of this production type.', )
     disease_prevalence_relid = models.ForeignKey(RelationalEquation, related_name='+',
         help_text='Defines the prevelance for units of this production type.', )
+    def __str__(self):
+        return "Disease Reaction: %s" % (self.production_type, )
 
 
 class InDiseaseSpread(models.Model):
@@ -366,6 +383,8 @@ class InDiseaseSpread(models.Model):
         help_text='The start angle in degrees of the predominate wind direction for airborne spread.', )
     wind_direction_end = models.IntegerField(blank=True, null=True,
         help_text='The end angle in degrees of the predominate wind direction for airborne spread.', )
+    def __str__(self):
+        return "%s Spread" % (self.production_type_pair, )
 
 
 class InGeneral(models.Model):
@@ -418,11 +437,15 @@ class InGeneral(models.Model):
         help_text='Indicates if map outputs for units should be recorded in the scenario database.', )
     map_directory = models.CharField(max_length=255, blank=True,
         help_text='File path of the desired location for the output file.', )
+    def __str__(self):
+        return "Scenario: %s" % (self.scenario_description)
 
 
 class InProductionType(models.Model):
     production_type_name = models.CharField(max_length=255, )
     production_type_description = models.TextField(blank=True)
+    def __str__(self):
+        return self.production_type_name
 
 
 class InProductionTypePair(models.Model):
@@ -436,6 +459,8 @@ class InProductionTypePair(models.Model):
         help_text='Disease spread mechanism used to model spread by indirect contact between these types.', )
     airborne_contact_spread_model = models.ForeignKey(InDiseaseSpread, related_name='airborne_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by airbornespread between these types.', )
+    def __str__(self):
+        return "%s -> %s" % (self.source_production_type, self.destination_production_type)
 
 
 class InZone(models.Model):
@@ -443,6 +468,8 @@ class InZone(models.Model):
         help_text='Description of the zone', )
     zone_radius = models.FloatField(
         help_text='Radius in kilometers of the zone', )
+    def __str__(self):
+        return "%s: %skm" % (self.zone_description, self.zone_radius)
 
 
 class InZoneProductionType(models.Model):
@@ -458,6 +485,8 @@ class InZoneProductionType(models.Model):
         help_text='Multiplier for the probability of observice clinical signs in units of this production type in this zone.', )
     cost_surv_per_animal_day = MoneyField(default=0.0,
         help_text='Cost of surveillance per animal per day in this zone.', )
+    def __str__(self):
+        return "%s -> %s" % (self.zone, self.production_type)
 
 
 class ReadAllCodes(models.Model):
