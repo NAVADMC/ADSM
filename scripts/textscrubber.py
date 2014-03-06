@@ -116,21 +116,8 @@ def createForeignKeys(filename, output_filename):
             newline += ' = models.ForeignKey()'
             lines[index] = newline
 
-
-
     open(output_filename, 'w').writelines(lines)
 
-
-def generate_urls_from_models(input_file, output_filename):
-    lines = open(input_file, 'r').readlines()
-    edited_lines = []
-    for line in lines:
-        if 'class' in line[:5]:
-            model_name = re.split('\W+', line)[1]
-            edited_lines.append("url('^" + model_name + "/new/$', 'ScenarioCreator.views.new_entry'),")
-            edited_lines.append("url('^" + model_name + "/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),\n")
-
-    open(output_filename, 'w').write('\n'.join(edited_lines))
 
 
 if __name__ == '__main__':
