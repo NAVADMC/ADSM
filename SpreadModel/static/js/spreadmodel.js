@@ -1,5 +1,5 @@
 $(function(){
-    $('.btn-add').on('click', function(){
+    $('body').on('click', '.btn-add', function(){
         var $selector = $($(this).attr('rel'));
         var model = $selector.attr('name'); // field name
         modelModal.show(model, $selector);
@@ -7,14 +7,30 @@ $(function(){
 })
 
 var modelModal = {
+
+    ajax_submit: function($form, url, callback){
+        console.log($form, url, callback);
+        return $.post(url, $form.serialize(), callback);
+    },
+
+    update_contents: function(data){
+        console.log(data);
+    },
+
     show: function(model, selectInput) {
+        var self = this;
         var modal = this.template.clone();
         modal.attr('id', model+'_modal');
-        $.get(selectInput.attr('data-new-item-url'), function(newForm){
-            $newForm = $($.parseHTML(newForm));
+        var url = selectInput.attr('data-new-item-url');
+        $.get(url, function(newForm){
+            var $newForm = $($.parseHTML(newForm));
             modal.find('.modal-title').html($newForm.find('h1:not(.filename)').html());
-            modal.find('.modal-body').html($newForm.find('form'));
+            var $form = $newForm.find('form');
+            $form.find('button[type=submit]').remove();
+            modal.find('.modal-body').html($form);
             $('body').append(modal);
+            modal.find('.modal-footer .btn-primary').on('click', function() {
+                self.ajax_submit($form, url, self.update_contents)});
             modal.modal('show');
         })
 
@@ -27,7 +43,6 @@ var modelModal = {
                         <h4 class="modal-title">Modal title</h4>\
                       </div>\
                       <div class="modal-body">\
-                        <p>One fine body&hellip;</p>\
                       </div>\
                       <div class="modal-footer">\
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>\
