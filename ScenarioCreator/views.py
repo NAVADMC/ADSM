@@ -12,13 +12,12 @@ def new_form(request, form_class, title):
         model_instance = initialized_form.save()  # write to database
         model_title = model_instance.__class__.__name__
         if request.is_ajax():
-            return HttpResponse(json.dumps({'pk':model_instance.pk, 'title': str(model_instance),
-                                            'model': model_title, 'status': 'success'}),
-                                content_type="application/json")
-        return redirect('/setup/%s/%i/' % (model_title, model_instance.pk))
-    context = {'form': initialized_form,
-               'title': title}
-    return render(request, 'ScenarioCreator/new.html', context)
+            msg = {'pk': model_instance.pk, 'title': str(model_instance), 'model': model_title, 'status': 'success'}
+            return HttpResponse(json.dumps(msg), content_type="application/json")
+
+        return redirect('/setup/%s/%i/' % (model_title, model_instance.pk))  # redirect to edit URL
+    context = {'form': initialized_form, 'title': title}
+    return render(request, 'ScenarioCreator/new.html', context)  # render in validation error messages
 
 
 def new_scenario(request):
