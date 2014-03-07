@@ -6,6 +6,9 @@
 .dia.eps:
 	dia -e $@ $<
 
+.dia.svg:
+	dia -e $@ $<
+
 .gnuplot.eps:
 	(echo set terminal postscript eps color 24 && echo set output \'$@\' && cat $<) | gnuplot
 
