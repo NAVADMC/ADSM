@@ -365,11 +365,20 @@ class DiseaseReactionAssignment(models.Model):
 
 
 class DiseaseSpreadModel(models.Model):
-    disease = models.ForeignKey('Disease')
-    spread_method_code = models.CharField(max_length=255, blank=True,
+    disease = models.ForeignKey('Disease',
+                                help_text='Parent disease whose spreading characteristics this describes.')
+        # This is in Disease because of simulation restrictions
+    movement_control_relid = models.ForeignKey(RelationalEquation, related_name='+',
+        help_text='Relational function used to define movement control effects for the indicated production types combinations.', )
+    transport_delay_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
+        help_text='Relational function used to define the shipment delays for the indicated production types combinations.', )
+    class Meta:
+        abstract = True
+
+
+class IndirectSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct and Indirect that were not in Airborne
+    _spread_method_code = models.CharField(max_length=255, default='indirect',
         help_text='Code indicating the mechanism of the disease spread.', )
-    latent_can_infect = models.BooleanField(default=False,
-        help_text='Indicates if latent units of the source type can spread disease by direct contact. Not applicable to airborne spread or indirect spread.', )
     subclinical_can_infect = models.BooleanField(default=False,
         help_text='Indicates if subclinical units of the source type can spread disease by direct or indirect contact. ', )
     mean_contact_rate = models.FloatField(blank=True, null=True,
@@ -382,11 +391,23 @@ class DiseaseSpreadModel(models.Model):
         help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
     distance_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
         help_text='Defines the sipment distances for direct and indirect contact models.', )
-        # This is in Disease because of simulation restrictions
-    movement_control_relid = models.ForeignKey(RelationalEquation, related_name='+',
-        help_text='Relational function used to define movement control effects for the indicated production types combinations.', )
-    transport_delay_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
-        help_text='Relational function used to define the shipment delays for the indicated production types combinations.', )
+    def __str__(self):
+        return "%s Indirect Spread %i" % (self.disease, self.id)
+
+
+class DirectSpreadModel(IndirectSpreadModel):
+    latent_can_infect = models.BooleanField(default=False,
+        help_text='Indicates if latent units of the source type can spread disease by direct contact. Not applicable to airborne spread or indirect spread.', )
+    def __init__(self, *args, **kwargs):
+        super(IndirectSpreadModel, self).__init__(*args, **kwargs)
+        self._spread_method_code = 'direct'  # overrides 'indirect' value without creating a new field
+    def __str__(self):
+        return "%s Direct Spread %i" % (self.disease, self.id)
+
+
+class AirborneSpreadModel(DiseaseSpreadModel):
+    _spread_method_code = models.CharField(max_length=255, default='other',
+        help_text='Code indicating the mechanism of the disease spread.', )
     probability_airborne_spread_1km = models.FloatField(blank=True, null=True,
         help_text='For airborne spread the probability that disease will be spread to unit 1 kn away from the source unit.', )
     max_distance_airborne_spread = models.FloatField(blank=True, null=True,
@@ -396,7 +417,7 @@ class DiseaseSpreadModel(models.Model):
     wind_direction_end = models.IntegerField(blank=True, null=True,
         help_text='The end angle in degrees of the predominate wind direction for airborne spread.', )
     def __str__(self):
-        return "%s Spread" % (self.disease, )
+        return "%s Airborne Spread %i" % (self.disease, self.id)
 
 
 class Scenario(models.Model):
@@ -465,11 +486,11 @@ class ProductionTypePairTransmission(models.Model):
         help_text='The Production type that will be the source type for this production type combination.', )
     destination_production_type = models.ForeignKey(ProductionType, related_name='used_as_destinations',
         help_text='The Production type that will be the recipient type for this production type combination.', )
-    direct_contact_spread_model = models.ForeignKey(DiseaseSpreadModel,   related_name='direct_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+    direct_contact_spread_model = models.ForeignKey(DirectSpreadModel,   related_name='direct_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by direct contact between these types.', )
-    indirect_contact_spread_model = models.ForeignKey(DiseaseSpreadModel, related_name='indirect_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+    indirect_contact_spread_model = models.ForeignKey(IndirectSpreadModel, related_name='indirect_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by indirect contact between these types.', )
-    airborne_contact_spread_model = models.ForeignKey(DiseaseSpreadModel, related_name='airborne_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+    airborne_contact_spread_model = models.ForeignKey(AirborneSpreadModel, related_name='airborne_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by airborne spread between these types.', )
     def __str__(self):
         return "%s -> %s" % (self.source_production_type, self.destination_production_type)
