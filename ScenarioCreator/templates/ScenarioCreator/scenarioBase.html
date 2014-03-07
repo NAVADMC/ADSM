@@ -3,23 +3,24 @@
 {% block main %}
     <nav>
         <ul id="setupMenu">
-            <li><a href="/setup/InGeneral/new/">Scenario Settings</a>
+            <li><a href="/setup/Scenario/new/">Scenario Settings</a>
             <li><a href="#">Population</a>
-                <ul><li><a href="/setup/InProductionType/new/">Production Types</a></li>
+                <ul><li><a href="/setup/ProductionType/new/">Production Types</a></li>
                     <li><a href="/setup/DynamicUnit/new/">Farm Locations</a></li>
-                    <li><a href="/setup/InProductionTypePair/new/">Animal Pair Interactions</a></li>
                 </ul></li>
-            <li><a href="/setup/InDiseaseGlobal/new/">Disease</a>
-                <ul><li><a href="/setup/InDiseaseSpread/new/">Disease Spread</a></li>
-                    <li><a href="/setup/InDiseaseProductionType/new/">Disease Reaction</a></li>
+            <li><a href="/setup/Disease/new/">Disease</a>
+                <ul>
+                    <li><a href="/setup/DiseaseReaction/new/">Disease Reaction</a></li>
+                    <li><a href="/setup/DiseaseSpread/new/">Disease Spread</a></li>
+                    <li><a href="/setup/ProductionTypePairTransmission/new/">Animal Infection</a></li>
                 </ul></li>
-            <li><a href="/setup/InControlGlobal/new/">Controls</a>
-                <ul><li><a href="/setup/InControlPlan/new/">Control Protocol</a>
-                    <ul><li><a href="/setup/InControlsProductionType/new/">Destruction</a></li>
-                        <li><a href="/setup/InControlsProductionType/new/">Vaccination</a></li>
-                        <li><a href="/setup/InControlsProductionType/new/">Tracing</a></li></ul></li>
-                    <li><a href="/setup/InZone/new/">Zones</a>
-                        <ul><li><a href="/setup/InZoneProductionType/new/">Zone Effects</a></li></ul></li></ul></li>
+            <li><a href="/setup/ControlMasterPlan/new/">Controls</a>
+                <ul><li><a href="/setup/ControlProtocol/new/">Control Protocol</a>
+                    <ul><li><a href="/setup/ControlProtocol/new/">Destruction</a></li>
+                        <li><a href="/setup/ControlProtocol/new/">Vaccination</a></li>
+                        <li><a href="/setup/ControlProtocol/new/">Tracing</a></li></ul></li>
+                    <li><a href="/setup/Zone/new/">Zones</a>
+                        <ul><li><a href="/setup/ZoneProductionTypeEffect/new/">Zone Effects</a></li></ul></li></ul></li>
         </ul>
     </nav>
 <section>

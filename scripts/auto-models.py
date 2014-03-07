@@ -66,7 +66,7 @@ class DynamicUnit(models.Model):
     user_defined_3 = models.TextField(blank=True)
     user_defined_4 = models.TextField(blank=True)
 
-'''InChart is an equation model that defines either a Probability Distribution Function (pdf) or
+'''Equation is an equation model that defines either a Probability Distribution Function (pdf) or
  a relational function (relid) depending on which child class is used.  '''
 class InChart(models.Model):
     chart_name = models.CharField(max_length=255,  

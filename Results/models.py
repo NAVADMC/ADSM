@@ -1,11 +1,11 @@
 from django.db import models
-from ScenarioCreator.models import InProductionType, InZone, DynamicUnit
+from ScenarioCreator.models import ProductionType, Zone, DynamicUnit
 
 
 class OutDailyByProductionType(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
-    production_type = models.ForeignKey(InProductionType,
+    production_type = models.ForeignKey(ProductionType,
         help_text='The identifier of the production type that these outputs apply to.', )
     day = models.IntegerField(blank=True, null=True,
         help_text='The day within the iteration on which these outputs were generated.', )
@@ -312,7 +312,7 @@ class OutDailyByZone(models.Model):
         help_text='The iteration during which the outputs in this records where generated.', )
     day = models.IntegerField(blank=True, null=True,
         help_text='The day within the iteration on which these outputs were generated.', )
-    zone = models.ForeignKey(InZone,
+    zone = models.ForeignKey(Zone,
         help_text='Identifier of the zone for which this event occurred.', )
     zone_area = models.FloatField(blank=True, null=True,
         help_text='In square Kilometers', )
@@ -325,9 +325,9 @@ class OutDailyByZoneAndProductionType(models.Model):
         help_text='The iteration during which the outputs in this records where generated.', )
     day = models.IntegerField(blank=True, null=True,
         help_text='The day within the iteration on which these outputs were generated.', )
-    zone = models.ForeignKey(InZone,
+    zone = models.ForeignKey(Zone,
         help_text='Identifier of the zone for which this event occurred.', )
-    production_type = models.ForeignKey(InProductionType,
+    production_type = models.ForeignKey(ProductionType,
         help_text='The identifier of the production type that these outputs apply to.', )
     unit_days_in_zone = models.IntegerField(blank=True, null=True,
         help_text='Total number of unit days spent in a zone (1 unit for 1 day = 1 unit day 1 unit for 2 days = 2 unit days etc.)', )
@@ -348,7 +348,7 @@ class OutDailyEvents(models.Model):
         help_text='A number used to identify each event.', )
     unit = models.ForeignKey(DynamicUnit,
         help_text='Identifier of the unit for which this event occurred.', )
-    zone = models.ForeignKey(InZone,
+    zone = models.ForeignKey(Zone,
         help_text='Identifier of the zone for which this event occurred.', )
     event_code = models.CharField(max_length=255, blank=True,
         help_text='Code to indicate the type of event.', )
@@ -369,11 +369,11 @@ class OutDailyExposures(models.Model):
         help_text='', )
     exposed_unit = models.ForeignKey(DynamicUnit, related_name='events_where_unit_was_exposed',
         help_text='The identifier of the source unit for the exposure.', )
-    exposed_zone = models.ForeignKey(InZone, related_name='events_that_exposed_this_zone',
+    exposed_zone = models.ForeignKey(Zone, related_name='events_that_exposed_this_zone',
         help_text='The identifier of the zone of the source unit for the exposure.', )
     exposing_unit = models.ForeignKey(DynamicUnit, related_name='events_where_unit_exposed_others',
         help_text='The identifier of the recipient unit for the exposure.', )
-    exposing_zone = models.ForeignKey(InZone, related_name='events_that_exposed_others',
+    exposing_zone = models.ForeignKey(Zone, related_name='events_that_exposed_others',
         help_text='The identifier of the zone of the recipient unit for the exposure.', )
     spread_method_code = models.CharField(max_length=255, blank=True,
         help_text='Code indicating the mechanism of the disease spread.', )
@@ -390,7 +390,7 @@ class OutEpidemicCurves(models.Model):
         help_text='The iteration during which the outputs in this records where generated.', )
     day = models.IntegerField(blank=True, null=True,
         help_text='The day within the iteration on which these outputs were generated.', )
-    production_type = models.ForeignKey(InProductionType,
+    production_type = models.ForeignKey(ProductionType,
         help_text='The identifier of the production type that these outputs apply to.', )
     infected_units = models.IntegerField(blank=True, null=True,
         help_text='The number of units of the specified production type infected by any mechanism on the specific day in a spcified iteration.', )
@@ -474,7 +474,7 @@ class OutIterationByUnit(models.Model):
 class OutIterationByProductionType(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
-    production_type = models.ForeignKey(InProductionType,
+    production_type = models.ForeignKey(ProductionType,
         help_text='The identifier of the production type that these outputs apply to.', )
     transition_state_cum_unit_susceptible = models.IntegerField(blank=True, null=True,
         help_text='Number of units that are or become susceptible over the course of an iteration', )
@@ -707,7 +707,7 @@ class OutIterationByProductionType(models.Model):
 class OutIterationByZone(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
-    zone = models.ForeignKey(InZone,
+    zone = models.ForeignKey(Zone,
         help_text='Identifier of the zone for which this event occurred.', )
     max_zone_area = models.FloatField(blank=True, null=True,
         help_text='Maximum area (in square kilometers) reached for the indicated zone over the course of an iteration', )
@@ -726,9 +726,9 @@ class OutIterationByZone(models.Model):
 class OutIterationByZoneAndProductionType(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
-    zone = models.ForeignKey(InZone,
+    zone = models.ForeignKey(Zone,
         help_text='Identifier of the zone for which this event occurred.', )
-    production_type = models.ForeignKey(InProductionType,
+    production_type = models.ForeignKey(ProductionType,
         help_text='The identifier of the production type that these outputs apply to.', )
     unit_days_in_zone = models.IntegerField(blank=True, null=True,
         help_text='Total number of unit days spent in a zone (1 unit for 1 day = 1 unit day 1 unit for 2 days = 2 unit days etc.)', )
@@ -741,7 +741,7 @@ class OutIterationByZoneAndProductionType(models.Model):
 class OutIterationCosts(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
-    production_type = models.ForeignKey(InProductionType,
+    production_type = models.ForeignKey(ProductionType,
         help_text='The identifier of the production type that these outputs apply to.', )
     destroy_appraisal = models.FloatField(blank=True, null=True,
         help_text='Total cost of appraisal for all units destroyed over the course of an iteration.', )

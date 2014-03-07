@@ -7,8 +7,8 @@ url('^DynamicBlob/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 url('^DynamicUnit/new/$', 'ScenarioCreator.views.new_entry'),
 url('^DynamicUnit/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
-url('^InChart/new/$', 'ScenarioCreator.views.new_entry'),
-url('^InChart/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+url('^Equation/new/$', 'ScenarioCreator.views.new_entry'),
+url('^Equation/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
 url('^ProbabilityEquation/new/$', 'ScenarioCreator.views.new_entry'),
 url('^ProbabilityEquation/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
@@ -19,8 +19,8 @@ url('^RelationalEquation/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_en
 url('^EquationPoint/new/$', 'ScenarioCreator.views.new_entry'),
 url('^EquationPoint/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
-url('^InControlGlobal/new/$', 'ScenarioCreator.views.new_entry'),
-url('^InControlGlobal/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+url('^ControlMasterPlan/new/$', 'ScenarioCreator.views.new_entry'),
+url('^ControlMasterPlan/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
 url('^ProtocolAssignment/new/$', 'ScenarioCreator.views.new_entry'),
 url('^ProtocolAssignment/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
@@ -28,29 +28,29 @@ url('^ProtocolAssignment/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_en
 url('^ControlProtocol/new/$', 'ScenarioCreator.views.new_entry'),
 url('^ControlProtocol/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
-url('^InDiseaseGlobal/new/$', 'ScenarioCreator.views.new_entry'),
-url('^InDiseaseGlobal/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+url('^Disease/new/$', 'ScenarioCreator.views.new_entry'),
+url('^Disease/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
-url('^InDiseaseProductionType/new/$', 'ScenarioCreator.views.new_entry'),
-url('^InDiseaseProductionType/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+url('^DiseaseReaction/new/$', 'ScenarioCreator.views.new_entry'),
+url('^DiseaseReaction/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
-url('^InDiseaseSpread/new/$', 'ScenarioCreator.views.new_entry'),
-url('^InDiseaseSpread/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+url('^DiseaseSpreadModel/new/$', 'ScenarioCreator.views.new_entry'),
+url('^DiseaseSpreadModel/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
-url('^InGeneral/new/$', 'ScenarioCreator.views.new_entry'),
-url('^InGeneral/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+url('^Scenario/new/$', 'ScenarioCreator.views.new_entry'),
+url('^Scenario/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
-url('^InProductionType/new/$', 'ScenarioCreator.views.new_entry'),
-url('^InProductionType/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+url('^ProductionType/new/$', 'ScenarioCreator.views.new_entry'),
+url('^ProductionType/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
-url('^InProductionTypePair/new/$', 'ScenarioCreator.views.new_entry'),
-url('^InProductionTypePair/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+url('^ProductionTypePairTransmission/new/$', 'ScenarioCreator.views.new_entry'),
+url('^ProductionTypePairTransmission/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
-url('^InZone/new/$', 'ScenarioCreator.views.new_entry'),
-url('^InZone/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+url('^Zone/new/$', 'ScenarioCreator.views.new_entry'),
+url('^Zone/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
-url('^InZoneProductionType/new/$', 'ScenarioCreator.views.new_entry'),
-url('^InZoneProductionType/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+url('^ZoneProductionTypeEffect/new/$', 'ScenarioCreator.views.new_entry'),
+url('^ZoneProductionTypeEffect/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
 url('^ReadAllCodes/new/$', 'ScenarioCreator.views.new_entry'),
 url('^ReadAllCodes/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),

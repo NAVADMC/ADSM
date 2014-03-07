@@ -37,7 +37,7 @@ class DynamicBlob(models.Model):
 
 
 class DynamicUnit(models.Model):
-    production_type = models.ForeignKey('InProductionType',
+    production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
     latitude = LatitudeField(
         help_text='The latitude used to georeference this unit.', )
@@ -80,9 +80,9 @@ class DynamicUnit(models.Model):
         return "Unit(%s: (%s, %s)" % (self.production_type, self.latitude, self.longitude)
 
 
-'''InChart is an equation model that defines either a Probability Distribution Function (pdf) or
+'''Equation is a model that defines either a Probability Distribution Function (pdf) or
  a relational function (relid) depending on which child class is used.  '''
-class InChart(models.Model):
+class Equation(models.Model):
     chart_name = models.CharField(max_length=255,
         help_text='User-assigned name for each function.', )
     # field_name = models.CharField(max_length=255, )  # I don't think this is necessary
@@ -101,8 +101,8 @@ class InChart(models.Model):
 '''There are a large number of fields in this model because different chart_type use different
 parameters.  Parameters are all listed as optional because they are frequently unused.  A second
 layer of validation will be necessary for required parameters per chart_type.'''
-class ProbabilityEquation(InChart):
-    chart_type = models.CharField(max_length=255, blank=True,
+class ProbabilityEquation(Equation):
+    chart_type = models.CharField(max_length=255,
         help_text='For probability density functions identifies the type of function.',
                                   choices=chc("Point", "Uniform", "Triangular", "Piecewise", "Histogram", "Gaussian",
                                               "Poisson", "Beta", "Gamma", "Weibull", "Exponential", "Pearson5",
@@ -147,7 +147,7 @@ class ProbabilityEquation(InChart):
         help_text='The s parameter for probability density function types Negative Binomial.', )
 
 
-class RelationalEquation(InChart):
+class RelationalEquation(Equation):
     pass  # Inherited fields
 
 
@@ -162,7 +162,8 @@ class EquationPoint(models.Model):
         return 'Point(%s, %s)' % (self.x, self.y)
 
 
-class InControlGlobal(models.Model):
+class ControlMasterPlan(models.Model):
+    plan_name = models.CharField(max_length=255)
     _include_detection = models.BooleanField(default=False,
         help_text='Indicates if detection of disease in any production type will be modeled.', )
     _include_tracing = models.BooleanField(default=False,
@@ -192,23 +193,25 @@ class InControlGlobal(models.Model):
     vaccination_priority_order = models.CharField(max_length=255, blank=True,
         help_text='A string that identifies the primary priority order for vaccination.', )
     def __str__(self):
-        return "Global Control Capabilities " + str(self.id)
+        return str(self.plan_name) + ": Control Master Plan"
 
 
 class ProtocolAssignment(models.Model):
-    production_type = models.ForeignKey('InProductionType',
+    production_type = models.ForeignKey('ProductionType',
                                         help_text='The production type that these outputs apply to.', )
-    control_protocol = models.ForeignKey('ControlProtocol',  # TODO: perhaps place this in InProductionType
+    control_protocol = models.ForeignKey('ControlProtocol',  # TODO: perhaps place this in ProductionType
                                          help_text='The control protocol to apply to this production type.')
-    master_plan = models.ForeignKey('InControlGlobal')
-    notes = models.TextField(blank=True, )
+    master_plan = models.ForeignKey('ControlMasterPlan',
+                                    help_text='Points back to a master plan for grouping purposes.')
+    notes = models.TextField(blank=True,
+                             help_text='Why should this protocol be assigned to this production type?')
     def __str__(self):
         return "%s applied to %s" % (self.control_protocol, self.production_type)
 
 
 class ControlProtocol(models.Model):
-    control_plan_name = models.CharField(max_length=255,
-                                         help_text='Name your Protocol so you can recognize it later.', )
+    protocol_name = models.CharField(max_length=255,
+                                         help_text='Name your Protocol so you can recognize it later. Ex:"Quarantine"',)
     use_detection = models.BooleanField(default=False,
                                         help_text='Indicates if disease detection will be modeled for units of this production type.', )
     detection_probability_for_observed_time_in_clinical_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True,
@@ -324,19 +327,19 @@ class ControlProtocol(models.Model):
     vaccinate_retrospective_days = models.BooleanField(default=False,
                                                        help_text='Number of days in retrospect that should be used to determine which herds to vaccinate.', )
     def __str__(self):
-        return "Protocol: %s" % (self.control_plan_name, )
+        return "Protocol: %s" % (self.protocol_name, )
 
 
-class InDiseaseGlobal(models.Model):
+class Disease(models.Model):
     disease_name = models.TextField(blank=True)
     disease_description = models.TextField(blank=True)
     def __str__(self):
         return self.disease_name
 
 
-class InDiseaseProductionType(models.Model):
-    production_type = models.ForeignKey('InProductionType',
-        help_text='The production type that these outputs apply to.', )
+class DiseaseReaction(models.Model):
+    reaction_name = models.CharField(max_length=255, )
+    disease = models.ForeignKey('Disease')
     use_disease_transition = models.BooleanField(default=False,
         help_text='Indicates if units of this production type will undergo disease transition.', )
     disease_latent_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
@@ -350,12 +353,19 @@ class InDiseaseProductionType(models.Model):
     disease_prevalence_relid = models.ForeignKey(RelationalEquation, related_name='+',
         help_text='Defines the prevelance for units of this production type.', )
     def __str__(self):
-        return "Disease Reaction: %s" % (self.production_type, )
+        return self.reaction_name
 
 
-class InDiseaseSpread(models.Model):
-    production_type_pair = models.ForeignKey('InProductionTypePair',
-        help_text='Pair of production types that the spread record is representing.', )
+class DiseaseReactionAssignment(models.Model):
+    production_type = models.ForeignKey('ProductionType',
+        help_text='The production type that these outputs apply to.', )
+    reaction = models.ForeignKey('DiseaseReaction')
+    def __str__(self):
+        return "%s have a %s reaction to %s" % (self.production_type, self.reaction, self.reaction.disease)
+
+
+class DiseaseSpreadModel(models.Model):
+    disease = models.ForeignKey('Disease')
     spread_method_code = models.CharField(max_length=255, blank=True,
         help_text='Code indicating the mechanism of the disease spread.', )
     latent_can_infect = models.BooleanField(default=False,
@@ -386,20 +396,20 @@ class InDiseaseSpread(models.Model):
     wind_direction_end = models.IntegerField(blank=True, null=True,
         help_text='The end angle in degrees of the predominate wind direction for airborne spread.', )
     def __str__(self):
-        return "%s Spread" % (self.production_type_pair, )
+        return "%s Spread" % (self.disease, )
 
 
-class InGeneral(models.Model):
-    language = models.CharField(choices=(('en',"English"), ('es',"Spanish")), max_length=255, blank=True,
+class Scenario(models.Model):
+    language = models.CharField(choices=(('en', "English"), ('es', "Spanish")), max_length=255, blank=True,
         help_text='Language that the model is in - English is default.', )
-    scenario_description = models.TextField(blank=True,
+    description = models.TextField(blank=True,
         help_text='The description of the scenario.', )
     iterations = models.IntegerField(blank=True, null=True,
         help_text='The number of iterations of this scenario that should be run', )
     days = models.IntegerField(blank=True, null=True,
         help_text='The number of day that iterations of this scenario should run if the command Run> State and run until specified day… is used', )
-    sim_stop_reason = models.CharField(max_length=255, blank=True,
-        help_text='The citerion used to end each iteration. This may be that the specified number of days has passed the first detectino has occurred or the outbreak has ended.',
+    simulation_stop_criteria = models.CharField(max_length=255, blank=True,
+        help_text='The criterion used to end each iteration. This may be that the specified number of days has passed the first detectino has occurred or the outbreak has ended.',
         choices=(('disease-end','Simulation will stop when there are no more latent or infectious units.'),
                  ('first-detection','Simulation will stop when the first detection occurs.')))
     include_contact_spread = models.BooleanField(default=False,
@@ -443,29 +453,29 @@ class InGeneral(models.Model):
         return "Scenario: %s" % (self.scenario_description)
 
 
-class InProductionType(models.Model):
+class ProductionType(models.Model):
     production_type_name = models.CharField(max_length=255, )
     production_type_description = models.TextField(blank=True)
     def __str__(self):
         return self.production_type_name
 
 
-class InProductionTypePair(models.Model):
-    source_production_type = models.ForeignKey(InProductionType, related_name='used_as_sources',
+class ProductionTypePairTransmission(models.Model):
+    source_production_type = models.ForeignKey(ProductionType, related_name='used_as_sources',
         help_text='The Production type that will be the source type for this production type combination.', )
-    destination_production_type = models.ForeignKey(InProductionType, related_name='used_as_destinations',
+    destination_production_type = models.ForeignKey(ProductionType, related_name='used_as_destinations',
         help_text='The Production type that will be the recipient type for this production type combination.', )
-    direct_contact_spread_model = models.ForeignKey(InDiseaseSpread,   related_name='direct_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+    direct_contact_spread_model = models.ForeignKey(DiseaseSpreadModel,   related_name='direct_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by direct contact between these types.', )
-    indirect_contact_spread_model = models.ForeignKey(InDiseaseSpread, related_name='indirect_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+    indirect_contact_spread_model = models.ForeignKey(DiseaseSpreadModel, related_name='indirect_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by indirect contact between these types.', )
-    airborne_contact_spread_model = models.ForeignKey(InDiseaseSpread, related_name='airborne_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
-        help_text='Disease spread mechanism used to model spread by airbornespread between these types.', )
+    airborne_contact_spread_model = models.ForeignKey(DiseaseSpreadModel, related_name='airborne_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+        help_text='Disease spread mechanism used to model spread by airborne spread between these types.', )
     def __str__(self):
         return "%s -> %s" % (self.source_production_type, self.destination_production_type)
 
 
-class InZone(models.Model):
+class Zone(models.Model):
     zone_description = models.TextField(
         help_text='Description of the zone', )
     zone_radius = models.FloatField(
@@ -474,10 +484,10 @@ class InZone(models.Model):
         return "%s: %skm" % (self.zone_description, self.zone_radius)
 
 
-class InZoneProductionType(models.Model):
-    zone = models.ForeignKey(InZone,
+class ZoneProductionTypeEffect(models.Model):
+    zone = models.ForeignKey(Zone,
         help_text='Zone for which this event occurred.', )
-    production_type = models.ForeignKey('InProductionType',
+    production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
     zone_indirect_movement_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True,
         help_text='Function the describes indirect movement rate.', )
@@ -485,10 +495,10 @@ class InZoneProductionType(models.Model):
         help_text='Function the describes direct movement rate.', )
     zone_detection_multiplier = models.FloatField(default=1.0,
         help_text='Multiplier for the probability of observice clinical signs in units of this production type in this zone.', )
-    cost_surv_per_animal_day = MoneyField(default=0.0,
+    cost_of_surveillance_per_animal_day = MoneyField(default=0.0,
         help_text='Cost of surveillance per animal per day in this zone.', )
     def __str__(self):
-        return "%s -> %s" % (self.zone, self.production_type)
+        return "%s Zone -> %s" % (self.zone, self.production_type)
 
 
 class ReadAllCodes(models.Model):
