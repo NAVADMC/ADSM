@@ -20,6 +20,7 @@ def generate_urls_from_models(input_file):
             model_name = re.split('\W+', line)[1]
             model_strings.append("url('^" + model_name + "/new/$', 'ScenarioCreator.views.new_entry')")
             model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry')")
+            model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/copy/$', 'ScenarioCreator.views.copy_entry')")
 
     output = "patterns('', " + ",\n         ".join(model_strings) + ")"
     return eval(output)
