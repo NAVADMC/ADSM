@@ -56,19 +56,36 @@ def add_if_foreign_key(foreign_keys, line):
 
 """This generator assumes that there are no blank lines before the end of the class model definition.
  This means that if you def functions inside your class there must not be any blank lines between them."""
+
+
+def handle_field_inheritance(excluded_fields, foreign_keys, model_, parent_model, parent_model_cache):
+    if parent_model:
+        excluded_fields += parent_model_cache[parent_model][0]
+        foreign_keys += parent_model_cache[parent_model][1]
+    parent_model_cache[model_] = (excluded_fields, foreign_keys)
+    return excluded_fields, foreign_keys
+
+
 def generate_forms_with_hidden_fields_and_ForeignKeys(filename, output_filename):
     form_lines = []
     excluded_fields = []
     foreign_keys = []
+    parent_model_cache = {}
     fkey_count = 0
     model_ = ''
+    parent_model = ''
     with open(filename, 'r') as models_file:
         for line_number, line in enumerate(models_file):
             if line.startswith('class'):
-                model_ = re.split('\W+', line)[1]  # line.split()[1].split(sep='(')[0]
+                words = re.split('\W+', line)
+                model_ = words[1]
+                parent_model = words[2] if words[2] != 'models' else ''
             excluded_fields = add_if_excluded_field(excluded_fields, line)
             foreign_keys = add_if_foreign_key(foreign_keys, line)
+
             if not line.strip() and model_:  # empty line, end of class
+                excluded_fields, foreign_keys = handle_field_inheritance(excluded_fields, foreign_keys, model_,
+                                                                         parent_model, parent_model_cache)
                 print(model_ + '  ' + str(foreign_keys))
                 form_lines.append('class ' + model_ + 'Form(ModelForm):')
                 form_lines.append('    class Meta:')
@@ -79,9 +96,12 @@ def generate_forms_with_hidden_fields_and_ForeignKeys(filename, output_filename)
                     form_lines.append("        widgets = {" + ',\n                   '.join(foreign_keys) + '}')
                 form_lines.append('\n')
                 fkey_count += len(foreign_keys)
+
                 excluded_fields = []
                 foreign_keys = []
                 model_ = ''
+                parent_model = ''
+
     print("Found ForeignKeys: ", fkey_count)
     open(output_filename, 'w').write('\n'.join(form_lines))
 

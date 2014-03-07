@@ -9,7 +9,6 @@ class Add_or_Select(Select):
     #     context = super(Add_or_Select, self).get_context(name, value, attrs=None, choices=())
     #     context['attrs']['data-new-item-url'] = '/%s/new/' %
 
-
 class DbSchemaVersionForm(ModelForm):
     class Meta:
         model = DbSchemaVersion
@@ -102,7 +101,35 @@ class DiseaseSpreadModelForm(ModelForm):
     class Meta:
         model = DiseaseSpreadModel
         widgets = {'disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
-                   'distance_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'}),
+                   'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'}),
+                   'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'})}
+
+
+class IndirectSpreadModelForm(ModelForm):
+    class Meta:
+        model = IndirectSpreadModel
+        exclude = ['_spread_method_code']
+        widgets = {'distance_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'}),
+                   'disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
+                   'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'}),
+                   'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'})}
+
+
+class DirectSpreadModelForm(ModelForm):
+    class Meta:
+        model = DirectSpreadModel
+        exclude = ['_spread_method_code']
+        widgets = {'distance_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'}),
+                   'disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
+                   'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'}),
+                   'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'})}
+
+
+class AirborneSpreadModelForm(ModelForm):
+    class Meta:
+        model = AirborneSpreadModel
+        exclude = ['_spread_method_code']
+        widgets = {'disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'}),
                    'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'})}
 
@@ -122,9 +149,9 @@ class ProductionTypePairTransmissionForm(ModelForm):
         model = ProductionTypePairTransmission
         widgets = {'source_production_type':Add_or_Select(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
                    'destination_production_type':Add_or_Select(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-                   'direct_contact_spread_model':Add_or_Select(attrs={'data-new-item-url': '/setup/DiseaseSpreadModel/new/'}),
-                   'indirect_contact_spread_model':Add_or_Select(attrs={'data-new-item-url': '/setup/DiseaseSpreadModel/new/'}),
-                   'airborne_contact_spread_model':Add_or_Select(attrs={'data-new-item-url': '/setup/DiseaseSpreadModel/new/'})}
+                   'direct_contact_spread_model':Add_or_Select(attrs={'data-new-item-url': '/setup/DirectSpreadModel/new/'}),
+                   'indirect_contact_spread_model':Add_or_Select(attrs={'data-new-item-url': '/setup/IndirectSpreadModel/new/'}),
+                   'airborne_contact_spread_model':Add_or_Select(attrs={'data-new-item-url': '/setup/AirborneSpreadModel/new/'})}
 
 
 class ZoneForm(ModelForm):
