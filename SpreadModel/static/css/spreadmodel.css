@@ -64,3 +64,9 @@ body>section {
     background-color: #FFF;
 }
 
+.btn-add {
+    background: none;
+    padding:0;
+    border-width: 0;
+    color: #007700;
+}

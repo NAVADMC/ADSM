@@ -1,4 +1,5 @@
 import re
+from scripts.helptextimporter import split_field_line, is_field
 
 __author__ = 'Josiah Seaman'
 
@@ -37,29 +38,51 @@ def lowercase_a_file(filename):
     #     print(text, end='')
 
 
-def generate_forms_with_hidden_fields(filename, output_filename):
+def add_if_excluded_field(excluded_fields, line):
+    if line.lstrip() and line.lstrip()[0] == '_':  # field indentation and starts with _
+        index = line.find('=')
+        # print('Excluding: ', line)
+        excluded_fields.append(line[:index].strip())
+    return excluded_fields
+
+
+def add_if_foreign_key(foreign_keys, line):
+    if is_field(line) and 'ForeignKey' in line:
+        indentation, name, ftype, params, end = split_field_line(line)
+        target = re.split('\W+', params.replace("'", ''))[0]
+        entry = "'" + name.strip() + "':Add_or_Select(attrs={'data-new-item-url': '/setup/"+target+"/new/'})"
+        foreign_keys.append(entry)
+    return foreign_keys
+
+"""This generator assumes that there are no blank lines before the end of the class model definition.
+ This means that if you def functions inside your class there must not be any blank lines between them."""
+def generate_forms_with_hidden_fields_and_ForeignKeys(filename, output_filename):
     form_lines = []
     excluded_fields = []
+    foreign_keys = []
+    fkey_count = 0
     model_ = ''
     with open(filename, 'r') as models_file:
         for line_number, line in enumerate(models_file):
             if line.startswith('class'):
                 model_ = re.split('\W+', line)[1]  # line.split()[1].split(sep='(')[0]
-            if line.lstrip() and line.lstrip()[0] == '_':  # field indentation and starts with _
-                index = line.find('=')
-                print('Excluding: ', line)
-                excluded_fields.append(line[:index].strip())
+            excluded_fields = add_if_excluded_field(excluded_fields, line)
+            foreign_keys = add_if_foreign_key(foreign_keys, line)
             if not line.strip() and model_:  # empty line, end of class
-                print('Printing ' + str(excluded_fields))
+                print(model_ + '  ' + str(foreign_keys))
                 form_lines.append('class ' + model_ + 'Form(ModelForm):')
                 form_lines.append('    class Meta:')
                 form_lines.append('        model = ' + model_)
                 if excluded_fields:
                     form_lines.append('        exclude = ' + str(excluded_fields))
+                if foreign_keys:
+                    form_lines.append("        widgets = {" + ',\n                   '.join(foreign_keys) + '}')
                 form_lines.append('\n')
+                fkey_count += len(foreign_keys)
                 excluded_fields = []
+                foreign_keys = []
                 model_ = ''
-
+    print("Found ForeignKeys: ", fkey_count)
     open(output_filename, 'w').write('\n'.join(form_lines))
 
 
@@ -93,27 +116,14 @@ def createForeignKeys(filename, output_filename):
             newline += ' = models.ForeignKey()'
             lines[index] = newline
 
-
-
     open(output_filename, 'w').writelines(lines)
 
-
-def generate_urls_from_models(input_file, output_filename):
-    lines = open(input_file, 'r').readlines()
-    edited_lines = []
-    for line in lines:
-        if 'class' in line[:5]:
-            model_name = re.split('\W+', line)[1]
-            edited_lines.append("url('^" + model_name + "/new/$', 'ScenarioCreator.views.new_entry'),")
-            edited_lines.append("url('^" + model_name + "/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),\n")
-
-    open(output_filename, 'w').write('\n'.join(edited_lines))
 
 
 if __name__ == '__main__':
     #Step #1:  Search:  db_column='[^']*', in models.py to remove column names
     print("Running from: ", os.getcwd())
     # lowercase_a_file('CreateDjangoOutputTables.sql')
-    generate_forms_with_hidden_fields('../ScenarioCreator/models.py', 'auto-forms.py')
+    generate_forms_with_hidden_fields_and_ForeignKeys('../ScenarioCreator/models.py', 'auto-forms.py')
     # switch_to_boolean_fields('../ScenarioCreator/models.py', 'auto-models.py')
     # generate_urls_from_models('../ScenarioCreator/models.py', 'auto-urls.py')

@@ -1,72 +1,30 @@
+"""URLs is entirely procedural based on the contents of models.py.
+This has the advantage that urls automatically update as the models change or are renamed."""
+
+import re
+
 __author__ = 'josiahseaman'
 
 from django.conf.urls import patterns, url
 from ScenarioCreator.models import *
 from ScenarioCreator.forms import *
 
-urlpatterns = patterns('',
-                       url('^$', "ScenarioCreator.views.new_scenario"),
-                       url('^new/$', "ScenarioCreator.views.new_scenario", ),
 
-                       url('^DbSchemaVersion/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^DbSchemaVersion/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+"""Assumes that the only classes in models.py are models.Model.  Because any class will be given a URL,
+whether it is a model or not."""
+def generate_urls_from_models(input_file):
+    lines = open(input_file, 'r').readlines()
+    model_strings = []
+    for line in lines:
+        if 'class' in line[:5]:
+            model_name = re.split('\W+', line)[1]
+            model_strings.append("url('^" + model_name + "/new/$', 'ScenarioCreator.views.new_entry')")
+            model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry')")
+            model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/copy/$', 'ScenarioCreator.views.copy_entry')")
 
-                       url('^DynamicBlob/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^DynamicBlob/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+    output = "patterns('', " + ",\n         ".join(model_strings) + ")"
+    return eval(output)
 
-                       url('^DynamicUnit/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^DynamicUnit/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
 
-                       url('^InChart/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^InChart/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^ProbabilityEquation/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^ProbabilityEquation/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^RelationalEquation/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^RelationalEquation/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^EquationPoint/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^EquationPoint/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^InControlGlobal/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^InControlGlobal/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^InControlPlan/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^InControlPlan/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^InControlsProductionType/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^InControlsProductionType/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^InDiseaseGlobal/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^InDiseaseGlobal/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^InDiseaseProductionType/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^InDiseaseProductionType/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^InDiseaseSpread/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^InDiseaseSpread/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^InGeneral/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^InGeneral/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^InProductionType/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^InProductionType/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^InProductionTypePair/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^InProductionTypePair/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^InZone/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^InZone/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^InZoneProductionType/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^InZoneProductionType/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^ReadAllCodes/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^ReadAllCodes/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-
-                       url('^ReadAllCodeTypes/new/$', 'ScenarioCreator.views.new_entry'),
-                       url('^ReadAllCodeTypes/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
-                       )
-
+urlpatterns = generate_urls_from_models('ScenarioCreator/models.py')
 
