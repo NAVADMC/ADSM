@@ -56,6 +56,7 @@ def copy_entry(request, primary_key):
     initialized_form, model_name = initialize_from_existing_model(primary_key, request)
 
     if initialized_form.is_valid() and request.method == 'POST':
+        initialized_form.instance.pk = None  # This will cause a new instance to be created
         return save_new_instance(initialized_form, request)
     context = {'form': initialized_form,
                'title': "Copy a " + model_name}
