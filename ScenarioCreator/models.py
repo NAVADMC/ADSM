@@ -224,7 +224,7 @@ class ControlProtocol(models.Model):
         help_text='Indicator that trace back will be conducted for direct contacts where the reported unit was the source of contact and was of this production type.', )
     trace_direct_success = PercentField(blank=True, null=True,
         help_text='Probability of success of trace for direct contact.', )
-    trace_direct_trace_period = models.BooleanField(default=False,
+    trace_direct_trace_period = models.IntegerField(blank=True, null=True,
         help_text='Days before detection  (critical period) for tracing of direct contacts.', )
     trace_indirect_forward = models.BooleanField(default=False,
         help_text='Indicator that trace forward will be conducted for indirect contacts where the reported unit was the source of contact and was of this production type.', )
@@ -232,7 +232,7 @@ class ControlProtocol(models.Model):
         help_text='Indicator that trace back will be conducted for indirect contacts where the reported unit was the source of contact and was of this production type.', )
     trace_indirect_success = PercentField(blank=True, null=True,
         help_text='Probability of success of trace for indirect contact.', )
-    trace_indirect_trace_period = models.BooleanField(default=False,
+    trace_indirect_trace_period = models.IntegerField(blank=True, null=True,
         help_text='Days before detection  (critical period) for tracing of indirect contacts.', )
     trace_delay_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
         help_text='Shipping delay function.', )
@@ -245,13 +245,13 @@ class ControlProtocol(models.Model):
     destruction_is_ring_target = models.BooleanField(default=False,
         help_text='Indicates if unit of this production type will be subject to preemptive ring destruction.', )
     destroy_direct_forward_traces = models.BooleanField(default=False,
-        help_text='Indicates is units of this type identified by trace forward of indirect contacts will be subject to preemptive desctruction.', )
+        help_text='Indicates if units of this type identified by trace forward of indirect contacts will be subject to preemptive desctruction.', )
     destroy_indirect_forward_traces = models.BooleanField(default=False,
-        help_text='Indicates is units of this type identified by trace forward of direct contacts will be subject to preemptive desctruction.', )
+        help_text='Indicates if units of this type identified by trace forward of direct contacts will be subject to preemptive desctruction.', )
     destroy_direct_back_traces = models.BooleanField(default=False,
-        help_text='Indicates is units of this type identified by tracebackof direct contacts will be subject to preemptive desctruction.', )
+        help_text='Indicates if units of this type identified by tracebackof direct contacts will be subject to preemptive desctruction.', )
     destroy_indirect_back_traces = models.BooleanField(default=False,
-        help_text='Indicates is units of this type identified by traceback of indirect contacts will be subject to preemptive desctruction.', )
+        help_text='Indicates if units of this type identified by traceback of indirect contacts will be subject to preemptive desctruction.', )
     destruction_priority = models.IntegerField(blank=True, null=True,
         help_text='The desctruction prioroty of this production type relative to other production types.  A lower number indicates a higher priority.', )
     use_vaccination = models.BooleanField(default=False,
@@ -340,8 +340,6 @@ class Disease(models.Model):
 class DiseaseReaction(models.Model):
     reaction_name = models.CharField(max_length=255, )
     disease = models.ForeignKey('Disease')
-    use_disease_transition = models.BooleanField(default=False,
-        help_text='Indicates if units of this production type will undergo disease transition.', )
     disease_latent_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
         help_text='Defines the latent period for units of this production type.', )
     disease_subclinical_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
@@ -360,6 +358,8 @@ class DiseaseReactionAssignment(models.Model):
     production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
     reaction = models.ForeignKey('DiseaseReaction')
+    # Since there are ProductionTypes that can be listed without having a DiseaseReactionAssignment,
+    # this addresses boolean setting _use_disease_transition in DiseaseReaction
     def __str__(self):
         return "%s have a %s reaction to %s" % (self.production_type, self.reaction, self.reaction.disease)
 
