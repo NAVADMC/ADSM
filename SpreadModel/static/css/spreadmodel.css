@@ -70,3 +70,8 @@ body>section {
     border-width: 0;
     color: #007700;
 }
+
+textarea {
+    width: 400px;
+    height: 70px;
+}
