@@ -428,7 +428,7 @@ class Scenario(models.Model):
     iterations = models.IntegerField(blank=True, null=True,
         help_text='The number of iterations of this scenario that should be run', )
     days = models.IntegerField(blank=True, null=True,
-        help_text='The number of day that iterations of this scenario should run if the command Run> State and run until specified day… is used', )
+        help_text='The number of day that iterations of this scenario should run if the command Run> State and run until specified day is used', )
     simulation_stop_criteria = models.CharField(max_length=255, blank=True,
         help_text='The criterion used to end each iteration. This may be that the specified number of days has passed the first detectino has occurred or the outbreak has ended.',
         choices=(('disease-end','Simulation will stop when there are no more latent or infectious units.'),
