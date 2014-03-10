@@ -139,6 +139,11 @@ class ScenarioForm(ModelForm):
         model = Scenario
 
 
+class OutputSettingsForm(ModelForm):
+    class Meta:
+        model = OutputSettings
+
+
 class ProductionTypeForm(ModelForm):
     class Meta:
         model = ProductionType
