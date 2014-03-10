@@ -61,3 +61,7 @@ def copy_entry(request, primary_key):
     context = {'form': initialized_form,
                'title': "Copy a " + model_name}
     return render(request, 'ScenarioCreator/new.html', context)
+
+
+def disease_spread(request):
+    return render(request, 'ScenarioCreator/DiseaseSpread.html', {})

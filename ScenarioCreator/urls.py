@@ -5,14 +5,15 @@ import re
 
 __author__ = 'josiahseaman'
 
-from django.conf.urls import patterns, url
-from ScenarioCreator.models import *
-from ScenarioCreator.forms import *
+from django.conf.urls import patterns, url  # do not delete this
+from ScenarioCreator.models import *  # do not delete this
+from ScenarioCreator.forms import *  # do not delete this
 
 
 """Assumes that the only classes in models.py are models.Model.  Because any class will be given a URL,
 whether it is a model or not."""
-def generate_urls_from_models(input_file):
+def generate_urls_from_models(input_file, extra_urls=()):
+    assert hasattr(extra_urls, '__getitem__')
     lines = open(input_file, 'r').readlines()
     model_strings = []
     for line in lines:
@@ -22,9 +23,11 @@ def generate_urls_from_models(input_file):
             model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry')")
             model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/copy/$', 'ScenarioCreator.views.copy_entry')")
 
+    model_strings += extra_urls
     output = "patterns('', " + ",\n         ".join(model_strings) + ")"
     return eval(output)
 
 
-urlpatterns = generate_urls_from_models('ScenarioCreator/models.py')
+urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
+                                        ["url('^DiseaseSpread/$', 'ScenarioCreator.views.disease_spread')"])
 
