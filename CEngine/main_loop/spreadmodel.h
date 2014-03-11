@@ -57,7 +57,8 @@ typedef enum {
 typedef enum {
   SPREADMODEL_TraceNeither,
   SPREADMODEL_TraceForwardOrOut,
-  SPREADMODEL_TraceBackOrIn
+  SPREADMODEL_TraceBackOrIn,
+  SPREADMODEL_NTRACE_DIRECTIONS
 } SPREADMODEL_trace_direction;
 extern const char *SPREADMODEL_trace_direction_name[];
 extern const char *SPREADMODEL_trace_direction_abbrev[];
