@@ -75,7 +75,7 @@ AC_DEFUN(AM_PATH_MPI,[
 
   AC_CACHE_CHECK([for MPI],[ac_cv_with_mpi],[
   AC_LANG_PUSH(C)
-  AC_LINK_IFELSE([[
+  AC_LINK_IFELSE([AC_LANG_SOURCE([
 #include <stdio.h>
 
 #include <mpi.h>
@@ -90,7 +90,7 @@ main (int argc, char *argv[])
   MPI_Finalize ();
   return 0;
 }
-]],
+])],
     [ac_cv_with_mpi=yes],
     [ac_cv_with_mpi=no]) # end of AC_LINK_IFELSE 
   AC_LANG_POP(C)
