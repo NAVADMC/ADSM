@@ -4,7 +4,7 @@ dnl Neil Harvey <nharve01@uoguelph.ca>, August 2003
 dnl AM_PATH_MPI([ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl Test for MPI, and define MPI_CFLAGS and MPI_LIBS.
 dnl
-AC_DEFUN(AM_PATH_MPI,[
+AC_DEFUN([AM_PATH_MPI],[
   AC_ARG_WITH([mpi],
     AC_HELP_STRING([--with-mpi], [MPI installation prefix]),
     [ac_cv_with_mpi_root=${with_mpi}],
