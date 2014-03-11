@@ -218,31 +218,31 @@ class ControlProtocol(models.Model):
         help_text='Relational function used to define the probability of observing clinical signs in units of this production type.', )
     detection_probability_report_vs_first_detection_relid = models.ForeignKey(RelationalEquation, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the probability of reportin clinical signs in units of this production type.')
-    trace_direct_forward = models.BooleanField(default=False,
+    direct_trace_forward = models.BooleanField(default=False,
         help_text='Indicator that trace forward will be conducted for direct contacts where the reported unit was the source of contact and was of this production type.', )
-    trace_direct_back = models.BooleanField(default=False,
+    direct_trace_back = models.BooleanField(default=False,
         help_text='Indicator that trace back will be conducted for direct contacts where the reported unit was the source of contact and was of this production type.', )
-    trace_direct_success = PercentField(blank=True, null=True,
+    direct_trace_success_rate = PercentField(blank=True, null=True,
         help_text='Probability of success of trace for direct contact.', )
-    trace_direct_trace_period = models.IntegerField(blank=True, null=True,
-        help_text='Days before detection  (critical period) for tracing of direct contacts.', )
-    trace_indirect_forward = models.BooleanField(default=False,
+    direct_trace_period = models.IntegerField(blank=True, null=True,
+        help_text='Days before detection (critical period) for tracing of direct contacts.', )
+    indirect_trace_forward = models.BooleanField(default=False,
         help_text='Indicator that trace forward will be conducted for indirect contacts where the reported unit was the source of contact and was of this production type.', )
-    trace_indirect_back = models.BooleanField(default=False,
+    indirect_trace_back = models.BooleanField(default=False,
         help_text='Indicator that trace back will be conducted for indirect contacts where the reported unit was the source of contact and was of this production type.', )
-    trace_indirect_success = PercentField(blank=True, null=True,
+    indirect_trace_success = PercentField(blank=True, null=True,
         help_text='Probability of success of trace for indirect contact.', )
-    trace_indirect_trace_period = models.IntegerField(blank=True, null=True,
+    indirect_trace_period = models.IntegerField(blank=True, null=True,
         help_text='Days before detection  (critical period) for tracing of indirect contacts.', )
-    trace_delay_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
+    shipping_delay_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
         help_text='Shipping delay function.', )
     use_destruction = models.BooleanField(default=False,
         help_text='Indicates if detected clinical units of this production type will be destroyed.', )
-    destruction_is_ring_trigger = models.BooleanField(default=False,
+    destruction_is_a_ring_trigger = models.BooleanField(default=False,
         help_text='Indicates if detection of a unit of this production type will trigger the formation of a destruction ring.', )
     destruction_ring_radius = models.FloatField(blank=True, null=True,
         help_text='Radius in kilometers of the destruction ring.', )
-    destruction_is_ring_target = models.BooleanField(default=False,
+    destruction_is_a_ring_target = models.BooleanField(default=False,
         help_text='Indicates if unit of this production type will be subject to preemptive ring destruction.', )
     destroy_direct_forward_traces = models.BooleanField(default=False,
         help_text='Indicates if units of this type identified by trace forward of indirect contacts will be subject to preemptive desctruction.', )
@@ -256,67 +256,67 @@ class ControlProtocol(models.Model):
         help_text='The desctruction prioroty of this production type relative to other production types.  A lower number indicates a higher priority.', )
     use_vaccination = models.BooleanField(default=False,
         help_text='Indicates if units of this production type will be subject to vaccination.', )
-    vaccination_min_time_between = models.IntegerField(blank=True, null=True,
+    minimum_time_between_vaccinations = models.IntegerField(blank=True, null=True,
         help_text='The minimum time in days between vaccination for units of this production type.', )
-    vaccinate_detected = models.BooleanField(default=False,
+    vaccinate_detected_units = models.BooleanField(default=False,
         help_text='Indicates if units of this production type will be subject to vaccination if infected and detected.', )
     days_to_immunity = models.IntegerField(blank=True, null=True,
         help_text='The number of days required for the onset of vaccine immunity in a newly vaccinated unit of this type.', )
     vaccine_immune_period_pdf = models.ForeignKey(ProbabilityEquation, related_name='+',
         help_text='Defines the vaccine immune period for units of this production type.', )
-    vaccinate_ring = models.BooleanField(default=False,
+    trigger_vaccination_ring = models.BooleanField(default=False,
         help_text='Indicates if detection of a clinical unit of this type will trigger a vaccination ring.', )
     vaccination_ring_radius = models.FloatField(blank=True, null=True,
         help_text='Radius in kilometers of the vaccination ring.', )
     vaccination_priority = models.IntegerField(blank=True, null=True,
         help_text='The vacination priority of this production type relative to other production types.  A lower number indicates a higher priority.', )
-    cost_destroy_appraisal_per_unit = MoneyField(default=0.0,
+    cost_of_destruction_appraisal_per_unit = MoneyField(default=0.0,
         help_text='The cost associated with appraisal for each destroyed unit of this type.', )
-    cost_destroy_cleaning_per_unit = MoneyField(default=0.0,
+    cost_of_destruction_cleaning_per_unit = MoneyField(default=0.0,
         help_text='The cost associated with cleaning and disinfection for each destroyed unit of this type.', )
-    cost_destroy_euthanasia_per_animal = MoneyField(default=0.0,
+    cost_of_euthanasia_per_animal = MoneyField(default=0.0,
         help_text='The cost associated with euthanizing each destroyed animal of this type.', )
-    cost_destroy_indemnification_per_animal = MoneyField(default=0.0,
+    cost_of_indemnification_per_animal = MoneyField(default=0.0,
         help_text='The cost of indemnification for each destroyed animal of this type.', )
-    cost_destroy_disposal_per_animal = MoneyField(default=0.0,
+    cost_of_carcass_disposal_per_animal = MoneyField(default=0.0,
         help_text='The cost of carcass disposal for each destroyed animal of this type.', )
-    cost_vaccinate_setup_per_unit = MoneyField(default=0.0,
+    cost_of_vaccination_setup_per_unit = MoneyField(default=0.0,
         help_text='The cost of site setup for each vaccinated unit of this type.', )
-    cost_vaccinate_threshold = models.IntegerField(blank=True, null=True,
+    cost_of_vaccination_baseline_per_animal = MoneyField(default=0.0,  # TODO: These three should really be a RelationalEquation
+        help_text='The baseline cost of vaccination for each vaccinated animal of this type. This cost applies to all vaccinations before the threshold is met. ', )
+    vaccination_demand_threshold = models.IntegerField(blank=True, null=True,
         help_text='The number of animals of this type that can be vaccinated before the cost of vaccination increases.', )
-    cost_vaccinate_baseline_per_animal = MoneyField(default=0.0,
-        help_text='The baseline cost of vaccination for each vaccinated animal of this type. This cost applies to all vaccinations before the threshold is set in costVaccThershold is met. ', )
-    cost_vaccinate_additional_per_animal = MoneyField(default=0.0,
+    cost_of_vaccination_additional_per_animal = MoneyField(default=0.0,
         help_text='The additional cost of vaccination for each vaccinated animal of this type after the threshold is exceeded.', )
-    zone_detection_is_trigger = models.BooleanField(default=False,
+    detection_triggers_zone_creation = models.BooleanField(default=False,
         help_text='Indicator if detection of infected units of this production type will trigger a zone focus.', )
-    zone_direct_trace_is_trigger = models.BooleanField(default=False,
+    direct_trace_is_a_zone_trigger = models.BooleanField(default=False,
         help_text='Indicator if direct tracing of infected units of this production type will trigger a zone focus.', )
-    zone_indirect_trace_is_trigger = models.BooleanField(default=False,
+    indirect_trace_is_a_zone_trigger = models.BooleanField(default=False,
         help_text='Indicator if indirect tracing of infected units of this production type will trigger a zone focus.', )
-    exam_direct_forward = models.BooleanField(default=False,
+    examine_direct_forward_traces = models.BooleanField(default=False,
         help_text='Indicator if units identified by the trace-forward of direct contact will be examined for clinical signs of disease.', )
-    exam_direct_forward_multiplier = models.FloatField(blank=True, null=True,
-        help_text='Multiplier for the probability of observice clinical signs in units identified by the trace-forward of direct contact.', )
-    exam_indirect_forward = models.BooleanField(default=False,
+    exam_direct_forward_success_multiplier = models.FloatField(blank=True, null=True,
+        help_text='Multiplier for the probability of observing clinical signs in units identified by the trace-forward of direct contact.', )
+    examine_indirect_forward_traces = models.BooleanField(default=False,
         help_text='Indicator if units identified by the trace-forward of indirect contact will be examined for clinical signs of disease.', )
-    exam_indirect_forward_multiplier = models.FloatField(blank=True, null=True,
+    exam_indirect_forward_success_multiplier = models.FloatField(blank=True, null=True,
         help_text='Multiplier for the probability of observice clinical signs in units identified by the trace-forward of indirect contact .', )
-    exam_direct_back = models.BooleanField(default=False,
+    examine_direct_back_traces = models.BooleanField(default=False,
         help_text='Indicator if units identified by the trace-back of direct contact will be examined for clinical signs of disease.', )
-    exam_direct_back_multiplier = models.FloatField(blank=True, null=True,
+    exam_direct_back_success_multiplier = models.FloatField(blank=True, null=True,
         help_text='Multiplier for the probability of observice clinical signs in units identified by the trace-back of direct contact.', )
-    exam_indirect_back = models.BooleanField(default=False,
+    examine_indirect_back_traces = models.BooleanField(default=False,
         help_text='Indicator if units identified by the trace-back of indirect contact will be examined for clinical signs of disease.', )
-    exam_indirect_back_multiplier = models.FloatField(blank=True, null=True,
+    examine_indirect_back_success_multiplier = models.FloatField(blank=True, null=True,
         help_text='Multiplier for the probability of observice clinical signs in units identified by the trace-back of indirect contact.', )
-    test_direct_forward = models.BooleanField(default=False,
+    test_direct_forward_traces = models.BooleanField(default=False,
         help_text='Indicator that diagnostic testing shuold be performed on units identified by trace-forward of direct contacts.', )
-    test_indirect_forward = models.BooleanField(default=False,
+    test_indirect_forward_traces = models.BooleanField(default=False,
         help_text='Indicator that diagnostic testing shuold be performed on units identified by trace-forward of indirect contacts.', )
-    test_direct_back = models.BooleanField(default=False,
+    test_direct_back_traces = models.BooleanField(default=False,
         help_text='Indicator that diagnostic testing should be performed on units identified by trace-back of direct contacts.', )
-    test_indirect_back = models.BooleanField(default=False,
+    test_indirect_back_traces = models.BooleanField(default=False,
         help_text='Indicator that diagnostic testing should be performed on units identified by trace-back of indirect contacts.', )
     test_specificity = models.FloatField(blank=True, null=True,
         help_text='Test Specificity for units of this production type', )
