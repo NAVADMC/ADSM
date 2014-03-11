@@ -8,7 +8,6 @@ class Add_or_Select(Select):
     # def get_context(self, name, value, attrs=None, choices=()):
     #     context = super(Add_or_Select, self).get_context(name, value, attrs=None, choices=())
     #     context['attrs']['data-new-item-url'] = '/%s/new/' %
-
 class DbSchemaVersionForm(ModelForm):
     class Meta:
         model = DbSchemaVersion
@@ -26,52 +25,53 @@ class DynamicUnitForm(ModelForm):
         widgets = {'production_type':Add_or_Select(attrs={'data-new-item-url': '/setup/ProductionType/new/'})}
 
 
-class EquationForm(ModelForm):
+class FunctionForm(ModelForm):
     class Meta:
-        model = Equation
+        model = Function
 
 
-class ProbabilityEquationForm(ModelForm):
+class ProbabilityFunctionForm(ModelForm):
     class Meta:
-        model = ProbabilityEquation
+        model = ProbabilityFunction
 
 
-class RelationalEquationForm(ModelForm):
+class RelationalFunctionForm(ModelForm):
     class Meta:
-        model = RelationalEquation
+        model = RelationalFunction
 
 
-class EquationPointForm(ModelForm):
+class RelationalPointForm(ModelForm):
     class Meta:
-        model = EquationPoint
+        model = RelationalPoint
         exclude = ['_point_order']
-        widgets = {'chart':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'})}
+        widgets = {'relational_function':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
 class ControlMasterPlanForm(ModelForm):
     class Meta:
         model = ControlMasterPlan
         exclude = ['_include_detection', '_include_tracing', '_include_tracing_unit_exam', '_include_tracing_testing', '_include_destruction', '_include_vaccination', '_include_zones']
-        widgets = {'destruction_capacity_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'}),
-                   'vaccination_capacity_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'})}
+        widgets = {'destruction_capacity_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'vaccination_capacity_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
 class ProtocolAssignmentForm(ModelForm):
     class Meta:
         model = ProtocolAssignment
-        widgets = {'production_type':Add_or_Select(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-                   'control_protocol':Add_or_Select(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'}),
-                   'master_plan':Add_or_Select(attrs={'data-new-item-url': '/setup/ControlMasterPlan/new/'})}
+        exclude = ['_master_plan']
+        widgets = {'_master_plan':Add_or_Select(attrs={'data-new-item-url': '/setup/ControlMasterPlan/new/'}),
+                   'production_type':Add_or_Select(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
+                   'control_protocol':Add_or_Select(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'})}
 
 
 class ControlProtocolForm(ModelForm):
     class Meta:
         model = ControlProtocol
-        widgets = {'detection_probability_for_observed_time_in_clinical_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'}),
-                   'detection_probability_report_vs_first_detection_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'}),
-                   'trace_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'}),
-                   'vaccine_immune_period_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'}),
-                   'test_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'})}
+        widgets = {'detection_probability_for_observed_time_in_clinical_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'detection_probability_report_vs_first_detection_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'shipping_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'vaccine_immune_period_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'test_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
 class DiseaseForm(ModelForm):
@@ -82,12 +82,13 @@ class DiseaseForm(ModelForm):
 class DiseaseReactionForm(ModelForm):
     class Meta:
         model = DiseaseReaction
-        widgets = {'disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
-                   'disease_latent_period_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'}),
-                   'disease_subclinical_period_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'}),
-                   'disease_clinical_period_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'}),
-                   'disease_immune_period_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'}),
-                   'disease_prevalence_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'})}
+        exclude = ['_disease']
+        widgets = {'_disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
+                   'disease_latent_period_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'disease_subclinical_period_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'disease_clinical_period_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'disease_immune_period_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'disease_prevalence_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
 class DiseaseReactionAssignmentForm(ModelForm):
@@ -101,28 +102,28 @@ class DiseaseSpreadModelForm(ModelForm):
     class Meta:
         model = DiseaseSpreadModel
         widgets = {'disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
-                   'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'}),
-                   'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'})}
+                   'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
 class IndirectSpreadModelForm(ModelForm):
     class Meta:
         model = IndirectSpreadModel
         exclude = ['_spread_method_code']
-        widgets = {'distance_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'}),
+        widgets = {'distance_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
-                   'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'}),
-                   'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'})}
+                   'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
 class DirectSpreadModelForm(ModelForm):
     class Meta:
         model = DirectSpreadModel
         exclude = ['_spread_method_code']
-        widgets = {'distance_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'}),
+        widgets = {'distance_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
-                   'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'}),
-                   'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'})}
+                   'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
 class AirborneSpreadModelForm(ModelForm):
@@ -130,8 +131,8 @@ class AirborneSpreadModelForm(ModelForm):
         model = AirborneSpreadModel
         exclude = ['_spread_method_code']
         widgets = {'disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
-                   'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'}),
-                   'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityEquation/new/'})}
+                   'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
 class ScenarioForm(ModelForm):
@@ -164,13 +165,13 @@ class ZoneForm(ModelForm):
         model = Zone
 
 
-class ZoneProductionTypeEffectForm(ModelForm):
+class ZoneEffectOnProductionTypeForm(ModelForm):
     class Meta:
-        model = ZoneProductionTypeEffect
+        model = ZoneEffectOnProductionType
         widgets = {'zone':Add_or_Select(attrs={'data-new-item-url': '/setup/Zone/new/'}),
                    'production_type':Add_or_Select(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-                   'zone_indirect_movement_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'}),
-                   'zone_direct_movement_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalEquation/new/'})}
+                   'zone_indirect_movement_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'zone_direct_movement_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
 class ReadAllCodesForm(ModelForm):
