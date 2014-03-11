@@ -17,6 +17,8 @@ from django_extras.db.models import PercentField, LatitudeField, LongitudeField,
 def chc(*choice_list):
     return tuple((x, x) for x in choice_list)
 
+frequency = chc("never", "once", "daily", "weekly", "monthly", "yearly")
+
 
 class DbSchemaVersion(models.Model):
     version_number = models.CharField(max_length=255, unique=True,
@@ -480,6 +482,19 @@ class OutputSettings(models.Model):
     def __str__(self):
         return "Output Settings"
 
+
+class CustomOutputs(OutputSettings):
+    """This is an unimplemented feature based on looking at the XML spec"""
+    all_units_states = models.CharField(default="never", choices=frequency, )
+    num_units_in_each_state = models.CharField(default="never", choices=frequency, )
+    num_units_in_each_state_by_production_type = models.CharField(default="never", choices=frequency, )
+    num_animals_in_each_state = models.CharField(default="never", choices=frequency, )
+    num_animals_in_each_state_by_production_type = models.CharField(default="never", choices=frequency, )
+    disease_duration = models.CharField(default="never", choices=frequency, )
+    outbreak_duration = models.CharField(default="never", choices=frequency, )
+    clock_time = models.CharField(default="never", choices=frequency, )
+    tsdU = models.CharField(default="never", choices=frequency, )
+    tsdA = models.CharField(default="never", choices=frequency, )
 
 
 class ProductionType(models.Model):
