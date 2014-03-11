@@ -467,7 +467,7 @@ class OutputSettings(models.Model):
         help_text='The number of iterations for which daily outputs should be stored The minimum value is 3.', )
     write_daily_states_file = models.BooleanField(default=False,
         help_text='Indicates if a plain text file with the state of each unit on each day of each iteration should be written.', )
-    daily_states_filename = models.FileField(blank=True, null=True,
+    daily_states_filename = models.CharField(max_length=255, blank=True, null=True,
         help_text='The file name of the plain text file described above.', )
     save_daily_events = models.BooleanField(default=False,
         help_text='Indicates if all events should be recorded in the scenario database.', )
@@ -477,7 +477,7 @@ class OutputSettings(models.Model):
         help_text='Indicates if iteration outputs for units should be recorded in the scenario database.', )
     write_map_output = models.BooleanField(default=False,
         help_text='Indicates if map outputs for units should be recorded in the scenario database.', )
-    map_directory = models.FilePathField(max_length=255, blank=True, null=True,
+    map_directory = models.CharField(max_length=255, blank=True, null=True,
         help_text='File path of the desired location for the output file.', )
     def __str__(self):
         return "Output Settings"
@@ -485,16 +485,16 @@ class OutputSettings(models.Model):
 
 class CustomOutputs(OutputSettings):
     """This is an unimplemented feature based on looking at the XML spec"""
-    all_units_states = models.CharField(default="never", choices=frequency, )
-    num_units_in_each_state = models.CharField(default="never", choices=frequency, )
-    num_units_in_each_state_by_production_type = models.CharField(default="never", choices=frequency, )
-    num_animals_in_each_state = models.CharField(default="never", choices=frequency, )
-    num_animals_in_each_state_by_production_type = models.CharField(default="never", choices=frequency, )
-    disease_duration = models.CharField(default="never", choices=frequency, )
-    outbreak_duration = models.CharField(default="never", choices=frequency, )
-    clock_time = models.CharField(default="never", choices=frequency, )
-    tsdU = models.CharField(default="never", choices=frequency, )
-    tsdA = models.CharField(default="never", choices=frequency, )
+    all_units_states = models.CharField(default="never", max_length=50, choices=frequency, )
+    num_units_in_each_state = models.CharField(default="never", max_length=50, choices=frequency, )
+    num_units_in_each_state_by_production_type = models.CharField(default="never", max_length=50, choices=frequency, )
+    num_animals_in_each_state = models.CharField(default="never", max_length=50, choices=frequency, )
+    num_animals_in_each_state_by_production_type = models.CharField(default="never", max_length=50, choices=frequency, )
+    disease_duration = models.CharField(default="never", max_length=50, choices=frequency, )
+    outbreak_duration = models.CharField(default="never", max_length=50, choices=frequency, )
+    clock_time = models.CharField(default="never", max_length=50, choices=frequency, )
+    tsdU = models.CharField(default="never", max_length=50, choices=frequency, )
+    tsdA = models.CharField(default="never", max_length=50, choices=frequency, )
 
 
 class ProductionType(models.Model):
