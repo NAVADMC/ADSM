@@ -198,20 +198,6 @@ class ControlMasterPlan(models.Model):
         return str(self.plan_name) + ": Control Master Plan"
 
 
-class ProtocolAssignment(models.Model):
-    _master_plan = models.ForeignKey('ControlMasterPlan',
-                                     default=lambda: ControlMasterPlan.objects.get_or_create(id=1),
-        help_text='Points back to a master plan for grouping purposes.')
-    production_type = models.ForeignKey('ProductionType',
-        help_text='The production type that these outputs apply to.', )
-    control_protocol = models.ForeignKey('ControlProtocol',
-        help_text='The control protocol to apply to this production type.')
-    notes = models.TextField(blank=True,
-        help_text='Why should this protocol be assigned to this production type?')
-    def __str__(self):
-        return "%s applied to %s" % (self.control_protocol, self.production_type)
-
-
 class ControlProtocol(models.Model):
     protocol_name = models.CharField(max_length=255,
         help_text='Name your Protocol so you can recognize it later. Ex:"Quarantine"',)
@@ -331,6 +317,20 @@ class ControlProtocol(models.Model):
         help_text='Number of days in retrospect that should be used to determine which herds to vaccinate.', )
     def __str__(self):
         return "Protocol: %s" % (self.protocol_name, )
+
+
+class ProtocolAssignment(models.Model):
+    _master_plan = models.ForeignKey('ControlMasterPlan',
+                                     default=lambda: ControlMasterPlan.objects.get_or_create(id=1),
+        help_text='Points back to a master plan for grouping purposes.')
+    production_type = models.ForeignKey('ProductionType',
+        help_text='The production type that these outputs apply to.', )
+    control_protocol = models.ForeignKey('ControlProtocol',
+        help_text='The control protocol to apply to this production type.')
+    notes = models.TextField(blank=True,
+        help_text='Why should this protocol be assigned to this production type?')
+    def __str__(self):
+        return "%s applied to %s" % (self.control_protocol, self.production_type)
 
 
 class Disease(models.Model):
@@ -455,7 +455,7 @@ class OutputSettings(models.Model):
     iterations = models.IntegerField(blank=True, null=True,
         help_text='The number of iterations of this scenario that should be run', )
     days = models.IntegerField(blank=True, null=True,
-        help_text='The number of day that iterations of this scenario should run if the command Run> State and run until specified day is used', )
+        help_text='The maximum number of days that iterations of this scenario should run even if the stop criterion is not met.', )
     simulation_stop_criteria = models.CharField(max_length=255, blank=True,
         help_text='The criterion used to end each iteration. This may be that the specified number of days has passed the first detectino has occurred or the outbreak has ended.',
         choices=(('disease-end','Simulation will stop when there are no more latent or infectious units.'),
@@ -467,7 +467,7 @@ class OutputSettings(models.Model):
         help_text='The number of iterations for which daily outputs should be stored The minimum value is 3.', )
     write_daily_states_file = models.BooleanField(default=False,
         help_text='Indicates if a plain text file with the state of each unit on each day of each iteration should be written.', )
-    daily_states_filename = models.CharField(max_length=255, blank=True,
+    daily_states_filename = models.FileField(blank=True, null=True,
         help_text='The file name of the plain text file described above.', )
     save_daily_events = models.BooleanField(default=False,
         help_text='Indicates if all events should be recorded in the scenario database.', )
@@ -477,7 +477,7 @@ class OutputSettings(models.Model):
         help_text='Indicates if iteration outputs for units should be recorded in the scenario database.', )
     write_map_output = models.BooleanField(default=False,
         help_text='Indicates if map outputs for units should be recorded in the scenario database.', )
-    map_directory = models.CharField(max_length=255, blank=True,
+    map_directory = models.FilePathField(max_length=255, blank=True, null=True,
         help_text='File path of the desired location for the output file.', )
     def __str__(self):
         return "Output Settings"
