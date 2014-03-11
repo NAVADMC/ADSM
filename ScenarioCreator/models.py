@@ -367,7 +367,7 @@ class DiseaseReactionAssignment(models.Model):
 
 
 class DiseaseSpreadModel(models.Model):
-    disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1),
+    _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1),
         help_text='Parent disease whose spreading characteristics this describes.')
         # This is in Disease because of simulation restrictions
     movement_control_relid = models.ForeignKey(RelationalFunction, related_name='+',

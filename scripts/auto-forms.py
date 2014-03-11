@@ -91,7 +91,8 @@ class DiseaseReactionAssignmentForm(ModelForm):
 class DiseaseSpreadModelForm(ModelForm):
     class Meta:
         model = DiseaseSpreadModel
-        widgets = {'disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
+        exclude = ['_disease']
+        widgets = {'_disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
@@ -99,9 +100,9 @@ class DiseaseSpreadModelForm(ModelForm):
 class IndirectSpreadModelForm(ModelForm):
     class Meta:
         model = IndirectSpreadModel
-        exclude = ['_spread_method_code']
+        exclude = ['_spread_method_code', '_disease']
         widgets = {'distance_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
+                   '_disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
@@ -109,9 +110,9 @@ class IndirectSpreadModelForm(ModelForm):
 class DirectSpreadModelForm(ModelForm):
     class Meta:
         model = DirectSpreadModel
-        exclude = ['_spread_method_code']
+        exclude = ['_spread_method_code', '_disease']
         widgets = {'distance_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
+                   '_disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
@@ -119,8 +120,8 @@ class DirectSpreadModelForm(ModelForm):
 class AirborneSpreadModelForm(ModelForm):
     class Meta:
         model = AirborneSpreadModel
-        exclude = ['_spread_method_code']
-        widgets = {'disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
+        exclude = ['_spread_method_code', '_disease']
+        widgets = {'_disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
