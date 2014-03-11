@@ -226,6 +226,7 @@
 
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new resources_and_implementation_of_controls_model_new
+#define set_params resources_and_implementation_of_controls_model_set_params
 #define run resources_and_implementation_of_controls_model_run
 #define reset resources_and_implementation_of_controls_model_reset
 #define events_listened_for resources_and_implementation_of_controls_model_events_listened_for
@@ -1764,45 +1765,25 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 /**
- * Returns a new authorities model.
+ * Adds a set of parameters to a resources and implementation of controls model.
  */
-spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
-     ZON_zone_list_t * zones)
+void
+set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
 {
-  spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element *e;
+  scew_element const *e;
   gboolean success;
-  char *tmp;
   double dummy;
+  char *tmp;
 
-#if DEBUG
-  g_debug ("----- ENTER new (%s)", MODEL_NAME);
-#endif
-
-  self = g_new (spreadmodel_model_t, 1);
-  local_data = g_new (local_data_t, 1);
-
-  self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
-  self->outputs = g_ptr_array_new ();
-  self->model_data = local_data;
-  self->set_params = NULL;
-  self->run = run;
-  self->reset = reset;
-  self->is_singleton = spreadmodel_model_answer_yes;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
-  self->has_pending_actions = has_pending_actions;
-  self->has_pending_infections = spreadmodel_model_answer_no;
-  self->to_string = to_string;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
-  self->free = local_free;
+  #if DEBUG
+    g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
+  #endif
 
   /* Make sure the right XML subtree was sent. */
   g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
+
+  local_data = (local_data_t *) (self->model_data);
 
   e = scew_element_by_name (params, "destruction-program-delay");
   if (e != NULL)
@@ -1837,10 +1818,10 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   if (local_data->destruction_capacity_goes_to_0)
     {
       local_data->destruction_capacity_0_day = (int) ceil (dummy) - 1;
-#if DEBUG
-      g_debug ("destruction capacity drops to 0 on and after day %i",
-               local_data->destruction_capacity_0_day);
-#endif
+      #if DEBUG
+        g_debug ("destruction capacity drops to 0 on and after day %i",
+                 local_data->destruction_capacity_0_day);
+      #endif
     }
 
   e = scew_element_by_name (params, "destruction-priority-order");
@@ -1939,10 +1920,10 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   if (local_data->vaccination_capacity_goes_to_0)
     {
       local_data->vaccination_capacity_0_day = (int) ceil (dummy);
-#if DEBUG
-      g_debug ("vaccination capacity drops to 0 on and after the %ith day since 1st detection",
-               local_data->vaccination_capacity_0_day + 1);
-#endif
+      #if DEBUG
+        g_debug ("vaccination capacity drops to 0 on and after the %ith day since 1st detection",
+                 local_data->vaccination_capacity_0_day + 1);
+      #endif
     }
 
   e = scew_element_by_name (params, "vaccination-priority-order");
@@ -2004,6 +1985,52 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
       local_data->vaccination_prod_type_priority = 2;
       local_data->vaccination_time_waiting_priority = 3;
     }
+
+  #if DEBUG
+    g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
+
+
+
+/**
+ * Returns a new resources and implementation of controls model.
+ */
+spreadmodel_model_t *
+new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+     ZON_zone_list_t * zones)
+{
+  spreadmodel_model_t *self;
+  local_data_t *local_data;
+
+#if DEBUG
+  g_debug ("----- ENTER new (%s)", MODEL_NAME);
+#endif
+
+  self = g_new (spreadmodel_model_t, 1);
+  local_data = g_new (local_data_t, 1);
+
+  self->name = MODEL_NAME;
+  self->events_listened_for = events_listened_for;
+  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->outputs = g_ptr_array_new ();
+  self->model_data = local_data;
+  self->set_params = resources_and_implementation_of_controls_model_set_params;
+  self->run = run;
+  self->reset = reset;
+  self->is_singleton = spreadmodel_model_answer_yes;
+  self->is_listening_for = spreadmodel_model_is_listening_for;
+  self->has_pending_actions = has_pending_actions;
+  self->has_pending_infections = spreadmodel_model_answer_no;
+  self->to_string = to_string;
+  self->printf = spreadmodel_model_printf;
+  self->fprintf = spreadmodel_model_fprintf;
+  self->free = local_free;
+
+  /* Send the XML subtree to the set_params function to read the parameters. */
+  self->set_params (self, params);
 
   local_data->nunits = UNT_unit_list_length (units);
   local_data->nprod_types = units->production_type_names->len;
