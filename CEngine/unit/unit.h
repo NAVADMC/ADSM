@@ -269,10 +269,10 @@ UNT_unit_list_t *UNT_new_unit_list (void);
 
 #ifdef USE_SC_GUILIB 
   UNT_unit_list_t *UNT_load_unit_list ( const char *filename, GPtrArray *production_types );
-  UNT_unit_list_t *UNT_load_unit_list_from_stream (FILE *stream, const char *filename, GPtrArray *production_types);  
+  UNT_unit_list_t *UNT_load_unit_list_from_channel (GIOChannel *channel, const char *filename, GPtrArray *production_types);  
 #else
   UNT_unit_list_t *UNT_load_unit_list (const char *filename);
-  UNT_unit_list_t *UNT_load_unit_list_from_stream (FILE *stream, const char *filename);
+  UNT_unit_list_t *UNT_load_unit_list_from_channel (GIOChannel *channel, const char *filename);
 #endif
 
 

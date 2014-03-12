@@ -79,14 +79,6 @@ double trunc (double);
 
 
 
-#ifndef WIN_DLL
-#ifndef COGRID
-/* This line causes problems on Windows, but seems to be unnecessary. */
-extern FILE *stdin;
-#endif
-#endif
-
-
 /*
 unit.c needs access to the functions defined in spreadmodel.h,
 even when compiled as a *nix executable (in which case,
@@ -1672,24 +1664,28 @@ UNT_load_unit_list (const char *filename, GPtrArray *production_types)
 UNT_load_unit_list (const char *filename)
 #endif
 {
-  FILE *fp;
+  GIOChannel *channel;
+  GError *error;
   UNT_unit_list_t *units;
 
 #if DEBUG
   g_debug ("----- ENTER UNT_load_unit_list");
 #endif
 
-  fp = fopen (filename, "r");
-  if (fp == NULL)
+  channel = g_io_channel_new_file (filename, "r", &error);
+  if (channel == NULL)
     {
-      g_error ("could not open file \"%s\": %s", filename, strerror (errno));
+      g_error ("could not open file \"%s\": %s", filename, error->message);
     }
 #ifdef USE_SC_GUILIB
-  units = UNT_load_unit_list_from_stream (fp, filename, production_types);
+  /* Treat the channel as binary data, since we'll leave it to the XML parser
+   * to figure out the encoding. */
+  g_io_channel_set_encoding (channel, NULL, &error);
+  units = UNT_load_unit_list_from_channel (channel, filename, production_types);
 #else
-  units = UNT_load_unit_list_from_stream (fp, filename);
+  units = UNT_load_unit_list_from_channel (channel, filename);
 #endif
-  fclose (fp);
+  g_io_channel_shutdown (channel, /* flush = */ FALSE, &error);
 
 #if DEBUG
   g_debug ("----- EXIT UNT_load_unit_list");
@@ -1700,35 +1696,43 @@ UNT_load_unit_list (const char *filename)
 
 
 /**
- * Loads a unit list from an open stream.
+ * Loads a unit list from an open GIOChannel.
  *
- * @param stream a stream.  If NULL, defaults to stdin.  This function does not
- *   close the stream; that is the caller's responsibility.
+ * @param channel a GIOChannel.  If NULL, defaults to stdin.  This function does not
+ *   close the channel; that is the caller's responsibility.
  * @param filename a file name, if known, for reporting in error messages.  Use
  *   NULL if the file name is not known.
  * @return a unit list.
  */
 UNT_unit_list_t *
 #ifdef USE_SC_GUILIB
-UNT_load_unit_list_from_stream (FILE * stream, const char *filename, GPtrArray *production_types)
+UNT_load_unit_list_from_channel (GIOChannel *channel, const char *filename, GPtrArray *production_types)
 #else
-UNT_load_unit_list_from_stream (FILE * stream, const char *filename)
+UNT_load_unit_list_from_channel (GIOChannel *channel, const char *filename)
 #endif
 {
   UNT_unit_list_t *units;
   UNT_partial_unit_list_t to_pass;
   XML_Parser parser;            /* to read the file */
   int xmlerr;
-  char *linebuf = NULL;
-  size_t bufsize = 0;
-  ssize_t linelen;
+  GString *linebuf;
+  gsize linelen;
+  GIOStatus status;
+  GError *error;
 
 #if DEBUG
   g_debug ("----- ENTER UNT_load_unit_list_from_stream");
 #endif
 
-  if (stream == NULL)
-    stream = stdin;
+  if (channel == NULL)
+    {
+      #ifdef G_OS_UNIX
+        channel = g_io_channel_unix_new (STDIN_FILENO);
+      #endif
+      #ifdef G_OS_WIN32
+        channel = g_io_channel_win32_new_fd (STDIN_FILENO);
+      #endif
+    }
   if (filename == NULL)
     filename = "input";
 
@@ -1755,10 +1759,12 @@ UNT_load_unit_list_from_stream (FILE * stream, const char *filename)
   XML_SetElementHandler (parser, startElement, endElement);
   XML_SetCharacterDataHandler (parser, charData);
 
+  linebuf = g_string_new(NULL);
+
   while (1)
     {
-      linelen = getline (&linebuf, &bufsize, stream);
-      if (linelen == -1)
+      status = g_io_channel_read_line_string (channel, linebuf, &linelen, &error);
+      if (status == G_IO_STATUS_EOF || status == G_IO_STATUS_ERROR)
         {
           xmlerr = XML_Parse (parser, NULL, 0, 1);
           if (xmlerr == XML_STATUS_ERROR)
@@ -1769,7 +1775,7 @@ UNT_load_unit_list_from_stream (FILE * stream, const char *filename)
             }
           break;
         }
-      xmlerr = XML_Parse (parser, linebuf, linelen, 0);
+      xmlerr = XML_Parse (parser, linebuf->str, linelen, 0);
       if (xmlerr == XML_STATUS_ERROR)
         {
           g_error ("%s at line %lu in %s",
@@ -1781,7 +1787,7 @@ UNT_load_unit_list_from_stream (FILE * stream, const char *filename)
   /* Clean up. */
   XML_ParserFree (parser);
   g_string_free (to_pass.s, TRUE);
-  free (linebuf);
+  g_string_free (linebuf, TRUE);
 
 end:
 #if DEBUG
