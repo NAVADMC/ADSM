@@ -56,13 +56,42 @@ case "X${YACC}" in
 
 dnl Checks for libraries.
 
-PKG_CHECK_MODULES(GLIB,glib >= 2.6,,try_glib_20=yes)
-if test "X${try_glib_20}" = Xyes
+AC_CHECK_PROG(have_pkgconfig, pkg-config, yes)
+
+dnl Work around the fact that pkg-config is not available on MinGW. If
+dnl pkg-config is not present, we define stub versions of its macros just to
+dnl avoid syntax errors further on.
+dnl Workaround found here: http://osdir.com/ml/automake-gnu/2011-03/msg00007.html
+
+m4_define_default([PKG_PROG_PKG_CONFIG],
+[AC_MSG_CHECKING([pkg-config])
+AC_MSG_RESULT([no])])
+PKG_PROG_PKG_CONFIG
+
+m4_define_default([PKG_CHECK_MODULES],
+[AC_MSG_CHECKING([$1])
+AC_MSG_RESULT([no])
+$4])
+
+dnl g_option_context_new was introduced in version 2.6, so checking for that
+dnl function is equivalent to checking version >= 2.6.
+
+if test "X${have_pkgconfig}" = Xyes
 then
-  PKG_CHECK_MODULES(GLIB,glib-2.0 >= 2.6,,AC_MSG_ERROR(cannot continue without glib))
+  PKG_CHECK_MODULES([GLIB], [glib >= 2.6],,try_glib_20=yes)
+  if test "X${try_glib_20}" = Xyes
+  then
+    PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.6],,AC_MSG_ERROR(cannot continue without glib))
+  fi
+  AC_SUBST(GLIB_CFLAGS)
+  AC_SUBST(GLIB_LIBS)
+else
+  AC_CHECK_LIB(glib,g_option_context_new,,try_glib_20=yes)
+  if test "X${try_glib_20}" = Xyes
+  then
+    AC_CHECK_LIB(glib-2.0,g_option_context_new,,AC_MSG_ERROR(cannot continue without glib))
+  fi
 fi
-AC_SUBST(GLIB_CFLAGS)
-AC_SUBST(GLIB_LIBS)
 
 AM_PATH_GSL(1.4,[have_gsl=true],AC_MSG_ERROR(cannot continue without GSL))
 AC_SUBST(GSL_CFLAGS)
