@@ -47,6 +47,10 @@
 #  include <strings.h>
 #endif
 
+#if HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+
 #include "exposures_table_writer.h"
 
 /** This must match an element name in the DTD. */
@@ -69,9 +73,10 @@ EVT_event_type_t events_listened_for[] = {
 typedef struct
 {
   char *filename; /* with the .csv extension */
-  FILE *stream; /* The open file. */
-  gboolean stream_is_stdout;
+  GIOChannel *channel; /* The open file. */
+  gboolean channel_is_stdout;
   int run_number;
+  GString *buf;
 }
 local_data_t;
 
@@ -96,7 +101,7 @@ handle_output_dir_event (struct spreadmodel_model_t_ * self,
 #endif
 
   local_data = (local_data_t *) (self->model_data);
-  if (local_data->stream_is_stdout == FALSE)
+  if (local_data->channel_is_stdout == FALSE)
     {
       tmp = local_data->filename;
       local_data->filename = g_build_filename (event->output_dir, tmp, NULL);
@@ -124,24 +129,36 @@ void
 handle_before_any_simulations_event (struct spreadmodel_model_t_ * self)
 {
   local_data_t *local_data;
+  GError *error = NULL;
 
 #if DEBUG
   g_debug ("----- ENTER handle_before_any_simulations_event (%s)", MODEL_NAME);
 #endif
 
   local_data = (local_data_t *) (self->model_data);
-  if (!local_data->stream_is_stdout)
+  if (local_data->channel_is_stdout)
     {
-      errno = 0;
-      local_data->stream = fopen (local_data->filename, "w");
-      if (errno != 0)
+      #ifdef G_OS_UNIX
+        local_data->channel = g_io_channel_unix_new (STDOUT_FILENO);
+      #endif
+      #ifdef G_OS_WIN32
+        local_data->channel = g_io_channel_win32_new_fd (STDOUT_FILENO);
+      #endif
+    }
+  else
+    {
+      local_data->channel = g_io_channel_new_file (local_data->filename, "w", &error);
+      if (local_data->channel == NULL)
         {
           g_error ("%s: %s error when attempting to open file \"%s\"",
-                   MODEL_NAME, strerror(errno), local_data->filename);
+                   MODEL_NAME, error->message, local_data->filename);
         }
     }
-  fprintf (local_data->stream, "Run,Day,Type,Reason,Source ID,Production type,Lat,Lon,Zone,Recipient ID,Production type,Lat,Lon,Zone\n");
-  fflush (local_data->stream);
+  g_io_channel_write_chars (local_data->channel,
+                            "Run,Day,Type,Reason,Source ID,Production type,Lat,Lon,Zone,Recipient ID,Production type,Lat,Lon,Zone\n",
+                            -1 /* assume null-terminated string */,
+                            NULL, &error);
+  g_io_channel_flush (local_data->channel, &error);
 
   /* This count will be incremented for each new simulation. */
   local_data->run_number = 0;
@@ -191,6 +208,7 @@ handle_exposure_event (struct spreadmodel_model_t_ *self,
 {
   local_data_t *local_data;
   ZON_zone_fragment_t *exposing_unit_zone, *exposed_unit_zone, *background_zone;
+  GError *error = NULL;
 
 #if DEBUG
   g_debug ("----- ENTER handle_exposure_event (%s)", MODEL_NAME);
@@ -211,35 +229,38 @@ handle_exposure_event (struct spreadmodel_model_t_ *self,
        * recipient production type, recipient latitude, recipient longitude,
        * recipient zone. */
       if (event->exposing_unit == NULL)
-        fprintf (local_data->stream,
-                 "%i,%i,Exposure,%s,,,,,,%s,%s,%g,%g,%s\n",
-                 local_data->run_number,
-                 event->day,
-                 SPREADMODEL_contact_type_abbrev[event->contact_type],
-                 event->exposed_unit->official_id,
-                 event->exposed_unit->production_type_name,
-                 event->exposed_unit->latitude,
-                 event->exposed_unit->longitude,
-                 ZON_same_zone (exposed_unit_zone, background_zone) ? "" : exposed_unit_zone->parent->name);
+        g_string_printf (local_data->buf,
+                         "%i,%i,Exposure,%s,,,,,,%s,%s,%g,%g,%s\n",
+                         local_data->run_number,
+                         event->day,
+                         SPREADMODEL_contact_type_abbrev[event->contact_type],
+                         event->exposed_unit->official_id,
+                         event->exposed_unit->production_type_name,
+                         event->exposed_unit->latitude,
+                         event->exposed_unit->longitude,
+                         ZON_same_zone (exposed_unit_zone, background_zone) ? "" : exposed_unit_zone->parent->name);
       else
         {
           exposing_unit_zone = zones->membership[event->exposing_unit->index];
-          fprintf (local_data->stream,
-                   "%i,%i,Exposure,%s,%s,%s,%g,%g,%s,%s,%s,%g,%g,%s\n",
-                   local_data->run_number,
-                   event->day,
-                   SPREADMODEL_contact_type_abbrev[event->contact_type],
-                   event->exposing_unit->official_id,
-                   event->exposing_unit->production_type_name,
-                   event->exposing_unit->latitude,
-                   event->exposing_unit->longitude,
-                   ZON_same_zone (exposing_unit_zone, background_zone) ? "" : exposing_unit_zone->parent->name,
-                   event->exposed_unit->official_id,
-                   event->exposed_unit->production_type_name,
-                   event->exposed_unit->latitude,
-                   event->exposed_unit->longitude,
-                   ZON_same_zone (exposed_unit_zone, background_zone) ? "" : exposed_unit_zone->parent->name);
+          g_string_printf (local_data->buf,
+                           "%i,%i,Exposure,%s,%s,%s,%g,%g,%s,%s,%s,%g,%g,%s\n",
+                           local_data->run_number,
+                           event->day,
+                           SPREADMODEL_contact_type_abbrev[event->contact_type],
+                           event->exposing_unit->official_id,
+                           event->exposing_unit->production_type_name,
+                           event->exposing_unit->latitude,
+                           event->exposing_unit->longitude,
+                           ZON_same_zone (exposing_unit_zone, background_zone) ? "" : exposing_unit_zone->parent->name,
+                           event->exposed_unit->official_id,
+                           event->exposed_unit->production_type_name,
+                           event->exposed_unit->latitude,
+                           event->exposed_unit->longitude,
+                           ZON_same_zone (exposed_unit_zone, background_zone) ? "" : exposed_unit_zone->parent->name);
         }
+      g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
+                                -1 /* assume null-terminated string */,
+                                NULL, &error);
     }
 
 #if DEBUG
@@ -265,6 +286,7 @@ handle_infection_event (struct spreadmodel_model_t_ *self,
   local_data_t *local_data;
   const char *reason;
   ZON_zone_fragment_t *zone, *background_zone;
+  GError *error = NULL;
 
 #if DEBUG
   g_debug ("----- ENTER handle_infection_event (%s)", MODEL_NAME);
@@ -284,16 +306,19 @@ handle_infection_event (struct spreadmodel_model_t_ *self,
    * type, source latitude, source longitude, source zone, recipient ID,
    * recipient production type, recipient latitude, recipient longitude,
    * recipient zone. */
-  fprintf (local_data->stream,
-           "%i,%i,Infection,%s,,,,,,%s,%s,%g,%g,%s\n",
-           local_data->run_number,
-           event->day,
-           reason,
-           event->infected_unit->official_id,
-           event->infected_unit->production_type_name,
-           event->infected_unit->latitude,
-           event->infected_unit->longitude,
-           ZON_same_zone (zone, background_zone) ? "" : zone->parent->name);
+  g_string_printf (local_data->buf,
+                   "%i,%i,Infection,%s,,,,,,%s,%s,%g,%g,%s\n",
+                   local_data->run_number,
+                   event->day,
+                   reason,
+                   event->infected_unit->official_id,
+                   event->infected_unit->production_type_name,
+                   event->infected_unit->latitude,
+                   event->infected_unit->longitude,
+                   ZON_same_zone (zone, background_zone) ? "" : zone->parent->name);
+  g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
+                            -1 /* assume null-terminated string */,
+                            NULL, &error);
 
 #if DEBUG
   g_debug ("----- EXIT handle_infection_event (%s)", MODEL_NAME);
@@ -407,6 +432,7 @@ void
 local_free (struct spreadmodel_model_t_ *self)
 {
   local_data_t *local_data;
+  GError *error = NULL;
 
 #if DEBUG
   g_debug ("----- ENTER free (%s)", MODEL_NAME);
@@ -415,12 +441,13 @@ local_free (struct spreadmodel_model_t_ *self)
   local_data = (local_data_t *) (self->model_data);
 
   /* Flush and close the file. */
-  if (local_data->stream_is_stdout)
-    fflush (local_data->stream);
+  if (local_data->channel_is_stdout)
+    g_io_channel_flush (local_data->channel, &error);
   else
-    fclose (local_data->stream);
+    g_io_channel_shutdown (local_data->channel, /* flush = */ TRUE, &error);
 
   /* Free the dynamically-allocated parts. */
+  g_string_free (local_data->buf, TRUE);
   g_free (local_data->filename);
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
@@ -479,8 +506,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
     {
       local_data->filename = g_strdup ("stdout"); /* just so we have something
         to display, and to free later */
-      local_data->stream = stdout;
-      local_data->stream_is_stdout = TRUE;    
+      local_data->channel_is_stdout = TRUE;    
     }
   else
     {
@@ -490,8 +516,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
           || g_ascii_strcasecmp (local_data->filename, "-") == 0
           || g_ascii_strcasecmp (local_data->filename, "stdout") == 0)
         {
-          local_data->stream = stdout;
-          local_data->stream_is_stdout = TRUE;
+          local_data->channel_is_stdout = TRUE;
         }
       else
         {
@@ -505,9 +530,11 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
           tmp = local_data->filename;
           local_data->filename = spreadmodel_insert_node_number_into_filename (local_data->filename);
           g_free(tmp);
-          local_data->stream_is_stdout = FALSE;
+          local_data->channel_is_stdout = FALSE;
         }
     }
+
+  local_data->buf = g_string_new (NULL);
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

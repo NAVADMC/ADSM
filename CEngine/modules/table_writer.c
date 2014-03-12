@@ -34,8 +34,7 @@
 #include <gsl/gsl_statistics_double.h>
 #include <gsl/gsl_sort.h>
 
-#include <stdio.h>
-extern FILE *stdout;
+#include <unistd.h>
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -139,8 +138,8 @@ free_output_values (gpointer data)
 typedef struct
 {
   char *filename; /**< with the .csv extension */
-  FILE *stream; /**< The open file. */
-  gboolean stream_is_stdout;
+  GIOChannel *channel; /**< The open file. */
+  gboolean channel_is_stdout;
   GPtrArray *output_values; /**< A structure to accumulate output variable
     values so that we can do the median, quartiles, etc. after the simulation
     has finished. Each item is a pointer to an output_values_t object. */
@@ -168,7 +167,7 @@ handle_output_dir_event (struct spreadmodel_model_t_ * self,
   #endif
 
   local_data = (local_data_t *) (self->model_data);
-  if (local_data->stream_is_stdout == FALSE)
+  if (local_data->channel_is_stdout == FALSE)
     {
       tmp = local_data->filename;
       local_data->filename = g_build_filename (event->output_dir, tmp, NULL);
@@ -384,6 +383,8 @@ to_string (struct spreadmodel_model_t_ *self)
 static void
 print_table (local_data_t *local_data)
 {
+  GError *error = NULL;
+  GString *buf;
   guint i;
   output_values_t *output_value;
   guint nvalues;
@@ -394,19 +395,30 @@ print_table (local_data_t *local_data)
     g_debug ("----- ENTER print_table (%s)", MODEL_NAME);
   #endif
 
-  if (!local_data->stream_is_stdout)
+  if (local_data->channel_is_stdout)
     {
-      errno = 0;
-      local_data->stream = fopen (local_data->filename, "w");
-      if (errno != 0)
+      #ifdef G_OS_UNIX
+        local_data->channel = g_io_channel_unix_new (STDOUT_FILENO);
+      #endif
+      #ifdef G_OS_WIN32
+        local_data->channel = g_io_channel_win32_new_fd (STDOUT_FILENO);
+      #endif
+    }
+  else
+    {
+      local_data->channel = g_io_channel_new_file (local_data->filename, "w", &error);
+      if (local_data->channel == NULL)
         {
           g_error ("%s: %s error when attempting to open file \"%s\"",
-                   MODEL_NAME, strerror(errno), local_data->filename);
+                   MODEL_NAME, error->message, local_data->filename);
         }
     }
 
-  fprintf (local_data->stream, "Output,Number of occurrences,Mean,StdDev,Low,High,p5,p10,p25,p50 (Median),p75,p90,p95\n");
-  fflush (local_data->stream);
+  g_io_channel_write_chars (local_data->channel,
+                            "Output,Number of occurrences,Mean,StdDev,Low,High,p5,p10,p25,p50 (Median),p75,p90,p95\n",
+                            -1 /* assume null-terminated string */, NULL, &error);
+  g_io_channel_flush (local_data->channel, &error);
+  buf = g_string_new (NULL);
   for (i = 0; i < local_data->output_values->len; i++)
     {
       output_value = g_ptr_array_index (local_data->output_values, i);
@@ -443,12 +455,16 @@ print_table (local_data_t *local_data)
           p95 = gsl_stats_quantile_from_sorted_data (data_segment, 1, nvalues, 0.95);
         }
 
-      fprintf (local_data->stream, "%s,%d,%g,%g,%g,%g,%g,%g,%g,%g,%g,%g,%g\n",
-               output_value->name, nvalues,
-               mean, stddev, lo, hi,
-               p05, p10, p25, median, p75, p90, p95);
+      g_string_printf (buf, "%s,%d,%g,%g,%g,%g,%g,%g,%g,%g,%g,%g,%g\n",
+                       output_value->name, nvalues,
+                       mean, stddev, lo, hi,
+                       p05, p10, p25, median, p75, p90, p95);
+      g_io_channel_write_chars (local_data->channel, buf->str, 
+                                -1 /* assume null-terminated string */,
+                                NULL, &error);
     }
-  fflush (local_data->stream);
+  g_io_channel_flush (local_data->channel, &error);
+  g_string_free (buf, TRUE);
   
   return;
 }
@@ -464,6 +480,7 @@ void
 local_free (struct spreadmodel_model_t_ *self)
 {
   local_data_t *local_data;
+  GError *error = NULL;
 
   #if DEBUG
     g_debug ("----- ENTER free (%s)", MODEL_NAME);
@@ -475,10 +492,10 @@ local_free (struct spreadmodel_model_t_ *self)
   print_table (local_data);
 
   /* Flush and close the file. */
-  if (local_data->stream_is_stdout)
-    fflush (local_data->stream);
+  if (local_data->channel_is_stdout)
+    g_io_channel_flush (local_data->channel, &error);
   else
-    fclose (local_data->stream);
+    g_io_channel_shutdown (local_data->channel, /* flush = */ TRUE, &error);
 
   /* Free the dynamically-allocated parts. */
   g_free (local_data->filename);
@@ -522,8 +539,7 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
     {
       local_data->filename = g_strdup ("stdout"); /* just so we have something
         to display, and to free later */
-      local_data->stream = stdout;
-      local_data->stream_is_stdout = TRUE;    
+      local_data->channel_is_stdout = TRUE;    
     }
   else
     {
@@ -533,8 +549,7 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
           || g_ascii_strcasecmp (local_data->filename, "-") == 0
           || g_ascii_strcasecmp (local_data->filename, "stdout") == 0)
         {
-          local_data->stream = stdout;
-          local_data->stream_is_stdout = TRUE;
+          local_data->channel_is_stdout = TRUE;
         }
       else
         {
@@ -548,7 +563,7 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
           tmp = local_data->filename;
           local_data->filename = spreadmodel_insert_node_number_into_filename (local_data->filename);
           g_free(tmp);
-          local_data->stream_is_stdout = FALSE;
+          local_data->channel_is_stdout = FALSE;
         }
     }
 

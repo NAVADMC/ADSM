@@ -40,8 +40,7 @@
 #include "module.h"
 #include "module_util.h"
 
-#include <stdio.h>
-extern FILE *stdout;
+#include <unistd.h>
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -82,10 +81,11 @@ EVT_event_type_t events_listened_for[] = {
 typedef struct
 {
   char *filename; /* with the .csv extension */
-  FILE *stream; /* The open file. */
-  gboolean stream_is_stdout;
+  GIOChannel *channel; /* The open file. */
+  gboolean channel_is_stdout;
   int run_number;
   gboolean printed_header;
+  GString *buf;
 }
 local_data_t;
 
@@ -110,7 +110,7 @@ handle_output_dir_event (struct spreadmodel_model_t_ * self,
 #endif
 
   local_data = (local_data_t *) (self->model_data);
-  if (local_data->stream_is_stdout == FALSE)
+  if (local_data->channel_is_stdout == FALSE)
     {
       tmp = local_data->filename;
       local_data->filename = g_build_filename (event->output_dir, tmp, NULL);
@@ -142,6 +142,7 @@ handle_before_any_simulations_event (struct spreadmodel_model_t_ * self,
                                      EVT_event_queue_t * queue)
 {
   local_data_t *local_data;
+  GError *error = NULL;
 
 #if DEBUG
   g_debug ("----- ENTER handle_before_any_simulations_event (%s)", MODEL_NAME);
@@ -154,14 +155,22 @@ handle_before_any_simulations_event (struct spreadmodel_model_t_ * self,
 
   local_data->printed_header = FALSE;
 
-  if (!local_data->stream_is_stdout)
+  if (local_data->channel_is_stdout)
     {
-      errno = 0;
-      local_data->stream = fopen (local_data->filename, "w");
-      if (errno != 0)
+      #ifdef G_OS_UNIX
+        local_data->channel = g_io_channel_unix_new (STDOUT_FILENO);
+      #endif
+      #ifdef G_OS_WIN32
+        local_data->channel = g_io_channel_win32_new_fd (STDOUT_FILENO);
+      #endif
+    }
+  else
+    {
+      local_data->channel = g_io_channel_new_file (local_data->filename, "w", &error);
+      if (local_data->channel == NULL)
         {
           g_error ("%s: %s error when attempting to open file \"%s\"",
-                   MODEL_NAME, strerror(errno), local_data->filename);
+                   MODEL_NAME, error->message, local_data->filename);
         }
     }
 
@@ -245,6 +254,7 @@ handle_new_day_event (struct spreadmodel_model_t_ * self, EVT_new_day_event_t * 
   RPT_reporting_t *reporting;
   GPtrArray *names;
   char *name, *camel;
+  GError *error = NULL;
 
 #if DEBUG
   g_debug ("----- ENTER handle_new_day_event (%s)", MODEL_NAME);
@@ -256,7 +266,7 @@ handle_new_day_event (struct spreadmodel_model_t_ * self, EVT_new_day_event_t * 
   if (!local_data->printed_header)
     {
       /* The first two fields are run and day. */
-      fprintf (local_data->stream, "Run,Day");
+      g_string_printf (local_data->buf, "Run,Day");
 
       /* Output the other variables in the order they were created in the
        * new() function. */
@@ -271,14 +281,17 @@ handle_new_day_event (struct spreadmodel_model_t_ * self, EVT_new_day_event_t * 
             {
               name = (char *) g_ptr_array_index (names, j);
               camel = camelcase (name, /* capitalize first = */ FALSE); 
-              fprintf (local_data->stream, ",%s", camel);
+              g_string_append_printf (local_data->buf, ",%s", camel);
               g_free (camel);
               g_free (name);
             }
           g_ptr_array_free (names, TRUE);
         }
-      fprintf (local_data->stream, "\n");
-      fflush (local_data->stream);
+      g_string_append_c (local_data->buf, '\n');
+      g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
+                                -1 /* assume null-terminated string */,
+                                NULL, &error);
+      g_io_channel_flush (local_data->channel, &error);
 
       local_data->printed_header = TRUE;
     }  
@@ -307,6 +320,7 @@ handle_end_of_day2_event (struct spreadmodel_model_t_ * self,
   unsigned int var_count;
   GPtrArray *values;
   char *value;
+  GError *error = NULL;
 
 #if DEBUG
   g_debug ("----- ENTER handle_end_of_day2_event (%s)", MODEL_NAME);
@@ -320,7 +334,7 @@ handle_end_of_day2_event (struct spreadmodel_model_t_ * self,
   if (event->day > 0)
     {
       /* The first two fields are run and day. */
-      fprintf (local_data->stream, "%i,%i", local_data->run_number, event->day);
+      g_string_printf (local_data->buf, "%i,%i", local_data->run_number, event->day);
 
       /* Output the other variables in the order they were created in the
        * new() function. */
@@ -339,7 +353,7 @@ handle_end_of_day2_event (struct spreadmodel_model_t_ * self,
               for (j = 0; j < values->len; j++)
                 {
                   value = (char *) g_ptr_array_index (values, j);
-                  fprintf (local_data->stream, ",%s", value);
+                  g_string_append_printf (local_data->buf, ",%s", value);
                   g_free (value);
                 }
               g_ptr_array_free (values, TRUE);
@@ -350,10 +364,13 @@ handle_end_of_day2_event (struct spreadmodel_model_t_ * self,
                * empty; just print a bunch of commas. */
               var_count = RPT_reporting_var_count (reporting);
               for (j = 0; j < var_count; j++)
-                fprintf (local_data->stream, ",");
+                g_string_append_c (local_data->buf, ',');
             }
         } /* end of loop over output variables */
-      fprintf (local_data->stream, "\n");
+      g_string_append_c (local_data->buf, '\n');
+      g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
+                                -1 /* assume null-terminated string */,
+                                NULL, &error);
     }
 
 #if DEBUG
@@ -471,6 +488,7 @@ void
 local_free (struct spreadmodel_model_t_ *self)
 {
   local_data_t *local_data;
+  GError *error = NULL;
 
 #if DEBUG
   g_debug ("----- ENTER free (%s)", MODEL_NAME);
@@ -479,12 +497,13 @@ local_free (struct spreadmodel_model_t_ *self)
   local_data = (local_data_t *) (self->model_data);
 
   /* Flush and close the file. */
-  if (local_data->stream_is_stdout)
-    fflush (local_data->stream);
+  if (local_data->channel_is_stdout)
+    g_io_channel_flush (local_data->channel, &error);
   else
-    fclose (local_data->stream);
+    g_io_channel_shutdown (local_data->channel, /* flush = */ TRUE, &error);
 
   /* Free the dynamically-allocated parts. */
+  g_string_free (local_data->buf, TRUE);
   g_free (local_data->filename);
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
@@ -543,8 +562,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
     {
       local_data->filename = g_strdup ("stdout"); /* just so we have something
         to display, and to free later */
-      local_data->stream = stdout;
-      local_data->stream_is_stdout = TRUE;    
+      local_data->channel_is_stdout = TRUE;    
     }
   else
     {
@@ -554,8 +572,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
           || g_ascii_strcasecmp (local_data->filename, "-") == 0
           || g_ascii_strcasecmp (local_data->filename, "stdout") == 0)
         {
-          local_data->stream = stdout;
-          local_data->stream_is_stdout = TRUE;
+          local_data->channel_is_stdout = TRUE;
         }
       else
         {
@@ -569,13 +586,15 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
           tmp = local_data->filename;
           local_data->filename = spreadmodel_insert_node_number_into_filename (local_data->filename);
           g_free(tmp);
-          local_data->stream_is_stdout = FALSE;
+          local_data->channel_is_stdout = FALSE;
         }
     }
 
   /* This module maintains no output variables of its own.  Before any
    * simulations begin, we will gather all the output variables available from
    * other modules. */
+
+  local_data->buf = g_string_new (NULL);
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

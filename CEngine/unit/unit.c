@@ -1665,7 +1665,7 @@ UNT_load_unit_list (const char *filename)
 #endif
 {
   GIOChannel *channel;
-  GError *error;
+  GError *error = NULL;
   UNT_unit_list_t *units;
 
 #if DEBUG
@@ -1718,7 +1718,7 @@ UNT_load_unit_list_from_channel (GIOChannel *channel, const char *filename)
   GString *linebuf;
   gsize linelen;
   GIOStatus status;
-  GError *error;
+  GError *error = NULL;
 
 #if DEBUG
   g_debug ("----- ENTER UNT_load_unit_list_from_stream");
