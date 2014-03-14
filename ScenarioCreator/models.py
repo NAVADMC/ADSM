@@ -177,22 +177,23 @@ class ControlMasterPlan(models.Model):
     _include_destruction = models.BooleanField(default=False,
         help_text='Indicates if destruction of units in any production type will be modeled.', )
     _include_vaccination = models.BooleanField(default=False,
-        help_text='A string that identifies the secondary priority order for destruction.', )
+        help_text='A string that identifies the secondary priority order for destruction.', )  # TODO: wrong doc
     _include_zones = models.BooleanField(default=False,
         help_text='Indicates if zones will be modeled.', )
     destruction_program_delay = models.IntegerField(blank=True, null=True,
         help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
     destruction_capacity_relid = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text="The relational function used to define the daily destruction capacity.", )
-    destruction_priority_order = models.CharField(max_length=255, blank=True,
-        help_text='A string that identifies the primary priority order for destruction.', )  # These are an odd legacy.  Leave it for now
-    destrucion_reason_order = models.CharField(max_length=255, blank=True,
-        help_text='A string that identifies the primary priority order for destruction.', )
+    destruction_priority_order = models.CharField(max_length=255, default='"reason","time waiting","production type"',
+        help_text='The primary priority order for destruction.', )
+    destrucion_reason_order = models.CharField(max_length=255,
+        default='"Basic","Trace fwd direct","Trace fwd indirect","Trace back direct","Trace back indirect","Ring"',
+        help_text='The secondary priority order for destruction.', )
     units_detected_before_triggering_vaccincation = models.IntegerField(blank=True, null=True,
         help_text='The number of clinical units which must be detected before the initiation of a vaccination program.', )
     vaccination_capacity_relid = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational fucntion used to define the daily vaccination capacity.', )
-    vaccination_priority_order = models.CharField(max_length=255, blank=True,
+    vaccination_priority_order = models.CharField(max_length=255, default='“reason”,“time waiting”,“production type”',
         help_text='A string that identifies the primary priority order for vaccination.', )
     def __str__(self):
         return str(self.plan_name) + ": Control Master Plan"
@@ -242,7 +243,7 @@ class ControlProtocol(models.Model):
     destroy_indirect_back_traces = models.BooleanField(default=False,
         help_text='Indicates if units of this type identified by traceback of indirect contacts will be subject to preemptive desctruction.', )
     destruction_priority = models.IntegerField(blank=True, null=True,
-        help_text='The desctruction prioroty of this production type relative to other production types.  A lower number indicates a higher priority.', )
+        help_text='The desctruction priority of this production type relative to other production types.  A lower number indicates a higher priority.', )
     use_vaccination = models.BooleanField(default=False,
         help_text='Indicates if units of this production type will be subject to vaccination.', )
     minimum_time_between_vaccinations = models.IntegerField(blank=True, null=True,
@@ -391,7 +392,7 @@ class IndirectSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct 
         help_text='Indicates if a fixed contact rate will be used instead of the mean contact rate.', )
     fixed_contact_rate = models.FloatField(blank=True, null=True,
         help_text='The fixed contact rate (in recipient units per source unit per day) for direct or indirect contact models.', )
-    infection_probability = models.FloatField(blank=True, null=True,
+    infection_probability = PercentField(blank=True, null=True,
         help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
     distance_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the sipment distances for direct and indirect contact models.', )
@@ -412,7 +413,7 @@ class DirectSpreadModel(IndirectSpreadModel):
 class AirborneSpreadModel(DiseaseSpreadModel):
     _spread_method_code = models.CharField(max_length=255, default='other',
         help_text='Code indicating the mechanism of the disease spread.', )
-    spread_1km_probability = models.FloatField(blank=True, null=True,
+    spread_1km_probability = PercentField(blank=True, null=True,
         help_text='The probability that disease will be spread to unit 1 km away from the source unit.', )
     max_distance = models.FloatField(blank=True, null=True,
         help_text='The maximum distance in KM of airborne spread.', )
@@ -465,10 +466,8 @@ class OutputSettings(models.Model):
         help_text='Indicates if daily outputs should be stored for every iteration.', )
     maximum_iterations_for_daily_output = models.IntegerField(default=3,
         help_text='The number of iterations for which daily outputs should be stored The minimum value is 3.', )
-    write_daily_states_file = models.BooleanField(default=False,
-        help_text='Indicates if a plain text file with the state of each unit on each day of each iteration should be written.', )
     daily_states_filename = models.CharField(max_length=255, blank=True, null=True,
-        help_text='The file name of the plain text file described above.', )
+        help_text='The file name to output a plain text file with the state of each unit on each day of each iteration.', )
     save_daily_events = models.BooleanField(default=False,
         help_text='Indicates if all events should be recorded in the scenario database.', )
     save_daily_exposures = models.BooleanField(default=False,
