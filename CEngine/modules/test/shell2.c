@@ -5,12 +5,12 @@
  *
  * Each line of input should be of the form
  *
- * test/HERD-FILE test/model.CATEGORY/PARAM-FILE
+ * test/POPULATION-FILE test/module.CATEGORY/PARAM-FILE
  *
- * The script will strip the .xml extensions from the herd and parameter file
+ * The script will strip the .xml extensions from the population and parameter file
  * names and create a filename
  *
- * FOLDER/CATEGORY__HERD-FILE__PARAM-FILE.txt
+ * FOLDER/CATEGORY__POPULATION-FILE__PARAM-FILE.txt
  *
  * (where FOLDER is a constant specified below).  It will then print the
  * contents of that file to standard output.
@@ -34,7 +34,6 @@
 #include <stdlib.h>
 #include <glib.h>
 #include <glib/gprintf.h>
-#include <regex.h>
 #include "replace.h"
 
 #define FOLDER "sm_output"
@@ -49,8 +48,6 @@ main (int argc, char *argv[])
   size_t bufsize = 0;
   ssize_t len;
   GString *cmd = NULL, *filename = NULL;
-  gint tmp_file;
-  char *tmp_filename;
   GError *error;
 
   cmd = g_string_new (NULL);
@@ -67,6 +64,9 @@ main (int argc, char *argv[])
         }
       else if (g_ascii_strncasecmp (buf, "variables", 9) == 0)
         {
+          gint tmp_file;
+          char *tmp_filename;
+
           /* Get a temporary filename.  The simulation output will be sent to
            * this file, then processed by the full table filter. */
           tmp_file = g_file_open_tmp (NULL, &tmp_filename, &error);
@@ -90,48 +90,38 @@ main (int argc, char *argv[])
         }
       else
         {
-          regex_t regex;
-          regmatch_t match[3];
-          int errcode;
-          size_t errlength;
-          char *errmsg;
-          char *s;
+          GRegex *regex;
+          GError *error = NULL;
+          GMatchInfo *match = NULL;
 
           filename = g_string_new (NULL);
-          errcode = regcomp (&regex, "test/([^.]+)\\.xml", REG_EXTENDED);
-          if (errcode != 0)
+          /* Match out the population file name. */
+          regex = g_regex_new ("test/([^.]+)\\.xml", 0, 0, &error);
+          if (error != NULL)
             {
-              errlength = regerror (errcode, &regex, NULL, 0);
-              errmsg = g_new (char, errlength);
-              regerror (errcode, &regex, errmsg, errlength);
-              g_warning
-                ("regular expression did not compile because: %s\nreturning string not split",
-                 errmsg);
-              g_free (errmsg);
+              g_error ("regular expression did not compile because: %s",
+                       error->message);
             }
-          errcode = regexec (&regex, buf, 3, match, 0);
-          s = g_strndup (buf + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
-          g_string_printf (filename, "__%s", s);
-          free (s);
+          g_regex_match (regex, buf, 0, &match);
+          g_assert (g_match_info_matches(match));
+          g_string_printf (filename, "__%s", g_match_info_fetch (match, 1));
+          g_printf ("%s\n", filename->str);
+          g_match_info_free (match);
+          g_regex_unref (regex);
 
-          errcode = regcomp (&regex, "test/model.([^/]+)/([^.]+)\\.xml", REG_EXTENDED);
-          if (errcode != 0)
+          /* Match out the category name and parameter file name. */
+          regex = g_regex_new ("test/module.([^/]+)/([^.]+)\\.xml", 0, 0, &error);
+          if (error != NULL)
             {
-              errlength = regerror (errcode, &regex, NULL, 0);
-              errmsg = g_new (char, errlength);
-              regerror (errcode, &regex, errmsg, errlength);
-              g_warning
-                ("regular expression did not compile because: %s\nreturning string not split",
-                 errmsg);
-              g_free (errmsg);
+              g_error ("regular expression did not compile because: %s",
+                       error->message);
             }
-          errcode = regexec (&regex, buf, 3, match, 0);
-          s = g_strndup (buf + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
-          g_string_prepend (filename, s);
-          free (s);
-          s = g_strndup (buf + match[2].rm_so, match[2].rm_eo - match[2].rm_so);
-          g_string_append_printf (filename, "__%s.txt", s);
-          free (s);
+          g_regex_match (regex, buf, 0, &match);
+          g_assert (g_match_info_matches(match));
+          g_string_prepend (filename, g_match_info_fetch (match, 1));
+          g_string_append_printf (filename, "__%s.txt", g_match_info_fetch (match, 2));
+          g_match_info_free (match);
+          g_regex_unref (regex);
 
           g_string_printf (cmd, "cat test/%s/%s", FOLDER, filename->str);
           g_string_free (filename, TRUE);
