@@ -343,7 +343,7 @@ class Disease(models.Model):
 class DiseaseReaction(models.Model):
     reaction_name = models.CharField(max_length=255,
         help_text="Examples: Severe Reaction, FMD Long Incubation")
-    _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1), )
+    _disease = models.ForeignKey('Disease',  )#default=lambda: Disease.objects.get_or_create(id=1), )
     disease_latent_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the latent period for units of this production type.', )
     disease_subclinical_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',

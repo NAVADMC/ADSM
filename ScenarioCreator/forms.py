@@ -82,7 +82,7 @@ class DiseaseForm(ModelForm):
 class DiseaseReactionForm(ModelForm):
     class Meta:
         model = DiseaseReaction
-        exclude = ['_disease']
+        # exclude = ['_disease']
         widgets = {'_disease':Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'disease_latent_period_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_subclinical_period_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
