@@ -17,8 +17,16 @@ from django_extras.db.models import PercentField, LatitudeField, LongitudeField,
 def chc(*choice_list):
     return tuple((x, x) for x in choice_list)
 
-frequency = chc("never", "once", "daily", "weekly", "monthly", "yearly")
 
+def priority_choices():
+    return chc('reason, time waiting, production type',
+               'reason, production type, time waiting',
+               'time waiting, reason, production type',
+               'time waiting, production type, reason',
+               'production type, reason, time waiting',
+               'production type, time waiting, reason')
+
+frequency = chc("never", "once", "daily", "weekly", "monthly", "yearly")
 
 class DbSchemaVersion(models.Model):
     version_number = models.CharField(max_length=255, unique=True,
@@ -184,17 +192,21 @@ class ControlMasterPlan(models.Model):
         help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
     destruction_capacity_relid = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text="The relational function used to define the daily destruction capacity.", )
-    destruction_priority_order = models.CharField(max_length=255, default='"reason","time waiting","production type"',
-        help_text='The primary priority order for destruction.', )
+    destruction_priority_order = models.CharField(max_length=255,
+        help_text='The primary priority order for destruction.',
+        choices=priority_choices(), )
     destrucion_reason_order = models.CharField(max_length=255,
-        default='"Basic","Trace fwd direct","Trace fwd indirect","Trace back direct","Trace back indirect","Ring"',
+        default='Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring',
+        # old DB: 'basic,direct-forward,ring,indirect-forward,direct-back,indirect-back'
+        # old UI: Detected, Trace forward of direct contact, Ring, Trace forward of indirect contact, Trace back of direct contact, Trace back of indirect contact
         help_text='The secondary priority order for destruction.', )
     units_detected_before_triggering_vaccincation = models.IntegerField(blank=True, null=True,
         help_text='The number of clinical units which must be detected before the initiation of a vaccination program.', )
     vaccination_capacity_relid = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational fucntion used to define the daily vaccination capacity.', )
-    vaccination_priority_order = models.CharField(max_length=255, default='“reason”,“time waiting”,“production type”',
-        help_text='A string that identifies the primary priority order for vaccination.', )
+    vaccination_priority_order = models.CharField(max_length=255,
+        help_text='A string that identifies the primary priority order for vaccination.',
+        choices=priority_choices(), )
     def __str__(self):
         return str(self.plan_name) + ": Control Master Plan"
 
