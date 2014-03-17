@@ -447,7 +447,7 @@ class Scenario(models.Model):
     random_seed = models.IntegerField(blank=True, null=True,
         help_text='The specified seed value for the random number generator.', )
     include_contact_spread = models.BooleanField(default=True,  # TODO: hide these and programmatically set them
-        help_text='Indicates if disease spread by direct ot indirect contact is used in the scenario.', )
+        help_text='Indicates if disease spread by direct or indirect contact is used in the scenario.', )
     include_airborne_spread = models.BooleanField(default=False,
         help_text='Indicates if airborne spread is used in the model', )
     use_airborne_exponential_decay = models.BooleanField(default=False,
@@ -461,7 +461,7 @@ class Scenario(models.Model):
     cost_track_zone_surveillance = models.BooleanField(default=False,
         help_text='Indicates if zone surveillance costs should be tracked in the model.', )
     def __str__(self):
-        return "Scenario: %s" % (self.scenario_description, )
+        return "Scenario: %s" % (self.description, )
 
 
 class OutputSettings(models.Model):
@@ -469,7 +469,7 @@ class OutputSettings(models.Model):
         help_text='The number of iterations of this scenario that should be run', )
     days = models.IntegerField(blank=True, null=True,
         help_text='The maximum number of days that iterations of this scenario should run even if the stop criterion is not met.', )
-    simulation_stop_criteria = models.CharField(max_length=255, blank=True,
+    early_stop_criteria = models.CharField(max_length=255, blank=True,
         help_text='The criterion used to end each iteration. This may be that the specified number of days has passed the first detectino has occurred or the outbreak has ended.',
         choices=(('disease-end','Simulation will stop when there are no more latent or infectious units.'),
                  ('first-detection','Simulation will stop when the first detection occurs.')))

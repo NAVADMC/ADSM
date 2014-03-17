@@ -8,11 +8,11 @@ from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic 
 
 def save_new_instance(initialized_form, request):
     model_instance = initialized_form.save()  # write to database
-    model_title = model_instance.__class__.__name__
+    model_name = model_instance.__class__.__name__
     if request.is_ajax():
-        msg = {'pk': model_instance.pk, 'title': str(model_instance), 'model': model_title, 'status': 'success'}
+        msg = {'pk': model_instance.pk, 'title': str(model_instance), 'model': model_name, 'status': 'success'}
         return HttpResponse(json.dumps(msg), content_type="application/json")
-    return redirect('/setup/%s/%i/' % (model_title, model_instance.pk))  # redirect to edit URL
+    return redirect('/setup/%s/%i/' % (model_name, model_instance.pk))  # redirect to edit URL
 
 
 def new_form(request, initialized_form, context):
@@ -23,13 +23,13 @@ def new_form(request, initialized_form, context):
 
 def get_model_name_and_form(request):
     model_name = re.split('\W+', request.path)[2]  # Second word in the URL
-    form = globals()[model_name + 'Form']  # depends on naming convention
+    form = globals()[model_name + 'Form']  # IMPORTANT: depends on naming convention
     return model_name, form
 
 
 def initialize_from_existing_model(primary_key, request):
     model_name, form_class = get_model_name_and_form(request)
-    model = get_object_or_404(form_class.Meta.model, pk=primary_key)
+    model = form_class.Meta.model.objects.get(id=primary_key)  # may raise an exception
     initialized_form = form_class(request.POST or None, instance=model)
     return initialized_form, model_name
 
@@ -44,7 +44,11 @@ def new_entry(request):
 
 
 def edit_entry(request, primary_key):
-    initialized_form, model_name = initialize_from_existing_model(primary_key, request)
+    model_name, form = get_model_name_and_form(request)
+    try:
+        initialized_form, model_name = initialize_from_existing_model(primary_key, request)
+    except:
+        return redirect('/setup/%s/new/' % model_name)
     if initialized_form.is_valid() and request.method == 'POST':
         initialized_form.save()  # write instance updates to database
     context = {'form': initialized_form,
@@ -53,8 +57,11 @@ def edit_entry(request, primary_key):
 
 
 def copy_entry(request, primary_key):
-    initialized_form, model_name = initialize_from_existing_model(primary_key, request)
-
+    model_name, form = get_model_name_and_form(request)
+    try:
+        initialized_form, model_name = initialize_from_existing_model(primary_key, request)
+    except:
+            return redirect('/setup/%s/new/' % model_name)
     if initialized_form.is_valid() and request.method == 'POST':
         initialized_form.instance.pk = None  # This will cause a new instance to be created
         return save_new_instance(initialized_form, request)
