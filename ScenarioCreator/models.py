@@ -1,15 +1,26 @@
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
-#   * Rearrange models' order
-#   * Make sure each model has one field with primary_key=True
+"""This models file specifies all the tables used to create a settings file for
+a SpreadModel simulation.  This file in particular and the project in general
+relies heavily on conventions.  Please be careful to follow the existing conventions
+whenever you edit this file.
+Conventions:
+- field names are lower cased and separated by underscores, Django forms relies on this
+- hidden fields that will be filled in by exportvalidation.py start with an _
+    - forms.py relies on this
+- the names of Models are replicated in the hyperlinks
+- Model names are used in forms.py by appending <ModelName>Form to the end
+- scripts/textscrubber.py relies on the only blank lines being between classes
+    DO NOT put blank lines in the middle of models or before a class method
+- a Model with 'name' as the first field is assumed to be referenced other places
+    forms.py will give this special back-track features
+- to keep indentation consistent, field attributes (help_text) are double tabbed
+    This is one case where normal python convention would look even worse.
+    Don't autoformat this page.  You'll regret it
+- ForeignKeys that reference singletons (id=1) rely on the views.py redirect if it doesn't exist
+    The redirect avoids creating a blank table that you then can't access
 
-# Changes made in ScenarioCreator/models.py propagate to the script output
+Changes made in ScenarioCreator/models.py propagate to the script output
 
-# TextField is more costly than CharField.  Only use TextField for descriptions or urls.
-# CharFields are max=255 characters and are presented as a single text line in forms.
-# TextFields are unlimited and presented as giant text boxes in forms.
-# Search:  db_column='[^']*',  to remove column names
-
+"""
 from django.db import models
 from django_extras.db.models import PercentField, LatitudeField, LongitudeField, MoneyField
 
@@ -93,7 +104,7 @@ class DynamicUnit(models.Model):
 '''Function is a model that defines either a Probability Distribution Function (pdf) or
  a relational function (relid) depending on which child class is used.  '''
 class Function(models.Model):
-    function_name = models.CharField(max_length=255,
+    name = models.CharField(max_length=255,
         help_text='User-assigned name for each function.', )
     # field_name = models.CharField(max_length=255, )  # I don't think this is necessary
     x_axis_units = models.CharField(max_length=255, default="Days",
@@ -103,7 +114,7 @@ class Function(models.Model):
     class Meta:
         abstract = True
     def __str__(self):
-        return self.function_name
+        return self.name
 
 
 '''There are a large number of fields in this model because different equation_type use different
@@ -173,7 +184,7 @@ class RelationalPoint(models.Model):
 
 
 class ControlMasterPlan(models.Model):
-    plan_name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
     _include_detection = models.BooleanField(default=False,
         help_text='Indicates if detection of disease in any production type will be modeled.', )
     _include_tracing = models.BooleanField(default=False,
@@ -188,6 +199,8 @@ class ControlMasterPlan(models.Model):
         help_text='A string that identifies the secondary priority order for destruction.', )  # TODO: wrong doc
     _include_zones = models.BooleanField(default=False,
         help_text='Indicates if zones will be modeled.', )
+    tracing_program_delay = models.ForeignKey('ProbabilityFunction', blank=True, null=True,
+        help_text='Delay for carrying out a trace investigation')
     destruction_program_delay = models.IntegerField(blank=True, null=True,
         help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
     destruction_capacity_relid = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
@@ -208,11 +221,11 @@ class ControlMasterPlan(models.Model):
         help_text='A string that identifies the primary priority order for vaccination.',
         choices=priority_choices(), )
     def __str__(self):
-        return str(self.plan_name) + ": Control Master Plan"
+        return str(self.name) + ": Control Master Plan"
 
 
 class ControlProtocol(models.Model):
-    protocol_name = models.CharField(max_length=255,
+    name = models.CharField(max_length=255,
         help_text='Name your Protocol so you can recognize it later. Ex:"Quarantine"',)
     use_detection = models.BooleanField(default=False,
         help_text='Indicates if disease detection will be modeled for units of this production type.', )
@@ -329,7 +342,7 @@ class ControlProtocol(models.Model):
     vaccinate_retrospective_days = models.BooleanField(default=False,
         help_text='Number of days in retrospect that should be used to determine which herds to vaccinate.', )
     def __str__(self):
-        return "Protocol: %s" % (self.protocol_name, )
+        return "Protocol: %s" % (self.name, )
 
 
 class ProtocolAssignment(models.Model):
@@ -347,14 +360,15 @@ class ProtocolAssignment(models.Model):
 
 
 class Disease(models.Model):
-    disease_name = models.CharField(max_length=255, )
+    name = models.CharField(max_length=255,
+        help_text='Name of the Disease')
     disease_description = models.TextField(blank=True)
     def __str__(self):
-        return self.disease_name
+        return self.name
 
 
 class DiseaseReaction(models.Model):
-    reaction_name = models.CharField(max_length=255,
+    name = models.CharField(max_length=255,
         help_text="Examples: Severe Reaction, FMD Long Incubation")
     _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0], )
     disease_latent_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
@@ -369,7 +383,7 @@ class DiseaseReaction(models.Model):
         blank=True, null=True,
         help_text='Defines the prevelance for units of this production type.', )
     def __str__(self):
-        return self.reaction_name
+        return self.name
 
 
 class DiseaseReactionAssignment(models.Model):
