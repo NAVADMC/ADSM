@@ -9,7 +9,7 @@
  *
  * <small>(Image copyright information below)</small>
  *
- * Each module has an "is_singleton" function that returns TRUE if just one
+ * Each module has an "is_singleton" field that contains TRUE if just one
  * instance of the module can exist in memory, or FALSE if multiple instances
  * of the module can exist in memory.  It also has a "new" function that
  * creates and initializes an instance of the module.  The new function must
@@ -100,14 +100,6 @@ struct spreadmodel_model_t_;
 
 
 
-/** 
- * Type of a function that returns whether a model is a singleton (only one
- * instance should ever exist in memory) or not.
- */
-typedef gboolean (*spreadmodel_model_is_singleton_t) (struct spreadmodel_model_t_ *);
-
-
-
 /** Type of a function that creates and sets parameters for a model. */
 typedef struct spreadmodel_model_t_ *(*spreadmodel_model_new_t) (PAR_parameter_t *,
                                                                  UNT_unit_list_t *,
@@ -185,8 +177,7 @@ typedef struct spreadmodel_model_t_
   unsigned int nevents_listened_for; /**< Length of events_listened_for. */
   GPtrArray *outputs; /**< A list of the model's output variables. */
   void *model_data; /**< Specialized information for the particular model. */
-  spreadmodel_model_is_singleton_t is_singleton; /**< A function that reports
-    whether the module is a singleton or not. */
+  gboolean is_singleton; /**< Whether the module is a singleton or not. */
   spreadmodel_model_set_params_t set_params; /**< A function that sets parameters
     for the model. */
   spreadmodel_model_run_t run; /**< A function that runs the model. */

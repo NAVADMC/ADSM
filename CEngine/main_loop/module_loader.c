@@ -407,7 +407,7 @@ spreadmodel_load_modules (const char *parameter_file, UNT_unit_list_t * units,
 
           (*models)[nloaded++] = model;
 
-          if (model->is_singleton(model))
+          if (model->is_singleton)
             g_hash_table_insert (singletons, (gpointer) model_name, (gpointer) model);
 
         } /* end of case where a new model instance is created */

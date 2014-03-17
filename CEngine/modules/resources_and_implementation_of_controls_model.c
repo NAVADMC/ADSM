@@ -2020,7 +2020,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->set_params = resources_and_implementation_of_controls_model_set_params;
   self->run = run;
   self->reset = reset;
-  self->is_singleton = spreadmodel_model_answer_yes;
+  self->is_singleton = TRUE;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = has_pending_actions;
   self->has_pending_infections = spreadmodel_model_answer_no;
