@@ -187,12 +187,12 @@ ZON_zone_list_append (ZON_zone_list_t * zones, ZON_zone_t * zone)
        * parameters are loaded, use this zone's name if the background
        * zone's name is currently blank. */
       existing_zone = ZON_zone_list_get (zones, nzones - 1);
-      if (strlen (existing_zone->name) == 0)
+      if (existing_zone->name == NULL || existing_zone->name->len == 0)
         {
           #if DEBUG
-            g_debug ("setting name of background zone to \"%s\"", zone->name);
+            g_debug ("setting name of background zone to \"%s\"", zone->name->str);
           #endif
-          g_free (existing_zone->name);
+          g_string_free (existing_zone->name, TRUE);
           existing_zone->name = zone->name;
         }
       else
@@ -503,7 +503,7 @@ ZON_new_zone (char *name, int level, double radius)
 #endif
 
   z = g_new (ZON_zone_t, 1);
-  z->name = g_strdup (name);
+  z->name = g_string_new (name);
   z->level = level;
   z->radius = radius;
   z->radius_sq = radius * radius;
@@ -549,7 +549,7 @@ ZON_clone_zone (ZON_zone_t * zone)
 #endif
 
   clone = g_new (ZON_zone_t, 1);
-  clone->name = g_strdup (zone->name);
+  clone->name = g_string_new (zone->name->str);
 
 #if DEBUG
   g_debug ("----- ENTER ZON_clone_zone");
@@ -571,7 +571,7 @@ ZON_free_zone (ZON_zone_t * zone)
   if (zone == NULL)
     return;
 
-  g_free (zone->name);
+  g_string_free (zone->name, TRUE);
   g_array_free (zone->foci, TRUE);
   gpc_free_polygon (zone->poly);
   g_free (zone->poly);
@@ -603,7 +603,7 @@ ZON_zone_to_string (ZON_zone_t * zone)
 #endif
 
   s = g_string_new (NULL);
-  g_string_printf (s, "<zone \"%s\" level=%i", zone->name, zone->level);
+  g_string_printf (s, "<zone \"%s\" level=%i", zone->name->str, zone->level);
 
   if (zone->radius > EPSILON)
     g_string_append_printf (s, " radius=%.2g", zone->radius);

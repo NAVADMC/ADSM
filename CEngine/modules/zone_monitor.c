@@ -139,6 +139,7 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units
   gboolean area_due, perimeter_due, num_areas_due, num_units_due;
   int i;
   ZON_zone_t *zone, *next_smaller_zone;
+  gchar *name;
   double area;
   double perimeter;
   unsigned int nunits;
@@ -162,24 +163,25 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units
   for (i = 0; i < local_data->nzones - 1; i++)
     {
       zone = ZON_zone_list_get (zones, i);
+      name = zone->name->str;
 
       if (area_due)
         {
           area = ZON_update_area (zone);
-          RPT_reporting_set_real1 (local_data->area, area, zone->name);
+          RPT_reporting_set_real1 (local_data->area, area, name);
         }
 
       if (perimeter_due)
         {
           perimeter = ZON_update_perimeter (zone);
-          RPT_reporting_set_real1 (local_data->perimeter, perimeter, zone->name);
+          RPT_reporting_set_real1 (local_data->perimeter, perimeter, name);
           /* If the zone has grown, record the new maximum perimeter. */
           if (perimeter > 0
-              && (RPT_reporting_is_null1 (local_data->max_perimeter, zone->name)
-                  || (perimeter > RPT_reporting_get_real1 (local_data->max_perimeter, zone->name))))
+              && (RPT_reporting_is_null1 (local_data->max_perimeter, name)
+                  || (perimeter > RPT_reporting_get_real1 (local_data->max_perimeter, name))))
             {
-              RPT_reporting_set_real1 (local_data->max_perimeter, perimeter, zone->name);
-              RPT_reporting_set_integer1 (local_data->max_perimeter_day, event->day, zone->name);
+              RPT_reporting_set_real1 (local_data->max_perimeter, perimeter, name);
+              RPT_reporting_set_integer1 (local_data->max_perimeter_day, event->day, name);
             } 
             
 			    if (NULL != spreadmodel_record_zone_perimeter)
@@ -188,7 +190,7 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units
 
       if (num_areas_due)
         RPT_reporting_set_integer1 (local_data->num_separate_areas,
-                                    zone->poly->num_contours, zone->name);
+                                    zone->poly->num_contours, name);
     }
 
   /* In the loop above, the area of each zone polygon was computed.  But since
@@ -202,19 +204,20 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units
       for (i = local_data->nzones - 2; i >= 0; i--)
         {
           zone = ZON_zone_list_get (zones, i);
+          name = zone->name->str;
           if (i > 0)
             {
               next_smaller_zone = ZON_zone_list_get (zones, i - 1);
               zone->area -= next_smaller_zone->area;
-              RPT_reporting_set_real1 (local_data->area, zone->area, zone->name);
+              RPT_reporting_set_real1 (local_data->area, zone->area, name);
             }
           /* If the zone has grown, record the new maximum area. */
           if (zone->area > 0
-              && (RPT_reporting_is_null1 (local_data->max_area_day, zone->name)
-                  || (zone->area > RPT_reporting_get_real1 (local_data->max_area, zone->name))))
+              && (RPT_reporting_is_null1 (local_data->max_area_day, name)
+                  || (zone->area > RPT_reporting_get_real1 (local_data->max_area, name))))
             {
-              RPT_reporting_set_real1 (local_data->max_area, zone->area, zone->name);
-              RPT_reporting_set_integer1 (local_data->max_area_day, event->day, zone->name);
+              RPT_reporting_set_real1 (local_data->max_area, zone->area, name);
+              RPT_reporting_set_integer1 (local_data->max_area_day, event->day, name);
             }
 #ifdef USE_SC_GUILIB
 		      sc_record_zone_area( event->day, zone );
@@ -246,15 +249,16 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units
       for (i = 0; i < nunits; i++)
         {
           zone = zones->membership[i]->parent;
-          RPT_reporting_add_integer1 (local_data->num_units, 1, zone->name);
+          name = zone->name->str;
+          RPT_reporting_add_integer1 (local_data->num_units, 1, name);
           unit = UNT_unit_list_get (units, i);
-          drill_down_list[0] = zone->name;
+          drill_down_list[0] = name;
           drill_down_list[1] = unit->production_type_name;
           RPT_reporting_add_integer (local_data->num_units_by_prodtype, 1, drill_down_list);
           if (unit->state != Destroyed)
             {
-              RPT_reporting_add_integer1 (local_data->num_unit_days, 1, zone->name);
-              RPT_reporting_add_integer1 (local_data->num_animal_days, unit->size, zone->name);
+              RPT_reporting_add_integer1 (local_data->num_unit_days, 1, name);
+              RPT_reporting_add_integer1 (local_data->num_animal_days, unit->size, name);
               RPT_reporting_add_integer (local_data->num_unit_days_by_prodtype, 1,
                                          drill_down_list);
               RPT_reporting_add_integer (local_data->num_animal_days_by_prodtype, unit->size,
@@ -320,36 +324,38 @@ handle_last_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * unit
 
   for (i = 0; i < local_data->nzones - 1; i++)
     {
+      gchar *name;
       zone = ZON_zone_list_get (zones, i);
+      name = zone->name->str;
 
       if (!skip_area)
         {
           area = ZON_update_area (zone);
-          RPT_reporting_set_real1 (local_data->area, area, zone->name);
+          RPT_reporting_set_real1 (local_data->area, area, name);
         }
 
       if (!skip_perimeter)
         {
           perimeter = ZON_update_perimeter (zone);
-          RPT_reporting_set_real1 (local_data->perimeter, perimeter, zone->name);
+          RPT_reporting_set_real1 (local_data->perimeter, perimeter, name);
           if (local_data->final_perimeter->frequency != RPT_never)
             {
-              RPT_reporting_set_real1 (local_data->final_perimeter, perimeter, zone->name);
+              RPT_reporting_set_real1 (local_data->final_perimeter, perimeter, name);
             }
           /* If the zone has grown, record the new maximum perimeter. */
           if (perimeter > 0
-              && (RPT_reporting_is_null1 (local_data->max_perimeter, zone->name)
-                  || (perimeter > RPT_reporting_get_real1 (local_data->max_perimeter, zone->name))))
+              && (RPT_reporting_is_null1 (local_data->max_perimeter, name)
+                  || (perimeter > RPT_reporting_get_real1 (local_data->max_perimeter, name))))
             {
-              RPT_reporting_set_real1 (local_data->max_perimeter, perimeter, zone->name);
-              RPT_reporting_set_integer1 (local_data->max_perimeter_day, event->day, zone->name);
+              RPT_reporting_set_real1 (local_data->max_perimeter, perimeter, name);
+              RPT_reporting_set_integer1 (local_data->max_perimeter_day, event->day, name);
             }
-          RPT_reporting_set_real1 (local_data->final_perimeter, perimeter, zone->name);
+          RPT_reporting_set_real1 (local_data->final_perimeter, perimeter, name);
         }
 
       if (!skip_num_areas)
         RPT_reporting_set_integer1 (local_data->num_separate_areas,
-                                    zone->poly->num_contours, zone->name);
+                                    zone->poly->num_contours, name);
     }
 
   if (!skip_area)
@@ -358,24 +364,26 @@ handle_last_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * unit
        * "background" zone. */
       for (i = local_data->nzones - 2; i >= 0; i--)
         {
+          gchar *name;
           zone = ZON_zone_list_get (zones, i);
+          name = zone->name->str;
           if (i > 0)
             {
               next_smaller_zone = ZON_zone_list_get (zones, i - 1);
               zone->area -= next_smaller_zone->area;
-              RPT_reporting_set_real1 (local_data->area, zone->area, zone->name);
+              RPT_reporting_set_real1 (local_data->area, zone->area, name);
             }
           if (local_data->final_area->frequency != RPT_never)
             {
-              RPT_reporting_set_real1 (local_data->final_area, zone->area, zone->name);
+              RPT_reporting_set_real1 (local_data->final_area, zone->area, name);
             }
           /* If the zone has grown, record the new maximum area. */
           if (zone->area > 0
-              && (RPT_reporting_is_null1 (local_data->max_area_day, zone->name)
-                  || (zone->area > RPT_reporting_get_real1 (local_data->max_area, zone->name))))
+              && (RPT_reporting_is_null1 (local_data->max_area_day, name)
+                  || (zone->area > RPT_reporting_get_real1 (local_data->max_area, name))))
             {
-              RPT_reporting_set_real1 (local_data->max_area, zone->area, zone->name);
-              RPT_reporting_set_integer1 (local_data->max_area_day, event->day, zone->name);
+              RPT_reporting_set_real1 (local_data->max_area, zone->area, name);
+              RPT_reporting_set_integer1 (local_data->max_area_day, event->day, name);
             }
         }
     }
@@ -388,9 +396,9 @@ handle_last_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * unit
       for (i = 0; i < nunits; i++)
         {
           zone = zones->membership[i]->parent;
-          RPT_reporting_add_integer1 (local_data->num_units, 1, zone->name);
+          RPT_reporting_add_integer1 (local_data->num_units, 1, zone->name->str);
           unit = UNT_unit_list_get (units, i);
-          drill_down_list[0] = zone->name;
+          drill_down_list[0] = zone->name->str;
           drill_down_list[1] = unit->production_type_name;
           RPT_reporting_add_integer (local_data->num_units_by_prodtype, 1, drill_down_list);
         }
@@ -691,25 +699,27 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   nprod_types = units->production_type_names->len;
   for (i = 0; i < local_data->nzones; i++)
     {
+      gchar *name;
       zone = ZON_zone_list_get (zones, i);
+      name = zone->name->str;
 
       if (i < local_data->nzones - 1)
         {
-          RPT_reporting_set_real1 (local_data->area, 0, zone->name);
-          RPT_reporting_set_real1 (local_data->max_area, 0, zone->name);
-          RPT_reporting_set_integer1 (local_data->max_area_day, 0, zone->name);
-          RPT_reporting_set_real1 (local_data->final_area, 0, zone->name);
-          RPT_reporting_set_real1 (local_data->perimeter, 0, zone->name);
-          RPT_reporting_set_real1 (local_data->max_perimeter, 0, zone->name);
-          RPT_reporting_set_integer1 (local_data->max_perimeter_day, 0, zone->name);
-          RPT_reporting_set_real1 (local_data->final_perimeter, 0, zone->name);
-          RPT_reporting_set_integer1 (local_data->num_separate_areas, 0, zone->name);
+          RPT_reporting_set_real1 (local_data->area, 0, name);
+          RPT_reporting_set_real1 (local_data->max_area, 0, name);
+          RPT_reporting_set_integer1 (local_data->max_area_day, 0, name);
+          RPT_reporting_set_real1 (local_data->final_area, 0, zone->name->str);
+          RPT_reporting_set_real1 (local_data->perimeter, 0, zone->name->str);
+          RPT_reporting_set_real1 (local_data->max_perimeter, 0, zone->name->str);
+          RPT_reporting_set_integer1 (local_data->max_perimeter_day, 0, zone->name->str);
+          RPT_reporting_set_real1 (local_data->final_perimeter, 0, zone->name->str);
+          RPT_reporting_set_integer1 (local_data->num_separate_areas, 0, zone->name->str);
         }
-      RPT_reporting_set_integer1 (local_data->num_units, 0, zone->name);
-      RPT_reporting_set_integer1 (local_data->num_unit_days, 0, zone->name);
-      RPT_reporting_set_integer1 (local_data->num_animal_days, 0, zone->name);
+      RPT_reporting_set_integer1 (local_data->num_units, 0, zone->name->str);
+      RPT_reporting_set_integer1 (local_data->num_unit_days, 0, zone->name->str);
+      RPT_reporting_set_integer1 (local_data->num_animal_days, 0, zone->name->str);
 
-      drill_down_list[0] = zone->name;
+      drill_down_list[0] = zone->name->str;
       for (j = 0; j < nprod_types; j++)
         {
           drill_down_list[1] = (char *) g_ptr_array_index (units->production_type_names, j);

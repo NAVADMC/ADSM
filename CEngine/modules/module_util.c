@@ -150,12 +150,15 @@ spreadmodel_read_zone_attribute (const scew_element * params, ZON_zone_list_t * 
           tokens = g_strsplit (attr_text, ",", 0);
           for (iter = tokens; *iter != NULL; iter++)
             {
+              gchar *normalized;
               #if DEBUG
                 g_debug ("token = \"%s\"", *iter);
               #endif
+              normalized = g_utf8_normalize (*iter, -1, G_NORMALIZE_DEFAULT);
               for (i = 0; i < nzones; i++)
-                if (strcasecmp (*iter, ZON_zone_list_get (zones, i)->name) == 0)
+                if (g_utf8_collate (normalized, ZON_zone_list_get (zones, i)->name->str) == 0)
                   break;
+              g_free (normalized);
               if (i == nzones)
                 g_warning ("there is no zone named \"%s\"", *iter);
               else

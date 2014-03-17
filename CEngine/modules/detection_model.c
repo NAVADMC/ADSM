@@ -531,7 +531,7 @@ to_string (struct spreadmodel_model_t_ *self)
         {
           zone = ZON_zone_list_get (local_data->zones, j);
           g_string_append_printf (s, "\n    prob-multiplier for \"%s\" zone=%g",
-                                  zone->name, local_data->zone_multiplier[j][i]);
+                                  zone->name->str, local_data->zone_multiplier[j][i]);
         }
     }
   g_string_append_c (s, '>');

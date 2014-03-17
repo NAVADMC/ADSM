@@ -85,7 +85,7 @@
  * the Delphi user interface also needs to be updated. */
 typedef struct
 {
-  char *name;
+  GString *name;
   int level;
   double radius;
   double radius_sq; /* Comparing distance^2 to radius^2 saves us taking a

@@ -241,7 +241,7 @@ handle_detection_event (struct spreadmodel_model_t_ *self,
                    event->unit->size,
                    event->unit->latitude,
                    event->unit->longitude,
-                   ZON_same_zone (zone, background_zone) ? "" : zone->parent->name);
+                   ZON_same_zone (zone, background_zone) ? "" : zone->parent->name->str);
   g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
                             -1 /* assume null-terminated string */,
                             NULL, &error);
@@ -291,7 +291,7 @@ handle_exam_event (struct spreadmodel_model_t_ *self,
                    event->unit->size,
                    event->unit->latitude,
                    event->unit->longitude,
-                   ZON_same_zone (zone, background_zone) ? "" : zone->parent->name);
+                   ZON_same_zone (zone, background_zone) ? "" : zone->parent->name->str);
   g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
                             -1 /* assume null-terminated string */,
                             NULL, &error);
@@ -342,7 +342,7 @@ handle_attempt_to_trace_event (struct spreadmodel_model_t_ *self,
                    event->unit->size,
                    event->unit->latitude,
                    event->unit->longitude,
-                   ZON_same_zone (zone, background_zone) ? "" : zone->parent->name);
+                   ZON_same_zone (zone, background_zone) ? "" : zone->parent->name->str);
   g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
                             -1 /* assume null-terminated string */,
                             NULL, &error);
@@ -414,7 +414,7 @@ handle_trace_result_event (struct spreadmodel_model_t_ *self,
                    identified_unit->size,
                    identified_unit->latitude,
                    identified_unit->longitude,
-                   ZON_same_zone (zone, background_zone) ? "" : zone->parent->name);
+                   ZON_same_zone (zone, background_zone) ? "" : zone->parent->name->str);
   g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
                             -1 /* assume null-terminated string */,
                             NULL, &error);
@@ -464,7 +464,7 @@ handle_vaccination_event (struct spreadmodel_model_t_ *self,
                    event->unit->size,
                    event->unit->latitude,
                    event->unit->longitude,
-                   ZON_same_zone (zone, background_zone) ? "" : zone->parent->name);
+                   ZON_same_zone (zone, background_zone) ? "" : zone->parent->name->str);
   g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
                             -1 /* assume null-terminated string */,
                             NULL, &error);
@@ -514,7 +514,7 @@ handle_destruction_event (struct spreadmodel_model_t_ *self,
                    event->unit->size,
                    event->unit->latitude,
                    event->unit->longitude,
-                   ZON_same_zone (zone, background_zone) ? "" : zone->parent->name);
+                   ZON_same_zone (zone, background_zone) ? "" : zone->parent->name->str);
   g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
                             -1 /* assume null-terminated string */,
                             NULL, &error);
