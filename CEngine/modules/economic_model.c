@@ -502,7 +502,7 @@ to_string (struct spreadmodel_model_t_ *self)
                     {
                       g_string_append_printf (s, "\n for %s in %s",
                                               (char *) g_ptr_array_index (local_data->production_types, j),
-                                              ZON_zone_list_get (local_data->zones, i)->name->str);
+                                              ZON_zone_list_get (local_data->zones, i)->name);
                       g_string_sprintfa (s, "\n  surveillance (per animal, per day)=%g", surveillance_cost_param[i][j]);
                     }
                 }

@@ -222,7 +222,7 @@ check_circle_and_rezone (int id, gpointer arg)
 #if DEBUG
                   s = g_string_new (NULL);
                   g_string_printf (s, "unit \"%s\" was in zone \"%s\" (level %i)",
-                                   unit->official_id, current_fragment->parent->name->str, current_level);
+                                   unit->official_id, current_fragment->parent->name, current_level);
 #endif
                   zones->membership[unit->index] = callback_data->fragment_containing_focus[i];
 
@@ -239,7 +239,7 @@ check_circle_and_rezone (int id, gpointer arg)
 #endif				  
 #if DEBUG
                   g_string_append_printf (s, ", now in zone \"%s\" (level %i)",
-                                          zone->name->str, zone->level);
+                                          zone->name, zone->level);
                   g_debug ("%s", s->str);
                   g_string_free (s, TRUE);
 #endif
@@ -327,7 +327,7 @@ check_poly_and_rezone (int id, gpointer arg)
 #if DEBUG
               s = g_string_new (NULL);
               g_string_printf (s, "unit \"%s\" was in zone \"%s\" (level %i)",
-                               unit->official_id, current_fragment->parent->name->str, current_level);
+                               unit->official_id, current_fragment->parent->name, current_level);
 #endif
               zones->membership[unit->index] = callback_data->hole_fragment;
 
@@ -344,7 +344,7 @@ check_poly_and_rezone (int id, gpointer arg)
 #endif			  
 
 #if DEBUG
-              g_string_append_printf (s, ", now in zone \"%s\" (level %i)", zone->name->str, zone->level);
+              g_string_append_printf (s, ", now in zone \"%s\" (level %i)", zone->name, zone->level);
               g_debug ("%s", s->str);
               g_string_free (s, TRUE);
 #endif
@@ -547,13 +547,13 @@ static void param_block_reporting (gpointer data, gpointer user_data)
   if (param_block->num_fragments->frequency != RPT_never)
     RPT_reporting_set_integer1 (param_block->num_fragments,
                                 g_queue_get_length (zone->fragments),
-                                zone->name->str);
+                                zone->name);
   if (param_block->num_holes_filled->frequency != RPT_never)
     RPT_reporting_set_integer1 (param_block->num_holes_filled,
-                                zone->nholes_filled, zone->name->str);
+                                zone->nholes_filled, zone->name);
   if (param_block->cumul_num_holes_filled->frequency != RPT_never)
     RPT_reporting_add_integer1 (param_block->cumul_num_holes_filled,
-                                zone->nholes_filled, zone->name->str);
+                                zone->nholes_filled, zone->name);
 }
 
 
@@ -676,7 +676,7 @@ static void param_block_to_string (gpointer data, gpointer user_data)
 
   g_string_append_printf (s,
                           "<\"%s\" level=%i radius=%.2f >\n",
-                          zone->name->str,
+                          zone->name,
                           zone->level,
                           zone->radius);
 }

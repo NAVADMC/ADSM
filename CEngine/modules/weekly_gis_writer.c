@@ -192,7 +192,7 @@ max_zone_name_length (ZON_zone_list_t *zones)
   for (i = 0; i < n; i++)
     {
       zone = ZON_zone_list_get (zones, i);
-      len = g_utf8_strlen (zone->name->str, -1);
+      len = g_utf8_strlen (zone->name, -1);
       if (len > max)
         max = len;
     }
@@ -440,11 +440,11 @@ write_zones_shapefile (local_data_t *local_data,
       shape_id = SHPWriteObject (shape_file, -1, shape);
       /* Convert the zone's name from UTF-8 to ISO-8859-1. (Will this work or
        * does it need to be ASCII?) */
-      name = g_convert_with_fallback (zone->name->str, -1, "ISO-8859-1", "UTF-8", "?", NULL, NULL, NULL);
+      name = g_convert_with_fallback (zone->name, -1, "ISO-8859-1", "UTF-8", "?", NULL, NULL, NULL);
       DBFWriteStringAttribute (dbf_file, shape_id, name_field, name);
       g_free (name);
       #if DEBUG
-        g_debug ("wrote shape for \"%s\" zone", zone->name->str);
+        g_debug ("wrote shape for \"%s\" zone", zone->name);
       #endif
 
       SHPDestroyObject (shape);

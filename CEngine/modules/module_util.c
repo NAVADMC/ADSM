@@ -47,7 +47,6 @@ spreadmodel_read_prodtype_attribute (const scew_element * params,
   XML_Char const *attr_text;
   gchar **tokens;
   gchar **iter;
-  gchar *tmp;                   /* for converting between encodings */
   int i;                        /* loop counter */
 
 #if DEBUG
@@ -79,20 +78,21 @@ spreadmodel_read_prodtype_attribute (const scew_element * params,
           tokens = g_strsplit (attr_text, ",", 0);
           for (iter = tokens; *iter != NULL; iter++)
             {
+              gchar *normalized;
               #if DEBUG
                 g_debug ("token (Expat encoding) = \"%s\"", *iter);
               #endif
               /* Expat stores the text as UTF-8.  Convert to ISO-8859-1. */
-              tmp = g_convert_with_fallback (*iter, -1, "ISO-8859-1", "UTF-8", "?", NULL, NULL, NULL);
-              g_assert (tmp != NULL);
+              normalized = g_utf8_normalize (*iter, -1, G_NORMALIZE_DEFAULT);
+              g_assert (normalized != NULL);
               for (i = 0; i < nprod_types; i++)
-                if (strcasecmp (tmp, g_ptr_array_index (production_type_names, i)) == 0)
+                if (g_utf8_collate (normalized, g_ptr_array_index (production_type_names, i)) == 0)
                   break;
+              g_free (normalized);
               if (i == nprod_types)
-                g_warning ("there are no \"%s\" units", tmp);
+                g_warning ("there are no \"%s\" units", *iter);
               else
                 flags[i] = TRUE;
-              g_free (tmp);
             }
           g_strfreev (tokens);
         }
@@ -156,7 +156,7 @@ spreadmodel_read_zone_attribute (const scew_element * params, ZON_zone_list_t * 
               #endif
               normalized = g_utf8_normalize (*iter, -1, G_NORMALIZE_DEFAULT);
               for (i = 0; i < nzones; i++)
-                if (g_utf8_collate (normalized, ZON_zone_list_get (zones, i)->name->str) == 0)
+                if (g_utf8_collate (normalized, ZON_zone_list_get (zones, i)->name) == 0)
                   break;
               g_free (normalized);
               if (i == nzones)

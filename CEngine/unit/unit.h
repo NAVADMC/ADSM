@@ -189,7 +189,7 @@ typedef struct
 {
   unsigned int index;           /**< position in a unit list */
   UNT_production_type_t production_type;  
-  char *production_type_name;
+  gchar *production_type_name;  /**< in UTF-8 */
   UNT_id_t official_id;         /**< arbitrary identifier string */
   unsigned int size;            /**< number of animals */
   double latitude, longitude;
@@ -242,7 +242,7 @@ UNT_unit_t;
 typedef struct
 {
   GArray *list; /**< Each item is a UNT_unit_t structure. */
-  GPtrArray *production_type_names; /**< Each pointer is to a regular C string. */
+  GPtrArray *production_type_names; /**< Each item is a (gchar *) pointer and is in UTF-8. */
   
 #ifdef USE_SC_GUILIB  
   /*  This field is used on the SC version if the user wants to 
@@ -306,7 +306,7 @@ int UNT_fprintf_unit_list (FILE *, UNT_unit_list_t *);
 char *UNT_unit_list_summary_to_string (UNT_unit_list_t *);
 char *UNT_unit_list_prevalence_to_string (UNT_unit_list_t *, unsigned int day);
 
-UNT_unit_t *UNT_new_unit (UNT_production_type_t, char *production_type_name,
+UNT_unit_t *UNT_new_unit (UNT_production_type_t, gchar *production_type_name,
                           unsigned int size, double x, double y);
 void UNT_free_unit (UNT_unit_t *, gboolean free_segment);
 char *UNT_unit_to_string (UNT_unit_t *);

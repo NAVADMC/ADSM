@@ -644,7 +644,7 @@ UNT_unit_set_longitude (UNT_unit_t * unit, double lon)
  */
 UNT_unit_t *
 UNT_new_unit (UNT_production_type_t production_type,
-              char *production_type_name, unsigned int size, double x, double y)
+              gchar *production_type_name, unsigned int size, double x, double y)
 {
   UNT_unit_t *unit;
 
@@ -925,18 +925,16 @@ endElement (void *userData, const char *name)
 #ifdef USE_SC_GUILIB
       GPtrArray *production_type_ids;
 #endif
-      char *tmp, *tmp2;
+      gchar *tmp;
       int i;
 
-      tmp = g_strdup (partial->s->str);
+      /* Expat stores the text as UTF-8. */
+      tmp = g_utf8_normalize (partial->s->str, -1, G_NORMALIZE_DEFAULT);
+      g_assert (tmp != NULL);
       g_strstrip (tmp);
       #if DEBUG
         g_debug ("  accumulated string (Expat encoding) = \"%s\"", tmp);
       #endif
-      /* Expat stores the text as UTF-8.  Convert to ISO-8859-1. */
-      tmp2 = g_convert_with_fallback (tmp, -1, "ISO-8859-1", "UTF-8", "?", NULL, NULL, NULL);
-      g_assert (tmp2 != NULL);
-      g_free (tmp);
       production_type_names = partial->units->production_type_names;
 #ifdef USE_SC_GUILIB
       production_type_ids = partial->units->production_types;
@@ -955,7 +953,7 @@ endElement (void *userData, const char *name)
 
       for (i = 0; i < production_type_ids->len; i++)
         {
-          if (strcasecmp (tmp2, ((PRT_production_type_data_t*)(g_ptr_array_index (production_type_ids, i)) )->name  ) == 0)
+          if (g_utf8_collate (tmp, ((PRT_production_type_data_t*)(g_ptr_array_index (production_type_ids, i)) )->name  ) == 0)
 	  {
 #ifdef DEBUG
 	    g_debug ("Found production type: %s, production-type-id: %i, at index: %i\n", ((PRT_production_type_data_t*)(g_ptr_array_index (production_type_ids, i)) )->name, ((PRT_production_type_data_t*)(g_ptr_array_index (production_type_ids, i)) )->id, i );
@@ -976,21 +974,21 @@ endElement (void *userData, const char *name)
 #else
       for (i = 0; i < production_type_names->len; i++)
         {
-          if (strcasecmp (tmp2, g_ptr_array_index (production_type_names, i)) == 0)
+          if (g_utf8_collate (tmp, g_ptr_array_index (production_type_names, i)) == 0)
             break;
         }
       if (i == production_type_names->len)
         {
           /* We haven't encountered this production type before; add its name to
            * the list. */
-          g_ptr_array_add (production_type_names, tmp2);
+          g_ptr_array_add (production_type_names, tmp);
           #if DEBUG
-            g_debug ("  adding new production type \"%s\"", tmp2);
+            g_debug ("  adding new production type \"%s\"", tmp);
           #endif
         }
 #endif
       else
-        g_free (tmp2);
+        g_free (tmp);
 
       partial->unit->production_type = i;
 
