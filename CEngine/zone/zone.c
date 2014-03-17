@@ -187,7 +187,7 @@ ZON_zone_list_append (ZON_zone_list_t * zones, ZON_zone_t * zone)
        * parameters are loaded, use this zone's name if the background
        * zone's name is currently blank. */
       existing_zone = ZON_zone_list_get (zones, nzones - 1);
-      if (strlen (existing_zone->name) == 0)
+      if (g_utf8_strlen (existing_zone->name, -1) == 0)
         {
           #if DEBUG
             g_debug ("setting name of background zone to \"%s\"", zone->name);

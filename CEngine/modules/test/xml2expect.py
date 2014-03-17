@@ -17,7 +17,7 @@ import xml.dom.minidom
 import operator
 import string
 
-OUTPUT_ENCODING = "iso-8859-1" # to match output from the simulator
+OUTPUT_ENCODING = "utf-8" # to match output from the simulator
 
 
 

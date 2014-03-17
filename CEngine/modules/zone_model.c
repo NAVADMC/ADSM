@@ -758,7 +758,8 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
   const XML_Char *variable_name;
   gboolean success;
   int i;
-  char *tmp, *name;
+  char *tmp;
+  gchar *name;
   int level;
   double radius;
 
@@ -776,9 +777,9 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
   e = scew_element_by_name (params, "name");
   if (e != NULL)
     {
-      /* Expat stores the text as UTF-8.  Convert to ISO-8859-1. */
+      /* Expat stores the text as UTF-8. */
       tmp = PAR_get_text (e);
-      name = g_convert_with_fallback (tmp, -1, "ISO-8859-1", "UTF-8", "?", NULL, NULL, NULL);
+      name = g_utf8_normalize (tmp, -1, G_NORMALIZE_DEFAULT);
       g_assert (name != NULL);
       g_free (tmp);
     }
