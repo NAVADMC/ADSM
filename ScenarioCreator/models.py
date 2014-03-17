@@ -98,8 +98,6 @@ class Function(models.Model):
     # field_name = models.CharField(max_length=255, )  # I don't think this is necessary
     x_axis_units = models.CharField(max_length=255, default="Days",
         help_text='Specifies the descriptive units for the x axis in relational functions.', )
-    y_axis_units = models.CharField(max_length=255, blank=True,
-        help_text='Specifies the descriptive units for the x axis in probability density and relational functions.', )
     notes = models.TextField(blank=True, null=True,
         help_text='', )  # Why is this hidden?
     class Meta:
@@ -114,11 +112,12 @@ layer of validation will be necessary for required parameters per equation_type.
 class ProbabilityFunction(Function):
     equation_type = models.CharField(max_length=255,
         help_text='For probability density functions identifies the type of function.',
-                                  choices=chc("Point", "Uniform", "Triangular", "Piecewise", "Histogram", "Gaussian",
-                                              "Poisson", "Beta", "Gamma", "Weibull", "Exponential", "Pearson5",
-                                              "Logistic",
-                                              "LogLogistic", "Lognormal", "NegativeBinomial", "Pareto", "Bernoulli",
-                                              "Binomial", "Discrete Uniform", "Hypergeometric", "Inverse Gaussian"))
+        default="Triangular",
+        choices=chc("Point", "Uniform", "Triangular", "Piecewise", "Histogram", "Gaussian",
+                    "Poisson", "Beta", "Gamma", "Weibull", "Exponential", "Pearson5",
+                    "Logistic",
+                    "LogLogistic", "Lognormal", "NegativeBinomial", "Pareto", "Bernoulli",
+                    "Binomial", "Discrete Uniform", "Hypergeometric", "Inverse Gaussian"))
     mean = models.FloatField(blank=True, null=True,
         help_text='The mean for probability density function types Gaussian Lognormal Possoin and Exponential.', )
     std_dev = models.FloatField(blank=True, null=True,
@@ -158,7 +157,8 @@ class ProbabilityFunction(Function):
 
 
 class RelationalFunction(Function):
-    pass  # Inherited fields
+    y_axis_units = models.CharField(max_length=255, blank=True,
+        help_text='Specifies the descriptive units for the x axis in relational functions.', )
 
 
 class RelationalPoint(models.Model):
@@ -356,7 +356,7 @@ class Disease(models.Model):
 class DiseaseReaction(models.Model):
     reaction_name = models.CharField(max_length=255,
         help_text="Examples: Severe Reaction, FMD Long Incubation")
-    _disease = models.ForeignKey('Disease',  )#default=lambda: Disease.objects.get_or_create(id=1), )
+    _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1), )
     disease_latent_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the latent period for units of this production type.', )
     disease_subclinical_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
@@ -366,6 +366,7 @@ class DiseaseReaction(models.Model):
     disease_immune_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the natural immune period for units of this production type.', )
     disease_prevalence_relid = models.ForeignKey(RelationalFunction, related_name='+',
+        blank=True, null=True,
         help_text='Defines the prevelance for units of this production type.', )
     def __str__(self):
         return self.reaction_name
@@ -385,8 +386,6 @@ class DiseaseSpreadModel(models.Model):
     _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1),
         help_text='Parent disease whose spreading characteristics this describes.')
         # This is in Disease because of simulation restrictions
-    movement_control_relid = models.ForeignKey(RelationalFunction, related_name='+',
-        help_text='Relational function used to define movement control effects for the indicated production types combinations.', )
     transport_delay_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Relational function used to define the shipment delays for the indicated production types combinations.', )
     class Meta:
@@ -408,6 +407,8 @@ class IndirectSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct 
         help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
     distance_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the sipment distances for direct and indirect contact models.', )
+    movement_control_relid = models.ForeignKey(RelationalFunction, related_name='+',
+        help_text='Relational function used to define movement control effects for the indicated production types combinations.', )
     def __str__(self):
         return "%s Indirect Spread %i" % (self.disease, self.id)
 
