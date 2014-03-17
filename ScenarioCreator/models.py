@@ -106,7 +106,6 @@ class DynamicUnit(models.Model):
 class Function(models.Model):
     name = models.CharField(max_length=255,
         help_text='User-assigned name for each function.', )
-    # field_name = models.CharField(max_length=255, )  # I don't think this is necessary
     x_axis_units = models.CharField(max_length=255, default="Days",
         help_text='Specifies the descriptive units for the x axis in relational functions.', )
     notes = models.TextField(blank=True, null=True,
