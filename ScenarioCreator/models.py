@@ -163,7 +163,7 @@ class RelationalFunction(Function):
 
 class RelationalPoint(models.Model):
     relational_function = models.ForeignKey(RelationalFunction)
-    _point_order = models.IntegerField()
+    _point_order = models.IntegerField()  # validated
     x = models.FloatField(
         help_text='The x value of the point.', )
     y = models.FloatField(
@@ -449,7 +449,7 @@ class Scenario(models.Model):
     include_contact_spread = models.BooleanField(default=True,  # TODO: hide these and programmatically set them
         help_text='Indicates if disease spread by direct ot indirect contact is used in the scenario.', )
     include_airborne_spread = models.BooleanField(default=False,
-        help_text='Indicates ifairborne spread is used in the model', )
+        help_text='Indicates if airborne spread is used in the model', )
     use_airborne_exponential_decay = models.BooleanField(default=False,
         help_text='Indicates if the decrease in probability by airborne transmission is simulated by the exponential (TRUE) or linear (FALSE) algorithm.', )
     use_within_unit_prevalence = models.BooleanField(default=False,
@@ -569,4 +569,5 @@ class ReadAllCodeTypes(models.Model):
     _code_type = models.CharField(max_length=255,
         help_text='Type of code', )
     _code_type_description = models.TextField()
+
 
