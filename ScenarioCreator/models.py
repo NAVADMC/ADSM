@@ -383,6 +383,7 @@ class DiseaseReactionAssignment(models.Model):
 
 
 class DiseaseSpreadModel(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True, )
     _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0],
         help_text='Parent disease whose spreading characteristics this describes.')
         # This is in Disease because of simulation restrictions
@@ -397,12 +398,10 @@ class IndirectSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct 
         help_text='Code indicating the mechanism of the disease spread.', )
     subclinical_animals_can_infect_others = models.BooleanField(default=False,
         help_text='Indicates if subclinical units of the source type can spread disease by direct or indirect contact. ', )
-    mean_contact_rate = models.FloatField(blank=True, null=True,
-        help_text='The mean contact rate (in recipient units per source unit per day) for direct or indirect contact models.', )
+    contact_rate = models.FloatField(blank=True, null=True,
+        help_text='The average contact rate (in recipient units per source unit per day) for direct or indirect contact models.', )
     use_fixed_contact_rate = models.BooleanField(default=False,
-        help_text='Indicates if a fixed contact rate will be used instead of the mean contact rate.', )
-    fixed_contact_rate = models.FloatField(blank=True, null=True,
-        help_text='The fixed contact rate (in recipient units per source unit per day) for direct or indirect contact models.', )
+        help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
     infection_probability = PercentField(blank=True, null=True,
         help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
     distance_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
@@ -410,7 +409,7 @@ class IndirectSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct 
     movement_control_relid = models.ForeignKey(RelationalFunction, related_name='+',
         help_text='Relational function used to define movement control effects for the indicated production types combinations.', )
     def __str__(self):
-        return "%s Indirect Spread %i" % (self.disease, self.id)
+        return "%s %s Indirect Spread %i" % (self.name, self._disease, self.id)
 
 
 class DirectSpreadModel(IndirectSpreadModel):
@@ -420,7 +419,7 @@ class DirectSpreadModel(IndirectSpreadModel):
         super(IndirectSpreadModel, self).__init__(*args, **kwargs)
         self._spread_method_code = 'direct'  # overrides 'indirect' value without creating a new field
     def __str__(self):
-        return "%s Direct Spread %i" % (self.disease, self.id)
+        return "%s Direct Spread %i" % (self._disease, self.id)
 
 
 class AirborneSpreadModel(DiseaseSpreadModel):
@@ -430,12 +429,12 @@ class AirborneSpreadModel(DiseaseSpreadModel):
         help_text='The probability that disease will be spread to unit 1 km away from the source unit.', )
     max_distance = models.FloatField(blank=True, null=True,
         help_text='The maximum distance in KM of airborne spread.', )
-    wind_direction_start = models.IntegerField(blank=True, null=True,
+    wind_direction_start = models.IntegerField(default=0,
         help_text='The start angle in degrees of the predominate wind direction for airborne spread.', )
-    wind_direction_end = models.IntegerField(blank=True, null=True,
+    wind_direction_end = models.IntegerField(default=360,
         help_text='The end angle in degrees of the predominate wind direction for airborne spread.', )
     def __str__(self):
-        return "%s Airborne Spread %i" % (self.disease, self.id)
+        return "%s Airborne Spread %i" % (self._disease, self.id)
 
 
 class Scenario(models.Model):
