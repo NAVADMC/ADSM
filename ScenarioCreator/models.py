@@ -334,7 +334,7 @@ class ControlProtocol(models.Model):
 
 class ProtocolAssignment(models.Model):
     _master_plan = models.ForeignKey('ControlMasterPlan',
-                                     default=lambda: ControlMasterPlan.objects.get_or_create(id=1),
+                                     default=lambda: ControlMasterPlan.objects.get_or_create(id=1)[0],
         help_text='Points back to a master plan for grouping purposes.')
     production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
@@ -356,7 +356,7 @@ class Disease(models.Model):
 class DiseaseReaction(models.Model):
     reaction_name = models.CharField(max_length=255,
         help_text="Examples: Severe Reaction, FMD Long Incubation")
-    _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1), )
+    _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0], )
     disease_latent_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the latent period for units of this production type.', )
     disease_subclinical_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
@@ -383,7 +383,7 @@ class DiseaseReactionAssignment(models.Model):
 
 
 class DiseaseSpreadModel(models.Model):
-    _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1),
+    _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0],
         help_text='Parent disease whose spreading characteristics this describes.')
         # This is in Disease because of simulation restrictions
     transport_delay_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
