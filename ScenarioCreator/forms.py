@@ -1,7 +1,7 @@
-from uni_form.layout import Layout, Fieldset
+from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
 from ScenarioCreator.models import *
 from floppyforms import ModelForm, Select, CharField
-from uni_form.helper import FormHelper
+from crispy_forms.helper import FormHelper
 
 
 class Add_or_Select(Select):
@@ -71,6 +71,7 @@ class ControlProtocolForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
+            'name',
             Fieldset('Detection',
                 'use_detection',
                 'detection_probability_for_observed_time_in_clinical_relid',
@@ -141,7 +142,10 @@ class ControlProtocolForm(ModelForm):
                 'cost_of_vaccination_baseline_per_animal',
                 'vaccination_demand_threshold',
                 'cost_of_vaccination_additional_per_animal',
-            )
+            ),
+            ButtonHolder(
+                Submit('Save', 'Save', css_class='button white'),
+            ),
         )
         return super(ControlProtocolForm, self).__init__(*args, **kwargs)
     class Meta:

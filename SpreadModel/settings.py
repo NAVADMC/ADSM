@@ -39,11 +39,10 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'floppyforms',
-    'uni_form',
+    'crispy_forms',
     'ScenarioCreator',
     'Results',
 )
-
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -68,6 +67,7 @@ ROOT_URLCONF = 'SpreadModel.urls'
 
 WSGI_APPLICATION = 'SpreadModel.wsgi.application'
 
+CRISPY_TEMPLATE_PACK = 'bootstrap'
 
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
