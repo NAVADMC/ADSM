@@ -144,8 +144,8 @@ class ControlProtocolForm(ModelForm):
                 'cost_of_vaccination_additional_per_animal',
             ),
             ButtonHolder(
-                Submit('Save', 'Save', css_class='button white'),
-            ),
+                Submit('submit', 'Submit', css_class='button white')
+            )
         )
         return super(ControlProtocolForm, self).__init__(*args, **kwargs)
     class Meta:
