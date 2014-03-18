@@ -250,6 +250,12 @@ class ControlProtocol(models.Model):
         help_text='Days before detection  (critical period) for tracing of indirect contacts.', )
     shipping_delay_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Shipping delay function.', )
+    detection_triggers_zone_creation = models.BooleanField(default=False,
+        help_text='Indicator if detection of infected units of this production type will trigger a zone focus.', )
+    direct_trace_is_a_zone_trigger = models.BooleanField(default=False,
+        help_text='Indicator if direct tracing of infected units of this production type will trigger a zone focus.', )
+    indirect_trace_is_a_zone_trigger = models.BooleanField(default=False,
+        help_text='Indicator if indirect tracing of infected units of this production type will trigger a zone focus.', )
     use_destruction = models.BooleanField(default=False,
         help_text='Indicates if detected clinical units of this production type will be destroyed.', )
     destruction_is_a_ring_trigger = models.BooleanField(default=False,
@@ -284,30 +290,11 @@ class ControlProtocol(models.Model):
         help_text='Radius in kilometers of the vaccination ring.', )
     vaccination_priority = models.IntegerField(blank=True, null=True,
         help_text='The vacination priority of this production type relative to other production types.  A lower number indicates a higher priority.', )
-    cost_of_destruction_appraisal_per_unit = MoneyField(default=0.0,
-        help_text='The cost associated with appraisal for each destroyed unit of this type.', )
-    cost_of_destruction_cleaning_per_unit = MoneyField(default=0.0,
-        help_text='The cost associated with cleaning and disinfection for each destroyed unit of this type.', )
-    cost_of_euthanasia_per_animal = MoneyField(default=0.0,
-        help_text='The cost associated with euthanizing each destroyed animal of this type.', )
-    cost_of_indemnification_per_animal = MoneyField(default=0.0,
-        help_text='The cost of indemnification for each destroyed animal of this type.', )
-    cost_of_carcass_disposal_per_animal = MoneyField(default=0.0,
-        help_text='The cost of carcass disposal for each destroyed animal of this type.', )
-    cost_of_vaccination_setup_per_unit = MoneyField(default=0.0,
-        help_text='The cost of site setup for each vaccinated unit of this type.', )
-    cost_of_vaccination_baseline_per_animal = MoneyField(default=0.0,  # TODO: These three should really be a RelationalFunction
-        help_text='The baseline cost of vaccination for each vaccinated animal of this type. This cost applies to all vaccinations before the threshold is met. ', )
     vaccination_demand_threshold = models.IntegerField(blank=True, null=True,
         help_text='The number of animals of this type that can be vaccinated before the cost of vaccination increases.', )
     cost_of_vaccination_additional_per_animal = MoneyField(default=0.0,
         help_text='The additional cost of vaccination for each vaccinated animal of this type after the threshold is exceeded.', )
-    detection_triggers_zone_creation = models.BooleanField(default=False,
-        help_text='Indicator if detection of infected units of this production type will trigger a zone focus.', )
-    direct_trace_is_a_zone_trigger = models.BooleanField(default=False,
-        help_text='Indicator if direct tracing of infected units of this production type will trigger a zone focus.', )
-    indirect_trace_is_a_zone_trigger = models.BooleanField(default=False,
-        help_text='Indicator if indirect tracing of infected units of this production type will trigger a zone focus.', )
+    use_testing = models.BooleanField(default=False, )
     examine_direct_forward_traces = models.BooleanField(default=False,
         help_text='Indicator if units identified by the trace-forward of direct contact will be examined for clinical signs of disease.', )
     exam_direct_forward_success_multiplier = models.FloatField(blank=True, null=True,
@@ -340,6 +327,21 @@ class ControlProtocol(models.Model):
         help_text='Function that describes the delay in obtaining test results.', )
     vaccinate_retrospective_days = models.BooleanField(default=False,
         help_text='Number of days in retrospect that should be used to determine which herds to vaccinate.', )
+    use_cost_accounting = models.BooleanField(default=False, )
+    cost_of_destruction_appraisal_per_unit = MoneyField(default=0.0,
+        help_text='The cost associated with appraisal for each destroyed unit of this type.', )
+    cost_of_destruction_cleaning_per_unit = MoneyField(default=0.0,
+        help_text='The cost associated with cleaning and disinfection for each destroyed unit of this type.', )
+    cost_of_euthanasia_per_animal = MoneyField(default=0.0,
+        help_text='The cost associated with euthanizing each destroyed animal of this type.', )
+    cost_of_indemnification_per_animal = MoneyField(default=0.0,
+        help_text='The cost of indemnification for each destroyed animal of this type.', )
+    cost_of_carcass_disposal_per_animal = MoneyField(default=0.0,
+        help_text='The cost of carcass disposal for each destroyed animal of this type.', )
+    cost_of_vaccination_setup_per_unit = MoneyField(default=0.0,
+        help_text='The cost of site setup for each vaccinated unit of this type.', )
+    cost_of_vaccination_baseline_per_animal = MoneyField(default=0.0,
+        help_text='The baseline cost of vaccination for each vaccinated animal of this type. This cost applies to all vaccinations before the threshold is met. ', )
     def __str__(self):
         return "Protocol: %s" % (self.name, )
 

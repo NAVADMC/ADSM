@@ -1,5 +1,7 @@
+from uni_form.layout import Layout, Fieldset
 from ScenarioCreator.models import *
 from floppyforms import ModelForm, Select, CharField
+from uni_form.helper import FormHelper
 
 
 class Add_or_Select(Select):
@@ -65,6 +67,83 @@ class ProtocolAssignmentForm(ModelForm):
 
 
 class ControlProtocolForm(ModelForm):
+    """https://speakerdeck.com/maraujop/advanced-django-forms-usage slide 47"""
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Fieldset('Detection',
+                'use_detection',
+                'detection_probability_for_observed_time_in_clinical_relid',
+                'detection_probability_report_vs_first_detection_relid'
+            ),
+            Fieldset('Tracing',
+                'trace_direct_forward',
+                'trace_direct_back',
+                'direct_trace_success_rate',
+                'direct_trace_period',
+                'trace_indirect_forward',
+                'trace_indirect_back',
+                'indirect_trace_success',
+                'indirect_trace_period',
+                'shipping_delay_pdf',
+                'detection_triggers_zone_creation',
+                'direct_trace_is_a_zone_trigger',
+                'indirect_trace_is_a_zone_trigger',
+            ),
+            Fieldset('Destruction',
+                'use_destruction',
+                'destruction_is_a_ring_trigger',
+                'destruction_ring_radius',
+                'destruction_is_a_ring_target',
+                'destroy_direct_forward_traces',
+                'destroy_indirect_forward_traces',
+                'destroy_direct_back_traces',
+                'destroy_indirect_back_traces',
+                'destruction_priority',
+            ),
+            Fieldset('Vaccination',
+                'use_vaccination',
+                'minimum_time_between_vaccinations',
+                'vaccinate_detected_units',
+                'days_to_immunity',
+                'vaccine_immune_period_pdf',
+                'trigger_vaccination_ring',
+                'vaccination_ring_radius',
+                'vaccination_priority',
+                'vaccinate_retrospective_days',
+            ),
+            Fieldset('Testing',
+                'use_testing',
+                'examine_direct_forward_traces',
+                'exam_direct_forward_success_multiplier',
+                'examine_indirect_forward_traces',
+                'exam_indirect_forward_success_multiplier',
+                'examine_direct_back_traces',
+                'exam_direct_back_success_multiplier',
+                'examine_indirect_back_traces',
+                'examine_indirect_back_success_multiplier',
+                'test_direct_forward_traces',
+                'test_indirect_forward_traces',
+                'test_direct_back_traces',
+                'test_indirect_back_traces',
+                'test_specificity',
+                'test_sensitivity',
+                'test_delay_pdf',
+            ),
+            Fieldset('Cost Accounting',
+                'use_cost_accounting',
+                'cost_of_destruction_appraisal_per_unit',
+                'cost_of_destruction_cleaning_per_unit',
+                'cost_of_euthanasia_per_animal',
+                'cost_of_indemnification_per_animal',
+                'cost_of_carcass_disposal_per_animal',
+                'cost_of_vaccination_setup_per_unit',
+                'cost_of_vaccination_baseline_per_animal',
+                'vaccination_demand_threshold',
+                'cost_of_vaccination_additional_per_animal',
+            )
+        )
+        return super(ControlProtocolForm, self).__init__(*args, **kwargs)
     class Meta:
         model = ControlProtocol
         widgets = {'detection_probability_for_observed_time_in_clinical_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
