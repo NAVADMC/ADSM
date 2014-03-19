@@ -28,7 +28,7 @@ class DynamicBlobForm(ModelForm):
 
 class DynamicUnitForm(ModelForm):
     class Meta:
-        model = DynamicUnit
+        model = Unit
         exclude = ['_final_state_code', '_final_control_state_code', '_final_detection_state_code', '_cum_infected', '_cum_detected', '_cum_destroyed', '_cum_vaccinated']
         widgets = {'production_type': Add_or_Select(attrs={'data-new-item-url': '/setup/ProductionType/new/'})}
 
@@ -269,6 +269,7 @@ class AirborneSpreadModelForm(ModelForm):
 class ScenarioForm(ModelForm):
     class Meta:
         model = Scenario
+        exclude = ['_output_settings']
 
 
 class OutputSettingsForm(ModelForm):

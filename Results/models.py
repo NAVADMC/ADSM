@@ -1,5 +1,5 @@
 from django.db import models
-from ScenarioCreator.models import ProductionType, Zone, DynamicUnit
+from ScenarioCreator.models import ProductionType, Zone, Unit
 
 
 class OutDailyByProductionType(models.Model):
@@ -346,7 +346,7 @@ class OutDailyEvents(models.Model):
         help_text='The day within the iteration on which these outputs were generated.', )
     event = models.IntegerField(blank=True, null=True,
         help_text='A number used to identify each event.', )
-    unit = models.ForeignKey(DynamicUnit,
+    unit = models.ForeignKey(Unit,
         help_text='Identifier of the unit for which this event occurred.', )
     zone = models.ForeignKey(Zone,
         help_text='Identifier of the zone for which this event occurred.', )
@@ -367,11 +367,11 @@ class OutDailyExposures(models.Model):
         help_text='An identifier of each exposure.', )
     initiated_day = models.IntegerField(blank=True, null=True,
         help_text='', )
-    exposed_unit = models.ForeignKey(DynamicUnit, related_name='events_where_unit_was_exposed',
+    exposed_unit = models.ForeignKey(Unit, related_name='events_where_unit_was_exposed',
         help_text='The identifier of the source unit for the exposure.', )
     exposed_zone = models.ForeignKey(Zone, related_name='events_that_exposed_this_zone',
         help_text='The identifier of the zone of the source unit for the exposure.', )
-    exposing_unit = models.ForeignKey(DynamicUnit, related_name='events_where_unit_exposed_others',
+    exposing_unit = models.ForeignKey(Unit, related_name='events_where_unit_exposed_others',
         help_text='The identifier of the recipient unit for the exposure.', )
     exposing_zone = models.ForeignKey(Zone, related_name='events_that_exposed_others',
         help_text='The identifier of the zone of the recipient unit for the exposure.', )
@@ -459,7 +459,7 @@ class OutIteration(models.Model):
 class OutIterationByUnit(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
-    unit = models.ForeignKey(DynamicUnit,
+    unit = models.ForeignKey(Unit,
         help_text='Identifier of the unit for which this event occurred.', )
     last_status_code = models.CharField(max_length=255, blank=True,
         help_text='Final status that a unit was in for an iteration', )

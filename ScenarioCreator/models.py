@@ -57,7 +57,7 @@ class DynamicBlob(models.Model):
         help_text='', )  # polygons?
 
 
-class DynamicUnit(models.Model):
+class Unit(models.Model):
     production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
     latitude = LatitudeField(

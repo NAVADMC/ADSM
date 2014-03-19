@@ -7,6 +7,18 @@ import re
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 
 
+def basic_context():
+    return {'Scenarios': Scenario.objects.all(),
+            'OutputSettings': OutputSettings.objects.all(),
+            'ProductionType': ProductionType.objects.all(),
+            'Farm': Unit.objects.all(),
+            'Disease': Disease.objects.all(),
+            'ControlMasterPlan': ControlMasterPlan.objects.all()}
+
+def disease_spread(request):
+    return render(request, 'ScenarioCreator/DiseaseSpread.html', {})
+
+
 def save_new_instance(initialized_form, request):
     model_instance = initialized_form.save()  # write to database
     model_name = model_instance.__class__.__name__
@@ -40,8 +52,9 @@ def initialize_from_existing_model(primary_key, request):
 def new_entry(request):
     model_name, form = get_model_name_and_form(request)
     initialized_form = form(request.POST or None)
-    context = {'form': initialized_form,
-               'title': "Create a new " + model_name}
+    context = basic_context()
+    context.update({'form': initialized_form,
+                    'title': "Create a new " + model_name})
     return new_form(request, initialized_form, context)
 
 
@@ -53,8 +66,9 @@ def edit_entry(request, primary_key):
         return redirect('/setup/%s/new/' % model_name)
     if initialized_form.is_valid() and request.method == 'POST':
         initialized_form.save()  # write instance updates to database
-    context = {'form': initialized_form,
-               'title': "Edit a " + model_name}
+    context = basic_context()
+    context.update({'form': initialized_form,
+                    'title': "Edit a " + model_name}.items())
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
@@ -67,10 +81,8 @@ def copy_entry(request, primary_key):
     if initialized_form.is_valid() and request.method == 'POST':
         initialized_form.instance.pk = None  # This will cause a new instance to be created
         return save_new_instance(initialized_form, request)
-    context = {'form': initialized_form,
-               'title': "Copy a " + model_name}
+    context = basic_context()
+    context.update({'form': initialized_form,
+                    'title': "Copy a " + model_name}.items())
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
-
-def disease_spread(request):
-    return render(request, 'ScenarioCreator/DiseaseSpread.html', {})

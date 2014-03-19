@@ -3,7 +3,9 @@
 {% block main %}
     <nav>
         <ul id="setupMenu">
-            <li><a href="/setup/Scenario/1/">Scenario Settings</a>
+            <li><a href="/setup/Scenario/1/"
+                   class="{% if Scenarios|length > 0  %}completed {% endif %}"
+                    >Scenario Settings</a>
                 <ul><li><a href="/setup/OutputSettings/1/">Output Settings</a></li></ul></li>
             <li><a href="#">Population</a>
                 <ul><li><a href="/setup/ProductionType/new/">Production Types</a></li>

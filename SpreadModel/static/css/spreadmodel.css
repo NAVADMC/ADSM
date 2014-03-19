@@ -64,6 +64,11 @@ body>section {
     background-color: #FFF;
 }
 
+#setupMenu .completed {
+    background-color: #999;
+}
+
+
 .btn-add {
     background: none;
     padding:0;
