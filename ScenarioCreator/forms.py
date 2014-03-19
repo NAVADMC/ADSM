@@ -11,6 +11,11 @@ class Add_or_Select(Select):
     # def get_context(self, name, value, attrs=None, choices=()):
     #     context = super(Add_or_Select, self).get_context(name, value, attrs=None, choices=())
     #     context['attrs']['data-new-item-url'] = '/%s/new/' %
+
+
+def submit_button():
+    return ButtonHolder(Submit('submit', 'Submit', css_class='button white'))
+
 class DbSchemaVersionForm(ModelForm):
     class Meta:
         model = DbSchemaVersion
@@ -148,11 +153,9 @@ class ControlProtocolForm(ModelForm):
                     'cost_of_vaccination_additional_per_animal',
                     )
             ),
-            ButtonHolder(
-                Submit('submit', 'Submit', css_class='button white')
-            )
+            submit_button()
         )
-        return super(ControlProtocolForm, self).__init__(*args, **kwargs)
+        return super(self.__class__, self).__init__(*args, **kwargs)
     class Meta:
         model = ControlProtocol
         widgets = {'detection_probability_for_observed_time_in_clinical_relid': Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
@@ -196,6 +199,20 @@ class DiseaseSpreadModelForm(ModelForm):
 
 
 class IndirectSpreadModelForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            # 'latent_animals_can_infect_others',  # Indirect doesn't have this field
+            'subclinical_animals_can_infect_others',
+            'use_fixed_contact_rate',
+            'contact_rate',
+            'infection_probability',
+            'distance_pdf',
+            'transport_delay_pdf',
+            'movement_control_relid',
+            submit_button()
+        )
+        return super(self.__class__, self).__init__(*args, **kwargs)
     class Meta:
         model = IndirectSpreadModel
         exclude = ['_spread_method_code', '_disease']
@@ -206,6 +223,20 @@ class IndirectSpreadModelForm(ModelForm):
 
 
 class DirectSpreadModelForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            'latent_animals_can_infect_others',
+            'subclinical_animals_can_infect_others',
+            'use_fixed_contact_rate',
+            'contact_rate',
+            'infection_probability',
+            'distance_pdf',
+            'transport_delay_pdf',
+            'movement_control_relid',
+            submit_button()
+        )
+        return super(self.__class__, self).__init__(*args, **kwargs)
     class Meta:
         model = DirectSpreadModel
         exclude = ['_spread_method_code', '_disease']
@@ -216,6 +247,17 @@ class DirectSpreadModelForm(ModelForm):
 
 
 class AirborneSpreadModelForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            'spread_1km_probability',
+            'max_distance',
+            'wind_direction_start',
+            'wind_direction_end',
+            'transport_delay_pdf',
+            submit_button()
+        )
+        return super(self.__class__, self).__init__(*args, **kwargs)
     class Meta:
         model = AirborneSpreadModel
         exclude = ['_spread_method_code', '_disease']
