@@ -19,7 +19,7 @@ def save_new_instance(initialized_form, request):
 def new_form(request, initialized_form, context):
     if initialized_form.is_valid():
         return save_new_instance(initialized_form, request)
-    return render(request, 'ScenarioCreator/protocol.html', context)  # render in validation error messages
+    return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages
 
 
 def get_model_name_and_form(request):
@@ -55,7 +55,7 @@ def edit_entry(request, primary_key):
         initialized_form.save()  # write instance updates to database
     context = {'form': initialized_form,
                'title': "Edit a " + model_name}
-    return render(request, 'ScenarioCreator/new.html', context)
+    return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
 def copy_entry(request, primary_key):
@@ -69,7 +69,7 @@ def copy_entry(request, primary_key):
         return save_new_instance(initialized_form, request)
     context = {'form': initialized_form,
                'title': "Copy a " + model_name}
-    return render(request, 'ScenarioCreator/new.html', context)
+    return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
 def disease_spread(request):
