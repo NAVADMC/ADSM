@@ -270,17 +270,17 @@ class ControlProtocol(models.Model):
     destroy_indirect_forward_traces = models.BooleanField(default=False,
         help_text='Indicates if units of this type identified by trace forward of direct contacts will be subject to preemptive desctruction.', )
     destroy_direct_back_traces = models.BooleanField(default=False,
-        help_text='Indicates if units of this type identified by tracebackof direct contacts will be subject to preemptive desctruction.', )
+        help_text='Indicates if units of this type identified by trace back of direct contacts will be subject to preemptive desctruction.', )
     destroy_indirect_back_traces = models.BooleanField(default=False,
-        help_text='Indicates if units of this type identified by traceback of indirect contacts will be subject to preemptive desctruction.', )
+        help_text='Indicates if units of this type identified by trace back of indirect contacts will be subject to preemptive desctruction.', )
     destruction_priority = models.IntegerField(blank=True, null=True,
         help_text='The desctruction priority of this production type relative to other production types.  A lower number indicates a higher priority.', )
     use_vaccination = models.BooleanField(default=False,
         help_text='Indicates if units of this production type will be subject to vaccination.', )
+    vaccinate_detected_units = models.BooleanField(default=False,  # TODO: Clarify the distinction between use_vaccination and vaccinate_detected_units
+        help_text='Indicates if units of this production type will be subject to vaccination if infected and detected.', )
     minimum_time_between_vaccinations = models.IntegerField(blank=True, null=True,
         help_text='The minimum time in days between vaccination for units of this production type.', )
-    vaccinate_detected_units = models.BooleanField(default=False,
-        help_text='Indicates if units of this production type will be subject to vaccination if infected and detected.', )
     days_to_immunity = models.IntegerField(blank=True, null=True,
         help_text='The number of days required for the onset of vaccine immunity in a newly vaccinated unit of this type.', )
     vaccine_immune_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
