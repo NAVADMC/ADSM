@@ -19,10 +19,7 @@ def save_new_instance(initialized_form, request):
 def new_form(request, initialized_form, context):
     if initialized_form.is_valid():
         return save_new_instance(initialized_form, request)
-    template = 'ScenarioCreator/new.html'
-    if isinstance(initialized_form, ControlProtocolForm):
-        template = 'ScenarioCreator/protocol.html'
-    return render(request, template, context)  # render in validation error messages
+    return render(request, 'ScenarioCreator/protocol.html', context)  # render in validation error messages
 
 
 def get_model_name_and_form(request):

@@ -232,6 +232,7 @@ class ControlProtocol(models.Model):
         help_text='Relational function used to define the probability of observing clinical signs in units of this production type.', )
     detection_probability_report_vs_first_detection_relid = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the probability of reportin clinical signs in units of this production type.')
+    use_tracing = models.BooleanField(default=False, )
     trace_direct_forward = models.BooleanField(default=False,
         help_text='Indicator that trace forward will be conducted for direct contacts where the reported unit was the source of contact and was of this production type.', )
     trace_direct_back = models.BooleanField(default=False,
@@ -325,7 +326,7 @@ class ControlProtocol(models.Model):
         help_text='Test Sensitivity for units of this production type', )
     test_delay_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Function that describes the delay in obtaining test results.', )
-    vaccinate_retrospective_days = models.BooleanField(default=False,
+    vaccinate_retrospective_days = models.IntegerField(blank=True, null=True,
         help_text='Number of days in retrospect that should be used to determine which herds to vaccinate.', )
     use_cost_accounting = models.BooleanField(default=False, )
     cost_of_destruction_appraisal_per_unit = MoneyField(default=0.0,
