@@ -64,8 +64,8 @@ body>section {
     background-color: #FFF;
 }
 
-#setupMenu .completed {
-    background-color: #999;
+#setupMenu .completed, .completed {
+    background-color: #D0D0D0;
 }
 
 
