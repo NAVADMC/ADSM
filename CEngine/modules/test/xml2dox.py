@@ -285,8 +285,8 @@ def main ():
 				paramFileName = getText (test.getElementsByTagName ("parameter-file")[0])
 			except IndexError:
 				raise Exception, ("Missing parameter file name for test %s/%s" % (category, shortName))
-			print ' * See the <a href="test-xml-%s-%s.html">parameters as XML</a>.' \
-			  % (category, paramFileName.replace('.','_8'))
+			print ' * See the <a href="test-xml-%s-%s.html">parameters as XML</a> (module.%s/%s.xml).' \
+			  % (category, paramFileName.replace('.','_8'), category, paramFileName)
 			# The replace above deals with an odd behavior of Doxygen: if you
 			# use the @page directive to create a documentation page, but there
 			# is a period in the page name (e.g., the test suite contains pages
