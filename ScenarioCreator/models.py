@@ -249,7 +249,7 @@ class ControlProtocol(models.Model):
         help_text='Probability of success of trace for indirect contact.', )
     indirect_trace_period = models.IntegerField(blank=True, null=True,
         help_text='Days before detection  (critical period) for tracing of indirect contacts.', )
-    shipping_delay_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
+    shipping_delay_pdf = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Shipping delay function.', )
     detection_triggers_zone_creation = models.BooleanField(default=False,
         help_text='Indicator if detection of infected units of this production type will trigger a zone focus.', )
@@ -283,7 +283,7 @@ class ControlProtocol(models.Model):
         help_text='The minimum time in days between vaccination for units of this production type.', )
     days_to_immunity = models.IntegerField(blank=True, null=True,
         help_text='The number of days required for the onset of vaccine immunity in a newly vaccinated unit of this type.', )
-    vaccine_immune_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
+    vaccine_immune_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Defines the vaccine immune period for units of this production type.', )
     trigger_vaccination_ring = models.BooleanField(default=False,
         help_text='Indicates if detection of a clinical unit of this type will trigger a vaccination ring.', )
