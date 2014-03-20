@@ -1,3 +1,9 @@
+"""Form inheritance is for better support of layouts.  All forms have a default layout that it inherits from
+ModelForm -> models.py.  This basic layout can be overridden by declaring an __init__ with a self.helper Layout.
+See DirectSpreadModel for an example.  More complex widgets and layouts are accessible from there.
+All forms now have their "submit" button restored and you can choose custom layouts.  ControlProtocol has tabs."""
+
+
 from crispy_forms.bootstrap import TabHolder, Tab
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
 from ScenarioCreator.models import *
@@ -16,46 +22,56 @@ class Add_or_Select(Select):
 def submit_button():
     return ButtonHolder(Submit('submit', 'Submit', css_class='button white'))
 
-class DbSchemaVersionForm(ModelForm):
+
+class BaseForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        if not hasattr(self, 'helper'):  # so as not to override specific layouts
+            self.helper = FormHelper()
+            fields_and_submit = list(self.base_fields.keys()) + [submit_button()]
+            self.helper.layout = Layout(*fields_and_submit)
+        return super().__init__(*args, **kwargs)
+
+
+class DbSchemaVersionForm(BaseForm):
     class Meta:
         model = DbSchemaVersion
 
 
-class DynamicBlobForm(ModelForm):
+class DynamicBlobForm(BaseForm):
     class Meta:
         model = DynamicBlob
 
 
-class DynamicUnitForm(ModelForm):
+class UnitForm(BaseForm):
     class Meta:
         model = Unit
         exclude = ['_final_state_code', '_final_control_state_code', '_final_detection_state_code', '_cum_infected', '_cum_detected', '_cum_destroyed', '_cum_vaccinated']
         widgets = {'production_type': Add_or_Select(attrs={'data-new-item-url': '/setup/ProductionType/new/'})}
 
 
-class FunctionForm(ModelForm):
+class FunctionForm(BaseForm):
     class Meta:
         model = Function
 
 
-class ProbabilityFunctionForm(ModelForm):
+class ProbabilityFunctionForm(BaseForm):
     class Meta:
         model = ProbabilityFunction
 
 
-class RelationalFunctionForm(ModelForm):
+class RelationalFunctionForm(BaseForm):
     class Meta:
         model = RelationalFunction
 
 
-class RelationalPointForm(ModelForm):
+class RelationalPointForm(BaseForm):
     class Meta:
         model = RelationalPoint
         exclude = ['_point_order']
         widgets = {'relational_function': Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
-class ControlMasterPlanForm(ModelForm):
+class ControlMasterPlanForm(BaseForm):
     class Meta:
         model = ControlMasterPlan
         exclude = ['_include_detection', '_include_tracing', '_include_tracing_unit_exam', '_include_tracing_testing', '_include_destruction', '_include_vaccination', '_include_zones']
@@ -63,7 +79,7 @@ class ControlMasterPlanForm(ModelForm):
                    'vaccination_capacity_relid': Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
-class ProtocolAssignmentForm(ModelForm):
+class ProtocolAssignmentForm(BaseForm):
     class Meta:
         model = ProtocolAssignment
         exclude = ['_master_plan']
@@ -72,7 +88,7 @@ class ProtocolAssignmentForm(ModelForm):
                    'control_protocol': Add_or_Select(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'})}
 
 
-class ControlProtocolForm(ModelForm):
+class ControlProtocolForm(BaseForm):
     """https://speakerdeck.com/maraujop/advanced-django-forms-usage slide 47"""
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
@@ -155,7 +171,7 @@ class ControlProtocolForm(ModelForm):
             ),
             submit_button()
         )
-        return super(self.__class__, self).__init__(*args, **kwargs)
+        return super().__init__(*args, **kwargs)
     class Meta:
         model = ControlProtocol
         widgets = {'detection_probability_for_observed_time_in_clinical_relid': Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
@@ -165,12 +181,12 @@ class ControlProtocolForm(ModelForm):
                    'test_delay_pdf': Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
-class DiseaseForm(ModelForm):
+class DiseaseForm(BaseForm):
     class Meta:
         model = Disease
 
 
-class DiseaseReactionForm(ModelForm):
+class DiseaseReactionForm(BaseForm):
     class Meta:
         model = DiseaseReaction
         exclude = ['_disease']
@@ -182,14 +198,14 @@ class DiseaseReactionForm(ModelForm):
                    'disease_prevalence_relid': Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
-class DiseaseReactionAssignmentForm(ModelForm):
+class DiseaseReactionAssignmentForm(BaseForm):
     class Meta:
         model = DiseaseReactionAssignment
         widgets = {'production_type': Add_or_Select(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
                    'reaction': Add_or_Select(attrs={'data-new-item-url': '/setup/DiseaseReaction/new/'})}
 
 
-class DiseaseSpreadModelForm(ModelForm):
+class DiseaseSpreadModelForm(BaseForm):
     class Meta:
         model = DiseaseSpreadModel
         exclude = ['_disease']
@@ -198,7 +214,7 @@ class DiseaseSpreadModelForm(ModelForm):
                    'transport_delay_pdf': Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
-class IndirectSpreadModelForm(ModelForm):
+class IndirectSpreadModelForm(BaseForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -212,7 +228,7 @@ class IndirectSpreadModelForm(ModelForm):
             'movement_control_relid',
             submit_button()
         )
-        return super(self.__class__, self).__init__(*args, **kwargs)
+        return super().__init__(*args, **kwargs)
     class Meta:
         model = IndirectSpreadModel
         exclude = ['_spread_method_code', '_disease']
@@ -222,7 +238,7 @@ class IndirectSpreadModelForm(ModelForm):
                    'transport_delay_pdf': Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
-class DirectSpreadModelForm(ModelForm):
+class DirectSpreadModelForm(BaseForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -236,7 +252,7 @@ class DirectSpreadModelForm(ModelForm):
             'movement_control_relid',
             submit_button()
         )
-        return super(self.__class__, self).__init__(*args, **kwargs)
+        return super().__init__(*args, **kwargs)
     class Meta:
         model = DirectSpreadModel
         exclude = ['_spread_method_code', '_disease']
@@ -246,7 +262,7 @@ class DirectSpreadModelForm(ModelForm):
                    'transport_delay_pdf': Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
-class AirborneSpreadModelForm(ModelForm):
+class AirborneSpreadModelForm(BaseForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -257,7 +273,7 @@ class AirborneSpreadModelForm(ModelForm):
             'transport_delay_pdf',
             submit_button()
         )
-        return super(self.__class__, self).__init__(*args, **kwargs)
+        return super().__init__(*args, **kwargs)
     class Meta:
         model = AirborneSpreadModel
         exclude = ['_spread_method_code', '_disease']
@@ -266,23 +282,23 @@ class AirborneSpreadModelForm(ModelForm):
                    'transport_delay_pdf': Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
-class ScenarioForm(ModelForm):
+class ScenarioForm(BaseForm):
     class Meta:
         model = Scenario
         exclude = ['_output_settings']
 
 
-class OutputSettingsForm(ModelForm):
+class OutputSettingsForm(BaseForm):
     class Meta:
         model = OutputSettings
 
 
-class ProductionTypeForm(ModelForm):
+class ProductionTypeForm(BaseForm):
     class Meta:
         model = ProductionType
 
 
-class ProductionTypePairTransmissionForm(ModelForm):
+class ProductionTypePairTransmissionForm(BaseForm):
     class Meta:
         model = ProductionTypePairTransmission
         widgets = {'source_production_type': Add_or_Select(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
@@ -292,12 +308,12 @@ class ProductionTypePairTransmissionForm(ModelForm):
                    'airborne_contact_spread_model': Add_or_Select(attrs={'data-new-item-url': '/setup/AirborneSpreadModel/new/'})}
 
 
-class ZoneForm(ModelForm):
+class ZoneForm(BaseForm):
     class Meta:
         model = Zone
 
 
-class ZoneEffectOnProductionTypeForm(ModelForm):
+class ZoneEffectOnProductionTypeForm(BaseForm):
     class Meta:
         model = ZoneEffectOnProductionType
         widgets = {'zone': Add_or_Select(attrs={'data-new-item-url': '/setup/Zone/new/'}),
@@ -306,13 +322,13 @@ class ZoneEffectOnProductionTypeForm(ModelForm):
                    'zone_direct_movement_relid': Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
-class ReadAllCodesForm(ModelForm):
+class ReadAllCodesForm(BaseForm):
     class Meta:
         model = ReadAllCodes
         exclude = ['_code', '_code_type', '_code_description']
 
 
-class ReadAllCodeTypesForm(ModelForm):
+class ReadAllCodeTypesForm(BaseForm):
     class Meta:
         model = ReadAllCodeTypes
         exclude = ['_code_type', '_code_type_description']

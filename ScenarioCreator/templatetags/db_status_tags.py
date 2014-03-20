@@ -8,7 +8,6 @@ register = template.Library()
 
 @register.filter()
 def completed(queryset):
-    print(queryset)
     if queryset:
         return 'completed '
     return ''
