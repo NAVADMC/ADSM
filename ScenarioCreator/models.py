@@ -409,7 +409,7 @@ class DiseaseSpreadModel(models.Model):
         abstract = True
 
 
-class IndirectSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct and Indirect that were not in Airborne
+class AbstractSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct and Indirect that were not in Airborne
     _spread_method_code = models.CharField(max_length=255, default='indirect',
         help_text='Code indicating the mechanism of the disease spread.', )
     subclinical_animals_can_infect_others = models.BooleanField(default=False,
@@ -424,18 +424,27 @@ class IndirectSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct 
         help_text='Defines the sipment distances for direct and indirect contact models.', )
     movement_control_relid = models.ForeignKey(RelationalFunction, related_name='+',
         help_text='Relational function used to define movement control effects for the indicated production types combinations.', )
+    class Meta:
+        abstract = True
+
+
+class IndirectSpreadModel(AbstractSpreadModel):
+    """This has to inherit from AbstractSpreadModel or else Django treats DirectSpreadModel and IndirectSpreadModel as
+    interchangable, which they are not."""
     def __str__(self):
         return "%s %s Indirect Spread %i" % (self.name, self._disease, self.id)
 
 
-class DirectSpreadModel(IndirectSpreadModel):
+class DirectSpreadModel(AbstractSpreadModel):
+    """This has to inherit from AbstractSpreadModel or else Django treats DirectSpreadModel and IndirectSpreadModel as
+    interchangable, which they are not."""
     latent_animals_can_infect_others = models.BooleanField(default=False,
         help_text='Indicates if latent units of the source type can spread disease by direct contact. Not applicable to airborne spread or indirect spread.', )
     def __init__(self, *args, **kwargs):
-        super(IndirectSpreadModel, self).__init__(*args, **kwargs)
+        super(AbstractSpreadModel, self).__init__(*args, **kwargs)
         self._spread_method_code = 'direct'  # overrides 'indirect' value without creating a new field
     def __str__(self):
-        return "%s Direct Spread %i" % (self._disease, self.id)
+        return "%s %s Direct Spread %i" % (self.name, self._disease, self.id)
 
 
 class AirborneSpreadModel(DiseaseSpreadModel):
@@ -450,7 +459,7 @@ class AirborneSpreadModel(DiseaseSpreadModel):
     wind_direction_end = models.IntegerField(default=360,
         help_text='The end angle in degrees of the predominate wind direction for airborne spread.', )
     def __str__(self):
-        return "%s Airborne Spread %i" % (self._disease, self.id)
+        return "%s %s Airborne Spread %i" % (self.name, self._disease, self.id)
 
 
 class Scenario(models.Model):
