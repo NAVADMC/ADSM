@@ -195,7 +195,7 @@ class ControlMasterPlan(models.Model):
     _include_destruction = models.BooleanField(default=False,
         help_text='Indicates if destruction of units in any production type will be modeled.', )
     _include_vaccination = models.BooleanField(default=False,
-        help_text='A string that identifies the secondary priority order for destruction.', )  # TODO: wrong doc
+        help_text='Indicates if vaccination of units in any production type will be modeled.', )
     _include_zones = models.BooleanField(default=False,
         help_text='Indicates if zones will be modeled.', )
     tracing_program_delay = models.ForeignKey('ProbabilityFunction', blank=True, null=True,
