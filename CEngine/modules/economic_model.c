@@ -30,6 +30,7 @@
 #define events_listened_for economic_model_events_listened_for
 #define to_string economic_model_to_string
 #define local_free economic_model_free
+#define handle_before_any_simulations_event economic_model_handle_before_any_simulations_event
 #define handle_new_day_event economic_model_handle_new_day_event
 #define handle_vaccination_event economic_model_handle_vaccination_event
 #define handle_destruction_event economic_model_handle_destruction_event
@@ -52,9 +53,10 @@
 
 
 
-#define NEVENTS_LISTENED_FOR 3
+#define NEVENTS_LISTENED_FOR 4
 EVT_event_type_t events_listened_for[] =
 {
+  EVT_BeforeAnySimulations,
   EVT_NewDay,
   EVT_Vaccination,
   EVT_Destruction
@@ -129,6 +131,43 @@ typedef struct
   RPT_reporting_t *cumul_surveillance_cost;
 }
 local_data_t;
+
+
+
+/**
+ * Before any simulations, this module announces the output variables it is
+ * recording.
+ *
+ * @param self this module.
+ * @param queue for any new events this function creates.
+ */
+void
+handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
+                                     EVT_event_queue_t *queue)
+{
+  unsigned int n, i;
+  RPT_reporting_t *output;
+  GPtrArray *outputs = NULL;
+
+  n = self->outputs->len;
+  for (i = 0; i < n; i++)
+    {
+      output = (RPT_reporting_t *) g_ptr_array_index (self->outputs, i);
+      if (output->frequency != RPT_never)
+        {
+          if (outputs == NULL)
+            outputs = g_ptr_array_new();
+          g_ptr_array_add (outputs, output);
+        }
+    }
+
+  if (outputs != NULL)
+    EVT_event_enqueue (queue, EVT_new_declaration_of_outputs_event (outputs));
+  /* We don't free the pointer array, that will be done when the event is freed
+   * after all interested modules have processed it. */
+
+  return;
+}
 
 
 
@@ -356,6 +395,9 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
 
   switch (event->type)
     {
+    case EVT_BeforeAnySimulations:
+      handle_before_any_simulations_event (self, queue);
+      break;
     case EVT_NewDay:
       handle_new_day_event (self, units, zones, &(event->u.new_day));
       break;

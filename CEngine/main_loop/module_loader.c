@@ -401,10 +401,6 @@ spreadmodel_load_modules (const char *parameter_file, UNT_unit_list_t * units,
 
           model = model_instantiation_fn (model_spec, units, projection, zones);
 
-          /* Add the model's output variables to the list of reporting variables. */
-          for (j = 0; j < model->outputs->len; j++)
-            g_ptr_array_add (outputs, g_ptr_array_index (model->outputs, j));
-
           (*models)[nloaded++] = model;
 
           if (model->is_singleton)
