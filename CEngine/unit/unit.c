@@ -586,17 +586,9 @@ UNT_free_change_request_as_GFunc (gpointer data, gpointer user_data)
 void
 UNT_unit_clear_change_requests (UNT_unit_t * unit)
 {
-#if DEBUG
-  g_debug ("----- ENTER UNT_unit_clear_change_requests");
-#endif
-
   g_slist_foreach (unit->change_requests, UNT_free_change_request_as_GFunc, NULL);
   g_slist_free (unit->change_requests);
   unit->change_requests = NULL;
-
-#if DEBUG
-  g_debug ("----- EXIT UNT_unit_clear_change_requests");
-#endif
 }
 
 
@@ -739,11 +731,7 @@ UNT_unit_project (UNT_unit_t * unit, projPJ projection)
       unit->x = p.u;
       unit->y = p.v;
     }
-#if DEBUG
-  g_debug ("unit \"%s\" lat,lon %.3f,%.3f -> x,y %.1f,%.1f",
-           unit->official_id, unit->latitude, unit->longitude,
-           unit->x, unit->y);
-#endif
+
   return;
 }
 
@@ -849,10 +837,6 @@ startElement (void *userData, const char *name, const char **atts)
 {
   UNT_partial_unit_list_t *partial;
 
-#if DEBUG
-  g_debug ("encountered start tag for \"%s\"", name);
-#endif
-
   partial = (UNT_partial_unit_list_t *) userData;
   if (strcmp (name, "herds") == 0)
     {
@@ -892,10 +876,6 @@ endElement (void *userData, const char *name)
   char *filename;
   XML_Parser parser;
 
-#if DEBUG
-  g_debug ("encountered end tag for \"%s\"", name);
-#endif
-
   partial = (UNT_partial_unit_list_t *) userData;
   filename = partial->filename;
   parser = partial->parser;
@@ -907,9 +887,6 @@ endElement (void *userData, const char *name)
       char *tmp;
       tmp = g_strdup (partial->s->str);
       g_strstrip (tmp);
-      #if DEBUG
-        g_debug ("  accumulated string (Expat encoding) = \"%s\"", tmp);
-      #endif
       /* Expat stores the text as UTF-8.  Convert to ISO-8859-1. */
       partial->unit->official_id = g_convert_with_fallback (tmp, -1, "ISO-8859-1", "UTF-8", "?", NULL, NULL, NULL);
       g_assert (partial->unit->official_id != NULL);
@@ -932,9 +909,6 @@ endElement (void *userData, const char *name)
       tmp = g_utf8_normalize (partial->s->str, -1, G_NORMALIZE_DEFAULT);
       g_assert (tmp != NULL);
       g_strstrip (tmp);
-      #if DEBUG
-        g_debug ("  accumulated string (Expat encoding) = \"%s\"", tmp);
-      #endif
       production_type_names = partial->units->production_type_names;
 #ifdef USE_SC_GUILIB
       production_type_ids = partial->units->production_types;
@@ -1008,9 +982,6 @@ endElement (void *userData, const char *name)
 
       tmp = g_strdup (partial->s->str);
       g_strstrip (tmp);
-#if DEBUG
-      g_debug ("  accumulated string = \"%s\"", tmp);
-#endif
 
       errno = 0;
       size = strtol (tmp, &endptr, 0);
@@ -1058,9 +1029,6 @@ endElement (void *userData, const char *name)
 
       tmp = g_strdup (partial->s->str);
       g_strstrip (tmp);
-#if DEBUG
-      g_debug ("  accumulated string = \"%s\"", tmp);
-#endif
 
       lat = strtod (tmp, &endptr);
       if (tmp[0] == '\0')
@@ -1105,9 +1073,6 @@ endElement (void *userData, const char *name)
 
       tmp = g_strdup (partial->s->str);
       g_strstrip (tmp);
-#if DEBUG
-      g_debug ("  accumulated string = \"%s\"", tmp);
-#endif
 
       lon = strtod (tmp, &endptr);
       if (tmp[0] == '\0')
@@ -1152,9 +1117,6 @@ endElement (void *userData, const char *name)
 
       tmp = g_strdup (partial->s->str);
       g_strstrip (tmp);
-#if DEBUG
-      g_debug ("  accumulated string = \"%s\"", tmp);
-#endif
 
       x = strtod (tmp, &endptr);
       if (tmp[0] == '\0')
@@ -1199,9 +1161,6 @@ endElement (void *userData, const char *name)
 
       tmp = g_strdup (partial->s->str);
       g_strstrip (tmp);
-#if DEBUG
-      g_debug ("  accumulated string = \"%s\"", tmp);
-#endif
 
       y = strtod (tmp, &endptr);
       if (tmp[0] == '\0')
@@ -1243,9 +1202,6 @@ endElement (void *userData, const char *name)
        * a string. */
       tmp = g_strdup (partial->s->str);
       g_strstrip (tmp);
-      #if DEBUG
-        g_debug ("  accumulated string = \"%s\"", tmp);
-      #endif
 
       if (tmp[0] == '\0')
         {
@@ -1321,9 +1277,6 @@ endElement (void *userData, const char *name)
 
       tmp = g_strdup (partial->s->str);
       g_strstrip (tmp);
-#if DEBUG
-      g_debug ("  accumulated string = \"%s\"", tmp);
-#endif
 
       errno = 0;
       days = strtol (tmp, &endptr, 0);
@@ -1368,9 +1321,6 @@ endElement (void *userData, const char *name)
 
       tmp = g_strdup (partial->s->str);
       g_strstrip (tmp);
-#if DEBUG
-      g_debug ("  accumulated string = \"%s\"", tmp);
-#endif
 
       errno = 0;
       days = strtol (tmp, &endptr, 0);
@@ -1434,9 +1384,6 @@ endElement (void *userData, const char *name)
 
       tmp = g_strdup (partial->s->str);
       g_strstrip (tmp);
-#if DEBUG
-      g_debug ("  accumulated string = \"%s\"", tmp);
-#endif
       projection = pj_init_plus (tmp);
       if (!projection)
         {
@@ -2045,10 +1992,6 @@ UNT_step (UNT_unit_t * unit, GHashTable *infectious_units)
   GSList *iter;
   UNT_change_request_t *request;
 
-#if DEBUG
-  g_debug ("----- ENTER UNT_step");
-#endif
-
   old_state = unit->state;
   unit->days_in_state++;
 
@@ -2136,9 +2079,7 @@ UNT_step (UNT_unit_t * unit, GHashTable *infectious_units)
 #endif
     }
 
-#if DEBUG
-  g_debug ("----- EXIT UNT_step");
-#endif
+  return;
 }
 
 

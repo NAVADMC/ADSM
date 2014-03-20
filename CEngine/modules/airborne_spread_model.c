@@ -219,8 +219,8 @@ build_size_factor_list (UNT_unit_list_t * units)
   g_debug ("largest number of animals = %u", max_size);
 #endif
 
-  /* Build a histogram with one bin for each size. */
-  histogram = gsl_histogram_alloc (max_size);
+  /* Build a histogram. */
+  histogram = gsl_histogram_alloc (MIN(200,max_size));
   g_assert (histogram != NULL);
   gsl_histogram_set_ranges_uniform (histogram, 0.5, (double) max_size + 0.5);
   for (i = 0; i < nunits; i++)
@@ -244,15 +244,6 @@ build_size_factor_list (UNT_unit_list_t * units)
       unit = UNT_unit_list_get (units, i);
       size_factor[i] = PDF_cdf (unit->size, size_dist) * 2;
     }
-
-#if DEBUG
-  g_debug ("size factors");
-  for (i = 0; i < nunits; i++)
-    {
-      unit = UNT_unit_list_get (units, i);
-      g_debug ("unit #%u (size %u) = %g", i, unit->size, size_factor[i]);
-    }
-#endif
 
   PDF_free_dist (size_dist);
 
@@ -528,7 +519,8 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units
         && (unit1->state == InfectiousSubclinical || unit1->state == InfectiousClinical);
 #if DEBUG
       g_string_sprintfa (s, "%s be source", unit1_can_be_source ? "can" : "cannot");
-      g_debug ("%s", s->str);
+      if (unit1_can_be_source)
+        g_debug ("%s", s->str);
       g_string_free (s, TRUE);
 #endif
       if (!unit1_can_be_source)

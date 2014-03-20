@@ -119,9 +119,6 @@ REL_new_generic_chart (double *x, double *y, size_t n)
   #endif
   for (i = 0; i + 1 < n;)
     {
-      #if DEBUG
-        g_debug ("i=%lu", (unsigned long)i);
-      #endif
       if (gsl_fcmp (x[i], x[i + 1], EPSILON) == 0 && gsl_fcmp (y[i], y[i + 1], EPSILON) == 0)
         {
           for (j = i; j + 1 < n; j++)
@@ -151,9 +148,6 @@ REL_new_generic_chart (double *x, double *y, size_t n)
   #endif
   for (i = 0; i + 2 < n;)
     {
-      #if DEBUG
-        g_debug ("i=%lu", (unsigned long)i);
-      #endif
       if (gsl_fcmp (y[i], y[i + 1], EPSILON) == 0 && gsl_fcmp (y[i + 1], y[i + 2], EPSILON) == 0)
         {
           for (j = i + 1; j + 1 < n; j++)

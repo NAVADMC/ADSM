@@ -280,10 +280,6 @@ check_and_choose (int id, gpointer arg)
   unsigned long production_type;
   unsigned long index;
 
-#if DEBUG
-  g_debug ("----- ENTER check_and_choose (%s)", MODEL_NAME);
-#endif
-
   callback_data = (callback_t *) arg;
   g_assert (callback_data != NULL);
 
@@ -449,9 +445,7 @@ check_and_choose (int id, gpointer arg)
          ;      
     };
   }; /*  END if callback_data->_contacts != NULL */
-#if DEBUG
-  g_debug ( "----- EXIT check_and_choose (%s) - Optimized Version", MODEL_NAME );
-#endif
+
   return;
 }
 

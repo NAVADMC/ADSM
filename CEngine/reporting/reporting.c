@@ -1537,15 +1537,7 @@ RPT_reporting_reset (RPT_reporting_t * reporting)
 void
 RPT_reporting_zero_as_GDataForeachFunc (GQuark key_id, gpointer data, gpointer user_data)
 {
-#if DEBUG
-  g_debug ("----- ENTER RPT_reporting_zero_as_GDataForeachFunc");
-#endif
-
   RPT_reporting_zero ((RPT_reporting_t *) data);
-
-#if DEBUG
-  g_debug ("----- EXIT RPT_reporting_zero_as_GDataForeachFunc");
-#endif
 }
 
 
@@ -1563,10 +1555,6 @@ RPT_reporting_zero_as_GDataForeachFunc (GQuark key_id, gpointer data, gpointer u
 void
 RPT_reporting_zero (RPT_reporting_t * reporting)
 {
-#if DEBUG
-  g_debug ("----- ENTER RPT_reporting_zero");
-#endif
-
   switch (reporting->type)
     {
     case RPT_integer:
@@ -1583,9 +1571,7 @@ RPT_reporting_zero (RPT_reporting_t * reporting)
       g_assert_not_reached ();
     }
 
-#if DEBUG
-  g_debug ("----- EXIT RPT_reporting_zero");
-#endif
+  return;
 }
 
 
