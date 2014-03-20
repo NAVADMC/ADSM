@@ -9,6 +9,9 @@
 .dia.svg:
 	dia -e $@ $<
 
+.gnuplot.svg:
+	(echo set term svg enhanced mouse && echo set output \'$@\' && cat $<) | gnuplot
+
 .gnuplot.eps:
 	(echo set terminal postscript eps color 24 && echo set output \'$@\' && cat $<) | gnuplot
 
