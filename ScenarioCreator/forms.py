@@ -77,7 +77,8 @@ class ControlMasterPlanForm(BaseForm):
     class Meta:
         model = ControlMasterPlan
         exclude = ['_include_detection', '_include_tracing', '_include_tracing_unit_exam', '_include_tracing_testing', '_include_destruction', '_include_vaccination', '_include_zones']
-        widgets = {'destruction_capacity_relid': Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+        widgets = {'tracing_program_delay': Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'destruction_capacity_relid': Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'vaccination_capacity_relid': Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 

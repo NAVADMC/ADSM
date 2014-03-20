@@ -7,13 +7,22 @@ import re
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 
 
-def basic_context():
-    return {'Scenarios': Scenario.objects.all(),
-            'OutputSettings': OutputSettings.objects.all(),
-            'ProductionType': ProductionType.objects.all(),
-            'Farm': Unit.objects.all(),
+def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
+    return {'Scenario': Scenario.objects.all(),
+            'OutputSetting': OutputSettings.objects.all(),
+            'ProductionTypes': ProductionType.objects.all(),
+            'Farms': Unit.objects.all(),
             'Disease': Disease.objects.all(),
-            'ControlMasterPlan': ControlMasterPlan.objects.all()}
+            'Reactions': DiseaseReaction.objects.all(),
+            'DirectSpreads': DirectSpreadModel.objects.all(),
+            'IndirectSpreads': IndirectSpreadModel.objects.all(),
+            'AirborneSpreads': AirborneSpreadModel.objects.all(),
+            'Transmissions': ProductionTypePairTransmission.objects.all(),
+            'ControlMasterPlan': ControlMasterPlan.objects.all(),
+            'Protocols': ControlProtocol.objects.all(),
+            'Zones': Zone.objects.all(),
+            'ZoneEffects': ZoneEffectOnProductionType.objects.all()}
+
 
 def disease_spread(request):
     return render(request, 'ScenarioCreator/DiseaseSpread.html', basic_context())

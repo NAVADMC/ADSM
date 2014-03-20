@@ -249,7 +249,7 @@ class ControlProtocol(models.Model):
         help_text='Probability of success of trace for indirect contact.', )
     indirect_trace_period = models.IntegerField(blank=True, null=True,
         help_text='Days before detection  (critical period) for tracing of indirect contacts.', )
-    shipping_delay_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
+    shipping_delay_pdf = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Shipping delay function.', )
     detection_triggers_zone_creation = models.BooleanField(default=False,
         help_text='Indicator if detection of infected units of this production type will trigger a zone focus.', )
