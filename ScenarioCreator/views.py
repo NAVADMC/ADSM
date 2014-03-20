@@ -16,7 +16,7 @@ def basic_context():
             'ControlMasterPlan': ControlMasterPlan.objects.all()}
 
 def disease_spread(request):
-    return render(request, 'ScenarioCreator/DiseaseSpread.html', {})
+    return render(request, 'ScenarioCreator/DiseaseSpread.html', basic_context())
 
 
 def save_new_instance(initialized_form, request):

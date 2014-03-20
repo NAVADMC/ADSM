@@ -6,6 +6,8 @@ All forms now have their "submit" button restored and you can choose custom layo
 
 from crispy_forms.bootstrap import TabHolder, Tab
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import OperationalError  # OperationalError is for initial manage.py syncdb
 from ScenarioCreator.models import *
 from floppyforms import ModelForm, Select, CharField
 from crispy_forms.helper import FormHelper
@@ -190,6 +192,11 @@ class DiseaseReactionForm(BaseForm):
     class Meta:
         model = DiseaseReaction
         exclude = ['_disease']
+        try:
+            if not Scenario.objects.get(id=1).use_within_unit_prevalence:
+                exclude.append('disease_prevalence_relid')
+        except (ObjectDoesNotExist, OperationalError):
+            pass  # If someone hasn't created a Scenario yet, the field will show
         widgets = {'_disease': Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'disease_latent_period_pdf': Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_subclinical_period_pdf': Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
@@ -205,19 +212,11 @@ class DiseaseReactionAssignmentForm(BaseForm):
                    'reaction': Add_or_Select(attrs={'data-new-item-url': '/setup/DiseaseReaction/new/'})}
 
 
-class DiseaseSpreadModelForm(BaseForm):
-    class Meta:
-        model = DiseaseSpreadModel
-        exclude = ['_disease']
-        widgets = {'_disease': Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
-                   'movement_control_relid': Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'transport_delay_pdf': Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
-
-
 class IndirectSpreadModelForm(BaseForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
+            'name',
             # 'latent_animals_can_infect_others',  # Indirect doesn't have this field
             'subclinical_animals_can_infect_others',
             'use_fixed_contact_rate',
@@ -242,6 +241,7 @@ class DirectSpreadModelForm(BaseForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
+            'name',
             'latent_animals_can_infect_others',
             'subclinical_animals_can_infect_others',
             'use_fixed_contact_rate',
@@ -266,6 +266,7 @@ class AirborneSpreadModelForm(BaseForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
+            'name',
             'spread_1km_probability',
             'max_distance',
             'wind_direction_start',
@@ -277,6 +278,10 @@ class AirborneSpreadModelForm(BaseForm):
     class Meta:
         model = AirborneSpreadModel
         exclude = ['_spread_method_code', '_disease']
+        try:
+            if Scenario.objects.get(id=1).use_airborne_exponential_decay:
+                exclude.append('max_distance')
+        except (ObjectDoesNotExist, OperationalError): pass
         widgets = {'_disease': Add_or_Select(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control_relid': Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay_pdf': Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
