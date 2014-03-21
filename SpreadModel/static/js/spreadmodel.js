@@ -14,7 +14,7 @@ $(function(){
             }else{
                 hide_target.hide()
             }
-        }).trigger('change')
+        }).trigger('change')  //TODO: this doesn't trigger on page load properly
 
     })
 
