@@ -82,6 +82,13 @@ class ControlMasterPlanForm(BaseForm):
 
 
 class ProtocolAssignmentForm(BaseForm):
+    """class CommentForm(forms.Form):
+        name = forms.CharField()
+        url = forms.URLField()
+        comment = forms.CharField()
+        This form will include three default TextInput widgets, with default rendering – no CSS class, no extra attributes. This means that the input boxes provided for each widget will be rendered exactly the same:
+    > f = CommentForm(auto_id=False)
+    > f.as_table()"""
     class Meta:
         model = ProtocolAssignment
         exclude = ['_master_plan']
