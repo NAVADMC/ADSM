@@ -247,8 +247,8 @@ class ControlProtocol(models.Model):
         help_text='Probability of success of trace for indirect contact.', )
     indirect_trace_period = models.IntegerField(blank=True, null=True,
         help_text='Days before detection  (critical period) for tracing of indirect contacts.', )
-    shipping_delay_pdf = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
-        help_text='Shipping delay function.', )
+    trace_result_delay_pdf = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
+        help_text='Delay for carrying out trace investigation result (days).', )
     detection_triggers_zone_creation = models.BooleanField(default=False,
         help_text='Indicator if detection of infected units of this production type will trigger a zone focus.', )
     direct_trace_is_a_zone_trigger = models.BooleanField(default=False,
@@ -402,7 +402,7 @@ class DiseaseSpreadModel(models.Model):
         help_text='Parent disease whose spreading characteristics this describes.')
         # This is in Disease because of simulation restrictions
     transport_delay_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
-        help_text='Relational function used to define the shipment delays for the indicated production types combinations.', )
+        help_text='Relational function used to define the shipment delays for the indicated production type.', )
     class Meta:
         abstract = True
 

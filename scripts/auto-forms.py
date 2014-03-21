@@ -59,7 +59,7 @@ class ControlProtocolForm(ModelForm):
         model = ControlProtocol
         widgets = {'detection_probability_for_observed_time_in_clinical_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'detection_probability_report_vs_first_detection_relid':Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'shipping_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'trace_result_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'vaccine_immune_period_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'test_delay_pdf':Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 

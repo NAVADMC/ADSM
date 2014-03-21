@@ -113,7 +113,7 @@ class ControlProtocolForm(BaseForm):
                     'trace_indirect_back',
                     'indirect_trace_success',
                     'indirect_trace_period',
-                    'shipping_delay_pdf',
+                    'trace_result_delay_pdf',
                     'detection_triggers_zone_creation',
                     'direct_trace_is_a_zone_trigger',
                     'indirect_trace_is_a_zone_trigger',
@@ -178,7 +178,7 @@ class ControlProtocolForm(BaseForm):
         model = ControlProtocol
         widgets = {'detection_probability_for_observed_time_in_clinical_relid': Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'detection_probability_report_vs_first_detection_relid': Add_or_Select(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'shipping_delay_pdf': Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'trace_result_delay_pdf': Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'vaccine_immune_period_pdf': Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'test_delay_pdf': Add_or_Select(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
