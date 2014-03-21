@@ -249,12 +249,6 @@ class ControlProtocol(models.Model):
         help_text='Days before detection  (critical period) for tracing of indirect contacts.', )
     trace_result_delay_pdf = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Delay for carrying out trace investigation result (days).', )
-    detection_triggers_zone_creation = models.BooleanField(default=False,
-        help_text='Indicator if detection of infected units of this production type will trigger a zone focus.', )
-    direct_trace_is_a_zone_trigger = models.BooleanField(default=False,
-        help_text='Indicator if direct tracing of infected units of this production type will trigger a zone focus.', )
-    indirect_trace_is_a_zone_trigger = models.BooleanField(default=False,
-        help_text='Indicator if indirect tracing of infected units of this production type will trigger a zone focus.', )
     use_destruction = models.BooleanField(default=False,
         help_text='Indicates if detected clinical units of this production type will be destroyed.', )
     destruction_is_a_ring_trigger = models.BooleanField(default=False,
@@ -569,6 +563,12 @@ class ZoneEffectOnProductionType(models.Model):
         help_text='Zone for which this event occurred.', )
     production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
+    detection_triggers_zone_creation = models.BooleanField(default=False,
+        help_text='Indicator if detection of infected units of this production type will trigger a zone focus.', )
+    direct_trace_is_a_zone_trigger = models.BooleanField(default=False,
+        help_text='Indicator if direct tracing of infected units of this production type will trigger a zone focus.', )
+    indirect_trace_is_a_zone_trigger = models.BooleanField(default=False,
+        help_text='Indicator if indirect tracing of infected units of this production type will trigger a zone focus.', )
     zone_indirect_movement_relid = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Function the describes indirect movement rate.', )
     zone_direct_movement_relid = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
