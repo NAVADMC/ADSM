@@ -9,7 +9,7 @@ from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import OperationalError  # OperationalError is for initial manage.py syncdb
 from ScenarioCreator.models import *
-from floppyforms import ModelForm, Select, CharField
+from floppyforms import ModelForm, Select, CharField, NumberInput
 from crispy_forms.helper import FormHelper
 
 
@@ -293,6 +293,7 @@ class ScenarioForm(BaseForm):
 class OutputSettingsForm(BaseForm):
     class Meta:
         model = OutputSettings
+        widgets = {'maximum_iterations_for_daily_output': NumberInput(attrs={'data-toggle-controller': 'save_all_daily_outputs'})}
 
 
 class ProductionTypeForm(BaseForm):

@@ -4,6 +4,20 @@ $(function(){
         var model = $selector.attr('name'); // field name
         modelModal.show(model, $selector);
     })
+    $('[data-toggle-controller]').each(function(){
+        var controller = '[name=' + $(this).attr('data-toggle-controller') + ']'
+        var hide_target = $(this).parents('.control-group')
+        var required_value = $(this).attr('data-required-value') || 'True'
+        $('body').on('change', controller, function(){
+            if($(this).val() == required_value){
+                hide_target.show()
+            }else{
+                hide_target.hide()
+            }
+        }).trigger('change')
+
+    })
+
 })
 
 var modelModal = {
@@ -76,3 +90,4 @@ var modelModal = {
                   </div>\
                 </div>')
 }
+
