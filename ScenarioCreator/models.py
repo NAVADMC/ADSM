@@ -271,23 +271,23 @@ class ControlProtocol(models.Model):
         help_text='Indicates if units of this type identified by trace back of direct contacts will be subject to preemptive desctruction.', )
     destroy_indirect_back_traces = models.BooleanField(default=False,
         help_text='Indicates if units of this type identified by trace back of indirect contacts will be subject to preemptive desctruction.', )
-    destruction_priority = models.IntegerField(blank=True, null=True,
+    destruction_priority = models.IntegerField(default=5, blank=True, null=True,
         help_text='The desctruction priority of this production type relative to other production types.  A lower number indicates a higher priority.', )
     use_vaccination = models.BooleanField(default=False,
         help_text='Indicates if units of this production type will be subject to vaccination.', )
     vaccinate_detected_units = models.BooleanField(default=False,  # TODO: Clarify the distinction between use_vaccination and vaccinate_detected_units
         help_text='Indicates if units of this production type will be subject to vaccination if infected and detected.', )
-    minimum_time_between_vaccinations = models.IntegerField(blank=True, null=True,
-        help_text='The minimum time in days between vaccination for units of this production type.', )
     days_to_immunity = models.IntegerField(blank=True, null=True,
         help_text='The number of days required for the onset of vaccine immunity in a newly vaccinated unit of this type.', )
+    minimum_time_between_vaccinations = models.IntegerField(blank=True, null=True,
+        help_text='The minimum time in days between vaccination for units of this production type.', )
     vaccine_immune_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Defines the vaccine immune period for units of this production type.', )
     trigger_vaccination_ring = models.BooleanField(default=False,
         help_text='Indicates if detection of a clinical unit of this type will trigger a vaccination ring.', )
     vaccination_ring_radius = models.FloatField(blank=True, null=True,
         help_text='Radius in kilometers of the vaccination ring.', )
-    vaccination_priority = models.IntegerField(blank=True, null=True,
+    vaccination_priority = models.IntegerField(default=5, blank=True, null=True,
         help_text='The vacination priority of this production type relative to other production types.  A lower number indicates a higher priority.', )
     vaccination_demand_threshold = models.IntegerField(blank=True, null=True,
         help_text='The number of animals of this type that can be vaccinated before the cost of vaccination increases.', )
@@ -498,8 +498,10 @@ class OutputSettings(models.Model):
                  ('first-detection','Simulation will stop when the first detection occurs.')))
      ## Outputs requested:
     save_all_daily_outputs = models.BooleanField(default=False,
+        choices=((True, 'Save all daily output fo every iteration (warning: this option may produce very large scenario files)'),
+                 (False, 'Save all daily output for a specified number of iterations')),
         help_text='Indicates if daily outputs should be stored for every iteration.', )
-    maximum_iterations_for_daily_output = models.IntegerField(default=3,
+    maximum_iterations_for_daily_output = models.IntegerField(default=3, blank=True, null=True,  # TODO: validate min(3,x)
         help_text='The number of iterations for which daily outputs should be stored The minimum value is 3.', )
     daily_states_filename = models.CharField(max_length=255, blank=True, null=True,
         help_text='The file name to output a plain text file with the state of each unit on each day of each iteration.', )
