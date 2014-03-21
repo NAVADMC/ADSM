@@ -198,8 +198,6 @@ class ControlMasterPlan(models.Model):
         help_text='Indicates if vaccination of units in any production type will be modeled.', )
     _include_zones = models.BooleanField(default=False,
         help_text='Indicates if zones will be modeled.', )
-    tracing_program_delay = models.ForeignKey('ProbabilityFunction', blank=True, null=True,
-        help_text='Delay for carrying out a trace investigation')
     destruction_program_delay = models.IntegerField(blank=True, null=True,
         help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
     destruction_capacity_relid = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
