@@ -80,3 +80,13 @@ textarea {
     width: 400px;
     height: 70px;
 }
+
+td, th {
+    padding-bottom: 8px;
+    padding-right: 10px;
+}
+
+th {
+    padding-right: 40px;
+}
+

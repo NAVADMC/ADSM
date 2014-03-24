@@ -6,7 +6,7 @@
     <h1>{{ title }}</h1>
 
     <table>
-        <tr><th>Production Type</th><th>Protocol</th><th>Notes</th></tr>
+        <tr><th><h3>Production Type</h3></th><th><h3>Protocol</h3></th><th><h3>Notes</h3></th></tr>
         <tbody>
         {% for form in forms %}
             {% form form using 'ScenarioCreator/FormRow.html' %}
