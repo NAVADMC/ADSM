@@ -91,7 +91,7 @@ class ProtocolAssignmentForm(ModelForm):  # not a crispy form
     > f.as_table()"""
     class Meta:
         model = ProtocolAssignment
-        exclude = ['_master_plan', 'notes']
+        exclude = ['_master_plan', ]
         widgets = {'_master_plan': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlMasterPlan/new/'}),
                    'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
                    'control_protocol': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'})}

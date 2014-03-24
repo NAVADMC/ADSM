@@ -8,8 +8,8 @@
     <table>
         <tr><th>Production Type</th><th>Protocol</th><th>Notes</th></tr>
         <tbody>
-        {% for formrow in forms %}
-            {% form formrow using 'ScenarioCreator/FormRow.html' %}
+        {% for form in forms %}
+            {% form form using 'ScenarioCreator/FormRow.html' %}
         {% endfor %}
         </tbody>
     </table>

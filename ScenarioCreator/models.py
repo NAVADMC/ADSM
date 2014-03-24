@@ -354,7 +354,7 @@ class ProtocolAssignment(models.Model):
         help_text='The production type that these outputs apply to.', )
     control_protocol = models.ForeignKey('ControlProtocol',
         help_text='The control protocol to apply to this production type.')
-    notes = models.TextField(blank=True,
+    notes = models.CharField(max_length=255, blank=True, null=True,
         help_text='Why should this protocol be assigned to this production type?')
     def __str__(self):
         return "%s applied to %s" % (self.control_protocol, self.production_type)
