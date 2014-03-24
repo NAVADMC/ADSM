@@ -33,10 +33,23 @@ def assign_protocols(request):
     forms = []
     for pt in ProductionType.objects.all():
         initialized_form = ProtocolAssignmentForm(request.POST or None)
-        initialized_form.production_type_id = pt.id
+        initialized_form.fields['production_type'].initial = pt.id
         forms.append(initialized_form)
     context['forms'] = forms
-    return render(request, 'ScenarioCreator/ProtocolAssignment.html', context)  # ProtocolAssignment
+    context['title'] = 'Assign a Control Protocol to each Production Type'
+    return render(request, 'ScenarioCreator/ProtocolAssignment.html', context)
+
+
+def assign_reactions(request):
+    context = basic_context()
+    forms = []
+    for pt in ProductionType.objects.all():
+        initialized_form = DiseaseReactionAssignmentForm(request.POST or None)
+        initialized_form.fields['production_type'].initial = pt.id
+        forms.append(initialized_form)
+    context['forms'] = forms
+    context['title'] = 'Set what Reaction each Production Type has to the Disease'
+    return render(request, 'ScenarioCreator/ProtocolAssignment.html', context)
 
 
 def save_new_instance(initialized_form, request):

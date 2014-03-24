@@ -81,20 +81,20 @@ class ControlMasterPlanForm(BaseForm):
                    'vaccination_capacity_relid': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
-class ProtocolAssignmentForm(ModelForm):  # not a crispy form
-    """class CommentForm(forms.Form):
-        name = forms.CharField()
-        url = forms.URLField()
-        comment = forms.CharField()
-        This form will include three default TextInput widgets, with default rendering – no CSS class, no extra attributes. This means that the input boxes provided for each widget will be rendered exactly the same:
-    > f = CommentForm(auto_id=False)
-    > f.as_table()"""
+class ProtocolAssignmentForm(BaseForm):
     class Meta:
         model = ProtocolAssignment
         exclude = ['_master_plan', ]
-        widgets = {'_master_plan': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlMasterPlan/new/'}),
-                   'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-                   'control_protocol': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'})}
+        # widgets = {'_master_plan': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlMasterPlan/new/'}),
+        #            'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
+        #            'control_protocol': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'})}
+
+
+class DiseaseReactionAssignmentForm(BaseForm):
+    class Meta:
+        model = DiseaseReactionAssignment
+        # widgets = {'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
+        #            'reaction': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseReaction/new/'})}
 
 
 class ControlProtocolForm(BaseForm):
@@ -210,13 +210,6 @@ class DiseaseReactionForm(BaseForm):
                    'disease_clinical_period_pdf': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_immune_period_pdf': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_prevalence_relid': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
-
-
-class DiseaseReactionAssignmentForm(BaseForm):
-    class Meta:
-        model = DiseaseReactionAssignment
-        widgets = {'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-                   'reaction': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseReaction/new/'})}
 
 
 class IndirectSpreadModelForm(BaseForm):
