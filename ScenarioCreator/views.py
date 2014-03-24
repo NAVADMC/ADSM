@@ -34,9 +34,9 @@ def assign_protocols(request):
     for pt in ProductionType.objects.all():
         initialized_form = ProtocolAssignmentForm(request.POST or None)
         initialized_form.production_type_id = pt.id
-        forms.append(initialized_form.as_table())
+        forms.append(initialized_form)
     context['forms'] = forms
-    return render(request, 'ScenarioCreator/ProtocolAssignment.html', context)
+    return render(request, 'ScenarioCreator/ProtocolAssignment.html', context)  # ProtocolAssignment
 
 
 def save_new_instance(initialized_form, request):

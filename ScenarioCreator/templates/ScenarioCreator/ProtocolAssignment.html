@@ -1,11 +1,16 @@
 {% extends 'ScenarioCreator/navigationPane.html' %}
+{% load floppyforms %}
+
 {% block content %}
 
     <h1>Assign a Control Protocol to each Production Type</h1>
 
     <table>
+        <tr><th>Production Type</th><th>Protocol</th><th>Notes</th></tr>
+        <tbody>
         {% for formrow in forms %}
-            {{ formrow }}
+            {% form formrow using 'ScenarioCreator/FormRow.html' %}
         {% endfor %}
+        </tbody>
     </table>
 {% endblock %}
