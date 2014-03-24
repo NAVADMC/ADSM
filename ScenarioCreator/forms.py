@@ -101,7 +101,8 @@ class ControlProtocolForm(BaseForm):
                 Tab('Detection',
                     'use_detection',
                     'detection_probability_for_observed_time_in_clinical_relid',
-                    'detection_probability_report_vs_first_detection_relid'
+                    'detection_probability_report_vs_first_detection_relid',
+                    'detection_is_a_zone_trigger',
                 ),
                 Tab('Tracing',
                     'use_tracing',
@@ -114,6 +115,8 @@ class ControlProtocolForm(BaseForm):
                     'indirect_trace_success',
                     'indirect_trace_period',
                     'trace_result_delay_pdf',
+                    'direct_trace_is_a_zone_trigger',
+                    'indirect_trace_is_a_zone_trigger',
                     ),
                 Tab('Testing',
                     'use_testing',
