@@ -39,6 +39,7 @@ def priority_choices():
 
 frequency = chc("never", "once", "daily", "weekly", "monthly", "yearly")
 
+
 class DbSchemaVersion(models.Model):
     version_number = models.CharField(max_length=255, unique=True,
         help_text='', )
@@ -65,14 +66,14 @@ class Unit(models.Model):
     longitude = LongitudeField(
         help_text='The longitude used to georeference this unit.', )
     initial_state = models.CharField(max_length=255,
-        help_text='Code indicating the actual disease state of the unit at the beginning of the simulation.',
-                                          choices=(('L', 'Latent'),
-                                                   ('S', 'Susceptible'),
-                                                   ('B', 'Subclinical'),
-                                                   ('C', 'Clinical'),
-                                                   ('N', 'Naturally Immune'),
-                                                   ('V', 'Vaccine Immune'),
-                                                   ('D', 'Destroyed')))
+                                     help_text='Code indicating the actual disease state of the unit at the beginning of the simulation.',
+                                     choices=(('L', 'Latent'),
+                                              ('S', 'Susceptible'),
+                                              ('B', 'Subclinical'),
+                                              ('C', 'Clinical'),
+                                              ('N', 'Naturally Immune'),
+                                              ('V', 'Vaccine Immune'),
+                                              ('D', 'Destroyed')))
     days_in_initial_state = models.IntegerField(blank=True, null=True,
         help_text='The number of days that the unit will remain in its initial state unless preempted by other events.', )
     days_left_in_initial_state = models.IntegerField(blank=True, null=True,
@@ -101,69 +102,69 @@ class Unit(models.Model):
         return "Unit(%s: (%s, %s)" % (self.production_type, self.latitude, self.longitude)
 
 
-'''Function is a model that defines either a Probability Distribution Function (pdf) or
- a relational function (relid) depending on which child class is used.  '''
 class Function(models.Model):
+    """Function is a model that defines either a Probability Distribution Function (pdf) or
+ a relational function (relid) depending on which child class is used.  """
     name = models.CharField(max_length=255,
-        help_text='User-assigned name for each function.', )
+                            help_text='User-assigned name for each function.', )
     x_axis_units = models.CharField(max_length=255, default="Days",
-        help_text='Specifies the descriptive units for the x axis in relational functions.', )
+                                    help_text='Specifies the descriptive units for the x axis in relational functions.', )
     notes = models.TextField(blank=True, null=True,
-        help_text='', )  # Why is this hidden?
+                             help_text='', )  # Why is this hidden?
     class Meta:
         abstract = True
     def __str__(self):
         return self.name
 
 
-'''There are a large number of fields in this model because different equation_type use different
-parameters.  Parameters are all listed as optional because they are frequently unused.  A second
-layer of validation will be necessary for required parameters per equation_type.'''
 class ProbabilityFunction(Function):
+    """There are a large number of fields in this model because different equation_type use different
+parameters.  Parameters are all listed as optional because they are frequently unused.  A second
+layer of validation will be necessary for required parameters per equation_type."""
     equation_type = models.CharField(max_length=255,
-        help_text='For probability density functions identifies the type of function.',
-        default="Triangular",
-        choices=chc("Point", "Uniform", "Triangular", "Piecewise", "Histogram", "Gaussian",
-                    "Poisson", "Beta", "Gamma", "Weibull", "Exponential", "Pearson5",
-                    "Logistic",
-                    "LogLogistic", "Lognormal", "NegativeBinomial", "Pareto", "Bernoulli",
-                    "Binomial", "Discrete Uniform", "Hypergeometric", "Inverse Gaussian"))
+                                     help_text='For probability density functions identifies the type of function.',
+                                     default="Triangular",
+                                     choices=chc("Point", "Uniform", "Triangular", "Piecewise", "Histogram", "Gaussian",
+                                                 "Poisson", "Beta", "Gamma", "Weibull", "Exponential", "Pearson5",
+                                                 "Logistic",
+                                                 "LogLogistic", "Lognormal", "NegativeBinomial", "Pareto", "Bernoulli",
+                                                 "Binomial", "Discrete Uniform", "Hypergeometric", "Inverse Gaussian"))
     mean = models.FloatField(blank=True, null=True,
-        help_text='The mean for probability density function types Gaussian Lognormal Possoin and Exponential.', )
+                             help_text='The mean for probability density function types Gaussian Lognormal Possoin and Exponential.', )
     std_dev = models.FloatField(blank=True, null=True,
-        help_text='The mean for probability density function types Gaussian and Lognormal.', )
+                                help_text='The mean for probability density function types Gaussian and Lognormal.', )
     min = models.FloatField(blank=True, null=True,
-        help_text='The minimumfor probability density function types Uniform Triangular Beta and betaPERT.', )
+                            help_text='The minimumfor probability density function types Uniform Triangular Beta and betaPERT.', )
     mode = models.FloatField(blank=True, null=True,
-        help_text='The Mode for probability density function types Point Triangular and BetaPERT.', )
+                             help_text='The Mode for probability density function types Point Triangular and BetaPERT.', )
     max = models.FloatField(blank=True, null=True,
-        help_text='The maximum value for probability density function types Uniform Triangular Beta and BetaPERT.', )
+                            help_text='The maximum value for probability density function types Uniform Triangular Beta and BetaPERT.', )
     alpha = models.FloatField(blank=True, null=True,
-        help_text='The alpha parameter for probability density function types Gamma Weibull and Pearson 5 or the alpha1 parameter for Beta probability density functions.', )
+                              help_text='The alpha parameter for probability density function types Gamma Weibull and Pearson 5 or the alpha1 parameter for Beta probability density functions.', )
     alpha2 = models.FloatField(blank=True, null=True,
-        help_text='The alpha2 parameter for Beta probability density function types.', )
+                               help_text='The alpha2 parameter for Beta probability density function types.', )
     beta = models.FloatField(blank=True, null=True,
-        help_text='The beta parameter for probability density function types Gamma Weibull and Pearson 5.', )
+                             help_text='The beta parameter for probability density function types Gamma Weibull and Pearson 5.', )
     location = models.FloatField(blank=True, null=True,
-        help_text='The location parameter for probability density function types Logistic and Loglogistic.', )
+                                 help_text='The location parameter for probability density function types Logistic and Loglogistic.', )
     scale = models.FloatField(blank=True, null=True,
-        help_text='The scale parameter for probability density function types Logistic and Loglogistic.', )
+                              help_text='The scale parameter for probability density function types Logistic and Loglogistic.', )
     shape = models.FloatField(blank=True, null=True,
-        help_text='The shape parameter for probability density function types Loglogistic Inverse Gaussian.', )  # or should this be the equation_type list of PDF functions?
+                              help_text='The shape parameter for probability density function types Loglogistic Inverse Gaussian.', )  # or should this be the equation_type list of PDF functions?
     n = models.IntegerField(blank=True, null=True,
-        help_text='The n parameter for probability density function types Binomial Hypergeometric.', )
+                            help_text='The n parameter for probability density function types Binomial Hypergeometric.', )
     p = models.FloatField(blank=True, null=True,
-        help_text='The p parameter for probability density function types Negative Binomial Bernoulli.', )
+                          help_text='The p parameter for probability density function types Negative Binomial Bernoulli.', )
     m = models.IntegerField(blank=True, null=True,
-        help_text='The m parameter for probability density function types Hypergeometric.', )
+                            help_text='The m parameter for probability density function types Hypergeometric.', )
     d = models.IntegerField(blank=True, null=True,
-        help_text='The d parameter for probability density function types Hypergeometric.', )
+                            help_text='The d parameter for probability density function types Hypergeometric.', )
     theta = models.FloatField(blank=True, null=True,
-        help_text='The Theta parameter for probability density function types Pareto.', )
+                              help_text='The Theta parameter for probability density function types Pareto.', )
     a = models.FloatField(blank=True, null=True,
-        help_text='The a parameter for probability density function types Pareto.', )
+                          help_text='The a parameter for probability density function types Pareto.', )
     s = models.IntegerField(blank=True, null=True,
-        help_text='The s parameter for probability density function types Negative Binomial.', )
+                            help_text='The s parameter for probability density function types Negative Binomial.', )
 
 
 class RelationalFunction(Function):
@@ -494,8 +495,8 @@ class OutputSettings(models.Model):
         help_text='The maximum number of days that iterations of this scenario should run even if the stop criterion is not met.', )
     early_stop_criteria = models.CharField(max_length=255, blank=True,
         help_text='The criterion used to end each iteration. This may be that the specified number of days has passed the first detectino has occurred or the outbreak has ended.',
-        choices=(('disease-end','Simulation will stop when there are no more latent or infectious units.'),
-                 ('first-detection','Simulation will stop when the first detection occurs.')))
+        choices=(('disease-end', 'Simulation will stop when there are no more latent or infectious units.'),
+                 ('first-detection', 'Simulation will stop when the first detection occurs.')))
      ## Outputs requested:
     save_all_daily_outputs = models.BooleanField(default=False,
         choices=((True, 'Save all daily output fo every iteration (warning: this option may produce very large scenario files)'),
@@ -545,7 +546,7 @@ class ProductionTypePairTransmission(models.Model):
         help_text='The Production type that will be the source type for this production type combination.', )
     destination_production_type = models.ForeignKey(ProductionType, related_name='used_as_destinations',
         help_text='The Production type that will be the recipient type for this production type combination.', )
-    direct_contact_spread_model = models.ForeignKey(DirectSpreadModel,   related_name='direct_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+    direct_contact_spread_model = models.ForeignKey(DirectSpreadModel, related_name='direct_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by direct contact between these types.', )
     indirect_contact_spread_model = models.ForeignKey(IndirectSpreadModel, related_name='indirect_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by indirect contact between these types.', )
@@ -594,5 +595,3 @@ class ReadAllCodeTypes(models.Model):
     _code_type = models.CharField(max_length=255,
         help_text='Type of code', )
     _code_type_description = models.TextField()
-
-

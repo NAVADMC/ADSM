@@ -94,4 +94,3 @@ def copy_entry(request, primary_key):
     context.update({'form': initialized_form,
                     'title': "Copy a " + model_name}.items())
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
-

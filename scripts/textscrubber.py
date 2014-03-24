@@ -50,7 +50,7 @@ def add_if_foreign_key(foreign_keys, line):
     if is_field(line) and 'ForeignKey' in line:
         indentation, name, ftype, params, end = split_field_line(line)
         target = re.split('\W+', params.replace("'", ''))[0]
-        entry = "'" + name.strip() + "':Add_or_Select(attrs={'data-new-item-url': '/setup/"+target+"/new/'})"
+        entry = "'" + name.strip() + "':AddOrSelect(attrs={'data-new-item-url': '/setup/"+target+"/new/'})"
         foreign_keys.append(entry)
     return foreign_keys
 
