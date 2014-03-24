@@ -6,7 +6,11 @@
     <h1>{{ title }}</h1>
 
     <table>
-        <tr><th><h3>Production Type</h3></th><th><h3>Protocol</h3></th><th><h3>Notes</h3></th></tr>
+        <tr>
+            {% for key, value in forms.0.fields.items %}
+                <th><h3>{{value.label}}</h3></th>
+            {% endfor %}
+        </tr>
         <tbody>
         {% for form in forms %}
             {% form form using 'ScenarioCreator/FormRow.html' %}
