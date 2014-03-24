@@ -1,0 +1,11 @@
+{% extends 'ScenarioCreator/navigationPane.html' %}
+{% block content %}
+
+    <h1>Assign a Control Protocol to each Production Type</h1>
+
+    <table>
+        {% for formrow in forms %}
+            {{ formrow }}
+        {% endfor %}
+    </table>
+{% endblock %}

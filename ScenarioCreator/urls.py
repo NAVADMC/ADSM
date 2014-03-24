@@ -29,5 +29,6 @@ def generate_urls_from_models(input_file, extra_urls=()):
 
 
 urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
-                                        ["url('^DiseaseSpread/$', 'ScenarioCreator.views.disease_spread')"])
+                                        ["url('^DiseaseSpread/$', 'ScenarioCreator.views.disease_spread')",
+                                         "url('^AssignProtocols/$', 'ScenarioCreator.views.assign_protocols')"])
 

@@ -81,7 +81,7 @@ class ControlMasterPlanForm(BaseForm):
                    'vaccination_capacity_relid': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
-class ProtocolAssignmentForm(BaseForm):
+class ProtocolAssignmentForm(ModelForm):  # not a crispy form
     """class CommentForm(forms.Form):
         name = forms.CharField()
         url = forms.URLField()
@@ -91,7 +91,7 @@ class ProtocolAssignmentForm(BaseForm):
     > f.as_table()"""
     class Meta:
         model = ProtocolAssignment
-        exclude = ['_master_plan']
+        exclude = ['_master_plan', 'notes']
         widgets = {'_master_plan': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlMasterPlan/new/'}),
                    'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
                    'control_protocol': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'})}

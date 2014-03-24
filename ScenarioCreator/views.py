@@ -28,6 +28,17 @@ def disease_spread(request):
     return render(request, 'ScenarioCreator/DiseaseSpread.html', basic_context())
 
 
+def assign_protocols(request):
+    context = basic_context()
+    forms = []
+    for pt in ProductionType.objects.all():
+        initialized_form = ProtocolAssignmentForm(request.POST or None)
+        initialized_form.production_type_id = pt.id
+        forms.append(initialized_form.as_table())
+    context['forms'] = forms
+    return render(request, 'ScenarioCreator/ProtocolAssignment.html', context)
+
+
 def save_new_instance(initialized_form, request):
     model_instance = initialized_form.save()  # write to database
     model_name = model_instance.__class__.__name__
