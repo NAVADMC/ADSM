@@ -130,3 +130,10 @@ def copy_entry(request, primary_key):
     context.update({'form': initialized_form,
                     'title': "Copy a " + model_name}.items())
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
+
+
+def delete_entry(request, primary_key):
+    model_name, form = get_model_name_and_form(request)
+    model = form.Meta.model
+    model.objects.filter(pk=primary_key).delete()
+    return redirect('/setup/%s/new/' % model_name)
