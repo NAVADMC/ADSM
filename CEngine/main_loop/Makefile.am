@@ -37,7 +37,8 @@ libspreadmodel_a_SOURCES = main_loop.c module_loader.c module_loader.h \
   $(top_srcdir)/gis/gis.c $(top_srcdir)/gis/gis.h \
   $(top_srcdir)/reporting/reporting.c $(top_srcdir)/reporting/reporting.h \
   $(top_srcdir)/rng/rng.c $(top_srcdir)/rng/rng.h \
-  $(top_srcdir)/spatial_search/spatial_search_rtree.c $(top_srcdir)/spatial_search/spatial_search.h \
+  $(top_srcdir)/spatial_search/spatial_search_rtree.c $(top_srcdir)/spatial_search/spatial_search_rtree.h \ 
+  $(top_srcdir)/spatial_search/spatial_search.h \
   $(top_srcdir)/spatial_search/rTreeIndex.c $(top_srcdir)/spatial_search/rTreeIndex.h \
   $(top_srcdir)/spatial_search/ch2d.c $(top_srcdir)/spatial_search/ch2d.h \
   $(top_srcdir)/zone/zone.c $(top_srcdir)/zone/zone.h \

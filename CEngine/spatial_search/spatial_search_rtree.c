@@ -28,7 +28,7 @@
 #endif
 
 #include "spatial_search.h"
-#include <rTreeIndex.h>
+#include "rTreeIndex.h"
 #include "ch2d.h"
 #include "wml.h"
 #include <gsl/gsl_math.h>
@@ -68,7 +68,7 @@ private_data_t;
  * @param y2 the y-coordinate of point 2.
  * @return the distance between point 1 and point 2.
  */
-double
+static double
 distance (double x1, double y1, double x2, double y2)
 {
   double dx, dy;
@@ -90,7 +90,7 @@ distance (double x1, double y1, double x2, double y2)
  * @param y2 the y-coordinate of point 2.
  * @return the square of the distance between point 1 and point 2.
  */
-double
+static double
 distance_sq (double x1, double y1, double x2, double y2)
 {
   double dx, dy;
@@ -99,39 +99,6 @@ distance_sq (double x1, double y1, double x2, double y2)
   dy = y2 - y1;
 
   return dx * dx + dy * dy;
-}
-
-
-
-/**
- * Creates a new spatial search object.
- *
- * @return a pointer to a newly-created spatial_search_t structure.
- */
-spatial_search_t *
-new_spatial_search (void)
-{
-  spatial_search_t *searcher;
-  private_data_t *private_data;
-
-#if DEBUG
-  g_debug ("----- ENTER new_spatial_search");
-#endif
-
-  searcher = g_new (spatial_search_t, 1);
-  searcher->npoints = 0;
-  /* min_x, max_x, min_y, and max_y are undefined until the first point is
-   * added. */
-  private_data = g_new (private_data_t, 1);
-  private_data->rtree = RTreeNewIndex ();
-  private_data->xy = g_array_new (FALSE, FALSE, sizeof(double));
-  searcher->private_data = (gpointer) private_data;
-
-#if DEBUG
-  g_debug ("----- EXIT new_spatial_search");
-#endif
-
-  return searcher;
 }
 
 
@@ -146,37 +113,37 @@ new_spatial_search (void)
  * @param x the x-coordinate.
  * @param y the y-coordinate.
  */
-void
-spatial_search_add_point (spatial_search_t *searcher, double x, double y)
+static void
+add_point (spatial_search_t *self, double x, double y)
 {
   private_data_t *private_data;
   struct Rect rect;
 
-  private_data = (private_data_t *)(searcher->private_data);
+  private_data = (private_data_t *)(self->private_data);
   rect.boundary[0] = x;
   rect.boundary[1] = y;
   rect.boundary[2] = x;
   rect.boundary[3] = y;
-  searcher->npoints++;
-  RTreeInsertRect (&rect, searcher->npoints, &(private_data->rtree), 0);
+  self->npoints++;
+  RTreeInsertRect (&rect, self->npoints, &(private_data->rtree), 0);
   g_array_append_val (private_data->xy, x);
   g_array_append_val (private_data->xy, y);
-  if (searcher->npoints == 1)
+  if (self->npoints == 1)
     {
       /* This is the very first point. */
-      searcher->min_x = searcher->max_x = x;
-      searcher->min_y = searcher->max_y = y;
+      self->min_x = self->max_x = x;
+      self->min_y = self->max_y = y;
     }
   else
     {
-      if (x < searcher->min_x)
-        searcher->min_x = x;
-      else if (x > searcher->max_x)
-        searcher->max_x = x;
-      if (y < searcher->min_y)
-        searcher->min_y = y;
-      else if (y > searcher->max_y)
-        searcher->max_y = y;
+      if (x < self->min_x)
+        self->min_x = x;
+      else if (x > self->max_x)
+        self->max_x = x;
+      if (y < self->min_y)
+        self->min_y = y;
+      else if (y > self->max_y)
+        self->max_y = y;
     }
 
   return;
@@ -193,7 +160,7 @@ spatial_search_add_point (spatial_search_t *searcher, double x, double y)
  * @param searcher the spatial search object.
  */
 void
-find_oriented_bounding_box (spatial_search_t *searcher)
+find_oriented_bounding_box (spatial_search_t *self)
 {
   private_data_t *private_data;
   unsigned int npoints;
@@ -213,9 +180,9 @@ find_oriented_bounding_box (spatial_search_t *searcher)
   g_debug ("----- ENTER find_oriented_bounding_box");
 #endif
 
-  private_data = (private_data_t *)(searcher->private_data);
+  private_data = (private_data_t *)(self->private_data);
 
-  npoints = searcher->npoints;
+  npoints = self->npoints;
   if (npoints == 0)
     goto end;
 
@@ -260,15 +227,15 @@ find_oriented_bounding_box (spatial_search_t *searcher)
   /* If the points are all at the same location, or they are all in a
    * horizontal or vertical line, we can avoid calling the convex hull
    * algorithm. */
-  all_x_same = (gsl_fcmp (searcher->min_x, searcher->max_x, EPSILON) == 0);
-  all_y_same = (gsl_fcmp (searcher->min_y, searcher->max_y, EPSILON) == 0);
+  all_x_same = (gsl_fcmp (self->min_x, self->max_x, EPSILON) == 0);
+  all_y_same = (gsl_fcmp (self->min_y, self->max_y, EPSILON) == 0);
   if (all_x_same && all_y_same)
     {
 #if DEBUG
       g_debug ("all %u points have the same location: bounding box is a point", npoints);
 #endif
-      x = searcher->min_x;
-      y = searcher->min_y;
+      x = self->min_x;
+      y = self->min_y;
       for (i = 0; i < 4; i++)
         {
           private_data->bounding_box[2 * i] = x;
@@ -281,14 +248,14 @@ find_oriented_bounding_box (spatial_search_t *searcher)
 #if DEBUG
       g_debug ("all %u points have the same x-location: bounding box is a line", npoints);
 #endif
-      x = searcher->min_x;
-      y = searcher->min_y;
+      x = self->min_x;
+      y = self->min_y;
       for (i = 0; i < 2; i++)
         {
           private_data->bounding_box[2 * i] = x;
           private_data->bounding_box[2 * i + 1] = y;
         }
-      y = searcher->max_y;
+      y = self->max_y;
       for (i = 2; i < 4; i++)
         {
           private_data->bounding_box[2 * i] = x;
@@ -301,14 +268,14 @@ find_oriented_bounding_box (spatial_search_t *searcher)
 #if DEBUG
       g_debug ("all %u points have the same y-location: bounding box is a line", npoints);
 #endif
-      x = searcher->min_x;
-      y = searcher->min_y;
+      x = self->min_x;
+      y = self->min_y;
       for (i = 0; i < 2; i++)
         {
           private_data->bounding_box[2 * i] = x;
           private_data->bounding_box[2 * i + 1] = y;
         }
-      x = searcher->max_x;
+      x = self->max_x;
       for (i = 2; i < 4; i++)
         {
           private_data->bounding_box[2 * i] = x;
@@ -401,31 +368,31 @@ end:
  *
  * @param searcher the spatial search object.
  */
-void
-spatial_search_prepare (spatial_search_t *searcher)
+static void
+prepare (spatial_search_t *self)
 {
   private_data_t *private_data;
 
 #if DEBUG
-  g_debug ("----- ENTER spatial_search_prepare");
+  g_debug ("----- ENTER prepare");
 #endif
 
-  private_data = (private_data_t *)(searcher->private_data);
+  private_data = (private_data_t *)(self->private_data);
 
 #if DEBUG
   g_debug ("x range %g-%g y range %g-%g",
-           searcher->min_x, searcher->max_x,
-           searcher->min_y, searcher->max_y);
+           self->min_x, self->max_x,
+           self->min_y, self->max_y);
 #endif
 
   /* This is specific to the R-tree algorithm: it is useful to know how large
    * the area covered by the points is.  So we find the minimum-area oriented
    * bounding box around the point. */
-  find_oriented_bounding_box (searcher);
+  find_oriented_bounding_box (self);
   private_data->rtree_threshold = 0.25 * private_data->short_axis_length;
 
 #if DEBUG
-  g_debug ("----- EXIT spatial_search_prepare");
+  g_debug ("----- EXIT prepare");
 #endif
 
   return;
@@ -490,20 +457,20 @@ spatial_search_circle_callback (int id, void *arg)
  *   the circle.
  * @param user_data any data to be passed to user_function.  Can be NULL.
  */
-void
-spatial_search_circle_by_xy (spatial_search_t * searcher,
-                             double x, double y, double radius,
-                             spatial_search_hit_callback user_function,
-                             gpointer user_data)
+static void
+search_circle_by_xy (spatial_search_t * self,
+                     double x, double y, double radius,
+                     spatial_search_hit_callback user_function,
+                     gpointer user_data)
 {
   private_data_t *private_data;
   spatial_search_callback_args_t args;
 
 #if DEBUG
-  g_debug ("----- ENTER spatial_search_circle_by_xy (x=%g, y=%g, radius=%g)", x, y, radius);
+  g_debug ("----- ENTER search_circle_by_xy (x=%g, y=%g, radius=%g)", x, y, radius);
 #endif
 
-  private_data = (private_data_t *)(searcher->private_data);
+  private_data = (private_data_t *)(self->private_data);
 
   args.user_function = user_function;
   args.user_data = user_data;
@@ -530,13 +497,13 @@ spatial_search_circle_by_xy (spatial_search_t * searcher,
 #if DEBUG
       g_debug ("use exhaustive search");
 #endif
-      npoints = searcher->npoints;
+      npoints = self->npoints;
       for (id = 1; id <= npoints; id++)
         spatial_search_circle_callback (id, &args);
     }
 
 #if DEBUG
-  g_debug ("----- EXIT spatial_search_circle_by_xy");
+  g_debug ("----- EXIT search_circle_by_xy");
 #endif
 
   return;
@@ -556,28 +523,28 @@ spatial_search_circle_by_xy (spatial_search_t * searcher,
  *   the circle.
  * @param user_data any data to be passed to user_function.  Can be NULL.
  */
-void
-spatial_search_circle_by_id (spatial_search_t * searcher,
-                             int id, double radius,
-                             spatial_search_hit_callback user_function,
-                             gpointer user_data)
+static void
+search_circle_by_id (spatial_search_t * self,
+                     int id, double radius,
+                     spatial_search_hit_callback user_function,
+                     gpointer user_data)
 {
   private_data_t *private_data;
   unsigned int index;
   double x, y;
 
 #if DEBUG
-  g_debug ("----- ENTER spatial_search_circle_by_id (id=%i, radius=%g)", id, radius);
+  g_debug ("----- ENTER search_circle_by_id (id=%i, radius=%g)", id, radius);
 #endif
 
-  private_data = (private_data_t *)(searcher->private_data);
+  private_data = (private_data_t *)(self->private_data);
   index = id * 2;
   x = g_array_index (private_data->xy, double, index);
   y = g_array_index (private_data->xy, double, index + 1);
-  spatial_search_circle_by_xy (searcher, x, y, radius, user_function, user_data);
+  search_circle_by_xy (self, x, y, radius, user_function, user_data);
 
 #if DEBUG
-  g_debug ("----- EXIT spatial_search_circle_by_id");
+  g_debug ("----- EXIT search_circle_by_id");
 #endif
 
   return;
@@ -621,21 +588,21 @@ spatial_search_rectangle_callback (int id, void *arg)
  *   the rectangle.
  * @param user_data any data to be passed to user_function.  Can be NULL.
  */
-void
-spatial_search_rectangle (spatial_search_t * searcher,
-                          double x1, double y1, double x2, double y2,
-                          spatial_search_hit_callback user_function,
-                          gpointer user_data)
+static void
+search_rectangle (spatial_search_t * self,
+                  double x1, double y1, double x2, double y2,
+                  spatial_search_hit_callback user_function,
+                  gpointer user_data)
 {
   private_data_t *private_data;
   spatial_search_callback_args_t args;
   double long_axis;
 
 #if DEBUG
-  g_debug ("----- ENTER spatial_search_rectangle");
+  g_debug ("----- ENTER search_rectangle");
 #endif
 
-  private_data = (private_data_t *)(searcher->private_data);
+  private_data = (private_data_t *)(self->private_data);
 
   args.user_function = user_function;
   args.user_data = user_data;
@@ -654,7 +621,7 @@ spatial_search_rectangle (spatial_search_t * searcher,
     {
       unsigned int npoints, id;
       double *x, *y;
-      npoints = searcher->npoints;
+      npoints = self->npoints;
       x = y = (double *)(private_data->xy->data);
       y++;
       for (id = 1; id <= npoints; id++, x+=2, y+=2)
@@ -665,7 +632,7 @@ spatial_search_rectangle (spatial_search_t * searcher,
     }
 
 #if DEBUG
-  g_debug ("----- EXIT spatial_search_rectangle");
+  g_debug ("----- EXIT search_rectangle");
 #endif
 
   return;
@@ -678,8 +645,8 @@ spatial_search_rectangle (spatial_search_t * searcher,
  *
  * @param searcher a spatial search object.
  */
-void
-free_spatial_search (spatial_search_t *searcher)
+static void
+free_searcher (spatial_search_t *self)
 {
   private_data_t *private_data;
 
@@ -687,13 +654,13 @@ free_spatial_search (spatial_search_t *searcher)
   g_debug ("----- ENTER free_spatial_search");
 #endif
 
-  if (searcher != NULL)
+  if (self != NULL)
   {
-    private_data = (private_data_t *)(searcher->private_data);  
+    private_data = (private_data_t *)(self->private_data);  
     RTreeDeleteIndex (private_data->rtree);
     g_array_free (private_data->xy, TRUE);
     g_free (private_data);
-    g_free (searcher);
+    g_free (self);
   }
 
 #if DEBUG
@@ -701,6 +668,47 @@ free_spatial_search (spatial_search_t *searcher)
 #endif
 
   return;
+}
+
+
+
+/**
+ * Creates a new spatial search object.
+ *
+ * @return a pointer to a newly-created spatial_search_t structure.
+ */
+spatial_search_t *
+new_rtree_spatial_search (void)
+{
+  spatial_search_t *self;
+  private_data_t *private_data;
+
+#if DEBUG
+  g_debug ("----- ENTER new_rtree_spatial_search");
+#endif
+
+  self = g_new (spatial_search_t, 1);
+  self->npoints = 0;
+  /* min_x, max_x, min_y, and max_y are undefined until the first point is
+   * added. */
+  private_data = g_new (private_data_t, 1);
+  private_data->rtree = RTreeNewIndex ();
+  private_data->xy = g_array_new (FALSE, FALSE, sizeof(double));
+  self->private_data = (gpointer) private_data;
+  
+  /* Function pointers */
+  self->add_point = add_point;
+  self->prepare = prepare;
+  self->search_circle_by_xy = search_circle_by_xy;
+  self->search_circle_by_id = search_circle_by_id;
+  self->search_rectangle = search_rectangle;
+  self->free = free_searcher;
+
+#if DEBUG
+  g_debug ("----- EXIT new_rtree_spatial_search");
+#endif
+
+  return self;
 }
 
 /* end of file spatial_search_rtree.c */
