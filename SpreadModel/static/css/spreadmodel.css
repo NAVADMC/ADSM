@@ -19,7 +19,7 @@ body>nav {
     top: 50px;
     bottom: 0;
     left: 0;
-    width: 210px;
+    width: 250px;
     overflow: auto;
     /*background-color: #DDD;*/
 }
@@ -27,7 +27,7 @@ body>nav {
 body>section {
     margin-top: 50px;
     padding-top: 0px;
-    margin-left: 210px;
+    margin-left: 250px;
     padding-left: 20px;
 }
 #setupMenu {
