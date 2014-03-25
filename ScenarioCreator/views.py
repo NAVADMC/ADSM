@@ -8,20 +8,20 @@ from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic 
 
 
 def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
-    return {'Scenario': Scenario.objects.all(),
-            'OutputSetting': OutputSettings.objects.all(),
-            'ProductionTypes': ProductionType.objects.all(),
-            'Farms': Unit.objects.all(),
-            'Disease': Disease.objects.all(),
-            'Reactions': DiseaseReaction.objects.all(),
-            'DirectSpreads': DirectSpreadModel.objects.all(),
-            'IndirectSpreads': IndirectSpreadModel.objects.all(),
-            'AirborneSpreads': AirborneSpreadModel.objects.all(),
-            'Transmissions': ProductionTypePairTransmission.objects.all(),
-            'ControlMasterPlan': ControlMasterPlan.objects.all(),
-            'Protocols': ControlProtocol.objects.all(),
-            'Zones': Zone.objects.all(),
-            'ZoneEffects': ZoneEffectOnProductionType.objects.all()}
+    return {'Scenario': Scenario.objects.count(),
+            'OutputSetting': OutputSettings.objects.count(),
+            'ProductionTypes': ProductionType.objects.count(),
+            'Farms': Unit.objects.count(),
+            'Disease': Disease.objects.count(),
+            'Reactions': DiseaseReaction.objects.count(),
+            'DirectSpreads': DirectSpreadModel.objects.count(),
+            'IndirectSpreads': IndirectSpreadModel.objects.count(),
+            'AirborneSpreads': AirborneSpreadModel.objects.count(),
+            'Transmissions': ProductionTypePairTransmission.objects.count(),
+            'ControlMasterPlan': ControlMasterPlan.objects.count(),
+            'Protocols': ControlProtocol.objects.count(),
+            'Zones': Zone.objects.count(),
+            'ZoneEffects': ZoneEffectOnProductionType.objects.count()}
 
 
 def disease_spread(request):

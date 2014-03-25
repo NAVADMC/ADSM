@@ -7,10 +7,10 @@ register = template.Library()
 
 
 @register.filter()
-def completed(queryset):
-    if queryset:
+def completed(itemcount):
+    if itemcount != 0:
         return 'completed '
-        # return 'class="completed "><span class="badge pull-right">%i</span' % len(queryset)
+        # return 'class="completed "><span class="badge pull-right">%i</span' % len(itemcount)
     return ''
 
 
