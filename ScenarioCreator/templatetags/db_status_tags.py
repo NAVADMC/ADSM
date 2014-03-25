@@ -10,6 +10,7 @@ register = template.Library()
 def completed(queryset):
     if queryset:
         return 'completed '
+        # return 'class="completed "><span class="badge pull-right">%i</span' % len(queryset)
     return ''
 
 
