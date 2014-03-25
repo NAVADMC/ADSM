@@ -310,11 +310,11 @@ class ProductionTypeForm(BaseForm):
 class ProductionTypePairTransmissionForm(BaseForm):
     class Meta:
         model = ProductionTypePairTransmission
-        widgets = {'source_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-                   'destination_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-                   'direct_contact_spread_model': AddOrSelect(attrs={'data-new-item-url': '/setup/DirectSpreadModel/new/'}),
-                   'indirect_contact_spread_model': AddOrSelect(attrs={'data-new-item-url': '/setup/IndirectSpreadModel/new/'}),
-                   'airborne_contact_spread_model': AddOrSelect(attrs={'data-new-item-url': '/setup/AirborneSpreadModel/new/'})}
+        # widgets = {'source_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
+        #            'destination_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
+        #            'direct_contact_spread_model': AddOrSelect(attrs={'data-new-item-url': '/setup/DirectSpreadModel/new/'}),
+        #            'indirect_contact_spread_model': AddOrSelect(attrs={'data-new-item-url': '/setup/IndirectSpreadModel/new/'}),
+        #            'airborne_contact_spread_model': AddOrSelect(attrs={'data-new-item-url': '/setup/AirborneSpreadModel/new/'})}
 
 
 class ZoneForm(BaseForm):

@@ -25,7 +25,19 @@ def basic_context():  # TODO: This might not be performant... but it's nice to h
 
 
 def disease_spread(request):
-    return render(request, 'ScenarioCreator/DiseaseSpread.html', basic_context())
+    context = basic_context()
+    forms = []
+    pts = list(ProductionType.objects.all())
+    for source in pts:
+        for destination in pts:
+            initialized_form = ProductionTypePairTransmissionForm(request.POST or None)
+            initialized_form.fields['source_production_type'].initial = source.id
+            initialized_form.fields['destination_production_type'].initial = destination.id
+            forms.append(initialized_form)
+    context['forms'] = forms
+    context['title'] = 'How does Disease spread from one Production Type to another?'
+    return render(request, 'ScenarioCreator/ProtocolAssignment.html', context)
+    # return render(request, 'ScenarioCreator/DiseaseSpread.html', basic_context())
 
 
 def assign_protocols(request):
