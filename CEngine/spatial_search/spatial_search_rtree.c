@@ -1,4 +1,4 @@
-/** @file spatial_search.c
+/** @file spatial_search_rtree.c
  * Functions for finding objects in a spatial arrangement.
  *
  * The current implementation uses the R-tree data structure developed by A.
@@ -703,4 +703,4 @@ free_spatial_search (spatial_search_t *searcher)
   return;
 }
 
-/* end of file spatial_search.c */
+/* end of file spatial_search_rtree.c */
