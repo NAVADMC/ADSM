@@ -137,3 +137,12 @@ def delete_entry(request, primary_key):
     model = form.Meta.model
     model.objects.filter(pk=primary_key).delete()
     return redirect('/setup/%s/new/' % model_name)
+
+
+'''Utility Views for UI'''
+def save_scenario(request):
+    top_level_models = [Scenario, Population, Disease, ControlMasterPlan]
+    for parent_object in top_level_models:
+        node = parent_object.objects.using('default').all()
+        node.save(using='save_file')
+    return 'Scenario Saved'

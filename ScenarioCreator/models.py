@@ -58,7 +58,12 @@ class DynamicBlob(models.Model):
         help_text='', )  # polygons?
 
 
+class Population(models.Model):
+    source_file = models.FilePathField(default='SampleScenario.sqlite3')
+
+
 class Unit(models.Model):
+    _population = models.ForeignKey(Population, default=lambda: Population.objects.get_or_create(id=1)[0], )
     production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
     latitude = LatitudeField(

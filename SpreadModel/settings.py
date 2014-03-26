@@ -75,8 +75,10 @@ CRISPY_TEMPLATE_PACK = 'bootstrap'
 
 DATABASES = {
     'default': {
+        'NAME': os.path.join(BASE_DIR, 'activeSession.sqlite3'),
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'defaultSettings.db'),
+        'USER': 'josiah',
+        'PASSWORD': '1',
     }
 }
 
