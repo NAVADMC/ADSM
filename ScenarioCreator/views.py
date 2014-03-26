@@ -4,6 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db import connections
+from django.conf import settings
 import re
 
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
@@ -144,7 +145,8 @@ def delete_entry(request, primary_key):
 
 '''Utility Views for UI'''
 def create_db_connection(db_name, db_path):
-    from django.conf import settings
+    needs_sync = not os.path.isfile(db_path)
+
     connections.databases[db_name] = {
         'NAME': os.path.join(settings.BASE_DIR, db_path),
         'ENGINE': 'django.db.backends.sqlite3'}
@@ -152,13 +154,28 @@ def create_db_connection(db_name, db_path):
     # EDIT: this is actually performed for you in the wrapper class __getitem__
     # method.. although it may be good to do it when being initially setup to
     # prevent runtime errors later.
-    # connections.databases.ensure_defaults('new-alias')
+    # connections.databases.ensure_defaults(db_name)
+    if needs_sync:
+        # Don't import django.core.management if it isn't needed.
+        from django.core.management import call_command
+        print('Building DB structure...')
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
+        call_command('syncdb',
+            # verbosity=0,
+            interactive=False,
+            database=connections[db_name].alias,  # database=self.connection.alias,
+            load_initial_data=False)
+        # call_command('syncdb', )
+        print('Done creating database')
 
 
 def save_scenario(request, file_path='saved_session.sqlite3'):
     create_db_connection('save_file', file_path)
     top_level_models = [Scenario, Population, Disease, ControlMasterPlan]
     for parent_object in top_level_models:
-        node = parent_object.objects.using('default').all()
-        node.save(using='save_file')
+        try:
+            node = parent_object.objects.using('default').get(id=1)
+            node.save(using='save_file')
+        except ObjectDoesNotExist:
+            print("Couldn't find a ", parent_object)
     return 'Scenario Saved'
