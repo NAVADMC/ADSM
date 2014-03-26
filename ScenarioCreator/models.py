@@ -489,6 +489,7 @@ class Scenario(models.Model):
 
 
 class OutputSettings(models.Model):
+    _scenario = models.ForeignKey('Scenario', default=lambda: Scenario.objects.get_or_create(id=1)[0],)
     iterations = models.IntegerField(blank=True, null=True,
         help_text='The number of iterations of this scenario that should be run', )
     days = models.IntegerField(blank=True, null=True,

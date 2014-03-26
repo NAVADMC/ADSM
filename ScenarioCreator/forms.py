@@ -291,12 +291,13 @@ class AirborneSpreadModelForm(BaseForm):
 class ScenarioForm(BaseForm):
     class Meta:
         model = Scenario
-        exclude = ['_output_settings']
+        exclude = []
 
 
 class OutputSettingsForm(BaseForm):
     class Meta:
         model = OutputSettings
+        exclude = ['_scenario']
         widgets = {'save_all_daily_outputs': RadioSelect(),
             'maximum_iterations_for_daily_output': NumberInput(attrs={'data-toggle-controller': 'save_all_daily_outputs',
                                                                       'data-required-value': 'False'})}
