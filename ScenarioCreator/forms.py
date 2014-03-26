@@ -44,6 +44,19 @@ class DynamicBlobForm(BaseForm):
         model = DynamicBlob
 
 
+class PopulationForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_class = 'form-horizontal'
+        self.helper.layout = Layout(
+            'source_file',
+            submit_button()
+        )
+        return super().__init__(*args, **kwargs)
+    class Meta:
+        model = Population
+
+
 class UnitForm(BaseForm):
     class Meta:
         model = Unit

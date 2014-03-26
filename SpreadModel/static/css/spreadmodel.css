@@ -76,6 +76,10 @@ body>section {
     color: #007700;
 }
 
+.btn-primary {
+    margin: 8px;
+}
+
 textarea {
     width: 400px;
     height: 70px;

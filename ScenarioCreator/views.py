@@ -1,7 +1,9 @@
 import json
+import os
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.db import connections
 import re
 
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
@@ -10,6 +12,7 @@ from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic 
 def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
     return {'Scenario': Scenario.objects.count(),
             'OutputSetting': OutputSettings.objects.count(),
+            'Population': Population.objects.count(),
             'ProductionTypes': ProductionType.objects.count(),
             'Farms': Unit.objects.count(),
             'Disease': Disease.objects.count(),
@@ -140,7 +143,20 @@ def delete_entry(request, primary_key):
 
 
 '''Utility Views for UI'''
-def save_scenario(request):
+def create_db_connection(db_name, db_path):
+    from django.conf import settings
+    connections.databases[db_name] = {
+        'NAME': os.path.join(settings.BASE_DIR, db_path),
+        'ENGINE': 'django.db.backends.sqlite3'}
+    # Ensure the remaining default connection information is defined.
+    # EDIT: this is actually performed for you in the wrapper class __getitem__
+    # method.. although it may be good to do it when being initially setup to
+    # prevent runtime errors later.
+    # connections.databases.ensure_defaults('new-alias')
+
+
+def save_scenario(request, file_path='saved_session.sqlite3'):
+    create_db_connection('save_file', file_path)
     top_level_models = [Scenario, Population, Disease, ControlMasterPlan]
     for parent_object in top_level_models:
         node = parent_object.objects.using('default').all()

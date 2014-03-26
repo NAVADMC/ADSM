@@ -59,7 +59,7 @@ class DynamicBlob(models.Model):
 
 
 class Population(models.Model):
-    source_file = models.FilePathField(default='SampleScenario.sqlite3')
+    source_file = models.CharField(max_length=255, default='SampleScenario.sqlite3')  # source_file made generic CharField so Django doesn't try to copy and save the raw file
 
 
 class Unit(models.Model):
@@ -70,7 +70,7 @@ class Unit(models.Model):
         help_text='The latitude used to georeference this unit.', )
     longitude = LongitudeField(
         help_text='The longitude used to georeference this unit.', )
-    initial_state = models.CharField(max_length=255,
+    initial_state = models.CharField(max_length=255, default='S',
                                      help_text='Code indicating the actual disease state of the unit at the beginning of the simulation.',
                                      choices=(('L', 'Latent'),
                                               ('S', 'Susceptible'),
