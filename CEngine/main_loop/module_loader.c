@@ -208,6 +208,7 @@ get_num_days (scew_element * e)
 {
   long int tmp;
 
+  errno = 0;
   tmp = strtol (scew_element_contents (e), NULL, 10);   /* base 10 */
   g_assert (errno != ERANGE && errno != EINVAL);
   return (unsigned int) tmp;
@@ -226,6 +227,7 @@ get_num_runs (scew_element * e)
 {
   long int tmp;
 
+  errno = 0;
   tmp = strtol (scew_element_contents (e), NULL, 10);   /* base 10 */
   g_assert (errno != ERANGE && errno != EINVAL);
   return (unsigned int) tmp;
