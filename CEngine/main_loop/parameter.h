@@ -43,7 +43,7 @@ double PAR_get_probability (PAR_parameter_t *, gboolean * success);
 double PAR_get_money (PAR_parameter_t *, gboolean * success);
 PDF_dist_t *PAR_get_PDF (PAR_parameter_t *);
 REL_chart_t *PAR_get_relationship_chart (PAR_parameter_t *);
-gboolean PAR_get_boolean (PAR_parameter_t *, gboolean * success);
+gboolean PAR_get_boolean (sqlite3 *db, char *query);
 double PAR_get_unitless (PAR_parameter_t *, gboolean * success);
 int PAR_get_unitless_int (PAR_parameter_t *, gboolean * success);
 char *PAR_get_text (sqlite3 *db, char *query);

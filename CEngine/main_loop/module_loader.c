@@ -164,15 +164,39 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
   
   /*  This isn't a mandatory parameter.  If this field is NULL, the default is
       STOP_NORMAL. */
-  *_exit_conditions = get_exit_condition (PAR_get_text (parameter_db, "SELECT sim_stop_reason from inGeneral"));
+  *_exit_conditions = get_exit_condition (PAR_get_text (parameter_db, "SELECT sim_stop_reason FROM inGeneral"));
 
   singletons = g_hash_table_new (g_str_hash, g_str_equal);
 
   /* Instantiate modules based on which features are active in the scenario. */
   tmp_models = g_ptr_array_new();
 
+  if (PAR_get_boolean (parameter_db, "SELECT include_airborne_spread FROM inGeneral"))
+    {
+      if (PAR_get_boolean (parameter_db, "SELECT use_airborne_exponential_decay FROM inGeneral"))
+        {
+          g_ptr_array_add (tmp_models,
+                           airborne_spread_exponential_model_new (parameter_db, units, projection, zones));
+        }
+      else
+        {
+          g_ptr_array_add (tmp_models,
+                           airborne_spread_model_new (parameter_db, units, projection, zones));
+        }
+    }
+
   /* Conflict resolver is always added. */
   g_ptr_array_add (tmp_models, conflict_resolver_new (NULL, units, projection, zones));
+
+  #if DEBUG
+    for (i = 0; i < tmp_models->len; i++)
+      {
+        model = g_ptr_array_index (tmp_models, i);
+        s = model->to_string (model);
+        g_debug ("%s", s);
+        g_free (s);
+      }
+  #endif
 
   if (FALSE)
     {
@@ -201,11 +225,6 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
 
         } /* end of case where a new model instance is created */
 
-      #if DEBUG
-        s = model->to_string (model);
-        g_debug ("%s", s);
-        g_free (s);
-      #endif
     }                           /* end of loop over models */
 
   /* We can free the hash table structure without freeing the keys (because the

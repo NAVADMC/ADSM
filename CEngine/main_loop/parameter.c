@@ -1132,58 +1132,57 @@ PAR_get_relationship_chart (PAR_parameter_t * param)
 
 
 /**
+ * Retrieves a boolean parameter from the database.
+ *
+ * @param loc location of a gboolean into which to write the boolean.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+PAR_get_boolean_callback (void *loc, int ncols, char **value, char **colname)
+{
+  gboolean *result;
+  long int tmp;
+  
+  g_assert (ncols == 1);
+  errno = 0;
+  tmp = strtol (value[0], NULL, 10);   /* base 10 */
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  result = (gboolean *)loc;
+  *result = (tmp == 1);
+  return 0;
+}
+
+
+
+/**
  * Retrieves a boolean.
  *
- * Side effect: upon return, the location indicated by <i>success</i> contains
- * FALSE if the parameter was missing, out of range, or otherwise invalid, and
- * TRUE otherwise.
- *
- * @param param a boolean parameter.
- * @param success a location in which to store a success or failure flag.
- * @return the value.  If the conversion did not succeed, this value is
- *   undefined.
+ * @param db a parameter database.
+ * @param query the query to retrieve the parameter.
+ * @return the boolean.
  */
 gboolean
-PAR_get_boolean (PAR_parameter_t * param, gboolean * success)
+PAR_get_boolean (sqlite3 *db, char *query)
 {
-  gboolean x = FALSE;
-  XML_Char const *element_text;
+  gboolean result;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER PAR_get_boolean");
 #endif
 
-  *success = FALSE;
-  if (param != NULL)
-    {
-      element_text = scew_element_contents (param);
-      if (g_strcmp0 (element_text, "1") == 0
-          || g_ascii_strcasecmp (element_text, "t") == 0
-          || g_ascii_strcasecmp (element_text, "y") == 0
-          || g_ascii_strcasecmp (element_text, "true") == 0
-          || g_ascii_strcasecmp (element_text, "yes") == 0)
-        {
-          x = TRUE;
-          *success = TRUE;
-        }
-      else if (g_strcmp0 (element_text, "0") == 0
-               || g_ascii_strcasecmp (element_text, "f") == 0
-               || g_ascii_strcasecmp (element_text, "n") == 0
-               || g_ascii_strcasecmp (element_text, "false") == 0
-               || g_ascii_strcasecmp (element_text, "no") == 0)
-        {
-          x = FALSE;
-          *success = TRUE;
-        }
-      else
-        g_warning ("missing or invalid boolean parameter");
-    }
+  sqlite3_exec (db, query, PAR_get_boolean_callback, &result, &sqlerr);
+  g_assert (sqlerr == NULL);
 
 #if DEBUG
   g_debug ("----- EXIT PAR_get_boolean");
 #endif
 
-  return x;
+  return result;
 }
 
 
@@ -1320,8 +1319,7 @@ PAR_get_text (sqlite3 *db, char *query)
 /**
  * Retrieves an integer parameter from the database.
  *
- * @param loc location of an unsigned int into which to write the number of
- *   days.
+ * @param loc location of a gint into which to write the integer.
  * @param ncols number of columns in the SQL query result.
  * @param values values returned by the SQL query, all in text form.
  * @param colname names of columns in the SQL query result.

@@ -38,13 +38,10 @@
  *
  */
 gboolean *
-spreadmodel_read_prodtype_attribute (const scew_element * params,
-                                     char *attr_name, GPtrArray * production_type_names)
+spreadmodel_read_prodtype_attribute (char *attr_text, GPtrArray * production_type_names)
 {
   gboolean *flags;
   unsigned int nprod_types;
-  scew_attribute *attr;
-  XML_Char const *attr_text;
   gchar **tokens;
   gchar **iter;
   int i;                        /* loop counter */
@@ -56,17 +53,15 @@ spreadmodel_read_prodtype_attribute (const scew_element * params,
   nprod_types = production_type_names->len;
   flags = g_new0 (gboolean, nprod_types);
 
-  attr = scew_element_attribute_by_name (params, attr_name);
-  /* If the "production-type" attribute is missing, assume the parameters apply
-   * to all production types. */
-  if (attr == NULL)
+  /* If the text is null or blank, assume the parameters apply to all
+   * production types. */
+  if (attr_text == NULL)
     {
       for (i = 0; i < nprod_types; i++)
         flags[i] = TRUE;
     }
   else
     {
-      attr_text = scew_attribute_value (attr);
       /* If the "production-type" attribute is blank, assume the parameters
        * apply to all production types. */
       if (strlen (attr_text) == 0)

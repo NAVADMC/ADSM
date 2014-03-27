@@ -763,32 +763,107 @@ local_free (struct spreadmodel_model_t_ *self)
 
 /**
  * Adds a set of parameters to an airborne spread model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
  */
-void
-set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
+static int
+set_params_s (void *data, int ncols, char **value, char **colname)
 {
+  spreadmodel_model_t *self;
   local_data_t *local_data;
   gboolean *from_production_type, *to_production_type;
+  char *endptr;
+  double prob_spread_1km;
+  double wind_dir_start, wind_dir_end;
+  gboolean wind_range_crosses_0;
+  double max_spread;
+  PDF_dist_t *delay;
   unsigned int nprod_types, i, j;
-  param_block_t *param_block;
-  scew_element const *e;
-  gboolean success;
 
 #if DEBUG
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
+  self = (spreadmodel_model_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
   /* Find out which to-from production type combinations these parameters apply
    * to. */
   from_production_type =
-    spreadmodel_read_prodtype_attribute (params, "from-production-type", local_data->production_types);
+    spreadmodel_read_prodtype_attribute (value[0], local_data->production_types);
   to_production_type =
-    spreadmodel_read_prodtype_attribute (params, "to-production-type", local_data->production_types);
+    spreadmodel_read_prodtype_attribute (value[1], local_data->production_types);
+
+  prob_spread_1km = strtod (value[2], &endptr);
+  if (errno == ERANGE || endptr == value[2] || prob_spread_1km < 0)
+    {
+      g_warning ("setting probability of spread at 1 km to 0");
+      prob_spread_1km = 0;
+    }
+  prob_spread_1km = CLAMP (prob_spread_1km, 0, 1);
+
+  wind_dir_start = strtod (value[3], &endptr);
+  if (errno == ERANGE || endptr == value[3])
+    {
+      g_warning ("setting start of area at risk of exposure to 0");
+      wind_dir_start = 0;
+    }
+  /* Force the angle into the range [0,360). */
+  while (wind_dir_start < 0)
+    wind_dir_start += 360;
+  while (wind_dir_start >= 360)
+    wind_dir_start -= 360;
+
+  wind_dir_end = strtod (value[4], &endptr);
+  if (errno == ERANGE || endptr == value[4])
+    {
+      g_warning ("setting end of area at risk of exposure to 360");
+      wind_dir_end = 360;
+    }
+  /* Force the angle into the range [0,360]. */
+  while (wind_dir_end < 0)
+    wind_dir_end += 360;
+  while (wind_dir_end > 360)
+    wind_dir_end -= 360;
+
+  /* Note that start > end is allowed.  See the header comment. */
+  wind_range_crosses_0 = (wind_dir_start > wind_dir_end);
+
+  /* Setting both start and end to 0 seems like a sensible way to turn off
+   * airborne spread, but headings close to north will "sneak through" this
+   * restriction because we allow a little wiggle room for rounding errors. If
+   * the user tries this, instead set prob-spread-1km=0. */
+  if (wind_dir_start == 0 && wind_dir_end == 0)
+    prob_spread_1km = 0;
+
+  max_spread = strtod (value[5], &endptr);
+  if (errno == ERANGE || endptr == value[5])
+    {
+      g_warning ("setting maximum distance of spread to 0");
+      max_spread = 0;
+    }
+  /* The maximum spread distance cannot be negative. */
+  if (max_spread < 0)
+    {
+      g_warning ("maximum distance of spread cannot be negative, setting to 0");
+      max_spread = 0;
+    }
+  /* Setting the maximum spread distance to 0 seems like a sensible way to turn
+   * off airborne spread, but max-spread <= 1 doesn't make sense in the
+   * formula.  If the user tries this, instead set max-spread=2,
+   * prob-spread-1km=0. */
+  if (max_spread <= 1)
+    {
+      g_warning ("maximum distance of spread is less than or equal to 1 km: no airborne spread will be used");
+      max_spread = 2;
+      prob_spread_1km = 0;
+    }
+
+  delay = PDF_new_point_dist (0);
 
   nprod_types = local_data->production_types->len;
   for (i = 0; i < nprod_types; i++)
@@ -796,6 +871,8 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
       for (j = 0; j < nprod_types; j++)
         if (to_production_type[j] == TRUE)
           {
+            param_block_t *param_block;
+
             /* If necessary, create a row in the 2D array for this from-
              * production type. */
             if (local_data->param_block[i] == NULL)
@@ -821,83 +898,12 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
                            (char *) g_ptr_array_index (local_data->production_types, j));
               }
 
-            e = scew_element_by_name (params, "prob-spread-1km");
-            param_block->prob_spread_1km = PAR_get_probability (e, &success);
-            if (success == FALSE)
-              {
-                g_warning ("setting probability of spread at 1 km to 0");
-                param_block->prob_spread_1km = 0;
-              }
-
-            e = scew_element_by_name (params, "wind-direction-start");
-            param_block->wind_dir_start = PAR_get_angle (e, &success);
-            if (success == FALSE)
-              {
-                g_warning ("setting start of area at risk of exposure to 0");
-                param_block->wind_dir_start = 0;
-              }
-            /* Force the angle into the range [0,360). */
-            while (param_block->wind_dir_start < 0)
-              param_block->wind_dir_start += 360;
-            while (param_block->wind_dir_start >= 360)
-              param_block->wind_dir_start -= 360;
-
-            e = scew_element_by_name (params, "wind-direction-end");
-            param_block->wind_dir_end = PAR_get_angle (e, &success);
-            if (success == FALSE)
-              {
-                g_warning ("setting end of area at risk of exposure to 360");
-                param_block->wind_dir_end = 360;
-              }
-            /* Force the angle into the range [0,360]. */
-            while (param_block->wind_dir_end < 0)
-              param_block->wind_dir_end += 360;
-            while (param_block->wind_dir_end > 360)
-              param_block->wind_dir_end -= 360;
-
-            /* Note that start > end is allowed.  See the header comment. */
-            param_block->wind_range_crosses_0 =
-              (param_block->wind_dir_start > param_block->wind_dir_end);
-
-            /* Setting both start and end to 0 seems like a sensible way to
-             * turn off airborne spread, but headings close to north will
-             * "sneak through" this restriction because we allow a little
-             * wiggle room for rounding errors.  If the user tries this,
-             * instead set prob-spread-1km=0. */
-            if (param_block->wind_dir_start == 0 && param_block->wind_dir_end == 0)
-              param_block->prob_spread_1km = 0;
-
-            e = scew_element_by_name (params, "max-spread");
-            param_block->max_spread = PAR_get_length (e, &success);
-            if (success == FALSE)
-              {
-                g_warning ("setting maximum distance of spread to 0");
-                param_block->max_spread = 0;
-              }
-            /* The maximum spread distance cannot be negative. */
-            if (param_block->max_spread < 0)
-              {
-                g_warning ("maximum distance of spread cannot be negative, setting to 0");
-                param_block->max_spread = 0;
-              }
-            /* Setting the maximum spread distance to 0 seems like a sensible
-             * way to turn off airborne spread, but max-spread <= 1 doesn't
-             * make sense in the formula.  If the user tries this, instead set
-             * max-spread=2, prob-spread-1km=0. */
-            if (param_block->max_spread <= 1)
-              {
-                g_warning ("maximum distance of spread is less than or equal to 1 km: no airborne spread will be used");
-                param_block->max_spread = 2;
-                param_block->prob_spread_1km = 0;
-              }
-
-            e = scew_element_by_name (params, "delay");
-            if (e != NULL)
-              {
-                param_block->delay = PAR_get_PDF (e);
-              }
-            else
-              param_block->delay = PDF_new_point_dist (0);
+            param_block->prob_spread_1km = prob_spread_1km;
+            param_block->wind_dir_start = wind_dir_start;
+            param_block->wind_dir_end = wind_dir_end;
+            param_block->wind_range_crosses_0 = wind_range_crosses_0;
+            param_block->max_spread = max_spread;
+            param_block->delay = PDF_clone_dist (delay);
 
             /* Keep track of the maximum distance of spread from each
              * production type.  This determines whether we will use the R-tree
@@ -908,12 +914,13 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
 
   g_free (from_production_type);
   g_free (to_production_type);
+  PDF_free_dist (delay);
 
 #if DEBUG
   g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
 #endif
 
-  return;
+  return 0;
 }
 
 
@@ -922,12 +929,13 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
  * Returns a new airborne spread model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 *params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
   unsigned int nprod_types, i;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -941,7 +949,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  self->set_params = set_params;
+  /* self->set_params = set_params; */
   self->run = run;
   self->reset = reset;
   self->is_singleton = TRUE;
@@ -956,7 +964,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   /* local_data->param_block is a 2D array of parameter blocks, each block
    * holding the parameters for one to-from combination of production types.
    * Initially, all row pointers are NULL.  Rows will be created as needed in
-   * the init function. */
+   * the set_params function. */
   local_data->production_types = units->production_type_names;
   nprod_types = local_data->production_types->len;
   local_data->param_block = g_new0 (param_block_t **, nprod_types);
@@ -979,9 +987,12 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   local_data->npending_infections = 0;
   local_data->rotating_index = 0;
 
-  /* Send the XML subtree to the init function to read the production type
-   * combination specific parameters. */
-  self->set_params (self, params);
+  /* Call the set_params function to read the production type combination
+   * specific parameters. */
+  sqlite3_exec (params,
+                "SELECT pt1.production_type_name,pt2.production_type_name,probability_airborne_spread_1km,wind_direction_start,wind_direction_end,max_distance_airborne_spread FROM inProductionType pt1,inProductionType pt2,inProductionTypePair pairing,inDiseaseSpread disease WHERE pt1.production_type_id=pairing._sourceproductiontypeid AND pt2.production_type_id=pairing._destproductiontypeid AND pairing._productiontypepairid = disease._productiontypepairid AND pairing.use_airborne_spread=1;",
+                set_params_s, self, &sqlerr);
+  g_assert (sqlerr == NULL);
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);
