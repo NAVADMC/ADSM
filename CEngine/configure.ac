@@ -99,6 +99,8 @@ AC_SUBST(GSL_LIBS)
 
 AC_CHECK_LIB(expat,XML_Parse,,AC_MSG_ERROR(cannot continue without expat))
 
+PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3], , AC_MSG_ERROR(cannot continue without SQLite3))
+
 AC_CHECK_LIB(m,pow,,AC_MSG_ERROR(cannot continue without math library))
 
 AC_CHECK_LIB(shp,SHPCreate,,AC_MSG_ERROR(cannot continue without Shapefile library))

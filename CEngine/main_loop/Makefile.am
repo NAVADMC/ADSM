@@ -102,7 +102,7 @@ spreadmodel_SOURCES = cli.c
 if HAVE_MPI
   spreadmodel_SOURCES += mpix.c mpix.h
 endif
-spreadmodel_LDADD = libspreadmodel.a @LEXLIB@ @GLIB_LIBS@ @GSL_LIBS@ @SCEW_LIBS@
+spreadmodel_LDADD = libspreadmodel.a @GLIB_LIBS@ @GSL_LIBS@ @SCEW_LIBS@ @SQLITE_LIBS@
 if HAVE_MPI
   spreadmodel_LDADD += @MPI_LIBS@
 endif

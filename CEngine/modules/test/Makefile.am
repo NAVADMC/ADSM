@@ -108,7 +108,7 @@ if USE_SC_GUILIB
     $(top_srcdir)/sc_guilib/sc_database.c
 endif
 minispreadmodel_CPPFLAGS = -DCANCEL_MPI=1 $(AM_CPPFLAGS)
-minispreadmodel_LDADD = @LEXLIB@ @GLIB_LIBS@ @GSL_LIBS@ @SCEW_LIBS@
+minispreadmodel_LDADD = @GLIB_LIBS@ @GSL_LIBS@ @SCEW_LIBS@ @SQLITE_LIBS@
 if HAVE_MPI
   minispreadmodel_LDADD += @MPI_LIBS@
 endif

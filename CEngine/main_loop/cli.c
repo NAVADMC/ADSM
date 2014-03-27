@@ -31,7 +31,7 @@ int
 main (int argc, char *argv[])
 {
   int verbosity = 0;
-  const char *parameter_file = NULL;
+  const char *parameter_db_name = NULL;
   const char *population_file = NULL;
 #ifdef USE_SC_GUILIB
   const char *production_type_file = NULL;
@@ -52,6 +52,8 @@ main (int argc, char *argv[])
 #endif
     { NULL }
   };
+  int sqlerr;
+  sqlite3 *parameter_db;
 
 #if HAVE_MPI && !CANCEL_MPI
   /* Initialize MPI. */
@@ -86,16 +88,22 @@ main (int argc, char *argv[])
       g_error ("option parsing failed: %s\n", option_error->message);
     }
   if (argc >= 2)
-    parameter_file = argv[1];
+    parameter_db_name = argv[1];
   else
     {
-      g_error ("Need name of parameter file");
+      g_error ("Need name of parameter database");
     }
   g_option_context_free (context);
 
+  sqlerr = sqlite3_open_v2 (parameter_db_name, &parameter_db, SQLITE_OPEN_READONLY, NULL);
+  if (sqlerr !=  SQLITE_OK)
+    {
+      g_error ("Error opening parameter database: %s", sqlite3_errstr (sqlerr));
+    }
+
 #ifdef USE_SC_GUILIB
   run_sim_main ((char *)population_file,
-                (char *)parameter_file,
+                parameter_db,
                 (char *)output_dir,
                 fixed_rng_value,
                 verbosity,
@@ -103,7 +111,7 @@ main (int argc, char *argv[])
                 production_type_file);
 #else
   run_sim_main ((char *)population_file,
-                (char *)parameter_file,
+                parameter_db,
                 (char *)output_dir,
                 fixed_rng_value,
                 verbosity,
@@ -113,6 +121,8 @@ main (int argc, char *argv[])
 #if HAVE_MPI && !CANCEL_MPI
   MPI_Finalize ();
 #endif
+
+  sqlite3_close (parameter_db);
 
   return EXIT_SUCCESS;
 }

@@ -689,12 +689,12 @@ default_projection (UNT_unit_list_t * units)
 #ifdef USE_SC_GUILIB
 DLL_API void
 run_sim_main (const char *population_file,
-              const char *parameter_file,
+              sqlite3 *parameter_db,
               const char *output_dir, double fixed_rng_value, int verbosity, int seed, char *production_type_file)
 #else
 DLL_API void
 run_sim_main (const char *population_file,
-              const char *parameter_file,
+              sqlite3 *parameter_db,
               const char *output_dir, double fixed_rng_value, int verbosity, int seed)
 #endif
 {
@@ -886,7 +886,7 @@ run_sim_main (const char *population_file,
 
   /* Get the simulation parameters. */
   nmodels =
-    spreadmodel_load_modules (parameter_file, units, units->projection, zones,
+    spreadmodel_load_modules (parameter_db, units, units->projection, zones,
                               &ndays, &nruns, &models, reporting_vars, &exit_conditions );
   nzones = ZON_zone_list_length (zones);
 

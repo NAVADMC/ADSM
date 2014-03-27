@@ -1265,24 +1265,48 @@ PAR_get_unitless_int (PAR_parameter_t * param, gboolean * success)
 
 
 /**
- * Retrieves a text value.  The text is copied, so the original PAR_parameter_t
- * object may be freed after calling this function.
+ * Retrieves a text parameter from the database.
  *
- * @param param a text parameter.
+ * @param loc location of a char * into which to write the starting location of
+ *   the text.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+PAR_get_text_callback (void *loc, int ncols, char **value, char **colname)
+{
+  char **result;
+  
+  g_assert (ncols == 1);
+  result = (char **)loc;
+  *result = value[0];
+  return 0;
+}
+
+
+
+/**
+ * Retrieves a text value.  The text is copied and must be freed with g_free.
+ *
+ * @param db a parameter database.
+ * @param query the query to retrieve the parameter.
  * @return the text.
  */
 char *
-PAR_get_text (PAR_parameter_t * param)
+PAR_get_text (sqlite3 *db, char *query)
 {
-  const char *element_text;
-  char *text;
+  char *text = NULL;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER PAR_get_text");
 #endif
 
-  element_text = scew_element_contents (param);
-  text = g_strdup (element_text);
+  sqlite3_exec (db, query, PAR_get_text_callback, &text, &sqlerr);
+  g_assert (sqlerr == NULL);
+  text = g_strdup (text);
 
 #if DEBUG
   g_debug ("----- EXIT PAR_get_text");
@@ -1291,4 +1315,59 @@ PAR_get_text (PAR_parameter_t * param)
   return text;
 }
 
+
+
+/**
+ * Retrieves an integer parameter from the database.
+ *
+ * @param loc location of an unsigned int into which to write the number of
+ *   days.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+PAR_get_int_callback (void *loc, int ncols, char **value, char **colname)
+{
+  gint *result;
+  long int tmp;
+  
+  g_assert (ncols == 1);
+  errno = 0;
+  tmp = strtol (value[0], NULL, 10);   /* base 10 */
+  g_assert (errno != ERANGE && errno != EINVAL);
+  result = (gint *)loc;
+  *result = (gint)tmp;
+  return 0;
+}
+
+
+
+/**
+ * Retrieves an integer parameter.
+ *
+ * @param db a parameter database.
+ * @param query the query to retrieve the parameter.
+ * @return the integer.
+ */
+gint
+PAR_get_int (sqlite3 *db, char *query)
+{
+  gint result;
+  char *sqlerr;
+
+  #if DEBUG
+    g_debug ("----- ENTER PAR_get_int");
+  #endif
+
+  sqlite3_exec (db, query, PAR_get_int_callback, &result, &sqlerr);
+  g_assert (sqlerr == NULL);
+
+  #if DEBUG
+    g_debug ("----- EXIT PAR_get_int");
+  #endif
+
+  return result;
+}
 /* end of file parameter.c */
