@@ -490,6 +490,7 @@
 #include "event_manager.h"
 #include "reporting.h"
 #include "rng.h"
+#include "spatial_search_rtree.h"
 
 #ifdef USE_SC_GUILIB
 #include "sc_spreadmodel_outputs.h"
@@ -827,7 +828,7 @@ run_sim_main (const char *population_file,
       UNT_unit_list_project (units, units->projection);
     }
   /* Build a spatial index around the unit locations. */
-  units->spatial_index = new_spatial_search ();
+  units->spatial_index = new_rtree_spatial_search ();
   for (i = 0; i < nunits; i++)
     {
       unit = UNT_unit_list_get (units, i);
