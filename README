@@ -7,5 +7,6 @@ pip install django  # 1.6
 pip install django-floppyforms
 pip install django-crispy-forms
 pip install django-extras
+pip install django-debug-toolbar
 pip install selenium  # only necessary for testing
 pip install cx-freeze  # only necessary for creating executables
