@@ -111,7 +111,8 @@ class DiseaseReactionAssignmentForm(BaseForm):
 
 
 class ControlProtocolForm(BaseForm):
-    """https://speakerdeck.com/maraujop/advanced-django-forms-usage slide 47"""
+    """https://speakerdeck.com/maraujop/advanced-django-forms-usage slide 47
+    http://stackoverflow.com/questions/19625211/bootstrap-linking-to-a-tab-with-an-url"""
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_class = 'form-horizontal'

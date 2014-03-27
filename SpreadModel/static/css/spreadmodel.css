@@ -14,6 +14,12 @@ h1.filename {
     color: #555;
 }
 
+#open_dialog {
+    width:200px;
+    height:30px;
+    position:absolute;
+}
+
 body>nav {
     position: fixed;
     top: 50px;

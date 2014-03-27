@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -169,7 +170,7 @@ def create_db_connection(db_name, db_path):
         print('Done creating database')
 
 
-def save_scenario(request, file_path='saved_session.sqlite3'):
+def db_save(file_path):
     create_db_connection('save_file', file_path)
     top_level_models = [Scenario, Population, Disease, ControlMasterPlan]
     for parent_object in top_level_models:
@@ -179,3 +180,12 @@ def save_scenario(request, file_path='saved_session.sqlite3'):
         except ObjectDoesNotExist:
             print("Couldn't find a ", parent_object)
     return 'Scenario Saved'
+
+
+def save_scenario(request, file_path='saved_session.sqlite3'):
+    # subprocess.call([])  # This would be best for long operations (non-blocking) but could be os specific
+    # return db_save(file_path)
+    print('Copying database...')
+    shutil.copy('activeSession.sqlite3', 'copy_active.sqlite3')
+    print('Done copying database')
+    return redirect('/setup/Scenario/1/')
