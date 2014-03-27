@@ -139,7 +139,7 @@ layer of validation will be necessary for required parameters per equation_type.
     std_dev = models.FloatField(blank=True, null=True,
                                 help_text='The mean for probability density function types Gaussian and Lognormal.', )
     min = models.FloatField(blank=True, null=True,
-                            help_text='The minimumfor probability density function types Uniform Triangular Beta and betaPERT.', )
+                            help_text='The minimum for probability density function types Uniform Triangular Beta and betaPERT.', )
     mode = models.FloatField(blank=True, null=True,
                              help_text='The Mode for probability density function types Point Triangular and BetaPERT.', )
     max = models.FloatField(blank=True, null=True,
