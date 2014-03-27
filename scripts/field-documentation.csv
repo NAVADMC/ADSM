@@ -87,7 +87,7 @@ vaccination_capacity_relid, ForeignKey, Relational fucntion used to define the d
 vaccination_priority_order, CharField, A string that identifies the primary priority order for vaccinatio
 
 class ControlProtocol
-name, CharField, Name your Protocol so you can recognize it later. Ex:"Quarantine
+name, CharField, Name your Protocol so you can recognize it later.
 use_detection, BooleanField, Indicates if disease detection will be modeled for units of this production type.
 detection_probability_for_observed_time_in_clinical_relid, ForeignKey, Relational function used to define the probability of observing clinical signs in units of this production type.
 detection_probability_report_vs_first_detection_relid, ForeignKey, Relational function used to define the probability of reportin clinical signs in units of this production typ
