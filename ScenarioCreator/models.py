@@ -1,5 +1,10 @@
 """This models file specifies all the tables used to create a settings file for
-a SpreadModel simulation.  This file in particular and the project in general
+a SpreadModel simulation.
+This project uses South migration tool for database structure changes.
+Use manage.py schemamigration APPNAME --auto whenever the models.py changes.
+Then rune manage.py migrate to apply the changes.
+
+This file in particular and the project in general
 relies heavily on conventions.  Please be careful to follow the existing conventions
 whenever you edit this file.
 Conventions:
