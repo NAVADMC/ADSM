@@ -190,3 +190,13 @@ def save_scenario(request, file_path='saved_session.sqlite3'):
     shutil.copy('activeSession.sqlite3', 'copy_active.sqlite3')
     print('Done copying database')
     return redirect('/setup/Scenario/1/')
+
+
+def open_scenario(request):
+    #file munch
+    target = request.POST['open_file']
+    shutil.copy(target, 'activeSession.sqlite3')
+    print('Sessions overwritten with ', target)
+    if not os.path.isfile(target):
+        print('File does not exist')
+    return redirect('/setup/Scenario/1/')

@@ -18,8 +18,10 @@
         <strong>Success!</strong> File saved to {{ filename }}
     </div>
     <div id="open_dialog">
-        <h1><a href="#">Open</a></h1>
-        <input type="file" id="selector"/>
+        <form action="/setup/OpenScenario/" method="POST">
+            <h1><a href="#">Open</a></h1>
+            <input type="file" id="open_file" name="open_file" accept=".sqlite3"/>
+        </form>
     </div>
 </header>
 {% block main %}

@@ -34,6 +34,7 @@ urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
                                          "url('^AssignProtocols/$', 'ScenarioCreator.views.assign_protocols')",
                                          "url('^AssignReactions/$', 'ScenarioCreator.views.assign_reactions')",
                                          "url('^SaveScenario/?P<file_path>\w+/$', 'ScenarioCreator.views.save_scenario')",
-                                         "url('^SaveScenario/', 'ScenarioCreator.views.save_scenario')"
+                                         "url('^SaveScenario/', 'ScenarioCreator.views.save_scenario')",
+                                         "url('^OpenScenario/', 'ScenarioCreator.views.open_scenario')"
                                         ])
 

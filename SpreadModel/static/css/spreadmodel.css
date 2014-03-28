@@ -40,13 +40,13 @@ header .alert {
 /*These two elements are stacked on top of each other for visual effect.*/
 #open_dialog h1 {
     position:absolute;
-    width:200px;
+    width:80px;
     height:30px;
 }
 /*Absolute positioning being same same is required for #open_dialog children*/
 #open_dialog input {
     position:absolute;
-    width:200px;
+    width:80px;
     height:40px;
     opacity:0;
 }
