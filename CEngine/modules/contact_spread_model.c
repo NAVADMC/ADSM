@@ -86,7 +86,6 @@
 
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new contact_spread_model_new
-#define set_params contact_spread_model_set_params
 #define run contact_spread_model_run
 #define reset contact_spread_model_reset
 #define events_listened_for contact_spread_model_events_listened_for
@@ -193,6 +192,8 @@ typedef struct
   unsigned int rotating_index; /**< To go with pending_infections. */
   gboolean outbreak_known;
   int public_announcement_day;
+  sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
+    so that it will be available to the set_params function. */
 }
 local_data_t;
 
@@ -1468,17 +1469,24 @@ local_free (struct spreadmodel_model_t_ *self)
 
 /**
  * Adds a set of parameters to a contact spread model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
  */
-void
-set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
+static int
+set_params (void *data, int ncols, char **value, char **colname)
 {
+  spreadmodel_model_t *self;
   local_data_t *local_data;
+  sqlite3 *params;
   param_block_t t;
-  scew_element const *e;
-  gboolean success;
-  scew_attribute *attr;
-  XML_Char const *attr_text;
   SPREADMODEL_contact_type contact_type;
+  long int tmp;
+  gboolean use_fixed_contact_rate;
+  guint pdf_id, rel_id;
   gboolean *from_production_type, *to_production_type;
   gboolean *zone;
   unsigned int nprod_types, nzones, i, j;
@@ -1487,18 +1495,16 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
+  self = (spreadmodel_model_t *)data;
   local_data = (local_data_t *) (self->model_data);
+  params = local_data->db;
+
+  g_assert (ncols == 10);
 
   /* Find out whether these parameters are for direct or indirect contact. */
-  attr = scew_element_attribute_by_name (params, "contact-type");
-  g_assert (attr != NULL);
-  attr_text = scew_attribute_value (attr);
-  if (strcmp (attr_text, "direct") == 0)
+  if (strcmp (value[2], "direct") == 0)
     contact_type = SPREADMODEL_DirectContact;
-  else if (strcmp (attr_text, "indirect") == 0)
+  else if (strcmp (value[2], "indirect") == 0)
     contact_type = SPREADMODEL_IndirectContact;
   else
     g_assert_not_reached ();
@@ -1506,36 +1512,23 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
   /* Read the parameters and store them in a temporary param_block_t
    * structure. */
 
-  e = scew_element_by_name (params, "movement-rate");
-  t.fixed_movement_rate = -1.0;
-  t.movement_rate = 0;
-  if (e != NULL)
+  errno = 0;
+  tmp = strtol (value[3], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  use_fixed_contact_rate = (tmp == 1);
+  errno = 0;
+  t.movement_rate = strtod (value[4], NULL);
+  g_assert (errno != ERANGE);
+  if (use_fixed_contact_rate)
     {
-      /* There is a mean movement rate, so don't use the fixed rate */
-      /* -1 seems like a reasonable default value for fixed_movement_rate. */
       /* If fixed_movement_rate >= 0, use it instead of the Poisson distribution */
-      t.movement_rate = PAR_get_frequency (e, &success);
-      if (success == FALSE)
-        {
-          g_warning ("setting movement rate to 0");
-          t.movement_rate = 0;
-        }
+      t.fixed_movement_rate = t.movement_rate;
     }
   else
     {
-      /* If there is no mean movement rate specified, look for a fixed movement rate */
-      e = scew_element_by_name (params, "fixed-movement-rate");
-      if (e != NULL)
-        {
-          t.fixed_movement_rate = PAR_get_frequency (e, &success);
-          if (success == FALSE)
-            {
-              g_warning ("setting movement rate to 0");
-              t.fixed_movement_rate = -1.0;
-            }
-        }
+      t.fixed_movement_rate = -1;
     }
-
   /* The movement rate cannot be negative. */
   if (t.movement_rate < 0)
     {
@@ -1543,93 +1536,51 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
       t.movement_rate = 0;
     }
 
-  e = scew_element_by_name (params, "distance");
-  if (e != NULL)
+  errno = 0;
+  pdf_id = strtol (value[5], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  t.distance_dist = PAR_get_PDF (params, pdf_id);
+  /* No part of the distance distribution can be negative. */
+  if (!t.distance_dist->has_inf_lower_tail)
     {
-      t.distance_dist = PAR_get_PDF (e);
-      /* No part of the distance distribution can be negative. */
-      if (!t.distance_dist->has_inf_lower_tail)
-        {
-          g_assert (PDF_cdf (-EPSILON, t.distance_dist) == 0);
-        }
-    }
-  else
-    {
-      t.distance_dist = NULL;
+      g_assert (PDF_cdf (-EPSILON, t.distance_dist) == 0);
     }
 
-  e = scew_element_by_name (params, "delay");
-  if (e != NULL)
-    {
-      t.shipping_delay = PAR_get_PDF (e);
-    }
-  else
-    {
-      t.shipping_delay = PDF_new_point_dist (0);
-    }
+  errno = 0;
+  pdf_id = strtol (value[6], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  t.shipping_delay = PAR_get_PDF (params, pdf_id);
 
-  e = scew_element_by_name (params, "prob-infect");
-  if (e != NULL)
-    {
-      t.prob_infect = PAR_get_probability (e, &success);
-      if (success == FALSE)
-        {
-          g_warning ("setting probability of infection to 0");
-          t.prob_infect = 0;
-        }
-    }
-  else
-    {
-      t.prob_infect = 0;
-    }
+  errno = 0;
+  t.prob_infect = strtod (value[7], NULL);
+  g_assert (errno != ERANGE);
+  g_assert (t.prob_infect >= 0 && t.prob_infect <= 1);
 
-  e = scew_element_by_name (params, "movement-control");
-  if (e != NULL)
-    {
-      t.movement_control = PAR_get_relationship_chart (e);
-    }
-  else
-    {
-      t.movement_control = REL_new_point_chart (1);
-    }
+  t.movement_control = REL_new_point_chart (1) /* PAR_get_relationship_chart (e) */;
   /* The movement rate multiplier cannot go negative. */
   g_assert (REL_chart_min (t.movement_control) >= 0);
 
-  e = scew_element_by_name (params, "latent-units-can-infect");
-  if (contact_type == SPREADMODEL_DirectContact && e != NULL)
-    {
-      t.latent_units_can_infect = PAR_get_boolean (e, &success);
-      if (success == FALSE)
-        {
-          g_warning ("latent units will be able to infect");
-          t.latent_units_can_infect = TRUE;
-        }
-    }
-  else
-    t.latent_units_can_infect = (contact_type == SPREADMODEL_DirectContact);
+  errno = 0;
+  tmp = strtol (value[8], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  t.latent_units_can_infect = (tmp == 1);
 
-  e = scew_element_by_name (params, "subclinical-units-can-infect");
-  if (e != NULL)
-    {
-      t.subclinical_units_can_infect = PAR_get_boolean (e, &success);
-      if (success == FALSE)
-        {
-          g_warning ("subclinical units will be able to infect");
-          t.subclinical_units_can_infect = TRUE;
-        }
-    }
-  else
-    t.subclinical_units_can_infect = TRUE;
+  errno = 0;
+  tmp = strtol (value[9], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  t.subclinical_units_can_infect = (tmp == 1);
 
   /* Find out which to-from production type combinations, or which production
    * type-zone combinations, these parameters apply to. */
   from_production_type =
-    spreadmodel_read_prodtype_attribute (params, "from-production-type", local_data->production_types);
+    spreadmodel_read_prodtype_attribute (value[0], local_data->production_types);
   to_production_type =
-    spreadmodel_read_prodtype_attribute (params, "to-production-type", local_data->production_types);
-  if (scew_element_attribute_by_name (params, "zone") != NULL)
+    spreadmodel_read_prodtype_attribute (value[1], local_data->production_types);
+/*  if (scew_element_attribute_by_name (params, "zone") != NULL)
     zone = spreadmodel_read_zone_attribute (params, local_data->zones);
-  else
+  else */
     zone = NULL;
 
   /* Copy the parameters to the appropriate place. */
@@ -1749,7 +1700,7 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
   g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
 #endif
 
-  return;
+  return 0;
 }
 
 
@@ -1758,12 +1709,13 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
  * Returns a new contact spread model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
   unsigned int nprod_types, nzones, i;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -1777,7 +1729,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  self->set_params = set_params;
   self->run = run;
   self->reset = reset;
   self->is_singleton = TRUE;
@@ -1829,9 +1780,17 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   local_data->npending_infections = 0;
   local_data->rotating_index = 0;
 
-  /* Send the XML subtree to the init function to read the production type
-   * combination specific parameters. */
-  self->set_params (self, params);
+  /* Call the set_params function to read the production type combination
+   * specific parameters. */
+  local_data->db = params;
+  sqlite3_exec (params,
+                "SELECT src_prodtype.name,dest_prodtype.name,\"direct\",use_fixed_contact_rate,contact_rate,distance_pdf_id,transport_delay_pdf_id,infection_probability,latent_animals_can_infect_others,subclinical_animals_can_infect_others FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_directspreadmodel direct WHERE src_prodtype.id=pairing.source_production_type_id AND dest_prodtype.id=pairing.destination_production_type_id AND pairing.direct_contact_spread_model_id = direct.id",
+                set_params, self, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
+  local_data->db = NULL;
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);
