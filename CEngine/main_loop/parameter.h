@@ -41,12 +41,12 @@ double PAR_get_angle (PAR_parameter_t *, gboolean * success);
 double PAR_get_frequency (PAR_parameter_t *, gboolean * success);
 double PAR_get_probability (PAR_parameter_t *, gboolean * success);
 double PAR_get_money (PAR_parameter_t *, gboolean * success);
-PDF_dist_t *PAR_get_PDF (PAR_parameter_t *);
+PDF_dist_t *PAR_get_PDF (sqlite3 *, guint id);
 REL_chart_t *PAR_get_relationship_chart (PAR_parameter_t *);
-gboolean PAR_get_boolean (sqlite3 *db, char *query);
+gboolean PAR_get_boolean (sqlite3 *, char *query);
 double PAR_get_unitless (PAR_parameter_t *, gboolean * success);
 int PAR_get_unitless_int (PAR_parameter_t *, gboolean * success);
-char *PAR_get_text (sqlite3 *db, char *query);
-gint PAR_get_int (sqlite3 *db, char *query);
+char *PAR_get_text (sqlite3 *, char *query);
+gint PAR_get_int (sqlite3 *, char *query);
 
 #endif /* !PARAMETER_H */

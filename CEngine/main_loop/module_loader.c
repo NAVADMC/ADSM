@@ -171,6 +171,12 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
   /* Instantiate modules based on which features are active in the scenario. */
   tmp_models = g_ptr_array_new();
 
+  if (PAR_get_int (parameter_db, "SELECT COUNT(*) FROM ScenarioCreator_diseasereactionassignment") >= 1)
+    {
+      g_ptr_array_add (tmp_models,
+                       disease_model_new (parameter_db, units, projection, zones));
+    }
+
   if (PAR_get_boolean (parameter_db, "SELECT include_airborne_spread FROM ScenarioCreator_scenario"))
     {
       if (PAR_get_boolean (parameter_db, "SELECT use_airborne_exponential_decay FROM ScenarioCreator_scenario"))

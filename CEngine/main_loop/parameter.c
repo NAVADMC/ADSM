@@ -638,49 +638,73 @@ PAR_get_histogram_PDF( scew_element* const fn_element )
 
 
 /**
+ * Retrieves a probability distribution function parameter from the database.
+ *
+ * @param loc location of a PDF_dist_t * into which to write the pointer to
+ *   the created object.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+PAR_get_PDF_callback (void *loc, int ncols, char **value, char **colname)
+{
+  PDF_dist_t **result;
+  PDF_dist_t *dist = NULL;
+  char *equation_type;
+  
+  g_assert (ncols == 19);
+  equation_type = value[0];
+  if (strcmp (equation_type, "Point") == 0)
+    {
+      double mode;
+      errno = 0;
+      mode = strtod (value[4], NULL);
+      if (errno == ERANGE)
+        {
+          g_error ("point distribution parameter \"%s\" is not a number", value[4]);
+        }
+      dist = PDF_new_point_dist (mode);
+    }
+  else
+    {
+      g_assert_not_reached();
+    }
+  result = (PDF_dist_t **)loc;
+  *result = dist;
+  return 0;
+}
+
+
+
+
+/**
  * Retrieves a probability distribution function.
  *
  * @param param a probability distribution function parameter.
  * @return a probability distribution function object.
  */
 PDF_dist_t *
-PAR_get_PDF (PAR_parameter_t * param)
+PAR_get_PDF (sqlite3 *db, guint id)
 {
   PDF_dist_t *dist;
-  scew_element *e, *tmp, *fn_param;
+  char *query;
+  char *sqlerr;
 #if DEBUG
   g_debug ("----- ENTER PAR_get_PDF");
 #endif
 
-  /* For old-style XML (used through NAADSM 3.1.23), a block of XML that
-     represents a PDF has no <probability-density-function> tag: we can jump 
-     right into the individual function types.
-     New-style XML (supported in NAADSM 3.1.24 and later) introduces the
-     <probability-density-function> tag.  We need to determine which style
-     that we're dealing with here.
-  */
-  tmp = scew_element_by_name (param, "probability-density-function");
-  if( tmp )
-    fn_param = tmp;  
-  else
-    fn_param = (scew_element*)param; 
-
+  query = g_strdup_printf ("SELECT equation_type,mean,std_dev,min,mode,max,alpha,alpha2,beta,location,scale,shape,n,p,m,d,theta,a,s FROM ScenarioCreator_probabilityfunction WHERE id=%u", id);
+  sqlite3_exec (db, query, PAR_get_PDF_callback, &dist, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
+  g_free (query);
 
   /* Find out what kind of distribution it is. */
-  e = scew_element_by_name (fn_param, "point");
-  if (e)
-    {
-      double value;
-
-      errno = 0;
-      value = strtod (scew_element_contents (e), NULL);
-      if (errno == ERANGE)
-        {
-          g_error ("point distribution parameter \"%s\" is not a number", scew_element_contents (e));
-        }
-      dist = PDF_new_point_dist (value);
-      goto end;
-    }
+/*
   e = scew_element_by_name (fn_param, "uniform");
   if (e)
     {
@@ -952,10 +976,10 @@ PAR_get_PDF (PAR_parameter_t * param)
   e = scew_element_by_name (fn_param, "hypergeometric");
   if (e)
     {
-      /* n1 = d
-       * n2 = m - d
-       * t = n
-       */
+       n1 = d
+       n2 = m - d
+       t = n
+      
       int n1, n2, t, m;
 
       errno = 0;
@@ -972,10 +996,8 @@ PAR_get_PDF (PAR_parameter_t * param)
       dist = PDF_new_hypergeometric_dist (n1, n2, t);
       goto end;
     }
+*/
 
-  g_assert_not_reached ();
-
-end:
 #if DEBUG
   g_debug ("----- EXIT PAR_get_PDF");
 #endif
@@ -1280,10 +1302,13 @@ static int
 PAR_get_text_callback (void *loc, int ncols, char **value, char **colname)
 {
   char **result;
+  gchar *normalized;
   
   g_assert (ncols == 1);
+  normalized = g_utf8_normalize (value[0], -1, G_NORMALIZE_DEFAULT);
+  
   result = (char **)loc;
-  *result = value[0];
+  *result = normalized;
   return 0;
 }
 
@@ -1311,7 +1336,6 @@ PAR_get_text (sqlite3 *db, char *query)
     {
       g_error ("%s", sqlerr);
     }
-  text = g_strdup (text);
 
 #if DEBUG
   g_debug ("----- EXIT PAR_get_text");
