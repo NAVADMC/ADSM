@@ -1,18 +1,24 @@
 import json
 import os
 import shutil
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db import connections
 from django.conf import settings
 import re
-
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
+
+scenario_filename = 'activeSession.sqlite3'  # This keeps track of the state for all views and is used by basic_context
+
+
+def activeSession():
+    full_path = settings.DATABASES['default']['NAME']
+    return full_path.replace(settings.BASE_DIR, '')
+
 
 
 def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
-    return {'filename': 'ActiveSession',
+    return {'filename': scenario_filename.replace('.sqlite3', ''),
             'Scenario': Scenario.objects.count(),
             'OutputSetting': OutputSettings.objects.count(),
             'Population': Population.objects.count(),
@@ -190,17 +196,20 @@ def db_save(file_path):
 def save_scenario(request, file_path='saved_session.sqlite3'):
     # subprocess.call([])  # This would be best for long operations (non-blocking) but could be os specific
     # return db_save(file_path)
-    print('Copying database...')
-    shutil.copy('activeSession.sqlite3', 'copy_active.sqlite3')
-    print('Done copying database')
+    if not activeSession() != scenario_filename:
+        print('Copying database to', scenario_filename)
+        shutil.copy(activeSession(), scenario_filename)
+    else:
+        print('I need to select a file path to save first')
     return redirect('/setup/Scenario/1/')
 
 
 def open_scenario(request):
-    #file munch
     target = request.POST['open_file']
-    shutil.copy(target, 'activeSession.sqlite3')
-    print('Sessions overwritten with ', target)
-    if not os.path.isfile(target):
+    if os.path.isfile(target):
+        shutil.copy(target, activeSession())
+        scenario_filename = target
+        print('Sessions overwritten with ', target)
+    else:
         print('File does not exist')
     return redirect('/setup/Scenario/1/')
