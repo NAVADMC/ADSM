@@ -990,9 +990,12 @@ new (sqlite3 *params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read the production type combination
    * specific parameters. */
   sqlite3_exec (params,
-                "SELECT pt1.production_type_name,pt2.production_type_name,probability_airborne_spread_1km,wind_direction_start,wind_direction_end,max_distance_airborne_spread FROM inProductionType pt1,inProductionType pt2,inProductionTypePair pairing,inDiseaseSpread disease WHERE pt1.production_type_id=pairing._sourceproductiontypeid AND pt2.production_type_id=pairing._destproductiontypeid AND pairing._productiontypepairid = disease._productiontypepairid AND pairing.use_airborne_spread=1;",
+                "SELECT src.name,dest.name,spread_1km_probability,wind_direction_start,wind_direction_end,max_distance FROM ScenarioCreator_productiontype src,ScenarioCreator_productiontype dest,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_airbornespreadmodel airborne WHERE src.id=pairing.source_production_type_id AND dest.id=pairing.destination_production_type_id AND pairing.airborne_contact_spread_model_id = airborne.id",
                 set_params_s, self, &sqlerr);
-  g_assert (sqlerr == NULL);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

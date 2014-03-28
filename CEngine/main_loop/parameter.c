@@ -1176,7 +1176,10 @@ PAR_get_boolean (sqlite3 *db, char *query)
 #endif
 
   sqlite3_exec (db, query, PAR_get_boolean_callback, &result, &sqlerr);
-  g_assert (sqlerr == NULL);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
 
 #if DEBUG
   g_debug ("----- EXIT PAR_get_boolean");
@@ -1304,7 +1307,10 @@ PAR_get_text (sqlite3 *db, char *query)
 #endif
 
   sqlite3_exec (db, query, PAR_get_text_callback, &text, &sqlerr);
-  g_assert (sqlerr == NULL);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
   text = g_strdup (text);
 
 #if DEBUG
@@ -1360,7 +1366,10 @@ PAR_get_int (sqlite3 *db, char *query)
   #endif
 
   sqlite3_exec (db, query, PAR_get_int_callback, &result, &sqlerr);
-  g_assert (sqlerr == NULL);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
 
   #if DEBUG
     g_debug ("----- EXIT PAR_get_int");

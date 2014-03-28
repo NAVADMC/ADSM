@@ -159,21 +159,21 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
   g_debug ("----- ENTER spreadmodel_load_models");
 #endif
 
-  *ndays = (unsigned int) PAR_get_int (parameter_db, "SELECT days FROM inGeneral");
-  *nruns = (unsigned int) PAR_get_int (parameter_db, "SELECT iterations FROM inGeneral");
+  *ndays = (unsigned int) PAR_get_int (parameter_db, "SELECT days FROM ScenarioCreator_outputsettings");
+  *nruns = (unsigned int) PAR_get_int (parameter_db, "SELECT iterations FROM ScenarioCreator_outputsettings");
   
   /*  This isn't a mandatory parameter.  If this field is NULL, the default is
       STOP_NORMAL. */
-  *_exit_conditions = get_exit_condition (PAR_get_text (parameter_db, "SELECT sim_stop_reason FROM inGeneral"));
+  *_exit_conditions = get_exit_condition (PAR_get_text (parameter_db, "SELECT early_stop_criteria FROM ScenarioCreator_outputsettings"));
 
   singletons = g_hash_table_new (g_str_hash, g_str_equal);
 
   /* Instantiate modules based on which features are active in the scenario. */
   tmp_models = g_ptr_array_new();
 
-  if (PAR_get_boolean (parameter_db, "SELECT include_airborne_spread FROM inGeneral"))
+  if (PAR_get_boolean (parameter_db, "SELECT include_airborne_spread FROM ScenarioCreator_scenario"))
     {
-      if (PAR_get_boolean (parameter_db, "SELECT use_airborne_exponential_decay FROM inGeneral"))
+      if (PAR_get_boolean (parameter_db, "SELECT use_airborne_exponential_decay FROM ScenarioCreator_scenario"))
         {
           g_ptr_array_add (tmp_models,
                            airborne_spread_exponential_model_new (parameter_db, units, projection, zones));
@@ -185,7 +185,7 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
         }
     }
 
-  if (PAR_get_boolean (parameter_db, "SELECT write_daily_states_file FROM inGeneral"))
+  if (PAR_get_boolean (parameter_db, "SELECT daily_states_filename IS NOT NULL FROM ScenarioCreator_outputsettings"))
     {
       g_ptr_array_add (tmp_models,
                        state_table_writer_new (parameter_db, units, projection, zones));

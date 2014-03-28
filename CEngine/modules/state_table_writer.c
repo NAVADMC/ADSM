@@ -412,7 +412,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Get the filename for the table.  If the filename is omitted, blank, '-',
    * or 'stdout' (case insensitive), then the table is written to standard
    * output. */
-  filename = PAR_get_text (params, "SELECT daily_states_filename FROM inGeneral");
+  filename = PAR_get_text (params, "SELECT daily_states_filename FROM ScenarioCreator_outputsettings");
   if (filename == NULL)
     {
       local_data->filename = g_strdup ("stdout"); /* just so we have something
