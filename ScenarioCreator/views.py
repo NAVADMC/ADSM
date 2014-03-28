@@ -30,6 +30,10 @@ def basic_context():  # TODO: This might not be performant... but it's nice to h
             'ZoneEffects': ZoneEffectOnProductionType.objects.count()}
 
 
+def home(request):
+    return redirect('/setup/Scenario/1/')
+
+
 def disease_spread(request):
     context = basic_context()
     forms = []
