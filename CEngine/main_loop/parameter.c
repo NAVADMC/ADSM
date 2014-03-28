@@ -682,7 +682,8 @@ PAR_get_PDF_callback (void *loc, int ncols, char **value, char **colname)
 /**
  * Retrieves a probability distribution function.
  *
- * @param param a probability distribution function parameter.
+ * @param db a parameter database.
+ * @param id the database ID of the probability distribution function.
  * @return a probability distribution function object.
  */
 PDF_dist_t *
@@ -1007,142 +1008,86 @@ PAR_get_PDF (sqlite3 *db, guint id)
 
 
 
+typedef struct
+{
+  GArray *x; /* growable array of doubles */
+  GArray *y; /* growable array of doubles */
+}
+PAR_get_relchart_callback_args_t;
+
+
+  
+/**
+ * Retrieves a relationship chart parameter from the database. This callback
+ * function is called once for each x-y pair (database row) in the chart.
+ *
+ * @param loc location of a PAR_get_relchart_callback_args_t object into which
+ *  to accumulate the x-y pairs.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+PAR_get_relchart_callback (void *loc, int ncols, char **value, char **colname)
+{
+  PAR_get_relchart_callback_args_t *build;
+  double x, y;
+  
+  g_assert (ncols == 2);
+  build = (PAR_get_relchart_callback_args_t *) loc;
+  errno = 0;
+  x = strtod (value[0], NULL);
+  if (errno == ERANGE)
+    {
+      g_error ("relationship chart point \"%s\" is not a number", value[0]);
+    }
+  errno = 0;
+  y = strtod (value[1], NULL);
+  if (errno == ERANGE)
+    {
+      g_error ("relationship chart point \"%s\" is not a number", value[1]);
+    }
+  g_array_append_val (build->x, x);
+  g_array_append_val (build->y, y);
+  return 0;
+}
+
+
+
+
 /**
  * Retrieves a relationship chart.
  *
- * @param param a relationship chart parameter.
+ * @param db a parameter database.
+ * @param id the database ID of the relationship chart.
  * @return a relationship chart object.
  */
 REL_chart_t *
-PAR_get_relationship_chart (PAR_parameter_t * param)
+PAR_get_relchart (sqlite3 *db, guint id)
 {
   REL_chart_t *chart;
-  scew_list *ee, *iter;
-  unsigned int npoints;
-  double *x, *y;
-  unsigned int i, j;
-  double value;
-  scew_element *fn_element;
-  gboolean old_style_xml;
+  PAR_get_relchart_callback_args_t build;
+  char *query;
+  char *sqlerr;
   
   #if DEBUG
     g_debug ("----- ENTER PAR_get_relationship_chart");
   #endif
-  
-  /* Determine whether we're dealing with new- or old-style XML. */
-  /*-------------------------------------------------------------*/
-  /* New-style XML has the tag <relational-function>. */
-  fn_element = scew_element_by_name( param, "relational-function" );
-  if( fn_element )
-    old_style_xml = FALSE; 
-  else
-    old_style_xml = TRUE;
-  
-  /* Parse XML, once we know what style it is. */
-  /*-------------------------------------------*/
-  if( old_style_xml )
-    {
-      gboolean xvalue;
-      scew_element *e;
 
-      ee = scew_element_list_by_name (param, "value");
-      npoints = scew_list_size (ee);
-      npoints /= 2;
-      #if DEBUG
-        g_debug ("%u points", npoints);
-      #endif
-    
-      /* Copy the x,y values from the DOM tree into arrays. */
-      x = g_new (double, npoints);
-      y = g_new (double, npoints);
-    
-      i = 0;
-      xvalue = TRUE;
-      for (iter = ee; iter != NULL; iter = scew_list_next(iter))
-        {
-          errno = 0;
-          e = (scew_element *) scew_list_data (iter);
-          value = strtod (scew_element_contents (e), NULL);
-          g_assert (errno != ERANGE);
-          /* The list of elements alternates x,y,x,y... */
-          if (xvalue)
-            x[i] = value;
-          else
-            y[i++] = value;
-          xvalue = !xvalue;
-        }
-      chart = REL_new_chart (x, y, npoints);
-      g_free (y);
-      g_free (x);
-      scew_list_free (ee);
-    }
-  else /* Parse new-style XML */
+  build.x = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
+  build.y = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
+  query = g_strdup_printf ("SELECT x,y FROM ScenarioCreator_relationalfunction fn,ScenarioCreator_relationalpoint pt WHERE fn.id=%u AND pt.relational_function_id=fn.id ORDER BY _point_order", id);
+  sqlite3_exec (db, query, PAR_get_relchart_callback, &build, &sqlerr);
+  if (sqlerr)
     {
-      scew_element *ve, *xe, *ye;
-      gboolean success;  
-      
-      success = TRUE; /* Until shown otherwise. */
-      
-      /* Loop over all elements once to determine the number of points. */
-      /*----------------------------------------------------------------*/
-      npoints = 0;
-      for( i = 0; i < scew_element_count( fn_element ); ++i ) 
-        {
-          ve = scew_element_by_index( fn_element, i );
-          if( 0 == g_ascii_strcasecmp( "value", scew_element_name( ve ) ) )
-            ++npoints;    
-        }
-      
-      /* Set up data structures. */
-      /*-------------------------*/
-      x = g_new (double, npoints);
-      y = g_new (double, npoints);
-              
-      /* Loop over all elements again a second time to fill the array of points. */
-      /*-------------------------------------------------------------------------*/ 
-      j = 0;
-      for( i = 0; i < scew_element_count( fn_element ); ++i ) 
-        {
-          ve = scew_element_by_index( fn_element, i );
-          if( 0 == g_ascii_strcasecmp( "value", scew_element_name( ve ) ) )
-            {         
-              errno = 0;
-              xe = scew_element_by_name( ve, "x" );
-              ye = scew_element_by_name( ve, "y" );
-              
-              if( xe )
-                {
-                  value = strtod( scew_element_contents( xe ), NULL );
-                  g_assert (errno != ERANGE);
-                  x[j] = value;  
-                }
-              else
-                success = FALSE;
-                
-              if( ye )
-                {
-                  value = strtod( scew_element_contents( ye ), NULL );
-                  g_assert (errno != ERANGE);
-                  y[j] = value;
-                }
-              else
-                success = FALSE;                        
-             
-              ++j;
-              
-              if( !success )
-                break; 
-            }
-        }      
-      
-      if( !success )
-        chart = NULL;
-      else
-        chart = REL_new_chart (x, y, npoints);
-        
-      g_free (y);
-      g_free (x); 
+      g_error ("%s", sqlerr);
     }
+  g_free (query);
+
+  chart = REL_new_chart ((double *)(build.x->data), (double *)(build.y->data), build.x->len);
+  g_array_free (build.x, /* free_segment = */ TRUE);
+  g_array_free (build.y, /* free_segment = */ TRUE);
 
   #if DEBUG
     g_debug ("----- EXIT PAR_get_relationship_chart");

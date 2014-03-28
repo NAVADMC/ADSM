@@ -42,7 +42,7 @@ double PAR_get_frequency (PAR_parameter_t *, gboolean * success);
 double PAR_get_probability (PAR_parameter_t *, gboolean * success);
 double PAR_get_money (PAR_parameter_t *, gboolean * success);
 PDF_dist_t *PAR_get_PDF (sqlite3 *, guint id);
-REL_chart_t *PAR_get_relationship_chart (PAR_parameter_t *);
+REL_chart_t *PAR_get_relchart (sqlite3 *, guint id);
 gboolean PAR_get_boolean (sqlite3 *, char *query);
 double PAR_get_unitless (PAR_parameter_t *, gboolean * success);
 int PAR_get_unitless_int (PAR_parameter_t *, gboolean * success);

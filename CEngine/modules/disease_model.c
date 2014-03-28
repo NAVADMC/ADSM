@@ -562,20 +562,26 @@ set_params_s (void *data, int ncols, char **value, char **colname)
   t.infectious_clinical_period = PAR_get_PDF (params, pdf_id);
   pdf_id = strtol(value[4], NULL, /* base */ 10);
   t.immunity_period = PAR_get_PDF (params, pdf_id);
-  /*
-  t.prevalence = PAR_get_relationship_chart (params, strtol(value[4], NULL, 10));
-  if (REL_chart_min (t.prevalence) < 0)
+  if (value[5] != NULL)
     {
-      g_error ("Y-values <0 are not allowed in a prevalence chart");
+      rel_id = strtol(value[5], NULL, /* base */ 10);
+      t.prevalence = PAR_get_relchart (params, rel_id);
+      if (REL_chart_min (t.prevalence) < 0)
+        {
+          g_error ("Y-values <0 are not allowed in a prevalence chart");
+        }
+      if (REL_chart_max (t.prevalence) > 1)
+        {
+          g_error ("Y-values >1 are not allowed in a prevalence chart");
+        }
+      /* Scale and translate so that the x-values go from 0 to 1. */
+      REL_chart_set_domain (t.prevalence, 0, 1);
     }
-  if (REL_chart_max (t.prevalence) > 1)
+  else
     {
-      g_error ("Y-values >1 are not allowed in a prevalence chart");
-    } */
-  /* Scale and translate so that the x-values go from 0 to 1. */
-  /* REL_chart_set_domain (t.prevalence, 0, 1); */
-  /* Don't use prevalence, use the old behaviour. */
-  t.prevalence = NULL;
+      /* Don't use prevalence, use the old behaviour. */
+      t.prevalence = NULL;
+    }
 
   /* Find out which production types these parameters apply to. */
   production_type =
