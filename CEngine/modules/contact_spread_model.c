@@ -1499,7 +1499,7 @@ set_params (void *data, int ncols, char **value, char **colname)
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
-  g_assert (ncols == 10);
+  g_assert (ncols == 11);
 
   /* Find out whether these parameters are for direct or indirect contact. */
   if (strcmp (value[2], "direct") == 0)
@@ -1556,18 +1556,21 @@ set_params (void *data, int ncols, char **value, char **colname)
   g_assert (errno != ERANGE);
   g_assert (t.prob_infect >= 0 && t.prob_infect <= 1);
 
-  t.movement_control = REL_new_point_chart (1) /* PAR_get_relationship_chart (e) */;
+  errno = 0;
+  rel_id = strtol (value[8], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);  
+  t.movement_control = PAR_get_relchart (params, rel_id);
   /* The movement rate multiplier cannot go negative. */
   g_assert (REL_chart_min (t.movement_control) >= 0);
 
   errno = 0;
-  tmp = strtol (value[8], NULL, /* base */ 10);
+  tmp = strtol (value[9], NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
   g_assert (tmp == 0 || tmp == 1);
   t.latent_units_can_infect = (tmp == 1);
 
   errno = 0;
-  tmp = strtol (value[9], NULL, /* base */ 10);
+  tmp = strtol (value[10], NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
   g_assert (tmp == 0 || tmp == 1);
   t.subclinical_units_can_infect = (tmp == 1);
@@ -1784,7 +1787,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * specific parameters. */
   local_data->db = params;
   sqlite3_exec (params,
-                "SELECT src_prodtype.name,dest_prodtype.name,\"direct\",use_fixed_contact_rate,contact_rate,distance_pdf_id,transport_delay_pdf_id,infection_probability,latent_animals_can_infect_others,subclinical_animals_can_infect_others FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_directspreadmodel direct WHERE src_prodtype.id=pairing.source_production_type_id AND dest_prodtype.id=pairing.destination_production_type_id AND pairing.direct_contact_spread_model_id = direct.id",
+                "SELECT src_prodtype.name,dest_prodtype.name,\"direct\",use_fixed_contact_rate,contact_rate,distance_pdf_id,transport_delay_pdf_id,infection_probability,movement_control_relid_id,latent_animals_can_infect_others,subclinical_animals_can_infect_others FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_directspreadmodel direct WHERE src_prodtype.id=pairing.source_production_type_id AND dest_prodtype.id=pairing.destination_production_type_id AND pairing.direct_contact_spread_model_id = direct.id UNION SELECT src_prodtype.name,dest_prodtype.name,\"indirect\",use_fixed_contact_rate,contact_rate,distance_pdf_id,transport_delay_pdf_id,infection_probability,movement_control_relid_id,0,subclinical_animals_can_infect_others FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_indirectspreadmodel indirect WHERE src_prodtype.id=pairing.source_production_type_id AND dest_prodtype.id=pairing.destination_production_type_id AND pairing.indirect_contact_spread_model_id = indirect.id",
                 set_params, self, &sqlerr);
   if (sqlerr)
     {
