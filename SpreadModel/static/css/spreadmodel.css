@@ -24,6 +24,13 @@ header h1 {
     width: 10%;
 }
 
+header .alert {
+    float: left;
+    margin-top: 5px;
+    width: 25%;
+    height: 40px;
+}
+
 #open_dialog {
     float: left;
     width:10%;

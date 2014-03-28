@@ -12,7 +12,8 @@ from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic 
 
 
 def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
-    return {'Scenario': Scenario.objects.count(),
+    return {'filename': 'ActiveSession',
+            'Scenario': Scenario.objects.count(),
             'OutputSetting': OutputSettings.objects.count(),
             'Population': Population.objects.count(),
             'ProductionTypes': ProductionType.objects.count(),
