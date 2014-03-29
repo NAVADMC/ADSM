@@ -65,7 +65,6 @@
 
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new detection_model_new
-#define set_params detection_model_set_params
 #define run detection_model_run
 #define reset detection_model_reset
 #define events_listened_for detection_model_events_listened_for
@@ -128,6 +127,8 @@ typedef struct
     reporting due to one value per production type.  The array is initialized
     in the reset function, and the values are re-calculated each day once an
     outbreak is known. */
+  sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
+    so that it will be available to the set_params function. */
 }
 local_data_t;
 
@@ -597,14 +598,21 @@ local_free (struct spreadmodel_model_t_ *self)
 
 /**
  * Adds a set of parameters to a detection model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
  */
-void
-set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
+static int
+set_params (void *data, int ncols, char **value, char **colname)
 {
+  spreadmodel_model_t *self;
   local_data_t *local_data;
+  sqlite3 *params;
   param_block_t t;
-  scew_element const *e;
-  gboolean success;
+  guint rel_id;
   double zone_multiplier;
   gboolean *production_type;
   gboolean *zone;
@@ -614,36 +622,26 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
+  self = (spreadmodel_model_t *)data;
   local_data = (local_data_t *) (self->model_data);
+  params = local_data->db;
+
+  g_assert (ncols == 3);
 
   /* Read the parameters and store them in a temporary param_block_t
    * structure. */
 
-  e = scew_element_by_name (params, "prob-report-vs-time-clinical");
-  if (e != NULL)
-    {
-      t.prob_report_vs_days_clinical = PAR_get_relationship_chart (e);
-    }
-  else
-    {
-      /* Default to 0 = no detection. */
-      t.prob_report_vs_days_clinical = REL_new_point_chart (0);
-    }
+  errno = 0;
+  rel_id = strtol (value[1], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);  
+  t.prob_report_vs_days_clinical = PAR_get_relchart (params, rel_id);
 
-  e = scew_element_by_name (params, "prob-report-vs-time-since-outbreak");
-  if (e != NULL)
-    {
-      t.prob_report_vs_days_since_outbreak = PAR_get_relationship_chart (e);
-    }
-  else
-    {
-      /* Default to 1 = public knowledge of outbreak has o effect. */
-      t.prob_report_vs_days_since_outbreak = REL_new_point_chart (1);
-    }
+  errno = 0;
+  rel_id = strtol (value[2], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);  
+  t.prob_report_vs_days_since_outbreak = PAR_get_relchart (params, rel_id);
 
+/*
   e = scew_element_by_name (params, "zone-prob-multiplier");
   if (e != NULL)
     {
@@ -669,14 +667,16 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
     {
       zone_multiplier = 1;
     }
+*/
+  zone_multiplier = 1;
 
   /* Find out which production types, or which production type-zone
    * combinations, these parameters apply to. */
   production_type =
-    spreadmodel_read_prodtype_attribute (params, "production-type", local_data->production_types);
-  if (scew_element_attribute_by_name (params, "zone") != NULL)
+    spreadmodel_read_prodtype_attribute (value[0], local_data->production_types);
+/*  if (scew_element_attribute_by_name (params, "zone") != NULL)
     zone = spreadmodel_read_zone_attribute (params, local_data->zones);
-  else
+  else */
     zone = NULL;
 
   /* Copy the parameters to the appropriate place. */
@@ -752,7 +752,7 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
   g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
 #endif
 
-  return;
+  return 0;
 }
 
 
@@ -761,12 +761,13 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
  * Returns a new detection model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
   unsigned int nprod_types, nzones, i, j;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -780,7 +781,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  self->set_params = set_params;
   self->run = run;
   self->reset = reset;
   self->is_singleton = TRUE;
@@ -826,9 +826,17 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
    * function. */
   local_data->prob_report_from_awareness = g_new (double, nprod_types);
 
-  /* Send the XML subtree to the init function to read the production type
-   * combination specific parameters. */
-  self->set_params (self, params);
+  /* Call the set_params function to read the production type combination
+   * specific parameters. */
+  local_data->db = params;
+  sqlite3_exec (params,
+                "SELECT prodtype.name,detection_probability_for_observed_time_in_clinical_relid_id,detection_probability_report_vs_first_detection_relid_id ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol detection,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=detection.id",
+                set_params, self, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
+  local_data->db = NULL;
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

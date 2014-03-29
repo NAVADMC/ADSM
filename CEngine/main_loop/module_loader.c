@@ -197,6 +197,14 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                        contact_spread_model_new (parameter_db, units, projection, zones));
     }
 
+  if (PAR_get_boolean (parameter_db, "SELECT _include_detection FROM ScenarioCreator_controlmasterplan"))
+    {
+      g_ptr_array_add (tmp_models,
+                       detection_model_new (parameter_db, units, projection, zones));
+      g_ptr_array_add (tmp_models,
+                       quarantine_model_new (parameter_db, units, projection, zones));
+    }
+
   if (PAR_get_boolean (parameter_db, "SELECT daily_states_filename IS NOT NULL FROM ScenarioCreator_outputsettings"))
     {
       g_ptr_array_add (tmp_models,
