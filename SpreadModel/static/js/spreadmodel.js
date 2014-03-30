@@ -15,9 +15,11 @@ $(function(){
                 hide_target.hide()
             }
         }).trigger('change')  //TODO: this doesn't trigger on page load properly
-
     })
 
+    $("#open_file").change(function(){
+        $(this).parent('form').submit();
+    })
 })
 
 var modelModal = {

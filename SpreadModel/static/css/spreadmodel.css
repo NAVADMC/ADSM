@@ -7,11 +7,48 @@ header {
     border-bottom: 2px solid #EEE;
 }
 
-h1.filename {
+header h1 {
     font-size: 24px;
     line-height: 50px;
     margin: 0 10px;
     color: #555;
+}
+
+.filename {
+    float: left;
+    width: 20%;
+}
+
+#save_scenario {
+    float: left;
+    width: 10%;
+}
+
+header .alert {
+    float: left;
+    margin-top: 5px;
+    width: 25%;
+    height: 40px;
+}
+
+#open_dialog {
+    float: left;
+    width:10%;
+    height: 50px;
+}
+
+/*These two elements are stacked on top of each other for visual effect.*/
+#open_dialog h1 {
+    position:absolute;
+    width:80px;
+    height:30px;
+}
+/*Absolute positioning being same same is required for #open_dialog children*/
+#open_dialog input {
+    position:absolute;
+    width:80px;
+    height:40px;
+    opacity:0;
 }
 
 body>nav {
@@ -74,6 +111,10 @@ body>section {
     padding:0;
     border-width: 0;
     color: #007700;
+}
+
+.btn-primary {
+    margin: 8px;
 }
 
 textarea {

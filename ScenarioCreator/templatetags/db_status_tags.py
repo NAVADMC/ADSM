@@ -8,7 +8,7 @@ register = template.Library()
 
 @register.filter()
 def completed(itemcount):
-    if itemcount != 0:
+    if itemcount:
         return 'completed '
         # return 'class="completed "><span class="badge pull-right">%i</span' % len(itemcount)
     return ''

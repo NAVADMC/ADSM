@@ -44,10 +44,23 @@ class DynamicBlobForm(BaseForm):
         model = DynamicBlob
 
 
+class PopulationForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_class = 'form-horizontal'
+        self.helper.layout = Layout(
+            'source_file',
+            submit_button()
+        )
+        return super().__init__(*args, **kwargs)
+    class Meta:
+        model = Population
+
+
 class UnitForm(BaseForm):
     class Meta:
         model = Unit
-        exclude = ['_final_state_code', '_final_control_state_code', '_final_detection_state_code', '_cum_infected', '_cum_detected', '_cum_destroyed', '_cum_vaccinated']
+        exclude = ['_population', '_final_state_code', '_final_control_state_code', '_final_detection_state_code', '_cum_infected', '_cum_detected', '_cum_destroyed', '_cum_vaccinated']
         widgets = {'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'})}
 
 
@@ -98,7 +111,8 @@ class DiseaseReactionAssignmentForm(BaseForm):
 
 
 class ControlProtocolForm(BaseForm):
-    """https://speakerdeck.com/maraujop/advanced-django-forms-usage slide 47"""
+    """https://speakerdeck.com/maraujop/advanced-django-forms-usage slide 47
+    http://stackoverflow.com/questions/19625211/bootstrap-linking-to-a-tab-with-an-url"""
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_class = 'form-horizontal'
@@ -291,12 +305,13 @@ class AirborneSpreadModelForm(BaseForm):
 class ScenarioForm(BaseForm):
     class Meta:
         model = Scenario
-        exclude = ['_output_settings']
+        exclude = []
 
 
 class OutputSettingsForm(BaseForm):
     class Meta:
         model = OutputSettings
+        exclude = ['_scenario']
         widgets = {'save_all_daily_outputs': RadioSelect(),
             'maximum_iterations_for_daily_output': NumberInput(attrs={'data-toggle-controller': 'save_all_daily_outputs',
                                                                       'data-required-value': 'False'})}

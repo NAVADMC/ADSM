@@ -22,6 +22,7 @@ def generate_urls_from_models(input_file, extra_urls=()):
             model_strings.append("url('^" + model_name + "/new/$', 'ScenarioCreator.views.new_entry')")
             model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry')")
             model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/copy/$', 'ScenarioCreator.views.copy_entry')")
+            model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/delete/$', 'ScenarioCreator.views.delete_entry')")
 
     model_strings += extra_urls
     output = "patterns('', " + ",\n         ".join(model_strings) + ")"
@@ -31,5 +32,9 @@ def generate_urls_from_models(input_file, extra_urls=()):
 urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
                                         ["url('^DiseaseSpread/$', 'ScenarioCreator.views.disease_spread')",
                                          "url('^AssignProtocols/$', 'ScenarioCreator.views.assign_protocols')",
-                                         "url('^AssignReactions/$', 'ScenarioCreator.views.assign_reactions')"])
+                                         "url('^AssignReactions/$', 'ScenarioCreator.views.assign_reactions')",
+                                         "url('^SaveScenario/?P<file_path>\w+/$', 'ScenarioCreator.views.save_scenario')",
+                                         "url('^SaveScenario/', 'ScenarioCreator.views.save_scenario')",
+                                         "url('^OpenScenario/', 'ScenarioCreator.views.open_scenario')"
+                                        ])
 

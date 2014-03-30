@@ -1,15 +1,27 @@
 import json
-from django.core.exceptions import ObjectDoesNotExist
+import os
+import shutil
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.db import connections
+from django.conf import settings
 import re
-
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
+
+scenario_filename = 'activeSession.sqlite3'  # This keeps track of the state for all views and is used by basic_context
+
+
+def activeSession():
+    full_path = settings.DATABASES['default']['NAME']
+    return full_path.replace(settings.BASE_DIR, '')
+
 
 
 def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
-    return {'Scenario': Scenario.objects.count(),
+    return {'filename': scenario_filename.replace('.sqlite3', ''),
+            'Scenario': Scenario.objects.count(),
             'OutputSetting': OutputSettings.objects.count(),
+            'Population': Population.objects.count(),
             'ProductionTypes': ProductionType.objects.count(),
             'Farms': Unit.objects.count(),
             'Disease': Disease.objects.count(),
@@ -22,6 +34,10 @@ def basic_context():  # TODO: This might not be performant... but it's nice to h
             'Protocols': ControlProtocol.objects.count(),
             'Zones': Zone.objects.count(),
             'ZoneEffects': ZoneEffectOnProductionType.objects.count()}
+
+
+def home(request):
+    return redirect('/setup/Scenario/1/')
 
 
 def disease_spread(request):
@@ -130,3 +146,70 @@ def copy_entry(request, primary_key):
     context.update({'form': initialized_form,
                     'title': "Copy a " + model_name}.items())
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
+
+
+def delete_entry(request, primary_key):
+    model_name, form = get_model_name_and_form(request)
+    model = form.Meta.model
+    model.objects.filter(pk=primary_key).delete()
+    return redirect('/setup/%s/new/' % model_name)
+
+
+'''Utility Views for UI'''
+def create_db_connection(db_name, db_path):
+    needs_sync = not os.path.isfile(db_path)
+
+    connections.databases[db_name] = {
+        'NAME': os.path.join(settings.BASE_DIR, db_path),
+        'ENGINE': 'django.db.backends.sqlite3'}
+    # Ensure the remaining default connection information is defined.
+    # EDIT: this is actually performed for you in the wrapper class __getitem__
+    # method.. although it may be good to do it when being initially setup to
+    # prevent runtime errors later.
+    # connections.databases.ensure_defaults(db_name)
+    if needs_sync:
+        # Don't import django.core.management if it isn't needed.
+        from django.core.management import call_command
+        print('Building DB structure...')
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
+        call_command('syncdb',
+            # verbosity=0,
+            interactive=False,
+            database=connections[db_name].alias,  # database=self.connection.alias,
+            load_initial_data=False)
+        # call_command('syncdb', )
+        print('Done creating database')
+
+
+def db_save(file_path):
+    create_db_connection('save_file', file_path)
+    top_level_models = [Scenario, Population, Disease, ControlMasterPlan]
+    for parent_object in top_level_models:
+        try:
+            node = parent_object.objects.using('default').get(id=1)
+            node.save(using='save_file')
+        except ObjectDoesNotExist:
+            print("Couldn't find a ", parent_object)
+    return 'Scenario Saved'
+
+
+def save_scenario(request, file_path='saved_session.sqlite3'):
+    # subprocess.call([])  # This would be best for long operations (non-blocking) but could be os specific
+    # return db_save(file_path)
+    if not activeSession() != scenario_filename:
+        print('Copying database to', scenario_filename)
+        shutil.copy(activeSession(), scenario_filename)
+    else:
+        print('I need to select a file path to save first')
+    return redirect('/setup/Scenario/1/')
+
+
+def open_scenario(request):
+    target = request.POST['open_file']
+    if os.path.isfile(target):
+        shutil.copy(target, activeSession())
+        scenario_filename = target
+        print('Sessions overwritten with ', target)
+    else:
+        print('File does not exist')
+    return redirect('/setup/Scenario/1/')

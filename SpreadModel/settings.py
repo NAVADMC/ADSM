@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
+    'south',
     'floppyforms',
     'crispy_forms',
     'ScenarioCreator',
@@ -75,8 +76,10 @@ CRISPY_TEMPLATE_PACK = 'bootstrap'
 
 DATABASES = {
     'default': {
+        'NAME': os.path.join(BASE_DIR, 'activeSession.sqlite3'),
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'defaultSettings.db'),
+        'USER': 'josiah',
+        'PASSWORD': '1',
     }
 }
 
