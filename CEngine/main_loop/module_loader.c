@@ -206,6 +206,12 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                        quarantine_model_new (parameter_db, units, projection, zones));
     }
 
+  if (PAR_get_boolean (parameter_db, "SELECT _include_zones FROM ScenarioCreator_controlmasterplan"))
+    {
+      g_ptr_array_add (tmp_models,
+                       zone_model_new (parameter_db, units, projection, zones));
+    }
+
   include_vaccination = PAR_get_boolean (parameter_db, "SELECT _include_vaccination FROM ScenarioCreator_controlmasterplan");
   if (include_vaccination)
     {

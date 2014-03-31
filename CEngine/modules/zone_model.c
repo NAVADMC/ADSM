@@ -30,14 +30,12 @@
 
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new zone_model_new
-#define set_params zone_model_set_params
 #define run zone_model_run
 #define reset zone_model_reset
 #define events_listened_for zone_model_events_listened_for
 #define to_string zone_model_to_string
 #define local_free zone_model_free
 #define handle_midnight_event zone_model_handle_midnight_event
-#define handle_new_day_event zone_model_handle_new_day_event
 
 #include "module.h"
 #include "gis.h"
@@ -61,10 +59,9 @@
 
 
 
-#define NEVENTS_LISTENED_FOR 2
+#define NEVENTS_LISTENED_FOR 1
 EVT_event_type_t events_listened_for[] = {
-  EVT_Midnight,
-  EVT_NewDay
+  EVT_Midnight
 };
 
 
@@ -73,9 +70,6 @@ EVT_event_type_t events_listened_for[] = {
 typedef struct
 {
   ZON_zone_t *zone;
-  RPT_reporting_t *num_fragments;
-  RPT_reporting_t *num_holes_filled;
-  RPT_reporting_t *cumul_num_holes_filled;
 }
 param_block_t;
 
@@ -538,55 +532,6 @@ end:
 
 
 /**
- */
-static void param_block_reporting (gpointer data, gpointer user_data)
-{
-  param_block_t *param_block = (param_block_t *) data;
-  ZON_zone_t *zone = param_block->zone;
-
-  if (param_block->num_fragments->frequency != RPT_never)
-    RPT_reporting_set_integer1 (param_block->num_fragments,
-                                g_queue_get_length (zone->fragments),
-                                zone->name);
-  if (param_block->num_holes_filled->frequency != RPT_never)
-    RPT_reporting_set_integer1 (param_block->num_holes_filled,
-                                zone->nholes_filled, zone->name);
-  if (param_block->cumul_num_holes_filled->frequency != RPT_never)
-    RPT_reporting_add_integer1 (param_block->cumul_num_holes_filled,
-                                zone->nholes_filled, zone->name);
-}
-
-
-
-/**
- * Responds to a new day event by updating the reporting variables.
- *
- * @param self the model.
- * @param event a new day event.
- */
-void
-handle_new_day_event (struct spreadmodel_model_t_ *self, EVT_new_day_event_t * event)
-{
-  local_data_t *local_data;
-
-#if DEBUG
-  g_debug ("----- ENTER handle_new_day_event (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-
-  g_ptr_array_foreach (local_data->param_blocks,
-                       param_block_reporting,
-                       NULL);
-
-#if DEBUG
-  g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
  * Runs this model.
  *
  * @param self the model.
@@ -606,9 +551,6 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
 
   switch (event->type)
     {
-    case EVT_NewDay:
-      handle_new_day_event (self, &(event->u.new_day));
-      break;
     case EVT_Midnight:
       handle_midnight_event(self, units, zones, &(event->u.midnight));
       break;
@@ -626,18 +568,6 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
 
 
 /**
- */
-static void param_block_reset_reporting (gpointer data, gpointer user_data)
-{
-  param_block_t *param_block = (param_block_t *) data;
-
-  RPT_reporting_zero (param_block->num_fragments);
-  RPT_reporting_zero (param_block->cumul_num_holes_filled);
-}
-
-
-
-/**
  * Resets this model after a simulation run.
  *
  * @param self the model.
@@ -645,17 +575,11 @@ static void param_block_reset_reporting (gpointer data, gpointer user_data)
 void
 reset (struct spreadmodel_model_t_ *self)
 {
-  local_data_t *local_data;
-
 #if DEBUG
   g_debug ("----- ENTER reset (%s)", MODEL_NAME);
 #endif
 
-  local_data = (local_data_t *) (self->model_data);
-
-  g_ptr_array_foreach (local_data->param_blocks,
-                       param_block_reset_reporting,
-                       NULL);
+  /* Nothing to do. */
 
 #if DEBUG
   g_debug ("----- EXIT reset (%s)", MODEL_NAME);
@@ -746,143 +670,54 @@ local_free (struct spreadmodel_model_t_ *self)
 
 /**
  * Adds a set of parameters to a zone model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
  */
-void
-set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
+static int
+set_params (void *data, int ncols, char **value, char **colname)
 {
+  spreadmodel_model_t *self;
   local_data_t *local_data = NULL;
   param_block_t *param_block = NULL;
-  scew_element const *e;
-  scew_list *ee, *iter;
-  RPT_reporting_t *output;
-  const XML_Char *variable_name;
-  gboolean success;
-  int i;
-  char *tmp;
   gchar *name;
-  int level;
   double radius;
 
 #if DEBUG
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
+  self = (spreadmodel_model_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
   param_block = g_new0 (param_block_t, 1);
 
-  e = scew_element_by_name (params, "name");
-  if (e != NULL)
+  if (value[0] != NULL)
     {
-      /* Expat stores the text as UTF-8. */
-      tmp = PAR_get_text (e);
-      name = g_utf8_normalize (tmp, -1, G_NORMALIZE_DEFAULT);
+      name = g_utf8_normalize (value[0], -1, G_NORMALIZE_DEFAULT);
       g_assert (name != NULL);
-      g_free (tmp);
     }
   else
-    name = g_strdup ("unnamed zone");
+    {
+      name = g_strdup ("unnamed zone");
+    }
 
-  e = scew_element_by_name (params, "level");
-  if (e != NULL)
+  errno = 0;
+  radius = strtod (value[1], NULL);
+  g_assert (errno != ERANGE);
+  /* Radius must be positive. */
+  if (radius < 0)
     {
-      level = PAR_get_unitless (e, &success);
-      if (success == FALSE)
-        {
-          /* This value will be re-assigned later, when the zone is added to
-           * the zone list. */
-          level = -1;
-        }
-    }
-  else
-    level = -1;
-
-  e = scew_element_by_name (params, "radius");
-  if (e != NULL)
-    {
-      radius = PAR_get_length (e, &success);
-      if (success == FALSE)
-        {
-          g_warning ("setting zone radius to 0");
-          radius = 0;
-        }
-      /* Radius must be positive. */
-      if (radius < 0)
-        {
-          g_warning ("zone radius cannot be negative, setting to 0");
-          radius = 0;
-        }
-    }
-  else
-    {
-      g_warning ("zone radius missing, setting to 0");
+      g_warning ("zone radius cannot be negative, setting to 0");
       radius = 0;
     }
 
-  param_block->zone = ZON_new_zone (name, level, radius);
+  param_block->zone = ZON_new_zone (name, /* level = */ -1, radius);
 
-  {
-    GString * s = g_string_new (NULL);
-
-    g_string_printf (s, "%s-num-fragments", name);
-    param_block->num_fragments =
-      RPT_new_reporting (s->str, RPT_group, RPT_never);
-
-    g_string_printf (s, "%s-num-holes-filled", name);
-    param_block->num_holes_filled =
-      RPT_new_reporting (s->str, RPT_group, RPT_never);
-
-    g_string_printf (s, "%s-cumulative-num-holes-filled", name);
-    param_block->cumul_num_holes_filled =
-      RPT_new_reporting (s->str, RPT_group, RPT_never);
-
-    g_string_free(s, TRUE);
-  }
   g_free (name);
-
-  g_ptr_array_add (self->outputs, param_block->num_fragments);
-  g_ptr_array_add (self->outputs, param_block->num_holes_filled);
-  g_ptr_array_add (self->outputs, param_block->cumul_num_holes_filled);
-
-  /* Set the reporting frequency for the output variables. */
-  ee = scew_element_list_by_name (params, "output");
-#if DEBUG
-  g_debug ("%i output variables", scew_list_size(ee));
-#endif
-  for (iter = ee; iter != NULL; iter = scew_list_next(iter))
-    {
-      GString * long_variable_name = g_string_new (NULL);
-
-      e = (scew_element *) scew_list_data (iter);
-      variable_name = scew_element_contents (scew_element_by_name (e, "variable-name"));
-      g_string_printf (long_variable_name, "%s-%s", name, variable_name);
-      /* Do the outputs include a variable with this name? */
-      for (i = 0; i < self->outputs->len; i++)
-        {
-          output = (RPT_reporting_t *) g_ptr_array_index (self->outputs, i);
-          if ((strcmp (output->name, variable_name) == 0) ||
-              (strcmp (output->name, long_variable_name->str) == 0))
-            break;
-        }
-      if (i == self->outputs->len)
-        g_warning ("no output variable named \"%s\", ignoring", variable_name);
-      else
-        {
-          RPT_reporting_set_frequency (output,
-                                       RPT_string_to_frequency (scew_element_contents
-                                                                (scew_element_by_name
-                                                                 (e, "frequency"))));
-#if DEBUG
-          g_debug ("report \"%s\" %s", variable_name, RPT_frequency_name[output->frequency]);
-#endif
-        }
-
-      g_string_free(long_variable_name, TRUE);
-    }
-  scew_list_free (ee);
 
   /* Add the zone object to the zone list. */
   ZON_zone_list_append (local_data->zones, param_block->zone);
@@ -894,7 +729,7 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
   g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
 #endif
 
-  return;
+  return 0;
 }
 
 
@@ -903,11 +738,12 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
  * Returns a new zone model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -921,7 +757,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_sized_new (3);
   self->model_data = local_data;
-  self->set_params = set_params;
   self->run = run;
   self->reset = reset;
   self->is_singleton = TRUE;
@@ -938,9 +773,15 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
 
   local_data->param_blocks = g_ptr_array_new();
 
-  /* Send the XML subtree to the init function to read the production type
-   * combination specific parameters. */
-  self->set_params (self, params);
+  /* Call the set_params function to read the production type combination
+   * specific parameters. */
+  sqlite3_exec (params,
+                "SELECT zone_description,zone_radius FROM ScenarioCreator_zone ORDER BY zone_radius",
+                set_params, self, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);
