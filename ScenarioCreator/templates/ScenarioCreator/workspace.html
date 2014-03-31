@@ -1,0 +1,14 @@
+{% extends 'ScenarioCreator/navigationPane.html' %}
+{% load floppyforms %}
+{% load crispy_forms_tags  %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+    <ul id="file_list">
+        {% for file in db_files %}
+            <li>{{ file }}</li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}
