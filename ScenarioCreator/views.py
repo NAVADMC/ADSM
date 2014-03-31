@@ -9,13 +9,12 @@ from django.conf import settings
 import re
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 
-scenario_filename = 'activeSession.sqlite3'  # This keeps track of the state for all views and is used by basic_context
+scenario_filename = 'activeSession'  # This keeps track of the state for all views and is used by basic_context
 
 
 def activeSession():
     full_path = settings.DATABASES['default']['NAME']
-    return full_path.replace(settings.BASE_DIR, '')
-
+    return os.path.split(full_path)[-1]
 
 
 def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
@@ -195,30 +194,45 @@ def delete_entry(request, primary_key):
 #     return 'Scenario Saved'
 
 
+def workspace_path(target):
+    return "./workspace/"+target+".sqlite3"
+
+
 def file_dialog(request):
+    # try:
+    print( "Saving ", scenario_filename)
+    if scenario_filename:
+        save_scenario(request, scenario_filename) #Save the file that's already open
+    # except ValueError:
+    #     pass  # New scenario
     db_files = glob("./workspace/*.sqlite3")
+    db_files = map(lambda x: x.replace('./workspace\\', '').replace('.sqlite3', ''), db_files)
     context = basic_context()
     context['db_files'] = db_files
     return render(request, 'ScenarioCreator/workspace.html', context)
 
 
-def save_scenario(request, file_path='saved_session.sqlite3'):
+def save_scenario(request, target):
     # subprocess.call([])  # This would be best for long operations (non-blocking) but could be os specific
-    # return db_save(file_path)
-    if not activeSession() != scenario_filename:
-        print('Copying database to', scenario_filename)
-        shutil.copy(activeSession(), scenario_filename)
+    # return db_save(target)
+    if target:
+        scenario_filename = target
     else:
-        print('I need to select a file path to save first')
+        target = scenario_filename
+    if scenario_filename:
+        print('Copying database to', target)
+        shutil.copy(activeSession(), workspace_path(target))
+    else:
+        raise ValueError('I need to select a file path to save first')
     return redirect('/setup/Scenario/1/')
 
 
-def open_scenario(request):
-    target = request.POST['open_file']
-    if os.path.isfile(target):
-        shutil.copy(target, activeSession())
-        scenario_filename = target
-        print('Sessions overwritten with ', target)
-    else:
-        print('File does not exist')
+def open_scenario(request, target):
+    # if os.path.isfile(workspace_path(target)):
+    print("Copying ", workspace_path(target), activeSession())
+    shutil.copy(workspace_path(target), activeSession())
+    scenario_filename = target
+    print('Sessions overwritten with ', target)
+    # else:
+    #     print('File does not exist')
     return redirect('/setup/Scenario/1/')
