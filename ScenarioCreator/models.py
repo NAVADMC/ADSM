@@ -211,7 +211,7 @@ class ControlMasterPlan(models.Model):
         help_text='Indicates if zones will be modeled.', )
     destruction_program_delay = models.IntegerField(blank=True, null=True,
         help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
-    destruction_capacity_relid = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
+    destruction_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text="The relational function used to define the daily destruction capacity.", )
     destruction_priority_order = models.CharField(max_length=255,
         help_text='The primary priority order for destruction.',
@@ -223,7 +223,7 @@ class ControlMasterPlan(models.Model):
         help_text='The secondary priority order for destruction.', )
     units_detected_before_triggering_vaccincation = models.IntegerField(blank=True, null=True,
         help_text='The number of clinical units which must be detected before the initiation of a vaccination program.', )
-    vaccination_capacity_relid = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
+    vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the daily vaccination capacity.', )
     vaccination_priority_order = models.CharField(max_length=255,
         help_text='A string that identifies the primary priority order for vaccination.',
@@ -237,9 +237,9 @@ class ControlProtocol(models.Model):
         help_text='Name your Protocol so you can recognize it later. Ex:"Quarantine"',)
     use_detection = models.BooleanField(default=False,
         help_text='Indicates if disease detection will be modeled for units of this production type.', )
-    detection_probability_for_observed_time_in_clinical_relid = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
+    detection_probability_for_observed_time_in_clinical = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the probability of observing clinical signs in units of this production type.', )
-    detection_probability_report_vs_first_detection_relid = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
+    detection_probability_report_vs_first_detection = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the probability of reporting clinical signs in units of this production type.')
     detection_is_a_zone_trigger = models.BooleanField(default=False,
         help_text='Indicator if detection of infected units of this production type will trigger a zone focus.', )
@@ -390,7 +390,7 @@ class DiseaseReaction(models.Model):
         help_text='Defines the clinical period for units of this production type.', )
     disease_immune_period = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the natural immune period for units of this production type.', )
-    disease_prevalence_relid = models.ForeignKey(RelationalFunction, related_name='+',
+    disease_prevalence = models.ForeignKey(RelationalFunction, related_name='+',
         blank=True, null=True,
         help_text='Defines the prevalance for units of this production type.', )
     def __str__(self):
@@ -431,7 +431,7 @@ class AbstractSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct 
         help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
     distance = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the shipment distances for direct and indirect contact models.', )
-    movement_control_relid = models.ForeignKey(RelationalFunction, related_name='+',
+    movement_control = models.ForeignKey(RelationalFunction, related_name='+',
         help_text='Relational function used to define movement control effects for the indicated production types combinations.', )
     class Meta:
         abstract = True
@@ -581,9 +581,9 @@ class ZoneEffectOnProductionType(models.Model):
         help_text='Zone for which this event occurred.', )
     production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
-    zone_indirect_movement_relid = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
+    zone_indirect_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Function the describes indirect movement rate.', )
-    zone_direct_movement_relid = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
+    zone_direct_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Function the describes direct movement rate.', )
     zone_detection_multiplier = models.FloatField(default=1.0,
         help_text='Multiplier for the probability of observing clinical signs in units of this production type in this zone.', )
