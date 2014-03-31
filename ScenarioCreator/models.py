@@ -392,7 +392,7 @@ class DiseaseReaction(models.Model):
         help_text='Defines the natural immune period for units of this production type.', )
     disease_prevalence = models.ForeignKey(RelationalFunction, related_name='+',
         blank=True, null=True,
-        help_text='Defines the prevalence for units of this production type.', )
+        help_text='Defines the prevalance for units of this production type.', )
     def __str__(self):
         return self.name
 
@@ -429,7 +429,7 @@ class AbstractSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct 
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
     infection_probability = PercentField(blank=True, null=True,
         help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
-    distance_distribution = models.ForeignKey(ProbabilityFunction, related_name='+',
+    distance = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the shipment distances for direct and indirect contact models.', )
     movement_control = models.ForeignKey(RelationalFunction, related_name='+',
         help_text='Relational function used to define movement control effects for the indicated production types combinations.', )
@@ -487,7 +487,7 @@ class Scenario(models.Model):
     use_airborne_exponential_decay = models.BooleanField(default=False,
         help_text='Indicates if the decrease in probability by airborne transmission is simulated by the exponential (TRUE) or linear (FALSE) algorithm.', )
     use_within_unit_prevalence = models.BooleanField(default=False,
-        help_text='Indicates if within unit prevalence should be used in the model.', )
+        help_text='Indicates if within unit prevalance should be used in the model.', )
     cost_track_destruction = models.BooleanField(default=False,
         help_text='Indicates if destruction costs should be tracked in the model.', )
     cost_track_vaccination = models.BooleanField(default=False,

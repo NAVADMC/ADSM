@@ -236,7 +236,7 @@ class IndirectSpreadModelForm(BaseForm):
             'use_fixed_contact_rate',
             'contact_rate',
             'infection_probability',
-            'distance_distribution',
+            'distance',
             'transport_delay',
             'movement_control',
             submit_button()
@@ -245,7 +245,7 @@ class IndirectSpreadModelForm(BaseForm):
     class Meta:
         model = IndirectSpreadModel
         exclude = ['_spread_method_code', '_disease']
-        widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+        widgets = {'distance': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
@@ -261,7 +261,7 @@ class DirectSpreadModelForm(BaseForm):
             'use_fixed_contact_rate',
             'contact_rate',
             'infection_probability',
-            'distance_distribution',
+            'distance',
             'transport_delay',
             'movement_control',
             submit_button()
@@ -270,7 +270,7 @@ class DirectSpreadModelForm(BaseForm):
     class Meta:
         model = DirectSpreadModel
         exclude = ['_spread_method_code', '_disease']
-        widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+        widgets = {'distance': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
