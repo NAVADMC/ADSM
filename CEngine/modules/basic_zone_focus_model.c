@@ -246,14 +246,69 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 /**
+ * Adds a set of parameters to a basic zone focus model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+set_params (void *data, int ncols, char **value, char **colname)
+{
+  spreadmodel_model_t *self;
+  local_data_t *local_data;
+  long int tmp;
+  gboolean detection_triggers_zone;
+  gboolean *production_type;
+  unsigned int nprod_types, i;
+
+  #if DEBUG
+    g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
+  #endif
+
+  self = (spreadmodel_model_t *)data;
+  local_data = (local_data_t *) (self->model_data);
+
+  g_assert (ncols == 2);
+
+  errno = 0;
+  tmp = strtol (value[1], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);  
+  g_assert (tmp == 0 || tmp == 1);
+  detection_triggers_zone = (tmp == 1);
+
+  if (detection_triggers_zone)
+    {
+      production_type = spreadmodel_read_prodtype_attribute (value[0], local_data->production_types);
+      nprod_types = local_data->production_types->len;
+      for (i = 0; i < nprod_types; i++)
+        {
+          local_data->production_type[i] = TRUE;
+        }
+      g_free (production_type);
+    }
+
+  #if DEBUG
+    g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
+  #endif
+
+  return 0;
+}
+
+
+
+/**
  * Returns a new basic zone focus model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -278,15 +333,18 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
-#if DEBUG
-  g_debug ("setting production types");
-#endif
   local_data->production_types = units->production_type_names;
-  local_data->production_type =
-    spreadmodel_read_prodtype_attribute (params, "production-type", units->production_type_names);
+  local_data->production_type = g_new (gboolean, local_data->production_types->len);
+
+  /* Call the set_params function to read the production type specific
+   * parameters. */
+  sqlite3_exec (params,
+                "SELECT prodtype.name,detection_is_a_zone_trigger FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id",
+                set_params, self, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

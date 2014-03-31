@@ -196,6 +196,8 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
     {
       g_ptr_array_add (tmp_models,
                        zone_model_new (parameter_db, units, projection, zones));
+      g_ptr_array_add (tmp_models,
+                       basic_zone_focus_model_new (parameter_db, units, projection, zones));
     }
 
   if (PAR_get_boolean (parameter_db, "SELECT include_contact_spread FROM ScenarioCreator_scenario"))
