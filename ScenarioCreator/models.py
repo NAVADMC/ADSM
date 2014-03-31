@@ -260,7 +260,7 @@ class ControlProtocol(models.Model):
         help_text='Probability of success of trace for indirect contact.', )
     indirect_trace_period = models.IntegerField(blank=True, null=True,
         help_text='Days before detection  (critical period) for tracing of indirect contacts.', )
-    trace_result_delay_pdf = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
+    trace_result_delay = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Delay for carrying out trace investigation result (days).', )
     direct_trace_is_a_zone_trigger = models.BooleanField(default=False,
         help_text='Indicator if direct tracing of infected units of this production type will trigger a zone focus.', )
@@ -292,7 +292,7 @@ class ControlProtocol(models.Model):
         help_text='The number of days required for the onset of vaccine immunity in a newly vaccinated unit of this type.', )
     minimum_time_between_vaccinations = models.IntegerField(blank=True, null=True,
         help_text='The minimum time in days between vaccination for units of this production type.', )
-    vaccine_immune_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
+    vaccine_immune_period = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Defines the vaccine immune period for units of this production type.', )
     trigger_vaccination_ring = models.BooleanField(default=False,
         help_text='Indicates if detection of a clinical unit of this type will trigger a vaccination ring.', )
@@ -333,7 +333,7 @@ class ControlProtocol(models.Model):
         help_text='Test Specificity for units of this production type', )
     test_sensitivity = models.FloatField(blank=True, null=True,
         help_text='Test Sensitivity for units of this production type', )
-    test_delay_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
+    test_delay = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Function that describes the delay in obtaining test results.', )
     vaccinate_retrospective_days = models.IntegerField(blank=True, null=True,
         help_text='Number of days in retrospect that should be used to determine which herds to vaccinate.', )
@@ -382,13 +382,13 @@ class DiseaseReaction(models.Model):
     name = models.CharField(max_length=255,
         help_text="Examples: Severe Reaction, FMD Long Incubation")
     _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0], )
-    disease_latent_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
+    disease_latent_period = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the latent period for units of this production type.', )
-    disease_subclinical_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
+    disease_subclinical_period = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the subclinical period for units of this production type.', )
-    disease_clinical_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
+    disease_clinical_period = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the clinical period for units of this production type.', )
-    disease_immune_period_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
+    disease_immune_period = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the natural immune period for units of this production type.', )
     disease_prevalence_relid = models.ForeignKey(RelationalFunction, related_name='+',
         blank=True, null=True,
@@ -412,7 +412,7 @@ class DiseaseSpreadModel(models.Model):
     _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0],
         help_text='Parent disease whose spreading characteristics this describes.')
         # This is in Disease because of simulation restrictions
-    transport_delay_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
+    transport_delay = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Relational function used to define the shipment delays for the indicated production type.', )
     class Meta:
         abstract = True
@@ -429,7 +429,7 @@ class AbstractSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct 
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
     infection_probability = PercentField(blank=True, null=True,
         help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
-    distance_pdf = models.ForeignKey(ProbabilityFunction, related_name='+',
+    distance = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the shipment distances for direct and indirect contact models.', )
     movement_control_relid = models.ForeignKey(RelationalFunction, related_name='+',
         help_text='Relational function used to define movement control effects for the indicated production types combinations.', )
