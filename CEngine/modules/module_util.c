@@ -106,12 +106,10 @@ spreadmodel_read_prodtype_attribute (char *attr_text, GPtrArray * production_typ
  *
  */
 gboolean *
-spreadmodel_read_zone_attribute (const scew_element * params, ZON_zone_list_t * zones)
+spreadmodel_read_zone_attribute (char *attr_text, ZON_zone_list_t * zones)
 {
   gboolean *flags;
   unsigned int nzones;
-  scew_attribute *attr;
-  XML_Char const *attr_text;
   gchar **tokens;
   gchar **iter;
   int i;                        /* loop counter */
@@ -123,17 +121,15 @@ spreadmodel_read_zone_attribute (const scew_element * params, ZON_zone_list_t * 
   nzones = ZON_zone_list_length (zones);
   flags = g_new0 (gboolean, nzones);
 
-  attr = scew_element_attribute_by_name (params, "zone");
-  /* If the "zone" attribute is missing, assume the parameters apply in all
-   * zones. */
-  if (attr == NULL)
+  /* If the text is null or blank, assume the parameters apply to all
+   * production types. */
+  if (attr_text == NULL)
     {
       for (i = 0; i < nzones; i++)
         flags[i] = TRUE;
     }
   else
     {
-      attr_text = scew_attribute_value (attr);
       /* If the "zone" attribute is blank, assume the parameters apply in all
        * zones. */
       if (strlen (attr_text) == 0)

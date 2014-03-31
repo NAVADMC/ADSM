@@ -1468,7 +1468,8 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 /**
- * Adds a set of parameters to a contact spread model.
+ * Adds a set of from-production-type/to-production-type combination specific
+ * parameters to a contact spread model.
  *
  * @param data this module ("self"), but cast to a void *.
  * @param ncols number of columns in the SQL query result.
@@ -1488,8 +1489,7 @@ set_params (void *data, int ncols, char **value, char **colname)
   gboolean use_fixed_contact_rate;
   guint pdf_id, rel_id;
   gboolean *from_production_type, *to_production_type;
-  gboolean *zone;
-  unsigned int nprod_types, nzones, i, j;
+  unsigned int nprod_types, i, j;
 
 #if DEBUG
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
@@ -1575,126 +1575,71 @@ set_params (void *data, int ncols, char **value, char **colname)
   g_assert (tmp == 0 || tmp == 1);
   t.subclinical_units_can_infect = (tmp == 1);
 
-  /* Find out which to-from production type combinations, or which production
-   * type-zone combinations, these parameters apply to. */
+  /* Find out which to-from production type combinations these parameters apply
+   * to. */
   from_production_type =
     spreadmodel_read_prodtype_attribute (value[0], local_data->production_types);
   to_production_type =
     spreadmodel_read_prodtype_attribute (value[1], local_data->production_types);
-/*  if (scew_element_attribute_by_name (params, "zone") != NULL)
-    zone = spreadmodel_read_zone_attribute (params, local_data->zones);
-  else */
-    zone = NULL;
 
   /* Copy the parameters to the appropriate place. */
   nprod_types = local_data->production_types->len;
-  nzones = ZON_zone_list_length (local_data->zones);
-  if (zone == NULL)
-    {
-      /* These parameters are by to-from production type. */
+  {
+    param_block_t ***contact_type_block;
+    param_block_t *param_block;
 
-      param_block_t ***contact_type_block;
-      param_block_t *param_block;
+    contact_type_block = local_data->param_block[contact_type];
+    for (i = 0; i < nprod_types; i++)
+      {
+        if (from_production_type[i] == FALSE)
+          continue;
 
-      contact_type_block = local_data->param_block[contact_type];
-      for (i = 0; i < nprod_types; i++)
-        {
-          if (from_production_type[i] == FALSE)
-            continue;
+        /* If necessary, create a row in the 2D array for this from-
+         * production type. */
+        if (contact_type_block[i] == NULL)
+          contact_type_block[i] = g_new0 (param_block_t *, nprod_types);
 
-          /* If necessary, create a row in the 2D array for this from-
-           * production type. */
-          if (contact_type_block[i] == NULL)
-            contact_type_block[i] = g_new0 (param_block_t *, nprod_types);
+        for (j = 0; j < nprod_types; j++)
+          {
+            if (to_production_type[j] == FALSE)
+              continue;
 
-          for (j = 0; j < nprod_types; j++)
-            {
-              if (to_production_type[j] == FALSE)
-                continue;
+            /* Create a parameter block for this to-from production type
+             * combination, or overwrite the existing one. */
+            param_block = contact_type_block[i][j];
+            if (param_block == NULL)
+              {
+                param_block = g_new (param_block_t, 1);
+                contact_type_block[i][j] = param_block;
+                #if DEBUG
+                  g_debug ("setting parameters for %s -> %s (%s)",
+                           (char *) g_ptr_array_index (local_data->production_types, i),
+                           (char *) g_ptr_array_index (local_data->production_types, j),
+                           SPREADMODEL_contact_type_name[contact_type]);
+                #endif
+              }
+            else
+              {
+                g_warning ("overwriting previous parameters for %s -> %s (%s)",
+                           (char *) g_ptr_array_index (local_data->production_types, i),
+                           (char *) g_ptr_array_index (local_data->production_types, j),
+                           SPREADMODEL_contact_type_name[contact_type]);
+              }
 
-              /* Create a parameter block for this to-from production type
-               * combination, or overwrite the existing one. */
-              param_block = contact_type_block[i][j];
-              if (param_block == NULL)
-                {
-                  param_block = g_new (param_block_t, 1);
-                  contact_type_block[i][j] = param_block;
-                  #if DEBUG
-                    g_debug ("setting parameters for %s -> %s (%s)",
-                             (char *) g_ptr_array_index (local_data->production_types, i),
-                             (char *) g_ptr_array_index (local_data->production_types, j),
-                             SPREADMODEL_contact_type_name[contact_type]);
-                  #endif
-                }
-              else
-                {
-                  g_warning ("overwriting previous parameters for %s -> %s (%s)",
-                             (char *) g_ptr_array_index (local_data->production_types, i),
-                             (char *) g_ptr_array_index (local_data->production_types, j),
-                             SPREADMODEL_contact_type_name[contact_type]);
-                }
-
-              param_block->movement_rate = t.movement_rate;
-              param_block->fixed_movement_rate = t.fixed_movement_rate;
-              param_block->movement_control = REL_clone_chart (t.movement_control);
-              param_block->distance_dist = PDF_clone_dist (t.distance_dist);
-              param_block->shipping_delay = PDF_clone_dist (t.shipping_delay);
-              param_block->latent_units_can_infect = t.latent_units_can_infect;
-              param_block->subclinical_units_can_infect = t.subclinical_units_can_infect;
-              param_block->prob_infect = t.prob_infect;
-            }
-        }
-    }
-  else
-    {
-      /* These parameters are by production type-zone. */
-
-      REL_chart_t ***contact_type_chart;
-
-#if DEBUG
-      g_debug ("here");
-#endif
-
-      contact_type_chart = local_data->movement_control[contact_type];
-      for (i = 0; i < nzones; i++)
-        {
-          if (zone[i] == FALSE)
-            continue;
-
-          for (j = 0; j < nprod_types; j++)
-            {
-              if (from_production_type[j] == FALSE)
-                continue;
-
-              /* Create a relationship chart for this to-from production type
-               * combination, or overwrite the existing one. */
-              if (contact_type_chart[i][j] == NULL)
-                {
-                  #if DEBUG
-                    g_debug ("setting movement control for %s in \"%s\" zone (%s)",
-                             (char *) g_ptr_array_index (local_data->production_types, j),
-                             ZON_zone_list_get (local_data->zones, i)->name,
-                             SPREADMODEL_contact_type_name[contact_type]);
-                  #endif
-                  ;
-                }
-              else
-                {
-                  REL_free_chart (contact_type_chart[i][j]);
-                  g_warning ("overwriting previous movement control for %s in \"%s\" zone (%s)",
-                             (char *) g_ptr_array_index (local_data->production_types, j),
-                             ZON_zone_list_get (local_data->zones, i)->name,
-                             SPREADMODEL_contact_type_name[contact_type]);
-                }
-              contact_type_chart[i][j] = REL_clone_chart (t.movement_control);
-            }
-        }
-    }
+            param_block->movement_rate = t.movement_rate;
+            param_block->fixed_movement_rate = t.fixed_movement_rate;
+            param_block->movement_control = REL_clone_chart (t.movement_control);
+            param_block->distance_dist = PDF_clone_dist (t.distance_dist);
+            param_block->shipping_delay = PDF_clone_dist (t.shipping_delay);
+            param_block->latent_units_can_infect = t.latent_units_can_infect;
+            param_block->subclinical_units_can_infect = t.subclinical_units_can_infect;
+            param_block->prob_infect = t.prob_infect;
+          }
+      }
+  }
 
   g_free (from_production_type);
   g_free (to_production_type);
-  if (zone != NULL)
-    g_free (zone);
   PDF_free_dist (t.distance_dist);
   PDF_free_dist (t.shipping_delay);
   REL_free_chart (t.movement_control);
@@ -1706,6 +1651,113 @@ set_params (void *data, int ncols, char **value, char **colname)
   return 0;
 }
 
+
+
+/**
+ * Adds a set of zone/production type combination specific parameters to a
+ * contact spread model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+set_zone_params (void *data, int ncols, char **value, char **colname)
+{
+  spreadmodel_model_t *self;
+  local_data_t *local_data;
+  sqlite3 *params;
+  guint rel_id;
+  REL_chart_t *movement_control;
+  SPREADMODEL_contact_type contact_type;
+  gboolean *production_type;
+  gboolean *zone;
+  unsigned int nprod_types, nzones, i, j;
+
+  #if DEBUG
+    g_debug ("----- ENTER set_zone_params (%s)", MODEL_NAME);
+  #endif
+
+  self = (spreadmodel_model_t *)data;
+  local_data = (local_data_t *) (self->model_data);
+  params = local_data->db;
+
+  g_assert (ncols == 4);
+
+  errno = 0;
+  rel_id = strtol (value[3], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);  
+  movement_control = PAR_get_relchart (params, rel_id);
+  /* The movement rate multiplier cannot go negative. */
+  g_assert (REL_chart_min (movement_control) >= 0);
+
+  /* Find out whether these parameters are for direct or indirect contact. */
+  if (strcmp (value[2], "direct") == 0)
+    contact_type = SPREADMODEL_DirectContact;
+  else if (strcmp (value[2], "indirect") == 0)
+    contact_type = SPREADMODEL_IndirectContact;
+  else
+    g_assert_not_reached ();
+
+  /* Find out which zone/production type combinations these parameters apply
+   * to. */
+  zone = spreadmodel_read_zone_attribute (value[0], local_data->zones);
+  production_type = spreadmodel_read_prodtype_attribute (value[1], local_data->production_types);
+
+  /* Copy the parameters to the appropriate place. */
+  nzones = ZON_zone_list_length (local_data->zones);
+  nprod_types = local_data->production_types->len;
+  {
+    REL_chart_t ***contact_type_chart;
+
+    contact_type_chart = local_data->movement_control[contact_type];
+    for (i = 0; i < nzones; i++)
+      {
+        if (zone[i] == FALSE)
+          continue;
+
+        for (j = 0; j < nprod_types; j++)
+          {
+            if (production_type[j] == FALSE)
+              continue;
+
+            /* Create a relationship chart for this to-from production type
+             * combination, or overwrite the existing one. */
+            if (contact_type_chart[i][j] == NULL)
+              {
+                #if DEBUG
+                  g_debug ("setting movement control for %s in \"%s\" zone (%s)",
+                           (char *) g_ptr_array_index (local_data->production_types, j),
+                           ZON_zone_list_get (local_data->zones, i)->name,
+                           SPREADMODEL_contact_type_name[contact_type]);
+                #endif
+                ;
+              }
+            else
+              {
+                REL_free_chart (contact_type_chart[i][j]);
+                g_warning ("overwriting previous movement control for %s in \"%s\" zone (%s)",
+                           (char *) g_ptr_array_index (local_data->production_types, j),
+                           ZON_zone_list_get (local_data->zones, i)->name,
+                           SPREADMODEL_contact_type_name[contact_type]);
+              }
+            contact_type_chart[i][j] = REL_clone_chart (movement_control);
+          }
+      }
+  }
+
+  REL_free_chart (movement_control);
+  g_free (zone);
+  g_free (production_type);
+
+  #if DEBUG
+    g_debug ("----- EXIT set_zone_params (%s)", MODEL_NAME);
+  #endif
+
+  return 0;
+}
 
 
 /**
@@ -1783,12 +1835,22 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->npending_infections = 0;
   local_data->rotating_index = 0;
 
-  /* Call the set_params function to read the production type combination
-   * specific parameters. */
+  /* Call the set_params function to read the from-production-type/
+   * to-production-type combination specific parameters. */
   local_data->db = params;
   sqlite3_exec (params,
                 "SELECT src_prodtype.name,dest_prodtype.name,\"direct\",use_fixed_contact_rate,contact_rate,distance_pdf_id,transport_delay_pdf_id,infection_probability,movement_control_relid_id,latent_animals_can_infect_others,subclinical_animals_can_infect_others FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_directspreadmodel direct WHERE src_prodtype.id=pairing.source_production_type_id AND dest_prodtype.id=pairing.destination_production_type_id AND pairing.direct_contact_spread_model_id = direct.id UNION SELECT src_prodtype.name,dest_prodtype.name,\"indirect\",use_fixed_contact_rate,contact_rate,distance_pdf_id,transport_delay_pdf_id,infection_probability,movement_control_relid_id,0,subclinical_animals_can_infect_others FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_indirectspreadmodel indirect WHERE src_prodtype.id=pairing.source_production_type_id AND dest_prodtype.id=pairing.destination_production_type_id AND pairing.indirect_contact_spread_model_id = indirect.id",
                 set_params, self, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
+
+  /* Call the set_zone_params function to read the zone/production type
+   * combination specific parameters. */
+  sqlite3_exec (params,
+                "SELECT zone.name,prodtype.name,\"direct\",zone_direct_movement_relid_id FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectonproductiontype pairing WHERE zone.id=pairing.zone_id AND prodtype.id=pairing.production_type_id UNION SELECT zone.name,prodtype.name,\"indirect\",zone_indirect_movement_relid_id FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectonproductiontype pairing WHERE zone.id=pairing.zone_id AND prodtype.id=pairing.production_type_id",
+                set_zone_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

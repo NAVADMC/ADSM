@@ -25,7 +25,7 @@
 
 /* Prototypes. */
 gboolean *spreadmodel_read_prodtype_attribute (char *, GPtrArray *);
-gboolean *spreadmodel_read_zone_attribute (const scew_element *, ZON_zone_list_t *);
+gboolean *spreadmodel_read_zone_attribute (char *, ZON_zone_list_t *);
 void spreadmodel_extend_rotating_array (GPtrArray * array, unsigned int length, unsigned int index);
 void g_queue_free_as_GDestroyNotify (gpointer data);
 char *spreadmodel_insert_node_number_into_filename (const char *filename);
