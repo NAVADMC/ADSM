@@ -19,7 +19,7 @@ Search/Replace:
     description = CharField(max_length=255,  ->   description = TextField(
 
 Search: "id =" these should be ForeignKeys.  You have to do these manually since they
- require judgement calls.  Example: distance_pdf = models.ForeignKey(ProbabilityFunction, related_name='+')
+ require judgement calls.  Example: distance_distribution = models.ForeignKey(ProbabilityFunction, related_name='+')
 """
 
 

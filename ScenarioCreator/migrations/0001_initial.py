@@ -217,7 +217,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('_disease', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.Disease'])),
-            ('disease_latent_period_pdf', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ProbabilityFunction'], related_name='+')),
+            ('disease_latent_period', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ProbabilityFunction'], related_name='+')),
             ('disease_subclinical_period_pdf', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ProbabilityFunction'], related_name='+')),
             ('disease_clinical_period_pdf', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ProbabilityFunction'], related_name='+')),
             ('disease_immune_period_pdf', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ProbabilityFunction'], related_name='+')),
