@@ -429,7 +429,7 @@ class AbstractSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct 
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
     infection_probability = PercentField(blank=True, null=True,
         help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
-    distance = models.ForeignKey(ProbabilityFunction, related_name='+',
+    distance_distribution = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the shipment distances for direct and indirect contact models.', )
     movement_control = models.ForeignKey(RelationalFunction, related_name='+',
         help_text='Relational function used to define movement control effects for the indicated production types combinations.', )
