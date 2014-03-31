@@ -25,7 +25,6 @@
 
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new ring_vaccination_model_new
-#define set_params ring_vaccination_model_set_params
 #define run ring_vaccination_model_run
 #define reset ring_vaccination_model_reset
 #define events_listened_for ring_vaccination_model_events_listened_for
@@ -83,7 +82,9 @@ typedef struct
   int priority;
   unsigned int min_time_between_vaccinations; /**< The minimum number of days
     until a unit may be revaccinated. */
-  double radius;
+  double radius; /**< The radius of ring created around a unit of this
+    production type. If zero or negative, no ring is created around units of
+    this production type. */
   gboolean vaccinate_detected_units_defined; /**< Whether the parameters
     explicitly define vaccinate-detected-units.  Needed for backwards
     compatibility. */
@@ -96,13 +97,10 @@ param_block_t;
 typedef struct
 {
   GPtrArray *production_types;
-  param_block_t ***param_block; /**< Blocks of parameters.
+  param_block_t **param_block; /**< Blocks of parameters.
     Use an expression of the form
-    param_block[from_production_type][to_production_type]
+    param_block[production_type]
     to get a pointer to a particular param_block. */
-  double *max_radius; /**< One value for each production type, giving the
-    largest vaccination ring that can be triggered by a unit of that production
-    type. */
   GHashTable *detected_units; /**< A list of detected units.  The pointer to
     the UNT_unit_t structure is the key. */
   GHashTable *requested_today; /**< A list of units for which this module made
@@ -214,8 +212,8 @@ check_and_choose (int id, gpointer arg)
   local_data = callback_data->local_data;
   unit1 = callback_data->unit1;
 
-  /* Is unit 2 a production type we're interested in? */
-  param_block = local_data->param_block[unit1->production_type][unit2->production_type];
+  /* Is unit 2 a production type that gets vaccinated? */
+  param_block = local_data->param_block[unit2->production_type];
   if (param_block == NULL)
     goto end;
 
@@ -263,6 +261,7 @@ ring_vaccinate (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, UNT_
                 int day, EVT_event_queue_t * queue)
 {
   local_data_t *local_data;
+  param_block_t *param_block;
   callback_t callback_data;
 
 #if DEBUG
@@ -278,8 +277,9 @@ ring_vaccinate (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, UNT_
   callback_data.queue = queue;
 
   /* Find the distances to other units. */
+  param_block = local_data->param_block[unit->production_type];
   spatial_search_circle_by_id (units->spatial_index, unit->index,
-                               local_data->max_radius[unit->production_type] + EPSILON,
+                               param_block->radius + EPSILON,
                                check_and_choose, &callback_data);
 
 #if DEBUG
@@ -399,7 +399,7 @@ to_string (struct spreadmodel_model_t_ *self)
 {
   GString *s;
   local_data_t *local_data;
-  unsigned int nprod_types, i, j;
+  unsigned int nprod_types, i;
   param_block_t *param_block;
   char *chararray;
 
@@ -407,23 +407,21 @@ to_string (struct spreadmodel_model_t_ *self)
   s = g_string_new (NULL);
   g_string_printf (s, "<%s", MODEL_NAME);
 
-  /* Add the parameter block for each to-from combination of production
-   * types. */
+  /* Add the parameter block for each production type. */
   nprod_types = local_data->production_types->len;
   for (i = 0; i < nprod_types; i++)
-    if (local_data->param_block[i] != NULL)
-      for (j = 0; j < nprod_types; j++)
-        if (local_data->param_block[i][j] != NULL)
-          {
-            param_block = local_data->param_block[i][j];
-            g_string_append_printf (s, "\n  for %s -> %s",
-                                    (char *) g_ptr_array_index (local_data->production_types, i),
-                                    (char *) g_ptr_array_index (local_data->production_types, j));
-            g_string_append_printf (s, "\n    priority=%i", param_block->priority);
-            g_string_append_printf (s, "\n    radius=%g", param_block->radius);
-            g_string_append_printf (s, "\n    min-time-between-vaccinations=%u",
-                                    param_block->min_time_between_vaccinations);
-          }
+    {
+      param_block = local_data->param_block[i];
+      if (param_block != NULL)
+        {
+          g_string_append_printf (s, "\n  for %s",
+                                  (char *) g_ptr_array_index (local_data->production_types, i));
+          g_string_append_printf (s, "\n    radius=%g", param_block->radius);
+          g_string_append_printf (s, "\n    priority=%i", param_block->priority);
+          g_string_append_printf (s, "\n    min-time-between-vaccinations=%u",
+                                  param_block->min_time_between_vaccinations);
+        }
+    }
   g_string_append_c (s, '>');
 
   /* don't return the wrapper object */
@@ -443,7 +441,7 @@ void
 local_free (struct spreadmodel_model_t_ *self)
 {
   local_data_t *local_data;
-  unsigned int nprod_types, i, j;
+  unsigned int nprod_types, i;
 
 #if DEBUG
   g_debug ("----- ENTER free (%s)", MODEL_NAME);
@@ -454,17 +452,13 @@ local_free (struct spreadmodel_model_t_ *self)
   /* Free each of the parameter blocks. */
   nprod_types = local_data->production_types->len;
   for (i = 0; i < nprod_types; i++)
-    if (local_data->param_block[i] != NULL)
-      {
-        for (j = 0; j < nprod_types; j++)
-          g_free (local_data->param_block[i][j]);
-        /* Free this row of the 2D array. */
+    {
+      if (local_data->param_block[i] != NULL)
         g_free (local_data->param_block[i]);
-      }
-  /* Free the array of pointers to rows. */
+    }
+  /* Free the array of pointers. */
   g_free (local_data->param_block);
 
-  g_free (local_data->max_radius);
   g_hash_table_destroy (local_data->detected_units);
   g_hash_table_destroy (local_data->requested_today);
   g_free (local_data);
@@ -480,163 +474,139 @@ local_free (struct spreadmodel_model_t_ *self)
 
 /**
  * Adds a set of parameters to a ring vaccination model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
  */
-void
-set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
+static int
+set_params (void *data, int ncols, char **value, char **colname)
 {
+  spreadmodel_model_t *self;
   local_data_t *local_data;
-  gboolean *from_production_type, *to_production_type;
-  unsigned int nprod_types, i, j;
+  gboolean *production_type;
+  param_block_t t;
+  long int tmp;
+  unsigned int nprod_types, i;
   param_block_t *param_block;
-  scew_element const *e;
-  scew_attribute *attr;
-  gboolean success;
 
 #if DEBUG
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
+  self = (spreadmodel_model_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
-  /* Find out which to-from production type combinations these parameters apply
-   * to. */
-  from_production_type =
-    spreadmodel_read_prodtype_attribute (params, "from-production-type", local_data->production_types);
-  /* Temporary support for older parameter files that only had a
-   * "production-type" attribute and implied "from-any" functionality. */
-  attr = scew_element_attribute_by_name (params, "production-type");
-  if (attr != NULL)
-    to_production_type =
-      spreadmodel_read_prodtype_attribute (params, "production-type", local_data->production_types);
+  g_assert (ncols == 7);
+
+  /* Read the parameters and store them in a temporary param_block_t
+   * structure. */
+
+  errno = 0;
+  tmp = strtol (value[1], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);  
+  g_assert (tmp == 0 || tmp == 1);
+  if (tmp == 1)
+    {
+      errno = 0;
+      t.radius = strtod (value[2], NULL);
+      g_assert (errno != ERANGE);
+      /* Radius must be positive. */
+      if (t.radius < 0)
+        {
+          g_warning ("%s: radius cannot be negative, setting to 0", MODEL_NAME);
+          t.radius = 0;
+        }
+    }
   else
-    to_production_type =
-      spreadmodel_read_prodtype_attribute (params, "to-production-type", local_data->production_types);
+    {
+      /* Do not vaccinate around detected units of this type. */
+      t.radius = 0;
+    }
+
+  errno = 0;
+  tmp = strtol (value[3], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  if (tmp == 1)
+    {
+      tmp = strtol (value[4], NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);
+      t.priority = tmp;
+      if (t.priority < 1)
+        {
+          g_warning ("%s: priority cannot be less than 1, setting to 1", MODEL_NAME);
+          t.priority = 1;
+        }
+
+      tmp = strtol (value[5], NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);
+      g_assert (tmp == 0 || tmp == 1);
+      t.vaccinate_detected_units_defined = TRUE;
+      t.vaccinate_detected_units = (tmp == 1);
+
+      tmp = strtol (value[6], NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);
+      if (tmp < 1)
+        {
+          g_warning ("%s: minimum time between vaccinations cannot be less than 1, setting to 1", MODEL_NAME);
+          tmp = 1;
+        }
+      t.min_time_between_vaccinations = tmp;
+    }
+  else
+    {
+      /* Do not vaccinate units of this type. */
+      t.priority = INT_MAX;
+      t.vaccinate_detected_units_defined = TRUE;
+      t.vaccinate_detected_units = FALSE;
+      t.min_time_between_vaccinations = 0;
+    }
+
+  /* Find out which production type these parameters apply to. */
+  production_type =
+    spreadmodel_read_prodtype_attribute (value[0], local_data->production_types);
 
   nprod_types = local_data->production_types->len;
   for (i = 0; i < nprod_types; i++)
-    if (from_production_type[i] == TRUE)
-      for (j = 0; j < nprod_types; j++)
-        if (to_production_type[j] == TRUE)
-          {
-            /* If necessary, create a row in the 2D array for this from-
-             * production type. */
-            if (local_data->param_block[i] == NULL)
-              local_data->param_block[i] = g_new0 (param_block_t *, nprod_types);
+    {
+      if (production_type[i] == TRUE)
+        {
+          /* Create a parameter block for this production type, or overwrite the
+           * existing one. */
+          param_block = local_data->param_block[i];
+          if (param_block == NULL)
+            {
+              param_block = g_new (param_block_t, 1);
+              local_data->param_block[i] = param_block;
+              #if DEBUG
+                g_debug ("setting parameters for %s",
+                         (char *) g_ptr_array_index (local_data->production_types, i));
+              #endif
+            }
+          else
+            {
+              g_warning ("overwriting previous parameters for %s",
+                         (char *) g_ptr_array_index (local_data->production_types, i));
+            }
 
-            /* Create a parameter block for this to-from production type
-             * combination, or overwrite the existing one. */
-            param_block = local_data->param_block[i][j];
-            if (param_block == NULL)
-              {
-                param_block = g_new (param_block_t, 1);
-                local_data->param_block[i][j] = param_block;
-#if DEBUG
-                g_debug ("setting parameters for %s -> %s",
-                         (char *) g_ptr_array_index (local_data->production_types, i),
-                         (char *) g_ptr_array_index (local_data->production_types, j));
-#endif
-              }
-            else
-              {
-                g_warning ("overwriting previous parameters for %s -> %s",
-                           (char *) g_ptr_array_index (local_data->production_types, i),
-                           (char *) g_ptr_array_index (local_data->production_types, j));
-              }
+          param_block->radius = t.radius;
+          param_block->priority = t.priority;
+          param_block->vaccinate_detected_units_defined = t.vaccinate_detected_units_defined;
+          param_block->vaccinate_detected_units = t.vaccinate_detected_units;
+          param_block->min_time_between_vaccinations = t.min_time_between_vaccinations;
+      }
+    }
 
-            e = scew_element_by_name (params, "priority");
-            if (e != NULL)
-              {
-                param_block->priority = (int) round (PAR_get_unitless (e, &success));
-                if (success == FALSE)
-                  {
-                    g_warning ("%s: setting priority to 1", MODEL_NAME);
-                    param_block->priority = 1;
-                  }
-                if (param_block->priority < 1)
-                  {
-                    g_warning ("%s: priority cannot be less than 1, setting to 1", MODEL_NAME);
-                    param_block->priority = 1;
-                  }
-              }
-            else
-              {
-                g_warning ("%s: priority missing, setting to 1", MODEL_NAME);
-                param_block->priority = 1;
-              }
-
-		    e = scew_element_by_name (params, "radius");
-		    if (e != NULL)
-		      {
-		        param_block->radius = PAR_get_length (e, &success);
-		        if (success == FALSE)
-		          {
-		            g_warning ("%s: setting radius to 0", MODEL_NAME);
-		            param_block->radius = 0;
-		          }
-		        /* Radius must be positive. */
-		        if (param_block->radius < 0)
-		          {
-		            g_warning ("%s: radius cannot be negative, setting to 0", MODEL_NAME);
-		            param_block->radius = 0;
-		          }
-		      }
-		    else
-		      {
-		        g_warning ("%s: radius missing, setting to 0", MODEL_NAME);
-		        param_block->radius = 0;
-		      }
-
-		    e = scew_element_by_name (params, "min-time-between-vaccinations");
-		    if (e != NULL)
-		      {
-		        param_block->min_time_between_vaccinations = (int) (PAR_get_time (e, &success));
-		        if (success == FALSE)
-		          {
-		            g_warning ("%s: setting minimum time between vaccinations to 31 days", MODEL_NAME);
-		            param_block->min_time_between_vaccinations = 31;
-		          }
-		      }
-		    else
-		      {
-		        g_warning ("%s: minimum time between vaccinations parameter missing, setting to 31 days",
-		                   MODEL_NAME);
-		        param_block->min_time_between_vaccinations = 31;
-		      }
-
-		    e = scew_element_by_name (params, "vaccinate-detected-units");
-		    if (e != NULL)
-		      {
-		        param_block->vaccinate_detected_units_defined = TRUE;
-		        param_block->vaccinate_detected_units = PAR_get_boolean (e, &success);
-		        if (success == FALSE)
-		          {
-		            param_block->vaccinate_detected_units = TRUE; /* default */
-		          }
-		      }
-		    else
-		      {
-		        param_block->vaccinate_detected_units_defined = FALSE;
-		        param_block->vaccinate_detected_units = TRUE; /* default */
-		      }
-
-            /* Keep track of the maximum distance of spread from each
-             * production type.  This determines whether we will use the R-tree
-             * index when looking for units to spread infection to. */
-            if (param_block->radius > local_data->max_radius[i])
-              local_data->max_radius[i] = param_block->radius;
-          }
-
-  g_free (from_production_type);
-  g_free (to_production_type);
+  g_free (production_type);
 
 #if DEBUG
   g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
 #endif
 
-  return;
+  return 0;
 }
 
 
@@ -645,12 +615,13 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
  * Returns a new ring vaccination model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
   unsigned int nprod_types;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -664,7 +635,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  self->set_params = set_params;
   self->run = run;
   self->reset = reset;
   self->is_singleton = TRUE;
@@ -676,13 +646,13 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
-  /* local_data->param_block is a 2D array of parameter blocks, each block
-   * holding the parameters for one to-from combination of production types.
-   * Initially, all row pointers are NULL.  Rows will be created as needed in
-   * the set_params function. */
+  /* local_data->param_block is an array of parameter blocks, each block
+   * holding the parameters for one production type. Initially, all pointers
+   * are NULL.  Parameter blocks will be created as needed in the set_params
+   * function. */
   local_data->production_types = units->production_type_names;
   nprod_types = local_data->production_types->len;
-  local_data->param_block = g_new0 (param_block_t **, nprod_types);
+  local_data->param_block = g_new0 (param_block_t *, nprod_types);
 
   /* Initialize a list of detected units. */
   local_data->detected_units = g_hash_table_new (g_direct_hash, g_direct_equal);
@@ -691,13 +661,15 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
    * unit on the same day. */
   local_data->requested_today = g_hash_table_new (g_direct_hash, g_direct_equal);
 
-  /* Initialize an array to hold the radius of the largest vaccination ring
-   * that can be triggered around each production type. */
-  local_data->max_radius = g_new0 (double, nprod_types);
-
-  /* Send the XML subtree to the init function to read the production type
-   * combination specific parameters. */
-  self->set_params (self, params);
+  /* Call the set_params function to read the production type combination
+   * specific parameters. */
+  sqlite3_exec (params,
+                "SELECT prodtype.name,trigger_vaccination_ring,vaccination_ring_radius,use_vaccination,vaccination_priority,vaccinate_detected_units,minimum_time_between_vaccinations FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol vaccine,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=vaccine.id",
+                set_params, self, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

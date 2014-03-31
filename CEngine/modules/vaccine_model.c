@@ -81,10 +81,21 @@ EVT_event_type_t events_listened_for[] = { EVT_BeforeAnySimulations,
 /* Specialized information for this model. */
 typedef struct
 {
-  gboolean *production_type;
-  GPtrArray *production_types;
   double delay;
   PDF_dist_t *immunity_period;
+}
+param_block_t;
+
+
+
+typedef struct
+{
+  GPtrArray *production_types;
+  param_block_t **param_block; /**< Blocks of parameters.  Use an expression
+    of the form param_block[production_type] to get a pointer to a particular
+    param_block. */
+  sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
+    so that it will be available to the set_params function. */
 }
 local_data_t;
 
@@ -104,7 +115,8 @@ handle_before_any_simulations_event (struct spreadmodel_model_t_ * self,
                                      EVT_event_queue_t * queue)
 {
   local_data_t *local_data;
-  unsigned int i;
+  unsigned int nprod_types, i;
+  param_block_t *param_block;
   char * production_type_name;
   
 #if DEBUG
@@ -112,15 +124,20 @@ handle_before_any_simulations_event (struct spreadmodel_model_t_ * self,
 #endif
     
   local_data = (local_data_t *) (self->model_data);
-  for (i = 0; i < local_data->production_types->len; i++)
-    if (local_data->production_type[i] == TRUE)
-      {
-        production_type_name = (char *) g_ptr_array_index (local_data->production_types, i);
-        EVT_event_enqueue (queue,
-                           EVT_new_declaration_of_vaccine_delay_event (i,
-                                                                       production_type_name,
-                                                                       local_data->delay));
-      }
+  nprod_types = local_data->production_types->len;
+  for (i = 0; i < nprod_types; i++)
+    {
+      param_block = local_data->param_block[i];
+
+      if (param_block != NULL)
+        {
+          production_type_name = (char *) g_ptr_array_index (local_data->production_types, i);
+          EVT_event_enqueue (queue,
+                             EVT_new_declaration_of_vaccine_delay_event (i,
+                                                                         production_type_name,
+                                                                         param_block->delay));
+        }
+    }
 
 #if DEBUG
   g_debug ("----- EXIT handle_before_any_simulations_event (%s)", MODEL_NAME);
@@ -143,6 +160,7 @@ handle_vaccination_event (struct spreadmodel_model_t_ *self,
                           EVT_vaccination_event_t * event, RAN_gen_t * rng)
 {
   local_data_t *local_data;
+  param_block_t *param_block;
   int delay, immunity_period;
   
 #if DEBUG
@@ -150,38 +168,41 @@ handle_vaccination_event (struct spreadmodel_model_t_ *self,
 #endif
 
   local_data = (local_data_t *) (self->model_data);
-
-  #if DEBUG
-    g_debug ("override initial state = (%i)", event->override_initial_state);
-  #endif
-
-  if (event->override_initial_state == VaccineImmune)
-    delay = 0;
-  else
-    delay = local_data->delay;
-  #if DEBUG
-    g_debug ("vaccine will take %hu days to take effect", delay);
-  #endif
-
-  if (event->override_initial_state == VaccineImmune && event->override_days_left_in_state > 0)
-    immunity_period = event->override_days_left_in_state;
-  else
+  param_block = local_data->param_block[event->unit->production_type];
+  if (param_block != NULL)
     {
-      immunity_period = (int) round (PDF_random (local_data->immunity_period, rng));
-      if (immunity_period < 0)
-        {
-          #if DEBUG
-            g_debug ("%s distribution returned %i for immunity period, using 0 instead",
-                     PDF_dist_type_name[local_data->immunity_period->type], immunity_period);
-          #endif
-          immunity_period = 0;
-        }
-    }
-  #if DEBUG
-    g_debug ("vaccine immunity will last %hu days", immunity_period);
-  #endif
+      #if DEBUG
+        g_debug ("override initial state = (%i)", event->override_initial_state);
+      #endif
 
-  UNT_vaccinate (event->unit, delay, immunity_period);
+      if (event->override_initial_state == VaccineImmune)
+        delay = 0;
+      else
+        delay = param_block->delay;
+      #if DEBUG
+        g_debug ("vaccine will take %hu days to take effect", delay);
+      #endif
+
+      if (event->override_initial_state == VaccineImmune && event->override_days_left_in_state > 0)
+        immunity_period = event->override_days_left_in_state;
+      else
+        {
+          immunity_period = (int) round (PDF_random (param_block->immunity_period, rng));
+          if (immunity_period < 0)
+            {
+              #if DEBUG
+                g_debug ("%s distribution returned %i for immunity period, using 0 instead",
+                         PDF_dist_type_name[param_block->immunity_period->type], immunity_period);
+              #endif
+              immunity_period = 0;
+            }
+        }
+      #if DEBUG
+        g_debug ("vaccine immunity will last %hu days", immunity_period);
+      #endif
+
+      UNT_vaccinate (event->unit, delay, immunity_period);
+  }
 
 #if DEBUG
   g_debug ("----- EXIT handle_vaccination_event (%s)", MODEL_NAME);
@@ -206,9 +227,6 @@ void
 run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
      EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
-  local_data_t *local_data;
-  EVT_vaccination_event_t *vaccination_event;
-
 #if DEBUG
   g_debug ("----- ENTER run (%s)", MODEL_NAME);
 #endif
@@ -219,20 +237,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
       handle_before_any_simulations_event (self, queue);
       break;
     case EVT_Vaccination:
-      local_data = (local_data_t *) (self->model_data);
-      vaccination_event = &(event->u.vaccination);
-      if (local_data->production_type[vaccination_event->unit->production_type] == TRUE)
-        {
-          handle_vaccination_event (self, vaccination_event, rng);
-        }
-      else
-        {
-          #if DEBUG
-            g_debug ("unit is %s, sub-model does not apply",
-                     vaccination_event->unit->production_type_name);
-          #endif
-          ;
-        }
+      handle_vaccination_event (self, &(event->u.vaccination), rng);
       break;
     default:
       g_error
@@ -278,34 +283,33 @@ char *
 to_string (struct spreadmodel_model_t_ *self)
 {
   GString *s;
-  gboolean already_names;
-  unsigned int i;
-  char *substring, *chararray;
   local_data_t *local_data;
+  unsigned int nprod_types, i;
+  param_block_t *param_block;
+  char *substring, *chararray;
 
   local_data = (local_data_t *) (self->model_data);
   s = g_string_new (NULL);
-  g_string_sprintf (s, "<%s for ", MODEL_NAME);
-  already_names = FALSE;
-  for (i = 0; i < local_data->production_types->len; i++)
-    if (local_data->production_type[i] == TRUE)
-      {
-        if (already_names)
-          g_string_append_printf (s, ",%s",
-                                  (char *) g_ptr_array_index (local_data->production_types, i));
-        else
-          {
-            g_string_append_printf (s, "%s",
-                                    (char *) g_ptr_array_index (local_data->production_types, i));
-            already_names = TRUE;
-          }
-      }
+  g_string_printf (s, "<%s", MODEL_NAME);
 
-  g_string_sprintfa (s, "\n  delay=%g\n", local_data->delay);
+  /* Add the parameter block for each production type. */
+  nprod_types = local_data->production_types->len;
+  for (i = 0; i < nprod_types; i++)
+    {
+      param_block = local_data->param_block[i];
+      if (param_block == NULL)
+        continue;
 
-  substring = PDF_dist_to_string (local_data->immunity_period);
-  g_string_sprintfa (s, "  immunity-period=%s>\n", substring);
-  g_free (substring);
+      g_string_append_printf (s, "\n  for %s",
+                              (char *) g_ptr_array_index (local_data->production_types, i));
+
+      g_string_append_printf (s, "\n    delay=%g", param_block->delay);
+
+      substring = PDF_dist_to_string (param_block->immunity_period);
+      g_string_append_printf (s, "\n    immunity-period=%s", substring);
+      g_free (substring);
+    }
+  g_string_append_c (s, '>');
 
   /* don't return the wrapper object */
   chararray = s->str;
@@ -324,15 +328,28 @@ void
 local_free (struct spreadmodel_model_t_ *self)
 {
   local_data_t *local_data;
+  unsigned int nprod_types, i;
+  param_block_t *param_block;
 
 #if DEBUG
   g_debug ("----- ENTER free (%s)", MODEL_NAME);
 #endif
 
-  /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  g_free (local_data->production_type);
-  PDF_free_dist (local_data->immunity_period);
+
+  /* Free each of the parameter blocks. */
+  nprod_types = local_data->production_types->len;
+  for (i = 0; i < nprod_types; i++)
+    {
+      param_block = local_data->param_block[i];
+      if (param_block != NULL)
+        {
+          PDF_free_dist (param_block->immunity_period);
+          g_free (param_block);
+        }
+    }
+  g_free (local_data->param_block);
+
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
   g_free (self);
@@ -345,16 +362,118 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 /**
+ * Adds a set of parameters to a vaccine model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+set_params (void *data, int ncols, char **value, char **colname)
+{
+  spreadmodel_model_t *self;
+  local_data_t *local_data;
+  sqlite3 *params;
+  param_block_t t;
+  guint pdf_id;
+  gboolean *production_type;
+  unsigned int nprod_types, i;
+
+  #if DEBUG
+    g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
+  #endif
+
+  self = (spreadmodel_model_t *)data;
+  local_data = (local_data_t *) (self->model_data);
+  params = local_data->db;
+
+  g_assert (ncols == 3);
+
+  /* Read the parameters and store them in a temporary param_block_t
+   * structure. */
+
+  errno = 0;
+  t.delay = strtod (value[1], NULL);
+  g_assert (errno != ERANGE);
+  /* The delay cannot be negative. */
+  if (t.delay < 0)
+    {
+      g_warning ("vaccine model delay parameter cannot be negative, setting to 0 days");
+      t.delay = 0;
+    }
+
+  errno = 0;
+  pdf_id = strtol (value[2], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);  
+  t.immunity_period = PAR_get_PDF (params, pdf_id);
+  /* No part of the immunity period distribution should be negative. */
+  if (t.immunity_period->has_inf_lower_tail == FALSE
+      && PDF_cdf (-EPSILON, t.immunity_period) > 0)
+    {
+      g_warning
+        ("vaccine model immunity period distribution should not include negative values");
+    }
+
+  /* Find out which production types these parameters apply to. */
+  production_type =
+    spreadmodel_read_prodtype_attribute (value[0], local_data->production_types);
+
+  /* Copy the parameters to the appropriate place. */
+  nprod_types = local_data->production_types->len;
+  for (i = 0; i < nprod_types; i++)
+    {
+      param_block_t *param_block;
+
+      if (production_type[i] == FALSE)
+        continue;
+
+      /* Create a parameter block for this production type, or overwrite
+       * the existing one. */
+      param_block = local_data->param_block[i];
+      if (param_block == NULL)
+        {
+          #if DEBUG
+            g_debug ("setting parameters for %s",
+                     (char *) g_ptr_array_index (local_data->production_types, i));
+          #endif
+          param_block = g_new (param_block_t, 1);
+          local_data->param_block[i] = param_block;
+        }
+      else
+        {
+          g_warning ("overwriting previous parameters for %s",
+                     (char *) g_ptr_array_index (local_data->production_types, i));
+          PDF_free_dist (param_block->immunity_period);
+        }
+      param_block->delay = t.delay;
+      param_block->immunity_period = PDF_clone_dist (t.immunity_period);
+    }
+
+  g_free (production_type);
+  PDF_free_dist (t.immunity_period);
+
+  #if DEBUG
+    g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
+  #endif
+
+  return 0;
+}
+
+
+
+/**
  * Returns a new vaccine model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element *e;
-  gboolean success;
+  guint nprod_types;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -379,55 +498,25 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
-  #if DEBUG
-    g_debug ("setting production types");
-  #endif
+  /* local_data->param_block holds an array of parameter blocks, where each
+   * block holds the parameters for one production type.  Initially, all
+   * pointers are NULL.  Blocks will be created as needed in the set_params
+   * function. */
   local_data->production_types = units->production_type_names;
-  local_data->production_type =
-    spreadmodel_read_prodtype_attribute (params, "production-type", units->production_type_names);
+  nprod_types = local_data->production_types->len;
+  local_data->param_block = g_new0 (param_block_t *, nprod_types);
 
-  e = scew_element_by_name (params, "delay");
-  if (e != NULL)
+  /* Call the set_params function to read the production type combination
+   * specific parameters. */
+  local_data->db = params;
+  sqlite3_exec (params,
+                "SELECT prodtype.name,days_to_immunity,vaccine_immune_period_pdf_id ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol vaccine,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=vaccine.id",
+                set_params, self, &sqlerr);
+  if (sqlerr)
     {
-      local_data->delay = PAR_get_time (e, &success);
-      if (success == FALSE)
-        {
-          g_warning ("setting vaccine model delay parameter to 0 days");
-          local_data->delay = 0;
-        }
-      /* The delay cannot be negative. */
-      if (local_data->delay < 0)
-        {
-          g_warning ("vaccine model delay parameter cannot be negative, setting to 0 days");
-          local_data->delay = 0;
-        }
+      g_error ("%s", sqlerr);
     }
-  else
-    {
-      g_warning ("vaccine model delay parameter missing, setting to 0 days");
-      local_data->delay = 0;
-    }
-
-  e = scew_element_by_name (params, "immunity-period");
-  if (e != NULL)
-    {
-      local_data->immunity_period = PAR_get_PDF (e);
-      /* No part of the immunity period distribution should be negative. */
-      if (local_data->immunity_period->has_inf_lower_tail == FALSE
-          && PDF_cdf (-EPSILON, local_data->immunity_period) > 0)
-        {
-          g_warning
-            ("vaccine model immunity period distribution should not include negative values");
-        }
-    }
-  else
-    {
-      local_data->immunity_period = PDF_new_point_dist (1);
-      g_warning ("vaccine model immunity period parameter missing, setting to 1 day");
-    }
+  local_data->db = NULL;
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);
