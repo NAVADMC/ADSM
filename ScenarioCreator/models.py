@@ -26,8 +26,11 @@ Conventions:
 Changes made in ScenarioCreator/models.py propagate to the script output
 
 """
+import os
+from django.core.exceptions import ValidationError
 from django.db import models
 from django_extras.db.models import PercentField, LatitudeField, LongitudeField, MoneyField
+import ScenarioCreator.parser
 
 
 def chc(*choice_list):
@@ -41,6 +44,10 @@ def priority_choices():
                'time waiting, production type, reason',
                'production type, reason, time waiting',
                'production type, time waiting, reason')
+
+
+def workspace(file_name):
+    return 'workspace/' + file_name
 
 frequency = chc("never", "once", "daily", "weekly", "monthly", "yearly")
 
@@ -65,6 +72,15 @@ class DynamicBlob(models.Model):
 
 class Population(models.Model):
     source_file = models.CharField(max_length=255, default='Population_Ireland.xml')  # source_file made generic CharField so Django doesn't try to copy and save the raw file
+    def clean_fields(self, exclude=None):
+        if os.path.isfile(workspace(self.source_file)):
+            p = ScenarioCreator.parser.PopulationParser(self.source_file)
+            data = p.parse_to_dictionary()
+            for entry in data:
+                farm = Unit.create(**entry)
+                farm.save()
+        else:
+            raise ValidationError(self.source_file + " is not a file in the workspace.")
 
 
 class Unit(models.Model):
@@ -108,6 +124,9 @@ class Unit(models.Model):
     user_defined_2 = models.TextField(blank=True)
     user_defined_3 = models.TextField(blank=True)
     user_defined_4 = models.TextField(blank=True)
+    @classmethod
+    def create(cls, **kwargs):
+        return Unit(**kwargs)
     def __str__(self):
         return "Unit(%s: (%s, %s)" % (self.production_type, self.latitude, self.longitude)
 

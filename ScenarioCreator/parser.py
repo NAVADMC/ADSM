@@ -1,3 +1,5 @@
+import ScenarioCreator.models
+
 __author__ = 'Josiah'
 from xml.etree.ElementTree import ElementTree
 
@@ -12,7 +14,7 @@ class PopulationParser:
     text_fields = list(zip(model_labels, xml_fields))
 
     def __init__(self, filename):
-        tree = ElementTree(file='workspace/' + filename)
+        tree = ElementTree(file=ScenarioCreator.models.workspace(filename))
         self.top_level = tree.getroot()
         self.population = []
 
