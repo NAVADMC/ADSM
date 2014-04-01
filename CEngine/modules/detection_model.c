@@ -611,12 +611,9 @@ set_params (void *data, int ncols, char **value, char **colname)
   spreadmodel_model_t *self;
   local_data_t *local_data;
   sqlite3 *params;
-  param_block_t t;
+  guint production_type;
+  param_block_t *p;
   guint rel_id;
-  double zone_multiplier;
-  gboolean *production_type;
-  gboolean *zone;
-  unsigned int nprod_types, nzones, i, j;
 
 #if DEBUG
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
@@ -628,129 +625,92 @@ set_params (void *data, int ncols, char **value, char **colname)
 
   g_assert (ncols == 3);
 
-  /* Read the parameters and store them in a temporary param_block_t
-   * structure. */
+  /* Find out which production type these parameters apply to. */
+  production_type =
+    spreadmodel_read_prodtype (value[0], local_data->production_types);
 
+  /* Check that we are not overwriting an existing parameter block (that would
+   * indicate a bug). */
+  g_assert (local_data->param_block[production_type] == NULL);
+
+  /* Create a new parameter block. */
+  p = g_new (param_block_t, 1);
+  local_data->param_block[production_type] = p;
+
+  /* Read the parameters. */
   errno = 0;
   rel_id = strtol (value[1], NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);  
-  t.prob_report_vs_days_clinical = PAR_get_relchart (params, rel_id);
+  p->prob_report_vs_days_clinical = PAR_get_relchart (params, rel_id);
 
   errno = 0;
   rel_id = strtol (value[2], NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);  
-  t.prob_report_vs_days_since_outbreak = PAR_get_relchart (params, rel_id);
-
-/*
-  e = scew_element_by_name (params, "zone-prob-multiplier");
-  if (e != NULL)
-    {
-      zone_multiplier = PAR_get_unitless (e, &success);
-      if (success == FALSE)
-        {
-          g_warning ("%s: setting zone multiplier to 1 (no effect)", MODEL_NAME);
-          zone_multiplier = 1;
-        }
-      else if (zone_multiplier < 0)
-        {
-          g_warning ("%s: zone multiplier cannot be negative, setting to 1 (no effect)",
-                     MODEL_NAME);
-          zone_multiplier = 1;
-        }
-      else if (zone_multiplier < 1)
-        {
-          g_warning ("%s: zone multiplier is less than 1, will result in slower detection inside zone",
-                     MODEL_NAME);
-        }      
-    }
-  else
-    {
-      zone_multiplier = 1;
-    }
-*/
-  zone_multiplier = 1;
-
-  /* Find out which production types, or which production type-zone
-   * combinations, these parameters apply to. */
-  production_type =
-    spreadmodel_read_prodtype_attribute (value[0], local_data->production_types);
-/*  if (scew_element_attribute_by_name (params, "zone") != NULL)
-    zone = spreadmodel_read_zone_attribute (params, local_data->zones);
-  else */
-    zone = NULL;
-
-  /* Copy the parameters to the appropriate place. */
-  nprod_types = local_data->production_types->len;
-  nzones = ZON_zone_list_length (local_data->zones);
-  if (zone == NULL)
-    {
-      /* These parameters are detection charts by production type. */
-
-      param_block_t *param_block;
-
-      for (i = 0; i < nprod_types; i++)
-        {
-          if (production_type[i] == FALSE)
-            continue;
-
-          /* Create a parameter block for this production type, or overwrite
-           * the existing one. */
-          param_block = local_data->param_block[i];
-          if (param_block == NULL)
-            {
-              #if DEBUG
-                g_debug ("setting parameters for %s",
-                         (char *) g_ptr_array_index (local_data->production_types, i));
-              #endif
-              param_block = g_new (param_block_t, 1);
-              local_data->param_block[i] = param_block;
-            }
-          else
-            {
-              g_warning ("overwriting previous parameters for %s",
-                         (char *) g_ptr_array_index (local_data->production_types, i));
-              REL_free_chart (param_block->prob_report_vs_days_clinical);
-              REL_free_chart (param_block->prob_report_vs_days_since_outbreak);
-            }
-          param_block->prob_report_vs_days_clinical =
-            REL_clone_chart (t.prob_report_vs_days_clinical);
-          param_block->prob_report_vs_days_since_outbreak =
-            REL_clone_chart (t.prob_report_vs_days_since_outbreak);
-        }
-    }
-  else
-    {
-      /* These parameters are the multiplier by production type-zone. */
-
-      for (i = 0; i < nzones; i++)
-        {
-          if (zone[i] == FALSE)
-            continue;
-
-          for (j = 0; j < nprod_types; j++)
-            {
-              if (production_type[j] == FALSE)
-                continue;
-
-              #if DEBUG
-                g_debug ("setting multiplier for %s in \"%s\" zone",
-                         (char *) g_ptr_array_index (local_data->production_types, j),
-                         ZON_zone_list_get (local_data->zones, i)->name);
-              #endif
-              local_data->zone_multiplier[i][j] = zone_multiplier;
-            }
-        }
-    }
-
-  g_free (production_type);
-  if (zone != NULL)
-    g_free (zone);
-  REL_free_chart (t.prob_report_vs_days_clinical);
-  REL_free_chart (t.prob_report_vs_days_since_outbreak);
+  p->prob_report_vs_days_since_outbreak = PAR_get_relchart (params, rel_id);
 
 #if DEBUG
   g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
 #endif
+
+  return 0;
+}
+
+
+
+/**
+ * Adds a set of zone/production type combination specific parameters to a
+ * contact spread model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+set_zone_params (void *data, int ncols, char **value, char **colname)
+{
+  spreadmodel_model_t *self;
+  local_data_t *local_data;
+  guint zone, production_type;
+  double multiplier;
+
+  #if DEBUG
+    g_debug ("----- ENTER set_zone_params (%s)", MODEL_NAME);
+  #endif
+
+  self = (spreadmodel_model_t *)data;
+  local_data = (local_data_t *) (self->model_data);
+
+  g_assert (ncols == 3);
+
+  /* Find out which zone/production type combination these parameters apply
+   * to. */
+  zone = spreadmodel_read_zone (value[0], local_data->zones);
+  production_type = spreadmodel_read_prodtype (value[1], local_data->production_types);
+
+  /* Read the parameter. */
+  errno = 0;
+  multiplier = strtod (value[2], NULL);
+  g_assert (errno != ERANGE);
+  /* The zone multiplier cannot be negative. */
+  if (multiplier < 0)
+    {
+      g_error ("%s: zone multiplier cannot be negative", MODEL_NAME);
+    }
+  /* The zone multiplier is allowed to be less than 1, but this may not be what
+   * the modeler intended. */
+  if (multiplier < 1)
+    {
+      g_warning ("%s: zone multiplier is less than 1, will result in slower detection inside zone",
+                 MODEL_NAME);
+    }
+
+  local_data->zone_multiplier[zone][production_type] = multiplier;
+
+  #if DEBUG
+    g_debug ("----- EXIT set_zone_params (%s)", MODEL_NAME);
+  #endif
 
   return 0;
 }
@@ -826,8 +786,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * function. */
   local_data->prob_report_from_awareness = g_new (double, nprod_types);
 
-  /* Call the set_params function to read the production type combination
-   * specific parameters. */
+  /* Call the set_params function to read the production type specific
+   * parameters. */
   local_data->db = params;
   sqlite3_exec (params,
                 "SELECT prodtype.name,detection_probability_for_observed_time_in_clinical_relid_id,detection_probability_report_vs_first_detection_relid_id ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol detection,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=detection.id",
@@ -837,6 +797,16 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       g_error ("%s", sqlerr);
     }
   local_data->db = NULL;
+
+  /* Call the set_zone_params function to read the zone/production type
+   * combination specific parameters. */
+  sqlite3_exec (params,
+                "SELECT zone.zone_description,prodtype.name,zone_detection_multiplier FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectonproductiontype pairing WHERE zone.id=pairing.zone_id AND prodtype.id=pairing.production_type_id UNION SELECT zone.zone_description,prodtype.name,\"indirect\",zone_indirect_movement_id FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectonproductiontype pairing WHERE zone.id=pairing.zone_id AND prodtype.id=pairing.production_type_id",
+                set_zone_params, self, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);
