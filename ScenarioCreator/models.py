@@ -64,7 +64,7 @@ class DynamicBlob(models.Model):
 
 
 class Population(models.Model):
-    source_file = models.CharField(max_length=255, default='SampleScenario.sqlite3')  # source_file made generic CharField so Django doesn't try to copy and save the raw file
+    source_file = models.CharField(max_length=255, default='Population_Ireland.xml')  # source_file made generic CharField so Django doesn't try to copy and save the raw file
 
 
 class Unit(models.Model):
