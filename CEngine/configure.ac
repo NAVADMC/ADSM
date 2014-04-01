@@ -102,8 +102,8 @@ AC_CHECK_LIB(expat,XML_Parse,,AC_MSG_ERROR(cannot continue without expat))
 if test "X${have_pkgconfig}" = Xyes
 then
   PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3], ,AC_MSG_ERROR(cannot continue without SQLite3))
-  AC_SUBST(SCEW_CFLAGS)
-  AC_SUBST(SCEW_LIBS)
+  AC_SUBST(SQLITE_CFLAGS)
+  AC_SUBST(SQLITE_LIBS)
 else
   AC_CHECK_LIB(sqlite3,sqlite3_open,,AC_MSG_ERROR(cannot continue without SQLite3))
 fi
