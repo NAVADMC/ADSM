@@ -70,7 +70,8 @@ EVT_event_type_t events_listened_for[] = { EVT_Detection };
 /** Specialized information for this model. */
 typedef struct
 {
-  gboolean *production_type;
+  gboolean *production_type; /**< One boolean for each production type. TRUE if
+    detection of a disease unit of the production type triggers a zone. */
   GPtrArray *production_types;
 }
 local_data_t;
@@ -99,16 +100,15 @@ handle_detection_event (struct spreadmodel_model_t_ *self,
   unit = event->unit;
 
   /* Check whether the unit is a production type we're interested in. */
-  if (local_data->production_type[unit->production_type] == FALSE)
-    goto end;
+  if (local_data->production_type[unit->production_type] == TRUE)
+    {
+      #if DEBUG
+        g_debug ("ordering a zone focus around unit \"%s\"", unit->official_id);
+      #endif
+      EVT_event_enqueue (queue,
+                         EVT_new_request_for_zone_focus_event (unit, event->day, "reported diseased"));
+    }
 
-#if DEBUG
-  g_debug ("ordering a zone focus around unit \"%s\"", unit->official_id);
-#endif
-  EVT_event_enqueue (queue,
-                     EVT_new_request_for_zone_focus_event (unit, event->day, "reported diseased"));
-
-end:
 #if DEBUG
   g_debug ("----- EXIT handle_detection_event (%s)", MODEL_NAME);
 #endif
@@ -261,8 +261,7 @@ set_params (void *data, int ncols, char **value, char **colname)
   local_data_t *local_data;
   long int tmp;
   gboolean detection_triggers_zone;
-  gboolean *production_type;
-  unsigned int nprod_types, i;
+  guint production_type;
 
   #if DEBUG
     g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
@@ -281,13 +280,9 @@ set_params (void *data, int ncols, char **value, char **colname)
 
   if (detection_triggers_zone)
     {
-      production_type = spreadmodel_read_prodtype_attribute (value[0], local_data->production_types);
-      nprod_types = local_data->production_types->len;
-      for (i = 0; i < nprod_types; i++)
-        {
-          local_data->production_type[i] = TRUE;
-        }
-      g_free (production_type);
+      /* Find out which production type these parameters apply to. */
+      production_type = spreadmodel_read_prodtype (value[0], local_data->production_types);
+      local_data->production_type[production_type] = TRUE;
     }
 
   #if DEBUG

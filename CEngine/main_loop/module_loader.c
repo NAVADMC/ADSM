@@ -146,6 +146,8 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                                    to models. */
   spreadmodel_model_new_t model_instantiation_fn;
   spreadmodel_model_t *model;
+  gboolean include_zones;
+  gboolean include_detection;
   gboolean include_vaccination;
   int nmodels;
   int i;                        /* loop counter */
@@ -183,12 +185,11 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                        airborne_spread_model_new (parameter_db, units, projection, zones));
     }
 
-  if (PAR_get_boolean (parameter_db, "SELECT _include_zones FROM ScenarioCreator_controlmasterplan"))
+  include_zones = PAR_get_boolean (parameter_db, "SELECT _include_zones FROM ScenarioCreator_controlmasterplan");
+  if (include_zones)
     {
       g_ptr_array_add (tmp_models,
                        zone_model_new (parameter_db, units, projection, zones));
-      g_ptr_array_add (tmp_models,
-                       basic_zone_focus_model_new (parameter_db, units, projection, zones));
     }
 
   if (PAR_get_boolean (parameter_db, "SELECT include_contact_spread FROM ScenarioCreator_scenario"))
@@ -197,12 +198,19 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                        contact_spread_model_new (parameter_db, units, projection, zones));
     }
 
-  if (PAR_get_boolean (parameter_db, "SELECT _include_detection FROM ScenarioCreator_controlmasterplan"))
+  include_detection = PAR_get_boolean (parameter_db, "SELECT _include_detection FROM ScenarioCreator_controlmasterplan");
+  if (include_detection)
     {
       g_ptr_array_add (tmp_models,
                        detection_model_new (parameter_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
                        quarantine_model_new (parameter_db, units, projection, zones));
+    }
+
+  if (include_zones && include_detection)
+    {
+      g_ptr_array_add (tmp_models,
+                       basic_zone_focus_model_new (parameter_db, units, projection, zones));
     }
 
   include_vaccination = PAR_get_boolean (parameter_db, "SELECT _include_vaccination FROM ScenarioCreator_controlmasterplan");
