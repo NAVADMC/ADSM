@@ -38,7 +38,6 @@
 #endif
 
 #include "airborne_spread_model.h"
-#include "airborne_spread_exponential_model.h"
 #include "apparent_events_table_writer.h"
 #include "basic_destruction_model.h"
 #include "basic_zone_focus_model.h"
@@ -180,16 +179,8 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
 
   if (PAR_get_boolean (parameter_db, "SELECT include_airborne_spread FROM ScenarioCreator_scenario"))
     {
-      if (PAR_get_boolean (parameter_db, "SELECT use_airborne_exponential_decay FROM ScenarioCreator_scenario"))
-        {
-          g_ptr_array_add (tmp_models,
-                           airborne_spread_exponential_model_new (parameter_db, units, projection, zones));
-        }
-      else
-        {
-          g_ptr_array_add (tmp_models,
-                           airborne_spread_model_new (parameter_db, units, projection, zones));
-        }
+      g_ptr_array_add (tmp_models,
+                       airborne_spread_model_new (parameter_db, units, projection, zones));
     }
 
   if (PAR_get_boolean (parameter_db, "SELECT _include_zones FROM ScenarioCreator_controlmasterplan"))

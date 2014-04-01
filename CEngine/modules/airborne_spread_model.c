@@ -1,11 +1,13 @@
 /** @file airborne_spread_model.c
- * Module for airborne spread in which the probability of infection falls off
- * linearly with distance.
+ * Module for airborne spread.
  *
- * This module has 3 parameters:
+ * This module has 4 parameters:
  * <ul>
  *   <li>
  *     The probability of infection at 1 km distance.
+ *   <li>
+ *     Whether probability of infection falls off linearly or exponentially
+ *     with distance from the source.
  *   <li>
  *     The area at risk of exposure, given as a range (<i>start</i> and <i>end</i>) in
  *     degrees, following the navigation and surveying convention that
@@ -16,7 +18,7 @@
  *     <i>end</i>=225, but for south winds, you would use <i>start</i>=315,
  *     <i>end</i>=45 (see figure below).
  *   <li>
- *     The maximum distance of spread, in km.
+ *     The maximum distance of spread, in km, for the linear dropoff formula.
  * </ul>
  *
  * @image html directions.png "Parameters for north winds (left) and south winds (right)"
@@ -41,7 +43,8 @@
  *         If <i>A</i> can be the source and <i>B</i> can be the target, or
  *         vice versa, continue; otherwise, go on to the next pair of units.
  *       <li>
- *         If the distance between <i>A</i> and <i>B</i> < the maximum
+ *         If using linear dropoff and
+ *         the distance between <i>A</i> and <i>B</i> < the maximum
  *         distance specified in the parameters, continue; otherwise, go on to
  *         the next pair of units.
  *       <li>
@@ -52,7 +55,6 @@
  *         Compute the probability of infection <i>P</i> =
  *         <i>SizeFactor</i>(<i>A</i>)
  *         &times; prevalence in <i>A</i>
- *         &times; probability of infection at 1 km
  *         &times; <i>DistanceFactor</i>(<i>A</i>,<i>B</i>)
  *         &times; <i>SizeFactor</i>(<i>B</i>).
  *       <li>
@@ -70,8 +72,13 @@
  * where
  * <ul>
  *   <li>
- *     <i>DistanceFactor</i>(<i>A</i>,<i>B</i>) = (maximum distance of spread -
+ *     If using linear dropoff:
+ *     <i>DistanceFactor</i>(<i>A</i>,<i>B</i>) = (probability of infection at 1 km)
+ *     &times; (maximum distance of spread -
  *     distance from <i>A</i> to <i>B</i>) / (maximum distance of spread - 1)
+ *   <li>
+ *     If using exponential dropoff:
+ *     <i>DistanceFactor</i>(<i>A</i>,<i>B</i>) = (probability of infection at 1 km)<sup>distance from <i>A</i> to <i>B</i></sup>
  * </ul>
  *
  * @image html airborne.png
@@ -95,7 +102,6 @@
 
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new airborne_spread_model_new
-#define set_params airborne_spread_model_set_params
 #define run airborne_spread_model_run
 #define reset airborne_spread_model_reset
 #define events_listened_for airborne_spread_model_events_listened_for
@@ -164,6 +170,8 @@ typedef struct
 {
   GPtrArray *production_types; /**< Each item in the list is a char *. */
   param_block_t ***param_block;
+  gboolean use_exponential_dropoff; /**< If TRUE, uses the exponential dropoff
+    formula; if FALSE, uses the linear dropoff formula. */
   double *max_spread;
   double *size_factor;
   GPtrArray *pending_infections; /**< An array to store delayed contacts.  Each
@@ -176,6 +184,8 @@ typedef struct
   unsigned int npending_exposures;
   unsigned int npending_infections;
   unsigned int rotating_index; /**< To go with pending_infections. */
+  sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
+    so that it will be available to the set_params function. */
 }
 local_data_t;
 
@@ -350,20 +360,24 @@ check_and_infect (int id, gpointer arg)
   #endif
 
   distance = GIS_distance (unit1->x, unit1->y, unit2->x, unit2->y);
-  max_spread = param_block->max_spread;
-  distance_factor = (max_spread - distance) / (max_spread - 1);
+  if (local_data->use_exponential_dropoff)
+    {
+      distance_factor = pow (param_block->prob_spread_1km, distance);
+    }
+  else
+    {
+      max_spread = param_block->max_spread;
+      distance_factor = param_block->prob_spread_1km * (max_spread - distance) / (max_spread - 1);
+    }
   unit1_size_factor = local_data->size_factor[unit1->index];
   unit2_size_factor = local_data->size_factor[unit2->index];
   #if DEBUG
-    g_debug ("  P = %g * %g * %g * %g * %g",
-             unit1_size_factor, unit1->prevalence, distance_factor, param_block->prob_spread_1km,
-             unit2_size_factor);
+    g_debug ("  P = %g * %g * %g * %g",
+             unit1_size_factor, unit1->prevalence, distance_factor, unit2_size_factor);
   #endif
 
   rng = callback_data->rng;
-  P =
-    unit1_size_factor * unit1->prevalence * distance_factor * param_block->prob_spread_1km *
-    unit2_size_factor;
+  P = unit1_size_factor * unit1->prevalence * distance_factor * unit2_size_factor;
   r = RAN_num (rng);
   exposure_is_adequate = (r < P); 
 
@@ -666,7 +680,8 @@ to_string (struct spreadmodel_model_t_ *self)
 
   local_data = (local_data_t *) (self->model_data);
   s = g_string_new (NULL);
-  g_string_printf (s, "<%s", MODEL_NAME);
+  g_string_printf (s, "<%s %s", MODEL_NAME,
+                   local_data->use_exponential_dropoff ? "exponential" : "linear");
 
   /* Add the parameter block for each to-from combination of production
    * types. */
@@ -683,7 +698,10 @@ to_string (struct spreadmodel_model_t_ *self)
             g_string_append_printf (s, "\n    prob-spread-1km=%g", param_block->prob_spread_1km);
             g_string_append_printf (s, "\n    wind-direction=(%g,%g)",
                                     param_block->wind_dir_start, param_block->wind_dir_end);
-            g_string_append_printf (s, "\n    max-spread=%g", param_block->max_spread);
+            if (local_data->use_exponential_dropoff == FALSE)
+              {
+                g_string_append_printf (s, "\n    max-spread=%g", param_block->max_spread);
+              }
 
             substring = PDF_dist_to_string (param_block->delay);
             g_string_append_printf (s, "\n    delay=%s", substring);
@@ -771,18 +789,15 @@ local_free (struct spreadmodel_model_t_ *self)
  * @return 0
  */
 static int
-set_params_s (void *data, int ncols, char **value, char **colname)
+set_params (void *data, int ncols, char **value, char **colname)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  gboolean *from_production_type, *to_production_type;
+  sqlite3 *params;
+  UNT_production_type_t from_production_type, to_production_type;
+  param_block_t *p;
   char *endptr;
-  double prob_spread_1km;
-  double wind_dir_start, wind_dir_end;
-  gboolean wind_range_crosses_0;
-  double max_spread;
-  PDF_dist_t *delay;
-  unsigned int nprod_types, i, j;
+  guint pdf_id;
 
 #if DEBUG
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
@@ -790,131 +805,121 @@ set_params_s (void *data, int ncols, char **value, char **colname)
 
   self = (spreadmodel_model_t *)data;
   local_data = (local_data_t *) (self->model_data);
+  params = local_data->db;
 
-  /* Find out which to-from production type combinations these parameters apply
+  g_assert (ncols == 7);
+
+  /* Find out which to-from production type combination these parameters apply
    * to. */
   from_production_type =
-    spreadmodel_read_prodtype_attribute (value[0], local_data->production_types);
+    spreadmodel_read_prodtype (value[0], local_data->production_types);
   to_production_type =
-    spreadmodel_read_prodtype_attribute (value[1], local_data->production_types);
+    spreadmodel_read_prodtype (value[1], local_data->production_types);
 
-  prob_spread_1km = strtod (value[2], &endptr);
-  if (errno == ERANGE || endptr == value[2] || prob_spread_1km < 0)
+  /* If necessary, create a row in the 2D array for this from-production-type. */
+  if (local_data->param_block[from_production_type] == NULL)
+    {
+      local_data->param_block[from_production_type] =
+        g_new0 (param_block_t *, local_data->production_types->len);
+    }
+  /* Check that we are not overwriting an existing parameter block (that would
+   * indicate a bug). */
+  g_assert (local_data->param_block[from_production_type][to_production_type] == NULL);
+
+  /* Create a new parameter block. */
+  p = g_new (param_block_t, 1);
+  local_data->param_block[from_production_type][to_production_type] = p;  
+
+  /* Read the parameters. */
+  p->prob_spread_1km = strtod (value[2], &endptr);
+  if (errno == ERANGE || endptr == value[2] || p->prob_spread_1km < 0)
     {
       g_warning ("setting probability of spread at 1 km to 0");
-      prob_spread_1km = 0;
+      p->prob_spread_1km = 0;
     }
-  prob_spread_1km = CLAMP (prob_spread_1km, 0, 1);
+  p->prob_spread_1km = CLAMP (p->prob_spread_1km, 0, 1);
 
-  wind_dir_start = strtod (value[3], &endptr);
+  p->wind_dir_start = strtod (value[3], &endptr);
   if (errno == ERANGE || endptr == value[3])
     {
       g_warning ("setting start of area at risk of exposure to 0");
-      wind_dir_start = 0;
+      p->wind_dir_start = 0;
     }
   /* Force the angle into the range [0,360). */
-  while (wind_dir_start < 0)
-    wind_dir_start += 360;
-  while (wind_dir_start >= 360)
-    wind_dir_start -= 360;
+  while (p->wind_dir_start < 0)
+    p->wind_dir_start += 360;
+  while (p->wind_dir_start >= 360)
+    p->wind_dir_start -= 360;
 
-  wind_dir_end = strtod (value[4], &endptr);
+  p->wind_dir_end = strtod (value[4], &endptr);
   if (errno == ERANGE || endptr == value[4])
     {
       g_warning ("setting end of area at risk of exposure to 360");
-      wind_dir_end = 360;
+      p->wind_dir_end = 360;
     }
   /* Force the angle into the range [0,360]. */
-  while (wind_dir_end < 0)
-    wind_dir_end += 360;
-  while (wind_dir_end > 360)
-    wind_dir_end -= 360;
+  while (p->wind_dir_end < 0)
+    p->wind_dir_end += 360;
+  while (p->wind_dir_end > 360)
+    p->wind_dir_end -= 360;
 
   /* Note that start > end is allowed.  See the header comment. */
-  wind_range_crosses_0 = (wind_dir_start > wind_dir_end);
+  p->wind_range_crosses_0 = (p->wind_dir_start > p->wind_dir_end);
 
   /* Setting both start and end to 0 seems like a sensible way to turn off
    * airborne spread, but headings close to north will "sneak through" this
    * restriction because we allow a little wiggle room for rounding errors. If
    * the user tries this, instead set prob-spread-1km=0. */
-  if (wind_dir_start == 0 && wind_dir_end == 0)
-    prob_spread_1km = 0;
+  if (p->wind_dir_start == 0 && p->wind_dir_end == 0)
+    p->prob_spread_1km = 0;
 
-  max_spread = strtod (value[5], &endptr);
-  if (errno == ERANGE || endptr == value[5])
+  if (local_data->use_exponential_dropoff)
     {
-      g_warning ("setting maximum distance of spread to 0");
-      max_spread = 0;
+      /* The exponential falloff curve never actually gets to 0, but we set the
+       * maximum distance as the distance at which the probability drops to 1
+       * in a million.  The constant 4 is needed in the calculation because the
+       * probability formula includes multipliers (the size factors) that may
+       * boost the probability by as much as 4 times. */
+      if (p->prob_spread_1km > 0)
+        p->max_spread = log (1.0/1000000 / 4) / log (p->prob_spread_1km);
+      else
+        p->max_spread = 0;
+    }
+  else
+    {
+      p->max_spread = strtod (value[5], &endptr);
+      if (errno == ERANGE || endptr == value[5])
+        {
+          g_warning ("setting maximum distance of spread to 0");
+          p->max_spread = 0;
+        }
     }
   /* The maximum spread distance cannot be negative. */
-  if (max_spread < 0)
+  if (p->max_spread < 0)
     {
       g_warning ("maximum distance of spread cannot be negative, setting to 0");
-      max_spread = 0;
+      p->max_spread = 0;
     }
   /* Setting the maximum spread distance to 0 seems like a sensible way to turn
    * off airborne spread, but max-spread <= 1 doesn't make sense in the
    * formula.  If the user tries this, instead set max-spread=2,
    * prob-spread-1km=0. */
-  if (max_spread <= 1)
+  if (p->max_spread <= 1)
     {
       g_warning ("maximum distance of spread is less than or equal to 1 km: no airborne spread will be used");
-      max_spread = 2;
-      prob_spread_1km = 0;
+      p->max_spread = 2;
+      p->prob_spread_1km = 0;
     }
+  /* Keep track of the maximum distance of spread from each production type.
+   * This determines whether we will use the R-tree index when looking for
+   * units to spread infection to. */
+  if (p->max_spread > local_data->max_spread[from_production_type])
+    local_data->max_spread[from_production_type] = p->max_spread;
 
-  delay = PDF_new_point_dist (0);
-
-  nprod_types = local_data->production_types->len;
-  for (i = 0; i < nprod_types; i++)
-    if (from_production_type[i] == TRUE)
-      for (j = 0; j < nprod_types; j++)
-        if (to_production_type[j] == TRUE)
-          {
-            param_block_t *param_block;
-
-            /* If necessary, create a row in the 2D array for this from-
-             * production type. */
-            if (local_data->param_block[i] == NULL)
-              local_data->param_block[i] = g_new0 (param_block_t *, nprod_types);
-
-            /* Create a parameter block for this to-from production type
-             * combination, or overwrite the existing one. */
-            param_block = local_data->param_block[i][j];
-            if (param_block == NULL)
-              {
-                param_block = g_new (param_block_t, 1);
-                local_data->param_block[i][j] = param_block;
-                #if DEBUG
-                  g_debug ("setting parameters for %s -> %s",
-                           (char *) g_ptr_array_index (local_data->production_types, i),
-                           (char *) g_ptr_array_index (local_data->production_types, j));
-                #endif
-              }
-            else
-              {
-                g_warning ("overwriting previous parameters for %s -> %s",
-                           (char *) g_ptr_array_index (local_data->production_types, i),
-                           (char *) g_ptr_array_index (local_data->production_types, j));
-              }
-
-            param_block->prob_spread_1km = prob_spread_1km;
-            param_block->wind_dir_start = wind_dir_start;
-            param_block->wind_dir_end = wind_dir_end;
-            param_block->wind_range_crosses_0 = wind_range_crosses_0;
-            param_block->max_spread = max_spread;
-            param_block->delay = PDF_clone_dist (delay);
-
-            /* Keep track of the maximum distance of spread from each
-             * production type.  This determines whether we will use the R-tree
-             * index when looking for units to spread infection to. */
-            if (param_block->max_spread > local_data->max_spread[i])
-              local_data->max_spread[i] = param_block->max_spread;
-          }
-
-  g_free (from_production_type);
-  g_free (to_production_type);
-  PDF_free_dist (delay);
+  errno = 0;
+  pdf_id = strtol (value[6], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  p->delay = PAR_get_PDF (params, pdf_id);
 
 #if DEBUG
   g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
@@ -949,7 +954,6 @@ new (sqlite3 *params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  /* self->set_params = set_params; */
   self->run = run;
   self->reset = reset;
   self->is_singleton = TRUE;
@@ -987,15 +991,18 @@ new (sqlite3 *params, UNT_unit_list_t * units, projPJ projection,
   local_data->npending_infections = 0;
   local_data->rotating_index = 0;
 
+  local_data->use_exponential_dropoff = PAR_get_boolean (params, "SELECT use_airborne_exponential_decay FROM ScenarioCreator_scenario");
   /* Call the set_params function to read the production type combination
    * specific parameters. */
+  local_data->db = params;
   sqlite3_exec (params,
-                "SELECT src.name,dest.name,spread_1km_probability,wind_direction_start,wind_direction_end,max_distance FROM ScenarioCreator_productiontype src,ScenarioCreator_productiontype dest,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_airbornespreadmodel airborne WHERE src.id=pairing.source_production_type_id AND dest.id=pairing.destination_production_type_id AND pairing.airborne_contact_spread_model_id = airborne.id",
-                set_params_s, self, &sqlerr);
+                "SELECT src_prodtype.name,dest_prodtype.name,spread_1km_probability,wind_direction_start,wind_direction_end,max_distance,transport_delay_id FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_airbornespreadmodel airborne WHERE src_prodtype.id=pairing.source_production_type_id AND dest_prodtype.id=pairing.destination_production_type_id AND pairing.airborne_contact_spread_model_id = airborne.id",
+                set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
     }
+  local_data->db = NULL;
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

@@ -50,7 +50,6 @@ libspreadmodel_a_SOURCES = main_loop.c module_loader.c module_loader.h \
   $(top_srcdir)/modules/contact_spread_model.c $(top_srcdir)/modules/contact_spread_model.h \
   $(top_srcdir)/modules/contact_recorder_model.c $(top_srcdir)/modules/contact_recorder_model.h \
   $(top_srcdir)/modules/airborne_spread_model.c $(top_srcdir)/modules/airborne_spread_model.h \
-  $(top_srcdir)/modules/airborne_spread_exponential_model.c $(top_srcdir)/modules/airborne_spread_exponential_model.h \
   $(top_srcdir)/modules/detection_model.c $(top_srcdir)/modules/detection_model.h \
   $(top_srcdir)/modules/vaccine_model.c $(top_srcdir)/modules/vaccine_model.h \
   $(top_srcdir)/modules/resources_and_implementation_of_controls_model.c $(top_srcdir)/modules/resources_and_implementation_of_controls_model.h \
