@@ -35,135 +35,79 @@
 
 
 /**
- *
+ * Compares a text string against a list of production type names. Returns the
+ * position of the matching name in the list.
  */
-gboolean *
-spreadmodel_read_prodtype_attribute (char *attr_text, GPtrArray * production_type_names)
+guint
+spreadmodel_read_prodtype (char *text, GPtrArray * production_type_names)
 {
-  gboolean *flags;
-  unsigned int nprod_types;
-  gchar **tokens;
-  gchar **iter;
-  int i;                        /* loop counter */
+  gchar *normalized;
+  guint nprod_types;
+  guint loc;
 
-#if DEBUG
-  g_debug ("----- ENTER spreadmodel_read_prodtype_attribute");
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER spreadmodel_read_prodtype");
+  #endif
+
+  /* The text is assumed to be UTF-8. Normalize it to allow for comparison. */
+  normalized = g_utf8_normalize (text, -1, G_NORMALIZE_DEFAULT);
+  g_assert (normalized != NULL);
 
   nprod_types = production_type_names->len;
-  flags = g_new0 (gboolean, nprod_types);
-
-  /* If the text is null or blank, assume the parameters apply to all
-   * production types. */
-  if (attr_text == NULL)
+  for (loc = 0; loc < nprod_types; loc++)
     {
-      for (i = 0; i < nprod_types; i++)
-        flags[i] = TRUE;
+      if (g_utf8_collate (normalized, g_ptr_array_index (production_type_names, loc)) == 0)
+        break;
     }
-  else
-    {
-      /* If the "production-type" attribute is blank, assume the parameters
-       * apply to all production types. */
-      if (strlen (attr_text) == 0)
-        for (i = 0; i < nprod_types; i++)
-          flags[i] = TRUE;
-      else
-        {
-          /* Split up the text at commas. */
-          tokens = g_strsplit (attr_text, ",", 0);
-          for (iter = tokens; *iter != NULL; iter++)
-            {
-              gchar *normalized;
-              #if DEBUG
-                g_debug ("token (Expat encoding) = \"%s\"", *iter);
-              #endif
-              /* Expat stores the text as UTF-8.  Convert to ISO-8859-1. */
-              normalized = g_utf8_normalize (*iter, -1, G_NORMALIZE_DEFAULT);
-              g_assert (normalized != NULL);
-              for (i = 0; i < nprod_types; i++)
-                if (g_utf8_collate (normalized, g_ptr_array_index (production_type_names, i)) == 0)
-                  break;
-              g_free (normalized);
-              if (i == nprod_types)
-                g_warning ("there are no \"%s\" units", *iter);
-              else
-                flags[i] = TRUE;
-            }
-          g_strfreev (tokens);
-        }
-    }
+  g_free (normalized);
 
-#if DEBUG
-  g_debug ("----- EXIT spreadmodel_read_prodtype_attribute");
-#endif
+  if (loc == nprod_types)
+    g_error ("text \"%s\" did not match any production type", text);
 
-  return flags;
+  #if DEBUG
+    g_debug ("----- EXIT spreadmodel_read_prodtype");
+  #endif
+
+  return loc;
 }
 
 
 
 /**
- *
+ * Compares a text string against a list of production type names. Returns the
+ * position of the matching name in the list.
  */
-gboolean *
-spreadmodel_read_zone_attribute (char *attr_text, ZON_zone_list_t * zones)
+guint
+spreadmodel_read_zone (char *text, ZON_zone_list_t * zones)
 {
-  gboolean *flags;
-  unsigned int nzones;
-  gchar **tokens;
-  gchar **iter;
-  int i;                        /* loop counter */
+  gchar *normalized;
+  guint nzones;
+  guint loc;
 
-#if DEBUG
-  g_debug ("----- ENTER spreadmodel_read_zone_attribute");
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER spreadmodel_read_zone");
+  #endif
+
+  /* The text is assumed to be UTF-8. Normalize it to allow for comparison. */
+  normalized = g_utf8_normalize (text, -1, G_NORMALIZE_DEFAULT);
+  g_assert (normalized != NULL);
 
   nzones = ZON_zone_list_length (zones);
-  flags = g_new0 (gboolean, nzones);
-
-  /* If the text is null or blank, assume the parameters apply to all
-   * production types. */
-  if (attr_text == NULL)
+  for (loc = 0; loc < nzones; loc++)
     {
-      for (i = 0; i < nzones; i++)
-        flags[i] = TRUE;
+      if (g_utf8_collate (normalized, ZON_zone_list_get (zones, loc)->name) == 0)
+        break;
     }
-  else
-    {
-      /* If the "zone" attribute is blank, assume the parameters apply in all
-       * zones. */
-      if (strlen (attr_text) == 0)
-        for (i = 0; i < nzones; i++)
-          flags[i] = TRUE;
-      else
-        {
-          /* Split up the text at commas. */
-          tokens = g_strsplit (attr_text, ",", 0);
-          for (iter = tokens; *iter != NULL; iter++)
-            {
-              gchar *normalized;
-              #if DEBUG
-                g_debug ("token = \"%s\"", *iter);
-              #endif
-              normalized = g_utf8_normalize (*iter, -1, G_NORMALIZE_DEFAULT);
-              for (i = 0; i < nzones; i++)
-                if (g_utf8_collate (normalized, ZON_zone_list_get (zones, i)->name) == 0)
-                  break;
-              g_free (normalized);
-              if (i == nzones)
-                g_warning ("there is no zone named \"%s\"", *iter);
-              else
-                flags[i] = TRUE;
-            }
-          g_strfreev (tokens);
-        }
-    }
+  g_free (normalized);
 
-#if DEBUG
-  g_debug ("----- EXIT spreadmodel_read_zone_attribute");
-#endif
+  if (loc == nzones)
+    g_error ("text \"%s\" did not match any zone", text);
 
-  return flags;
+  #if DEBUG
+    g_debug ("----- EXIT spreadmodel_read_zone");
+  #endif
+
+  return loc;
 }
 
 
