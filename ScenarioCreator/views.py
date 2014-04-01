@@ -209,6 +209,7 @@ def file_dialog(request):
     db_files = map(lambda x: x.replace('./workspace\\', '').replace('.sqlite3', ''), db_files)
     context = basic_context()
     context['db_files'] = db_files
+    context['title'] = 'Select a new Scenario to Open'
     return render(request, 'ScenarioCreator/workspace.html', context)
 
 

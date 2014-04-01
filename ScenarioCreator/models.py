@@ -474,7 +474,7 @@ class AirborneSpreadModel(DiseaseSpreadModel):
 class Scenario(models.Model):
     description = models.TextField(blank=True,
         help_text='The description of the scenario.', )
-    language = models.CharField(choices=(('en', "English"), ('es', "Spanish")), max_length=255, blank=True,
+    language = models.CharField(default='en', choices=(('en', "English"), ('es', "Spanish")), max_length=255, blank=True,
         help_text='Language that the model is in - English is default.', )
     use_fixed_random_seed = models.BooleanField(default=False,
         help_text='Indicates if a specific seed value for the random number generator should be used.', )
