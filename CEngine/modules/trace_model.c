@@ -62,11 +62,11 @@ EVT_event_type_t events_listened_for[] = { EVT_Detection };
 /** Specialized information for this model. */
 typedef struct
 {
-  SPREADMODEL_contact_type contact_type;
-  SPREADMODEL_trace_direction direction;
-  gboolean *production_type;
+  int *trace_period[SPREADMODEL_NCONTACT_TYPES][SPREADMODEL_NTRACE_DIRECTIONS]; /**< Number
+    of days back we are interested in tracing.  Use an expression of the form
+    trace_period[contact_type][direction][production_type]
+    to get a particular value.  A negative number means "don't trace". */
   GPtrArray *production_types;
-  int trace_period;             /* Number of days back we are interesting in tracing back. */
 }
 local_data_t;
 
@@ -87,6 +87,9 @@ handle_detection_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * uni
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
+  SPREADMODEL_contact_type contact_type;
+  SPREADMODEL_trace_direction direction;
+  int trace_period;
 
 #if DEBUG
   g_debug ("----- ENTER handle_detection_event (%s)", MODEL_NAME);
@@ -94,20 +97,25 @@ handle_detection_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * uni
 
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
-  if (local_data->production_type[unit->production_type] == TRUE)
+  for (contact_type = 0; contact_type < SPREADMODEL_NCONTACT_TYPES; contact_type++)
     {
-      #if DEBUG
-        g_debug ("unit \"%s\" request to %s %ss", 
-                 unit->official_id,
-                 SPREADMODEL_trace_direction_name[local_data->direction],
-                 SPREADMODEL_contact_type_name[local_data->contact_type]);
-      #endif
-      EVT_event_enqueue (queue,
-                         EVT_new_attempt_to_trace_event (unit,
-                                                         event->day,
-                                                         local_data->contact_type,
-                                                         local_data->direction,
-                                                         local_data->trace_period));
+      for (direction = 0; direction < SPREADMODEL_NTRACE_DIRECTIONS; direction++)
+        {
+          trace_period =
+            local_data->trace_period[contact_type][direction][unit->production_type];
+          if (trace_period >= 0)
+            {
+              #if DEBUG
+                g_debug ("unit \"%s\" request to %s %ss", 
+                         unit->official_id,
+                         SPREADMODEL_trace_direction_name[direction],
+                         SPREADMODEL_contact_type_name[contact_type]);
+              #endif
+              EVT_event_enqueue (queue,
+                EVT_new_attempt_to_trace_event (unit, event->day,
+                                                contact_type, direction, trace_period));
+            }
+        }
     }
 
 #if DEBUG
@@ -184,33 +192,38 @@ char *
 to_string (struct spreadmodel_model_t_ *self)
 {
   GString *s;
-  gboolean already_names;
   unsigned int i;
   char *chararray;
   local_data_t *local_data;
 
   local_data = (local_data_t *) (self->model_data);
   s = g_string_new (NULL);
-  g_string_sprintf (s, "<%s on detection of ", MODEL_NAME);
-  already_names = FALSE;
+  g_string_append_printf (s, "<%s on detection of", MODEL_NAME);
   for (i = 0; i < local_data->production_types->len; i++)
-    if (local_data->production_type[i] == TRUE)
-      {
-        if (already_names)
-          g_string_append_printf (s, ",%s",
-                                  (char *) g_ptr_array_index (local_data->production_types, i));
-        else
-          {
-            g_string_append_printf (s, "%s",
-                                    (char *) g_ptr_array_index (local_data->production_types, i));
-            already_names = TRUE;
-          }
-      }
-  g_string_append_printf (s, " %s %ss",
-                          SPREADMODEL_trace_direction_name[local_data->direction],
-                          SPREADMODEL_contact_type_name[local_data->contact_type]);
+    {
+      SPREADMODEL_contact_type contact_type;
+      SPREADMODEL_trace_direction direction;
+      int trace_period;
 
-  g_string_append_printf (s, "\n  trace-period=%i>", local_data->trace_period);
+      g_string_append_printf (s, "\n  %s:",
+                              (char *) g_ptr_array_index (local_data->production_types, i));
+      for (contact_type = 0; contact_type < SPREADMODEL_NCONTACT_TYPES; contact_type++)
+        {
+          for (direction = 0; direction < SPREADMODEL_NTRACE_DIRECTIONS; direction++)
+            {
+              trace_period =
+                local_data->trace_period[contact_type][direction][i];
+              if (trace_period >= 0)
+                {
+                  g_string_append_printf (s, " %s%s %i days",
+                                          SPREADMODEL_trace_direction_name[direction],
+                                          SPREADMODEL_contact_type_name[contact_type],
+                                          trace_period);
+                }
+            }
+        }
+    }
+  g_string_append_c (s, '>');
 
   /* don't return the wrapper object */
   chararray = s->str;
@@ -230,6 +243,7 @@ void
 local_free (struct spreadmodel_model_t_ *self)
 {
   local_data_t *local_data;
+  guint i, j;
 
 #if DEBUG
   g_debug ("----- ENTER free (%s)", MODEL_NAME);
@@ -237,7 +251,14 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  g_free (local_data->production_type);
+
+  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+    {
+      for (j = 0; j < SPREADMODEL_NTRACE_DIRECTIONS; j++)
+        {
+          g_free (local_data->trace_period[i][j]);
+        }    
+    }
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
   g_free (self);
@@ -250,18 +271,104 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 /**
+ * Adds a set of production type specific parameters to a trace model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+set_params (void *data, int ncols, char **value, char **colname)
+{
+  spreadmodel_model_t *self;
+  local_data_t *local_data;
+  guint production_type;
+  long int trace_period;
+  long int tmp;
+
+  #if DEBUG
+    g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
+  #endif
+
+  self = (spreadmodel_model_t *)data;
+  local_data = (local_data_t *) (self->model_data);
+
+  g_assert (ncols == 7);
+
+  /* Find out which production type these parameters apply to. */
+  production_type = spreadmodel_read_prodtype (value[0], local_data->production_types);
+
+  /* Read the parameters. */
+  errno = 0;
+  trace_period = strtol (value[1], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  if (trace_period < 0)
+    {
+      trace_period = -1; /* do not trace */
+    }
+  errno = 0;
+  tmp = strtol (value[2], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  if (tmp == 1)
+    {
+      local_data->trace_period[SPREADMODEL_DirectContact][SPREADMODEL_TraceForwardOrOut][production_type] = trace_period;
+    }
+  errno = 0;
+  tmp = strtol (value[3], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  if (tmp == 1)
+    {
+      local_data->trace_period[SPREADMODEL_DirectContact][SPREADMODEL_TraceBackOrIn][production_type] = trace_period;
+    }
+
+  errno = 0;
+  trace_period = strtol (value[4], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  if (trace_period < 0)
+    {
+      trace_period = -1; /* do not trace */
+    }
+  errno = 0;
+  tmp = strtol (value[5], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  if (tmp == 1)
+    {
+      local_data->trace_period[SPREADMODEL_IndirectContact][SPREADMODEL_TraceForwardOrOut][production_type] = trace_period;
+    }
+  errno = 0;
+  tmp = strtol (value[6], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  if (tmp == 1)
+    {
+      local_data->trace_period[SPREADMODEL_IndirectContact][SPREADMODEL_TraceBackOrIn][production_type] = trace_period;
+    }
+
+  #if DEBUG
+    g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
+  #endif
+
+  return 0;
+}
+
+
+
+/**
  * Returns a new trace model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element const *e;
-  scew_attribute *attr;
-  XML_Char const *attr_text;
-  gboolean success;
+  guint nprod_types, i, j, k;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -286,56 +393,29 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
-  #if DEBUG
-    g_debug ("setting contact type");
-  #endif
-  attr = scew_element_attribute_by_name (params, "contact-type");
-  g_assert (attr != NULL);
-  attr_text = scew_attribute_value (attr);
-  if (strcmp (attr_text, "direct") == 0)
-    local_data->contact_type = SPREADMODEL_DirectContact;
-  else if (strcmp (attr_text, "indirect") == 0)
-    local_data->contact_type = SPREADMODEL_IndirectContact;
-  else
-    g_assert_not_reached ();
-
-  #if DEBUG
-    g_debug ("setting trace direction");
-  #endif
-  attr = scew_element_attribute_by_name (params, "direction");
-  g_assert (attr != NULL);
-  attr_text = scew_attribute_value (attr);
-  if (strcmp (attr_text, "out") == 0)
-    local_data->direction = SPREADMODEL_TraceForwardOrOut;
-  else if (strcmp (attr_text, "in") == 0)
-    local_data->direction = SPREADMODEL_TraceBackOrIn;
-  else
-    g_assert_not_reached ();
-
-  #if DEBUG
-    g_debug ("setting production types");
-  #endif
+  /* Initialize the 3D array of trace periods. */
   local_data->production_types = units->production_type_names;
-  local_data->production_type =
-    spreadmodel_read_prodtype_attribute (params, "production-type", units->production_type_names);
-
-  e = scew_element_by_name (params, "trace-period");
-  if (e != NULL)
+  nprod_types = local_data->production_types->len;
+  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
     {
-      local_data->trace_period = (int) ceil (PAR_get_time (e, &success));
-      if (success == FALSE)
+      for (j = 0; j < SPREADMODEL_NTRACE_DIRECTIONS; j++)
         {
-          g_warning ("%s: setting period of interest to 1 week", MODEL_NAME);
-          local_data->trace_period = 7;
-        }
+          local_data->trace_period[i][j] = g_new (int, nprod_types);
+          for (k = 0; k < nprod_types; k++)
+            {
+              local_data->trace_period[i][j][k] = -1;
+            }
+        }    
     }
-  else
+
+  /* Call the set_params function to read the production type specific
+   * parameters. */
+  sqlite3_exec (params,
+                "SELECT prodtype.name,direct_trace_period,trace_direct_forward,trace_direct_back,indirect_trace_period,trace_indirect_forward,trace_indirect_back FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol, ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id",
+                set_params, self, &sqlerr);
+  if (sqlerr)
     {
-      g_warning ("%s: period of interest missing, setting 1 to week", MODEL_NAME);
-      local_data->trace_period = 7;
+      g_error ("%s", sqlerr);
     }
 
 #if DEBUG

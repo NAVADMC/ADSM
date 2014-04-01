@@ -50,7 +50,6 @@
 
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new contact_recorder_model_new
-#define set_params contact_recorder_model_set_params
 #define run contact_recorder_model_run
 #define reset contact_recorder_model_reset
 #define events_listened_for contact_recorder_model_events_listened_for
@@ -107,10 +106,9 @@ typedef struct
     trace_success[contact_type][source_production_type]
     to get a particular value.  A negative number means "we don't record these
     contacts". */
-  PDF_dist_t **trace_delay[SPREADMODEL_NCONTACT_TYPES]; /**< Number of days that a
-    trace takes.  Use an expression of the form
-    trace_delay[contact_type][source_production_type]
-    to get a particular distribution. */
+  PDF_dist_t **trace_delay; /**< Number of days that a trace takes.  Use an
+    expression of the form trace_delay[source_production_type] to get a
+    particular distribution. */
   GQueue **trace_out; /* Lists of exposures originating <i>from</i> a unit.
     The array contains one GQueue for each unit.  Each node of a GQueue stores
     a pointer to an Exposure event.  The newest exposures are at the head of
@@ -131,6 +129,8 @@ typedef struct
     GQueue that is 2 places ahead of the rotating index, etc. */
   unsigned int npending_results;
   unsigned int rotating_index; /**< To go with pending_results. */
+  sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
+    so that it will be available to the set_params function. */
 }
 local_data_t;
 
@@ -305,7 +305,7 @@ handle_attempt_to_trace_event (struct spreadmodel_model_t_ *self,
       record->traced = TRUE;
       
       /* The release of the trace result may be delayed. */
-      delay_dist = local_data->trace_delay[record->contact_type][unit->production_type];
+      delay_dist = local_data->trace_delay[unit->production_type];
       if (delay_dist == NULL)
         delay = 0;
       else
@@ -549,26 +549,23 @@ to_string (struct spreadmodel_model_t_ *self)
   /* Add the trace delay parameter for each combination of contact type and
    * source production type. */
   g_string_sprintfa (s, "\n  trace-delay=");
-  for (contact_type = SPREADMODEL_DirectContact; contact_type <= SPREADMODEL_IndirectContact; contact_type++)
-    for (i = 0; i < nprod_types; i++)
-      {
-        delay = local_data->trace_delay[contact_type][i];
-        if (delay == NULL)
-          {
-            g_string_append_printf (s, "\n    0 for %s from %s",
-                                    SPREADMODEL_contact_type_name[contact_type],
-                                    (char *) g_ptr_array_index (local_data->production_types, i));
-          }
-        else
-          {
-            delay_as_string = PDF_dist_to_string (delay);
-            g_string_append_printf (s, "\n    %s for %s from %s",
-                                    delay_as_string,
-                                    SPREADMODEL_contact_type_name[contact_type],
-                                    (char *) g_ptr_array_index (local_data->production_types, i));
-            g_free (delay_as_string);
-          }
-      }
+  for (i = 0; i < nprod_types; i++)
+    {
+      delay = local_data->trace_delay[i];
+      if (delay == NULL)
+        {
+          g_string_append_printf (s, "\n    0 from %s",
+                                  (char *) g_ptr_array_index (local_data->production_types, i));
+        }
+      else
+        {
+          delay_as_string = PDF_dist_to_string (delay);
+          g_string_append_printf (s, "\n    %s from %s",
+                                  delay_as_string,
+                                  (char *) g_ptr_array_index (local_data->production_types, i));
+          g_free (delay_as_string);
+        }
+    }
   g_string_append_c (s, '>');
 
   /* don't return the wrapper object */
@@ -606,12 +603,9 @@ local_free (struct spreadmodel_model_t_ *self)
       g_free (local_data->trace_success[contact_type]);
     }
 
-  for (contact_type = SPREADMODEL_DirectContact; contact_type <= SPREADMODEL_IndirectContact; contact_type++)
-    {
-      for (i = 0; i < nprod_types; i++)
-        PDF_free_dist (local_data->trace_delay[contact_type][i]);
-      g_free (local_data->trace_delay[contact_type]);
-    }
+  for (i = 0; i < nprod_types; i++)
+    PDF_free_dist (local_data->trace_delay[i]);
+  g_free (local_data->trace_delay);
 
   for (i = 0; i < local_data->nunits; i++)
     {
@@ -650,100 +644,61 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 /**
- * Adds a set of parameters to the model.
+ * Adds a set of parameters to a contact recorder.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
  */
-void
-set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
+static int
+set_params (void *data, int ncols, char **value, char **colname)
 {
+  spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element const *e;
-  gboolean success;
-  scew_attribute *attr;
-  XML_Char const *attr_text;
-  SPREADMODEL_contact_type contact_type;
-  gboolean *production_type;
+  sqlite3 *params;
+  guint production_type;
   double trace_success;
-  unsigned int nprod_types, i;
-  int trace_period;
-  PDF_dist_t *trace_delay;
+  guint pdf_id;
 
 #if DEBUG
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
+  self = (spreadmodel_model_t *)data;
   local_data = (local_data_t *) (self->model_data);
+  params = local_data->db;
 
-  /* Find out whether these parameters are for direct or indirect contact. */
-  attr = scew_element_attribute_by_name (params, "contact-type");
-  g_assert (attr != NULL);
-  attr_text = scew_attribute_value (attr);
-  if (strcmp (attr_text, "direct") == 0)
-    contact_type = SPREADMODEL_DirectContact;
-  else if (strcmp (attr_text, "indirect") == 0)
-    contact_type = SPREADMODEL_IndirectContact;
-  else
-    g_assert_not_reached ();
+  g_assert (ncols == 4);
 
   /* Find out which source production type these parameters apply to. */
   production_type =
-    spreadmodel_read_prodtype_attribute (params, "production-type", local_data->production_types);
+    spreadmodel_read_prodtype (value[0], local_data->production_types);
 
-  e = scew_element_by_name (params, "trace-success");
-  if (e != NULL)
-    {
-      trace_success = PAR_get_probability (e, &success);
-      if (success == FALSE)
-        {
-          g_warning ("%s: settting probability of trace success to 1", MODEL_NAME);
-          trace_success = 1;
-        }
-    }
-  else
-    {
-      g_warning ("%s: probability of trace success missing, setting to 1", MODEL_NAME);
-      trace_success = 1;
-    }
+  errno = 0;
+  trace_success = strtod (value[1], NULL);
+  g_assert (errno != ERANGE);
+  g_assert (trace_success >= 0 && trace_success <= 1);
+  local_data->trace_success[SPREADMODEL_DirectContact][production_type] = trace_success;
 
-  nprod_types = local_data->production_types->len;
-  for (i = 0; i < nprod_types; i++)
-    if (production_type[i] == TRUE)
-      local_data->trace_success[contact_type][i] = trace_success;
+  errno = 0;
+  trace_success = strtod (value[2], NULL);
+  g_assert (errno != ERANGE);
+  g_assert (trace_success >= 0 && trace_success <= 1);
+  local_data->trace_success[SPREADMODEL_IndirectContact][production_type] = trace_success;
 
-  trace_period = 0;
-  e = scew_element_by_name (params, "trace-period");
-  if (e != NULL)
-    {
-      trace_period = (int) ceil (PAR_get_time (e, &success));
-      if (success == FALSE)
-        g_warning ("%s: period of interest not modified", MODEL_NAME);
-    }
-  else
-    {
-      g_warning ("%s: period of interest missing", MODEL_NAME);
-    }
-  local_data->trace_period = MAX (local_data->trace_period, trace_period);
-
-  e = scew_element_by_name (params, "trace-delay");
-  if (e != NULL)
-    {
-      trace_delay = PAR_get_PDF (e);
-      g_assert (trace_delay != NULL);
-      for (i = 0; i < nprod_types; i++)
-        if (production_type[i] == TRUE)
-          local_data->trace_delay[contact_type][i] = PDF_clone_dist (trace_delay);
-      PDF_free_dist (trace_delay);
-    }
-
-  g_free (production_type);
+  errno = 0;
+  pdf_id = strtol (value[3], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (local_data->trace_delay[production_type] == NULL);
+  local_data->trace_delay[production_type] = PAR_get_PDF (params, pdf_id);
 
 #if DEBUG
   g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
 #endif
 
-  return;
+  return 0;
 }
 
 
@@ -752,7 +707,7 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
  * Returns a new contact recorder model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
@@ -760,6 +715,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   unsigned int nprod_types;
   SPREADMODEL_contact_type contact_type;
   unsigned int i;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -773,7 +729,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  self->set_params = set_params;
   self->run = run;
   self->reset = reset;
   self->is_singleton = TRUE;
@@ -784,9 +739,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->printf = spreadmodel_model_printf;
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
-
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
 
   /* Create an array to hold probabilities of trace success.  The array is 2-
    * dimensional because it is indexed by contact type and source production
@@ -802,12 +754,8 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
         }
     }
 
-  /* Create an array to hold trace delays.  The array is 2-dimensional because
-   * it is indexed by contact type and source production type. */
-  for (contact_type = SPREADMODEL_DirectContact; contact_type <= SPREADMODEL_IndirectContact; contact_type++)
-    {
-      local_data->trace_delay[contact_type] = g_new0 (PDF_dist_t *, nprod_types);
-    }
+  /* Create an array to hold trace delays. */
+  local_data->trace_delay = g_new0 (PDF_dist_t *, nprod_types);
 
   /* Initialize an array for delayed results.  We don't know yet how long the
    * the array needs to be, since that will depend on values we sample from the
@@ -828,11 +776,19 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
       local_data->trace_in[i] = g_queue_new ();
     }
 
-  local_data->trace_period = 0;
+  local_data->trace_period = PAR_get_int (params, "SELECT MAX(trace_period) FROM (SELECT direct_trace_period AS trace_period FROM ScenarioCreator_controlprotocol UNION SELECT indirect_trace_period AS trace_period FROM ScenarioCreator_controlprotocol");
 
-  /* Send the XML subtree to the init function to read the production type
-   * combination specific parameters. */
-  self->set_params (self, params);
+  /* Call the set_params function to read the production type specific
+   * parameters. */
+  local_data->db = params;
+  sqlite3_exec (params,
+                "SELECT prodtype.name,direct_trace_success_rate,indirect_trace_success,trace_result_delay_id FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol, ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id",
+                set_params, self, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
+  local_data->db = NULL;
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

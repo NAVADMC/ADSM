@@ -69,7 +69,6 @@ minispreadmodel_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/
   $(top_srcdir)/modules/resources_and_implementation_of_controls_model.c $(top_srcdir)/modules/resources_and_implementation_of_controls_model.h \
   $(top_srcdir)/modules/quarantine_model.c $(top_srcdir)/modules/quarantine_model.h \
   $(top_srcdir)/modules/basic_destruction_model.c $(top_srcdir)/modules/basic_destruction_model.h \
-  $(top_srcdir)/modules/trace_back_destruction_model.c $(top_srcdir)/modules/trace_back_destruction_model.h \
   $(top_srcdir)/modules/ring_destruction_model.c $(top_srcdir)/modules/ring_destruction_model.h \
   $(top_srcdir)/modules/ring_vaccination_model.c $(top_srcdir)/modules/ring_vaccination_model.h \
   $(top_srcdir)/modules/trace_model.c $(top_srcdir)/modules/trace_model.h \
@@ -79,12 +78,10 @@ minispreadmodel_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/
   $(top_srcdir)/modules/test_model.c $(top_srcdir)/modules/test_model.h \
   $(top_srcdir)/modules/zone_model.c $(top_srcdir)/modules/zone_model.h \
   $(top_srcdir)/modules/basic_zone_focus_model.c $(top_srcdir)/modules/basic_zone_focus_model.h \
-  $(top_srcdir)/modules/trace_back_zone_focus_model.c $(top_srcdir)/modules/trace_back_zone_focus_model.h \
   $(top_srcdir)/modules/trace_zone_focus_model.c $(top_srcdir)/modules/trace_zone_focus_model.h \
   $(top_srcdir)/modules/economic_model.c $(top_srcdir)/modules/economic_model.h \
   $(top_srcdir)/modules/destruction_monitor.c $(top_srcdir)/modules/destruction_monitor.h \
   $(top_srcdir)/modules/destruction_list_monitor.c $(top_srcdir)/modules/destruction_list_monitor.h \
-  $(top_srcdir)/modules/trace_back_monitor.c $(top_srcdir)/modules/trace_back_monitor.h \
   $(top_srcdir)/modules/trace_monitor.c $(top_srcdir)/modules/trace_monitor.h \
   $(top_srcdir)/modules/vaccination_monitor.c $(top_srcdir)/modules/vaccination_monitor.h \
   $(top_srcdir)/modules/vaccination_list_monitor.c $(top_srcdir)/modules/vaccination_list_monitor.h \

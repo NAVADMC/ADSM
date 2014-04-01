@@ -64,9 +64,6 @@
 #include "table_writer.h"
 #include "test_model.h"
 #include "test_monitor.h"
-#include "trace_back_destruction_model.h"
-#include "trace_back_monitor.h"
-#include "trace_back_zone_focus_model.h"
 #include "trace_destruction_model.h"
 #include "trace_exam_model.h"
 #include "trace_model.h"
@@ -148,6 +145,7 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
   spreadmodel_model_t *model;
   gboolean include_zones;
   gboolean include_detection;
+  gboolean include_tracing;
   gboolean include_vaccination;
   int nmodels;
   int i;                        /* loop counter */
@@ -211,6 +209,15 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
     {
       g_ptr_array_add (tmp_models,
                        basic_zone_focus_model_new (parameter_db, units, projection, zones));
+    }
+
+  include_tracing = PAR_get_boolean (parameter_db, "SELECT _include_tracing FROM ScenarioCreator_controlmasterplan");
+  if (include_tracing)
+    {
+      g_ptr_array_add (tmp_models,
+                       contact_recorder_model_new (parameter_db, units, projection, zones));
+      g_ptr_array_add (tmp_models,
+                       trace_model_new (parameter_db, units, projection, zones));
     }
 
   include_vaccination = PAR_get_boolean (parameter_db, "SELECT _include_vaccination FROM ScenarioCreator_controlmasterplan");
