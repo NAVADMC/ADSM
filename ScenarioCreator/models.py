@@ -84,14 +84,21 @@ class DynamicBlob(models.Model):
 
 class Population(models.Model):
     source_file = models.CharField(max_length=255, default='Population_Ireland.xml')  # source_file made generic CharField so Django doesn't try to copy and save the raw file
+
     def clean_fields(self, exclude=None):
         if not os.path.isfile(workspace(self.source_file)):
             raise ValidationError(self.source_file + " is not a file in the workspace.")
-    def clean(self):
+
+    def save(self):
+        super(Population, self).save()
+        self.import_population()  # Population must be saved to db so that it can be foreignkeyed
+
+    def import_population(self):
         print("Parsing ", self.source_file)
         p = ScenarioCreator.parser.PopulationParser(self.source_file)
         data = p.parse_to_dictionary()
         for entry_dict in data:
+            entry_dict['_population'] = self
             farm = Unit.create(**entry_dict)
             farm.save()
         print("Done creating %i Units" % len(data))

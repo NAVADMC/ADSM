@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 # Create your tests here.
-from ScenarioCreator.models import Scenario, choice_char_from_value, squish_name, Unit
+from ScenarioCreator.models import Scenario, choice_char_from_value, squish_name, Unit, Population
 
 updatedPost = {'description': 'Updated Description', "naadsm_version": '3.2.19', "language": 'en', "num_runs": '10',
                "num_days": '40', 'scenario_name': 'sample'}
@@ -40,3 +40,10 @@ class ModelUtilsTest(TestCase):
 
     def test_squish(self):
         self.assertEqual('thefeanciestevar', squish_name('  The FeanCiest Evar  '))
+
+    def test_population_link(self):
+        index = Unit.objects.count()
+        p = Population(source_file='Population_Ireland.xml')
+        p.save()
+        self.assertGreater( Unit.objects.count(), index, "No new Units were added")
+        self.assertEqual( Unit.objects.get(id=index+1)._population, p, "New Unit should link back to newest Population object")
