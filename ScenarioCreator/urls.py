@@ -33,8 +33,9 @@ urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
                                         ["url('^DiseaseSpread/$', 'ScenarioCreator.views.disease_spread')",
                                          "url('^AssignProtocols/$', 'ScenarioCreator.views.assign_protocols')",
                                          "url('^AssignReactions/$', 'ScenarioCreator.views.assign_reactions')",
-                                         "url('^SaveScenario/?P<file_path>\w+/$', 'ScenarioCreator.views.save_scenario')",
-                                         "url('^SaveScenario/', 'ScenarioCreator.views.save_scenario')",
-                                         "url('^OpenScenario/', 'ScenarioCreator.views.open_scenario')"
+                                         "url('^SaveScenario/(?P<file_path>\w+)/$', 'ScenarioCreator.views.save_scenario')",
+                                         # "url('^SaveScenario/', 'ScenarioCreator.views.save_scenario')",
+                                         "url('^Workspace/$', 'ScenarioCreator.views.file_dialog')",
+                                         "url('^OpenScenario/(?P<target>\w+)/$', 'ScenarioCreator.views.open_scenario')",
                                         ])
 

@@ -1,3 +1,4 @@
+from glob import glob
 import json
 import os
 import shutil
@@ -8,13 +9,12 @@ from django.conf import settings
 import re
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 
-scenario_filename = 'activeSession.sqlite3'  # This keeps track of the state for all views and is used by basic_context
+scenario_filename = 'activeSession'  # This keeps track of the state for all views and is used by basic_context
 
 
 def activeSession():
     full_path = settings.DATABASES['default']['NAME']
-    return full_path.replace(settings.BASE_DIR, '')
-
+    return os.path.split(full_path)[-1]
 
 
 def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
@@ -156,60 +156,83 @@ def delete_entry(request, primary_key):
 
 
 '''Utility Views for UI'''
-def create_db_connection(db_name, db_path):
-    needs_sync = not os.path.isfile(db_path)
+# Leave this code here until we can use it for importing chunks of a scenario in the Scenario Builder
+# def create_db_connection(db_name, db_path):
+#     needs_sync = not os.path.isfile(db_path)
+#
+#     connections.databases[db_name] = {
+#         'NAME': os.path.join(settings.BASE_DIR, db_path),
+#         'ENGINE': 'django.db.backends.sqlite3'}
+#     # Ensure the remaining default connection information is defined.
+#     # EDIT: this is actually performed for you in the wrapper class __getitem__
+#     # method.. although it may be good to do it when being initially setup to
+#     # prevent runtime errors later.
+#     # connections.databases.ensure_defaults(db_name)
+#     if needs_sync:
+#         # Don't import django.core.management if it isn't needed.
+#         from django.core.management import call_command
+#         print('Building DB structure...')
+#         os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
+#         call_command('syncdb',
+#             # verbosity=0,
+#             interactive=False,
+#             database=connections[db_name].alias,  # database=self.connection.alias,
+#             load_initial_data=False)
+#         # call_command('syncdb', )
+#         print('Done creating database')
+#
+#
+# def db_save(file_path):
+#     create_db_connection('save_file', file_path)
+#     top_level_models = [Scenario, Population, Disease, ControlMasterPlan]
+#     for parent_object in top_level_models:
+#         try:
+#             node = parent_object.objects.using('default').get(id=1)
+#             node.save(using='save_file')
+#         except ObjectDoesNotExist:
+#             print("Couldn't find a ", parent_object)
+#     return 'Scenario Saved'
 
-    connections.databases[db_name] = {
-        'NAME': os.path.join(settings.BASE_DIR, db_path),
-        'ENGINE': 'django.db.backends.sqlite3'}
-    # Ensure the remaining default connection information is defined.
-    # EDIT: this is actually performed for you in the wrapper class __getitem__
-    # method.. although it may be good to do it when being initially setup to
-    # prevent runtime errors later.
-    # connections.databases.ensure_defaults(db_name)
-    if needs_sync:
-        # Don't import django.core.management if it isn't needed.
-        from django.core.management import call_command
-        print('Building DB structure...')
-        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
-        call_command('syncdb',
-            # verbosity=0,
-            interactive=False,
-            database=connections[db_name].alias,  # database=self.connection.alias,
-            load_initial_data=False)
-        # call_command('syncdb', )
-        print('Done creating database')
+
+def workspace_path(target):
+    return "./workspace/"+target+".sqlite3"
 
 
-def db_save(file_path):
-    create_db_connection('save_file', file_path)
-    top_level_models = [Scenario, Population, Disease, ControlMasterPlan]
-    for parent_object in top_level_models:
-        try:
-            node = parent_object.objects.using('default').get(id=1)
-            node.save(using='save_file')
-        except ObjectDoesNotExist:
-            print("Couldn't find a ", parent_object)
-    return 'Scenario Saved'
+def file_dialog(request):
+    # try:
+    print( "Saving ", scenario_filename)
+    if scenario_filename:
+        save_scenario(request, scenario_filename) #Save the file that's already open
+    # except ValueError:
+    #     pass  # New scenario
+    db_files = glob("./workspace/*.sqlite3")
+    db_files = map(lambda x: x.replace('./workspace\\', '').replace('.sqlite3', ''), db_files)
+    context = basic_context()
+    context['db_files'] = db_files
+    return render(request, 'ScenarioCreator/workspace.html', context)
 
 
-def save_scenario(request, file_path='saved_session.sqlite3'):
+def save_scenario(request, target):
     # subprocess.call([])  # This would be best for long operations (non-blocking) but could be os specific
-    # return db_save(file_path)
-    if not activeSession() != scenario_filename:
-        print('Copying database to', scenario_filename)
-        shutil.copy(activeSession(), scenario_filename)
+    # return db_save(target)
+    if target:
+        scenario_filename = target
     else:
-        print('I need to select a file path to save first')
+        target = scenario_filename
+    if scenario_filename:
+        print('Copying database to', target)
+        shutil.copy(activeSession(), workspace_path(target))
+    else:
+        raise ValueError('I need to select a file path to save first')
     return redirect('/setup/Scenario/1/')
 
 
-def open_scenario(request):
-    target = request.POST['open_file']
-    if os.path.isfile(target):
-        shutil.copy(target, activeSession())
-        scenario_filename = target
-        print('Sessions overwritten with ', target)
-    else:
-        print('File does not exist')
+def open_scenario(request, target):
+    # if os.path.isfile(workspace_path(target)):
+    print("Copying ", workspace_path(target), activeSession())
+    shutil.copy(workspace_path(target), activeSession())
+    scenario_filename = target
+    print('Sessions overwritten with ', target)
+    # else:
+    #     print('File does not exist')
     return redirect('/setup/Scenario/1/')
