@@ -146,6 +146,8 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
   gboolean include_zones;
   gboolean include_detection;
   gboolean include_tracing;
+  gboolean include_exams;
+  gboolean include_testing;
   gboolean include_vaccination;
   gboolean include_destruction;
   int nmodels;
@@ -227,6 +229,20 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
     {
       g_ptr_array_add (tmp_models,
                        trace_zone_focus_model_new (parameter_db, units, projection, zones));
+    }
+
+  include_exams = PAR_get_boolean (parameter_db, "SELECT _include_tracing_unit_exam FROM ScenarioCreator_controlmasterplan");
+  if (include_exams)
+    {
+      g_ptr_array_add (tmp_models,
+                       trace_exam_model_new (parameter_db, units, projection, zones));
+    }
+
+  include_testing = PAR_get_boolean (parameter_db, "SELECT _include_tracing_testing FROM ScenarioCreator_controlmasterplan");
+  if (include_testing)
+    {
+      g_ptr_array_add (tmp_models,
+                       test_model_new (parameter_db, units, projection, zones));
     }
 
   include_vaccination = PAR_get_boolean (parameter_db, "SELECT _include_vaccination FROM ScenarioCreator_controlmasterplan");
