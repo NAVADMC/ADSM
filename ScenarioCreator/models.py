@@ -270,7 +270,7 @@ class ControlMasterPlan(models.Model):
     destruction_priority_order = models.CharField(max_length=255,
         help_text='The primary priority order for destruction.',
         choices=priority_choices(), )
-    destrucion_reason_order = models.CharField(max_length=255,
+    destruction_reason_order = models.CharField(max_length=255,
         default='Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring',
         # old DB: 'basic,direct-forward,ring,indirect-forward,direct-back,indirect-back'
         # old UI: Detected, Trace forward of direct contact, Ring, Trace forward of indirect contact, Trace back of direct contact, Trace back of indirect contact
