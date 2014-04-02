@@ -226,7 +226,6 @@
 
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new resources_and_implementation_of_controls_model_new
-#define set_params resources_and_implementation_of_controls_model_set_params
 #define run resources_and_implementation_of_controls_model_run
 #define reset resources_and_implementation_of_controls_model_reset
 #define events_listened_for resources_and_implementation_of_controls_model_events_listened_for
@@ -381,6 +380,9 @@ typedef struct
   int vaccination_reason_priority;
   GHashTable *detected_today; /**< Records the units detected today.  Useful
     for cancelling vaccination of detected units. */
+
+  sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
+    so that it will be available to the set_params function. */
 }
 local_data_t;
 
@@ -1766,51 +1768,40 @@ local_free (struct spreadmodel_model_t_ *self)
 
 /**
  * Adds a set of parameters to a resources and implementation of controls model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
  */
-void
-set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
+static int
+set_params (void *data, int ncols, char **value, char **colname)
 {
+  spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element const *e;
-  gboolean success;
+  sqlite3 *params;
+  guint rel_id;
   double dummy;
-  char *tmp;
 
   #if DEBUG
     g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
   #endif
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
+  self = (spreadmodel_model_t *)data;
   local_data = (local_data_t *) (self->model_data);
+  params = local_data->db;
 
-  e = scew_element_by_name (params, "destruction-program-delay");
-  if (e != NULL)
-    {
-      local_data->destruction_program_delay = (int) (PAR_get_time (e, &success));
-      if (success == FALSE)
-        {
-          g_warning ("%s: setting destruction program delay to 0 days", MODEL_NAME);
-          local_data->destruction_program_delay = 0;
-        }
-    }
-  else
-    {
-      g_warning ("%s: destruction program delay missing, setting to 0 days", MODEL_NAME);
-      local_data->destruction_program_delay = 0;
-    }
+  g_assert (ncols == 6);
 
-  e = scew_element_by_name (params, "destruction-capacity");
-  if (e != NULL)
-    {
-      local_data->destruction_capacity = PAR_get_relationship_chart (e);
-    }
-  else
-    {
-      g_warning ("%s: destruction capacity missing, setting to 0", MODEL_NAME);
-      local_data->destruction_capacity = REL_new_point_chart (0);
-    }
+  errno = 0;
+  local_data->destruction_program_delay = (int) strtol (value[0], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);  
+
+  errno = 0;
+  rel_id = strtol (value[1], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);  
+  local_data->destruction_capacity = PAR_get_relchart (params, rel_id);
   /* Set a flag if the destruction capacity chart at some point drops to 0 and
    * stays there. */
   local_data->destruction_capacity_goes_to_0 =
@@ -1824,95 +1815,60 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
       #endif
     }
 
-  e = scew_element_by_name (params, "destruction-priority-order");
-  if (e != NULL)
+  if (strcasecmp (value[2], "production type, reason, time waiting") == 0)
     {
-      tmp = PAR_get_text (e);
-      if (strcasecmp (tmp, "production type,reason,time waiting") == 0)
-        {
-          local_data->destruction_prod_type_priority = 1;
-          local_data->destruction_reason_priority = 2;
-          local_data->destruction_time_waiting_priority = 3;
-        }
-      else if (strcasecmp (tmp, "production type,time waiting,reason") == 0)
-        {
-          local_data->destruction_prod_type_priority = 1;
-          local_data->destruction_reason_priority = 3;
-          local_data->destruction_time_waiting_priority = 2;
-        }
-      else if (strcasecmp (tmp, "reason,production type,time waiting") == 0)
-        {
-          local_data->destruction_prod_type_priority = 2;
-          local_data->destruction_reason_priority = 1;
-          local_data->destruction_time_waiting_priority = 3;
-        }
-      else if (strcasecmp (tmp, "reason,time waiting,production type") == 0)
-        {
-          local_data->destruction_prod_type_priority = 3;
-          local_data->destruction_reason_priority = 1;
-          local_data->destruction_time_waiting_priority = 2;
-        }
-      else if (strcasecmp (tmp, "time waiting,reason,production type") == 0)
-        {
-          local_data->destruction_prod_type_priority = 3;
-          local_data->destruction_reason_priority = 2;
-          local_data->destruction_time_waiting_priority = 1;
-        }
-      else if (strcasecmp (tmp, "time waiting,production type,reason") == 0)
-        {
-          local_data->destruction_prod_type_priority = 2;
-          local_data->destruction_reason_priority = 3;
-          local_data->destruction_time_waiting_priority = 1;
-        }
-      else
-        {
-          g_warning
-            ("%s: assuming destruction priority order reason > production type > time waiting",
-             MODEL_NAME);
-          local_data->destruction_reason_priority = 1;
-          local_data->destruction_prod_type_priority = 2;
-          local_data->destruction_time_waiting_priority = 3;
-        }
-      g_free (tmp);
+      local_data->destruction_prod_type_priority = 1;
+      local_data->destruction_reason_priority = 2;
+      local_data->destruction_time_waiting_priority = 3;
+    }
+  else if (strcasecmp (value[2], "production type, time waiting, reason") == 0)
+    {
+      local_data->destruction_prod_type_priority = 1;
+      local_data->destruction_reason_priority = 3;
+      local_data->destruction_time_waiting_priority = 2;
+    }
+  else if (strcasecmp (value[2], "reason, production type, time waiting") == 0)
+    {
+      local_data->destruction_prod_type_priority = 2;
+      local_data->destruction_reason_priority = 1;
+      local_data->destruction_time_waiting_priority = 3;
+    }
+  else if (strcasecmp (value[2], "reason, time waiting, production type") == 0)
+    {
+      local_data->destruction_prod_type_priority = 3;
+      local_data->destruction_reason_priority = 1;
+      local_data->destruction_time_waiting_priority = 2;
+    }
+  else if (strcasecmp (value[2], "time waiting, reason, production type") == 0)
+    {
+      local_data->destruction_prod_type_priority = 3;
+      local_data->destruction_reason_priority = 2;
+      local_data->destruction_time_waiting_priority = 1;
+    }
+  else if (strcasecmp (value[2], "time waiting, production type, reason") == 0)
+    {
+      local_data->destruction_prod_type_priority = 2;
+      local_data->destruction_reason_priority = 3;
+      local_data->destruction_time_waiting_priority = 1;
     }
   else
     {
-      g_warning ("%s: assuming destruction priority order reason > production type > time waiting",
-                 MODEL_NAME);
+      g_warning
+        ("%s: assuming destruction priority order reason > production type > time waiting",
+         MODEL_NAME);
       local_data->destruction_reason_priority = 1;
       local_data->destruction_prod_type_priority = 2;
       local_data->destruction_time_waiting_priority = 3;
     }
 
-  e = scew_element_by_name (params, "vaccination-program-delay");
-  if (e != NULL)
-    {
-      local_data->vaccination_program_threshold =
-        (unsigned int) round (PAR_get_unitless (e, &success));
-      if (success == FALSE)
-        {
-          g_warning ("%s: will begin vaccination after first detection", MODEL_NAME);
-          local_data->vaccination_program_threshold = 1;
-        }
-    }
-  else
-    {
-      g_warning
-        ("%s: begin after detections parameter missing, will begin vaccination after first detection",
-         MODEL_NAME);
-      local_data->vaccination_program_threshold = 1;
-    }
+  errno = 0;
+  local_data->vaccination_program_threshold = strtol (value[3], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);  
 
-  e = scew_element_by_name (params, "vaccination-capacity");
-  if (e != NULL)
-    {
-      local_data->vaccination_capacity = PAR_get_relationship_chart (e);
-    }
-  else
-    {
-      g_warning ("%s: vaccination capacity missing, setting to 0", MODEL_NAME);
-      local_data->vaccination_capacity = REL_new_point_chart (0);
-    }
+  errno = 0;
+  rel_id = strtol (value[4], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);  
+  local_data->vaccination_capacity = PAR_get_relchart (params, rel_id);
   /* Set a flag if the vaccination capacity chart at some point drops to 0 and
    * stays there. */
   local_data->vaccination_capacity_goes_to_0 =
@@ -1926,61 +1882,47 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
       #endif
     }
 
-  e = scew_element_by_name (params, "vaccination-priority-order");
-  if (e != NULL)
+  if (strcasecmp (value[5], "production type, reason, time waiting") == 0)
     {
-      tmp = PAR_get_text (e);
-      if (strcasecmp (tmp, "production type,reason,time waiting") == 0)
-        {
-          local_data->vaccination_prod_type_priority = 1;
-          local_data->vaccination_reason_priority = 2;
-          local_data->vaccination_time_waiting_priority = 3;
-        }
-      else if (strcasecmp (tmp, "production type,time waiting,reason") == 0)
-        {
-          local_data->vaccination_prod_type_priority = 1;
-          local_data->vaccination_reason_priority = 3;
-          local_data->vaccination_time_waiting_priority = 2;
-        }
-      else if (strcasecmp (tmp, "reason,production type,time waiting") == 0)
-        {
-          local_data->vaccination_prod_type_priority = 2;
-          local_data->vaccination_reason_priority = 1;
-          local_data->vaccination_time_waiting_priority = 3;
-        }
-      else if (strcasecmp (tmp, "reason,time waiting,production type") == 0)
-        {
-          local_data->vaccination_prod_type_priority = 3;
-          local_data->vaccination_reason_priority = 1;
-          local_data->vaccination_time_waiting_priority = 2;
-        }
-      else if (strcasecmp (tmp, "time waiting,reason,production type") == 0)
-        {
-          local_data->vaccination_prod_type_priority = 3;
-          local_data->vaccination_reason_priority = 2;
-          local_data->vaccination_time_waiting_priority = 1;
-        }
-      else if (strcasecmp (tmp, "time waiting,production type,reason") == 0)
-        {
-          local_data->vaccination_prod_type_priority = 2;
-          local_data->vaccination_reason_priority = 3;
-          local_data->vaccination_time_waiting_priority = 1;
-        }
-      else
-        {
-          g_warning
-            ("%s: assuming vaccination priority order reason > production type > time waiting",
-             MODEL_NAME);
-          local_data->vaccination_reason_priority = 1;
-          local_data->vaccination_prod_type_priority = 2;
-          local_data->vaccination_time_waiting_priority = 3;
-        }
-      g_free (tmp);
+      local_data->vaccination_prod_type_priority = 1;
+      local_data->vaccination_reason_priority = 2;
+      local_data->vaccination_time_waiting_priority = 3;
+    }
+  else if (strcasecmp (value[5], "production type, time waiting, reason") == 0)
+    {
+      local_data->vaccination_prod_type_priority = 1;
+      local_data->vaccination_reason_priority = 3;
+      local_data->vaccination_time_waiting_priority = 2;
+    }
+  else if (strcasecmp (value[5], "reason, production type, time waiting") == 0)
+    {
+      local_data->vaccination_prod_type_priority = 2;
+      local_data->vaccination_reason_priority = 1;
+      local_data->vaccination_time_waiting_priority = 3;
+     }
+  else if (strcasecmp (value[5], "reason, time waiting, production type") == 0)
+    {
+      local_data->vaccination_prod_type_priority = 3;
+      local_data->vaccination_reason_priority = 1;
+      local_data->vaccination_time_waiting_priority = 2;
+    }
+  else if (strcasecmp (value[5], "time waiting, reason, production type") == 0)
+    {
+      local_data->vaccination_prod_type_priority = 3;
+      local_data->vaccination_reason_priority = 2;
+      local_data->vaccination_time_waiting_priority = 1;
+    }
+  else if (strcasecmp (value[5], "time waiting, production type, reason") == 0)
+    {
+      local_data->vaccination_prod_type_priority = 2;
+      local_data->vaccination_reason_priority = 3;
+      local_data->vaccination_time_waiting_priority = 1;
     }
   else
     {
-      g_warning ("%s: assuming vaccination priority order reason > production type > time waiting",
-                 MODEL_NAME);
+      g_warning
+        ("%s: assuming vaccination priority order reason > production type > time waiting",
+         MODEL_NAME);
       local_data->vaccination_reason_priority = 1;
       local_data->vaccination_prod_type_priority = 2;
       local_data->vaccination_time_waiting_priority = 3;
@@ -1990,7 +1932,7 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
     g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
   #endif
 
-  return;
+  return 0;
 }
 
 
@@ -1999,11 +1941,12 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
  * Returns a new resources and implementation of controls model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -2017,7 +1960,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  self->set_params = resources_and_implementation_of_controls_model_set_params;
   self->run = run;
   self->reset = reset;
   self->is_singleton = TRUE;
@@ -2028,9 +1970,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->printf = spreadmodel_model_printf;
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
-
-  /* Send the XML subtree to the set_params function to read the parameters. */
-  self->set_params (self, params);
 
   local_data->nunits = UNT_unit_list_length (units);
   local_data->nprod_types = units->production_type_names->len;
@@ -2063,6 +2002,17 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   local_data->destruction_reasons = g_ptr_array_new ();
   local_data->nvaccination_reasons = 0;
   local_data->vaccination_reasons = g_ptr_array_new ();
+
+  /* Call the set_params function to read the parameters. */
+  local_data->db = params,
+  sqlite3_exec (params,
+                "SELECT destruction_program_delay,destruction_capacity_id,destruction_priority_order,units_detected_before_triggering_vaccination,vaccination_capacity_id,vaccination_priority_order FROM ScenarioCreator_controlmasterplan",
+                set_params, self, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
+  local_data->db = NULL;
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

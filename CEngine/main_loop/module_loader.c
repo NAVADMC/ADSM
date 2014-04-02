@@ -147,6 +147,7 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
   gboolean include_detection;
   gboolean include_tracing;
   gboolean include_vaccination;
+  gboolean include_destruction;
   int nmodels;
   int i;                        /* loop counter */
   const XML_Char *variable_name;
@@ -235,6 +236,14 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                        vaccine_model_new (parameter_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
                        ring_vaccination_model_new (parameter_db, units, projection, zones));
+    }
+
+  include_destruction = PAR_get_boolean (parameter_db, "SELECT _include_destruction FROM ScenarioCreator_controlmasterplan");
+  
+  if (include_vaccination || include_destruction)
+    {
+      g_ptr_array_add (tmp_models,
+                       resources_and_implementation_of_controls_model_new (parameter_db, units, projection, zones));
     }
   
   if (PAR_get_boolean (parameter_db, "SELECT daily_states_filename IS NOT NULL FROM ScenarioCreator_outputsettings"))
