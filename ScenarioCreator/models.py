@@ -88,11 +88,13 @@ class Population(models.Model):
         if not os.path.isfile(workspace(self.source_file)):
             raise ValidationError(self.source_file + " is not a file in the workspace.")
     def clean(self):
+        print("Parsing ", self.source_file)
         p = ScenarioCreator.parser.PopulationParser(self.source_file)
         data = p.parse_to_dictionary()
         for entry_dict in data:
             farm = Unit.create(**entry_dict)
             farm.save()
+        print("Done creating %i Units" % len(data))
 
 
 class Unit(models.Model):
@@ -147,7 +149,7 @@ class Unit(models.Model):
             elif key == 'initial_size':
                 kwargs[key] = int(kwargs[key])
             elif key == 'initial_state':
-                kwargs[key] = choice_char_from_value(kwargs[key], Unit.initial_state.choices) or 'S'
+                kwargs[key] = choice_char_from_value(kwargs[key], Unit._meta.get_field_by_name('initial_state')[0]._choices) or 'S'
         unit = cls(**kwargs)
         return unit
 
