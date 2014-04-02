@@ -49,6 +49,18 @@ def priority_choices():
 def workspace(file_name):
     return 'workspace/' + file_name
 
+
+def squish_name(name):
+    return name.lower().strip().replace(' ', '').replace('_', '')
+
+
+def choice_char_from_value(value, map_tuple):
+    value = squish_name(value)
+    for key, full_str in map_tuple:
+        if value == squish_name(full_str):
+            return key
+    return None
+
 frequency = chc("never", "once", "daily", "weekly", "monthly", "yearly")
 
 
@@ -73,14 +85,14 @@ class DynamicBlob(models.Model):
 class Population(models.Model):
     source_file = models.CharField(max_length=255, default='Population_Ireland.xml')  # source_file made generic CharField so Django doesn't try to copy and save the raw file
     def clean_fields(self, exclude=None):
-        if os.path.isfile(workspace(self.source_file)):
-            p = ScenarioCreator.parser.PopulationParser(self.source_file)
-            data = p.parse_to_dictionary()
-            for entry in data:
-                farm = Unit.create(**entry)
-                farm.save()
-        else:
+        if not os.path.isfile(workspace(self.source_file)):
             raise ValidationError(self.source_file + " is not a file in the workspace.")
+    def clean(self):
+        p = ScenarioCreator.parser.PopulationParser(self.source_file)
+        data = p.parse_to_dictionary()
+        for entry_dict in data:
+            farm = Unit.create(**entry_dict)
+            farm.save()
 
 
 class Unit(models.Model):
@@ -93,10 +105,10 @@ class Unit(models.Model):
         help_text='The longitude used to georeference this unit.', )
     initial_state = models.CharField(max_length=255, default='S',
                                      help_text='Code indicating the actual disease state of the unit at the beginning of the simulation.',
-                                     choices=(('L', 'Latent'),
-                                              ('S', 'Susceptible'),
-                                              ('B', 'Subclinical'),
-                                              ('C', 'Clinical'),
+                                     choices=(('S', 'Susceptible'),
+                                              ('L', 'Latent'),
+                                              ('B', 'Infectious Subclinical'),
+                                              ('C', 'Infectious Clinical'),
                                               ('N', 'Naturally Immune'),
                                               ('V', 'Vaccine Immune'),
                                               ('D', 'Destroyed')))
@@ -124,9 +136,21 @@ class Unit(models.Model):
     user_defined_2 = models.TextField(blank=True)
     user_defined_3 = models.TextField(blank=True)
     user_defined_4 = models.TextField(blank=True)
+
     @classmethod
     def create(cls, **kwargs):
-        return Unit(**kwargs)
+        for key in kwargs:  #Convert values into their proper type
+            if key == 'production_type':
+                kwargs[key] = ProductionType.objects.get_or_create(name=kwargs[key])[0]
+            elif key in ('latitude', 'longitude'):
+                kwargs[key] = float(kwargs[key])
+            elif key == 'initial_size':
+                kwargs[key] = int(kwargs[key])
+            elif key == 'initial_state':
+                kwargs[key] = choice_char_from_value(kwargs[key], Unit.initial_state.choices) or 'S'
+        unit = cls(**kwargs)
+        return unit
+
     def __str__(self):
         return "Unit(%s: (%s, %s)" % (self.production_type, self.latitude, self.longitude)
 
@@ -565,7 +589,7 @@ class CustomOutputs(OutputSettings):
 
 
 class ProductionType(models.Model):
-    name = models.CharField(max_length=255, )
+    name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     def __str__(self):
         return self.name
