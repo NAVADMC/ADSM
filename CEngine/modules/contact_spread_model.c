@@ -1483,13 +1483,13 @@ set_params (void *data, int ncols, char **value, char **colname)
   spreadmodel_model_t *self;
   local_data_t *local_data;
   sqlite3 *params;
-  param_block_t t;
+  guint from_production_type, to_production_type;
   SPREADMODEL_contact_type contact_type;
+  param_block_t ***contact_type_block;
+  param_block_t *p;
   long int tmp;
   gboolean use_fixed_contact_rate;
   guint pdf_id, rel_id;
-  gboolean *from_production_type, *to_production_type;
-  unsigned int nprod_types, i, j;
 
 #if DEBUG
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
@@ -1501,6 +1501,13 @@ set_params (void *data, int ncols, char **value, char **colname)
 
   g_assert (ncols == 11);
 
+  /* Find out which to-from production type combination these parameters apply
+   * to. */
+  from_production_type =
+    spreadmodel_read_prodtype (value[0], local_data->production_types);
+  to_production_type =
+    spreadmodel_read_prodtype (value[1], local_data->production_types);
+
   /* Find out whether these parameters are for direct or indirect contact. */
   if (strcmp (value[2], "direct") == 0)
     contact_type = SPREADMODEL_DirectContact;
@@ -1509,140 +1516,84 @@ set_params (void *data, int ncols, char **value, char **colname)
   else
     g_assert_not_reached ();
 
-  /* Read the parameters and store them in a temporary param_block_t
-   * structure. */
+  /* If necessary, create a row in the 2D array for this from-production-type. */
+  contact_type_block = local_data->param_block[contact_type];
+  if (contact_type_block[from_production_type] == NULL)
+    {
+      contact_type_block[from_production_type] =
+        g_new0 (param_block_t *, local_data->production_types->len);
+    }
+  /* Check that we are not overwriting an existing parameter block (that would
+   * indicate a bug). */
+  g_assert (contact_type_block[from_production_type][to_production_type] == NULL);
 
+  /* Create a new parameter block. */
+  p = g_new (param_block_t, 1);
+  contact_type_block[from_production_type][to_production_type] = p;
+
+  /* Read the parameters. */
   errno = 0;
   tmp = strtol (value[3], NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
   g_assert (tmp == 0 || tmp == 1);
   use_fixed_contact_rate = (tmp == 1);
   errno = 0;
-  t.movement_rate = strtod (value[4], NULL);
+  p->movement_rate = strtod (value[4], NULL);
   g_assert (errno != ERANGE);
   if (use_fixed_contact_rate)
     {
       /* If fixed_movement_rate >= 0, use it instead of the Poisson distribution */
-      t.fixed_movement_rate = t.movement_rate;
+      p->fixed_movement_rate = p->movement_rate;
     }
   else
     {
-      t.fixed_movement_rate = -1;
+      p->fixed_movement_rate = -1;
     }
   /* The movement rate cannot be negative. */
-  if (t.movement_rate < 0)
+  if (p->movement_rate < 0)
     {
       g_warning ("movement rate cannot be negative, setting to 0");
-      t.movement_rate = 0;
+      p->movement_rate = 0;
     }
 
   errno = 0;
   pdf_id = strtol (value[5], NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
-  t.distance_dist = PAR_get_PDF (params, pdf_id);
+  p->distance_dist = PAR_get_PDF (params, pdf_id);
   /* No part of the distance distribution can be negative. */
-  if (!t.distance_dist->has_inf_lower_tail)
+  if (!p->distance_dist->has_inf_lower_tail)
     {
-      g_assert (PDF_cdf (-EPSILON, t.distance_dist) == 0);
+      g_assert (PDF_cdf (-EPSILON, p->distance_dist) == 0);
     }
 
   errno = 0;
   pdf_id = strtol (value[6], NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
-  t.shipping_delay = PAR_get_PDF (params, pdf_id);
+  p->shipping_delay = PAR_get_PDF (params, pdf_id);
 
   errno = 0;
-  t.prob_infect = strtod (value[7], NULL);
+  p->prob_infect = strtod (value[7], NULL);
   g_assert (errno != ERANGE);
-  g_assert (t.prob_infect >= 0 && t.prob_infect <= 1);
+  g_assert (p->prob_infect >= 0 && p->prob_infect <= 1);
 
   errno = 0;
   rel_id = strtol (value[8], NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);  
-  t.movement_control = PAR_get_relchart (params, rel_id);
+  p->movement_control = PAR_get_relchart (params, rel_id);
   /* The movement rate multiplier cannot go negative. */
-  g_assert (REL_chart_min (t.movement_control) >= 0);
+  g_assert (REL_chart_min (p->movement_control) >= 0);
 
   errno = 0;
   tmp = strtol (value[9], NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
   g_assert (tmp == 0 || tmp == 1);
-  t.latent_units_can_infect = (tmp == 1);
+  p->latent_units_can_infect = (tmp == 1);
 
   errno = 0;
   tmp = strtol (value[10], NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
   g_assert (tmp == 0 || tmp == 1);
-  t.subclinical_units_can_infect = (tmp == 1);
-
-  /* Find out which to-from production type combinations these parameters apply
-   * to. */
-  from_production_type =
-    spreadmodel_read_prodtype_attribute (value[0], local_data->production_types);
-  to_production_type =
-    spreadmodel_read_prodtype_attribute (value[1], local_data->production_types);
-
-  /* Copy the parameters to the appropriate place. */
-  nprod_types = local_data->production_types->len;
-  {
-    param_block_t ***contact_type_block;
-    param_block_t *param_block;
-
-    contact_type_block = local_data->param_block[contact_type];
-    for (i = 0; i < nprod_types; i++)
-      {
-        if (from_production_type[i] == FALSE)
-          continue;
-
-        /* If necessary, create a row in the 2D array for this from-
-         * production type. */
-        if (contact_type_block[i] == NULL)
-          contact_type_block[i] = g_new0 (param_block_t *, nprod_types);
-
-        for (j = 0; j < nprod_types; j++)
-          {
-            if (to_production_type[j] == FALSE)
-              continue;
-
-            /* Create a parameter block for this to-from production type
-             * combination, or overwrite the existing one. */
-            param_block = contact_type_block[i][j];
-            if (param_block == NULL)
-              {
-                param_block = g_new (param_block_t, 1);
-                contact_type_block[i][j] = param_block;
-                #if DEBUG
-                  g_debug ("setting parameters for %s -> %s (%s)",
-                           (char *) g_ptr_array_index (local_data->production_types, i),
-                           (char *) g_ptr_array_index (local_data->production_types, j),
-                           SPREADMODEL_contact_type_name[contact_type]);
-                #endif
-              }
-            else
-              {
-                g_warning ("overwriting previous parameters for %s -> %s (%s)",
-                           (char *) g_ptr_array_index (local_data->production_types, i),
-                           (char *) g_ptr_array_index (local_data->production_types, j),
-                           SPREADMODEL_contact_type_name[contact_type]);
-              }
-
-            param_block->movement_rate = t.movement_rate;
-            param_block->fixed_movement_rate = t.fixed_movement_rate;
-            param_block->movement_control = REL_clone_chart (t.movement_control);
-            param_block->distance_dist = PDF_clone_dist (t.distance_dist);
-            param_block->shipping_delay = PDF_clone_dist (t.shipping_delay);
-            param_block->latent_units_can_infect = t.latent_units_can_infect;
-            param_block->subclinical_units_can_infect = t.subclinical_units_can_infect;
-            param_block->prob_infect = t.prob_infect;
-          }
-      }
-  }
-
-  g_free (from_production_type);
-  g_free (to_production_type);
-  PDF_free_dist (t.distance_dist);
-  PDF_free_dist (t.shipping_delay);
-  REL_free_chart (t.movement_control);
+  p->subclinical_units_can_infect = (tmp == 1);
 
 #if DEBUG
   g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
@@ -1669,12 +1620,11 @@ set_zone_params (void *data, int ncols, char **value, char **colname)
   spreadmodel_model_t *self;
   local_data_t *local_data;
   sqlite3 *params;
+  guint zone, production_type;
+  SPREADMODEL_contact_type contact_type;
+  REL_chart_t ***contact_type_chart;
   guint rel_id;
   REL_chart_t *movement_control;
-  SPREADMODEL_contact_type contact_type;
-  gboolean *production_type;
-  gboolean *zone;
-  unsigned int nprod_types, nzones, i, j;
 
   #if DEBUG
     g_debug ("----- ENTER set_zone_params (%s)", MODEL_NAME);
@@ -1686,12 +1636,10 @@ set_zone_params (void *data, int ncols, char **value, char **colname)
 
   g_assert (ncols == 4);
 
-  errno = 0;
-  rel_id = strtol (value[3], NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);  
-  movement_control = PAR_get_relchart (params, rel_id);
-  /* The movement rate multiplier cannot go negative. */
-  g_assert (REL_chart_min (movement_control) >= 0);
+  /* Find out which zone/production type combination these parameters apply
+   * to. */
+  zone = spreadmodel_read_zone (value[0], local_data->zones);
+  production_type = spreadmodel_read_prodtype (value[1], local_data->production_types);
 
   /* Find out whether these parameters are for direct or indirect contact. */
   if (strcmp (value[2], "direct") == 0)
@@ -1701,56 +1649,19 @@ set_zone_params (void *data, int ncols, char **value, char **colname)
   else
     g_assert_not_reached ();
 
-  /* Find out which zone/production type combinations these parameters apply
-   * to. */
-  zone = spreadmodel_read_zone_attribute (value[0], local_data->zones);
-  production_type = spreadmodel_read_prodtype_attribute (value[1], local_data->production_types);
+  /* Check that we are not overwriting an existing chart (that would
+   * indicate a bug). */
+  contact_type_chart = local_data->movement_control[contact_type];
+  g_assert (contact_type_chart[zone][production_type] == NULL);
 
-  /* Copy the parameters to the appropriate place. */
-  nzones = ZON_zone_list_length (local_data->zones);
-  nprod_types = local_data->production_types->len;
-  {
-    REL_chart_t ***contact_type_chart;
-
-    contact_type_chart = local_data->movement_control[contact_type];
-    for (i = 0; i < nzones; i++)
-      {
-        if (zone[i] == FALSE)
-          continue;
-
-        for (j = 0; j < nprod_types; j++)
-          {
-            if (production_type[j] == FALSE)
-              continue;
-
-            /* Create a relationship chart for this to-from production type
-             * combination, or overwrite the existing one. */
-            if (contact_type_chart[i][j] == NULL)
-              {
-                #if DEBUG
-                  g_debug ("setting movement control for %s in \"%s\" zone (%s)",
-                           (char *) g_ptr_array_index (local_data->production_types, j),
-                           ZON_zone_list_get (local_data->zones, i)->name,
-                           SPREADMODEL_contact_type_name[contact_type]);
-                #endif
-                ;
-              }
-            else
-              {
-                REL_free_chart (contact_type_chart[i][j]);
-                g_warning ("overwriting previous movement control for %s in \"%s\" zone (%s)",
-                           (char *) g_ptr_array_index (local_data->production_types, j),
-                           ZON_zone_list_get (local_data->zones, i)->name,
-                           SPREADMODEL_contact_type_name[contact_type]);
-              }
-            contact_type_chart[i][j] = REL_clone_chart (movement_control);
-          }
-      }
-  }
-
-  REL_free_chart (movement_control);
-  g_free (zone);
-  g_free (production_type);
+  /* Read the parameter. */
+  errno = 0;
+  rel_id = strtol (value[3], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);  
+  movement_control = PAR_get_relchart (params, rel_id);
+  /* The movement rate multiplier cannot go negative. */
+  g_assert (REL_chart_min (movement_control) >= 0);
+  contact_type_chart[zone][production_type] = movement_control;
 
   #if DEBUG
     g_debug ("----- EXIT set_zone_params (%s)", MODEL_NAME);
