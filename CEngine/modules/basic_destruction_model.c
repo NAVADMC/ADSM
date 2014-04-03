@@ -70,9 +70,12 @@ EVT_event_type_t events_listened_for[] = { EVT_BeforeAnySimulations, EVT_Detecti
 /** Specialized information for this model. */
 typedef struct
 {
-  gboolean *production_type;
+  int *priority; /**< The priority associated with each production type. The
+    priority numbers start at 1 for the highest priority. If an element in this
+    array is 0, then basic destruction is not used for that production type. */
   GPtrArray *production_types;
-  int priority;
+  GHashTable *priority_order_table; /**< A temporary structure that exists
+    for use in the set_params functions. */
 }
 local_data_t;
 
@@ -123,6 +126,7 @@ handle_detection_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * uni
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
+  int priority;
 
 #if DEBUG
   g_debug ("----- ENTER handle_detection_event (%s)", MODEL_NAME);
@@ -135,8 +139,8 @@ handle_detection_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * uni
    * it is not already destroyed.  We can "detect" a destroyed unit because of
    * test result delays -- if a test comes back positive and the unit has been
    * pre-emptively destroyed in the meantime, that is still a "detection". */
-  if (local_data->production_type[unit->production_type] == TRUE
-      && unit->state != Destroyed)
+  priority = local_data->priority[unit->production_type];
+  if (priority > 0 && unit->state != Destroyed)
     {
       #if DEBUG
         g_debug ("ordering unit \"%s\" destroyed", event->unit->official_id);
@@ -145,7 +149,7 @@ handle_detection_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * uni
                          EVT_new_request_for_destruction_event (event->unit,
                                                                 event->day,
                                                                 "Det",
-                                                                local_data->priority));
+                                                                priority));
     }
 
 #if DEBUG
@@ -225,31 +229,26 @@ reset (struct spreadmodel_model_t_ *self)
 char *
 to_string (struct spreadmodel_model_t_ *self)
 {
-  GString *s;
-  gboolean already_names;
-  unsigned int i;
-  char *chararray;
   local_data_t *local_data;
+  GString *s;
+  guint nprod_types, i;
+  char *chararray;
 
   local_data = (local_data_t *) (self->model_data);
   s = g_string_new (NULL);
-  g_string_sprintf (s, "<%s for ", MODEL_NAME);
-  already_names = FALSE;
-  for (i = 0; i < local_data->production_types->len; i++)
-    if (local_data->production_type[i] == TRUE)
-      {
-        if (already_names)
-          g_string_append_printf (s, ",%s",
-                                  (char *) g_ptr_array_index (local_data->production_types, i));
-        else
-          {
-            g_string_append_printf (s, "%s",
-                                    (char *) g_ptr_array_index (local_data->production_types, i));
-            already_names = TRUE;
-          }
-      }
+  g_string_sprintf (s, "<%s", MODEL_NAME);
 
-  g_string_sprintfa (s, "\n  priority=%i>", local_data->priority);
+  nprod_types = local_data->production_types->len;
+  for (i = 0; i < nprod_types; i++)
+    {
+      if (local_data->priority[i] > 0)
+        {
+          g_string_append_printf (s, "\n  for %s",
+                                  (char *) g_ptr_array_index (local_data->production_types, i));
+          g_string_append_printf (s, "\n    priority=%d", local_data->priority[i]);
+        }
+    }
+  g_string_append_c (s, '>');
 
   /* don't return the wrapper object */
   chararray = s->str;
@@ -275,7 +274,7 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  g_free (local_data->production_type);
+  g_free (local_data->priority);
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
   g_free (self);
@@ -288,16 +287,64 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 /**
+ * Adds a set of parameters to a basic destruction model. This function will be
+ * called once for each production type that has basic destruction enabled.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+set_params (void *data, int ncols, char **value, char **colname)
+{
+  spreadmodel_model_t *self;
+  local_data_t *local_data;
+  char *production_type_name;
+  guint production_type_id;
+  char *key;
+  gpointer p;
+  guint priority;
+
+  #if DEBUG
+    g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
+  #endif
+
+  self = (spreadmodel_model_t *)data;
+  local_data = (local_data_t *) (self->model_data);
+
+  g_assert (ncols == 1);
+
+  /* Priority numbers are stored in a hash table keyed by strings of the form
+   * "production type,reason". */
+  production_type_name = value[0];
+  key = g_strdup_printf ("%s,%s", production_type_name,
+                         SPREADMODEL_control_reason_name[SPREADMODEL_ControlDetection]);
+  p = g_hash_table_lookup (local_data->priority_order_table, key);
+  g_assert (p != NULL);
+  priority = GPOINTER_TO_UINT(p);
+  g_free (key);  
+
+  production_type_id = spreadmodel_read_prodtype(production_type_name, local_data->production_types);
+  local_data->priority[production_type_id] = priority;
+
+  return 0;
+}
+
+
+
+/**
  * Returns a new basic destruction model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element *e;
-  gboolean success;
+  guint nprod_types;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -322,36 +369,25 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
-#if DEBUG
-  g_debug ("setting production types");
-#endif
+  /* Initialize an array to hold priorities. */
   local_data->production_types = units->production_type_names;
-  local_data->production_type =
-    spreadmodel_read_prodtype_attribute (params, "production-type", units->production_type_names);
+  nprod_types = local_data->production_types->len;
+  local_data->priority = g_new0 (int, nprod_types);
 
-  e = scew_element_by_name (params, "priority");
-  if (e != NULL)
+  /* Get a table that shows the priority order for combinations of production
+   * type and reason for destruction. */
+  local_data->priority_order_table = spreadmodel_read_priority_order (params);
+
+  sqlite3_exec (params,
+                "SELECT prodtype.name FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND use_destruction=1",
+                set_params, self, &sqlerr);
+  if (sqlerr)
     {
-      local_data->priority = (int) round (PAR_get_unitless (e, &success));
-      if (success == FALSE)
-        {
-          g_warning ("%s: setting priority to 1", MODEL_NAME);
-          local_data->priority = 1;
-        }
-      if (local_data->priority < 1)
-        {
-          g_warning ("%s: priority cannot be less than 1, setting to 1", MODEL_NAME);
-          local_data->priority = 1;
-        }
+      g_error ("%s", sqlerr);
     }
-  else
-    {
-      g_warning ("%s: priority missing, setting to 1", MODEL_NAME);
-      local_data->priority = 1;
-    }
+
+  g_hash_table_destroy (local_data->priority_order_table);
+  local_data->priority_order_table = NULL;
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

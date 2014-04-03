@@ -255,7 +255,20 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
     }
 
   include_destruction = PAR_get_boolean (parameter_db, "SELECT _include_destruction FROM ScenarioCreator_controlmasterplan");
-  
+  if (include_destruction)
+    {
+      g_ptr_array_add (tmp_models,
+                       basic_destruction_model_new (parameter_db, units, projection, zones));
+      g_ptr_array_add (tmp_models,
+                       ring_destruction_model_new (parameter_db, units, projection, zones));
+    }
+
+  if (include_tracing && include_destruction)
+    {
+      g_ptr_array_add (tmp_models,
+                       trace_destruction_model_new (parameter_db, units, projection, zones));
+    }
+
   if (include_vaccination || include_destruction)
     {
       g_ptr_array_add (tmp_models,

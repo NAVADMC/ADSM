@@ -78,10 +78,21 @@ EVT_event_type_t events_listened_for[] = { EVT_BeforeAnySimulations, EVT_Detecti
 /** Specialized information for this model. */
 typedef struct
 {
-  gboolean *from_production_type, *to_production_type;
-  GPtrArray *production_types;
-  int priority;
+  gboolean triggers_ring;
   double radius;
+  gboolean include_in_ring;
+  int priority;
+}
+param_block_t;
+
+
+
+typedef struct
+{
+  GPtrArray *production_types;
+  param_block_t **param_block;
+  GHashTable *priority_order_table; /**< A temporary structure that exists
+    for use in the set_params functions. */
 }
 local_data_t;
 
@@ -142,6 +153,7 @@ check_and_choose (int id, gpointer arg)
   UNT_unit_t *unit2;
   UNT_unit_t *unit1;
   local_data_t *local_data;
+  param_block_t *param_block;
 
 #if DEBUG
   g_debug ("----- ENTER check_and_choose (%s)", MODEL_NAME);
@@ -159,7 +171,9 @@ check_and_choose (int id, gpointer arg)
 
   /* Is unit 2 the production type we're interested in, and not already
    * destroyed? */
-  if (local_data->to_production_type[unit2->production_type] == FALSE
+  param_block = local_data->param_block[unit2->production_type];
+  if (param_block == NULL
+      || param_block->include_in_ring == FALSE
       || unit2->state == Destroyed)
     goto end;
 
@@ -170,7 +184,7 @@ check_and_choose (int id, gpointer arg)
                      EVT_new_request_for_destruction_event (unit2,
                                                             callback_data->day,
                                                             "Ring",
-                                                            local_data->priority));
+                                                            param_block->priority));
 
 end:
 #if DEBUG
@@ -183,7 +197,7 @@ end:
 
 void
 ring_destroy (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
-              UNT_unit_t * unit, int day, EVT_event_queue_t * queue)
+              UNT_unit_t * unit, double radius, int day, EVT_event_queue_t * queue)
 {
   local_data_t *local_data;
   callback_t callback_data;
@@ -202,7 +216,7 @@ ring_destroy (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
 
   /* Find the distances to other units. */
   spatial_search_circle_by_id (units->spatial_index, unit->index,
-                               local_data->radius + EPSILON,
+                               radius + EPSILON,
                                check_and_choose, &callback_data);
 
 #if DEBUG
@@ -226,6 +240,7 @@ handle_detection_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * uni
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
+  param_block_t *param_block;
 
 #if DEBUG
   g_debug ("----- ENTER handle_detection_event (%s)", MODEL_NAME);
@@ -234,8 +249,9 @@ handle_detection_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * uni
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
 
-  if (local_data->from_production_type[unit->production_type] == TRUE)
-    ring_destroy (self, units, unit, event->day, queue);
+  param_block = local_data->param_block[unit->production_type];
+  if (param_block != NULL && param_block->triggers_ring == TRUE)
+    ring_destroy (self, units, unit, param_block->radius, event->day, queue);
 
 #if DEBUG
   g_debug ("----- EXIT handle_detection_event (%s)", MODEL_NAME);
@@ -314,32 +330,47 @@ reset (struct spreadmodel_model_t_ *self)
 char *
 to_string (struct spreadmodel_model_t_ *self)
 {
-  GString *s;
-  gboolean already_names;
-  unsigned int i;
-  char *chararray;
   local_data_t *local_data;
+  GString *s;
+  guint nprod_types, i;
+  param_block_t *param_block;
+  gboolean already_names;
+  char *chararray;
 
   local_data = (local_data_t *) (self->model_data);
   s = g_string_new (NULL);
-  g_string_printf (s, "<%s for ", MODEL_NAME);
-  already_names = FALSE;
-  for (i = 0; i < local_data->production_types->len; i++)
-    if (local_data->to_production_type[i] == TRUE)
-      {
-        if (already_names)
-          g_string_append_printf (s, ",%s",
-                                  (char *) g_ptr_array_index (local_data->production_types, i));
-        else
-          {
-            g_string_append_printf (s, "%s",
-                                    (char *) g_ptr_array_index (local_data->production_types, i));
-            already_names = TRUE;
-          }
-      }
+  g_string_printf (s, "<%s", MODEL_NAME);
 
-  g_string_append_printf (s, "\n  priority=%i\n", local_data->priority);
-  g_string_append_printf (s, "  radius=%g>", local_data->radius);
+  nprod_types = local_data->production_types->len;
+  for (i = 0; i < nprod_types; i++)
+    {
+      param_block = local_data->param_block[i];
+      if (param_block != NULL && param_block->triggers_ring)
+        {
+          g_string_append_printf (s, "\n  %s triggers %g km ring",
+                                  (char *) g_ptr_array_index (local_data->production_types, i),
+                                  param_block->radius);
+        }
+    }
+  already_names = FALSE;
+  g_string_append_printf (s, "\n  included in ring: ");
+  for (i = 0; i < nprod_types; i++)
+    {
+      param_block = local_data->param_block[i];
+      if (param_block != NULL && param_block->include_in_ring)
+        {
+          if (already_names)
+            g_string_append_c (s, ',');
+          else
+            already_names = TRUE;
+          g_string_append_printf (s, "%s",
+                                  (char *) g_ptr_array_index (local_data->production_types, i));
+        }
+    }
+  if (!already_names)
+    g_string_append_printf (s, "none");
+
+  g_string_append_c (s, '>');
 
   /* don't return the wrapper object */
   chararray = s->str;
@@ -358,6 +389,7 @@ void
 local_free (struct spreadmodel_model_t_ *self)
 {
   local_data_t *local_data;
+  guint nprod_types, i;
 
 #if DEBUG
   g_debug ("----- ENTER free (%s)", MODEL_NAME);
@@ -365,8 +397,14 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  g_free (local_data->from_production_type);
-  g_free (local_data->to_production_type);
+
+  nprod_types = local_data->production_types->len;
+  for (i = 0; i < nprod_types; i++)
+    {
+      if (local_data->param_block[i] != NULL)
+        g_free (local_data->param_block[i]);
+    }
+  g_free (local_data->param_block);
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
   g_free (self);
@@ -379,17 +417,100 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 /**
+ * Adds a set of parameters to a ring destruction model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+set_params (void *data, int ncols, char **value, char **colname)
+{
+  spreadmodel_model_t *self;
+  local_data_t *local_data;
+  char *production_type_name;
+  guint production_type_id;
+  param_block_t *p;
+  long int tmp;
+
+  #if DEBUG
+    g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
+  #endif
+
+  g_assert (ncols == 4);
+
+  self = (spreadmodel_model_t *)data;
+  local_data = (local_data_t *) (self->model_data);
+
+  /* Find out which production type these parameters apply to. */
+  production_type_name = value[0];
+  production_type_id = spreadmodel_read_prodtype (production_type_name, local_data->production_types);
+
+  /* Check that we are not overwriting an existing parameter block (that would
+   * indicate a bug). */
+  g_assert (local_data->param_block[production_type_id] == NULL);
+
+  /* Create a new parameter block. */
+  p = g_new (param_block_t, 1);
+  local_data->param_block[production_type_id] = p;
+
+  /* Read the parameters. */
+  errno = 0;
+  tmp = strtol (value[1], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  p->triggers_ring = (tmp == 1);
+  
+  if (p->triggers_ring)
+    {
+      errno = 0;
+      p->radius = strtod (value[2], NULL);
+      g_assert (errno != ERANGE);
+      /* Radius must be positive. */
+      if (p->radius < 0)
+        {
+          g_warning ("%s: radius cannot be negative, setting to 0", MODEL_NAME);
+          p->radius = 0;
+        }
+    }
+
+  errno = 0;
+  tmp = strtol (value[1], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  p->include_in_ring = (tmp == 1);
+
+  if (p->include_in_ring)
+    {
+      char *key;
+      gpointer ptr;
+
+      key = g_strdup_printf ("%s,%s", production_type_name,
+                             SPREADMODEL_control_reason_name[SPREADMODEL_ControlRing]);
+      ptr = g_hash_table_lookup (local_data->priority_order_table, key);
+      g_assert (ptr != NULL);
+      p->priority = GPOINTER_TO_UINT(ptr);
+      g_free (key);
+    }
+
+  return 0;
+}
+
+
+
+/**
  * Returns a new ring destruction model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element *e;
-  scew_attribute *attr;
-  gboolean success;
+  guint nprod_types;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -414,71 +535,24 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
-#if DEBUG
-  g_debug ("setting \"from\" production types");
-#endif
+  /* Initialize an array to hold parameter blocks. */
   local_data->production_types = units->production_type_names;
-  local_data->from_production_type =
-    spreadmodel_read_prodtype_attribute (params, "from-production-type", units->production_type_names);
+  nprod_types = local_data->production_types->len;
+  local_data->param_block = g_new0 (param_block_t *, nprod_types);
 
-#if DEBUG
-  g_debug ("setting \"to\" production types");
-#endif
-  /* Temporary support for older parameter files that only had a
-   * "production-type" attribute and implied "from-any" functionality. */
-  attr = scew_element_attribute_by_name (params, "production-type");
-  if (attr != NULL)
-    local_data->to_production_type =
-      spreadmodel_read_prodtype_attribute (params, "production-type", units->production_type_names);
-  else
-    local_data->to_production_type =
-      spreadmodel_read_prodtype_attribute (params, "to-production-type", units->production_type_names);
-
-  e = scew_element_by_name (params, "priority");
-  if (e != NULL)
+  /* Get a table that shows the priority order for combinations of production
+   * type and reason for destruction. */
+  local_data->priority_order_table = spreadmodel_read_priority_order (params);
+  sqlite3_exec (params,
+                "SELECT prodtype.name,destruction_is_a_ring_trigger,destruction_ring_radius,destruction_is_a_ring_target FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND (destruction_is_a_ring_trigger=1 OR destruction_is_a_ring_target=1)",
+                set_params, self, &sqlerr);
+  if (sqlerr)
     {
-      local_data->priority = (int) round (PAR_get_unitless (e, &success));
-      if (success == FALSE)
-        {
-          g_warning ("%s: setting priority to 1", MODEL_NAME);
-          local_data->priority = 1;
-        }
-      if (local_data->priority < 1)
-        {
-          g_warning ("%s: priority cannot be less than 1, setting to 1", MODEL_NAME);
-          local_data->priority = 1;
-        }
-    }
-  else
-    {
-      g_warning ("%s: priority missing, setting to 1", MODEL_NAME);
-      local_data->priority = 1;
+      g_error ("%s", sqlerr);
     }
 
-  e = scew_element_by_name (params, "radius");
-  if (e != NULL)
-    {
-      local_data->radius = PAR_get_length (e, &success);
-      if (success == FALSE)
-        {
-          g_warning ("%s: setting radius to 0", MODEL_NAME);
-          local_data->radius = 0;
-        }
-      /* Radius must be positive. */
-      if (local_data->radius < 0)
-        {
-          g_warning ("%s: radius cannot be negative, setting to 0", MODEL_NAME);
-          local_data->radius = 0;
-        }
-    }
-  else
-    {
-      g_warning ("%s: radius missing, setting to 0", MODEL_NAME);
-      local_data->radius = 0;
-    }
+  g_hash_table_destroy (local_data->priority_order_table);
+  local_data->priority_order_table = NULL;
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);
