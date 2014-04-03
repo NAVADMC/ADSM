@@ -376,83 +376,54 @@ set_params (void *data, int ncols, char **value, char **colname)
   spreadmodel_model_t *self;
   local_data_t *local_data;
   sqlite3 *params;
-  param_block_t t;
+  guint production_type_id;
+  param_block_t *p;
   guint pdf_id;
-  gboolean *production_type;
-  unsigned int nprod_types, i;
 
   #if DEBUG
     g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
   #endif
 
+  g_assert (ncols == 3);
+
   self = (spreadmodel_model_t *)data;
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
-  g_assert (ncols == 3);
+  /* Find out which production types these parameters apply to. */
+  production_type_id =
+    spreadmodel_read_prodtype (value[0], local_data->production_types);
 
-  /* Read the parameters and store them in a temporary param_block_t
-   * structure. */
+  /* Check that we are not overwriting an existing parameter block (that would
+   * indicate a bug). */
+  g_assert (local_data->param_block[production_type_id] == NULL);
 
+  /* Create a new parameter block. */
+  p = g_new (param_block_t, 1);
+  local_data->param_block[production_type_id] = p;
+
+  /* Read the parameters. */
   errno = 0;
-  t.delay = strtod (value[1], NULL);
+  p->delay = strtod (value[1], NULL);
   g_assert (errno != ERANGE);
   /* The delay cannot be negative. */
-  if (t.delay < 0)
+  if (p->delay < 0)
     {
       g_warning ("vaccine model delay parameter cannot be negative, setting to 0 days");
-      t.delay = 0;
+      p->delay = 0;
     }
 
   errno = 0;
   pdf_id = strtol (value[2], NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);  
-  t.immunity_period = PAR_get_PDF (params, pdf_id);
+  p->immunity_period = PAR_get_PDF (params, pdf_id);
   /* No part of the immunity period distribution should be negative. */
-  if (t.immunity_period->has_inf_lower_tail == FALSE
-      && PDF_cdf (-EPSILON, t.immunity_period) > 0)
+  if (p->immunity_period->has_inf_lower_tail == FALSE
+      && PDF_cdf (-EPSILON, p->immunity_period) > 0)
     {
       g_warning
         ("vaccine model immunity period distribution should not include negative values");
     }
-
-  /* Find out which production types these parameters apply to. */
-  production_type =
-    spreadmodel_read_prodtype_attribute (value[0], local_data->production_types);
-
-  /* Copy the parameters to the appropriate place. */
-  nprod_types = local_data->production_types->len;
-  for (i = 0; i < nprod_types; i++)
-    {
-      param_block_t *param_block;
-
-      if (production_type[i] == FALSE)
-        continue;
-
-      /* Create a parameter block for this production type, or overwrite
-       * the existing one. */
-      param_block = local_data->param_block[i];
-      if (param_block == NULL)
-        {
-          #if DEBUG
-            g_debug ("setting parameters for %s",
-                     (char *) g_ptr_array_index (local_data->production_types, i));
-          #endif
-          param_block = g_new (param_block_t, 1);
-          local_data->param_block[i] = param_block;
-        }
-      else
-        {
-          g_warning ("overwriting previous parameters for %s",
-                     (char *) g_ptr_array_index (local_data->production_types, i));
-          PDF_free_dist (param_block->immunity_period);
-        }
-      param_block->delay = t.delay;
-      param_block->immunity_period = PDF_clone_dist (t.immunity_period);
-    }
-
-  g_free (production_type);
-  PDF_free_dist (t.immunity_period);
 
   #if DEBUG
     g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
@@ -505,8 +476,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   nprod_types = local_data->production_types->len;
   local_data->param_block = g_new0 (param_block_t *, nprod_types);
 
-  /* Call the set_params function to read the production type combination
-   * specific parameters. */
+  /* Call the set_params function to read the production type specific
+   * parameters. */
   local_data->db = params;
   sqlite3_exec (params,
                 "SELECT prodtype.name,days_to_immunity,vaccine_immune_period_pdf_id ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol vaccine,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=vaccine.id",

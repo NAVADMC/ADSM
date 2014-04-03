@@ -486,24 +486,32 @@ set_params (void *data, int ncols, char **value, char **colname)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  gboolean *production_type;
-  param_block_t t;
+  guint production_type_id;
+  param_block_t *p;
   long int tmp;
-  unsigned int nprod_types, i;
-  param_block_t *param_block;
 
 #if DEBUG
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
+  g_assert (ncols == 7);
+
   self = (spreadmodel_model_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
-  g_assert (ncols == 7);
+  /* Find out which production types these parameters apply to. */
+  production_type_id =
+    spreadmodel_read_prodtype (value[0], local_data->production_types);
 
-  /* Read the parameters and store them in a temporary param_block_t
-   * structure. */
+  /* Check that we are not overwriting an existing parameter block (that would
+   * indicate a bug). */
+  g_assert (local_data->param_block[production_type_id] == NULL);
 
+  /* Create a new parameter block. */
+  p = g_new (param_block_t, 1);
+  local_data->param_block[production_type_id] = p;
+
+  /* Read the parameters. */
   errno = 0;
   tmp = strtol (value[1], NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);  
@@ -511,19 +519,19 @@ set_params (void *data, int ncols, char **value, char **colname)
   if (tmp == 1)
     {
       errno = 0;
-      t.radius = strtod (value[2], NULL);
+      p->radius = strtod (value[2], NULL);
       g_assert (errno != ERANGE);
       /* Radius must be positive. */
-      if (t.radius < 0)
+      if (p->radius < 0)
         {
           g_warning ("%s: radius cannot be negative, setting to 0", MODEL_NAME);
-          t.radius = 0;
+          p->radius = 0;
         }
     }
   else
     {
       /* Do not vaccinate around detected units of this type. */
-      t.radius = 0;
+      p->radius = 0;
     }
 
   errno = 0;
@@ -534,18 +542,18 @@ set_params (void *data, int ncols, char **value, char **colname)
     {
       tmp = strtol (value[4], NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);
-      t.priority = tmp;
-      if (t.priority < 1)
+      p->priority = tmp;
+      if (p->priority < 1)
         {
           g_warning ("%s: priority cannot be less than 1, setting to 1", MODEL_NAME);
-          t.priority = 1;
+          p->priority = 1;
         }
 
       tmp = strtol (value[5], NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);
       g_assert (tmp == 0 || tmp == 1);
-      t.vaccinate_detected_units_defined = TRUE;
-      t.vaccinate_detected_units = (tmp == 1);
+      p->vaccinate_detected_units_defined = TRUE;
+      p->vaccinate_detected_units = (tmp == 1);
 
       tmp = strtol (value[6], NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);
@@ -554,53 +562,16 @@ set_params (void *data, int ncols, char **value, char **colname)
           g_warning ("%s: minimum time between vaccinations cannot be less than 1, setting to 1", MODEL_NAME);
           tmp = 1;
         }
-      t.min_time_between_vaccinations = tmp;
+      p->min_time_between_vaccinations = tmp;
     }
   else
     {
       /* Do not vaccinate units of this type. */
-      t.priority = INT_MAX;
-      t.vaccinate_detected_units_defined = TRUE;
-      t.vaccinate_detected_units = FALSE;
-      t.min_time_between_vaccinations = 0;
+      p->priority = INT_MAX;
+      p->vaccinate_detected_units_defined = TRUE;
+      p->vaccinate_detected_units = FALSE;
+      p->min_time_between_vaccinations = 0;
     }
-
-  /* Find out which production type these parameters apply to. */
-  production_type =
-    spreadmodel_read_prodtype_attribute (value[0], local_data->production_types);
-
-  nprod_types = local_data->production_types->len;
-  for (i = 0; i < nprod_types; i++)
-    {
-      if (production_type[i] == TRUE)
-        {
-          /* Create a parameter block for this production type, or overwrite the
-           * existing one. */
-          param_block = local_data->param_block[i];
-          if (param_block == NULL)
-            {
-              param_block = g_new (param_block_t, 1);
-              local_data->param_block[i] = param_block;
-              #if DEBUG
-                g_debug ("setting parameters for %s",
-                         (char *) g_ptr_array_index (local_data->production_types, i));
-              #endif
-            }
-          else
-            {
-              g_warning ("overwriting previous parameters for %s",
-                         (char *) g_ptr_array_index (local_data->production_types, i));
-            }
-
-          param_block->radius = t.radius;
-          param_block->priority = t.priority;
-          param_block->vaccinate_detected_units_defined = t.vaccinate_detected_units_defined;
-          param_block->vaccinate_detected_units = t.vaccinate_detected_units;
-          param_block->min_time_between_vaccinations = t.min_time_between_vaccinations;
-      }
-    }
-
-  g_free (production_type);
 
 #if DEBUG
   g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
