@@ -136,12 +136,6 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                           guint *_exit_conditions )
 {
   GPtrArray *tmp_models;
-  const char *model_name;       /* name of a model */
-  GHashTable *singletons;       /* stores the "singleton" modules (for which
-                                   there can be only one instance).  Keys are
-                                   model names (char *) and data are pointers
-                                   to models. */
-  spreadmodel_model_new_t model_instantiation_fn;
   spreadmodel_model_t *model;
   gboolean include_zones;
   gboolean include_detection;
@@ -168,8 +162,6 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
   /*  This isn't a mandatory parameter.  If this field is NULL, the default is
       STOP_NORMAL. */
   *_exit_conditions = get_exit_condition (PAR_get_text (parameter_db, "SELECT early_stop_criteria FROM ScenarioCreator_outputsettings"));
-
-  singletons = g_hash_table_new (g_str_hash, g_str_equal);
 
   /* Instantiate modules based on which features are active in the scenario. */
   tmp_models = g_ptr_array_new();
@@ -293,40 +285,6 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
         g_free (s);
       }
   #endif
-
-  if (FALSE)
-    {
-      /* If there is already an instance of this kind of module, and this kind
-       * of module is a "singleton" module (only one instance of it can exist),
-       * then pass the parameters to the existing instance.  Otherwise, create
-       * a new instance. */
-      model = g_hash_table_lookup (singletons, model_name);
-      if (model != NULL)
-        {
-          #if DEBUG
-            g_debug ("adding parameters to existing instance");
-          #endif
-          model->set_params (model, NULL);
-        }
-      else
-        {
-          /* Get the module's "new" function (to instantiate a model object). */
-
-          #if DEBUG
-            g_debug ("\"new\" function = <%p>", model_instantiation_fn);
-          #endif
-
-          if (model->is_singleton)
-            g_hash_table_insert (singletons, (gpointer) model_name, (gpointer) model);
-
-        } /* end of case where a new model instance is created */
-
-    }                           /* end of loop over models */
-
-  /* We can free the hash table structure without freeing the keys (because the
-   * keys are model names, which are static strings) or the values (because the
-   * values are model instances, which persist after this function ends). */
-  g_hash_table_destroy (singletons);
 
   /* If table output is turned on, set the reporting frequency for the output
    * variables. */

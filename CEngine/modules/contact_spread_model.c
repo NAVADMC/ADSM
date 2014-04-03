@@ -144,11 +144,11 @@ EVT_event_type_t events_listened_for[] =
 
 
 /**
- * Specialized information for this module.  Because the module is a singleton,
- * with only one instance existing, there is a local_data_t structure that
- * holds global information, and the local_data_t structure contains an array
- * of param_block_t structures, each of which holds parameters specific to one
- * contact type/source production type/recipient production type combination.
+ * Specialized information for this module.  There is a local_data_t structure
+ * that holds global information, and the local_data_t structure contains an
+ * array of param_block_t structures, each of which holds parameters specific
+ * to one contact type/source production type/recipient production type
+ * combination.
  */
 typedef struct
 {
@@ -1697,7 +1697,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_singleton = TRUE;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = has_pending_actions;
   self->has_pending_infections = has_pending_infections;

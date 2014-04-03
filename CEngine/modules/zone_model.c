@@ -722,7 +722,7 @@ set_params (void *data, int ncols, char **value, char **colname)
   /* Add the zone object to the zone list. */
   ZON_zone_list_append (local_data->zones, param_block->zone);
 
-  /* Add the param_block to the list (for the singleton model). */
+  /* Add the param_block to the list. */
   g_ptr_array_add (local_data->param_blocks, param_block);
 
 #if DEBUG
@@ -759,7 +759,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_singleton = TRUE;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = spreadmodel_model_answer_no;
   self->has_pending_infections = spreadmodel_model_answer_no;
