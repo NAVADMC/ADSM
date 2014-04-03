@@ -173,7 +173,7 @@ def delete_entry(request, primary_key):
 #         from django.core.management import call_command
 #         print('Building DB structure...')
 #         os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
-#         call_command('syncdb',
+#         call_command('migrate',
 #             # verbosity=0,
 #             interactive=False,
 #             database=connections[db_name].alias,  # database=self.connection.alias,
@@ -228,12 +228,28 @@ def save_scenario(request, target):
     return redirect('/setup/Scenario/1/')
 
 
+def update_db_version():
+    print("Checking Scenario version")
+    # Don't import django.core.management if it isn't needed.
+    from django.core.management import call_command
+
+    print('Building DB structure...')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
+    call_command('migrate',
+                 # verbosity=0,
+                 interactive=False,
+                 database=connections['default'].alias,  # database=self.connection.alias,
+                 load_initial_data=False)
+    print('Done creating database')
+
+
 def open_scenario(request, target):
     # if os.path.isfile(workspace_path(target)):
     print("Copying ", workspace_path(target), activeSession())
     shutil.copy(workspace_path(target), activeSession())
     scenario_filename = target
     print('Sessions overwritten with ', target)
+    update_db_version()
     # else:
     #     print('File does not exist')
     return redirect('/setup/Scenario/1/')
