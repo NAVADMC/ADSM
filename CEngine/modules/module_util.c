@@ -306,4 +306,269 @@ spreadmodel_insert_node_number_into_filename (const char *filename)
 #endif
 }
 
+
+
+/**
+ * Fills in an array with the production types by priority order. This function
+ * will be called once per production type, with the first call containing the
+ * highest-priority production type.
+ *
+ * @param data a GPtrArray in which to store the production type names. The
+ *   production type names are copied from the query result and should be freed
+ *   using g_free().
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+read_prodtype_order_callback (void *data, int ncols, char **value, char **colname)
+{
+  GPtrArray *prodtype_order;
+  
+  g_assert (ncols == 1);
+  prodtype_order = (GPtrArray *)data;
+  g_ptr_array_add (prodtype_order, g_strdup(value[0]));
+  
+  return 0;
+}
+
+
+
+/**
+ * Fills in an array with the reasons in priority order.
+ *
+ * @param data location of an array in which to store the reasons.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+read_reason_order_callback (void *data, int ncols, char **value, char **colname)
+{
+  SPREADMODEL_control_reason *reason_order;
+  guint priority;
+  gchar **tokens, **iter;
+
+  g_assert (ncols == 1);
+  reason_order = (SPREADMODEL_control_reason *)data;
+  /* The reason order is given in a comma-separated string in value[0]. */
+  tokens = g_strsplit (value[0], ",", 0);
+  for (iter = tokens, priority = 0; *iter != NULL; iter++)
+    {
+      SPREADMODEL_control_reason reason;
+      g_strstrip (*iter);
+      for (reason = 0; reason < SPREADMODEL_NCONTROL_REASONS; reason++)
+        {
+          if (strcmp (*iter, SPREADMODEL_control_reason_name[reason]) == 0)
+            break;
+        }
+      g_assert (reason < SPREADMODEL_NCONTROL_REASONS);
+      reason_order[priority++] = reason;
+    }
+  g_strfreev (tokens);
+
+  return 0;
+}
+
+
+
+/**
+ * Finds out whether reason has priority over production type.
+ *
+ * @param data pointer to a boolean in which to store the answer.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+read_primary_order_callback (void *data, int ncols, char **value, char **colname)
+{
+  gboolean *reason_has_priority_over_prodtype;
+  gchar *reason_loc, *prodtype_loc;
+ 
+  g_assert (ncols == 1);
+  reason_has_priority_over_prodtype = (gboolean *)data;
+  reason_loc = strstr (value[0], "reason");
+  prodtype_loc = strstr (value[0], "production type");
+  *reason_has_priority_over_prodtype = (reason_loc < prodtype_loc);
+
+  return 0;
+}
+
+
+
+static void
+build_priority_debug_string (gpointer key,
+                             gpointer value,
+                             gpointer user_data)
+{
+  char *prodtype_reason_combo;
+  guint priority;
+  GString *s;
+
+  prodtype_reason_combo = (char *)key;
+  priority = GPOINTER_TO_UINT(value);
+  s = (GString *)user_data;
+  
+  if (s->len == 0)
+    {
+      g_string_append_c (s, '{');
+    }
+  else
+    {
+      g_string_append_c (s, ',');
+    }
+  g_string_append_printf (s, "%s:%u", prodtype_reason_combo, priority);
+
+  return;
+}
+
+/**
+ * Reads the destruction priority order from the parameters database. Returns
+ * a GHashTable in which keys are strings (char *) of the form
+ * "production type,reason". Reason is one of the strings from
+ * SPREADMODEL_control_reason_name. Values are ints stored using
+ * GUINT_TO_POINTER.
+ *
+ * The hash table has a key_destroy_func and value_destroy_func set, so a call
+ * to g_hash_table_destroy will fully clean up all memory used.
+ */ 
+GHashTable *
+spreadmodel_read_priority_order (sqlite3 *params)
+{
+  GHashTable *table;
+  gboolean reason_has_priority_over_prodtype;
+  SPREADMODEL_control_reason *reason_order; /**< An array containing the
+    elements in the enumeration SPREADMODEL_control_reason, in order of
+    descending priority (that is, the highest priority reason is at the start
+    of the list). */
+  GPtrArray *prodtype_order; /**< A GPtrArray containing production type names
+    (char *) in order of descending priority (that is, the highest priority
+    production type is at the start of the list). */
+  guint priority;
+  guint i, j;
+  char *sqlerr;
+
+  /* First find out if reason has priority over production type. */
+  sqlite3_exec (params,
+                "SELECT destruction_priority_order FROM ScenarioCreator_controlmasterplan",
+                read_primary_order_callback, &reason_has_priority_over_prodtype, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
+  #if DEBUG
+    if (reason_has_priority_over_prodtype)
+      g_debug ("reason has priority over production type");
+    else
+      g_debug ("production type has priority over reason");
+  #endif
+
+  /* Next get the relative ordering of reasons. */
+  reason_order = g_new0 (SPREADMODEL_control_reason, SPREADMODEL_NCONTROL_REASONS);
+  sqlite3_exec (params,
+                "SELECT destrucion_reason_order FROM ScenarioCreator_controlmasterplan",
+                read_reason_order_callback, reason_order, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
+  #if DEBUG
+  {
+    GString *s;
+    int i;
+    s = g_string_new (NULL);
+    for (i = 0; i < SPREADMODEL_NCONTROL_REASONS; i++)
+      {
+        if (i > 0)
+          g_string_append_c (s, ',');
+        g_string_append_printf (s, "%s", SPREADMODEL_control_reason_name[reason_order[i]]);
+      }
+    g_debug ("reason order (highest priority first): %s", s->str);
+    g_string_free (s, TRUE);
+  }
+  #endif
+
+  /* Next get the relative ordering of production types. */
+  prodtype_order = g_ptr_array_new_with_free_func (g_free);
+  sqlite3_exec (params,
+                "SELECT prodtype.name FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id ORDER BY destruction_priority ASC",
+                read_prodtype_order_callback, prodtype_order, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
+  #if DEBUG
+  {
+    GString *s;
+    int i;
+    s = g_string_new (NULL);
+    for (i = 0; i < prodtype_order->len; i++)
+      {
+        if (i > 0)
+          g_string_append_c (s, ',');
+        g_string_append_printf (s, "%s", (char *)g_ptr_array_index(prodtype_order, i));
+      }
+    g_debug ("production type order (highest priority first): %s", s->str);
+    g_string_free (s, TRUE);
+  }
+  #endif
+
+  /* Create the hash table to return. */
+  table = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  priority = 1;
+  if (reason_has_priority_over_prodtype)
+    {
+      for (i = 0; i < SPREADMODEL_NCONTROL_REASONS; i++)
+        {
+          const char *reason;
+          reason = SPREADMODEL_control_reason_name[reason_order[i]];
+          for (j = 0; j < prodtype_order->len; j++)
+            {
+              char *prodtype;
+              char *key;
+              prodtype = (char *)g_ptr_array_index(prodtype_order, j);
+              key = g_strdup_printf ("%s,%s", prodtype, reason);
+              g_hash_table_replace (table, key, GUINT_TO_POINTER(priority++));
+            }
+        }
+    }
+  else
+    {
+      for (i = 0; i < prodtype_order->len; i++)
+        {
+          char *prodtype;
+          prodtype = (char *)g_ptr_array_index(prodtype_order, i);
+          for (j = 0; j < SPREADMODEL_NCONTROL_REASONS; j++)
+            {
+              const char *reason;
+              char *key;
+              reason = SPREADMODEL_control_reason_name[reason_order[j]];
+              key = g_strdup_printf ("%s,%s", prodtype, reason);
+              g_hash_table_replace (table, key, GUINT_TO_POINTER(priority++));
+            }
+        }              
+    }
+
+  #if DEBUG
+  {
+    GString *s;
+    s = g_string_new (NULL);
+    g_hash_table_foreach (table, build_priority_debug_string, s);
+    g_string_append_c (s, '}');
+    g_debug ("priority order = %s", s->str);
+    g_string_free (s, TRUE);
+  }
+  #endif
+
+  /* Clean up */
+  g_free (reason_order);
+  g_ptr_array_free (prodtype_order, /* free_seg = */ TRUE);
+
+  return table;
+}
+
 /* end of file module_util.c */

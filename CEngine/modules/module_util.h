@@ -29,5 +29,6 @@ guint spreadmodel_read_zone (char *, ZON_zone_list_t *);
 void spreadmodel_extend_rotating_array (GPtrArray * array, unsigned int length, unsigned int index);
 void g_queue_free_as_GDestroyNotify (gpointer data);
 char *spreadmodel_insert_node_number_into_filename (const char *filename);
+GHashTable *spreadmodel_read_priority_order (sqlite3 *);
 
 #endif /* !MODULE_UTIL_H */
