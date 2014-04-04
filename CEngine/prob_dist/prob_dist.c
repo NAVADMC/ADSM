@@ -602,21 +602,22 @@ calc_cumulative_for_piecewise (PDF_piecewise_dist_t * a)
  * @image html piecewise.png
  *
  * @param n the number of points on the curve.  \a n >= 1.
- * @param xy an array containing the points on the curve, as
- *   {<i>x</i><sub>0</sub>, <i>y</i><sub>0</sub>, <i>x</i><sub>1</sub>,
- *   <i>y</i><sub>1</sub>, <i>x</i><sub>2</sub>, <i>y</i><sub>2</sub>, ...}
- *   The <i>x</i>-coordinates must be strictly increasing.  The first and last
- *   <i>y</i>-coordinates must be 0.  The others must be positive or 0, and at
- *   least one of them must be positive.  The <i>y</i>-coordinates will be
- *   scaled if necessary to make the area under the curve equal 1.  The values
- *   from xy are copied, so the array can be freed if desired after calling
- *   this function.
+ * @param x an array containing the <i>x</i>-coordinates of the points on the
+ *   curve.  The <i>x</i>-coordinates must be strictly increasing.  The values
+ *   from x are copied, so the array can be freed if desired after calling this
+ *   function.
+ * @param y an array containing the <i>y</i>-coordinates of the points on the
+ *   curve.  The first and last <i>y</i>-coordinates must be 0.  The others
+ *   must be positive or 0, and at least one of them must be positive.  The
+ *   <i>y</i>-coordinates will be scaled if necessary to make the area under
+ *   the curve equal 1.  The values from y are copied, so the array can be
+ *   freed if desired after calling this function.
  * @return a pointer to a newly-created PDF_dist_t structure, or NULL if there
  *   wasn't enough memory to allocate one.  If \a n = 1, this function will
  *   return a "point" distribution.
  */
 PDF_dist_t *
-PDF_new_piecewise_dist (unsigned int n, double *xy)
+PDF_new_piecewise_dist (unsigned int n, double *x, double *y)
 {
   PDF_dist_t *dist;
   PDF_piecewise_dist_t *p;      /* part specific to this distribution */
@@ -631,7 +632,7 @@ PDF_new_piecewise_dist (unsigned int n, double *xy)
   g_assert (n >= 1);
 
   if (n == 1)
-    dist = PDF_new_point_dist (xy[1]);
+    dist = PDF_new_point_dist (y[0]);
   else
     {
       dist = g_new (PDF_dist_t, 1);
@@ -649,12 +650,12 @@ PDF_new_piecewise_dist (unsigned int n, double *xy)
       positive_y = FALSE;
       for (i = 0; i < n; i++)
         {
-          p->x[i] = *xy++;
+          p->x[i] = x[i];
           if (i > 0)
             {
               g_assert (p->x[i] > p->x[i - 1]);
             }
-          p->y[i] = *xy++;
+          p->y[i] = y[i];
           if (i == 0 || i == n - 1)
             g_assert (p->y[i] == 0);
           else
@@ -3797,20 +3798,8 @@ PDF_clone_dist (PDF_dist_t * dist)
     case PDF_Piecewise:
       {
         PDF_piecewise_dist_t *d;
-        double *xy;
-        unsigned int n, i;
-
         d = &(dist->u.piecewise);
-        /* Copy the x-y coordinates from the existing distribution. */
-        n = d->n;
-        xy = g_new (double, 2 * n);
-        for (i = 0; i < n; i++)
-          {
-            xy[2 * i] = d->x[i];
-            xy[2 * i + 1] = d->y[i];
-          }
-        clone = PDF_new_piecewise_dist (n, xy);
-        g_free (xy);
+        clone = PDF_new_piecewise_dist (d->n, d->x, d->y);
         break;
       }
     case PDF_Histogram:
