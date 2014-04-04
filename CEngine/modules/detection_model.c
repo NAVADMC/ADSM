@@ -789,7 +789,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * parameters. */
   local_data->db = params;
   sqlite3_exec (params,
-                "SELECT prodtype.name,detection_probability_for_observed_time_in_clinical_relid_id,detection_probability_report_vs_first_detection_relid_id ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol detection,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=detection.id",
+                "SELECT prodtype.name,detection_probability_for_observed_time_in_clinical_relid_id,detection_probability_report_vs_first_detection_relid_id FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol detection,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=detection.id",
                 set_params, self, &sqlerr);
   if (sqlerr)
     {
