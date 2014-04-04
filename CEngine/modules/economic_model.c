@@ -24,7 +24,6 @@
 
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new economic_model_new
-#define set_params economic_model_set_params
 #define run economic_model_run
 #define reset economic_model_reset
 #define events_listened_for economic_model_events_listened_for
@@ -656,369 +655,148 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 /**
- * Adds a set of parameters to a contact spread model.
+ * Adds a set of parameters to an economic model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
  */
-void
-set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
+static int
+set_params (void *data, int ncols, char **value, char **colname)
 {
-  local_data_t *local_data = (local_data_t *) (self->model_data);
-  unsigned int nzones = ZON_zone_list_length (local_data->zones);
-  unsigned int nprod_types = local_data->production_types->len;
-  scew_element *e;
-  scew_list *ee, *iter;
-  gboolean success;
-  gboolean has_destruction_cost_params = FALSE;
-  gboolean has_vaccination_cost_params = FALSE;
-  gboolean has_surveillance_cost_param = FALSE;
-  destruction_cost_data_t destruction_cost_params = {};
-  vaccination_cost_data_t vaccination_cost_params = {};
-  double surveillance_cost_param = 0;
-  gboolean *production_type = NULL;
-  gboolean *zone = NULL;
-  unsigned int i, j;
-  RPT_reporting_t *output;
-  const XML_Char *variable_name;
+  spreadmodel_model_t *self;
+  local_data_t *local_data;
+  guint production_type_id;
+  destruction_cost_data_t *d;
+  vaccination_cost_data_t *v;
 
 #if DEBUG
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
+  g_assert (ncols == 10);
 
-#if DEBUG
-  g_debug ("setting production types");
-#endif
+  self = (spreadmodel_model_t *)data;
+  local_data = (local_data_t *) (self->model_data);
+
+  /* Find out which production type these parameters apply to. */
+  production_type_id =
+    spreadmodel_read_prodtype (value[0], local_data->production_types);
 
   /* Destruction Cost Parameters */
-  e = scew_element_by_name (params, "appraisal");
-  if (e != NULL)
-    {
-      destruction_cost_params.appraisal = PAR_get_money (e, &success);
-      if (success)
-        {
-          has_destruction_cost_params = TRUE;
-        }
-      else
-        {
-          g_warning ("%s: setting per-unit appraisal cost to 0", MODEL_NAME);
-          destruction_cost_params.appraisal = 0;
-        }
-    }
-  else
-    {
-      g_warning ("%s: per-unit appraisal cost missing, setting to 0", MODEL_NAME);
-      destruction_cost_params.appraisal = 0;
-    }
 
-  e = scew_element_by_name (params, "euthanasia");
-  if (e != NULL)
-    {
-      destruction_cost_params.euthanasia = PAR_get_money (e, &success);
-      if (success)
-        {
-          has_destruction_cost_params = TRUE;
-        }
-      else
-        {
-          g_warning ("%s: setting per-animal euthanasia cost to 0", MODEL_NAME);
-          destruction_cost_params.euthanasia = 0;
-        }
-    }
-  else
-    {
-      g_warning ("%s: per-animal euthanasia cost missing, setting to 0", MODEL_NAME);
-      destruction_cost_params.euthanasia = 0;
-    }
+  /* Check that we are not overwriting an existing parameter block (that would
+   * indicate a bug). */
+  g_assert (local_data->destruction_cost_params[production_type_id] == NULL);
 
-  e = scew_element_by_name (params, "indemnification");
-  if (e != NULL)
-    {
-      destruction_cost_params.indemnification = PAR_get_money (e, &success);
-      if (success)
-        {
-          has_destruction_cost_params = TRUE;
-        }
-      else
-        {
-          g_warning ("%s: setting per-animal indemnification cost to 0", MODEL_NAME);
-          destruction_cost_params.indemnification = 0;
-        }
-    }
-  else
-    {
-      g_warning ("%s: per-animal indemnification cost missing, setting to 0", MODEL_NAME);
-      destruction_cost_params.indemnification = 0;
-    }
+  /* Create a new parameter block. */
+  d = g_new (destruction_cost_data_t, 1);
+  local_data->destruction_cost_params[production_type_id] = d;
 
-  e = scew_element_by_name (params, "carcass-disposal");
-  if (e != NULL)
-    {
-      destruction_cost_params.carcass_disposal = PAR_get_money (e, &success);
-      if (success)
-        {
-          has_destruction_cost_params = TRUE;
-        }
-      else
-        {
-          g_warning ("%s: setting per-animal carcass disposal cost to 0", MODEL_NAME);
-          destruction_cost_params.carcass_disposal = 0;
-        }
-    }
-  else
-    {
-      g_warning ("%s: per-animal carcass disposal cost missing, setting to 0", MODEL_NAME);
-      destruction_cost_params.carcass_disposal = 0;
-    }
-
-  e = scew_element_by_name (params, "cleaning-disinfecting");
-  if (e != NULL)
-    {
-      destruction_cost_params.cleaning_disinfecting = PAR_get_money (e, &success);
-      if (success)
-        {
-          has_destruction_cost_params = TRUE;
-        }
-      else
-        {
-          g_warning ("%s: setting per-unit cleaning and disinfecting cost to 0", MODEL_NAME);
-          destruction_cost_params.cleaning_disinfecting = 0;
-        }
-    }
-  else
-    {
-      g_warning ("%s: per-unit cleaning and disinfecting cost missing, setting to 0", MODEL_NAME);
-      destruction_cost_params.cleaning_disinfecting = 0;
-    }
+  errno = 0;
+  d->appraisal = strtod (value[1], NULL);
+  g_assert (errno != ERANGE);
+  errno = 0;
+  d->euthanasia = strtod (value[2], NULL);
+  g_assert (errno != ERANGE);
+  errno = 0;
+  d->indemnification = strtod (value[3], NULL);
+  g_assert (errno != ERANGE);
+  errno = 0;
+  d->carcass_disposal = strtod (value[4], NULL);
+  g_assert (errno != ERANGE);
+  errno = 0;
+  d->cleaning_disinfecting = strtod (value[5], NULL);
+  g_assert (errno != ERANGE);
 
   /* Vaccination Cost Parameters */
-  e = scew_element_by_name (params, "vaccination-fixed");
-  if (e != NULL)
-    {
-      vaccination_cost_params.vaccination_fixed = PAR_get_money (e, &success);
-      if (success)
-        {
-          has_vaccination_cost_params = TRUE;
-        }
-      else
-        {
-          g_warning ("%s: setting per-unit vaccination cost to 0", MODEL_NAME);
-          vaccination_cost_params.vaccination_fixed = 0;
-        }
-    }
-  else
-    {
-      g_warning ("%s: per-unit vaccination cost missing, setting to 0", MODEL_NAME);
-      vaccination_cost_params.vaccination_fixed = 0;
-    }
 
-  e = scew_element_by_name (params, "vaccination");
-  if (e != NULL)
-    {
-      vaccination_cost_params.vaccination = PAR_get_money (e, &success);
-      if (success)
-        {
-          has_vaccination_cost_params = TRUE;
-        }
-      else
-        {
-          g_warning ("%s: setting per-animal vaccination cost to 0", MODEL_NAME);
-          vaccination_cost_params.vaccination = 0;
-        }
-    }
-  else
-    {
-      g_warning ("%s: per-animal vaccination cost missing, setting to 0", MODEL_NAME);
-      vaccination_cost_params.vaccination = 0;
-    }
+  /* Check that we are not overwriting an existing parameter block (that would
+   * indicate a bug). */
+  g_assert (local_data->vaccination_cost_params[production_type_id] == NULL);
 
-  e = scew_element_by_name (params, "baseline-vaccination-capacity");
-  if (e != NULL)
-    {
-      vaccination_cost_params.baseline_capacity = (unsigned int) PAR_get_unitless (e, &success);
-      if (success)
-        {
-          has_vaccination_cost_params = TRUE;
-        }
-      else
-        {
-          g_warning ("%s: setting baseline vaccination capacity to 1,000,000", MODEL_NAME);
-          vaccination_cost_params.baseline_capacity = 1000000;
-        }
-    }
-  else
-    {
-      g_warning ("%s: baseline vaccination capacity missing, setting to 1,000,000", MODEL_NAME);
-      vaccination_cost_params.baseline_capacity = 1000000;
-    }
+  /* Create a new parameter block. */
+  v = g_new (vaccination_cost_data_t, 1);
+  local_data->vaccination_cost_params[production_type_id] = v;
 
-  e = scew_element_by_name (params, "additional-vaccination");
-  if (e != NULL)
-    {
-      vaccination_cost_params.extra_vaccination = PAR_get_money (e, &success);
-      if (success)
-        {
-          has_vaccination_cost_params = TRUE;
-        }
-      else
-        {
-          g_warning ("%s: setting additional per-animal vaccination cost to 0", MODEL_NAME);
-          vaccination_cost_params.extra_vaccination = 0;
-        }
-    }
-  else
-    {
-      g_warning ("%s: additional per-animal vaccination cost missing, setting to 0", MODEL_NAME);
-      vaccination_cost_params.extra_vaccination = 0;
-    }
+  errno = 0;
+  v->baseline_capacity = strtol (value[6], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);  
+  errno = 0;
+  v->vaccination = strtod (value[7], NULL);
+  g_assert (errno != ERANGE);
+  errno = 0;
+  v->extra_vaccination = strtod (value[8], NULL);
+  g_assert (errno != ERANGE);
+  errno = 0;
+  v->vaccination_fixed = strtod (value[9], NULL);
+  g_assert (errno != ERANGE);
 
   /* No vaccinations have been performed yet. */
-  vaccination_cost_params.capacity_used = 0;
+  v->capacity_used = 0;
 
-  /* Surveillance Cost Parameters */
-  e = scew_element_by_name (params, "surveillance");
-  if (e != NULL)
+  return 0;
+}
+
+
+
+/**
+ * Adds a set of zone/production type combination specific parameters to an
+ * economic model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+set_zone_params (void *data, int ncols, char **value, char **colname)
+{
+  spreadmodel_model_t *self;
+  local_data_t *local_data;
+  guint zone_id, production_type_id;
+
+  #if DEBUG
+    g_debug ("----- ENTER set_zone_params (%s)", MODEL_NAME);
+  #endif
+
+  g_assert (ncols == 3);
+
+  self = (spreadmodel_model_t *)data;
+  local_data = (local_data_t *) (self->model_data);
+
+  /* Find out which zone/production type combination these parameters apply
+   * to. */
+  zone_id = spreadmodel_read_zone (value[0], local_data->zones);
+  production_type_id = spreadmodel_read_prodtype (value[1], local_data->production_types);
+
+  /* Create a paramater block if needed. */
+  if (local_data->surveillance_cost_param == NULL)
     {
-      surveillance_cost_param = PAR_get_money (e, &success);
-      if (success)
-        {
-          has_surveillance_cost_param = TRUE;
-        }
-      else
-        {
-          g_warning ("%s: setting per-animal zone surveillance cost to 0", MODEL_NAME);
-          surveillance_cost_param = 0;
-        }
+      guint nzones;
+      nzones = ZON_zone_list_length (local_data->zones);
+      local_data->surveillance_cost_param = g_new0 (double *, nzones);
     }
-  else
+  if (local_data->surveillance_cost_param[zone_id] == NULL)
     {
-      g_warning ("%s: per-animal zone surveillance cost missing, setting to 0", MODEL_NAME);
-      surveillance_cost_param = 0;
-    }
-
-  /* Set the reporting frequency for the output variables. */
-  ee = scew_element_list_by_name (params, "output");
-#if DEBUG
-  g_debug ("%i output variables", scew_list_size(ee));
-#endif
-  for (iter = ee; iter != NULL; iter = scew_list_next(iter))
-    {
-      e = (scew_element *) scew_list_data (iter);
-      variable_name = scew_element_contents (scew_element_by_name (e, "variable-name"));
-      /* Do the outputs include a variable with this name? */
-      for (j = 0; j < self->outputs->len; j++)
-        {
-          output = (RPT_reporting_t *) g_ptr_array_index (self->outputs, j);
-          if (strcmp (output->name, variable_name) == 0)
-            break;
-        }
-      if (j == self->outputs->len)
-        g_warning ("no output variable named \"%s\", ignoring", variable_name);
-      else
-        {
-          RPT_reporting_set_frequency (output,
-                                       RPT_string_to_frequency (scew_element_contents
-                                                                (scew_element_by_name
-                                                                 (e, "frequency"))));
-#if DEBUG
-          g_debug ("report \"%s\" %s", variable_name, RPT_frequency_name[output->frequency]);
-#endif
-        }
-    }
-  scew_list_free (ee);
-
-  /* Read zone and production type attributes to determine which
-   * entries should be filled in. */
-  if (scew_element_attribute_by_name (params, "zone") != NULL)
-    zone = spreadmodel_read_zone_attribute (params, local_data->zones);
-  else
-    zone = NULL;
-  production_type =
-    spreadmodel_read_prodtype_attribute (params, "production-type", local_data->production_types);
-
-  /* Copy the parameters into the selected zone and production types. */
-  for (i = 0; i < nprod_types; i++)
-    {
-      if (production_type[i])
-        {
-          if (has_destruction_cost_params)
-            {
-              if (local_data->destruction_cost_params == NULL)
-                {
-                  local_data->destruction_cost_params =
-                    g_new0 (destruction_cost_data_t *, nprod_types);
-                  g_assert (local_data->destruction_cost_params != NULL);
-                }
-              if (local_data->destruction_cost_params[i] == NULL)
-                {
-                  local_data->destruction_cost_params[i] =
-                    g_new0 (destruction_cost_data_t, 1);
-                  g_assert (local_data->destruction_cost_params[i] != NULL);
-                }
-              memcpy (local_data->destruction_cost_params[i],
-                      &destruction_cost_params,
-                      sizeof (destruction_cost_data_t));
-            }
-          if (has_vaccination_cost_params)
-            {
-              if (local_data->vaccination_cost_params == NULL)
-                {
-                  local_data->vaccination_cost_params =
-                    g_new0 (vaccination_cost_data_t *, nprod_types);
-                  g_assert (local_data->vaccination_cost_params != NULL);
-                }
-              if (local_data->vaccination_cost_params[i] == NULL)
-                {
-                  local_data->vaccination_cost_params[i] =
-                    g_new0 (vaccination_cost_data_t, 1);
-                  g_assert (local_data->vaccination_cost_params[i] != NULL);
-                }
-              memcpy (local_data->vaccination_cost_params[i],
-                      &vaccination_cost_params,
-                      sizeof (vaccination_cost_data_t));
-            }
-
-          if (has_surveillance_cost_param)
-            {
-              if (zone)
-                {
-                  for (j = 0; j < nzones; j++)
-                    {
-                      if (zone[j])
-                        {
-                          if (local_data->surveillance_cost_param == NULL)
-                            {
-                              local_data->surveillance_cost_param =
-                                g_new0 (double *, nzones);
-                              g_assert (local_data->surveillance_cost_param != NULL);
-                            }
-                          if (local_data->surveillance_cost_param[j] == NULL)
-                            {
-                              local_data->surveillance_cost_param[j] =
-                                g_new0 (double, nprod_types);
-                              g_assert (local_data->surveillance_cost_param[j] != NULL);
-                            }
-                          local_data->surveillance_cost_param[j][i] = surveillance_cost_param;
-                        }
-                    }
-                }
-              else
-                {
-                  g_warning ("%s: ignoring given surveillance cost, because no zone was specified", MODEL_NAME);
-                }
-            }
-        }
+      guint nprod_types;
+      nprod_types = local_data->production_types->len;
+      local_data->surveillance_cost_param[zone_id] = g_new0 (double, nprod_types);
     }
 
-  g_free (production_type);
-  if (zone != NULL)
-    g_free (zone);
+  /* Read the parameter. */
+  errno = 0;
+  local_data->surveillance_cost_param[zone_id][production_type_id] = strtod (value[2], NULL);
+  g_assert (errno != ERANGE);
 
-#if DEBUG
-  g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
-#endif
+  #if DEBUG
+    g_debug ("----- EXIT set_zone_params (%s)", MODEL_NAME);
+  #endif
 
-  return;
+  return 0;
 }
 
 
@@ -1027,11 +805,12 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
  * Returns a new economic model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -1045,7 +824,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  self->set_params = set_params;
   self->run = run;
   self->reset = reset;
   self->is_listening_for = spreadmodel_model_is_listening_for;
@@ -1130,9 +908,25 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   g_ptr_array_add (self->outputs, local_data->cumul_vaccination_subtotal);
   g_ptr_array_add (self->outputs, local_data->cumul_surveillance_cost);
 
-  /* Send the XML subtree to the init function to read the production type
+  /* Call the set_params function to read the production type specific
+   * parameters. */
+  sqlite3_exec (params,
+                "SELECT prodtype.name,cost_of_destruction_appraisal_per_unit,cost_of_destruction_cleaning_per_unit,cost_of_euthanasia_per_animal,cost_of_indemnification_per_animal,cost_of_carcass_disposal_per_animal,vaccination_demand_threshold,cost_of_vaccination_baseline_per_animal,cost_of_vaccination_additional_per_animal,cost_of_vaccination_setup_per_unit FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND use_cost_accounting=1s",
+                set_params, self, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
+
+  /* Call the set_zone_params function to read the zone/production type
    * combination specific parameters. */
-  self->set_params (self, params);
+  sqlite3_exec (params,
+                "SELECT zone.zone_description,prodtype.name,cost_of_surveillance_per_animal_day FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectonproductiontype pairing WHERE zone.id=pairing.zone_id AND prodtype.id=pairing.production_type_id",
+                set_zone_params, self, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

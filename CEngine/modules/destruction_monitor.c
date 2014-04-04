@@ -488,18 +488,12 @@ local_free (struct spreadmodel_model_t_ *self)
  * Returns a new destruction monitor.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element *e;
-  scew_list *ee, *iter;
   unsigned int n;
-  const XML_Char *variable_name;
-  RPT_frequency_t freq;
-  gboolean success;
-  gboolean broken_down;
   unsigned int i;      /* loop counter */
   char *prodtype_name;
   const char *drill_down_list[3] = { NULL, NULL, NULL };
@@ -516,7 +510,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  self->set_params = NULL;
   self->run = run;
   self->reset = reset;
   self->is_listening_for = spreadmodel_model_is_listening_for;
@@ -526,9 +519,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->printf = spreadmodel_model_printf;
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
-
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
 
   local_data->destruction_occurred =
     RPT_new_reporting ("destrOccurred", RPT_integer, RPT_never);
@@ -595,84 +585,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   g_ptr_array_add (self->outputs, local_data->cumul_num_animals_destroyed_by_reason_and_prodtype);
 
   /* Set the reporting frequency for the output variables. */
-  ee = scew_element_list_by_name (params, "output");
-#if DEBUG
-  g_debug ("%u output variables", scew_list_size(ee));
-#endif
-  for (iter = ee; iter != NULL; iter = scew_list_next(iter))
-    {
-      e = (scew_element *) scew_list_data (iter);
-      variable_name = scew_element_contents (scew_element_by_name (e, "variable-name"));
-      freq = RPT_string_to_frequency (scew_element_contents
-                                      (scew_element_by_name (e, "frequency")));
-      broken_down = PAR_get_boolean (scew_element_by_name (e, "broken-down"), &success);
-      if (!success)
-      	broken_down = FALSE;
-      broken_down = broken_down || (g_strstr_len (variable_name, -1, "-by-") != NULL); 
-      /* Starting at version 3.2 we accept either the old, verbose output
-       * variable names or the new shorter ones. */
-      if (strcmp (variable_name, "destrOccurred") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->destruction_occurred, freq);
-        }
-      else if (strcmp (variable_name, "firstDestruction") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->first_destruction, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->first_destruction_by_reason, freq);
-              RPT_reporting_set_frequency (local_data->first_destruction_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->first_destruction_by_reason_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "desnU") == 0
-               || strncmp (variable_name, "num-units-destroyed", 19) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->num_units_destroyed, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->num_units_destroyed_by_reason, freq);
-              RPT_reporting_set_frequency (local_data->num_units_destroyed_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->num_units_destroyed_by_reason_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "descU") == 0
-               || strncmp (variable_name, "cumulative-num-units-destroyed", 30) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_num_units_destroyed, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->cumul_num_units_destroyed_by_reason, freq);
-              RPT_reporting_set_frequency (local_data->cumul_num_units_destroyed_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_num_units_destroyed_by_reason_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "desnA") == 0
-               || strncmp (variable_name, "num-animals-destroyed", 21) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->num_animals_destroyed, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->num_animals_destroyed_by_reason, freq);
-              RPT_reporting_set_frequency (local_data->num_animals_destroyed_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->num_animals_destroyed_by_reason_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "descA") == 0
-               || strncmp (variable_name, "cumulative-num-animals-destroyed", 32) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_num_animals_destroyed, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->cumul_num_animals_destroyed_by_reason, freq);
-              RPT_reporting_set_frequency (local_data->cumul_num_animals_destroyed_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_num_animals_destroyed_by_reason_and_prodtype, freq);
-            }
-        }
-      else
-        g_warning ("no output variable named \"%s\", ignoring", variable_name);        
-    }
-  scew_list_free (ee);
 
   /* Initialize the output variables we already know about. */
   local_data->production_types = units->production_type_names;

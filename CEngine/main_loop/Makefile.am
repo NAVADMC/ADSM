@@ -17,7 +17,7 @@ AM_CPPFLAGS = -I$(top_srcdir) \
 if USE_SC_GUILIB
   AM_CPPFLAGS +=  -I$(top_srcdir)/sc_guilib 
 endif
-AM_CPPFLAGS += @GLIB_CFLAGS@ @GSL_CFLAGS@ @SCEW_CFLAGS@ 
+AM_CPPFLAGS += @GLIB_CFLAGS@ @GSL_CFLAGS@ 
 if HAVE_MPI
   AM_CPPFLAGS += @MPI_CFLAGS@
 endif
@@ -98,7 +98,7 @@ spreadmodel_SOURCES = cli.c
 if HAVE_MPI
   spreadmodel_SOURCES += mpix.c mpix.h
 endif
-spreadmodel_LDADD = libspreadmodel.a @GLIB_LIBS@ @GSL_LIBS@ @SCEW_LIBS@ @SQLITE_LIBS@
+spreadmodel_LDADD = libspreadmodel.a @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@
 if HAVE_MPI
   spreadmodel_LDADD += @MPI_LIBS@
 endif

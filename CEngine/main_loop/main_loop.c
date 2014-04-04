@@ -270,31 +270,6 @@
  *
  * <table>
  *   <tr>
- *     <td><b>Component:</b></td> <td>Simple C Expat Wrapper (SCEW)</a></td>
- *   </tr>
- *   <tr>
- *     <td><b>Used for:</b></td> <td>reading XML files</td>
- *   </tr>
- *   <tr>
- *     <td><b>Author:</b></td> <td>Aleix Conchillo Flaque</td>
- *   </tr>
- *   <tr>
- *     <td><b>License:</b></td>
- *     <td>
- *       GNU Lesser General Public License (GNU LGPL)
- *       [<a href="http://www.gnu.org/copyleft/lgpl.html">read text</a>]
- *     </td>
- *   </tr>
- *   <tr>
- *     <td><b>Website:</b></td>
- *     <td>
- *       <a href="http://www.nongnu.org/scew/">http://www.nongnu.org/scew/</a>
- *     </td>
- *   </tr>
- * </table>
- *
- * <table>
- *   <tr>
  *     <td><b>Component:</b></td> <td>R-tree library</a></td>
  *   </tr>
  *   <tr>

@@ -598,7 +598,7 @@ local_free (struct spreadmodel_model_t_ *self)
  * Returns a new conflict resolver model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;

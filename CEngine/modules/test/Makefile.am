@@ -30,7 +30,7 @@ AM_CPPFLAGS = -I$(top_srcdir) \
 if USE_SC_GUILIB
   AM_CPPFLAGS +=  -I$(top_srcdir)/sc_guilib
 endif
-AM_CPPFLAGS += @GLIB_CFLAGS@ @GSL_CFLAGS@ @SCEW_CFLAGS@
+AM_CPPFLAGS += @GLIB_CFLAGS@ @GSL_CFLAGS@
 
 # Create a program just like the real simulator, but without MPI, for running
 # small tests.
@@ -104,7 +104,7 @@ if USE_SC_GUILIB
     $(top_srcdir)/sc_guilib/sc_database.c
 endif
 minispreadmodel_CPPFLAGS = -DCANCEL_MPI=1 $(AM_CPPFLAGS)
-minispreadmodel_LDADD = @GLIB_LIBS@ @GSL_LIBS@ @SCEW_LIBS@ @SQLITE_LIBS@
+minispreadmodel_LDADD = @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@
 if HAVE_MPI
   minispreadmodel_LDADD += @MPI_LIBS@
 endif

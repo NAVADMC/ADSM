@@ -146,7 +146,7 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
   gboolean include_destruction;
   int nmodels;
   int i;                        /* loop counter */
-  const XML_Char *variable_name;
+  const char *variable_name;
   unsigned int nzones;
 #if DEBUG
   char *s;

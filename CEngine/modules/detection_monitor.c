@@ -566,17 +566,11 @@ local_free (struct spreadmodel_model_t_ *self)
  * Returns a new detection monitor.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element *e;
-  scew_list *ee, *iter;
-  const XML_Char *variable_name;
-  RPT_frequency_t freq;
-  gboolean success;
-  gboolean broken_down;
   unsigned int i, j;         /* loop counters */
   char *prodtype_name;
 
@@ -592,7 +586,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  self->set_params = NULL;
   self->run = run;
   self->reset = reset;
   self->is_listening_for = spreadmodel_model_is_listening_for;
@@ -602,9 +595,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->printf = spreadmodel_model_printf;
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
-
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
 
   local_data->detection_occurred =
     RPT_new_reporting ("detOccurred", RPT_integer, RPT_never);
@@ -686,97 +676,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   g_ptr_array_add (self->outputs, local_data->cumul_nanimals_detected_by_means_and_prodtype);
 
   /* Set the reporting frequency for the output variables. */
-  ee = scew_element_list_by_name (params, "output");
-#if DEBUG
-  g_debug ("%u output variables", scew_list_size(ee));
-#endif
-  for (iter = ee; iter != NULL; iter = scew_list_next(iter))
-    {
-      e = (scew_element *) scew_list_data (iter);
-      variable_name = scew_element_contents (scew_element_by_name (e, "variable-name"));
-      freq = RPT_string_to_frequency (scew_element_contents
-                                      (scew_element_by_name (e, "frequency")));
-      broken_down = PAR_get_boolean (scew_element_by_name (e, "broken-down"), &success);
-      if (!success)
-        broken_down = FALSE;
-      broken_down = broken_down || (g_strstr_len (variable_name, -1, "-by-") != NULL); 
-      /* Starting at version 3.2 we accept either the old, verbose output
-       * variable names or the new shorter ones. */
-      if (strcmp (variable_name, "detOccurred") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->detection_occurred, freq);
-        }
-      else if (strcmp (variable_name, "firstDetection") == 0
-               || strcmp (variable_name, "time-to-first-detection") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->first_detection, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->first_detection_by_means, freq);
-              RPT_reporting_set_frequency (local_data->first_detection_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->first_detection_by_means_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "lastDetection") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->last_detection, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->last_detection_by_means, freq);
-              RPT_reporting_set_frequency (local_data->last_detection_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->last_detection_by_means_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "detnU") == 0
-               || strncmp (variable_name, "num-units-detected", 18) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->nunits_detected, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->nunits_detected_by_means, freq);
-              RPT_reporting_set_frequency (local_data->nunits_detected_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->nunits_detected_by_means_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "detnA") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->nanimals_detected, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->nanimals_detected_by_means, freq);
-              RPT_reporting_set_frequency (local_data->nanimals_detected_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->nanimals_detected_by_means_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "detcU") == 0
-               || strncmp (variable_name, "cumulative-num-units-detected", 29) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_nunits_detected, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->cumul_nunits_detected_by_means, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nunits_detected_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nunits_detected_by_means_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "detcUq") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_nunits_detected_uniq, freq);
-        }
-      else if (strcmp (variable_name, "detcA") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_nanimals_detected, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->cumul_nanimals_detected_by_means, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nanimals_detected_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nanimals_detected_by_means_and_prodtype, freq);
-            }
-        }
-      else
-        g_warning ("no output variable named \"%s\", ignoring", variable_name);
-    }
-  scew_list_free (ee);
 
   /* Initialize the categories in the output variables. */
   local_data->production_types = units->production_type_names;

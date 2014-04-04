@@ -397,7 +397,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_sized_new (0);
   self->model_data = local_data;
-  self->set_params = NULL;
   self->run = run;
   self->reset = reset;
   self->is_listening_for = spreadmodel_model_is_listening_for;

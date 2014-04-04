@@ -17,7 +17,7 @@
 #ifndef EXAM_MONITOR_H
 #define EXAM_MONITOR_H
 
-spreadmodel_model_t *exam_monitor_new (scew_element * params, UNT_unit_list_t *,
+spreadmodel_model_t *exam_monitor_new (sqlite3 *, UNT_unit_list_t *,
                                        projPJ, ZON_zone_list_t *);
 
 #endif

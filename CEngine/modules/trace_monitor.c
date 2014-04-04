@@ -485,17 +485,11 @@ local_free (struct spreadmodel_model_t_ *self)
  * Returns a new trace monitor.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projections,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projections,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element *e;
-  scew_list *ee, *iter;
-  const XML_Char *variable_name;
-  RPT_frequency_t freq;
-  gboolean success;
-  gboolean broken_down;
   unsigned int i, j;      /* loop counters */
   const char *contact_type_name;
   char *prodtype_name;
@@ -513,7 +507,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projections,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  self->set_params = NULL;
   self->run = run;
   self->reset = reset;
   self->is_listening_for = spreadmodel_model_is_listening_for;
@@ -523,9 +516,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projections,
   self->printf = spreadmodel_model_printf;
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
-
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
 
   local_data->nunits_potentially_traced =
     RPT_new_reporting ("trnUAllp", RPT_integer, RPT_never);
@@ -625,110 +615,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projections,
   g_ptr_array_add (self->outputs, local_data->cumul_nanimals_traced_by_contacttype_and_prodtype);
 
   /* Set the reporting frequency for the output variables. */
-  ee = scew_element_list_by_name (params, "output");
-#if DEBUG
-  g_debug ("%u output variables", scew_list_size(ee));
-#endif
-  for (iter = ee; iter != NULL; iter = scew_list_next(iter))
-    {
-      e = (scew_element *) scew_list_data (iter);
-      variable_name = scew_element_contents (scew_element_by_name (e, "variable-name"));
-      freq = RPT_string_to_frequency (scew_element_contents
-                                      (scew_element_by_name (e, "frequency")));
-      broken_down = PAR_get_boolean (scew_element_by_name (e, "broken-down"), &success);
-      if (!success)
-      	broken_down = FALSE;
-      broken_down = broken_down || (g_strstr_len (variable_name, -1, "-by-") != NULL); 
-      /* Starting at version 3.2 we accept either the old, verbose output
-       * variable names or the new shorter ones. */
-      if (strcmp (variable_name, "trnUp") == 0
-          || strncmp (variable_name, "num-contacts-potentially-traced", 31) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->nunits_potentially_traced, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->nunits_potentially_traced_by_contacttype, freq);
-              RPT_reporting_set_frequency (local_data->nunits_potentially_traced_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->nunits_potentially_traced_by_contacttype_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "trnU") == 0
-               || strncmp (variable_name, "num-contacts-traced", 19) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->nunits_traced, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->nunits_traced_by_contacttype, freq);
-              RPT_reporting_set_frequency (local_data->nunits_traced_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->nunits_traced_by_contacttype_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "trcUp") == 0
-               || strncmp (variable_name, "cumulative-num-contacts-potentially-traced", 42) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_nunits_potentially_traced, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->cumul_nunits_potentially_traced_by_contacttype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nunits_potentially_traced_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nunits_potentially_traced_by_contacttype_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "trcU") == 0
-               || strncmp (variable_name, "cumulative-num-contacts-traced", 30) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_nunits_traced, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->cumul_nunits_traced_by_contacttype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nunits_traced_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nunits_traced_by_contacttype_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "trnAp") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->nanimals_potentially_traced, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->nanimals_potentially_traced_by_contacttype, freq);
-              RPT_reporting_set_frequency (local_data->nanimals_potentially_traced_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->nanimals_potentially_traced_by_contacttype_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "trnA") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->nanimals_traced, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->nanimals_traced_by_contacttype, freq);
-              RPT_reporting_set_frequency (local_data->nanimals_traced_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->nanimals_traced_by_contacttype_and_prodtype, freq);
-            }
-        }      
-      else if (strcmp (variable_name, "trcAp") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_nanimals_potentially_traced, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->cumul_nanimals_potentially_traced_by_contacttype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nanimals_potentially_traced_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nanimals_potentially_traced_by_contacttype_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "trcA") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_nanimals_traced, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->cumul_nanimals_traced_by_contacttype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nanimals_traced_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nanimals_traced_by_contacttype_and_prodtype, freq);
-            }
-        }
-      else
-        g_warning ("no output variable named \"%s\", ignoring", variable_name);        
-    }
-  scew_list_free (ee);
 
   /* Initialize the categories in the output variables. */
   local_data->production_types = units->production_type_names;

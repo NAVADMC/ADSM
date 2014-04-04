@@ -66,15 +66,10 @@ struct spreadmodel_model_t_;
 
 
 /** Type of a function that creates and sets parameters for a model. */
-typedef struct spreadmodel_model_t_ *(*spreadmodel_model_new_t) (PAR_parameter_t *,
+typedef struct spreadmodel_model_t_ *(*spreadmodel_model_new_t) (sqlite3 *,
                                                                  UNT_unit_list_t *,
                                                                  projPJ,
                                                                  ZON_zone_list_t *);
-
-
-
-/** Type of a function that sets parameters for a model. */
-typedef void (*spreadmodel_model_set_params_t) (struct spreadmodel_model_t_ *, PAR_parameter_t *);
 
 
 
@@ -142,8 +137,6 @@ typedef struct spreadmodel_model_t_
   unsigned int nevents_listened_for; /**< Length of events_listened_for. */
   GPtrArray *outputs; /**< A list of the model's output variables. */
   void *model_data; /**< Specialized information for the particular model. */
-  spreadmodel_model_set_params_t set_params; /**< A function that sets parameters
-    for the model. */
   spreadmodel_model_run_t run; /**< A function that runs the model. */
   spreadmodel_model_reset_t reset; /**< A function that resets the model after one simulation run. */
   spreadmodel_model_is_listening_for_t is_listening_for; /**< A function that reports whether the model is listening for a given event type.*/

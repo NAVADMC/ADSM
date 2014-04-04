@@ -130,15 +130,6 @@ case "X${ac_cv_with_mpi}" in
     ;;
   esac
 
-if test "X${have_pkgconfig}" = Xyes
-then
-  PKG_CHECK_MODULES(SCEW,scew >= 1.0.0,,AC_MSG_ERROR(cannot continue without SCEW))
-  AC_SUBST(SCEW_CFLAGS)
-  AC_SUBST(SCEW_LIBS)
-else
-  AC_CHECK_LIB(scew,scew_element_attribute_by_name,,AC_MSG_ERROR(cannot continue without SCEW))
-fi
-
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(errno.h math.h unistd.h limits.h regex.h ctype.h)

@@ -659,7 +659,7 @@ set_params (void *data, int ncols, char **value, char **colname)
 
 /**
  * Adds a set of zone/production type combination specific parameters to a
- * contact spread model.
+ * detection model.
  *
  * @param data this module ("self"), but cast to a void *.
  * @param ncols number of columns in the SQL query result.
