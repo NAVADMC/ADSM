@@ -281,380 +281,142 @@ PAR_get_money (PAR_parameter_t * param, gboolean * success)
 
 
 
-/**
- * Retrieves a piecewise probability density function.
- *
- * @param fn_element a piecewise probability distribution function parameter.
- * @return a probability distribution function object.
- */
-PDF_dist_t *
-PAR_get_piecewise_PDF( scew_element* const fn_element ) 
+typedef struct
 {
-  PDF_dist_t *dist;
-  gboolean old_style_xml, new_style_xml;
-  unsigned int i, j;
-  unsigned int element_count;
-  scew_element* e;
-  double x, y, *xy;
-  unsigned int npoints;
-  scew_list *ee;
-  scew_list *iter;
-  scew_element *ve, *xe, *ye;
-  gboolean had_error;
-                      
-  dist = NULL;
-  
-  /* Determine whether we're dealing with new- or old-style XML. 
-     Depending on what we find, one of two possible parsing approaches will
-     be used below.
-  */
-  old_style_xml = FALSE;
-  new_style_xml = FALSE;
-  npoints = 0;
-
-  element_count = scew_element_count( fn_element ); 
-  for( i = 0; i < element_count; ++i )
-    {
-      e = scew_element_by_index( fn_element, i );
-      
-      if( 0 == g_ascii_strcasecmp( "value", scew_element_name( e ) ) )
-        {
-          if( scew_element_by_name( e, "x" ) )
-            {
-              /* npoints will be used below by the new-style parsing function.  
-                 It will be reset if necessary by the old-style parsing function.
-              */
-              ++npoints; 
-              new_style_xml = TRUE;
-            }
-          else
-            old_style_xml = TRUE;      
-        }    
-    } 
-
-  if( new_style_xml && old_style_xml )
-    {
-      g_error( "Multiple XML schema versions seem to be mixed in PAR_get_piecewise_PDF()" );
-      goto end;
-    }
-  else if( (!new_style_xml) && (!old_style_xml) )
-    {   
-      g_error( "XML schema version cannot be determined in PAR_get_piecewise_PDF()" );
-      goto end;  
-    }
-  
-  
-  /* If we can tell which style we're parsing, then do it. */
-  if( old_style_xml )
-    {
-      /* This is Neil's original piecewise parsing function. */    
-      ee = scew_element_list_by_name (fn_element, "value");
-      npoints = scew_list_size (ee);
-      #if DEBUG
-        g_debug ("%u points", npoints);
-      #endif
-      
-      /* Copy the x,y values from the DOM tree into an array. */
-      xy = g_new (double, 2 * npoints);
-      
-      errno = 0;
-      for (i = 0, iter = ee; iter != NULL; i++, iter = scew_list_next(iter))
-        {
-          xe = (scew_element *) scew_list_data (iter);
-          x = strtod (scew_element_contents (xe), NULL);
-          g_assert (errno != ERANGE);
-          xy[2 * i] = x;
-        }
-      scew_list_free (ee);
-      ee = scew_element_list_by_name (fn_element, "p");
-      npoints = scew_list_size (ee);
-      for (i = 0, iter = ee; iter != NULL; i++, iter = scew_list_next(iter))
-        {
-          ye = (scew_element *) scew_list_data (iter);
-          y = strtod (scew_element_contents (ye), NULL);
-          g_assert (errno != ERANGE);
-          xy[2 * i + 1] = y;
-        }
-      dist = PDF_new_piecewise_dist (npoints, xy);
-      g_free (xy);
-      scew_list_free (ee);
-    }
-  else /* if new-style xml */
-    {
-      /* This function is mostly translated from the Delphi code for parsing new-style piecewise PDFs. */      
-      had_error = FALSE;
-      xy = g_new (double, 2 * npoints);
-      
-      j = 0;
-      errno = 0;
-      for( i = 0; i < element_count; ++i )
-        {
-          ve = scew_element_by_index( fn_element, i );
-          if( 0 == g_ascii_strcasecmp( "value", scew_element_name( ve ) ) )
-            {
-              xe = scew_element_by_name( ve, "x" );
-              ye = scew_element_by_name( ve, "p" );
-              
-              if( xe )
-                {
-                  x = strtod( scew_element_contents( xe ), NULL ); 
-                  g_assert (errno != ERANGE);
-                  xy[2 * j] = x;
-                }
-              else
-                {
-                  had_error = TRUE;
-                  break;
-                }
-                
-              if( ye )
-                {
-                  y = strtod( scew_element_contents( ye ), NULL ); 
-                  g_assert (errno != ERANGE);
-                  xy[2 * j + 1] = y;
-                }
-              else
-                {
-                  had_error = TRUE;
-                  break;
-                } 
-                                    
-              ++j;
-            }  
-        }
- 
-      if( had_error )
-        dist = NULL;
-      else
-        dist = PDF_new_piecewise_dist (npoints, xy);
-        
-      g_free (xy);    
-    }
-       
-end:
-    
-  return dist; 
+  GArray *x; /* growable array of doubles */
+  GArray *y; /* growable array of doubles */
 }
+PAR_get_relchart_callback_args_t;
 
 
+  
 /**
- * Retrieves a histogram probability density function.
+ * Retrieves a relationship chart parameter from the database. This callback
+ * function is called once for each x-y pair (database row) in the chart.
  *
- * @param fn_element a histogram probability distribution function parameter.
- * @return a probability distribution function object.
- */
-PDF_dist_t *
-PAR_get_histogram_PDF( scew_element* const fn_element )
-{
-  PDF_dist_t *dist;
-  gboolean old_style_xml;
-  unsigned int i, j;
-  unsigned int nbins, nbins2;
-  gsl_histogram *h;
-  double *range; 
-
-  /* Determine whether we're dealing with new- or old-style XML. 
-     Depending on what we find, one of two possible parsing approaches will
-     be used below.
-     
-     Only new-style XML has the tag <value> for histogram PDFs.
-  */
-  if( scew_element_by_name( fn_element, "value" ) )
-    old_style_xml = FALSE;
-  else
-    old_style_xml = TRUE;
-
-
-  if( old_style_xml ) 
-    {
-      scew_list *ee, *iter;
-      scew_element *xe;
-      double x;
-
-      ee = scew_element_list_by_name (fn_element, "x0");
-      nbins = scew_list_size (ee);
-      #if DEBUG
-        g_debug ("%u bins", nbins);
-      #endif
-
-      h = gsl_histogram_alloc (nbins);
-
-      /* Copy the range values from the DOM tree into an array. */
-      range = g_new (double, nbins + 1);
-      errno = 0;
-      for (i = 0, iter = ee; iter != NULL; i++, iter = scew_list_next(iter))
-        {
-          xe = (scew_element *) scew_list_data (iter);
-          x = strtod (scew_element_contents (xe), NULL);
-          g_assert (errno != ERANGE);
-          range[i] = x;
-        }
-      scew_list_free (ee);
-      /* Get the final upper bound of the histogram. */
-      ee = scew_element_list_by_name (fn_element, "x1");
-      nbins2 = scew_list_size (ee);
-      g_assert (nbins2 == nbins);
-      xe = (scew_element *) scew_list_data (scew_list_last (ee));
-      x = strtod (scew_element_contents (xe), NULL);
-      g_assert (errno != ERANGE);
-      range[nbins] = x;
-      /* FIXME: should we check that the upper limit of one bin really is the
-       * lower limit of the next one up? */
-      scew_list_free (ee);
-      gsl_histogram_set_ranges (h, range, nbins+1);
-
-      /* The upper and lower limits of each bin have been established.  Now
-       * fill in the counts in the bins. */
-      ee = scew_element_list_by_name (fn_element, "p");
-      nbins2 = scew_list_size (ee);
-      g_assert (nbins2 == nbins);
-      for (i = 0, iter = ee; iter != NULL; i++, iter = scew_list_next(iter))
-        {
-          xe = (scew_element *) scew_list_data (iter);
-          x = strtod (scew_element_contents (xe), NULL);
-          g_assert (errno != ERANGE);
-          gsl_histogram_accumulate (h, (range[i]+range[i+1])/2.0, x);
-        }
-      scew_list_free (ee);
-      g_free(range);
-
-      /* Last step, take the histogram given by the user, which may contain
-       * either counts or probability values in the bins, and turn it into a
-       * probability distribution function (where the values of all bins must
-       * sum to 1). */
-      dist = PDF_new_histogram_dist (h);
-      gsl_histogram_free (h); 
-    }
-  else /* parse new-style XML */
-    {
-      double x0, x1, p;
-      scew_element *ev, *ex0, *ex1, *ep;
-      unsigned int element_count;
-      gboolean success;
-      double* counts;
-      
-      /* Determine how many histogram bins there are. */
-      /*----------------------------------------------*/
-      nbins = 0;
-      element_count = scew_element_count( fn_element ); 
-      for( i = 0; i < element_count; ++i )
-        {
-          ev = scew_element_by_index( fn_element, i );
-          
-          if( 0 == g_ascii_strcasecmp( "value", scew_element_name( ev ) ) )
-            ++nbins;   
-        } 
-    
-      /* Set up the data structures. */
-      /*-----------------------------*/
-      range = g_new (double, nbins + 1);
-      counts = g_new( double, nbins );           
-      
-      /* Parse the XML and fill the data structures. */
-      /*---------------------------------------------*/
-      success = TRUE; /* Until shown otherwise. */
-      errno = 0;
-      j = 0;
-      for( i = 0; i < element_count; ++i )
-        {
-          ev = scew_element_by_index( fn_element, i );
-        
-          if( 0 != g_ascii_strcasecmp( "value", scew_element_name( ev ) ) )
-            {
-              success = FALSE;
-              break; 
-            }
-          else
-            {
-              ex0 = scew_element_by_name( ev, "x0" );
-              ex1 = scew_element_by_name( ev, "x1" );
-              ep = scew_element_by_name( ev, "p" );
-              
-              if( ex0 )
-                {
-                  x0 = strtod( scew_element_contents( ex0 ), NULL ); 
-                  g_assert (errno != ERANGE);
-                }
-              else
-                success = FALSE;
-                
-              if( ex1 )
-                {
-                  x1 = strtod( scew_element_contents( ex1 ), NULL ); 
-                  g_assert (errno != ERANGE);
-                }
-              else
-                success = FALSE;
-                
-              if( ep )
-                {
-                  p = strtod( scew_element_contents( ep ), NULL ); 
-                  g_assert (errno != ERANGE);
-                }
-              else
-                success = FALSE;
-                
-              if( !success )
-                break;
-              else
-                {
-                  range[j] = x0;               
-                  /* FIXME: should we check that the upper limit of one bin really is the
-                   * lower limit of the next one up? */
-                  range[j+1] = x1;
-                  
-                  counts[j] = p;
-                  ++j;                
-                }               
-            }
-        }
-        
-      if( success )
-        {
-          h = gsl_histogram_alloc (nbins);
-          gsl_histogram_set_ranges (h, range, nbins+1);
-          
-          for( i = 0; i < nbins; ++i )
-            gsl_histogram_accumulate (h, (range[i]+range[i+1])/2.0, counts[i]);  
-                     
-          /* Last step, take the histogram given by the user, which may contain
-           * either counts or probability values in the bins, and turn it into a
-           * probability distribution function (where the values of all bins must
-           * sum to 1). */
-          dist = PDF_new_histogram_dist (h);
-          gsl_histogram_free (h);   
-        }
-      else
-        dist = NULL;
-
-      g_free(range);
-      g_free( counts );
-
-    } 
-    
-  return dist; 
-}
-
-
-
-/**
- * Retrieves a probability distribution function parameter from the database.
- *
- * @param loc location of a PDF_dist_t * into which to write the pointer to
- *   the created object.
+ * @param loc location of a PAR_get_relchart_callback_args_t object into which
+ *  to accumulate the x-y pairs.
  * @param ncols number of columns in the SQL query result.
  * @param values values returned by the SQL query, all in text form.
  * @param colname names of columns in the SQL query result.
  * @return 0
  */
 static int
-PAR_get_PDF_callback (void *loc, int ncols, char **value, char **colname)
+PAR_get_relchart_callback (void *loc, int ncols, char **value, char **colname)
 {
-  PDF_dist_t **result;
+  PAR_get_relchart_callback_args_t *build;
+  double x, y;
+  
+  g_assert (ncols == 2);
+  build = (PAR_get_relchart_callback_args_t *) loc;
+  errno = 0;
+  x = strtod (value[0], NULL);
+  if (errno == ERANGE)
+    {
+      g_error ("relationship chart point \"%s\" is not a number", value[0]);
+    }
+  errno = 0;
+  y = strtod (value[1], NULL);
+  if (errno == ERANGE)
+    {
+      g_error ("relationship chart point \"%s\" is not a number", value[1]);
+    }
+  g_array_append_val (build->x, x);
+  g_array_append_val (build->y, y);
+  return 0;
+}
+
+
+
+
+/**
+ * Retrieves a relationship chart.
+ *
+ * @param db a parameter database.
+ * @param id the database ID of the relationship chart.
+ * @return a relationship chart object.
+ */
+REL_chart_t *
+PAR_get_relchart (sqlite3 *db, guint id)
+{
+  REL_chart_t *chart;
+  PAR_get_relchart_callback_args_t build;
+  char *query;
+  char *sqlerr;
+  
+  #if DEBUG
+    g_debug ("----- ENTER PAR_get_relationship_chart");
+  #endif
+
+  build.x = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
+  build.y = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
+  query = g_strdup_printf ("SELECT x,y FROM ScenarioCreator_relationalfunction fn,ScenarioCreator_relationalpoint pt WHERE fn.id=%u AND pt.relational_function_id=fn.id ORDER BY _point_order", id);
+  sqlite3_exec (db, query, PAR_get_relchart_callback, &build, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
+  g_free (query);
+
+  chart = REL_new_chart ((double *)(build.x->data), (double *)(build.y->data), build.x->len);
+  g_array_free (build.x, /* free_segment = */ TRUE);
+  g_array_free (build.y, /* free_segment = */ TRUE);
+
+  #if DEBUG
+    g_debug ("----- EXIT PAR_get_relationship_chart");
+  #endif
+
+  return chart;
+}
+
+
+
+typedef struct
+{
+  sqlite3 *db; /**< A parameter database. */
+  PDF_dist_t *dist; /**< A location into which to write the pointer to the
+    created object. */
+}
+PAR_get_PDF_callback_args_t;
+
+
+  
+/**
+ * Retrieves a probability distribution function parameter from the database.
+ *
+ * @param data pointer to a PAR_get_PDF_callback_args_t structure.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+PAR_get_PDF_callback (void *data, int ncols, char **value, char **colname)
+{
+  PAR_get_PDF_callback_args_t *args;
   PDF_dist_t *dist = NULL;
   char *equation_type;
+  #if DEBUG
+    GString *s;
+    int i;
+  #endif
   
   g_assert (ncols == 19);
+
+  args = (PAR_get_PDF_callback_args_t *)data;
+
+  #if DEBUG
+    s = g_string_new ("[");
+    for (i = 0; i < ncols; i++)
+      {
+        if (i > 0)
+          g_string_append_c (s, ',');
+        g_string_append_printf (s, "%s=%s", colname[i], value[i]);
+      }
+    g_string_append_c (s, ']');    
+    g_debug ("query returned %s", s->str);
+    g_string_free (s, TRUE);    
+  #endif
   equation_type = value[0];
   if (strcmp (equation_type, "Point") == 0)
     {
@@ -667,15 +429,91 @@ PAR_get_PDF_callback (void *loc, int ncols, char **value, char **colname)
         }
       dist = PDF_new_point_dist (mode);
     }
+  else if (strcmp (equation_type, "Triangular") == 0)
+    {
+      double a,c,b;
+
+      errno = 0;
+      a = strtod (value[3], NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      c = strtod (value[4], NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      b = strtod (value[5], NULL);
+      g_assert (errno != ERANGE);
+
+      dist = PDF_new_triangular_dist (a, c, b);
+    }
+  else if (strcmp (equation_type, "Piecewise") == 0)
+    {
+      guint rel_id;
+      PAR_get_relchart_callback_args_t build;
+      char *query;
+      char *sqlerr;
+
+      rel_id = 0; /* Filling this in for now just to prevent an uninitialized
+        variable warning */
+      build.x = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
+      build.y = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
+      query = g_strdup_printf ("SELECT x,y FROM ScenarioCreator_relationalfunction fn,ScenarioCreator_relationalpoint pt WHERE fn.id=%u AND pt.relational_function_id=fn.id ORDER BY _point_order", rel_id);
+      sqlite3_exec (args->db, query, PAR_get_relchart_callback, &build, &sqlerr);
+      if (sqlerr)
+        {
+          g_error ("%s", sqlerr);
+        }
+      g_free (query);
+
+      dist = PDF_new_piecewise_dist (build.x->len, (double *)(build.x->data), (double *)(build.y->data));
+      g_array_free (build.x, /* free_segment = */ TRUE);
+      g_array_free (build.y, /* free_segment = */ TRUE);
+    }
+  else if (strcmp (equation_type, "Histogram") == 0)
+    {
+      guint rel_id;
+      PAR_get_relchart_callback_args_t build;
+      char *query;
+      char *sqlerr;
+      guint nbins, i;
+      gsl_histogram *h;
+      double *range;
+
+      rel_id = 0; /* Filling this in for now just to prevent an uninitialized
+        variable warning */
+      build.x = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
+      build.y = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
+      query = g_strdup_printf ("SELECT x,y FROM ScenarioCreator_relationalfunction fn,ScenarioCreator_relationalpoint pt WHERE fn.id=%u AND pt.relational_function_id=fn.id ORDER BY _point_order", rel_id);
+      sqlite3_exec (args->db, query, PAR_get_relchart_callback, &build, &sqlerr);
+      if (sqlerr)
+        {
+          g_error ("%s", sqlerr);
+        }
+      g_free (query);
+
+      nbins = build.x->len - 1;
+      h = gsl_histogram_alloc (nbins);
+      /* The x-values read from the database define the range (upper and lower
+       * limit) of each bin. */
+      range = (double *)(build.x->data);
+      gsl_histogram_set_ranges (h, range, nbins + 1);
+      /* The y-values read from the database give the amount to add to each bin
+       * (the final y-value is ignored). */
+      for (i = 0; i < nbins; i++)
+        gsl_histogram_accumulate (h, (range[i]+range[i+1])/2.0, g_array_index(build.y, double, i));
+
+      dist = PDF_new_histogram_dist (h);
+      gsl_histogram_free (h);   
+    }
   else
     {
+      g_warning ("%s distribution not supported", equation_type);
       g_assert_not_reached();
     }
-  result = (PDF_dist_t **)loc;
-  *result = dist;
+  args->dist = dist;
   return 0;
 }
-
 
 
 
@@ -689,15 +527,17 @@ PAR_get_PDF_callback (void *loc, int ncols, char **value, char **colname)
 PDF_dist_t *
 PAR_get_PDF (sqlite3 *db, guint id)
 {
-  PDF_dist_t *dist;
+  PAR_get_PDF_callback_args_t args;
   char *query;
   char *sqlerr;
 #if DEBUG
   g_debug ("----- ENTER PAR_get_PDF");
 #endif
 
+  args.db = db;
+  args.dist = NULL;
   query = g_strdup_printf ("SELECT equation_type,mean,std_dev,min,mode,max,alpha,alpha2,beta,location,scale,shape,n,p,m,d,theta,a,s FROM ScenarioCreator_probabilityfunction WHERE id=%u", id);
-  sqlite3_exec (db, query, PAR_get_PDF_callback, &dist, &sqlerr);
+  sqlite3_exec (db, query, PAR_get_PDF_callback, &args, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
@@ -717,21 +557,6 @@ PAR_get_PDF (sqlite3 *db, guint id)
       b = strtod (scew_element_contents (scew_element_by_name (e, "b")), NULL);
       g_assert (errno != ERANGE);
       dist = PDF_new_uniform_dist (a, b);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "triangular");
-  if (e)
-    {
-      double a, c, b;
-
-      errno = 0;
-      a = strtod (scew_element_contents (scew_element_by_name (e, "a")), NULL);
-      g_assert (errno != ERANGE);
-      c = strtod (scew_element_contents (scew_element_by_name (e, "c")), NULL);
-      g_assert (errno != ERANGE);
-      b = strtod (scew_element_contents (scew_element_by_name (e, "b")), NULL);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_triangular_dist (a, c, b);
       goto end;
     }
   e = scew_element_by_name (fn_param, "gaussian");
@@ -894,18 +719,6 @@ PAR_get_PDF (sqlite3 *db, guint id)
       dist = PDF_new_lognormal_dist (zeta, sigma);
       goto end;
     }
-  e = scew_element_by_name (fn_param, "piecewise");
-  if (e)
-    {
-      dist = PAR_get_piecewise_PDF( e );
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "histogram");
-  if (e)
-    {
-      dist = PAR_get_histogram_PDF( e );
-      goto end;
-    }
   e = scew_element_by_name (fn_param, "negative-binomial");
   if (e)
     {
@@ -1003,97 +816,7 @@ PAR_get_PDF (sqlite3 *db, guint id)
   g_debug ("----- EXIT PAR_get_PDF");
 #endif
 
-  return dist;
-}
-
-
-
-typedef struct
-{
-  GArray *x; /* growable array of doubles */
-  GArray *y; /* growable array of doubles */
-}
-PAR_get_relchart_callback_args_t;
-
-
-  
-/**
- * Retrieves a relationship chart parameter from the database. This callback
- * function is called once for each x-y pair (database row) in the chart.
- *
- * @param loc location of a PAR_get_relchart_callback_args_t object into which
- *  to accumulate the x-y pairs.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
- * @return 0
- */
-static int
-PAR_get_relchart_callback (void *loc, int ncols, char **value, char **colname)
-{
-  PAR_get_relchart_callback_args_t *build;
-  double x, y;
-  
-  g_assert (ncols == 2);
-  build = (PAR_get_relchart_callback_args_t *) loc;
-  errno = 0;
-  x = strtod (value[0], NULL);
-  if (errno == ERANGE)
-    {
-      g_error ("relationship chart point \"%s\" is not a number", value[0]);
-    }
-  errno = 0;
-  y = strtod (value[1], NULL);
-  if (errno == ERANGE)
-    {
-      g_error ("relationship chart point \"%s\" is not a number", value[1]);
-    }
-  g_array_append_val (build->x, x);
-  g_array_append_val (build->y, y);
-  return 0;
-}
-
-
-
-
-/**
- * Retrieves a relationship chart.
- *
- * @param db a parameter database.
- * @param id the database ID of the relationship chart.
- * @return a relationship chart object.
- */
-REL_chart_t *
-PAR_get_relchart (sqlite3 *db, guint id)
-{
-  REL_chart_t *chart;
-  PAR_get_relchart_callback_args_t build;
-  char *query;
-  char *sqlerr;
-  
-  #if DEBUG
-    g_debug ("----- ENTER PAR_get_relationship_chart");
-  #endif
-
-  build.x = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
-  build.y = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
-  query = g_strdup_printf ("SELECT x,y FROM ScenarioCreator_relationalfunction fn,ScenarioCreator_relationalpoint pt WHERE fn.id=%u AND pt.relational_function_id=fn.id ORDER BY _point_order", id);
-  sqlite3_exec (db, query, PAR_get_relchart_callback, &build, &sqlerr);
-  if (sqlerr)
-    {
-      g_error ("%s", sqlerr);
-    }
-  g_free (query);
-
-  chart = REL_new_chart ((double *)(build.x->data), (double *)(build.y->data), build.x->len);
-  g_array_free (build.x, /* free_segment = */ TRUE);
-  g_array_free (build.y, /* free_segment = */ TRUE);
-
-  #if DEBUG
-    g_debug ("----- EXIT PAR_get_relationship_chart");
-  #endif
-
-  return chart;
+  return args.dist;
 }
 
 
