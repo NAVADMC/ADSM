@@ -218,9 +218,6 @@ def save_scenario(request, target):
     # return db_save(target)
     if target:
         scenario_filename = target
-    else:
-        target = scenario_filename
-    if scenario_filename:
         print('Copying database to', target)
         shutil.copy(activeSession(), workspace_path(target))
     else:
