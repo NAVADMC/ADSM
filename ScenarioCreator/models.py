@@ -25,6 +25,8 @@ Conventions:
 
 Changes made in ScenarioCreator/models.py propagate to the script output
 
+Limit foreignkey choices with a dictionary filter on field values:
+                     limit_choices_to={'is_staff': True}
 """
 import os
 from django.core.exceptions import ValidationError
