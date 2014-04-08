@@ -35,7 +35,7 @@ class Migration(SchemaMigration):
             '_include_tracing_unit_exam': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             '_include_vaccination': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             '_include_zones': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'destrucion_reason_order': ('django.db.models.fields.CharField', [], {'default': "'Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring'", 'max_length': '255'}),
+            'destruction_reason_order': ('django.db.models.fields.CharField', [], {'default': "'Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring'", 'max_length': '255'}),
             'destruction_capacity': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'+'", 'null': 'True', 'blank': 'True', 'to': "orm['ScenarioCreator.RelationalFunction']"}),
             'destruction_priority_order': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'destruction_program_delay': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
