@@ -1861,14 +1861,28 @@ set_params (void *data, int ncols, char **value, char **colname)
       local_data->destruction_time_waiting_priority = 3;
     }
 
-  errno = 0;
-  local_data->vaccination_program_threshold = strtol (value[3], NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);  
+  if (value[3] != NULL)
+    {
+      errno = 0;
+      local_data->vaccination_program_threshold = strtol (value[3], NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);  
+    }
+  else
+    {
+      local_data->vaccination_program_threshold = 0;
+    }
 
-  errno = 0;
-  rel_id = strtol (value[4], NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);  
-  local_data->vaccination_capacity = PAR_get_relchart (params, rel_id);
+  if (value[4] != NULL)
+    {
+      errno = 0;
+      rel_id = strtol (value[4], NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);  
+      local_data->vaccination_capacity = PAR_get_relchart (params, rel_id);
+    }
+  else
+    {
+      local_data->vaccination_capacity = REL_new_point_chart (0);
+    }
   /* Set a flag if the vaccination capacity chart at some point drops to 0 and
    * stays there. */
   local_data->vaccination_capacity_goes_to_0 =
