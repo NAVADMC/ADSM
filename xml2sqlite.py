@@ -52,18 +52,53 @@ def getPdf( xml ):
 
 
 
+def getRelChart( xml ):
+	"""Returns a RelationalFunction object corresponding to the XML."""
+	assert isinstance( xml, ET.Element )
+	firstChild = list( xml )[0]
+	if firstChild.tag == 'relational-function':
+		# New style
+		name = firstChild.attrib['name']
+		relChart = RelationalFunction( name=name )
+		relChart.save()
+		for xyPair in firstChild.findall( './value' ):
+			point = RelationalPoint(
+			  relational_function = relChart,
+			  x = float( xyPair.find( './x' ).text ),
+			  y = float( xyPair.find( './y' ).text )
+			)
+			point.save()
+	else:
+		# Old style
+		relChart = RelationalFunction( name='' )
+		relChart.save()
+		values = [float( el.text ) for el in xml.findall( './/value' )]
+		while values:
+			point = RelationalPoint(
+			  relational_function = relChart,
+			  x = values[0],
+			  y = values[1]
+			)
+			point.save()
+			values = values[2:]
+
+	return relChart
+
+
+
 def main():
 	# Make sure the database has all the correct tables.
 	call_command('syncdb', verbosity=0)
 
 	xml = ET.parse( sys.stdin ).getroot()
 
+	usePrevalence = (xml.find( './/disease-model/prevalence' ) != None)
 	useAirborneExponentialDecay = (xml.find( './/airborne-spread-exponential-model' ) != None)
 	scenario = Scenario(
 	  description = xml.find( './description' ).text,
 	  include_airborne_spread = (xml.find( './/airborne-spread-model' ) != None or xml.find( './/airborne-spread-exponential-model' ) != None),
 	  use_airborne_exponential_decay = useAirborneExponentialDecay,
-	  use_within_unit_prevalence = (xml.find( './/disease-model/prevalence' ) != None)
+	  use_within_unit_prevalence = usePrevalence
 	)
 	scenario.save()
 
@@ -98,12 +133,17 @@ def main():
 		subclinicalPeriod = getPdf( el.find( './infectious-subclinical-period' ) )
 		clinicalPeriod = getPdf( el.find( './infectious-clinical-period' ) )
 		immunePeriod = getPdf( el.find( './immunity-period' ) )
+		if usePrevalence:
+			prevalence = getRelChart( el.find( './prevalence' ) )
+		else:
+			prevalence = None
 		diseaseReaction = DiseaseReaction(
 		  _disease = disease,
 		  disease_latent_period = latentPeriod,
 		  disease_subclinical_period = subclinicalPeriod,
 		  disease_clinical_period = clinicalPeriod,
-		  disease_immune_period = immunePeriod
+		  disease_immune_period = immunePeriod,
+		  disease_prevalence = prevalence
 		)
 		diseaseReaction.save()
 
