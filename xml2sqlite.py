@@ -192,6 +192,82 @@ def main():
 		# end of loop over from-production-types covered by this <airborne-spread[-exponential]-model> element
 	# end of loop over <airborne-spread[-exponential]-model> elements
 
+	plan = None
+	useDetection = (xml.find( './/detection-model' ) != None)
+	useDestruction = (
+	  (xml.find( './/basic-destruction-model' ) != None)
+	  or (xml.find( './/trace-destruction-model' ) != None)
+	  or (xml.find( './/trace-back-destruction-model' ) != None)
+	  or (xml.find( './/ring-destruction-model' ) != None)
+	)
+
+	if useDetection or useDestruction:
+		plan = ControlMasterPlan(
+		  _include_detection = useDetection,
+		  _include_destruction = useDestruction
+		)
+		plan.save()
+
+	for el in xml.findall( './/detection-model' ):
+		observing = getRelChart( el.find( './prob-report-vs-time-clinical' ) )
+		reporting = getRelChart( el.find( './prob-report-vs-time-since-outbreak' ) )
+		protocol = ControlProtocol(
+		  use_detection = True,
+		  detection_probability_for_observed_time_in_clinical = observing,
+		  detection_probability_report_vs_first_detection = reporting,
+		  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+		)
+		protocol.save()
+
+		for typeName in getProductionTypes( el.attrib['production-type'], productionTypeNames ):
+			assignment = ProtocolAssignment(
+			  production_type = ProductionType.objects.get( name=typeName ),
+			  control_protocol = protocol
+			)
+			assignment.save()
+		# end of loop over production-types covered by this <detection-model> element
+	# end of loop over <detection-model> elements
+
+	for el in xml.findall( './/basic-destruction-model' ):
+		priority = int( el.find( './priority' ).text )
+
+		for typeName in getProductionTypes( el.attrib['production-type'], productionTypeNames ):
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=typeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			protocol.use_destruction = True
+			protocol.destruction_priority = 1
+			protocol.save()
+		# end of loop over production-types covered by this <basic-destruction-model> element
+	# end of loop over <basic-destruction-model> elements
+
+	for el in xml.findall( './/resources-and-implementation-of-controls-model' ):
+		if useDestruction:
+			plan.destruction_program_delay = int( el.find( './destruction-program-delay/value' ).text )
+			plan.destruction_capacity = getRelChart( el.find( './destruction-capacity' ) )
+			try:
+				order = el.find( './destruction-priority-order' ).text
+			except AttributeError:
+				order = 'reason,production type,time waiting' # the old default
+			# The XML did not put spaces after the commas, but the Django
+			# model does.
+			order = ', '.join( order.split( ',' ) )
+			plan.destruction_priority_order = order
+			plan.save()
+	# end of loop over <resources-and-implementation-of-control-model> elements
+
 
 
 if __name__ == "__main__":
