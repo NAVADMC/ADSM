@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 from django.conf.global_settings import STATICFILES_DIRS
+import django.db.router
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -76,12 +77,20 @@ CRISPY_TEMPLATE_PACK = 'bootstrap'
 
 DATABASES = {
     'default': {
-        'NAME': os.path.join(BASE_DIR, 'activeSession.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'settings.sqlite3'),
         'ENGINE': 'django.db.backends.sqlite3',
         'USER': 'josiah',
         'PASSWORD': '1',
+    },
+    'scenario_db': {
+        'NAME': os.path.join(BASE_DIR, 'activeSession.sqlite3'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        # 'USER': 'josiah',
+        # 'PASSWORD': '1',
     }
 }
+
+DATABASE_ROUTERS = ['ScenarioCreator.router.ScenarioRouter', ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
