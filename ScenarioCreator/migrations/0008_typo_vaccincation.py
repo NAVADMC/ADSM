@@ -7,7 +7,7 @@ from django.db import models
 
 class Migration(SchemaMigration):
     def forwards(self, orm):
-        db.rename_column('ScenarioCreator_controlmasterplan', 'destrucion_reason_order', 'destruction_reason_order')
+        db.rename_column('ScenarioCreator_controlmasterplan', 'units_detected_before_triggering_vaccincation', 'units_detected_before_triggering_vaccination')
 
 
     def backwards(self, orm):
@@ -41,7 +41,7 @@ class Migration(SchemaMigration):
             'destruction_program_delay': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'units_detected_before_triggering_vaccincation': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'units_detected_before_triggering_vaccination': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'vaccination_capacity': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'+'", 'null': 'True', 'blank': 'True', 'to': "orm['ScenarioCreator.RelationalFunction']"}),
             'vaccination_priority_order': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },

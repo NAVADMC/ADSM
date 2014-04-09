@@ -173,7 +173,7 @@ def delete_entry(request, primary_key):
 #         from django.core.management import call_command
 #         print('Building DB structure...')
 #         os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
-#         call_command('syncdb',
+#         call_command('migrate',
 #             # verbosity=0,
 #             interactive=False,
 #             database=connections[db_name].alias,  # database=self.connection.alias,
@@ -218,14 +218,26 @@ def save_scenario(request, target):
     # return db_save(target)
     if target:
         scenario_filename = target
-    else:
-        target = scenario_filename
-    if scenario_filename:
         print('Copying database to', target)
         shutil.copy(activeSession(), workspace_path(target))
     else:
         raise ValueError('I need to select a file path to save first')
     return redirect('/setup/Scenario/1/')
+
+
+def update_db_version():
+    print("Checking Scenario version")
+    # Don't import django.core.management if it isn't needed.
+    from django.core.management import call_command
+
+    print('Building DB structure...')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
+    call_command('migrate',
+                 # verbosity=0,
+                 interactive=False,
+                 database=connections['default'].alias,  # database=self.connection.alias,
+                 load_initial_data=False)
+    print('Done creating database')
 
 
 def open_scenario(request, target):
@@ -234,6 +246,7 @@ def open_scenario(request, target):
     shutil.copy(workspace_path(target), activeSession())
     scenario_filename = target
     print('Sessions overwritten with ', target)
+    update_db_version()
     # else:
     #     print('File does not exist')
     return redirect('/setup/Scenario/1/')
