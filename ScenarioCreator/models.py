@@ -25,9 +25,14 @@ Conventions:
 
 Changes made in ScenarioCreator/models.py propagate to the script output
 
+Limit foreignkey choices with a dictionary filter on field values:
+                     limit_choices_to={'is_staff': True}
 """
+import os
+from django.core.exceptions import ValidationError
 from django.db import models
 from django_extras.db.models import PercentField, LatitudeField, LongitudeField, MoneyField
+import ScenarioCreator.parser
 
 
 def chc(*choice_list):
@@ -41,6 +46,22 @@ def priority_choices():
                'time waiting, production type, reason',
                'production type, reason, time waiting',
                'production type, time waiting, reason')
+
+
+def workspace(file_name):
+    return 'workspace/' + file_name
+
+
+def squish_name(name):
+    return name.lower().strip().replace(' ', '').replace('_', '')
+
+
+def choice_char_from_value(value, map_tuple):
+    value = squish_name(value)
+    for key, full_str in map_tuple:
+        if value == squish_name(full_str):
+            return key
+    return None
 
 frequency = chc("never", "once", "daily", "weekly", "monthly", "yearly")
 
@@ -64,7 +85,27 @@ class DynamicBlob(models.Model):
 
 
 class Population(models.Model):
-    source_file = models.CharField(max_length=255, default='SampleScenario.sqlite3')  # source_file made generic CharField so Django doesn't try to copy and save the raw file
+    source_file = models.CharField(max_length=255, blank=True)  # source_file made generic CharField so Django doesn't try to copy and save the raw file
+
+    def clean_fields(self, exclude=None):
+        if self.source_file and not os.path.isfile(workspace(self.source_file)):
+            raise ValidationError(self.source_file + " is not a file in the workspace.")
+
+    def save(self, *args, **kwargs):
+        super(Population, self).save(*args, **kwargs)
+        self.import_population()  # Population must be saved to db so that it can be foreignkeyed
+
+    def import_population(self):
+        if not self.source_file:
+            return
+        print("Parsing ", self.source_file)
+        p = ScenarioCreator.parser.PopulationParser(self.source_file)
+        data = p.parse_to_dictionary()
+        for entry_dict in data:
+            entry_dict['_population'] = self
+            farm = Unit.create(**entry_dict)
+            farm.save()
+        print("Done creating %i Units" % len(data))
 
 
 class Unit(models.Model):
@@ -77,10 +118,10 @@ class Unit(models.Model):
         help_text='The longitude used to georeference this unit.', )
     initial_state = models.CharField(max_length=255, default='S',
                                      help_text='Code indicating the actual disease state of the unit at the beginning of the simulation.',
-                                     choices=(('L', 'Latent'),
-                                              ('S', 'Susceptible'),
-                                              ('B', 'Subclinical'),
-                                              ('C', 'Clinical'),
+                                     choices=(('S', 'Susceptible'),
+                                              ('L', 'Latent'),
+                                              ('B', 'Infectious Subclinical'),
+                                              ('C', 'Infectious Clinical'),
                                               ('N', 'Naturally Immune'),
                                               ('V', 'Vaccine Immune'),
                                               ('D', 'Destroyed')))
@@ -108,6 +149,21 @@ class Unit(models.Model):
     user_defined_2 = models.TextField(blank=True)
     user_defined_3 = models.TextField(blank=True)
     user_defined_4 = models.TextField(blank=True)
+
+    @classmethod
+    def create(cls, **kwargs):
+        for key in kwargs:  #Convert values into their proper type
+            if key == 'production_type':
+                kwargs[key] = ProductionType.objects.get_or_create(name=kwargs[key])[0]
+            elif key in ('latitude', 'longitude'):
+                kwargs[key] = float(kwargs[key])
+            elif key == 'initial_size':
+                kwargs[key] = int(kwargs[key])
+            elif key == 'initial_state':
+                kwargs[key] = choice_char_from_value(kwargs[key], Unit._meta.get_field_by_name('initial_state')[0]._choices) or 'S'
+        unit = cls(**kwargs)
+        return unit
+
     def __str__(self):
         return "Unit(%s: (%s, %s)" % (self.production_type, self.latitude, self.longitude)
 
@@ -134,11 +190,11 @@ layer of validation will be necessary for required parameters per equation_type.
     equation_type = models.CharField(max_length=255,
                                      help_text='For probability density functions identifies the type of function.',
                                      default="Triangular",
-                                     choices=chc("Point", "Uniform", "Triangular", "Piecewise", "Histogram", "Gaussian",
-                                                 "Poisson", "Beta", "Gamma", "Weibull", "Exponential", "Pearson5",
-                                                 "Logistic",
-                                                 "LogLogistic", "Lognormal", "NegativeBinomial", "Pareto", "Bernoulli",
-                                                 "Binomial", "Discrete Uniform", "Hypergeometric", "Inverse Gaussian"))
+                                     choices=chc("Beta", "Bernoulli", "Binomial", "Discrete Uniform", "Exponential",
+                                                 "Point", "Gamma", "Gaussian", "Histogram", "Hypergeometric",
+                                                 "Inverse Gaussian", "Logistic", "LogLogistic", "Lognormal",
+                                                 "NegativeBinomial", "Pareto", "Pearson5", "Piecewise", "Poisson",
+                                                 "Triangular", "Uniform", "Weibull"))
     mean = models.FloatField(blank=True, null=True,
                              help_text='The mean for probability density function types Gaussian Lognormal Possoin and Exponential.', )
     std_dev = models.FloatField(blank=True, null=True,
@@ -175,6 +231,8 @@ layer of validation will be necessary for required parameters per equation_type.
                           help_text='The a parameter for probability density function types Pareto.', )
     s = models.IntegerField(blank=True, null=True,
                             help_text='The s parameter for probability density function types Negative Binomial.', )
+    graph = models.ForeignKey('RelationalFunction', blank=True, null=True,
+            help_text='A series of points used in Histogram and Piecewise functions.')
 
 
 class RelationalFunction(Function):
@@ -216,12 +274,12 @@ class ControlMasterPlan(models.Model):
     destruction_priority_order = models.CharField(max_length=255,
         help_text='The primary priority order for destruction.',
         choices=priority_choices(), )
-    destrucion_reason_order = models.CharField(max_length=255,
+    destruction_reason_order = models.CharField(max_length=255,
         default='Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring',
         # old DB: 'basic,direct-forward,ring,indirect-forward,direct-back,indirect-back'
         # old UI: Detected, Trace forward of direct contact, Ring, Trace forward of indirect contact, Trace back of direct contact, Trace back of indirect contact
         help_text='The secondary priority order for destruction.', )
-    units_detected_before_triggering_vaccincation = models.IntegerField(blank=True, null=True,
+    units_detected_before_triggering_vaccination = models.IntegerField(blank=True, null=True,
         help_text='The number of clinical units which must be detected before the initiation of a vaccination program.', )
     vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the daily vaccination capacity.', )
@@ -474,7 +532,7 @@ class AirborneSpreadModel(DiseaseSpreadModel):
 class Scenario(models.Model):
     description = models.TextField(blank=True,
         help_text='The description of the scenario.', )
-    language = models.CharField(choices=(('en', "English"), ('es', "Spanish")), max_length=255, blank=True,
+    language = models.CharField(default='en', choices=(('en', "English"), ('es', "Spanish")), max_length=255, blank=True,
         help_text='Language that the model is in - English is default.', )
     use_fixed_random_seed = models.BooleanField(default=False,
         help_text='Indicates if a specific seed value for the random number generator should be used.', )
@@ -546,7 +604,7 @@ class CustomOutputs(OutputSettings):
 
 
 class ProductionType(models.Model):
-    name = models.CharField(max_length=255, )
+    name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     def __str__(self):
         return self.name

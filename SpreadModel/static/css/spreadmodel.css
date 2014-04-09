@@ -131,3 +131,24 @@ th {
     padding-right: 40px;
 }
 
+#file_list ul {
+    list-style-type: none;
+    font-size: 20px;
+}
+
+#file_list li {
+    text-decoration: none;
+}
+
+#file_list li:nth-child(even) {
+    background-color: #ddd;
+}
+
+#file_list {
+    margin-top: 20px;
+    width: 50%
+}
+
+.controls ul {
+
+}
