@@ -613,7 +613,7 @@ PAR_get_boolean_callback (void *loc, int ncols, char **value, char **colname)
 gboolean
 PAR_get_boolean (sqlite3 *db, char *query)
 {
-  gboolean result;
+  gboolean result = FALSE;
   char *sqlerr;
 
 #if DEBUG
@@ -729,7 +729,7 @@ PAR_get_int_callback (void *loc, int ncols, char **value, char **colname)
 gint
 PAR_get_int (sqlite3 *db, char *query)
 {
-  gint result;
+  gint result = 0;
   char *sqlerr;
 
   #if DEBUG
