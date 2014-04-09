@@ -789,7 +789,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * parameters. */
   local_data->db = params;
   sqlite3_exec (params,
-                "SELECT prodtype.name,detection_probability_for_observed_time_in_clinical_relid_id,detection_probability_report_vs_first_detection_relid_id FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol detection,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=detection.id",
+                "SELECT prodtype.name,detection_probability_for_observed_time_in_clinical_id,detection_probability_report_vs_first_detection_id FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol detection,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=detection.id",
                 set_params, self, &sqlerr);
   if (sqlerr)
     {
@@ -800,7 +800,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_zone_params function to read the zone/production type
    * combination specific parameters. */
   sqlite3_exec (params,
-                "SELECT zone.zone_description,prodtype.name,zone_detection_multiplier FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectonproductiontype pairing WHERE zone.id=pairing.zone_id AND prodtype.id=pairing.production_type_id UNION SELECT zone.zone_description,prodtype.name,\"indirect\",zone_indirect_movement_id FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectonproductiontype pairing WHERE zone.id=pairing.zone_id AND prodtype.id=pairing.production_type_id",
+                "SELECT zone.zone_description,prodtype.name,zone_detection_multiplier FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectonproductiontype pairing WHERE zone.id=pairing.zone_id AND prodtype.id=pairing.production_type_id UNION SELECT zone.zone_description,prodtype.name,zone_indirect_movement_id FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectonproductiontype pairing WHERE zone.id=pairing.zone_id AND prodtype.id=pairing.production_type_id",
                 set_zone_params, self, &sqlerr);
   if (sqlerr)
     {
