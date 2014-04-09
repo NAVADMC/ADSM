@@ -1302,15 +1302,6 @@
     cattle to pigs.
     
     There is no detection, vaccination, or destruction.
-    
-    The ratio of new infections in the last 4 days to new infections in the 4
-    days prior to that is reported.  It has no value until day 8, when it will
-    be 1.0.  (The airborne infections on days 5 and 8 = a numerator of 2; the
-    initial infection plus the airborne infection on day 2 = a denominator of
-    2.)  On day 9 the ratio will be 0.5 (the airborne infection on day 8 = a
-    numerator of 1; the airborne infections on days 2 and 5 = a denominator of
-    2).  On day 10 the ratio will be 1.0 (the airborne infection on day 8 = a
-    numerator of 1; the airborne infection on day 5 = a denominator of 1).
   </parameter-description>
 
   <output>
@@ -1325,21 +1316,20 @@
       <td>infnUAirPigs</td>
       <td>infnUAll</td>
       <td>infcUAll</td>
-      <td>ratio</td>
     </tr>
-    <!--   Ini        Air       Cattle      Pigs    Ini/Cattle  Ini/Pigs  Air/Cattle  Air/Pigs    Total      Cumul      ratio  -->
-    <tr><td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td></td></tr>
+    <!--   Ini        Air       Cattle      Pigs    Ini/Cattle  Ini/Pigs  Air/Cattle  Air/Pigs    Total      Cumul     -->
+    <tr><td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
     <!-- Note that the "Ini" counts are separate, and most of the output
       variables are reserved for infections that happen during the simulation. -->
-    <tr><td>0</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>1</td> <td></td></tr>
-    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td></td></tr>
-    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td></td></tr>
-    <tr><td>0</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>2</td> <td></td></tr>
-    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>2</td> <td></td></tr>
-    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>2</td> <td></td></tr>
-    <tr><td>0</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>3</td> <td>1.0</td></tr>
-    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>3</td> <td>0.5</td></tr>
-    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>3</td> <td>1.0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>2</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>2</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>2</td></tr>
+    <tr><td>0</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>3</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>3</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>3</td></tr>
   </output>
 </variable-test>
 
