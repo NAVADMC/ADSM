@@ -25,7 +25,7 @@ def activeSession():
 
 
 def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
-    return {'filename': scenario_filename().replace('.sqlite3', ''),
+    return {'filename': scenario_filename(),
             'Scenario': Scenario.objects.count(),
             'OutputSetting': OutputSettings.objects.count(),
             'Population': Population.objects.count(),
