@@ -3,13 +3,14 @@ __author__ = 'Josiah Seaman'
 
 
 def part_of_scenario(model):
-    return model._meta.app_label in ['ScenarioCreator', 'Results']
+    return model._meta.app_label in ['ScenarioCreator', 'Results', 'south']
 
 
 def route_by_app(model):
     if part_of_scenario(model):
         return 'scenario_db'
     return None
+
 
 class ScenarioRouter(object):
     """ A router to separate all database operations based on a single scenario from global persistent settings.
@@ -28,11 +29,10 @@ class ScenarioRouter(object):
            return True
         return False
 
-    def allow_migrate(self, db, model):
+    def allow_syncdb(self, db, model):
         """ Ensures Scenario tables are not created in non-scenario databases
         """
         if db == 'scenario_db':
             return part_of_scenario(model)
-        elif part_of_scenario(model):  # but not going into the scenario Database
-            return False
-        return None
+        else:  # but not going into the scenario Database
+            return not part_of_scenario(model)

@@ -13,7 +13,7 @@ scenario_filename = 'activeSession'  # This keeps track of the state for all vie
 
 
 def activeSession():
-    full_path = settings.DATABASES['default']['NAME']
+    full_path = settings.DATABASES['scenario_db']['NAME']
     return os.path.split(full_path)[-1]
 
 
@@ -235,7 +235,7 @@ def update_db_version():
     call_command('migrate',
                  # verbosity=0,
                  interactive=False,
-                 database=connections['default'].alias,  # database=self.connection.alias,
+                 database=connections['scenario_db'].alias,  # database=self.connection.alias,
                  load_initial_data=False)
     print('Done creating database')
 
