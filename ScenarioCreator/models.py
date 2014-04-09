@@ -190,11 +190,11 @@ layer of validation will be necessary for required parameters per equation_type.
     equation_type = models.CharField(max_length=255,
                                      help_text='For probability density functions identifies the type of function.',
                                      default="Triangular",
-                                     choices=chc("Point", "Uniform", "Triangular", "Piecewise", "Histogram", "Gaussian",
-                                                 "Poisson", "Beta", "Gamma", "Weibull", "Exponential", "Pearson5",
-                                                 "Logistic",
-                                                 "LogLogistic", "Lognormal", "NegativeBinomial", "Pareto", "Bernoulli",
-                                                 "Binomial", "Discrete Uniform", "Hypergeometric", "Inverse Gaussian"))
+                                     choices=chc("Beta", "Bernoulli", "Binomial", "Discrete Uniform", "Exponential",
+                                                 "Point", "Gamma", "Gaussian", "Histogram", "Hypergeometric",
+                                                 "Inverse Gaussian", "Logistic", "LogLogistic", "Lognormal",
+                                                 "NegativeBinomial", "Pareto", "Pearson5", "Piecewise", "Poisson",
+                                                 "Triangular", "Uniform", "Weibull"))
     mean = models.FloatField(blank=True, null=True,
                              help_text='The mean for probability density function types Gaussian Lognormal Possoin and Exponential.', )
     std_dev = models.FloatField(blank=True, null=True,
@@ -231,6 +231,8 @@ layer of validation will be necessary for required parameters per equation_type.
                           help_text='The a parameter for probability density function types Pareto.', )
     s = models.IntegerField(blank=True, null=True,
                             help_text='The s parameter for probability density function types Negative Binomial.', )
+    graph = models.ForeignKey('RelationalFunction', blank=True, null=True,
+            help_text='A series of points used in Histogram and Piecewise functions.')
 
 
 class RelationalFunction(Function):
