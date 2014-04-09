@@ -272,6 +272,13 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
       g_ptr_array_add (tmp_models,
                        state_table_writer_new (parameter_db, units, projection, zones));
     }
+  else
+    {
+      g_ptr_array_add (tmp_models,
+                       full_table_writer_new (parameter_db, units, projection, zones));
+      g_ptr_array_add (tmp_models,
+                       infection_monitor_new (parameter_db, units, projection, zones));
+    }
 
   /* Conflict resolver is always added. */
   g_ptr_array_add (tmp_models, conflict_resolver_new (NULL, units, projection, zones));
