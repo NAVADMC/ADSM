@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'crispy_forms',
     'ScenarioCreator',
     'Results',
+    'Settings',
 )
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',

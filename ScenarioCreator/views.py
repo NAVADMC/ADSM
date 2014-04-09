@@ -8,8 +8,15 @@ from django.db import connections
 from django.conf import settings
 import re
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
+from Settings.models import SmSession
 
-scenario_filename = 'activeSession'  # This keeps track of the state for all views and is used by basic_context
+
+def scenario_filename(new_value=None):
+    session = SmSession.objects.get_or_create(id=1)[0]  # This keeps track of the state for all views and is used by basic_context
+    if new_value is not None:  # you can still set it to ''
+        session.scenario_filename = new_value
+        session.save()
+    return session.scenario_filename
 
 
 def activeSession():
@@ -18,7 +25,7 @@ def activeSession():
 
 
 def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
-    return {'filename': scenario_filename.replace('.sqlite3', ''),
+    return {'filename': scenario_filename().replace('.sqlite3', ''),
             'Scenario': Scenario.objects.count(),
             'OutputSetting': OutputSettings.objects.count(),
             'Population': Population.objects.count(),
@@ -200,9 +207,9 @@ def workspace_path(target):
 
 def file_dialog(request):
     # try:
-    print( "Saving ", scenario_filename)
-    if scenario_filename:
-        save_scenario(request, scenario_filename) #Save the file that's already open
+    print( "Saving ", scenario_filename())
+    if scenario_filename():
+        save_scenario(request, scenario_filename())  # Save the file that's already open
     # except ValueError:
     #     pass  # New scenario
     db_files = glob("./workspace/*.sqlite3")
@@ -213,15 +220,18 @@ def file_dialog(request):
     return render(request, 'ScenarioCreator/workspace.html', context)
 
 
-def save_scenario(request, target):
-    # subprocess.call([])  # This would be best for long operations (non-blocking) but could be os specific
-    # return db_save(target)
+def save_scenario(request, target=None):
+    """Save to the existing session of a new file name if target is provided
+    """
+    if not target and scenario_filename():
+        target = scenario_filename()
+
     if target:
-        scenario_filename = target
+        scenario_filename(target)
         print('Copying database to', target)
         shutil.copy(activeSession(), workspace_path(target))
     else:
-        raise ValueError('I need to select a file path to save first')
+        raise ValueError('You need to select a file path to save first')
     return redirect('/setup/Scenario/1/')
 
 
@@ -242,9 +252,9 @@ def update_db_version():
 
 def open_scenario(request, target):
     # if os.path.isfile(workspace_path(target)):
-    print("Copying ", workspace_path(target), activeSession())
+    print("Copying ", workspace_path(target), "to", activeSession())
     shutil.copy(workspace_path(target), activeSession())
-    scenario_filename = target
+    scenario_filename(target)
     print('Sessions overwritten with ', target)
     update_db_version()
     # else:
