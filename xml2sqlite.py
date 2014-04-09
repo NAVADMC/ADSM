@@ -31,19 +31,24 @@ def getPdf( xml ):
 	firstChild = list( xml )[0]
 	if firstChild.tag == 'probability-density-function':
 		# New style
+		name = firstChild.attrib['name']
 		firstChild = list( firstChild )[0]
 		# Now "firstChild" is the PDF element
-	pdfName = firstChild.tag
+	else:
+		name = ''
+	pdfType = firstChild.tag
 
-	args = {'equation_type': pdfName.capitalize()}
+	args = {'equation_type': pdfType.capitalize(), 'name': name}
 
-	if pdfName == 'point':
+	if pdfType == 'point':
 		args['mode'] = float( firstChild.text )
 	else:
-		print( pdfName )
+		print( pdfType )
 		raise NotImplementedError
 
-	return ProbabilityFunction( **args )
+	pdf = ProbabilityFunction( **args )
+	pdf.save()
+	return pdf
 
 
 
@@ -79,7 +84,8 @@ def main():
 	productionTypeNames.update( set( [el.attrib['from-production-type'] for el in xml.findall( './/*[@from-production-type]' )] ) )
 	# If an empty production type attribute appeared anywhere in the XML,
 	# ignore that.
-	productionTypeNames.remove( '' )
+	if '' in productionTypeNames:
+		productionTypeNames.remove( '' )
 	for name in productionTypeNames:
 		productionType = ProductionType( name=name )
 		productionType.save()
@@ -92,15 +98,11 @@ def main():
 		subclinicalPeriod = getPdf( el.find( './infectious-subclinical-period' ) )
 		clinicalPeriod = getPdf( el.find( './infectious-clinical-period' ) )
 		immunePeriod = getPdf( el.find( './immunity-period' ) )
-		latentPeriod.save()
-		subclinicalPeriod.save()
-		clinicalPeriod.save()
-		immunePeriod.save()
 		diseaseReaction = DiseaseReaction(
 		  _disease = disease,
 		  disease_latent_period = latentPeriod,
-		  disease_subclinical_period = clinicalPeriod,
-		  disease_clinical_period = subclinicalPeriod,
+		  disease_subclinical_period = subclinicalPeriod,
+		  disease_clinical_period = clinicalPeriod,
 		  disease_immune_period = immunePeriod
 		)
 		diseaseReaction.save()
@@ -126,7 +128,6 @@ def main():
 			maxDistance = float( el.find( './max-spread/value' ).text )
 		if el.find( './delay' ) != None:
 			delay = getPdf( el.find( './delay' ) )
-			delay.save()
 		else:
 			delay = zeroDelay
 		airborneSpreadModel = AirborneSpreadModel(
@@ -147,8 +148,8 @@ def main():
 				  airborne_contact_spread_model = airborneSpreadModel
 				)
 				pairing.save()
-			# end of loop over to-production-types covered by this <airborne-spread[-exponential]-model> elements	
-		# end of loop over from-production-types covered by this <airborne-spread[-exponential]-model> elements
+			# end of loop over to-production-types covered by this <airborne-spread[-exponential]-model> element
+		# end of loop over from-production-types covered by this <airborne-spread[-exponential]-model> element
 	# end of loop over <airborne-spread[-exponential]-model> elements
 
 
