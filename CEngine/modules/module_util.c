@@ -470,7 +470,7 @@ spreadmodel_read_priority_order (sqlite3 *params)
   /* Next get the relative ordering of reasons. */
   reason_order = g_new0 (SPREADMODEL_control_reason, SPREADMODEL_NCONTROL_REASONS);
   sqlite3_exec (params,
-                "SELECT destrucion_reason_order FROM ScenarioCreator_controlmasterplan",
+                "SELECT destruction_reason_order FROM ScenarioCreator_controlmasterplan",
                 read_reason_order_callback, reason_order, &sqlerr);
   if (sqlerr)
     {
