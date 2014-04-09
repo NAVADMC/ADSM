@@ -82,7 +82,7 @@ class RelationalFunctionForm(BaseForm):
 class RelationalPointForm(BaseForm):
     class Meta:
         model = RelationalPoint
-        exclude = ['_point_order']
+        exclude = []
         widgets = {'relational_function': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
