@@ -273,6 +273,9 @@ def main():
 
 	plan = None
 	useDetection = (xml.find( './/detection-model' ) != None)
+	useTracing = (
+	  (xml.find( './/trace-back-destruction-model' ) != None)
+	)
 	useDestruction = (
 	  (xml.find( './/basic-destruction-model' ) != None)
 	  or (xml.find( './/trace-destruction-model' ) != None)
@@ -280,9 +283,10 @@ def main():
 	  or (xml.find( './/ring-destruction-model' ) != None)
 	)
 
-	if useDetection or useDestruction:
+	if useDetection or useTracing or useDestruction:
 		plan = ControlMasterPlan(
 		  _include_detection = useDetection,
+		  _include_tracing = useTracing,
 		  _include_destruction = useDestruction
 		)
 		plan.save()
@@ -311,6 +315,84 @@ def main():
 		# end of loop over production-types covered by this <detection-model> element
 	# end of loop over <detection-model> elements
 
+	# Destruction priority order information is distributed among several
+	# different elements. Keep 2 lists that will help sort it out later.
+	destructionReasonOrder = []
+	destructionProductionTypeOrder = []
+
+	for el in xml.findall( './/trace-back-destruction-model' ):
+		# This is an older module, superseded by the combination of contact-
+		# recorder-model, trace-model, and trace-destruction-model.
+
+		# Enable trace forward/out from all production types.
+		contactType = el.attrib['contact-type']
+		assert (contactType == 'direct' or contactType == 'indirect')
+		tracePeriod = int( el.find( './trace-period/value' ).text )
+		traceSuccess = float( el.find( './trace-success' ).text )
+		for typeName in productionTypeNames:
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=typeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			protocol.use_tracing = True
+			if contactType == 'direct':
+				protocol.trace_direct_forward = True
+				protocol.direct_trace_success_rate = traceSuccess
+				protocol.direct_trace_period = tracePeriod
+			else:
+				protocol.trace_indirect_forward = True
+				protocol.indirect_trace_success = traceSuccess
+				protocoo.indirect_trace_period = tracePeriod
+			protocol.trace_result_delay = zeroDelay
+			protocol.save()
+		# end of loop to enable trace forward/out from all production types
+
+		# Enable destruction of specific production types when identified by
+		# trace.
+		priority = int( el.find( './priority' ).text )
+		try:
+			typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
+		except KeyError:
+			typeNames = productionTypeNames
+		for typeName in typeNames:
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=typeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			if contactType == 'direct':
+				protocol.destroy_direct_forward_traces = True
+				reason = 'Trace fwd direct'
+			else:
+				protocol.destroy_indirect_forward_traces = True
+				reason = 'Trace fwd indirect'
+			protocol.save()
+			destructionReasonOrder.append( (priority, reason) )
+			destructionProductionTypeOrder.append ( (priority, typeName) )
+		# end of loop over production-types covered by this <trace-back-destruction-model> element
+	# end of loop over <trace-back-destruction-model> elements
+
 	for el in xml.findall( './/basic-destruction-model' ):
 		priority = int( el.find( './priority' ).text )
 
@@ -335,8 +417,9 @@ def main():
 				)
 				assignment.save()
 			protocol.use_destruction = True
-			protocol.destruction_priority = 1
 			protocol.save()
+			destructionReasonOrder.append( (priority, 'Basic') )
+			destructionProductionTypeOrder.append ( (priority, typeName) )
 		# end of loop over production-types covered by this <basic-destruction-model> element
 	# end of loop over <basic-destruction-model> elements
 
@@ -345,14 +428,41 @@ def main():
 			plan.destruction_program_delay = int( el.find( './destruction-program-delay/value' ).text )
 			plan.destruction_capacity = getRelChart( el.find( './destruction-capacity' ) )
 			try:
-				order = el.find( './destruction-priority-order' ).text
+				order = el.find( './destruction-priority-order' ).text.strip()
 			except AttributeError:
 				order = 'reason,production type,time waiting' # the old default
 			# The XML did not put spaces after the commas, but the Django
 			# model does.
 			order = ', '.join( order.split( ',' ) )
 			plan.destruction_priority_order = order
+
+			# Create a new version of destructionReasonOrder where a) only the
+			# minimum priority number attached to each reason is preserved and
+			# b) the list is sorted by priority.
+			newDestructionReasonOrder = []
+			for reason in set( [item[1] for item in destructionReasonOrder] ):
+				minPriority = min( [item[0] for item in filter( lambda item: item[1]==reason, destructionReasonOrder )] )
+				newDestructionReasonOrder.append( (minPriority, reason) )
+			newDestructionReasonOrder.sort()
+			plan.destruction_reason_order = ', '.join( [item[1] for item in newDestructionReasonOrder] )
+
+			# Similar process for destructionProductionTypeOrder.
+			newDestructionProductionTypeOrder = []
+			for typeName in set( [item[1] for item in destructionProductionTypeOrder] ):
+				minPriority = min( [item[0] for item in filter( lambda item: item[1]==typeName, destructionProductionTypeOrder )] )
+				newDestructionProductionTypeOrder.append( (minPriority, typeName) )
+			newDestructionProductionTypeOrder.sort()
+			newDestructionProductionTypeOrder = [item[1] for item in newDestructionProductionTypeOrder]
+			priority = 1
+			for typeName in newDestructionProductionTypeOrder:
+				assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
+				protocol = assignment.control_protocol
+				protocol.destruction_priority = priority
+				protocol.save()
+				priority += 1
+
 			plan.save()
+		# end of if useDestruction==True
 	# end of loop over <resources-and-implementation-of-control-model> elements
 
 
