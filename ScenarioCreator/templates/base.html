@@ -10,7 +10,11 @@
 </head>
 <body>
 <header>
-    <h1 class="filename"><img src="{{STATIC_URL}}icons/icon_4743/icon_4743.svg" width=32 height=32 alt=""/>  {{ filename }}</h1>
+    <h1 class="filename">
+        <img src="{{STATIC_URL}}icons/icon_4743/icon_4743.svg" width=32 height=32 alt=""/>
+        <input type="text" value="{{ filename }}">
+    </h1>
+
     {# <button type="button" id="loading-example-btn" data-loading-text="Loading..." class="btn btn-primary"> #}
     <h1><a id="new_scenario" href="/setup/NewScenario/">New </a></h1>
     <h1><a id="save_scenario" href="/setup/SaveScenario/">Save </a></h1>

@@ -273,10 +273,10 @@ def new_scenario(request):
                  interactive=False,
                  database=connections['scenario_db'].alias,
                  load_initial_data=False)
-
     call_command('migrate',
                  # verbosity=0,
                  interactive=False,
                  database=connections['scenario_db'].alias,
                  load_initial_data=False)
+    scenario_filename("Untitled Scenario")
     return redirect('/setup/Scenario/1/')
