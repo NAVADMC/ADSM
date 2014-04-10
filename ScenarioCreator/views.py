@@ -208,9 +208,9 @@ def workspace_path(target):
 
 def file_dialog(request):
     # try:
-    print( "Saving ", scenario_filename())
-    if scenario_filename():
-        save_scenario(request, scenario_filename())  # Save the file that's already open
+    # print( "Saving ", scenario_filename())
+    # if scenario_filename():
+    #     save_scenario(request, scenario_filename())  # Save the file that's already open
     # except ValueError:
     #     pass  # New scenario
     db_files = glob("./workspace/*.sqlite3")
