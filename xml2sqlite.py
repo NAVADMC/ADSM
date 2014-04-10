@@ -366,35 +366,41 @@ def main():
 		# trace.
 		priority = int( el.find( './priority' ).text )
 		try:
-			typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
-		except KeyError:
-			typeNames = productionTypeNames
-		for typeName in typeNames:
-			# If a ControlProtocol object has already been assigned to this
-			# production type, retrieve it; otherwise, create a new one.
+			quarantineOnly = getBool( el.find( './quarantine-only' ) )
+		except AttributeError:
+			quarantineOnly = False
+		if not quarantineOnly:
 			try:
-				assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
-				protocol = assignment.control_protocol
-			except ProtocolAssignment.DoesNotExist:
-				protocol = ControlProtocol(
-				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
-				)
+				typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
+			except KeyError:
+				typeNames = productionTypeNames
+			for typeName in typeNames:
+				# If a ControlProtocol object has already been assigned to this
+				# production type, retrieve it; otherwise, create a new one.
+				try:
+					assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
+					protocol = assignment.control_protocol
+				except ProtocolAssignment.DoesNotExist:
+					protocol = ControlProtocol(
+					  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+					)
+					protocol.save()
+					assignment = ProtocolAssignment(
+					  production_type = ProductionType.objects.get( name=typeName ),
+					  control_protocol = protocol
+					)
+					assignment.save()
+				if contactType == 'direct':
+					protocol.destroy_direct_forward_traces = True
+					reason = 'Trace fwd direct'
+				else:
+					protocol.destroy_indirect_forward_traces = True
+					reason = 'Trace fwd indirect'
 				protocol.save()
-				assignment = ProtocolAssignment(
-				  production_type = ProductionType.objects.get( name=typeName ),
-				  control_protocol = protocol
-				)
-				assignment.save()
-			if contactType == 'direct':
-				protocol.destroy_direct_forward_traces = True
-				reason = 'Trace fwd direct'
-			else:
-				protocol.destroy_indirect_forward_traces = True
-				reason = 'Trace fwd indirect'
-			protocol.save()
-			destructionReasonOrder.append( (priority, reason) )
-			destructionProductionTypeOrder.append ( (priority, typeName) )
-		# end of loop over production-types covered by this <trace-back-destruction-model> element
+				destructionReasonOrder.append( (priority, reason) )
+				destructionProductionTypeOrder.append ( (priority, typeName) )
+			# end of loop over production-types covered by this <trace-back-destruction-model> element
+		# end of if not quarantineOnly
 	# end of loop over <trace-back-destruction-model> elements
 
 	for el in xml.findall( './/basic-destruction-model' ):
