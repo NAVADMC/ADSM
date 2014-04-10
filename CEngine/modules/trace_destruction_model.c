@@ -395,7 +395,6 @@ set_params (void *data, int ncols, char **value, char **colname)
   production_type_name = value[0];
   production_type_id = spreadmodel_read_prodtype (production_type_name, local_data->production_types);
 
-  /* Trace back/in direct */
   local_data->priority[SPREADMODEL_DirectContact][SPREADMODEL_TraceBackOrIn][production_type_id]
     = get_priority (local_data->priority_order_table, production_type_name,
                     SPREADMODEL_ControlTraceBackDirect, value[1]);
@@ -404,11 +403,11 @@ set_params (void *data, int ncols, char **value, char **colname)
     = get_priority (local_data->priority_order_table, production_type_name,
                     SPREADMODEL_ControlTraceForwardDirect, value[2]);
 
-  local_data->priority[SPREADMODEL_DirectContact][SPREADMODEL_TraceBackOrIn][production_type_id]
+  local_data->priority[SPREADMODEL_IndirectContact][SPREADMODEL_TraceBackOrIn][production_type_id]
     = get_priority (local_data->priority_order_table, production_type_name,
                     SPREADMODEL_ControlTraceBackIndirect, value[3]);
 
-  local_data->priority[SPREADMODEL_DirectContact][SPREADMODEL_TraceForwardOrOut][production_type_id]
+  local_data->priority[SPREADMODEL_IndirectContact][SPREADMODEL_TraceForwardOrOut][production_type_id]
     = get_priority (local_data->priority_order_table, production_type_name,
                     SPREADMODEL_ControlTraceForwardIndirect, value[4]);
 
@@ -466,7 +465,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * type and reason for destruction. */
   local_data->priority_order_table = spreadmodel_read_priority_order (params);
   sqlite3_exec (params,
-                "SELECT prodtype.name,destroy_direct_back_traces,destroy_direct_forward_traces,destroy_indirect_back_traces,destroy_indirect_forward_traces FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id",
+                "SELECT prodtype.name,destroy_direct_back_traces,destroy_direct_forward_traces,destroy_indirect_back_traces,destroy_indirect_forward_traces FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND (destroy_direct_back_traces=1 OR destroy_direct_forward_traces=1 OR destroy_indirect_back_traces=1 OR destroy_indirect_forward_traces=1)",
                 set_params, self, &sqlerr);
   if (sqlerr)
     {
