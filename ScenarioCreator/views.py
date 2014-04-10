@@ -244,7 +244,7 @@ def update_db_version():
     call_command('migrate',
                  # verbosity=0,
                  interactive=False,
-                 database=connections['scenario_db'].alias,  # database=self.connection.alias,
+                 database=connections['scenario_db'].alias,
                  load_initial_data=False)
     print('Done creating database')
 
@@ -260,12 +260,23 @@ def open_scenario(request, target):
     #     print('File does not exist')
     return redirect('/setup/Scenario/1/')
 
+
 def new_scenario(request):
-    shutil.rmtree(activeSession())
+    print("Deleting", activeSession())
+    try:
+        os.remove(activeSession())
+    except:
+        pass  # the file may not exist anyways
     #creates a new blank file by migrate / syncdb
+    call_command('syncdb',
+                 # verbosity=0,
+                 interactive=False,
+                 database=connections['scenario_db'].alias,
+                 load_initial_data=False)
+
     call_command('migrate',
                  # verbosity=0,
                  interactive=False,
-                 database=connections['scenario_db'].alias,  # database=self.connection.alias,
+                 database=connections['scenario_db'].alias,
                  load_initial_data=False)
     return redirect('/setup/Scenario/1/')
