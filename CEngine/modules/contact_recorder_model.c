@@ -676,16 +676,30 @@ set_params (void *data, int ncols, char **value, char **colname)
   production_type =
     spreadmodel_read_prodtype (value[0], local_data->production_types);
 
-  errno = 0;
-  trace_success = strtod (value[1], NULL);
-  g_assert (errno != ERANGE);
-  g_assert (trace_success >= 0 && trace_success <= 1);
+  if (value[1] != NULL)
+    {
+      errno = 0;
+      trace_success = strtod (value[1], NULL);
+      g_assert (errno != ERANGE);
+      g_assert (trace_success >= 0 && trace_success <= 1);
+    }
+  else
+    {
+      trace_success = 0;
+    }
   local_data->trace_success[SPREADMODEL_DirectContact][production_type] = trace_success;
 
-  errno = 0;
-  trace_success = strtod (value[2], NULL);
-  g_assert (errno != ERANGE);
-  g_assert (trace_success >= 0 && trace_success <= 1);
+  if (value[2] != NULL)
+    {
+      errno = 0;
+      trace_success = strtod (value[2], NULL);
+      g_assert (errno != ERANGE);
+      g_assert (trace_success >= 0 && trace_success <= 1);
+    }
+  else
+    {
+      trace_success = 0;
+    }
   local_data->trace_success[SPREADMODEL_IndirectContact][production_type] = trace_success;
 
   errno = 0;
@@ -775,13 +789,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       local_data->trace_in[i] = g_queue_new ();
     }
 
-  local_data->trace_period = PAR_get_int (params, "SELECT MAX(trace_period) FROM (SELECT direct_trace_period AS trace_period FROM ScenarioCreator_controlprotocol UNION SELECT indirect_trace_period AS trace_period FROM ScenarioCreator_controlprotocol");
+  local_data->trace_period = PAR_get_int (params, "SELECT MAX(trace_period) FROM (SELECT direct_trace_period AS trace_period FROM ScenarioCreator_controlprotocol UNION SELECT indirect_trace_period AS trace_period FROM ScenarioCreator_controlprotocol)");
 
   /* Call the set_params function to read the production type specific
    * parameters. */
   local_data->db = params;
   sqlite3_exec (params,
-                "SELECT prodtype.name,direct_trace_success_rate,indirect_trace_success,trace_result_delay_id FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol, ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id",
+                "SELECT prodtype.name,direct_trace_success_rate,indirect_trace_success,trace_result_delay_id FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol, ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND (trace_direct_forward=1 OR trace_direct_back=1 OR trace_indirect_forward=1 OR trace_indirect_back=1)",
                 set_params, self, &sqlerr);
   if (sqlerr)
     {

@@ -215,7 +215,7 @@ to_string (struct spreadmodel_model_t_ *self)
                 local_data->trace_period[contact_type][direction][i];
               if (trace_period >= 0)
                 {
-                  g_string_append_printf (s, " %s%s %i days",
+                  g_string_append_printf (s, " %s %s %i days",
                                           SPREADMODEL_trace_direction_name[direction],
                                           SPREADMODEL_contact_type_name[contact_type],
                                           trace_period);
@@ -301,52 +301,68 @@ set_params (void *data, int ncols, char **value, char **colname)
   production_type = spreadmodel_read_prodtype (value[0], local_data->production_types);
 
   /* Read the parameters. */
-  errno = 0;
-  trace_period = strtol (value[1], NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);
-  if (trace_period < 0)
+  if (value[1] != NULL)
     {
-      trace_period = -1; /* do not trace */
-    }
-  errno = 0;
-  tmp = strtol (value[2], NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);
-  g_assert (tmp == 0 || tmp == 1);
-  if (tmp == 1)
-    {
-      local_data->trace_period[SPREADMODEL_DirectContact][SPREADMODEL_TraceForwardOrOut][production_type] = trace_period;
-    }
-  errno = 0;
-  tmp = strtol (value[3], NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);
-  g_assert (tmp == 0 || tmp == 1);
-  if (tmp == 1)
-    {
-      local_data->trace_period[SPREADMODEL_DirectContact][SPREADMODEL_TraceBackOrIn][production_type] = trace_period;
+      errno = 0;
+      trace_period = strtol (value[1], NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);
+      if (trace_period >= 0)
+        {
+          if (value[2] != NULL)
+            {
+              errno = 0;
+              tmp = strtol (value[2], NULL, /* base */ 10);
+              g_assert (errno != ERANGE && errno != EINVAL);
+              g_assert (tmp == 0 || tmp == 1);
+              if (tmp == 1)
+                {
+                  local_data->trace_period[SPREADMODEL_DirectContact][SPREADMODEL_TraceForwardOrOut][production_type] = trace_period;
+                }
+            }
+          if (value[3] != NULL)
+            {
+              errno = 0;
+              tmp = strtol (value[3], NULL, /* base */ 10);
+              g_assert (errno != ERANGE && errno != EINVAL);
+              g_assert (tmp == 0 || tmp == 1);
+              if (tmp == 1)
+                {
+                  local_data->trace_period[SPREADMODEL_DirectContact][SPREADMODEL_TraceBackOrIn][production_type] = trace_period;
+                }
+            }
+        }
     }
 
-  errno = 0;
-  trace_period = strtol (value[4], NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);
-  if (trace_period < 0)
+  if (value[4] != NULL)
     {
-      trace_period = -1; /* do not trace */
-    }
-  errno = 0;
-  tmp = strtol (value[5], NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);
-  g_assert (tmp == 0 || tmp == 1);
-  if (tmp == 1)
-    {
-      local_data->trace_period[SPREADMODEL_IndirectContact][SPREADMODEL_TraceForwardOrOut][production_type] = trace_period;
-    }
-  errno = 0;
-  tmp = strtol (value[6], NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);
-  g_assert (tmp == 0 || tmp == 1);
-  if (tmp == 1)
-    {
-      local_data->trace_period[SPREADMODEL_IndirectContact][SPREADMODEL_TraceBackOrIn][production_type] = trace_period;
+      errno = 0;
+      trace_period = strtol (value[4], NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);
+      if (trace_period >= 0)
+        {
+          if (value[5] != NULL)
+            {
+              errno = 0;
+              tmp = strtol (value[5], NULL, /* base */ 10);
+              g_assert (errno != ERANGE && errno != EINVAL);
+              g_assert (tmp == 0 || tmp == 1);
+              if (tmp == 1)
+                {
+                  local_data->trace_period[SPREADMODEL_IndirectContact][SPREADMODEL_TraceForwardOrOut][production_type] = trace_period;
+                }
+            }
+          if (value[6] != NULL)
+            {
+              errno = 0;
+              tmp = strtol (value[6], NULL, /* base */ 10);
+              g_assert (errno != ERANGE && errno != EINVAL);
+              g_assert (tmp == 0 || tmp == 1);
+              if (tmp == 1)
+                {
+                  local_data->trace_period[SPREADMODEL_IndirectContact][SPREADMODEL_TraceBackOrIn][production_type] = trace_period;
+                }
+            }
+        }
     }
 
   #if DEBUG
@@ -410,7 +426,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read the production type specific
    * parameters. */
   sqlite3_exec (params,
-                "SELECT prodtype.name,direct_trace_period,trace_direct_forward,trace_direct_back,indirect_trace_period,trace_indirect_forward,trace_indirect_back FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol, ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id",
+                "SELECT prodtype.name,direct_trace_period,trace_direct_forward,trace_direct_back,indirect_trace_period,trace_indirect_forward,trace_indirect_back FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol, ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND (trace_direct_forward=1 OR trace_direct_back=1 OR trace_indirect_forward=1 OR trace_indirect_back=1)",
                 set_params, self, &sqlerr);
   if (sqlerr)
     {
