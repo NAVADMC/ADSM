@@ -2,6 +2,7 @@ from glob import glob
 import json
 import os
 import shutil
+from django.core.management import call_command
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db import connections
@@ -237,8 +238,6 @@ def save_scenario(request, target=None):
 
 def update_db_version():
     print("Checking Scenario version")
-    # Don't import django.core.management if it isn't needed.
-    from django.core.management import call_command
 
     print('Building DB structure...')
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
@@ -259,4 +258,14 @@ def open_scenario(request, target):
     update_db_version()
     # else:
     #     print('File does not exist')
+    return redirect('/setup/Scenario/1/')
+
+def new_scenario(request):
+    shutil.rmtree(activeSession())
+    #creates a new blank file by migrate / syncdb
+    call_command('migrate',
+                 # verbosity=0,
+                 interactive=False,
+                 database=connections['scenario_db'].alias,  # database=self.connection.alias,
+                 load_initial_data=False)
     return redirect('/setup/Scenario/1/')
