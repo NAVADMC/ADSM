@@ -5288,7 +5288,7 @@ PDF_has_variance (PDF_dist_t * dist)
       {
         PDF_loglogistic_dist_t *d;
         d = &(dist->u.loglogistic);
-        if (1.0 >= d->shape)
+        if (2.0 >= d->shape)
           {
             return FALSE;
           }
@@ -5473,9 +5473,9 @@ PDF_variance (PDF_dist_t * dist)
       {
         PDF_loglogistic_dist_t *d;
         d = &(dist->u.loglogistic);
-        if (1.0 >= d->shape)
+        if (2.0 >= d->shape)
           {
-            /* Cannot compute variance for shape <= 1.0. */
+            /* Cannot compute variance for shape <= 2.0. */
             variance = GSL_NAN;
           }
         else
