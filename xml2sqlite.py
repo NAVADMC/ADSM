@@ -120,9 +120,13 @@ def main():
 	outputSettings.save()
 
 	# Gather the production type names into a set.
-	productionTypeNames = set( [el.attrib['production-type'] for el in xml.findall( './/*[@production-type]' )] )
-	productionTypeNames.update( set( [el.attrib['to-production-type'] for el in xml.findall( './/*[@to-production-type]' )] ) )
-	productionTypeNames.update( set( [el.attrib['from-production-type'] for el in xml.findall( './/*[@from-production-type]' )] ) )
+	productionTypeNames = set()
+	for el in xml.findall( './/*[@production-type]' ):
+		productionTypeNames.update( getProductionTypes( el.attrib['production-type'], [] ) )
+	for el in xml.findall( './/*[@to-production-type]' ):
+		productionTypeNames.update( getProductionTypes( el.attrib['to-production-type'], [] ) )
+	for el in xml.findall( './/*[@from-production-type]' ):
+		productionTypeNames.update( getProductionTypes( el.attrib['from-production-type'], [] ) )
 	# If an empty production type attribute appeared anywhere in the XML,
 	# ignore that.
 	if '' in productionTypeNames:
