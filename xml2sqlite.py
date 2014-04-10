@@ -147,9 +147,13 @@ def main():
 		)
 		diseaseReaction.save()
 
-		for productionTypeName in getProductionTypes( el.attrib['production-type'], productionTypeNames ):
+		try:
+			typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
+		except KeyError:
+			typeNames = productionTypeNames
+		for typeName in typeNames:
 			diseaseReactionAssignment = DiseaseReactionAssignment(
-			  production_type = ProductionType.objects.get( name=productionTypeName ),
+			  production_type = ProductionType.objects.get( name=typeName ),
 			  reaction = diseaseReaction
 			)
 			diseaseReactionAssignment.save()
@@ -219,7 +223,11 @@ def main():
 		)
 		protocol.save()
 
-		for typeName in getProductionTypes( el.attrib['production-type'], productionTypeNames ):
+		try:
+			typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
+		except KeyError:
+			typeNames = productionTypeNames
+		for typeName in typeNames:
 			assignment = ProtocolAssignment(
 			  production_type = ProductionType.objects.get( name=typeName ),
 			  control_protocol = protocol
@@ -231,7 +239,11 @@ def main():
 	for el in xml.findall( './/basic-destruction-model' ):
 		priority = int( el.find( './priority' ).text )
 
-		for typeName in getProductionTypes( el.attrib['production-type'], productionTypeNames ):
+		try:
+			typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
+		except KeyError:
+			typeNames = productionTypeNames
+		for typeName in typeNames:
 			# If a ControlProtocol object has already been assigned to this
 			# production type, retrieve it; otherwise, create a new one.
 			try:
