@@ -86,6 +86,12 @@ def getRelChart( xml ):
 
 
 
+def getBool( xml ):
+	"""Returns a boolean corresponding to the XML."""
+	return (xml.text.lower() in ('1', 'y', 'yes', 't', 'true'))
+
+
+
 def main():
 	# Make sure the database has all the correct tables.
 	call_command('syncdb', verbosity=0)
@@ -195,6 +201,75 @@ def main():
 			# end of loop over to-production-types covered by this <airborne-spread[-exponential]-model> element
 		# end of loop over from-production-types covered by this <airborne-spread[-exponential]-model> element
 	# end of loop over <airborne-spread[-exponential]-model> elements
+
+	for el in xml.findall( './/contact-spread-model' ):
+		if 'zone' in el.attrib:
+			continue
+		fixedRate = (el.find( './fixed-movement-rate' ) != None)
+		if fixedRate:
+			contactRate = float( el.find( './fixed-movement-rate/value' ).text )
+		else:
+			contactRate = float( el.find( './movement-rate/value' ).text )
+		distance = getPdf( el.find( './distance' ) )
+		delay = getPdf( el.find( './delay' ) )
+		probInfect = float( el.find( './prob-infect' ).text )
+		try:
+			subclinicalCanInfect = getBool( el.find( './subclinical-units-can-infect' ) )
+		except AttributeError:
+			subclinicalCanInfect = True # default
+		movementControl = getRelChart( el.find( './movement-control' ) )
+
+		if el.attrib['contact-type'] == 'direct':
+			contactSpreadModel = DirectSpreadModel(
+			  _disease = disease,
+			  use_fixed_contact_rate = fixedRate,
+			  contact_rate = contactRate,
+			  movement_control = movementControl,
+			  distance_distribution = distance,
+			  transport_delay = delay,
+			  infection_probability = probInfect,
+			  latent_animals_can_infect_others = getBool( el.find( './latent-units-can-infect' ) ),
+			  subclinical_animals_can_infect_others = subclinicalCanInfect
+			)
+		elif el.attrib['contact-type'] == 'indirect':
+			contactSpreadModel = IndirectSpreadModel(
+			  _disease = disease,
+			  use_fixed_contact_rate = fixedRate,
+			  contact_rate = contactRate,
+			  movement_control = movementControl,
+			  distance_distribution = distance,
+			  transport_delay = delay,
+			  infection_probability = probInfect,
+			  subclinical_animals_can_infect_others = subclinicalCanInfect
+			)
+		else:
+			assert False
+		contactSpreadModel.save()
+
+		for fromTypeName in getProductionTypes( el.attrib['from-production-type'], productionTypeNames ):
+			for toTypeName in getProductionTypes( el.attrib['to-production-type'], productionTypeNames ):
+				# If a ProductionTypePairTransmission object has already been
+				# assigned to this from/to pairing of production types,
+				# retrieve it; otherwise, create a new one.
+				try:
+					pairing = ProductionTypePairTransmission.objects.get(
+					  source_production_type__name=fromTypeName,
+					  destination_production_type__name=toTypeName
+					)
+				except ProductionTypePairTransmission.DoesNotExist:
+					pairing = ProductionTypePairTransmission(
+					  source_production_type = ProductionType.objects.get( name=fromTypeName ),
+					  destination_production_type = ProductionType.objects.get( name=toTypeName )
+					)
+					pairing.save()
+				if el.attrib['contact-type'] == 'direct':
+					pairing.direct_contact_spread_model = contactSpreadModel
+				else:
+					pairing.indirect_contact_spread_model = contactSpreadModel
+				pairing.save()
+			# end of loop over to-production-types covered by this <contact-spread-model> element
+		# end of loop over from-production-types covered by this <contact-spread-model> element		
+	# end of loop over <contact-spread-model> elements
 
 	plan = None
 	useDetection = (xml.find( './/detection-model' ) != None)
