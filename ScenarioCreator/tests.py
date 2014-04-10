@@ -11,23 +11,23 @@ standardPost = {'description': 'words', "naadsm_version": '3.2.19', "language": 
 
 class CreatorTest(TestCase):
     def test_index_page(self):
-        r = self.client.get('/setup/')
-        self.assertEqual(r.status_code, 200)
+        r = self.client.get('')
+        self.assertEqual(r.status_code, 302)
 
     def test_create_Scenario(self):
-        r = self.client.get('/setup/new/')
+        r = self.client.get('/setup/Scenario/new/')
         self.assertEqual(r.status_code, 200)
         self.assertTrue('form' in r.context)
         length = Scenario.objects.count()
-        r = self.client.post('/setup/new/', standardPost)
+        r = self.client.post('/setup/Scenario/new/', standardPost)
         #"exit_condition":...
-        self.assertEqual(r.status_code, 200)
-        self.assertEqual(Scenario.objects.count(), length +1)
+        self.assertEqual(r.status_code, 302)  #redirects to edit page on post of new content
+        self.assertEqual(Scenario.objects.count(), length + 1)
 
     def test_edit_Scenario(self):
-        r = self.client.post('/setup/new/', standardPost)
-        r = self.client.get('/setup/1/')
-        r = self.client.post('/setup/1/', updatedPost)
+        r = self.client.post('/setup/Scenario/new/', standardPost)
+        r = self.client.get('/setup/Scenario/1/')
+        r = self.client.post('/setup/Scenario/1/', updatedPost)
         self.assertEqual(Scenario.objects.get(pk=1).description, 'Updated Description')
 
 

@@ -242,7 +242,6 @@ class RelationalFunction(Function):
 
 class RelationalPoint(models.Model):
     relational_function = models.ForeignKey(RelationalFunction)
-    _point_order = models.IntegerField(blank=True, null=True, )  # validated
     x = models.FloatField(
         help_text='The x value of the point.', )
     y = models.FloatField(
