@@ -577,6 +577,68 @@ def main():
 		# end of loop over production-types covered by this <trace-destruction-model> element
 	# end of loop over <trace-destruction-model> elements
 
+	for el in xml.findall( './/ring-destruction-model' ):
+		# Older XML files allowed just a "production-type" elements and an
+		# implied "from-any" functionality.
+		if 'production-type' in el.attrib:
+			fromTypeNames = productionTypeNames
+			toTypeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
+		else:
+			try:
+				fromTypeNames = getProductionTypes( el.attrib['from-production-type'], productionTypeNames )
+			except KeyError:
+				fromTypeNames = productionTypeNames
+			try:
+				toTypeNames = getProductionTypes( el.attrib['to-production-type'], productionTypeNames )
+			except KeyError:
+				toTypeNames = productionTypeNames
+
+		radius = float( el.find( './radius/value' ).text )
+		for fromTypeName in fromTypeNames:
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=fromTypeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=fromTypeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			protocol.destruction_is_a_ring_trigger = True
+			protocol.destruction_ring_radius = radius
+			protocol.save()
+		# end of loop over from-production-types covered by this <ring-destruction-model> element
+
+		priority = int( el.find( './priority' ).text )
+		for toTypeName in toTypeNames:
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=toTypeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=toTypeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			protocol.destruction_is_a_ring_target = True
+			protocol.save()
+			destructionReasonOrder.append( (priority, 'Ring') )
+			destructionProductionTypeOrder.append( (priority, toTypeName) )
+		# end of loop over to-production-types covered by this <ring-destruction-model> element
+	# end of loop over <ring-destruction-model> elements
+
 	for el in xml.findall( './/resources-and-implementation-of-controls-model' ):
 		if useDestruction:
 			plan.destruction_program_delay = int( el.find( './destruction-program-delay/value' ).text )
