@@ -702,11 +702,18 @@ set_params (void *data, int ncols, char **value, char **colname)
     }
   local_data->trace_success[SPREADMODEL_IndirectContact][production_type] = trace_success;
 
-  errno = 0;
-  pdf_id = strtol (value[3], NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);
-  g_assert (local_data->trace_delay[production_type] == NULL);
-  local_data->trace_delay[production_type] = PAR_get_PDF (params, pdf_id);
+  if (value[3] != NULL)
+    {
+      errno = 0;
+      pdf_id = strtol (value[3], NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);
+      g_assert (local_data->trace_delay[production_type] == NULL);
+      local_data->trace_delay[production_type] = PAR_get_PDF (params, pdf_id);
+    }
+  else
+    {
+      local_data->trace_delay[production_type] = PDF_new_point_dist (0);
+    }
 
 #if DEBUG
   g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
