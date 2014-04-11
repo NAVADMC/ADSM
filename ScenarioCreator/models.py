@@ -172,11 +172,10 @@ class Function(models.Model):
     """Function is a model that defines either a Probability Distribution Function (pdf) or
  a relational function (relid) depending on which child class is used.  """
     name = models.CharField(max_length=255,
-                            help_text='User-assigned name for each function.', )
+        help_text='User-assigned name for each function.', )
     x_axis_units = models.CharField(max_length=255, default="Days",
-                                    help_text='Specifies the descriptive units for the x axis in relational functions.', )
-    notes = models.TextField(blank=True, null=True,
-                             help_text='', )  # Why is this hidden?
+        help_text='Specifies the descriptive units for the x axis in relational functions.', )
+    notes = models.TextField(blank=True, null=True, help_text='', )
     class Meta:
         abstract = True
     def __str__(self):
@@ -184,55 +183,55 @@ class Function(models.Model):
 
 
 class ProbabilityFunction(Function):
-    """There are a large number of fields in this model because different equation_type use different
-parameters.  Parameters are all listed as optional because they are frequently unused.  A second
-layer of validation will be necessary for required parameters per equation_type."""
+    """ There are a large number of fields in this model because different equation_type use different
+        parameters.  Parameters are all listed as optional because they are frequently unused.  A second
+        layer of validation will be necessary for required parameters per equation_type."""
     equation_type = models.CharField(max_length=255,
-                                     help_text='For probability density functions identifies the type of function.',
-                                     default="Triangular",
-                                     choices=chc("Beta", "Bernoulli", "Binomial", "Discrete Uniform", "Exponential",
-                                                 "Point", "Gamma", "Gaussian", "Histogram", "Hypergeometric",
-                                                 "Inverse Gaussian", "Logistic", "LogLogistic", "Lognormal",
-                                                 "NegativeBinomial", "Pareto", "Pearson5", "Piecewise", "Poisson",
-                                                 "Triangular", "Uniform", "Weibull"))
+        help_text='For probability density functions identifies the type of function.',
+        default="Triangular",
+        choices=chc("Beta", "BetaPERT", "Bernoulli", "Binomial", "Discrete Uniform",
+                    "Exponential", "Fixed Value", "Gamma", "Gaussian", "Histogram", "Hypergeometric",
+                    "Inverse Gaussian", "Logistic", "LogLogistic", "Lognormal",
+                    "NegativeBinomial", "Pareto", "Pearson5", "Piecewise", "Poisson",
+                    "Triangular", "Uniform", "Weibull"))
     mean = models.FloatField(blank=True, null=True,
-                             help_text='The mean for probability density function types Gaussian Lognormal Possoin and Exponential.', )
+        help_text='The mean for probability density function types Gaussian, Lognormal, Possoin, and Exponential.', )
     std_dev = models.FloatField(blank=True, null=True,
-                                help_text='The mean for probability density function types Gaussian and Lognormal.', )
+        help_text='The mean for probability density function types Gaussian and Lognormal.', )
     min = models.FloatField(blank=True, null=True,
-                            help_text='The minimum for probability density function types Uniform Triangular Beta and betaPERT.', )
+        help_text='The minimum for probability density function types Uniform, Triangular, Beta, and BetaPERT.', )
     mode = models.FloatField(blank=True, null=True,
-                             help_text='The Mode for probability density function types Point Triangular and BetaPERT.', )
+        help_text='The Mode for probability density function types Fixed Value, Triangular, and BetaPERT.', )
     max = models.FloatField(blank=True, null=True,
-                            help_text='The maximum value for probability density function types Uniform Triangular Beta and BetaPERT.', )
+        help_text='The maximum value for probability density function types Uniform, Triangular, Beta, and BetaPERT.', )
     alpha = models.FloatField(blank=True, null=True,
-                              help_text='The alpha parameter for probability density function types Gamma Weibull and Pearson 5 or the alpha1 parameter for Beta probability density functions.', )
+        help_text='The alpha parameter for probability density function types Gamma, Weibull, and Pearson 5 or the alpha1 parameter for Beta probability density functions.', )
     alpha2 = models.FloatField(blank=True, null=True,
-                               help_text='The alpha2 parameter for Beta probability density function types.', )
+        help_text='The alpha2 parameter for Beta probability density function types.', )
     beta = models.FloatField(blank=True, null=True,
-                             help_text='The beta parameter for probability density function types Gamma Weibull and Pearson 5.', )
+        help_text='The beta parameter for probability density function types Gamma, Weibull, and Pearson 5.', )
     location = models.FloatField(blank=True, null=True,
-                                 help_text='The location parameter for probability density function types Logistic and Loglogistic.', )
+        help_text='The location parameter for probability density function types Logistic and Loglogistic.', )
     scale = models.FloatField(blank=True, null=True,
-                              help_text='The scale parameter for probability density function types Logistic and Loglogistic.', )
+        help_text='The scale parameter for probability density function types Logistic and Loglogistic.', )
     shape = models.FloatField(blank=True, null=True,
-                              help_text='The shape parameter for probability density function types Loglogistic Inverse Gaussian.', )  # or should this be the equation_type list of PDF functions?
+        help_text='The shape parameter for probability density function types Loglogistic, Inverse, and Gaussian.', )
     n = models.IntegerField(blank=True, null=True,
-                            help_text='The n parameter for probability density function types Binomial Hypergeometric.', )
+        help_text='The n parameter for probability density function types Binomial and Hypergeometric.', )
     p = models.FloatField(blank=True, null=True,
-                          help_text='The p parameter for probability density function types Negative Binomial Bernoulli.', )
+        help_text='The p parameter for probability density function types Negative Binomial and Bernoulli.', )
     m = models.IntegerField(blank=True, null=True,
-                            help_text='The m parameter for probability density function types Hypergeometric.', )
+        help_text='The m parameter for probability density function type Hypergeometric.', )
     d = models.IntegerField(blank=True, null=True,
-                            help_text='The d parameter for probability density function types Hypergeometric.', )
+        help_text='The d parameter for probability density function type Hypergeometric.', )
     theta = models.FloatField(blank=True, null=True,
-                              help_text='The Theta parameter for probability density function types Pareto.', )
+        help_text='The Theta parameter for probability density function type Pareto.', )
     a = models.FloatField(blank=True, null=True,
-                          help_text='The a parameter for probability density function types Pareto.', )
+        help_text='The a parameter for probability density function type Pareto.', )
     s = models.IntegerField(blank=True, null=True,
-                            help_text='The s parameter for probability density function types Negative Binomial.', )
+        help_text='The s parameter for probability density function type Negative Binomial.', )
     graph = models.ForeignKey('RelationalFunction', blank=True, null=True,
-            help_text='A series of points used in Histogram and Piecewise functions.')
+        help_text='A series of points used in Histogram and Piecewise functions.')
 
 
 class RelationalFunction(Function):
