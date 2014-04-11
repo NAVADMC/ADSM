@@ -282,6 +282,7 @@ def main():
 	  (xml.find( './/trace-model' ) != None)
 	  or (xml.find( './/trace-back-destruction-model' ) != None)
 	)
+	useVaccination = (xml.find( './/ring-vaccination-model' ) != None)
 	useDestruction = (
 	  (xml.find( './/basic-destruction-model' ) != None)
 	  or (xml.find( './/trace-destruction-model' ) != None)
@@ -293,6 +294,7 @@ def main():
 		plan = ControlMasterPlan(
 		  _include_detection = useDetection,
 		  _include_tracing = useTracing,
+		  _include_vaccination = useVaccination,
 		  _include_destruction = useDestruction
 		)
 		plan.save()
@@ -402,6 +404,102 @@ def main():
 			protocol.save()
 		# end of loop over production types covered by this <trace-model> element
 	# end of loop over <trace-model> elements
+
+	# Vaccination priority order information is distributed among several
+	# different elements. Keep a list that will help sort it out later.
+	vaccinationProductionTypeOrder = []
+
+	productionTypesWithVaccineEffectsDefined = set()
+	for el in xml.findall( './/vaccine-model' ):
+		delay = int( el.find( './delay/value' ).text )
+		immunityPeriod = getPdf( el.find( './immunity-period' ) )
+
+		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
+		for typeName in typeNames:
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=typeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			protocol.days_to_immunity = delay
+			protocol.vaccine_immune_period = immunityPeriod
+			protocol.save()
+			productionTypesWithVaccineEffectsDefined.add( typeName )
+		# end of loop over production types covered by this <vaccine-model> element
+	# end of loop over <vaccine-model> elements
+
+	productionTypesThatAreVaccinated = set()
+	for el in xml.findall( './/ring-vaccination-model' ):
+		# Older XML files allowed just a "production-type" attribute and an
+		# implied "from-any" functionality.
+		if 'production-type' in el.attrib:
+			fromTypeNames = productionTypeNames
+			toTypeNames = getProductionTypes( el, 'production-type', productionTypeNames )
+		else:
+			fromTypeNames = getProductionTypes( el, 'from-production-type', productionTypeNames )
+			toTypeNames = getProductionTypes( el, 'to-production-type', productionTypeNames )
+
+		radius = float( el.find( './radius/value' ).text )
+		for fromTypeName in fromTypeNames:
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=fromTypeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=fromTypeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			protocol.trigger_vaccination_ring = True
+			protocol.vaccination_ring_radius = radius
+			protocol.save()
+		# end of loop over from-production-types covered by this <ring-vaccination-model> element
+
+		priority = int( el.find( './priority' ).text )
+		minTimeBetweenVaccinations = int( el.find( './min-time-between-vaccinations/value' ).text )
+		for toTypeName in toTypeNames:
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=toTypeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=toTypeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			protocol.use_vaccination = True
+			protocol.minimum_time_between_vaccinations = minTimeBetweenVaccinations
+			protocol.save()
+			vaccinationProductionTypeOrder.append( (priority, toTypeName) )
+			productionTypesThatAreVaccinated.add( toTypeName )
+		# end of loop over to-production-types covered by this <ring-vaccination-model> element
+	# end of loop over <ring-vaccination-model> elements
+
+	if productionTypesThatAreVaccinated != productionTypesWithVaccineEffectsDefined:
+		raise Exception( 'mismatch between production types that are vaccinated and production types with vaccine effects defined' )
+		sys.exit()
 
 	# Destruction priority order information is distributed among several
 	# different elements. Keep 2 lists that will help sort it out later.
@@ -561,7 +659,7 @@ def main():
 	# end of loop over <trace-destruction-model> elements
 
 	for el in xml.findall( './/ring-destruction-model' ):
-		# Older XML files allowed just a "production-type" elements and an
+		# Older XML files allowed just a "production-type" attribute and an
 		# implied "from-any" functionality.
 		if 'production-type' in el.attrib:
 			fromTypeNames = productionTypeNames
@@ -656,6 +754,38 @@ def main():
 
 			plan.save()
 		# end of if useDestruction==True
+
+		if useVaccination:
+			try:
+				plan.units_detected_before_triggering_vaccination = int( el.find( './vaccination-program-delay' ).text )
+			except AttributeError:
+				plan.units_detected_before_triggering_vaccination = 1 # default
+			plan.vaccination_capacity = getRelChart( el.find( './vaccination-capacity' ) )
+			order = el.find( './vaccination-priority-order' ).text.strip()
+			# The XML did not put spaces after the commas, but the Django
+			# model does.
+			order = ', '.join( order.split( ',' ) )
+			plan.vaccination_priority_order = order
+
+			# Create a new version of vaccinationProductionTypeOrder where a)
+			# only the minimum priority number attached to each production type
+			# is preserved and b) the list is sorted by priority.
+			newVaccinationProductionTypeOrder = []
+			for typeName in set( [item[1] for item in vaccinationProductionTypeOrder] ):
+				minPriority = min( [item[0] for item in filter( lambda item: item[1]==typeName, vaccinationProductionTypeOrder )] )
+				newVaccinationProductionTypeOrder.append( (minPriority, typeName) )
+			newVaccinationProductionTypeOrder.sort()
+			newVaccinationProductionTypeOrder = [item[1] for item in newVaccinationProductionTypeOrder]
+			priority = 1
+			for typeName in newVaccinationProductionTypeOrder:
+				assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
+				protocol = assignment.control_protocol
+				protocol.vaccination_priority = priority
+				protocol.save()
+				priority += 1
+
+			plan.save()
+		# end of if useVaccination==True
 	# end of loop over <resources-and-implementation-of-control-model> elements
 
 
