@@ -28,7 +28,6 @@
 #define local_free destruction_monitor_free
 #define handle_before_any_simulations_event destruction_monitor_handle_before_any_simulations_event
 #define handle_new_day_event destruction_monitor_handle_new_day_event
-#define handle_declaration_of_destruction_reasons_event destruction_monitor_handle_declaration_of_destruction_reasons_event
 #define handle_destruction_event destruction_monitor_handle_destruction_event
 
 #include "module.h"
@@ -46,9 +45,9 @@
 
 
 
-#define NEVENTS_LISTENED_FOR 4
+#define NEVENTS_LISTENED_FOR 3
 EVT_event_type_t events_listened_for[] =
-  { EVT_BeforeAnySimulations, EVT_NewDay, EVT_DeclarationOfDestructionReasons, EVT_Destruction };
+  { EVT_BeforeAnySimulations, EVT_NewDay, EVT_Destruction };
 
 
 
@@ -77,8 +76,6 @@ typedef struct
   RPT_reporting_t *cumul_num_animals_destroyed_by_reason;
   RPT_reporting_t *cumul_num_animals_destroyed_by_prodtype;
   RPT_reporting_t *cumul_num_animals_destroyed_by_reason_and_prodtype;
-  gboolean reasons_declared;
-  gboolean first_day;
 }
 local_data_t;
 
@@ -151,88 +148,8 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, EVT_new_day_event_t * e
       RPT_reporting_zero (local_data->num_animals_destroyed_by_reason_and_prodtype);
     }
 
-  /* If no reasons for destruction have been declared, turn off the first-
-   * destruction-by-reason output variables. */
-  if (local_data->first_day == TRUE)
-    {
-      local_data->first_day = FALSE;
-      if (local_data->reasons_declared == FALSE)
-        {
-           RPT_reporting_set_frequency (local_data->first_destruction_by_reason, RPT_never);
-           RPT_reporting_set_frequency (local_data->first_destruction_by_reason_and_prodtype, RPT_never);
-        }
-    }
-
 #if DEBUG
   g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
- * Responds to a declaration of destruction reasons by recording the potential
- * reasons for destruction.
- *
- * @param self the model.
- * @param event a declaration of destruction reasons event.
- */
-void
-handle_declaration_of_destruction_reasons_event (struct spreadmodel_model_t_ *self,
-                                                 EVT_declaration_of_destruction_reasons_event_t *
-                                                 event)
-{
-  local_data_t *local_data;
-  unsigned int n, i, j;
-  const char *reason;
-  const char *drill_down_list[3] = { NULL, NULL, NULL };
-
-#if DEBUG
-  g_debug ("----- ENTER handle_declaration_of_destruction_reasons_event (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-
-  /* If any potential reason is not already present in our reporting variables,
-   * add it, with an initial count of 0 destructions. */
-  n = event->reasons->len;
-  if (n > 0)
-    local_data->reasons_declared = TRUE;
-  for (i = 0; i < n; i++)
-    {
-      reason = (char *) g_ptr_array_index (event->reasons, i);
-      /* Two function calls for the first_destruction variable: one to
-       * establish the type of the sub-variable (it's an integer), and one to
-       * clear it to "null" (it has no meaningful value until a destruction
-       * occurs). */
-      RPT_reporting_add_integer1 (local_data->first_destruction_by_reason, 0, reason);
-      RPT_reporting_set_null1 (local_data->first_destruction_by_reason, reason);
-      RPT_reporting_add_integer1 (local_data->num_units_destroyed_by_reason, 0, reason);
-      RPT_reporting_add_integer1 (local_data->cumul_num_units_destroyed_by_reason, 0, reason);
-      RPT_reporting_add_integer1 (local_data->num_animals_destroyed_by_reason, 0, reason);
-      RPT_reporting_add_integer1 (local_data->cumul_num_animals_destroyed_by_reason, 0, reason);
-
-      drill_down_list[0] = reason;
-      for (j = 0; j < local_data->production_types->len; j++)
-        {
-          drill_down_list[1] = (char *) g_ptr_array_index (local_data->production_types, j);
-          RPT_reporting_add_integer (local_data->first_destruction_by_reason_and_prodtype, 0,
-                                     drill_down_list);
-          RPT_reporting_set_null (local_data->first_destruction_by_reason_and_prodtype,
-                                  drill_down_list);
-          RPT_reporting_add_integer (local_data->num_units_destroyed_by_reason_and_prodtype, 0,
-                                     drill_down_list);
-          RPT_reporting_add_integer (local_data->cumul_num_units_destroyed_by_reason_and_prodtype, 0,
-                                     drill_down_list);
-          RPT_reporting_add_integer (local_data->num_animals_destroyed_by_reason_and_prodtype, 0,
-                                     drill_down_list);
-          RPT_reporting_add_integer (local_data->cumul_num_animals_destroyed_by_reason_and_prodtype, 0,
-                                     drill_down_list);
-        }
-    }
-
-#if DEBUG
-  g_debug ("----- EXIT handle_declaration_of_destruction_reasons_event (%s)", MODEL_NAME);
 #endif
 }
 
@@ -370,11 +287,6 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day));
       break;
-    case EVT_DeclarationOfDestructionReasons:
-      handle_declaration_of_destruction_reasons_event (self,
-                                                       &(event->u.
-                                                         declaration_of_destruction_reasons));
-      break;
     case EVT_Destruction:
       handle_destruction_event (self, &(event->u.destruction));
       break;
@@ -494,7 +406,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   spreadmodel_model_t *self;
   local_data_t *local_data;
   unsigned int n;
-  unsigned int i;      /* loop counter */
+  unsigned int i, j;      /* loop counters */
   char *prodtype_name;
   const char *drill_down_list[3] = { NULL, NULL, NULL };
 
@@ -586,7 +498,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* Set the reporting frequency for the output variables. */
 
-  /* Initialize the output variables we already know about. */
+  /* Initialize the output variables. */
   local_data->production_types = units->production_type_names;
   n = local_data->production_types->len;
   drill_down_list[0] = "Ini";
@@ -608,9 +520,39 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       RPT_reporting_add_integer (local_data->num_animals_destroyed_by_reason_and_prodtype, 0, drill_down_list);
       RPT_reporting_add_integer (local_data->cumul_num_animals_destroyed_by_reason_and_prodtype, 0, drill_down_list);
     }
+  for (i = 0; i < SPREADMODEL_NCONTROL_REASONS; i++)
+    {
+      const char *reason;
+      reason = SPREADMODEL_control_reason_abbrev[i];
+      /* Two function calls for the first_destruction variable: one to
+       * establish the type of the sub-variable (it's an integer), and one to
+       * clear it to "null" (it has no meaningful value until a destruction
+       * occurs). */
+      RPT_reporting_add_integer1 (local_data->first_destruction_by_reason, 0, reason);
+      RPT_reporting_set_null1 (local_data->first_destruction_by_reason, reason);
+      RPT_reporting_add_integer1 (local_data->num_units_destroyed_by_reason, 0, reason);
+      RPT_reporting_add_integer1 (local_data->cumul_num_units_destroyed_by_reason, 0, reason);
+      RPT_reporting_add_integer1 (local_data->num_animals_destroyed_by_reason, 0, reason);
+      RPT_reporting_add_integer1 (local_data->cumul_num_animals_destroyed_by_reason, 0, reason);
 
-  local_data->reasons_declared = FALSE;
-  local_data->first_day = TRUE;
+      drill_down_list[0] = reason;
+      for (j = 0; j < n; j++)
+        {
+          drill_down_list[1] = (char *) g_ptr_array_index (local_data->production_types, j);
+          RPT_reporting_add_integer (local_data->first_destruction_by_reason_and_prodtype, 0,
+                                     drill_down_list);
+          RPT_reporting_set_null (local_data->first_destruction_by_reason_and_prodtype,
+                                  drill_down_list);
+          RPT_reporting_add_integer (local_data->num_units_destroyed_by_reason_and_prodtype, 0,
+                                     drill_down_list);
+          RPT_reporting_add_integer (local_data->cumul_num_units_destroyed_by_reason_and_prodtype, 0,
+                                     drill_down_list);
+          RPT_reporting_add_integer (local_data->num_animals_destroyed_by_reason_and_prodtype, 0,
+                                     drill_down_list);
+          RPT_reporting_add_integer (local_data->cumul_num_animals_destroyed_by_reason_and_prodtype, 0,
+                                     drill_down_list);
+        }
+    }
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

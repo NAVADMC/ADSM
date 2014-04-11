@@ -30,7 +30,6 @@
 #define events_listened_for ring_destruction_model_events_listened_for
 #define to_string ring_destruction_model_to_string
 #define local_free ring_destruction_model_free
-#define handle_before_any_simulations_event ring_destruction_model_before_any_simulations_event
 #define handle_detection_event ring_destruction_model_handle_detection_event
 #define check_and_choose ring_destruction_model_check_and_choose
 
@@ -66,8 +65,8 @@ double round (double x);
 
 
 
-#define NEVENTS_LISTENED_FOR 2
-EVT_event_type_t events_listened_for[] = { EVT_BeforeAnySimulations, EVT_Detection };
+#define NEVENTS_LISTENED_FOR 1
+EVT_event_type_t events_listened_for[] = { EVT_Detection };
 
 
 
@@ -95,37 +94,6 @@ typedef struct
     for use in the set_params functions. */
 }
 local_data_t;
-
-
-
-/**
- * Before any simulations, this module declares all the reasons for which it
- * may request a destruction.
- *
- * @param queue for any new events the model creates.
- */
-void
-handle_before_any_simulations_event (EVT_event_queue_t * queue)
-{
-  GPtrArray *reasons;
-
-#if DEBUG
-  g_debug ("----- ENTER handle_before_any_simulations_event (%s)", MODEL_NAME);
-#endif
-
-  reasons = g_ptr_array_sized_new (1);
-  g_ptr_array_add (reasons, "Ring");
-  EVT_event_enqueue (queue, EVT_new_declaration_of_destruction_reasons_event (reasons));
-
-  /* Note that we don't clean up the GPtrArray.  It will be freed along with
-   * the declaration event after all interested sub-models have processed the
-   * event. */
-
-#if DEBUG
-  g_debug ("----- EXIT handle_before_any_simulations_event (%s)", MODEL_NAME);
-#endif
-  return;
-}
 
 
 
@@ -281,9 +249,6 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
 
   switch (event->type)
     {
-    case EVT_BeforeAnySimulations:
-      handle_before_any_simulations_event (queue);
-      break;
     case EVT_Detection:
       handle_detection_event (self, units, &(event->u.detection), queue);
       break;

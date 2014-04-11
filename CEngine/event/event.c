@@ -49,7 +49,6 @@ const char *EVT_event_type_name[] = {
   "BeforeEachSimulation",
   "DeclarationOfVaccinationReasons",
   "DeclarationOfVaccineDelay",
-  "DeclarationOfDestructionReasons",
   "DeclarationOfOutputs",
   "NewDay", "Exposure", "AttemptToInfect", "Infection", "Detection",
   "PublicAnnouncement", "Exam", "AttemptToTrace", "TraceResult", "Test",
@@ -260,56 +259,6 @@ EVT_declaration_of_vaccine_delay_event_to_string
   s = g_string_new (NULL);
   g_string_printf (s, "<Declaration of vaccine delay event for \"%s\" delay=%i>",
                    event->production_type_name, event->delay);
-  /* don't return the wrapper object */
-  chararray = s->str;
-  g_string_free (s, FALSE);
-  return chararray;
-}
-
-
-
-/**
- * Creates a new "declaration of destruction reasons" event.
- *
- * @param reasons an array of ordinary C strings giving the reasons for which
- *   a model may request destructions.  The pointer to the array is copied so
- *   the strings and the array structure itself should not be freed after
- *   calling this function.
- * @return a pointer to a newly-created EVT_event_t structure.
- */
-EVT_event_t *
-EVT_new_declaration_of_destruction_reasons_event (GPtrArray * reasons)
-{
-  EVT_event_t *event;
-
-  event = g_new (EVT_event_t, 1);
-  event->type = EVT_DeclarationOfDestructionReasons;
-  event->u.declaration_of_destruction_reasons.reasons = reasons;
-  return event;
-}
-
-
-
-/**
- * Returns a text representation of a declaration of destruction reasons event.
- *
- * @param event a declaration of destruction reasons event.
- * @return a string.
- */
-char *
-EVT_declaration_of_destruction_reasons_event_to_string
-  (EVT_declaration_of_destruction_reasons_event_t * event)
-{
-  GString *s;
-  char *chararray;
-  int i;
-
-  s = g_string_new ("<Declaration of destruction reasons event\n  reasons=");
-  for (i = 0; i < event->reasons->len; i++)
-    g_string_append_printf (s, i == 0 ? "\"%s\"" : ",\"%s\"",
-                            (char *) g_ptr_array_index (event->reasons, i));
-  g_string_append_c (s, '>');
-
   /* don't return the wrapper object */
   chararray = s->str;
   g_string_free (s, FALSE);
@@ -1546,11 +1495,6 @@ EVT_free_event (EVT_event_t * event)
        * reasons, because we assume they are static strings. */
       g_ptr_array_free (event->u.declaration_of_vaccination_reasons.reasons, TRUE);
       break;
-    case EVT_DeclarationOfDestructionReasons:
-      /* Note that we do not free the C strings in the array of destruction
-       * reasons, because we assume they are static strings. */
-      g_ptr_array_free (event->u.declaration_of_destruction_reasons.reasons, TRUE);
-      break;
     case EVT_DeclarationOfOutputs:
       /* Note that we free the GPtrArray structure that holds the list of
        * reporting variables, but we do not free the reporting variables
@@ -1689,12 +1633,6 @@ EVT_event_to_string (EVT_event_t * event)
     case EVT_DeclarationOfVaccineDelay:
       s =
         EVT_declaration_of_vaccine_delay_event_to_string (&(event->u.declaration_of_vaccine_delay));
-      break;
-    case EVT_DeclarationOfDestructionReasons:
-      s =
-        EVT_declaration_of_destruction_reasons_event_to_string (&
-                                                                (event->u.
-                                                                 declaration_of_destruction_reasons));
       break;
     case EVT_DeclarationOfOutputs:
       s = EVT_declaration_of_outputs_event_to_string (&(event->u.declaration_of_outputs));

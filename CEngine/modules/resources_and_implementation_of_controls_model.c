@@ -233,7 +233,6 @@
 #define to_string resources_and_implementation_of_controls_model_to_string
 #define local_free resources_and_implementation_of_controls_model_free
 #define handle_new_day_event resources_and_implementation_of_controls_model_handle_new_day_event
-#define handle_declaration_of_destruction_reasons_event resources_and_implementation_of_controls_model_handle_declaration_of_destruction_reasons_event
 #define handle_declaration_of_vaccination_reasons_event resources_and_implementation_of_controls_model_handle_declaration_of_vaccination_reasons_event
 #define handle_detection_event resources_and_implementation_of_controls_model_handle_detection_event
 #define handle_request_for_destruction_event resources_and_implementation_of_controls_model_handle_request_for_destruction_event
@@ -274,9 +273,9 @@ double round (double x);
 
 
 
-#define NEVENTS_LISTENED_FOR 8
+#define NEVENTS_LISTENED_FOR 7
 EVT_event_type_t events_listened_for[] =
-  { EVT_NewDay, EVT_Detection, EVT_DeclarationOfDestructionReasons,
+  { EVT_NewDay, EVT_Detection,
   EVT_RequestForDestruction, EVT_DeclarationOfVaccinationReasons,
   EVT_RequestForVaccination, EVT_Vaccination, EVT_RequestForZoneFocus
 };
@@ -299,11 +298,6 @@ typedef struct
     outbreak_known is TRUE. */
 
   /* Parameters concerning destruction. */
-  unsigned int ndestruction_reasons; /**< Number of distinct reasons for
-    destruction. */
-  GPtrArray *destruction_reasons; /**< A temporary array used when counting the
-    number of distinct reasons for destruction.  It stores the reasons declared
-    so far, so that they will not be double-counted. */
   int destruction_program_delay; /**< The number of days between
     recognizing and outbreak and beginning a destruction program. */
   int destruction_program_begin_day; /**< The day of the simulation on which
@@ -573,7 +567,7 @@ destroy_by_priority (struct spreadmodel_model_t_ *self, int day,
 
       npriorities = local_data->pending_destructions->len;
       if (local_data->destruction_prod_type_priority == 1)
-        step = local_data->ndestruction_reasons;
+        step = SPREADMODEL_NCONTROL_REASONS;
       else
         step = local_data->nprod_types;
       start = 0;
@@ -969,75 +963,6 @@ handle_new_day_event (struct spreadmodel_model_t_ *self,
 
 
 /**
- * Responds to a declaration of destruction reasons by recording the potential
- * reasons for destruction.
- *
- * @param self the model.
- * @param event a declaration of destruction reasons event.
- */
-void
-handle_declaration_of_destruction_reasons_event (struct spreadmodel_model_t_ *self,
-                                                 EVT_declaration_of_destruction_reasons_event_t *
-                                                 event)
-{
-  local_data_t *local_data;
-  unsigned int n, m, i, j;
-  char *reason;
-#if DEBUG
-  GString *s;
-#endif
-
-#if DEBUG
-  g_debug ("----- ENTER handle_declaration_of_destruction_reasons_event (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-
-  /* Copy the list of potential reasons for destruction.  (Note that we just
-   * copy the pointers to the C strings, assuming that they are static strings.)
-   * If any potential reason is not already present in our list, add to our
-   * count of distinct reasons. */
-  n = event->reasons->len;
-  for (i = 0; i < n; i++)
-    {
-      reason = (char *) g_ptr_array_index (event->reasons, i);
-
-      m = local_data->destruction_reasons->len;
-      for (j = 0; j < m; j++)
-        {
-          if (strcasecmp (reason, g_ptr_array_index (local_data->destruction_reasons, j)) == 0)
-            break;
-        }
-      if (j == m)
-        {
-          /* We haven't encountered this reason before; add its name to the
-           * list. */
-          g_ptr_array_add (local_data->destruction_reasons, reason);
-          local_data->ndestruction_reasons++;
-#if DEBUG
-          g_debug ("  adding new reason \"%s\"", reason);
-#endif
-        }
-    }
-#if DEBUG
-  s = g_string_new ("  list of reasons now={");
-  n = local_data->destruction_reasons->len;
-  for (i = 0; i < n; i++)
-    g_string_append_printf (s, i == 0 ? "\"%s\"" : ",\"%s\"",
-                            (char *) g_ptr_array_index (local_data->destruction_reasons, i));
-  g_string_append_c (s, '}');
-  g_debug ("%s", s->str);
-  g_string_free (s, TRUE);
-#endif
-
-#if DEBUG
-  g_debug ("----- EXIT handle_declaration_of_destruction_reasons_event (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
  * Responds to a declaration of vaccination reasons by recording the potential
  * reasons for vaccination.
  *
@@ -1296,7 +1221,7 @@ handle_request_for_destruction_event (struct spreadmodel_model_t_ *self,
           int old_request_block, event_block;
 
           if (local_data->destruction_prod_type_priority == 1)
-            step = local_data->ndestruction_reasons;
+            step = SPREADMODEL_NCONTROL_REASONS;
           else
             step = local_data->nprod_types;
 
@@ -1521,11 +1446,6 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day), units, queue);
       break;
-    case EVT_DeclarationOfDestructionReasons:
-      handle_declaration_of_destruction_reasons_event (self,
-                                                       &(event->u.
-                                                         declaration_of_destruction_reasons));
-      break;
     case EVT_DeclarationOfVaccinationReasons:
       handle_declaration_of_vaccination_reasons_event (self,
                                                        &(event->u.
@@ -1738,7 +1658,6 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* We destroy the array of pointers but not the C strings they were pointing
    * to; those we assume are static strings. */
-  g_ptr_array_free (local_data->destruction_reasons, TRUE);
   g_ptr_array_free (local_data->vaccination_reasons, TRUE);
 
   REL_free_chart (local_data->vaccination_capacity);
@@ -2025,8 +1944,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* We don't yet know how many distinct reasons for destruction or vaccination
    * requests there may be.  We will rely on other sub-models to tell us. */
-  local_data->ndestruction_reasons = 0;
-  local_data->destruction_reasons = g_ptr_array_new ();
   local_data->nvaccination_reasons = 0;
   local_data->vaccination_reasons = g_ptr_array_new ();
 
