@@ -235,12 +235,10 @@ def file_dialog(request):
     return render(request, 'ScenarioCreator/workspace.html', context)
 
 
-def save_scenario(request, target=None):
+def save_scenario(request):
     """Save to the existing session of a new file name if target is provided
     """
-    if not target and scenario_filename():
-        target = scenario_filename()
-
+    target = request.POST['filename']
     if target:
         scenario_filename(target)
         print('Copying database to', target)
