@@ -530,7 +530,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read the production type specific
    * parameters. */
   sqlite3_exec (params,
-                "SELECT prodtype.name,examine_direct_forward_traces,exam_direct_forward_success_multiplier,test_direct_forward_traces,examine_direct_back_traces,exam_direct_back_success_multiplier,test_direct_back_traces,examine_indirect_forward_traces,exam_indirect_forward_success_multiplier,test_indirect_forward_traces,examine_indirect_back_traces,exam_indirect_back_success_multiplier,test_indirect_back_traces FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol, ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id",
+                "SELECT prodtype.name,examine_direct_forward_traces,exam_direct_forward_success_multiplier,test_direct_forward_traces,examine_direct_back_traces,exam_direct_back_success_multiplier,test_direct_back_traces,examine_indirect_forward_traces,exam_indirect_forward_success_multiplier,test_indirect_forward_traces,examine_indirect_back_traces,examine_indirect_back_success_multiplier,test_indirect_back_traces FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol, ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id",
                 set_params, self, &sqlerr);
   if (sqlerr)
     {
