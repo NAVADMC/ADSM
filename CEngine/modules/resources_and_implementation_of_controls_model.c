@@ -1794,14 +1794,28 @@ set_params (void *data, int ncols, char **value, char **colname)
 
   g_assert (ncols == 6);
 
-  errno = 0;
-  local_data->destruction_program_delay = (int) strtol (value[0], NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);  
+  if (value[0] != NULL)
+    {
+      errno = 0;
+      local_data->destruction_program_delay = (int) strtol (value[0], NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);
+    }
+  else
+    {
+      local_data->destruction_program_delay = 0;
+    }
 
-  errno = 0;
-  rel_id = strtol (value[1], NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);  
-  local_data->destruction_capacity = PAR_get_relchart (params, rel_id);
+  if (value[1] != NULL)
+    {
+      errno = 0;
+      rel_id = strtol (value[1], NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);  
+      local_data->destruction_capacity = PAR_get_relchart (params, rel_id);
+    }
+  else
+    {
+      local_data->destruction_capacity = REL_new_point_chart (0);
+    }
   /* Set a flag if the destruction capacity chart at some point drops to 0 and
    * stays there. */
   local_data->destruction_capacity_goes_to_0 =
