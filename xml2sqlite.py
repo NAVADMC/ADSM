@@ -332,6 +332,10 @@ def main():
 		except KeyError:
 			direction = 'both'
 		traceSuccess = float( el.find( './trace-success' ).text )
+		if el.find( './trace-delay' ) != None:
+			traceDelay = getPdf( el.find( './trace-delay' ) )
+		else:
+			traceDelay = zeroDelay # default
 
 		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		for typeName in typeNames:
