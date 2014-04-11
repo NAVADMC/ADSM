@@ -16,11 +16,15 @@ import xml.etree.ElementTree as ET
 
 
 
-def getProductionTypes( text, allowedNames ):
-	if text == '':
+def getProductionTypes( xml, attributeName, allowedNames ):
+	if attributeName not in xml.attrib:
 		types = allowedNames
 	else:
-		types = text.split(',')
+		text = xml.attrib[attributeName]
+		if text == '':
+			types = allowedNames
+		else:
+			types = text.split(',')
 	return types
 
 
@@ -122,11 +126,11 @@ def main():
 	# Gather the production type names into a set.
 	productionTypeNames = set()
 	for el in xml.findall( './/*[@production-type]' ):
-		productionTypeNames.update( getProductionTypes( el.attrib['production-type'], [] ) )
+		productionTypeNames.update( getProductionTypes( el, 'production-type', [] ) )
 	for el in xml.findall( './/*[@to-production-type]' ):
-		productionTypeNames.update( getProductionTypes( el.attrib['to-production-type'], [] ) )
+		productionTypeNames.update( getProductionTypes( el, 'to-production-type', [] ) )
 	for el in xml.findall( './/*[@from-production-type]' ):
-		productionTypeNames.update( getProductionTypes( el.attrib['from-production-type'], [] ) )
+		productionTypeNames.update( getProductionTypes( el, 'from-production-type', [] ) )
 	# If an empty production type attribute appeared anywhere in the XML,
 	# ignore that.
 	if '' in productionTypeNames:
@@ -157,10 +161,7 @@ def main():
 		)
 		diseaseReaction.save()
 
-		try:
-			typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
-		except KeyError:
-			typeNames = productionTypeNames
+		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		for typeName in typeNames:
 			diseaseReactionAssignment = DiseaseReactionAssignment(
 			  production_type = ProductionType.objects.get( name=typeName ),
@@ -194,8 +195,8 @@ def main():
 		)
 		airborneSpreadModel.save()
 
-		for fromTypeName in getProductionTypes( el.attrib['from-production-type'], productionTypeNames ):
-			for toTypeName in getProductionTypes( el.attrib['to-production-type'], productionTypeNames ):
+		for fromTypeName in getProductionTypes( el, 'from-production-type', productionTypeNames ):
+			for toTypeName in getProductionTypes( el, 'to-production-type', productionTypeNames ):
 				pairing = ProductionTypePairTransmission(
 				  source_production_type = ProductionType.objects.get( name=fromTypeName ),
 				  destination_production_type = ProductionType.objects.get( name=toTypeName ),
@@ -250,8 +251,8 @@ def main():
 			assert False
 		contactSpreadModel.save()
 
-		for fromTypeName in getProductionTypes( el.attrib['from-production-type'], productionTypeNames ):
-			for toTypeName in getProductionTypes( el.attrib['to-production-type'], productionTypeNames ):
+		for fromTypeName in getProductionTypes( el, 'from-production-type', productionTypeNames ):
+			for toTypeName in getProductionTypes( el, 'to-production-type', productionTypeNames ):
 				# If a ProductionTypePairTransmission object has already been
 				# assigned to this from/to pairing of production types,
 				# retrieve it; otherwise, create a new one.
@@ -307,10 +308,7 @@ def main():
 		)
 		protocol.save()
 
-		try:
-			typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
-		except KeyError:
-			typeNames = productionTypeNames
+		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		for typeName in typeNames:
 			assignment = ProtocolAssignment(
 			  production_type = ProductionType.objects.get( name=typeName ),
@@ -333,10 +331,7 @@ def main():
 			direction = 'both'
 		traceSuccess = float( el.find( './trace-success' ).text )
 
-		try:
-			typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
-		except KeyError:
-			typeNames = productionTypeNames
+		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		for typeName in typeNames:
 			# If a ControlProtocol object has already been assigned to this
 			# production type, retrieve it; otherwise, create a new one.
@@ -375,10 +370,7 @@ def main():
 			direction = 'both'		
 		tracePeriod = int( el.find( './trace-period/value' ).text )
 
-		try:
-			typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
-		except KeyError:
-			typeNames = productionTypeNames
+		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		for typeName in typeNames:
 			# If a ControlProtocol object has already been assigned to this
 			# production type, retrieve it; otherwise, create a new one.
@@ -462,10 +454,7 @@ def main():
 		except AttributeError:
 			quarantineOnly = False
 		if not quarantineOnly:
-			try:
-				typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
-			except KeyError:
-				typeNames = productionTypeNames
+			typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 			for typeName in typeNames:
 				# If a ControlProtocol object has already been assigned to this
 				# production type, retrieve it; otherwise, create a new one.
@@ -498,10 +487,7 @@ def main():
 	for el in xml.findall( './/basic-destruction-model' ):
 		priority = int( el.find( './priority' ).text )
 
-		try:
-			typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
-		except KeyError:
-			typeNames = productionTypeNames
+		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		for typeName in typeNames:
 			# If a ControlProtocol object has already been assigned to this
 			# production type, retrieve it; otherwise, create a new one.
@@ -538,10 +524,7 @@ def main():
 			direction = 'both'
 		priority = int( el.find( './priority' ).text )
 
-		try:
-			typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
-		except KeyError:
-			typeNames = productionTypeNames
+		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		for typeName in typeNames:
 			# If a ControlProtocol object has already been assigned to this
 			# production type, retrieve it; otherwise, create a new one.
@@ -582,16 +565,10 @@ def main():
 		# implied "from-any" functionality.
 		if 'production-type' in el.attrib:
 			fromTypeNames = productionTypeNames
-			toTypeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
+			toTypeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		else:
-			try:
-				fromTypeNames = getProductionTypes( el.attrib['from-production-type'], productionTypeNames )
-			except KeyError:
-				fromTypeNames = productionTypeNames
-			try:
-				toTypeNames = getProductionTypes( el.attrib['to-production-type'], productionTypeNames )
-			except KeyError:
-				toTypeNames = productionTypeNames
+			fromTypeNames = getProductionTypes( el, 'from-production-type', productionTypeNames )
+			toTypeNames = getProductionTypes( el, 'to-production-type', productionTypeNames )
 
 		radius = float( el.find( './radius/value' ).text )
 		for fromTypeName in fromTypeNames:
