@@ -278,7 +278,8 @@ def main():
 	plan = None
 	useDetection = (xml.find( './/detection-model' ) != None)
 	useTracing = (
-	  (xml.find( './/trace-back-destruction-model' ) != None)
+	  (xml.find( './/trace-model' ) != None)
+	  or (xml.find( './/trace-back-destruction-model' ) != None)
 	)
 	useDestruction = (
 	  (xml.find( './/basic-destruction-model' ) != None)
@@ -318,6 +319,97 @@ def main():
 			assignment.save()
 		# end of loop over production-types covered by this <detection-model> element
 	# end of loop over <detection-model> elements
+
+	for el in xml.findall( './/contact-recorder-model' ):
+		try:
+			contactType = el.attrib['contact-type']
+			assert (contactType == 'direct' or contactType == 'indirect')
+		except KeyError:
+			contactType = 'both'
+		try:
+			direction = el.attrib['direction']
+			assert (direction == 'in' or direction == 'out')
+		except KeyError:
+			direction = 'both'
+		traceSuccess = float( el.find( './trace-success' ).text )
+
+		try:
+			typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
+		except KeyError:
+			typeNames = productionTypeNames
+		for typeName in typeNames:
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=typeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			if contactType == 'direct' or contactType == 'both':
+				protocol.direct_trace_success_rate = traceSuccess
+			if contactType == 'indirect' or contactType == 'both':
+				protocol.indirect_trace_success = traceSuccess
+			protocol.trace_result_delay = zeroDelay
+			protocol.save()
+		# end of loop over production types covered by this <contact-recorder-model> element
+	# end of loop over <contact-recorder-model> elements
+
+	for el in xml.findall( './/trace-model' ):
+		try:
+			contactType = el.attrib['contact-type']
+			assert (contactType == 'direct' or contactType == 'indirect')
+		except KeyError:
+			contactType = 'both'
+		try:
+			direction = el.attrib['direction']
+			assert (direction == 'in' or direction == 'out')
+		except KeyError:
+			direction = 'both'		
+		tracePeriod = int( el.find( './trace-period/value' ).text )
+
+		try:
+			typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
+		except KeyError:
+			typeNames = productionTypeNames
+		for typeName in typeNames:
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=typeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			if contactType == 'direct' or contactType == 'both':
+				if direction == 'out' or direction == 'both':
+					protocol.trace_direct_forward = True
+				if direction == 'in' or direction == 'both':
+					protocol.trace_direct_back = True
+				protocol.direct_trace_period = tracePeriod
+			if contactType == 'indirect' or contactType == 'both':
+				if direction == 'out' or direction == 'both':
+					protocol.trace_indirect_forward = True
+				if direction == 'in' or direction == 'both':
+					protocol.trace_indirect_back = True
+				protocol.indirect_trace_period = tracePeriod
+			protocol.save()
+		# end of loop over production types covered by this <trace-model> element
+	# end of loop over <trace-model> elements
 
 	# Destruction priority order information is distributed among several
 	# different elements. Keep 2 lists that will help sort it out later.
@@ -432,6 +524,58 @@ def main():
 			destructionProductionTypeOrder.append ( (priority, typeName) )
 		# end of loop over production-types covered by this <basic-destruction-model> element
 	# end of loop over <basic-destruction-model> elements
+
+	for el in xml.findall( './/trace-destruction-model' ):
+		try:
+			contactType = el.attrib['contact-type']
+			assert (contactType == 'direct' or contactType == 'indirect')
+		except KeyError:
+			contactType = 'both'
+		try:
+			direction = el.attrib['direction']
+			assert (direction == 'in' or direction == 'out')
+		except KeyError:
+			direction = 'both'
+		priority = int( el.find( './priority' ).text )
+
+		try:
+			typeNames = getProductionTypes( el.attrib['production-type'], productionTypeNames )
+		except KeyError:
+			typeNames = productionTypeNames
+		for typeName in typeNames:
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=typeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			if contactType == 'direct' or contactType == 'both':
+				if direction == 'out' or direction == 'both':
+					protocol.destroy_direct_forward_traces = True
+					destructionReasonOrder.append( (priority, 'Trace fwd direct') )
+				if direction == 'in' or direction == 'both':
+					protocol.destroy_direct_back_traces = True
+					destructionReasonOrder.append( (priority, 'Trace back direct') )
+			if contactType == 'indirect' or contactType == 'both':
+				if direction == 'out' or direction == 'both':
+					protocol.destroy_indirect_forward_traces = True
+					destructionReasonOrder.append( (priority, 'Trace fwd indirect') )
+				if direction == 'in' or direction == 'both':
+					protocol.destroy_indirect_back_traces = True
+					destructionReasonOrder.append( (priority, 'Trace back indirect') )
+			protocol.save()
+			destructionProductionTypeOrder.append ( (priority, typeName) )
+		# end of loop over production-types covered by this <trace-destruction-model> element
+	# end of loop over <trace-destruction-model> elements
 
 	for el in xml.findall( './/resources-and-implementation-of-controls-model' ):
 		if useDestruction:
