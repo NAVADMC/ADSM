@@ -15,18 +15,14 @@
             <img src="{{STATIC_URL}}icons/icon_4743/icon_4743.svg" width=32 height=32 alt=""/>
             <input type="text" name="filename" value="{{ filename }}">
         </h1>
-        <h1><a id="new_scenario" href="/setup/NewScenario/">New </a></h1>
-{#        <h1><a id="save_scenario" href="/setup/SaveScenario/">Save </a></h1>#}
-        <input type="Submit" value="Save" class="btn btn-primary button white">
-{#        <input type=​"submit" name=​"submit" value=​"Save" class=​"btn btn-primary button white" id="submit-id-submit">​#}
-        <div class="alert alert-info alert-dismissable">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-            <strong>Success!</strong> File saved to {{ filename }}
-        </div>
+        <h1><a id="new_scenario" href="/setup/NewScenario/" class="btn btn-primary button white">New </a></h1>
+        <h1><input type="Submit" value="Save" class="btn btn-primary button white"></h1>
+{#        <div class="alert alert-info alert-dismissable">#}
+{#            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>#}
+{#            <strong>Success!</strong> File saved to {{ filename }}#}
+{#        </div>#}
+        <h1><a href="/setup/Workspace/" id="open_dialog" class="btn btn-primary button white">Open</a></h1>
     </form>
-    <div id="open_dialog">
-        <h1><a href="/setup/Workspace/">Open</a></h1>
-    </div>
 </header>
 {% block main %}
 
