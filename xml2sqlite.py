@@ -282,6 +282,8 @@ def main():
 	  (xml.find( './/trace-model' ) != None)
 	  or (xml.find( './/trace-back-destruction-model' ) != None)
 	)
+	useExams = (xml.find( './/trace-exam-model' ) != None)
+	useTesting = (xml.find( './/test-model' ) != None)
 	useVaccination = (xml.find( './/ring-vaccination-model' ) != None)
 	useDestruction = (
 	  (xml.find( './/basic-destruction-model' ) != None)
@@ -294,6 +296,8 @@ def main():
 		plan = ControlMasterPlan(
 		  _include_detection = useDetection,
 		  _include_tracing = useTracing,
+		  _include_tracing_unit_exam = useExams,
+		  _include_tracing_testing = useTesting,
 		  _include_vaccination = useVaccination,
 		  _include_destruction = useDestruction
 		)
@@ -358,7 +362,7 @@ def main():
 				protocol.direct_trace_success_rate = traceSuccess
 			if contactType == 'indirect' or contactType == 'both':
 				protocol.indirect_trace_success = traceSuccess
-			protocol.trace_result_delay = zeroDelay
+			protocol.trace_result_delay = traceDelay
 			protocol.save()
 		# end of loop over production types covered by this <contact-recorder-model> element
 	# end of loop over <contact-recorder-model> elements
@@ -408,6 +412,90 @@ def main():
 			protocol.save()
 		# end of loop over production types covered by this <trace-model> element
 	# end of loop over <trace-model> elements
+
+	for el in xml.findall( './/trace-exam-model' ):
+		try:
+			contactType = el.attrib['contact-type']
+			assert (contactType == 'direct' or contactType == 'indirect')
+		except KeyError:
+			contactType = 'both'
+		try:
+			direction = el.attrib['direction']
+			assert (direction == 'in' or direction == 'out')
+		except KeyError:
+			direction = 'both'
+		detectionMultiplier = float( el.find( './detection-multiplier' ).text )
+		try:
+			testIfNoSigns = getBool( el.find( './test-if-no-signs' ) )
+		except AttributeError:
+			testIfNoSigns = False
+
+		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
+		for typeName in typeNames:
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=typeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			if contactType == 'direct' or contactType == 'both':
+				if direction == 'out' or direction == 'both':
+					protocol.examine_direct_forward_traces = True
+					protocol.exam_direct_forward_success_multiplier = detectionMultiplier
+					protocol.test_direct_forward_traces = testIfNoSigns
+				if direction == 'in' or direction == 'both':
+					protocol.examine_direct_back_back_traces = True
+					protocol.exam_direct_back_success_multiplier = detectionMultiplier
+					protocol.test_direct_back_traces = testIfNoSigns
+			if contactType == 'indirect' or contactType == 'both':
+				if direction == 'out' or direction == 'both':
+					protocol.examine_indirect_forward_traces = True
+					protocol.exam_indirect_forward_success_multiplier = detectionMultiplier
+					protocol.test_indirect_forward_traces = testIfNoSigns
+				if direction == 'in' or direction == 'both':
+					protocol.examine_indirect_back_traces = True
+					protocol.examine_indirect_back_success_multiplier = detectionMultiplier
+					protocol.test_indirect_back_traces = testIfNoSigns
+			protocol.save()
+		# end of loop over production types covered by this <trace-exam-model> element
+	# end of loop over <trace-exam-model> elements
+
+	for el in xml.findall( './/test-model' ):
+		sensitivity = float( el.find( './sensitivity' ).text )
+		specificity = float( el.find( './specificity' ).text )
+		delay = getPdf( el.find( './delay' ) )
+		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
+		for typeName in typeNames:
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=typeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			protocol.test_sensitivity = sensitivity
+			protocol.test_specificity = specificity
+			protocol.test_delay = delay
+			protocol.save()
+		# end of loop over production types covered by this <test-model> element		
+	# end of loop over <test-model> elements
 
 	# Vaccination priority order information is distributed among several
 	# different elements. Keep a list that will help sort it out later.
@@ -503,7 +591,6 @@ def main():
 
 	if productionTypesThatAreVaccinated != productionTypesWithVaccineEffectsDefined:
 		raise Exception( 'mismatch between production types that are vaccinated and production types with vaccine effects defined' )
-		sys.exit()
 
 	# Destruction priority order information is distributed among several
 	# different elements. Keep 2 lists that will help sort it out later.
