@@ -300,16 +300,16 @@ def main():
 	for el in xml.findall( './/detection-model' ):
 		observing = getRelChart( el.find( './prob-report-vs-time-clinical' ) )
 		reporting = getRelChart( el.find( './prob-report-vs-time-since-outbreak' ) )
-		protocol = ControlProtocol(
-		  use_detection = True,
-		  detection_probability_for_observed_time_in_clinical = observing,
-		  detection_probability_report_vs_first_detection = reporting,
-		  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
-		)
-		protocol.save()
 
 		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		for typeName in typeNames:
+			protocol = ControlProtocol(
+			  use_detection = True,
+			  detection_probability_for_observed_time_in_clinical = observing,
+			  detection_probability_report_vs_first_detection = reporting,
+			  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+			)
+			protocol.save()
 			assignment = ProtocolAssignment(
 			  production_type = ProductionType.objects.get( name=typeName ),
 			  control_protocol = protocol
