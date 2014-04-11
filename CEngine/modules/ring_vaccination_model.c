@@ -634,7 +634,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read the production type combination
    * specific parameters. */
   sqlite3_exec (params,
-                "SELECT prodtype.name,trigger_vaccination_ring,vaccination_ring_radius,use_vaccination,vaccination_priority,vaccinate_detected_units,minimum_time_between_vaccinations FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol vaccine,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=vaccine.id",
+                "SELECT prodtype.name,trigger_vaccination_ring,vaccination_ring_radius,use_vaccination,vaccination_priority,vaccinate_detected_units,minimum_time_between_vaccinations FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol vaccine,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=vaccine.id AND (trigger_vaccination_ring=1 OR use_vaccination=1)",
                 set_params, self, &sqlerr);
   if (sqlerr)
     {
