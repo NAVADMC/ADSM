@@ -16,7 +16,7 @@ header h1 {
 
 .filename {
     float: left;
-    width: 20%;
+    width: 350px;
 }
 
 .filename input {
@@ -27,6 +27,11 @@ header h1 {
 header h1 {
     float: left;
     width: 10%;
+}
+
+header form {
+    float: left;
+    width: 50%;
 }
 
 header .alert {
