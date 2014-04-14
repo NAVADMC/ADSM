@@ -453,7 +453,7 @@ def main():
 					protocol.exam_direct_forward_success_multiplier = detectionMultiplier
 					protocol.test_direct_forward_traces = testIfNoSigns
 				if direction == 'in' or direction == 'both':
-					protocol.examine_direct_back_back_traces = True
+					protocol.examine_direct_back_traces = True
 					protocol.exam_direct_back_success_multiplier = detectionMultiplier
 					protocol.test_direct_back_traces = testIfNoSigns
 			if contactType == 'indirect' or contactType == 'both':
