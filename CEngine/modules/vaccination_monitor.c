@@ -512,47 +512,47 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->vaccination_occurred =
-    RPT_new_reporting ("vaccOccurred", RPT_integer, RPT_never);
+    RPT_new_reporting ("vaccOccurred", RPT_integer, RPT_daily);
   local_data->first_vaccination =
-    RPT_new_reporting ("firstVaccination", RPT_integer, RPT_never);
+    RPT_new_reporting ("firstVaccination", RPT_integer, RPT_daily);
   local_data->first_vaccination_by_reason =
-    RPT_new_reporting ("firstVaccination", RPT_group, RPT_never);
+    RPT_new_reporting ("firstVaccination", RPT_group, RPT_daily);
   local_data->first_vaccination_by_prodtype =
-    RPT_new_reporting ("firstVaccination", RPT_group, RPT_never);
+    RPT_new_reporting ("firstVaccination", RPT_group, RPT_daily);
   local_data->first_vaccination_by_reason_and_prodtype =
-    RPT_new_reporting ("firstVaccination", RPT_group, RPT_never);
+    RPT_new_reporting ("firstVaccination", RPT_group, RPT_daily);
   local_data->num_units_vaccinated =
-    RPT_new_reporting ("vacnUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("vacnUAll", RPT_integer, RPT_daily);
   local_data->num_units_vaccinated_by_reason =
-    RPT_new_reporting ("vacnU", RPT_group, RPT_never);
+    RPT_new_reporting ("vacnU", RPT_group, RPT_daily);
   local_data->num_units_vaccinated_by_prodtype =
-    RPT_new_reporting ("vacnU", RPT_group, RPT_never);
+    RPT_new_reporting ("vacnU", RPT_group, RPT_daily);
   local_data->num_units_vaccinated_by_reason_and_prodtype =
-    RPT_new_reporting ("vacnU", RPT_group, RPT_never);
+    RPT_new_reporting ("vacnU", RPT_group, RPT_daily);
   local_data->cumul_num_units_vaccinated =
-    RPT_new_reporting ("vaccUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("vaccUAll", RPT_integer, RPT_daily);
   local_data->cumul_num_units_vaccinated_by_reason =
-    RPT_new_reporting ("vaccU", RPT_group, RPT_never);
+    RPT_new_reporting ("vaccU", RPT_group, RPT_daily);
   local_data->cumul_num_units_vaccinated_by_prodtype =
-    RPT_new_reporting ("vaccU", RPT_group, RPT_never);
+    RPT_new_reporting ("vaccU", RPT_group, RPT_daily);
   local_data->cumul_num_units_vaccinated_by_reason_and_prodtype =
-    RPT_new_reporting ("vaccU", RPT_group, RPT_never);
+    RPT_new_reporting ("vaccU", RPT_group, RPT_daily);
   local_data->num_animals_vaccinated =
-    RPT_new_reporting ("vacnAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("vacnAAll", RPT_integer, RPT_daily);
   local_data->num_animals_vaccinated_by_reason =
-    RPT_new_reporting ("vacnA", RPT_group, RPT_never);
+    RPT_new_reporting ("vacnA", RPT_group, RPT_daily);
   local_data->num_animals_vaccinated_by_prodtype =
-    RPT_new_reporting ("vacnA", RPT_group, RPT_never);
+    RPT_new_reporting ("vacnA", RPT_group, RPT_daily);
   local_data->num_animals_vaccinated_by_reason_and_prodtype =
-    RPT_new_reporting ("vacnA", RPT_group, RPT_never);
+    RPT_new_reporting ("vacnA", RPT_group, RPT_daily);
   local_data->cumul_num_animals_vaccinated =
-    RPT_new_reporting ("vaccAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("vaccAAll", RPT_integer, RPT_daily);
   local_data->cumul_num_animals_vaccinated_by_reason =
-    RPT_new_reporting ("vaccA", RPT_group, RPT_never);
+    RPT_new_reporting ("vaccA", RPT_group, RPT_daily);
   local_data->cumul_num_animals_vaccinated_by_prodtype =
-    RPT_new_reporting ("vaccA", RPT_group, RPT_never);
+    RPT_new_reporting ("vaccA", RPT_group, RPT_daily);
   local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype =
-    RPT_new_reporting ("vaccA", RPT_group, RPT_never);
+    RPT_new_reporting ("vaccA", RPT_group, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->vaccination_occurred);
   g_ptr_array_add (self->outputs, local_data->first_vaccination);
   g_ptr_array_add (self->outputs, local_data->first_vaccination_by_reason);

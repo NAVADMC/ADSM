@@ -442,29 +442,29 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->nunits_awaiting_destruction =
-    RPT_new_reporting ("deswUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("deswUAll", RPT_integer, RPT_daily);
   local_data->nunits_awaiting_destruction_by_prodtype =
-    RPT_new_reporting ("deswU", RPT_group, RPT_never);
+    RPT_new_reporting ("deswU", RPT_group, RPT_daily);
   local_data->nanimals_awaiting_destruction =
-    RPT_new_reporting ("deswAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("deswAAll", RPT_integer, RPT_daily);
   local_data->nanimals_awaiting_destruction_by_prodtype =
-    RPT_new_reporting ("deswA", RPT_group, RPT_never);
+    RPT_new_reporting ("deswA", RPT_group, RPT_daily);
   local_data->peak_nunits_awaiting_destruction =
-    RPT_new_reporting ("deswUMax", RPT_integer, RPT_never);
+    RPT_new_reporting ("deswUMax", RPT_integer, RPT_daily);
   local_data->peak_nunits_awaiting_destruction_day =
-    RPT_new_reporting ("deswUMaxDay", RPT_integer, RPT_never);
+    RPT_new_reporting ("deswUMaxDay", RPT_integer, RPT_daily);
   local_data->peak_nanimals_awaiting_destruction =
-    RPT_new_reporting ("deswAMax", RPT_integer, RPT_never);
+    RPT_new_reporting ("deswAMax", RPT_integer, RPT_daily);
   local_data->peak_nanimals_awaiting_destruction_day =
-    RPT_new_reporting ("deswAMaxDay", RPT_integer, RPT_never);
+    RPT_new_reporting ("deswAMaxDay", RPT_integer, RPT_daily);
   local_data->peak_wait_time =
-    RPT_new_reporting ("deswUTimeMax", RPT_integer, RPT_never);
+    RPT_new_reporting ("deswUTimeMax", RPT_integer, RPT_daily);
   local_data->average_wait_time =
-    RPT_new_reporting ("deswUTimeAvg", RPT_real, RPT_never);
+    RPT_new_reporting ("deswUTimeAvg", RPT_real, RPT_daily);
   local_data->unit_days_in_queue =
-    RPT_new_reporting ("deswUDaysInQueue", RPT_integer, RPT_never);
+    RPT_new_reporting ("deswUDaysInQueue", RPT_integer, RPT_daily);
   local_data->animal_days_in_queue =
-    RPT_new_reporting ("deswADaysInQueue", RPT_integer, RPT_never);
+    RPT_new_reporting ("deswADaysInQueue", RPT_integer, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->nunits_awaiting_destruction);
   g_ptr_array_add (self->outputs, local_data->nunits_awaiting_destruction_by_prodtype);
   g_ptr_array_add (self->outputs, local_data->nanimals_awaiting_destruction);

@@ -544,29 +544,29 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->nunits_awaiting_vaccination =
-    RPT_new_reporting ("vacwUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("vacwUAll", RPT_integer, RPT_daily);
   local_data->nunits_awaiting_vaccination_by_prodtype =
-    RPT_new_reporting ("vacwU", RPT_group, RPT_never);
+    RPT_new_reporting ("vacwU", RPT_group, RPT_daily);
   local_data->nanimals_awaiting_vaccination =
-    RPT_new_reporting ("vacwAAll", RPT_real, RPT_never);
+    RPT_new_reporting ("vacwAAll", RPT_real, RPT_daily);
   local_data->nanimals_awaiting_vaccination_by_prodtype =
-    RPT_new_reporting ("vacwA", RPT_group, RPT_never);
+    RPT_new_reporting ("vacwA", RPT_group, RPT_daily);
   local_data->peak_nunits_awaiting_vaccination =
-    RPT_new_reporting ("vacwUMax", RPT_integer, RPT_never);
+    RPT_new_reporting ("vacwUMax", RPT_integer, RPT_daily);
   local_data->peak_nunits_awaiting_vaccination_day =
-    RPT_new_reporting ("vacwUMaxDay", RPT_integer, RPT_never);
+    RPT_new_reporting ("vacwUMaxDay", RPT_integer, RPT_daily);
   local_data->peak_nanimals_awaiting_vaccination =
-    RPT_new_reporting ("vacwAMax", RPT_real, RPT_never);
+    RPT_new_reporting ("vacwAMax", RPT_real, RPT_daily);
   local_data->peak_nanimals_awaiting_vaccination_day =
-    RPT_new_reporting ("vacwAMaxDay", RPT_integer, RPT_never);
+    RPT_new_reporting ("vacwAMaxDay", RPT_integer, RPT_daily);
   local_data->peak_wait_time =
-    RPT_new_reporting ("vacwUTimeMax", RPT_integer, RPT_never);
+    RPT_new_reporting ("vacwUTimeMax", RPT_integer, RPT_daily);
   local_data->average_wait_time =
-    RPT_new_reporting ("vacwUTimeAvg", RPT_real, RPT_never);
+    RPT_new_reporting ("vacwUTimeAvg", RPT_real, RPT_daily);
   local_data->unit_days_in_queue =
-    RPT_new_reporting ("vacwUDaysInQueue", RPT_integer, RPT_never);
+    RPT_new_reporting ("vacwUDaysInQueue", RPT_integer, RPT_daily);
   local_data->animal_days_in_queue =
-    RPT_new_reporting ("vacwADaysInQueue", RPT_real, RPT_never);
+    RPT_new_reporting ("vacwADaysInQueue", RPT_real, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->nunits_awaiting_vaccination);
   g_ptr_array_add (self->outputs, local_data->nunits_awaiting_vaccination_by_prodtype);
   g_ptr_array_add (self->outputs, local_data->nanimals_awaiting_vaccination);

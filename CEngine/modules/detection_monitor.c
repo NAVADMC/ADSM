@@ -597,57 +597,57 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->detection_occurred =
-    RPT_new_reporting ("detOccurred", RPT_integer, RPT_never);
+    RPT_new_reporting ("detOccurred", RPT_integer, RPT_daily);
   local_data->first_detection =
-    RPT_new_reporting ("firstDetection", RPT_integer, RPT_never);
+    RPT_new_reporting ("firstDetection", RPT_integer, RPT_daily);
   local_data->first_detection_by_means =
-    RPT_new_reporting ("firstDetection", RPT_group, RPT_never);
+    RPT_new_reporting ("firstDetection", RPT_group, RPT_daily);
   local_data->first_detection_by_prodtype =
-    RPT_new_reporting ("firstDetection", RPT_group, RPT_never);
+    RPT_new_reporting ("firstDetection", RPT_group, RPT_daily);
   local_data->first_detection_by_means_and_prodtype =
-    RPT_new_reporting ("firstDetection", RPT_group, RPT_never);
+    RPT_new_reporting ("firstDetection", RPT_group, RPT_daily);
   local_data->last_detection =
-    RPT_new_reporting ("lastDetection", RPT_integer, RPT_never);
+    RPT_new_reporting ("lastDetection", RPT_integer, RPT_daily);
   local_data->last_detection_by_means =
-    RPT_new_reporting ("lastDetection", RPT_group, RPT_never);
+    RPT_new_reporting ("lastDetection", RPT_group, RPT_daily);
   local_data->last_detection_by_prodtype =
-    RPT_new_reporting ("lastDetection", RPT_group, RPT_never);
+    RPT_new_reporting ("lastDetection", RPT_group, RPT_daily);
   local_data->last_detection_by_means_and_prodtype =
-    RPT_new_reporting ("lastDetection", RPT_group, RPT_never);
+    RPT_new_reporting ("lastDetection", RPT_group, RPT_daily);
   local_data->nunits_detected =
-    RPT_new_reporting ("detnUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("detnUAll", RPT_integer, RPT_daily);
   local_data->nunits_detected_by_means =
-    RPT_new_reporting ("detnU", RPT_group, RPT_never);
+    RPT_new_reporting ("detnU", RPT_group, RPT_daily);
   local_data->nunits_detected_by_prodtype =
-    RPT_new_reporting ("detnU", RPT_group, RPT_never);
+    RPT_new_reporting ("detnU", RPT_group, RPT_daily);
   local_data->nunits_detected_by_means_and_prodtype =
-    RPT_new_reporting ("detnU", RPT_group, RPT_never);
+    RPT_new_reporting ("detnU", RPT_group, RPT_daily);
   local_data->nanimals_detected =
-    RPT_new_reporting ("detnAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("detnAAll", RPT_integer, RPT_daily);
   local_data->nanimals_detected_by_means =
-    RPT_new_reporting ("detnA", RPT_group, RPT_never);
+    RPT_new_reporting ("detnA", RPT_group, RPT_daily);
   local_data->nanimals_detected_by_prodtype =
-    RPT_new_reporting ("detnA", RPT_group, RPT_never);
+    RPT_new_reporting ("detnA", RPT_group, RPT_daily);
   local_data->nanimals_detected_by_means_and_prodtype =
-    RPT_new_reporting ("detnA", RPT_group, RPT_never);
+    RPT_new_reporting ("detnA", RPT_group, RPT_daily);
   local_data->cumul_nunits_detected =
-    RPT_new_reporting ("detcUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("detcUAll", RPT_integer, RPT_daily);
   local_data->cumul_nunits_detected_by_means =
-    RPT_new_reporting ("detcU", RPT_group, RPT_never);
+    RPT_new_reporting ("detcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_detected_by_prodtype =
-    RPT_new_reporting ("detcU", RPT_group, RPT_never);
+    RPT_new_reporting ("detcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_detected_by_means_and_prodtype =
-    RPT_new_reporting ("detcU", RPT_group, RPT_never);
+    RPT_new_reporting ("detcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_detected_uniq =
-    RPT_new_reporting ("detcUqAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("detcUqAll", RPT_integer, RPT_daily);
   local_data->cumul_nanimals_detected =
-    RPT_new_reporting ("detcAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("detcAAll", RPT_integer, RPT_daily);
   local_data->cumul_nanimals_detected_by_means =
-    RPT_new_reporting ("detcA", RPT_group, RPT_never);
+    RPT_new_reporting ("detcA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_detected_by_prodtype =
-    RPT_new_reporting ("detcA", RPT_group, RPT_never);
+    RPT_new_reporting ("detcA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_detected_by_means_and_prodtype =
-    RPT_new_reporting ("detcA", RPT_group, RPT_never);
+    RPT_new_reporting ("detcA", RPT_group, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->detection_occurred);
   g_ptr_array_add (self->outputs, local_data->first_detection);
   g_ptr_array_add (self->outputs, local_data->first_detection_by_means);

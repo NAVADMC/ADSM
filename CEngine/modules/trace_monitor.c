@@ -518,69 +518,69 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projections,
   self->free = local_free;
 
   local_data->nunits_potentially_traced =
-    RPT_new_reporting ("trnUAllp", RPT_integer, RPT_never);
+    RPT_new_reporting ("trnUAllp", RPT_integer, RPT_daily);
   local_data->nunits_potentially_traced_by_contacttype =
-    RPT_new_reporting ("trnU", RPT_group, RPT_never);
+    RPT_new_reporting ("trnU", RPT_group, RPT_daily);
   local_data->nunits_potentially_traced_by_prodtype =
-    RPT_new_reporting ("trnU", RPT_group, RPT_never);
+    RPT_new_reporting ("trnU", RPT_group, RPT_daily);
   local_data->nunits_potentially_traced_by_contacttype_and_prodtype =
-    RPT_new_reporting ("trnU", RPT_group, RPT_never);
+    RPT_new_reporting ("trnU", RPT_group, RPT_daily);
   local_data->cumul_nunits_potentially_traced =
-    RPT_new_reporting ("trcUAllp", RPT_integer, RPT_never);
+    RPT_new_reporting ("trcUAllp", RPT_integer, RPT_daily);
   local_data->cumul_nunits_potentially_traced_by_contacttype =
-    RPT_new_reporting ("trcU", RPT_group, RPT_never);
+    RPT_new_reporting ("trcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_potentially_traced_by_prodtype =
-    RPT_new_reporting ("trcU", RPT_group, RPT_never);
+    RPT_new_reporting ("trcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_potentially_traced_by_contacttype_and_prodtype =
-    RPT_new_reporting ("trcU", RPT_group, RPT_never);
+    RPT_new_reporting ("trcU", RPT_group, RPT_daily);
   local_data->nunits_traced =
-    RPT_new_reporting ("trnUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("trnUAll", RPT_integer, RPT_daily);
   local_data->nunits_traced_by_contacttype =
-    RPT_new_reporting ("trnU", RPT_group, RPT_never);
+    RPT_new_reporting ("trnU", RPT_group, RPT_daily);
   local_data->nunits_traced_by_prodtype =
-    RPT_new_reporting ("trnU", RPT_group, RPT_never);
+    RPT_new_reporting ("trnU", RPT_group, RPT_daily);
   local_data->nunits_traced_by_contacttype_and_prodtype =
-    RPT_new_reporting ("trnU", RPT_group, RPT_never);
+    RPT_new_reporting ("trnU", RPT_group, RPT_daily);
   local_data->cumul_nunits_traced =
-    RPT_new_reporting ("trcUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("trcUAll", RPT_integer, RPT_daily);
   local_data->cumul_nunits_traced_by_contacttype =
-    RPT_new_reporting ("trcU", RPT_group, RPT_never);
+    RPT_new_reporting ("trcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_traced_by_prodtype =
-    RPT_new_reporting ("trcU", RPT_group, RPT_never);
+    RPT_new_reporting ("trcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_traced_by_contacttype_and_prodtype =
-    RPT_new_reporting ("trcU", RPT_group, RPT_never);
+    RPT_new_reporting ("trcU", RPT_group, RPT_daily);
   local_data->nanimals_potentially_traced =
-    RPT_new_reporting ("trnAAllp", RPT_integer, RPT_never);
+    RPT_new_reporting ("trnAAllp", RPT_integer, RPT_daily);
   local_data->nanimals_potentially_traced_by_contacttype =
-    RPT_new_reporting ("trnA", RPT_group, RPT_never);
+    RPT_new_reporting ("trnA", RPT_group, RPT_daily);
   local_data->nanimals_potentially_traced_by_prodtype =
-    RPT_new_reporting ("trnA", RPT_group, RPT_never);
+    RPT_new_reporting ("trnA", RPT_group, RPT_daily);
   local_data->nanimals_potentially_traced_by_contacttype_and_prodtype =
-    RPT_new_reporting ("trnA", RPT_group, RPT_never);
+    RPT_new_reporting ("trnA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_potentially_traced =
-    RPT_new_reporting ("trcAAllp", RPT_integer, RPT_never);
+    RPT_new_reporting ("trcAAllp", RPT_integer, RPT_daily);
   local_data->cumul_nanimals_potentially_traced_by_contacttype =
-    RPT_new_reporting ("trcA", RPT_group, RPT_never);
+    RPT_new_reporting ("trcA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_potentially_traced_by_prodtype =
-    RPT_new_reporting ("trcA", RPT_group, RPT_never);
+    RPT_new_reporting ("trcA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_potentially_traced_by_contacttype_and_prodtype =
-    RPT_new_reporting ("trcA", RPT_group, RPT_never);
+    RPT_new_reporting ("trcA", RPT_group, RPT_daily);
   local_data->nanimals_traced =
-    RPT_new_reporting ("trnAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("trnAAll", RPT_integer, RPT_daily);
   local_data->nanimals_traced_by_contacttype =
-    RPT_new_reporting ("trnA", RPT_group, RPT_never);
+    RPT_new_reporting ("trnA", RPT_group, RPT_daily);
   local_data->nanimals_traced_by_prodtype =
-    RPT_new_reporting ("trnA", RPT_group, RPT_never);
+    RPT_new_reporting ("trnA", RPT_group, RPT_daily);
   local_data->nanimals_traced_by_contacttype_and_prodtype =
-    RPT_new_reporting ("trnA", RPT_group, RPT_never);
+    RPT_new_reporting ("trnA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_traced =
-    RPT_new_reporting ("trcAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("trcAAll", RPT_integer, RPT_daily);
   local_data->cumul_nanimals_traced_by_contacttype =
-    RPT_new_reporting ("trcA", RPT_group, RPT_never);
+    RPT_new_reporting ("trcA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_traced_by_prodtype =
-    RPT_new_reporting ("trcA", RPT_group, RPT_never);
+    RPT_new_reporting ("trcA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_traced_by_contacttype_and_prodtype =
-    RPT_new_reporting ("trcA", RPT_group, RPT_never);
+    RPT_new_reporting ("trcA", RPT_group, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->nunits_potentially_traced);
   g_ptr_array_add (self->outputs, local_data->nunits_potentially_traced_by_contacttype);
   g_ptr_array_add (self->outputs, local_data->nunits_potentially_traced_by_prodtype);

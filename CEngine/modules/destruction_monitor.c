@@ -433,47 +433,47 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->destruction_occurred =
-    RPT_new_reporting ("destrOccurred", RPT_integer, RPT_never);
+    RPT_new_reporting ("destrOccurred", RPT_integer, RPT_daily);
   local_data->first_destruction =
-    RPT_new_reporting ("firstDestruction", RPT_integer, RPT_never);
+    RPT_new_reporting ("firstDestruction", RPT_integer, RPT_daily);
   local_data->first_destruction_by_reason =
-    RPT_new_reporting ("firstDestruction", RPT_group, RPT_never);
+    RPT_new_reporting ("firstDestruction", RPT_group, RPT_daily);
   local_data->first_destruction_by_prodtype =
-    RPT_new_reporting ("firstDestruction", RPT_group, RPT_never);
+    RPT_new_reporting ("firstDestruction", RPT_group, RPT_daily);
   local_data->first_destruction_by_reason_and_prodtype =
-    RPT_new_reporting ("firstDestruction", RPT_group, RPT_never);
+    RPT_new_reporting ("firstDestruction", RPT_group, RPT_daily);
   local_data->num_units_destroyed =
-    RPT_new_reporting ("desnUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("desnUAll", RPT_integer, RPT_daily);
   local_data->num_units_destroyed_by_reason =
-    RPT_new_reporting ("desnU", RPT_group, RPT_never);
+    RPT_new_reporting ("desnU", RPT_group, RPT_daily);
   local_data->num_units_destroyed_by_prodtype =
-    RPT_new_reporting ("desnU", RPT_group, RPT_never);
+    RPT_new_reporting ("desnU", RPT_group, RPT_daily);
   local_data->num_units_destroyed_by_reason_and_prodtype =
-    RPT_new_reporting ("desnU", RPT_group, RPT_never);
+    RPT_new_reporting ("desnU", RPT_group, RPT_daily);
   local_data->cumul_num_units_destroyed =
-    RPT_new_reporting ("descUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("descUAll", RPT_integer, RPT_daily);
   local_data->cumul_num_units_destroyed_by_reason =
-    RPT_new_reporting ("descU", RPT_group, RPT_never);
+    RPT_new_reporting ("descU", RPT_group, RPT_daily);
   local_data->cumul_num_units_destroyed_by_prodtype =
-    RPT_new_reporting ("descU", RPT_group, RPT_never);
+    RPT_new_reporting ("descU", RPT_group, RPT_daily);
   local_data->cumul_num_units_destroyed_by_reason_and_prodtype =
-    RPT_new_reporting ("descU", RPT_group, RPT_never);
+    RPT_new_reporting ("descU", RPT_group, RPT_daily);
   local_data->num_animals_destroyed =
-    RPT_new_reporting ("desnAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("desnAAll", RPT_integer, RPT_daily);
   local_data->num_animals_destroyed_by_reason =
-    RPT_new_reporting ("desnA", RPT_group, RPT_never);
+    RPT_new_reporting ("desnA", RPT_group, RPT_daily);
   local_data->num_animals_destroyed_by_prodtype =
-    RPT_new_reporting ("desnA", RPT_group, RPT_never);
+    RPT_new_reporting ("desnA", RPT_group, RPT_daily);
   local_data->num_animals_destroyed_by_reason_and_prodtype =
-    RPT_new_reporting ("desnA", RPT_group, RPT_never);
+    RPT_new_reporting ("desnA", RPT_group, RPT_daily);
   local_data->cumul_num_animals_destroyed =
-    RPT_new_reporting ("descAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("descAAll", RPT_integer, RPT_daily);
   local_data->cumul_num_animals_destroyed_by_reason =
-    RPT_new_reporting ("descA", RPT_group, RPT_never);
+    RPT_new_reporting ("descA", RPT_group, RPT_daily);
   local_data->cumul_num_animals_destroyed_by_prodtype =
-    RPT_new_reporting ("descA", RPT_group, RPT_never);
+    RPT_new_reporting ("descA", RPT_group, RPT_daily);
   local_data->cumul_num_animals_destroyed_by_reason_and_prodtype =
-    RPT_new_reporting ("descA", RPT_group, RPT_never);
+    RPT_new_reporting ("descA", RPT_group, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->destruction_occurred);
   g_ptr_array_add (self->outputs, local_data->first_destruction);
   g_ptr_array_add (self->outputs, local_data->first_destruction_by_reason);
