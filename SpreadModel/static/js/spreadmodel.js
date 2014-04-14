@@ -4,6 +4,7 @@ $(function(){
         var model = $selector.attr('name'); // field name
         modelModal.show(model, $selector);
     })
+
     $('[data-toggle-controller]').each(function(){
         var controller = '[name=' + $(this).attr('data-toggle-controller') + ']'
         var hide_target = $(this).parents('.control-group')
