@@ -442,7 +442,7 @@ set_params (void *data, int ncols, char **value, char **colname)
     }
 
   errno = 0;
-  tmp = strtol (value[1], NULL, /* base */ 10);
+  tmp = strtol (value[3], NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
   g_assert (tmp == 0 || tmp == 1);
   p->include_in_ring = (tmp == 1);
