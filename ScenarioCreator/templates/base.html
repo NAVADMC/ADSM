@@ -10,7 +10,19 @@
 </head>
 <body>
 <header>
-    <h1 class="filename"><img src="{{STATIC_URL}}icons/icon_4743/icon_4743.svg" width=32 height=32 alt=""/>  Filename</h1>
+    <form class="ajax" method="post" action="/setup/SaveScenario/">
+        <h1 class="filename">
+            <img src="{{STATIC_URL}}icons/icon_4743/icon_4743.svg" width=32 height=32 alt=""/>
+            <input type="text" name="filename" value="{{ filename }}">
+        </h1>
+        <h1><a id="new_scenario" href="/setup/NewScenario/" class="btn btn-primary button white">New </a></h1>
+        <h1><input type="Submit" value="Save" class="btn btn-primary button white"></h1>
+{#        <div class="alert alert-info alert-dismissable">#}
+{#            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>#}
+{#            <strong>Success!</strong> File saved to {{ filename }}#}
+{#        </div>#}
+        <h1><a href="/setup/Workspace/" id="open_dialog" class="btn btn-primary button white">Open</a></h1>
+    </form>
 </header>
 {% block main %}
 

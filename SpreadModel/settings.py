@@ -39,10 +39,12 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
+    'south',
     'floppyforms',
     'crispy_forms',
     'ScenarioCreator',
     'Results',
+    'Settings',
 )
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -75,10 +77,18 @@ CRISPY_TEMPLATE_PACK = 'bootstrap'
 
 DATABASES = {
     'default': {
+        'NAME': os.path.join(BASE_DIR, 'settings.sqlite3'),
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'defaultSettings.db'),
+        'USER': 'josiah',
+        'PASSWORD': '1',
+    },
+    'scenario_db': {
+        'NAME': os.path.join(BASE_DIR, 'activeSession.sqlite3'),
+        'ENGINE': 'django.db.backends.sqlite3',
     }
 }
+
+DATABASE_ROUTERS = ['ScenarioCreator.router.ScenarioRouter', ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/

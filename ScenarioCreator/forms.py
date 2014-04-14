@@ -44,10 +44,23 @@ class DynamicBlobForm(BaseForm):
         model = DynamicBlob
 
 
+class PopulationForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_class = 'form-horizontal'
+        self.helper.layout = Layout(
+            'source_file',
+            submit_button()
+        )
+        return super().__init__(*args, **kwargs)
+    class Meta:
+        model = Population
+
+
 class UnitForm(BaseForm):
     class Meta:
         model = Unit
-        exclude = ['_final_state_code', '_final_control_state_code', '_final_detection_state_code', '_cum_infected', '_cum_detected', '_cum_destroyed', '_cum_vaccinated']
+        exclude = ['_population', '_final_state_code', '_final_control_state_code', '_final_detection_state_code', '_cum_infected', '_cum_detected', '_cum_destroyed', '_cum_vaccinated']
         widgets = {'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'})}
 
 
@@ -69,7 +82,7 @@ class RelationalFunctionForm(BaseForm):
 class RelationalPointForm(BaseForm):
     class Meta:
         model = RelationalPoint
-        exclude = ['_point_order']
+        exclude = []
         widgets = {'relational_function': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
@@ -77,8 +90,8 @@ class ControlMasterPlanForm(BaseForm):
     class Meta:
         model = ControlMasterPlan
         exclude = ['_include_detection', '_include_tracing', '_include_tracing_unit_exam', '_include_tracing_testing', '_include_destruction', '_include_vaccination', '_include_zones']
-        widgets = {'destruction_capacity_relid': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'vaccination_capacity_relid': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
+        widgets = {'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
 class ProtocolAssignmentForm(BaseForm):
@@ -98,7 +111,8 @@ class DiseaseReactionAssignmentForm(BaseForm):
 
 
 class ControlProtocolForm(BaseForm):
-    """https://speakerdeck.com/maraujop/advanced-django-forms-usage slide 47"""
+    """https://speakerdeck.com/maraujop/advanced-django-forms-usage slide 47
+    http://stackoverflow.com/questions/19625211/bootstrap-linking-to-a-tab-with-an-url"""
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_class = 'form-horizontal'
@@ -107,8 +121,8 @@ class ControlProtocolForm(BaseForm):
             TabHolder(
                 Tab('Detection',
                     'use_detection',
-                    'detection_probability_for_observed_time_in_clinical_relid',
-                    'detection_probability_report_vs_first_detection_relid',
+                    'detection_probability_for_observed_time_in_clinical',
+                    'detection_probability_report_vs_first_detection',
                     'detection_is_a_zone_trigger',
                     ),
                 Tab('Tracing',
@@ -121,7 +135,7 @@ class ControlProtocolForm(BaseForm):
                     'trace_indirect_back',
                     'indirect_trace_success',
                     'indirect_trace_period',
-                    'trace_result_delay_pdf',
+                    'trace_result_delay',
                     'direct_trace_is_a_zone_trigger',
                     'indirect_trace_is_a_zone_trigger',
                     ),
@@ -141,7 +155,7 @@ class ControlProtocolForm(BaseForm):
                     'test_indirect_back_traces',
                     'test_specificity',
                     'test_sensitivity',
-                    'test_delay_pdf',
+                    'test_delay',
                     ),
                 Tab('Destruction',
                     'use_destruction',
@@ -159,7 +173,7 @@ class ControlProtocolForm(BaseForm):
                     'vaccinate_detected_units',
                     'minimum_time_between_vaccinations',
                     'days_to_immunity',
-                    'vaccine_immune_period_pdf',
+                    'vaccine_immune_period',
                     'trigger_vaccination_ring',
                     'vaccination_ring_radius',
                     'vaccination_priority',
@@ -183,11 +197,11 @@ class ControlProtocolForm(BaseForm):
         return super().__init__(*args, **kwargs)
     class Meta:
         model = ControlProtocol
-        widgets = {'detection_probability_for_observed_time_in_clinical_relid': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'detection_probability_report_vs_first_detection_relid': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'trace_result_delay_pdf': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'vaccine_immune_period_pdf': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'test_delay_pdf': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
+        widgets = {'detection_probability_for_observed_time_in_clinical': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'detection_probability_report_vs_first_detection': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'trace_result_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'vaccine_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'test_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
 class DiseaseForm(BaseForm):
@@ -201,15 +215,15 @@ class DiseaseReactionForm(BaseForm):
         exclude = ['_disease']
         try:
             if not Scenario.objects.get(id=1).use_within_unit_prevalence:
-                exclude.append('disease_prevalence_relid')
+                exclude.append('disease_prevalence')
         except (ObjectDoesNotExist, OperationalError):
             pass  # If someone hasn't created a Scenario yet, the field will show
         widgets = {'_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
-                   'disease_latent_period_pdf': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'disease_subclinical_period_pdf': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'disease_clinical_period_pdf': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'disease_immune_period_pdf': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'disease_prevalence_relid': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
+                   'disease_latent_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'disease_subclinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'disease_clinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'disease_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'disease_prevalence': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
 class IndirectSpreadModelForm(BaseForm):
@@ -222,19 +236,19 @@ class IndirectSpreadModelForm(BaseForm):
             'use_fixed_contact_rate',
             'contact_rate',
             'infection_probability',
-            'distance_pdf',
-            'transport_delay_pdf',
-            'movement_control_relid',
+            'distance_distribution',
+            'transport_delay',
+            'movement_control',
             submit_button()
         )
         return super().__init__(*args, **kwargs)
     class Meta:
         model = IndirectSpreadModel
         exclude = ['_spread_method_code', '_disease']
-        widgets = {'distance_pdf': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+        widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
-                   'movement_control_relid': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'transport_delay_pdf': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
+                   'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
 class DirectSpreadModelForm(BaseForm):
@@ -247,19 +261,19 @@ class DirectSpreadModelForm(BaseForm):
             'use_fixed_contact_rate',
             'contact_rate',
             'infection_probability',
-            'distance_pdf',
-            'transport_delay_pdf',
-            'movement_control_relid',
+            'distance_distribution',
+            'transport_delay',
+            'movement_control',
             submit_button()
         )
         return super().__init__(*args, **kwargs)
     class Meta:
         model = DirectSpreadModel
         exclude = ['_spread_method_code', '_disease']
-        widgets = {'distance_pdf': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+        widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
-                   'movement_control_relid': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'transport_delay_pdf': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
+                   'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
 class AirborneSpreadModelForm(BaseForm):
@@ -271,7 +285,7 @@ class AirborneSpreadModelForm(BaseForm):
             'max_distance',
             'wind_direction_start',
             'wind_direction_end',
-            'transport_delay_pdf',
+            'transport_delay',
             submit_button()
         )
         return super().__init__(*args, **kwargs)
@@ -284,19 +298,20 @@ class AirborneSpreadModelForm(BaseForm):
         except (ObjectDoesNotExist, OperationalError):
             pass
         widgets = {'_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
-                   'movement_control_relid': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'transport_delay_pdf': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
+                   'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
 class ScenarioForm(BaseForm):
     class Meta:
         model = Scenario
-        exclude = ['_output_settings']
+        exclude = []
 
 
 class OutputSettingsForm(BaseForm):
     class Meta:
         model = OutputSettings
+        exclude = ['_scenario']
         widgets = {'save_all_daily_outputs': RadioSelect(),
             'maximum_iterations_for_daily_output': NumberInput(attrs={'data-toggle-controller': 'save_all_daily_outputs',
                                                                       'data-required-value': 'False'})}
@@ -327,8 +342,8 @@ class ZoneEffectOnProductionTypeForm(BaseForm):
         model = ZoneEffectOnProductionType
         widgets = {'zone': AddOrSelect(attrs={'data-new-item-url': '/setup/Zone/new/'}),
                    'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-                   'zone_indirect_movement_relid': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'zone_direct_movement_relid': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
+                   'zone_indirect_movement': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'zone_direct_movement': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
 class ReadAllCodesForm(BaseForm):

@@ -4,6 +4,7 @@ $(function(){
         var model = $selector.attr('name'); // field name
         modelModal.show(model, $selector);
     })
+
     $('[data-toggle-controller]').each(function(){
         var controller = '[name=' + $(this).attr('data-toggle-controller') + ']'
         var hide_target = $(this).parents('.control-group')
@@ -15,9 +16,11 @@ $(function(){
                 hide_target.hide()
             }
         }).trigger('change')  //TODO: this doesn't trigger on page load properly
-
     })
 
+    $("#open_file").change(function(){
+        $(this).parent('form').submit();
+    })
 })
 
 var modelModal = {
