@@ -565,6 +565,10 @@ def main():
 
 		priority = int( el.find( './priority' ).text )
 		minTimeBetweenVaccinations = int( el.find( './min-time-between-vaccinations/value' ).text )
+		try:
+			vaccinateDetectedUnits = getBool( el.find( './vaccinate-detected-units' ) )
+		except AttributeError:
+			vaccinateDetectedUnits = True
 		for toTypeName in toTypeNames:
 			# If a ControlProtocol object has already been assigned to this
 			# production type, retrieve it; otherwise, create a new one.
@@ -583,6 +587,7 @@ def main():
 				assignment.save()
 			protocol.use_vaccination = True
 			protocol.minimum_time_between_vaccinations = minTimeBetweenVaccinations
+			protocol.vaccinate_detected_units = vaccinateDetectedUnits
 			protocol.save()
 			vaccinationProductionTypeOrder.append( (priority, toTypeName) )
 			productionTypesThatAreVaccinated.add( toTypeName )
