@@ -30,7 +30,7 @@ def scenario_filename(new_value=None):
 
 def activeSession():
     full_path = settings.DATABASES['scenario_db']['NAME']
-    return os.path.split(full_path)[-1]
+    return os.path.basename(full_path)
 
 
 def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
@@ -218,6 +218,7 @@ def delete_entry(request, primary_key):
 
 def workspace_path(target):
     return "./workspace/"+target+".sqlite3"
+    #os.path.join(BASE_DIR, 'settings.sqlite3')
 
 
 def file_dialog(request):
@@ -228,7 +229,7 @@ def file_dialog(request):
     # except ValueError:
     #     pass  # New scenario
     db_files = glob("./workspace/*.sqlite3")
-    db_files = map(lambda x: x.replace('./workspace\\', '').replace('.sqlite3', ''), db_files)
+    db_files = map(lambda f: os.path.splitext(os.path.basename(f))[0], db_files)  # remove directory and extension
     context = basic_context()
     context['db_files'] = db_files
     context['title'] = 'Select a new Scenario to Open'
