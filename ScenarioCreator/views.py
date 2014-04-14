@@ -12,6 +12,14 @@ from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic 
 from Settings.models import SmSession
 
 
+def unsaved_changes(new_value=None):
+    session = SmSession.objects.get_or_create(id=1)[0]  # This keeps track of the state for all views and is used by basic_context
+    if new_value is not None:  # you can still set it to False
+        session.unsaved_changes = new_value
+        session.save()
+    return session.unsaved_changes
+
+
 def scenario_filename(new_value=None):
     session = SmSession.objects.get_or_create(id=1)[0]  # This keeps track of the state for all views and is used by basic_context
     if new_value is not None:  # you can still set it to ''
@@ -27,6 +35,7 @@ def activeSession():
 
 def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
     return {'filename': scenario_filename(),
+            'unsaved_changes': unsaved_changes(),
             'Scenario': Scenario.objects.count(),
             'OutputSetting': OutputSettings.objects.count(),
             'Population': Population.objects.count(),
@@ -90,6 +99,7 @@ def assign_reactions(request):
 
 def save_new_instance(initialized_form, request):
     model_instance = initialized_form.save()  # write to database
+    unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
     model_name = model_instance.__class__.__name__
     if request.is_ajax():
         msg = {'pk': model_instance.pk, 'title': str(model_instance), 'model': model_name, 'status': 'success'}
@@ -135,6 +145,8 @@ def edit_entry(request, primary_key):
         return redirect('/setup/%s/new/' % model_name)
     if initialized_form.is_valid() and request.method == 'POST':
         initialized_form.save()  # write instance updates to database
+        unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
+
     context = basic_context()
     context.update({'form': initialized_form,
                     'title': "Edit a " + model_name}.items())
@@ -199,6 +211,8 @@ def delete_entry(request, primary_key):
 #             node.save(using='save_file')
 #         except ObjectDoesNotExist:
 #             print("Couldn't find a ", parent_object)
+#
+#     unsaved_changes(False)  # File is now in sync
 #     return 'Scenario Saved'
 
 
@@ -221,16 +235,15 @@ def file_dialog(request):
     return render(request, 'ScenarioCreator/workspace.html', context)
 
 
-def save_scenario(request, target=None):
+def save_scenario(request):
     """Save to the existing session of a new file name if target is provided
     """
-    if not target and scenario_filename():
-        target = scenario_filename()
-
+    target = request.POST['filename']
     if target:
         scenario_filename(target)
         print('Copying database to', target)
         shutil.copy(activeSession(), workspace_path(target))
+        unsaved_changes(False)  # File is now in sync
     else:
         raise ValueError('You need to select a file path to save first')
     return redirect('/setup/Scenario/1/')
@@ -256,6 +269,7 @@ def open_scenario(request, target):
     scenario_filename(target)
     print('Sessions overwritten with ', target)
     update_db_version()
+    unsaved_changes(False)  # File is now in sync
     # else:
     #     print('File does not exist')
     return redirect('/setup/Scenario/1/')
@@ -273,10 +287,10 @@ def new_scenario(request):
                  interactive=False,
                  database=connections['scenario_db'].alias,
                  load_initial_data=False)
-
     call_command('migrate',
                  # verbosity=0,
                  interactive=False,
                  database=connections['scenario_db'].alias,
                  load_initial_data=False)
+    scenario_filename("Untitled Scenario")
     return redirect('/setup/Scenario/1/')
