@@ -390,37 +390,37 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->nunits_examined =
-    RPT_new_reporting ("exmnUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("exmnUAll", RPT_integer, RPT_daily);
   local_data->nunits_examined_by_reason =
-    RPT_new_reporting ("exmnU", RPT_group, RPT_never);
+    RPT_new_reporting ("exmnU", RPT_group, RPT_daily);
   local_data->nunits_examined_by_prodtype =
-    RPT_new_reporting ("exmnU", RPT_group, RPT_never);
+    RPT_new_reporting ("exmnU", RPT_group, RPT_daily);
   local_data->nunits_examined_by_reason_and_prodtype =
-    RPT_new_reporting ("exmnU", RPT_group, RPT_never);
+    RPT_new_reporting ("exmnU", RPT_group, RPT_daily);
   local_data->nanimals_examined =
-    RPT_new_reporting ("exmnAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("exmnAAll", RPT_integer, RPT_daily);
   local_data->nanimals_examined_by_reason =
-    RPT_new_reporting ("exmnA", RPT_group, RPT_never);
+    RPT_new_reporting ("exmnA", RPT_group, RPT_daily);
   local_data->nanimals_examined_by_prodtype =
-    RPT_new_reporting ("exmnA", RPT_group, RPT_never);
+    RPT_new_reporting ("exmnA", RPT_group, RPT_daily);
   local_data->nanimals_examined_by_reason_and_prodtype =
-    RPT_new_reporting ("exmnA", RPT_group, RPT_never);
+    RPT_new_reporting ("exmnA", RPT_group, RPT_daily);
   local_data->cumul_nunits_examined =
-    RPT_new_reporting ("exmcUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("exmcUAll", RPT_integer, RPT_daily);
   local_data->cumul_nunits_examined_by_reason =
-    RPT_new_reporting ("exmcU", RPT_group, RPT_never);
+    RPT_new_reporting ("exmcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_examined_by_prodtype =
-    RPT_new_reporting ("exmcU", RPT_group, RPT_never);
+    RPT_new_reporting ("exmcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_examined_by_reason_and_prodtype =
-    RPT_new_reporting ("exmcU", RPT_group, RPT_never);
+    RPT_new_reporting ("exmcU", RPT_group, RPT_daily);
   local_data->cumul_nanimals_examined =
-    RPT_new_reporting ("exmcAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("exmcAAll", RPT_integer, RPT_daily);
   local_data->cumul_nanimals_examined_by_reason =
-    RPT_new_reporting ("exmcA", RPT_group, RPT_never);
+    RPT_new_reporting ("exmcA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_examined_by_prodtype =
-    RPT_new_reporting ("exmcA", RPT_group, RPT_never);
+    RPT_new_reporting ("exmcA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_examined_by_reason_and_prodtype =
-    RPT_new_reporting ("exmcA", RPT_group, RPT_never);
+    RPT_new_reporting ("exmcA", RPT_group, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->nunits_examined);
   g_ptr_array_add (self->outputs, local_data->nunits_examined_by_reason);
   g_ptr_array_add (self->outputs, local_data->nunits_examined_by_prodtype);

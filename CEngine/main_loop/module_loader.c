@@ -288,6 +288,16 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
           g_ptr_array_add (tmp_models,
                            trace_monitor_new (parameter_db, units, projection, zones));
         }
+      if (include_exams)
+        {
+          g_ptr_array_add (tmp_models,
+                           exam_monitor_new (parameter_db, units, projection, zones));
+        }
+      if (include_testing)
+        {
+          g_ptr_array_add (tmp_models,
+                           test_monitor_new (parameter_db, units, projection, zones));
+        }
       if (include_vaccination)
         {
           g_ptr_array_add (tmp_models,

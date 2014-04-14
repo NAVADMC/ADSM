@@ -417,37 +417,37 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->cumul_nunits_tested =
-    RPT_new_reporting ("tstcUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("tstcUAll", RPT_integer, RPT_daily);
   local_data->cumul_nunits_tested_by_reason =
-    RPT_new_reporting ("tstcU", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_tested_by_prodtype =
-    RPT_new_reporting ("tstcU", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_tested_by_reason_and_prodtype =
-    RPT_new_reporting ("tstcU", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_truepos =
-    RPT_new_reporting ("tstcUTruePos", RPT_integer, RPT_never);
+    RPT_new_reporting ("tstcUTruePos", RPT_integer, RPT_daily);
   local_data->cumul_nunits_truepos_by_prodtype =
-    RPT_new_reporting ("tstcUTruePos", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcUTruePos", RPT_group, RPT_daily);
   local_data->cumul_nunits_trueneg =
-    RPT_new_reporting ("tstcUTrueNeg", RPT_integer, RPT_never);
+    RPT_new_reporting ("tstcUTrueNeg", RPT_integer, RPT_daily);
   local_data->cumul_nunits_trueneg_by_prodtype =
-    RPT_new_reporting ("tstcUTrueNeg", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcUTrueNeg", RPT_group, RPT_daily);
   local_data->cumul_nunits_falsepos =
-    RPT_new_reporting ("tstcUFalsePos", RPT_integer, RPT_never);
+    RPT_new_reporting ("tstcUFalsePos", RPT_integer, RPT_daily);
   local_data->cumul_nunits_falsepos_by_prodtype =
-    RPT_new_reporting ("tstcUFalsePos", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcUFalsePos", RPT_group, RPT_daily);
   local_data->cumul_nunits_falseneg =
-    RPT_new_reporting ("tstcUFalseNeg", RPT_integer, RPT_never);
+    RPT_new_reporting ("tstcUFalseNeg", RPT_integer, RPT_daily);
   local_data->cumul_nunits_falseneg_by_prodtype =
-    RPT_new_reporting ("tstcUFalseNeg", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcUFalseNeg", RPT_group, RPT_daily);
   local_data->cumul_nanimals_tested =
-    RPT_new_reporting ("tstcAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("tstcAAll", RPT_integer, RPT_daily);
   local_data->cumul_nanimals_tested_by_reason =
-    RPT_new_reporting ("tstcA", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_tested_by_prodtype =
-    RPT_new_reporting ("tstcA", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_tested_by_reason_and_prodtype =
-    RPT_new_reporting ("tstcA", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcA", RPT_group, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->cumul_nunits_tested);
   g_ptr_array_add (self->outputs, local_data->cumul_nunits_tested_by_reason);
   g_ptr_array_add (self->outputs, local_data->cumul_nunits_tested_by_prodtype);
