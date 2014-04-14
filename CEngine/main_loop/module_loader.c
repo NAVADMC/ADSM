@@ -282,9 +282,6 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
         {
           g_ptr_array_add (tmp_models,
                            detection_monitor_new (parameter_db, units, projection, zones));
-        }
-      if (include_tracing)
-        {
           g_ptr_array_add (tmp_models,
                            trace_monitor_new (parameter_db, units, projection, zones));
         }
