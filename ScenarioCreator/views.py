@@ -50,7 +50,9 @@ def basic_context():  # TODO: This might not be performant... but it's nice to h
             'ControlMasterPlan': ControlMasterPlan.objects.count(),
             'Protocols': ControlProtocol.objects.count(),
             'Zones': Zone.objects.count(),
-            'ZoneEffects': ZoneEffectOnProductionType.objects.count()}
+            'ZoneEffects': ZoneEffectOnProductionType.objects.count(),
+            'ProbabilityFunctions': ProbabilityFunction.objects.count(),
+            'RelationalFunctions': RelationalFunction.objects.count()}
 
 
 def home(request):
