@@ -445,6 +445,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   for (i = 0; i < local_data->production_types->len; i++)
     {
       prodtype_name = (char *) g_ptr_array_index (local_data->production_types, i);
+      RPT_reporting_set_integer1 (local_data->nunits_examined_by_prodtype, 0, prodtype_name);
+      RPT_reporting_set_integer1 (local_data->nanimals_examined_by_prodtype, 0, prodtype_name);
       RPT_reporting_set_integer1 (local_data->cumul_nunits_examined_by_prodtype, 0, prodtype_name);
       RPT_reporting_set_integer1 (local_data->cumul_nanimals_examined_by_prodtype, 0, prodtype_name);
     }
