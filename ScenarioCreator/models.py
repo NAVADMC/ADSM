@@ -416,7 +416,7 @@ class ProtocolAssignment(models.Model):
     _master_plan = models.ForeignKey('ControlMasterPlan',
                                      default=lambda: ControlMasterPlan.objects.get_or_create(id=1)[0],
         help_text='Points back to a master plan for grouping purposes.')
-    production_type = models.ForeignKey('ProductionType',
+    production_type = models.ForeignKey('ProductionType', unique=True,
         help_text='The production type that these outputs apply to.', )
     control_protocol = models.ForeignKey('ControlProtocol',
         help_text='The control protocol to apply to this production type.')
@@ -454,7 +454,7 @@ class DiseaseReaction(models.Model):
 
 
 class DiseaseReactionAssignment(models.Model):
-    production_type = models.ForeignKey('ProductionType',
+    production_type = models.ForeignKey('ProductionType', unique=True,
         help_text='The production type that these outputs apply to.', )
     reaction = models.ForeignKey('DiseaseReaction')
     # Since there are ProductionTypes that can be listed without having a DiseaseReactionAssignment,
@@ -619,6 +619,8 @@ class ProductionTypePairTransmission(models.Model):
         help_text='Disease spread mechanism used to model spread by indirect contact between these types.', )
     airborne_contact_spread_model = models.ForeignKey(AirborneSpreadModel, related_name='airborne_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by airborne spread between these types.', )
+    class Meta:
+        unique_together = ('source_production_type', 'destination_production_type',)
     def __str__(self):
         return "%s -> %s" % (self.source_production_type, self.destination_production_type)
 
