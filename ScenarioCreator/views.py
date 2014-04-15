@@ -10,7 +10,8 @@ from django.conf import settings
 import re
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from Settings.models import SmSession
-
+from django.forms.models import inlineformset_factory
+from django.forms.models import modelformset_factory
 
 def unsaved_changes(new_value=None):
     session = SmSession.objects.get_or_create(id=1)[0]  # This keeps track of the state for all views and is used by basic_context
@@ -89,14 +90,16 @@ def assign_protocols(request):
 
 def assign_reactions(request):
     context = basic_context()
-    forms = []
-    for pt in ProductionType.objects.all():
-        initialized_form = DiseaseReactionAssignmentForm(request.POST or None)
-        initialized_form.fields['production_type'].initial = pt.id
-        forms.append(initialized_form)
-    context['forms'] = forms
+
+    SpreadSet = modelformset_factory(DiseaseReactionAssignment, extra=0, form=DiseaseReactionAssignmentForm)
+    initial = [{'production_type': pt.id, 'reaction': pt.id} for pt in ProductionType.objects.all()]
+    print(initial)
+    forms = SpreadSet(initial=initial, queryset=ProductionType.objects.all())
+
+    context['formset'] = forms
+
     context['title'] = 'Set what Reaction each Production Type has to the Disease'
-    return render(request, 'ScenarioCreator/ProtocolAssignment.html', context)
+    return render(request, 'ScenarioCreator/FormSet.html', context)
 
 
 def save_new_instance(initialized_form, request):
