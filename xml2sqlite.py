@@ -100,7 +100,7 @@ def main():
 	# Make sure the database has all the correct tables.
 	call_command('syncdb', verbosity=0)
 
-	xml = ET.parse( sys.stdin ).getroot()
+	xml = ET.parse( sys.stdin.detach() ).getroot()
 
 	usePrevalence = (xml.find( './/disease-model/prevalence' ) != None)
 	useAirborneExponentialDecay = (xml.find( './/airborne-spread-exponential-model' ) != None)
