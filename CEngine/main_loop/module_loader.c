@@ -277,6 +277,8 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
       g_ptr_array_add (tmp_models,
                        full_table_writer_new (parameter_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
+                       exposure_monitor_new (parameter_db, units, projection, zones));
+      g_ptr_array_add (tmp_models,
                        infection_monitor_new (parameter_db, units, projection, zones));
       if (include_detection)
         {

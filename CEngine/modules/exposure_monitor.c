@@ -408,41 +408,41 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->num_units_exposed =
-    RPT_new_reporting ("expnUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("expnUAll", RPT_integer, RPT_daily);
   local_data->num_units_exposed_by_cause =
-    RPT_new_reporting ("expnU", RPT_group, RPT_never);
+    RPT_new_reporting ("expnU", RPT_group, RPT_daily);
   local_data->num_units_exposed_by_prodtype =
-    RPT_new_reporting ("expnU", RPT_group, RPT_never);
+    RPT_new_reporting ("expnU", RPT_group, RPT_daily);
   local_data->num_units_exposed_by_cause_and_prodtype =
-    RPT_new_reporting ("expnU", RPT_group, RPT_never);
+    RPT_new_reporting ("expnU", RPT_group, RPT_daily);
   local_data->cumul_num_units_exposed =
-    RPT_new_reporting ("expcUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("expcUAll", RPT_integer, RPT_daily);
   local_data->cumul_num_units_exposed_by_cause =
-    RPT_new_reporting ("expcU", RPT_group, RPT_never);
+    RPT_new_reporting ("expcU", RPT_group, RPT_daily);
   local_data->cumul_num_units_exposed_by_prodtype =
-    RPT_new_reporting ("expcU", RPT_group, RPT_never);
+    RPT_new_reporting ("expcU", RPT_group, RPT_daily);
   local_data->cumul_num_units_exposed_by_cause_and_prodtype =
-    RPT_new_reporting ("expcU", RPT_group, RPT_never);
+    RPT_new_reporting ("expcU", RPT_group, RPT_daily);
   local_data->num_animals_exposed =
-    RPT_new_reporting ("expnAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("expnAAll", RPT_integer, RPT_daily);
   local_data->num_animals_exposed_by_cause =
-    RPT_new_reporting ("expnA", RPT_group, RPT_never);
+    RPT_new_reporting ("expnA", RPT_group, RPT_daily);
   local_data->num_animals_exposed_by_prodtype =
-    RPT_new_reporting ("expnA", RPT_group, RPT_never);
+    RPT_new_reporting ("expnA", RPT_group, RPT_daily);
   local_data->num_animals_exposed_by_cause_and_prodtype =
-    RPT_new_reporting ("expnA", RPT_group, RPT_never);
+    RPT_new_reporting ("expnA", RPT_group, RPT_daily);
   local_data->cumul_num_animals_exposed =
-    RPT_new_reporting ("expcAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("expcAAll", RPT_integer, RPT_daily);
   local_data->cumul_num_animals_exposed_by_cause =
-    RPT_new_reporting ("expcA", RPT_group, RPT_never);
+    RPT_new_reporting ("expcA", RPT_group, RPT_daily);
   local_data->cumul_num_animals_exposed_by_prodtype =
-    RPT_new_reporting ("expcA", RPT_group, RPT_never);
+    RPT_new_reporting ("expcA", RPT_group, RPT_daily);
   local_data->cumul_num_animals_exposed_by_cause_and_prodtype =
-    RPT_new_reporting ("expcA", RPT_group, RPT_never);
+    RPT_new_reporting ("expcA", RPT_group, RPT_daily);
   local_data->num_adequate_exposures =
-    RPT_new_reporting ("adqnUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("adqnUAll", RPT_integer, RPT_daily);
   local_data->cumul_num_adequate_exposures =
-    RPT_new_reporting ("adqcUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("adqcUAll", RPT_integer, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->num_units_exposed);
   g_ptr_array_add (self->outputs, local_data->num_units_exposed_by_cause);
   g_ptr_array_add (self->outputs, local_data->num_units_exposed_by_prodtype);
