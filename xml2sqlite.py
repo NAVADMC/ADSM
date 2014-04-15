@@ -100,6 +100,13 @@ def main():
 	# Make sure the database has all the correct tables.
 	call_command('syncdb', verbosity=0)
 
+	# sys.stdin is implicitly treated as having whatever encoding is returned
+	# by locale.getpreferredencoding(). That can cause problems: for example,
+	# if locale.getpreferredencoding() returns 'UTF-8' and the XML file we are
+	# reading is ISO-8859-1, then reads from sys.stdin will fail (even if the
+	# XML file properly declares its encoding). Using sys.stdin.detach() makes
+	# the input stream get treated as binary, and then it's up to ET.parse() to
+	# figure out the XML file's encoding.
 	xml = ET.parse( sys.stdin.detach() ).getroot()
 
 	usePrevalence = (xml.find( './/disease-model/prevalence' ) != None)
