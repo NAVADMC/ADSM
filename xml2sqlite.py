@@ -13,6 +13,7 @@ import sys
 from django.conf import settings
 from django.core.management import call_command
 import xml.etree.ElementTree as ET
+import warnings
 
 
 
@@ -604,8 +605,10 @@ def main():
 		# end of loop over to-production-types covered by this <ring-vaccination-model> element
 	# end of loop over <ring-vaccination-model> elements
 
+	if len( productionTypesThatAreVaccinated - productionTypesWithVaccineEffectsDefined ) > 0:
+		raise Exception( 'some production types that are vaccinated do not have vaccine effects defined' )
 	if productionTypesThatAreVaccinated != productionTypesWithVaccineEffectsDefined:
-		raise Exception( 'mismatch between production types that are vaccinated and production types with vaccine effects defined' )
+		warnings.warn( 'mismatch between production types that are vaccinated and production types that have vaccine effects defined' )
 
 	# Destruction priority order information is distributed among several
 	# different elements. Keep 2 lists that will help sort it out later.
