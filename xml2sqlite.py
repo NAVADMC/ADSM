@@ -47,6 +47,10 @@ def getPdf( xml ):
 
 	if pdfType == 'point':
 		args['mode'] = float( firstChild.text )
+	elif pdfType == 'triangular':
+		args['min'] = float( firstChild.find( './a' ).text )
+		args['mode'] = float( firstChild.find( './c' ).text )
+		args['max'] = float( firstChild.find( './b' ).text )
 	else:
 		print( pdfType )
 		raise NotImplementedError
