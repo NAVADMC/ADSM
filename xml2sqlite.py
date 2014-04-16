@@ -112,11 +112,15 @@ def main():
 
 	usePrevalence = (xml.find( './/disease-model/prevalence' ) != None)
 	useAirborneExponentialDecay = (xml.find( './/airborne-spread-exponential-model' ) != None)
+	useEconomic = (xml.find( './/economic-model' ) != None)
 	scenario = Scenario(
 	  description = xml.find( './description' ).text,
 	  include_airborne_spread = (xml.find( './/airborne-spread-model' ) != None or xml.find( './/airborne-spread-exponential-model' ) != None),
 	  use_airborne_exponential_decay = useAirborneExponentialDecay,
-	  use_within_unit_prevalence = usePrevalence
+	  use_within_unit_prevalence = usePrevalence,
+	  cost_track_zone_surveillance = useEconomic,
+	  cost_track_vaccination = useEconomic,
+	  cost_track_destruction = useEconomic
 	)
 	scenario.save()
 
@@ -900,6 +904,37 @@ def main():
 			plan.save()
 		# end of if useVaccination==True
 	# end of loop over <resources-and-implementation-of-control-model> elements
+
+	for el in xml.findall( './/economic-model' ):
+		vaccinationFixed = float( el.find( './vaccination-fixed/value' ).text )
+		vaccinationBase = float( el.find( './vaccination/value' ).text )
+		vaccinationExtra = float( el.find( './additional-vaccination/value' ).text )
+		baselineCapacity = int( el.find( './baseline-vaccination-capacity' ).text )
+
+		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
+		for typeName in typeNames:
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=typeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			protocol.cost_of_vaccination_setup_per_unit = vaccinationFixed
+			protocol.cost_of_vaccination_baseline_per_animal = vaccinationBase
+			protocol.cost_of_vaccination_additional_per_animal = vaccinationExtra
+			protocol.vaccination_demand_threshold = baselineCapacity
+			protocol.save()
+		# end of loop over production types covered by this <economic-model> element
+	# end of loop over <economic-model> elements
 
 
 

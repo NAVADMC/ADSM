@@ -865,27 +865,27 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     RPT_new_reporting ("surveillance-cost", RPT_real, RPT_never);
   */
   local_data->cumul_total_cost =
-    RPT_new_reporting ("costsTotal", RPT_real, RPT_never);
+    RPT_new_reporting ("costsTotal", RPT_real, RPT_daily);
   local_data->cumul_appraisal_cost =
-    RPT_new_reporting ("destrAppraisal", RPT_real, RPT_never);
+    RPT_new_reporting ("destrAppraisal", RPT_real, RPT_daily);
   local_data->cumul_euthanasia_cost =
-    RPT_new_reporting ("destrEuthanasia", RPT_real, RPT_never);
+    RPT_new_reporting ("destrEuthanasia", RPT_real, RPT_daily);
   local_data->cumul_indemnification_cost =
-    RPT_new_reporting ("destrIndemnification", RPT_real, RPT_never);
+    RPT_new_reporting ("destrIndemnification", RPT_real, RPT_daily);
   local_data->cumul_carcass_disposal_cost =
-    RPT_new_reporting ("destrDisposal", RPT_real, RPT_never);
+    RPT_new_reporting ("destrDisposal", RPT_real, RPT_daily);
   local_data->cumul_cleaning_disinfecting_cost =
-    RPT_new_reporting ("destrCleaning", RPT_real, RPT_never);
+    RPT_new_reporting ("destrCleaning", RPT_real, RPT_daily);
   local_data->cumul_destruction_subtotal =
-    RPT_new_reporting ("destrSubtotal", RPT_real, RPT_never);
+    RPT_new_reporting ("destrSubtotal", RPT_real, RPT_daily);
   local_data->cumul_vaccination_setup_cost =
-    RPT_new_reporting ("vaccSetup", RPT_real, RPT_never);
+    RPT_new_reporting ("vaccSetup", RPT_real, RPT_daily);
   local_data->cumul_vaccination_cost =
-    RPT_new_reporting ("vaccVaccination", RPT_real, RPT_never);
+    RPT_new_reporting ("vaccVaccination", RPT_real, RPT_daily);
   local_data->cumul_vaccination_subtotal =
-    RPT_new_reporting ("vaccSubtotal", RPT_real, RPT_never);
+    RPT_new_reporting ("vaccSubtotal", RPT_real, RPT_daily);
   local_data->cumul_surveillance_cost =
-    RPT_new_reporting ("costSurveillance", RPT_real, RPT_never);
+    RPT_new_reporting ("costSurveillance", RPT_real, RPT_daily);
   /*
   g_ptr_array_add (self->outputs, local_data->total_cost);
   g_ptr_array_add (self->outputs, local_data->appraisal_cost);
@@ -911,7 +911,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read the production type specific
    * parameters. */
   sqlite3_exec (params,
-                "SELECT prodtype.name,cost_of_destruction_appraisal_per_unit,cost_of_destruction_cleaning_per_unit,cost_of_euthanasia_per_animal,cost_of_indemnification_per_animal,cost_of_carcass_disposal_per_animal,vaccination_demand_threshold,cost_of_vaccination_baseline_per_animal,cost_of_vaccination_additional_per_animal,cost_of_vaccination_setup_per_unit FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND use_cost_accounting=1s",
+                "SELECT prodtype.name,cost_of_destruction_appraisal_per_unit,cost_of_destruction_cleaning_per_unit,cost_of_euthanasia_per_animal,cost_of_indemnification_per_animal,cost_of_carcass_disposal_per_animal,vaccination_demand_threshold,cost_of_vaccination_baseline_per_animal,cost_of_vaccination_additional_per_animal,cost_of_vaccination_setup_per_unit FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND use_cost_accounting=1",
                 set_params, self, &sqlerr);
   if (sqlerr)
     {

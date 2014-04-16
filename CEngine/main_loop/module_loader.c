@@ -145,6 +145,7 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
   gboolean include_testing;
   gboolean include_vaccination;
   gboolean include_destruction;
+  gboolean include_economic;
   int nmodels;
   int i;                        /* loop counter */
   const char *variable_name;
@@ -310,6 +311,13 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                            vaccination_monitor_new (parameter_db, units, projection, zones));
           g_ptr_array_add (tmp_models,
                            vaccination_list_monitor_new (parameter_db, units, projection, zones));
+        }
+
+      include_economic = PAR_get_boolean (parameter_db, "SELECT (cost_track_zone_surveillance=1 OR cost_track_vaccination=1 OR cost_track_destruction=1) FROM ScenarioCreator_scenario");
+      if (include_economic)
+        {
+          g_ptr_array_add (tmp_models,
+                           economic_model_new (parameter_db, units, projection, zones));
         }
     }
 
