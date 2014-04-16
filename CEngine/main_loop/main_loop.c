@@ -674,12 +674,6 @@ run_sim_main (const char *population_file,
 #endif
 {
   unsigned int ndays, nruns, day, run;
-  double prevalence_num, prevalence_denom;
-  RPT_reporting_t *num_units_in_state;
-  RPT_reporting_t *num_units_in_state_by_prodtype;
-  RPT_reporting_t *num_animals_in_state;
-  RPT_reporting_t *num_animals_in_state_by_prodtype;
-  RPT_reporting_t *avg_prevalence;
   RPT_reporting_t *last_day_of_disease;
   RPT_reporting_t *last_day_of_outbreak;
   RPT_reporting_t *clock_time;
@@ -696,8 +690,7 @@ run_sim_main (const char *population_file,
   unsigned int nzones;
   ZON_zone_list_t *zones;
   ZON_zone_t *zone;
-  int i, j;                     /* loop counters */
-  const char *drill_down_list[3] = { NULL, NULL, NULL };
+  int i;                     /* loop counter */
   gboolean active_infections_yesterday, active_infections_today,
     pending_actions, pending_infections, disease_end_recorded,
     stop_on_disease_end, early_exit;
@@ -813,25 +806,6 @@ run_sim_main (const char *population_file,
 
   /* Initialize the reporting variables, and bundle them together so they can
    * easily be sent to a function for initialization. */
-  num_units_in_state = RPT_new_reporting ("tsdU", RPT_group, RPT_never);
-  num_units_in_state_by_prodtype =
-    RPT_new_reporting ("num-units-in-each-state-by-production-type", RPT_group, RPT_never);
-  num_animals_in_state = RPT_new_reporting ("tsdA", RPT_group, RPT_never);
-  num_animals_in_state_by_prodtype =
-    RPT_new_reporting ("num-animals-in-each-state-by-production-type", RPT_group, RPT_never);
-  for (i = 0; i < UNT_NSTATES; i++)
-    {
-      RPT_reporting_set_integer1 (num_units_in_state, 0, UNT_state_name[i]);
-      RPT_reporting_set_integer1 (num_animals_in_state, 0, UNT_state_name[i]);
-      drill_down_list[1] = UNT_state_name[i];
-      for (j = 0; j < units->production_type_names->len; j++)
-        {
-          drill_down_list[0] = (char *) g_ptr_array_index (units->production_type_names, j);
-          RPT_reporting_set_integer (num_units_in_state_by_prodtype, 0, drill_down_list);
-          RPT_reporting_set_integer (num_animals_in_state_by_prodtype, 0, drill_down_list);
-        }
-    }
-  avg_prevalence = RPT_new_reporting ("average-prevalence", RPT_real, RPT_never);
   last_day_of_disease =
     RPT_new_reporting ("diseaseDuration", RPT_integer, RPT_never);
   last_day_of_outbreak =
@@ -840,11 +814,6 @@ run_sim_main (const char *population_file,
   version = RPT_new_reporting ("version", RPT_group, RPT_never);
   split_version (PACKAGE_VERSION, version);
   reporting_vars = g_ptr_array_new ();
-  g_ptr_array_add (reporting_vars, num_units_in_state);
-  g_ptr_array_add (reporting_vars, num_units_in_state_by_prodtype);
-  g_ptr_array_add (reporting_vars, num_animals_in_state);
-  g_ptr_array_add (reporting_vars, num_animals_in_state_by_prodtype);
-  g_ptr_array_add (reporting_vars, avg_prevalence);
   g_ptr_array_add (reporting_vars, last_day_of_disease);
   g_ptr_array_add (reporting_vars, last_day_of_outbreak);
   g_ptr_array_add (reporting_vars, clock_time);
@@ -1044,38 +1013,19 @@ run_sim_main (const char *population_file,
           /* Process changes made to the units and zones on the previous day. */
           spreadmodel_create_event (manager, EVT_new_midnight_event (day), units, zones, rng);
 
-          /* Count the number of units and animals infected, vaccinated, and
-           * destroyed, and the number of units and animals in each state. */
-          RPT_reporting_zero (num_units_in_state);
-          RPT_reporting_zero (num_animals_in_state);
-          prevalence_num = prevalence_denom = 0;
-
+          /* Check if there are active infections. */
+          active_infections_today = FALSE;
           for (i = 0; i < nunits; i++)
             {
               unit = UNT_unit_list_get (units, i);
-
-              RPT_reporting_add_integer1 (num_units_in_state, 1, UNT_state_name[unit->state]);
-              RPT_reporting_add_integer1 (num_animals_in_state, unit->size,
-                                          UNT_state_name[unit->state]);
-              drill_down_list[0] = unit->production_type_name;
-              drill_down_list[1] = UNT_state_name[unit->state];
-              RPT_reporting_add_integer (num_units_in_state_by_prodtype, 1, drill_down_list);
-              RPT_reporting_add_integer (num_animals_in_state_by_prodtype, unit->size,
-                                         drill_down_list);
-
-              if (unit->state >= Latent && unit->state <= InfectiousClinical)
+              if (unit->state == Latent
+                  || unit->state == InfectiousSubclinical
+                  || unit->state == InfectiousClinical)
                 {
-                  prevalence_num += unit->size * unit->prevalence;
-                  prevalence_denom += unit->size;
+                  active_infections_today = TRUE;
+                  break;
                 }
-              RPT_reporting_set_real (avg_prevalence, (prevalence_denom > 0) ?
-                                      prevalence_num / prevalence_denom : 0, NULL);
-            }                   /* end loop over units */
-          active_infections_today = (
-            RPT_reporting_get_integer1 (num_units_in_state, UNT_state_name[Latent]) > 0
-            || RPT_reporting_get_integer1 (num_units_in_state, UNT_state_name[InfectiousSubclinical]) > 0
-            || RPT_reporting_get_integer1 (num_units_in_state, UNT_state_name[InfectiousClinical]) > 0
-          );
+            }
 
           /* Run the models to get today's changes. */
           spreadmodel_create_event (manager, EVT_new_new_day_event (day), units, zones, rng);
@@ -1282,11 +1232,6 @@ run_sim_main (const char *population_file,
 #endif
 
   /* Clean up. */
-  RPT_free_reporting (num_units_in_state);
-  RPT_free_reporting (num_units_in_state_by_prodtype);
-  RPT_free_reporting (num_animals_in_state);
-  RPT_free_reporting (num_animals_in_state_by_prodtype);
-  RPT_free_reporting (avg_prevalence);
   RPT_free_reporting (last_day_of_disease);
   RPT_free_reporting (last_day_of_outbreak);
   RPT_free_reporting (clock_time);

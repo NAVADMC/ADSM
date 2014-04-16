@@ -66,6 +66,7 @@ libspreadmodel_a_SOURCES = main_loop.c module_loader.c module_loader.h \
   $(top_srcdir)/modules/basic_zone_focus_model.c $(top_srcdir)/modules/basic_zone_focus_model.h \
   $(top_srcdir)/modules/trace_zone_focus_model.c $(top_srcdir)/modules/trace_zone_focus_model.h \
   $(top_srcdir)/modules/economic_model.c $(top_srcdir)/modules/economic_model.h \
+  $(top_srcdir)/modules/unit_state_monitor.c $(top_srcdir)/modules/unit_state_monitor.h \
   $(top_srcdir)/modules/destruction_monitor.c $(top_srcdir)/modules/destruction_monitor.h \
   $(top_srcdir)/modules/destruction_list_monitor.c $(top_srcdir)/modules/destruction_list_monitor.h \
   $(top_srcdir)/modules/trace_monitor.c $(top_srcdir)/modules/trace_monitor.h \

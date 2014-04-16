@@ -70,6 +70,7 @@
 #include "trace_monitor.h"
 #include "trace_quarantine_model.h"
 #include "trace_zone_focus_model.h"
+#include "unit_state_monitor.h"
 #include "vaccination_monitor.h"
 #include "vaccination_list_monitor.h"
 #include "vaccine_model.h"
@@ -276,6 +277,8 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
     {
       g_ptr_array_add (tmp_models,
                        full_table_writer_new (parameter_db, units, projection, zones));
+      g_ptr_array_add (tmp_models,
+                       unit_state_monitor_new (parameter_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
                        exposure_monitor_new (parameter_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
