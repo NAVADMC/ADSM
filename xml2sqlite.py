@@ -291,7 +291,10 @@ def main():
 	)
 	useExams = (xml.find( './/trace-exam-model' ) != None)
 	useTesting = (xml.find( './/test-model' ) != None)
-	useVaccination = (xml.find( './/ring-vaccination-model' ) != None)
+	useVaccination = (
+	  (xml.find( './/vaccine-model' ) != None)
+	  or (xml.find( './/ring-vaccination-model' ) != None)
+	)
 	useDestruction = (
 	  (xml.find( './/basic-destruction-model' ) != None)
 	  or (xml.find( './/trace-destruction-model' ) != None)
@@ -299,7 +302,7 @@ def main():
 	  or (xml.find( './/ring-destruction-model' ) != None)
 	)
 
-	if useDetection or useTracing or useDestruction:
+	if useDetection or useTracing or useVaccination or useDestruction:
 		plan = ControlMasterPlan(
 		  _include_detection = useDetection,
 		  _include_tracing = useTracing,

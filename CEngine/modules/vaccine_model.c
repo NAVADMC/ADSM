@@ -480,7 +480,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * parameters. */
   local_data->db = params;
   sqlite3_exec (params,
-                "SELECT prodtype.name,days_to_immunity,vaccine_immune_period_id FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol vaccine,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=vaccine.id AND use_vaccination=1",
+                "SELECT prodtype.name,days_to_immunity,vaccine_immune_period_id FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol vaccine,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=vaccine.id",
                 set_params, self, &sqlerr);
   if (sqlerr)
     {
