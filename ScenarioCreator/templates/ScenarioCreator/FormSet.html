@@ -1,7 +1,10 @@
 {% extends 'ScenarioCreator/navigationPane.html' %}
 {% load floppyforms %}
+{% load crispy_forms_tags %}
 
 {% block content %}
+
+{#    {% crispy formset formset.form.helper %}#}
 
 <form method="post" action="">
     {{ formset.management_form }}
@@ -15,7 +18,8 @@
         </tr>
         <tbody>
             {% for form in formset %}
-                    {% form form using 'ScenarioCreator/FormRow.html' %}
+                {{form.id}}
+                {% form form using 'ScenarioCreator/FormRow.html' %}
             {% endfor %}
      </tbody>
     </table>
