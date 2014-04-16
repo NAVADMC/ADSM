@@ -35,21 +35,24 @@ def activeSession():
 
 
 def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
+    PT_count = ProductionType.objects.count()
     return {'filename': scenario_filename(),
             'unsaved_changes': unsaved_changes(),
             'Scenario': Scenario.objects.count(),
             'OutputSetting': OutputSettings.objects.count(),
             'Population': Population.objects.count(),
-            'ProductionTypes': ProductionType.objects.count(),
+            'ProductionTypes': PT_count,
             'Farms': Unit.objects.count(),
             'Disease': Disease.objects.count(),
             'Reactions': DiseaseReaction.objects.count(),
+            'ReactionAssignment': DiseaseReactionAssignment.objects.count() == PT_count,
             'DirectSpreads': DirectSpreadModel.objects.count(),
             'IndirectSpreads': IndirectSpreadModel.objects.count(),
             'AirborneSpreads': AirborneSpreadModel.objects.count(),
-            'Transmissions': ProductionTypePairTransmission.objects.count(),
+            'Transmissions': ProductionTypePairTransmission.objects.count() == PT_count ** 2,
             'ControlMasterPlan': ControlMasterPlan.objects.count(),
             'Protocols': ControlProtocol.objects.count(),
+            'ProtocolAssignments': ProtocolAssignment.objects.count(),
             'Zones': Zone.objects.count(),
             'ZoneEffects': ZoneEffectOnProductionType.objects.count(),
             'ProbabilityFunctions': ProbabilityFunction.objects.count(),
