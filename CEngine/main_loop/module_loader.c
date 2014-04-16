@@ -283,6 +283,10 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                        exposure_monitor_new (parameter_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
                        infection_monitor_new (parameter_db, units, projection, zones));
+      g_ptr_array_add (tmp_models,
+                       destruction_monitor_new (parameter_db, units, projection, zones));
+      g_ptr_array_add (tmp_models,
+                       destruction_list_monitor_new (parameter_db, units, projection, zones));
       if (include_detection)
         {
           g_ptr_array_add (tmp_models,
@@ -306,13 +310,6 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                            vaccination_monitor_new (parameter_db, units, projection, zones));
           g_ptr_array_add (tmp_models,
                            vaccination_list_monitor_new (parameter_db, units, projection, zones));
-        }
-      if (include_destruction)
-        {
-          g_ptr_array_add (tmp_models,
-                           destruction_monitor_new (parameter_db, units, projection, zones));
-          g_ptr_array_add (tmp_models,
-                           destruction_list_monitor_new (parameter_db, units, projection, zones));
         }
     }
 
