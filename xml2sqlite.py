@@ -227,6 +227,10 @@ def main():
 		delay = getPdf( el.find( './delay' ) )
 		probInfect = float( el.find( './prob-infect' ).text )
 		try:
+			latentCanInfect = getBool( el.find( './latent-units-can-infect' ) )
+		except AttributeError:
+			latentCanInfect = True # default
+		try:
 			subclinicalCanInfect = getBool( el.find( './subclinical-units-can-infect' ) )
 		except AttributeError:
 			subclinicalCanInfect = True # default
@@ -241,7 +245,7 @@ def main():
 			  distance_distribution = distance,
 			  transport_delay = delay,
 			  infection_probability = probInfect,
-			  latent_animals_can_infect_others = getBool( el.find( './latent-units-can-infect' ) ),
+			  latent_animals_can_infect_others = latentCanInfect,
 			  subclinical_animals_can_infect_others = subclinicalCanInfect
 			)
 		elif el.attrib['contact-type'] == 'indirect':
