@@ -66,21 +66,10 @@ EVT_event_type_t events_listened_for[] = {
 
 
 
-/* Specialized information for this model. */
-typedef struct
-{
-  ZON_zone_t *zone;
-}
-param_block_t;
-
-
-
 typedef struct
 {
   UNT_unit_list_t * units;
   ZON_zone_list_t * zones;
-
-  GPtrArray * param_blocks;
 }
 local_data_t;
 
@@ -589,25 +578,6 @@ reset (struct spreadmodel_model_t_ *self)
 
 
 /**
- */
-static void param_block_to_string (gpointer data, gpointer user_data)
-{
-  param_block_t *param_block = (param_block_t *) data;
-  ZON_zone_t *zone = param_block->zone;
-  GString *s = (GString *) user_data;
-
-  zone = param_block->zone;
-
-  g_string_append_printf (s,
-                          "<\"%s\" level=%i radius=%.2f >\n",
-                          zone->name,
-                          zone->level,
-                          zone->radius);
-}
-
-
-
-/**
  * Returns a text representation of this model.
  *
  * @param self the model.
@@ -616,21 +586,25 @@ static void param_block_to_string (gpointer data, gpointer user_data)
 char *
 to_string (struct spreadmodel_model_t_ *self)
 {
-  GString *s;
-  char *chararray;
   local_data_t *local_data;
+  GString *s;
+  guint nzones, i;
+  ZON_zone_t *zone;
 
   local_data = (local_data_t *) (self->model_data);
   s = g_string_new (NULL);
-
-  g_string_printf(s, "<%s\n", MODEL_NAME);
-  g_ptr_array_foreach (local_data->param_blocks, param_block_to_string, s);
-  g_string_printf(s, ">");
+  g_string_append_printf (s, "<%s", MODEL_NAME);
+  nzones = ZON_zone_list_length (local_data->zones);
+  for (i = 0; i < nzones; i++)
+    {
+      zone = ZON_zone_list_get (local_data->zones, i);
+      g_string_append_printf (s, "\n  \"%s\" level=%i radius=%.2f",
+                              zone->name, zone->level, zone->radius);
+    }
+  g_string_append_c (s, '>');
 
   /* don't return the wrapper object */
-  chararray = s->str;
-  g_string_free (s, FALSE);
-  return chararray;
+  return g_string_free (s, /* free_segment = */ FALSE);
 }
 
 
@@ -656,7 +630,6 @@ local_free (struct spreadmodel_model_t_ *self)
   RPT_free_reporting (local_data->num_holes_filled);
   RPT_free_reporting (local_data->cumul_num_holes_filled);
 #endif
-  g_ptr_array_free (local_data->param_blocks, TRUE);
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
   g_free (self);
@@ -682,9 +655,9 @@ set_params (void *data, int ncols, char **value, char **colname)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data = NULL;
-  param_block_t *param_block = NULL;
   gchar *name;
   double radius;
+  ZON_zone_t *zone = NULL;
 
 #if DEBUG
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
@@ -692,8 +665,6 @@ set_params (void *data, int ncols, char **value, char **colname)
 
   self = (spreadmodel_model_t *)data;
   local_data = (local_data_t *) (self->model_data);
-
-  param_block = g_new0 (param_block_t, 1);
 
   if (value[0] != NULL)
     {
@@ -715,15 +686,11 @@ set_params (void *data, int ncols, char **value, char **colname)
       radius = 0;
     }
 
-  param_block->zone = ZON_new_zone (name, /* level = */ -1, radius);
-
+  zone = ZON_new_zone (name, /* level = */ -1, radius);
   g_free (name);
 
   /* Add the zone object to the zone list. */
-  ZON_zone_list_append (local_data->zones, param_block->zone);
-
-  /* Add the param_block to the list. */
-  g_ptr_array_add (local_data->param_blocks, param_block);
+  ZON_zone_list_append (local_data->zones, zone);
 
 #if DEBUG
   g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
@@ -769,8 +736,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   local_data->units = units;
   local_data->zones = zones;
-
-  local_data->param_blocks = g_ptr_array_new();
 
   /* Call the set_params function to read the production type combination
    * specific parameters. */
