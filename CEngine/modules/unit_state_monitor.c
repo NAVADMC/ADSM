@@ -74,6 +74,8 @@ typedef struct
   RPT_reporting_t *num_animals_in_state;
   RPT_reporting_t *num_animals_in_state_by_prodtype;
   RPT_reporting_t *avg_prevalence;
+  RPT_reporting_t *last_day_of_disease;
+  gboolean disease_end_recorded;
 }
 local_data_t;
 
@@ -130,7 +132,9 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, EVT_new_day_event_t * e
   double prevalence_num, prevalence_denom;
   guint nunits, i;
   UNT_unit_t *unit;
+  UNT_state_t state;
   const char *drill_down_list[3] = { NULL, NULL, NULL };
+  gboolean active_infections;
 
   #if DEBUG
     g_debug ("----- ENTER handle_new_day_event (%s)", MODEL_NAME);
@@ -146,28 +150,44 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, EVT_new_day_event_t * e
   RPT_reporting_zero (local_data->num_animals_in_state_by_prodtype);
   prevalence_num = prevalence_denom = 0;
 
+  active_infections = FALSE;
   nunits = UNT_unit_list_length (units);
   for (i = 0; i < nunits; i++)
     {
       unit = UNT_unit_list_get (units, i);
+      state = unit->state;
 
-      RPT_reporting_add_integer1 (local_data->num_units_in_state, 1, UNT_state_name[unit->state]);
+      RPT_reporting_add_integer1 (local_data->num_units_in_state, 1, UNT_state_name[state]);
       RPT_reporting_add_integer1 (local_data->num_animals_in_state, unit->size,
-                                  UNT_state_name[unit->state]);
+                                  UNT_state_name[state]);
       drill_down_list[0] = unit->production_type_name;
-      drill_down_list[1] = UNT_state_name[unit->state];
+      drill_down_list[1] = UNT_state_name[state];
       RPT_reporting_add_integer (local_data->num_units_in_state_by_prodtype, 1, drill_down_list);
       RPT_reporting_add_integer (local_data->num_animals_in_state_by_prodtype, unit->size,
                                  drill_down_list);
 
-      if (unit->state >= Latent && unit->state <= InfectiousClinical)
+      if (state >= Latent && state <= InfectiousClinical)
         {
+          active_infections = TRUE;
           prevalence_num += unit->size * unit->prevalence;
           prevalence_denom += unit->size;
         }
       RPT_reporting_set_real (local_data->avg_prevalence, (prevalence_denom > 0) ?
                               prevalence_num / prevalence_denom : 0, NULL);
     }                   /* end loop over units */
+
+  if (active_infections)
+    {
+      local_data->disease_end_recorded = FALSE;
+    }
+  else
+    {
+      if (local_data->disease_end_recorded == FALSE)
+        {
+          RPT_reporting_set_integer (local_data->last_day_of_disease, event->day - 1, NULL);
+          local_data->disease_end_recorded = TRUE;
+        }
+    }
 
   #if DEBUG
     g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
@@ -223,11 +243,15 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
 void
 reset (struct spreadmodel_model_t_ *self)
 {
+  local_data_t *local_data;
+
   #if DEBUG
     g_debug ("----- ENTER reset (%s)", MODEL_NAME);
   #endif
 
-  /* Nothing to do. */
+  local_data = (local_data_t *) (self->model_data);
+  RPT_reporting_set_null (local_data->last_day_of_disease, NULL);
+  local_data->disease_end_recorded = FALSE;
 
   #if DEBUG
     g_debug ("----- EXIT reset (%s)", MODEL_NAME);
@@ -327,11 +351,14 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     RPT_new_reporting ("tsdA", RPT_group, RPT_daily);
   local_data->avg_prevalence =
     RPT_new_reporting ("average-prevalence", RPT_real, RPT_daily);
+  local_data->last_day_of_disease =
+    RPT_new_reporting ("diseaseDuration", RPT_integer, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->num_units_in_state);
   g_ptr_array_add (self->outputs, local_data->num_units_in_state_by_prodtype);
   g_ptr_array_add (self->outputs, local_data->num_animals_in_state);
   g_ptr_array_add (self->outputs, local_data->num_animals_in_state_by_prodtype);
   g_ptr_array_add (self->outputs, local_data->avg_prevalence);
+  g_ptr_array_add (self->outputs, local_data->last_day_of_disease);
 
   /* Initialize the output variables. */
   local_data->production_types = units->production_type_names;

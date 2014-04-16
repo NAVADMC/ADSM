@@ -674,7 +674,6 @@ run_sim_main (const char *population_file,
 #endif
 {
   unsigned int ndays, nruns, day, run;
-  RPT_reporting_t *last_day_of_disease;
   RPT_reporting_t *last_day_of_outbreak;
   RPT_reporting_t *clock_time;
   RPT_reporting_t *version;
@@ -806,15 +805,12 @@ run_sim_main (const char *population_file,
 
   /* Initialize the reporting variables, and bundle them together so they can
    * easily be sent to a function for initialization. */
-  last_day_of_disease =
-    RPT_new_reporting ("diseaseDuration", RPT_integer, RPT_never);
   last_day_of_outbreak =
     RPT_new_reporting ("outbreakDuration", RPT_integer, RPT_never);
   clock_time = RPT_new_reporting ("clock-time", RPT_real, RPT_never);
   version = RPT_new_reporting ("version", RPT_group, RPT_never);
   split_version (PACKAGE_VERSION, version);
   reporting_vars = g_ptr_array_new ();
-  g_ptr_array_add (reporting_vars, last_day_of_disease);
   g_ptr_array_add (reporting_vars, last_day_of_outbreak);
   g_ptr_array_add (reporting_vars, clock_time);
   g_ptr_array_add (reporting_vars, version);
@@ -957,7 +953,6 @@ run_sim_main (const char *population_file,
       _iteration.infectious_units = g_hash_table_new( g_direct_hash, g_direct_equal );
 
       /* Reset reporting variables. */
-      RPT_reporting_set_null (last_day_of_disease, NULL);
       RPT_reporting_set_null (last_day_of_outbreak, NULL);
 
       /* Reset all models. */
@@ -1065,7 +1060,6 @@ run_sim_main (const char *population_file,
               if (NULL != spreadmodel_disease_end)
                 spreadmodel_disease_end (day);
 #endif
-              RPT_reporting_set_integer (last_day_of_disease, day - 1, NULL);
               disease_end_recorded = TRUE;
             }
 
@@ -1232,7 +1226,6 @@ run_sim_main (const char *population_file,
 #endif
 
   /* Clean up. */
-  RPT_free_reporting (last_day_of_disease);
   RPT_free_reporting (last_day_of_outbreak);
   RPT_free_reporting (clock_time);
   RPT_free_reporting (version);
