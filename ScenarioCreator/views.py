@@ -79,16 +79,33 @@ def disease_spread(request):
     # return render(request, 'ScenarioCreator/DiseaseSpread.html', basic_context())
 
 
+def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request):
+    """FormSet is pre-populated with existing assignments and it detects and fills in missing
+    assignments with a blank form with production type filled in."""
+
+    try:
+        initialized_formset = MyFormSet(request.POST, request.FILES, queryset=TargetModel.objects.all())
+        if initialized_formset.is_valid():
+            instances = initialized_formset.save()
+            print(instances)
+            unsaved_changes(True)
+            context['formset'] = initialized_formset
+    except ValidationError:
+        forms = MyFormSet(queryset=TargetModel.objects.all())
+        for index, pt in enumerate(missing):
+            index += TargetModel.objects.count()
+            forms[index].fields['production_type'].initial = pt.id
+        context['formset'] = forms
+
+
 def assign_protocols(request):
     context = basic_context()
-    forms = []
-    for pt in ProductionType.objects.all():
-        initialized_form = ProtocolAssignmentForm(request.POST or None)
-        initialized_form.fields['production_type'].initial = pt.id
-        forms.append(initialized_form)
-    context['forms'] = forms
+    missing = ProductionType.objects.filter(protocolassignment__isnull=True)
+    ProtocolSet = modelformset_factory(ProtocolAssignment, extra=len(missing), form=ProtocolAssignmentForm)
+    populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request)
+
     context['title'] = 'Assign a Control Protocol to each Production Type'
-    return render(request, 'ScenarioCreator/ProtocolAssignment.html', context)
+    return render(request, 'ScenarioCreator/FormSet.html', context)
 
 
 def assign_reactions(request):
@@ -100,20 +117,7 @@ def assign_reactions(request):
     SpreadSet = modelformset_factory(DiseaseReactionAssignment,
                                      extra=len(missing),
                                      form=DiseaseReactionAssignmentForm)
-
-    if request.method == 'POST':
-        initialized_formset = SpreadSet(request.POST, request.FILES, queryset=DiseaseReactionAssignment.objects.all())
-        if initialized_formset.is_valid():
-            instances = initialized_formset.save()
-            print(instances)
-            unsaved_changes(True)
-            context['formset'] = initialized_formset
-    else:
-        forms = SpreadSet(queryset=DiseaseReactionAssignment.objects.all())
-        for index, pt in enumerate(missing):
-            index += DiseaseReactionAssignment.objects.count()
-            forms[index].fields['production_type'].initial = pt.id
-        context['formset'] = forms
+    populate_forms_matching_ProductionType(SpreadSet, DiseaseReactionAssignment, context, missing, request)
 
     context['title'] = 'Set what Reaction each Production Type has to the Disease'
     return render(request, 'ScenarioCreator/FormSet.html', context)
