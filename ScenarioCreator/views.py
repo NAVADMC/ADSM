@@ -91,10 +91,14 @@ def assign_protocols(request):
 def assign_reactions(request):
     context = basic_context()
 
-    SpreadSet = modelformset_factory(DiseaseReactionAssignment, extra=0, form=DiseaseReactionAssignmentForm)
-    initial = [{'production_type': pt.id, 'reaction': pt.id} for pt in ProductionType.objects.all()]
-    print(initial)
-    forms = SpreadSet(initial=initial, queryset=ProductionType.objects.all())
+    difference = ProductionType.objects.count() - DiseaseReactionAssignment.objects.count()
+    SpreadSet = modelformset_factory(DiseaseReactionAssignment,
+                                     extra=difference,
+                                     form=DiseaseReactionAssignmentForm)
+    forms = SpreadSet(queryset=DiseaseReactionAssignment.objects.all())
+    for index, pt in enumerate(ProductionType.objects.filter(diseasereactionassignment__isnull=True)):
+        index += DiseaseReactionAssignment.objects.count()
+        forms[index].fields['production_type'].initial = pt.id
 
     context['formset'] = forms
 
