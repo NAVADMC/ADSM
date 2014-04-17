@@ -963,10 +963,48 @@ def main():
 	# end of loop over <resources-and-implementation-of-control-model> elements
 
 	for el in xml.findall( './/economic-model' ):
-		vaccinationFixed = float( el.find( './vaccination-fixed/value' ).text )
-		vaccinationBase = float( el.find( './vaccination/value' ).text )
-		vaccinationExtra = float( el.find( './additional-vaccination/value' ).text )
-		baselineCapacity = int( el.find( './baseline-vaccination-capacity' ).text )
+		try:
+			vaccinationFixed = float( el.find( './vaccination-fixed/value' ).text )
+		except AttributeError:
+			vaccinationFixed = None
+		try:
+			vaccinationBase = float( el.find( './vaccination/value' ).text )
+		except AttributeError:
+			vaccinationBase = None
+		try:
+			vaccinationExtra = float( el.find( './additional-vaccination/value' ).text )
+		except AttributeError:
+			vaccinationExtra = None
+		try:
+			baselineCapacity = int( el.find( './baseline-vaccination-capacity' ).text )
+		except AttributeError:
+			baselineCapacity = None
+
+		try:
+			appraisal = float( el.find( './appraisal/value' ).text )
+		except AttributeError:
+			appraisal = None
+		try:
+			euthanasia = float( el.find( './euthanasia/value' ).text )
+		except AttributeError:
+			euthanasia = None
+		try:
+			indemnification = float( el.find( './indemnification/value' ).text )
+		except AttributeError:
+			indemnification = None
+		try:
+			disposal = float( el.find( './carcass-disposal/value' ).text )
+		except AttributeError:
+			disposal = None
+		try:
+			cleaning = float( el.find( './cleaning-disinfecting/value' ).text )
+		except AttributeError:
+			cleaning = None
+
+		try:
+			surveillance = float( el.find( './surveillance/value' ).text )
+		except AttributeError:
+			surveillance = None
 
 		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		for typeName in typeNames:
