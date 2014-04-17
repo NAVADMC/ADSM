@@ -460,7 +460,7 @@ class DiseaseReactionAssignment(models.Model):
     # Since there are ProductionTypes that can be listed without having a DiseaseReactionAssignment,
     # this addresses boolean setting _use_disease_transition in DiseaseReaction
     def __str__(self):
-        return "%s have a %s reaction to %s" % (self.production_type, self.reaction, self.reaction._disease)
+        return "%s have a %s reaction to %s" % (self.production_type, self.reaction, self.reaction._disease) if self.reaction else "No Reaction"
 
 
 class DiseaseSpreadModel(models.Model):
