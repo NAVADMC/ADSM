@@ -223,6 +223,14 @@ def main():
 		# end of loop over from-production-types covered by this <airborne-spread[-exponential]-model> element
 	# end of loop over <airborne-spread[-exponential]-model> elements
 
+	for el in xml.findall( './/zone-model' ):
+		name = ( el.find( './name' ).text )
+		radius = float( el.find( './radius/value' ).text )
+
+		zone = Zone( zone_description=name, zone_radius=radius )
+		zone.save()
+	# end of loop over <zone-model> elements
+
 	for el in xml.findall( './/contact-spread-model' ):
 		if 'zone' in el.attrib:
 			continue
@@ -307,6 +315,7 @@ def main():
 	)
 	useExams = (xml.find( './/trace-exam-model' ) != None)
 	useTesting = (xml.find( './/test-model' ) != None)
+	useZones = (xml.find( './/zone-model' ) != None)
 	useVaccination = (
 	  (xml.find( './/vaccine-model' ) != None)
 	  or (xml.find( './/ring-vaccination-model' ) != None)
@@ -324,29 +333,47 @@ def main():
 		  _include_tracing = useTracing,
 		  _include_tracing_unit_exam = useExams,
 		  _include_tracing_testing = useTesting,
+		  _include_zones = useZones,
 		  _include_vaccination = useVaccination,
 		  _include_destruction = useDestruction
 		)
 		plan.save()
 
 	for el in xml.findall( './/detection-model' ):
-		observing = getRelChart( el.find( './prob-report-vs-time-clinical' ) )
-		reporting = getRelChart( el.find( './prob-report-vs-time-since-outbreak' ) )
+		# <detection-model> elements come in 2 forms. The first form, with a
+		# production-type attribute, specifies the probability of observing
+		# clinical signs of disease and the probability of reporting those
+		# signs. The second form, with a production-type attribute and a zone
+		# attribute, specifies a multiplier to use on the probability of
+		# observing clinical signs when inside a zone.
+		if 'zone' in el.attrib:
+			multiplier = float( el.find( './zone-prob-multiplier' ).text )
+		else:
+			observing = getRelChart( el.find( './prob-report-vs-time-clinical' ) )
+			reporting = getRelChart( el.find( './prob-report-vs-time-since-outbreak' ) )
 
 		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		for typeName in typeNames:
-			protocol = ControlProtocol(
-			  use_detection = True,
-			  detection_probability_for_observed_time_in_clinical = observing,
-			  detection_probability_report_vs_first_detection = reporting,
-			  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
-			)
-			protocol.save()
-			assignment = ProtocolAssignment(
-			  production_type = ProductionType.objects.get( name=typeName ),
-			  control_protocol = protocol
-			)
-			assignment.save()
+			if 'zone' in el.attrib:
+				effect = ZoneEffectOnProductionType(
+				  zone = Zone.objects.get( zone_description=el.attrib['zone'] ),
+				  production_type = ProductionType.objects.get( name=typeName ),
+				  zone_detection_multiplier = multiplier
+				)
+				effect.save()
+			else:
+				protocol = ControlProtocol(
+				  use_detection = True,
+				  detection_probability_for_observed_time_in_clinical = observing,
+				  detection_probability_report_vs_first_detection = reporting,
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=typeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
 		# end of loop over production-types covered by this <detection-model> element
 	# end of loop over <detection-model> elements
 
@@ -522,6 +549,29 @@ def main():
 			protocol.save()
 		# end of loop over production types covered by this <test-model> element		
 	# end of loop over <test-model> elements
+
+	for el in xml.findall( './/basic-zone-focus-model' ):
+		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
+		for typeName in typeNames:
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=typeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			protocol.detection_is_a_zone_trigger = True
+			protocol.save()
+		# end of loop over production types covered by this <basic-zone-focus-model> element
+	# end of loop over <basic-zone-focus-model> elements
 
 	# Vaccination priority order information is distributed among several
 	# different elements. Keep a list that will help sort it out later.
