@@ -573,6 +573,43 @@ def main():
 		# end of loop over production types covered by this <basic-zone-focus-model> element
 	# end of loop over <basic-zone-focus-model> elements
 
+	for el in xml.findall( './/trace-back-zone-focus-model' ) + xml.findall( './/trace-zone-focus-model' ):
+		# <trace-back-zone-focus-model> is an older module, superseded by the
+		# combination of contact-recorder-model, trace-model, and trace-zone-
+		# focus-model.
+
+		if 'contact-type' in el.attrib:
+			contactType = el.attrib['contact-type']
+			assert (contactType == 'direct' or contactType == 'indirect')
+		else:
+			contactType = 'both'
+
+		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
+		for typeName in typeNames:
+			# If a ControlProtocol object has already been assigned to this
+			# production type, retrieve it; otherwise, create a new one.
+			try:
+				assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
+				protocol = assignment.control_protocol
+			except ProtocolAssignment.DoesNotExist:
+				protocol = ControlProtocol(
+				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+				)
+				protocol.save()
+				assignment = ProtocolAssignment(
+				  production_type = ProductionType.objects.get( name=typeName ),
+				  control_protocol = protocol
+				)
+				assignment.save()
+			protocol.use_tracing = True
+			if contactType == 'direct' or contactType == 'both':
+				protocol.direct_trace_is_a_zone_trigger = True
+			if contactType == 'indirect' or contactType == 'both':
+				protocol.indirect_trace_is_a_zone_trigger = True
+			protocol.save()
+		# end of loop over production types covered by this <trace-back-zone-focus-model> or <trace-zone-focus-model> element
+	# end of loop over <trace-back-zone-focus-model> and <trace-zone-focus-model> elements
+
 	# Vaccination priority order information is distributed among several
 	# different elements. Keep a list that will help sort it out later.
 	vaccinationProductionTypeOrder = []
