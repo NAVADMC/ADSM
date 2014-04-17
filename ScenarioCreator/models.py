@@ -416,9 +416,9 @@ class ProtocolAssignment(models.Model):
     _master_plan = models.ForeignKey('ControlMasterPlan',
                                      default=lambda: ControlMasterPlan.objects.get_or_create(id=1)[0],
         help_text='Points back to a master plan for grouping purposes.')
-    production_type = models.ForeignKey('ProductionType',
+    production_type = models.ForeignKey('ProductionType', unique=True,
         help_text='The production type that these outputs apply to.', )
-    control_protocol = models.ForeignKey('ControlProtocol',
+    control_protocol = models.ForeignKey('ControlProtocol', blank=True, null=True,  # Just to note you're excluding it
         help_text='The control protocol to apply to this production type.')
     notes = models.CharField(max_length=255, blank=True, null=True,
         help_text='Why should this protocol be assigned to this production type?')
@@ -454,13 +454,13 @@ class DiseaseReaction(models.Model):
 
 
 class DiseaseReactionAssignment(models.Model):
-    production_type = models.ForeignKey('ProductionType',
+    production_type = models.ForeignKey('ProductionType', unique=True,
         help_text='The production type that these outputs apply to.', )
-    reaction = models.ForeignKey('DiseaseReaction')
+    reaction = models.ForeignKey('DiseaseReaction', blank=True, null=True) # can be excluded from disease progression
     # Since there are ProductionTypes that can be listed without having a DiseaseReactionAssignment,
     # this addresses boolean setting _use_disease_transition in DiseaseReaction
     def __str__(self):
-        return "%s have a %s reaction to %s" % (self.production_type, self.reaction, self.reaction._disease)
+        return "%s have a %s reaction to %s" % (self.production_type, self.reaction, self.reaction._disease) if self.reaction else "No Reaction"
 
 
 class DiseaseSpreadModel(models.Model):
@@ -619,6 +619,8 @@ class ProductionTypePairTransmission(models.Model):
         help_text='Disease spread mechanism used to model spread by indirect contact between these types.', )
     airborne_contact_spread_model = models.ForeignKey(AirborneSpreadModel, related_name='airborne_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by airborne spread between these types.', )
+    class Meta:
+        unique_together = ('source_production_type', 'destination_production_type',)
     def __str__(self):
         return "%s -> %s" % (self.source_production_type, self.destination_production_type)
 

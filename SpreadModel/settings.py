@@ -25,6 +25,7 @@ SECRET_KEY = '(iosdjsujy653@eo2lzs*x2$*OTGh#=y_vpzvbo6n^(7eao0-tbc!rcgd'
 DEBUG = True
 
 TEMPLATE_DEBUG = True
+# TEMPLATE_STRING_IF_INVALID = 'XXXXXX_BAD_{{ %s }}'
 
 ALLOWED_HOSTS = []
 

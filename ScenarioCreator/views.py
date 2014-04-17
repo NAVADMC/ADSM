@@ -10,6 +10,8 @@ from django.conf import settings
 import re
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from Settings.models import SmSession
+from django.forms.models import inlineformset_factory
+from django.forms.models import modelformset_factory
 
 
 def unsaved_changes(new_value=None):
@@ -34,67 +36,116 @@ def activeSession():
 
 
 def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
+    PT_count = ProductionType.objects.count()
     return {'filename': scenario_filename(),
             'unsaved_changes': unsaved_changes(),
             'Scenario': Scenario.objects.count(),
             'OutputSetting': OutputSettings.objects.count(),
             'Population': Population.objects.count(),
-            'ProductionTypes': ProductionType.objects.count(),
+            'ProductionTypes': PT_count,
             'Farms': Unit.objects.count(),
             'Disease': Disease.objects.count(),
             'Reactions': DiseaseReaction.objects.count(),
+            'ReactionAssignment': DiseaseReactionAssignment.objects.count() == PT_count,
             'DirectSpreads': DirectSpreadModel.objects.count(),
             'IndirectSpreads': IndirectSpreadModel.objects.count(),
             'AirborneSpreads': AirborneSpreadModel.objects.count(),
-            'Transmissions': ProductionTypePairTransmission.objects.count(),
+            'Transmissions': ProductionTypePairTransmission.objects.count() == PT_count ** 2,
             'ControlMasterPlan': ControlMasterPlan.objects.count(),
             'Protocols': ControlProtocol.objects.count(),
+            'ProtocolAssignments': ProtocolAssignment.objects.count(),
             'Zones': Zone.objects.count(),
-            'ZoneEffects': ZoneEffectOnProductionType.objects.count()}
+            'ZoneEffects': ZoneEffectOnProductionType.objects.count(),
+            'ProbabilityFunctions': ProbabilityFunction.objects.count(),
+            'RelationalFunctions': RelationalFunction.objects.count()}
 
 
 def home(request):
     return redirect('/setup/Scenario/1/')
 
 
+def extra_forms_needed():
+    missing = list(ProductionType.objects.all())
+    for entry in ProductionTypePairTransmission.objects.all():
+        if entry.destination_production_type_id == entry.source_production_type_id:  #Spread within a species
+            missing.remove(entry.source_production_type)
+    extra_count = len(missing)
+    if not missing and ProductionTypePairTransmission.objects.count() < ProductionType.objects.count() ** 2:
+        #all possible interactions are not accounted for
+        extra_count = 1  # add one more blank possibility
+    return extra_count, missing
+
+
 def disease_spread(request):
     context = basic_context()
-    forms = []
-    pts = list(ProductionType.objects.all())
-    for source in pts:
-        for destination in pts:
-            initialized_form = ProductionTypePairTransmissionForm(request.POST or None)
-            initialized_form.fields['source_production_type'].initial = source.id
-            initialized_form.fields['destination_production_type'].initial = destination.id
-            forms.append(initialized_form)
-    context['forms'] = forms
+    extra_count, missing = extra_forms_needed()
+    SpreadSet = modelformset_factory(ProductionTypePairTransmission, extra=extra_count, form=ProductionTypePairTransmissionForm)
+
+    try:
+        initialized_formset = SpreadSet(request.POST, request.FILES, queryset=ProductionTypePairTransmission.objects.all())
+        if initialized_formset.is_valid():
+            instances = initialized_formset.save()
+            print(instances)
+            unsaved_changes(True)
+            return redirect('/setup/DiseaseSpread/')  # update these numbers after database save because they've changed
+    except ValidationError:
+        initialized_formset = SpreadSet(queryset=ProductionTypePairTransmission.objects.all())
+    context['formset'] = initialized_formset
+    for index, pt in enumerate(missing):
+        index += ProductionTypePairTransmission.objects.count()
+        context['formset'][index].fields['source_production_type'].initial = pt.id
+        context['formset'][index].fields['destination_production_type'].initial = pt.id
+
     context['title'] = 'How does Disease spread from one Production Type to another?'
-    return render(request, 'ScenarioCreator/ProtocolAssignment.html', context)
-    # return render(request, 'ScenarioCreator/DiseaseSpread.html', basic_context())
+    return render(request, 'ScenarioCreator/FormSet.html', context)
+
+
+def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request):
+    """FormSet is pre-populated with existing assignments and it detects and fills in missing
+    assignments with a blank form with production type filled in."""
+
+    try:
+        initialized_formset = MyFormSet(request.POST, request.FILES, queryset=TargetModel.objects.all())
+        if initialized_formset.is_valid():
+            instances = initialized_formset.save()
+            print(instances)
+            unsaved_changes(True)
+            context['formset'] = initialized_formset
+            return False
+    except ValidationError:
+        forms = MyFormSet(queryset=TargetModel.objects.all())
+        for index, pt in enumerate(missing):
+            index += TargetModel.objects.count()
+            forms[index].fields['production_type'].initial = pt.id
+        context['formset'] = forms
+    return True
 
 
 def assign_protocols(request):
     context = basic_context()
-    forms = []
-    for pt in ProductionType.objects.all():
-        initialized_form = ProtocolAssignmentForm(request.POST or None)
-        initialized_form.fields['production_type'].initial = pt.id
-        forms.append(initialized_form)
-    context['forms'] = forms
-    context['title'] = 'Assign a Control Protocol to each Production Type'
-    return render(request, 'ScenarioCreator/ProtocolAssignment.html', context)
+    missing = ProductionType.objects.filter(protocolassignment__isnull=True)
+    ProtocolSet = modelformset_factory(ProtocolAssignment, extra=len(missing), form=ProtocolAssignmentForm)
+    if populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request):
+        context['title'] = 'Assign a Control Protocol to each Production Type'
+        return render(request, 'ScenarioCreator/FormSet.html', context)
+    else:
+        return redirect(request.path)
 
 
 def assign_reactions(request):
+    """FormSet is pre-populated with existing assignments and it detects and fills in missing
+    assignments with a blank form with production type filled in."""
+
     context = basic_context()
-    forms = []
-    for pt in ProductionType.objects.all():
-        initialized_form = DiseaseReactionAssignmentForm(request.POST or None)
-        initialized_form.fields['production_type'].initial = pt.id
-        forms.append(initialized_form)
-    context['forms'] = forms
-    context['title'] = 'Set what Reaction each Production Type has to the Disease'
-    return render(request, 'ScenarioCreator/ProtocolAssignment.html', context)
+    missing = ProductionType.objects.filter(diseasereactionassignment__isnull=True)
+    ReactionSet = modelformset_factory(DiseaseReactionAssignment,
+                                     extra=len(missing),
+                                     form=DiseaseReactionAssignmentForm)
+    if populate_forms_matching_ProductionType(ReactionSet, DiseaseReactionAssignment, context, missing, request):
+        context['title'] = 'Set what Reaction each Production Type has to the Disease'
+        return render(request, 'ScenarioCreator/FormSet.html', context)
+    else:
+        return redirect(request.path)
 
 
 def save_new_instance(initialized_form, request):

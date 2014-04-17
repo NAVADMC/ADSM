@@ -1,0 +1,29 @@
+{% extends 'ScenarioCreator/navigationPane.html' %}
+{% load floppyforms %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+    <h1>{{ title }}</h1>
+
+<form method="post" action="">
+    {{ formset.management_form }}
+    <table>
+        <tr>
+            {% for key, value in formset.0.fields.items %}
+                {% if value.label %}
+                    <th><h4>{{value.label}}</h4></th>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        <tbody>
+            {% for form in formset %}
+                {{form.id}}
+                {% form form using 'ScenarioCreator/FormRow.html' %}
+            {% endfor %}
+     </tbody>
+    </table>
+    <input type="submit" name="submit" value="Submit" class="btn btn-primary button white" id="submit-id-submit">
+</form>
+
+{% endblock %}

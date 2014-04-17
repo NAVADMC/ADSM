@@ -2,9 +2,8 @@
 
 <tr>
     {% form form using %}{# needed to push the context for the formconfig #}
-            {% for field in form.visible_fields %}
-{#                {% block row %}{% formrow field %}{% endblock %}#}
-                <td>{% block widget %}{% formfield field %}{% endblock %}</td>
-            {% endfor %}
-        {% endform %}
+        {% for field in form.visible_fields %}
+            <td>{% block widget %}{% formfield field %}{% endblock %}</td>
+        {% endfor %}
+    {% endform %}
 </tr>
