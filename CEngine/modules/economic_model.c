@@ -686,56 +686,73 @@ set_params (void *data, int ncols, char **value, char **colname)
     spreadmodel_read_prodtype (value[0], local_data->production_types);
 
   /* Destruction Cost Parameters */
+  if (value[1] != NULL)
+    {
+      if (local_data->destruction_cost_params == NULL)
+        {
+          local_data->destruction_cost_params =
+            g_new0 (destruction_cost_data_t *, local_data->production_types->len);
+        }
 
-  /* Check that we are not overwriting an existing parameter block (that would
-   * indicate a bug). */
-  g_assert (local_data->destruction_cost_params[production_type_id] == NULL);
+      /* Check that we are not overwriting an existing parameter block (that would
+       * indicate a bug). */
+      g_assert (local_data->destruction_cost_params[production_type_id] == NULL);
 
-  /* Create a new parameter block. */
-  d = g_new (destruction_cost_data_t, 1);
-  local_data->destruction_cost_params[production_type_id] = d;
+      /* Create a new parameter block. */
+      d = g_new (destruction_cost_data_t, 1);
+      local_data->destruction_cost_params[production_type_id] = d;
 
-  errno = 0;
-  d->appraisal = strtod (value[1], NULL);
-  g_assert (errno != ERANGE);
-  errno = 0;
-  d->euthanasia = strtod (value[2], NULL);
-  g_assert (errno != ERANGE);
-  errno = 0;
-  d->indemnification = strtod (value[3], NULL);
-  g_assert (errno != ERANGE);
-  errno = 0;
-  d->carcass_disposal = strtod (value[4], NULL);
-  g_assert (errno != ERANGE);
-  errno = 0;
-  d->cleaning_disinfecting = strtod (value[5], NULL);
-  g_assert (errno != ERANGE);
+      errno = 0;
+      d->appraisal = strtod (value[1], NULL);
+      g_assert (errno != ERANGE);
+      errno = 0;
+      d->euthanasia = strtod (value[2], NULL);
+      g_assert (errno != ERANGE);
+      errno = 0;
+      d->indemnification = strtod (value[3], NULL);
+      g_assert (errno != ERANGE);
+      errno = 0;
+      d->carcass_disposal = strtod (value[4], NULL);
+      g_assert (errno != ERANGE);
+      errno = 0;
+      d->cleaning_disinfecting = strtod (value[5], NULL);
+      g_assert (errno != ERANGE);
+    }
 
   /* Vaccination Cost Parameters */
 
-  /* Check that we are not overwriting an existing parameter block (that would
-   * indicate a bug). */
-  g_assert (local_data->vaccination_cost_params[production_type_id] == NULL);
+  if (value[6] != NULL)
+    {
+      if (local_data->vaccination_cost_params == NULL)
+        {
+          local_data->vaccination_cost_params =
+            g_new0 (vaccination_cost_data_t *, local_data->production_types->len);
+        }
 
-  /* Create a new parameter block. */
-  v = g_new (vaccination_cost_data_t, 1);
-  local_data->vaccination_cost_params[production_type_id] = v;
+      /* Check that we are not overwriting an existing parameter block (that would
+       * indicate a bug). */
+      g_assert (local_data->vaccination_cost_params[production_type_id] == NULL);
 
-  errno = 0;
-  v->baseline_capacity = strtol (value[6], NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);  
-  errno = 0;
-  v->vaccination = strtod (value[7], NULL);
-  g_assert (errno != ERANGE);
-  errno = 0;
-  v->extra_vaccination = strtod (value[8], NULL);
-  g_assert (errno != ERANGE);
-  errno = 0;
-  v->vaccination_fixed = strtod (value[9], NULL);
-  g_assert (errno != ERANGE);
+      /* Create a new parameter block. */
+      v = g_new (vaccination_cost_data_t, 1);
+      local_data->vaccination_cost_params[production_type_id] = v;
 
-  /* No vaccinations have been performed yet. */
-  v->capacity_used = 0;
+      errno = 0;
+      v->baseline_capacity = strtol (value[6], NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);  
+      errno = 0;
+      v->vaccination = strtod (value[7], NULL);
+      g_assert (errno != ERANGE);
+      errno = 0;
+      v->extra_vaccination = strtod (value[8], NULL);
+      g_assert (errno != ERANGE);
+      errno = 0;
+      v->vaccination_fixed = strtod (value[9], NULL);
+      g_assert (errno != ERANGE);
+
+      /* No vaccinations have been performed yet. */
+      v->capacity_used = 0;
+    }
 
   return 0;
 }
@@ -911,7 +928,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read the production type specific
    * parameters. */
   sqlite3_exec (params,
-                "SELECT prodtype.name,cost_of_destruction_appraisal_per_unit,cost_of_destruction_cleaning_per_unit,cost_of_euthanasia_per_animal,cost_of_indemnification_per_animal,cost_of_carcass_disposal_per_animal,vaccination_demand_threshold,cost_of_vaccination_baseline_per_animal,cost_of_vaccination_additional_per_animal,cost_of_vaccination_setup_per_unit FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND use_cost_accounting=1",
+                "SELECT prodtype.name,cost_of_destruction_appraisal_per_unit,cost_of_euthanasia_per_animal,cost_of_indemnification_per_animal,cost_of_carcass_disposal_per_animal,cost_of_destruction_cleaning_per_unit,vaccination_demand_threshold,cost_of_vaccination_baseline_per_animal,cost_of_vaccination_additional_per_animal,cost_of_vaccination_setup_per_unit FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND use_cost_accounting=1",
                 set_params, self, &sqlerr);
   if (sqlerr)
     {
