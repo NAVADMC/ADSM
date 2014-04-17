@@ -13,7 +13,6 @@ from Settings.models import SmSession
 from django.forms.models import inlineformset_factory
 from django.forms.models import modelformset_factory
 
-
 def unsaved_changes(new_value=None):
     session = SmSession.objects.get_or_create(id=1)[0]  # This keeps track of the state for all views and is used by basic_context
     if new_value is not None:  # you can still set it to False
@@ -111,25 +110,23 @@ def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, miss
             print(instances)
             unsaved_changes(True)
             context['formset'] = initialized_formset
-            return False
     except ValidationError:
         forms = MyFormSet(queryset=TargetModel.objects.all())
         for index, pt in enumerate(missing):
             index += TargetModel.objects.count()
             forms[index].fields['production_type'].initial = pt.id
         context['formset'] = forms
-    return True
 
 
 def assign_protocols(request):
     context = basic_context()
     missing = ProductionType.objects.filter(protocolassignment__isnull=True)
     ProtocolSet = modelformset_factory(ProtocolAssignment, extra=len(missing), form=ProtocolAssignmentForm)
-    if populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request):
-        context['title'] = 'Assign a Control Protocol to each Production Type'
-        return render(request, 'ScenarioCreator/FormSet.html', context)
-    else:
-        return redirect(request.path)
+    populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request)
+
+    context['title'] = 'Assign a Control Protocol to each Production Type'
+    return render(request, 'ScenarioCreator/FormSet.html', context)
+
 
 def assign_reactions(request):
     """FormSet is pre-populated with existing assignments and it detects and fills in missing
@@ -140,11 +137,10 @@ def assign_reactions(request):
     ReactionSet = modelformset_factory(DiseaseReactionAssignment,
                                      extra=len(missing),
                                      form=DiseaseReactionAssignmentForm)
-    if populate_forms_matching_ProductionType(ReactionSet, DiseaseReactionAssignment, context, missing, request):
-        context['title'] = 'Set what Reaction each Production Type has to the Disease'
-        return render(request, 'ScenarioCreator/FormSet.html', context)
-    else:
-        return redirect(request.path)
+    populate_forms_matching_ProductionType(ReactionSet, DiseaseReactionAssignment, context, missing, request)
+
+    context['title'] = 'Set what Reaction each Production Type has to the Disease'
+    return render(request, 'ScenarioCreator/FormSet.html', context)
 
 
 def save_new_instance(initialized_form, request):
