@@ -63,20 +63,40 @@ def home(request):
     return redirect('/setup/Scenario/1/')
 
 
+def extra_forms_needed():
+    missing = list(ProductionType.objects.all())
+    for entry in ProductionTypePairTransmission.objects.all():
+        if entry.destination_production_type_id == entry.source_production_type_id:  #Spread within a species
+            missing.remove(entry.source_production_type)
+    extra_count = len(missing)
+    if not missing and ProductionTypePairTransmission.objects.count() < ProductionType.objects.count() ** 2:
+        #all possible interactions are not accounted for
+        extra_count = 1  # add one more blank possibility
+    return extra_count, missing
+
+
 def disease_spread(request):
     context = basic_context()
-    forms = []
-    pts = list(ProductionType.objects.all())
-    for source in pts:
-        for destination in pts:
-            initialized_form = ProductionTypePairTransmissionForm(request.POST or None)
-            initialized_form.fields['source_production_type'].initial = source.id
-            initialized_form.fields['destination_production_type'].initial = destination.id
-            forms.append(initialized_form)
-    context['forms'] = forms
+    extra_count, missing = extra_forms_needed()
+    SpreadSet = modelformset_factory(ProductionTypePairTransmission, extra=extra_count, form=ProductionTypePairTransmissionForm)
+
+    try:
+        initialized_formset = SpreadSet(request.POST, request.FILES, queryset=ProductionTypePairTransmission.objects.all())
+        if initialized_formset.is_valid():
+            instances = initialized_formset.save()
+            print(instances)
+            unsaved_changes(True)
+            return redirect('/setup/DiseaseSpread/')  # update these numbers after database save because they've changed
+    except ValidationError:
+        initialized_formset = SpreadSet(queryset=ProductionTypePairTransmission.objects.all())
+    context['formset'] = initialized_formset
+    for index, pt in enumerate(missing):
+        index += ProductionTypePairTransmission.objects.count()
+        context['formset'][index].fields['source_production_type'].initial = pt.id
+        context['formset'][index].fields['destination_production_type'].initial = pt.id
+
     context['title'] = 'How does Disease spread from one Production Type to another?'
-    return render(request, 'ScenarioCreator/ProtocolAssignment.html', context)
-    # return render(request, 'ScenarioCreator/DiseaseSpread.html', basic_context())
+    return render(request, 'ScenarioCreator/FormSet.html', context)
 
 
 def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request):
@@ -114,10 +134,10 @@ def assign_reactions(request):
 
     context = basic_context()
     missing = ProductionType.objects.filter(diseasereactionassignment__isnull=True)
-    SpreadSet = modelformset_factory(DiseaseReactionAssignment,
+    ReactionSet = modelformset_factory(DiseaseReactionAssignment,
                                      extra=len(missing),
                                      form=DiseaseReactionAssignmentForm)
-    populate_forms_matching_ProductionType(SpreadSet, DiseaseReactionAssignment, context, missing, request)
+    populate_forms_matching_ProductionType(ReactionSet, DiseaseReactionAssignment, context, missing, request)
 
     context['title'] = 'Set what Reaction each Production Type has to the Disease'
     return render(request, 'ScenarioCreator/FormSet.html', context)
