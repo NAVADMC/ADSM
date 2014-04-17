@@ -39,7 +39,6 @@
 #include "detection_monitor.h"
 
 #include "spreadmodel.h"
-#include "general.h"
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "detection-monitor"
@@ -248,7 +247,6 @@ handle_detection_event (struct spreadmodel_model_t_ *self, EVT_detection_event_t
   if (RPT_reporting_is_null (local_data->first_detection, NULL))
     {
       RPT_reporting_set_integer (local_data->first_detection, event->day, NULL);
-      _iteration.first_detection = TRUE;
       RPT_reporting_set_integer (local_data->detection_occurred, 1, NULL);
     } 
   if (RPT_reporting_is_null1 (local_data->first_detection_by_prodtype, unit->production_type_name))

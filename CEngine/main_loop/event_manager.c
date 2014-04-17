@@ -22,6 +22,7 @@
 #include "event_manager.h"
 
 #include "spreadmodel.h"
+#include "general.h"
 
 
 /**
@@ -208,6 +209,9 @@ spreadmodel_create_event (spreadmodel_event_manager_t * manager, EVT_event_t * n
       /* spreadmodel_printf( s ); */
       g_free (s);
 #endif
+
+      if (event->type == EVT_Detection)
+        _iteration.first_detection = TRUE;
 
       for (iter = manager->listeners[event->type]; iter != NULL; iter = g_slist_next (iter))
         {
