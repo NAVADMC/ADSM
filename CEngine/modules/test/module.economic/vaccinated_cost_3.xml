@@ -78,6 +78,7 @@
         <value>31</value>
         <units><xdf:unit>day</xdf:unit></units>
       </min-time-between-vaccinations>      
+      <vaccinate-detected-units>no</vaccinate-detected-units>
     </ring-vaccination-model>
 
     <ring-vaccination-model to-production-type="D">
@@ -90,6 +91,7 @@
         <value>31</value>
         <units><xdf:unit>day</xdf:unit></units>
       </min-time-between-vaccinations>      
+      <vaccinate-detected-units>no</vaccinate-detected-units>
     </ring-vaccination-model>
 
     <ring-vaccination-model to-production-type="E">
@@ -102,6 +104,7 @@
         <value>31</value>
         <units><xdf:unit>day</xdf:unit></units>
       </min-time-between-vaccinations>      
+      <vaccinate-detected-units>no</vaccinate-detected-units>
     </ring-vaccination-model>
 
     <ring-vaccination-model to-production-type="F">
@@ -114,6 +117,7 @@
         <value>31</value>
         <units><xdf:unit>day</xdf:unit></units>
       </min-time-between-vaccinations>      
+      <vaccinate-detected-units>no</vaccinate-detected-units>
     </ring-vaccination-model>
 
     <ring-vaccination-model to-production-type="G">
@@ -126,6 +130,7 @@
         <value>31</value>
         <units><xdf:unit>day</xdf:unit></units>
       </min-time-between-vaccinations>      
+      <vaccinate-detected-units>no</vaccinate-detected-units>
     </ring-vaccination-model>
 
     <vaccine-model>

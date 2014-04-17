@@ -122,6 +122,7 @@
         <value>31</value>
         <units><xdf:unit>day</xdf:unit></units>
       </min-time-between-vaccinations>      
+      <vaccinate-detected-units>no</vaccinate-detected-units>
     </ring-vaccination-model>
 
     <ring-vaccination-model production-type="Pigs">
@@ -134,6 +135,7 @@
         <value>31</value>
         <units><xdf:unit>day</xdf:unit></units>
       </min-time-between-vaccinations>      
+      <vaccinate-detected-units>no</vaccinate-detected-units>
     </ring-vaccination-model>
 
     <ring-vaccination-model production-type="Sheep">
@@ -146,6 +148,7 @@
         <value>31</value>
         <units><xdf:unit>day</xdf:unit></units>
       </min-time-between-vaccinations>      
+      <vaccinate-detected-units>no</vaccinate-detected-units>
     </ring-vaccination-model>
 
     <vaccine-model production-type="Beef Cattle">
