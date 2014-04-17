@@ -122,9 +122,9 @@ def main():
 	  include_airborne_spread = (xml.find( './/airborne-spread-model' ) != None or xml.find( './/airborne-spread-exponential-model' ) != None),
 	  use_airborne_exponential_decay = useAirborneExponentialDecay,
 	  use_within_unit_prevalence = usePrevalence,
-	  cost_track_zone_surveillance = useEconomic,
-	  cost_track_vaccination = useEconomic,
-	  cost_track_destruction = useEconomic
+	  cost_track_zone_surveillance = (xml.find( './/economic-model/surveillance' ) != None),
+	  cost_track_vaccination = (xml.find( './/economic-model/vaccination' ) != None),
+	  cost_track_destruction = (xml.find( './/economic-model/euthanasia' ) != None)
 	)
 	scenario.save()
 
@@ -985,11 +985,41 @@ def main():
 				  control_protocol = protocol
 				)
 				assignment.save()
-			protocol.cost_of_vaccination_setup_per_unit = vaccinationFixed
-			protocol.cost_of_vaccination_baseline_per_animal = vaccinationBase
-			protocol.cost_of_vaccination_additional_per_animal = vaccinationExtra
-			protocol.vaccination_demand_threshold = baselineCapacity
+			protocol.use_cost_accounting = True
+			if vaccinationFixed != None:
+				protocol.cost_of_vaccination_setup_per_unit = vaccinationFixed
+			if vaccinationBase != None:
+				protocol.cost_of_vaccination_baseline_per_animal = vaccinationBase
+			if vaccinationExtra != None:
+				protocol.cost_of_vaccination_additional_per_animal = vaccinationExtra
+			if baselineCapacity != None:
+				protocol.vaccination_demand_threshold = baselineCapacity
+			if appraisal != None:
+				protocol.cost_of_destruction_appraisal_per_unit = appraisal
+			if euthanasia != None:
+				protocol.cost_of_euthanasia_per_animal = euthanasia
+			if indemnification != None:
+				protocol.cost_of_indemnification_per_animal = indemnification
+			if disposal != None:
+				protocol.cost_of_carcass_disposal_per_animal = disposal
+			if cleaning != None:
+				protocol.cost_of_destruction_cleaning_per_unit = cleaning
 			protocol.save()
+
+			if 'zone' in el.attrib and surveillance != None:
+				zoneName = el.attrib['zone']
+				# If a ZoneEffectOnProductionType object has already been
+				# assigned to this combination of production type and zone,
+				# retrieve it; otherwise, create a new one.
+				try:
+					effect = ZoneEffectOnProductionType.objects.get( production_type__name=typeName, zone__zone_description=zoneName )
+				except ZoneEffectOnProductionType.DoesNotExist:
+					effect = ZoneEffectOnProductionType(
+					  zone = Zone.objects.get( zone_description=zoneName ),
+					  production_type = ProductionType.objects.get( name=typeName )
+					)
+				effect.cost_of_surveillance_per_animal_day = surveillance
+				effect.save()
 		# end of loop over production types covered by this <economic-model> element
 	# end of loop over <economic-model> elements
 
