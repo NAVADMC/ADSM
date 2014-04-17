@@ -806,7 +806,7 @@ run_sim_main (const char *population_file,
   /* Initialize the reporting variables, and bundle them together so they can
    * easily be sent to a function for initialization. */
   last_day_of_outbreak =
-    RPT_new_reporting ("outbreakDuration", RPT_integer, RPT_never);
+    RPT_new_reporting ("outbreakDuration", RPT_integer, RPT_daily);
   clock_time = RPT_new_reporting ("clock-time", RPT_real, RPT_never);
   version = RPT_new_reporting ("version", RPT_group, RPT_never);
   split_version (PACKAGE_VERSION, version);
