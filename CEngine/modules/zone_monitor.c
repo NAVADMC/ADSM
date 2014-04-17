@@ -562,22 +562,22 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
-  local_data->area = RPT_new_reporting ("zoneArea", RPT_group, RPT_never);
-  local_data->max_area = RPT_new_reporting ("maxZoneArea", RPT_group, RPT_never);
-  local_data->max_area_day = RPT_new_reporting ("maxZoneAreaDay", RPT_group, RPT_never);
-  local_data->final_area = RPT_new_reporting ("finalZoneArea", RPT_group, RPT_never);
-  local_data->perimeter = RPT_new_reporting ("zonePerimeter", RPT_group, RPT_never);
-  local_data->max_perimeter = RPT_new_reporting ("maxZonePerimeter", RPT_group, RPT_never);
-  local_data->max_perimeter_day = RPT_new_reporting ("maxZonePerimeterDay", RPT_group, RPT_never);
-  local_data->final_perimeter = RPT_new_reporting ("finalZonePerimeter", RPT_group, RPT_never);
+  local_data->area = RPT_new_reporting ("zoneArea", RPT_group, RPT_daily);
+  local_data->max_area = RPT_new_reporting ("maxZoneArea", RPT_group, RPT_daily);
+  local_data->max_area_day = RPT_new_reporting ("maxZoneAreaDay", RPT_group, RPT_daily);
+  local_data->final_area = RPT_new_reporting ("finalZoneArea", RPT_group, RPT_daily);
+  local_data->perimeter = RPT_new_reporting ("zonePerimeter", RPT_group, RPT_daily);
+  local_data->max_perimeter = RPT_new_reporting ("maxZonePerimeter", RPT_group, RPT_daily);
+  local_data->max_perimeter_day = RPT_new_reporting ("maxZonePerimeterDay", RPT_group, RPT_daily);
+  local_data->final_perimeter = RPT_new_reporting ("finalZonePerimeter", RPT_group, RPT_daily);
   local_data->num_separate_areas =
-    RPT_new_reporting ("num-separate-areas", RPT_group, RPT_never);
-  local_data->num_units = RPT_new_reporting ("unitsInZone", RPT_group, RPT_never);
-  local_data->num_units_by_prodtype = RPT_new_reporting ("unitsInZone", RPT_group, RPT_never);
-  local_data->num_unit_days = RPT_new_reporting ("unitDaysInZone", RPT_group, RPT_never);
-  local_data->num_unit_days_by_prodtype = RPT_new_reporting ("unitDaysInZone", RPT_group, RPT_never);
-  local_data->num_animal_days = RPT_new_reporting ("animalDaysInZone", RPT_group, RPT_never);
-  local_data->num_animal_days_by_prodtype = RPT_new_reporting ("animalDaysInZone", RPT_group, RPT_never);
+    RPT_new_reporting ("num-separate-areas", RPT_group, RPT_daily);
+  local_data->num_units = RPT_new_reporting ("unitsInZone", RPT_group, RPT_daily);
+  local_data->num_units_by_prodtype = RPT_new_reporting ("unitsInZone", RPT_group, RPT_daily);
+  local_data->num_unit_days = RPT_new_reporting ("unitDaysInZone", RPT_group, RPT_daily);
+  local_data->num_unit_days_by_prodtype = RPT_new_reporting ("unitDaysInZone", RPT_group, RPT_daily);
+  local_data->num_animal_days = RPT_new_reporting ("animalDaysInZone", RPT_group, RPT_daily);
+  local_data->num_animal_days_by_prodtype = RPT_new_reporting ("animalDaysInZone", RPT_group, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->area);
   g_ptr_array_add (self->outputs, local_data->max_area);
   g_ptr_array_add (self->outputs, local_data->max_area_day);

@@ -35,6 +35,7 @@
 #define events_listened_for zone_model_events_listened_for
 #define to_string zone_model_to_string
 #define local_free zone_model_free
+#define handle_request_for_zone_focus_event zone_model_handle_request_for_zone_focus_event
 #define handle_midnight_event zone_model_handle_midnight_event
 
 #include "module.h"
@@ -59,8 +60,9 @@
 
 
 
-#define NEVENTS_LISTENED_FOR 1
+#define NEVENTS_LISTENED_FOR 2
 EVT_event_type_t events_listened_for[] = {
+  EVT_RequestForZoneFocus,
   EVT_Midnight
 };
 
@@ -347,6 +349,47 @@ check_poly_and_rezone (int id, gpointer arg)
 
 
 /**
+ * Responds to a request for zone focus event by adding a new zone focus (to
+ * come into the effect at Mignight) to the zone list.
+ *
+ * @param self this module.
+ * @param event a request for zone focus event.
+ * @param zones the zone list.
+ */
+void
+handle_request_for_zone_focus_event (struct spreadmodel_model_t_ *self,
+                                     EVT_request_for_zone_focus_event_t * event,
+                                     ZON_zone_list_t * zones)
+{
+  local_data_t *local_data;
+  UNT_unit_t *unit;
+
+#if DEBUG
+  g_debug ("----- ENTER handle_request_for_zone_focus_event (%s)", MODEL_NAME);
+#endif
+
+  local_data = (local_data_t *) (self->model_data);
+  unit = event->unit;
+#if DEBUG
+  g_debug ("adding pending zone focus at x=%g, y=%g", unit->x, unit->y);
+#endif
+  ZON_zone_list_add_focus (zones, unit->x, unit->y);
+
+#ifdef USE_SC_GUILIB
+  sc_make_zone_focus( event->day, unit );
+#else
+  if( NULL != spreadmodel_make_zone_focus )
+    spreadmodel_make_zone_focus (unit->index);
+#endif
+
+#if DEBUG
+  g_debug ("----- EXIT handle_request_for_zone_focus_event (%s)", MODEL_NAME);
+#endif
+}
+
+
+
+/**
  * Responds to a midnight event by updating the zone shapes and unit-to-zone
  * assignments.
  *
@@ -540,6 +583,9 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
 
   switch (event->type)
     {
+    case EVT_RequestForZoneFocus:
+      handle_request_for_zone_focus_event (self, &(event->u.request_for_zone_focus), zones);
+      break;
     case EVT_Midnight:
       handle_midnight_event(self, units, zones, &(event->u.midnight));
       break;

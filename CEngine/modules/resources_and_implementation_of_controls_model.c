@@ -237,7 +237,6 @@
 #define handle_detection_event resources_and_implementation_of_controls_model_handle_detection_event
 #define handle_request_for_destruction_event resources_and_implementation_of_controls_model_handle_request_for_destruction_event
 #define handle_request_for_vaccination_event resources_and_implementation_of_controls_model_handle_request_for_vaccination_event
-#define handle_request_for_zone_focus_event resources_and_implementation_of_controls_model_handle_request_for_zone_focus_event
 #define handle_vaccination_event resources_and_implementation_of_controls_model_handle_vaccination_event
 
 #include "module.h"
@@ -273,11 +272,11 @@ double round (double x);
 
 
 
-#define NEVENTS_LISTENED_FOR 7
+#define NEVENTS_LISTENED_FOR 6
 EVT_event_type_t events_listened_for[] =
   { EVT_NewDay, EVT_Detection,
   EVT_RequestForDestruction, EVT_DeclarationOfVaccinationReasons,
-  EVT_RequestForVaccination, EVT_Vaccination, EVT_RequestForZoneFocus
+  EVT_RequestForVaccination, EVT_Vaccination
 };
 
 
@@ -1383,47 +1382,6 @@ handle_vaccination_event (struct spreadmodel_model_t_ *self, EVT_vaccination_eve
 
 
 /**
- * Responds to a request for zone focus event by adding a new zone focus (to
- * come into the effect on the next simulation day) to the zone list.
- *
- * @param self the model.
- * @param event a request for zone focus event.
- * @param zones the zone list.
- */
-void
-handle_request_for_zone_focus_event (struct spreadmodel_model_t_ *self,
-                                     EVT_request_for_zone_focus_event_t * event,
-                                     ZON_zone_list_t * zones)
-{
-  local_data_t *local_data;
-  UNT_unit_t *unit;
-
-#if DEBUG
-  g_debug ("----- ENTER handle_request_for_zone_focus_event (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-  unit = event->unit;
-#if DEBUG
-  g_debug ("adding pending zone focus at x=%g, y=%g", unit->x, unit->y);
-#endif
-  ZON_zone_list_add_focus (zones, unit->x, unit->y);
-
-#ifdef USE_SC_GUILIB
-  sc_make_zone_focus( event->day, unit );
-#else
-  if( NULL != spreadmodel_make_zone_focus )
-    spreadmodel_make_zone_focus (unit->index);
-#endif
-
-#if DEBUG
-  g_debug ("----- EXIT handle_request_for_zone_focus_event (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
  * Runs this model.
  *
  * @param self the model.
@@ -1462,9 +1420,6 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
       break;
     case EVT_Vaccination:
       handle_vaccination_event (self, &(event->u.vaccination));
-      break;
-    case EVT_RequestForZoneFocus:
-      handle_request_for_zone_focus_event (self, &(event->u.request_for_zone_focus), zones);
       break;
     default:
       g_error
