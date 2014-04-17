@@ -232,7 +232,10 @@ def main():
 		else:
 			contactRate = float( el.find( './movement-rate/value' ).text )
 		distance = getPdf( el.find( './distance' ) )
-		delay = getPdf( el.find( './delay' ) )
+		if el.find( './delay' ) != None:
+			delay = getPdf( el.find( './delay' ) )
+		else:
+			delay = zeroDelay
 		probInfect = float( el.find( './prob-infect' ).text )
 		try:
 			latentCanInfect = getBool( el.find( './latent-units-can-infect' ) )
