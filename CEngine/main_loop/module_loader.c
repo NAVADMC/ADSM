@@ -98,7 +98,7 @@ get_exit_condition (char *exit_condition_text)
       if (g_ascii_strcasecmp (exit_condition_text, "diseaseEnd") == 0)
         ret_val = ret_val | STOP_ON_DISEASE_END;
 
-      else if (g_ascii_strcasecmp (exit_condition_text, "firstDetection") == 0)
+      else if (g_ascii_strcasecmp (exit_condition_text, "first-detection") == 0)
         ret_val = ret_val | STOP_ON_FIRST_DETECTION;
     }
   
