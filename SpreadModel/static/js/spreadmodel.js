@@ -63,9 +63,9 @@ var modelModal = {
         $.get(url, function(newForm){
             var $newForm = $($.parseHTML(newForm));
 
-            modal.find('.modal-title').html($newForm.find('h1:not(.filename)').html());
-            var $form = $newForm.find('form');
-            $form.find('button[type=submit]').remove();
+            modal.find('.modal-title').html($newForm.find('#title').html());
+            var $form = $newForm.find('form:not(.filename)');
+            $form.find('.buttonHolder').remove();
             modal.find('.modal-body').html($form);
             $('body').append(modal);
             modal.find('.modal-footer .btn-primary').on('click', function() {

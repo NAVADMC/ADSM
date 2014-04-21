@@ -306,6 +306,8 @@ class ScenarioForm(BaseForm):
     class Meta:
         model = Scenario
         exclude = []
+        widgets = {'language': Select(attrs={'data-toggle-controller': 'language',
+                                             'data-required-value': 'Spanish'})}
 
 
 class OutputSettingsForm(BaseForm):
