@@ -420,7 +420,7 @@ class Disease(models.Model):
     name = models.CharField(max_length=255,
         help_text='Name of the Disease')
     disease_description = models.TextField(blank=True)
-    include_contact_spread = models.BooleanField(default=True,  # TODO: hide these and programmatically set them
+    include_contact_spread = models.BooleanField(default=True,
         help_text='Indicates if disease spread by direct or indirect contact is used in the scenario.', )
     include_airborne_spread = models.BooleanField(default=True,
         help_text='Indicates if airborne spread is used in the model', )
@@ -432,9 +432,9 @@ class Disease(models.Model):
         return self.name
 
 
-class DiseaseReaction(models.Model):
+class DiseaseProgression(models.Model):
     name = models.CharField(max_length=255,
-        help_text="Examples: Severe Reaction, FMD Long Incubation")
+        help_text="Examples: Severe Progression, FMD Long Incubation")
     _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0], )  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
     disease_latent_period = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the latent period for units of this production type.', )
@@ -451,14 +451,14 @@ class DiseaseReaction(models.Model):
         return self.name
 
 
-class DiseaseReactionAssignment(models.Model):
+class DiseaseProgressionAssignment(models.Model):
     production_type = models.ForeignKey('ProductionType', unique=True,
         help_text='The production type that these outputs apply to.', )
-    reaction = models.ForeignKey('DiseaseReaction', blank=True, null=True) # can be excluded from disease progression
-    # Since there are ProductionTypes that can be listed without having a DiseaseReactionAssignment,
-    # this addresses boolean setting _use_disease_transition in DiseaseReaction
+    progression = models.ForeignKey('DiseaseProgression', blank=True, null=True) # can be excluded from disease progression
+    # Since there are ProductionTypes that can be listed without having a DiseaseProgressionAssignment,
+    # this addresses boolean setting _use_disease_transition in DiseaseProgression
     def __str__(self):
-        return "%s have a %s reaction to %s" % (self.production_type, self.reaction, self.reaction._disease) if self.reaction else "No Reaction"
+        return "%s have %s progression characteristics" % (self.production_type, self.progression) if self.progression else "No Progression"
 
 
 class DiseaseSpreadModel(models.Model):

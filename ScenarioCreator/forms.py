@@ -98,11 +98,11 @@ class ProtocolAssignmentForm(BaseForm):
         #            'control_protocol': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'})}
 
 
-class DiseaseReactionAssignmentForm(BaseForm):
+class DiseaseProgressionAssignmentForm(BaseForm):
     class Meta:
-        model = DiseaseReactionAssignment
+        model = DiseaseProgressionAssignment
         # widgets = {'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-        #            'reaction': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseReaction/new/'})}
+        #            'progression': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseProgression/new/'})}
 
 
 class ControlProtocolForm(BaseForm):
@@ -204,9 +204,9 @@ class DiseaseForm(BaseForm):
         model = Disease
 
 
-class DiseaseReactionForm(BaseForm):
+class DiseaseProgressionForm(BaseForm):
     class Meta:
-        model = DiseaseReaction
+        model = DiseaseProgression
         exclude = ['_disease']
         try:
             if not Disease.objects.get(id=1).use_within_unit_prevalence:

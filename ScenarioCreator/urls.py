@@ -32,7 +32,7 @@ def generate_urls_from_models(input_file, extra_urls=()):
 urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
                                         ["url('^DiseaseSpread/$', 'ScenarioCreator.views.disease_spread')",
                                          "url('^AssignProtocols/$', 'ScenarioCreator.views.assign_protocols')",
-                                         "url('^AssignReactions/$', 'ScenarioCreator.views.assign_reactions')",
+                                         "url('^AssignProgressions/$', 'ScenarioCreator.views.assign_progressions')",
                                          "url('^SaveScenario/$', 'ScenarioCreator.views.save_scenario')",
                                          "url('^NewScenario/$', 'ScenarioCreator.views.new_scenario')",
                                          "url('^Workspace/$', 'ScenarioCreator.views.file_dialog')",

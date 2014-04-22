@@ -159,8 +159,8 @@ class Disease
 name, CharField, Name of the Disea
 disease_description, TextField, 
 
-class DiseaseReaction
-name, CharField, Examples: Severe Reaction, FMD Long Incubati
+class DiseaseProgression
+name, CharField, Examples: Severe Progression, FMD Long Incubati
 _disease, ForeignKey, 
 disease_latent_period_pdf, ForeignKey, Defines the latent period for units of this production type.
 disease_subclinical_period_pdf, ForeignKey, Defines the subclinical period for units of this production type.
@@ -168,9 +168,9 @@ disease_clinical_period_pdf, ForeignKey, Defines the clinical period for units o
 disease_immune_period_pdf, ForeignKey, Defines the natural immune period for units of this production type.
 disease_prevalence_relid, ForeignKey, Defines the prevelance for units of this production type.
 
-class DiseaseReactionAssignment
+class DiseaseProgressionAssignment
 production_type, ForeignKey, The production type that these outputs apply to.
-reaction, ForeignKey, 
+progression, ForeignKey,
 
 class DiseaseSpreadModel
 name, CharField, 
