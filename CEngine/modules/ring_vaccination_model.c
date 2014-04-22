@@ -83,8 +83,8 @@ typedef struct
   unsigned int min_time_between_vaccinations; /**< The minimum number of days
     until a unit may be revaccinated. */
   double radius; /**< The radius of ring created around a unit of this
-    production type. If zero or negative, no ring is created around units of
-    this production type. */
+    production type. If negative, no ring is created around units of this
+    production type. */
   gboolean vaccinate_detected_units_defined; /**< Whether the parameters
     explicitly define vaccinate-detected-units.  Needed for backwards
     compatibility. */
@@ -303,6 +303,7 @@ handle_detection_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * uni
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
+  param_block_t *param_block;
   
 #if DEBUG
   g_debug ("----- ENTER handle_detection_event (%s)", MODEL_NAME);
@@ -312,7 +313,8 @@ handle_detection_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * uni
   unit = event->unit;
   g_hash_table_insert (local_data->detected_units, (gpointer)unit, (gpointer)unit);
 
-  if (local_data->param_block[unit->production_type] != NULL)
+  param_block = local_data->param_block[unit->production_type];
+  if (param_block != NULL && param_block->radius >= 0)
     ring_vaccinate (self, units, unit, event->day, queue);
 
 #if DEBUG
@@ -531,7 +533,7 @@ set_params (void *data, int ncols, char **value, char **colname)
   else
     {
       /* Do not vaccinate around detected units of this type. */
-      p->radius = 0;
+      p->radius = -1;
     }
 
   errno = 0;
