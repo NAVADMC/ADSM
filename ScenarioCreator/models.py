@@ -430,6 +430,14 @@ class Disease(models.Model):
     name = models.CharField(max_length=255,
         help_text='Name of the Disease')
     disease_description = models.TextField(blank=True)
+    include_contact_spread = models.BooleanField(default=True,  # TODO: hide these and programmatically set them
+        help_text='Indicates if disease spread by direct or indirect contact is used in the scenario.', )
+    include_airborne_spread = models.BooleanField(default=True,
+        help_text='Indicates if airborne spread is used in the model', )
+    use_airborne_exponential_decay = models.BooleanField(default=False,
+        help_text='Indicates if the decrease in probability by airborne transmission is simulated by the exponential (TRUE) or linear (FALSE) algorithm.', )
+    use_within_unit_prevalence = models.BooleanField(default=False,
+        help_text='Indicates if within unit prevalance should be used in the model.', )
     def __str__(self):
         return self.name
 
@@ -536,20 +544,6 @@ class Scenario(models.Model):
         help_text='Indicates if a specific seed value for the random number generator should be used.', )
     random_seed = models.IntegerField(blank=True, null=True,
         help_text='The specified seed value for the random number generator.', )
-    include_contact_spread = models.BooleanField(default=True,  # TODO: hide these and programmatically set them
-        help_text='Indicates if disease spread by direct or indirect contact is used in the scenario.', )
-    include_airborne_spread = models.BooleanField(default=False,
-        help_text='Indicates if airborne spread is used in the model', )
-    use_airborne_exponential_decay = models.BooleanField(default=False,
-        help_text='Indicates if the decrease in probability by airborne transmission is simulated by the exponential (TRUE) or linear (FALSE) algorithm.', )
-    use_within_unit_prevalence = models.BooleanField(default=False,
-        help_text='Indicates if within unit prevalance should be used in the model.', )
-    cost_track_destruction = models.BooleanField(default=False,
-        help_text='Indicates if destruction costs should be tracked in the model.', )
-    cost_track_vaccination = models.BooleanField(default=False,
-        help_text='Indicates if vaccination costs should be tracked in the model.', )
-    cost_track_zone_surveillance = models.BooleanField(default=False,
-        help_text='Indicates if zone surveillance costs should be tracked in the model.', )
     def __str__(self):
         return "Scenario: %s" % (self.description, )
 
@@ -583,6 +577,12 @@ class OutputSettings(models.Model):
         help_text='Indicates if map outputs for units should be recorded in the scenario database.', )
     map_directory = models.CharField(max_length=255, blank=True, null=True,
         help_text='File path of the desired location for the output file.', )
+    cost_track_destruction = models.BooleanField(default=False,
+        help_text='Indicates if destruction costs should be tracked in the model.', )
+    cost_track_vaccination = models.BooleanField(default=False,
+        help_text='Indicates if vaccination costs should be tracked in the model.', )
+    cost_track_zone_surveillance = models.BooleanField(default=False,
+        help_text='Indicates if zone surveillance costs should be tracked in the model.', )
     def __str__(self):
         return "Output Settings"
 
