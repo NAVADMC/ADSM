@@ -66,19 +66,6 @@ def choice_char_from_value(value, map_tuple):
 frequency = chc("never", "once", "daily", "weekly", "monthly", "yearly")
 
 
-class DbSchemaVersion(models.Model):
-    version_number = models.CharField(max_length=255, unique=True,
-        help_text='', )
-    version_application = models.CharField(max_length=255,
-        help_text='This gets passed around as an identifier - not sure of definition', )
-    version_date = models.CharField(max_length=255,
-        help_text='', )
-    version_info_url = models.TextField(blank=True,
-        help_text='', )
-    version_id = models.IntegerField(blank=True, null=True,
-        help_text='Number of the NAADSM Version used to run the simulation.', )
-
-
 class DynamicBlob(models.Model):
     zone_perimeters = models.CharField(max_length=255, blank=True,
         help_text='', )  # polygons?
