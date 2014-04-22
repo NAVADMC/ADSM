@@ -300,7 +300,7 @@ class AirborneSpreadModelForm(BaseForm):
 class ScenarioForm(BaseForm):
     class Meta:
         model = Scenario
-        exclude = []
+        exclude = ['language', 'use_fixed_random_seed', 'random_seed']
         widgets = {'language': Select(attrs={'data-toggle-controller': 'language',
                                              'data-required-value': 'Spanish'})}
 

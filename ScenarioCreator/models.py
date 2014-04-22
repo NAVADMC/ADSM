@@ -566,12 +566,12 @@ class OutputSettings(models.Model):
         help_text='Indicates if map outputs for units should be recorded in the scenario database.', )
     map_directory = models.CharField(max_length=255, blank=True, null=True,
         help_text='File path of the desired location for the output file.', )
-    cost_track_destruction = models.BooleanField(default=False,
-        help_text='Indicates if destruction costs should be tracked in the model.', )
-    cost_track_vaccination = models.BooleanField(default=False,
-        help_text='Indicates if vaccination costs should be tracked in the model.', )
-    cost_track_zone_surveillance = models.BooleanField(default=False,
-        help_text='Indicates if zone surveillance costs should be tracked in the model.', )
+    cost_track_destruction = models.BooleanField(default=True,
+        help_text='Disable this to ignore entered destruction costs.', )
+    cost_track_vaccination = models.BooleanField(default=True,
+        help_text='Disable this to ignore entered vaccination costs.', )
+    cost_track_zone_surveillance = models.BooleanField(default=True,
+        help_text='Disable this to ignore entered zone surveillance costs.', )
     def __str__(self):
         return "Output Settings"
 
