@@ -132,9 +132,14 @@ def main():
 		statesFile = '-'
 	else:
 		statesFile = None
+	if xml.find( './exit-condition/first-detection' ) != None:
+		earlyExitCondition = 'first-detection'
+	else:
+		earlyExitCondition = ''
 	outputSettings = OutputSettings(
       iterations = int( xml.find( './num-runs' ).text ),
       days = int( xml.find( './num-days' ).text ),
+      early_stop_criteria = earlyExitCondition,
       daily_states_filename = statesFile
     )
 	outputSettings.save()
