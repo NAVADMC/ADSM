@@ -34,11 +34,6 @@ class BaseForm(ModelForm):
         return super().__init__(*args, **kwargs)
 
 
-class DbSchemaVersionForm(BaseForm):
-    class Meta:
-        model = DbSchemaVersion
-
-
 class DynamicBlobForm(BaseForm):
     class Meta:
         model = DynamicBlob
@@ -214,7 +209,7 @@ class DiseaseReactionForm(BaseForm):
         model = DiseaseReaction
         exclude = ['_disease']
         try:
-            if not Scenario.objects.get(id=1).use_within_unit_prevalence:
+            if not Disease.objects.get(id=1).use_within_unit_prevalence:
                 exclude.append('disease_prevalence')
         except (ObjectDoesNotExist, OperationalError):
             pass  # If someone hasn't created a Scenario yet, the field will show
@@ -293,7 +288,7 @@ class AirborneSpreadModelForm(BaseForm):
         model = AirborneSpreadModel
         exclude = ['_spread_method_code', '_disease']
         try:
-            if Scenario.objects.get(id=1).use_airborne_exponential_decay:
+            if Disease.objects.get(id=1).use_airborne_exponential_decay:
                 exclude.append('max_distance')
         except (ObjectDoesNotExist, OperationalError):
             pass
