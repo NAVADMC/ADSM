@@ -346,3 +346,8 @@ def new_scenario(request):
                  load_initial_data=False)
     scenario_filename("Untitled Scenario")
     return redirect('/setup/Scenario/1/')
+
+
+def run_simulation(request):
+    #execute system commands here
+    return render(request, 'ScenarioCreator/SimulationProgress.html', basic_context())

@@ -37,5 +37,6 @@ urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
                                          "url('^NewScenario/$', 'ScenarioCreator.views.new_scenario')",
                                          "url('^Workspace/$', 'ScenarioCreator.views.file_dialog')",
                                          "url('^OpenScenario/(?P<target>[\w\s]+)/$', 'ScenarioCreator.views.open_scenario')",
+                                         "url('^RunSimulation/$', 'ScenarioCreator.views.run_simulation')",
                                         ])
 
