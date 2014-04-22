@@ -42,6 +42,13 @@ header .alert {
     display: none;
 }
 
+header #admin_link {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin-right: 5px;
+}
+
 body>nav {
     position: fixed;
     top: 50px;
