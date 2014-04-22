@@ -311,7 +311,11 @@ class OutputSettingsForm(BaseForm):
         exclude = ['_scenario']
         widgets = {'save_all_daily_outputs': RadioSelect(),
             'maximum_iterations_for_daily_output': NumberInput(attrs={'data-toggle-controller': 'save_all_daily_outputs',
-                                                                      'data-required-value': 'False'})}
+                                                                      'data-required-value': 'False'}),
+            'days': NumberInput(
+                attrs={'data-toggle-controller': 'stop_criteria',
+                       'data-required-value': 'stop-days'})
+        }
 
 
 class ProductionTypeForm(BaseForm):

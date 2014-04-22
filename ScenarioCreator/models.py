@@ -543,16 +543,18 @@ class OutputSettings(models.Model):
     _scenario = models.ForeignKey('Scenario', default=lambda: Scenario.objects.get_or_create(id=1)[0],)  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
     iterations = models.IntegerField(blank=True, null=True,
         help_text='The number of iterations of this scenario that should be run', )
-    days = models.IntegerField(blank=True, null=True,
-        help_text='The maximum number of days that iterations of this scenario should run even if the stop criterion is not met.', )
-    early_stop_criteria = models.CharField(max_length=255, blank=True,
-        help_text='The criterion used to end each iteration. This may be that the specified number of days has passed the first detection has occurred or the outbreak has ended.',
+    stop_criteria = models.CharField(max_length=255, default='disease-end',
+        help_text='The criterion used to end each iteration.',
         choices=(('disease-end', 'Simulation will stop when there are no more latent or infectious units.'),
-                 ('first-detection', 'Simulation will stop when the first detection occurs.')))
+                 ('first-detection', 'Simulation will stop when the first detection occurs.'),
+                 ('outbreak-end', 'Simulation will stop at the end of the outbreak'),
+                 ('stop-days', 'Simulation with stop after a specified number of days')))
+    days = models.IntegerField(blank=True, null=True,
+        help_text='The maximum number of days that iterations of this scenario should run.', )
      ## Outputs requested:
     save_all_daily_outputs = models.BooleanField(default=False,
         choices=((True, 'Save all daily output fo every iteration (warning: this option may produce very large scenario files)'),
-                 (False, 'Save all daily output for a specified number of iterations')),
+                 (False, 'Save all daily output only for a specified number of iterations')),
         help_text='Indicates if daily outputs should be stored for every iteration.', )
     maximum_iterations_for_daily_output = models.IntegerField(default=3, blank=True, null=True,  # TODO: validate min(3,x)
         help_text='The number of iterations for which daily outputs should be stored The minimum value is 3.', )
