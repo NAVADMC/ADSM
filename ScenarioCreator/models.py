@@ -531,8 +531,6 @@ class Scenario(models.Model):
         help_text='The description of the scenario.', )
     language = models.CharField(default='en', choices=(('en', "English"), ('es', "Spanish")), max_length=255, blank=True,
         help_text='Language that the model is in - English is default.', )
-    use_fixed_random_seed = models.BooleanField(default=False,
-        help_text='Indicates if a specific seed value for the random number generator should be used.', )
     random_seed = models.IntegerField(blank=True, null=True,
         help_text='The specified seed value for the random number generator.', )
     def __str__(self):
