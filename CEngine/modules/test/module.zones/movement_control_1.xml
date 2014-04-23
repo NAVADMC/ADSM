@@ -72,7 +72,7 @@
 
     <!-- The parameters below will give 2 shipments per day, to a unit 10 km
       away. -->
-    <contact-spread-model from-production-type="Beef Cattle" to-production-type="Pigs" contact-type="direct">
+    <contact-spread-model from-production-type="Beef Cattle" to-production-type="Pigs" contact-type="indirect">
       <fixed-movement-rate>
         <value>2</value>
         <units><xdf:unit power="-1">day</xdf:unit></units>
@@ -98,7 +98,7 @@
       <subclinical-units-can-infect>true</subclinical-units-can-infect>
     </contact-spread-model>
 
-    <contact-spread-model from-production-type="Beef Cattle" zone="High risk" contact-type="direct">
+    <contact-spread-model from-production-type="Beef Cattle" zone="High risk" contact-type="indirect">
       <!-- Movement is slowed down to half its normal rate. -->
       <movement-control>
         <value>0</value> <value>0.5</value>
@@ -121,6 +121,8 @@
         <units><xdf:unitless /></units>
       </prob-report-vs-time-since-outbreak>
     </detection-model>
+
+    <quarantine-model />
 
     <resources-and-implementation-of-controls-model>
       <!-- Destruction isn't used in this scenario. -->
