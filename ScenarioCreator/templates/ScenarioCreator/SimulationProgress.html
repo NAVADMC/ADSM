@@ -1,0 +1,16 @@
+{% extends 'ScenarioCreator/navigationPane.html' %}
+{% load floppyforms %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+    <h1 id="title">Simulation Status</h1>
+    <img src="{{STATIC_URL}}icons/Population_Map.png" alt="Kind of like this"/>
+    <p style="font-size:10px">It's just an image.  You got really excited for a second there, didn't you?</p>
+
+    <ul>
+        <li>Validation of whole scenario</li>
+        <li>Simulation run X out of 40 iterations</li>
+        <li>Progress bar</li>
+    </ul>
+{% endblock %}

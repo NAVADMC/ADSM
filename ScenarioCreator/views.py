@@ -45,8 +45,8 @@ def basic_context():  # TODO: This might not be performant... but it's nice to h
             'ProductionTypes': PT_count,
             'Farms': Unit.objects.count(),
             'Disease': Disease.objects.count(),
-            'Reactions': DiseaseReaction.objects.count(),
-            'ReactionAssignment': DiseaseReactionAssignment.objects.count() == PT_count,
+            'Progressions': DiseaseProgression.objects.count(),
+            'ProgressionAssignment': DiseaseProgressionAssignment.objects.count() == PT_count,
             'DirectSpreads': DirectSpreadModel.objects.count(),
             'IndirectSpreads': IndirectSpreadModel.objects.count(),
             'AirborneSpreads': AirborneSpreadModel.objects.count(),
@@ -132,17 +132,17 @@ def assign_protocols(request):
         return redirect(request.path)
 
 
-def assign_reactions(request):
+def assign_progressions(request):
     """FormSet is pre-populated with existing assignments and it detects and fills in missing
     assignments with a blank form with production type filled in."""
 
     context = basic_context()
-    missing = ProductionType.objects.filter(diseasereactionassignment__isnull=True)
-    ReactionSet = modelformset_factory(DiseaseReactionAssignment,
+    missing = ProductionType.objects.filter(diseaseprogressionassignment__isnull=True)
+    ProgressionSet = modelformset_factory(DiseaseProgressionAssignment,
                                      extra=len(missing),
-                                     form=DiseaseReactionAssignmentForm)
-    if populate_forms_matching_ProductionType(ReactionSet, DiseaseReactionAssignment, context, missing, request):
-        context['title'] = 'Set what Reaction each Production Type has to the Disease'
+                                     form=DiseaseProgressionAssignmentForm)
+    if populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request):
+        context['title'] = 'Set what Progression each Production Type has with the Disease'
         return render(request, 'ScenarioCreator/FormSet.html', context)
     else:
         return redirect(request.path)
@@ -346,3 +346,8 @@ def new_scenario(request):
                  load_initial_data=False)
     scenario_filename("Untitled Scenario")
     return redirect('/setup/Scenario/1/')
+
+
+def run_simulation(request):
+    #execute system commands here
+    return render(request, 'ScenarioCreator/SimulationProgress.html', basic_context())

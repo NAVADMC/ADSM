@@ -34,11 +34,6 @@ class BaseForm(ModelForm):
         return super().__init__(*args, **kwargs)
 
 
-class DbSchemaVersionForm(BaseForm):
-    class Meta:
-        model = DbSchemaVersion
-
-
 class DynamicBlobForm(BaseForm):
     class Meta:
         model = DynamicBlob
@@ -103,11 +98,11 @@ class ProtocolAssignmentForm(BaseForm):
         #            'control_protocol': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'})}
 
 
-class DiseaseReactionAssignmentForm(BaseForm):
+class DiseaseProgressionAssignmentForm(BaseForm):
     class Meta:
-        model = DiseaseReactionAssignment
+        model = DiseaseProgressionAssignment
         # widgets = {'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-        #            'reaction': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseReaction/new/'})}
+        #            'progression': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseProgression/new/'})}
 
 
 class ControlProtocolForm(BaseForm):
@@ -209,12 +204,12 @@ class DiseaseForm(BaseForm):
         model = Disease
 
 
-class DiseaseReactionForm(BaseForm):
+class DiseaseProgressionForm(BaseForm):
     class Meta:
-        model = DiseaseReaction
+        model = DiseaseProgression
         exclude = ['_disease']
         try:
-            if not Scenario.objects.get(id=1).use_within_unit_prevalence:
+            if not Disease.objects.get(id=1).use_within_unit_prevalence:
                 exclude.append('disease_prevalence')
         except (ObjectDoesNotExist, OperationalError):
             pass  # If someone hasn't created a Scenario yet, the field will show
@@ -293,7 +288,7 @@ class AirborneSpreadModelForm(BaseForm):
         model = AirborneSpreadModel
         exclude = ['_spread_method_code', '_disease']
         try:
-            if Scenario.objects.get(id=1).use_airborne_exponential_decay:
+            if Disease.objects.get(id=1).use_airborne_exponential_decay:
                 exclude.append('max_distance')
         except (ObjectDoesNotExist, OperationalError):
             pass
@@ -305,7 +300,7 @@ class AirborneSpreadModelForm(BaseForm):
 class ScenarioForm(BaseForm):
     class Meta:
         model = Scenario
-        exclude = []
+        exclude = ['language', 'use_fixed_random_seed', 'random_seed']
         widgets = {'language': Select(attrs={'data-toggle-controller': 'language',
                                              'data-required-value': 'Spanish'})}
 
@@ -316,7 +311,11 @@ class OutputSettingsForm(BaseForm):
         exclude = ['_scenario']
         widgets = {'save_all_daily_outputs': RadioSelect(),
             'maximum_iterations_for_daily_output': NumberInput(attrs={'data-toggle-controller': 'save_all_daily_outputs',
-                                                                      'data-required-value': 'False'})}
+                                                                      'data-required-value': 'False'}),
+            'days': NumberInput(
+                attrs={'data-toggle-controller': 'stop_criteria',
+                       'data-required-value': 'stop-days'})
+        }
 
 
 class ProductionTypeForm(BaseForm):

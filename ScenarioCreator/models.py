@@ -66,19 +66,6 @@ def choice_char_from_value(value, map_tuple):
 frequency = chc("never", "once", "daily", "weekly", "monthly", "yearly")
 
 
-class DbSchemaVersion(models.Model):
-    version_number = models.CharField(max_length=255, unique=True,
-        help_text='', )
-    version_application = models.CharField(max_length=255,
-        help_text='This gets passed around as an identifier - not sure of definition', )
-    version_date = models.CharField(max_length=255,
-        help_text='', )
-    version_info_url = models.TextField(blank=True,
-        help_text='', )
-    version_id = models.IntegerField(blank=True, null=True,
-        help_text='Number of the NAADSM Version used to run the simulation.', )
-
-
 class DynamicBlob(models.Model):
     zone_perimeters = models.CharField(max_length=255, blank=True,
         help_text='', )  # polygons?
@@ -109,7 +96,7 @@ class Population(models.Model):
 
 
 class Unit(models.Model):
-    _population = models.ForeignKey(Population, default=lambda: Population.objects.get_or_create(id=1)[0], )
+    _population = models.ForeignKey(Population, default=lambda: Population.objects.get_or_create(id=1)[0], )  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
     production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
     latitude = LatitudeField(
@@ -251,19 +238,21 @@ class RelationalPoint(models.Model):
 
 class ControlMasterPlan(models.Model):
     name = models.CharField(max_length=255)
-    _include_detection = models.BooleanField(default=False,
+    disable_all_controls = models.BooleanField(default=False,
+        help_text='Disable all Control activities for this simulation run.  Normally used temporarily to test uncontrolled disease spread.')
+    _include_detection = models.BooleanField(default=True,
         help_text='Indicates if detection of disease in any production type will be modeled.', )
-    _include_tracing = models.BooleanField(default=False,
+    _include_tracing = models.BooleanField(default=True,
         help_text='Indicates if tracing of units in any production type will be modeled.', )
-    _include_tracing_unit_exam = models.BooleanField(default=False,
+    _include_tracing_unit_exam = models.BooleanField(default=True,
         help_text='Indicates if tracing using diagnostic testing in any production type will be modeled.', )
-    _include_tracing_testing = models.BooleanField(default=False,
+    _include_tracing_testing = models.BooleanField(default=True,
         help_text='Indicates if tracing using unit examination in any production type will be modeled.', )
-    _include_destruction = models.BooleanField(default=False,
+    _include_destruction = models.BooleanField(default=True,
         help_text='Indicates if destruction of units in any production type will be modeled.', )
-    _include_vaccination = models.BooleanField(default=False,
+    _include_vaccination = models.BooleanField(default=True,
         help_text='Indicates if vaccination of units in any production type will be modeled.', )
-    _include_zones = models.BooleanField(default=False,
+    _include_zones = models.BooleanField(default=True,
         help_text='Indicates if zones will be modeled.', )
     destruction_program_delay = models.IntegerField(blank=True, null=True,
         help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
@@ -415,7 +404,8 @@ class ControlProtocol(models.Model):
 class ProtocolAssignment(models.Model):
     _master_plan = models.ForeignKey('ControlMasterPlan',
                                      default=lambda: ControlMasterPlan.objects.get_or_create(id=1)[0],
-        help_text='Points back to a master plan for grouping purposes.')
+                                     # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
+                                     help_text='Points back to a master plan for grouping purposes.')
     production_type = models.ForeignKey('ProductionType', unique=True,
         help_text='The production type that these outputs apply to.', )
     control_protocol = models.ForeignKey('ControlProtocol', blank=True, null=True,  # Just to note you're excluding it
@@ -430,14 +420,22 @@ class Disease(models.Model):
     name = models.CharField(max_length=255,
         help_text='Name of the Disease')
     disease_description = models.TextField(blank=True)
+    include_contact_spread = models.BooleanField(default=True,
+        help_text='Indicates if disease spread by direct or indirect contact is used in the scenario.', )
+    include_airborne_spread = models.BooleanField(default=True,
+        help_text='Indicates if airborne spread is used in the model', )
+    use_airborne_exponential_decay = models.BooleanField(default=False,
+        help_text='Indicates if the decrease in probability by airborne transmission is simulated by the exponential (TRUE) or linear (FALSE) algorithm.', )
+    use_within_unit_prevalence = models.BooleanField(default=False,
+        help_text='Indicates if within unit prevalance should be used in the model.', )
     def __str__(self):
         return self.name
 
 
-class DiseaseReaction(models.Model):
+class DiseaseProgression(models.Model):
     name = models.CharField(max_length=255,
-        help_text="Examples: Severe Reaction, FMD Long Incubation")
-    _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0], )
+        help_text="Examples: Severe Progression, FMD Long Incubation")
+    _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0], )  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
     disease_latent_period = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the latent period for units of this production type.', )
     disease_subclinical_period = models.ForeignKey(ProbabilityFunction, related_name='+',
@@ -453,20 +451,21 @@ class DiseaseReaction(models.Model):
         return self.name
 
 
-class DiseaseReactionAssignment(models.Model):
+class DiseaseProgressionAssignment(models.Model):
     production_type = models.ForeignKey('ProductionType', unique=True,
         help_text='The production type that these outputs apply to.', )
-    reaction = models.ForeignKey('DiseaseReaction', blank=True, null=True) # can be excluded from disease progression
-    # Since there are ProductionTypes that can be listed without having a DiseaseReactionAssignment,
-    # this addresses boolean setting _use_disease_transition in DiseaseReaction
+    progression = models.ForeignKey('DiseaseProgression', blank=True, null=True) # can be excluded from disease progression
+    # Since there are ProductionTypes that can be listed without having a DiseaseProgressionAssignment,
+    # this addresses boolean setting _use_disease_transition in DiseaseProgression
     def __str__(self):
-        return "%s have a %s reaction to %s" % (self.production_type, self.reaction, self.reaction._disease) if self.reaction else "No Reaction"
+        return "%s have %s progression characteristics" % (self.production_type, self.progression) if self.progression else "No Progression"
 
 
 class DiseaseSpreadModel(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, )
     _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0],
-        help_text='Parent disease whose spreading characteristics this describes.')
+                                 # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
+                                 help_text='Parent disease whose spreading characteristics this describes.')
         # This is in Disease because of simulation restrictions
     transport_delay = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Relational function used to define the shipment delays for the indicated production type.', )
@@ -532,42 +531,28 @@ class Scenario(models.Model):
         help_text='The description of the scenario.', )
     language = models.CharField(default='en', choices=(('en', "English"), ('es', "Spanish")), max_length=255, blank=True,
         help_text='Language that the model is in - English is default.', )
-    use_fixed_random_seed = models.BooleanField(default=False,
-        help_text='Indicates if a specific seed value for the random number generator should be used.', )
     random_seed = models.IntegerField(blank=True, null=True,
         help_text='The specified seed value for the random number generator.', )
-    include_contact_spread = models.BooleanField(default=True,  # TODO: hide these and programmatically set them
-        help_text='Indicates if disease spread by direct or indirect contact is used in the scenario.', )
-    include_airborne_spread = models.BooleanField(default=False,
-        help_text='Indicates if airborne spread is used in the model', )
-    use_airborne_exponential_decay = models.BooleanField(default=False,
-        help_text='Indicates if the decrease in probability by airborne transmission is simulated by the exponential (TRUE) or linear (FALSE) algorithm.', )
-    use_within_unit_prevalence = models.BooleanField(default=False,
-        help_text='Indicates if within unit prevalance should be used in the model.', )
-    cost_track_destruction = models.BooleanField(default=False,
-        help_text='Indicates if destruction costs should be tracked in the model.', )
-    cost_track_vaccination = models.BooleanField(default=False,
-        help_text='Indicates if vaccination costs should be tracked in the model.', )
-    cost_track_zone_surveillance = models.BooleanField(default=False,
-        help_text='Indicates if zone surveillance costs should be tracked in the model.', )
     def __str__(self):
         return "Scenario: %s" % (self.description, )
 
 
 class OutputSettings(models.Model):
-    _scenario = models.ForeignKey('Scenario', default=lambda: Scenario.objects.get_or_create(id=1)[0],)
+    _scenario = models.ForeignKey('Scenario', default=lambda: Scenario.objects.get_or_create(id=1)[0],)  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
     iterations = models.IntegerField(blank=True, null=True,
         help_text='The number of iterations of this scenario that should be run', )
-    days = models.IntegerField(blank=True, null=True,
-        help_text='The maximum number of days that iterations of this scenario should run even if the stop criterion is not met.', )
-    early_stop_criteria = models.CharField(max_length=255, blank=True,
-        help_text='The criterion used to end each iteration. This may be that the specified number of days has passed the first detection has occurred or the outbreak has ended.',
+    stop_criteria = models.CharField(max_length=255, default='disease-end',
+        help_text='The criterion used to end each iteration.',
         choices=(('disease-end', 'Simulation will stop when there are no more latent or infectious units.'),
-                 ('first-detection', 'Simulation will stop when the first detection occurs.')))
+                 ('first-detection', 'Simulation will stop when the first detection occurs.'),
+                 ('outbreak-end', 'Simulation will stop at the end of the outbreak'),
+                 ('stop-days', 'Simulation with stop after a specified number of days')))
+    days = models.IntegerField(blank=True, null=True,
+        help_text='The maximum number of days that iterations of this scenario should run.', )
      ## Outputs requested:
     save_all_daily_outputs = models.BooleanField(default=False,
         choices=((True, 'Save all daily output fo every iteration (warning: this option may produce very large scenario files)'),
-                 (False, 'Save all daily output for a specified number of iterations')),
+                 (False, 'Save all daily output only for a specified number of iterations')),
         help_text='Indicates if daily outputs should be stored for every iteration.', )
     maximum_iterations_for_daily_output = models.IntegerField(default=3, blank=True, null=True,  # TODO: validate min(3,x)
         help_text='The number of iterations for which daily outputs should be stored The minimum value is 3.', )
@@ -583,6 +568,12 @@ class OutputSettings(models.Model):
         help_text='Indicates if map outputs for units should be recorded in the scenario database.', )
     map_directory = models.CharField(max_length=255, blank=True, null=True,
         help_text='File path of the desired location for the output file.', )
+    cost_track_destruction = models.BooleanField(default=True,
+        help_text='Disable this to ignore entered destruction costs.', )
+    cost_track_vaccination = models.BooleanField(default=True,
+        help_text='Disable this to ignore entered vaccination costs.', )
+    cost_track_zone_surveillance = models.BooleanField(default=True,
+        help_text='Disable this to ignore entered zone surveillance costs.', )
     def __str__(self):
         return "Output Settings"
 

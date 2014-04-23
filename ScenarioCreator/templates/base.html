@@ -10,7 +10,7 @@
 </head>
 <body>
 <header>
-    <form class="ajax filename" method="post" action="/setup/SaveScenario/">
+    <form class="ajax" method="post" action="/setup/SaveScenario/">
         <h1 class="filename">
             <img src="{{STATIC_URL}}icons/icon_4743/icon_4743.svg" width=32 height=32 alt=""/>
             <input type="text" name="filename" value="{{ filename }}">
@@ -23,6 +23,7 @@
 {#        </div>#}
         <h1><a href="/setup/Workspace/" id="open_dialog" class="btn btn-primary button white">Open</a></h1>
     </form>
+    <a href="/admin/" id="admin_link">Advanced Panel</a>
 </header>
 {% block main %}
 
