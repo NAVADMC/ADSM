@@ -43,10 +43,8 @@ EXTRA_DIST = radius_0.xml radius_0_w_vars.xml radius_0.5.xml radius_1.xml \
  destroyed_before_ring.xml destroyed_sameday_ring.xml \
  revaccinate_2_prodtypes.xml revaccinate_2_prodtypes_w_vars.xml \
  radius_0_vacc_detected_w_vars.xml \
- detected_before_ring_default.xml \
  detected_before_ring_vacc_detected.xml \
  detected_before_ring_no_vacc_detected.xml \
- detected_sameday_ring_default.xml \
  detected_sameday_ring_vacc_detected.xml \
  detected_sameday_ring_no_vacc_detected.xml \
  detected_sameday_ring_no_vacc_detected2.xml \

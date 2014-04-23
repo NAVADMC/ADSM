@@ -85,9 +85,6 @@ typedef struct
   double radius; /**< The radius of ring created around a unit of this
     production type. If negative, no ring is created around units of this
     production type. */
-  gboolean vaccinate_detected_units_defined; /**< Whether the parameters
-    explicitly define vaccinate-detected-units.  Needed for backwards
-    compatibility. */
   gboolean vaccinate_detected_units;
 }
 param_block_t;
@@ -214,11 +211,7 @@ check_and_choose (int id, gpointer arg)
 
   /* Is unit 2 a production type that gets vaccinated? */
   param_block = local_data->param_block[unit2->production_type];
-  if (param_block == NULL)
-    goto end;
-
-  /* Are unit 1 and unit 2 the same? */
-  if (unit1 == unit2 && param_block->vaccinate_detected_units_defined == FALSE)
+  if (param_block == NULL || param_block->priority == INT_MAX)
     goto end;
 
   /* Do we want to exclude units that are known to be infected? */
@@ -243,7 +236,7 @@ check_and_choose (int id, gpointer arg)
                                                             callback_data->day,
                                                             "Ring",
                                                             param_block->priority,
-                                                            param_block->vaccinate_detected_units_defined && !(param_block->vaccinate_detected_units),
+                                                            !(param_block->vaccinate_detected_units),
                                                             param_block->min_time_between_vaccinations));
   g_hash_table_insert (local_data->requested_today, unit2, unit2);
 
@@ -419,9 +412,12 @@ to_string (struct spreadmodel_model_t_ *self)
           g_string_append_printf (s, "\n  for %s",
                                   (char *) g_ptr_array_index (local_data->production_types, i));
           g_string_append_printf (s, "\n    radius=%g", param_block->radius);
-          g_string_append_printf (s, "\n    priority=%i", param_block->priority);
-          g_string_append_printf (s, "\n    min-time-between-vaccinations=%u",
-                                  param_block->min_time_between_vaccinations);
+		  if (param_block->priority < INT_MAX)
+		    {
+              g_string_append_printf (s, "\n    priority=%i", param_block->priority);
+              g_string_append_printf (s, "\n    min-time-between-vaccinations=%u",
+                                      param_block->min_time_between_vaccinations);
+            }
         }
     }
   g_string_append_c (s, '>');
@@ -554,7 +550,6 @@ set_params (void *data, int ncols, char **value, char **colname)
       tmp = strtol (value[5], NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);
       g_assert (tmp == 0 || tmp == 1);
-      p->vaccinate_detected_units_defined = TRUE;
       p->vaccinate_detected_units = (tmp == 1);
 
       tmp = strtol (value[6], NULL, /* base */ 10);
@@ -570,7 +565,6 @@ set_params (void *data, int ncols, char **value, char **colname)
     {
       /* Do not vaccinate units of this type. */
       p->priority = INT_MAX;
-      p->vaccinate_detected_units_defined = TRUE;
       p->vaccinate_detected_units = FALSE;
       p->min_time_between_vaccinations = 0;
     }
