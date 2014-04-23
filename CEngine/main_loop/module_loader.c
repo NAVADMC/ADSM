@@ -138,6 +138,7 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
 {
   GPtrArray *tmp_models;
   spreadmodel_model_t *model;
+  gboolean disable_all_controls;
   gboolean include_zones;
   gboolean include_detection;
   gboolean include_tracing;
@@ -180,7 +181,9 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                        airborne_spread_model_new (parameter_db, units, projection, zones));
     }
 
-  include_zones = PAR_get_boolean (parameter_db, "SELECT _include_zones FROM ScenarioCreator_controlmasterplan");
+  disable_all_controls = PAR_get_boolean (parameter_db, "SELECT disable_all_controls FROM ScenarioCreator_controlmasterplan");
+
+  include_zones = (!disable_all_controls) && PAR_get_boolean (parameter_db, "SELECT _include_zones FROM ScenarioCreator_controlmasterplan");
   if (include_zones)
     {
       g_ptr_array_add (tmp_models,
@@ -193,7 +196,7 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                        contact_spread_model_new (parameter_db, units, projection, zones));
     }
 
-  include_detection = PAR_get_boolean (parameter_db, "SELECT _include_detection FROM ScenarioCreator_controlmasterplan");
+  include_detection = (!disable_all_controls) && PAR_get_boolean (parameter_db, "SELECT _include_detection FROM ScenarioCreator_controlmasterplan");
   if (include_detection)
     {
       g_ptr_array_add (tmp_models,
@@ -208,7 +211,7 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                        basic_zone_focus_model_new (parameter_db, units, projection, zones));
     }
 
-  include_tracing = PAR_get_boolean (parameter_db, "SELECT _include_tracing FROM ScenarioCreator_controlmasterplan");
+  include_tracing = (!disable_all_controls) && PAR_get_boolean (parameter_db, "SELECT _include_tracing FROM ScenarioCreator_controlmasterplan");
   if (include_tracing)
     {
       g_ptr_array_add (tmp_models,
@@ -225,21 +228,21 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                        trace_zone_focus_model_new (parameter_db, units, projection, zones));
     }
 
-  include_exams = PAR_get_boolean (parameter_db, "SELECT _include_tracing_unit_exam FROM ScenarioCreator_controlmasterplan");
+  include_exams = (!disable_all_controls) && PAR_get_boolean (parameter_db, "SELECT _include_tracing_unit_exam FROM ScenarioCreator_controlmasterplan");
   if (include_exams)
     {
       g_ptr_array_add (tmp_models,
                        trace_exam_model_new (parameter_db, units, projection, zones));
     }
 
-  include_testing = PAR_get_boolean (parameter_db, "SELECT _include_tracing_testing FROM ScenarioCreator_controlmasterplan");
+  include_testing = (!disable_all_controls) && PAR_get_boolean (parameter_db, "SELECT _include_tracing_testing FROM ScenarioCreator_controlmasterplan");
   if (include_testing)
     {
       g_ptr_array_add (tmp_models,
                        test_model_new (parameter_db, units, projection, zones));
     }
 
-  include_vaccination = PAR_get_boolean (parameter_db, "SELECT _include_vaccination FROM ScenarioCreator_controlmasterplan");
+  include_vaccination = (!disable_all_controls) && PAR_get_boolean (parameter_db, "SELECT _include_vaccination FROM ScenarioCreator_controlmasterplan");
   if (include_vaccination)
     {
       g_ptr_array_add (tmp_models,
@@ -248,7 +251,7 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                        ring_vaccination_model_new (parameter_db, units, projection, zones));
     }
 
-  include_destruction = PAR_get_boolean (parameter_db, "SELECT _include_destruction FROM ScenarioCreator_controlmasterplan");
+  include_destruction = (!disable_all_controls) && PAR_get_boolean (parameter_db, "SELECT _include_destruction FROM ScenarioCreator_controlmasterplan");
   if (include_destruction)
     {
       g_ptr_array_add (tmp_models,
