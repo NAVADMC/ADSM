@@ -29,20 +29,13 @@ Limit foreignkey choices with a dictionary filter on field values:
                      limit_choices_to={'is_staff': True}
 """
 import os
-import random
-import timeit
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_extras.db.models import PercentField, LatitudeField, LongitudeField, MoneyField
 import re
+import time
 import ScenarioCreator.parser
 
-
-def wrapper(func, *args, **kwargs):
-    """Wrapper for Timeit function calls"""
-    def wrapped():
-        return func(*args, **kwargs)
-    return wrapped
 
 def chc(*choice_list):
     return tuple((x, x) for x in choice_list)
@@ -95,6 +88,7 @@ class Population(models.Model):
     def import_population(self):
         if not self.source_file:
             return
+        start_time = time.process_time()
         print("Parsing ", self.source_file)
         p = ScenarioCreator.parser.PopulationParser(self.source_file)
         print("Parsing to Dictionary")
@@ -108,9 +102,9 @@ class Population(models.Model):
             if index % 4000 == 0:  # random.randrange(1001) == 1000:
                 progress = index  # len(django_objects)
                 print("Creating", progress, "objects:", "{:.1%}".format(progress / total))
-        wrapped = wrapper(Unit.objects.bulk_create, django_objects)
-        execution_time = timeit.timeit(wrapped, number=1)
-        print("Done creating %i Units took %i seconds" % (len(data), execution_time))
+        Unit.objects.bulk_create(django_objects)
+        execution_time = (time.process_time() - start_time)
+        print("Done creating", '{:,}'.format(len(data)), "Units took %i seconds" % (execution_time))
 
 
 class Unit(models.Model):
