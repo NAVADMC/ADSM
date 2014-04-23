@@ -14,6 +14,10 @@ from django.forms.models import inlineformset_factory
 from django.forms.models import modelformset_factory
 
 
+def spaces_for_camel_case(text):
+    return re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
+
+
 def unsaved_changes(new_value=None):
     session = SmSession.objects.get_or_create(id=1)[0]  # This keeps track of the state for all views and is used by basic_context
     if new_value is not None:  # you can still set it to False
@@ -153,7 +157,10 @@ def save_new_instance(initialized_form, request):
     unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
     model_name = model_instance.__class__.__name__
     if request.is_ajax():
-        msg = {'pk': model_instance.pk, 'title': str(model_instance), 'model': model_name, 'status': 'success'}
+        msg = {'pk': model_instance.pk,
+               'title': spaces_for_camel_case(str(model_instance)),
+               'model': model_name,
+               'status': 'success'}
         return HttpResponse(json.dumps(msg), content_type="application/json")
     return redirect('/setup/%s/%i/' % (model_name, model_instance.pk))  # redirect to edit URL
 
@@ -183,8 +190,8 @@ def new_entry(request):
     model_name, form = get_model_name_and_form(request)
     initialized_form = form(request.POST or None)
     context = basic_context()
-    context.update({'form': initialized_form,
-                    'title': "Create a new " + model_name})
+    context['form'] = initialized_form
+    context['title'] = "Create a new " + spaces_for_camel_case(model_name)
     return new_form(request, initialized_form, context)
 
 
@@ -200,7 +207,7 @@ def edit_entry(request, primary_key):
 
     context = basic_context()
     context['form'] = initialized_form
-    context['title'] = "Edit a " + model_name
+    context['title'] = "Edit a " + spaces_for_camel_case(model_name)
     context['model_link'] = '/setup/' + model_name + '/' + primary_key + '/'
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
@@ -215,8 +222,8 @@ def copy_entry(request, primary_key):
         initialized_form.instance.pk = None  # This will cause a new instance to be created
         return save_new_instance(initialized_form, request)
     context = basic_context()
-    context.update({'form': initialized_form,
-                    'title': "Copy a " + model_name}.items())
+    context['form'] = initialized_form
+    context['title'] = "Copy a " + spaces_for_camel_case(model_name)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
