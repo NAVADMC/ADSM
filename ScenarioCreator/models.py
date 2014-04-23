@@ -240,20 +240,6 @@ class ControlMasterPlan(models.Model):
     name = models.CharField(max_length=255)
     disable_all_controls = models.BooleanField(default=False,
         help_text='Disable all Control activities for this simulation run.  Normally used temporarily to test uncontrolled disease spread.')
-    _include_detection = models.BooleanField(default=True,
-        help_text='Indicates if detection of disease in any production type will be modeled.', )
-    _include_tracing = models.BooleanField(default=True,
-        help_text='Indicates if tracing of units in any production type will be modeled.', )
-    _include_tracing_unit_exam = models.BooleanField(default=True,
-        help_text='Indicates if tracing using diagnostic testing in any production type will be modeled.', )
-    _include_tracing_testing = models.BooleanField(default=True,
-        help_text='Indicates if tracing using unit examination in any production type will be modeled.', )
-    _include_destruction = models.BooleanField(default=True,
-        help_text='Indicates if destruction of units in any production type will be modeled.', )
-    _include_vaccination = models.BooleanField(default=True,
-        help_text='Indicates if vaccination of units in any production type will be modeled.', )
-    _include_zones = models.BooleanField(default=True,
-        help_text='Indicates if zones will be modeled.', )
     destruction_program_delay = models.IntegerField(blank=True, null=True,
         help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
     destruction_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
