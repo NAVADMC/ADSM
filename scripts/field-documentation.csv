@@ -71,13 +71,6 @@ y, FloatField, The y value of the point.
 
 class ControlMasterPlan
 name, CharField, 
-_include_detection, BooleanField, Indicates if detection of disease in any production type will be modeled.
-_include_tracing, BooleanField, Indicates if tracing of units in any production type will be modeled.
-_include_tracing_unit_exam, BooleanField, Indicates if tracing using diagnostic testing in any production type will be modeled.
-_include_tracing_testing, BooleanField, Indicates if tracing using unit examination in any production type will be modeled.
-_include_destruction, BooleanField, Indicates if destruction of units in any production type will be modeled.
-_include_vaccination, BooleanField, Indicates if vaccination of units in any production type will be modeled.
-_include_zones, BooleanField, Indicates if zones will be modeled.
 destruction_program_delay, IntegerField, The number of days that must pass after the first detection before a destruction program can begin.
 destruction_capacity_relid, ForeignKey, The relational function used to define the daily destruction capacity.
 destruction_priority_order, CharField, The primary priority order for destructio

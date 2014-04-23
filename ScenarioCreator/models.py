@@ -32,6 +32,7 @@ import os
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_extras.db.models import PercentField, LatitudeField, LongitudeField, MoneyField
+import re
 import ScenarioCreator.parser
 
 
@@ -64,6 +65,7 @@ def choice_char_from_value(value, map_tuple):
     return None
 
 frequency = chc("never", "once", "daily", "weekly", "monthly", "yearly")
+sqlite_keywords = ['abort', 'action', 'add', 'after', 'all', 'alter', 'analyze', 'and', 'as', 'asc', 'attach', 'autoincrement', 'before', 'begin', 'between', 'by', 'cascade', 'case', 'cast', 'check', 'collate', 'column', 'commit', 'conflict', 'constraint', 'create', 'cross', 'current_date', 'current_time', 'current_timestamp', 'database', 'default', 'deferrable', 'deferred', 'delete', 'desc', 'detach', 'distinct', 'drop', 'each', 'else', 'end', 'escape', 'except', 'exclusive', 'exists', 'explain', 'fail', 'for', 'foreign', 'from', 'full', 'glob', 'group', 'having', 'if', 'ignore', 'immediate', 'in', 'index', 'indexed', 'initially', 'inner', 'insert', 'instead', 'intersect', 'into', 'is', 'isnull', 'join', 'key', 'left', 'like', 'limit', 'match', 'natural', 'no', 'not', 'notnull', 'null', 'of', 'offset', 'on', 'or', 'order', 'outer', 'plan', 'pragma', 'primary', 'query', 'raise', 'recursive', 'references', 'regexp', 'reindex', 'release', 'rename', 'replace', 'restrict', 'right', 'rollback', 'row', 'savepoint', 'select', 'set', 'table', 'temp', 'temporary', 'then', 'to', 'transaction', 'trigger', 'union', 'unique', 'update', 'using', 'vacuum', 'values', 'view', 'virtual', 'when', 'where', 'with', 'without']
 
 
 class DynamicBlob(models.Model):
@@ -240,20 +242,6 @@ class ControlMasterPlan(models.Model):
     name = models.CharField(max_length=255)
     disable_all_controls = models.BooleanField(default=False,
         help_text='Disable all Control activities for this simulation run.  Normally used temporarily to test uncontrolled disease spread.')
-    _include_detection = models.BooleanField(default=True,
-        help_text='Indicates if detection of disease in any production type will be modeled.', )
-    _include_tracing = models.BooleanField(default=True,
-        help_text='Indicates if tracing of units in any production type will be modeled.', )
-    _include_tracing_unit_exam = models.BooleanField(default=True,
-        help_text='Indicates if tracing using diagnostic testing in any production type will be modeled.', )
-    _include_tracing_testing = models.BooleanField(default=True,
-        help_text='Indicates if tracing using unit examination in any production type will be modeled.', )
-    _include_destruction = models.BooleanField(default=True,
-        help_text='Indicates if destruction of units in any production type will be modeled.', )
-    _include_vaccination = models.BooleanField(default=True,
-        help_text='Indicates if vaccination of units in any production type will be modeled.', )
-    _include_zones = models.BooleanField(default=True,
-        help_text='Indicates if zones will be modeled.', )
     destruction_program_delay = models.IntegerField(blank=True, null=True,
         help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
     destruction_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
@@ -595,6 +583,14 @@ class CustomOutputs(OutputSettings):
 class ProductionType(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
+
+    def clean_fields(self, exclude=None):
+        if re.findall(r'\W', self.name) or self.name.lower() in sqlite_keywords:
+            print("Conflicts:", re.findall(r'\W', self.name))
+            raise ValidationError(self.name + " must only have alpha-numeric characters.  Keywords not allowed.")
+        if re.match(r'[0-9]', self.name[0]):
+            raise ValidationError(self.name + " cannot start with a number.")
+
     def __str__(self):
         return self.name
 

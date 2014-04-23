@@ -85,7 +85,7 @@ class RelationalPointForm(BaseForm):
 class ControlMasterPlanForm(BaseForm):
     class Meta:
         model = ControlMasterPlan
-        exclude = ['_include_detection', '_include_tracing', '_include_tracing_unit_exam', '_include_tracing_testing', '_include_destruction', '_include_vaccination', '_include_zones']
+        exclude = []
         widgets = {'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
