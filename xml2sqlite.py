@@ -310,7 +310,39 @@ def main():
 				pairing.save()
 			# end of loop over to-production-types covered by this <contact-spread-model> element
 		# end of loop over from-production-types covered by this <contact-spread-model> element		
-	# end of loop over <contact-spread-model> elements
+	# end of loop over <contact-spread-model> elements without a "zone" attribute
+
+	for el in xml.findall( './/contact-spread-model' ):
+		if 'zone' not in el.attrib:
+			continue
+
+		fromTypeNames = getProductionTypes( el, 'from-production-type', productionTypeNames )
+		if 'contact-type' in el.attrib:
+			contactType = el.attrib['contact-type']
+			assert (contactType == 'direct' or contactType == 'indirect')
+		else:
+			contactType = 'both'
+		zoneName = el.attrib['zone']
+		movementControl = getRelChart( el.find( './movement-control' ) )
+
+		for fromTypeName in fromTypeNames:
+			# If a ZoneEffectOnProductionType object has already been assigned
+			# to this combination of production type and zone, retrieve it;
+			# otherwise, create a new one.
+			try:
+				effect = ZoneEffectOnProductionType.objects.get( production_type__name=fromTypeName, zone__zone_description=zoneName )
+			except ZoneEffectOnProductionType.DoesNotExist:
+				effect = ZoneEffectOnProductionType(
+				  zone = Zone.objects.get( zone_description=zoneName ),
+				  production_type = ProductionType.objects.get( name=fromTypeName )
+				)
+			if contactType == 'direct' or contactType == 'both':
+				effect.zone_direct_movement = movementControl
+			if contactType == 'indirect' or contactType == 'both':
+				effect.zone_indirect_movement = movementControl
+			effect.save()
+		# end of loop over from-production-types covered by this <contact-spread-model> element
+	# end of loop over <contact-spread-model> elements with a "zone" attribute
 
 	plan = None
 	useDetection = (xml.find( './/detection-model' ) != None)
@@ -360,11 +392,18 @@ def main():
 		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		for typeName in typeNames:
 			if 'zone' in el.attrib:
-				effect = ZoneEffectOnProductionType(
-				  zone = Zone.objects.get( zone_description=el.attrib['zone'] ),
-				  production_type = ProductionType.objects.get( name=typeName ),
-				  zone_detection_multiplier = multiplier
-				)
+				zoneName = el.attrib['zone']
+				# If a ZoneEffectOnProductionType object has already been
+				# assigned to this combination of production type and zone,
+				# retrieve it; otherwise, create a new one.
+				try:
+					effect = ZoneEffectOnProductionType.objects.get( production_type__name=typeName, zone__zone_description=zoneName )
+				except ZoneEffectOnProductionType.DoesNotExist:
+					effect = ZoneEffectOnProductionType(
+					  zone = Zone.objects.get( zone_description=zoneName ),
+					  production_type = ProductionType.objects.get( name=typeName )
+					)
+				effect.zone_detection_multiplier = multiplier
 				effect.save()
 			else:
 				protocol = ControlProtocol(
@@ -715,7 +754,7 @@ def main():
 	if len( productionTypesThatAreVaccinated - productionTypesWithVaccineEffectsDefined ) > 0:
 		raise Exception( 'some production types that are vaccinated do not have vaccine effects defined' )
 	if productionTypesThatAreVaccinated != productionTypesWithVaccineEffectsDefined:
-		warnings.warn( 'mismatch between production types that are vaccinated and production types that have vaccine effects defined' )
+		warnings.warn( 'mismatch between production types that are vaccinated and production types that have vaccine effects defined', Warning )
 
 	# Destruction priority order information is distributed among several
 	# different elements. Keep 2 lists that will help sort it out later.
