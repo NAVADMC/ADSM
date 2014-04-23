@@ -531,10 +531,10 @@ class OutputSettings(models.Model):
         help_text='The number of iterations of this scenario that should be run', )
     stop_criteria = models.CharField(max_length=255, default='disease-end',
         help_text='The criterion used to end each iteration.',
-        choices=(('disease-end', 'Simulation will stop when there are no more latent or infectious units.'),
-                 ('first-detection', 'Simulation will stop when the first detection occurs.'),
-                 ('outbreak-end', 'Simulation will stop at the end of the outbreak'),
-                 ('stop-days', 'Simulation with stop after a specified number of days')))
+        choices=(('disease-end', 'Stop when there are no more latent or infectious units.'),
+                 ('first-detection', 'Stop when the first detection occurs.'),
+                 ('outbreak-end', 'Stop when there are no more latent or infectious units and all control activities are finished'),
+                 ('stop-days', 'Stop after a specified number of days')))
     days = models.IntegerField(blank=True, null=True,
         help_text='The maximum number of days that iterations of this scenario should run.', )
      ## Outputs requested:
