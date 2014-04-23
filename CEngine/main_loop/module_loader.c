@@ -163,18 +163,18 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
   
   /*  This isn't a mandatory parameter.  If this field is NULL, the default is
       STOP_NORMAL. */
-  *_exit_conditions = get_exit_condition (PAR_get_text (parameter_db, "SELECT early_stop_criteria FROM ScenarioCreator_outputsettings"));
+  *_exit_conditions = get_exit_condition (PAR_get_text (parameter_db, "SELECT stop_criteria FROM ScenarioCreator_outputsettings"));
 
   /* Instantiate modules based on which features are active in the scenario. */
   tmp_models = g_ptr_array_new();
 
-  if (PAR_get_int (parameter_db, "SELECT COUNT(*) FROM ScenarioCreator_diseasereactionassignment") >= 1)
+  if (PAR_get_int (parameter_db, "SELECT COUNT(*) FROM ScenarioCreator_diseaseprogressionassignment") >= 1)
     {
       g_ptr_array_add (tmp_models,
                        disease_model_new (parameter_db, units, projection, zones));
     }
 
-  if (PAR_get_boolean (parameter_db, "SELECT include_airborne_spread FROM ScenarioCreator_scenario"))
+  if (PAR_get_boolean (parameter_db, "SELECT include_airborne_spread FROM ScenarioCreator_disease"))
     {
       g_ptr_array_add (tmp_models,
                        airborne_spread_model_new (parameter_db, units, projection, zones));
@@ -187,7 +187,7 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                        zone_model_new (parameter_db, units, projection, zones));
     }
 
-  if (PAR_get_boolean (parameter_db, "SELECT include_contact_spread FROM ScenarioCreator_scenario"))
+  if (PAR_get_boolean (parameter_db, "SELECT include_contact_spread FROM ScenarioCreator_disease"))
     {
       g_ptr_array_add (tmp_models,
                        contact_spread_model_new (parameter_db, units, projection, zones));
@@ -318,7 +318,7 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                            vaccination_list_monitor_new (parameter_db, units, projection, zones));
         }
 
-      include_economic = PAR_get_boolean (parameter_db, "SELECT (cost_track_zone_surveillance=1 OR cost_track_vaccination=1 OR cost_track_destruction=1) FROM ScenarioCreator_scenario");
+      include_economic = PAR_get_boolean (parameter_db, "SELECT (cost_track_zone_surveillance=1 OR cost_track_vaccination=1 OR cost_track_destruction=1) FROM ScenarioCreator_outputsettings");
       if (include_economic)
         {
           g_ptr_array_add (tmp_models,

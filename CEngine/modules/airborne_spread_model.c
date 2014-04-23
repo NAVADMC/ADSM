@@ -990,7 +990,7 @@ new (sqlite3 *params, UNT_unit_list_t * units, projPJ projection,
   local_data->npending_infections = 0;
   local_data->rotating_index = 0;
 
-  local_data->use_exponential_dropoff = PAR_get_boolean (params, "SELECT use_airborne_exponential_decay FROM ScenarioCreator_scenario");
+  local_data->use_exponential_dropoff = PAR_get_boolean (params, "SELECT use_airborne_exponential_decay FROM ScenarioCreator_disease");
   /* Call the set_params function to read the production type combination
    * specific parameters. */
   local_data->db = params;

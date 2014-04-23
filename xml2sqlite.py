@@ -114,17 +114,9 @@ def main():
 	# figure out the XML file's encoding.
 	xml = ET.parse( sys.stdin.detach() ).getroot()
 
-	usePrevalence = (xml.find( './/disease-model/prevalence' ) != None)
-	useAirborneExponentialDecay = (xml.find( './/airborne-spread-exponential-model' ) != None)
 	useEconomic = (xml.find( './/economic-model' ) != None)
 	scenario = Scenario(
-	  description = xml.find( './description' ).text,
-	  include_airborne_spread = (xml.find( './/airborne-spread-model' ) != None or xml.find( './/airborne-spread-exponential-model' ) != None),
-	  use_airborne_exponential_decay = useAirborneExponentialDecay,
-	  use_within_unit_prevalence = usePrevalence,
-	  cost_track_zone_surveillance = (xml.find( './/economic-model/surveillance' ) != None),
-	  cost_track_vaccination = (xml.find( './/economic-model/vaccination' ) != None),
-	  cost_track_destruction = (xml.find( './/economic-model/euthanasia' ) != None)
+	  description = xml.find( './description' ).text
 	)
 	scenario.save()
 
@@ -139,8 +131,11 @@ def main():
 	outputSettings = OutputSettings(
       iterations = int( xml.find( './num-runs' ).text ),
       days = int( xml.find( './num-days' ).text ),
-      early_stop_criteria = earlyExitCondition,
-      daily_states_filename = statesFile
+      stop_criteria = earlyExitCondition,
+      daily_states_filename = statesFile,
+      cost_track_zone_surveillance = (xml.find( './/economic-model/surveillance' ) != None),
+	  cost_track_vaccination = (xml.find( './/economic-model/vaccination' ) != None),
+	  cost_track_destruction = (xml.find( './/economic-model/euthanasia' ) != None)
     )
 	outputSettings.save()
 
@@ -160,7 +155,12 @@ def main():
 		productionType = ProductionType( name=name )
 		productionType.save()
 
-	disease = Disease( name='' )
+	useAirborneExponentialDecay = (xml.find( './/airborne-spread-exponential-model' ) != None)
+	disease = Disease(
+	  name='',
+	  include_airborne_spread = (xml.find( './/airborne-spread-model' ) != None or xml.find( './/airborne-spread-exponential-model' ) != None),
+	  use_airborne_exponential_decay = useAirborneExponentialDecay
+	)
 	disease.save()
 
 	for el in xml.findall( './/disease-model' ):
@@ -168,27 +168,27 @@ def main():
 		subclinicalPeriod = getPdf( el.find( './infectious-subclinical-period' ) )
 		clinicalPeriod = getPdf( el.find( './infectious-clinical-period' ) )
 		immunePeriod = getPdf( el.find( './immunity-period' ) )
-		if usePrevalence:
+		if el.find( './prevalence' ) != None:
 			prevalence = getRelChart( el.find( './prevalence' ) )
 		else:
 			prevalence = None
-		diseaseReaction = DiseaseReaction(
+		diseaseProgression = DiseaseProgression(
 		  _disease = disease,
 		  disease_latent_period = latentPeriod,
 		  disease_subclinical_period = subclinicalPeriod,
 		  disease_clinical_period = clinicalPeriod,
 		  disease_immune_period = immunePeriod,
-		  disease_prevalence = prevalence
+		  disease_prevalence = prevalence,
 		)
-		diseaseReaction.save()
+		diseaseProgression.save()
 
 		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		for typeName in typeNames:
-			diseaseReactionAssignment = DiseaseReactionAssignment(
+			diseaseProgressionAssignment = DiseaseProgressionAssignment(
 			  production_type = ProductionType.objects.get( name=typeName ),
-			  reaction = diseaseReaction
+			  progression = diseaseProgression
 			)
-			diseaseReactionAssignment.save()
+			diseaseProgressionAssignment.save()
 		# end of loop over production types covered by this <disease-model> element
 	# end of loop over <disease-model> elements
 

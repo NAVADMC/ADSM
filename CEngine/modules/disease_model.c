@@ -642,7 +642,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * specific parameters. */
   local_data->db = params;
   sqlite3_exec (params,
-                "SELECT prodtype.name,disease_latent_period_id,disease_subclinical_period_id,disease_clinical_period_id,disease_immune_period_id,disease_prevalence_id FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_diseasereactionassignment xref,ScenarioCreator_diseasereaction disease WHERE prodtype.id=xref.production_type_id AND xref.reaction_id = disease.id",
+                "SELECT prodtype.name,disease_latent_period_id,disease_subclinical_period_id,disease_clinical_period_id,disease_immune_period_id,disease_prevalence_id FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_diseaseprogressionassignment xref,ScenarioCreator_diseaseprogression disease WHERE prodtype.id=xref.production_type_id AND xref.progression_id = disease.id",
                 set_params, self, &sqlerr);
   if (sqlerr)
     {
