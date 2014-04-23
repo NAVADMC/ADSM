@@ -199,8 +199,9 @@ def edit_entry(request, primary_key):
         unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
 
     context = basic_context()
-    context.update({'form': initialized_form,
-                    'title': "Edit a " + model_name}.items())
+    context['form'] = initialized_form
+    context['title'] = "Edit a " + model_name
+    context['model_link'] = '/setup/' + model_name + '/' + primary_key + '/'
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
