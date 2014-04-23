@@ -263,7 +263,7 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                        trace_destruction_model_new (parameter_db, units, projection, zones));
     }
 
-  if (include_vaccination || include_destruction)
+  if (include_detection || include_vaccination || include_destruction)
     {
       g_ptr_array_add (tmp_models,
                        resources_and_implementation_of_controls_model_new (parameter_db, units, projection, zones));
