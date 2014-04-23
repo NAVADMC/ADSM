@@ -221,7 +221,7 @@ def main():
 				pairing = ProductionTypePairTransmission(
 				  source_production_type = ProductionType.objects.get( name=fromTypeName ),
 				  destination_production_type = ProductionType.objects.get( name=toTypeName ),
-				  airborne_contact_spread_model = airborneSpread
+				  airborne_spread = airborneSpread
 				)
 				pairing.save()
 			# end of loop over to-production-types covered by this <airborne-spread[-exponential]-model> element
@@ -304,9 +304,9 @@ def main():
 					)
 					pairing.save()
 				if el.attrib['contact-type'] == 'direct':
-					pairing.direct_contact_spread_model = contactSpreadModel
+					pairing.direct_contact_spread = contactSpreadModel
 				else:
-					pairing.indirect_contact_spread_model = contactSpreadModel
+					pairing.indirect_contact_spread = contactSpreadModel
 				pairing.save()
 			# end of loop over to-production-types covered by this <contact-spread-model> element
 		# end of loop over from-production-types covered by this <contact-spread-model> element		
@@ -794,7 +794,7 @@ def main():
 			else:
 				protocol.trace_indirect_forward = True
 				protocol.indirect_trace_success = traceSuccess
-				protocoo.indirect_trace_period = tracePeriod
+				protocol.indirect_trace_period = tracePeriod
 			protocol.trace_result_delay = zeroDelay
 			protocol.save()
 		# end of loop to enable trace forward/out from all production types

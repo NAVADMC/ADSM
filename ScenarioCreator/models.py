@@ -600,11 +600,11 @@ class ProductionTypePairTransmission(models.Model):
         help_text='The Production type that will be the source type for this production type combination.', )
     destination_production_type = models.ForeignKey(ProductionType, related_name='used_as_destinations',
         help_text='The Production type that will be the recipient type for this production type combination.', )
-    direct_contact_spread_model = models.ForeignKey(DirectSpread, related_name='direct_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+    direct_contact_spread = models.ForeignKey(DirectSpread, related_name='direct_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by direct contact between these types.', )
-    indirect_contact_spread_model = models.ForeignKey(IndirectSpread, related_name='indirect_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+    indirect_contact_spread = models.ForeignKey(IndirectSpread, related_name='indirect_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by indirect contact between these types.', )
-    airborne_contact_spread_model = models.ForeignKey(AirborneSpread, related_name='airborne_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+    airborne_spread = models.ForeignKey(AirborneSpread, related_name='airborne_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by airborne spread between these types.', )
     class Meta:
         unique_together = ('source_production_type', 'destination_production_type',)
