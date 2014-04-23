@@ -88,7 +88,7 @@ class Population(models.Model):
     def import_population(self):
         if not self.source_file:
             return
-        start_time = time.process_time()
+        start_time = time.process_time()  # perf_counter() would also work
         print("Parsing ", self.source_file)
         p = ScenarioCreator.parser.PopulationParser(self.source_file)
         print("Parsing to Dictionary")
