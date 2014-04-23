@@ -1,6 +1,6 @@
 """Form inheritance is for better support of layouts.  All forms have a default layout that it inherits from
 ModelForm -> models.py.  This basic layout can be overridden by declaring an __init__ with a self.helper Layout.
-See DirectSpreadModel for an example.  More complex widgets and layouts are accessible from there.
+See DirectSpread for an example.  More complex widgets and layouts are accessible from there.
 All forms now have their "submit" button restored and you can choose custom layouts.  ControlProtocol has tabs."""
 
 
@@ -222,7 +222,7 @@ class DiseaseProgressionForm(BaseForm):
                    'disease_prevalence': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
-class IndirectSpreadModelForm(BaseForm):
+class IndirectSpreadForm(BaseForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -239,7 +239,7 @@ class IndirectSpreadModelForm(BaseForm):
         )
         return super().__init__(*args, **kwargs)
     class Meta:
-        model = IndirectSpreadModel
+        model = IndirectSpread
         exclude = ['_spread_method_code', '_disease']
         widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
@@ -247,7 +247,7 @@ class IndirectSpreadModelForm(BaseForm):
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
-class DirectSpreadModelForm(BaseForm):
+class DirectSpreadForm(BaseForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -264,7 +264,7 @@ class DirectSpreadModelForm(BaseForm):
         )
         return super().__init__(*args, **kwargs)
     class Meta:
-        model = DirectSpreadModel
+        model = DirectSpread
         exclude = ['_spread_method_code', '_disease']
         widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
@@ -272,7 +272,7 @@ class DirectSpreadModelForm(BaseForm):
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
-class AirborneSpreadModelForm(BaseForm):
+class AirborneSpreadForm(BaseForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -286,7 +286,7 @@ class AirborneSpreadModelForm(BaseForm):
         )
         return super().__init__(*args, **kwargs)
     class Meta:
-        model = AirborneSpreadModel
+        model = AirborneSpread
         exclude = ['_spread_method_code', '_disease']
         try:
             if Disease.objects.get(id=1).use_airborne_exponential_decay:
@@ -329,9 +329,9 @@ class ProductionTypePairTransmissionForm(BaseForm):
         model = ProductionTypePairTransmission
         # widgets = {'source_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
         #            'destination_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-        #            'direct_contact_spread_model': AddOrSelect(attrs={'data-new-item-url': '/setup/DirectSpreadModel/new/'}),
-        #            'indirect_contact_spread_model': AddOrSelect(attrs={'data-new-item-url': '/setup/IndirectSpreadModel/new/'}),
-        #            'airborne_contact_spread_model': AddOrSelect(attrs={'data-new-item-url': '/setup/AirborneSpreadModel/new/'})}
+        #            'direct_contact_spread_model': AddOrSelect(attrs={'data-new-item-url': '/setup/DirectSpread/new/'}),
+        #            'indirect_contact_spread_model': AddOrSelect(attrs={'data-new-item-url': '/setup/IndirectSpread/new/'}),
+        #            'airborne_contact_spread_model': AddOrSelect(attrs={'data-new-item-url': '/setup/AirborneSpread/new/'})}
 
 
 class ZoneForm(BaseForm):

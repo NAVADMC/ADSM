@@ -449,7 +449,7 @@ class DiseaseProgressionAssignment(models.Model):
         return "%s have %s progression characteristics" % (self.production_type, self.progression) if self.progression else "No Progression"
 
 
-class DiseaseSpreadModel(models.Model):
+class DiseaseSpread(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, )
     _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0],
                                  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
@@ -461,7 +461,7 @@ class DiseaseSpreadModel(models.Model):
         abstract = True
 
 
-class AbstractSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct and Indirect that were not in Airborne
+class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indirect that were not in Airborne
     _spread_method_code = models.CharField(max_length=255, default='indirect',
         help_text='Code indicating the mechanism of the disease spread.', )
     subclinical_animals_can_infect_others = models.BooleanField(default=False,
@@ -480,26 +480,26 @@ class AbstractSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct 
         abstract = True
 
 
-class IndirectSpreadModel(AbstractSpreadModel):
-    """This has to inherit from AbstractSpreadModel or else Django treats DirectSpreadModel and IndirectSpreadModel as
+class IndirectSpread(AbstractSpread):
+    """This has to inherit from AbstractSpread or else Django treats DirectSpread and IndirectSpread as
     interchangable, which they are not."""
     def __str__(self):
         return "%s %s Indirect Spread %i" % (self.name, self._disease, self.id)
 
 
-class DirectSpreadModel(AbstractSpreadModel):
-    """This has to inherit from AbstractSpreadModel or else Django treats DirectSpreadModel and IndirectSpreadModel as
+class DirectSpread(AbstractSpread):
+    """This has to inherit from AbstractSpread or else Django treats DirectSpread and IndirectSpread as
     interchangable, which they are not."""
     latent_animals_can_infect_others = models.BooleanField(default=False,
         help_text='Indicates if latent units of the source type can spread disease by direct contact. Not applicable to airborne spread or indirect spread.', )
     def __init__(self, *args, **kwargs):
-        super(AbstractSpreadModel, self).__init__(*args, **kwargs)
+        super(AbstractSpread, self).__init__(*args, **kwargs)
         self._spread_method_code = 'direct'  # overrides 'indirect' value without creating a new field
     def __str__(self):
         return "%s %s Direct Spread %i" % (self.name, self._disease, self.id)
 
 
-class AirborneSpreadModel(DiseaseSpreadModel):
+class AirborneSpread(DiseaseSpread):
     _spread_method_code = models.CharField(max_length=255, default='other',
         help_text='Code indicating the mechanism of the disease spread.', )
     spread_1km_probability = PercentField(blank=True, null=True,
@@ -600,11 +600,11 @@ class ProductionTypePairTransmission(models.Model):
         help_text='The Production type that will be the source type for this production type combination.', )
     destination_production_type = models.ForeignKey(ProductionType, related_name='used_as_destinations',
         help_text='The Production type that will be the recipient type for this production type combination.', )
-    direct_contact_spread_model = models.ForeignKey(DirectSpreadModel, related_name='direct_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+    direct_contact_spread_model = models.ForeignKey(DirectSpread, related_name='direct_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by direct contact between these types.', )
-    indirect_contact_spread_model = models.ForeignKey(IndirectSpreadModel, related_name='indirect_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+    indirect_contact_spread_model = models.ForeignKey(IndirectSpread, related_name='indirect_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by indirect contact between these types.', )
-    airborne_contact_spread_model = models.ForeignKey(AirborneSpreadModel, related_name='airborne_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
+    airborne_contact_spread_model = models.ForeignKey(AirborneSpread, related_name='airborne_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by airborne spread between these types.', )
     class Meta:
         unique_together = ('source_production_type', 'destination_production_type',)

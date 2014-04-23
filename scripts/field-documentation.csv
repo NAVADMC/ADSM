@@ -165,12 +165,12 @@ class DiseaseProgressionAssignment
 production_type, ForeignKey, The production type that these outputs apply to.
 progression, ForeignKey,
 
-class DiseaseSpreadModel
+class DiseaseSpread
 name, CharField, 
 _disease, ForeignKey, Parent disease whose spreading characteristics this describe
 transport_delay_pdf, ForeignKey, Relational function used to define the shipment delays for the indicated production type.
 
-class AbstractSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct and Indirect that were not in Airborne
+class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indirect that were not in Airborne
 
 _spread_method_code, CharField, Code indicating the mechanism of the disease spread.
 subclinical_animals_can_infect_others, BooleanField, Indicates if subclinical units of the source type can spread disease by direct or indirect contact. 
@@ -180,14 +180,14 @@ infection_probability, = PercentField, The probability that a contact will resul
 distance_pdf, ForeignKey, Defines the sipment distances for direct and indirect contact models.
 movement_control_relid, ForeignKey, Relational function used to define movement control effects for the indicated production types combinations.
 
-class IndirectSpreadModel(AbstractSpreadModel):
+class IndirectSpread(AbstractSpread):
 
 
-class DirectSpreadModel(AbstractSpreadModel):
+class DirectSpread(AbstractSpread):
 
 latent_animals_can_infect_others, BooleanField, Indicates if latent units of the source type can spread disease by direct contact. Not applicable to airborne spread or indirect spread.
 
-class AirborneSpreadModel(DiseaseSpreadModel):
+class AirborneSpread(DiseaseSpread):
 
 _spread_method_code, CharField, Code indicating the mechanism of the disease spread.
 spread_1km_probability, = PercentField, The probability that disease will be spread to unit 1 km away from the source unit.

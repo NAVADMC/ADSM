@@ -206,7 +206,7 @@ def main():
 			delay = getPdf( el.find( './delay' ) )
 		else:
 			delay = zeroDelay
-		airborneSpreadModel = AirborneSpreadModel(
+		airborneSpread = AirborneSpread(
 		  _disease = disease,
 		  max_distance = maxDistance,
 		  spread_1km_probability = float( el.find( './prob-spread-1km' ).text ),
@@ -214,14 +214,14 @@ def main():
 		  wind_direction_end = float( el.find( './wind-direction-end/value' ).text ),
 		  transport_delay = delay
 		)
-		airborneSpreadModel.save()
+		airborneSpread.save()
 
 		for fromTypeName in getProductionTypes( el, 'from-production-type', productionTypeNames ):
 			for toTypeName in getProductionTypes( el, 'to-production-type', productionTypeNames ):
 				pairing = ProductionTypePairTransmission(
 				  source_production_type = ProductionType.objects.get( name=fromTypeName ),
 				  destination_production_type = ProductionType.objects.get( name=toTypeName ),
-				  airborne_contact_spread_model = airborneSpreadModel
+				  airborne_contact_spread_model = airborneSpread
 				)
 				pairing.save()
 			# end of loop over to-production-types covered by this <airborne-spread[-exponential]-model> element
@@ -261,7 +261,7 @@ def main():
 		movementControl = getRelChart( el.find( './movement-control' ) )
 
 		if el.attrib['contact-type'] == 'direct':
-			contactSpreadModel = DirectSpreadModel(
+			contactSpreadModel = DirectSpread(
 			  _disease = disease,
 			  use_fixed_contact_rate = fixedRate,
 			  contact_rate = contactRate,
@@ -273,7 +273,7 @@ def main():
 			  subclinical_animals_can_infect_others = subclinicalCanInfect
 			)
 		elif el.attrib['contact-type'] == 'indirect':
-			contactSpreadModel = IndirectSpreadModel(
+			contactSpreadModel = IndirectSpread(
 			  _disease = disease,
 			  use_fixed_contact_rate = fixedRate,
 			  contact_rate = contactRate,
