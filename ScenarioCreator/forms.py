@@ -5,7 +5,7 @@ All forms now have their "submit" button restored and you can choose custom layo
 
 
 from crispy_forms.bootstrap import TabHolder, Tab
-from crispy_forms.layout import Layout, ButtonHolder, Submit
+from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import OperationalError  # OperationalError is for initial manage.py syncdb
 from ScenarioCreator.models import *
@@ -22,7 +22,8 @@ class AddOrSelect(Select):
 
 
 def submit_button():
-    return ButtonHolder(Submit('submit', 'Submit', css_class='button white'))
+    return ButtonHolder(Submit('submit', 'Submit', css_class='button white'),
+                        HTML(open('ScenarioCreator/templates/ScenarioCreator/EditButtons.html', 'r').read()))
 
 
 class BaseForm(ModelForm):
