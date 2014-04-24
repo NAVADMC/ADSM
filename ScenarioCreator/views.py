@@ -50,11 +50,11 @@ def basic_context():  # TODO: This might not be performant... but it's nice to h
             'Farms': Unit.objects.count(),
             'Disease': Disease.objects.count(),
             'Progressions': DiseaseProgression.objects.count(),
-            'ProgressionAssignment': DiseaseProgressionAssignment.objects.count() == PT_count,
+            'ProgressionAssignment': DiseaseProgressionAssignment.objects.count() == PT_count and PT_count, #Fixed false complete status when there are no Production Types
             'DirectSpreads': DirectSpread.objects.count(),
             'IndirectSpreads': IndirectSpread.objects.count(),
             'AirborneSpreads': AirborneSpread.objects.count(),
-            'Transmissions': ProductionTypePairTransmission.objects.count() == PT_count ** 2,
+            'Transmissions': ProductionTypePairTransmission.objects.count() == PT_count ** 2 and PT_count, #Fixed false complete status when there are no Production Types
             'ControlMasterPlan': ControlMasterPlan.objects.count(),
             'Protocols': ControlProtocol.objects.count(),
             'ProtocolAssignments': ProtocolAssignment.objects.count(),
