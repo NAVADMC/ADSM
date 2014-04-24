@@ -30,7 +30,7 @@ Limit foreignkey choices with a dictionary filter on field values:
 """
 import os
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django_extras.db.models import PercentField, LatitudeField, LongitudeField, MoneyField
 import re
@@ -517,9 +517,10 @@ class AirborneSpread(DiseaseSpread):
         help_text='The probability that disease will be spread to unit 1 km away from the source unit.', )
     max_distance = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='The maximum distance in KM of airborne spread.', )
-    wind_direction_start = models.PositiveIntegerField(default=0,
+    wind_direction_start = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=0,
         help_text='The start angle in degrees of the predominate wind direction for airborne spread.', )
-    wind_direction_end = models.PositiveIntegerField(default=360,
+    #TODO: This doesn't keep start and end from crossing each other.
+    wind_direction_end = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=360,
         help_text='The end angle in degrees of the predominate wind direction for airborne spread.', )
     def __str__(self):
         return "%s %s Airborne Spread %i" % (self.name, self._disease, self.id)
