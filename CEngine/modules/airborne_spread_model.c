@@ -995,7 +995,7 @@ new (sqlite3 *params, UNT_unit_list_t * units, projPJ projection,
    * specific parameters. */
   local_data->db = params;
   sqlite3_exec (params,
-                "SELECT src_prodtype.name,dest_prodtype.name,spread_1km_probability,wind_direction_start,wind_direction_end,max_distance,transport_delay_id FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_airbornespread airborne WHERE src_prodtype.id=pairing.source_production_type_id AND dest_prodtype.id=pairing.destination_production_type_id AND pairing.airborne_contact_spread_model_id = airborne.id",
+                "SELECT src_prodtype.name,dest_prodtype.name,spread_1km_probability,wind_direction_start,wind_direction_end,max_distance,transport_delay_id FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_airbornespread airborne WHERE src_prodtype.id=pairing.source_production_type_id AND dest_prodtype.id=pairing.destination_production_type_id AND pairing.airborne_spread_id = airborne.id",
                 set_params, self, &sqlerr);
   if (sqlerr)
     {

@@ -350,9 +350,6 @@ def main():
 	  (xml.find( './/trace-model' ) != None)
 	  or (xml.find( './/trace-back-destruction-model' ) != None)
 	)
-	useExams = (xml.find( './/trace-exam-model' ) != None)
-	useTesting = (xml.find( './/test-model' ) != None)
-	useZones = (xml.find( './/zone-model' ) != None)
 	useVaccination = (
 	  (xml.find( './/vaccine-model' ) != None)
 	  or (xml.find( './/ring-vaccination-model' ) != None)
@@ -365,15 +362,7 @@ def main():
 	)
 
 	if useDetection or useTracing or useVaccination or useDestruction:
-		plan = ControlMasterPlan(
-		  _include_detection = useDetection,
-		  _include_tracing = useTracing,
-		  _include_tracing_unit_exam = useExams,
-		  _include_tracing_testing = useTesting,
-		  _include_zones = useZones,
-		  _include_vaccination = useVaccination,
-		  _include_destruction = useDestruction
-		)
+		plan = ControlMasterPlan()
 		plan.save()
 
 	for el in xml.findall( './/detection-model' ):
@@ -494,6 +483,7 @@ def main():
 				  control_protocol = protocol
 				)
 				assignment.save()
+			protocol.use_tracing = True
 			if contactType == 'direct' or contactType == 'both':
 				if direction == 'out' or direction == 'both':
 					protocol.trace_direct_forward = True
@@ -587,6 +577,7 @@ def main():
 				  control_protocol = protocol
 				)
 				assignment.save()
+			protocol.use_testing = True
 			protocol.test_sensitivity = sensitivity
 			protocol.test_specificity = specificity
 			protocol.test_delay = delay
