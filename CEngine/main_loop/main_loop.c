@@ -865,12 +865,32 @@ run_sim_main (const char *population_file,
   if (seed >= 0)
     gsl_rng_set (gsl_format_rng, seed + me.rank);
   else
-    gsl_rng_set (gsl_format_rng, time(NULL) + me.rank);
+    {
+      seed = PAR_get_int (parameter_db, "SELECT (CASE WHEN random_seed IS NULL THEN -1 ELSE random_seed END) FROM ScenarioCreator_Scenario");
+      if (seed >= 0)
+        {
+          gsl_rng_set (gsl_format_rng, seed + me.rank);
+        }
+      else
+        {
+          gsl_rng_set (gsl_format_rng, time(NULL) + me.rank);
+        }
+    }
 #else
   if (seed >= 0)
     gsl_rng_set (gsl_format_rng, seed);
   else
-    gsl_rng_set (gsl_format_rng, time(NULL));
+    {
+      seed = PAR_get_int (parameter_db, "SELECT (CASE WHEN random_seed IS NULL THEN -1 ELSE random_seed END) FROM ScenarioCreator_Scenario");
+      if (seed >= 0)
+        {
+          gsl_rng_set (gsl_format_rng, seed);
+        }
+      else
+        {
+          gsl_rng_set (gsl_format_rng, time(NULL));
+        }
+    }
 #endif
   rng = RAN_new_generator (gsl_format_rng);
   if (fixed_rng_value >= 0 && fixed_rng_value < 1)
