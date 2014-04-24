@@ -30,6 +30,7 @@ Limit foreignkey choices with a dictionary filter on field values:
 """
 import os
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django_extras.db.models import PercentField, LatitudeField, LongitudeField, MoneyField
 import re
@@ -128,7 +129,7 @@ class Unit(models.Model):
         help_text='The number of days that the unit will remain in its initial state unless preempted by other events.', )
     days_left_in_initial_state = models.IntegerField(blank=True, null=True,
         help_text='', )
-    initial_size = models.IntegerField(
+    initial_size = models.PositiveIntegerField(
         help_text='The number of animals in the unit.', )
     _final_state_code = models.CharField(max_length=255, blank=True,
         help_text='Code indicating the actual disease state of the unit at the end of the simulation.', )
@@ -136,13 +137,13 @@ class Unit(models.Model):
         help_text='', )
     _final_detection_state_code = models.CharField(max_length=255, blank=True,
         help_text='', )
-    _cum_infected = models.IntegerField(blank=True, null=True,
+    _cum_infected = models.PositiveIntegerField(blank=True, null=True,
         help_text='The total number of iterations in which this unit became infected.', )
-    _cum_detected = models.IntegerField(blank=True, null=True,
+    _cum_detected = models.PositiveIntegerField(blank=True, null=True,
         help_text='The total number of iterations in which this unit was detected.', )
-    _cum_destroyed = models.IntegerField(blank=True, null=True,
+    _cum_destroyed = models.PositiveIntegerField(blank=True, null=True,
         help_text='The total number of iterations in which this unit was destroyed.', )
-    _cum_vaccinated = models.IntegerField(blank=True, null=True,
+    _cum_vaccinated = models.PositiveIntegerField(blank=True, null=True,
         help_text='The total number of iterations in which this unit was vaccinated.', )
     user_defined_1 = models.TextField(blank=True)
     user_defined_2 = models.TextField(blank=True)
@@ -215,19 +216,19 @@ class ProbabilityFunction(Function):
         help_text='The scale parameter for probability density function types Logistic and Loglogistic.', )
     shape = models.FloatField(blank=True, null=True,
         help_text='The shape parameter for probability density function types Loglogistic, Inverse, and Gaussian.', )
-    n = models.IntegerField(blank=True, null=True,
+    n = models.PositiveIntegerField(blank=True, null=True,
         help_text='The n parameter for probability density function types Binomial and Hypergeometric.', )
     p = models.FloatField(blank=True, null=True,
         help_text='The p parameter for probability density function types Negative Binomial and Bernoulli.', )
-    m = models.IntegerField(blank=True, null=True,
+    m = models.PositiveIntegerField(blank=True, null=True,
         help_text='The m parameter for probability density function type Hypergeometric.', )
-    d = models.IntegerField(blank=True, null=True,
+    d = models.PositiveIntegerField(blank=True, null=True,
         help_text='The d parameter for probability density function type Hypergeometric.', )
     theta = models.FloatField(blank=True, null=True,
         help_text='The Theta parameter for probability density function type Pareto.', )
     a = models.FloatField(blank=True, null=True,
         help_text='The a parameter for probability density function type Pareto.', )
-    s = models.IntegerField(blank=True, null=True,
+    s = models.PositiveIntegerField(blank=True, null=True,
         help_text='The s parameter for probability density function type Negative Binomial.', )
     graph = models.ForeignKey('RelationalFunction', blank=True, null=True,
         help_text='A series of points used in Histogram and Piecewise functions.')
@@ -252,7 +253,7 @@ class ControlMasterPlan(models.Model):
     name = models.CharField(max_length=255)
     disable_all_controls = models.BooleanField(default=False,
         help_text='Disable all Control activities for this simulation run.  Normally used temporarily to test uncontrolled disease spread.')
-    destruction_program_delay = models.IntegerField(blank=True, null=True,
+    destruction_program_delay = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
     destruction_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text="The relational function used to define the daily destruction capacity.", )
@@ -264,7 +265,7 @@ class ControlMasterPlan(models.Model):
         # old DB: 'basic,direct-forward,ring,indirect-forward,direct-back,indirect-back'
         # old UI: Detected, Trace forward of direct contact, Ring, Trace forward of indirect contact, Trace back of direct contact, Trace back of indirect contact
         help_text='The secondary priority order for destruction.', )
-    units_detected_before_triggering_vaccination = models.IntegerField(blank=True, null=True,
+    units_detected_before_triggering_vaccination = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of clinical units which must be detected before the initiation of a vaccination program.', )
     vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the daily vaccination capacity.', )
@@ -293,7 +294,7 @@ class ControlProtocol(models.Model):
         help_text='Indicator that trace back will be conducted for direct contacts where the reported unit was the source of contact and was of this production type.', )
     direct_trace_success_rate = PercentField(blank=True, null=True,
         help_text='Probability of success of trace for direct contact.', )
-    direct_trace_period = models.IntegerField(blank=True, null=True,
+    direct_trace_period = models.PositiveIntegerField(blank=True, null=True,
         help_text='Days before detection (critical period) for tracing of direct contacts.', )
     trace_indirect_forward = models.BooleanField(default=False,
         help_text='Indicator that trace forward will be conducted for indirect contacts where the reported unit was the source of contact and was of this production type.', )
@@ -301,7 +302,7 @@ class ControlProtocol(models.Model):
         help_text='Indicator that trace back will be conducted for indirect contacts where the reported unit was the source of contact and was of this production type.', )
     indirect_trace_success = PercentField(blank=True, null=True,
         help_text='Probability of success of trace for indirect contact.', )
-    indirect_trace_period = models.IntegerField(blank=True, null=True,
+    indirect_trace_period = models.PositiveIntegerField(blank=True, null=True,
         help_text='Days before detection  (critical period) for tracing of indirect contacts.', )
     trace_result_delay = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Delay for carrying out trace investigation result (days).', )
@@ -325,15 +326,15 @@ class ControlProtocol(models.Model):
         help_text='Indicates if units of this type identified by trace back of direct contacts will be subject to preemptive destruction.', )
     destroy_indirect_back_traces = models.BooleanField(default=False,
         help_text='Indicates if units of this type identified by trace back of indirect contacts will be subject to preemptive destruction.', )
-    destruction_priority = models.IntegerField(default=5, blank=True, null=True,
+    destruction_priority = models.PositiveIntegerField(default=5, blank=True, null=True,
         help_text='The destruction priority of this production type relative to other production types.  A lower number indicates a higher priority.', )
     use_vaccination = models.BooleanField(default=False,
         help_text='Indicates if units of this production type will be subject to vaccination.', )
     vaccinate_detected_units = models.BooleanField(default=False,  # TODO: Clarify the distinction between use_vaccination and vaccinate_detected_units
         help_text='Indicates if units of this production type will be subject to vaccination if infected and detected.', )
-    days_to_immunity = models.IntegerField(blank=True, null=True,
+    days_to_immunity = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of days required for the onset of vaccine immunity in a newly vaccinated unit of this type.', )
-    minimum_time_between_vaccinations = models.IntegerField(blank=True, null=True,
+    minimum_time_between_vaccinations = models.PositiveIntegerField(blank=True, null=True,
         help_text='The minimum time in days between vaccination for units of this production type.', )
     vaccine_immune_period = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Defines the vaccine immune period for units of this production type.', )
@@ -341,9 +342,9 @@ class ControlProtocol(models.Model):
         help_text='Indicates if detection of a clinical unit of this type will trigger a vaccination ring.', )
     vaccination_ring_radius = models.FloatField(blank=True, null=True,
         help_text='Radius in kilometers of the vaccination ring.', )
-    vaccination_priority = models.IntegerField(default=5, blank=True, null=True,
+    vaccination_priority = models.PositiveIntegerField(default=5, blank=True, null=True,
         help_text='The vaccination priority of this production type relative to other production types.  A lower number indicates a higher priority.', )
-    vaccination_demand_threshold = models.IntegerField(blank=True, null=True,
+    vaccination_demand_threshold = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of animals of this type that can be vaccinated before the cost of vaccination increases.', )
     cost_of_vaccination_additional_per_animal = MoneyField(default=0.0,
         help_text='The additional cost of vaccination for each vaccinated animal of this type after the threshold is exceeded.', )
@@ -378,7 +379,7 @@ class ControlProtocol(models.Model):
         help_text='Test Sensitivity for units of this production type', )
     test_delay = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Function that describes the delay in obtaining test results.', )
-    vaccinate_retrospective_days = models.IntegerField(blank=True, null=True,
+    vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True,
         help_text='Number of days in retrospect that should be used to determine which herds to vaccinate.', )
     use_cost_accounting = models.BooleanField(default=False, )
     cost_of_destruction_appraisal_per_unit = MoneyField(default=0.0,
@@ -516,9 +517,9 @@ class AirborneSpread(DiseaseSpread):
         help_text='The probability that disease will be spread to unit 1 km away from the source unit.', )
     max_distance = models.FloatField(blank=True, null=True,
         help_text='The maximum distance in KM of airborne spread.', )
-    wind_direction_start = models.IntegerField(default=0,
+    wind_direction_start = models.PositiveIntegerField(default=0,
         help_text='The start angle in degrees of the predominate wind direction for airborne spread.', )
-    wind_direction_end = models.IntegerField(default=360,
+    wind_direction_end = models.PositiveIntegerField(default=360,
         help_text='The end angle in degrees of the predominate wind direction for airborne spread.', )
     def __str__(self):
         return "%s %s Airborne Spread %i" % (self.name, self._disease, self.id)
@@ -537,7 +538,7 @@ class Scenario(models.Model):
 
 class OutputSettings(models.Model):
     _scenario = models.ForeignKey('Scenario', default=lambda: Scenario.objects.get_or_create(id=1)[0],)  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
-    iterations = models.IntegerField(blank=True, null=True,
+    iterations = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of iterations of this scenario that should be run', )
     stop_criteria = models.CharField(max_length=255, default='disease-end',
         help_text='The criterion used to end each iteration.',
@@ -545,14 +546,14 @@ class OutputSettings(models.Model):
                  ('first-detection', 'Stop when the first detection occurs.'),
                  ('outbreak-end', 'Stop when there are no more latent or infectious units and all control activities are finished'),
                  ('stop-days', 'Stop after a specified number of days')))
-    days = models.IntegerField(blank=True, null=True,
+    days = models.PositiveIntegerField(blank=True, null=True,
         help_text='The maximum number of days that iterations of this scenario should run.', )
      ## Outputs requested:
     save_all_daily_outputs = models.BooleanField(default=False,
         choices=((True, 'Save all daily output fo every iteration (warning: this option may produce very large scenario files)'),
                  (False, 'Save all daily output only for a specified number of iterations')),
         help_text='Indicates if daily outputs should be stored for every iteration.', )
-    maximum_iterations_for_daily_output = models.IntegerField(default=3, blank=True, null=True,  # TODO: validate min(3,x)
+    maximum_iterations_for_daily_output = models.PositiveIntegerField(default=3, blank=True, null=True,  # TODO: validate min(3,x)
         help_text='The number of iterations for which daily outputs should be stored The minimum value is 3.', )
     daily_states_filename = models.CharField(max_length=255, blank=True, null=True,
         help_text='The file name to output a plain text file with the state of each unit on each day of each iteration.', )
