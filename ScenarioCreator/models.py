@@ -194,15 +194,15 @@ class ProbabilityFunction(Function):
                     "Inverse Gaussian", "Logistic", "LogLogistic", "Lognormal",
                     "NegativeBinomial", "Pareto", "Pearson5", "Piecewise", "Poisson",
                     "Triangular", "Uniform", "Weibull"))
-    mean = models.FloatField(blank=True, null=True,
+    mean = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='The mean for probability density function types Gaussian, Lognormal, Possoin, and Exponential.', )
-    std_dev = models.FloatField(blank=True, null=True,
+    std_dev = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='The mean for probability density function types Gaussian and Lognormal.', )
-    min = models.FloatField(blank=True, null=True,
+    min = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='The minimum for probability density function types Uniform, Triangular, Beta, and BetaPERT.', )
-    mode = models.FloatField(blank=True, null=True,
+    mode = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='The Mode for probability density function types Fixed Value, Triangular, and BetaPERT.', )
-    max = models.FloatField(blank=True, null=True,
+    max = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='The maximum value for probability density function types Uniform, Triangular, Beta, and BetaPERT.', )
     alpha = models.FloatField(blank=True, null=True,
         help_text='The alpha parameter for probability density function types Gamma, Weibull, and Pearson 5 or the alpha1 parameter for Beta probability density functions.', )
@@ -241,9 +241,9 @@ class RelationalFunction(Function):
 
 class RelationalPoint(models.Model):
     relational_function = models.ForeignKey(RelationalFunction)
-    x = models.FloatField(
+    x = models.FloatField(validators=[MinValueValidator(0.0)],
         help_text='The x value of the point.', )
-    y = models.FloatField(
+    y = models.FloatField(validators=[MinValueValidator(0.0)],
         help_text='The y value of the point.', )
     def __str__(self):
         return 'Point(%s, %s)' % (self.x, self.y)
@@ -314,7 +314,7 @@ class ControlProtocol(models.Model):
         help_text='Indicates if detected clinical units of this production type will be destroyed.', )
     destruction_is_a_ring_trigger = models.BooleanField(default=False,
         help_text='Indicates if detection of a unit of this production type will trigger the formation of a destruction ring.', )
-    destruction_ring_radius = models.FloatField(blank=True, null=True,
+    destruction_ring_radius = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Radius in kilometers of the destruction ring.', )
     destruction_is_a_ring_target = models.BooleanField(default=False,
         help_text='Indicates if unit of this production type will be subject to preemptive ring destruction.', )
@@ -340,7 +340,7 @@ class ControlProtocol(models.Model):
         help_text='Defines the vaccine immune period for units of this production type.', )
     trigger_vaccination_ring = models.BooleanField(default=False,
         help_text='Indicates if detection of a clinical unit of this type will trigger a vaccination ring.', )
-    vaccination_ring_radius = models.FloatField(blank=True, null=True,
+    vaccination_ring_radius = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Radius in kilometers of the vaccination ring.', )
     vaccination_priority = models.PositiveIntegerField(default=5, blank=True, null=True,
         help_text='The vaccination priority of this production type relative to other production types.  A lower number indicates a higher priority.', )
@@ -351,19 +351,19 @@ class ControlProtocol(models.Model):
     use_testing = models.BooleanField(default=False, )
     examine_direct_forward_traces = models.BooleanField(default=False,
         help_text='Indicator if units identified by the trace-forward of direct contact will be examined for clinical signs of disease.', )
-    exam_direct_forward_success_multiplier = models.FloatField(blank=True, null=True,
+    exam_direct_forward_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Multiplier for the probability of observing clinical signs in units identified by the trace-forward of direct contact.', )
     examine_indirect_forward_traces = models.BooleanField(default=False,
         help_text='Indicator if units identified by the trace-forward of indirect contact will be examined for clinical signs of disease.', )
-    exam_indirect_forward_success_multiplier = models.FloatField(blank=True, null=True,
+    exam_indirect_forward_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Multiplier for the probability of observing clinical signs in units identified by the trace-forward of indirect contact .', )
     examine_direct_back_traces = models.BooleanField(default=False,
         help_text='Indicator if units identified by the trace-back of direct contact will be examined for clinical signs of disease.', )
-    exam_direct_back_success_multiplier = models.FloatField(blank=True, null=True,
+    exam_direct_back_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Multiplier for the probability of observing clinical signs in units identified by the trace-back of direct contact.', )
     examine_indirect_back_traces = models.BooleanField(default=False,
         help_text='Indicator if units identified by the trace-back of indirect contact will be examined for clinical signs of disease.', )
-    examine_indirect_back_success_multiplier = models.FloatField(blank=True, null=True,
+    examine_indirect_back_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Multiplier for the probability of observing clinical signs in units identified by the trace-back of indirect contact.', )
     test_direct_forward_traces = models.BooleanField(default=False,
         help_text='Indicator that diagnostic testing should be performed on units identified by trace-forward of direct contacts.', )
@@ -373,9 +373,9 @@ class ControlProtocol(models.Model):
         help_text='Indicator that diagnostic testing should be performed on units identified by trace-back of direct contacts.', )
     test_indirect_back_traces = models.BooleanField(default=False,
         help_text='Indicator that diagnostic testing should be performed on units identified by trace-back of indirect contacts.', )
-    test_specificity = models.FloatField(blank=True, null=True,
+    test_specificity = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Test Specificity for units of this production type', )
-    test_sensitivity = models.FloatField(blank=True, null=True,
+    test_sensitivity = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Test Sensitivity for units of this production type', )
     test_delay = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Function that describes the delay in obtaining test results.', )
@@ -477,7 +477,7 @@ class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indire
         help_text='Code indicating the mechanism of the disease spread.', )
     subclinical_animals_can_infect_others = models.BooleanField(default=False,
         help_text='Indicates if subclinical units of the source type can spread disease by direct or indirect contact. ', )
-    contact_rate = models.FloatField(blank=True, null=True,
+    contact_rate = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='The average contact rate (in recipient units per source unit per day) for direct or indirect contact models.', )
     use_fixed_contact_rate = models.BooleanField(default=False,
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
@@ -515,7 +515,7 @@ class AirborneSpread(DiseaseSpread):
         help_text='Code indicating the mechanism of the disease spread.', )
     spread_1km_probability = PercentField(blank=True, null=True,
         help_text='The probability that disease will be spread to unit 1 km away from the source unit.', )
-    max_distance = models.FloatField(blank=True, null=True,
+    max_distance = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='The maximum distance in KM of airborne spread.', )
     wind_direction_start = models.PositiveIntegerField(default=0,
         help_text='The start angle in degrees of the predominate wind direction for airborne spread.', )
@@ -626,7 +626,7 @@ class ProductionTypePairTransmission(models.Model):
 class Zone(models.Model):
     zone_description = models.TextField(
         help_text='Description of the zone', )
-    zone_radius = models.FloatField(
+    zone_radius = models.FloatField(validators=[MinValueValidator(0.0)],
         help_text='Radius in kilometers of the zone', )
     def __str__(self):
         return "%s: %skm" % (self.zone_description, self.zone_radius)
@@ -641,7 +641,7 @@ class ZoneEffectOnProductionType(models.Model):
         help_text='Function the describes indirect movement rate.', )
     zone_direct_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Function the describes direct movement rate.', )
-    zone_detection_multiplier = models.FloatField(default=1.0,
+    zone_detection_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], default=1.0,
         help_text='Multiplier for the probability of observing clinical signs in units of this production type in this zone.', )
     cost_of_surveillance_per_animal_day = MoneyField(default=0.0,
         help_text='Cost of surveillance per animal per day in this zone.', )
