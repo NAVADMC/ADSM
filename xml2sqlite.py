@@ -289,20 +289,10 @@ def main():
 
 		for fromTypeName in getProductionTypes( el, 'from-production-type', productionTypeNames ):
 			for toTypeName in getProductionTypes( el, 'to-production-type', productionTypeNames ):
-				# If a ProductionTypePairTransmission object has already been
-				# assigned to this from/to pairing of production types,
-				# retrieve it; otherwise, create a new one.
-				try:
-					pairing = ProductionTypePairTransmission.objects.get(
-					  source_production_type__name=fromTypeName,
-					  destination_production_type__name=toTypeName
-					)
-				except ProductionTypePairTransmission.DoesNotExist:
-					pairing = ProductionTypePairTransmission(
-					  source_production_type = ProductionType.objects.get( name=fromTypeName ),
-					  destination_production_type = ProductionType.objects.get( name=toTypeName )
-					)
-					pairing.save()
+				pairing, created = ProductionTypePairTransmission.objects.get_or_create(
+				  source_production_type = ProductionType.objects.get( name=fromTypeName ),
+				  destination_production_type = ProductionType.objects.get( name=toTypeName )
+				)
 				if el.attrib['contact-type'] == 'direct':
 					pairing.direct_contact_spread = contactSpreadModel
 				else:
@@ -326,16 +316,10 @@ def main():
 		movementControl = getRelChart( el.find( './movement-control' ) )
 
 		for fromTypeName in fromTypeNames:
-			# If a ZoneEffectOnProductionType object has already been assigned
-			# to this combination of production type and zone, retrieve it;
-			# otherwise, create a new one.
-			try:
-				effect = ZoneEffectOnProductionType.objects.get( production_type__name=fromTypeName, zone__zone_description=zoneName )
-			except ZoneEffectOnProductionType.DoesNotExist:
-				effect = ZoneEffectOnProductionType(
-				  zone = Zone.objects.get( zone_description=zoneName ),
-				  production_type = ProductionType.objects.get( name=fromTypeName )
-				)
+			effect, created = ZoneEffectOnProductionType.objects.get_or_create(
+			  zone = Zone.objects.get( zone_description=zoneName ),
+			  production_type = ProductionType.objects.get( name=fromTypeName )
+			)
 			if contactType == 'direct' or contactType == 'both':
 				effect.zone_direct_movement = movementControl
 			if contactType == 'indirect' or contactType == 'both':
@@ -382,16 +366,10 @@ def main():
 		for typeName in typeNames:
 			if 'zone' in el.attrib:
 				zoneName = el.attrib['zone']
-				# If a ZoneEffectOnProductionType object has already been
-				# assigned to this combination of production type and zone,
-				# retrieve it; otherwise, create a new one.
-				try:
-					effect = ZoneEffectOnProductionType.objects.get( production_type__name=typeName, zone__zone_description=zoneName )
-				except ZoneEffectOnProductionType.DoesNotExist:
-					effect = ZoneEffectOnProductionType(
-					  zone = Zone.objects.get( zone_description=zoneName ),
-					  production_type = ProductionType.objects.get( name=typeName )
-					)
+				effect, created = ZoneEffectOnProductionType.objects.get_or_create(
+				  zone = Zone.objects.get( zone_description=zoneName ),
+				  production_type = ProductionType.objects.get( name=typeName )
+				)
 				effect.zone_detection_multiplier = multiplier
 				effect.save()
 			else:
@@ -1121,13 +1099,10 @@ def main():
 				# If a ZoneEffectOnProductionType object has already been
 				# assigned to this combination of production type and zone,
 				# retrieve it; otherwise, create a new one.
-				try:
-					effect = ZoneEffectOnProductionType.objects.get( production_type__name=typeName, zone__zone_description=zoneName )
-				except ZoneEffectOnProductionType.DoesNotExist:
-					effect = ZoneEffectOnProductionType(
-					  zone = Zone.objects.get( zone_description=zoneName ),
-					  production_type = ProductionType.objects.get( name=typeName )
-					)
+				effect, created = ZoneEffectOnProductionType.objects.get_or_create(
+				  zone = Zone.objects.get( zone_description=zoneName ),
+				  production_type = ProductionType.objects.get( name=typeName )
+				)
 				effect.cost_of_surveillance_per_animal_day = surveillance
 				effect.save()
 		# end of loop over production types covered by this <economic-model> element
