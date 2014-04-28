@@ -64,7 +64,8 @@ var modelModal = {
             var $newForm = $($.parseHTML(newForm));
 
             modal.find('.modal-title').html($newForm.find('#title').html());
-            var $form = $newForm.find('form:not(.filename)');
+            console.log($newForm)
+            var $form = $newForm.not('header, nav').find('form');
             $form.find('.buttonHolder').remove();
             modal.find('.modal-body').html($form);
             $('body').append(modal);
