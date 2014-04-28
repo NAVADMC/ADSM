@@ -126,6 +126,8 @@ def main():
 		statesFile = None
 	if xml.find( './exit-condition/first-detection' ) != None:
 		earlyExitCondition = 'first-detection'
+	elif xml.find( './exit-condition/disease-end' ) != None:
+		earlyExitCondition = 'disease-end'	
 	else:
 		earlyExitCondition = ''
 	outputSettings = OutputSettings(
