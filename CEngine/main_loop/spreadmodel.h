@@ -30,6 +30,7 @@
 #endif
 
 #include <glib.h>
+#include <sqlite3.h>
 
 #include "unit.h"
 #include "zone.h"
@@ -239,13 +240,13 @@ UNT_zone_t;
 #ifdef USE_SC_GUILIB
 DLL_API void
 run_sim_main (const char *population_file,
-              const char *parameter_file,
+              sqlite3 *parameter_db,
               const char *output_dir,
               double fixed_rng_value, int verbosity, int seed, char *production_type_file);
 #else
 DLL_API void
 run_sim_main (const char *population_file,
-              const char *parameter_file,
+              sqlite3 *parameter_db,
               const char *output_dir,
               double fixed_rng_value, int verbosity, int seed);
 #endif

@@ -62,10 +62,7 @@ EVT_event_type_t events_listened_for[] = { EVT_TraceResult };
 /** Specialized information for this model. */
 typedef struct
 {
-  SPREADMODEL_contact_type contact_type;
-  SPREADMODEL_trace_direction direction;
-  gboolean *production_type;
-  GPtrArray *production_types;
+  int dummy;                    /* to prevent "struct has no members" warnings */
 }
 local_data_t;
 
@@ -91,24 +88,20 @@ handle_trace_result_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * 
 
   local_data = (local_data_t *) (self->model_data);
 
-  if (event->traced == FALSE || event->contact_type != local_data->contact_type)
-    goto end;
+  if (event->traced)
+    {
+      if (event->direction == SPREADMODEL_TraceForwardOrOut)
+        unit = event->exposed_unit;
+      else
+        unit = event->exposing_unit;
 
-  if (local_data->direction == SPREADMODEL_TraceForwardOrOut)
-    unit = event->exposed_unit;
-  else
-    unit = event->exposing_unit;
+      #if DEBUG
+        g_debug ("requesting quarantine of unit \"%s\"", unit->official_id);
+      #endif
 
-  if (local_data->production_type[unit->production_type] == FALSE)
-    goto end;
+      UNT_quarantine (unit);
+    }
 
-#if DEBUG
-  g_debug ("requesting quarantine of unit \"%s\"", unit->official_id);
-#endif
-
-  UNT_quarantine (unit);
-
-end:
 #if DEBUG
   g_debug ("----- EXIT handle_trace_result_event (%s)", MODEL_NAME);
 #endif
@@ -183,44 +176,13 @@ reset (struct spreadmodel_model_t_ *self)
 char *
 to_string (struct spreadmodel_model_t_ *self)
 {
-  GString *s;
-  gboolean already_names;
-  unsigned int i;
-  char *chararray;
-  local_data_t *local_data;
-
-  local_data = (local_data_t *) (self->model_data);
-  s = g_string_new (NULL);
-  g_string_sprintf (s, "<%s for ", MODEL_NAME);
-  already_names = FALSE;
-  for (i = 0; i < local_data->production_types->len; i++)
-    if (local_data->production_type[i] == TRUE)
-      {
-        if (already_names)
-          g_string_append_printf (s, ",%s",
-                                  (char *) g_ptr_array_index (local_data->production_types, i));
-        else
-          {
-            g_string_append_printf (s, "%s",
-                                    (char *) g_ptr_array_index (local_data->production_types, i));
-            already_names = TRUE;
-          }
-      }
-  g_string_append_printf (s, " units found by %s %s>",
-    SPREADMODEL_contact_type_name[local_data->contact_type],
-    SPREADMODEL_trace_direction_name[local_data->direction]);
-
-  /* don't return the wrapper object */
-  chararray = s->str;
-  g_string_free (s, FALSE);
-  return chararray;
+  return g_strdup_printf ("<%s>", MODEL_NAME);
 }
 
 
 
 /**
- * Frees this model.  Does not free the contact type name or production type
- * names.
+ * Frees this model.
  *
  * @param self the model.
  */
@@ -235,7 +197,6 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  g_free (local_data->production_type);
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
   g_free (self);
@@ -248,16 +209,14 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 /**
- * Returns a new trace destruction model.
+ * Returns a new trace quarantine model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_attribute *attr;
-  XML_Char const *attr_text;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -273,7 +232,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_singleton = FALSE;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = spreadmodel_model_answer_no;
   self->has_pending_infections = spreadmodel_model_answer_no;
@@ -281,42 +239,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->printf = spreadmodel_model_printf;
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
-
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
-#if DEBUG
-  g_debug ("setting contact type");
-#endif
-  attr = scew_element_attribute_by_name (params, "contact-type");
-  g_assert (attr != NULL);
-  attr_text = scew_attribute_value (attr);
-  if (strcmp (attr_text, "direct") == 0)
-    local_data->contact_type = SPREADMODEL_DirectContact;
-  else if (strcmp (attr_text, "indirect") == 0)
-    local_data->contact_type = SPREADMODEL_IndirectContact;
-  else
-    g_assert_not_reached ();
-
-#if DEBUG
-  g_debug ("setting trace direction");
-#endif
-  attr = scew_element_attribute_by_name (params, "direction");
-  g_assert (attr != NULL);
-  attr_text = scew_attribute_value (attr);
-  if (strcmp (attr_text, "out") == 0)
-    local_data->direction = SPREADMODEL_TraceForwardOrOut;
-  else if (strcmp (attr_text, "in") == 0)
-    local_data->direction = SPREADMODEL_TraceBackOrIn;
-  else
-    g_assert_not_reached ();
-
-#if DEBUG
-  g_debug ("setting production types");
-#endif
-  local_data->production_types = units->production_type_names;
-  local_data->production_type =
-    spreadmodel_read_prodtype_attribute (params, "production-type", units->production_type_names);
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

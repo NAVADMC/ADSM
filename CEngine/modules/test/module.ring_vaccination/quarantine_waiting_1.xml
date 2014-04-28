@@ -201,7 +201,7 @@
       </min-time-between-vaccinations>      
     </ring-vaccination-model>
 
-    <vaccine-model production-type="Beef Cattle">
+    <vaccine-model production-type="Beef Cattle,Pigs,Sheep">
       <delay>
         <value>0</value>
         <units><xdf:unit>day</xdf:unit></units>

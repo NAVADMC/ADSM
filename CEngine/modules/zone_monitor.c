@@ -530,17 +530,11 @@ local_free (struct spreadmodel_model_t_ *self)
  * Returns a new zone monitor.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element const *e;
-  scew_list *ee, *iter;
-  const XML_Char *variable_name;
-  RPT_frequency_t freq;
-  gboolean success;
-  gboolean broken_down;
   unsigned int nprod_types;
   int i, j;
   ZON_zone_t *zone;
@@ -558,10 +552,8 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  self->set_params = NULL;
   self->run = run;
   self->reset = reset;
-  self->is_singleton = TRUE;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = spreadmodel_model_answer_no;
   self->has_pending_infections = spreadmodel_model_answer_no;
@@ -570,25 +562,22 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
-  local_data->area = RPT_new_reporting ("zoneArea", RPT_group, RPT_never);
-  local_data->max_area = RPT_new_reporting ("maxZoneArea", RPT_group, RPT_never);
-  local_data->max_area_day = RPT_new_reporting ("maxZoneAreaDay", RPT_group, RPT_never);
-  local_data->final_area = RPT_new_reporting ("finalZoneArea", RPT_group, RPT_never);
-  local_data->perimeter = RPT_new_reporting ("zonePerimeter", RPT_group, RPT_never);
-  local_data->max_perimeter = RPT_new_reporting ("maxZonePerimeter", RPT_group, RPT_never);
-  local_data->max_perimeter_day = RPT_new_reporting ("maxZonePerimeterDay", RPT_group, RPT_never);
-  local_data->final_perimeter = RPT_new_reporting ("finalZonePerimeter", RPT_group, RPT_never);
+  local_data->area = RPT_new_reporting ("zoneArea", RPT_group, RPT_daily);
+  local_data->max_area = RPT_new_reporting ("maxZoneArea", RPT_group, RPT_daily);
+  local_data->max_area_day = RPT_new_reporting ("maxZoneAreaDay", RPT_group, RPT_daily);
+  local_data->final_area = RPT_new_reporting ("finalZoneArea", RPT_group, RPT_daily);
+  local_data->perimeter = RPT_new_reporting ("zonePerimeter", RPT_group, RPT_daily);
+  local_data->max_perimeter = RPT_new_reporting ("maxZonePerimeter", RPT_group, RPT_daily);
+  local_data->max_perimeter_day = RPT_new_reporting ("maxZonePerimeterDay", RPT_group, RPT_daily);
+  local_data->final_perimeter = RPT_new_reporting ("finalZonePerimeter", RPT_group, RPT_daily);
   local_data->num_separate_areas =
-    RPT_new_reporting ("num-separate-areas", RPT_group, RPT_never);
-  local_data->num_units = RPT_new_reporting ("unitsInZone", RPT_group, RPT_never);
-  local_data->num_units_by_prodtype = RPT_new_reporting ("unitsInZone", RPT_group, RPT_never);
-  local_data->num_unit_days = RPT_new_reporting ("unitDaysInZone", RPT_group, RPT_never);
-  local_data->num_unit_days_by_prodtype = RPT_new_reporting ("unitDaysInZone", RPT_group, RPT_never);
-  local_data->num_animal_days = RPT_new_reporting ("animalDaysInZone", RPT_group, RPT_never);
-  local_data->num_animal_days_by_prodtype = RPT_new_reporting ("animalDaysInZone", RPT_group, RPT_never);
+    RPT_new_reporting ("num-separate-areas", RPT_group, RPT_daily);
+  local_data->num_units = RPT_new_reporting ("unitsInZone", RPT_group, RPT_daily);
+  local_data->num_units_by_prodtype = RPT_new_reporting ("unitsInZone", RPT_group, RPT_daily);
+  local_data->num_unit_days = RPT_new_reporting ("unitDaysInZone", RPT_group, RPT_daily);
+  local_data->num_unit_days_by_prodtype = RPT_new_reporting ("unitDaysInZone", RPT_group, RPT_daily);
+  local_data->num_animal_days = RPT_new_reporting ("animalDaysInZone", RPT_group, RPT_daily);
+  local_data->num_animal_days_by_prodtype = RPT_new_reporting ("animalDaysInZone", RPT_group, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->area);
   g_ptr_array_add (self->outputs, local_data->max_area);
   g_ptr_array_add (self->outputs, local_data->max_area_day);
@@ -606,83 +595,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   g_ptr_array_add (self->outputs, local_data->num_animal_days_by_prodtype);
 
   /* Set the reporting frequency for the output variables. */
-  ee = scew_element_list_by_name (params, "output");
-#if DEBUG
-  g_debug ("%u output variables", scew_list_size(ee));
-#endif
-  for (iter = ee; iter != NULL; iter = scew_list_next(iter))
-    {
-      e = (scew_element *) scew_list_data (iter);
-      variable_name = scew_element_contents (scew_element_by_name (e, "variable-name"));
-      freq = RPT_string_to_frequency (scew_element_contents
-                                      (scew_element_by_name (e, "frequency")));
-      broken_down = PAR_get_boolean (scew_element_by_name (e, "broken-down"), &success);
-      if (!success)
-      	broken_down = FALSE;
-      broken_down = broken_down || (g_strstr_len (variable_name, -1, "-by-") != NULL); 
-      /* Starting at version 3.2 we accept either the old, verbose output
-       * variable names or the new shorter ones. */
-      if (strcmp (variable_name, "zoneArea") == 0
-               || strcmp (variable_name, "zone-area") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->area, freq);
-        }
-      else if (strcmp (variable_name, "maxZoneArea") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->max_area, freq);
-        }
-      else if (strcmp (variable_name, "maxZoneAreaDay") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->max_area_day, freq);
-        }
-      else if (strcmp (variable_name, "finalZoneArea") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->final_area, freq);
-        }
-      else if (strcmp (variable_name, "zonePerimeter") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->perimeter, freq);
-        }
-      else if (strcmp (variable_name, "maxZonePerimeter") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->max_perimeter, freq);
-        }
-      else if (strcmp (variable_name, "maxZonePerimeterDay") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->max_perimeter_day, freq);
-        }
-      else if (strcmp (variable_name, "finalZonePerimeter") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->final_perimeter, freq);
-        }
-      else if (strcmp (variable_name, "num-separate-areas") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->num_separate_areas, freq);
-        }
-      else if (strcmp (variable_name, "unitsInZone") == 0
-               || strncmp (variable_name, "num-units-in-zone", 17) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->num_units, freq);
-          if (broken_down)
-            RPT_reporting_set_frequency (local_data->num_units_by_prodtype, freq);
-        }
-      else if (strcmp (variable_name, "unitDaysInZone") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->num_unit_days, freq);
-          if (broken_down)
-            RPT_reporting_set_frequency (local_data->num_unit_days_by_prodtype, freq);
-        }
-      else if (strcmp (variable_name, "animalDaysInZone") == 0
-               || strncmp (variable_name, "num-animal-days-in-zone", 23) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->num_animal_days, freq);
-          if (broken_down)
-            RPT_reporting_set_frequency (local_data->num_animal_days_by_prodtype, freq);
-        }
-      else
-        g_warning ("no output variable named \"%s\", ignoring", variable_name);        
-    }
-  scew_list_free (ee);
 
   local_data->nzones = ZON_zone_list_length (zones);
   local_data->projection = projection;

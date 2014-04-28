@@ -389,7 +389,7 @@ PDF_dist_t;
 PDF_dist_t *PDF_new_point_dist (double);
 PDF_dist_t *PDF_new_uniform_dist (double a, double b);
 PDF_dist_t *PDF_new_triangular_dist (double a, double c, double b);
-PDF_dist_t *PDF_new_piecewise_dist (unsigned int, double *xy);
+PDF_dist_t *PDF_new_piecewise_dist (unsigned int, double *x, double *y);
 PDF_dist_t *PDF_new_histogram_dist (gsl_histogram *);
 PDF_dist_t *PDF_new_gaussian_dist (double mu, double sigma);
 PDF_dist_t *PDF_new_inverse_gaussian_dist (double mu, double lambda);

@@ -116,7 +116,7 @@ expect_after {
 		category = getText (test.getElementsByTagName ("category")[0])
 		parameterFileName = getText (test.getElementsByTagName ("parameter-file")[0])
 		populationFileName = getText (test.getElementsByTagName ("population-file")[0])
-		print 'set params "test/module.%s/%s.xml"' % (category, parameterFileName)
+		print 'set params "test/module.%s/%s.sqlite3"' % (category, parameterFileName)
 		print 'set herds "test/%s.xml"' % (populationFileName)
 
 		table = test.getElementsByTagName ("output")[0]
@@ -145,7 +145,7 @@ expect_after {
 		category = getText (test.getElementsByTagName ("category")[0])
 		parameterFileName = getText (test.getElementsByTagName ("parameter-file")[0])
 		populationFileName = getText (test.getElementsByTagName ("population-file")[0])
-		print 'set params "test/module.%s/%s.xml"' % (category, parameterFileName)
+		print 'set params "test/module.%s/%s.sqlite3"' % (category, parameterFileName)
 		print 'set herds "test/%s.xml"' % (populationFileName)
 
 		tables = test.getElementsByTagName ("output")
@@ -177,7 +177,7 @@ expect_after {
 		category = getText (test.getElementsByTagName ("category")[0])
 		parameterFileName = getText (test.getElementsByTagName ("parameter-file")[0])
 		populationFileName = getText (test.getElementsByTagName ("population-file")[0])
-		print 'set params "test/module.%s/%s.xml"' % (category, parameterFileName)
+		print 'set params "test/module.%s/%s.sqlite3"' % (category, parameterFileName)
 		print 'set herds "test/%s.xml"' % (populationFileName)
 
 		table = test.getElementsByTagName ("output")[0]
@@ -213,7 +213,7 @@ expect_after {
 		category = getText (test.getElementsByTagName ("category")[0])
 		parameterFileName = getText (test.getElementsByTagName ("parameter-file")[0])
 		populationFileName = getText (test.getElementsByTagName ("population-file")[0])
-		print 'set params "test/module.%s/%s.xml"' % (category, parameterFileName)
+		print 'set params "test/module.%s/%s.sqlite3"' % (category, parameterFileName)
 		print 'set herds "test/%s.xml"' % (populationFileName)
 		tables = test.getElementsByTagName ("output")
 

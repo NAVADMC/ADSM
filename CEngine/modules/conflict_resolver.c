@@ -23,7 +23,6 @@
 
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new conflict_resolver_new
-#define set_params conflict_resolver_set_params
 #define run conflict_resolver_run
 #define reset conflict_resolver_reset
 #define events_listened_for conflict_resolver_events_listened_for
@@ -596,30 +595,10 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 /**
- * Adds a set of parameters to a conflict resolver model.
- */
-void
-set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
-{
-#if DEBUG
-  g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
-#endif
-
-  /* Nothing to do. */
-
-#if DEBUG
-  g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
-#endif
-  return;
-}
-
-
-
-/**
  * Returns a new conflict resolver model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
@@ -637,10 +616,8 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  self->set_params = set_params;
   self->run = run;
   self->reset = reset;
-  self->is_singleton = TRUE;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = spreadmodel_model_answer_no;
   self->has_pending_infections = spreadmodel_model_answer_no;

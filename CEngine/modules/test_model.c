@@ -82,13 +82,23 @@ EVT_event_type_t events_listened_for[] = { EVT_NewDay,
 /* Specialized information for this model. */
 typedef struct
 {
-  gboolean *production_type;
-  GPtrArray *production_types;
   PDF_dist_t *delay;
   double sensitivity; /**< The probability that the test will correctly give a
     positive result for a diseased or recovered (naturally immune) unit. */
   double specificity; /**< The probability that the test will correctly give a
     negative result for a healthy unit. */
+}
+param_block_t;
+
+
+
+typedef struct
+{
+  GPtrArray *production_types;
+  param_block_t **param_block; /**< Blocks of parameters.  Use an expression of
+    the form
+    param_block[production_type]
+    to get a pointer to a particular parameter block. */
   GPtrArray *pending_results; /**< An array to store delayed test results.
     Each item in the array is a GQueue of TestResult and Detection events.
     (Actually a singly-linked list would suffice, but the GQueue syntax is much
@@ -103,6 +113,8 @@ typedef struct
     track detections for units that are currently undergoing tests, so that we
     know whether an eventual positive test result should trigger a new
     Detection or not. */
+  sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
+    so that it will be available to the set_params function. */
 }
 local_data_t;
 
@@ -238,7 +250,7 @@ handle_detection_event (struct spreadmodel_model_t_ *self,
 
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
-  if (local_data->production_type[unit->production_type] == FALSE)
+  if (local_data->param_block[unit->production_type] == NULL)
     goto end;
 
   p = g_hash_table_lookup (local_data->detection_status, unit);
@@ -283,6 +295,7 @@ handle_test_event (struct spreadmodel_model_t_ *self,
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
+  param_block_t *param_block;
   double r;
   gboolean positive, correct;
   EVT_event_t *result, *detection;
@@ -303,7 +316,8 @@ handle_test_event (struct spreadmodel_model_t_ *self,
   local_data = (local_data_t *) (self->model_data);
 
   unit = event->unit;
-  if (local_data->production_type[unit->production_type] == FALSE)
+  param_block = local_data->param_block[unit->production_type];
+  if (param_block == NULL)
     goto end;
 
 #if DEBUG
@@ -318,29 +332,29 @@ handle_test_event (struct spreadmodel_model_t_ *self,
     case InfectiousClinical:
     case NaturallyImmune:
       r = RAN_num (rng);
-      positive = (r < local_data->sensitivity);
+      positive = (r < param_block->sensitivity);
       correct = positive;
 #if DEBUG
-      if (r < local_data->sensitivity)
+      if (r < param_block->sensitivity)
         g_string_append_printf (s, ", r (%g) < sensitivity (%g) -> positive",
-				r, local_data->sensitivity);
+				r, param_block->sensitivity);
       else
         g_string_append_printf (s, ", r (%g) >= sensitivity (%g) -> negative",
-				r, local_data->sensitivity);
+				r, param_block->sensitivity);
 #endif
       break;
     case Susceptible:
     case VaccineImmune:
       r = RAN_num (rng);
-      positive = (r >= local_data->specificity);
+      positive = (r >= param_block->specificity);
       correct = !positive;
 #if DEBUG
-      if (r < local_data->specificity)
+      if (r < param_block->specificity)
         g_string_append_printf (s, ", r (%g) < specificity (%g) -> negative",
-				r, local_data->specificity);
+				r, param_block->specificity);
       else
         g_string_append_printf (s, ", r (%g) >= specificity (%g) -> positive",
-				r, local_data->specificity);
+				r, param_block->specificity);
 #endif
       break;
     case Destroyed:
@@ -370,7 +384,7 @@ handle_test_event (struct spreadmodel_model_t_ *self,
     detection = EVT_new_detection_event (unit, event->day, SPREADMODEL_DetectionDiagnosticTest, test_result);
   else
     detection = NULL;
-  delay = (int) round (PDF_random (local_data->delay, rng));
+  delay = (int) round (PDF_random (param_block->delay, rng));
   /* If there is no delay, release the test result immediately; otherwise, add
    * it to a list to be released on a future day. */
   if (delay <= 0)
@@ -525,36 +539,35 @@ has_pending_actions (struct spreadmodel_model_t_ *self)
 char *
 to_string (struct spreadmodel_model_t_ *self)
 {
-  GString *s;
-  gboolean already_names;
-  unsigned int i;
-  char *substring, *chararray;
   local_data_t *local_data;
+  GString *s;
+  guint nprod_types, i;
+  param_block_t *param_block;
+  char *substring, *chararray;
 
   local_data = (local_data_t *) (self->model_data);
   s = g_string_new (NULL);
-  g_string_sprintf (s, "<%s for ", MODEL_NAME);
-  already_names = FALSE;
-  for (i = 0; i < local_data->production_types->len; i++)
-    if (local_data->production_type[i] == TRUE)
-      {
-        if (already_names)
-	  g_string_append_printf (s, ",%s",
-	 			  (char *) g_ptr_array_index (local_data->production_types, i));
-	else
-	  {			  
-	    g_string_append_printf (s, "%s",
-	 			    (char *) g_ptr_array_index (local_data->production_types, i));
-	    already_names = TRUE;
-	  }
-      }
+  g_string_sprintf (s, "<%s", MODEL_NAME);
 
-  substring = PDF_dist_to_string (local_data->delay);
-  g_string_sprintfa (s, "\n  delay=%s\n", substring);
-  g_free (substring);
+  /* Add the parameter block for each production type. */
+  nprod_types = local_data->production_types->len;
+  for (i = 0; i < nprod_types; i++)
+    {
+      param_block = local_data->param_block[i];
+      if (param_block == NULL)
+        continue;
 
-  g_string_sprintfa (s, "  sensitivity=%g\n", local_data->sensitivity);
-  g_string_sprintfa (s, "  specificity=%g>", local_data->specificity);
+      g_string_append_printf (s, "\n  for %s",
+                              (char *) g_ptr_array_index (local_data->production_types, i));
+
+      substring = PDF_dist_to_string (param_block->delay);
+      g_string_append_printf (s, "\n    delay=%s\n", substring);
+      g_free (substring);
+
+      g_string_append_printf (s, "    sensitivity=%g\n", param_block->sensitivity);
+      g_string_append_printf (s, "    specificity=%g>", param_block->specificity);
+    }
+  g_string_append_c (s, '>');
 
   /* don't return the wrapper object */
   chararray = s->str;
@@ -573,8 +586,9 @@ void
 local_free (struct spreadmodel_model_t_ *self)
 {
   local_data_t *local_data;
+  guint nprod_types, i;
+  param_block_t *param_block;
   GQueue *q;
-  unsigned int i;
   
 #if DEBUG
   g_debug ("----- ENTER free (%s)", MODEL_NAME);
@@ -582,9 +596,18 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  g_free (local_data->production_type);
 
-  PDF_free_dist (local_data->delay);
+  nprod_types = local_data->production_types->len;
+  for (i = 0; i < nprod_types; i++)
+    {
+      param_block = local_data->param_block[i];
+      if (param_block != NULL)
+        {
+          PDF_free_dist (param_block->delay);
+          g_free (param_block);
+        }
+    }
+  g_free (local_data->param_block);
 
   for (i = 0; i < local_data->pending_results->len; i++)
     {
@@ -608,16 +631,82 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 /**
+ * Adds a set of production type specific parameters to a test model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+set_params (void *data, int ncols, char **value, char **colname)
+{
+  spreadmodel_model_t *self;
+  local_data_t *local_data;
+  sqlite3 *params;
+  guint production_type;
+  param_block_t *p;
+  guint pdf_id;
+
+  #if DEBUG
+    g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
+  #endif
+
+  self = (spreadmodel_model_t *)data;
+  local_data = (local_data_t *) (self->model_data);
+  params = local_data->db;
+
+  g_assert (ncols == 4);
+
+  /* Find out which production type these parameters apply to. */
+  production_type =
+    spreadmodel_read_prodtype (value[0], local_data->production_types);
+
+  /* Check that we are not overwriting an existing parameter block (that would
+   * indicate a bug). */
+  g_assert (local_data->param_block[production_type] == NULL);
+
+  /* Create a new parameter block. */
+  p = g_new (param_block_t, 1);
+  local_data->param_block[production_type] = p;
+
+  /* Read the parameters. */
+  errno = 0;
+  pdf_id = strtol (value[1], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);  
+  p->delay = PAR_get_PDF (params, pdf_id);
+
+  errno = 0;
+  p->sensitivity = strtod (value[2], NULL);
+  g_assert (errno != ERANGE);
+  g_assert (p->sensitivity >= 0 && p->sensitivity <= 1);
+
+  errno = 0;
+  p->specificity = strtod (value[3], NULL);
+  g_assert (errno != ERANGE);
+  g_assert (p->specificity >= 0 && p->specificity <= 1);
+
+#if DEBUG
+  g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
+#endif
+
+  return 0;
+}
+
+
+
+/**
  * Returns a new test model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t *units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t *units, projPJ projection,
      ZON_zone_list_t *zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element *e;
-  gboolean success;
+  guint nprod_types;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -633,7 +722,6 @@ new (scew_element * params, UNT_unit_list_t *units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_singleton = FALSE;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = has_pending_actions;
   self->has_pending_infections = spreadmodel_model_answer_no;
@@ -642,67 +730,32 @@ new (scew_element * params, UNT_unit_list_t *units, projPJ projection,
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
+  /* Initialize an array for delayed test results.  We don't know yet how
+   * long the array needs to be, since that will depend on values we sample
+   * from the delay distribution, so we initialize it to length 1. */
+  local_data->pending_results = g_ptr_array_new ();
+  g_ptr_array_add (local_data->pending_results, g_queue_new());
+  local_data->npending_results = 0;
+  local_data->rotating_index = 0;
 
-#if DEBUG
-  g_debug ("setting production types");
-#endif
+  local_data->detection_status = g_hash_table_new (g_direct_hash, g_direct_equal);
+
+  /* Initialize the array of parameter blocks. */
   local_data->production_types = units->production_type_names;
-  local_data->production_type = spreadmodel_read_prodtype_attribute (params, "production-type", units->production_type_names);
+  nprod_types = local_data->production_types->len;
+  local_data->param_block = g_new0 (param_block_t *, nprod_types);
 
-  e = scew_element_by_name (params, "delay");
-  if (e != NULL)
+  /* Call the set_params function to read the production type specific
+   * parameters. */
+  local_data->db = params;
+  sqlite3_exec (params,
+                "SELECT prodtype.name,test_delay_id,test_sensitivity,test_specificity FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol, ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id",
+                set_params, self, &sqlerr);
+  if (sqlerr)
     {
-      local_data->delay = PAR_get_PDF (e);
+      g_error ("%s", sqlerr);
     }
-  else
-    {
-      g_warning ("%s: delay parameter missing, setting to 0 days", MODEL_NAME);
-      local_data->delay = PDF_new_point_dist (0);
-    }
-
-  e = scew_element_by_name (params, "sensitivity");
-  if (e != NULL)
-    {
-      local_data->sensitivity = PAR_get_probability (e, &success);
-      if (success == FALSE)
-	{
-	  g_warning ("%s: setting sensitivity to 1", MODEL_NAME);
-	  local_data->sensitivity = 1.0;
-	}
-    }
-  else
-    {
-      local_data->sensitivity = 1.0;
-      g_warning ("%s: sensitivity parameter missing, setting to 1", MODEL_NAME);
-    }
-
-  e = scew_element_by_name (params, "specificity");
-  if (e != NULL)
-    {
-      local_data->specificity = PAR_get_probability (e, &success);
-      if (success == FALSE)
-	{
-	  g_warning ("%s: setting specificity to 1", MODEL_NAME);
-	  local_data->specificity = 1.0;
-	}
-    }
-  else
-    {
-      local_data->specificity = 1.0;
-      g_warning ("%s: specificity parameter missing, setting to 1", MODEL_NAME);
-    }
-
-    /* Initialize an array for delayed test results.  We don't know yet how
-     * long the array needs to be, since that will depend on values we sample
-     * from the delay distribution, so we initialize it to length 1. */
-    local_data->pending_results = g_ptr_array_new ();
-    g_ptr_array_add (local_data->pending_results, g_queue_new());
-    local_data->npending_results = 0;
-    local_data->rotating_index = 0;
-
-    local_data->detection_status = g_hash_table_new (g_direct_hash, g_direct_equal);
+  local_data->db = NULL;
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

@@ -23,7 +23,7 @@
 
 
 /* Prototypes. */
-int spreadmodel_load_modules (const char *parameter_file,
+int spreadmodel_load_modules (sqlite3 *parameter_db,
                               UNT_unit_list_t *, projPJ, ZON_zone_list_t *,
                               unsigned int *ndays, unsigned int *nruns,
                               spreadmodel_model_t *** models, GPtrArray * outputs, guint *_exit_conditions);

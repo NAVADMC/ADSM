@@ -378,12 +378,12 @@ local_free (struct spreadmodel_model_t_ *self)
  * Returns a new state table writer.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element const *e;
+  char *filename;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -397,10 +397,8 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_sized_new (0);
   self->model_data = local_data;
-  self->set_params = NULL;
   self->run = run;
   self->reset = reset;
-  self->is_singleton = TRUE;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = spreadmodel_model_answer_no;
   self->has_pending_infections = spreadmodel_model_answer_no;
@@ -409,14 +407,11 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
   /* Get the filename for the table.  If the filename is omitted, blank, '-',
    * or 'stdout' (case insensitive), then the table is written to standard
    * output. */
-  e = scew_element_by_name (params, "filename");
-  if (e == NULL)
+  filename = PAR_get_text (params, "SELECT daily_states_filename FROM ScenarioCreator_outputsettings");
+  if (filename == NULL)
     {
       local_data->filename = g_strdup ("stdout"); /* just so we have something
         to display, and to free later */
@@ -424,7 +419,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
     }
   else
     {
-      local_data->filename = PAR_get_text (e);
+      local_data->filename = filename;
       if (local_data->filename == NULL
           || g_ascii_strcasecmp (local_data->filename, "") == 0
           || g_ascii_strcasecmp (local_data->filename, "-") == 0

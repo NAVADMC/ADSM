@@ -92,7 +92,7 @@
       <latent-units-can-infect>false</latent-units-can-infect>
     </contact-spread-model>
 
-    <contact-spread-model from-production-type="Beef Cattle" to-production-type="Pigs" contact-type="direct">
+    <contact-spread-model from-production-type="Beef Cattle" to-production-type="Pigs" contact-type="indirect">
       <fixed-movement-rate>
         <value>1</value>
         <units><xdf:unit power="-1">day</xdf:unit></units>
@@ -159,6 +159,8 @@
       </prob-report-vs-time-since-outbreak>
     </detection-model>
 
+    <quarantine-model />
+
     <resources-and-implementation-of-controls-model>
       <!-- The authorities can begin a destruction program immediately. -->
       <destruction-program-delay>
@@ -207,10 +209,10 @@
       <priority>3</priority>
     </basic-destruction-model>
 
-    <!-- Record direct contacts.  When a trace is requested, there is a 3-day
+    <!-- Record direct and indirect contacts.  When a trace is requested, there is a 3-day
       delay to retrieve records.  Because the production type is unspecified,
       it is taken to apply to all production types. -->
-    <contact-recorder-model contact-type="direct">
+    <contact-recorder-model>
       <trace-period>
         <value>7</value>
 	<units><xdf:unit>day</xdf:unit></units>
@@ -222,8 +224,8 @@
       </trace-delay>
     </contact-recorder-model>
 
-    <!-- When a diseased unit is detected, trace out direct contacts. -->
-    <trace-model contact-type="direct" direction="out">
+    <!-- When a diseased unit is detected, trace out direct and indirect contacts. -->
+    <trace-model direction="out">
       <trace-period>
         <value>7</value>
 	<units><xdf:unit>day</xdf:unit></units>
@@ -231,10 +233,10 @@
     </trace-model>
 
     <!-- Units found by trace are quarantined and tested for disease. -->
-    <trace-quarantine-model contact-type="direct" direction="out">
+    <trace-quarantine-model direction="out">
     </trace-quarantine-model>
 
-    <trace-exam-model contact-type="direct" direction="out">
+    <trace-exam-model direction="out">
       <detection-multiplier>1</detection-multiplier>
       <test-if-no-signs>true</test-if-no-signs>
     </trace-exam-model>

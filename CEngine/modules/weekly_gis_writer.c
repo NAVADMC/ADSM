@@ -23,7 +23,6 @@
 
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new weekly_gis_writer_new
-#define set_params weekly_gis_writer_set_params
 #define run weekly_gis_writer_run
 #define reset weekly_gis_writer_reset
 #define events_listened_for weekly_gis_writer_events_listened_for
@@ -34,6 +33,7 @@
 
 #include "module.h"
 #include <shapefil.h>
+#include <string.h>
 
 #include "weekly_gis_writer.h"
 
@@ -635,10 +635,9 @@ local_free (struct spreadmodel_model_t_ *self)
  * Set the parameters for this module.
  */
 void
-set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
+set_params (struct spreadmodel_model_t_ *self, sqlite3 * params)
 {
   local_data_t *local_data;
-  scew_element *e;
 
   #if DEBUG
     g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
@@ -646,16 +645,12 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
 
   local_data = (local_data_t *) (self->model_data);
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
   /* Get the base filename for the ArcView files.  If the filename is omitted
    * or blank, then "weekly_gis" is used. */
   local_data->base_filename = NULL;
-  e = scew_element_by_name (params, "filename");
-  if (e != NULL)
+  if (FALSE)
     {
-      local_data->base_filename = PAR_get_text (e);
+      local_data->base_filename = NULL; /* PAR_get_text (e); */
       if (local_data->base_filename != NULL
           && g_ascii_strcasecmp (local_data->base_filename, "") == 0)
         {
@@ -690,7 +685,7 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
  * Returns a new weekly GIS writer.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
@@ -708,10 +703,8 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  self->set_params = weekly_gis_writer_set_params;
   self->run = run;
   self->reset = reset;
-  self->is_singleton = TRUE;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = spreadmodel_model_answer_no;
   self->has_pending_infections = spreadmodel_model_answer_no;
@@ -719,9 +712,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->printf = spreadmodel_model_printf;
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
-
-  /* Send the XML subtree to the set_params function to read the parameters. */
-  self->set_params (self, params);
 
   local_data->projection = projection;
   local_data->seen_day_1 = 0;

@@ -71,9 +71,10 @@ EVT_event_type_t events_listened_for[] = { EVT_TraceResult };
 /** Specialized information for this model. */
 typedef struct
 {
-  SPREADMODEL_contact_type contact_type;
-  const char *contact_type_name;
-  gboolean *production_type;
+  gboolean *create_zone[SPREADMODEL_NCONTACT_TYPES]; /**< Whether or not to
+    create a zone around a unit.  Use an expression of the form
+    trace_period[contact_type][production_type]
+    to retrieve a value. */
   GPtrArray *production_types;
 }
 local_data_t;
@@ -99,22 +100,19 @@ handle_trace_result_event (struct spreadmodel_model_t_ *self,
 #endif
 
   local_data = (local_data_t *) (self->model_data);
-  unit = event->exposed_unit;
+  if (event->direction == SPREADMODEL_TraceForwardOrOut)
+    unit = event->exposed_unit;
+  else
+    unit = event->exposing_unit;
 
-  /* Check whether the unit is a production type we're interested in. */
-  if (local_data->production_type[unit->production_type] == FALSE)
-    goto end;
+  if (local_data->create_zone[event->contact_type][unit->production_type] == TRUE)
+    {
+      #if DEBUG
+        g_debug ("ordering a zone focus around unit \"%s\"", unit->official_id);
+      #endif
+      EVT_event_enqueue (queue, EVT_new_request_for_zone_focus_event (unit, event->day, "trace out"));
+    }
 
-  /* Check whether the trace is for a contact type we're interested in. */
-  if (event->contact_type != local_data->contact_type)
-    goto end;
-
-#if DEBUG
-  g_debug ("ordering a zone focus around unit \"%s\"", unit->official_id);
-#endif
-  EVT_event_enqueue (queue, EVT_new_request_for_zone_focus_event (unit, event->day, "trace out"));
-
-end:
 #if DEBUG
   g_debug ("----- EXIT handle_trace_result_event (%s)", MODEL_NAME);
 #endif
@@ -190,29 +188,26 @@ char *
 to_string (struct spreadmodel_model_t_ *self)
 {
   GString *s;
-  gboolean already_names;
-  unsigned int i;
+  guint i, j;
   char *chararray;
   local_data_t *local_data;
 
   local_data = (local_data_t *) (self->model_data);
   s = g_string_new (NULL);
-  g_string_sprintf (s, "<%s for ", MODEL_NAME);
-  already_names = FALSE;
+  g_string_sprintf (s, "<%s create zones around", MODEL_NAME);
   for (i = 0; i < local_data->production_types->len; i++)
-    if (local_data->production_type[i] == TRUE)
-      {
-        if (already_names)
-          g_string_append_printf (s, ",%s",
-                                  (char *) g_ptr_array_index (local_data->production_types, i));
-        else
-          {
-            g_string_append_printf (s, "%s",
-                                    (char *) g_ptr_array_index (local_data->production_types, i));
-            already_names = TRUE;
-          }
-      }
-
+    {
+      for (j = 0; j < SPREADMODEL_NCONTACT_TYPES; j++)
+        {
+          if (local_data->create_zone[j][i] == TRUE)
+            {
+              g_string_append_printf (s, "\n  %s found by trace of %s",
+                                      (char *) g_ptr_array_index (local_data->production_types, i),
+                                      SPREADMODEL_contact_type_name[j]);
+             
+            }
+        }
+    }
   g_string_append_c (s, '>');
 
   /* don't return the wrapper object */
@@ -232,6 +227,7 @@ void
 local_free (struct spreadmodel_model_t_ *self)
 {
   local_data_t *local_data;
+  guint i;
 
 #if DEBUG
   g_debug ("----- ENTER free (%s)", MODEL_NAME);
@@ -239,7 +235,10 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  g_free (local_data->production_type);
+  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+    {
+      g_free (local_data->create_zone[i]);
+    }
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
   g_free (self);
@@ -252,16 +251,71 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 /**
+ * Adds a set of production type specific parameters to a trace zone focus model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+set_params (void *data, int ncols, char **value, char **colname)
+{
+  spreadmodel_model_t *self;
+  local_data_t *local_data;
+  guint production_type;
+  long int tmp;
+
+  #if DEBUG
+    g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
+  #endif
+
+  self = (spreadmodel_model_t *)data;
+  local_data = (local_data_t *) (self->model_data);
+
+  g_assert (ncols == 3);
+
+  /* Find out which production type these parameters apply to. */
+  production_type = spreadmodel_read_prodtype (value[0], local_data->production_types);
+
+  errno = 0;
+  tmp = strtol (value[1], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  if (tmp == 1)
+    {
+      local_data->create_zone[SPREADMODEL_DirectContact][production_type] = TRUE;
+    }
+  errno = 0;
+  tmp = strtol (value[2], NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  if (tmp == 1)
+    {
+      local_data->create_zone[SPREADMODEL_IndirectContact][production_type] = TRUE;
+    }
+
+  #if DEBUG
+    g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
+  #endif
+
+  return 0;
+}
+
+
+
+/**
  * Returns a new trace zone focus model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_attribute *attr;
-  XML_Char const *attr_text;
+  guint nprod_types, i;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -277,7 +331,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_singleton = FALSE;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = spreadmodel_model_answer_no;
   self->has_pending_infections = spreadmodel_model_answer_no;
@@ -286,29 +339,23 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
-#if DEBUG
-  g_debug ("setting contact type");
-#endif
-  attr = scew_element_attribute_by_name (params, "contact-type");
-  g_assert (attr != NULL);
-  attr_text = scew_attribute_value (attr);
-  if (strcmp (attr_text, "direct") == 0)
-    local_data->contact_type = SPREADMODEL_DirectContact;
-  else if (strcmp (attr_text, "indirect") == 0)
-    local_data->contact_type = SPREADMODEL_IndirectContact;
-  else
-    g_assert_not_reached ();
-  local_data->contact_type_name = SPREADMODEL_contact_type_abbrev[local_data->contact_type];
-
-#if DEBUG
-  g_debug ("setting production types");
-#endif
+  /* Initialize the 2D array of booleans. */
   local_data->production_types = units->production_type_names;
-  local_data->production_type =
-    spreadmodel_read_prodtype_attribute (params, "production-type", units->production_type_names);
+  nprod_types = local_data->production_types->len;
+  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+    {
+      local_data->create_zone[i] = g_new0 (gboolean, nprod_types);
+    }
+
+  /* Call the set_params function to read the production type specific
+   * parameters. */
+  sqlite3_exec (params,
+                "SELECT prodtype.name,direct_trace_is_a_zone_trigger,indirect_trace_is_a_zone_trigger FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol, ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id",
+                set_params, self, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

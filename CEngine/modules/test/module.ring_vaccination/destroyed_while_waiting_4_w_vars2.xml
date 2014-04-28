@@ -91,7 +91,7 @@
       </radius>
     </ring-destruction-model>
 
-    <vaccine-model>
+    <vaccine-model production-type="A,B,C,D,E,F,G">
       <delay>
         <value>0</value>
         <units><xdf:unit>day</xdf:unit></units>

@@ -64,7 +64,6 @@ typedef enum
   EVT_BeforeEachSimulation,
   EVT_DeclarationOfVaccinationReasons,
   EVT_DeclarationOfVaccineDelay,
-  EVT_DeclarationOfDestructionReasons,
   EVT_DeclarationOfOutputs,
   EVT_NewDay, EVT_Exposure, EVT_AttemptToInfect, EVT_Infection,
   EVT_Detection, EVT_PublicAnnouncement, EVT_Exam, EVT_AttemptToTrace,
@@ -145,19 +144,6 @@ typedef struct
   int delay;
 }
 EVT_declaration_of_vaccine_delay_event_t;
-
-
-
-/**
- * A "declaration of destruction reasons" event.  Models that can request
- * destructions use this event to communicate the reason(s) they will supply
- * for the requests, so that other models may initialize counters, etc.
- */
-typedef struct
-{
-  GPtrArray *reasons; /**< array of pointers to ordinary C strings */
-}
-EVT_declaration_of_destruction_reasons_event_t;
 
 
 
@@ -512,7 +498,6 @@ typedef struct
     EVT_before_each_simulation_event_t before_each_simulation;
     EVT_declaration_of_vaccination_reasons_event_t declaration_of_vaccination_reasons;
     EVT_declaration_of_vaccine_delay_event_t declaration_of_vaccine_delay;
-    EVT_declaration_of_destruction_reasons_event_t declaration_of_destruction_reasons;
     EVT_declaration_of_outputs_event_t declaration_of_outputs;
     EVT_new_day_event_t new_day;
     EVT_exposure_event_t exposure;
@@ -561,7 +546,6 @@ EVT_event_t *EVT_new_declaration_of_vaccination_reasons_event (GPtrArray * reaso
 EVT_event_t *EVT_new_declaration_of_vaccine_delay_event (UNT_production_type_t,
                                                          char * production_type_name,
                                                          int);
-EVT_event_t *EVT_new_declaration_of_destruction_reasons_event (GPtrArray * reasons);
 EVT_event_t *EVT_new_declaration_of_outputs_event (GPtrArray *);
 EVT_event_t *EVT_new_new_day_event (int day);
 EVT_event_t *EVT_new_exposure_event (UNT_unit_t * exposing_unit,

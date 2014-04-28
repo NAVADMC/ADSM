@@ -610,19 +610,12 @@ local_free (struct spreadmodel_model_t_ *self)
  * Returns a new infection monitor.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element *e;
-  scew_list *ee, *iter;
-  unsigned int n;
-  const XML_Char *variable_name;
-  RPT_frequency_t freq;
-  gboolean success;
-  gboolean broken_down;
-  unsigned int i, j;      /* loop counters */
+  guint n, i, j;
   char *prodtype_name;
 
 #if DEBUG
@@ -637,10 +630,8 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_sized_new (18);
   self->model_data = local_data;
-  self->set_params = NULL;
   self->run = run;
   self->reset = reset;
-  self->is_singleton = TRUE;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = spreadmodel_model_answer_no;
   self->has_pending_infections = spreadmodel_model_answer_no;
@@ -649,67 +640,43 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
-  e = scew_element_by_name (params, "ratio-period");
-  if (e != NULL)
-    {
-      local_data->nrecent_days = (int) round (PAR_get_time (e, &success));
-      if (success == FALSE)
-        {
-          g_warning ("%s: setting ratio period to 2 weeks", MODEL_NAME);
-          local_data->nrecent_days = 14;
-        }
-      if (local_data->nrecent_days < 1)
-        {
-          g_warning ("%s: ratio period cannot be less than 1, setting to 2 weeks", MODEL_NAME);
-          local_data->nrecent_days = 14;
-        }
-    }
-  else
-    {
-      g_warning ("%s: ratio period missing, setting 2 to weeks", MODEL_NAME);
-      local_data->nrecent_days = 14;
-    }
-
   local_data->num_units_infected =
-    RPT_new_reporting ("infnUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("infnUAll", RPT_integer, RPT_daily);
   local_data->num_units_infected_by_cause =
-    RPT_new_reporting ("infnU", RPT_group, RPT_never);
+    RPT_new_reporting ("infnU", RPT_group, RPT_daily);
   local_data->num_units_infected_by_prodtype =
-    RPT_new_reporting ("infnU", RPT_group, RPT_never);
+    RPT_new_reporting ("infnU", RPT_group, RPT_daily);
   local_data->num_units_infected_by_cause_and_prodtype =
-    RPT_new_reporting ("infnU", RPT_group, RPT_never);
+    RPT_new_reporting ("infnU", RPT_group, RPT_daily);
   local_data->cumul_num_units_infected =
-    RPT_new_reporting ("infcUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("infcUAll", RPT_integer, RPT_daily);
   local_data->cumul_num_units_infected_by_cause =
-    RPT_new_reporting ("infcU", RPT_group, RPT_never);
+    RPT_new_reporting ("infcU", RPT_group, RPT_daily);
   local_data->cumul_num_units_infected_by_prodtype =
-    RPT_new_reporting ("infcU", RPT_group, RPT_never);
+    RPT_new_reporting ("infcU", RPT_group, RPT_daily);
   local_data->cumul_num_units_infected_by_cause_and_prodtype =
-    RPT_new_reporting ("infcU", RPT_group, RPT_never);
+    RPT_new_reporting ("infcU", RPT_group, RPT_daily);
   local_data->num_animals_infected =
-    RPT_new_reporting ("infnAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("infnAAll", RPT_integer, RPT_daily);
   local_data->num_animals_infected_by_cause =
-    RPT_new_reporting ("infnA", RPT_group, RPT_never);
+    RPT_new_reporting ("infnA", RPT_group, RPT_daily);
   local_data->num_animals_infected_by_prodtype =
-    RPT_new_reporting ("infnA", RPT_group, RPT_never);
+    RPT_new_reporting ("infnA", RPT_group, RPT_daily);
   local_data->num_animals_infected_by_cause_and_prodtype =
-    RPT_new_reporting ("infnA", RPT_group, RPT_never);
+    RPT_new_reporting ("infnA", RPT_group, RPT_daily);
   local_data->cumul_num_animals_infected =
-    RPT_new_reporting ("infcAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("infcAAll", RPT_integer, RPT_daily);
   local_data->cumul_num_animals_infected_by_cause =
-    RPT_new_reporting ("infcA", RPT_group, RPT_never);
+    RPT_new_reporting ("infcA", RPT_group, RPT_daily);
   local_data->cumul_num_animals_infected_by_prodtype =
-    RPT_new_reporting ("infcA", RPT_group, RPT_never);
+    RPT_new_reporting ("infcA", RPT_group, RPT_daily);
   local_data->cumul_num_animals_infected_by_cause_and_prodtype =
-    RPT_new_reporting ("infcA", RPT_group, RPT_never);
+    RPT_new_reporting ("infcA", RPT_group, RPT_daily);
   local_data->first_det_u_inf =
-    RPT_new_reporting ("firstDetUInfAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("firstDetUInfAll", RPT_integer, RPT_daily);
   local_data->first_det_a_inf =
-    RPT_new_reporting ("firstDetAInfAll", RPT_integer, RPT_never);
-  local_data->ratio = RPT_new_reporting ("ratio", RPT_real, RPT_never);
+    RPT_new_reporting ("firstDetAInfAll", RPT_integer, RPT_daily);
+  local_data->ratio = RPT_new_reporting ("ratio", RPT_real, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->num_units_infected);
   g_ptr_array_add (self->outputs, local_data->num_units_infected_by_cause);
   g_ptr_array_add (self->outputs, local_data->num_units_infected_by_prodtype);
@@ -731,82 +698,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   g_ptr_array_add (self->outputs, local_data->ratio);
 
   /* Set the reporting frequency for the output variables. */
-  ee = scew_element_list_by_name (params, "output");
-#if DEBUG
-  g_debug ("%u output variables", scew_list_size(ee));
-#endif
-  for (iter = ee; iter != NULL; iter = scew_list_next(iter))
-    {
-      e = (scew_element *) scew_list_data (iter);
-      variable_name = scew_element_contents (scew_element_by_name (e, "variable-name"));
-      freq = RPT_string_to_frequency (scew_element_contents
-                                      (scew_element_by_name (e, "frequency")));
-      broken_down = PAR_get_boolean (scew_element_by_name (e, "broken-down"), &success);
-      if (!success)
-      	broken_down = FALSE;
-      broken_down = broken_down || (g_strstr_len (variable_name, -1, "-by-") != NULL); 
-      /* Starting at version 3.2 we accept either the old, verbose output
-       * variable names or the new shorter ones. */
-      if (strcmp (variable_name, "infnU") == 0
-          || strncmp (variable_name, "num-units-infected", 18) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->num_units_infected, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->num_units_infected_by_cause, freq);
-              RPT_reporting_set_frequency (local_data->num_units_infected_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->num_units_infected_by_cause_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "infcU") == 0
-               || strncmp (variable_name, "cumulative-num-units-infected", 29) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_num_units_infected, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->cumul_num_units_infected_by_cause, freq);
-              RPT_reporting_set_frequency (local_data->cumul_num_units_infected_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_num_units_infected_by_cause_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "infnA") == 0
-               || strncmp (variable_name, "num-animals-infected", 20) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->num_animals_infected, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->num_animals_infected_by_cause, freq);
-              RPT_reporting_set_frequency (local_data->num_animals_infected_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->num_animals_infected_by_cause_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "infcA") == 0
-               || strncmp (variable_name, "cumulative-num-animals-infected", 31) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_num_animals_infected, freq);
-          if (broken_down)
-            {
-              RPT_reporting_set_frequency (local_data->cumul_num_animals_infected_by_cause, freq);
-              RPT_reporting_set_frequency (local_data->cumul_num_animals_infected_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_num_animals_infected_by_cause_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "firstDetUInf") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->first_det_u_inf, freq);
-        }
-      else if (strcmp (variable_name, "firstDetAInf") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->first_det_a_inf, freq);
-        }
-      else if (strcmp (variable_name, "ratio") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->ratio, freq);
-        }
-      else
-        g_warning ("no output variable named \"%s\", ignoring", variable_name);        
-    }
-  scew_list_free (ee);
 
   /* Initialize the output variables. */
   local_data->production_types = units->production_type_names;
@@ -843,6 +734,7 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
 
   /* A list to store the number of new infections on each day for the recent
    * past. */
+  local_data->nrecent_days = 7;
   local_data->nrecent_infections = g_new0 (unsigned int, local_data->nrecent_days * 2);
   local_data->recent_day_index = 0;
 
