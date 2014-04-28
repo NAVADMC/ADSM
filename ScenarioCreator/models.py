@@ -495,7 +495,7 @@ class IndirectSpread(AbstractSpread):
     """This has to inherit from AbstractSpread or else Django treats DirectSpread and IndirectSpread as
     interchangable, which they are not."""
     def __str__(self):
-        return "%s %s Indirect Spread %i" % (self.name, self._disease, self.id)
+        return "%s %i" % (self.name, self.id)
 
 
 class DirectSpread(AbstractSpread):
@@ -507,7 +507,7 @@ class DirectSpread(AbstractSpread):
         super(AbstractSpread, self).__init__(*args, **kwargs)
         self._spread_method_code = 'direct'  # overrides 'indirect' value without creating a new field
     def __str__(self):
-        return "%s %s Direct Spread %i" % (self.name, self._disease, self.id)
+        return "%s %i" % (self.name, self.id)
 
 
 class AirborneSpread(DiseaseSpread):
@@ -523,7 +523,7 @@ class AirborneSpread(DiseaseSpread):
     wind_direction_end = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=360,
         help_text='The end angle in degrees of the predominate wind direction for airborne spread.', )
     def __str__(self):
-        return "%s %s Airborne Spread %i" % (self.name, self._disease, self.id)
+        return "%s %i" % (self.name, self.id)
 
 
 class Scenario(models.Model):

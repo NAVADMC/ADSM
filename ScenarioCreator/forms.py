@@ -112,8 +112,8 @@ class ProtocolAssignmentForm(BaseForm):
 class DiseaseProgressionAssignmentForm(BaseForm):
     class Meta:
         model = DiseaseProgressionAssignment
-        # widgets = {'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-        #            'progression': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseProgression/new/'})}
+        widgets = {'production_type': FixedSelect(),
+                   'progression': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseProgression/new/'})}
 
 
 class ControlProtocolForm(BaseForm):
@@ -337,11 +337,12 @@ class ProductionTypeForm(BaseForm):
 class ProductionTypePairTransmissionForm(BaseForm):
     class Meta:
         model = ProductionTypePairTransmission
-        # widgets = {'source_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-        #            'destination_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-        #            'direct_contact_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/DirectSpread/new/'}),
-        #            'indirect_contact_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/IndirectSpread/new/'}),
-        #            'airborne_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/AirborneSpread/new/'})}
+        widgets = {
+                   # 'source_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
+                   # 'destination_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
+                   'direct_contact_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/DirectSpread/new/'}),
+                   'indirect_contact_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/IndirectSpread/new/'}),
+                   'airborne_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/AirborneSpread/new/'})}
 
 
 class ZoneForm(BaseForm):
