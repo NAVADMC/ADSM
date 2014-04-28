@@ -377,7 +377,7 @@ class ControlProtocol(models.Model):
         help_text='Test Specificity for units of this production type', )
     test_sensitivity = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Test Sensitivity for units of this production type', )
-    test_delay = models.ForeignKey(ProbabilityFunction, related_name='+',
+    test_delay = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Function that describes the delay in obtaining test results.', )
     vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True,
         help_text='Number of days in retrospect that should be used to determine which herds to vaccinate.', )
