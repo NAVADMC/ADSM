@@ -216,19 +216,19 @@ class ProbabilityFunction(Function):
         help_text='The scale parameter for probability density function types Logistic and Loglogistic.', )
     shape = models.FloatField(blank=True, null=True,
         help_text='The shape parameter for probability density function types Loglogistic, Inverse, and Gaussian.', )
-    n = models.PositiveIntegerField(blank=True, null=True,
+    n = models.PositiveIntegerField(validators=[MinValueValidator(0)], blank=True, null=True,
         help_text='The n parameter for probability density function types Binomial and Hypergeometric.', )
-    p = models.FloatField(blank=True, null=True,
+    p = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(1.0)], blank=True, null=True,
         help_text='The p parameter for probability density function types Negative Binomial and Bernoulli.', )
-    m = models.PositiveIntegerField(blank=True, null=True,
+    m = models.PositiveIntegerField(validators=[MinValueValidator(0)], blank=True, null=True,
         help_text='The m parameter for probability density function type Hypergeometric.', )
-    d = models.PositiveIntegerField(blank=True, null=True,
+    d = models.PositiveIntegerField(validators=[MinValueValidator(0)], blank=True, null=True,
         help_text='The d parameter for probability density function type Hypergeometric.', )
-    theta = models.FloatField(blank=True, null=True,
+    theta = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='The Theta parameter for probability density function type Pareto.', )
-    a = models.FloatField(blank=True, null=True,
+    a = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='The a parameter for probability density function type Pareto.', )
-    s = models.PositiveIntegerField(blank=True, null=True,
+    s = models.PositiveIntegerField(validators=[MinValueValidator(0)], blank=True, null=True,
         help_text='The s parameter for probability density function type Negative Binomial.', )
     graph = models.ForeignKey('RelationalFunction', blank=True, null=True,
         help_text='A series of points used in Histogram and Piecewise functions.')
