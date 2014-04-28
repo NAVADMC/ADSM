@@ -23,6 +23,13 @@ class AddOrSelect(Select):
 class FixedSelect(Select):
     template_name = 'floppyforms/fixed_select.html'
 
+    def get_context(self, name, value, attrs=None, choices=()):
+        context = super(FixedSelect, self).get_context(name, value, attrs)
+        print([x for x in self.choices])
+        context['value'] = value
+        context['value_name'] = [x[1] for x in self.choices if x[0] == value][0]  # first match
+        return context
+
 
 def submit_button():
     return ButtonHolder(Submit('submit', 'Submit', css_class='button white'),

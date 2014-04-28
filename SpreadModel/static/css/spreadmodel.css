@@ -129,6 +129,11 @@ th {
     padding-right: 40px;
 }
 
+select {
+    margin: 8px 0;
+}
+
+
 #file_list ul {
     list-style-type: none;
     font-size: 20px;
