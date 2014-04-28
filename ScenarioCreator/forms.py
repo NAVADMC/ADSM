@@ -25,7 +25,6 @@ class FixedSelect(Select):
 
     def get_context(self, name, value, attrs=None, choices=()):
         context = super(FixedSelect, self).get_context(name, value, attrs)
-        print([x for x in self.choices])
         context['value'] = value
         context['value_name'] = [x[1] for x in self.choices if x[0] == value][0]  # first match
         return context
