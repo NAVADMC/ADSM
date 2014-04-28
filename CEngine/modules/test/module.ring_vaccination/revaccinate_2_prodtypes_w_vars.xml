@@ -105,6 +105,7 @@
         <value>4</value>
         <units><xdf:unit>day</xdf:unit></units>
       </min-time-between-vaccinations>      
+      <vaccinate-detected-units>no</vaccinate-detected-units>
     </ring-vaccination-model>
 
     <ring-vaccination-model to-production-type="Pigs">
@@ -117,6 +118,7 @@
         <value>5</value>
         <units><xdf:unit>day</xdf:unit></units>
       </min-time-between-vaccinations>      
+      <vaccinate-detected-units>no</vaccinate-detected-units>
     </ring-vaccination-model>
 
     <vaccination-list-monitor>

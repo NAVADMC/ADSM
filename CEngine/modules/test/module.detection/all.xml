@@ -2551,9 +2551,10 @@
     without clinical signs lasts 1 day, infectiousness with clinical signs
     lasts 3 days, and immunity lasts 3 days.
 
-    The movement rate from sheep units to cattle units and from cattle units to
-    pig units is fixed at 1 shipment per day.  The distance of shipments is
-    fixed at 10 km.  The probability of infection given exposure is 1.
+    The rate of direct contacts from sheep units to cattle units is fixed at 1
+    contact per day. The rate of indirect contacts from cattle units to pig
+    units is fixed at 1 shipment per day.  The distance of contacts is fixed at
+    10 km.  The probability of infection given exposure is 1.
 
     Only sheep units are detected.  The probability of detection vs. the number
     of days a unit has been showing clinical signs is fixed at 1.  The
@@ -2638,9 +2639,10 @@
     without clinical signs lasts 1 day, infectiousness with clinical signs
     lasts 3 days, and immunity lasts 3 days.
 
-    The movement rate from sheep units to cattle units and from cattle units to
-    pig units is fixed at 1 shipment per day.  The distance of shipments is
-    fixed at 10 km.  The probability of infection given exposure is 1.
+    The rate of direct contacts from sheep units to cattle units is fixed at 1
+    contact per day. The rate of indirect contacts from cattle units to pig
+    units is fixed at 1 shipment per day.  The distance of contacts is fixed at
+    10 km.  The probability of infection given exposure is 1.
 
     Only sheep units are detected.  The probability of detection vs. the number
     of days a unit has been showing clinical signs is fixed at 1.  The

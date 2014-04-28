@@ -95,7 +95,19 @@
         <value>31</value>
         <units><xdf:unit>day</xdf:unit></units>
       </min-time-between-vaccinations> 
+      <vaccinate-detected-units>no</vaccinate-detected-units>
     </ring-vaccination-model>
+
+    <vaccine-model production-type="A">
+      <delay>
+        <value>0</value>
+        <units><xdf:unit>day</xdf:unit></units>
+      </delay>
+      <immunity-period>
+        <point>5</point>
+        <units><xdf:unit>day</xdf:unit></units>
+      </immunity-period>
+    </vaccine-model>
 
     <vaccination-monitor>
       <output>

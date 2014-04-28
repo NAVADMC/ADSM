@@ -1,7 +1,9 @@
+import unittest
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 # Create your tests here.
-from ScenarioCreator.models import Scenario, choice_char_from_value, squish_name, Unit, Population
+from ScenarioCreator.models import Scenario, choice_char_from_value, squish_name, Unit, Population, ProductionType
 
 updatedPost = {'description': 'Updated Description', "naadsm_version": '3.2.19', "language": 'en', "num_runs": '10',
                "num_days": '40', 'scenario_name': 'sample'}
@@ -47,3 +49,18 @@ class ModelUtilsTest(TestCase):
         p.save()
         self.assertGreater( Unit.objects.count(), index, "No new Units were added")
         self.assertEqual( Unit.objects.get(id=index+1)._population, p, "New Unit should link back to newest Population object")
+
+class CleanTest(unittest.TestCase):
+    def test_production_type_names(self):
+        pt = ProductionType(name='Bob')
+        pt.clean_fields()
+        pt = ProductionType(name='123Bob')
+        self.assertRaises(ValidationError, pt.clean_fields)
+        pt = ProductionType(name='Bob@#$%^&*')
+        self.assertRaises(ValidationError, pt.clean_fields)
+        pt = ProductionType(name='TABLE')
+        self.assertRaises(ValidationError, pt.clean_fields)
+        pt = ProductionType(name='table')
+        self.assertRaises(ValidationError, pt.clean_fields)
+
+

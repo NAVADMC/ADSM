@@ -105,6 +105,9 @@
         <units><xdf:unit>day</xdf:unit></units>
         <units><xdf:unit>herd</xdf:unit><xdf:unit power="-1">day</xdf:unit></units>
       </destruction-capacity>
+      <destruction-priority-order>
+        reason,production type,time waiting
+      </destruction-priority-order>
       <!-- Vaccination isn't used in this scenario. -->
       <vaccination-capacity>
         <value>0</value> <value>1000</value>
@@ -113,17 +116,28 @@
       </vaccination-capacity>
     </resources-and-implementation-of-controls-model>
 
+    <!-- 2 production types x 2 reasons = 4 priorities
+     | 1 Basic,Beef Cattle
+     | 2 Basic,Pigs
+     | 3 Trace fwd direct,Beef Cattle
+     | 4 Trace fwd direct,Pigs
+     +-->
+
     <!-- The unit will be destroyed when the infection is confirmed. -->
-    <basic-destruction-model>
+    <basic-destruction-model production-type="Beef Cattle">
       <priority>1</priority>
     </basic-destruction-model>
 
-    <trace-back-destruction-model production-type="Beef Cattle" contact-type="direct">
+    <basic-destruction-model production-type="Pigs">
       <priority>2</priority>
+    </basic-destruction-model>
+
+    <trace-back-destruction-model production-type="Beef Cattle" contact-type="direct">
+      <priority>3</priority>
       <trace-success>1.0</trace-success>
       <trace-period>
         <value>3</value>
-	<units><xdf:unit>day</xdf:unit></units>
+        <units><xdf:unit>day</xdf:unit></units>
       </trace-period>
     </trace-back-destruction-model>
 

@@ -514,17 +514,11 @@ local_free (struct spreadmodel_model_t_ *self)
  * Returns a new vaccination list monitor.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element *e;
-  scew_list *ee, *iter;
-  const XML_Char *variable_name;
-  RPT_frequency_t freq;
-  gboolean success;
-  gboolean broken_down;
   unsigned int i;      /* loop counter */
 
 #if DEBUG
@@ -539,10 +533,8 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_sized_new (10);
   self->model_data = local_data;
-  self->set_params = NULL;
   self->run = run;
   self->reset = reset;
-  self->is_singleton = TRUE;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = spreadmodel_model_answer_no;
   self->has_pending_infections = spreadmodel_model_answer_no;
@@ -551,33 +543,30 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
   local_data->nunits_awaiting_vaccination =
-    RPT_new_reporting ("vacwUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("vacwUAll", RPT_integer, RPT_daily);
   local_data->nunits_awaiting_vaccination_by_prodtype =
-    RPT_new_reporting ("vacwU", RPT_group, RPT_never);
+    RPT_new_reporting ("vacwU", RPT_group, RPT_daily);
   local_data->nanimals_awaiting_vaccination =
-    RPT_new_reporting ("vacwAAll", RPT_real, RPT_never);
+    RPT_new_reporting ("vacwAAll", RPT_real, RPT_daily);
   local_data->nanimals_awaiting_vaccination_by_prodtype =
-    RPT_new_reporting ("vacwA", RPT_group, RPT_never);
+    RPT_new_reporting ("vacwA", RPT_group, RPT_daily);
   local_data->peak_nunits_awaiting_vaccination =
-    RPT_new_reporting ("vacwUMax", RPT_integer, RPT_never);
+    RPT_new_reporting ("vacwUMax", RPT_integer, RPT_daily);
   local_data->peak_nunits_awaiting_vaccination_day =
-    RPT_new_reporting ("vacwUMaxDay", RPT_integer, RPT_never);
+    RPT_new_reporting ("vacwUMaxDay", RPT_integer, RPT_daily);
   local_data->peak_nanimals_awaiting_vaccination =
-    RPT_new_reporting ("vacwAMax", RPT_real, RPT_never);
+    RPT_new_reporting ("vacwAMax", RPT_real, RPT_daily);
   local_data->peak_nanimals_awaiting_vaccination_day =
-    RPT_new_reporting ("vacwAMaxDay", RPT_integer, RPT_never);
+    RPT_new_reporting ("vacwAMaxDay", RPT_integer, RPT_daily);
   local_data->peak_wait_time =
-    RPT_new_reporting ("vacwUTimeMax", RPT_integer, RPT_never);
+    RPT_new_reporting ("vacwUTimeMax", RPT_integer, RPT_daily);
   local_data->average_wait_time =
-    RPT_new_reporting ("vacwUTimeAvg", RPT_real, RPT_never);
+    RPT_new_reporting ("vacwUTimeAvg", RPT_real, RPT_daily);
   local_data->unit_days_in_queue =
-    RPT_new_reporting ("vacwUDaysInQueue", RPT_integer, RPT_never);
+    RPT_new_reporting ("vacwUDaysInQueue", RPT_integer, RPT_daily);
   local_data->animal_days_in_queue =
-    RPT_new_reporting ("vacwADaysInQueue", RPT_real, RPT_never);
+    RPT_new_reporting ("vacwADaysInQueue", RPT_real, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->nunits_awaiting_vaccination);
   g_ptr_array_add (self->outputs, local_data->nunits_awaiting_vaccination_by_prodtype);
   g_ptr_array_add (self->outputs, local_data->nanimals_awaiting_vaccination);
@@ -592,62 +581,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   g_ptr_array_add (self->outputs, local_data->animal_days_in_queue);
 
   /* Set the reporting frequency for the output variables. */
-  ee = scew_element_list_by_name (params, "output");
-#if DEBUG
-  g_debug ("%u output variables", scew_list_size(ee));
-#endif
-  for (iter = ee; iter != NULL; iter = scew_list_next(iter))
-    {
-      e = (scew_element *) scew_list_data (iter);
-      variable_name = scew_element_contents (scew_element_by_name (e, "variable-name"));
-      freq = RPT_string_to_frequency (scew_element_contents
-                                      (scew_element_by_name (e, "frequency")));
-      broken_down = PAR_get_boolean (scew_element_by_name (e, "broken-down"), &success);
-      if (!success)
-      	broken_down = FALSE;
-      broken_down = broken_down || (g_strstr_len (variable_name, -1, "-by-") != NULL); 
-      /* Starting at version 3.2 we accept either the old, verbose output
-       * variable names or the new shorter ones. */
-      if (strcmp (variable_name, "vacwU") == 0
-          || strncmp (variable_name, "num-units-awaiting-vaccination", 30) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->nunits_awaiting_vaccination, freq);
-          if (broken_down)
-            RPT_reporting_set_frequency (local_data->nunits_awaiting_vaccination_by_prodtype, freq);
-        }
-      else if (strcmp (variable_name, "vacwA") == 0
-               || strncmp (variable_name, "num-animals-awaiting-vaccination", 32) == 0)
-        {
-          RPT_reporting_set_frequency (local_data->nanimals_awaiting_vaccination, freq);
-          if (broken_down)
-            RPT_reporting_set_frequency (local_data->nanimals_awaiting_vaccination_by_prodtype, freq);
-        }
-      else if (strcmp (variable_name, "vacwUMax") == 0
-               || strcmp (variable_name, "peak-num-units-awaiting-vaccination") == 0)
-        RPT_reporting_set_frequency (local_data->peak_nunits_awaiting_vaccination, freq);
-      else if (strcmp (variable_name, "vacwUMaxDay") == 0)
-        RPT_reporting_set_frequency (local_data->peak_nunits_awaiting_vaccination_day, freq);
-      else if (strcmp (variable_name, "vacwAMax") == 0
-               || strcmp (variable_name, "peak-num-animals-awaiting-vaccination") == 0)
-        RPT_reporting_set_frequency (local_data->peak_nanimals_awaiting_vaccination, freq);
-      else if (strcmp (variable_name, "vacwAMaxDay") == 0)
-        RPT_reporting_set_frequency (local_data->peak_nanimals_awaiting_vaccination_day, freq);
-      else if (strcmp (variable_name, "vacwUTimeMax") == 0
-               || strcmp (variable_name, "peak-wait-time") == 0
-               || strcmp (variable_name, "peak-vaccination-wait-time") == 0)
-        RPT_reporting_set_frequency (local_data->peak_wait_time, freq);
-      else if (strcmp (variable_name, "vacwUTimeAvg") == 0
-               || strcmp (variable_name, "average-wait-time") == 0
-               || strcmp (variable_name, "average-vaccination-wait-time") == 0)
-        RPT_reporting_set_frequency (local_data->average_wait_time, freq);
-      else if (strcmp (variable_name, "vacwUDaysInQueue") == 0)
-        RPT_reporting_set_frequency (local_data->unit_days_in_queue, freq);
-      else if (strcmp (variable_name, "vacwADaysInQueue") == 0)
-        RPT_reporting_set_frequency (local_data->animal_days_in_queue, freq);
-      else
-        g_warning ("no output variable named \"%s\", ignoring", variable_name);        
-    }
-  scew_list_free (ee);
 
   local_data->nunits = UNT_unit_list_length (units);
   local_data->production_types = units->production_type_names;

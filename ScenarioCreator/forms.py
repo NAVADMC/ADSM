@@ -1,28 +1,39 @@
 """Form inheritance is for better support of layouts.  All forms have a default layout that it inherits from
 ModelForm -> models.py.  This basic layout can be overridden by declaring an __init__ with a self.helper Layout.
-See DirectSpreadModel for an example.  More complex widgets and layouts are accessible from there.
+See DirectSpread for an example.  More complex widgets and layouts are accessible from there.
 All forms now have their "submit" button restored and you can choose custom layouts.  ControlProtocol has tabs."""
 
 
 from crispy_forms.bootstrap import TabHolder, Tab
-from crispy_forms.layout import Layout, ButtonHolder, Submit
+from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Field, Hidden
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import OperationalError  # OperationalError is for initial manage.py syncdb
 from ScenarioCreator.models import *
-from floppyforms import ModelForm, Select, NumberInput, RadioSelect
+from floppyforms import ModelForm, Select, NumberInput, RadioSelect, HiddenInput, TextInput
 from crispy_forms.helper import FormHelper
 
 
 class AddOrSelect(Select):
     template_name = 'floppyforms/model_select.html'
-
     # def get_context(self, name, value, attrs=None, choices=()):
     #     context = super(AddOrSelect, self).get_context(name, value, attrs=None, choices=())
     #     context['attrs']['data-new-item-url'] = '/%s/new/' %
 
 
+class FixedSelect(Select):
+    template_name = 'floppyforms/fixed_select.html'
+
+    def get_context(self, name, value, attrs=None, choices=()):
+        context = super(FixedSelect, self).get_context(name, value, attrs)
+        print([x for x in self.choices])
+        context['value'] = value
+        context['value_name'] = [x[1] for x in self.choices if x[0] == value][0]  # first match
+        return context
+
+
 def submit_button():
-    return ButtonHolder(Submit('submit', 'Submit', css_class='button white'))
+    return ButtonHolder(Submit('submit', 'Submit', css_class='button white'),
+                        HTML(open('ScenarioCreator/templates/ScenarioCreator/EditButtons.html', 'r').read()))
 
 
 class BaseForm(ModelForm):
@@ -32,11 +43,6 @@ class BaseForm(ModelForm):
             fields_and_submit = list(self.base_fields.keys()) + [submit_button()]
             self.helper.layout = Layout(*fields_and_submit)
         return super().__init__(*args, **kwargs)
-
-
-class DbSchemaVersionForm(BaseForm):
-    class Meta:
-        model = DbSchemaVersion
 
 
 class DynamicBlobForm(BaseForm):
@@ -89,7 +95,7 @@ class RelationalPointForm(BaseForm):
 class ControlMasterPlanForm(BaseForm):
     class Meta:
         model = ControlMasterPlan
-        exclude = ['_include_detection', '_include_tracing', '_include_tracing_unit_exam', '_include_tracing_testing', '_include_destruction', '_include_vaccination', '_include_zones']
+        exclude = []
         widgets = {'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
@@ -98,16 +104,16 @@ class ProtocolAssignmentForm(BaseForm):
     class Meta:
         model = ProtocolAssignment
         exclude = ['_master_plan', ]
-        # widgets = {'_master_plan': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlMasterPlan/new/'}),
-        #            'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-        #            'control_protocol': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'})}
+        widgets = {'_master_plan': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlMasterPlan/new/'}),
+                   'production_type': FixedSelect(),
+                   'control_protocol': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'})}
 
 
-class DiseaseReactionAssignmentForm(BaseForm):
+class DiseaseProgressionAssignmentForm(BaseForm):
     class Meta:
-        model = DiseaseReactionAssignment
-        # widgets = {'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-        #            'reaction': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseReaction/new/'})}
+        model = DiseaseProgressionAssignment
+        widgets = {'production_type': FixedSelect(),
+                   'progression': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseProgression/new/'})}
 
 
 class ControlProtocolForm(BaseForm):
@@ -209,12 +215,12 @@ class DiseaseForm(BaseForm):
         model = Disease
 
 
-class DiseaseReactionForm(BaseForm):
+class DiseaseProgressionForm(BaseForm):
     class Meta:
-        model = DiseaseReaction
+        model = DiseaseProgression
         exclude = ['_disease']
         try:
-            if not Scenario.objects.get(id=1).use_within_unit_prevalence:
+            if not Disease.objects.get(id=1).use_within_unit_prevalence:
                 exclude.append('disease_prevalence')
         except (ObjectDoesNotExist, OperationalError):
             pass  # If someone hasn't created a Scenario yet, the field will show
@@ -226,7 +232,7 @@ class DiseaseReactionForm(BaseForm):
                    'disease_prevalence': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
-class IndirectSpreadModelForm(BaseForm):
+class IndirectSpreadForm(BaseForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -243,7 +249,7 @@ class IndirectSpreadModelForm(BaseForm):
         )
         return super().__init__(*args, **kwargs)
     class Meta:
-        model = IndirectSpreadModel
+        model = IndirectSpread
         exclude = ['_spread_method_code', '_disease']
         widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
@@ -251,7 +257,7 @@ class IndirectSpreadModelForm(BaseForm):
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
-class DirectSpreadModelForm(BaseForm):
+class DirectSpreadForm(BaseForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -268,7 +274,7 @@ class DirectSpreadModelForm(BaseForm):
         )
         return super().__init__(*args, **kwargs)
     class Meta:
-        model = DirectSpreadModel
+        model = DirectSpread
         exclude = ['_spread_method_code', '_disease']
         widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
@@ -276,7 +282,7 @@ class DirectSpreadModelForm(BaseForm):
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
 
 
-class AirborneSpreadModelForm(BaseForm):
+class AirborneSpreadForm(BaseForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -290,10 +296,10 @@ class AirborneSpreadModelForm(BaseForm):
         )
         return super().__init__(*args, **kwargs)
     class Meta:
-        model = AirborneSpreadModel
+        model = AirborneSpread
         exclude = ['_spread_method_code', '_disease']
         try:
-            if Scenario.objects.get(id=1).use_airborne_exponential_decay:
+            if Disease.objects.get(id=1).use_airborne_exponential_decay:
                 exclude.append('max_distance')
         except (ObjectDoesNotExist, OperationalError):
             pass
@@ -305,7 +311,9 @@ class AirborneSpreadModelForm(BaseForm):
 class ScenarioForm(BaseForm):
     class Meta:
         model = Scenario
-        exclude = []
+        exclude = ['language', 'use_fixed_random_seed', 'random_seed']
+        widgets = {'language': Select(attrs={'data-toggle-controller': 'language',
+                                             'data-required-value': 'Spanish'})}
 
 
 class OutputSettingsForm(BaseForm):
@@ -314,7 +322,11 @@ class OutputSettingsForm(BaseForm):
         exclude = ['_scenario']
         widgets = {'save_all_daily_outputs': RadioSelect(),
             'maximum_iterations_for_daily_output': NumberInput(attrs={'data-toggle-controller': 'save_all_daily_outputs',
-                                                                      'data-required-value': 'False'})}
+                                                                      'data-required-value': 'False'}),
+            'days': NumberInput(
+                attrs={'data-toggle-controller': 'stop_criteria',
+                       'data-required-value': 'stop-days'})
+        }
 
 
 class ProductionTypeForm(BaseForm):
@@ -325,11 +337,12 @@ class ProductionTypeForm(BaseForm):
 class ProductionTypePairTransmissionForm(BaseForm):
     class Meta:
         model = ProductionTypePairTransmission
-        # widgets = {'source_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-        #            'destination_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-        #            'direct_contact_spread_model': AddOrSelect(attrs={'data-new-item-url': '/setup/DirectSpreadModel/new/'}),
-        #            'indirect_contact_spread_model': AddOrSelect(attrs={'data-new-item-url': '/setup/IndirectSpreadModel/new/'}),
-        #            'airborne_contact_spread_model': AddOrSelect(attrs={'data-new-item-url': '/setup/AirborneSpreadModel/new/'})}
+        widgets = {
+                   # 'source_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
+                   # 'destination_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
+                   'direct_contact_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/DirectSpread/new/'}),
+                   'indirect_contact_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/IndirectSpread/new/'}),
+                   'airborne_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/AirborneSpread/new/'})}
 
 
 class ZoneForm(BaseForm):

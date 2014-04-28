@@ -4191,67 +4191,6 @@
 
 <variable-test>
   <category>ring_vaccination</category>
-  <short-name>unit detected prior to ring, default</short-name>
-
-  <description>
-    This is one of a set of scenarios to test the option to allow or disallow
-    vaccination of known infected units.  In this test, we accept the default
-    behavior of SpreadModel, which is to vaccinate everything in the ring except
-    the unit at the center that triggered the ring.
-  </description>
-
-  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
-  <creation-date>20 May 2009</creation-date>
-  <model-version>3.0</model-version>
-
-  <population-file>6units_2</population-file>
-
-  <parameter-file>detected_before_ring_default</parameter-file>
-
-  <parameter-description>
-    For cattle, the latent period lasts 1 day, the infectious clinical period
-    lasts 2 days, and immunity lasts 3 days.  Pigs are similar but the latent
-    period lasts 2 days.
-
-    For both production types, the probability of detection vs. the number of
-    days a unit has been showing clinical signs is fixed at 1.  The probability
-    of detection vs. the number of days since a public announcement of an
-    outbreak is also fixed at 1.
-
-    When a diseased pig unit is detected, all units within 2 km will be
-    vaccinated.  The vaccine produces immunity immediately, and the immunity
-    lasts 5 days. The authorities can vaccinate an unlimited/very large number
-    of units each day.
-
-    There is no spread or destruction.
-
-    What should happen:
-     - On day 1 the infected units (0 and 1) will be Latent.
-     - On day 2 unit 0 will be Infectious Clinical.  It will be detected but
-       will not trigger vaccination.
-     - On day 3 unit 1 will be Infectious Clinical.  It will be detected and
-       will trigger a vaccination ring.  Units 0, 4, and 5 will be marked for
-       vaccination.
-     - On day 4 those units will be vaccinated.
-  </parameter-description>
-
-  <diagram>6units_2_w_ring</diagram>
-
-  <output>
-    <tr>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
-    </tr>
-    <tr><td>0</td> <td>0</td></tr>
-    <tr><td>0</td> <td>0</td></tr>
-    <tr><td>3</td> <td>0</td></tr>
-    <tr><td>0</td> <td>3</td></tr>
-    <tr><td>0</td> <td>0</td></tr>
-  </output>
-</variable-test>
-
-<variable-test>
-  <category>ring_vaccination</category>
   <short-name>unit detected prior to ring, vaccinate detected units</short-name>
 
   <description>
@@ -4366,63 +4305,6 @@
     <tr><td>0</td> <td>0</td></tr>
     <tr><td>2</td> <td>0</td></tr>
     <tr><td>0</td> <td>2</td></tr>
-    <tr><td>0</td> <td>0</td></tr>
-  </output>
-</variable-test>
-
-<variable-test>
-  <category>ring_vaccination</category>
-  <short-name>unit detected same day as ring, default</short-name>
-
-  <description>
-    This is one of a set of scenarios to test the option to allow or disallow
-    vaccination of known infected units.  In this test, we accept the default
-    behavior of SpreadModel, which is to vaccinate everything in the ring except
-    the unit at the center that triggered the ring.
-  </description>
-
-  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
-  <creation-date>20 May 2009</creation-date>
-  <model-version>3.0</model-version>
-
-  <population-file>6units_2</population-file>
-
-  <parameter-file>detected_sameday_ring_default</parameter-file>
-
-  <parameter-description>
-    For both cattle and pigs, the latent period lasts 1 day, the infectious
-    clinical period lasts 2 days, and immunity lasts 3 days.
-
-    For both production types, the probability of detection vs. the number of
-    days a unit has been showing clinical signs is fixed at 1.  The probability
-    of detection vs. the number of days since a public announcement of an
-    outbreak is also fixed at 1.
-
-    When a diseased pig unit is detected, all units within 2 km will be
-    vaccinated.  The vaccine produces immunity immediately, and the immunity
-    lasts 5 days. The authorities can vaccinate an unlimited/very large number
-    of units each day.
-
-    There is no spread or destruction.
-
-    What should happen:
-     - On day 1 the infected units (0 and 1) will be Latent.
-     - On day 2 units 0 and 1 will be Infectious Clinical.  They will be
-       detected and unit 1 will trigger a vaccination ring.  Units 0, 4, and 5
-       will be marked for vaccination.
-     - On day 3 those units will be vaccinated.
-  </parameter-description>
-
-  <diagram>6units_2_w_ring</diagram>
-
-  <output>
-    <tr>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
-    </tr>
-    <tr><td>0</td> <td>0</td></tr>
-    <tr><td>3</td> <td>0</td></tr>
-    <tr><td>0</td> <td>3</td></tr>
     <tr><td>0</td> <td>0</td></tr>
   </output>
 </variable-test>

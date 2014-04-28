@@ -26,7 +26,6 @@
 
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new disease_model_new
-#define set_params disease_model_set_params
 #define run disease_model_run
 #define reset disease_model_reset
 #define events_listened_for disease_model_events_listened_for
@@ -93,6 +92,8 @@ typedef struct
     the form param_block[production_type] to get a pointer to a particular
     param_block. */
   RPT_reporting_t *elapsed_time;
+  sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
+    so that it will be available to the set_params function. */
 }
 local_data_t;
 
@@ -523,147 +524,78 @@ local_free (struct spreadmodel_model_t_ *self)
 
 /**
  * Adds a set of parameters to a disease model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
  */
-void
-set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
+static int
+set_params (void *data, int ncols, char **value, char **colname)
 {
+  spreadmodel_model_t *self;
   local_data_t *local_data;
-  param_block_t t;
-  scew_element const *e;
-  gboolean *production_type;
-  unsigned int nprod_types, i;
+  sqlite3 *params;
+  guint production_type;
+  param_block_t *p;
+  guint pdf_id, rel_id;
 
 #if DEBUG
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
+  self = (spreadmodel_model_t *)data;
   local_data = (local_data_t *) (self->model_data);
+  params = local_data->db;
 
-  /* Read the parameters and store them in a temporary param_block_t
-   * structure. */
+  /* Find out which production type these parameters apply to. */
+  production_type = spreadmodel_read_prodtype (value[0], local_data->production_types);
 
-  e = scew_element_by_name (params, "latent-period");
-  if (e != NULL)
-    {
-      t.latent_period = PAR_get_PDF (e);
-    }
-  else
-    {
-      /* Default to 0 = no latent period. */
-      t.latent_period = PDF_new_point_dist (0);
-    }
+  /* Check that we are not overwriting an existing parameter block (that would
+   * indicate a bug). */
+  g_assert (local_data->param_block[production_type] == NULL);
 
-  e = scew_element_by_name (params, "infectious-subclinical-period");
-  if (e != NULL)
-    {
-      t.infectious_subclinical_period = PAR_get_PDF (e);
-    }
-  else
-    {
-      /* Default to 0 = no infectious subclinical period. */
-      t.infectious_subclinical_period = PDF_new_point_dist (0);
-    }
+  /* Create a new parameter block. */
+  p = g_new (param_block_t, 1);
+  local_data->param_block[production_type] = p;  
 
-  e = scew_element_by_name (params, "infectious-clinical-period");
-  if (e != NULL)
+  /* Read the parameters. */
+  g_assert (ncols == 6);
+  pdf_id = strtol(value[1], NULL, /* base */ 10);
+  p->latent_period = PAR_get_PDF (params, pdf_id);
+  pdf_id = strtol(value[2], NULL, /* base */ 10);
+  p->infectious_subclinical_period = PAR_get_PDF (params, pdf_id);
+  pdf_id = strtol(value[3], NULL, /* base */ 10);
+  p->infectious_clinical_period = PAR_get_PDF (params, pdf_id);
+  pdf_id = strtol(value[4], NULL, /* base */ 10);
+  p->immunity_period = PAR_get_PDF (params, pdf_id);
+  if (value[5] != NULL)
     {
-      t.infectious_clinical_period = PAR_get_PDF (e);
-    }
-  else
-    {
-      /* Default to 0 = no infectious clinical period. */
-      t.infectious_clinical_period = PDF_new_point_dist (0);
-    }
-
-  e = scew_element_by_name (params, "immunity-period");
-  if (e != NULL)
-    {
-      t.immunity_period = PAR_get_PDF (e);
-    }
-  else
-    {
-      /* Default to 0 = no immunity period. */
-      t.immunity_period = PDF_new_point_dist (0);
-    }
-
-  e = scew_element_by_name (params, "prevalence");
-  if (e != NULL)
-    {
-      t.prevalence = PAR_get_relationship_chart (e);
-      if (REL_chart_min (t.prevalence) < 0)
+      rel_id = strtol(value[5], NULL, /* base */ 10);
+      p->prevalence = PAR_get_relchart (params, rel_id);
+      if (REL_chart_min (p->prevalence) < 0)
         {
           g_error ("Y-values <0 are not allowed in a prevalence chart");
         }
-      if (REL_chart_max (t.prevalence) > 1)
+      if (REL_chart_max (p->prevalence) > 1)
         {
           g_error ("Y-values >1 are not allowed in a prevalence chart");
         }
       /* Scale and translate so that the x-values go from 0 to 1. */
-      REL_chart_set_domain (t.prevalence, 0, 1);
+      REL_chart_set_domain (p->prevalence, 0, 1);
     }
   else
     {
       /* Don't use prevalence, use the old behaviour. */
-      t.prevalence = NULL;
+      p->prevalence = NULL;
     }
-
-  /* Find out which production types these parameters apply to. */
-  production_type =
-    spreadmodel_read_prodtype_attribute (params, "production-type", local_data->production_types);
-
-  /* Copy the parameters to the appropriate place. */
-  nprod_types = local_data->production_types->len;
-  for (i = 0; i < nprod_types; i++)
-    {
-      param_block_t *param_block;
-
-      if (production_type[i] == FALSE)
-        continue;
-
-      /* Create a parameter block for this production type, or overwrite
-       * the existing one. */
-      param_block = local_data->param_block[i];
-      if (param_block == NULL)
-        {
-          #if DEBUG
-            g_debug ("setting parameters for %s",
-                     (char *) g_ptr_array_index (local_data->production_types, i));
-          #endif
-          param_block = g_new (param_block_t, 1);
-          local_data->param_block[i] = param_block;
-        }
-      else
-        {
-          g_warning ("overwriting previous parameters for %s",
-                     (char *) g_ptr_array_index (local_data->production_types, i));
-          PDF_free_dist (param_block->latent_period);
-          PDF_free_dist (param_block->infectious_subclinical_period);
-          PDF_free_dist (param_block->infectious_clinical_period);
-          PDF_free_dist (param_block->immunity_period);
-          REL_free_chart (param_block->prevalence); /* safe even if NULL */
-        }
-      param_block->latent_period = PDF_clone_dist (t.latent_period);
-      param_block->infectious_subclinical_period = PDF_clone_dist (t.infectious_subclinical_period);
-      param_block->infectious_clinical_period = PDF_clone_dist (t.infectious_clinical_period);
-      param_block->immunity_period = PDF_clone_dist (t.immunity_period);
-      param_block->prevalence = REL_clone_chart (t.prevalence);
-    }
-
-  g_free (production_type);
-  PDF_free_dist (t.latent_period);
-  PDF_free_dist (t.infectious_subclinical_period);
-  PDF_free_dist (t.infectious_clinical_period);
-  PDF_free_dist (t.immunity_period);
-  REL_free_chart (t.prevalence); /* safe even if NULL */
 
 #if DEBUG
   g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
 #endif
 
-  return;
+  return 0;
 }
 
 
@@ -672,12 +604,13 @@ set_params (struct spreadmodel_model_t_ *self, PAR_parameter_t * params)
  * Returns a new disease model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
   unsigned int nprod_types;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -691,10 +624,8 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  self->set_params = set_params;
   self->run = run;
   self->reset = reset;
-  self->is_singleton = TRUE;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = spreadmodel_model_answer_no;
   self->has_pending_infections = spreadmodel_model_answer_no;
@@ -707,9 +638,17 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   nprod_types = local_data->production_types->len;
   local_data->param_block = g_new0 (param_block_t *, nprod_types);
 
-  /* Send the XML subtree to the init function to read the production type
+  /* Call the set_params function to read the production type combination
    * specific parameters. */
-  self->set_params (self, params);
+  local_data->db = params;
+  sqlite3_exec (params,
+                "SELECT prodtype.name,disease_latent_period_id,disease_subclinical_period_id,disease_clinical_period_id,disease_immune_period_id,disease_prevalence_id FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_diseaseprogressionassignment xref,ScenarioCreator_diseaseprogression disease WHERE prodtype.id=xref.production_type_id AND xref.progression_id = disease.id",
+                set_params, self, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
+  local_data->db = NULL;
 
   /* Attach the relevant prevalence chart to each unit structure. */
   attach_prevalence_charts (self, units);

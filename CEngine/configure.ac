@@ -99,6 +99,15 @@ AC_SUBST(GSL_LIBS)
 
 AC_CHECK_LIB(expat,XML_Parse,,AC_MSG_ERROR(cannot continue without expat))
 
+if test "X${have_pkgconfig}" = Xyes
+then
+  PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3], ,AC_MSG_ERROR(cannot continue without SQLite3))
+  AC_SUBST(SQLITE_CFLAGS)
+  AC_SUBST(SQLITE_LIBS)
+else
+  AC_CHECK_LIB(sqlite3,sqlite3_open,,AC_MSG_ERROR(cannot continue without SQLite3))
+fi
+
 AC_CHECK_LIB(m,pow,,AC_MSG_ERROR(cannot continue without math library))
 
 AC_CHECK_LIB(shp,SHPCreate,,AC_MSG_ERROR(cannot continue without Shapefile library))
@@ -120,15 +129,6 @@ case "X${ac_cv_with_mpi}" in
   * )
     ;;
   esac
-
-if test "X${have_pkgconfig}" = Xyes
-then
-  PKG_CHECK_MODULES(SCEW,scew >= 1.0.0,,AC_MSG_ERROR(cannot continue without SCEW))
-  AC_SUBST(SCEW_CFLAGS)
-  AC_SUBST(SCEW_LIBS)
-else
-  AC_CHECK_LIB(scew,scew_element_attribute_by_name,,AC_MSG_ERROR(cannot continue without SCEW))
-fi
 
 dnl Checks for header files.
 AC_HEADER_STDC

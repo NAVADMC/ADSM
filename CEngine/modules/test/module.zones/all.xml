@@ -2951,10 +2951,9 @@
     lasts 5 days, clinical signs accompany infectiousness immediately, and
     immunity lasts 4 days.
 
-    The movement rate from cattle units to pig units is fixed at 2 per day.
-    The distance of shipments is fixed at 10 km.  Latent units can be the
-    source of an exposure.  No parameters are set for movement for any other
-    production type combinations.
+    The indirect contact rate from cattle units to pig units is fixed at 2 per
+    day.  The distance of contacts is fixed at 10 km.  No parameters are set
+    for contact for any other production type combinations.
 
     The probability of detection vs. the number of days a pig unit has been
     showing clinical signs is fixed at 1.  The probability of detection vs. the
@@ -2968,11 +2967,10 @@
     There is no destruction or vaccination.
 
     Recapping what should happen as a result of all this:
-     - On day 1 both units will be Latent.  There will be 2 exposures from unit
-       0 to unit 1.
+     - On day 1 both units will be Latent.
      - Day 2 and day 3 will be the same as day 1.
      - On day 4 both units will be Infectious Clinical.  The pig unit will be
-       detected.  There will again be 2 exposures from unit 0 to unit 1.
+       detected.  There will be 2 exposures from unit 0 to unit 1.
      - On day 5, because of the detection, there will be a 15 km radius "High
        risk" zone in effect around unit 1.  Both units will be inside the zone.
        However, because no special movement controls have been set for cattle
@@ -2988,9 +2986,9 @@
       <td>expnUAll</td>
       <td>num-separate-areasHighRisk</td>
     </tr>
-    <tr><td>2</td> <td>0</td></tr>
-    <tr><td>2</td> <td>0</td></tr>
-    <tr><td>2</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td></tr>
     <tr><td>2</td> <td>0</td></tr>
     <tr><td>2</td> <td>1</td></tr>
     <tr><td>2</td> <td>1</td></tr>
@@ -3023,10 +3021,9 @@
     lasts 5 days, clinical signs accompany infectiousness immediately, and
     immunity lasts 4 days.
 
-    The movement rate from cattle units to pig units is fixed at 2 per day.
-    The distance of shipments is fixed at 10 km.  Latent units can be the
-    source of an exposure.  No parameters are set for movement for any other
-    production type combinations.
+    The indirect contact rate from cattle units to pig units is fixed at 2 per
+    day.  The distance of contacts is fixed at 10 km.  No parameters are set
+    for contact for any other production type combinations.
 
     The probability of detection vs. the number of days a pig unit has been
     showing clinical signs is fixed at 1.  The probability of detection vs. the
@@ -3035,17 +3032,16 @@
     
     There are two zones, "High risk" and "Disease free".  When a diseased pig
     unit is detected, a "High risk" zone 15 km in radius is established around
-    it.  Inside a "High risk" zone, movement from cattle units is reduced by
+    it.  Inside a "High risk" zone, contact from cattle units is reduced by
     half after a detection.
 
     There is no destruction or vaccination.
 
     Recapping what should happen as a result of all this:
-     - On day 1 both units will be Latent.  There will be 2 exposures from unit
-       0 to unit 1.
+     - On day 1 both units will be Latent.
      - Day 2 and day 3 will be the same as day 1.
      - On day 4 both units will be Infectious Clinical.  The pig unit will be
-       detected.  There will again be 2 exposures from unit 0 to unit 1.
+       detected.  There will be 2 exposures from unit 0 to unit 1.
      - On day 5, because of the detection, there will be a 15 km radius "High
        risk" zone in effect around unit 1.  Both units will be inside the zone.
        Because special movement controls have been set for cattle units inside
@@ -3060,9 +3056,9 @@
       <td>expnUAll</td>
       <td>num-separate-areasHighRisk</td>
     </tr>
-    <tr><td>2</td> <td>0</td></tr>
-    <tr><td>2</td> <td>0</td></tr>
-    <tr><td>2</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td></tr>
     <tr><td>2</td> <td>0</td></tr>
     <tr><td>1</td> <td>1</td></tr>
     <tr><td>1</td> <td>1</td></tr>

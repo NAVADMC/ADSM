@@ -386,17 +386,11 @@ local_free (struct spreadmodel_model_t_ *self)
  * Returns a new test monitor.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element *e;
-  scew_list *ee, *iter;
-  const XML_Char *variable_name;
-  RPT_frequency_t freq;
-  gboolean success;
-  gboolean broken_down;
   unsigned int i, j;         /* loop counters */
   char *prodtype_name;
 
@@ -412,10 +406,8 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
-  self->set_params = NULL;
   self->run = run;
   self->reset = reset;
-  self->is_singleton = TRUE;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = spreadmodel_model_answer_no;
   self->has_pending_infections = spreadmodel_model_answer_no;
@@ -424,41 +416,38 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
   local_data->cumul_nunits_tested =
-    RPT_new_reporting ("tstcUAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("tstcUAll", RPT_integer, RPT_daily);
   local_data->cumul_nunits_tested_by_reason =
-    RPT_new_reporting ("tstcU", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_tested_by_prodtype =
-    RPT_new_reporting ("tstcU", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_tested_by_reason_and_prodtype =
-    RPT_new_reporting ("tstcU", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_truepos =
-    RPT_new_reporting ("tstcUTruePos", RPT_integer, RPT_never);
+    RPT_new_reporting ("tstcUTruePos", RPT_integer, RPT_daily);
   local_data->cumul_nunits_truepos_by_prodtype =
-    RPT_new_reporting ("tstcUTruePos", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcUTruePos", RPT_group, RPT_daily);
   local_data->cumul_nunits_trueneg =
-    RPT_new_reporting ("tstcUTrueNeg", RPT_integer, RPT_never);
+    RPT_new_reporting ("tstcUTrueNeg", RPT_integer, RPT_daily);
   local_data->cumul_nunits_trueneg_by_prodtype =
-    RPT_new_reporting ("tstcUTrueNeg", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcUTrueNeg", RPT_group, RPT_daily);
   local_data->cumul_nunits_falsepos =
-    RPT_new_reporting ("tstcUFalsePos", RPT_integer, RPT_never);
+    RPT_new_reporting ("tstcUFalsePos", RPT_integer, RPT_daily);
   local_data->cumul_nunits_falsepos_by_prodtype =
-    RPT_new_reporting ("tstcUFalsePos", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcUFalsePos", RPT_group, RPT_daily);
   local_data->cumul_nunits_falseneg =
-    RPT_new_reporting ("tstcUFalseNeg", RPT_integer, RPT_never);
+    RPT_new_reporting ("tstcUFalseNeg", RPT_integer, RPT_daily);
   local_data->cumul_nunits_falseneg_by_prodtype =
-    RPT_new_reporting ("tstcUFalseNeg", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcUFalseNeg", RPT_group, RPT_daily);
   local_data->cumul_nanimals_tested =
-    RPT_new_reporting ("tstcAAll", RPT_integer, RPT_never);
+    RPT_new_reporting ("tstcAAll", RPT_integer, RPT_daily);
   local_data->cumul_nanimals_tested_by_reason =
-    RPT_new_reporting ("tstcA", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_tested_by_prodtype =
-    RPT_new_reporting ("tstcA", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_tested_by_reason_and_prodtype =
-    RPT_new_reporting ("tstcA", RPT_group, RPT_never);
+    RPT_new_reporting ("tstcA", RPT_group, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->cumul_nunits_tested);
   g_ptr_array_add (self->outputs, local_data->cumul_nunits_tested_by_reason);
   g_ptr_array_add (self->outputs, local_data->cumul_nunits_tested_by_prodtype);
@@ -477,65 +466,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   g_ptr_array_add (self->outputs, local_data->cumul_nanimals_tested_by_reason_and_prodtype);
 
   /* Set the reporting frequency for the output variables. */
-  ee = scew_element_list_by_name (params, "output");
-#if DEBUG
-  g_debug ("%u output variables", scew_list_size(ee));
-#endif
-  for (iter = ee; iter != NULL; iter = scew_list_next(iter))
-    {
-      e = (scew_element *) scew_list_data (iter);
-      variable_name = scew_element_contents (scew_element_by_name (e, "variable-name"));
-      freq = RPT_string_to_frequency (scew_element_contents
-                                      (scew_element_by_name (e, "frequency")));
-      broken_down = PAR_get_boolean (scew_element_by_name (e, "broken-down"), &success);
-      if (strcmp (variable_name, "tstcU") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_nunits_tested, freq);
-          if (success == TRUE && broken_down == TRUE)
-            {
-              RPT_reporting_set_frequency (local_data->cumul_nunits_tested_by_reason, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nunits_tested_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nunits_tested_by_reason_and_prodtype, freq);
-            }
-        }
-      else if (strcmp (variable_name, "tstcUTruePos") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_nunits_truepos, freq);
-          if (success == TRUE && broken_down == TRUE)
-            RPT_reporting_set_frequency (local_data->cumul_nunits_truepos_by_prodtype, freq);
-        }
-      else if (strcmp (variable_name, "tstcUTrueNeg") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_nunits_trueneg, freq);
-          if (success == TRUE && broken_down == TRUE)
-            RPT_reporting_set_frequency (local_data->cumul_nunits_trueneg_by_prodtype, freq);
-        }
-      else if (strcmp (variable_name, "tstcUFalsePos") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_nunits_falsepos, freq);
-          if (success == TRUE && broken_down == TRUE)
-            RPT_reporting_set_frequency (local_data->cumul_nunits_falsepos_by_prodtype, freq);
-        }
-      else if (strcmp (variable_name, "tstcUFalseNeg") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_nunits_falseneg, freq);
-          if (success == TRUE && broken_down == TRUE)
-            RPT_reporting_set_frequency (local_data->cumul_nunits_falseneg_by_prodtype, freq);
-        }
-      else if (strcmp (variable_name, "tstcA") == 0)
-        {
-          RPT_reporting_set_frequency (local_data->cumul_nanimals_tested, freq);
-          if (success == TRUE && broken_down == TRUE)
-            {
-              RPT_reporting_set_frequency (local_data->cumul_nanimals_tested_by_reason, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nanimals_tested_by_prodtype, freq);
-              RPT_reporting_set_frequency (local_data->cumul_nanimals_tested_by_reason_and_prodtype, freq);
-            }
-        }
-      else
-        g_warning ("no output variable named \"%s\", ignoring", variable_name);
-    }
-  scew_list_free (ee);
 
   /* Initialize the categories in the output variables. */
   local_data->production_types = units->production_type_names;

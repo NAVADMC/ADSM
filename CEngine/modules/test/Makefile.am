@@ -30,7 +30,7 @@ AM_CPPFLAGS = -I$(top_srcdir) \
 if USE_SC_GUILIB
   AM_CPPFLAGS +=  -I$(top_srcdir)/sc_guilib
 endif
-AM_CPPFLAGS += @GLIB_CFLAGS@ @GSL_CFLAGS@ @SCEW_CFLAGS@
+AM_CPPFLAGS += @GLIB_CFLAGS@ @GSL_CFLAGS@
 
 # Create a program just like the real simulator, but without MPI, for running
 # small tests.
@@ -64,13 +64,11 @@ minispreadmodel_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/
   $(top_srcdir)/modules/contact_spread_model.c $(top_srcdir)/modules/contact_spread_model.h \
   $(top_srcdir)/modules/contact_recorder_model.c $(top_srcdir)/modules/contact_recorder_model.h \
   $(top_srcdir)/modules/airborne_spread_model.c $(top_srcdir)/modules/airborne_spread_model.h \
-  $(top_srcdir)/modules/airborne_spread_exponential_model.c $(top_srcdir)/modules/airborne_spread_exponential_model.h \
   $(top_srcdir)/modules/detection_model.c $(top_srcdir)/modules/detection_model.h \
   $(top_srcdir)/modules/vaccine_model.c $(top_srcdir)/modules/vaccine_model.h \
   $(top_srcdir)/modules/resources_and_implementation_of_controls_model.c $(top_srcdir)/modules/resources_and_implementation_of_controls_model.h \
   $(top_srcdir)/modules/quarantine_model.c $(top_srcdir)/modules/quarantine_model.h \
   $(top_srcdir)/modules/basic_destruction_model.c $(top_srcdir)/modules/basic_destruction_model.h \
-  $(top_srcdir)/modules/trace_back_destruction_model.c $(top_srcdir)/modules/trace_back_destruction_model.h \
   $(top_srcdir)/modules/ring_destruction_model.c $(top_srcdir)/modules/ring_destruction_model.h \
   $(top_srcdir)/modules/ring_vaccination_model.c $(top_srcdir)/modules/ring_vaccination_model.h \
   $(top_srcdir)/modules/trace_model.c $(top_srcdir)/modules/trace_model.h \
@@ -80,12 +78,11 @@ minispreadmodel_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/
   $(top_srcdir)/modules/test_model.c $(top_srcdir)/modules/test_model.h \
   $(top_srcdir)/modules/zone_model.c $(top_srcdir)/modules/zone_model.h \
   $(top_srcdir)/modules/basic_zone_focus_model.c $(top_srcdir)/modules/basic_zone_focus_model.h \
-  $(top_srcdir)/modules/trace_back_zone_focus_model.c $(top_srcdir)/modules/trace_back_zone_focus_model.h \
   $(top_srcdir)/modules/trace_zone_focus_model.c $(top_srcdir)/modules/trace_zone_focus_model.h \
   $(top_srcdir)/modules/economic_model.c $(top_srcdir)/modules/economic_model.h \
+  $(top_srcdir)/modules/unit_state_monitor.c $(top_srcdir)/modules/unit_state_monitor.h \
   $(top_srcdir)/modules/destruction_monitor.c $(top_srcdir)/modules/destruction_monitor.h \
   $(top_srcdir)/modules/destruction_list_monitor.c $(top_srcdir)/modules/destruction_list_monitor.h \
-  $(top_srcdir)/modules/trace_back_monitor.c $(top_srcdir)/modules/trace_back_monitor.h \
   $(top_srcdir)/modules/trace_monitor.c $(top_srcdir)/modules/trace_monitor.h \
   $(top_srcdir)/modules/vaccination_monitor.c $(top_srcdir)/modules/vaccination_monitor.h \
   $(top_srcdir)/modules/vaccination_list_monitor.c $(top_srcdir)/modules/vaccination_list_monitor.h \
@@ -108,7 +105,7 @@ if USE_SC_GUILIB
     $(top_srcdir)/sc_guilib/sc_database.c
 endif
 minispreadmodel_CPPFLAGS = -DCANCEL_MPI=1 $(AM_CPPFLAGS)
-minispreadmodel_LDADD = @LEXLIB@ @GLIB_LIBS@ @GSL_LIBS@ @SCEW_LIBS@
+minispreadmodel_LDADD = @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@
 if HAVE_MPI
   minispreadmodel_LDADD += @MPI_LIBS@
 endif

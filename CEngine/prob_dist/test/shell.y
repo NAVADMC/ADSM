@@ -313,7 +313,7 @@ new_command :
   | PIECEWISE LPAREN num_list RPAREN
     {
       int npoints;
-      double *xy, *p;
+      double *x, *y, *px, *py;
       GSList *iter;
 
       current_sample_free ();
@@ -327,18 +327,25 @@ new_command :
 	}
       else
 	{
-	  /* Copy the arguments into an array, then free the argument list
+	  /* Copy the arguments into x and y arrays, then free the argument list
 	   * structure. */
-	  xy = g_new (double, npoints);
-	  for (iter = $3, p = xy; iter != NULL; iter = g_slist_next (iter))
+      npoints /= 2;
+      x = g_new (double, npoints);
+      y = g_new (double, npoints);
+	  
+	  for (iter = $3, px = x, py = y; iter != NULL; )
 	    {
-	      *p++ = *((double *)(iter->data));
+	      *px++ = *((double *)(iter->data));
+	      iter = g_slist_next (iter);
+	      *py++ = *((double *)(iter->data));
+	      iter = g_slist_next (iter);
 	    }
 	  g_slist_foreach ($3, g_free_as_GFunc, NULL);
 	  g_slist_free ($3);
 
-	  current_dist = PDF_new_piecewise_dist (npoints / 2, xy);
-	  g_free (xy);
+	  current_dist = PDF_new_piecewise_dist (npoints, x, y);
+	  g_free (x);
+	  g_free (y);
 	}
       PDF_printf_dist (current_dist);
       printf ("\n%s", PROMPT);

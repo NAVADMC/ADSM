@@ -452,8 +452,8 @@ const char *SPREADMODEL_detection_reason_abbrev[] = {
 };
 
 const char *SPREADMODEL_control_reason_name[] = {
-  "Unspecified", "Ring", "Trace Forward Direct", "Trace Forward Indirect",
-  "Trace Back Direct", "Trace Back Indirect", "Detection", "Initial State",
+  "Unspecified", "Ring", "Trace fwd direct", "Trace fwd indirect",
+  "Trace back direct", "Trace back indirect", "Basic", "Initial state",
   NULL
 };
 

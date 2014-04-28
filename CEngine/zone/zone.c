@@ -220,8 +220,8 @@ ZON_zone_list_append (ZON_zone_list_t * zones, ZON_zone_t * zone)
    * existing zone. */
   if (zone->level == -1)
     {
-      if (nzones > 0)
-        zone->level = ZON_zone_list_get (zones, nzones - 1)->level + 1;
+      if (nzones > 1)
+        zone->level = ZON_zone_list_get (zones, nzones - 2)->level + 1;
       else
         zone->level = 1;
     }

@@ -71,13 +71,6 @@ y, FloatField, The y value of the point.
 
 class ControlMasterPlan
 name, CharField, 
-_include_detection, BooleanField, Indicates if detection of disease in any production type will be modeled.
-_include_tracing, BooleanField, Indicates if tracing of units in any production type will be modeled.
-_include_tracing_unit_exam, BooleanField, Indicates if tracing using diagnostic testing in any production type will be modeled.
-_include_tracing_testing, BooleanField, Indicates if tracing using unit examination in any production type will be modeled.
-_include_destruction, BooleanField, Indicates if destruction of units in any production type will be modeled.
-_include_vaccination, BooleanField, Indicates if vaccination of units in any production type will be modeled.
-_include_zones, BooleanField, Indicates if zones will be modeled.
 destruction_program_delay, IntegerField, The number of days that must pass after the first detection before a destruction program can begin.
 destruction_capacity_relid, ForeignKey, The relational function used to define the daily destruction capacity.
 destruction_priority_order, CharField, The primary priority order for destructio
@@ -159,8 +152,8 @@ class Disease
 name, CharField, Name of the Disea
 disease_description, TextField, 
 
-class DiseaseReaction
-name, CharField, Examples: Severe Reaction, FMD Long Incubati
+class DiseaseProgression
+name, CharField, Examples: Severe Progression, FMD Long Incubati
 _disease, ForeignKey, 
 disease_latent_period_pdf, ForeignKey, Defines the latent period for units of this production type.
 disease_subclinical_period_pdf, ForeignKey, Defines the subclinical period for units of this production type.
@@ -168,16 +161,16 @@ disease_clinical_period_pdf, ForeignKey, Defines the clinical period for units o
 disease_immune_period_pdf, ForeignKey, Defines the natural immune period for units of this production type.
 disease_prevalence_relid, ForeignKey, Defines the prevelance for units of this production type.
 
-class DiseaseReactionAssignment
+class DiseaseProgressionAssignment
 production_type, ForeignKey, The production type that these outputs apply to.
-reaction, ForeignKey, 
+progression, ForeignKey,
 
-class DiseaseSpreadModel
+class DiseaseSpread
 name, CharField, 
 _disease, ForeignKey, Parent disease whose spreading characteristics this describe
 transport_delay_pdf, ForeignKey, Relational function used to define the shipment delays for the indicated production type.
 
-class AbstractSpreadModel(DiseaseSpreadModel):  # lots of fields between Direct and Indirect that were not in Airborne
+class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indirect that were not in Airborne
 
 _spread_method_code, CharField, Code indicating the mechanism of the disease spread.
 subclinical_animals_can_infect_others, BooleanField, Indicates if subclinical units of the source type can spread disease by direct or indirect contact. 
@@ -187,14 +180,14 @@ infection_probability, = PercentField, The probability that a contact will resul
 distance_pdf, ForeignKey, Defines the sipment distances for direct and indirect contact models.
 movement_control_relid, ForeignKey, Relational function used to define movement control effects for the indicated production types combinations.
 
-class IndirectSpreadModel(AbstractSpreadModel):
+class IndirectSpread(AbstractSpread):
 
 
-class DirectSpreadModel(AbstractSpreadModel):
+class DirectSpread(AbstractSpread):
 
 latent_animals_can_infect_others, BooleanField, Indicates if latent units of the source type can spread disease by direct contact. Not applicable to airborne spread or indirect spread.
 
-class AirborneSpreadModel(DiseaseSpreadModel):
+class AirborneSpread(DiseaseSpread):
 
 _spread_method_code, CharField, Code indicating the mechanism of the disease spread.
 spread_1km_probability, = PercentField, The probability that disease will be spread to unit 1 km away from the source unit.

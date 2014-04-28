@@ -18,7 +18,7 @@
 #ifndef CONTACT_RECORDER_MODEL_H
 #define CONTACT_RECORDER_MODEL_H
 
-spreadmodel_model_t *contact_recorder_model_new (scew_element * params, UNT_unit_list_t *,
+spreadmodel_model_t *contact_recorder_model_new (sqlite3 *, UNT_unit_list_t *,
                                                  projPJ, ZON_zone_list_t *);
 
 #endif

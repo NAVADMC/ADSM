@@ -8,7 +8,7 @@
 
   <models>
 
-    <disease-model>
+    <disease-model production-type="A,B,C">
       <latent-period>
         <point>2</point>
         <units><xdf:unit>day</xdf:unit></units>
@@ -84,6 +84,7 @@
         <value>31</value>
         <units><xdf:unit>day</xdf:unit></units>
       </min-time-between-vaccinations>      
+      <vaccinate-detected-units>true</vaccinate-detected-units>
     </ring-vaccination-model>
 
     <ring-vaccination-model production-type="B">
@@ -96,6 +97,7 @@
         <value>31</value>
         <units><xdf:unit>day</xdf:unit></units>
       </min-time-between-vaccinations>      
+      <vaccinate-detected-units>true</vaccinate-detected-units>
     </ring-vaccination-model>
 
     <vaccine-model>

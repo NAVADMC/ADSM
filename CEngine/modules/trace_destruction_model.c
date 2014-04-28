@@ -28,7 +28,6 @@
 #define events_listened_for trace_destruction_model_events_listened_for
 #define to_string trace_destruction_model_to_string
 #define local_free trace_destruction_model_free
-#define handle_before_any_simulations_event trace_destruction_model_handle_before_any_simulations_event
 #define handle_trace_result_event trace_destruction_model_handle_trace_result_event
 
 #include "module.h"
@@ -63,70 +62,27 @@ double round (double x);
 
 
 
-#define NEVENTS_LISTENED_FOR 2
-EVT_event_type_t events_listened_for[] =
-  { EVT_BeforeAnySimulations, EVT_TraceResult };
+#define NEVENTS_LISTENED_FOR 1
+EVT_event_type_t events_listened_for[] = { EVT_TraceResult };
 
 
 
 /** Specialized information for this model. */
 typedef struct
 {
-  SPREADMODEL_contact_type contact_type;
-  SPREADMODEL_trace_direction direction;
-  gboolean *production_type;
+  int *priority[SPREADMODEL_NCONTACT_TYPES][SPREADMODEL_NTRACE_DIRECTIONS]; /**< Priority
+    for destroying a unit identified by trace.
+    Use an expression of the form
+    priority[contact_type][direction][production_type]
+    to retrieve a value.
+    Priority numbers start at 1 for the highest priority. If an element in this
+    array is 0, then destruction is not used for that contact type/direction/
+    production type combination.  */
   GPtrArray *production_types;
-  int priority;
+  GHashTable *priority_order_table; /**< A temporary structure that exists
+    for use in the set_params functions. */
 }
 local_data_t;
-
-
-
-/**
- * Before any simulations, this module declares all the reasons for which it
- * may request a destruction.
- *
- * @param self this module.
- * @param queue for any new events the model creates.
- */
-void
-handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
-                                     EVT_event_queue_t * queue)
-{
-  local_data_t *local_data;
-  GPtrArray *reasons;
-
-#if DEBUG
-  g_debug ("----- ENTER handle_before_any_simulations_event (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-  reasons = g_ptr_array_sized_new (1);
-  if (local_data->direction == SPREADMODEL_TraceForwardOrOut)
-    {
-      if (local_data->contact_type == SPREADMODEL_DirectContact)
-        g_ptr_array_add (reasons, "DirFwd");
-      else
-        g_ptr_array_add (reasons, "IndFwd");
-    }
-  else /* trace-in */
-    {
-      if (local_data->contact_type == SPREADMODEL_DirectContact)
-        g_ptr_array_add (reasons, "DirBack");
-      else
-        g_ptr_array_add (reasons, "IndBack");
-    }
-  EVT_event_enqueue (queue, EVT_new_declaration_of_destruction_reasons_event (reasons));
-
-  /* Note that we don't clean up the GPtrArray.  It will be freed along with
-   * the declaration event after all interested sub-models have processed the
-   * event. */
-
-#if DEBUG
-  g_debug ("----- EXIT handle_before_any_simulations_event (%s)", MODEL_NAME);
-#endif
-  return;
-}
 
 
 
@@ -145,6 +101,7 @@ handle_trace_result_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * 
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
+  int priority;
   EVT_event_t *destr_event;
 
 #if DEBUG
@@ -159,42 +116,32 @@ handle_trace_result_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * 
   if (event->traced == FALSE)
     goto end;
 
-  /* This module is parameterized by production type, contact type, and trace
-   * direction.  For example, it might apply to a cattle unit found by tracing
-   * direct contacts out from another unit (the cattle unit was the recipient).
-   * Or it might apply to a pig unit found by tracing indirect contacts into
-   * another unit (the pig unit was the source).  Make sure the trace result
-   * event we have received is one we are interested in. */
-  if (event->contact_type != local_data->contact_type)
-    goto end;
-
-  if (event->direction != local_data->direction)
-    goto end;
-
-  if (local_data->direction == SPREADMODEL_TraceForwardOrOut)
+  if (event->direction == SPREADMODEL_TraceForwardOrOut)
     unit = event->exposed_unit;
   else
     unit = event->exposing_unit;
+  if (unit->state == Destroyed)
+    goto end;
 
-  if (local_data->production_type[unit->production_type] == FALSE
-      || unit->state == Destroyed)
+  priority = local_data->priority[event->contact_type][event->direction][unit->production_type];
+  if (priority == 0)
     goto end;
 
   /* Now that we know this is a trace result we are interested in, issue
    * destruction requests. */
-  if (local_data->direction == SPREADMODEL_TraceForwardOrOut)
+  if (event->direction == SPREADMODEL_TraceForwardOrOut)
     {
       if (event->contact_type == SPREADMODEL_DirectContact)
-        destr_event = EVT_new_request_for_destruction_event (unit, event->day, "DirFwd", local_data->priority);
+        destr_event = EVT_new_request_for_destruction_event (unit, event->day, "DirFwd", priority);
       else /* indirect */
-        destr_event = EVT_new_request_for_destruction_event (unit, event->day, "IndFwd", local_data->priority);
+        destr_event = EVT_new_request_for_destruction_event (unit, event->day, "IndFwd", priority);
     }
   else
     {
       if (event->contact_type == SPREADMODEL_DirectContact)
-        destr_event = EVT_new_request_for_destruction_event (unit, event->day, "DirBack", local_data->priority);
+        destr_event = EVT_new_request_for_destruction_event (unit, event->day, "DirBack", priority);
       else /* indirect */
-        destr_event = EVT_new_request_for_destruction_event (unit, event->day, "IndBack", local_data->priority);
+        destr_event = EVT_new_request_for_destruction_event (unit, event->day, "IndBack", priority);
     }
 #if DEBUG
   g_debug ("requesting destruction of unit \"%s\"", unit->official_id);
@@ -230,9 +177,6 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
 
   switch (event->type)
     {
-    case EVT_BeforeAnySimulations:
-      handle_before_any_simulations_event (self, queue);
-      break;
     case EVT_TraceResult:
       handle_trace_result_event (self, units, &(event->u.trace_result), rng, queue);
       break;
@@ -279,39 +223,35 @@ reset (struct spreadmodel_model_t_ *self)
 char *
 to_string (struct spreadmodel_model_t_ *self)
 {
-  GString *s;
-  gboolean already_names;
-  unsigned int i;
-  char *chararray;
   local_data_t *local_data;
+  GString *s;
+  guint i;
+  SPREADMODEL_contact_type contact_type;
+  SPREADMODEL_trace_direction direction;
 
   local_data = (local_data_t *) (self->model_data);
   s = g_string_new (NULL);
-  g_string_sprintf (s, "<%s for ", MODEL_NAME);
-  already_names = FALSE;
+  g_string_sprintf (s, "<%s", MODEL_NAME);
   for (i = 0; i < local_data->production_types->len; i++)
-    if (local_data->production_type[i] == TRUE)
-      {
-        if (already_names)
-          g_string_append_printf (s, ",%s",
-                                  (char *) g_ptr_array_index (local_data->production_types, i));
-        else
-          {
-            g_string_append_printf (s, "%s",
-                                    (char *) g_ptr_array_index (local_data->production_types, i));
-            already_names = TRUE;
-          }
-      }
-  g_string_append_printf (s, " units found by %s %s",
-    SPREADMODEL_contact_type_name[local_data->contact_type],
-    SPREADMODEL_trace_direction_name[local_data->direction]);
+    {
+      for (direction = 0; direction < SPREADMODEL_NTRACE_DIRECTIONS; direction++)
+        {
+          for (contact_type = 0; contact_type < SPREADMODEL_NCONTACT_TYPES; contact_type++)
+            {
+              int priority;
+              priority = local_data->priority[contact_type][direction][i];
+              if (priority > 0)
+                g_string_append_printf (s, "  for %s units found by %s %s",
+                                        (char *) g_ptr_array_index (local_data->production_types, i),
+                                        SPREADMODEL_trace_direction_name[direction],
+                                        SPREADMODEL_contact_type_name[contact_type]);
+            }
+        }
+    }
+  g_string_append_c (s, '>');
 
-  g_string_append_printf (s, "\n  priority=%i>", local_data->priority);
-
-  /* don't return the wrapper object */
-  chararray = s->str;
-  g_string_free (s, FALSE);
-  return chararray;
+  /* Discard the wrapper object and return the string inside. */
+  return g_string_free (s, FALSE);
 }
 
 
@@ -326,6 +266,7 @@ void
 local_free (struct spreadmodel_model_t_ *self)
 {
   local_data_t *local_data;
+  guint i, j;
 
 #if DEBUG
   g_debug ("----- ENTER free (%s)", MODEL_NAME);
@@ -333,7 +274,13 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  g_free (local_data->production_type);
+  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+    {
+      for (j = 0; j < SPREADMODEL_NTRACE_DIRECTIONS; j++)
+        {
+          g_free (local_data->priority[i][j]);
+        }
+    }
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
   g_free (self);
@@ -345,19 +292,98 @@ local_free (struct spreadmodel_model_t_ *self)
 
 
 
+static int
+get_priority (GHashTable *priority_order_table,
+              char *production_type_name,
+              SPREADMODEL_control_reason reason,
+              char *boolean_as_text)
+{
+  int priority = 0;
+  long int tmp;
+
+  errno = 0;
+  tmp = strtol (boolean_as_text, NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+
+  if (tmp == 1)
+    {
+      char *key;
+      gpointer ptr;
+      key = g_strdup_printf ("%s,%s", production_type_name,
+                             SPREADMODEL_control_reason_name[reason]);
+      ptr = g_hash_table_lookup (priority_order_table, key);
+      g_assert (ptr != NULL);
+      priority = GPOINTER_TO_UINT(ptr);
+      g_free (key);
+    }
+
+  return priority;
+}
+              
+              
+/**
+ * Adds a set of parameters to a trace destruction model.
+ *
+ * @param data this module ("self"), but cast to a void *.
+ * @param ncols number of columns in the SQL query result.
+ * @param values values returned by the SQL query, all in text form.
+ * @param colname names of columns in the SQL query result.
+ * @return 0
+ */
+static int
+set_params (void *data, int ncols, char **value, char **colname)
+{
+  spreadmodel_model_t *self;
+  local_data_t *local_data;
+  char *production_type_name;
+  guint production_type_id;
+
+  #if DEBUG
+    g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
+  #endif
+
+  g_assert (ncols == 5);
+
+  self = (spreadmodel_model_t *)data;
+  local_data = (local_data_t *) (self->model_data);
+
+  /* Find out which production type these parameters apply to. */
+  production_type_name = value[0];
+  production_type_id = spreadmodel_read_prodtype (production_type_name, local_data->production_types);
+
+  local_data->priority[SPREADMODEL_DirectContact][SPREADMODEL_TraceBackOrIn][production_type_id]
+    = get_priority (local_data->priority_order_table, production_type_name,
+                    SPREADMODEL_ControlTraceBackDirect, value[1]);
+
+  local_data->priority[SPREADMODEL_DirectContact][SPREADMODEL_TraceForwardOrOut][production_type_id]
+    = get_priority (local_data->priority_order_table, production_type_name,
+                    SPREADMODEL_ControlTraceForwardDirect, value[2]);
+
+  local_data->priority[SPREADMODEL_IndirectContact][SPREADMODEL_TraceBackOrIn][production_type_id]
+    = get_priority (local_data->priority_order_table, production_type_name,
+                    SPREADMODEL_ControlTraceBackIndirect, value[3]);
+
+  local_data->priority[SPREADMODEL_IndirectContact][SPREADMODEL_TraceForwardOrOut][production_type_id]
+    = get_priority (local_data->priority_order_table, production_type_name,
+                    SPREADMODEL_ControlTraceForwardIndirect, value[4]);
+
+  return 0;
+}
+
+
+
 /**
  * Returns a new trace destruction model.
  */
 spreadmodel_model_t *
-new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
+new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
   spreadmodel_model_t *self;
   local_data_t *local_data;
-  scew_element const *e;
-  scew_attribute *attr;
-  XML_Char const *attr_text;
-  gboolean success;
+  guint nprod_types, i, j;
+  char *sqlerr;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -373,7 +399,6 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_singleton = FALSE;
   self->is_listening_for = spreadmodel_model_is_listening_for;
   self->has_pending_actions = spreadmodel_model_answer_no;
   self->has_pending_infections = spreadmodel_model_answer_no;
@@ -382,62 +407,30 @@ new (scew_element * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = spreadmodel_model_fprintf;
   self->free = local_free;
 
-  /* Make sure the right XML subtree was sent. */
-  g_assert (strcmp (scew_element_name (params), MODEL_NAME) == 0);
-
-#if DEBUG
-  g_debug ("setting contact type");
-#endif
-  attr = scew_element_attribute_by_name (params, "contact-type");
-  g_assert (attr != NULL);
-  attr_text = scew_attribute_value (attr);
-  if (strcmp (attr_text, "direct") == 0)
-    local_data->contact_type = SPREADMODEL_DirectContact;
-  else if (strcmp (attr_text, "indirect") == 0)
-    local_data->contact_type = SPREADMODEL_IndirectContact;
-  else
-    g_assert_not_reached ();
-
-#if DEBUG
-  g_debug ("setting trace direction");
-#endif
-  attr = scew_element_attribute_by_name (params, "direction");
-  g_assert (attr != NULL);
-  attr_text = scew_attribute_value (attr);
-  if (strcmp (attr_text, "out") == 0)
-    local_data->direction = SPREADMODEL_TraceForwardOrOut;
-  else if (strcmp (attr_text, "in") == 0)
-    local_data->direction = SPREADMODEL_TraceBackOrIn;
-  else
-    g_assert_not_reached ();
-
-#if DEBUG
-  g_debug ("setting production types");
-#endif
+  /* Initialize an array to hold priorities. */
   local_data->production_types = units->production_type_names;
-  local_data->production_type =
-    spreadmodel_read_prodtype_attribute (params, "production-type", units->production_type_names);
+  nprod_types = local_data->production_types->len;
+  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+    {
+      for (j = 0; j < SPREADMODEL_NTRACE_DIRECTIONS; j++)
+        {
+          local_data->priority[i][j] = g_new0 (int, nprod_types);
+        }
+    }
 
-  e = scew_element_by_name (params, "priority");
-  if (e != NULL)
+  /* Get a table that shows the priority order for combinations of production
+   * type and reason for destruction. */
+  local_data->priority_order_table = spreadmodel_read_priority_order (params);
+  sqlite3_exec (params,
+                "SELECT prodtype.name,destroy_direct_back_traces,destroy_direct_forward_traces,destroy_indirect_back_traces,destroy_indirect_forward_traces FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND (destroy_direct_back_traces=1 OR destroy_direct_forward_traces=1 OR destroy_indirect_back_traces=1 OR destroy_indirect_forward_traces=1)",
+                set_params, self, &sqlerr);
+  if (sqlerr)
     {
-      local_data->priority = (int) round (PAR_get_unitless (e, &success));
-      if (success == FALSE)
-        {
-          g_warning ("%s: setting priority to 1", MODEL_NAME);
-          local_data->priority = 1;
-        }
-      if (local_data->priority < 1)
-        {
-          g_warning ("%s: priority cannot be less than 1, setting to 1", MODEL_NAME);
-          local_data->priority = 1;
-        }
+      g_error ("%s", sqlerr);
     }
-  else
-    {
-      g_warning ("%s: priority missing, setting to 1", MODEL_NAME);
-      local_data->priority = 1;
-    }
+
+  g_hash_table_destroy (local_data->priority_order_table);
+  local_data->priority_order_table = NULL;
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

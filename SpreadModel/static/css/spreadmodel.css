@@ -42,6 +42,13 @@ header .alert {
     display: none;
 }
 
+header #admin_link {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin-right: 5px;
+}
+
 body>nav {
     position: fixed;
     top: 50px;
@@ -74,18 +81,18 @@ body>section {
     display:block;
     text-decoration: none;
     background-color: #EEE;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
-    line-height: 36px;
+    line-height: 30px;
     padding-left: 5px;
 }
 
 #setupMenu ul a {
-    font-size: 16px;
+    font-size: 14px;
 }
 
 #setupMenu ul ul a {
-    font-size: 14px;
+    font-size: 12px;
 }
 
 #setupMenu a:hover {
@@ -104,7 +111,7 @@ body>section {
     color: #007700;
 }
 
-.btn-primary {
+.btn {
     margin: 8px;
 }
 
@@ -119,8 +126,13 @@ td, th {
 }
 
 th {
-    padding-right: 40px;
+    padding-right: 20px;
 }
+
+select {
+    margin: 8px 0;
+}
+
 
 #file_list ul {
     list-style-type: none;

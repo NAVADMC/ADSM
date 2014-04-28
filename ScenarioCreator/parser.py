@@ -1,7 +1,7 @@
 import ScenarioCreator.models
 
 __author__ = 'Josiah'
-from xml.etree.ElementTree import ElementTree
+import xml.etree.ElementTree as ET
 
 
 def gettext(elem):
@@ -14,7 +14,17 @@ class PopulationParser:
     text_fields = list(zip(model_labels, xml_fields))
 
     def __init__(self, filename):
-        tree = ElementTree(file=ScenarioCreator.models.workspace(filename))
+        filepath = ScenarioCreator.models.workspace(filename)
+        try:
+            contents = open(filepath, encoding="utf-8").read()
+            contents.replace('encoding="UTF-16" ?', 'encoding="utf-8"?', 1)
+            # print(contents[:500])
+        except UnicodeDecodeError:
+            contents = open(filepath, encoding="utf-16").read()
+            contents.replace('encoding="UTF-16" ?', 'encoding="utf-8"?', 1)
+            # print(contents[:500])
+            contents.encode("utf-8", errors='xmlcharrefreplace')
+        tree = ET.ElementTree(ET.fromstring(contents))
         self.top_level = tree.getroot()
         self.population = []
 

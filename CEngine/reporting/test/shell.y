@@ -334,8 +334,7 @@ get_command :
 	case RPT_real:
 	  printf ("%g", RPT_reporting_get_real (current_variable, (const char **) drill_down_list));
 	  break;
-    case RPT_group:
-    case RPT_unknown_type:
+    default:
       g_assert_not_reached();
 	}
       printf ("\n%s", PROMPT);

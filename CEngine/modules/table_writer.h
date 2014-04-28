@@ -14,7 +14,7 @@
 #ifndef TABLE_WRITER_H
 #define TABLE_WRITER_H
 
-spreadmodel_model_t *table_writer_new (scew_element * params,
+spreadmodel_model_t *table_writer_new (sqlite3 *,
                                        UNT_unit_list_t *,
                                        projPJ,
                                        ZON_zone_list_t *);

@@ -158,7 +158,7 @@
       </min-time-between-vaccinations>      
     </ring-vaccination-model>
 
-    <vaccine-model production-type="Sheep,Goats">
+    <vaccine-model production-type="Sheep,Goats,Cattle,Pigs">
       <delay>
         <value>0</value>
         <units><xdf:unit>day</xdf:unit></units>

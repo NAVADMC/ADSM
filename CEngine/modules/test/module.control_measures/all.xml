@@ -4683,10 +4683,11 @@
     capacity is zero, so no units will ever actually be destroyed.
 
     A vaccination program begins at the fourth detection.  Units within 3/4 of
-    a km of a detection will be vaccinated.  The authorities can vaccinate 3
-    units each day.  Units of production type “A” have first priority, so unit
-    6, the sole unit of production type “B”, will always get vaccinated last.
-    The vaccine produces immunity immediately, and the immunity lasts 2 days.
+    a km of a detection will be vaccinated.  Detected infected units are
+    vaccinated.  The authorities can vaccinate 3 units each day.  Units of
+    production type “A” have first priority, so unit 6, the sole unit of
+    production type “B”, will always get vaccinated last.  The vaccine produces
+    immunity immediately, and the immunity lasts 2 days.
 
     There is no disease spread.
     

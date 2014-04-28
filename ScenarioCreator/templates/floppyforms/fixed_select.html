@@ -1,0 +1,5 @@
+<h4>{{ value_name }}:</h4>
+
+<input type="hidden" name="{{ name }}" value="{{ value }}"{% if multiple %} multiple="multiple"{% endif %}{% if required %} required{% endif %}{% include "floppyforms/attrs.html" %}>
+
+

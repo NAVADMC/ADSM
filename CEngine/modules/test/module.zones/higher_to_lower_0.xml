@@ -48,7 +48,7 @@
 
     <!-- The parameters below will give 1 shipment per day, to a herd 10 km
       away. -->
-    <contact-spread-model from-production-type="Sheep" to-production-type="Beef Cattle" contact-type="direct">
+    <contact-spread-model from-production-type="Sheep" to-production-type="Beef Cattle" contact-type="indirect">
       <fixed-movement-rate>
         <value>1</value>
         <units><xdf:unit power="-1">day</xdf:unit></units>
@@ -123,6 +123,8 @@
         <units><xdf:unitless /></units>
       </prob-report-vs-time-since-outbreak>
     </detection-model>
+    
+    <quarantine-model />
 
     <resources-and-implementation-of-controls-model>
       <!-- The authorities require 1 day to set up a destruction program. -->
