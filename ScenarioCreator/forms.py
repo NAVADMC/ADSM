@@ -5,20 +5,23 @@ All forms now have their "submit" button restored and you can choose custom layo
 
 
 from crispy_forms.bootstrap import TabHolder, Tab
-from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML
+from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Field, Hidden
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import OperationalError  # OperationalError is for initial manage.py syncdb
 from ScenarioCreator.models import *
-from floppyforms import ModelForm, Select, NumberInput, RadioSelect
+from floppyforms import ModelForm, Select, NumberInput, RadioSelect, HiddenInput, TextInput
 from crispy_forms.helper import FormHelper
 
 
 class AddOrSelect(Select):
     template_name = 'floppyforms/model_select.html'
-
     # def get_context(self, name, value, attrs=None, choices=()):
     #     context = super(AddOrSelect, self).get_context(name, value, attrs=None, choices=())
     #     context['attrs']['data-new-item-url'] = '/%s/new/' %
+
+
+class FixedSelect(Select):
+    template_name = 'floppyforms/fixed_select.html'
 
 
 def submit_button():
@@ -94,9 +97,9 @@ class ProtocolAssignmentForm(BaseForm):
     class Meta:
         model = ProtocolAssignment
         exclude = ['_master_plan', ]
-        # widgets = {'_master_plan': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlMasterPlan/new/'}),
-        #            'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
-        #            'control_protocol': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'})}
+        widgets = {'_master_plan': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlMasterPlan/new/'}),
+                   'production_type': FixedSelect(),
+                   'control_protocol': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'})}
 
 
 class DiseaseProgressionAssignmentForm(BaseForm):

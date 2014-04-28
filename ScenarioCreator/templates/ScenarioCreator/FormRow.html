@@ -5,5 +5,8 @@
         {% for field in form.visible_fields %}
             <td>{% block widget %}{% formfield field %}{% endblock %}</td>
         {% endfor %}
+{#        {% for field in form.hidden_fields %}#}
+{#            <td>{% formfield field %}</td>#}
+{#        {% endfor %}#}
     {% endform %}
 </tr>
