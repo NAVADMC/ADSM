@@ -343,18 +343,6 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
       }
   #endif
 
-  /* If table output is turned on, set the reporting frequency for the output
-   * variables. */
-  if (FALSE)
-    {
-      if (strcmp (variable_name, "num-units-in-each-state") == 0)
-        variable_name = "tsdU";
-      else if (strcmp (variable_name, "num-animals-in-each-state") == 0)
-        variable_name = "tsdA";
-      else if (strcmp (variable_name, "time-to-end-of-outbreak") == 0)
-        variable_name = "outbreakDuration";
-    }
-
   /* Make sure the zones' surveillance level numbers start at 1 and are
    * consecutive, because we're going to use them as list indices later. */
   nzones = ZON_zone_list_length (zones);
