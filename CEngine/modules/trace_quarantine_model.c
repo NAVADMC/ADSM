@@ -47,8 +47,6 @@
 
 #include "trace_quarantine_model.h"
 
-#include "spreadmodel.h"
-
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "trace-quarantine-model"
 

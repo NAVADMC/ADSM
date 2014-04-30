@@ -255,8 +255,6 @@
 #  include <math.h>
 #endif
 
-#include "spreadmodel.h"
-
 #include "resources_and_implementation_of_controls_model.h"
 
 #if !HAVE_ROUND && HAVE_RINT

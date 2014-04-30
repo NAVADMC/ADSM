@@ -71,20 +71,13 @@ double trunc (double);
 
 #define EPSILON 0.001
 
-#include <spreadmodel.h>
+#include "adsm.h"
 
 #ifdef USE_SC_GUILIB
 #  include <sc_guilib_outputs.h>
 #endif
 
 
-
-/*
-unit.c needs access to the functions defined in spreadmodel.h,
-even when compiled as a *nix executable (in which case,
-the functions defined will all be NULL).
-*/
-#include "spreadmodel.h"
 
 /**
  * A table of all valid state transitions.

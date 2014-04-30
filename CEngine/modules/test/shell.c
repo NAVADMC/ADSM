@@ -55,14 +55,14 @@ main (int argc, char *argv[])
       if (g_ascii_strncasecmp (tokens[0], "stochastic", 10) == 0)
         {
           /* Stochastic test */
-          g_string_printf (cmd, "test/minispreadmodel -V 0 -p %s %s",
+          g_string_printf (cmd, "test/miniadsm -V 0 -p %s %s",
                            tokens[1], tokens[2]);
           system (cmd->str);
         }
       else
         {
           /* Deterministic test */
-          g_string_printf (cmd, "test/minispreadmodel -r 0.5 -V 0 -p %s %s",
+          g_string_printf (cmd, "test/miniadsm -r 0.5 -V 0 -p %s %s",
                            tokens[0], tokens[1]);
           system (cmd->str);
         }

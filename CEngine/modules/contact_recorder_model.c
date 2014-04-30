@@ -77,8 +77,6 @@
 
 #include "contact_recorder_model.h"
 
-#include "spreadmodel.h"
-
 #if !HAVE_ROUND && HAVE_RINT
 #  define round rint
 #endif

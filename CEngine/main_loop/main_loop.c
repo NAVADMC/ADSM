@@ -496,11 +496,11 @@
 #endif
 
 /*
-main.c needs access to the functions defined in spreadmodel.h,
+main.c needs access to the functions defined in adsm.h,
 even when compiled as a *nix executable (in which case,
 the functions defined will all be NULL).
 */
-#include "spreadmodel.h"
+#include "adsm.h"
 
 #include "general.h"
 

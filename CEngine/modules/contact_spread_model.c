@@ -114,7 +114,6 @@
 #  include <math.h>
 #endif
 
-#include "spreadmodel.h"
 #include "general.h"
 #include "contact_spread_model.h"
 

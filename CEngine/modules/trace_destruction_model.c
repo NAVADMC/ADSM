@@ -55,8 +55,6 @@
  * but they're #defined so AC_CHECK_FUNCS doesn't find them. */
 double round (double x);
 
-#include "spreadmodel.h"
-
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "trace-destruction-model"
 

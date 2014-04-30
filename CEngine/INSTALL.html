@@ -1,7 +1,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>SpreadModel Installation Instructions</title>
+<title>ADSM Installation Instructions</title>
 <style type="text/css">
 body {
 	
@@ -240,7 +240,7 @@ div.optionText {
 					class="tableBody" align="center">
 					<caption><b>Installation Instructions Summary </b></caption>
 					<tr>
-						<td>Like most Unix programs, SpreadModel can be built and
+						<td>Like most Unix programs, ADSM can be built and
 						installed by:
 						<ul>
 							<li>Running the following commands within the directory
@@ -268,7 +268,7 @@ div.optionText {
 							<tr>
 								<td></td>
 								<td>
-								<div class="cautionText">If you have checked SpreadModel
+								<div class="cautionText">If you have checked ADSM
 								out of git instead of unpacking it from a distribution tar file,
 								you may need to run the command, "sh bootstrap", first. <br />
 								(For MS-Windows instructions see below)</div>
@@ -328,8 +328,8 @@ div.optionText {
 						<td><br />
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;It is best to insure that you have
 						the following software installed on your system before proceeding
-						with the configuration of the SpreadModel build environment.
-						However, if SpreadModel needs libraries that aren't present on
+						with the configuration of the ADSM build environment.
+						However, if ADSM needs libraries that aren't present on
 						your system, the configure script will stop and inform you.<br />
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some libraries may be available as
 						packages for your system; others you may need to download and
@@ -354,10 +354,10 @@ div.optionText {
 								<td>
 								<div class="cautionText">If you need to compile a missing
 								package, be sure to always compile it with the same
-								compiler/linker combination as you intend to use with SpreadModel.
+								compiler/linker combination as you intend to use with ADSM.
 								Also, be sure to enable any features such as <a
 									style="color: rgb(32, 74, 135);" href="#mpi">MPI</a> for those
-								same packages, which you also intend to enable for SpreadModel.
+								same packages, which you also intend to enable for ADSM.
 								This is especially important on parallel machines and
 								other such "super computer" systems! Note: For systems running
 								64bit OS versions: Also be sure to install missing libraries
@@ -514,7 +514,7 @@ div.optionText {
 									<td>
 									<div class="optionText">The default is to install to <a
 										style="color: rgb(52, 101, 164);" href="/usr/local">/usr/local</a>
-									(i.e., the executable `spreadmodel' goes in <a
+									(i.e., the executable `adsm' goes in <a
 										style="color: rgb(52, 101, 164);" href="/usr/local/bin">/usr/local/bin</a>
 									, the supporting libraries in <a
 										style="color: rgb(52, 101, 164);" href="/usr/local/lib">/usr/local/lib</a>
@@ -606,7 +606,7 @@ div.optionText {
 									<td>
 									<div class="optionText">The debug level is quite
 									verbose and is useful with small, short test cases, but it
-									slows SpreadModel down considerably. This switch disables
+									slows ADSM down considerably. This switch disables
 									debugging information to produce a much faster-running program.
 
 									<table>
@@ -677,11 +677,11 @@ div.optionText {
 								<table>
 									<tr>
 										<td>
-										<div class="cautionText">To use SpreadModel on
+										<div class="cautionText">To use ADSM on
 										MS-Windows without some form of UNIX emulator, it should be
 										built as a DLL to be used by the graphical user
 										interface for Windows. However, this portion of the software
-										is available already built as part of a regular SpreadModel
+										is available already built as part of a regular ADSM
 										installation package. It is highly recommended that you obtain
 										the DLL in that fashion rather than attempt to build it
 										yourself. Furthermore, each version of the GUI for Windows
@@ -697,9 +697,9 @@ div.optionText {
 								Installation: [for experts only]</div>
 								<br />
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Building a copy of the simulation
-								code as a DLL for use by the SpreadModel GUI, or for use in some
+								code as a DLL for use by the ADSM GUI, or for use in some
 								other GUI, should be considered an EXPERIMENTAL function for
-								anyone outside of the SpreadModel software engineering team. As
+								anyone outside of the ADSM software engineering team. As
 								stated above, there should be no reason to attempt this task,
 								however, if you must for some reason, then these instructions,
 								below, are provided to assist you do so, but are not guaranteed
@@ -711,11 +711,11 @@ div.optionText {
 										</td>
 										<td>
 										<div class="cautionText">It is best to download the
-										SpreadModel package for MS-Windows as a whole and use the DLL
+										ADSM package for MS-Windows as a whole and use the DLL
 										contained therein. Overwriting that DLL with your own version
 										can cause the package to no longer function correctly, or to
 										cease functioning entirely. Before proceeding with these
-										instructions, BACKUP your original SpreadModel installation package
+										instructions, BACKUP your original ADSM installation package
 										in case you need to recover the original DLL.</div>
 										</td>
 									</tr>
@@ -751,8 +751,8 @@ div.optionText {
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Once you have installed <a
 									style="color: rgb(32, 74, 135);" href="#mingw">MinGW</a> , then
 								Dev-C++, then the libraries and packages described in the
-								dependencies section, open the SpreadModel.dev project file in the DLL
-								directory of the SpreadModel source tree, with Dev-C++. From here
+								dependencies section, open the adsm.dev project file in the DLL
+								directory of the ADSM source tree, with Dev-C++. From here
 								you will need to modify the makefile and include, lib search and
 								link paths to match those of your own system.
 								<table>
@@ -772,8 +772,8 @@ div.optionText {
 								and the Dev-C++ project file has been updated to reflect your
 								system, run the compilation in Dev-C++. There will be a few
 								warnings, but there should not be any errors. When the
-								compilation is complete, you will have a spreadmodel.dll file located in
-								the DLL directory. Copy and paste this file into your SpreadModel GUI
+								compilation is complete, you will have a adsm.dll file located in
+								the DLL directory. Copy and paste this file into your ADSM GUI
 								program file directory and run the GUI as you normally would. If
 								the GUI produces an error about the version of the DLL, you have
 								the wrong version of simulation source code for that version of
@@ -841,9 +841,9 @@ div.optionText {
 						diagrams are deliberately the last step in the build process, so
 						if you get to that point, the executable program is already built.<br />
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The developer documentation for
-						SpreadModel is in HTML format and is created by the free tool <a
+						ADSM is in HTML format and is created by the free tool <a
 							style="color: rgb(32, 74, 135);" href="#doxygen">Doxygen</a> . To
-						build the documentation, cd to the directory in which you compiled SpreadModel
+						build the documentation, cd to the directory in which you compiled ADSM
 						and type ' <a
 							style="color: rgb(32, 74, 135);" href="#doxygen">doxygen</a> '.
 						You can then open the file `doc/html/index.html' in your
@@ -866,9 +866,9 @@ div.optionText {
 						regression test suite.<br />
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;After compiling, change directory to
 						the `modules' directory and type `make check' to test that
-						SpreadModel is working. It will run the tests and output a report
+						ADSM is working. It will run the tests and output a report
 						file named "module.sum". (Note that "make check" will run a copy of
-						SpreadModel built without <a style="color: rgb(32, 74, 135);"
+						ADSM built without <a style="color: rgb(32, 74, 135);"
 							href="#mpi">MPI</a> , so it will run just on the node you're
 						logged into -- you don't need to worry about how to submit it to
 						your cluster's job-control system.)<br />
@@ -913,9 +913,9 @@ div.optionText {
 						Before attempting to use the software, be sure that you executed:
 						make install from the command line, which copies all of the
 						executable(s) and libraries into the appropriate directories. If
-						you are reading this file, then you are probably installing SpreadModel
+						you are reading this file, then you are probably installing ADSM
 						on a multi-processor machine or on a cluster. This section is
-						meant to be a quick- start guide to running SpreadModel from the
+						meant to be a quick- start guide to running ADSM from the
 						command line: it describes a sequence of commands to generate
 						simulation results, and then to post-process them into tables and
 						plots. However, some information is also included below concerning
@@ -925,15 +925,15 @@ div.optionText {
 						<div class="subHeader">Command line options</div>
 						<br />
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; These are valid and the same for
-						all installations of SpreadModel except the MS-Windows
+						all installations of ADSM except the MS-Windows
 						DLL, which has no main() entry point, as it is not a standalone
 						program.<br />
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Running "spreadmodel --help" from the
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Running "adsm --help" from the
 						command line will give you a basic list of these command line
 						options. They are as follows:<br />
 						<br />
 						<div class="configOption">Usage: <br />
-						%spreadmodel [OPTIONS] &lt;scenario.xml&gt; <br />
+						%adsm [OPTIONS] &lt;scenario.xml&gt; <br />
 						<br />
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Where [OPTIONS] are:<br />
 						</div>
@@ -961,7 +961,7 @@ div.optionText {
 								--enable-debug configuration script switch set,
 								then this parameter allows you to vary the level of
 								information to output. It is best to specify this parameter as
-								-V0 for all non-testing runs of SpreadModel.</div>
+								-V0 for all non-testing runs of ADSM.</div>
 								<br />
 								</td>
 							</tr>
@@ -1034,10 +1034,10 @@ div.optionText {
 								</td>
 								<td valign="top" align="left" width="60%">
 								<div class="optionText">This mandatory parameter to
-								SpreadModel contains scenario specific information for this
+								ADSM contains scenario specific information for this
 								simulation. This was generated by one of several methods. It is
 								recommended, however, that it be generated by using the
-								MS-Windows SpreadModel GUI.</div>
+								MS-Windows ADSM GUI.</div>
 								<br />
 								<br />
 								<br />
@@ -1054,12 +1054,12 @@ div.optionText {
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Using MS-Windows you have two basic
 						options:
 						<ul>
-							<li>Run the GUI, spreadmodel.exe, which knows how to
+							<li>Run the GUI, adsm.exe, which knows how to
 							interface with the simulation DLL, which you should have
-							downloaded as a package from the main SpreadModel web site.</li>
+							downloaded as a package from the main ADSM web site.</li>
 							<br />
 							<li>Using <a style="color: rgb(32, 74, 135);" href="#cygwin">Cygwin</a>
-							, run the SpreadModel executable as suggested for a stand- alone,
+							, run the ADSM executable as suggested for a stand- alone,
 							UNIX system, specified below.</li>
 						</ul>
 						<br />
@@ -1071,17 +1071,17 @@ div.optionText {
 						may have specified the option: --prefix=""<br />
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The value you placed inside of the
 						quotes will now contain a bin directory, which contains the
-						SpreadModel executable. If you did not specify this switch the
+						ADSM executable. If you did not specify this switch the
 						program was installed into the standard /usr/local directory
 						structure, if you had write permissions to that directory
 						structure. <br />
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To run SpreadModel simply
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To run ADSM simply
 						choose the appropriate options, described above, and specify them
 						on the command line:<br />
 						<p />
 						<div class="optionText">[Example]</div>
 						<br />
-						<div class="optionText">%spreadmodel -p /home/me/population.xml -V0 -o
+						<div class="optionText">%adsm -p /home/me/population.xml -V0 -o
 						/home/me/results.txt /home/me/scenario.xml</div>
 						<br />
 
@@ -1102,7 +1102,7 @@ div.optionText {
 						Especially for the MPI enabled standalone systems, the mpirun
 						method is the most common. To use mpirun:<br />
 						<div class="optionText">[Example]<br />
-						%mpirun -n 20 /home/me/bin/spreadmodel -p /home/me/population.xml -V0 -o
+						%mpirun -n 20 /home/me/bin/adsm -p /home/me/population.xml -V0 -o
 						/home/me/results.txt /home/me/scenario.xml</div>
 						<r />
 
@@ -1115,16 +1115,16 @@ div.optionText {
 						<br />
 
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;These commands are used at the site
-						of the first SpreadModel installation, in Guelph, Ontario, on
+						of the first ADSM installation, in Guelph, Ontario, on
 						SHARCNet machines. The intention is to provide outputs in a format
-						that is familiar to users of the Windows version of SpreadModel. You
+						that is familiar to users of the Windows version of ADSM. You
 						can of course customize the commands to produce different outputs.
 						To avoid filename collisions, you may want to give each simulation
 						a unique ID (distinct from the job IDs assigned by your cluster's
 						job-control system). <br />
 						<p />In the example below the ID is "1000": <br />
-						<div class="optionText">sqsub -q mpi -n 4 -e spreadmodel_1000.err
-						bin/spreadmodel -p population.xml -o spreadmodel_1000_.log
+						<div class="optionText">sqsub -q mpi -n 4 -e adsm_1000.err
+						bin/adsm -p population.xml -o adsm_1000_.log
 						scenario.xml</div>
 						<br />
 						<div class="cautionText">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This
@@ -1132,23 +1132,23 @@ div.optionText {
 						is the job-control system, mpi is the queue, 4 is the number of
 						CPUs, and -e specifies a file to write error messages to. The -o
 						option specifies the name of the output files and is an option to
-						SpreadModel, not to the job-control system.</div>
+						ADSM, not to the job-control system.</div>
 						<br />
 
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Consult with your supercomputer
 						administrator to find out the equivalent options for your
 						job-control system.<br />
 						<p />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The directory from which to
-						issue this command is whatever directory your copy of SpreadModel went
+						issue this command is whatever directory your copy of ADSM went
 						into when you did "make install". If you are running on a
 						single-processor machine, for example, on an individual node in a
 						serial farm, the command-line would become:
 						<p />
-						<div class="optionText">bin/spreadmodel -p
+						<div class="optionText">bin/adsm -p
 						population.xml -o 1000.log scenario.xml</div>
 						<br />
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Again, the directory from which to
-						issue this command is whatever directory your copy of SpreadModel went
+						issue this command is whatever directory your copy of ADSM went
 						into when you did "make install".<br />
 						<br />
 						<p />
@@ -1156,7 +1156,7 @@ div.optionText {
 						<br />
 						<p />
 						<div class="subheader">Finding and analyzing output using
-						SpreadModel filter software</div>
+						ADSM filter software</div>
 						<br />
 						<table>
 							<tr>
@@ -1175,10 +1175,10 @@ div.optionText {
 						<br />
 						<p />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;When the job completes, the
 						working directory contains 1 output file per CPU, named: <br/>
-						spreadmodel_1000_0.log, spreadmodel_1000_1.log, etc. <br/>
+						adsm_1000_0.log, adsm_1000_1.log, etc. <br/>
 												
 						<p/>Issue the commands:<br/>
-            <div class="cautionText">cat spreadmodel_1000_*.log &gt;1000.log<br/>rm spreadmodel_1000_*.log<br/>
+            <div class="cautionText">cat adsm_1000_*.log &gt;1000.log<br/>rm adsm_1000_*.log<br/>
 						in order to get all	the output in one file. That way the outputs from each node aren't
 						interleaved.</div><br/>
 						<p/>Next, to make some spreadsheets:<br/>

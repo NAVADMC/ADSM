@@ -1,16 +1,16 @@
 .\" This program may also be used in an MPI environment if MPI was enabled during its compilation.
-.TH "spreadmodel" "1" "3.2.19b" "SpreadModel" "SpreadModel Simulation Engine"
+.TH "adsm" "1" "3.2.19b" "ADSM" "Animal Disease Spread Model Simulation Engine"
 .SH "NAME"
 .LP 
-spreadmodel \- Runs epidemiological simulations for animal populations
+adsm \- Runs epidemiological simulations for animal populations
 .SH "SYNTAX"
 .LP 
-spreadmodel [\fIoption\fP] \-h <population\-file> <\fIscenario\-file\fP>
+adsm [\fIoption\fP] \-h <population\-file> <\fIscenario\-file\fP>
 .br 
 
 .SH "DESCRIPTION"
 .LP 
-This program is part of the SpreadModel, software suite, which can be downloaded from http://
+This program is part of the ADSM software suite, which can be downloaded from http://
 .br 
 
 
@@ -51,17 +51,17 @@ If the dynamic model library loading method was selected during compilation, thi
 .LP 
 To run this program the standard way type:
 .br 
-spreadmodel \-h /home/me/population.xml \-m /home/me/models \-V0 \-o /home/me/results.txt  /home/me/scenario.xml
+adsm \-h /home/me/population.xml \-m /home/me/models \-V0 \-o /home/me/results.txt  /home/me/scenario.xml
 .LP 
 .br 
 Using standard MPI:
 .br 
-mpirun \-n 20 /home/me/bin/spreadmodel \-h /home/me/population.xml \-m /home/me/models \-V0 \-o /home/me/results.txt  /home/me/scenario.xml
+mpirun \-n 20 /home/me/bin/adsm \-h /home/me/population.xml \-m /home/me/models \-V0 \-o /home/me/results.txt  /home/me/scenario.xml
 .LP 
 .br 
 On SHARCNet systems [ see \-  http://www.sharcnet.org ]:
 .br 
-sqsub \-q mpi \-n 4 \-e spreadmodel_1000.err bin/spreadmodel \-\-model\-dir=models \-h population.xml \-o spreadmodel_1000_.log scenario.xml
+sqsub \-q mpi \-n 4 \-e adsm_1000.err bin/adsm \-\-model\-dir=models \-h population.xml \-o adsm_1000_.log scenario.xml
 .SH "AUTHORS"
 .LP 
 See the web site  http://
