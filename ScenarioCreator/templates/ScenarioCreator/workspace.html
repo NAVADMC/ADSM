@@ -8,7 +8,7 @@
     <ul id="file_list">
         {% for file in db_files %}
             <li><a href="/setup/OpenScenario/{{ file }}/">{{ file }}</a>
-                <a href="/setup/DeleteScenario/{{ file }}"><span class="glyphicon glyphicon-remove-circle pull-right"></span></a>
+                <a href="#confirm" data-remove-file="{{ file }}"><span class="glyphicon glyphicon-remove-circle pull-right"></span></a>
                 </li>
         {% endfor %}
     </ul>

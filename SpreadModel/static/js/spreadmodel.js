@@ -21,7 +21,24 @@ $(function(){
     $("#open_file").change(function(){
         $(this).parent('form').submit();
     })
+
+    $('[data-remove-file]').click(function(){
+        var filename = $(this).attr('data-remove-file')
+        var link = '/setup/DeleteScenario/' + filename
+//        alert(link);
+        BootstrapDialog.confirm('Are you sure you want to delete' + filename + '?', function(result){
+            if(result) {
+                alert('Deleting ' + link);
+            }else {
+                alert('Cancelling.');
+            }
+        });
+    })
 })
+
+
+
+
 
 var modelModal = {
 
