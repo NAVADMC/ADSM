@@ -25,12 +25,11 @@ $(function(){
     $('[data-remove-file]').click(function(){
         var filename = $(this).attr('data-remove-file')
         var link = '/setup/DeleteScenario/' + filename
-//        alert(link);
-        BootstrapDialog.confirm('Are you sure you want to delete' + filename + '?', function(result){
+        var dialog = new BootstrapDialog.confirm('Are you sure you want to delete <strong>' + filename + '</strong>?', function(result){
             if(result) {
-                alert('Deleting ' + link);
+                window.location = link;
             }else {
-                alert('Cancelling.');
+                dialog.close();
             }
         });
     })
