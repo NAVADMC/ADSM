@@ -38,8 +38,6 @@
 
 #include "exposure_monitor.h"
 
-#include "spreadmodel.h"
-
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "exposure-monitor"
 

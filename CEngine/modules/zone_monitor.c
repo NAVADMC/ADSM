@@ -33,7 +33,6 @@
 
 #include "module.h"
 #include "gis.h"
-#include "spreadmodel.h"
 
 #if STDC_HEADERS
 #  include <string.h>

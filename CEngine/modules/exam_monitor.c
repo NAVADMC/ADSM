@@ -31,7 +31,6 @@
 #define handle_exam_event exam_monitor_handle_exam_event
 
 #include "module.h"
-#include "spreadmodel.h"
 
 #if STDC_HEADERS
 #  include <string.h>

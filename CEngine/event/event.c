@@ -32,7 +32,6 @@
 #  include <stdlib.h>
 #endif
 
-#include "spreadmodel.h"
 #include "event.h"
 #include "reporting.h"
 

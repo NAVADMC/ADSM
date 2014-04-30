@@ -22,7 +22,7 @@
 #  include "mpix.h"
 #endif
 
-#include "spreadmodel.h"
+#include "adsm.h"
 #include "general.h"
 
 

@@ -130,8 +130,6 @@
 
 #include "spatial_search.h"
 
-#include "spreadmodel.h"
-
 #include "airborne_spread_model.h"
 
 #if !HAVE_ROUND && HAVE_RINT

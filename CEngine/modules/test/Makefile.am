@@ -35,13 +35,13 @@ AM_CPPFLAGS += @GLIB_CFLAGS@ @GSL_CFLAGS@
 # Create a program just like the real simulator, but without MPI, for running
 # small tests.
 
-noinst_PROGRAMS = minispreadmodel shell shell2 fcmp
+noinst_PROGRAMS = miniadsm shell shell2 fcmp
 
-minispreadmodel_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/main_loop.c \
+miniadsm_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/main_loop.c \
   $(top_srcdir)/main_loop/module_loader.c $(top_srcdir)/main_loop/module_loader.h \
   $(top_srcdir)/main_loop/event_manager.c $(top_srcdir)/main_loop/event_manager.h \
   $(top_srcdir)/main_loop/parameter.c $(top_srcdir)/main_loop/parameter.h \
-  $(top_srcdir)/main_loop/spreadmodel.c $(top_srcdir)/main_loop/spreadmodel.h \
+  $(top_srcdir)/main_loop/adsm.c $(top_srcdir)/main_loop/adsm.h \
   $(top_srcdir)/replace/replace.c $(top_srcdir)/replace/replace.h \
   $(top_srcdir)/general/general.c $(top_srcdir)/general/general.h \
   $(top_srcdir)/unit/unit.c $(top_srcdir)/unit/unit.h \
@@ -100,14 +100,14 @@ minispreadmodel_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/
   $(top_srcdir)/modules/weekly_gis_writer.c $(top_srcdir)/modules/weekly_gis_writer.h \
   $(top_srcdir)/modules/summary_gis_writer.c $(top_srcdir)/modules/summary_gis_writer.h
 if USE_SC_GUILIB
-  minispreadmodel_SOURCES += $(top_srcdir)/sc_guilib/production_type_data.c \
+  miniadsm_SOURCES += $(top_srcdir)/sc_guilib/production_type_data.c \
     $(top_srcdir)/sc_guilib/sc_guilib_outputs.c \
     $(top_srcdir)/sc_guilib/sc_database.c
 endif
-minispreadmodel_CPPFLAGS = -DCANCEL_MPI=1 $(AM_CPPFLAGS)
-minispreadmodel_LDADD = @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@
+miniadsm_CPPFLAGS = -DCANCEL_MPI=1 $(AM_CPPFLAGS)
+miniadsm_LDADD = @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@
 if HAVE_MPI
-  minispreadmodel_LDADD += @MPI_LIBS@
+  miniadsm_LDADD += @MPI_LIBS@
 endif
 
 shell_SOURCES = shell.c $(top_builddir)/replace/replace.c

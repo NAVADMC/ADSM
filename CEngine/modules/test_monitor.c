@@ -31,7 +31,6 @@
 #define handle_test_result_event test_monitor_handle_test_result_event
 
 #include "module.h"
-#include "spreadmodel.h"
 
 #if STDC_HEADERS
 #  include <string.h>

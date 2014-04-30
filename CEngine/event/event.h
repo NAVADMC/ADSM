@@ -45,7 +45,7 @@
 #define EVENT_H
 
 #include <stdio.h>
-#include "spreadmodel.h"
+#include "adsm.h"
 #include "rng.h"
 
 #if STDC_HEADERS
