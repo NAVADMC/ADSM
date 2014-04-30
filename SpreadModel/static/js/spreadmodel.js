@@ -25,12 +25,26 @@ $(function(){
     $('[data-remove-file]').click(function(){
         var filename = $(this).attr('data-remove-file')
         var link = '/setup/DeleteScenario/' + filename
-        var dialog = new BootstrapDialog.confirm('Are you sure you want to delete <strong>' + filename + '</strong>?', function(result){
-            if(result) {
-                window.location = link;
-            }else {
-                dialog.close();
-            }
+        var dialog = new BootstrapDialog.show({
+            title: 'Delete Scenario Confirmation',
+            type: BootstrapDialog.TYPE_WARNING,
+            message: 'Are you sure you want to delete <strong>' + filename + '</strong>?',
+            buttons: [
+                {
+                    label: 'Cancel',
+                    cssClass: 'btn',
+                    action: function(dialog){
+                        dialog.close();
+                    }
+                },
+                {
+                    label: 'Delete',
+                    cssClass: 'btn-danger',
+                    action: function(dialog){
+                        window.location = link;
+                    }
+                }
+            ]
         });
     })
 })
