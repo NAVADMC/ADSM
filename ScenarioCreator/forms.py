@@ -4,7 +4,7 @@ See DirectSpread for an example.  More complex widgets and layouts are accessibl
 All forms now have their "submit" button restored and you can choose custom layouts.  ControlProtocol has tabs."""
 
 
-from crispy_forms.bootstrap import TabHolder, Tab
+from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Field, Hidden
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import OperationalError  # OperationalError is for initial manage.py syncdb
@@ -134,11 +134,11 @@ class ControlProtocolForm(BaseForm):
                     'use_tracing',
                     'trace_direct_forward',
                     'trace_direct_back',
-                    'direct_trace_success_rate',
+                    AppendedText('direct_trace_success_rate', '%'),
                     'direct_trace_period',
                     'trace_indirect_forward',
                     'trace_indirect_back',
-                    'indirect_trace_success',
+                    AppendedText('indirect_trace_success', '%'),
                     'indirect_trace_period',
                     'trace_result_delay',
                     'direct_trace_is_a_zone_trigger',
@@ -240,7 +240,7 @@ class IndirectSpreadForm(BaseForm):
             'subclinical_animals_can_infect_others',
             'use_fixed_contact_rate',
             'contact_rate',
-            'infection_probability',
+            AppendedText('infection_probability', '%'),
             'distance_distribution',
             'transport_delay',
             'movement_control',
@@ -265,7 +265,7 @@ class DirectSpreadForm(BaseForm):
             'subclinical_animals_can_infect_others',
             'use_fixed_contact_rate',
             'contact_rate',
-            'infection_probability',
+            AppendedText('infection_probability', '%'),
             'distance_distribution',
             'transport_delay',
             'movement_control',
@@ -286,7 +286,7 @@ class AirborneSpreadForm(BaseForm):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'name',
-            'spread_1km_probability',
+            AppendedText('spread_1km_probability', '%'),
             'max_distance',
             'wind_direction_start',
             'wind_direction_end',
