@@ -32,7 +32,8 @@ import os
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django_extras.db.models import PercentField, LatitudeField, LongitudeField, MoneyField
+from django_extras.db.models import LatitudeField, LongitudeField, MoneyField
+from ScenarioCreator.custom_fields import PercentField
 import re
 import time
 import ScenarioCreator.parser
