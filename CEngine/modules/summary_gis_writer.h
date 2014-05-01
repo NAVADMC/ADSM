@@ -15,7 +15,7 @@
 #ifndef SUMMARY_GIS_WRITER_H
 #define SUMMARY_GIS_WRITER_H
 
-spreadmodel_model_t *summary_gis_writer_new (sqlite3 *, UNT_unit_list_t *,
-                                             projPJ, ZON_zone_list_t *);
+adsm_module_t *summary_gis_writer_new (sqlite3 *, UNT_unit_list_t *,
+                                       projPJ, ZON_zone_list_t *);
 
 #endif

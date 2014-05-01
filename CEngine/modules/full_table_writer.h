@@ -16,9 +16,9 @@
 #ifndef FULL_TABLE_WRITER_H
 #define FULL_TABLE_WRITER_H
 
-spreadmodel_model_t *full_table_writer_new (sqlite3 *,
-                                            UNT_unit_list_t *,
-                                            projPJ,
-                                            ZON_zone_list_t *);
+adsm_module_t *full_table_writer_new (sqlite3 *,
+                                      UNT_unit_list_t *,
+                                      projPJ,
+                                      ZON_zone_list_t *);
 
 #endif

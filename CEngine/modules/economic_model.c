@@ -141,7 +141,7 @@ local_data_t;
  * @param queue for any new events this function creates.
  */
 void
-handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
+handle_before_any_simulations_event (struct adsm_module_t_ *self,
                                      EVT_event_queue_t *queue)
 {
   unsigned int n, i;
@@ -179,7 +179,7 @@ handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
  * @param event a new day event.
  */
 void
-handle_new_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
+handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
                       ZON_zone_list_t * zones, EVT_new_day_event_t * event)
 {
   local_data_t *local_data = (local_data_t *) (self->model_data);
@@ -251,7 +251,7 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units
  * @param event a vaccination event.
  */
 void
-handle_vaccination_event (struct spreadmodel_model_t_ *self, EVT_vaccination_event_t * event)
+handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t * event)
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
@@ -316,7 +316,7 @@ handle_vaccination_event (struct spreadmodel_model_t_ *self, EVT_vaccination_eve
  * @param event a destruction event.
  */
 void
-handle_destruction_event (struct spreadmodel_model_t_ *self, EVT_destruction_event_t * event)
+handle_destruction_event (struct adsm_module_t_ *self, EVT_destruction_event_t * event)
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
@@ -385,7 +385,7 @@ handle_destruction_event (struct spreadmodel_model_t_ *self, EVT_destruction_eve
  * @param queue for any new events the model creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
      EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
 #if DEBUG
@@ -425,7 +425,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
  * @param self the model.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
   local_data_t *local_data = (local_data_t *) (self->model_data);
   unsigned int nprod_types = local_data->production_types->len;
@@ -482,7 +482,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @return a string.
  */
 char *
-to_string (struct spreadmodel_model_t_ *self)
+to_string (struct adsm_module_t_ *self)
 {
   GString *s;
   unsigned int i, j;
@@ -567,7 +567,7 @@ to_string (struct spreadmodel_model_t_ *self)
  * @param self the model.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data = (local_data_t *) (self->model_data);
   unsigned int nzones = ZON_zone_list_length (local_data->zones);
@@ -666,7 +666,7 @@ local_free (struct spreadmodel_model_t_ *self)
 static int
 set_params (void *data, int ncols, char **value, char **colname)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   guint production_type_id;
   destruction_cost_data_t *d;
@@ -678,12 +678,12 @@ set_params (void *data, int ncols, char **value, char **colname)
 
   g_assert (ncols == 10);
 
-  self = (spreadmodel_model_t *)data;
+  self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
   /* Find out which production type these parameters apply to. */
   production_type_id =
-    spreadmodel_read_prodtype (value[0], local_data->production_types);
+    adsm_read_prodtype (value[0], local_data->production_types);
 
   /* Destruction Cost Parameters */
   if (value[1] != NULL)
@@ -772,7 +772,7 @@ set_params (void *data, int ncols, char **value, char **colname)
 static int
 set_zone_params (void *data, int ncols, char **value, char **colname)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   guint zone_id, production_type_id;
 
@@ -782,13 +782,13 @@ set_zone_params (void *data, int ncols, char **value, char **colname)
 
   g_assert (ncols == 3);
 
-  self = (spreadmodel_model_t *)data;
+  self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
   /* Find out which zone/production type combination these parameters apply
    * to. */
-  zone_id = spreadmodel_read_zone (value[0], local_data->zones);
-  production_type_id = spreadmodel_read_prodtype (value[1], local_data->production_types);
+  zone_id = adsm_read_zone (value[0], local_data->zones);
+  production_type_id = adsm_read_prodtype (value[1], local_data->production_types);
 
   /* Create a paramater block if needed. */
   if (local_data->surveillance_cost_param == NULL)
@@ -821,11 +821,11 @@ set_zone_params (void *data, int ncols, char **value, char **colname)
 /**
  * Returns a new economic model.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   char *sqlerr;
 
@@ -833,7 +833,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
 #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -843,12 +843,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
-  self->has_pending_actions = spreadmodel_model_answer_no;
-  self->has_pending_infections = spreadmodel_model_answer_no;
+  self->is_listening_for = adsm_model_is_listening_for;
+  self->has_pending_actions = adsm_model_answer_no;
+  self->has_pending_infections = adsm_model_answer_no;
   self->to_string = to_string;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
   /* local_data->destruction_cost_params, ->vaccination_cost_params

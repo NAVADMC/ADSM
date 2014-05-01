@@ -39,14 +39,14 @@
  * position of the matching name in the list.
  */
 guint
-spreadmodel_read_prodtype (char *text, GPtrArray * production_type_names)
+adsm_read_prodtype (char *text, GPtrArray * production_type_names)
 {
   gchar *normalized;
   guint nprod_types;
   guint loc;
 
   #if DEBUG
-    g_debug ("----- ENTER spreadmodel_read_prodtype");
+    g_debug ("----- ENTER adsm_read_prodtype");
   #endif
 
   /* The text is assumed to be UTF-8. Normalize it to allow for comparison. */
@@ -65,7 +65,7 @@ spreadmodel_read_prodtype (char *text, GPtrArray * production_type_names)
     g_error ("text \"%s\" did not match any production type", text);
 
   #if DEBUG
-    g_debug ("----- EXIT spreadmodel_read_prodtype");
+    g_debug ("----- EXIT adsm_read_prodtype");
   #endif
 
   return loc;
@@ -78,14 +78,14 @@ spreadmodel_read_prodtype (char *text, GPtrArray * production_type_names)
  * position of the matching name in the list.
  */
 guint
-spreadmodel_read_zone (char *text, ZON_zone_list_t * zones)
+adsm_read_zone (char *text, ZON_zone_list_t * zones)
 {
   gchar *normalized;
   guint nzones;
   guint loc;
 
   #if DEBUG
-    g_debug ("----- ENTER spreadmodel_read_zone");
+    g_debug ("----- ENTER adsm_read_zone");
   #endif
 
   /* The text is assumed to be UTF-8. Normalize it to allow for comparison. */
@@ -104,7 +104,7 @@ spreadmodel_read_zone (char *text, ZON_zone_list_t * zones)
     g_error ("text \"%s\" did not match any zone", text);
 
   #if DEBUG
-    g_debug ("----- EXIT spreadmodel_read_zone");
+    g_debug ("----- EXIT adsm_read_zone");
   #endif
 
   return loc;
@@ -149,7 +149,7 @@ spreadmodel_read_zone (char *text, ZON_zone_list_t * zones)
  * @param index the current location of the rotating index
  */
 void
-spreadmodel_extend_rotating_array (GPtrArray * array, unsigned int length, unsigned int index)
+adsm_extend_rotating_array (GPtrArray * array, unsigned int length, unsigned int index)
 {
   unsigned int old_length, diff;
   unsigned int i;
@@ -159,7 +159,7 @@ spreadmodel_extend_rotating_array (GPtrArray * array, unsigned int length, unsig
 #endif
 
 #if DEBUG
-  g_debug ("----- ENTER spreadmodel_extend_rotating_array");
+  g_debug ("----- ENTER adsm_extend_rotating_array");
 #endif
 
   old_length = array->len;
@@ -248,7 +248,7 @@ spreadmodel_extend_rotating_array (GPtrArray * array, unsigned int length, unsig
 
 end:
 #if DEBUG
-  g_debug ("----- EXIT spreadmodel_extend_rotating_array");
+  g_debug ("----- EXIT adsm_extend_rotating_array");
 #endif
 
   return;
@@ -275,7 +275,7 @@ g_queue_free_as_GDestroyNotify (gpointer data)
  * file extension, or at the end of the filename if there is no file extension.
  */
 char *
-spreadmodel_insert_node_number_into_filename (const char *filename)
+adsm_insert_node_number_into_filename (const char *filename)
 {
 #if HAVE_MPI && !CANCEL_MPI
   GString *s;
@@ -437,7 +437,7 @@ build_priority_debug_string (gpointer key,
  * to g_hash_table_destroy will fully clean up all memory used.
  */ 
 GHashTable *
-spreadmodel_read_priority_order (sqlite3 *params)
+adsm_read_priority_order (sqlite3 *params)
 {
   GHashTable *table;
   gboolean reason_has_priority_over_prodtype;

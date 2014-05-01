@@ -48,7 +48,7 @@
 #include "general.h"
 
 #ifdef USE_SC_GUILIB
-#  include <sc_spreadmodel_outputs.h>
+#  include <sc_adsm_outputs.h>
 #endif
 
 #if !HAVE_ROUND && HAVE_RINT
@@ -119,7 +119,7 @@ local_data_t;
  * @param queue for any new events this function creates.
  */
 void
-handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
+handle_before_any_simulations_event (struct adsm_module_t_ *self,
                                      EVT_event_queue_t *queue)
 {
   unsigned int n, i;
@@ -156,7 +156,7 @@ handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
  * @param event a new day event.
  */
 void
-handle_new_day_event (struct spreadmodel_model_t_ *self, EVT_new_day_event_t * event)
+handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event)
 {
   local_data_t *local_data;
   unsigned int current, hi, i, count;
@@ -252,7 +252,7 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, EVT_new_day_event_t * e
  * @param event a detection event.
  */
 void
-handle_detection_event (struct spreadmodel_model_t_ *self, 
+handle_detection_event (struct adsm_module_t_ *self, 
                         EVT_detection_event_t * event)
 {
   local_data_t *local_data;
@@ -301,7 +301,7 @@ handle_detection_event (struct spreadmodel_model_t_ *self,
  * @param event an infection event.
  */
 void
-handle_infection_event (struct spreadmodel_model_t_ *self, EVT_infection_event_t * event)
+handle_infection_event (struct adsm_module_t_ *self, EVT_infection_event_t * event)
 {
   local_data_t *local_data;
   UNT_unit_t *infecting_unit, *infected_unit;
@@ -329,9 +329,9 @@ handle_infection_event (struct spreadmodel_model_t_ *self, EVT_infection_event_t
 #ifdef USE_SC_GUILIB
   sc_infect_unit( event->day, infected_unit, update );
 #else
-  if (NULL != spreadmodel_infect_unit)
+  if (NULL != adsm_infect_unit)
     {
-      spreadmodel_infect_unit (update);
+      adsm_infect_unit (update);
     }
 #endif
 #if UNDEFINED
@@ -443,7 +443,7 @@ handle_infection_event (struct spreadmodel_model_t_ *self, EVT_infection_event_t
  * @param queue for any new events the model creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
      EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
 #if DEBUG
@@ -483,7 +483,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
  * @param self the model.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   unsigned int i;
@@ -532,7 +532,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @return a string.
  */
 char *
-to_string (struct spreadmodel_model_t_ *self)
+to_string (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   GString *s;
@@ -556,7 +556,7 @@ to_string (struct spreadmodel_model_t_ *self)
  * @param self the model.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -602,11 +602,11 @@ local_free (struct spreadmodel_model_t_ *self)
 /**
  * Returns a new infection monitor.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   guint n, i, j;
   char *prodtype_name;
@@ -615,7 +615,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
 #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -625,12 +625,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
-  self->has_pending_actions = spreadmodel_model_answer_no;
-  self->has_pending_infections = spreadmodel_model_answer_no;
+  self->is_listening_for = adsm_model_is_listening_for;
+  self->has_pending_actions = adsm_model_answer_no;
+  self->has_pending_infections = adsm_model_answer_no;
   self->to_string = to_string;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
   local_data->num_units_infected =

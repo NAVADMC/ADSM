@@ -398,7 +398,7 @@ check_and_infect (int id, gpointer arg)
       exposure->u.exposure.day += delay;
       if (delay > local_data->pending_infections->len)
         {
-          spreadmodel_extend_rotating_array (local_data->pending_infections,
+          adsm_extend_rotating_array (local_data->pending_infections,
                                              delay, local_data->rotating_index);
         }
     
@@ -463,7 +463,7 @@ end:
  * @param queue for any new events the model creates.
  */
 void
-handle_new_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
+handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
                       EVT_new_day_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
   local_data_t *local_data;
@@ -566,7 +566,7 @@ handle_new_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units
  * @param queue for any new events the model creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
      EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
 #if DEBUG
@@ -599,7 +599,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
  * @param self the model.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   unsigned int i;
@@ -634,7 +634,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @return TRUE if the model has pending actions.
  */
 gboolean
-has_pending_actions (struct spreadmodel_model_t_ * self)
+has_pending_actions (struct adsm_module_t_ * self)
 {
   local_data_t *local_data;
 
@@ -651,7 +651,7 @@ has_pending_actions (struct spreadmodel_model_t_ * self)
  * @return TRUE if the model has pending infections.
  */
 gboolean
-has_pending_infections (struct spreadmodel_model_t_ * self)
+has_pending_infections (struct adsm_module_t_ * self)
 {
   local_data_t *local_data;
 
@@ -668,7 +668,7 @@ has_pending_infections (struct spreadmodel_model_t_ * self)
  * @return a string.
  */
 char *
-to_string (struct spreadmodel_model_t_ *self)
+to_string (struct adsm_module_t_ *self)
 {
   GString *s;
   local_data_t *local_data;
@@ -721,7 +721,7 @@ to_string (struct spreadmodel_model_t_ *self)
  * @param self the model.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   unsigned int nprod_types, i, j;
@@ -789,7 +789,7 @@ local_free (struct spreadmodel_model_t_ *self)
 static int
 set_params (void *data, int ncols, char **value, char **colname)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   sqlite3 *params;
   UNT_production_type_t from_production_type, to_production_type;
@@ -801,7 +801,7 @@ set_params (void *data, int ncols, char **value, char **colname)
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
-  self = (spreadmodel_model_t *)data;
+  self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
@@ -810,9 +810,9 @@ set_params (void *data, int ncols, char **value, char **colname)
   /* Find out which to-from production type combination these parameters apply
    * to. */
   from_production_type =
-    spreadmodel_read_prodtype (value[0], local_data->production_types);
+    adsm_read_prodtype (value[0], local_data->production_types);
   to_production_type =
-    spreadmodel_read_prodtype (value[1], local_data->production_types);
+    adsm_read_prodtype (value[1], local_data->production_types);
 
   /* If necessary, create a row in the 2D array for this from-production-type. */
   if (local_data->param_block[from_production_type] == NULL)
@@ -931,11 +931,11 @@ set_params (void *data, int ncols, char **value, char **colname)
 /**
  * Returns a new airborne spread model.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 *params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   unsigned int nprod_types, i;
   char *sqlerr;
@@ -944,7 +944,7 @@ new (sqlite3 *params, UNT_unit_list_t * units, projPJ projection,
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
 #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -954,12 +954,12 @@ new (sqlite3 *params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
+  self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = has_pending_actions;
   self->has_pending_infections = has_pending_infections;
   self->to_string = to_string;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
   /* local_data->param_block is a 2D array of parameter blocks, each block

@@ -1,4 +1,4 @@
-/** @file spreadmodel.h
+/** @file adsm.h
  *
  * @author Aaron Reeves <Aaron.Reeves@colostate.edu><br>
  *   Animal Population Health Institute<br>
@@ -18,8 +18,8 @@
  * any later version.
  */
 
-#ifndef SPREADMODEL_H
-#define SPREADMODEL_H
+#ifndef ADSM_H
+#define ADSM_H
 
 #if defined(DLL_EXPORTS)
 # define DLL_API __declspec( dllexport )
@@ -284,57 +284,57 @@ typedef void (*TFnVoid_5_Int_Int_Int_Int_Int) (int, int, int, int, int);
 /* Function pointers */
 /*-------------------*/
 /* For the display of debugging information in the GUI */
-TFnVoid_1_CharP spreadmodel_printf;
-TFnVoid_1_CharP spreadmodel_debug;
+TFnVoid_1_CharP adsm_printf;
+TFnVoid_1_CharP adsm_debug;
 
 /* For key simulation- and iteration-level events */
-TFnVoid_0 spreadmodel_sim_start;
-TFnVoid_1_Int spreadmodel_iteration_start;
-TFnVoid_1_Int spreadmodel_day_start;
-TFnVoid_1_Int spreadmodel_day_complete;
-TFnVoid_1_Int spreadmodel_disease_end;
-TFnVoid_1_Int spreadmodel_outbreak_end;
-TFnVoid_1_Int spreadmodel_iteration_complete;
-TFnVoid_1_Int spreadmodel_sim_complete;
+TFnVoid_0 adsm_sim_start;
+TFnVoid_1_Int adsm_iteration_start;
+TFnVoid_1_Int adsm_day_start;
+TFnVoid_1_Int adsm_day_complete;
+TFnVoid_1_Int adsm_disease_end;
+TFnVoid_1_Int adsm_outbreak_end;
+TFnVoid_1_Int adsm_iteration_complete;
+TFnVoid_1_Int adsm_sim_complete;
 
 /* Used to determine whether the user wants to interrupt a running simulation */
-TFnInt_0 spreadmodel_simulation_stop;
+TFnInt_0 adsm_simulation_stop;
 
 /* Used to update unit state and related events as an iteration runs */
-TFnVoid_1_TUNTUpdate spreadmodel_change_unit_state;
-TFnVoid_1_TUNTInfect spreadmodel_infect_unit;
-TFnVoid_1_TUNTDetect spreadmodel_detect_unit;
-TFnVoid_1_TUNTExpose spreadmodel_expose_unit;
-TFnVoid_1_TUNTTrace spreadmodel_trace_unit;
-TFnVoid_1_TUNTExam spreadmodel_examine_unit;
-TFnVoid_1_TUNTTest spreadmodel_test_unit;
-TFnVoid_1_Int spreadmodel_queue_unit_for_destruction;
-TFnVoid_1_TUNTControl spreadmodel_destroy_unit;
-TFnVoid_1_Int spreadmodel_queue_unit_for_vaccination;
-TFnVoid_1_TUNTControl spreadmodel_vaccinate_unit;
-TFnVoid_1_TUNTControl spreadmodel_cancel_unit_vaccination;
-TFnVoid_1_Int spreadmodel_make_zone_focus;
-TFnVoid_1_TUNTZone spreadmodel_record_zone_change;
-TFnVoid_2_Int_Double spreadmodel_record_zone_area;
-TFnVoid_2_Int_Double spreadmodel_record_zone_perimeter;
+TFnVoid_1_TUNTUpdate adsm_change_unit_state;
+TFnVoid_1_TUNTInfect adsm_infect_unit;
+TFnVoid_1_TUNTDetect adsm_detect_unit;
+TFnVoid_1_TUNTExpose adsm_expose_unit;
+TFnVoid_1_TUNTTrace adsm_trace_unit;
+TFnVoid_1_TUNTExam adsm_examine_unit;
+TFnVoid_1_TUNTTest adsm_test_unit;
+TFnVoid_1_Int adsm_queue_unit_for_destruction;
+TFnVoid_1_TUNTControl adsm_destroy_unit;
+TFnVoid_1_Int adsm_queue_unit_for_vaccination;
+TFnVoid_1_TUNTControl adsm_vaccinate_unit;
+TFnVoid_1_TUNTControl adsm_cancel_unit_vaccination;
+TFnVoid_1_Int adsm_make_zone_focus;
+TFnVoid_1_TUNTZone adsm_record_zone_change;
+TFnVoid_2_Int_Double adsm_record_zone_area;
+TFnVoid_2_Int_Double adsm_record_zone_perimeter;
 
 /* Used by the GUI to access zone information during a running simulation */
-TFnVoid_1_TUNTPerimeterList spreadmodel_set_zone_perimeters;
+TFnVoid_1_TUNTPerimeterList adsm_set_zone_perimeters;
 
 /* Used to write daily unit state output, when desired */
-TFnVoid_1_CharP spreadmodel_show_all_states;
+TFnVoid_1_CharP adsm_show_all_states;
 
 /* Used to write daily unit prevalence output, when desired */
-TFnVoid_1_CharP spreadmodel_show_all_prevalences;
+TFnVoid_1_CharP adsm_show_all_prevalences;
 
 /* Used to display g_warnings, etc., in the GUI */
-TFnVoid_1_CharP spreadmodel_display_g_message;
+TFnVoid_1_CharP adsm_display_g_message;
 
 /* Used to write daily unit zone output, when desired */
 /* This function will need to be re-implemented if it is ever needed again. */
-/* TFnVoid_1_CharP spreadmodel_show_all_zones; */
+/* TFnVoid_1_CharP adsm_show_all_zones; */
 
-TFnVoid_5_Int_Int_Int_Int_Int spreadmodel_report_search_hits;
+TFnVoid_5_Int_Int_Int_Int_Int adsm_report_search_hits;
 
 
 /* Functions used to set the function pointers */
@@ -387,7 +387,7 @@ DLL_API void set_report_search_hits (TFnVoid_5_Int_Int_Int_Int_Int fn);
 
 /* Function pointer helpers */
 /*--------------------------*/
-void clear_spreadmodel_fns (void);
-void spreadmodel_log_handler(const gchar *log_domain, GLogLevelFlags log_level, const gchar *message, gpointer user_data);
+void clear_adsm_fns (void);
+void adsm_log_handler(const gchar *log_domain, GLogLevelFlags log_level, const gchar *message, gpointer user_data);
 
-#endif /* SPREADMODEL_H */
+#endif /* ADSM_H */

@@ -1,4 +1,4 @@
-/** @file spreadmodel.c
+/** @file adsm.c
  *
  * @author Aaron Reeves <Aaron.Reeves@colostate.edu><br>
  *   Animal Population Health Institute<br>
@@ -19,7 +19,7 @@
  */
 
 
-#include "spreadmodel.h"
+#include "adsm.h"
 #include <glib.h>
 
 #include "gis.h"
@@ -42,7 +42,7 @@ DllMain (HINSTANCE hInst /* Library instance handle. */ ,
     {
     case DLL_PROCESS_ATTACH:
       /* printf( "@@@ DLL LOADED @@@" ); */
-      clear_spreadmodel_fns ();
+      clear_adsm_fns ();
       clear_rng_fns ();
       break;
     case DLL_PROCESS_DETACH:
@@ -111,14 +111,14 @@ specification_version (void)
 DLL_API void
 set_printf (TFnVoid_1_CharP fn)
 {
-  spreadmodel_printf = fn;
+  adsm_printf = fn;
 }
 
 
 DLL_API void
 set_debug (TFnVoid_1_CharP fn)
 {
-  spreadmodel_debug = fn;
+  adsm_debug = fn;
 }
 
 
@@ -126,56 +126,56 @@ set_debug (TFnVoid_1_CharP fn)
 DLL_API void
 set_sim_start (TFnVoid_0 fn)
 {
-  spreadmodel_sim_start = fn;
+  adsm_sim_start = fn;
 }
 
 
 DLL_API void
 set_iteration_start (TFnVoid_1_Int fn)
 {
-  spreadmodel_iteration_start = fn;
+  adsm_iteration_start = fn;
 }
 
 
 DLL_API void
 set_day_start (TFnVoid_1_Int fn)
 {
-  spreadmodel_day_start = fn;
+  adsm_day_start = fn;
 }
 
 
 DLL_API void
 set_day_complete (TFnVoid_1_Int fn)
 {
-  spreadmodel_day_complete = fn;
+  adsm_day_complete = fn;
 }
 
 
 DLL_API void
 set_disease_end (TFnVoid_1_Int fn)
 {
-  spreadmodel_disease_end = fn;
+  adsm_disease_end = fn;
 }
 
 
 DLL_API void
 set_outbreak_end (TFnVoid_1_Int fn)
 {
-  spreadmodel_outbreak_end = fn;
+  adsm_outbreak_end = fn;
 }
 
 
 DLL_API void
 set_iteration_complete (TFnVoid_1_Int fn)
 {
-  spreadmodel_iteration_complete = fn;
+  adsm_iteration_complete = fn;
 }
 
 
 DLL_API void
 set_sim_complete (TFnVoid_1_Int fn)
 {
-  spreadmodel_sim_complete = fn;
+  adsm_sim_complete = fn;
 }
 
 
@@ -183,112 +183,112 @@ set_sim_complete (TFnVoid_1_Int fn)
 DLL_API void
 set_change_unit_state (TFnVoid_1_TUNTUpdate fn)
 {
-  spreadmodel_change_unit_state = fn;
+  adsm_change_unit_state = fn;
 }
 
 
 DLL_API void
 set_infect_unit (TFnVoid_1_TUNTInfect fn)
 {
-  spreadmodel_infect_unit = fn;
+  adsm_infect_unit = fn;
 }
 
 
 DLL_API void
 set_expose_unit (TFnVoid_1_TUNTExpose fn)
 {
-  spreadmodel_expose_unit = fn;
+  adsm_expose_unit = fn;
 }
 
 
 DLL_API void
 set_detect_unit (TFnVoid_1_TUNTDetect fn)
 {
-  spreadmodel_detect_unit = fn;
+  adsm_detect_unit = fn;
 }
 
 
 DLL_API void
 set_trace_unit (TFnVoid_1_TUNTTrace fn)
 {
-  spreadmodel_trace_unit = fn;
+  adsm_trace_unit = fn;
 }
 
 
 DLL_API void
 set_examine_unit (TFnVoid_1_TUNTExam fn)
 {
-  spreadmodel_examine_unit = fn; 
+  adsm_examine_unit = fn; 
 }
 
 
 DLL_API void 
 set_test_unit (TFnVoid_1_TUNTTest fn)
 {
-  spreadmodel_test_unit = fn;  
+  adsm_test_unit = fn;  
 }
 
 
 DLL_API void 
 set_queue_unit_for_destruction (TFnVoid_1_Int fn)
 {
-  spreadmodel_queue_unit_for_destruction = fn; 
+  adsm_queue_unit_for_destruction = fn; 
 }
 
 
 DLL_API void
 set_destroy_unit (TFnVoid_1_TUNTControl fn)
 {
-  spreadmodel_destroy_unit = fn;
+  adsm_destroy_unit = fn;
 }
 
 
 DLL_API void 
 set_queue_unit_for_vaccination (TFnVoid_1_Int fn)
 {
-  spreadmodel_queue_unit_for_vaccination = fn; 
+  adsm_queue_unit_for_vaccination = fn; 
 }
 
 
 DLL_API void
 set_vaccinate_unit (TFnVoid_1_TUNTControl fn)
 {
-  spreadmodel_vaccinate_unit = fn;
+  adsm_vaccinate_unit = fn;
 }
 
 
 DLL_API void
 set_cancel_unit_vaccination (TFnVoid_1_TUNTControl fn)
 {
-  spreadmodel_cancel_unit_vaccination = fn;
+  adsm_cancel_unit_vaccination = fn;
 }
 
 
 DLL_API void
 set_make_zone_focus( TFnVoid_1_Int fn )
 {
-  spreadmodel_make_zone_focus = fn;
+  adsm_make_zone_focus = fn;
 }
 
 
 DLL_API void
 set_record_zone_change (TFnVoid_1_TUNTZone fn )
 {
-  spreadmodel_record_zone_change = fn;
+  adsm_record_zone_change = fn;
 }
 
 
 DLL_API void
 set_record_zone_area (TFnVoid_2_Int_Double fn)
 {
-  spreadmodel_record_zone_area = fn;
+  adsm_record_zone_area = fn;
 }
 
 
 DLL_API void
 set_record_zone_perimeter (TFnVoid_2_Int_Double fn)
 {
-  spreadmodel_record_zone_perimeter = fn;
+  adsm_record_zone_perimeter = fn;
 }
 
 
@@ -296,7 +296,7 @@ set_record_zone_perimeter (TFnVoid_2_Int_Double fn)
 DLL_API void
 set_set_zone_perimeters( TFnVoid_1_TUNTPerimeterList fn)
 {
-   spreadmodel_set_zone_perimeters = fn;
+   adsm_set_zone_perimeters = fn;
 }
 
 
@@ -324,7 +324,7 @@ get_zone_from_list( ZON_zone_list_t * zones, int i)
 DLL_API void
 set_show_all_states (TFnVoid_1_CharP fn)
 {
-  spreadmodel_show_all_states = fn;
+  adsm_show_all_states = fn;
 }
 
 
@@ -332,7 +332,7 @@ set_show_all_states (TFnVoid_1_CharP fn)
 DLL_API void
 set_show_all_prevalences (TFnVoid_1_CharP fn)
 {
-  spreadmodel_show_all_prevalences = fn;
+  adsm_show_all_prevalences = fn;
 }
 
 
@@ -342,7 +342,7 @@ set_show_all_prevalences (TFnVoid_1_CharP fn)
 DLL_API void
 set_show_all_zones (TFnVoid_1_CharP fn)
 {
-  spreadmodel_show_all_zones = fn;
+  adsm_show_all_zones = fn;
 }
 */
 
@@ -350,21 +350,21 @@ set_show_all_zones (TFnVoid_1_CharP fn)
 DLL_API void
 set_simulation_stop (TFnInt_0 fn)
 {
-  spreadmodel_simulation_stop = fn;
+  adsm_simulation_stop = fn;
 }
 
 
 DLL_API void
 set_display_g_message (TFnVoid_1_CharP fn)
 {
-  spreadmodel_display_g_message = fn;  
+  adsm_display_g_message = fn;  
 }
 
 
 DLL_API void
 set_report_search_hits (TFnVoid_5_Int_Int_Int_Int_Int fn)
 {
-  spreadmodel_report_search_hits = fn;
+  adsm_report_search_hits = fn;
 }
 /*---------------------------------------------------------------------------*/
 
@@ -374,7 +374,7 @@ set_report_search_hits (TFnVoid_5_Int_Int_Int_Int_Int fn)
  * Function pointer helpers
  *---------------------------------------------------------------------------*/
 void
-clear_spreadmodel_fns (void)
+clear_adsm_fns (void)
 {
   set_printf (NULL);
   set_debug (NULL);
@@ -418,10 +418,10 @@ clear_spreadmodel_fns (void)
 }
 
 void
-spreadmodel_log_handler(const gchar *log_domain, GLogLevelFlags log_level, const gchar *message, gpointer user_data)
+adsm_log_handler(const gchar *log_domain, GLogLevelFlags log_level, const gchar *message, gpointer user_data)
 {
-  if( NULL != spreadmodel_display_g_message )
-    spreadmodel_display_g_message( (gchar*) message ); 
+  if( NULL != adsm_display_g_message )
+    adsm_display_g_message( (gchar*) message ); 
 }
 /*---------------------------------------------------------------------------*/
 

@@ -80,7 +80,7 @@ local_data_t;
  * @param queue for any new events the model creates.
  */
 void
-handle_detection_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
+handle_detection_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
                         EVT_detection_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
   local_data_t *local_data;
@@ -134,7 +134,7 @@ handle_detection_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * uni
  * @param queue for any new events the model creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
      EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
 #if DEBUG
@@ -165,7 +165,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
  * @param self the model.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
 #if DEBUG
   g_debug ("----- ENTER reset (%s)", MODEL_NAME);
@@ -187,7 +187,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @return a string.
  */
 char *
-to_string (struct spreadmodel_model_t_ *self)
+to_string (struct adsm_module_t_ *self)
 {
   GString *s;
   unsigned int i;
@@ -238,7 +238,7 @@ to_string (struct spreadmodel_model_t_ *self)
  * @param self the model.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   guint i, j;
@@ -280,7 +280,7 @@ local_free (struct spreadmodel_model_t_ *self)
 static int
 set_params (void *data, int ncols, char **value, char **colname)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   guint production_type;
   long int trace_period;
@@ -290,13 +290,13 @@ set_params (void *data, int ncols, char **value, char **colname)
     g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
   #endif
 
-  self = (spreadmodel_model_t *)data;
+  self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
   g_assert (ncols == 7);
 
   /* Find out which production type these parameters apply to. */
-  production_type = spreadmodel_read_prodtype (value[0], local_data->production_types);
+  production_type = adsm_read_prodtype (value[0], local_data->production_types);
 
   /* Read the parameters. */
   if (value[1] != NULL)
@@ -375,11 +375,11 @@ set_params (void *data, int ncols, char **value, char **colname)
 /**
  * Returns a new trace model.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   guint nprod_types, i, j, k;
   char *sqlerr;
@@ -388,7 +388,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
 #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -398,12 +398,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
-  self->has_pending_actions = spreadmodel_model_answer_no;
-  self->has_pending_infections = spreadmodel_model_answer_no;
+  self->is_listening_for = adsm_model_is_listening_for;
+  self->has_pending_actions = adsm_model_answer_no;
+  self->has_pending_infections = adsm_model_answer_no;
   self->to_string = to_string;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
   /* Initialize the 3D array of trace periods. */

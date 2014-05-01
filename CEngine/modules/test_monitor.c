@@ -82,7 +82,7 @@ local_data_t;
  * @param queue for any new events this function creates.
  */
 void
-handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
+handle_before_any_simulations_event (struct adsm_module_t_ *self,
                                      EVT_event_queue_t *queue)
 {
   unsigned int n, i;
@@ -118,7 +118,7 @@ handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
  * @param event a test event.
  */
 void
-handle_test_event (struct spreadmodel_model_t_ *self, EVT_test_event_t * event)
+handle_test_event (struct adsm_module_t_ *self, EVT_test_event_t * event)
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
@@ -160,7 +160,7 @@ handle_test_event (struct spreadmodel_model_t_ *self, EVT_test_event_t * event)
  * @param event a test result event.
  */
 void
-handle_test_result_event (struct spreadmodel_model_t_ * self,
+handle_test_result_event (struct adsm_module_t_ * self,
                           EVT_test_result_event_t * event)
 {
   local_data_t *local_data;
@@ -213,8 +213,8 @@ handle_test_result_event (struct spreadmodel_model_t_ * self,
   #ifdef USE_SC_GUILIB
     sc_test_unit( event->unit, test );
   #else
-    if (NULL != spreadmodel_test_unit) 
-      spreadmodel_test_unit (test);
+    if (NULL != adsm_test_unit) 
+      adsm_test_unit (test);
   #endif
 
   /* Record the test in the SC version */
@@ -267,7 +267,7 @@ handle_test_result_event (struct spreadmodel_model_t_ * self,
  * @param queue for any new events the model creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
      EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
 #if DEBUG
@@ -304,7 +304,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
  * @param self the model.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -343,7 +343,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @param self the model.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -384,11 +384,11 @@ local_free (struct spreadmodel_model_t_ *self)
 /**
  * Returns a new test monitor.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   unsigned int i, j;         /* loop counters */
   char *prodtype_name;
@@ -397,7 +397,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
 #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -407,12 +407,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
-  self->has_pending_actions = spreadmodel_model_answer_no;
-  self->has_pending_infections = spreadmodel_model_answer_no;
-  self->to_string = spreadmodel_model_to_string_default;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->is_listening_for = adsm_model_is_listening_for;
+  self->has_pending_actions = adsm_model_answer_no;
+  self->has_pending_infections = adsm_model_answer_no;
+  self->to_string = adsm_module_to_string_default;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
   local_data->cumul_nunits_tested =

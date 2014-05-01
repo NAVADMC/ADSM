@@ -2065,9 +2065,9 @@ UNT_step (UNT_unit_t * unit, GHashTable *infectious_units)
 #ifdef USE_SC_GUILIB
       sc_change_unit_state ( unit, update );
 #else
-      if (NULL != spreadmodel_change_unit_state)
+      if (NULL != adsm_change_unit_state)
         {
-          spreadmodel_change_unit_state (update);
+          adsm_change_unit_state (update);
         }
 #endif
     }

@@ -20,7 +20,7 @@
 #ifndef VACCINATION_MONITOR_H
 #define VACCINATION_MONITOR_H
 
-spreadmodel_model_t *vaccination_monitor_new (sqlite3 *, UNT_unit_list_t *,
-                                              projPJ, ZON_zone_list_t *);
+adsm_module_t *vaccination_monitor_new (sqlite3 *, UNT_unit_list_t *,
+                                        projPJ, ZON_zone_list_t *);
 
 #endif

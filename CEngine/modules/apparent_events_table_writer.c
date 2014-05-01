@@ -100,7 +100,7 @@ local_data_t;
  * @param event an output directory event.
  */
 void
-handle_output_dir_event (struct spreadmodel_model_t_ * self,
+handle_output_dir_event (struct adsm_module_t_ * self,
                          EVT_output_dir_event_t *event)
 {
   local_data_t *local_data;
@@ -136,7 +136,7 @@ handle_output_dir_event (struct spreadmodel_model_t_ * self,
  * @param self the model.
  */
 void
-handle_before_any_simulations_event (struct spreadmodel_model_t_ * self)
+handle_before_any_simulations_event (struct adsm_module_t_ * self)
 {
   local_data_t *local_data;
   GError *error = NULL;
@@ -186,7 +186,7 @@ handle_before_any_simulations_event (struct spreadmodel_model_t_ * self)
  * @param self the model.
  */
 void
-handle_before_each_simulation_event (struct spreadmodel_model_t_ * self)
+handle_before_each_simulation_event (struct adsm_module_t_ * self)
 {
   local_data_t *local_data;
 
@@ -212,7 +212,7 @@ handle_before_each_simulation_event (struct spreadmodel_model_t_ * self)
  * @param zones the list of zones.
  */
 void
-handle_detection_event (struct spreadmodel_model_t_ *self,
+handle_detection_event (struct adsm_module_t_ *self,
                         EVT_detection_event_t * event,
                         ZON_zone_list_t *zones)
 {
@@ -262,7 +262,7 @@ handle_detection_event (struct spreadmodel_model_t_ *self,
  * @param zones the list of zones.
  */
 void
-handle_exam_event (struct spreadmodel_model_t_ *self,
+handle_exam_event (struct adsm_module_t_ *self,
                    EVT_exam_event_t * event,
                    ZON_zone_list_t *zones)
 {
@@ -312,7 +312,7 @@ handle_exam_event (struct spreadmodel_model_t_ *self,
  * @param zones the list of zones.
  */
 void
-handle_attempt_to_trace_event (struct spreadmodel_model_t_ *self,
+handle_attempt_to_trace_event (struct adsm_module_t_ *self,
                                EVT_attempt_to_trace_event_t * event,
                                ZON_zone_list_t *zones)
 {
@@ -363,7 +363,7 @@ handle_attempt_to_trace_event (struct spreadmodel_model_t_ *self,
  * @param zones the list of zones.
  */
 void
-handle_trace_result_event (struct spreadmodel_model_t_ *self,
+handle_trace_result_event (struct adsm_module_t_ *self,
                            EVT_trace_result_event_t * event,
                            ZON_zone_list_t *zones)
 {
@@ -435,7 +435,7 @@ handle_trace_result_event (struct spreadmodel_model_t_ *self,
  * @param zones the list of zones.
  */
 void
-handle_vaccination_event (struct spreadmodel_model_t_ *self,
+handle_vaccination_event (struct adsm_module_t_ *self,
                           EVT_vaccination_event_t * event,
                           ZON_zone_list_t *zones)
 {
@@ -485,7 +485,7 @@ handle_vaccination_event (struct spreadmodel_model_t_ *self,
  * @param zones the list of zones.
  */
 void
-handle_destruction_event (struct spreadmodel_model_t_ *self,
+handle_destruction_event (struct adsm_module_t_ *self,
                           EVT_destruction_event_t * event,
                           ZON_zone_list_t *zones)
 {
@@ -538,7 +538,7 @@ handle_destruction_event (struct spreadmodel_model_t_ *self,
  * @param queue for any new events the model creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
      ZON_zone_list_t * zones, EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
 #if DEBUG
@@ -593,7 +593,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
  * @param self the model.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
 #if DEBUG
   g_debug ("----- ENTER reset (%s)", MODEL_NAME);
@@ -616,7 +616,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @return a string.
  */
 char *
-to_string (struct spreadmodel_model_t_ *self)
+to_string (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   GString *s;
@@ -640,7 +640,7 @@ to_string (struct spreadmodel_model_t_ *self)
  * @param self the model.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   GError *error = NULL;
@@ -674,18 +674,18 @@ local_free (struct spreadmodel_model_t_ *self)
 /**
  * Returns a new apparent events table writer.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
 #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -695,12 +695,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
-  self->has_pending_actions = spreadmodel_model_answer_no;
-  self->has_pending_infections = spreadmodel_model_answer_no;
+  self->is_listening_for = adsm_model_is_listening_for;
+  self->has_pending_actions = adsm_model_answer_no;
+  self->has_pending_infections = adsm_model_answer_no;
   self->to_string = to_string;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
   /* Get the filename for the table.  If the filename is omitted, blank, '-',
@@ -732,7 +732,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
               g_free(tmp);
             }
           tmp = local_data->filename;
-          local_data->filename = spreadmodel_insert_node_number_into_filename (local_data->filename);
+          local_data->filename = adsm_insert_node_number_into_filename (local_data->filename);
           g_free(tmp);
           local_data->channel_is_stdout = FALSE;
         }

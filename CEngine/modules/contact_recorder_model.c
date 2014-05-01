@@ -143,7 +143,7 @@ local_data_t;
  * @param e an exposure event.
  */
 void
-handle_exposure_event (struct spreadmodel_model_t_ *self, EVT_event_t * e)
+handle_exposure_event (struct adsm_module_t_ *self, EVT_event_t * e)
 {
   local_data_t *local_data;
   EVT_exposure_event_t *event;
@@ -198,7 +198,7 @@ handle_exposure_event (struct spreadmodel_model_t_ *self, EVT_event_t * e)
  * @param queue for any new events the function creates.
  */
 void
-handle_attempt_to_trace_event (struct spreadmodel_model_t_ *self,
+handle_attempt_to_trace_event (struct adsm_module_t_ *self,
                                EVT_attempt_to_trace_event_t * event,
                                RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
@@ -328,7 +328,7 @@ handle_attempt_to_trace_event (struct spreadmodel_model_t_ *self,
         {
           result->u.trace_result.day += delay;
           if (delay > local_data->pending_results->len)
-            spreadmodel_extend_rotating_array (local_data->pending_results, delay,
+            adsm_extend_rotating_array (local_data->pending_results, delay,
                                                local_data->rotating_index);
           delay_index = (local_data->rotating_index + delay) % local_data->pending_results->len;
           q = (GQueue *) g_ptr_array_index (local_data->pending_results, delay_index);
@@ -355,7 +355,7 @@ handle_attempt_to_trace_event (struct spreadmodel_model_t_ *self,
  * @param queue for any new events the model creates.
  */
 void
-handle_new_day_event (struct spreadmodel_model_t_ *self,
+handle_new_day_event (struct adsm_module_t_ *self,
                       EVT_new_day_event_t * event,
                       EVT_event_queue_t * queue)
 {
@@ -406,7 +406,7 @@ handle_new_day_event (struct spreadmodel_model_t_ *self,
  * @param queue for any new events the model creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
      EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
 #if DEBUG
@@ -443,7 +443,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
  * @param self the model.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   unsigned int i;
@@ -497,7 +497,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @return TRUE if the model has pending actions.
  */
 gboolean
-has_pending_actions (struct spreadmodel_model_t_ * self)
+has_pending_actions (struct adsm_module_t_ * self)
 {
   local_data_t *local_data;
 
@@ -514,7 +514,7 @@ has_pending_actions (struct spreadmodel_model_t_ * self)
  * @return a string.
  */
 char *
-to_string (struct spreadmodel_model_t_ *self)
+to_string (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   GString *s;
@@ -581,7 +581,7 @@ to_string (struct spreadmodel_model_t_ *self)
  * @param self the model.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   SPREADMODEL_contact_type contact_type;
@@ -653,7 +653,7 @@ local_free (struct spreadmodel_model_t_ *self)
 static int
 set_params (void *data, int ncols, char **value, char **colname)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   sqlite3 *params;
   guint production_type;
@@ -664,7 +664,7 @@ set_params (void *data, int ncols, char **value, char **colname)
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
-  self = (spreadmodel_model_t *)data;
+  self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
@@ -672,7 +672,7 @@ set_params (void *data, int ncols, char **value, char **colname)
 
   /* Find out which source production type these parameters apply to. */
   production_type =
-    spreadmodel_read_prodtype (value[0], local_data->production_types);
+    adsm_read_prodtype (value[0], local_data->production_types);
 
   if (value[1] != NULL)
     {
@@ -725,11 +725,11 @@ set_params (void *data, int ncols, char **value, char **colname)
 /**
  * Returns a new contact recorder model.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   unsigned int nprod_types;
   SPREADMODEL_contact_type contact_type;
@@ -740,7 +740,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
 #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -750,12 +750,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
+  self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = has_pending_actions;
-  self->has_pending_infections = spreadmodel_model_answer_no;
+  self->has_pending_infections = adsm_model_answer_no;
   self->to_string = to_string;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
   /* Create an array to hold probabilities of trace success.  The array is 2-
