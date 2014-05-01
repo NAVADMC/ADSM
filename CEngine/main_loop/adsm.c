@@ -26,7 +26,7 @@
 #include "rng.h"
 
 /*-----------------------------------------------------------------------------
- * Required for the Windows DLL version of the SpreadModel core library
+ * Required for the Windows DLL version of the ADSM core library
  *
  * Other implementations should ignore this block.
  *---------------------------------------------------------------------------*/
@@ -430,34 +430,34 @@ adsm_log_handler(const gchar *log_domain, GLogLevelFlags log_level, const gchar 
 /*-----------------------------------------------------------------------------
  * Fully spelled out and abbreviated names for enums.
  *---------------------------------------------------------------------------*/
-const char *SPREADMODEL_trace_direction_name[] = {
+const char *ADSM_trace_direction_name[] = {
   "Trace Neither", "Trace Forward or Out", "Trace Back or In", NULL
 };
 
-const char *SPREADMODEL_trace_direction_abbrev[] = {
+const char *ADSM_trace_direction_abbrev[] = {
   "Neither", "Fwd", "Back", NULL
 };
 
-const char *SPREADMODEL_contact_type_name[] = {
+const char *ADSM_contact_type_name[] = {
   "Unknown", "Direct Contact", "Indirect Contact", "Airborne Spread",
   "Initially Infected", NULL
 };
 
-const char *SPREADMODEL_contact_type_abbrev[] = {
+const char *ADSM_contact_type_abbrev[] = {
   "Unkn", "Dir", "Ind", "Air", "Ini", NULL
 };
 
-const char *SPREADMODEL_detection_reason_abbrev[] = {
+const char *ADSM_detection_reason_abbrev[] = {
   "Unkn", "Clin", "Test", NULL
 };
 
-const char *SPREADMODEL_control_reason_name[] = {
+const char *ADSM_control_reason_name[] = {
   "Unspecified", "Ring", "Trace fwd direct", "Trace fwd indirect",
   "Trace back direct", "Trace back indirect", "Basic", "Initial state",
   NULL
 };
 
-const char *SPREADMODEL_control_reason_abbrev[] = {
+const char *ADSM_control_reason_abbrev[] = {
   "Unsp", "Ring", "DirFwd", "IndFwd", "DirBack", "IndBack", "Det", "Ini", NULL
 };
 

@@ -453,7 +453,7 @@ set_params (void *data, int ncols, char **value, char **colname)
       gpointer ptr;
 
       key = g_strdup_printf ("%s,%s", production_type_name,
-                             SPREADMODEL_control_reason_name[SPREADMODEL_ControlRing]);
+                             ADSM_control_reason_name[ADSM_ControlRing]);
       ptr = g_hash_table_lookup (local_data->priority_order_table, key);
       g_assert (ptr != NULL);
       p->priority = GPOINTER_TO_UINT(ptr);

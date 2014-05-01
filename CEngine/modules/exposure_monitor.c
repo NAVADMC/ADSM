@@ -169,26 +169,26 @@ handle_exposure_event (struct adsm_module_t_ *self, EVT_exposure_event_t * event
   exposing_unit = event->exposing_unit;
   exposed_unit = event->exposed_unit;
 
-  cause = SPREADMODEL_contact_type_abbrev[event->contact_type];
+  cause = ADSM_contact_type_abbrev[event->contact_type];
                                 
   update.src_index = exposing_unit->index;
-  update.src_state = (SPREADMODEL_disease_state) exposing_unit->state;
+  update.src_state = (ADSM_disease_state) exposing_unit->state;
   update.dest_index = exposed_unit->index;
-  update.dest_state = (SPREADMODEL_disease_state) exposed_unit->state;
+  update.dest_state = (ADSM_disease_state) exposed_unit->state;
   
   update.initiated_day = (int) event->initiated_day;
   update.finalized_day = (int) event->initiated_day + event->delay;
   
   if( TRUE == event->adequate )
-    update.is_adequate = SPREADMODEL_SuccessTrue;
+    update.is_adequate = ADSM_SuccessTrue;
   else
-    update.is_adequate = SPREADMODEL_SuccessFalse;
+    update.is_adequate = ADSM_SuccessFalse;
   
   switch (event->contact_type)
     {
-      case SPREADMODEL_DirectContact:
-      case SPREADMODEL_IndirectContact:
-      case SPREADMODEL_AirborneSpread:
+      case ADSM_DirectContact:
+      case ADSM_IndirectContact:
+      case ADSM_AirborneSpread:
         update.exposure_method = event->contact_type;
         break;      
       default:
@@ -473,14 +473,14 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       RPT_reporting_add_integer1 (local_data->num_animals_exposed_by_prodtype, 0, prodtype_name);
       RPT_reporting_add_integer1 (local_data->cumul_num_animals_exposed_by_prodtype, 0, prodtype_name);
     }
-  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+  for (i = 0; i < ADSM_NCONTACT_TYPES; i++)
     {
       const char *cause;
       const char *drill_down_list[3] = { NULL, NULL, NULL };
-      if ((SPREADMODEL_contact_type)i == SPREADMODEL_UnspecifiedInfectionType
-          || (SPREADMODEL_contact_type)i == SPREADMODEL_InitiallyInfected)
+      if ((ADSM_contact_type)i == ADSM_UnspecifiedInfectionType
+          || (ADSM_contact_type)i == ADSM_InitiallyInfected)
         continue;
-      cause = SPREADMODEL_contact_type_abbrev[i];
+      cause = ADSM_contact_type_abbrev[i];
       RPT_reporting_add_integer1 (local_data->num_units_exposed_by_cause, 0, cause);
       RPT_reporting_add_integer1 (local_data->cumul_num_units_exposed_by_cause, 0, cause);
       RPT_reporting_add_integer1 (local_data->num_animals_exposed_by_cause, 0, cause);

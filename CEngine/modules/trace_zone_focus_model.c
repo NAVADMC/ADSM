@@ -71,7 +71,7 @@ EVT_event_type_t events_listened_for[] = { EVT_TraceResult };
 /** Specialized information for this model. */
 typedef struct
 {
-  gboolean *create_zone[SPREADMODEL_NCONTACT_TYPES]; /**< Whether or not to
+  gboolean *create_zone[ADSM_NCONTACT_TYPES]; /**< Whether or not to
     create a zone around a unit.  Use an expression of the form
     trace_period[contact_type][production_type]
     to retrieve a value. */
@@ -100,7 +100,7 @@ handle_trace_result_event (struct adsm_module_t_ *self,
 #endif
 
   local_data = (local_data_t *) (self->model_data);
-  if (event->direction == SPREADMODEL_TraceForwardOrOut)
+  if (event->direction == ADSM_TraceForwardOrOut)
     unit = event->exposed_unit;
   else
     unit = event->exposing_unit;
@@ -197,13 +197,13 @@ to_string (struct adsm_module_t_ *self)
   g_string_sprintf (s, "<%s create zones around", MODEL_NAME);
   for (i = 0; i < local_data->production_types->len; i++)
     {
-      for (j = 0; j < SPREADMODEL_NCONTACT_TYPES; j++)
+      for (j = 0; j < ADSM_NCONTACT_TYPES; j++)
         {
           if (local_data->create_zone[j][i] == TRUE)
             {
               g_string_append_printf (s, "\n  %s found by trace of %s",
                                       (char *) g_ptr_array_index (local_data->production_types, i),
-                                      SPREADMODEL_contact_type_name[j]);
+                                      ADSM_contact_type_name[j]);
              
             }
         }
@@ -235,7 +235,7 @@ local_free (struct adsm_module_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+  for (i = 0; i < ADSM_NCONTACT_TYPES; i++)
     {
       g_free (local_data->create_zone[i]);
     }
@@ -285,7 +285,7 @@ set_params (void *data, int ncols, char **value, char **colname)
   g_assert (tmp == 0 || tmp == 1);
   if (tmp == 1)
     {
-      local_data->create_zone[SPREADMODEL_DirectContact][production_type] = TRUE;
+      local_data->create_zone[ADSM_DirectContact][production_type] = TRUE;
     }
   errno = 0;
   tmp = strtol (value[2], NULL, /* base */ 10);
@@ -293,7 +293,7 @@ set_params (void *data, int ncols, char **value, char **colname)
   g_assert (tmp == 0 || tmp == 1);
   if (tmp == 1)
     {
-      local_data->create_zone[SPREADMODEL_IndirectContact][production_type] = TRUE;
+      local_data->create_zone[ADSM_IndirectContact][production_type] = TRUE;
     }
 
   #if DEBUG
@@ -342,7 +342,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Initialize the 2D array of booleans. */
   local_data->production_types = units->production_type_names;
   nprod_types = local_data->production_types->len;
-  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+  for (i = 0; i < ADSM_NCONTACT_TYPES; i++)
     {
       local_data->create_zone[i] = g_new0 (gboolean, nprod_types);
     }

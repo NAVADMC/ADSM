@@ -60,7 +60,7 @@ EVT_event_type_t events_listened_for[] = { EVT_Detection };
 /** Specialized information for this model. */
 typedef struct
 {
-  int *trace_period[SPREADMODEL_NCONTACT_TYPES][SPREADMODEL_NTRACE_DIRECTIONS]; /**< Number
+  int *trace_period[ADSM_NCONTACT_TYPES][ADSM_NTRACE_DIRECTIONS]; /**< Number
     of days back we are interested in tracing.  Use an expression of the form
     trace_period[contact_type][direction][production_type]
     to get a particular value.  A negative number means "don't trace". */
@@ -85,8 +85,8 @@ handle_detection_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
-  SPREADMODEL_contact_type contact_type;
-  SPREADMODEL_trace_direction direction;
+  ADSM_contact_type contact_type;
+  ADSM_trace_direction direction;
   int trace_period;
 
 #if DEBUG
@@ -95,9 +95,9 @@ handle_detection_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
-  for (contact_type = 0; contact_type < SPREADMODEL_NCONTACT_TYPES; contact_type++)
+  for (contact_type = 0; contact_type < ADSM_NCONTACT_TYPES; contact_type++)
     {
-      for (direction = 0; direction < SPREADMODEL_NTRACE_DIRECTIONS; direction++)
+      for (direction = 0; direction < ADSM_NTRACE_DIRECTIONS; direction++)
         {
           trace_period =
             local_data->trace_period[contact_type][direction][unit->production_type];
@@ -106,8 +106,8 @@ handle_detection_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
               #if DEBUG
                 g_debug ("unit \"%s\" request to %s %ss", 
                          unit->official_id,
-                         SPREADMODEL_trace_direction_name[direction],
-                         SPREADMODEL_contact_type_name[contact_type]);
+                         ADSM_trace_direction_name[direction],
+                         ADSM_contact_type_name[contact_type]);
               #endif
               EVT_event_enqueue (queue,
                 EVT_new_attempt_to_trace_event (unit, event->day,
@@ -199,23 +199,23 @@ to_string (struct adsm_module_t_ *self)
   g_string_append_printf (s, "<%s on detection of", MODEL_NAME);
   for (i = 0; i < local_data->production_types->len; i++)
     {
-      SPREADMODEL_contact_type contact_type;
-      SPREADMODEL_trace_direction direction;
+      ADSM_contact_type contact_type;
+      ADSM_trace_direction direction;
       int trace_period;
 
       g_string_append_printf (s, "\n  %s:",
                               (char *) g_ptr_array_index (local_data->production_types, i));
-      for (contact_type = 0; contact_type < SPREADMODEL_NCONTACT_TYPES; contact_type++)
+      for (contact_type = 0; contact_type < ADSM_NCONTACT_TYPES; contact_type++)
         {
-          for (direction = 0; direction < SPREADMODEL_NTRACE_DIRECTIONS; direction++)
+          for (direction = 0; direction < ADSM_NTRACE_DIRECTIONS; direction++)
             {
               trace_period =
                 local_data->trace_period[contact_type][direction][i];
               if (trace_period >= 0)
                 {
                   g_string_append_printf (s, " %s %s %i days",
-                                          SPREADMODEL_trace_direction_name[direction],
-                                          SPREADMODEL_contact_type_name[contact_type],
+                                          ADSM_trace_direction_name[direction],
+                                          ADSM_contact_type_name[contact_type],
                                           trace_period);
                 }
             }
@@ -250,9 +250,9 @@ local_free (struct adsm_module_t_ *self)
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
 
-  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+  for (i = 0; i < ADSM_NCONTACT_TYPES; i++)
     {
-      for (j = 0; j < SPREADMODEL_NTRACE_DIRECTIONS; j++)
+      for (j = 0; j < ADSM_NTRACE_DIRECTIONS; j++)
         {
           g_free (local_data->trace_period[i][j]);
         }    
@@ -314,7 +314,7 @@ set_params (void *data, int ncols, char **value, char **colname)
               g_assert (tmp == 0 || tmp == 1);
               if (tmp == 1)
                 {
-                  local_data->trace_period[SPREADMODEL_DirectContact][SPREADMODEL_TraceForwardOrOut][production_type] = trace_period;
+                  local_data->trace_period[ADSM_DirectContact][ADSM_TraceForwardOrOut][production_type] = trace_period;
                 }
             }
           if (value[3] != NULL)
@@ -325,7 +325,7 @@ set_params (void *data, int ncols, char **value, char **colname)
               g_assert (tmp == 0 || tmp == 1);
               if (tmp == 1)
                 {
-                  local_data->trace_period[SPREADMODEL_DirectContact][SPREADMODEL_TraceBackOrIn][production_type] = trace_period;
+                  local_data->trace_period[ADSM_DirectContact][ADSM_TraceBackOrIn][production_type] = trace_period;
                 }
             }
         }
@@ -346,7 +346,7 @@ set_params (void *data, int ncols, char **value, char **colname)
               g_assert (tmp == 0 || tmp == 1);
               if (tmp == 1)
                 {
-                  local_data->trace_period[SPREADMODEL_IndirectContact][SPREADMODEL_TraceForwardOrOut][production_type] = trace_period;
+                  local_data->trace_period[ADSM_IndirectContact][ADSM_TraceForwardOrOut][production_type] = trace_period;
                 }
             }
           if (value[6] != NULL)
@@ -357,7 +357,7 @@ set_params (void *data, int ncols, char **value, char **colname)
               g_assert (tmp == 0 || tmp == 1);
               if (tmp == 1)
                 {
-                  local_data->trace_period[SPREADMODEL_IndirectContact][SPREADMODEL_TraceBackOrIn][production_type] = trace_period;
+                  local_data->trace_period[ADSM_IndirectContact][ADSM_TraceBackOrIn][production_type] = trace_period;
                 }
             }
         }
@@ -409,9 +409,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Initialize the 3D array of trace periods. */
   local_data->production_types = units->production_type_names;
   nprod_types = local_data->production_types->len;
-  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+  for (i = 0; i < ADSM_NCONTACT_TYPES; i++)
     {
-      for (j = 0; j < SPREADMODEL_NTRACE_DIRECTIONS; j++)
+      for (j = 0; j < ADSM_NTRACE_DIRECTIONS; j++)
         {
           local_data->trace_period[i][j] = g_new (int, nprod_types);
           for (k = 0; k < nprod_types; k++)

@@ -178,19 +178,19 @@ handle_destruction_event (struct adsm_module_t_ *self, EVT_destruction_event_t *
   update.day_commitment_made = event->day_commitment_made;
   
   if( 0 == strcmp( "Det", event->reason ) )
-    update.reason = SPREADMODEL_ControlDetection;
+    update.reason = ADSM_ControlDetection;
   else if( 0 == strcmp( "Ring", event->reason ) )
-    update.reason = SPREADMODEL_ControlRing;
+    update.reason = ADSM_ControlRing;
   else if( 0 == strcmp( "DirFwd", event->reason ) )
-    update.reason = SPREADMODEL_ControlTraceForwardDirect;
+    update.reason = ADSM_ControlTraceForwardDirect;
   else if( 0 == strcmp( "IndFwd", event->reason ) )
-    update.reason = SPREADMODEL_ControlTraceForwardIndirect;     
+    update.reason = ADSM_ControlTraceForwardIndirect;     
   else if( 0 == strcmp( "DirBack", event->reason ) )
-    update.reason = SPREADMODEL_ControlTraceBackDirect;
+    update.reason = ADSM_ControlTraceBackDirect;
   else if( 0 == strcmp( "IndBack", event->reason ) )
-    update.reason = SPREADMODEL_ControlTraceBackIndirect;
+    update.reason = ADSM_ControlTraceBackIndirect;
   else if( 0 == strcmp( "Ini", event->reason ) )
-    update.reason = SPREADMODEL_ControlInitialState;
+    update.reason = ADSM_ControlInitialState;
   else
     {
       g_error( "Unrecognized reason for destruction (%s) in handle_destruction_event", event->reason );
@@ -518,10 +518,10 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       RPT_reporting_add_integer (local_data->num_animals_destroyed_by_reason_and_prodtype, 0, drill_down_list);
       RPT_reporting_add_integer (local_data->cumul_num_animals_destroyed_by_reason_and_prodtype, 0, drill_down_list);
     }
-  for (i = 0; i < SPREADMODEL_NCONTROL_REASONS; i++)
+  for (i = 0; i < ADSM_NCONTROL_REASONS; i++)
     {
       const char *reason;
-      reason = SPREADMODEL_control_reason_abbrev[i];
+      reason = ADSM_control_reason_abbrev[i];
       /* Two function calls for the first_destruction variable: one to
        * establish the type of the sub-variable (it's an integer), and one to
        * clear it to "null" (it has no meaningful value until a destruction

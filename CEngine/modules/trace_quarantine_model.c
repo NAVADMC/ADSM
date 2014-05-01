@@ -88,7 +88,7 @@ handle_trace_result_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 
   if (event->traced)
     {
-      if (event->direction == SPREADMODEL_TraceForwardOrOut)
+      if (event->direction == ADSM_TraceForwardOrOut)
         unit = event->exposed_unit;
       else
         unit = event->exposing_unit;

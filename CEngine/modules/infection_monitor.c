@@ -321,7 +321,7 @@ handle_infection_event (struct adsm_module_t_ *self, EVT_infection_event_t * eve
   infecting_unit = event->infecting_unit;
   infected_unit = event->infected_unit;
 
-  cause = SPREADMODEL_contact_type_abbrev[event->contact_type];
+  cause = ADSM_contact_type_abbrev[event->contact_type];
 
   update.unit_index = infected_unit->index;
   update.infection_source_type = event->contact_type;
@@ -342,7 +342,7 @@ handle_infection_event (struct adsm_module_t_ *self, EVT_infection_event_t * eve
    * not included in many of the counts.  They will not be part of infnUAll or
    * infnU broken down by production type.  They will be part of infnUIni and
    * infnUIni broken down by production type. */
-  if (event->contact_type != SPREADMODEL_InitiallyInfected)
+  if (event->contact_type != ADSM_InitiallyInfected)
     {
       RPT_reporting_add_integer  (local_data->num_units_infected, 1, NULL);
       RPT_reporting_add_integer1 (local_data->num_units_infected_by_prodtype, 1, infected_unit->production_type_name);
@@ -703,13 +703,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       RPT_reporting_add_integer1 (local_data->num_animals_infected_by_prodtype, 0, prodtype_name);
       RPT_reporting_add_integer1 (local_data->cumul_num_animals_infected_by_prodtype, 0, prodtype_name);
     }
-  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+  for (i = 0; i < ADSM_NCONTACT_TYPES; i++)
     {
       const char *cause;
       const char *drill_down_list[3] = { NULL, NULL, NULL };
-      if ((SPREADMODEL_contact_type)i == SPREADMODEL_UnspecifiedInfectionType)
+      if ((ADSM_contact_type)i == ADSM_UnspecifiedInfectionType)
         continue;
-      cause = SPREADMODEL_contact_type_abbrev[i]; 
+      cause = ADSM_contact_type_abbrev[i]; 
       RPT_reporting_add_integer1 (local_data->num_units_infected_by_cause, 0, cause);
       RPT_reporting_add_integer1 (local_data->cumul_num_units_infected_by_cause, 0, cause);
       RPT_reporting_add_integer1 (local_data->num_animals_infected_by_cause, 0, cause);

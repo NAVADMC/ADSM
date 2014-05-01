@@ -2061,7 +2061,7 @@ UNT_step (UNT_unit_t * unit, GHashTable *infectious_units)
     {
       UNT_update_t update;
       update.unit_index = unit->index;
-      update.state = (SPREADMODEL_disease_state) unit->state;
+      update.state = (ADSM_disease_state) unit->state;
 #ifdef USE_SC_GUILIB
       sc_change_unit_state ( unit, update );
 #else

@@ -564,7 +564,7 @@ destroy_by_priority (struct adsm_module_t_ *self, int day,
 
       npriorities = local_data->pending_destructions->len;
       if (local_data->destruction_prod_type_priority == 1)
-        step = SPREADMODEL_NCONTROL_REASONS;
+        step = ADSM_NCONTROL_REASONS;
       else
         step = local_data->nprod_types;
       start = 0;
@@ -1218,7 +1218,7 @@ handle_request_for_destruction_event (struct adsm_module_t_ *self,
           int old_request_block, event_block;
 
           if (local_data->destruction_prod_type_priority == 1)
-            step = SPREADMODEL_NCONTROL_REASONS;
+            step = ADSM_NCONTROL_REASONS;
           else
             step = local_data->nprod_types;
 

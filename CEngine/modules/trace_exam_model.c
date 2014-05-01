@@ -85,7 +85,7 @@ param_block_t;
 typedef struct
 {
   GPtrArray *production_types; /**< Each item in the list is a char *. */
-  param_block_t **param_block[SPREADMODEL_NCONTACT_TYPES][SPREADMODEL_NTRACE_DIRECTIONS]; /**< Blocks
+  param_block_t **param_block[ADSM_NCONTACT_TYPES][ADSM_NTRACE_DIRECTIONS]; /**< Blocks
     of parameters.  Use an expression of the form
     param_block[contact_type][direction][production_type]
     to get a pointer to a particular parameter block. */
@@ -157,7 +157,7 @@ handle_trace_result_event (struct adsm_module_t_ *self,
   UNT_unit_t *unit;
   param_block_t *param_block;
   detection_exam_day_t *details;
-  SPREADMODEL_control_reason reason;
+  ADSM_control_reason reason;
 
 #if DEBUG
   g_debug ("----- ENTER handle_trace_result_event (%s)", MODEL_NAME);
@@ -168,7 +168,7 @@ handle_trace_result_event (struct adsm_module_t_ *self,
   if (event->traced == FALSE)
     goto end;
 
-  if (event->direction == SPREADMODEL_TraceForwardOrOut)
+  if (event->direction == ADSM_TraceForwardOrOut)
     unit = event->exposed_unit;
   else
     unit = event->exposing_unit;
@@ -192,19 +192,19 @@ handle_trace_result_event (struct adsm_module_t_ *self,
      )
     goto end;
 
-  if (event->contact_type == SPREADMODEL_DirectContact)
+  if (event->contact_type == ADSM_DirectContact)
     {
-      if (event->direction == SPREADMODEL_TraceForwardOrOut)
-        reason = SPREADMODEL_ControlTraceForwardDirect;
+      if (event->direction == ADSM_TraceForwardOrOut)
+        reason = ADSM_ControlTraceForwardDirect;
       else
-        reason = SPREADMODEL_ControlTraceBackDirect;
+        reason = ADSM_ControlTraceBackDirect;
     }
   else
     {
-      if (event->direction == SPREADMODEL_TraceForwardOrOut)
-        reason = SPREADMODEL_ControlTraceForwardIndirect;
+      if (event->direction == ADSM_TraceForwardOrOut)
+        reason = ADSM_ControlTraceForwardIndirect;
       else
-        reason = SPREADMODEL_ControlTraceBackIndirect;
+        reason = ADSM_ControlTraceBackIndirect;
     }
 
   EVT_event_enqueue (queue, EVT_new_exam_event (unit, event->day, reason,
@@ -317,9 +317,9 @@ to_string (struct adsm_module_t_ *self)
   g_string_sprintf (s, "<%s do exams for", MODEL_NAME);
   for (i = 0; i < local_data->production_types->len; i++)
     {
-      for (j = 0; j < SPREADMODEL_NTRACE_DIRECTIONS; j++)
+      for (j = 0; j < ADSM_NTRACE_DIRECTIONS; j++)
         {
-          for (k = 0; k < SPREADMODEL_NCONTACT_TYPES; k++)
+          for (k = 0; k < ADSM_NCONTACT_TYPES; k++)
             {
               param_block_t *param_block;
               param_block = local_data->param_block[k][j][i];
@@ -327,8 +327,8 @@ to_string (struct adsm_module_t_ *self)
                 {
                   g_string_append_printf (s, "\n  %s found by %s of %s",
                                         (char *) g_ptr_array_index (local_data->production_types, i),
-                                        SPREADMODEL_trace_direction_name[j],
-                                        SPREADMODEL_contact_type_name[k]);
+                                        ADSM_trace_direction_name[j],
+                                        ADSM_contact_type_name[k]);
                 }
             }
         }
@@ -362,9 +362,9 @@ local_free (struct adsm_module_t_ *self)
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
   nprod_types = local_data->production_types->len;
-  for (contact_type = 0; contact_type < SPREADMODEL_NCONTACT_TYPES; contact_type++)
+  for (contact_type = 0; contact_type < ADSM_NCONTACT_TYPES; contact_type++)
     {
-      for (direction = 0; direction < SPREADMODEL_NTRACE_DIRECTIONS; direction++)
+      for (direction = 0; direction < ADSM_NTRACE_DIRECTIONS; direction++)
         {
           for (i = 0; i < nprod_types; i++)
             {
@@ -456,16 +456,16 @@ set_params (void *data, int ncols, char **value, char **colname)
   production_type = adsm_read_prodtype (value[0], local_data->production_types);
 
   /* Read the parameters. */
-  local_data->param_block[SPREADMODEL_DirectContact][SPREADMODEL_TraceForwardOrOut][production_type]
+  local_data->param_block[ADSM_DirectContact][ADSM_TraceForwardOrOut][production_type]
     = make_param_block (value[1], value[2], value[3]);
 
-  local_data->param_block[SPREADMODEL_DirectContact][SPREADMODEL_TraceBackOrIn][production_type]
+  local_data->param_block[ADSM_DirectContact][ADSM_TraceBackOrIn][production_type]
     = make_param_block (value[4], value[5], value[6]);
 
-  local_data->param_block[SPREADMODEL_IndirectContact][SPREADMODEL_TraceForwardOrOut][production_type]
+  local_data->param_block[ADSM_IndirectContact][ADSM_TraceForwardOrOut][production_type]
     = make_param_block (value[7], value[8], value[9]);
 
-  local_data->param_block[SPREADMODEL_IndirectContact][SPREADMODEL_TraceBackOrIn][production_type]
+  local_data->param_block[ADSM_IndirectContact][ADSM_TraceBackOrIn][production_type]
     = make_param_block (value[10], value[11], value[12]);
   
   #if DEBUG
@@ -517,9 +517,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Initialize the 3D array of parameter blocks. */
   local_data->production_types = units->production_type_names;
   nprod_types = local_data->production_types->len;
-  for (contact_type = 0; contact_type < SPREADMODEL_NCONTACT_TYPES; contact_type++)
+  for (contact_type = 0; contact_type < ADSM_NCONTACT_TYPES; contact_type++)
     {
-      for (direction = 0; direction < SPREADMODEL_NTRACE_DIRECTIONS; direction++)
+      for (direction = 0; direction < ADSM_NTRACE_DIRECTIONS; direction++)
         {
           local_data->param_block[contact_type][direction] = g_new0 (param_block_t *, nprod_types);
         }    

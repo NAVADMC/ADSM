@@ -347,24 +347,24 @@ read_prodtype_order_callback (void *data, int ncols, char **value, char **colnam
 static int
 read_reason_order_callback (void *data, int ncols, char **value, char **colname)
 {
-  SPREADMODEL_control_reason *reason_order;
+  ADSM_control_reason *reason_order;
   guint priority;
   gchar **tokens, **iter;
 
   g_assert (ncols == 1);
-  reason_order = (SPREADMODEL_control_reason *)data;
+  reason_order = (ADSM_control_reason *)data;
   /* The reason order is given in a comma-separated string in value[0]. */
   tokens = g_strsplit (value[0], ",", 0);
   for (iter = tokens, priority = 0; *iter != NULL; iter++)
     {
-      SPREADMODEL_control_reason reason;
+      ADSM_control_reason reason;
       g_strstrip (*iter);
-      for (reason = 0; reason < SPREADMODEL_NCONTROL_REASONS; reason++)
+      for (reason = 0; reason < ADSM_NCONTROL_REASONS; reason++)
         {
-          if (strcmp (*iter, SPREADMODEL_control_reason_name[reason]) == 0)
+          if (strcmp (*iter, ADSM_control_reason_name[reason]) == 0)
             break;
         }
-      g_assert (reason < SPREADMODEL_NCONTROL_REASONS);
+      g_assert (reason < ADSM_NCONTROL_REASONS);
       reason_order[priority++] = reason;
     }
   g_strfreev (tokens);
@@ -430,7 +430,7 @@ build_priority_debug_string (gpointer key,
  * Reads the destruction priority order from the parameters database. Returns
  * a GHashTable in which keys are strings (char *) of the form
  * "production type,reason". Reason is one of the strings from
- * SPREADMODEL_control_reason_name. Values are ints stored using
+ * ADSM_control_reason_name. Values are ints stored using
  * GUINT_TO_POINTER.
  *
  * The hash table has a key_destroy_func and value_destroy_func set, so a call
@@ -441,8 +441,8 @@ adsm_read_priority_order (sqlite3 *params)
 {
   GHashTable *table;
   gboolean reason_has_priority_over_prodtype;
-  SPREADMODEL_control_reason *reason_order; /**< An array containing the
-    elements in the enumeration SPREADMODEL_control_reason, in order of
+  ADSM_control_reason *reason_order; /**< An array containing the
+    elements in the enumeration ADSM_control_reason, in order of
     descending priority (that is, the highest priority reason is at the start
     of the list). */
   GPtrArray *prodtype_order; /**< A GPtrArray containing production type names
@@ -468,7 +468,7 @@ adsm_read_priority_order (sqlite3 *params)
   #endif
 
   /* Next get the relative ordering of reasons. */
-  reason_order = g_new0 (SPREADMODEL_control_reason, SPREADMODEL_NCONTROL_REASONS);
+  reason_order = g_new0 (ADSM_control_reason, ADSM_NCONTROL_REASONS);
   sqlite3_exec (params,
                 "SELECT destruction_reason_order FROM ScenarioCreator_controlmasterplan",
                 read_reason_order_callback, reason_order, &sqlerr);
@@ -481,11 +481,11 @@ adsm_read_priority_order (sqlite3 *params)
     GString *s;
     int i;
     s = g_string_new (NULL);
-    for (i = 0; i < SPREADMODEL_NCONTROL_REASONS; i++)
+    for (i = 0; i < ADSM_NCONTROL_REASONS; i++)
       {
         if (i > 0)
           g_string_append_c (s, ',');
-        g_string_append_printf (s, "%s", SPREADMODEL_control_reason_name[reason_order[i]]);
+        g_string_append_printf (s, "%s", ADSM_control_reason_name[reason_order[i]]);
       }
     g_debug ("reason order (highest priority first): %s", s->str);
     g_string_free (s, TRUE);
@@ -522,10 +522,10 @@ adsm_read_priority_order (sqlite3 *params)
   priority = 1;
   if (reason_has_priority_over_prodtype)
     {
-      for (i = 0; i < SPREADMODEL_NCONTROL_REASONS; i++)
+      for (i = 0; i < ADSM_NCONTROL_REASONS; i++)
         {
           const char *reason;
-          reason = SPREADMODEL_control_reason_name[reason_order[i]];
+          reason = ADSM_control_reason_name[reason_order[i]];
           for (j = 0; j < prodtype_order->len; j++)
             {
               char *prodtype;
@@ -542,11 +542,11 @@ adsm_read_priority_order (sqlite3 *params)
         {
           char *prodtype;
           prodtype = (char *)g_ptr_array_index(prodtype_order, i);
-          for (j = 0; j < SPREADMODEL_NCONTROL_REASONS; j++)
+          for (j = 0; j < ADSM_NCONTROL_REASONS; j++)
             {
               const char *reason;
               char *key;
-              reason = SPREADMODEL_control_reason_name[reason_order[j]];
+              reason = ADSM_control_reason_name[reason_order[j]];
               key = g_strdup_printf ("%s,%s", prodtype, reason);
               g_hash_table_replace (table, key, GUINT_TO_POINTER(priority++));
             }

@@ -385,9 +385,9 @@ check_and_infect (int id, gpointer arg)
   day = callback_data->day;
   delay = (int) round (PDF_random (param_block->delay, rng));
   exposure = EVT_new_exposure_event (unit1, unit2, day,
-                                     SPREADMODEL_AirborneSpread,
+                                     ADSM_AirborneSpread,
                                      FALSE, exposure_is_adequate, delay);
-  exposure->u.exposure.contact_type = SPREADMODEL_AirborneSpread;
+  exposure->u.exposure.contact_type = ADSM_AirborneSpread;
                                       
   if (delay <= 0)
     {
@@ -414,7 +414,7 @@ check_and_infect (int id, gpointer arg)
   if( (TRUE == exposure_is_adequate) && (unit2->state == Susceptible) ) 
     {
       attempt_to_infect =
-        EVT_new_attempt_to_infect_event (unit1, unit2, day, SPREADMODEL_AirborneSpread);
+        EVT_new_attempt_to_infect_event (unit1, unit2, day, ADSM_AirborneSpread);
 
       if (delay <= 0)
         {

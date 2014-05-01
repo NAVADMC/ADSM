@@ -302,7 +302,7 @@ handle_test_event (struct adsm_module_t_ *self,
   int delay;
   int delay_index;
   GQueue *q;
-  SPREADMODEL_test_result test_result;
+  ADSM_test_result test_result;
   gpointer p;
   int detection_status;
 #if DEBUG
@@ -371,17 +371,17 @@ handle_test_event (struct adsm_module_t_ *self,
 #endif
 
   if( positive && correct )
-    test_result = SPREADMODEL_TestTruePositive;
+    test_result = ADSM_TestTruePositive;
   else if( positive && !( correct) )
-    test_result = SPREADMODEL_TestFalsePositive;
+    test_result = ADSM_TestFalsePositive;
   else if( !(positive) && correct )
-    test_result = SPREADMODEL_TestTrueNegative;
+    test_result = ADSM_TestTrueNegative;
   else
-    test_result = SPREADMODEL_TestFalseNegative;
+    test_result = ADSM_TestFalseNegative;
 
   result = EVT_new_test_result_event (unit, event->day, positive, correct, event->reason);
   if (positive)
-    detection = EVT_new_detection_event (unit, event->day, SPREADMODEL_DetectionDiagnosticTest, test_result);
+    detection = EVT_new_detection_event (unit, event->day, ADSM_DetectionDiagnosticTest, test_result);
   else
     detection = NULL;
   delay = (int) round (PDF_random (param_block->delay, rng));

@@ -99,7 +99,7 @@ typedef struct
 {
   GPtrArray *production_types; /**< Each item in the list is a char *. */
   int trace_period;            /**< Number of days back we are interesting in tracing back. */
-  double *trace_success[SPREADMODEL_NCONTACT_TYPES]; /**< Probability of tracing a
+  double *trace_success[ADSM_NCONTACT_TYPES]; /**< Probability of tracing a
     contact.  Use an expression of the form
     trace_success[contact_type][source_production_type]
     to get a particular value.  A negative number means "we don't record these
@@ -162,7 +162,7 @@ handle_exposure_event (struct adsm_module_t_ *self, EVT_event_t * e)
   */  
   if (event->traceable && event->exposing_unit != NULL)
     {
-      if (SPREADMODEL_UnspecifiedInfectionType  == event->contact_type)
+      if (ADSM_UnspecifiedInfectionType  == event->contact_type)
         g_error( "Contact type is unspecified in contact-recorder-model.handle_exposure_event" );
       else
         {
@@ -205,7 +205,7 @@ handle_attempt_to_trace_event (struct adsm_module_t_ *self,
   local_data_t *local_data;
   UNT_unit_t *unit;
   int day;
-  SPREADMODEL_trace_direction direction;
+  ADSM_trace_direction direction;
   GList *iter;
   EVT_exposure_event_t *record;
   double p, r;
@@ -229,25 +229,25 @@ handle_attempt_to_trace_event (struct adsm_module_t_ *self,
 
   #if DEBUG
     g_debug ("attempting %s from unit \"%s\", %i days back",
-             SPREADMODEL_trace_direction_name[direction], unit->official_id,
+             ADSM_trace_direction_name[direction], unit->official_id,
              local_data->trace_period);
   #endif
 
   /* Do the trace.  Note that this process may issue multiple TraceResults for
    * the same pair of units if A has had contact with B several times in the
    * time period of interest. */
-  if (direction == SPREADMODEL_TraceBackOrIn)
+  if (direction == ADSM_TraceBackOrIn)
     iter = g_queue_peek_head_link (local_data->trace_in[unit->index]);
-  else if (direction == SPREADMODEL_TraceForwardOrOut)
+  else if (direction == ADSM_TraceForwardOrOut)
     iter = g_queue_peek_head_link (local_data->trace_out[unit->index]);
   else
     iter = NULL;
 
   #if DEBUG
-    if (direction == SPREADMODEL_TraceBackOrIn)
+    if (direction == ADSM_TraceBackOrIn)
       g_debug ("trace list contains %u records",
                g_queue_get_length (local_data->trace_in[unit->index]));
-    else if (direction == SPREADMODEL_TraceForwardOrOut)
+    else if (direction == ADSM_TraceForwardOrOut)
       g_debug ("trace list contains %u records",
                g_queue_get_length (local_data->trace_out[unit->index]));
   #endif
@@ -291,7 +291,7 @@ handle_attempt_to_trace_event (struct adsm_module_t_ *self,
                                                          direction, day, day, FALSE));
           #if DEBUG
             g_debug ("%s misses contact from unit \"%s\" -> unit \"%s\" on day %hu (%i days ago)",
-                     SPREADMODEL_trace_direction_name[direction],
+                     ADSM_trace_direction_name[direction],
                      record->exposing_unit->official_id,
                      record->exposed_unit->official_id, record->day, days_ago);
           #endif
@@ -315,7 +315,7 @@ handle_attempt_to_trace_event (struct adsm_module_t_ *self,
                                            direction, day, day, TRUE);
       #if DEBUG
         g_debug ("%s finds contact from unit \"%s\" -> unit \"%s\" on day %hu (%i days ago)",
-                 SPREADMODEL_trace_direction_name[direction],
+                 ADSM_trace_direction_name[direction],
                  record->exposing_unit->official_id,
                  record->exposed_unit->official_id, record->day, days_ago);
       #endif
@@ -518,7 +518,7 @@ to_string (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   GString *s;
-  SPREADMODEL_contact_type contact_type;
+  ADSM_contact_type contact_type;
   unsigned int nprod_types, i;
   double p;
   PDF_dist_t *delay;
@@ -535,12 +535,12 @@ to_string (struct adsm_module_t_ *self)
    * source production type. */
   g_string_sprintfa (s, "\n  trace-success=");
   nprod_types = local_data->production_types->len;
-  for (contact_type = SPREADMODEL_DirectContact; contact_type <= SPREADMODEL_IndirectContact; contact_type++)
+  for (contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++)
     for (i = 0; i < nprod_types; i++)
       {
         p = local_data->trace_success[contact_type][i];
         g_string_append_printf (s, "\n    %g for %s from %s", p,
-                                SPREADMODEL_contact_type_name[contact_type],
+                                ADSM_contact_type_name[contact_type],
                                 (char *) g_ptr_array_index (local_data->production_types, i));
       }
 
@@ -584,7 +584,7 @@ void
 local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
-  SPREADMODEL_contact_type contact_type;
+  ADSM_contact_type contact_type;
   unsigned int nprod_types, i;
   GQueue *q;
 
@@ -596,7 +596,7 @@ local_free (struct adsm_module_t_ *self)
   local_data = (local_data_t *) (self->model_data);
 
   nprod_types = local_data->production_types->len;
-  for (contact_type = SPREADMODEL_DirectContact; contact_type <= SPREADMODEL_IndirectContact; contact_type++)
+  for (contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++)
     {
       g_free (local_data->trace_success[contact_type]);
     }
@@ -685,7 +685,7 @@ set_params (void *data, int ncols, char **value, char **colname)
     {
       trace_success = 0;
     }
-  local_data->trace_success[SPREADMODEL_DirectContact][production_type] = trace_success;
+  local_data->trace_success[ADSM_DirectContact][production_type] = trace_success;
 
   if (value[2] != NULL)
     {
@@ -698,7 +698,7 @@ set_params (void *data, int ncols, char **value, char **colname)
     {
       trace_success = 0;
     }
-  local_data->trace_success[SPREADMODEL_IndirectContact][production_type] = trace_success;
+  local_data->trace_success[ADSM_IndirectContact][production_type] = trace_success;
 
   if (value[3] != NULL)
     {
@@ -732,7 +732,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   adsm_module_t *self;
   local_data_t *local_data;
   unsigned int nprod_types;
-  SPREADMODEL_contact_type contact_type;
+  ADSM_contact_type contact_type;
   unsigned int i;
   char *sqlerr;
 
@@ -763,7 +763,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * type. */
   local_data->production_types = units->production_type_names;
   nprod_types = units->production_type_names->len;
-  for (contact_type = SPREADMODEL_DirectContact; contact_type <= SPREADMODEL_IndirectContact; contact_type++)
+  for (contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++)
     {
       local_data->trace_success[contact_type] = g_new (double, nprod_types);
       for (i = 0; i < nprod_types; i++)

@@ -68,7 +68,7 @@ EVT_event_type_t events_listened_for[] = { EVT_TraceResult };
 /** Specialized information for this model. */
 typedef struct
 {
-  int *priority[SPREADMODEL_NCONTACT_TYPES][SPREADMODEL_NTRACE_DIRECTIONS]; /**< Priority
+  int *priority[ADSM_NCONTACT_TYPES][ADSM_NTRACE_DIRECTIONS]; /**< Priority
     for destroying a unit identified by trace.
     Use an expression of the form
     priority[contact_type][direction][production_type]
@@ -114,7 +114,7 @@ handle_trace_result_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
   if (event->traced == FALSE)
     goto end;
 
-  if (event->direction == SPREADMODEL_TraceForwardOrOut)
+  if (event->direction == ADSM_TraceForwardOrOut)
     unit = event->exposed_unit;
   else
     unit = event->exposing_unit;
@@ -127,16 +127,16 @@ handle_trace_result_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 
   /* Now that we know this is a trace result we are interested in, issue
    * destruction requests. */
-  if (event->direction == SPREADMODEL_TraceForwardOrOut)
+  if (event->direction == ADSM_TraceForwardOrOut)
     {
-      if (event->contact_type == SPREADMODEL_DirectContact)
+      if (event->contact_type == ADSM_DirectContact)
         destr_event = EVT_new_request_for_destruction_event (unit, event->day, "DirFwd", priority);
       else /* indirect */
         destr_event = EVT_new_request_for_destruction_event (unit, event->day, "IndFwd", priority);
     }
   else
     {
-      if (event->contact_type == SPREADMODEL_DirectContact)
+      if (event->contact_type == ADSM_DirectContact)
         destr_event = EVT_new_request_for_destruction_event (unit, event->day, "DirBack", priority);
       else /* indirect */
         destr_event = EVT_new_request_for_destruction_event (unit, event->day, "IndBack", priority);
@@ -224,25 +224,25 @@ to_string (struct adsm_module_t_ *self)
   local_data_t *local_data;
   GString *s;
   guint i;
-  SPREADMODEL_contact_type contact_type;
-  SPREADMODEL_trace_direction direction;
+  ADSM_contact_type contact_type;
+  ADSM_trace_direction direction;
 
   local_data = (local_data_t *) (self->model_data);
   s = g_string_new (NULL);
   g_string_sprintf (s, "<%s", MODEL_NAME);
   for (i = 0; i < local_data->production_types->len; i++)
     {
-      for (direction = 0; direction < SPREADMODEL_NTRACE_DIRECTIONS; direction++)
+      for (direction = 0; direction < ADSM_NTRACE_DIRECTIONS; direction++)
         {
-          for (contact_type = 0; contact_type < SPREADMODEL_NCONTACT_TYPES; contact_type++)
+          for (contact_type = 0; contact_type < ADSM_NCONTACT_TYPES; contact_type++)
             {
               int priority;
               priority = local_data->priority[contact_type][direction][i];
               if (priority > 0)
                 g_string_append_printf (s, "  for %s units found by %s %s",
                                         (char *) g_ptr_array_index (local_data->production_types, i),
-                                        SPREADMODEL_trace_direction_name[direction],
-                                        SPREADMODEL_contact_type_name[contact_type]);
+                                        ADSM_trace_direction_name[direction],
+                                        ADSM_contact_type_name[contact_type]);
             }
         }
     }
@@ -272,9 +272,9 @@ local_free (struct adsm_module_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+  for (i = 0; i < ADSM_NCONTACT_TYPES; i++)
     {
-      for (j = 0; j < SPREADMODEL_NTRACE_DIRECTIONS; j++)
+      for (j = 0; j < ADSM_NTRACE_DIRECTIONS; j++)
         {
           g_free (local_data->priority[i][j]);
         }
@@ -293,7 +293,7 @@ local_free (struct adsm_module_t_ *self)
 static int
 get_priority (GHashTable *priority_order_table,
               char *production_type_name,
-              SPREADMODEL_control_reason reason,
+              ADSM_control_reason reason,
               char *boolean_as_text)
 {
   int priority = 0;
@@ -309,7 +309,7 @@ get_priority (GHashTable *priority_order_table,
       char *key;
       gpointer ptr;
       key = g_strdup_printf ("%s,%s", production_type_name,
-                             SPREADMODEL_control_reason_name[reason]);
+                             ADSM_control_reason_name[reason]);
       ptr = g_hash_table_lookup (priority_order_table, key);
       g_assert (ptr != NULL);
       priority = GPOINTER_TO_UINT(ptr);
@@ -350,21 +350,21 @@ set_params (void *data, int ncols, char **value, char **colname)
   production_type_name = value[0];
   production_type_id = adsm_read_prodtype (production_type_name, local_data->production_types);
 
-  local_data->priority[SPREADMODEL_DirectContact][SPREADMODEL_TraceBackOrIn][production_type_id]
+  local_data->priority[ADSM_DirectContact][ADSM_TraceBackOrIn][production_type_id]
     = get_priority (local_data->priority_order_table, production_type_name,
-                    SPREADMODEL_ControlTraceBackDirect, value[1]);
+                    ADSM_ControlTraceBackDirect, value[1]);
 
-  local_data->priority[SPREADMODEL_DirectContact][SPREADMODEL_TraceForwardOrOut][production_type_id]
+  local_data->priority[ADSM_DirectContact][ADSM_TraceForwardOrOut][production_type_id]
     = get_priority (local_data->priority_order_table, production_type_name,
-                    SPREADMODEL_ControlTraceForwardDirect, value[2]);
+                    ADSM_ControlTraceForwardDirect, value[2]);
 
-  local_data->priority[SPREADMODEL_IndirectContact][SPREADMODEL_TraceBackOrIn][production_type_id]
+  local_data->priority[ADSM_IndirectContact][ADSM_TraceBackOrIn][production_type_id]
     = get_priority (local_data->priority_order_table, production_type_name,
-                    SPREADMODEL_ControlTraceBackIndirect, value[3]);
+                    ADSM_ControlTraceBackIndirect, value[3]);
 
-  local_data->priority[SPREADMODEL_IndirectContact][SPREADMODEL_TraceForwardOrOut][production_type_id]
+  local_data->priority[ADSM_IndirectContact][ADSM_TraceForwardOrOut][production_type_id]
     = get_priority (local_data->priority_order_table, production_type_name,
-                    SPREADMODEL_ControlTraceForwardIndirect, value[4]);
+                    ADSM_ControlTraceForwardIndirect, value[4]);
 
   return 0;
 }
@@ -408,9 +408,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Initialize an array to hold priorities. */
   local_data->production_types = units->production_type_names;
   nprod_types = local_data->production_types->len;
-  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+  for (i = 0; i < ADSM_NCONTACT_TYPES; i++)
     {
-      for (j = 0; j < SPREADMODEL_NTRACE_DIRECTIONS; j++)
+      for (j = 0; j < ADSM_NTRACE_DIRECTIONS; j++)
         {
           local_data->priority[i][j] = g_new0 (int, nprod_types);
         }

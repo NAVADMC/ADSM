@@ -224,7 +224,7 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
 
-  means = SPREADMODEL_detection_reason_abbrev[event->means];
+  means = ADSM_detection_reason_abbrev[event->means];
 
   detection.unit_index = unit->index;
   detection.reason = event->means;
@@ -685,13 +685,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       RPT_reporting_set_integer1 (local_data->cumul_nunits_detected_by_prodtype, 0, prodtype_name);
       RPT_reporting_set_integer1 (local_data->cumul_nanimals_detected_by_prodtype, 0, prodtype_name);
     }
-  for (i = 0; i < SPREADMODEL_NDETECTION_REASONS; i++)
+  for (i = 0; i < ADSM_NDETECTION_REASONS; i++)
     {
       const char *means;
       const char *drill_down_list[3] = { NULL, NULL, NULL };
-      if ((SPREADMODEL_detection_reason)i == SPREADMODEL_DetectionReasonUnspecified)
+      if ((ADSM_detection_reason)i == ADSM_DetectionReasonUnspecified)
         continue;
-      means = SPREADMODEL_detection_reason_abbrev[i];
+      means = ADSM_detection_reason_abbrev[i];
       /* Two function calls for the first_detection and last_detection
        * variables: one to establish the type of the sub-variables (they are
        * integers), and one to clear them to "null" (they have no meaningful

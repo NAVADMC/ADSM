@@ -222,7 +222,7 @@ typedef struct
 #ifdef USE_SC_GUILIB  
   /*  This field is used on the SC version if the user wants to 
       write out the iteration summaries, as would be found in the Windows
-      software.  This hooks into some of the "spreadmodel_*" functions in order to set this
+      software.  This hooks into some of the "adsm_*" functions in order to set this
       data.  This allows for easy import of SC data into the PC database.
   */
   GPtrArray *production_types;  /**< Each item is a UNT_production_type_data_t structure */
@@ -247,7 +247,7 @@ typedef struct
 #ifdef USE_SC_GUILIB  
   /*  This field is used on the SC version if the user wants to 
       write out the iteration summaries, as would be found in the Windows
-      software.  This hooks into some of the "spreadmodel_*" functions in order to set this
+      software.  This hooks into some of the "adsm_*" functions in order to set this
       data.  This allows for easy import of SC data into the PC database.
   */
   GPtrArray *production_types;  /**< Each item is a UNT_production_type_data_t structure */

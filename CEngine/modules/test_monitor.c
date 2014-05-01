@@ -131,7 +131,7 @@ handle_test_event (struct adsm_module_t_ *self, EVT_test_event_t * event)
 
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
-  reason = SPREADMODEL_control_reason_abbrev[event->reason];
+  reason = ADSM_control_reason_abbrev[event->reason];
 
   RPT_reporting_add_integer (local_data->cumul_nunits_tested, 1, NULL);
   RPT_reporting_add_integer1 (local_data->cumul_nunits_tested_by_reason, 1, reason);
@@ -175,40 +175,40 @@ handle_test_result_event (struct adsm_module_t_ * self,
   /* -------------------------- */
   test.unit_index = event->unit->index;
 
-  if( event->reason == SPREADMODEL_ControlTraceForwardDirect )
+  if( event->reason == ADSM_ControlTraceForwardDirect )
     {
-      test.contact_type = SPREADMODEL_DirectContact;
-      test.trace_type = SPREADMODEL_TraceForwardOrOut;  
+      test.contact_type = ADSM_DirectContact;
+      test.trace_type = ADSM_TraceForwardOrOut;  
     }
-  else if( event->reason == SPREADMODEL_ControlTraceBackDirect )
+  else if( event->reason == ADSM_ControlTraceBackDirect )
     {
-      test.contact_type = SPREADMODEL_DirectContact;
-      test.trace_type = SPREADMODEL_TraceBackOrIn;    
+      test.contact_type = ADSM_DirectContact;
+      test.trace_type = ADSM_TraceBackOrIn;    
     }
-  else if( event->reason == SPREADMODEL_ControlTraceForwardIndirect )
+  else if( event->reason == ADSM_ControlTraceForwardIndirect )
     {
-      test.contact_type = SPREADMODEL_IndirectContact;
-      test.trace_type = SPREADMODEL_TraceForwardOrOut;    
+      test.contact_type = ADSM_IndirectContact;
+      test.trace_type = ADSM_TraceForwardOrOut;    
     }
-  else if( event->reason == SPREADMODEL_ControlTraceBackIndirect )
+  else if( event->reason == ADSM_ControlTraceBackIndirect )
     {
-      test.contact_type = SPREADMODEL_IndirectContact;
-      test.trace_type = SPREADMODEL_TraceBackOrIn;    
+      test.contact_type = ADSM_IndirectContact;
+      test.trace_type = ADSM_TraceBackOrIn;    
     }
   else
     {
       g_error( "Unrecognized event reason (%s) in test-monitor.handle_test_result_event",
-               SPREADMODEL_control_reason_name[event->reason] );  
+               ADSM_control_reason_name[event->reason] );  
     } 
 
   if( event->positive && event->correct )
-    test.test_result = SPREADMODEL_TestTruePositive;
+    test.test_result = ADSM_TestTruePositive;
   else if( event->positive && !(event->correct) )
-    test.test_result = SPREADMODEL_TestFalsePositive;
+    test.test_result = ADSM_TestFalsePositive;
   else if( !(event->positive) && event->correct )
-    test.test_result = SPREADMODEL_TestTrueNegative;
+    test.test_result = ADSM_TestTrueNegative;
   else if( !(event->positive) && !(event->correct) )
-    test.test_result = SPREADMODEL_TestFalseNegative;
+    test.test_result = ADSM_TestFalseNegative;
     
   #ifdef USE_SC_GUILIB
     sc_test_unit( event->unit, test );
@@ -478,16 +478,16 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       RPT_reporting_set_integer1 (local_data->cumul_nunits_falseneg_by_prodtype, 0, prodtype_name);
       RPT_reporting_set_integer1 (local_data->cumul_nanimals_tested_by_prodtype, 0, prodtype_name);
     }
-  for (i = 0; i < SPREADMODEL_NCONTROL_REASONS; i++)
+  for (i = 0; i < ADSM_NCONTROL_REASONS; i++)
     {
       const char *reason;
       const char *drill_down_list[3] = { NULL, NULL, NULL };
-      if ((SPREADMODEL_control_reason)i == SPREADMODEL_ControlReasonUnspecified
-          || (SPREADMODEL_control_reason)i == SPREADMODEL_ControlRing
-          || (SPREADMODEL_control_reason)i == SPREADMODEL_ControlDetection
-          || (SPREADMODEL_control_reason)i == SPREADMODEL_ControlInitialState)
+      if ((ADSM_control_reason)i == ADSM_ControlReasonUnspecified
+          || (ADSM_control_reason)i == ADSM_ControlRing
+          || (ADSM_control_reason)i == ADSM_ControlDetection
+          || (ADSM_control_reason)i == ADSM_ControlInitialState)
         continue;
-      reason = SPREADMODEL_control_reason_abbrev[i];
+      reason = ADSM_control_reason_abbrev[i];
       RPT_reporting_add_integer1 (local_data->cumul_nunits_tested_by_reason, 0, reason);
       RPT_reporting_add_integer1 (local_data->cumul_nanimals_tested_by_reason, 0, reason);
       drill_down_list[0] = reason;

@@ -235,7 +235,7 @@ handle_detection_event (struct adsm_module_t_ *self,
                    "%i,%i,Detection,%s,%s,%s,%u,%g,%g,%s\n",
                    local_data->run_number,
                    event->day,
-                   SPREADMODEL_detection_reason_abbrev[event->means],
+                   ADSM_detection_reason_abbrev[event->means],
                    event->unit->official_id,
                    event->unit->production_type_name,
                    event->unit->size,
@@ -285,7 +285,7 @@ handle_exam_event (struct adsm_module_t_ *self,
                    "%i,%i,Exam,%s,%s,%s,%u,%g,%g,%s\n",
                    local_data->run_number,
                    event->day,
-                   SPREADMODEL_control_reason_abbrev[event->reason],
+                   ADSM_control_reason_abbrev[event->reason],
                    event->unit->official_id,
                    event->unit->production_type_name,
                    event->unit->size,
@@ -335,8 +335,8 @@ handle_attempt_to_trace_event (struct adsm_module_t_ *self,
                    "%i,%i,TraceInitiated,%s%s,%s,%s,%u,%g,%g,%s\n",
                    local_data->run_number,
                    event->day,
-                   SPREADMODEL_contact_type_abbrev[event->contact_type],
-                   SPREADMODEL_trace_direction_abbrev[event->direction],
+                   ADSM_contact_type_abbrev[event->contact_type],
+                   ADSM_trace_direction_abbrev[event->direction],
                    event->unit->official_id,
                    event->unit->production_type_name,
                    event->unit->size,
@@ -382,13 +382,13 @@ handle_trace_result_event (struct adsm_module_t_ *self,
   /* If this is a trace forward/out, then the "identified unit" is the
    * recipient of the exposure. If this is a trace back/in, then the
    * "identified unit" is the source of the exposure.  */
-  if (event->direction == SPREADMODEL_TraceForwardOrOut)
+  if (event->direction == ADSM_TraceForwardOrOut)
     {
       originating_unit = event->exposing_unit;
       identified_unit = event->exposed_unit;
       preposition = "From";
     }
-  else if (event->direction == SPREADMODEL_TraceBackOrIn)
+  else if (event->direction == ADSM_TraceBackOrIn)
     {
       originating_unit = event->exposed_unit;
       identified_unit = event->exposing_unit;
@@ -406,7 +406,7 @@ handle_trace_result_event (struct adsm_module_t_ *self,
                    "%i,%i,TraceFound,%s%s%s,%s,%s,%u,%g,%g,%s\n",
                    local_data->run_number,
                    event->day,
-                   SPREADMODEL_contact_type_abbrev[event->contact_type],
+                   ADSM_contact_type_abbrev[event->contact_type],
                    preposition,
                    originating_unit->official_id,
                    identified_unit->official_id,

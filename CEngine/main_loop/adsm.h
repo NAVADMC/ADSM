@@ -49,88 +49,88 @@
 /* ------------------------------------------------------------------ */
 /* Used to indicate success of failure of exposures, traces, and detection by exams */
 typedef enum {
-  SPREADMODEL_SuccessUnspecified,
-  SPREADMODEL_SuccessTrue,
-  SPREADMODEL_SuccessFalse
-} SPREADMODEL_success;
+  ADSM_SuccessUnspecified,
+  ADSM_SuccessTrue,
+  ADSM_SuccessFalse
+} ADSM_success;
 
 /* Used to indicate trace direction  */
 typedef enum {
-  SPREADMODEL_TraceNeither,
-  SPREADMODEL_TraceForwardOrOut,
-  SPREADMODEL_TraceBackOrIn,
-  SPREADMODEL_NTRACE_DIRECTIONS
-} SPREADMODEL_trace_direction;
-extern const char *SPREADMODEL_trace_direction_name[];
-extern const char *SPREADMODEL_trace_direction_abbrev[];
+  ADSM_TraceNeither,
+  ADSM_TraceForwardOrOut,
+  ADSM_TraceBackOrIn,
+  ADSM_NTRACE_DIRECTIONS
+} ADSM_trace_direction;
+extern const char *ADSM_trace_direction_name[];
+extern const char *ADSM_trace_direction_abbrev[];
 
 /* Used to indicate type of exposure, contact, or infection  */
 typedef enum {
-  SPREADMODEL_UnspecifiedInfectionType,
-  SPREADMODEL_DirectContact,
-  SPREADMODEL_IndirectContact,
-  SPREADMODEL_AirborneSpread,
-  SPREADMODEL_InitiallyInfected
-} SPREADMODEL_contact_type;
-#define SPREADMODEL_NCONTACT_TYPES 5
-extern const char *SPREADMODEL_contact_type_name[];
-extern const char *SPREADMODEL_contact_type_abbrev[];
+  ADSM_UnspecifiedInfectionType,
+  ADSM_DirectContact,
+  ADSM_IndirectContact,
+  ADSM_AirborneSpread,
+  ADSM_InitiallyInfected
+} ADSM_contact_type;
+#define ADSM_NCONTACT_TYPES 5
+extern const char *ADSM_contact_type_name[];
+extern const char *ADSM_contact_type_abbrev[];
 
 /* Used to indicate diagnostic test results  */
 typedef enum {
-  SPREADMODEL_TestUnspecified,
-  SPREADMODEL_TestTruePositive,
-  SPREADMODEL_TestTrueNegative,
-  SPREADMODEL_TestFalsePositive,
-  SPREADMODEL_TestFalseNegative
-} SPREADMODEL_test_result;
+  ADSM_TestUnspecified,
+  ADSM_TestTruePositive,
+  ADSM_TestTrueNegative,
+  ADSM_TestFalsePositive,
+  ADSM_TestFalseNegative
+} ADSM_test_result;
 
 /* Used to indicate reasons for detection  */
 typedef enum {
-  SPREADMODEL_DetectionReasonUnspecified,
-  SPREADMODEL_DetectionClinicalSigns,
-  SPREADMODEL_DetectionDiagnosticTest,
-  SPREADMODEL_NDETECTION_REASONS
-} SPREADMODEL_detection_reason;
-extern const char *SPREADMODEL_detection_reason_abbrev[];
+  ADSM_DetectionReasonUnspecified,
+  ADSM_DetectionClinicalSigns,
+  ADSM_DetectionDiagnosticTest,
+  ADSM_NDETECTION_REASONS
+} ADSM_detection_reason;
+extern const char *ADSM_detection_reason_abbrev[];
 
 
 /* Used to indicate reasons for control activities  */
 typedef enum {
-  SPREADMODEL_ControlReasonUnspecified,
-  SPREADMODEL_ControlRing,
-  SPREADMODEL_ControlTraceForwardDirect,
-  SPREADMODEL_ControlTraceForwardIndirect,
-  SPREADMODEL_ControlTraceBackDirect,
-  SPREADMODEL_ControlTraceBackIndirect,
-  SPREADMODEL_ControlDetection,
-  SPREADMODEL_ControlInitialState,
-  SPREADMODEL_NCONTROL_REASONS
-} SPREADMODEL_control_reason;
-extern const char *SPREADMODEL_control_reason_name[];
-extern const char *SPREADMODEL_control_reason_abbrev[];
+  ADSM_ControlReasonUnspecified,
+  ADSM_ControlRing,
+  ADSM_ControlTraceForwardDirect,
+  ADSM_ControlTraceForwardIndirect,
+  ADSM_ControlTraceBackDirect,
+  ADSM_ControlTraceBackIndirect,
+  ADSM_ControlDetection,
+  ADSM_ControlInitialState,
+  ADSM_NCONTROL_REASONS
+} ADSM_control_reason;
+extern const char *ADSM_control_reason_name[];
+extern const char *ADSM_control_reason_abbrev[];
 
 /* Used when a unit's actual disease state changes */
 /* FIXME: Consider combining with the appropriate enum type used internally */
 typedef enum {
-  SPREADMODEL_StateSusceptible,
-  SPREADMODEL_StateLatent,
-  SPREADMODEL_StateInfectiousSubclinical,
-  SPREADMODEL_StateInfectiousClinical,
-  SPREADMODEL_StateNaturallyImmune,
-  SPREADMODEL_StateVaccineImmune,
-  SPREADMODEL_StateDestroyed,
-  SPREADMODEL_StateUnspecified
-} SPREADMODEL_disease_state;
+  ADSM_StateSusceptible,
+  ADSM_StateLatent,
+  ADSM_StateInfectiousSubclinical,
+  ADSM_StateInfectiousClinical,
+  ADSM_StateNaturallyImmune,
+  ADSM_StateVaccineImmune,
+  ADSM_StateDestroyed,
+  ADSM_StateUnspecified
+} ADSM_disease_state;
 
 /* =================================================================================== */
 /* FIXME: Consider combining these structs with the similar structs defined in event.h */
 /* =================================================================================== */
-/** Struct used by callers of the SpreadModel library when a unit's actual disease state has changed */
+/** Struct used by callers of the ADSM library when a unit's actual disease state has changed */
 typedef struct
 {
   unsigned int unit_index;  /* Index into the unit list of the unit that's changed */
-  SPREADMODEL_disease_state state;
+  ADSM_disease_state state;
   #ifdef USE_SC_GUILIB
     char *msg;
     int success;
@@ -139,36 +139,36 @@ typedef struct
 UNT_update_t;
 
 
-/** Struct used by callers of the SpreadModel library when a unit is infected */
+/** Struct used by callers of the ADSM library when a unit is infected */
 typedef struct
 {
   unsigned int unit_index;
-  SPREADMODEL_contact_type infection_source_type;
+  ADSM_contact_type infection_source_type;
 }
 UNT_infect_t;
 
 
-/** Struct used by callers of the SpreadModel library when a detection occurs. */
+/** Struct used by callers of the ADSM library when a detection occurs. */
 typedef struct
 {
   unsigned int unit_index;
-  SPREADMODEL_detection_reason reason;
-  SPREADMODEL_test_result test_result;
+  ADSM_detection_reason reason;
+  ADSM_test_result test_result;
 }
 UNT_detect_t;
 
 
-/** Struct used by callers of the SpreadModel library when a unit is destroyed or vaccinated. */
+/** Struct used by callers of the ADSM library when a unit is destroyed or vaccinated. */
 typedef struct
 {
   unsigned int unit_index;
-  SPREADMODEL_control_reason reason;
+  ADSM_control_reason reason;
   int day_commitment_made;
 }
 UNT_control_t;
 
   
-/** Struct used by callers of the SpreadModel library when an exposure
+/** Struct used by callers of the ADSM library when an exposure
  * has occurred.  If an "attempt to infect" event is generated, 
  * the attempt is considered successful.
  *
@@ -178,51 +178,51 @@ UNT_control_t;
 typedef struct
 {
   unsigned int src_index;
-  SPREADMODEL_disease_state src_state;
+  ADSM_disease_state src_state;
   unsigned int dest_index;
-  SPREADMODEL_disease_state dest_state;
+  ADSM_disease_state dest_state;
   int initiated_day;
   int finalized_day;
-  SPREADMODEL_success is_adequate;
-  SPREADMODEL_contact_type exposure_method;
+  ADSM_success is_adequate;
+  ADSM_contact_type exposure_method;
 }
 UNT_expose_t;
 
 
-/** Struct used by callers of the SpreadModel library when a unit is traced. */
+/** Struct used by callers of the ADSM library when a unit is traced. */
 typedef struct
 {
   unsigned int identified_index;
-  SPREADMODEL_disease_state identified_state;
+  ADSM_disease_state identified_state;
   unsigned int origin_index;
-  SPREADMODEL_disease_state origin_state;
+  ADSM_disease_state origin_state;
   int day;
   int initiated_day;
-  SPREADMODEL_success success;
-  SPREADMODEL_trace_direction trace_type;
-  SPREADMODEL_contact_type contact_type;
+  ADSM_success success;
+  ADSM_trace_direction trace_type;
+  ADSM_contact_type contact_type;
 }
 UNT_trace_t;
 
 
-/** Struct used by callers of the SpreadModel library when a unit is examined after tracing. */
+/** Struct used by callers of the ADSM library when a unit is examined after tracing. */
 typedef struct
 {
   int unit_index;
-  SPREADMODEL_trace_direction trace_type;
-  SPREADMODEL_contact_type contact_type;
-  SPREADMODEL_success disease_detected;
+  ADSM_trace_direction trace_type;
+  ADSM_contact_type contact_type;
+  ADSM_success disease_detected;
 }
 UNT_exam_t;
 
 
-/** Struct used by callers of the SpreadModel library when a unit is diagnostically tested after tracing. */
+/** Struct used by callers of the ADSM library when a unit is diagnostically tested after tracing. */
 typedef struct
 {
   int unit_index;
-  SPREADMODEL_test_result test_result;
-  SPREADMODEL_trace_direction trace_type;
-  SPREADMODEL_contact_type contact_type;
+  ADSM_test_result test_result;
+  ADSM_trace_direction trace_type;
+  ADSM_contact_type contact_type;
 }
 UNT_test_t;          
        

@@ -167,30 +167,30 @@ handle_exam_event (struct adsm_module_t_ *self, EVT_exam_event_t *event)
   /* -------------------------- */
   exam.unit_index = event->unit->index;
   
-  if ( event->reason == SPREADMODEL_ControlTraceForwardDirect )
+  if ( event->reason == ADSM_ControlTraceForwardDirect )
     {
-      exam.trace_type = SPREADMODEL_TraceForwardOrOut;
-      exam.contact_type = SPREADMODEL_DirectContact;
+      exam.trace_type = ADSM_TraceForwardOrOut;
+      exam.contact_type = ADSM_DirectContact;
     }
-  else if( event->reason == SPREADMODEL_ControlTraceBackDirect )
+  else if( event->reason == ADSM_ControlTraceBackDirect )
     {
-      exam.trace_type = SPREADMODEL_TraceBackOrIn;
-      exam.contact_type = SPREADMODEL_DirectContact;
+      exam.trace_type = ADSM_TraceBackOrIn;
+      exam.contact_type = ADSM_DirectContact;
     }
-  else if( event->reason == SPREADMODEL_ControlTraceForwardIndirect ) 
+  else if( event->reason == ADSM_ControlTraceForwardIndirect ) 
     {
-      exam.trace_type = SPREADMODEL_TraceForwardOrOut;
-      exam.contact_type = SPREADMODEL_IndirectContact;      
+      exam.trace_type = ADSM_TraceForwardOrOut;
+      exam.contact_type = ADSM_IndirectContact;      
     }
-  else if( event->reason == SPREADMODEL_ControlTraceBackIndirect )
+  else if( event->reason == ADSM_ControlTraceBackIndirect )
     {
-      exam.trace_type = SPREADMODEL_TraceBackOrIn;
-      exam.contact_type = SPREADMODEL_IndirectContact;        
+      exam.trace_type = ADSM_TraceBackOrIn;
+      exam.contact_type = ADSM_IndirectContact;        
     }
   else
     {
       g_error( "Unrecognized event reason (%s) in exam-monitor.handle_exam_event",
-               SPREADMODEL_control_reason_name[event->reason] );
+               ADSM_control_reason_name[event->reason] );
     }
 
   #ifdef USE_SC_GUILIB
@@ -205,7 +205,7 @@ handle_exam_event (struct adsm_module_t_ *self, EVT_exam_event_t *event)
   /* --------------------------------- */
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
-  reason = SPREADMODEL_control_reason_abbrev[event->reason];
+  reason = ADSM_control_reason_abbrev[event->reason];
 
   RPT_reporting_add_integer (local_data->nunits_examined, 1, NULL);
   RPT_reporting_add_integer1 (local_data->nunits_examined_by_reason, 1, reason);
@@ -449,14 +449,14 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       RPT_reporting_set_integer1 (local_data->cumul_nunits_examined_by_prodtype, 0, prodtype_name);
       RPT_reporting_set_integer1 (local_data->cumul_nanimals_examined_by_prodtype, 0, prodtype_name);
     }
-  for (i = 0; i < SPREADMODEL_NCONTROL_REASONS; i++)
+  for (i = 0; i < ADSM_NCONTROL_REASONS; i++)
     {
       const char *reason;
       const char *drill_down_list[3] = { NULL, NULL, NULL };
-      if ((SPREADMODEL_control_reason)i == SPREADMODEL_ControlReasonUnspecified
-          || (SPREADMODEL_control_reason)i == SPREADMODEL_ControlInitialState)
+      if ((ADSM_control_reason)i == ADSM_ControlReasonUnspecified
+          || (ADSM_control_reason)i == ADSM_ControlInitialState)
         continue;
-      reason = SPREADMODEL_control_reason_abbrev[i]; 
+      reason = ADSM_control_reason_abbrev[i]; 
       RPT_reporting_add_integer1 (local_data->nunits_examined_by_reason, 0, reason);
       RPT_reporting_add_integer1 (local_data->nanimals_examined_by_reason, 0, reason);
       RPT_reporting_add_integer1 (local_data->cumul_nunits_examined_by_reason, 0, reason);

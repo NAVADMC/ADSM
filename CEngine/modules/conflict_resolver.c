@@ -182,7 +182,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ * self,
         case InfectiousSubclinical:
         case InfectiousClinical:
         case NaturallyImmune:
-          event = EVT_new_infection_event (NULL, unit, 0, SPREADMODEL_InitiallyInfected);
+          event = EVT_new_infection_event (NULL, unit, 0, ADSM_InitiallyInfected);
           event->u.infection.override_initial_state = unit->initial_state;
           event->u.infection.override_days_in_state = unit->days_in_initial_state;
           event->u.infection.override_days_left_in_state = unit->days_left_in_initial_state;

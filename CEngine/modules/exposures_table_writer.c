@@ -233,7 +233,7 @@ handle_exposure_event (struct adsm_module_t_ *self,
                          "%i,%i,Exposure,%s,,,,,,%s,%s,%g,%g,%s\n",
                          local_data->run_number,
                          event->day,
-                         SPREADMODEL_contact_type_abbrev[event->contact_type],
+                         ADSM_contact_type_abbrev[event->contact_type],
                          event->exposed_unit->official_id,
                          event->exposed_unit->production_type_name,
                          event->exposed_unit->latitude,
@@ -246,7 +246,7 @@ handle_exposure_event (struct adsm_module_t_ *self,
                            "%i,%i,Exposure,%s,%s,%s,%g,%g,%s,%s,%s,%g,%g,%s\n",
                            local_data->run_number,
                            event->day,
-                           SPREADMODEL_contact_type_abbrev[event->contact_type],
+                           ADSM_contact_type_abbrev[event->contact_type],
                            event->exposing_unit->official_id,
                            event->exposing_unit->production_type_name,
                            event->exposing_unit->latitude,
@@ -294,8 +294,8 @@ handle_infection_event (struct adsm_module_t_ *self,
 
   local_data = (local_data_t *) (self->model_data);
 
-  if (event->contact_type == SPREADMODEL_InitiallyInfected)
-    reason = SPREADMODEL_contact_type_abbrev[SPREADMODEL_InitiallyInfected];
+  if (event->contact_type == ADSM_InitiallyInfected)
+    reason = ADSM_contact_type_abbrev[ADSM_InitiallyInfected];
   else
     reason = "";
 

@@ -249,11 +249,11 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
             g_debug ("r (%g) < P (%g)", r, P);
             g_debug ("unit \"%s\" detected and reported", unit->official_id);
           #endif
-          /* There was no diagnostic test, so SPREADMODEL_TestUnspecified is a legitimate value here. */
+          /* There was no diagnostic test, so ADSM_TestUnspecified is a legitimate value here. */
           EVT_event_enqueue (queue,
                              EVT_new_detection_event (unit, event->day,
-                                                      SPREADMODEL_DetectionClinicalSigns,
-                                                      SPREADMODEL_TestUnspecified));
+                                                      ADSM_DetectionClinicalSigns,
+                                                      ADSM_TestUnspecified));
           local_data->detected[unit->index] = TRUE;
         }
       else
@@ -338,11 +338,11 @@ handle_exam_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
             g_debug ("r (%g) < P (%g)", r, P);
             g_debug ("unit \"%s\" detected and reported", unit->official_id);
           #endif
-          /* There was no diagnostic test, so SPREADMODEL_TestUnspecified is a legitimate value here. */
+          /* There was no diagnostic test, so ADSM_TestUnspecified is a legitimate value here. */
           EVT_event_enqueue (queue,
                              EVT_new_detection_event (unit, event->day,
-                                                      SPREADMODEL_DetectionClinicalSigns,
-                                                      SPREADMODEL_TestUnspecified));
+                                                      ADSM_DetectionClinicalSigns,
+                                                      ADSM_TestUnspecified));
           local_data->detected[unit->index] = TRUE;
         }
       else

@@ -261,9 +261,9 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
   update.day_commitment_made = event->day_commitment_made;
   
   if( 0 == strcmp( "Ring", event->reason ) ) 
-    update.reason = SPREADMODEL_ControlRing;
+    update.reason = ADSM_ControlRing;
   else if( 0 == strcmp( "Ini", event->reason ) ) 
-    update.reason = SPREADMODEL_ControlInitialState;
+    update.reason = ADSM_ControlInitialState;
   else
     {
       g_error( "Unrecognized reason for vaccination (%s) in handle_vaccination_event", event->reason );
