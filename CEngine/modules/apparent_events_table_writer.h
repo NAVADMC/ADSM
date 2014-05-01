@@ -16,9 +16,9 @@
 #ifndef APPARENT_EVENTS_TABLE_WRITER_H
 #define APPARENT_EVENTS_TABLE_WRITER_H
 
-spreadmodel_model_t *apparent_events_table_writer_new (sqlite3 *,
-                                                       UNT_unit_list_t *,
-                                                       projPJ,
-                                                       ZON_zone_list_t *);
+adsm_module_t *apparent_events_table_writer_new (sqlite3 *,
+                                                 UNT_unit_list_t *,
+                                                 projPJ,
+                                                 ZON_zone_list_t *);
 
 #endif

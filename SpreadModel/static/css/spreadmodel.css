@@ -26,21 +26,21 @@ header h1 {
 
 header h1 {
     float: left;
-    width: 10%;
+    width: 83px;
 }
 
 header form {
     float: left;
-    width: 50%;
+    width: 840px;
 }
 
-header .alert {
-    float: left;
-    margin-top: 5px;
-    width: 25%;
-    height: 40px;
-    display: none;
-}
+/*header .alert {*/
+    /*float: left;*/
+    /*margin-top: 5px;*/
+    /*width: 25%;*/
+    /*height: 40px;*/
+    /*display: none;*/
+/*}*/
 
 header #admin_link {
     position: absolute;
@@ -154,4 +154,8 @@ select {
 
 .controls ul {
 
+}
+
+.glyphicon {
+    color: dimgrey;
 }

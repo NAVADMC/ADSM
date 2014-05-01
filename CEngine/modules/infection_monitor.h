@@ -1,4 +1,4 @@
-/** @file infection-monitor.h
+/** @file infection_monitor.h
  *
  * @author Aaron Reeves <Aaron.Reeves@colostate.edu><br>
  *   Animal Population Health Institute<br>
@@ -20,7 +20,7 @@
 #ifndef INFECTION_MONITOR_H
 #define INFECTION_MONITOR_H
 
-spreadmodel_model_t *infection_monitor_new (sqlite3 *, UNT_unit_list_t *,
-                                            projPJ, ZON_zone_list_t *);
+adsm_module_t *infection_monitor_new (sqlite3 *, UNT_unit_list_t *,
+                                      projPJ, ZON_zone_list_t *);
 
 #endif

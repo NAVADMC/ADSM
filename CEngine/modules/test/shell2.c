@@ -1,7 +1,7 @@
 /** @file modules/test/shell2.c
  * A simple shell to look up stored output from test runs.  It enables the
  * suite of tests to be run on output generated at another time on another
- * platform, e.g., from SpreadModel on Windows.
+ * platform, e.g., from ADSM on Windows.
  *
  * Each line of input should be of the form
  *
@@ -59,7 +59,7 @@ main (int argc, char *argv[])
         break;
       if (g_ascii_strncasecmp (buf, "stochastic", 10) == 0)
         {
-          g_string_printf (cmd, "test/minispreadmodel -V 0 --model-dir=.. -h %s", &buf[11]);
+          g_string_printf (cmd, "test/miniadsm -V 0 --model-dir=.. -h %s", &buf[11]);
           system (cmd->str);
         }
       else if (g_ascii_strncasecmp (buf, "variables", 9) == 0)
@@ -76,7 +76,7 @@ main (int argc, char *argv[])
           buf[len - 1] = '\0';
 
           /* Run the simulator. */
-          g_string_printf (cmd, "test/minispreadmodel-fixed-rng -V 0 --model-dir=.. -h %s > %s",
+          g_string_printf (cmd, "test/miniadsm-fixed-rng -V 0 --model-dir=.. -h %s > %s",
                            &buf[10], tmp_filename);
           system (cmd->str);
 

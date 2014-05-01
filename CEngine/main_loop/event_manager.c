@@ -21,7 +21,7 @@
 
 #include "event_manager.h"
 
-#include "spreadmodel.h"
+#include "adsm.h"
 #include "general.h"
 
 
@@ -33,10 +33,10 @@
  * @param models an array of sub-models.
  */
 void
-build_listener_list (GSList ** list, spreadmodel_model_t ** models, int nmodels)
+build_listener_list (GSList ** list, adsm_module_t ** models, int nmodels)
 {
   GSList *model_list;
-  spreadmodel_model_t *model;
+  adsm_module_t *model;
   EVT_event_type_t event_type;
   int i;                        /* loop counter */
 #if DEBUG
@@ -84,7 +84,7 @@ build_listener_list (GSList ** list, spreadmodel_model_t ** models, int nmodels)
       else
         for (; model_list != NULL; model_list = g_slist_next (model_list))
           {
-            model = (spreadmodel_model_t *) (model_list->data);
+            model = (adsm_module_t *) (model_list->data);
             g_string_sprintfa (s, " %s", model->name);
           }
       g_debug ("%s", s->str);
@@ -104,18 +104,18 @@ build_listener_list (GSList ** list, spreadmodel_model_t ** models, int nmodels)
  *
  * @param models a list of sub-models.
  * @param nmodels the number of sub-models.
- * @return a pointer to a newly-created spreadmodel_event_manager_t structure.
+ * @return a pointer to a newly-created adsm_event_manager_t structure.
  */
-spreadmodel_event_manager_t *
-spreadmodel_new_event_manager (spreadmodel_model_t ** models, int nmodels)
+adsm_event_manager_t *
+adsm_new_event_manager (adsm_module_t ** models, int nmodels)
 {
-  spreadmodel_event_manager_t *manager;
+  adsm_event_manager_t *manager;
 
 #if DEBUG
-  g_debug ("----- ENTER spreadmodel_new_event_manager");
+  g_debug ("----- ENTER adsm_new_event_manager");
 #endif
 
-  manager = g_new (spreadmodel_event_manager_t, 1);
+  manager = g_new (adsm_event_manager_t, 1);
   manager->nmodels = nmodels;
   manager->models = models;
   manager->queue = EVT_new_event_queue ();
@@ -123,7 +123,7 @@ spreadmodel_new_event_manager (spreadmodel_model_t ** models, int nmodels)
   build_listener_list (manager->listeners, models, nmodels);
 
 #if DEBUG
-  g_debug ("----- EXIT spreadmodel_new_event_manager");
+  g_debug ("----- EXIT adsm_new_event_manager");
 #endif
 
   return manager;
@@ -135,12 +135,12 @@ spreadmodel_new_event_manager (spreadmodel_model_t ** models, int nmodels)
  * Deletes an event manager from memory.  Does not delete the sub-models.
  */
 void
-spreadmodel_free_event_manager (spreadmodel_event_manager_t * manager)
+adsm_free_event_manager (adsm_event_manager_t * manager)
 {
   EVT_event_type_t event_type;
 
 #if DEBUG
-  g_debug ("----- ENTER spreadmodel_free_event_manager");
+  g_debug ("----- ENTER adsm_free_event_manager");
 #endif
 
   if (manager == NULL)
@@ -152,7 +152,7 @@ spreadmodel_free_event_manager (spreadmodel_event_manager_t * manager)
   g_free (manager);
 
 #if DEBUG
-  g_debug ("----- EXIT spreadmodel_free_event_manager");
+  g_debug ("----- EXIT adsm_free_event_manager");
 #endif
 }
 
@@ -175,18 +175,18 @@ spreadmodel_free_event_manager (spreadmodel_event_manager_t * manager)
  * @todo Keep "request" events in the queue if no sub-model claims them.
  */
 void
-spreadmodel_create_event (spreadmodel_event_manager_t * manager, EVT_event_t * new_event,
+adsm_create_event (adsm_event_manager_t * manager, EVT_event_t * new_event,
                           UNT_unit_list_t * units, ZON_zone_list_t * zones, RAN_gen_t * rng)
 {
   EVT_event_t *event;
   GSList *iter;
-  spreadmodel_model_t *model;
+  adsm_module_t *model;
 #if DEBUG
   char *s;
 #endif
 
 #if DEBUG
-  g_debug ("----- ENTER spreadmodel_create_event");
+  g_debug ("----- ENTER adsm_create_event");
 #endif
 
   EVT_event_enqueue (manager->queue, new_event);
@@ -206,7 +206,7 @@ spreadmodel_create_event (spreadmodel_event_manager_t * manager, EVT_event_t * n
 #if DEBUG
       s = EVT_event_to_string (event);
       g_debug ("now handling %s", s);
-      /* spreadmodel_printf( s ); */
+      /* adsm_printf( s ); */
       g_free (s);
 #endif
 
@@ -216,15 +216,15 @@ spreadmodel_create_event (spreadmodel_event_manager_t * manager, EVT_event_t * n
       for (iter = manager->listeners[event->type]; iter != NULL; iter = g_slist_next (iter))
         {
           /* Does the GUI user want to stop a simulation in progress? */
-          if (NULL != spreadmodel_simulation_stop)
+          if (NULL != adsm_simulation_stop)
             {
               /* This check may break the day loop.
                * If necessary, another check (see above) will break the iteration loop.*/
-              if (0 != spreadmodel_simulation_stop ())
+              if (0 != adsm_simulation_stop ())
                 break;
             }
 
-          model = (spreadmodel_model_t *) (iter->data);
+          model = (adsm_module_t *) (iter->data);
 #if DEBUG
           g_debug ("running %s", model->name);
 #endif 
@@ -242,7 +242,7 @@ spreadmodel_create_event (spreadmodel_event_manager_t * manager, EVT_event_t * n
       EVT_free_event (event);
     }
 #if DEBUG
-  g_debug ("----- EXIT spreadmodel_create_event");
+  g_debug ("----- EXIT adsm_create_event");
 #endif
 }
 

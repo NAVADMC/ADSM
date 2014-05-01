@@ -39,14 +39,14 @@
  * position of the matching name in the list.
  */
 guint
-spreadmodel_read_prodtype (char *text, GPtrArray * production_type_names)
+adsm_read_prodtype (char *text, GPtrArray * production_type_names)
 {
   gchar *normalized;
   guint nprod_types;
   guint loc;
 
   #if DEBUG
-    g_debug ("----- ENTER spreadmodel_read_prodtype");
+    g_debug ("----- ENTER adsm_read_prodtype");
   #endif
 
   /* The text is assumed to be UTF-8. Normalize it to allow for comparison. */
@@ -65,7 +65,7 @@ spreadmodel_read_prodtype (char *text, GPtrArray * production_type_names)
     g_error ("text \"%s\" did not match any production type", text);
 
   #if DEBUG
-    g_debug ("----- EXIT spreadmodel_read_prodtype");
+    g_debug ("----- EXIT adsm_read_prodtype");
   #endif
 
   return loc;
@@ -78,14 +78,14 @@ spreadmodel_read_prodtype (char *text, GPtrArray * production_type_names)
  * position of the matching name in the list.
  */
 guint
-spreadmodel_read_zone (char *text, ZON_zone_list_t * zones)
+adsm_read_zone (char *text, ZON_zone_list_t * zones)
 {
   gchar *normalized;
   guint nzones;
   guint loc;
 
   #if DEBUG
-    g_debug ("----- ENTER spreadmodel_read_zone");
+    g_debug ("----- ENTER adsm_read_zone");
   #endif
 
   /* The text is assumed to be UTF-8. Normalize it to allow for comparison. */
@@ -104,7 +104,7 @@ spreadmodel_read_zone (char *text, ZON_zone_list_t * zones)
     g_error ("text \"%s\" did not match any zone", text);
 
   #if DEBUG
-    g_debug ("----- EXIT spreadmodel_read_zone");
+    g_debug ("----- EXIT adsm_read_zone");
   #endif
 
   return loc;
@@ -149,7 +149,7 @@ spreadmodel_read_zone (char *text, ZON_zone_list_t * zones)
  * @param index the current location of the rotating index
  */
 void
-spreadmodel_extend_rotating_array (GPtrArray * array, unsigned int length, unsigned int index)
+adsm_extend_rotating_array (GPtrArray * array, unsigned int length, unsigned int index)
 {
   unsigned int old_length, diff;
   unsigned int i;
@@ -159,7 +159,7 @@ spreadmodel_extend_rotating_array (GPtrArray * array, unsigned int length, unsig
 #endif
 
 #if DEBUG
-  g_debug ("----- ENTER spreadmodel_extend_rotating_array");
+  g_debug ("----- ENTER adsm_extend_rotating_array");
 #endif
 
   old_length = array->len;
@@ -248,7 +248,7 @@ spreadmodel_extend_rotating_array (GPtrArray * array, unsigned int length, unsig
 
 end:
 #if DEBUG
-  g_debug ("----- EXIT spreadmodel_extend_rotating_array");
+  g_debug ("----- EXIT adsm_extend_rotating_array");
 #endif
 
   return;
@@ -275,7 +275,7 @@ g_queue_free_as_GDestroyNotify (gpointer data)
  * file extension, or at the end of the filename if there is no file extension.
  */
 char *
-spreadmodel_insert_node_number_into_filename (const char *filename)
+adsm_insert_node_number_into_filename (const char *filename)
 {
 #if HAVE_MPI && !CANCEL_MPI
   GString *s;
@@ -347,24 +347,24 @@ read_prodtype_order_callback (void *data, int ncols, char **value, char **colnam
 static int
 read_reason_order_callback (void *data, int ncols, char **value, char **colname)
 {
-  SPREADMODEL_control_reason *reason_order;
+  ADSM_control_reason *reason_order;
   guint priority;
   gchar **tokens, **iter;
 
   g_assert (ncols == 1);
-  reason_order = (SPREADMODEL_control_reason *)data;
+  reason_order = (ADSM_control_reason *)data;
   /* The reason order is given in a comma-separated string in value[0]. */
   tokens = g_strsplit (value[0], ",", 0);
   for (iter = tokens, priority = 0; *iter != NULL; iter++)
     {
-      SPREADMODEL_control_reason reason;
+      ADSM_control_reason reason;
       g_strstrip (*iter);
-      for (reason = 0; reason < SPREADMODEL_NCONTROL_REASONS; reason++)
+      for (reason = 0; reason < ADSM_NCONTROL_REASONS; reason++)
         {
-          if (strcmp (*iter, SPREADMODEL_control_reason_name[reason]) == 0)
+          if (strcmp (*iter, ADSM_control_reason_name[reason]) == 0)
             break;
         }
-      g_assert (reason < SPREADMODEL_NCONTROL_REASONS);
+      g_assert (reason < ADSM_NCONTROL_REASONS);
       reason_order[priority++] = reason;
     }
   g_strfreev (tokens);
@@ -430,19 +430,19 @@ build_priority_debug_string (gpointer key,
  * Reads the destruction priority order from the parameters database. Returns
  * a GHashTable in which keys are strings (char *) of the form
  * "production type,reason". Reason is one of the strings from
- * SPREADMODEL_control_reason_name. Values are ints stored using
+ * ADSM_control_reason_name. Values are ints stored using
  * GUINT_TO_POINTER.
  *
  * The hash table has a key_destroy_func and value_destroy_func set, so a call
  * to g_hash_table_destroy will fully clean up all memory used.
  */ 
 GHashTable *
-spreadmodel_read_priority_order (sqlite3 *params)
+adsm_read_priority_order (sqlite3 *params)
 {
   GHashTable *table;
   gboolean reason_has_priority_over_prodtype;
-  SPREADMODEL_control_reason *reason_order; /**< An array containing the
-    elements in the enumeration SPREADMODEL_control_reason, in order of
+  ADSM_control_reason *reason_order; /**< An array containing the
+    elements in the enumeration ADSM_control_reason, in order of
     descending priority (that is, the highest priority reason is at the start
     of the list). */
   GPtrArray *prodtype_order; /**< A GPtrArray containing production type names
@@ -468,7 +468,7 @@ spreadmodel_read_priority_order (sqlite3 *params)
   #endif
 
   /* Next get the relative ordering of reasons. */
-  reason_order = g_new0 (SPREADMODEL_control_reason, SPREADMODEL_NCONTROL_REASONS);
+  reason_order = g_new0 (ADSM_control_reason, ADSM_NCONTROL_REASONS);
   sqlite3_exec (params,
                 "SELECT destruction_reason_order FROM ScenarioCreator_controlmasterplan",
                 read_reason_order_callback, reason_order, &sqlerr);
@@ -481,11 +481,11 @@ spreadmodel_read_priority_order (sqlite3 *params)
     GString *s;
     int i;
     s = g_string_new (NULL);
-    for (i = 0; i < SPREADMODEL_NCONTROL_REASONS; i++)
+    for (i = 0; i < ADSM_NCONTROL_REASONS; i++)
       {
         if (i > 0)
           g_string_append_c (s, ',');
-        g_string_append_printf (s, "%s", SPREADMODEL_control_reason_name[reason_order[i]]);
+        g_string_append_printf (s, "%s", ADSM_control_reason_name[reason_order[i]]);
       }
     g_debug ("reason order (highest priority first): %s", s->str);
     g_string_free (s, TRUE);
@@ -522,10 +522,10 @@ spreadmodel_read_priority_order (sqlite3 *params)
   priority = 1;
   if (reason_has_priority_over_prodtype)
     {
-      for (i = 0; i < SPREADMODEL_NCONTROL_REASONS; i++)
+      for (i = 0; i < ADSM_NCONTROL_REASONS; i++)
         {
           const char *reason;
-          reason = SPREADMODEL_control_reason_name[reason_order[i]];
+          reason = ADSM_control_reason_name[reason_order[i]];
           for (j = 0; j < prodtype_order->len; j++)
             {
               char *prodtype;
@@ -542,11 +542,11 @@ spreadmodel_read_priority_order (sqlite3 *params)
         {
           char *prodtype;
           prodtype = (char *)g_ptr_array_index(prodtype_order, i);
-          for (j = 0; j < SPREADMODEL_NCONTROL_REASONS; j++)
+          for (j = 0; j < ADSM_NCONTROL_REASONS; j++)
             {
               const char *reason;
               char *key;
-              reason = SPREADMODEL_control_reason_name[reason_order[j]];
+              reason = ADSM_control_reason_name[reason_order[j]];
               key = g_strdup_printf ("%s,%s", prodtype, reason);
               g_hash_table_replace (table, key, GUINT_TO_POINTER(priority++));
             }

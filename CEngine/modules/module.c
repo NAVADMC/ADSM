@@ -28,7 +28,7 @@
  * @return TRUE if the module is listening for the event type.
  */
 gboolean
-spreadmodel_model_is_listening_for (struct spreadmodel_model_t_ *self, EVT_event_type_t event_type)
+adsm_model_is_listening_for (struct adsm_module_t_ *self, EVT_event_type_t event_type)
 {
   int i;
 
@@ -47,7 +47,7 @@ spreadmodel_model_is_listening_for (struct spreadmodel_model_t_ *self, EVT_event
  * @return a string. Must be freed using g_free().
  */
 char *
-spreadmodel_model_to_string_default (struct spreadmodel_model_t_ *self)
+adsm_module_to_string_default (struct adsm_module_t_ *self)
 {
   GString *s;
   char *chararray;
@@ -71,7 +71,7 @@ spreadmodel_model_to_string_default (struct spreadmodel_model_t_ *self)
  * @return the number of characters printed (not including the trailing '\\0').
  */
 int
-spreadmodel_model_fprintf (FILE * stream, struct spreadmodel_model_t_ *self)
+adsm_model_fprintf (FILE * stream, struct adsm_module_t_ *self)
 {
   char *s;
   int nchars_written;
@@ -91,9 +91,9 @@ spreadmodel_model_fprintf (FILE * stream, struct spreadmodel_model_t_ *self)
  * @return the number of characters printed (not including the trailing '\\0').
  */
 int
-spreadmodel_model_printf (struct spreadmodel_model_t_ *self)
+adsm_model_printf (struct adsm_module_t_ *self)
 {
-  return spreadmodel_model_fprintf (stdout, self);
+  return adsm_model_fprintf (stdout, self);
 }
 
 
@@ -107,7 +107,7 @@ spreadmodel_model_printf (struct spreadmodel_model_t_ *self)
  * @return TRUE.
  */
 gboolean
-spreadmodel_model_answer_yes (struct spreadmodel_model_t_ * self)
+adsm_model_answer_yes (struct adsm_module_t_ * self)
 {
   return TRUE;
 }
@@ -123,7 +123,7 @@ spreadmodel_model_answer_yes (struct spreadmodel_model_t_ * self)
  * @return FALSE.
  */
 gboolean
-spreadmodel_model_answer_no (struct spreadmodel_model_t_ * self)
+adsm_model_answer_no (struct adsm_module_t_ * self)
 {
   return FALSE;
 }

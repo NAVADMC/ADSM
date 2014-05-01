@@ -107,7 +107,7 @@ local_data_t;
  * @param event an output directory event.
  */
 void
-handle_output_dir_event (struct spreadmodel_model_t_ * self,
+handle_output_dir_event (struct adsm_module_t_ * self,
                          EVT_output_dir_event_t *event)
 {
   local_data_t *local_data;
@@ -277,7 +277,7 @@ create_grid (local_data_t *local_data, spatial_search_t *spatial_index)
  * @param units a list of units.
  */
 void
-handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
+handle_before_any_simulations_event (struct adsm_module_t_ *self,
                                      UNT_unit_list_t *units)
 {
   local_data_t *local_data;
@@ -306,7 +306,7 @@ handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
  * @param self this module.
  */
 void
-handle_before_each_simulation_event (struct spreadmodel_model_t_ * self)
+handle_before_each_simulation_event (struct adsm_module_t_ * self)
 {
   local_data_t *local_data;
 
@@ -334,7 +334,7 @@ handle_before_each_simulation_event (struct spreadmodel_model_t_ * self)
  * @param event an infection event.
  */
 void
-handle_infection_event (struct spreadmodel_model_t_ * self,
+handle_infection_event (struct adsm_module_t_ * self,
                         EVT_infection_event_t * event)
 {
   local_data_t *local_data;
@@ -369,7 +369,7 @@ handle_infection_event (struct spreadmodel_model_t_ * self,
  * @param event a vaccination event.
  */
 void
-handle_vaccination_event (struct spreadmodel_model_t_ * self,
+handle_vaccination_event (struct adsm_module_t_ * self,
                           EVT_vaccination_event_t * event)
 {
   local_data_t *local_data;
@@ -404,7 +404,7 @@ handle_vaccination_event (struct spreadmodel_model_t_ * self,
  * @param event a destruction event.
  */
 void
-handle_destruction_event (struct spreadmodel_model_t_ * self,
+handle_destruction_event (struct adsm_module_t_ * self,
                           EVT_destruction_event_t * event)
 {
   local_data_t *local_data;
@@ -434,7 +434,7 @@ handle_destruction_event (struct spreadmodel_model_t_ * self,
  * @param queue for any new events this module creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
      ZON_zone_list_t * zones, EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
   #if DEBUG
@@ -481,7 +481,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
  * @param self this module.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
   #if DEBUG
     g_debug ("----- ENTER reset (%s)", MODEL_NAME);
@@ -504,7 +504,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @return a string.
  */
 char *
-to_string (struct spreadmodel_model_t_ *self)
+to_string (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   GString *s;
@@ -675,7 +675,7 @@ void free_polygon_as_GDestroyNotify (gpointer data)
  * @param self this module.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -716,7 +716,7 @@ local_free (struct spreadmodel_model_t_ *self)
  * Set the parameters for this module.
  */
 static void
-set_params (struct spreadmodel_model_t_ *self, sqlite3 * params)
+set_params (struct adsm_module_t_ *self, sqlite3 * params)
 {
   local_data_t *local_data;
   gboolean success;
@@ -788,18 +788,18 @@ set_params (struct spreadmodel_model_t_ *self, sqlite3 * params)
 /**
  * Returns a new summary GIS writer.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
 
   #if DEBUG
     g_debug ("----- ENTER new (%s)", MODEL_NAME);
   #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -809,12 +809,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
-  self->has_pending_actions = spreadmodel_model_answer_no;
-  self->has_pending_infections = spreadmodel_model_answer_no;
+  self->is_listening_for = adsm_model_is_listening_for;
+  self->has_pending_actions = adsm_model_answer_no;
+  self->has_pending_infections = adsm_model_answer_no;
   self->to_string = to_string;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
   local_data->polys = g_ptr_array_new_with_free_func(free_polygon_as_GDestroyNotify);

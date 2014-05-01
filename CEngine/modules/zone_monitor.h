@@ -18,7 +18,7 @@
 #ifndef ZONE_MONITOR_H
 #define ZONE_MONITOR_H
 
-spreadmodel_model_t *zone_monitor_new (sqlite3 *, UNT_unit_list_t *,
-                                       projPJ, ZON_zone_list_t *);
+adsm_module_t *zone_monitor_new (sqlite3 *, UNT_unit_list_t *,
+                                 projPJ, ZON_zone_list_t *);
 
 #endif

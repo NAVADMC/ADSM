@@ -20,7 +20,7 @@
 #ifndef DETECTION_MODEL_H
 #define DETECTION_MODEL_H
 
-spreadmodel_model_t *detection_model_new (sqlite3 *, UNT_unit_list_t *,
-                                          projPJ, ZON_zone_list_t *);
+adsm_module_t *detection_model_new (sqlite3 *, UNT_unit_list_t *,
+                                    projPJ, ZON_zone_list_t *);
 
 #endif

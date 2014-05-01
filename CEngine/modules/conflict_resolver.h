@@ -19,7 +19,7 @@
 #ifndef CONFLICT_RESOLVER_H
 #define CONFLICT_RESOLVER_H
 
-spreadmodel_model_t *conflict_resolver_new (sqlite3 *, UNT_unit_list_t *,
-                                            projPJ, ZON_zone_list_t *);
+adsm_module_t *conflict_resolver_new (sqlite3 *, UNT_unit_list_t *,
+                                      projPJ, ZON_zone_list_t *);
 
 #endif

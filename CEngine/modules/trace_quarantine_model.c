@@ -47,8 +47,6 @@
 
 #include "trace_quarantine_model.h"
 
-#include "spreadmodel.h"
-
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "trace-quarantine-model"
 
@@ -76,7 +74,7 @@ local_data_t;
  * @param event a trace result event.
  */
 void
-handle_trace_result_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
+handle_trace_result_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
                            EVT_trace_result_event_t * event)
 {
   local_data_t *local_data;
@@ -90,7 +88,7 @@ handle_trace_result_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * 
 
   if (event->traced)
     {
-      if (event->direction == SPREADMODEL_TraceForwardOrOut)
+      if (event->direction == ADSM_TraceForwardOrOut)
         unit = event->exposed_unit;
       else
         unit = event->exposing_unit;
@@ -121,7 +119,7 @@ handle_trace_result_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * 
  * @param queue for any new events the model creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
      EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
 #if DEBUG
@@ -152,7 +150,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
  * @param self the model.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
 #if DEBUG
   g_debug ("----- ENTER reset (%s)", MODEL_NAME);
@@ -174,7 +172,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @return a string.
  */
 char *
-to_string (struct spreadmodel_model_t_ *self)
+to_string (struct adsm_module_t_ *self)
 {
   return g_strdup_printf ("<%s>", MODEL_NAME);
 }
@@ -187,7 +185,7 @@ to_string (struct spreadmodel_model_t_ *self)
  * @param self the model.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -211,18 +209,18 @@ local_free (struct spreadmodel_model_t_ *self)
 /**
  * Returns a new trace quarantine model.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
 #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -232,12 +230,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
-  self->has_pending_actions = spreadmodel_model_answer_no;
-  self->has_pending_infections = spreadmodel_model_answer_no;
+  self->is_listening_for = adsm_model_is_listening_for;
+  self->has_pending_actions = adsm_model_answer_no;
+  self->has_pending_infections = adsm_model_answer_no;
   self->to_string = to_string;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
 #if DEBUG
