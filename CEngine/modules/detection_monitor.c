@@ -116,7 +116,7 @@ local_data_t;
  * @param queue for any new events this function creates.
  */
 void
-handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
+handle_before_any_simulations_event (struct adsm_module_t_ *self,
                                      EVT_event_queue_t *queue)
 {
   unsigned int n, i;
@@ -151,7 +151,7 @@ handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
  * @param self the module.
  */
 void
-handle_new_day_event (struct spreadmodel_model_t_ *self)
+handle_new_day_event (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -206,7 +206,7 @@ handle_new_day_event (struct spreadmodel_model_t_ *self)
  * @param rng a random number generator.
  */
 void
-handle_detection_event (struct spreadmodel_model_t_ *self, EVT_detection_event_t * event,
+handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * event,
                         RAN_gen_t * rng)
 {
   local_data_t *local_data;
@@ -224,7 +224,7 @@ handle_detection_event (struct spreadmodel_model_t_ *self, EVT_detection_event_t
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
 
-  means = SPREADMODEL_detection_reason_abbrev[event->means];
+  means = ADSM_detection_reason_abbrev[event->means];
 
   detection.unit_index = unit->index;
   detection.reason = event->means;
@@ -233,9 +233,9 @@ handle_detection_event (struct spreadmodel_model_t_ *self, EVT_detection_event_t
 #ifdef USE_SC_GUILIB
   sc_detect_unit( event->day, unit, detection );
 #else  
-  if (NULL != spreadmodel_detect_unit)
+  if (NULL != adsm_detect_unit)
     {
-      spreadmodel_detect_unit (detection);
+      adsm_detect_unit (detection);
     }
 #endif  
 
@@ -424,7 +424,7 @@ handle_detection_event (struct spreadmodel_model_t_ *self, EVT_detection_event_t
  * @param queue for any new events the model creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
      EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
 #if DEBUG
@@ -461,7 +461,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
  * @param self the model.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -503,7 +503,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @param self the model.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -561,11 +561,11 @@ local_free (struct spreadmodel_model_t_ *self)
 /**
  * Returns a new detection monitor.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   unsigned int i, j;         /* loop counters */
   char *prodtype_name;
@@ -574,7 +574,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
 #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -584,12 +584,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
-  self->has_pending_actions = spreadmodel_model_answer_no;
-  self->has_pending_infections = spreadmodel_model_answer_no;
-  self->to_string = spreadmodel_model_to_string_default;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->is_listening_for = adsm_model_is_listening_for;
+  self->has_pending_actions = adsm_model_answer_no;
+  self->has_pending_infections = adsm_model_answer_no;
+  self->to_string = adsm_module_to_string_default;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
   local_data->detection_occurred =
@@ -685,13 +685,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       RPT_reporting_set_integer1 (local_data->cumul_nunits_detected_by_prodtype, 0, prodtype_name);
       RPT_reporting_set_integer1 (local_data->cumul_nanimals_detected_by_prodtype, 0, prodtype_name);
     }
-  for (i = 0; i < SPREADMODEL_NDETECTION_REASONS; i++)
+  for (i = 0; i < ADSM_NDETECTION_REASONS; i++)
     {
       const char *means;
       const char *drill_down_list[3] = { NULL, NULL, NULL };
-      if ((SPREADMODEL_detection_reason)i == SPREADMODEL_DetectionReasonUnspecified)
+      if ((ADSM_detection_reason)i == ADSM_DetectionReasonUnspecified)
         continue;
-      means = SPREADMODEL_detection_reason_abbrev[i];
+      means = ADSM_detection_reason_abbrev[i];
       /* Two function calls for the first_detection and last_detection
        * variables: one to establish the type of the sub-variables (they are
        * integers), and one to clear them to "null" (they have no meaningful

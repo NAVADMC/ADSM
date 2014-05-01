@@ -21,7 +21,7 @@
 #ifndef TRACE_QUARANTINE_MODEL_H
 #define TRACE_QUARANTINE_MODEL_H
 
-spreadmodel_model_t *trace_quarantine_model_new (sqlite3 *, UNT_unit_list_t *,
-                                                 projPJ, ZON_zone_list_t *);
+adsm_module_t *trace_quarantine_model_new (sqlite3 *, UNT_unit_list_t *,
+                                           projPJ, ZON_zone_list_t *);
 
 #endif

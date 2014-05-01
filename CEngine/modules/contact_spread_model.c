@@ -118,7 +118,7 @@
 #include "contact_spread_model.h"
 
 #ifdef USE_SC_GUILIB
-#  include <sc_spreadmodel_outputs.h>
+#  include <sc_adsm_outputs.h>
 #endif
 
 #if !HAVE_ROUND && HAVE_RINT
@@ -172,11 +172,11 @@ typedef struct
 {
   GPtrArray *production_types; /**< Each item in the list is a char *. */
   ZON_zone_list_t *zones;
-  param_block_t ***param_block[SPREADMODEL_NCONTACT_TYPES]; /**< Blocks of parameters.
+  param_block_t ***param_block[ADSM_NCONTACT_TYPES]; /**< Blocks of parameters.
     Use an expression of the form
     param_block[contact_type][source_production_type][recipient_production_type]
     to get a pointer to a particular param_block. */
-  REL_chart_t ***movement_control[SPREADMODEL_NCONTACT_TYPES]; /**< Movement control
+  REL_chart_t ***movement_control[ADSM_NCONTACT_TYPES]; /**< Movement control
     charts for units inside zones.  Use an expression of the form
     movement_control[contact_type][zone->level-1][source_production_type]
     to get a pointer to a particular chart. */
@@ -204,7 +204,7 @@ local_data_t;
  */
 typedef struct
 {
-  SPREADMODEL_contact_type contact_type;
+  ADSM_contact_type contact_type;
   unsigned int recipient_production_type;
   double movement_distance;
   UNT_unit_t *best_unit; /**< The current pick for best recipient. */
@@ -225,7 +225,7 @@ typedef struct
  */
 typedef struct
 {
-  struct spreadmodel_model_t_ *self;
+  struct adsm_module_t_ *self;
   UNT_unit_list_t *units;
   ZON_zone_list_t *zones;
   RAN_gen_t *rng;
@@ -276,7 +276,7 @@ check_and_choose (int id, gpointer arg)
   double difference;
   ZON_zone_fragment_t *unit1_fragment, *unit2_fragment;
   gboolean contact_forbidden;
-  SPREADMODEL_contact_type contact_type;
+  ADSM_contact_type contact_type;
   unsigned long production_type;
   unsigned long index;
 
@@ -330,7 +330,7 @@ check_and_choose (int id, gpointer arg)
                   {                     
                     /* If unit 2 is quarantined, it cannot be the recipient of a direct
                      * contact. */
-                    if ( ( unit2->quarantined ) && ( contact->contact_type == SPREADMODEL_DirectContact ) )
+                    if ( ( unit2->quarantined ) && ( contact->contact_type == ADSM_DirectContact ) )
                     {
                       #if DEBUG
                         g_debug ( "----- check_and_choose - Optimized Version:  Fit found, but not allowed; quarantined direct-contact" );
@@ -367,7 +367,7 @@ check_and_choose (int id, gpointer arg)
                     unit2_fragment = callback_data->zones->membership[unit2->index];
     
     
-                    contact_forbidden = ( ( unit2->quarantined && contact->contact_type == SPREADMODEL_DirectContact )
+                    contact_forbidden = ( ( unit2->quarantined && contact->contact_type == ADSM_DirectContact )
                                           || ( ZON_level ( unit2_fragment ) > ZON_level ( unit1_fragment ) )
                                           || ( ZON_level ( unit1_fragment ) - ZON_level ( unit2_fragment ) > 1 )
                                           || ( ( ZON_level ( unit1_fragment ) - ZON_level ( unit2_fragment ) == 1 )
@@ -404,7 +404,7 @@ check_and_choose (int id, gpointer arg)
                   else if ( difference < contact->min_difference )
                   {
                        
-                    contact_forbidden = ( unit2->quarantined && contact->contact_type == SPREADMODEL_DirectContact );
+                    contact_forbidden = ( unit2->quarantined && contact->contact_type == ADSM_DirectContact );
     
                     if ( !contact_forbidden )
                     {                       
@@ -453,7 +453,7 @@ check_and_choose (int id, gpointer arg)
 
 typedef struct
 {
-  struct spreadmodel_model_t_ *self;
+  struct adsm_module_t_ *self;
   UNT_unit_list_t *units;
   ZON_zone_list_t *zones;
   EVT_new_day_event_t *event;
@@ -484,7 +484,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data );
  * @param queue for any new events the model creates.
  */
 void
-handle_new_day_event (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
+handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
                       ZON_zone_list_t * zones, EVT_new_day_event_t * event,
                       RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
@@ -591,7 +591,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
   double rate;
   PDF_dist_t *poisson;
   unsigned int nunits;          /* number of units */
-  SPREADMODEL_contact_type contact_type;
+  ADSM_contact_type contact_type;
   param_block_t **contact_type_block;
   UNT_unit_t *unit1, *unit2;
   unsigned int nprod_types, i, j, k;
@@ -612,7 +612,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
   GQueue *q;
   GPtrArray ***_contacts;
 
-  struct spreadmodel_model_t_ *self;
+  struct adsm_module_t_ *self;
   UNT_unit_list_t *units;
   ZON_zone_list_t *zones;
   EVT_new_day_event_t *event;
@@ -672,7 +672,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
 
       /*  How many contact types do we have?  */
       j = 0;
-      for ( contact_type = SPREADMODEL_DirectContact; contact_type <= SPREADMODEL_IndirectContact; contact_type++ )
+      for ( contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++ )
         j++;
 
       /*  Begin building 1-dimension of the attempted exposure matrix */
@@ -687,7 +687,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
       if ( callback_data.contact_count > 0 )
       {        
         j = 0;
-        for ( contact_type = SPREADMODEL_DirectContact; contact_type <= SPREADMODEL_IndirectContact; contact_type++ )
+        for ( contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++ )
         {
           _contacts[j] = g_new( GPtrArray *, nprod_types );
   
@@ -695,7 +695,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
 
 #if DEBUG
       g_debug ("new_day_event_handler:  Trying %i production types for this contact type %s",
-               nprod_types, (( contact_type == SPREADMODEL_DirectContact)? "Direct":"Indirect"));
+               nprod_types, (( contact_type == ADSM_DirectContact)? "Direct":"Indirect"));
 #endif  
           for (i = 0; i < nprod_types; i++)
           {
@@ -715,7 +715,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
               {
   
                 /*  Can this exposure attempt happen? */
-                if ( !((unit1->quarantined) && (contact_type == SPREADMODEL_DirectContact)) )
+                if ( !((unit1->quarantined) && (contact_type == ADSM_DirectContact)) )
                 {
                   /*  Check spread parameters to see if this unit's state can spread for this contact type */ 
                   if ( (unit1->state == Latent && param_block->latent_units_can_infect == TRUE) || 
@@ -840,7 +840,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
               else
               {
 #if DEBUG
-                g_debug ( "new_day_event_handler:  parameter_block empty for this production_type/contact_type pair, %i/%s", i + 1, ((contact_type == SPREADMODEL_DirectContact)? "Direct":"Indirect") );
+                g_debug ( "new_day_event_handler:  parameter_block empty for this production_type/contact_type pair, %i/%s", i + 1, ((contact_type == ADSM_DirectContact)? "Direct":"Indirect") );
 #endif                    
               };
             }
@@ -879,7 +879,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
           /*  Iterate over the results and reset "try_again" status based on each 
               match's status.  A re-search using the exhaustive method may be necessary... */
           j = 0;
-          for( contact_type = SPREADMODEL_DirectContact; contact_type <= SPREADMODEL_IndirectContact; contact_type++ )
+          for( contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++ )
           {
             for( i = 0; i < nprod_types; i++ )
             {
@@ -915,7 +915,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
         /*  Iterate over the results and post exposure and infection events 
             when applicable, and simultaneously delete dynamic memory used */
         j = 0;
-        for( contact_type = SPREADMODEL_DirectContact; contact_type <= SPREADMODEL_IndirectContact; contact_type++ )
+        for( contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++ )
         {
           contact_type_block = local_data->param_block[contact_type][unit1->production_type];
   
@@ -1015,7 +1015,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
 #endif
   
                         /* Is the exposure adequate (i.e., will it cause infection in a susceptible unit)? */
-                        if (contact_type == SPREADMODEL_DirectContact && unit1->prevalence_curve != NULL)
+                        if (contact_type == ADSM_DirectContact && unit1->prevalence_curve != NULL)
                           P = unit1->prevalence;
                         else
                           P = param_block->prob_infect;
@@ -1037,7 +1037,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
                           exposure->u.exposure.day += shipping_delay;
                           if (shipping_delay > local_data->pending_infections->len)
                           {
-                            spreadmodel_extend_rotating_array (local_data->pending_infections,
+                            adsm_extend_rotating_array (local_data->pending_infections,
                                                                shipping_delay, local_data->rotating_index);
                           }
   
@@ -1109,7 +1109,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
       else
       {
         /* Free memory */
-        for( j = 0, contact_type = SPREADMODEL_DirectContact; contact_type <= SPREADMODEL_IndirectContact; contact_type++, j++ )
+        for( j = 0, contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++, j++ )
         {
           for (i = 0; i < nprod_types; i++)
             g_ptr_array_free (_contacts[j][i], TRUE);
@@ -1144,7 +1144,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
  * @param event a public announcement event.
  */
 void
-handle_public_announcement_event (struct spreadmodel_model_t_ *self,
+handle_public_announcement_event (struct adsm_module_t_ *self,
                                   EVT_public_announcement_event_t * event)
 {
   local_data_t *local_data;
@@ -1182,7 +1182,7 @@ handle_public_announcement_event (struct spreadmodel_model_t_ *self,
  * @param queue for any new events the model creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
      EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
 #if DEBUG
@@ -1215,7 +1215,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
  * @param self the model.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   unsigned int i;
@@ -1251,7 +1251,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @return TRUE if the model has pending actions.
  */
 gboolean
-has_pending_actions (struct spreadmodel_model_t_ * self)
+has_pending_actions (struct adsm_module_t_ * self)
 {
   local_data_t *local_data;
 
@@ -1268,7 +1268,7 @@ has_pending_actions (struct spreadmodel_model_t_ * self)
  * @return TRUE if the model has pending infections.
  */
 gboolean
-has_pending_infections (struct spreadmodel_model_t_ * self)
+has_pending_infections (struct adsm_module_t_ * self)
 {
   local_data_t *local_data;
 
@@ -1285,11 +1285,11 @@ has_pending_infections (struct spreadmodel_model_t_ * self)
  * @return a string.
  */
 char *
-to_string (struct spreadmodel_model_t_ *self)
+to_string (struct adsm_module_t_ *self)
 {
   GString *s;
   local_data_t *local_data;
-  SPREADMODEL_contact_type contact_type;
+  ADSM_contact_type contact_type;
   param_block_t ***contact_type_block;
   REL_chart_t ***contact_type_chart;
   unsigned int nprod_types, nzones, i, j;
@@ -1304,7 +1304,7 @@ to_string (struct spreadmodel_model_t_ *self)
   /* Add the parameter block for each to-from combination of production
    * types. */
   nprod_types = local_data->production_types->len;
-  for (contact_type = SPREADMODEL_DirectContact; contact_type <= SPREADMODEL_IndirectContact; contact_type++)
+  for (contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++)
     {
       contact_type_block = local_data->param_block[contact_type];
       for (i = 0; i < nprod_types; i++)
@@ -1318,7 +1318,7 @@ to_string (struct spreadmodel_model_t_ *self)
                                                                     i),
                                         (char *) g_ptr_array_index (local_data->production_types,
                                                                     j),
-                                        SPREADMODEL_contact_type_name[contact_type]);
+                                        ADSM_contact_type_name[contact_type]);
                 if (param_block->fixed_movement_rate > 0)
                   g_string_append_printf (s, "\n    fixed-movement-rate=%g",
                                           param_block->fixed_movement_rate);
@@ -1350,7 +1350,7 @@ to_string (struct spreadmodel_model_t_ *self)
   /* Add the movement control chart for each production type-zone
    * combination. */
   nzones = ZON_zone_list_length (local_data->zones);
-  for (contact_type = SPREADMODEL_DirectContact; contact_type <= SPREADMODEL_IndirectContact; contact_type++)
+  for (contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++)
     {
       contact_type_chart = local_data->movement_control[contact_type];
       for (i = 0; i < nzones; i++)
@@ -1362,7 +1362,7 @@ to_string (struct spreadmodel_model_t_ *self)
                                       (char *) g_ptr_array_index (local_data->production_types,
                                                                   j),
                                       ZON_zone_list_get (local_data->zones, i)->name,
-                                      SPREADMODEL_contact_type_name[contact_type]);
+                                      ADSM_contact_type_name[contact_type]);
               substring = REL_chart_to_string (chart);
               g_string_append_printf (s, "\n    movement-control=%s", substring);
               g_free (substring);
@@ -1385,11 +1385,11 @@ to_string (struct spreadmodel_model_t_ *self)
  * @param self the model.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   unsigned int nprod_types, nzones, i, j;
-  SPREADMODEL_contact_type contact_type;
+  ADSM_contact_type contact_type;
   param_block_t ***contact_type_block;
   param_block_t *param_block;
   REL_chart_t ***contact_type_chart;
@@ -1403,7 +1403,7 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free each of the parameter blocks. */
   nprod_types = local_data->production_types->len;
-  for (contact_type = SPREADMODEL_DirectContact; contact_type <= SPREADMODEL_IndirectContact; contact_type++)
+  for (contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++)
     {
       contact_type_block = local_data->param_block[contact_type];
       for (i = 0; i < nprod_types; i++)
@@ -1429,7 +1429,7 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free the movement control charts for units inside zones. */
   nzones = ZON_zone_list_length (local_data->zones);
-  for (contact_type = SPREADMODEL_DirectContact; contact_type <= SPREADMODEL_IndirectContact; contact_type++)
+  for (contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++)
     {
       contact_type_chart = local_data->movement_control[contact_type];
       for (i = 0; i < nzones; i++)
@@ -1479,11 +1479,11 @@ local_free (struct spreadmodel_model_t_ *self)
 static int
 set_params (void *data, int ncols, char **value, char **colname)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   sqlite3 *params;
   guint from_production_type, to_production_type;
-  SPREADMODEL_contact_type contact_type;
+  ADSM_contact_type contact_type;
   param_block_t ***contact_type_block;
   param_block_t *p;
   long int tmp;
@@ -1494,7 +1494,7 @@ set_params (void *data, int ncols, char **value, char **colname)
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
-  self = (spreadmodel_model_t *)data;
+  self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
@@ -1503,15 +1503,15 @@ set_params (void *data, int ncols, char **value, char **colname)
   /* Find out which to-from production type combination these parameters apply
    * to. */
   from_production_type =
-    spreadmodel_read_prodtype (value[0], local_data->production_types);
+    adsm_read_prodtype (value[0], local_data->production_types);
   to_production_type =
-    spreadmodel_read_prodtype (value[1], local_data->production_types);
+    adsm_read_prodtype (value[1], local_data->production_types);
 
   /* Find out whether these parameters are for direct or indirect contact. */
   if (strcmp (value[2], "direct") == 0)
-    contact_type = SPREADMODEL_DirectContact;
+    contact_type = ADSM_DirectContact;
   else if (strcmp (value[2], "indirect") == 0)
-    contact_type = SPREADMODEL_IndirectContact;
+    contact_type = ADSM_IndirectContact;
   else
     g_assert_not_reached ();
 
@@ -1616,11 +1616,11 @@ set_params (void *data, int ncols, char **value, char **colname)
 static int
 set_zone_params (void *data, int ncols, char **value, char **colname)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   sqlite3 *params;
   guint zone, production_type;
-  SPREADMODEL_contact_type contact_type;
+  ADSM_contact_type contact_type;
   REL_chart_t ***contact_type_chart;
   guint rel_id;
   REL_chart_t *movement_control;
@@ -1629,7 +1629,7 @@ set_zone_params (void *data, int ncols, char **value, char **colname)
     g_debug ("----- ENTER set_zone_params (%s)", MODEL_NAME);
   #endif
 
-  self = (spreadmodel_model_t *)data;
+  self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
@@ -1637,14 +1637,14 @@ set_zone_params (void *data, int ncols, char **value, char **colname)
 
   /* Find out which zone/production type combination these parameters apply
    * to. */
-  zone = spreadmodel_read_zone (value[0], local_data->zones);
-  production_type = spreadmodel_read_prodtype (value[1], local_data->production_types);
+  zone = adsm_read_zone (value[0], local_data->zones);
+  production_type = adsm_read_prodtype (value[1], local_data->production_types);
 
   /* Find out whether these parameters are for direct or indirect contact. */
   if (strcmp (value[2], "direct") == 0)
-    contact_type = SPREADMODEL_DirectContact;
+    contact_type = ADSM_DirectContact;
   else if (strcmp (value[2], "indirect") == 0)
-    contact_type = SPREADMODEL_IndirectContact;
+    contact_type = ADSM_IndirectContact;
   else
     g_assert_not_reached ();
 
@@ -1673,11 +1673,11 @@ set_zone_params (void *data, int ncols, char **value, char **colname)
 /**
  * Returns a new contact spread model.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   unsigned int nprod_types, nzones, i;
   char *sqlerr;
@@ -1686,7 +1686,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
 #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -1696,12 +1696,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
+  self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = has_pending_actions;
   self->has_pending_infections = has_pending_infections;
   self->to_string = to_string;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
   /* local_data->param_block holds two 2D arrays of parameter blocks, where
@@ -1712,10 +1712,10 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * the set_params function. */
   local_data->production_types = units->production_type_names;
   nprod_types = local_data->production_types->len;
-  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+  for (i = 0; i < ADSM_NCONTACT_TYPES; i++)
     local_data->param_block[i] = NULL;
-  local_data->param_block[SPREADMODEL_DirectContact] = g_new0 (param_block_t **, nprod_types);
-  local_data->param_block[SPREADMODEL_IndirectContact] = g_new0 (param_block_t **, nprod_types);
+  local_data->param_block[ADSM_DirectContact] = g_new0 (param_block_t **, nprod_types);
+  local_data->param_block[ADSM_IndirectContact] = g_new0 (param_block_t **, nprod_types);
 
   /* local_data->movement_control holds movement control charts by zone and
    * production type.  The first level of indexing is by contact type, then by
@@ -1723,14 +1723,14 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * rows contain all NULL pointers. */
   local_data->zones = zones;
   nzones = ZON_zone_list_length (zones);
-  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+  for (i = 0; i < ADSM_NCONTACT_TYPES; i++)
     local_data->movement_control[i] = NULL;
-  local_data->movement_control[SPREADMODEL_DirectContact] = g_new0 (REL_chart_t **, nzones);
+  local_data->movement_control[ADSM_DirectContact] = g_new0 (REL_chart_t **, nzones);
   for (i = 0; i < nzones; i++)
-    local_data->movement_control[SPREADMODEL_DirectContact][i] = g_new0 (REL_chart_t *, nprod_types);
-  local_data->movement_control[SPREADMODEL_IndirectContact] = g_new0 (REL_chart_t **, nzones);
+    local_data->movement_control[ADSM_DirectContact][i] = g_new0 (REL_chart_t *, nprod_types);
+  local_data->movement_control[ADSM_IndirectContact] = g_new0 (REL_chart_t **, nzones);
   for (i = 0; i < nzones; i++)
-    local_data->movement_control[SPREADMODEL_IndirectContact][i] = g_new0 (REL_chart_t *, nprod_types);
+    local_data->movement_control[ADSM_IndirectContact][i] = g_new0 (REL_chart_t *, nprod_types);
 
   /* No outbreak has been announced yet. */
   local_data->outbreak_known = FALSE;

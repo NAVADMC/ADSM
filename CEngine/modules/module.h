@@ -12,7 +12,7 @@
  * Each module has a "new" function that creates and initializes an instance of
  * the module.  The new function must fill in a set of function pointers so
  * that the module's functions can be called in an object-oriented style, e.g.,
- * <code>model->printf(model)</code>. See the spreadmodel_model_t_ structure
+ * <code>model->printf(model)</code>. See the adsm_module_t_ structure
  * for a list of these functions.
  *
  * <small>Image copyright information:
@@ -61,12 +61,12 @@
 
 
 
-struct spreadmodel_model_t_;
+struct adsm_module_t_;
 
 
 
 /** Type of a function that creates and sets parameters for a model. */
-typedef struct spreadmodel_model_t_ *(*spreadmodel_model_new_t) (sqlite3 *,
+typedef struct adsm_module_t_ *(*adsm_model_new_t) (sqlite3 *,
                                                                  UNT_unit_list_t *,
                                                                  projPJ,
                                                                  ZON_zone_list_t *);
@@ -74,19 +74,19 @@ typedef struct spreadmodel_model_t_ *(*spreadmodel_model_new_t) (sqlite3 *,
 
 
 /** Type of a function that frees a model. */
-typedef void (*spreadmodel_model_free_t) (struct spreadmodel_model_t_ *);
+typedef void (*adsm_model_free_t) (struct adsm_module_t_ *);
 
 
 
 /** Type of a function that runs a model. */
-typedef void (*spreadmodel_model_run_t) (struct spreadmodel_model_t_ *,
+typedef void (*adsm_model_run_t) (struct adsm_module_t_ *,
                                          UNT_unit_list_t *, ZON_zone_list_t *,
                                          EVT_event_t *, RAN_gen_t *, EVT_event_queue_t *);
 
 
 
 /** Type of a function that resets a model after one simulation run. */
-typedef void (*spreadmodel_model_reset_t) (struct spreadmodel_model_t_ *);
+typedef void (*adsm_model_reset_t) (struct adsm_module_t_ *);
 
 
 
@@ -94,7 +94,7 @@ typedef void (*spreadmodel_model_reset_t) (struct spreadmodel_model_t_ *);
  * Type of a function that reports whether a model is listening for a given
  * event type.
  */
-typedef gboolean (*spreadmodel_model_is_listening_for_t) (struct spreadmodel_model_t_ *, EVT_event_type_t);
+typedef gboolean (*adsm_model_is_listening_for_t) (struct adsm_module_t_ *, EVT_event_type_t);
 
 
 
@@ -102,7 +102,7 @@ typedef gboolean (*spreadmodel_model_is_listening_for_t) (struct spreadmodel_mod
  * Type of a function that reports whether a model has any pending actions to
  * carry out.
  */
-typedef gboolean (*spreadmodel_model_has_pending_actions_t) (struct spreadmodel_model_t_ *);
+typedef gboolean (*adsm_model_has_pending_actions_t) (struct adsm_module_t_ *);
 
 
 
@@ -110,52 +110,52 @@ typedef gboolean (*spreadmodel_model_has_pending_actions_t) (struct spreadmodel_
  * Type of a function that reports whether a model has any pending infections
  * to cause.
  */
-typedef gboolean (*spreadmodel_model_has_pending_infections_t) (struct spreadmodel_model_t_ *);
+typedef gboolean (*adsm_model_has_pending_infections_t) (struct adsm_module_t_ *);
 
 
 
 /** Type of a function that returns a string representation of a model. */
-typedef char *(*spreadmodel_model_to_string_t) (struct spreadmodel_model_t_ *);
+typedef char *(*adsm_module_to_string_t) (struct adsm_module_t_ *);
 
 
 
 /** Type of a function that prints a model. */
-typedef int (*spreadmodel_model_printf_t) (struct spreadmodel_model_t_ *);
+typedef int (*adsm_model_printf_t) (struct adsm_module_t_ *);
 
 
 
 /** Type of a function that prints a model to a stream. */
-typedef int (*spreadmodel_model_fprintf_t) (FILE *, struct spreadmodel_model_t_ *);
+typedef int (*adsm_model_fprintf_t) (FILE *, struct adsm_module_t_ *);
 
 
 
 /** A simulator module. */
-typedef struct spreadmodel_model_t_
+typedef struct adsm_module_t_
 {
   char *name; /**< A short name for the model. */
   EVT_event_type_t *events_listened_for; /**< A list of events the model listens for. */
   unsigned int nevents_listened_for; /**< Length of events_listened_for. */
   GPtrArray *outputs; /**< A list of the model's output variables. */
   void *model_data; /**< Specialized information for the particular model. */
-  spreadmodel_model_run_t run; /**< A function that runs the model. */
-  spreadmodel_model_reset_t reset; /**< A function that resets the model after one simulation run. */
-  spreadmodel_model_is_listening_for_t is_listening_for; /**< A function that reports whether the model is listening for a given event type.*/
-  spreadmodel_model_has_pending_actions_t has_pending_actions; /**< A function that reports whether the model has any pending actions to carry out.*/
-  spreadmodel_model_has_pending_infections_t has_pending_infections; /**< A function
+  adsm_model_run_t run; /**< A function that runs the model. */
+  adsm_model_reset_t reset; /**< A function that resets the model after one simulation run. */
+  adsm_model_is_listening_for_t is_listening_for; /**< A function that reports whether the model is listening for a given event type.*/
+  adsm_model_has_pending_actions_t has_pending_actions; /**< A function that reports whether the model has any pending actions to carry out.*/
+  adsm_model_has_pending_infections_t has_pending_infections; /**< A function
     that reports whether the model has any pending infections to cause. */
-  spreadmodel_model_to_string_t to_string; /**< A function that returns a string representation of the model. */
-  spreadmodel_model_printf_t printf; /**< A function that prints the model. */
-  spreadmodel_model_fprintf_t fprintf; /**< A function that prints the model to a stream. */
-  spreadmodel_model_free_t free; /**< A function that frees the model. */
+  adsm_module_to_string_t to_string; /**< A function that returns a string representation of the model. */
+  adsm_model_printf_t printf; /**< A function that prints the model. */
+  adsm_model_fprintf_t fprintf; /**< A function that prints the model to a stream. */
+  adsm_model_free_t free; /**< A function that frees the model. */
 }
-spreadmodel_model_t;
+adsm_module_t;
 
 /* Some methods that tend to be the same for most of the modules. */
-gboolean spreadmodel_model_is_listening_for (struct spreadmodel_model_t_ *, EVT_event_type_t);
-char *spreadmodel_model_to_string_default (struct spreadmodel_model_t_ *);
-int spreadmodel_model_fprintf (FILE *, struct spreadmodel_model_t_ *);
-int spreadmodel_model_printf (struct spreadmodel_model_t_ *);
-gboolean spreadmodel_model_answer_yes (struct spreadmodel_model_t_ *);
-gboolean spreadmodel_model_answer_no (struct spreadmodel_model_t_ *);
+gboolean adsm_model_is_listening_for (struct adsm_module_t_ *, EVT_event_type_t);
+char *adsm_module_to_string_default (struct adsm_module_t_ *);
+int adsm_model_fprintf (FILE *, struct adsm_module_t_ *);
+int adsm_model_printf (struct adsm_module_t_ *);
+gboolean adsm_model_answer_yes (struct adsm_module_t_ *);
+gboolean adsm_model_answer_no (struct adsm_module_t_ *);
 
 #endif /* !MODULE_H */

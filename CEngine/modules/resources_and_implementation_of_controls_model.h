@@ -19,9 +19,9 @@
 #ifndef RESOURCES_AND_IMPLEMENTATION_OF_CONTROLS_MODEL_H
 #define RESOURCES_AND_IMPLEMENTATION_OF_CONTROLS_MODEL_H
 
-spreadmodel_model_t *resources_and_implementation_of_controls_model_new (sqlite3 *,
-                                                                         UNT_unit_list_t *,
-                                                                         projPJ,
-                                                                         ZON_zone_list_t *);
+adsm_module_t *resources_and_implementation_of_controls_model_new (sqlite3 *,
+                                                                   UNT_unit_list_t *,
+                                                                   projPJ,
+                                                                   ZON_zone_list_t *);
 
 #endif

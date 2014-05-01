@@ -18,7 +18,7 @@
 #ifndef TRACE_ZONE_FOCUS_MODEL_H
 #define TRACE_ZONE_FOCUS_MODEL_H
 
-spreadmodel_model_t *trace_zone_focus_model_new (sqlite3 *, UNT_unit_list_t *,
-                                                 projPJ, ZON_zone_list_t *);
+adsm_module_t *trace_zone_focus_model_new (sqlite3 *, UNT_unit_list_t *,
+                                           projPJ, ZON_zone_list_t *);
 
 #endif

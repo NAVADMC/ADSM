@@ -131,14 +131,14 @@ get_exit_condition (char *exit_condition_text)
  * @return the number of models loaded.
  */
 int
-spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
-                          projPJ projection, ZON_zone_list_t * zones,
-                          unsigned int *ndays, unsigned int *nruns,
-                          spreadmodel_model_t *** models, GPtrArray * outputs,
-                          guint *_exit_conditions )
+adsm_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
+                   projPJ projection, ZON_zone_list_t * zones,
+                   unsigned int *ndays, unsigned int *nruns,
+                   adsm_module_t *** models, GPtrArray * outputs,
+                   guint *_exit_conditions )
 {
   GPtrArray *tmp_models;
-  spreadmodel_model_t *model;
+  adsm_module_t *model;
   gboolean disable_all_controls;
   gboolean include_zones;
   gboolean include_detection;
@@ -150,14 +150,13 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
   gboolean include_economic;
   int nmodels;
   int i;                        /* loop counter */
-  const char *variable_name;
   unsigned int nzones;
 #if DEBUG
   char *s;
 #endif
 
 #if DEBUG
-  g_debug ("----- ENTER spreadmodel_load_models");
+  g_debug ("----- ENTER adsm_load_models");
 #endif
 
   *ndays = (unsigned int) PAR_get_int (parameter_db, "SELECT days FROM ScenarioCreator_outputsettings");
@@ -358,13 +357,13 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
 #endif
 
 #if DEBUG
-  g_debug ("----- EXIT spreadmodel_load_models");
+  g_debug ("----- EXIT adsm_load_models");
 #endif
 
   /* The caller wants just the array of pointers to models. Discard the
    * GPtrArray objects that wraps that array. */
   nmodels = tmp_models->len;
-  *models = (spreadmodel_model_t **) (tmp_models->pdata);
+  *models = (adsm_module_t **) (tmp_models->pdata);
   g_ptr_array_free (tmp_models, /* free_seg = */ FALSE);
 
   return nmodels;
@@ -379,13 +378,13 @@ spreadmodel_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
  * @param models an array of models.
  */
 void
-spreadmodel_unload_modules (int nmodels, spreadmodel_model_t ** models)
+adsm_unload_modules (int nmodels, adsm_module_t ** models)
 {
-  spreadmodel_model_t *model;
+  adsm_module_t *model;
   int i;                        /* loop counter */
 
 #if DEBUG
-  g_debug ("----- ENTER spreadmodel_unload_models");
+  g_debug ("----- ENTER adsm_unload_models");
 #endif
 
   /* Free each model. */
@@ -397,7 +396,7 @@ spreadmodel_unload_modules (int nmodels, spreadmodel_model_t ** models)
   g_free (models);
 
 #if DEBUG
-  g_debug ("----- EXIT spreadmodel_unload_models");
+  g_debug ("----- EXIT adsm_unload_models");
 #endif
 }
 

@@ -468,7 +468,7 @@
 #include "spatial_search_rtree.h"
 
 #ifdef USE_SC_GUILIB
-#include "sc_spreadmodel_outputs.h"
+#include "sc_adsm_outputs.h"
 #endif
 
 #if HAVE_MPI && !CANCEL_MPI
@@ -679,8 +679,8 @@ run_sim_main (const char *population_file,
   RPT_reporting_t *version;
   GPtrArray *reporting_vars;
   int nmodels = 0;
-  spreadmodel_model_t **models = NULL;
-  spreadmodel_event_manager_t *manager;
+  adsm_module_t **models = NULL;
+  adsm_event_manager_t *manager;
   unsigned int nunits;
   UNT_unit_list_t *units;
   UNT_unit_t *unit;
@@ -710,7 +710,7 @@ run_sim_main (const char *population_file,
   /* This line prints a Byte Order Mark (BOM) that indicates that the output is
    * in UTF-8.  Not currently used. */
   /*
-  if (NULL == spreadmodel_printf)
+  if (NULL == adsm_printf)
     g_print ("%s", "\xEF\xBB\xBF");
   */
 
@@ -738,19 +738,19 @@ run_sim_main (const char *population_file,
       g_log_set_handler ("zone", G_LOG_ALL_LEVELS, silent_log_handler, NULL);
       g_log_set_handler ("gis", G_LOG_ALL_LEVELS, silent_log_handler, NULL);
       g_log_set_handler ("debug_off", G_LOG_ALL_LEVELS, silent_log_handler, NULL);
-      g_log_set_handler ("debug_on", G_LOG_ALL_LEVELS, spreadmodel_log_handler, NULL);
+      g_log_set_handler ("debug_on", G_LOG_ALL_LEVELS, adsm_log_handler, NULL);
       
       g_debug ("This will be the first debugging message reported to the GUI."); 
     #else
-      g_log_set_handler (NULL, G_LOG_ALERT_LEVELS, spreadmodel_log_handler, NULL);
-      g_log_set_handler ("unit", G_LOG_ALERT_LEVELS, spreadmodel_log_handler, NULL);
-      g_log_set_handler ("prob_dist", G_LOG_ALERT_LEVELS, spreadmodel_log_handler, NULL);
-      g_log_set_handler ("rel_chart", G_LOG_ALERT_LEVELS, spreadmodel_log_handler, NULL);
-      g_log_set_handler ("reporting", G_LOG_ALERT_LEVELS, spreadmodel_log_handler, NULL);
-      g_log_set_handler ("zone", G_LOG_ALERT_LEVELS, spreadmodel_log_handler, NULL);
-      g_log_set_handler ("gis", G_LOG_ALERT_LEVELS, spreadmodel_log_handler, NULL);
-      g_log_set_handler ("debug_off", G_LOG_ALERT_LEVELS, spreadmodel_log_handler, NULL);
-      g_log_set_handler ("debug_on", G_LOG_ALERT_LEVELS, spreadmodel_log_handler, NULL); 
+      g_log_set_handler (NULL, G_LOG_ALERT_LEVELS, adsm_log_handler, NULL);
+      g_log_set_handler ("unit", G_LOG_ALERT_LEVELS, adsm_log_handler, NULL);
+      g_log_set_handler ("prob_dist", G_LOG_ALERT_LEVELS, adsm_log_handler, NULL);
+      g_log_set_handler ("rel_chart", G_LOG_ALERT_LEVELS, adsm_log_handler, NULL);
+      g_log_set_handler ("reporting", G_LOG_ALERT_LEVELS, adsm_log_handler, NULL);
+      g_log_set_handler ("zone", G_LOG_ALERT_LEVELS, adsm_log_handler, NULL);
+      g_log_set_handler ("gis", G_LOG_ALERT_LEVELS, adsm_log_handler, NULL);
+      g_log_set_handler ("debug_off", G_LOG_ALERT_LEVELS, adsm_log_handler, NULL);
+      g_log_set_handler ("debug_on", G_LOG_ALERT_LEVELS, adsm_log_handler, NULL); 
     #endif    
   #endif
   
@@ -826,7 +826,7 @@ run_sim_main (const char *population_file,
 
   /* Get the simulation parameters. */
   nmodels =
-    spreadmodel_load_modules (parameter_db, units, units->projection, zones,
+    adsm_load_modules (parameter_db, units, units->projection, zones,
                               &ndays, &nruns, &models, reporting_vars, &exit_conditions );
   nzones = ZON_zone_list_length (zones);
 
@@ -898,7 +898,7 @@ run_sim_main (const char *population_file,
       RAN_fix (rng, fixed_rng_value);
     }
 
-  manager = spreadmodel_new_event_manager (models, nmodels);
+  manager = adsm_new_event_manager (models, nmodels);
 
   /* Determine whether each iteration should end when the active disease phase ends. */
   stop_on_disease_end = (0 != get_stop_on_disease_end( exit_conditions ) );
@@ -909,8 +909,8 @@ run_sim_main (const char *population_file,
 #ifdef USE_SC_GUILIB
   sc_sim_start( units, production_types, zones );
 #else
-  if (NULL != spreadmodel_sim_start)
-    spreadmodel_sim_start ();
+  if (NULL != adsm_sim_start)
+    adsm_sim_start ();
 #endif
 
 
@@ -925,11 +925,11 @@ run_sim_main (const char *population_file,
 */
 
   if (output_dir != NULL)
-    spreadmodel_create_event (manager, EVT_new_output_dir_event((char *)output_dir), units, zones, rng);
-  spreadmodel_create_event (manager, EVT_new_declaration_of_outputs_event(reporting_vars), units, zones, rng);
+    adsm_create_event (manager, EVT_new_output_dir_event((char *)output_dir), units, zones, rng);
+  adsm_create_event (manager, EVT_new_declaration_of_outputs_event(reporting_vars), units, zones, rng);
 
   /* Begin the loop over the specified number of iterations. */
-  spreadmodel_create_event (manager, EVT_new_before_any_simulations_event(), units, zones, rng);
+  adsm_create_event (manager, EVT_new_before_any_simulations_event(), units, zones, rng);
   for (run = 0; run < nruns; run++)
     {
 
@@ -945,9 +945,9 @@ run_sim_main (const char *population_file,
     _iteration.first_detection = FALSE;
 
       /* Does the GUI user want to stop a simulation in progress? */
-      if (NULL != spreadmodel_simulation_stop)
+      if (NULL != adsm_simulation_stop)
         {
-          if (0 != spreadmodel_simulation_stop ())
+          if (0 != adsm_simulation_stop ())
             break;
         }
 
@@ -956,13 +956,13 @@ run_sim_main (const char *population_file,
       #endif
 
 /*
-#error TODO:  After removing the infectious_unit updates from the sc_spreadmodel functions make sure to call them from near here if the optimizations have been defined
+#error TODO:  After removing the infectious_unit updates from the sc_adsm functions make sure to call them from near here if the optimizations have been defined
 */
 #ifdef USE_SC_GUILIB
       sc_iteration_start ( production_types, units,  run);
 #else
-      if (NULL != spreadmodel_iteration_start)
-        spreadmodel_iteration_start (run);
+      if (NULL != adsm_iteration_start)
+        adsm_iteration_start (run);
 #endif
 
       if ( _iteration.infectious_units != NULL )
@@ -988,7 +988,7 @@ run_sim_main (const char *population_file,
       disease_end_recorded = FALSE;
       early_exit = FALSE;
 
-      spreadmodel_create_event (manager, EVT_new_before_each_simulation_event(), units, zones, rng);
+      adsm_create_event (manager, EVT_new_before_each_simulation_event(), units, zones, rng);
 
       /* Run the iteration. */
       start_time = time (NULL);
@@ -1001,11 +1001,11 @@ run_sim_main (const char *population_file,
           double m_day_end_time = m_day_start_time;
 #endif
           /* Does the GUI user want to stop a simulation in progress? */
-          if (NULL != spreadmodel_simulation_stop)
+          if (NULL != adsm_simulation_stop)
             {
               /* This check may break the day loop.
                * If necessary, Another check (see above) will break the iteration loop.*/
-              if (0 != spreadmodel_simulation_stop ())
+              if (0 != adsm_simulation_stop ())
                 break;
             }
 
@@ -1018,15 +1018,15 @@ run_sim_main (const char *population_file,
 #ifdef USE_SC_GUILIB
           sc_day_start( production_types );
 #else
-          if (NULL != spreadmodel_day_start)
-            spreadmodel_day_start (day);
+          if (NULL != adsm_day_start)
+            adsm_day_start (day);
 #endif
 
 #if DEBUG && defined( USE_MPI )
           double m_start_day_time = MPI_Wtime();
 #endif
           /* Process changes made to the units and zones on the previous day. */
-          spreadmodel_create_event (manager, EVT_new_midnight_event (day), units, zones, rng);
+          adsm_create_event (manager, EVT_new_midnight_event (day), units, zones, rng);
 
           /* Check if there are active infections. */
           active_infections_today = FALSE;
@@ -1043,7 +1043,7 @@ run_sim_main (const char *population_file,
             }
 
           /* Run the models to get today's changes. */
-          spreadmodel_create_event (manager, EVT_new_new_day_event (day), units, zones, rng);
+          adsm_create_event (manager, EVT_new_new_day_event (day), units, zones, rng);
 
           /* Check if the outbreak is over, and if so, whether we can exit this
            * Monte Carlo trial early. */
@@ -1077,8 +1077,8 @@ run_sim_main (const char *population_file,
 #ifdef USE_SC_GUILIB
               sc_disease_end( day );
 #else
-              if (NULL != spreadmodel_disease_end)
-                spreadmodel_disease_end (day);
+              if (NULL != adsm_disease_end)
+                adsm_disease_end (day);
 #endif
               disease_end_recorded = TRUE;
             }
@@ -1111,8 +1111,8 @@ run_sim_main (const char *population_file,
 #ifdef USE_SC_GUILIB
           sc_outbreak_end( day );
 #else
-                  if (NULL != spreadmodel_outbreak_end)
-                    spreadmodel_outbreak_end (day);
+                  if (NULL != adsm_outbreak_end)
+                    adsm_outbreak_end (day);
 #endif
                   RPT_reporting_set_integer (last_day_of_outbreak, day - 1, NULL);
                   early_exit = TRUE;
@@ -1120,7 +1120,7 @@ run_sim_main (const char *population_file,
             }
           active_infections_yesterday = active_infections_today;
 
-          spreadmodel_create_event (manager, EVT_new_end_of_day_event (day, early_exit), units, zones, rng);
+          adsm_create_event (manager, EVT_new_end_of_day_event (day, early_exit), units, zones, rng);
 
           /* Next, check for pending actions... */
           pending_actions = FALSE;
@@ -1156,32 +1156,32 @@ run_sim_main (const char *population_file,
             {
               finish_time = time (NULL);
               RPT_reporting_set_real (clock_time, (double) (finish_time - start_time), NULL);
-              spreadmodel_create_event (manager, EVT_new_last_day_event (day), units, zones, rng);
+              adsm_create_event (manager, EVT_new_last_day_event (day), units, zones, rng);
             }
-          spreadmodel_create_event (manager, EVT_new_end_of_day2_event (day, early_exit || day == ndays), units, zones, rng);
+          adsm_create_event (manager, EVT_new_end_of_day2_event (day, early_exit || day == ndays), units, zones, rng);
 
-          if (NULL != spreadmodel_show_all_prevalences)
+          if (NULL != adsm_show_all_prevalences)
             {
               char *prev_summary = UNT_unit_list_prevalence_to_string (units, day);
-              spreadmodel_show_all_prevalences (prev_summary);
+              adsm_show_all_prevalences (prev_summary);
               free (prev_summary);
             }
 
-          if (NULL != spreadmodel_show_all_states)
+          if (NULL != adsm_show_all_states)
             {
               char *summary = UNT_unit_list_summary_to_string (units);
-              spreadmodel_show_all_states (summary);
+              adsm_show_all_states (summary);
               free (summary);
             }
 
-          if (NULL != spreadmodel_set_zone_perimeters)
-            spreadmodel_set_zone_perimeters (zones);
+          if (NULL != adsm_set_zone_perimeters)
+            adsm_set_zone_perimeters (zones);
 
 #ifdef USE_SC_GUILIB
           sc_day_complete( day, run, production_types, zones );
 #else
-          if (NULL != spreadmodel_day_complete)
-            spreadmodel_day_complete (day);
+          if (NULL != adsm_day_complete)
+            adsm_day_complete (day);
 #endif
 
 #if defined( USE_MPI ) && !CANCEL_MPI
@@ -1193,8 +1193,8 @@ run_sim_main (const char *population_file,
 #ifdef USE_SC_GUILIB
       sc_iteration_complete( zones, units, production_types, run );
 #else
-      if (NULL != spreadmodel_iteration_complete)
-        spreadmodel_iteration_complete (run);
+      if (NULL != adsm_iteration_complete)
+        adsm_iteration_complete (run);
 #endif
 
 #if defined( USE_MPI ) && !CANCEL_MPI
@@ -1230,17 +1230,17 @@ run_sim_main (const char *population_file,
     };
 #else
   /* Inform the GUI that the simulation has ended */
-  if (NULL != spreadmodel_sim_complete)
+  if (NULL != adsm_sim_complete)
     {
-      if (-1 == spreadmodel_simulation_stop ())
+      if (-1 == adsm_simulation_stop ())
         {
           /* simulation was interrupted by the user and did not complete. */
-          spreadmodel_sim_complete (0);
+          adsm_sim_complete (0);
         }
       else
         {
           /* Simulation ran to completion. */
-          spreadmodel_sim_complete (-1);
+          adsm_sim_complete (-1);
         }
     }
 #endif
@@ -1249,8 +1249,8 @@ run_sim_main (const char *population_file,
   RPT_free_reporting (last_day_of_outbreak);
   RPT_free_reporting (clock_time);
   RPT_free_reporting (version);
-  spreadmodel_free_event_manager (manager);
-  spreadmodel_unload_modules (nmodels, models);
+  adsm_free_event_manager (manager);
+  adsm_unload_modules (nmodels, models);
   RAN_free_generator (rng);
   ZON_free_zone_list (zones);
   UNT_free_unit_list (units);

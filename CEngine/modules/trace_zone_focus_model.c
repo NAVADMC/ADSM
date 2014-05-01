@@ -71,7 +71,7 @@ EVT_event_type_t events_listened_for[] = { EVT_TraceResult };
 /** Specialized information for this model. */
 typedef struct
 {
-  gboolean *create_zone[SPREADMODEL_NCONTACT_TYPES]; /**< Whether or not to
+  gboolean *create_zone[ADSM_NCONTACT_TYPES]; /**< Whether or not to
     create a zone around a unit.  Use an expression of the form
     trace_period[contact_type][production_type]
     to retrieve a value. */
@@ -89,7 +89,7 @@ local_data_t;
  * @param queue for any new events the model creates.
  */
 void
-handle_trace_result_event (struct spreadmodel_model_t_ *self,
+handle_trace_result_event (struct adsm_module_t_ *self,
                            EVT_trace_result_event_t * event, EVT_event_queue_t * queue)
 {
   local_data_t *local_data;
@@ -100,7 +100,7 @@ handle_trace_result_event (struct spreadmodel_model_t_ *self,
 #endif
 
   local_data = (local_data_t *) (self->model_data);
-  if (event->direction == SPREADMODEL_TraceForwardOrOut)
+  if (event->direction == ADSM_TraceForwardOrOut)
     unit = event->exposed_unit;
   else
     unit = event->exposing_unit;
@@ -132,7 +132,7 @@ handle_trace_result_event (struct spreadmodel_model_t_ *self,
  * @param queue for any new events the model creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
      ZON_zone_list_t * zones, EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
 #if DEBUG
@@ -163,7 +163,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
  * @param self the model.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
 #if DEBUG
   g_debug ("----- ENTER reset (%s)", MODEL_NAME);
@@ -185,7 +185,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @return a string.
  */
 char *
-to_string (struct spreadmodel_model_t_ *self)
+to_string (struct adsm_module_t_ *self)
 {
   GString *s;
   guint i, j;
@@ -197,13 +197,13 @@ to_string (struct spreadmodel_model_t_ *self)
   g_string_sprintf (s, "<%s create zones around", MODEL_NAME);
   for (i = 0; i < local_data->production_types->len; i++)
     {
-      for (j = 0; j < SPREADMODEL_NCONTACT_TYPES; j++)
+      for (j = 0; j < ADSM_NCONTACT_TYPES; j++)
         {
           if (local_data->create_zone[j][i] == TRUE)
             {
               g_string_append_printf (s, "\n  %s found by trace of %s",
                                       (char *) g_ptr_array_index (local_data->production_types, i),
-                                      SPREADMODEL_contact_type_name[j]);
+                                      ADSM_contact_type_name[j]);
              
             }
         }
@@ -224,7 +224,7 @@ to_string (struct spreadmodel_model_t_ *self)
  * @param self the model.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   guint i;
@@ -235,7 +235,7 @@ local_free (struct spreadmodel_model_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+  for (i = 0; i < ADSM_NCONTACT_TYPES; i++)
     {
       g_free (local_data->create_zone[i]);
     }
@@ -262,7 +262,7 @@ local_free (struct spreadmodel_model_t_ *self)
 static int
 set_params (void *data, int ncols, char **value, char **colname)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   guint production_type;
   long int tmp;
@@ -271,13 +271,13 @@ set_params (void *data, int ncols, char **value, char **colname)
     g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
   #endif
 
-  self = (spreadmodel_model_t *)data;
+  self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
   g_assert (ncols == 3);
 
   /* Find out which production type these parameters apply to. */
-  production_type = spreadmodel_read_prodtype (value[0], local_data->production_types);
+  production_type = adsm_read_prodtype (value[0], local_data->production_types);
 
   errno = 0;
   tmp = strtol (value[1], NULL, /* base */ 10);
@@ -285,7 +285,7 @@ set_params (void *data, int ncols, char **value, char **colname)
   g_assert (tmp == 0 || tmp == 1);
   if (tmp == 1)
     {
-      local_data->create_zone[SPREADMODEL_DirectContact][production_type] = TRUE;
+      local_data->create_zone[ADSM_DirectContact][production_type] = TRUE;
     }
   errno = 0;
   tmp = strtol (value[2], NULL, /* base */ 10);
@@ -293,7 +293,7 @@ set_params (void *data, int ncols, char **value, char **colname)
   g_assert (tmp == 0 || tmp == 1);
   if (tmp == 1)
     {
-      local_data->create_zone[SPREADMODEL_IndirectContact][production_type] = TRUE;
+      local_data->create_zone[ADSM_IndirectContact][production_type] = TRUE;
     }
 
   #if DEBUG
@@ -308,11 +308,11 @@ set_params (void *data, int ncols, char **value, char **colname)
 /**
  * Returns a new trace zone focus model.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   guint nprod_types, i;
   char *sqlerr;
@@ -321,7 +321,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
 #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -331,18 +331,18 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
-  self->has_pending_actions = spreadmodel_model_answer_no;
-  self->has_pending_infections = spreadmodel_model_answer_no;
+  self->is_listening_for = adsm_model_is_listening_for;
+  self->has_pending_actions = adsm_model_answer_no;
+  self->has_pending_infections = adsm_model_answer_no;
   self->to_string = to_string;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
   /* Initialize the 2D array of booleans. */
   local_data->production_types = units->production_type_names;
   nprod_types = local_data->production_types->len;
-  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+  for (i = 0; i < ADSM_NCONTACT_TYPES; i++)
     {
       local_data->create_zone[i] = g_new0 (gboolean, nprod_types);
     }

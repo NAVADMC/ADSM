@@ -217,9 +217,9 @@ check_circle_and_rezone (int id, gpointer arg)
 #ifdef USE_SC_GUILIB
                   sc_record_zone_change( unit, zone );
 #else				  
-                  if( NULL != spreadmodel_record_zone_change )
+                  if( NULL != adsm_record_zone_change )
                     {
-                      spreadmodel_record_zone_change( zone_update );
+                      adsm_record_zone_change( zone_update );
                     };
 #endif				  
 #if DEBUG
@@ -322,9 +322,9 @@ check_poly_and_rezone (int id, gpointer arg)
 #ifdef USE_SC_GUILIB
 			  sc_record_zone_change( unit, zone );
 #else			  
-			  if( NULL != spreadmodel_record_zone_change )
+			  if( NULL != adsm_record_zone_change )
                 {
-                  spreadmodel_record_zone_change( zone_update );
+                  adsm_record_zone_change( zone_update );
                 };
 #endif			  
 
@@ -357,7 +357,7 @@ check_poly_and_rezone (int id, gpointer arg)
  * @param zones the zone list.
  */
 void
-handle_request_for_zone_focus_event (struct spreadmodel_model_t_ *self,
+handle_request_for_zone_focus_event (struct adsm_module_t_ *self,
                                      EVT_request_for_zone_focus_event_t * event,
                                      ZON_zone_list_t * zones)
 {
@@ -378,8 +378,8 @@ handle_request_for_zone_focus_event (struct spreadmodel_model_t_ *self,
 #ifdef USE_SC_GUILIB
   sc_make_zone_focus( event->day, unit );
 #else
-  if( NULL != spreadmodel_make_zone_focus )
-    spreadmodel_make_zone_focus (unit->index);
+  if( NULL != adsm_make_zone_focus )
+    adsm_make_zone_focus (unit->index);
 #endif
 
 #if DEBUG
@@ -399,7 +399,7 @@ handle_request_for_zone_focus_event (struct spreadmodel_model_t_ *self,
  * @param event a midnight event.
  */
 void
-handle_midnight_event (struct spreadmodel_model_t_ *self,
+handle_midnight_event (struct adsm_module_t_ *self,
                        UNT_unit_list_t * units,
                        ZON_zone_list_t * zones,
                        EVT_midnight_event_t * event)
@@ -541,10 +541,10 @@ handle_midnight_event (struct spreadmodel_model_t_ *self,
     }                           /* end of loop over pending foci */
 
 #if DEBUG
-  if( NULL != spreadmodel_report_search_hits )
+  if( NULL != adsm_report_search_hits )
     {
       for( i = 0; i < report_array_size; ++i )
-        spreadmodel_report_search_hits( ZON_zone_list_get( zones, i )->level,
+        adsm_report_search_hits( ZON_zone_list_get( zones, i )->level,
                                         nHitsCircle[i], nHitsCircle[i],
                                         nHitsPoly[i], nHitsPoly[i] );
     }
@@ -574,7 +574,7 @@ end:
  * @param queue for any new events the model creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
      ZON_zone_list_t * zones, EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
 #if DEBUG
@@ -608,7 +608,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units,
  * @param self the model.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
 #if DEBUG
   g_debug ("----- ENTER reset (%s)", MODEL_NAME);
@@ -630,7 +630,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @return a string.
  */
 char *
-to_string (struct spreadmodel_model_t_ *self)
+to_string (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   GString *s;
@@ -661,7 +661,7 @@ to_string (struct spreadmodel_model_t_ *self)
  * @param self the model.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -699,7 +699,7 @@ local_free (struct spreadmodel_model_t_ *self)
 static int
 set_params (void *data, int ncols, char **value, char **colname)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data = NULL;
   gchar *name;
   double radius;
@@ -709,7 +709,7 @@ set_params (void *data, int ncols, char **value, char **colname)
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
-  self = (spreadmodel_model_t *)data;
+  self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
   if (value[0] != NULL)
@@ -750,11 +750,11 @@ set_params (void *data, int ncols, char **value, char **colname)
 /**
  * Returns a new zone model.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   char *sqlerr;
 
@@ -762,7 +762,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
 #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -772,12 +772,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
-  self->has_pending_actions = spreadmodel_model_answer_no;
-  self->has_pending_infections = spreadmodel_model_answer_no;
+  self->is_listening_for = adsm_model_is_listening_for;
+  self->has_pending_actions = adsm_model_answer_no;
+  self->has_pending_infections = adsm_model_answer_no;
   self->to_string = to_string;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
   local_data->units = units;

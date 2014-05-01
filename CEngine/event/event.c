@@ -362,7 +362,7 @@ EVT_new_day_event_to_string (EVT_new_day_event_t * event)
  */
 EVT_event_t *
 EVT_new_exposure_event (UNT_unit_t * exposing_unit, UNT_unit_t * exposed_unit,
-                        int day, SPREADMODEL_contact_type contact_type, gboolean traceable,
+                        int day, ADSM_contact_type contact_type, gboolean traceable,
                         gboolean adequate, int delay)
 {
   EVT_event_t *event;
@@ -400,7 +400,7 @@ EVT_exposure_event_to_string (EVT_exposure_event_t * event)
   g_string_sprintf (s, "<Exposure event units=\"%s\"->\"%s\" (%s) day=%i traceable=%i>",
                     event->exposing_unit->official_id,
                     event->exposed_unit->official_id,
-                    SPREADMODEL_contact_type_name[event->contact_type], event->day, event->traceable);
+                    ADSM_contact_type_name[event->contact_type], event->day, event->traceable);
   /* don't return the wrapper object */
   chararray = s->str;
   g_string_free (s, FALSE);
@@ -417,7 +417,7 @@ EVT_exposure_event_to_string (EVT_exposure_event_t * event)
 EVT_event_t *
 EVT_new_attempt_to_infect_event (UNT_unit_t * infecting_unit,
                                  UNT_unit_t * infected_unit, int day,
-                                 SPREADMODEL_contact_type contact_type)
+                                 ADSM_contact_type contact_type)
 {
   EVT_event_t *event;
 
@@ -481,7 +481,7 @@ EVT_attempt_to_infect_event_to_string (EVT_attempt_to_infect_event_t * event)
  */
 EVT_event_t *
 EVT_new_infection_event (UNT_unit_t * infecting_unit, UNT_unit_t * infected_unit,
-                         int day, SPREADMODEL_contact_type contact_type)
+                         int day, ADSM_contact_type contact_type)
 {
   EVT_event_t *event;
 
@@ -539,8 +539,8 @@ EVT_infection_event_to_string (EVT_infection_event_t * event)
  */
 EVT_event_t *
 EVT_new_detection_event (UNT_unit_t * unit, int day,
-                         SPREADMODEL_detection_reason means,
-                         SPREADMODEL_test_result test_result)
+                         ADSM_detection_reason means,
+                         ADSM_test_result test_result)
 {
   EVT_event_t *event;
 
@@ -624,7 +624,7 @@ EVT_public_announcement_event_to_string (EVT_public_announcement_event_t * event
  * @return a pointer to a newly-created EVT_event_t structure.
  */
 EVT_event_t *
-EVT_new_exam_event (UNT_unit_t * unit, int day, SPREADMODEL_control_reason reason,
+EVT_new_exam_event (UNT_unit_t * unit, int day, ADSM_control_reason reason,
                     double detection_multiplier, gboolean test_if_no_signs)
 {
   EVT_event_t *event;
@@ -673,8 +673,8 @@ EVT_exam_event_to_string (EVT_exam_event_t * event)
  */
 EVT_event_t *
 EVT_new_attempt_to_trace_event (UNT_unit_t * unit, int day,
-                                SPREADMODEL_contact_type contact_type,
-                                SPREADMODEL_trace_direction direction,
+                                ADSM_contact_type contact_type,
+                                ADSM_trace_direction direction,
                                 int trace_period)
 {
   EVT_event_t *event;
@@ -708,8 +708,8 @@ EVT_attempt_to_trace_event_to_string (EVT_attempt_to_trace_event_t * event)
                     event->unit->official_id,
                     event->unit->production_type_name,
                     event->day,
-                    SPREADMODEL_contact_type_abbrev[event->contact_type],
-                    SPREADMODEL_trace_direction_abbrev[event->direction]);
+                    ADSM_contact_type_abbrev[event->contact_type],
+                    ADSM_trace_direction_abbrev[event->direction]);
   /* don't return the wrapper object */
   chararray = s->str;
   g_string_free (s, FALSE);
@@ -726,8 +726,8 @@ EVT_attempt_to_trace_event_to_string (EVT_attempt_to_trace_event_t * event)
 EVT_event_t *
 EVT_new_trace_result_event (UNT_unit_t * exposing_unit,
                             UNT_unit_t * exposed_unit,
-                            SPREADMODEL_contact_type contact_type,
-                            SPREADMODEL_trace_direction direction,
+                            ADSM_contact_type contact_type,
+                            ADSM_trace_direction direction,
                             int day, int initiated_day, gboolean traced)
 {
   EVT_event_t *event;
@@ -766,8 +766,8 @@ EVT_trace_result_event_to_string (EVT_trace_result_event_t * event)
                     event->exposed_unit->production_type_name,
                     event->day,
                     event->initiated_day,
-                    SPREADMODEL_contact_type_abbrev[event->contact_type],
-                    SPREADMODEL_trace_direction_abbrev[event->direction],
+                    ADSM_contact_type_abbrev[event->contact_type],
+                    ADSM_trace_direction_abbrev[event->direction],
                     event->traced == TRUE ? "succeeded" : "failed");
   /* don't return the wrapper object */
   chararray = s->str;
@@ -783,7 +783,7 @@ EVT_trace_result_event_to_string (EVT_trace_result_event_t * event)
  * @return a pointer to a newly-created EVT_event_t structure.
  */
 EVT_event_t *
-EVT_new_test_event (UNT_unit_t * unit, int day, SPREADMODEL_control_reason reason)
+EVT_new_test_event (UNT_unit_t * unit, int day, ADSM_control_reason reason)
 {
   EVT_event_t *event;
 
@@ -828,7 +828,7 @@ EVT_test_event_to_string (EVT_test_event_t * event)
 EVT_event_t *
 EVT_new_test_result_event (UNT_unit_t * unit, int day,
                            gboolean positive, gboolean correct,
-                           SPREADMODEL_control_reason reason)
+                           ADSM_control_reason reason)
 {
   EVT_event_t *event;
 

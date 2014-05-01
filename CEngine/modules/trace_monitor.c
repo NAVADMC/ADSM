@@ -86,7 +86,7 @@ typedef struct
   RPT_reporting_t *cumul_nanimals_traced_by_contacttype_and_prodtype;
   /* These two arrays are needed to form variable names like "trcUDirp" and
    * "trcUIndPigsp". */
-  char *contact_type_name_with_p[SPREADMODEL_NCONTACT_TYPES];
+  char *contact_type_name_with_p[ADSM_NCONTACT_TYPES];
   char **production_type_name_with_p;
 }
 local_data_t;
@@ -101,7 +101,7 @@ local_data_t;
  * @param queue for any new events this function creates.
  */
 void
-handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
+handle_before_any_simulations_event (struct adsm_module_t_ *self,
                                      EVT_event_queue_t *queue)
 {
   unsigned int n, i;
@@ -136,7 +136,7 @@ handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
  * @param self the model.
  */
 void
-handle_new_day_event (struct spreadmodel_model_t_ *self)
+handle_new_day_event (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -178,7 +178,7 @@ handle_new_day_event (struct spreadmodel_model_t_ *self)
  * @param event a trace result event.
  */
 void
-handle_trace_result_event (struct spreadmodel_model_t_ *self, EVT_trace_result_event_t *event)
+handle_trace_result_event (struct adsm_module_t_ *self, EVT_trace_result_event_t *event)
 {
   local_data_t *local_data;
   UNT_unit_t *identified_unit, *origin_unit;
@@ -190,8 +190,8 @@ handle_trace_result_event (struct spreadmodel_model_t_ *self, EVT_trace_result_e
     g_debug ("----- ENTER handle_trace_result_event (%s)", MODEL_NAME);
   #endif
 
-  identified_unit = (event->direction == SPREADMODEL_TraceForwardOrOut) ? event->exposed_unit : event->exposing_unit;
-  origin_unit = (event->direction == SPREADMODEL_TraceForwardOrOut) ? event->exposing_unit : event->exposed_unit; 
+  identified_unit = (event->direction == ADSM_TraceForwardOrOut) ? event->exposed_unit : event->exposing_unit;
+  origin_unit = (event->direction == ADSM_TraceForwardOrOut) ? event->exposing_unit : event->exposed_unit; 
   
   /* Record the trace in the GUI */
   /* --------------------------- */
@@ -199,30 +199,30 @@ handle_trace_result_event (struct spreadmodel_model_t_ *self, EVT_trace_result_e
   trace.initiated_day = (int) event->initiated_day;
   
   trace.identified_index = identified_unit->index;
-  trace.identified_state = (SPREADMODEL_disease_state) identified_unit->state;
+  trace.identified_state = (ADSM_disease_state) identified_unit->state;
   
   trace.origin_index = origin_unit->index; 
-  trace.origin_state = (SPREADMODEL_disease_state) origin_unit->state;
+  trace.origin_state = (ADSM_disease_state) origin_unit->state;
   
   trace.trace_type = event->direction;
   trace.contact_type = event->contact_type;
-  if (trace.contact_type != SPREADMODEL_DirectContact
-      && trace.contact_type != SPREADMODEL_IndirectContact)
+  if (trace.contact_type != ADSM_DirectContact
+      && trace.contact_type != ADSM_IndirectContact)
     {
       g_error( "Bad contact type in contact-recorder-model.attempt_trace_event" );
       trace.contact_type = 0;
     }
 
   if( TRUE == event->traced )
-    trace.success = SPREADMODEL_SuccessTrue;
+    trace.success = ADSM_SuccessTrue;
   else
-    trace.success = SPREADMODEL_SuccessFalse; 
+    trace.success = ADSM_SuccessFalse; 
 
   #ifdef USE_SC_GUILIB
     sc_trace_unit( event->exposed_unit, trace );
   #else
-    if (NULL != spreadmodel_trace_unit)
-      spreadmodel_trace_unit (trace);
+    if (NULL != adsm_trace_unit)
+      adsm_trace_unit (trace);
   #endif
 
 
@@ -230,7 +230,7 @@ handle_trace_result_event (struct spreadmodel_model_t_ *self, EVT_trace_result_e
   /* ---------------------------------- */
   local_data = (local_data_t *) (self->model_data);
   
-  contact_type_name = SPREADMODEL_contact_type_abbrev[event->contact_type];
+  contact_type_name = ADSM_contact_type_abbrev[event->contact_type];
   drill_down_list[0] = contact_type_name;
 
   /* Record a potentially traced contact. */
@@ -340,7 +340,7 @@ handle_trace_result_event (struct spreadmodel_model_t_ *self, EVT_trace_result_e
  * @param queue for any new events the model creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
      EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
 #if DEBUG
@@ -377,7 +377,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
  * @param self the model.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -417,7 +417,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @param self the model.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
   unsigned int i;
@@ -462,7 +462,7 @@ local_free (struct spreadmodel_model_t_ *self)
   RPT_free_reporting (local_data->cumul_nanimals_traced_by_prodtype);
   RPT_free_reporting (local_data->cumul_nanimals_traced_by_contacttype_and_prodtype);
 
-  for (i = SPREADMODEL_DirectContact; i <= SPREADMODEL_IndirectContact; i++)
+  for (i = ADSM_DirectContact; i <= ADSM_IndirectContact; i++)
     g_free (local_data->contact_type_name_with_p[i]);
   for (i = 0; i < local_data->production_types->len; i++)
     g_free (local_data->production_type_name_with_p[i]);
@@ -482,11 +482,11 @@ local_free (struct spreadmodel_model_t_ *self)
 /**
  * Returns a new trace monitor.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projections,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   unsigned int i, j;      /* loop counters */
   const char *contact_type_name;
@@ -497,7 +497,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projections,
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
 #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -507,12 +507,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projections,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
-  self->has_pending_actions = spreadmodel_model_answer_no;
-  self->has_pending_infections = spreadmodel_model_answer_no;
-  self->to_string = spreadmodel_model_to_string_default;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->is_listening_for = adsm_model_is_listening_for;
+  self->has_pending_actions = adsm_model_answer_no;
+  self->has_pending_infections = adsm_model_answer_no;
+  self->to_string = adsm_module_to_string_default;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
   local_data->nunits_potentially_traced =
@@ -617,19 +617,19 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projections,
   /* Initialize the categories in the output variables. */
   local_data->production_types = units->production_type_names;
   /* These are the outputs broken down by contact type. */
-  for (i = SPREADMODEL_DirectContact; i <= SPREADMODEL_IndirectContact; i++)
+  for (i = ADSM_DirectContact; i <= ADSM_IndirectContact; i++)
     {
       /* Make a copy of each contact type name, but with "p" appended.  We need
        * this to form variables like "trcUDirp" and "trcUIndp". */
       local_data->contact_type_name_with_p[i] =
-        g_strdup_printf ("%sp", SPREADMODEL_contact_type_abbrev[i]);
+        g_strdup_printf ("%sp", ADSM_contact_type_abbrev[i]);
       
       contact_type_name = local_data->contact_type_name_with_p[i];
       RPT_reporting_add_integer1 (local_data->nunits_potentially_traced_by_contacttype, 0, contact_type_name);
       RPT_reporting_add_integer1 (local_data->cumul_nunits_potentially_traced_by_contacttype, 0, contact_type_name);
       RPT_reporting_add_integer1 (local_data->nanimals_potentially_traced_by_contacttype, 0, contact_type_name);
       RPT_reporting_add_integer1 (local_data->cumul_nanimals_potentially_traced_by_contacttype, 0, contact_type_name);
-      contact_type_name = SPREADMODEL_contact_type_abbrev[i];
+      contact_type_name = ADSM_contact_type_abbrev[i];
       RPT_reporting_add_integer1 (local_data->nunits_traced_by_contacttype, 0, contact_type_name);
       RPT_reporting_add_integer1 (local_data->cumul_nunits_traced_by_contacttype, 0, contact_type_name);
       RPT_reporting_add_integer1 (local_data->nanimals_traced_by_contacttype, 0, contact_type_name);
@@ -656,9 +656,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projections,
       RPT_reporting_add_integer1 (local_data->cumul_nanimals_traced_by_prodtype, 0, prodtype_name);
     }
   /* These are the outputs broken down by contact type and production type. */
-  for (i = SPREADMODEL_DirectContact; i <= SPREADMODEL_IndirectContact; i++)
+  for (i = ADSM_DirectContact; i <= ADSM_IndirectContact; i++)
     {
-      drill_down_list[0] = SPREADMODEL_contact_type_abbrev[i];
+      drill_down_list[0] = ADSM_contact_type_abbrev[i];
       for (j = 0; j < local_data->production_types->len; j++)
         {
           drill_down_list[1] = local_data->production_type_name_with_p[j];

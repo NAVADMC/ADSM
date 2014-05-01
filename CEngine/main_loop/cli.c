@@ -1,5 +1,5 @@
 /** @file cli.c
- * A command-line interface for SpreadModel.
+ * A command-line interface for ADSM.
  *
  * @author Neil Harvey <nharve01@uoguelph.ca><br>
  *   School of Computer Science, University of Guelph<br>
@@ -61,7 +61,7 @@ main (int argc, char *argv[])
     g_error ("Couldn't initialize MPI.");
 #endif
 
-  clear_spreadmodel_fns ();
+  clear_adsm_fns ();
 
 #ifdef USE_SC_GUILIB
   _scenario.scenarioId = NULL;
