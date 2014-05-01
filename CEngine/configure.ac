@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(spreadmodel, 3.2.19b)
+AC_INIT(adsm, 3.2.19b)
 AC_CONFIG_SRCDIR(main_loop/main_loop.c)
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(config.h)

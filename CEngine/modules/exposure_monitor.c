@@ -38,8 +38,6 @@
 
 #include "exposure_monitor.h"
 
-#include "spreadmodel.h"
-
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "exposure-monitor"
 
@@ -85,7 +83,7 @@ local_data_t;
  * @param queue for any new events this function creates.
  */
 void
-handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
+handle_before_any_simulations_event (struct adsm_module_t_ *self,
                                      EVT_event_queue_t *queue)
 {
   unsigned int n, i;
@@ -120,7 +118,7 @@ handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
  * @param self the model.
  */
 void
-handle_new_day_event (struct spreadmodel_model_t_ *self)
+handle_new_day_event (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -155,7 +153,7 @@ handle_new_day_event (struct spreadmodel_model_t_ *self)
  * @param event an exposure event.
  */
 void
-handle_exposure_event (struct spreadmodel_model_t_ *self, EVT_exposure_event_t * event)
+handle_exposure_event (struct adsm_module_t_ *self, EVT_exposure_event_t * event)
 {
   local_data_t *local_data;
   UNT_unit_t *exposing_unit, *exposed_unit;
@@ -171,26 +169,26 @@ handle_exposure_event (struct spreadmodel_model_t_ *self, EVT_exposure_event_t *
   exposing_unit = event->exposing_unit;
   exposed_unit = event->exposed_unit;
 
-  cause = SPREADMODEL_contact_type_abbrev[event->contact_type];
+  cause = ADSM_contact_type_abbrev[event->contact_type];
                                 
   update.src_index = exposing_unit->index;
-  update.src_state = (SPREADMODEL_disease_state) exposing_unit->state;
+  update.src_state = (ADSM_disease_state) exposing_unit->state;
   update.dest_index = exposed_unit->index;
-  update.dest_state = (SPREADMODEL_disease_state) exposed_unit->state;
+  update.dest_state = (ADSM_disease_state) exposed_unit->state;
   
   update.initiated_day = (int) event->initiated_day;
   update.finalized_day = (int) event->initiated_day + event->delay;
   
   if( TRUE == event->adequate )
-    update.is_adequate = SPREADMODEL_SuccessTrue;
+    update.is_adequate = ADSM_SuccessTrue;
   else
-    update.is_adequate = SPREADMODEL_SuccessFalse;
+    update.is_adequate = ADSM_SuccessFalse;
   
   switch (event->contact_type)
     {
-      case SPREADMODEL_DirectContact:
-      case SPREADMODEL_IndirectContact:
-      case SPREADMODEL_AirborneSpread:
+      case ADSM_DirectContact:
+      case ADSM_IndirectContact:
+      case ADSM_AirborneSpread:
         update.exposure_method = event->contact_type;
         break;      
       default:
@@ -203,9 +201,9 @@ handle_exposure_event (struct spreadmodel_model_t_ *self, EVT_exposure_event_t *
 #ifdef USE_SC_GUILIB
   sc_expose_unit( exposed_unit, update );
 #else	  
-  if (NULL != spreadmodel_expose_unit)
+  if (NULL != adsm_expose_unit)
     {
-      spreadmodel_expose_unit (update);
+      adsm_expose_unit (update);
     }
 #endif  
 
@@ -264,7 +262,7 @@ handle_exposure_event (struct spreadmodel_model_t_ *self, EVT_exposure_event_t *
  * @param queue for any new events the model creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
      EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
 #if DEBUG
@@ -301,7 +299,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
  * @param self the model.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -333,7 +331,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @param self the model.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -376,11 +374,11 @@ local_free (struct spreadmodel_model_t_ *self)
 /**
  * Returns a new exposure monitor.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   guint n, i, j;
   char *prodtype_name;
@@ -389,7 +387,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
 #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -399,12 +397,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
-  self->has_pending_actions = spreadmodel_model_answer_no;
-  self->has_pending_infections = spreadmodel_model_answer_no;
-  self->to_string = spreadmodel_model_to_string_default;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->is_listening_for = adsm_model_is_listening_for;
+  self->has_pending_actions = adsm_model_answer_no;
+  self->has_pending_infections = adsm_model_answer_no;
+  self->to_string = adsm_module_to_string_default;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
   local_data->num_units_exposed =
@@ -475,14 +473,14 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       RPT_reporting_add_integer1 (local_data->num_animals_exposed_by_prodtype, 0, prodtype_name);
       RPT_reporting_add_integer1 (local_data->cumul_num_animals_exposed_by_prodtype, 0, prodtype_name);
     }
-  for (i = 0; i < SPREADMODEL_NCONTACT_TYPES; i++)
+  for (i = 0; i < ADSM_NCONTACT_TYPES; i++)
     {
       const char *cause;
       const char *drill_down_list[3] = { NULL, NULL, NULL };
-      if ((SPREADMODEL_contact_type)i == SPREADMODEL_UnspecifiedInfectionType
-          || (SPREADMODEL_contact_type)i == SPREADMODEL_InitiallyInfected)
+      if ((ADSM_contact_type)i == ADSM_UnspecifiedInfectionType
+          || (ADSM_contact_type)i == ADSM_InitiallyInfected)
         continue;
-      cause = SPREADMODEL_contact_type_abbrev[i];
+      cause = ADSM_contact_type_abbrev[i];
       RPT_reporting_add_integer1 (local_data->num_units_exposed_by_cause, 0, cause);
       RPT_reporting_add_integer1 (local_data->cumul_num_units_exposed_by_cause, 0, cause);
       RPT_reporting_add_integer1 (local_data->num_animals_exposed_by_cause, 0, cause);

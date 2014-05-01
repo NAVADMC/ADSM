@@ -19,7 +19,7 @@
 #ifndef CONTACT_SPREAD_MODEL_H
 #define CONTACT_SPREAD_MODEL_H
 
-spreadmodel_model_t *contact_spread_model_new (sqlite3 *, UNT_unit_list_t *,
-                                               projPJ, ZON_zone_list_t *);
+adsm_module_t *contact_spread_model_new (sqlite3 *, UNT_unit_list_t *,
+                                         projPJ, ZON_zone_list_t *);
 
 #endif

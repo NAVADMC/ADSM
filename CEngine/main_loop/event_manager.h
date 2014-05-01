@@ -1,6 +1,6 @@
 /** @file event_manager.h
  * Interface for event_manager.c.  The event manager is a singleton object that
- * handles all communication among sub-models.  See spreadmodel_create_event() for
+ * handles all communication among sub-models.  See adsm_create_event() for
  * a flowchart describing its actions.
  *
  * @author Neil Harvey <nharve01@uoguelph.ca><br>
@@ -35,18 +35,18 @@
 typedef struct
 {
   int nmodels;
-  spreadmodel_model_t **models;
+  adsm_module_t **models;
   EVT_event_queue_t *queue;
   GSList *listeners[EVT_NEVENT_TYPES]; /** which models are listening for which events */
 }
-spreadmodel_event_manager_t;
+adsm_event_manager_t;
 
 
 
 /* Prototypes. */
-spreadmodel_event_manager_t *spreadmodel_new_event_manager (spreadmodel_model_t **, int);
-void spreadmodel_free_event_manager (spreadmodel_event_manager_t *);
-void spreadmodel_create_event (spreadmodel_event_manager_t *, EVT_event_t *,
+adsm_event_manager_t *adsm_new_event_manager (adsm_module_t **, int);
+void adsm_free_event_manager (adsm_event_manager_t *);
+void adsm_create_event (adsm_event_manager_t *, EVT_event_t *,
                                UNT_unit_list_t *, ZON_zone_list_t *, RAN_gen_t *);
                           
 

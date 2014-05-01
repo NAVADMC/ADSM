@@ -71,20 +71,13 @@ double trunc (double);
 
 #define EPSILON 0.001
 
-#include <spreadmodel.h>
+#include "adsm.h"
 
 #ifdef USE_SC_GUILIB
 #  include <sc_guilib_outputs.h>
 #endif
 
 
-
-/*
-unit.c needs access to the functions defined in spreadmodel.h,
-even when compiled as a *nix executable (in which case,
-the functions defined will all be NULL).
-*/
-#include "spreadmodel.h"
 
 /**
  * A table of all valid state transitions.
@@ -2068,13 +2061,13 @@ UNT_step (UNT_unit_t * unit, GHashTable *infectious_units)
     {
       UNT_update_t update;
       update.unit_index = unit->index;
-      update.state = (SPREADMODEL_disease_state) unit->state;
+      update.state = (ADSM_disease_state) unit->state;
 #ifdef USE_SC_GUILIB
       sc_change_unit_state ( unit, update );
 #else
-      if (NULL != spreadmodel_change_unit_state)
+      if (NULL != adsm_change_unit_state)
         {
-          spreadmodel_change_unit_state (update);
+          adsm_change_unit_state (update);
         }
 #endif
     }

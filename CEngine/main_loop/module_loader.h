@@ -23,10 +23,10 @@
 
 
 /* Prototypes. */
-int spreadmodel_load_modules (sqlite3 *parameter_db,
-                              UNT_unit_list_t *, projPJ, ZON_zone_list_t *,
-                              unsigned int *ndays, unsigned int *nruns,
-                              spreadmodel_model_t *** models, GPtrArray * outputs, guint *_exit_conditions);
-void spreadmodel_unload_modules (int nmodels, spreadmodel_model_t ** models);
+int adsm_load_modules (sqlite3 *parameter_db,
+                       UNT_unit_list_t *, projPJ, ZON_zone_list_t *,
+                       unsigned int *ndays, unsigned int *nruns,
+                       adsm_module_t *** models, GPtrArray * outputs, guint *_exit_conditions);
+void adsm_unload_modules (int nmodels, adsm_module_t ** models);
 
 #endif /* !MODULE_LOADER_H */

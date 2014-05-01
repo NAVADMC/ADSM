@@ -8,7 +8,7 @@
  *
  * @image html events.png
  *
- * Many SpreadModel events correspond to real-world events, for example, the
+ * Many ADSM events correspond to real-world events, for example, the
  * <i>Exposure</i> and <i>TestResult</i> events.
  * Three events are used to control timing:
  * <i>NewDay</i> is the event that initiates all daily processes,
@@ -45,7 +45,7 @@
 #define EVENT_H
 
 #include <stdio.h>
-#include "spreadmodel.h"
+#include "adsm.h"
 #include "rng.h"
 
 #if STDC_HEADERS
@@ -148,10 +148,9 @@ EVT_declaration_of_vaccine_delay_event_t;
 
 
 /**
- * A "declaration of outputs" event.  Modules that track outputs (listed in
- * Appendix B of the SpreadModel User's Guide) use this event to communicate which
- * outputs they track, in case other modules want to use or aggregate those
- * outputs.
+ * A "declaration of outputs" event.  Modules that track outputs use this event
+ * to communicate which outputs they track, in case other modules want to use
+ * or aggregate those outputs.
  */
 typedef struct
 {
@@ -176,7 +175,7 @@ typedef struct
   UNT_unit_t *exposing_unit;
   UNT_unit_t *exposed_unit;
   int day;       /**< day of the simulation */
-  SPREADMODEL_contact_type contact_type;
+  ADSM_contact_type contact_type;
   gboolean traceable;
   gboolean traced;
   gboolean adequate;
@@ -193,7 +192,7 @@ typedef struct
   UNT_unit_t *infecting_unit;
   UNT_unit_t *infected_unit;
   int day; /**< day of the simulation */
-  SPREADMODEL_contact_type contact_type;
+  ADSM_contact_type contact_type;
   UNT_state_t override_initial_state; /**< when using an infection event to
     specify an in-progress infection, set this to the unit's state (Latent,
     InfectiousSubclinical, or InfectiousClinical). */
@@ -216,7 +215,7 @@ typedef struct
   UNT_unit_t *infecting_unit;
   UNT_unit_t *infected_unit;
   int day; /**< day of the simulation */
-  SPREADMODEL_contact_type contact_type;
+  ADSM_contact_type contact_type;
   UNT_state_t override_initial_state; /**< when using an infection event to
     specify an in-progress infection, set this to the unit's state (Latent,
     InfectiousSubclinical, or InfectiousClinical). */
@@ -238,8 +237,8 @@ typedef struct
 {
   UNT_unit_t *unit;
   int day; /**< day of the simulation */
-  SPREADMODEL_detection_reason means; /**< how the unit was detected */
-  SPREADMODEL_test_result test_result; /**< If detection was by diagnostic testing, what was the test result? **/
+  ADSM_detection_reason means; /**< how the unit was detected */
+  ADSM_test_result test_result; /**< If detection was by diagnostic testing, what was the test result? **/
 }
 EVT_detection_event_t;
 
@@ -259,7 +258,7 @@ typedef struct
 {
   UNT_unit_t *unit;
   int day;
-  SPREADMODEL_control_reason reason;
+  ADSM_control_reason reason;
   double detection_multiplier;
   gboolean test_if_no_signs;
 }
@@ -272,8 +271,8 @@ typedef struct
 {
   UNT_unit_t *unit;
   int day;
-  SPREADMODEL_contact_type contact_type;
-  SPREADMODEL_trace_direction direction;
+  ADSM_contact_type contact_type;
+  ADSM_trace_direction direction;
   int trace_period;
 }
 EVT_attempt_to_trace_event_t;
@@ -285,8 +284,8 @@ typedef struct
 {
   UNT_unit_t *exposing_unit;
   UNT_unit_t *exposed_unit;
-  SPREADMODEL_contact_type contact_type;
-  SPREADMODEL_trace_direction direction;
+  ADSM_contact_type contact_type;
+  ADSM_trace_direction direction;
   int day;
   int initiated_day;
   gboolean traced;
@@ -299,7 +298,7 @@ typedef struct
 {
   UNT_unit_t *unit;
   int day;
-  SPREADMODEL_control_reason reason;
+  ADSM_control_reason reason;
 }
 EVT_test_event_t;
 
@@ -312,7 +311,7 @@ typedef struct
   int day;
   gboolean positive;
   gboolean correct; /**< enables tracking true and false positives and negatives */
-  SPREADMODEL_control_reason reason;
+  ADSM_control_reason reason;
 }
 EVT_test_result_event_t;
 
@@ -551,43 +550,43 @@ EVT_event_t *EVT_new_new_day_event (int day);
 EVT_event_t *EVT_new_exposure_event (UNT_unit_t * exposing_unit,
                                      UNT_unit_t * exposed_unit,
                                      int day,
-                                     SPREADMODEL_contact_type,
+                                     ADSM_contact_type,
                                      gboolean traceable,
                                      gboolean adequate,
                                      int delay);
 EVT_event_t *EVT_new_attempt_to_infect_event (UNT_unit_t * infecting_unit,
                                               UNT_unit_t * infected_unit,
-                                              int day, SPREADMODEL_contact_type);
+                                              int day, ADSM_contact_type);
 EVT_event_t *EVT_new_infection_event (UNT_unit_t * infecting_unit,
                                       UNT_unit_t * infected_unit,
-                                      int day, SPREADMODEL_contact_type);
+                                      int day, ADSM_contact_type);
 EVT_event_t *EVT_new_detection_event (UNT_unit_t *, int day,
-                                      SPREADMODEL_detection_reason,
-                                      SPREADMODEL_test_result);
+                                      ADSM_detection_reason,
+                                      ADSM_test_result);
 EVT_event_t *EVT_new_public_announcement_event (int day);
 EVT_event_t *EVT_new_exam_event (UNT_unit_t *,
                                  int day,
-                                 SPREADMODEL_control_reason,
+                                 ADSM_control_reason,
                                  double detection_multiplier,
                                  gboolean test_if_no_signs);
 EVT_event_t *EVT_new_attempt_to_trace_event (UNT_unit_t *,
                                              int day,
-                                             SPREADMODEL_contact_type,
-                                             SPREADMODEL_trace_direction,
+                                             ADSM_contact_type,
+                                             ADSM_trace_direction,
                                              int trace_period);
 EVT_event_t *EVT_new_trace_result_event (UNT_unit_t * exposing_unit,
                                          UNT_unit_t * exposed_unit,
-                                         SPREADMODEL_contact_type,
-                                         SPREADMODEL_trace_direction,
+                                         ADSM_contact_type,
+                                         ADSM_trace_direction,
                                          int day, int initiated_day, gboolean traced);
 EVT_event_t *EVT_new_test_event (UNT_unit_t *,
                                  int day,
-                                 SPREADMODEL_control_reason);
+                                 ADSM_control_reason);
 EVT_event_t *EVT_new_test_result_event (UNT_unit_t *,
                                         int day,
                                         gboolean positive,
                                         gboolean correct,
-                                        SPREADMODEL_control_reason);
+                                        ADSM_control_reason);
 EVT_event_t *EVT_new_request_for_vaccination_event (UNT_unit_t *,
                                                     int day,
                                                     char *reason,

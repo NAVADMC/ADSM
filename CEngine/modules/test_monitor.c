@@ -31,7 +31,6 @@
 #define handle_test_result_event test_monitor_handle_test_result_event
 
 #include "module.h"
-#include "spreadmodel.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -83,7 +82,7 @@ local_data_t;
  * @param queue for any new events this function creates.
  */
 void
-handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
+handle_before_any_simulations_event (struct adsm_module_t_ *self,
                                      EVT_event_queue_t *queue)
 {
   unsigned int n, i;
@@ -119,7 +118,7 @@ handle_before_any_simulations_event (struct spreadmodel_model_t_ *self,
  * @param event a test event.
  */
 void
-handle_test_event (struct spreadmodel_model_t_ *self, EVT_test_event_t * event)
+handle_test_event (struct adsm_module_t_ *self, EVT_test_event_t * event)
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
@@ -132,7 +131,7 @@ handle_test_event (struct spreadmodel_model_t_ *self, EVT_test_event_t * event)
 
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
-  reason = SPREADMODEL_control_reason_abbrev[event->reason];
+  reason = ADSM_control_reason_abbrev[event->reason];
 
   RPT_reporting_add_integer (local_data->cumul_nunits_tested, 1, NULL);
   RPT_reporting_add_integer1 (local_data->cumul_nunits_tested_by_reason, 1, reason);
@@ -161,7 +160,7 @@ handle_test_event (struct spreadmodel_model_t_ *self, EVT_test_event_t * event)
  * @param event a test result event.
  */
 void
-handle_test_result_event (struct spreadmodel_model_t_ * self,
+handle_test_result_event (struct adsm_module_t_ * self,
                           EVT_test_result_event_t * event)
 {
   local_data_t *local_data;
@@ -176,46 +175,46 @@ handle_test_result_event (struct spreadmodel_model_t_ * self,
   /* -------------------------- */
   test.unit_index = event->unit->index;
 
-  if( event->reason == SPREADMODEL_ControlTraceForwardDirect )
+  if( event->reason == ADSM_ControlTraceForwardDirect )
     {
-      test.contact_type = SPREADMODEL_DirectContact;
-      test.trace_type = SPREADMODEL_TraceForwardOrOut;  
+      test.contact_type = ADSM_DirectContact;
+      test.trace_type = ADSM_TraceForwardOrOut;  
     }
-  else if( event->reason == SPREADMODEL_ControlTraceBackDirect )
+  else if( event->reason == ADSM_ControlTraceBackDirect )
     {
-      test.contact_type = SPREADMODEL_DirectContact;
-      test.trace_type = SPREADMODEL_TraceBackOrIn;    
+      test.contact_type = ADSM_DirectContact;
+      test.trace_type = ADSM_TraceBackOrIn;    
     }
-  else if( event->reason == SPREADMODEL_ControlTraceForwardIndirect )
+  else if( event->reason == ADSM_ControlTraceForwardIndirect )
     {
-      test.contact_type = SPREADMODEL_IndirectContact;
-      test.trace_type = SPREADMODEL_TraceForwardOrOut;    
+      test.contact_type = ADSM_IndirectContact;
+      test.trace_type = ADSM_TraceForwardOrOut;    
     }
-  else if( event->reason == SPREADMODEL_ControlTraceBackIndirect )
+  else if( event->reason == ADSM_ControlTraceBackIndirect )
     {
-      test.contact_type = SPREADMODEL_IndirectContact;
-      test.trace_type = SPREADMODEL_TraceBackOrIn;    
+      test.contact_type = ADSM_IndirectContact;
+      test.trace_type = ADSM_TraceBackOrIn;    
     }
   else
     {
       g_error( "Unrecognized event reason (%s) in test-monitor.handle_test_result_event",
-               SPREADMODEL_control_reason_name[event->reason] );  
+               ADSM_control_reason_name[event->reason] );  
     } 
 
   if( event->positive && event->correct )
-    test.test_result = SPREADMODEL_TestTruePositive;
+    test.test_result = ADSM_TestTruePositive;
   else if( event->positive && !(event->correct) )
-    test.test_result = SPREADMODEL_TestFalsePositive;
+    test.test_result = ADSM_TestFalsePositive;
   else if( !(event->positive) && event->correct )
-    test.test_result = SPREADMODEL_TestTrueNegative;
+    test.test_result = ADSM_TestTrueNegative;
   else if( !(event->positive) && !(event->correct) )
-    test.test_result = SPREADMODEL_TestFalseNegative;
+    test.test_result = ADSM_TestFalseNegative;
     
   #ifdef USE_SC_GUILIB
     sc_test_unit( event->unit, test );
   #else
-    if (NULL != spreadmodel_test_unit) 
-      spreadmodel_test_unit (test);
+    if (NULL != adsm_test_unit) 
+      adsm_test_unit (test);
   #endif
 
   /* Record the test in the SC version */
@@ -268,7 +267,7 @@ handle_test_result_event (struct spreadmodel_model_t_ * self,
  * @param queue for any new events the model creates.
  */
 void
-run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
+run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zones,
      EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
 #if DEBUG
@@ -305,7 +304,7 @@ run (struct spreadmodel_model_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t
  * @param self the model.
  */
 void
-reset (struct spreadmodel_model_t_ *self)
+reset (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -344,7 +343,7 @@ reset (struct spreadmodel_model_t_ *self)
  * @param self the model.
  */
 void
-local_free (struct spreadmodel_model_t_ *self)
+local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
@@ -385,11 +384,11 @@ local_free (struct spreadmodel_model_t_ *self)
 /**
  * Returns a new test monitor.
  */
-spreadmodel_model_t *
+adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
      ZON_zone_list_t * zones)
 {
-  spreadmodel_model_t *self;
+  adsm_module_t *self;
   local_data_t *local_data;
   unsigned int i, j;         /* loop counters */
   char *prodtype_name;
@@ -398,7 +397,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
 #endif
 
-  self = g_new (spreadmodel_model_t, 1);
+  self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
@@ -408,12 +407,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
-  self->is_listening_for = spreadmodel_model_is_listening_for;
-  self->has_pending_actions = spreadmodel_model_answer_no;
-  self->has_pending_infections = spreadmodel_model_answer_no;
-  self->to_string = spreadmodel_model_to_string_default;
-  self->printf = spreadmodel_model_printf;
-  self->fprintf = spreadmodel_model_fprintf;
+  self->is_listening_for = adsm_model_is_listening_for;
+  self->has_pending_actions = adsm_model_answer_no;
+  self->has_pending_infections = adsm_model_answer_no;
+  self->to_string = adsm_module_to_string_default;
+  self->printf = adsm_model_printf;
+  self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
   local_data->cumul_nunits_tested =
@@ -479,16 +478,16 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       RPT_reporting_set_integer1 (local_data->cumul_nunits_falseneg_by_prodtype, 0, prodtype_name);
       RPT_reporting_set_integer1 (local_data->cumul_nanimals_tested_by_prodtype, 0, prodtype_name);
     }
-  for (i = 0; i < SPREADMODEL_NCONTROL_REASONS; i++)
+  for (i = 0; i < ADSM_NCONTROL_REASONS; i++)
     {
       const char *reason;
       const char *drill_down_list[3] = { NULL, NULL, NULL };
-      if ((SPREADMODEL_control_reason)i == SPREADMODEL_ControlReasonUnspecified
-          || (SPREADMODEL_control_reason)i == SPREADMODEL_ControlRing
-          || (SPREADMODEL_control_reason)i == SPREADMODEL_ControlDetection
-          || (SPREADMODEL_control_reason)i == SPREADMODEL_ControlInitialState)
+      if ((ADSM_control_reason)i == ADSM_ControlReasonUnspecified
+          || (ADSM_control_reason)i == ADSM_ControlRing
+          || (ADSM_control_reason)i == ADSM_ControlDetection
+          || (ADSM_control_reason)i == ADSM_ControlInitialState)
         continue;
-      reason = SPREADMODEL_control_reason_abbrev[i];
+      reason = ADSM_control_reason_abbrev[i];
       RPT_reporting_add_integer1 (local_data->cumul_nunits_tested_by_reason, 0, reason);
       RPT_reporting_add_integer1 (local_data->cumul_nanimals_tested_by_reason, 0, reason);
       drill_down_list[0] = reason;

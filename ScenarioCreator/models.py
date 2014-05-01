@@ -32,7 +32,8 @@ import os
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django_extras.db.models import PercentField, LatitudeField, LongitudeField, MoneyField
+from django_extras.db.models import LatitudeField, LongitudeField, MoneyField
+from ScenarioCreator.custom_fields import PercentField
 import re
 import time
 import ScenarioCreator.parser
@@ -466,7 +467,7 @@ class DiseaseSpread(models.Model):
                                  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
                                  help_text='Parent disease whose spreading characteristics this describes.')
         # This is in Disease because of simulation restrictions
-    transport_delay = models.ForeignKey(ProbabilityFunction, related_name='+',
+    transport_delay = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the shipment delays for the indicated production type.', )
     class Meta:
         abstract = True

@@ -1,6 +1,14 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+
 __author__ = 'Bryan'
 
-from django.db import models
+
+class PercentField(models.FloatField):
+    """ Float field that ensures field value is in the range 0-100. """
+    default_validators = [
+        MinValueValidator(0),
+        MaxValueValidator(100)]
 
 
 class ListField(models.TextField):

@@ -17,7 +17,7 @@
 #ifndef BASIC_ZONE_FOCUS_MODEL_H
 #define BASIC_ZONE_FOCUS_MODEL_H
 
-spreadmodel_model_t *basic_zone_focus_model_new (sqlite3 *, UNT_unit_list_t *,
-                                                 projPJ, ZON_zone_list_t *);
+adsm_module_t *basic_zone_focus_model_new (sqlite3 *, UNT_unit_list_t *,
+                                           projPJ, ZON_zone_list_t *);
 
 #endif

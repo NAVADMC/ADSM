@@ -34,7 +34,7 @@
     #include <glib.h>
 
     #include <general.h>
-    #include "spreadmodel.h"
+    #include "adsm.h"
     
     /*  local .h files, in one of many directories for this project, so use 
         "<>" here and "-I" in CFLAGS */

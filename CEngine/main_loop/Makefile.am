@@ -22,12 +22,12 @@ if HAVE_MPI
   AM_CPPFLAGS += @MPI_CFLAGS@
 endif
 
-include_HEADERS = spreadmodel.h
-lib_LIBRARIES = libspreadmodel.a
-libspreadmodel_a_SOURCES = main_loop.c module_loader.c module_loader.h \
+include_HEADERS = adsm.h
+lib_LIBRARIES = libadsm.a
+libadsm_a_SOURCES = main_loop.c module_loader.c module_loader.h \
   event_manager.c event_manager.h \
   parameter.c parameter.h \
-  spreadmodel.c spreadmodel.h \
+  adsm.c adsm.h \
   $(top_srcdir)/replace/replace.c $(top_srcdir)/replace/replace.h \
   $(top_srcdir)/general/general.c $(top_srcdir)/general/general.h \
   $(top_srcdir)/unit/unit.c $(top_srcdir)/unit/unit.h \
@@ -86,7 +86,7 @@ libspreadmodel_a_SOURCES = main_loop.c module_loader.c module_loader.h \
   $(top_srcdir)/modules/weekly_gis_writer.c $(top_srcdir)/modules/weekly_gis_writer.h \
   $(top_srcdir)/modules/summary_gis_writer.c $(top_srcdir)/modules/summary_gis_writer.h
 if USE_SC_GUILIB
-  libspreadmodel_a_SOURCES += $(top_srcdir)/sc_guilib/production_type_data.c \
+  libadsm_a_SOURCES += $(top_srcdir)/sc_guilib/production_type_data.c \
     $(top_srcdir)/sc_guilib/production_type_data.h \
     $(top_srcdir)/sc_guilib/sc_guilib_outputs.c \
     $(top_srcdir)/sc_guilib/sc_guilib_outputs.h \
@@ -94,12 +94,12 @@ if USE_SC_GUILIB
     $(top_srcdir)/sc_guilib/sc_database.h
 endif
 
-bin_PROGRAMS = spreadmodel
-spreadmodel_SOURCES = cli.c
+bin_PROGRAMS = adsm
+adsm_SOURCES = cli.c
 if HAVE_MPI
-  spreadmodel_SOURCES += mpix.c mpix.h
+  adsm_SOURCES += mpix.c mpix.h
 endif
-spreadmodel_LDADD = libspreadmodel.a @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@
+adsm_LDADD = libadsm.a @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@
 if HAVE_MPI
-  spreadmodel_LDADD += @MPI_LIBS@
+  adsm_LDADD += @MPI_LIBS@
 endif

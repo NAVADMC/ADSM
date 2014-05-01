@@ -15,5 +15,5 @@ SUBDIRS = wml \
   dll \
   doc
 mandir= $(exec_prefix)/man
-man1_MANS=spreadmodel.1
-EXTRA_DIST = Doxyfile doxygen.css spreadmodel.1 INSTALL.html
+man1_MANS=adsm.1
+EXTRA_DIST = Doxyfile doxygen.css adsm.1 INSTALL.html
