@@ -26,7 +26,7 @@ class FixedSelect(Select):
     def get_context(self, name, value, attrs=None, choices=()):
         context = super(FixedSelect, self).get_context(name, value, attrs)
         context['value'] = value
-        context['value_name'] = [x[1] for x in self.choices if x[0] == value][0]  # first match
+        context['value_name'] = ([x[1] for x in self.choices if x[0] == value] + [''])[0]  # first match
         return context
 
 
@@ -88,7 +88,19 @@ class RelationalPointForm(BaseForm):
     class Meta:
         model = RelationalPoint
         exclude = []
-        widgets = {'relational_function': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
+        widgets = {
+            'relational_function': FixedSelect()}
+            # 'relational_function': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
+
+
+
+class PointFormSetHelper(FormHelper):
+    def __init__(self, *args, **kwargs):
+        super(PointFormSetHelper, self).__init__(*args, **kwargs)
+        self.form_method = 'post'
+        self.layout = Layout('relational_function', 'x', 'y')
+        self.template = 'bootstrap/table_inline_formset.html'
+        self.add_input(Submit("submit", "Save"))
 
 
 class ControlMasterPlanForm(BaseForm):

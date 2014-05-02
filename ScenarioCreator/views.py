@@ -155,21 +155,24 @@ def assign_progressions(request):
 
 
 def handle_edge_cases(request, model_name, form):
+    parent_function = RelationalFunction.objects.get(id=2)
     print("Edge case detected")
-    PointFormSet = modelformset_factory(RelationalPoint, extra=2, form=RelationalPointForm)
-    formset = PointFormSet()
-
-    class PointFormSetHelper(FormHelper):
-        def __init__(self, *args, **kwargs):
-            super(PointFormSetHelper, self).__init__(*args, **kwargs)
-            self.form_method = 'post'
-            self.layout = Layout('relational_function', 'x', 'y')
-
-    helper = PointFormSetHelper()
-    helper.template = 'bootstrap/table_inline_formset.html'
-    helper.add_input(Submit("submit", "Save"))
     context = basic_context()
-    context.update({'formset': formset, 'helper': helper})
+    PointFormSet = modelformset_factory(RelationalPoint, extra=1, form=RelationalPointForm)
+    starting_set = RelationalPoint.objects.filter(relational_function=parent_function)
+    context.update({'helper': PointFormSetHelper()})
+    try:
+        initialized_formset = PointFormSet(request.POST, request.FILES, queryset=starting_set)
+        if initialized_formset.is_valid():
+            instances = initialized_formset.save()
+            print(instances)
+            unsaved_changes(True)
+            return redirect('/setup/RelationalPoint/new/')  # update these numbers after database save because they've changed
+    except ValidationError:
+        initialized_formset = PointFormSet(queryset=starting_set)
+        initialized_formset[ starting_set.count()].fields['relational_function'].initial = parent_function.id #blank field
+    context['formset'] = initialized_formset
+
     return render(request, 'ScenarioCreator/crispy-formset.html', context)
 
 

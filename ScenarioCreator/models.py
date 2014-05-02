@@ -242,10 +242,8 @@ class RelationalFunction(Function):
 
 class RelationalPoint(models.Model):
     relational_function = models.ForeignKey(RelationalFunction)
-    x = models.FloatField(validators=[MinValueValidator(0.0)],
-        help_text='The x value of the point.', )
-    y = models.FloatField(validators=[MinValueValidator(0.0)],
-        help_text='The y value of the point.', )
+    x = models.FloatField(validators=[MinValueValidator(0.0)], )
+    y = models.FloatField(validators=[MinValueValidator(0.0)], )
     def __str__(self):
         return 'Point(%s, %s)' % (self.x, self.y)
 
