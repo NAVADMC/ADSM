@@ -10,8 +10,8 @@ from django.conf import settings
 import re
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from Settings.models import SmSession
-from django.forms.models import inlineformset_factory
 from django.forms.models import modelformset_factory
+from django.forms.models import inlineformset_factory
 
 
 edge_cases = ['RelationalPoint']
@@ -154,10 +154,16 @@ def assign_progressions(request):
         return redirect(request.path)
 
 
+def blank_point_row(request):
+    PointFormSet = modelformset_factory(RelationalPoint, extra=1, form=RelationalPointForm)
+    formset = PointFormSet()
+    return render(request, 'ScenarioCreator/crispy-formset.html', {'formset':formset, 'helper': PointFormSetHelper()})
+
+
 def point_list(request, parent_id):
     parent_function = RelationalFunction.objects.get(id=parent_id)
     print("Edge case detected")
-    context = basic_context()
+    context = {}
     PointFormSet = modelformset_factory(RelationalPoint, extra=1, form=RelationalPointForm)
     starting_set = RelationalPoint.objects.filter(relational_function=parent_function)
     context.update({'helper': PointFormSetHelper()})
@@ -170,10 +176,29 @@ def point_list(request, parent_id):
             return redirect(request.path)  # update these numbers after database save because they've changed
     except ValidationError:
         initialized_formset = PointFormSet(queryset=starting_set)
-        initialized_formset[ starting_set.count()].fields['relational_function'].initial = parent_function.id #blank field
+        try:
+            initialized_formset[ starting_set.count()].fields['relational_function'].initial = parent_function.id #blank field
+        except: pass
     context['formset'] = initialized_formset
 
     return render(request, 'ScenarioCreator/crispy-formset.html', context)
+
+
+def relational_function(request):
+    context = basic_context()
+    main_form = RelationalFunctionForm(request.POST or None)
+    context['form'] = main_form
+    PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint)
+    if main_form.is_valid():
+        created_instance = main_form.save()  # in practice make sure it's valid first
+        formset = PointFormSet(request.POST, instance=created_instance)
+        formset.save()  #again, make sure it's valid first
+        return redirect(request.path)
+    function = RelationalFunction()  #blank
+    context['formset'] = PointFormSet(instance=function) #since function is empty, this formset will just be empty forms
+
+    context['title'] = "Create a Function"
+    return render(request, 'ScenarioCreator/RelationalFunction.html', context)
 
 
 def save_new_instance(initialized_form, request):
@@ -212,6 +237,8 @@ def initialize_from_existing_model(primary_key, request):
 '''New / Edit / Copy trio that are called from URLs'''
 def new_entry(request):
     model_name, form = get_model_name_and_form(request)
+    if model_name == 'RelationalFunction':
+        return relational_function(request)
     initialized_form = form(request.POST or None)
     context = basic_context()
     context['form'] = initialized_form

@@ -2,7 +2,8 @@
 ModelForm -> models.py.  This basic layout can be overridden by declaring an __init__ with a self.helper Layout.
 See DirectSpread for an example.  More complex widgets and layouts are accessible from there.
 All forms now have their "submit" button restored and you can choose custom layouts.  ControlProtocol has tabs."""
-
+from django.forms.models import modelformset_factory
+from django.forms.models import inlineformset_factory
 
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Field, Hidden
@@ -69,32 +70,12 @@ class UnitForm(BaseForm):
         widgets = {'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'})}
 
 
-class FunctionForm(BaseForm):
-    class Meta:
-        model = Function
-
-
 class ProbabilityFunctionForm(BaseForm):
     class Meta:
         model = ProbabilityFunction
 
 
-class RelationalFunctionForm(BaseForm):
-    def __init__(self, *args, **kwargs):
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            'name',
-            'x_axis_units',
-            'y_axis_units',
-            HTML('<div id="point_list"></div>'),
-            'notes',
-            submit_button()
-        )
-        return super().__init__(*args, **kwargs)
-
-    class Meta:
-        model = RelationalFunction
-
+###################################
 
 class RelationalPointForm(BaseForm):
     class Meta:
@@ -105,7 +86,6 @@ class RelationalPointForm(BaseForm):
             # 'relational_function': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
-
 class PointFormSetHelper(FormHelper):
     def __init__(self, *args, **kwargs):
         super(PointFormSetHelper, self).__init__(*args, **kwargs)
@@ -113,6 +93,29 @@ class PointFormSetHelper(FormHelper):
         self.layout = Layout('relational_function', 'x', 'y')
         self.template = 'bootstrap/table_inline_formset.html'
         self.add_input(Submit("submit", "Save"))
+
+
+class RelationalFunctionForm(BaseForm):
+
+    def __init__(self, *args, **kwargs):
+        PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            'name',
+            'x_axis_units',
+            'y_axis_units',
+            PointFormSet(),
+            HTML('<div id="point_list" data-path="{{request.path}}"></div>'),
+            'notes',
+            submit_button()
+        )
+        return super().__init__(*args, **kwargs)
+
+    class Meta:
+        model = RelationalFunction
+
+#################################
+
 
 
 class ControlMasterPlanForm(BaseForm):
