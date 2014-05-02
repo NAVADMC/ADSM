@@ -184,18 +184,24 @@ def point_list(request, parent_id):
     return render(request, 'ScenarioCreator/crispy-formset.html', context)
 
 
-def relational_function(request):
+def relational_function(request, primary_key=None):
     context = basic_context()
-    main_form = RelationalFunctionForm(request.POST or None)
+    if not primary_key:
+        model = RelationalFunction()
+        main_form = RelationalFunctionForm(request.POST or None)
+    else:
+        model = RelationalFunction.objects.get(id=primary_key)
+        main_form = RelationalFunctionForm(request.POST or None, instance=model)
     context['form'] = main_form
     PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint)
+    formset = PointFormSet(instance=model)
     if main_form.is_valid():
         created_instance = main_form.save()  # in practice make sure it's valid first
-        formset = PointFormSet(request.POST, instance=created_instance)
-        formset.save()  #again, make sure it's valid first
-        return redirect(request.path)
-    function = RelationalFunction()  #blank
-    context['formset'] = PointFormSet(instance=function) #since function is empty, this formset will just be empty forms
+        formset = PointFormSet(request.POST or None, instance=created_instance)
+        if formset.is_valid():
+            formset.save()  #again, make sure it's valid first
+            return redirect('/setup/RelationalFunction/%i/' % created_instance.id)
+    context['formset'] = formset #since function is empty, this formset will just be empty forms
 
     context['title'] = "Create a Function"
     return render(request, 'ScenarioCreator/RelationalFunction.html', context)
@@ -248,6 +254,9 @@ def new_entry(request):
 
 def edit_entry(request, primary_key):
     model_name, form = get_model_name_and_form(request)
+    if model_name == 'RelationalFunction':
+        return relational_function(request, primary_key)
+
     try:
         initialized_form, model_name = initialize_from_existing_model(primary_key, request)
     except ObjectDoesNotExist:

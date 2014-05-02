@@ -96,10 +96,10 @@ class PointFormSetHelper(FormHelper):
 
 
 class RelationalFunctionForm(BaseForm):
-
     def __init__(self, *args, **kwargs):
         PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint)
         self.helper = FormHelper()
+        self.helper.form_tag = False
         self.helper.layout = Layout(
             'name',
             'x_axis_units',
