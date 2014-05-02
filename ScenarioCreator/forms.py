@@ -32,8 +32,7 @@ class FixedSelect(Select):
 
 
 def submit_button():
-    return ButtonHolder(Submit('submit', 'Submit', css_class='button white'),
-                        HTML(open('ScenarioCreator/templates/ScenarioCreator/EditButtons.html', 'r').read()))
+    return ButtonHolder(HTML(open('ScenarioCreator/templates/ScenarioCreator/EditButtons.html', 'r').read()))
 
 
 class BaseForm(ModelForm):
@@ -97,17 +96,13 @@ class PointFormSetHelper(FormHelper):
 
 class RelationalFunctionForm(BaseForm):
     def __init__(self, *args, **kwargs):
-        PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint)
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.layout = Layout(
             'name',
             'x_axis_units',
             'y_axis_units',
-            PointFormSet(),
-            HTML('<div id="point_list" data-path="{{request.path}}"></div>'),
-            'notes',
-            submit_button()
+            'notes'
         )
         return super().__init__(*args, **kwargs)
 

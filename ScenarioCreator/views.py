@@ -192,6 +192,7 @@ def relational_function(request, primary_key=None):
     else:
         model = RelationalFunction.objects.get(id=primary_key)
         main_form = RelationalFunctionForm(request.POST or None, instance=model)
+        context['model_link'] = '/setup/RelationalFunction/' + primary_key + '/'
     context['form'] = main_form
     PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint)
     formset = PointFormSet(instance=model)
