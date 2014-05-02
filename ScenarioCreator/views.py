@@ -14,6 +14,8 @@ from django.forms.models import inlineformset_factory
 from django.forms.models import modelformset_factory
 
 
+edge_cases = ['RelationalPoint']
+
 def spaces_for_camel_case(text):
     return re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
 
@@ -152,6 +154,25 @@ def assign_progressions(request):
         return redirect(request.path)
 
 
+def handle_edge_cases(request, model_name, form):
+    print("Edge case detected")
+    PointFormSet = modelformset_factory(RelationalPoint, extra=2, form=RelationalPointForm)
+    formset = PointFormSet()
+
+    class PointFormSetHelper(FormHelper):
+        def __init__(self, *args, **kwargs):
+            super(PointFormSetHelper, self).__init__(*args, **kwargs)
+            self.form_method = 'post'
+            self.layout = Layout('relational_function', 'x', 'y')
+
+    helper = PointFormSetHelper()
+    helper.template = 'bootstrap/table_inline_formset.html'
+    helper.add_input(Submit("submit", "Save"))
+    context = basic_context()
+    context.update({'formset': formset, 'helper': helper})
+    return render(request, 'ScenarioCreator/crispy-formset.html', context)
+
+
 def save_new_instance(initialized_form, request):
     model_instance = initialized_form.save()  # write to database
     unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
@@ -188,6 +209,8 @@ def initialize_from_existing_model(primary_key, request):
 '''New / Edit / Copy trio that are called from URLs'''
 def new_entry(request):
     model_name, form = get_model_name_and_form(request)
+    if model_name in edge_cases:
+        return handle_edge_cases(request, model_name, form)
     initialized_form = form(request.POST or None)
     context = basic_context()
     context['form'] = initialized_form
