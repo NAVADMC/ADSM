@@ -93,7 +93,7 @@ def disease_spread(request):
             instances = initialized_formset.save()
             print(instances)
             unsaved_changes(True)
-            return redirect('/setup/DiseaseSpread/')  # update these numbers after database save because they've changed
+            return redirect(request.path)  # update these numbers after database save because they've changed
     except ValidationError:
         initialized_formset = SpreadSet(queryset=ProductionTypePairTransmission.objects.all())
     context['formset'] = initialized_formset
@@ -154,8 +154,8 @@ def assign_progressions(request):
         return redirect(request.path)
 
 
-def handle_edge_cases(request, model_name, form):
-    parent_function = RelationalFunction.objects.get(id=2)
+def point_list(request, parent_id):
+    parent_function = RelationalFunction.objects.get(id=parent_id)
     print("Edge case detected")
     context = basic_context()
     PointFormSet = modelformset_factory(RelationalPoint, extra=1, form=RelationalPointForm)
@@ -167,7 +167,7 @@ def handle_edge_cases(request, model_name, form):
             instances = initialized_formset.save()
             print(instances)
             unsaved_changes(True)
-            return redirect('/setup/RelationalPoint/new/')  # update these numbers after database save because they've changed
+            return redirect(request.path)  # update these numbers after database save because they've changed
     except ValidationError:
         initialized_formset = PointFormSet(queryset=starting_set)
         initialized_formset[ starting_set.count()].fields['relational_function'].initial = parent_function.id #blank field
@@ -212,8 +212,6 @@ def initialize_from_existing_model(primary_key, request):
 '''New / Edit / Copy trio that are called from URLs'''
 def new_entry(request):
     model_name, form = get_model_name_and_form(request)
-    if model_name in edge_cases:
-        return handle_edge_cases(request, model_name, form)
     initialized_form = form(request.POST or None)
     context = basic_context()
     context['form'] = initialized_form
