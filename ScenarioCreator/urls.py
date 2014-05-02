@@ -39,6 +39,5 @@ urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
                                          "url('^OpenScenario/(?P<target>[\w\s]+)/$', 'ScenarioCreator.views.open_scenario')",
                                          "url('^DeleteScenario/(?P<target>[\w\s]+)/$', 'ScenarioCreator.views.delete_scenario')",
                                          "url('^RunSimulation/$', 'ScenarioCreator.views.run_simulation')",
-                                         "url('^PointList/(?P<parent_id>\d+)/$', 'ScenarioCreator.views.point_list')",
                                         ])
 

@@ -2,8 +2,6 @@
 ModelForm -> models.py.  This basic layout can be overridden by declaring an __init__ with a self.helper Layout.
 See DirectSpread for an example.  More complex widgets and layouts are accessible from there.
 All forms now have their "submit" button restored and you can choose custom layouts.  ControlProtocol has tabs."""
-from django.forms.models import modelformset_factory
-from django.forms.models import inlineformset_factory
 
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Field, Hidden
@@ -74,24 +72,11 @@ class ProbabilityFunctionForm(BaseForm):
         model = ProbabilityFunction
 
 
-###################################
-
 class RelationalPointForm(BaseForm):
     class Meta:
         model = RelationalPoint
         exclude = []
-        widgets = {
-            'relational_function': FixedSelect()}
-            # 'relational_function': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
-
-
-class PointFormSetHelper(FormHelper):
-    def __init__(self, *args, **kwargs):
-        super(PointFormSetHelper, self).__init__(*args, **kwargs)
-        self.form_method = 'post'
-        self.layout = Layout('relational_function', 'x', 'y')
-        self.template = 'bootstrap/table_inline_formset.html'
-        self.add_input(Submit("submit", "Save"))
+        widgets = {'relational_function': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
 class RelationalFunctionForm(BaseForm):
@@ -108,9 +93,6 @@ class RelationalFunctionForm(BaseForm):
 
     class Meta:
         model = RelationalFunction
-
-#################################
-
 
 
 class ControlMasterPlanForm(BaseForm):

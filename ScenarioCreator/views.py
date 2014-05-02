@@ -154,36 +154,6 @@ def assign_progressions(request):
         return redirect(request.path)
 
 
-def blank_point_row(request):
-    PointFormSet = modelformset_factory(RelationalPoint, extra=1, form=RelationalPointForm)
-    formset = PointFormSet()
-    return render(request, 'ScenarioCreator/crispy-formset.html', {'formset':formset, 'helper': PointFormSetHelper()})
-
-
-def point_list(request, parent_id):
-    parent_function = RelationalFunction.objects.get(id=parent_id)
-    print("Edge case detected")
-    context = {}
-    PointFormSet = modelformset_factory(RelationalPoint, extra=1, form=RelationalPointForm)
-    starting_set = RelationalPoint.objects.filter(relational_function=parent_function)
-    context.update({'helper': PointFormSetHelper()})
-    try:
-        initialized_formset = PointFormSet(request.POST, request.FILES, queryset=starting_set)
-        if initialized_formset.is_valid():
-            instances = initialized_formset.save()
-            print(instances)
-            unsaved_changes(True)
-            return redirect(request.path)  # update these numbers after database save because they've changed
-    except ValidationError:
-        initialized_formset = PointFormSet(queryset=starting_set)
-        try:
-            initialized_formset[ starting_set.count()].fields['relational_function'].initial = parent_function.id #blank field
-        except: pass
-    context['formset'] = initialized_formset
-
-    return render(request, 'ScenarioCreator/crispy-formset.html', context)
-
-
 def relational_function(request, primary_key=None):
     context = basic_context()
     if not primary_key:
