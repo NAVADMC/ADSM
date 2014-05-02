@@ -80,6 +80,18 @@ class ProbabilityFunctionForm(BaseForm):
 
 
 class RelationalFunctionForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            'name',
+            'x_axis_units',
+            'y_axis_units',
+            HTML('<div id="point_list"></div>'),
+            'notes',
+            submit_button()
+        )
+        return super().__init__(*args, **kwargs)
+
     class Meta:
         model = RelationalFunction
 
