@@ -154,8 +154,7 @@ def assign_progressions(request):
         return redirect(request.path)
 
 
-def relational_function(request, primary_key=None):
-    context = basic_context()
+def initialize_relational_form(context, primary_key, request):
     if not primary_key:
         model = RelationalFunction()
         main_form = RelationalFunctionForm(request.POST or None)
@@ -164,17 +163,24 @@ def relational_function(request, primary_key=None):
         main_form = RelationalFunctionForm(request.POST or None, instance=model)
         context['model_link'] = '/setup/RelationalFunction/' + primary_key + '/'
     context['form'] = main_form
+    context['model'] = model
+    return context
+
+
+def relational_function(request, primary_key=None):
+    context = basic_context()
+    context = initialize_relational_form(context, primary_key, request)
     PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint)
-    formset = PointFormSet(instance=model)
-    if main_form.is_valid():
-        created_instance = main_form.save()  # in practice make sure it's valid first
+    formset = PointFormSet(instance=context['model'])
+    #Refactor: put everything in context,  save_model check context for 'form' and 'formset'
+    if context['form'].is_valid():
+        created_instance = context['form'].save()  # in practice make sure it's valid first
         formset = PointFormSet(request.POST or None, instance=created_instance)
         if formset.is_valid():
-            formset.save()  #again, make sure it's valid first
+            formset.save()  # again, make sure it's valid first
             return redirect('/setup/RelationalFunction/%i/' % created_instance.id)
-    context['formset'] = formset #since function is empty, this formset will just be empty forms
-
-    context['title'] = "Create a Function"
+    context['formset'] = formset
+    context['title'] = "Create a Relational Function"
     return render(request, 'ScenarioCreator/RelationalFunction.html', context)
 
 
