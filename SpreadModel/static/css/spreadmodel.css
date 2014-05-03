@@ -159,3 +159,8 @@ select {
 .glyphicon {
     color: dimgrey;
 }
+
+body .modal-dialog {
+    width: 50%;
+    margin-left: 25%;
+}
