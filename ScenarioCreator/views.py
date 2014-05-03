@@ -169,36 +169,38 @@ def initialize_relational_form(context, primary_key, request):
 
 def deepcopy_points(request, primary_key, created_instance):
     queryset = RelationalPoint.objects.filter(relational_function_id=primary_key)
-    print(queryset)
-    for point in queryset:
-        point = RelationalPoint(relational_function=created_instance, x=point.x, y=point.y) # copy
-        point.relational_function = created_instance
-        point.save()
+    for point in queryset:  # iterating over points already in DB
+        point = RelationalPoint(relational_function=created_instance, x=point.x, y=point.y) # copy with new parent
+        point.save()  # This assumes that things in the database are already valid, so doesn't call is_valid()
     queryset = RelationalPoint.objects.filter(relational_function_id=created_instance.id)
-    formset = PointFormSet(queryset=queryset)
+    formset = PointFormSet(queryset=queryset) # this queryset does not include anything the user typed in, during the copy operation
     return formset
 
 
 def relational_function(request, primary_key=None, doCopy=False):
+    """This handles the edge case of saving, copying, and creating Relational Functions.  RFs are different from any
+    other model in ADSM in that they have a list of RelationalPoints.  These points are listed alongside the normal form.
+    Rendering this page means render a form, then a formset of points.  Saving is more complex because the points also
+    foreignkey back to the RelationalFunction which must be created before it can be referenced.
+
+    It is possible to integrate this code back into the standard new / edit / copy views by checking for
+    context['formset'].  The extra logic for formsets could be kicked in only when one or more formsets are present."""
     context = basic_context()
     context = initialize_relational_form(context, primary_key, request)
     context['formset'] = PointFormSet(instance=context['model'])
-    #Refactor: put everything in context,  save_model check context for 'form' and 'formset'
     if context['form'].is_valid():
+        unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
         if doCopy:
             context['form'].instance.pk = None  # This will cause a new instance to be created
-            created_instance = context['form'].save()  # in practice make sure it's valid first
-            context['formset'] = deepcopy_points(request, primary_key, created_instance)  #TODO: copy points?
-            # instances = context['formset'].save()
-            # print(instances)
+            created_instance = context['form'].save()
+            context['formset'] = deepcopy_points(request, primary_key, created_instance)
             return redirect('/setup/RelationalFunction/%i/' % created_instance.id)
         else:
-            created_instance = context['form'].save()  # in practice make sure it's valid first
+            created_instance = context['form'].save()
             context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
         if context['formset'].is_valid():
             context['formset'].save()
             return redirect('/setup/RelationalFunction/%i/' % created_instance.id)
-        unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
     context['title'] = "Create a Relational Function"
     return render(request, 'ScenarioCreator/RelationalFunction.html', context)
 
