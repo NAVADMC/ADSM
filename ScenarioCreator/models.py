@@ -245,7 +245,7 @@ class RelationalPoint(models.Model):
     x = models.FloatField(validators=[MinValueValidator(0.0)], )
     y = models.FloatField(validators=[MinValueValidator(0.0)], )
     def __str__(self):
-        return 'Point(%s, %s)' % (self.x, self.y)
+        return '%i Point(%s, %s)' % (self.relational_function.id, self.x, self.y)
 
 
 class ControlMasterPlan(models.Model):

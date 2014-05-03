@@ -2,6 +2,7 @@
 ModelForm -> models.py.  This basic layout can be overridden by declaring an __init__ with a self.helper Layout.
 See DirectSpread for an example.  More complex widgets and layouts are accessible from there.
 All forms now have their "submit" button restored and you can choose custom layouts.  ControlProtocol has tabs."""
+from django.forms.models import inlineformset_factory
 
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Field, Hidden
@@ -77,6 +78,9 @@ class RelationalPointForm(BaseForm):
         model = RelationalPoint
         exclude = []
         widgets = {'relational_function': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
+
+
+PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint)
 
 
 class RelationalFunctionForm(BaseForm):

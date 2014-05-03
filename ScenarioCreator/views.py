@@ -167,19 +167,38 @@ def initialize_relational_form(context, primary_key, request):
     return context
 
 
-def relational_function(request, primary_key=None):
+def deepcopy_points(request, primary_key, created_instance):
+    queryset = RelationalPoint.objects.filter(relational_function_id=primary_key)
+    print(queryset)
+    for point in queryset:
+        point = RelationalPoint(relational_function=created_instance, x=point.x, y=point.y) # copy
+        point.relational_function = created_instance
+        point.save()
+    queryset = RelationalPoint.objects.filter(relational_function_id=created_instance.id)
+    formset = PointFormSet(queryset=queryset)
+    return formset
+
+
+def relational_function(request, primary_key=None, doCopy=False):
     context = basic_context()
     context = initialize_relational_form(context, primary_key, request)
-    PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint)
-    formset = PointFormSet(instance=context['model'])
+    context['formset'] = PointFormSet(instance=context['model'])
     #Refactor: put everything in context,  save_model check context for 'form' and 'formset'
     if context['form'].is_valid():
-        created_instance = context['form'].save()  # in practice make sure it's valid first
-        formset = PointFormSet(request.POST or None, instance=created_instance)
-        if formset.is_valid():
-            formset.save()  # again, make sure it's valid first
+        if doCopy:
+            context['form'].instance.pk = None  # This will cause a new instance to be created
+            created_instance = context['form'].save()  # in practice make sure it's valid first
+            context['formset'] = deepcopy_points(request, primary_key, created_instance)  #TODO: copy points?
+            # instances = context['formset'].save()
+            # print(instances)
             return redirect('/setup/RelationalFunction/%i/' % created_instance.id)
-    context['formset'] = formset
+        else:
+            created_instance = context['form'].save()  # in practice make sure it's valid first
+            context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
+        if context['formset'].is_valid():
+            context['formset'].save()
+            return redirect('/setup/RelationalFunction/%i/' % created_instance.id)
+        unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
     context['title'] = "Create a Relational Function"
     return render(request, 'ScenarioCreator/RelationalFunction.html', context)
 
@@ -251,6 +270,8 @@ def edit_entry(request, primary_key):
 
 def copy_entry(request, primary_key):
     model_name, form = get_model_name_and_form(request)
+    if model_name == 'RelationalFunction':
+        return relational_function(request, primary_key, doCopy=True)
     try:
         initialized_form, model_name = initialize_from_existing_model(primary_key, request)
     except ObjectDoesNotExist:
