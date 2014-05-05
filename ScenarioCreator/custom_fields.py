@@ -10,6 +10,19 @@ class PercentField(models.FloatField):
         MinValueValidator(0),
         MaxValueValidator(100)]
 
+    def to_python(self, value):
+        if not value:
+            return
+        if value > 1:  # why is this here?
+            return value
+        return value * 100
+
+    def get_db_prep_value(self, value, connection, prepared=False):
+        if not value:
+            return
+        # assert (isinstance(value, float))
+        return value / 100
+
 
 class ListField(models.TextField):
     __metaclass__ = models.SubfieldBase
