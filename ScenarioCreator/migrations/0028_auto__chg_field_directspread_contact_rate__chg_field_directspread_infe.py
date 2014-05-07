@@ -66,7 +66,7 @@ class Migration(SchemaMigration):
             '_spread_method_code': ('django.db.models.fields.CharField', [], {'default': "'other'", 'max_length': '255'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'max_distance': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'blank': 'True', 'max_length': '255', 'null': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'spread_1km_probability': ('ScenarioCreator.custom_fields.PercentField', [], {}),
             'transport_delay': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.ProbabilityFunction']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
             'wind_direction_end': ('django.db.models.fields.PositiveIntegerField', [], {'default': '360'}),
@@ -174,7 +174,7 @@ class Migration(SchemaMigration):
             'infection_probability': ('ScenarioCreator.custom_fields.PercentField', [], {}),
             'latent_animals_can_infect_others': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'movement_control': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.RelationalFunction']", 'related_name': "'+'"}),
-            'name': ('django.db.models.fields.CharField', [], {'blank': 'True', 'max_length': '255', 'null': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'subclinical_animals_can_infect_others': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'transport_delay': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.ProbabilityFunction']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
             'use_fixed_contact_rate': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
@@ -220,7 +220,7 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'infection_probability': ('ScenarioCreator.custom_fields.PercentField', [], {}),
             'movement_control': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.RelationalFunction']", 'related_name': "'+'"}),
-            'name': ('django.db.models.fields.CharField', [], {'blank': 'True', 'max_length': '255', 'null': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'subclinical_animals_can_infect_others': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'transport_delay': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.ProbabilityFunction']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
             'use_fixed_contact_rate': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
