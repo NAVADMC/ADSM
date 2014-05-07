@@ -67,6 +67,18 @@ def choice_char_from_value(value, map_tuple):
             return key
     return None
 
+def clean_filename(filename):
+    filename = filename.strip()  # whitespace
+    if filename:
+        fname = workspace(filename)
+        if os.path.isfile(fname):  # Already exists?
+            raise ValidationError("File already exists: " + fname)
+        try:  # valid filename?  permissions?
+            os.access(fname, os.W_OK)  #I'm not opening a file because that creates a blank one
+        except:
+            raise ValidationError("Cannot write to " + fname)
+    return filename
+
 sqlite_keywords = ['abort', 'action', 'add', 'after', 'all', 'alter', 'analyze', 'and', 'as', 'asc', 'attach', 'autoincrement', 'before', 'begin', 'between', 'by', 'cascade', 'case', 'cast', 'check', 'collate', 'column', 'commit', 'conflict', 'constraint', 'create', 'cross', 'current_date', 'current_time', 'current_timestamp', 'database', 'default', 'deferrable', 'deferred', 'delete', 'desc', 'detach', 'distinct', 'drop', 'each', 'else', 'end', 'escape', 'except', 'exclusive', 'exists', 'explain', 'fail', 'for', 'foreign', 'from', 'full', 'glob', 'group', 'having', 'if', 'ignore', 'immediate', 'in', 'index', 'indexed', 'initially', 'inner', 'insert', 'instead', 'intersect', 'into', 'is', 'isnull', 'join', 'key', 'left', 'like', 'limit', 'match', 'natural', 'no', 'not', 'notnull', 'null', 'of', 'offset', 'on', 'or', 'order', 'outer', 'plan', 'pragma', 'primary', 'query', 'raise', 'recursive', 'references', 'regexp', 'reindex', 'release', 'rename', 'replace', 'restrict', 'right', 'rollback', 'row', 'savepoint', 'select', 'set', 'table', 'temp', 'temporary', 'then', 'to', 'transaction', 'trigger', 'union', 'unique', 'update', 'using', 'vacuum', 'values', 'view', 'virtual', 'when', 'where', 'with', 'without']
 
 
@@ -552,7 +564,8 @@ class OutputSettings(models.Model):
         choices=((True, 'Save all daily output fo every iteration (warning: this option may produce very large scenario files)'),
                  (False, 'Save all daily output only for a specified number of iterations')),
         help_text='Indicates if daily outputs should be stored for every iteration.', )
-    maximum_iterations_for_daily_output = models.PositiveIntegerField(default=3, blank=True, null=True,  # TODO: validate min(3,x)
+    maximum_iterations_for_daily_output = models.PositiveIntegerField(default=3, blank=True, null=True,
+        validators=[MinValueValidator(3),],
         help_text='The number of iterations for which daily outputs should be stored The minimum value is 3.', )
     daily_states_filename = models.CharField(max_length=255, blank=True, null=True,
         help_text='The file name to output a plain text file with the state of each unit on each day of each iteration.', )
@@ -573,16 +586,11 @@ class OutputSettings(models.Model):
     cost_track_zone_surveillance = models.BooleanField(default=True,
         help_text='Disable this to ignore entered zone surveillance costs.', )
 
+
     def clean_fields(self, exclude=None):
-        self.daily_states_filename = self.daily_states_filename.strip()  # whitespace
-        if self.daily_states_filename:
-            fname = workspace(self.daily_states_filename)
-            if os.path.isfile(fname):
-                raise ValidationError("File already exists: " + fname)
-            try:  # valid filename?  permissions?  Already exists?
-                open(fname, 'w')
-            except:
-                raise ValidationError("Cannot write to " + fname)
+        self.daily_states_filename = clean_filename(self.daily_states_filename)
+        self.map_directory = clean_filename(self.map_directory)
+
 
     def __str__(self):
         return "Output Settings"
