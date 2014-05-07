@@ -14,25 +14,23 @@ class Percentage(float):
 
 class PercentField(models.FloatField, metaclass=models.SubfieldBase):
     """ Float field that ensures field value is in the range 0-100. """
-    # default_validators = [
-    #     MinValueValidator(0),
-    #     MaxValueValidator(100)]
+    default_validators = [
+        MinValueValidator(1),
+        MaxValueValidator(100)]
 
     def to_python(self, value):
         print("to_python", value)
-        if type(value) == type(Percentage(50.0)):  # check if it's already converted
+        if value >= 1.0:  # check if it's already converted
             return value
-        return Percentage(value / 100)
+        return value * 100
 
-
-    def get_db_prep_value(self, value, connection, prepared=False):
-        print("get_db_prep_value", value)
+    def get_prep_value(self, value):#, connection, prepared=False):
+        print("get_prep_value", value)
         if not value:
-            return
-        # if not isinstance(value, Percentage):
-        #     print( "ValueError: ", value)
-        # assert (isinstance(value, Percentage))
-        return float(value * 100)  # the type wrapper makes it clear if this has already been converted or not
+            return 0.0
+        if value < 1.0:
+            return value
+        return value / 100
 
     def value_to_string(self, obj):  # no idea if this has a purpose
         value = self._get_val_from_obj(obj)
