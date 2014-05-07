@@ -572,6 +572,18 @@ class OutputSettings(models.Model):
         help_text='Disable this to ignore entered vaccination costs.', )
     cost_track_zone_surveillance = models.BooleanField(default=True,
         help_text='Disable this to ignore entered zone surveillance costs.', )
+
+    def clean_fields(self, exclude=None):
+        self.daily_states_filename = self.daily_states_filename.strip()  # whitespace
+        if self.daily_states_filename:
+            fname = workspace(self.daily_states_filename)
+            if os.path.isfile(fname):
+                raise ValidationError("File already exists: " + fname)
+            try:  # valid filename?  permissions?  Already exists?
+                open(fname, 'w')
+            except:
+                raise ValidationError("Cannot write to " + fname)
+
     def __str__(self):
         return "Output Settings"
 
