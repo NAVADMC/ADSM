@@ -3956,6 +3956,81 @@
 
 <variable-test>
   <category>detection</category>
+  <short-name>self-reporting after positive test result</short-name>
+
+  <description>
+    Test whether a detection can occur by self-reporting after a positive test
+    result is already known (it should not).
+  </description>
+
+  <author>&lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>7 May 2014</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_pigs_sheep_infected</population-file>
+
+  <parameter-file>self_reporting_after_positive_test_result</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, the infectious
+    subclinical period lasts 1 day, the infectious clinical period lasts 3
+    days, and immunity lasts 3 days.
+
+    Pig units ship to sheep units once per day.  Sheep units ship to cattle
+    units once per day.  Latent units cannot be the source of an exposure.
+    The probability of infection given exposure is always too low to infect.
+
+    Pig units will be detected on the first day they show clinical signs.
+    Sheep and cattle units will be detected on the second day they show
+    clinical signs.  The probability of reporting vs. the number of days
+    since a public announcement of an outbreak is fixed at 1.  On the day
+    after the first detection, all direct contacts stop.
+
+    When a unit is detected, trace out (forward) will be initiated.  The
+    probability of success for a trace investigation is 1, and there is no
+    delay for finding recipient units.  Units found by trace are quarantined
+    and visually examined.  If no clinical signs are detected by the visual
+    exam, a test will be ordered.  The test sensitivity and specificity are
+    both 1, and test results are available immediately.
+
+    There is no vaccination or destruction.
+    
+    What should happen:
+     - On day 1 units 0 and 2 will be Latent.
+     - On day 2 units 0 and 2 will be Infectious Subclinical.  0 will ship to 1
+       and 2 will ship to 0.
+     - On day 3 units 0 and 2 will be Infectious Clinical.  Unit 2 will be
+       detected, the trace out will discover yesterday’s shipment to unit 0,
+       and unit 0 will be examined. Clinical signs will not be detected at unit
+       0 (the probability is too low) so a test will be ordered.  The test will
+       discover the disease. Count of detections: 2.
+     - On day 4 the probability of detection by clinical signs at unit 0 will
+       be high enough that detection could occur, but since that unit was
+       already detected by a test yesterday, no new detection should be
+       recorded.\n\n
+       The scenario is deliberately stopped at day 4.
+  </parameter-description>
+
+  <!-- The \n's in the text above are to make Doxygen correctly render a bullet
+    point that contains more than one paragraph. -->
+
+  <output>
+    <tr>
+      <td>detnUAll</td>
+      <td>detnUClinPigs</td>
+      <td>detnUTestSheep</td>
+      <td>detnUClinSheep</td>
+    </tr>
+    <!--   Det     Clin/Pigs  Test/Sheep Clin/Sheep  -->
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>2</td> <td>1</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>detection</category>
   <short-name>trace back/in, count exams</short-name>
 
   <description>
