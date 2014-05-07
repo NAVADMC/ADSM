@@ -67,7 +67,6 @@ def choice_char_from_value(value, map_tuple):
             return key
     return None
 
-frequency = chc("never", "once", "daily", "weekly", "monthly", "yearly")
 sqlite_keywords = ['abort', 'action', 'add', 'after', 'all', 'alter', 'analyze', 'and', 'as', 'asc', 'attach', 'autoincrement', 'before', 'begin', 'between', 'by', 'cascade', 'case', 'cast', 'check', 'collate', 'column', 'commit', 'conflict', 'constraint', 'create', 'cross', 'current_date', 'current_time', 'current_timestamp', 'database', 'default', 'deferrable', 'deferred', 'delete', 'desc', 'detach', 'distinct', 'drop', 'each', 'else', 'end', 'escape', 'except', 'exclusive', 'exists', 'explain', 'fail', 'for', 'foreign', 'from', 'full', 'glob', 'group', 'having', 'if', 'ignore', 'immediate', 'in', 'index', 'indexed', 'initially', 'inner', 'insert', 'instead', 'intersect', 'into', 'is', 'isnull', 'join', 'key', 'left', 'like', 'limit', 'match', 'natural', 'no', 'not', 'notnull', 'null', 'of', 'offset', 'on', 'or', 'order', 'outer', 'plan', 'pragma', 'primary', 'query', 'raise', 'recursive', 'references', 'regexp', 'reindex', 'release', 'rename', 'replace', 'restrict', 'right', 'rollback', 'row', 'savepoint', 'select', 'set', 'table', 'temp', 'temporary', 'then', 'to', 'transaction', 'trigger', 'union', 'unique', 'update', 'using', 'vacuum', 'values', 'view', 'virtual', 'when', 'where', 'with', 'without']
 
 
@@ -575,20 +574,6 @@ class OutputSettings(models.Model):
         help_text='Disable this to ignore entered zone surveillance costs.', )
     def __str__(self):
         return "Output Settings"
-
-
-class CustomOutputs(OutputSettings):
-    """This is an unimplemented feature based on looking at the XML spec"""
-    all_units_states = models.CharField(default="never", max_length=50, choices=frequency, )
-    num_units_in_each_state = models.CharField(default="never", max_length=50, choices=frequency, )
-    num_units_in_each_state_by_production_type = models.CharField(default="never", max_length=50, choices=frequency, )
-    num_animals_in_each_state = models.CharField(default="never", max_length=50, choices=frequency, )
-    num_animals_in_each_state_by_production_type = models.CharField(default="never", max_length=50, choices=frequency, )
-    disease_duration = models.CharField(default="never", max_length=50, choices=frequency, )
-    outbreak_duration = models.CharField(default="never", max_length=50, choices=frequency, )
-    clock_time = models.CharField(default="never", max_length=50, choices=frequency, )
-    tsdU = models.CharField(default="never", max_length=50, choices=frequency, )
-    tsdA = models.CharField(default="never", max_length=50, choices=frequency, )
 
 
 class ProductionType(models.Model):
