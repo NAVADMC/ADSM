@@ -10,9 +10,16 @@ class Percentage(float):
     #
     # def __str__(self):
     #     return "Percentage(" + super().__str__() + ")"
+    pass
 
 
-class PercentField(models.FloatField, metaclass=models.SubfieldBase):
+class PercentField(models.FloatField):
+    default_validators = [
+        MinValueValidator(0.0),
+        MaxValueValidator(1.0)]
+
+
+class PercentFieldLiteral(models.FloatField, metaclass=models.SubfieldBase):
     """ Float field that ensures field value is in the range 0-100. """
     default_validators = [
         MinValueValidator(1),
