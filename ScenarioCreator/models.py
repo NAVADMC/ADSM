@@ -459,7 +459,7 @@ class DiseaseProgressionAssignment(models.Model):
 
 
 class DiseaseSpread(models.Model):
-    name = models.CharField(max_length=255, blank=True, null=True, )
+    name = models.CharField(max_length=255,)
     _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0],
                                  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
                                  help_text='Parent disease whose spreading characteristics this describes.')
@@ -475,11 +475,11 @@ class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indire
         help_text='Code indicating the mechanism of the disease spread.', )
     subclinical_animals_can_infect_others = models.BooleanField(default=False,
         help_text='Indicates if subclinical units of the source type can spread disease by direct or indirect contact. ', )
-    contact_rate = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    contact_rate = models.FloatField(validators=[MinValueValidator(0.0)],
         help_text='The average contact rate (in recipient units per source unit per day) for direct or indirect contact models.', )
     use_fixed_contact_rate = models.BooleanField(default=False,
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
-    infection_probability = PercentField(blank=True, null=True,
+    infection_probability = PercentField(
         help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
     distance_distribution = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the shipment distances for direct and indirect contact models.', )
@@ -511,10 +511,10 @@ class DirectSpread(AbstractSpread):
 class AirborneSpread(DiseaseSpread):
     _spread_method_code = models.CharField(max_length=255, default='other',
         help_text='Code indicating the mechanism of the disease spread.', )
-    spread_1km_probability = PercentField(blank=True, null=True,
+    spread_1km_probability = PercentField(
         help_text='The probability that disease will be spread to unit 1 km away from the source unit.', )
     max_distance = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='The maximum distance in KM of airborne spread.', )
+        help_text='The maximum distance in KM of airborne spread.  Only used in Exponential Airborne Decay.', )
     wind_direction_start = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=0,
         help_text='The start angle in degrees of the predominate wind direction for airborne spread.', )
     #TODO: This doesn't keep start and end from crossing each other.

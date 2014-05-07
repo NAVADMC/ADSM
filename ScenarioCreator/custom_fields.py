@@ -1,5 +1,6 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from south.modelsinspector import add_introspection_rules
 
 
 class Percentage(float):
@@ -18,9 +19,11 @@ class PercentField(models.FloatField):
         MinValueValidator(0.0),
         MaxValueValidator(1.0)]
 
+add_introspection_rules([], ["^ScenarioCreator\.custom_fields\.PercentField"])
+
 
 class PercentFieldLiteral(models.FloatField, metaclass=models.SubfieldBase):
-    """ Float field that ensures field value is in the range 0-100. """
+    """ Currently not used. Float field that ensures field value is in the range 0-100. """
     default_validators = [
         MinValueValidator(1),
         MaxValueValidator(100)]
@@ -68,7 +71,6 @@ class ListField(models.TextField):
         value = self._get_val_from_obj(obj)
 
 
-from south.modelsinspector import add_introspection_rules
 
 add_introspection_rules([
                             (
