@@ -549,7 +549,7 @@ class Scenario(models.Model):
 
 class OutputSettings(models.Model):
     _scenario = models.ForeignKey('Scenario', default=lambda: Scenario.objects.get_or_create(id=1)[0],)  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
-    iterations = models.PositiveIntegerField(blank=True, null=True,
+    iterations = models.PositiveIntegerField(validators=[MinValueValidator(1)],
         help_text='The number of iterations of this scenario that should be run', )
     stop_criteria = models.CharField(max_length=255, default='disease-end',
         help_text='The criterion used to end each iteration.',
@@ -557,7 +557,7 @@ class OutputSettings(models.Model):
                  ('first-detection', 'Stop when the first detection occurs.'),
                  ('outbreak-end', 'Stop when there are no more latent or infectious units and all control activities are finished'),
                  ('stop-days', 'Stop after a specified number of days')))
-    days = models.PositiveIntegerField(blank=True, null=True,
+    days = models.PositiveIntegerField(blank=True, null=True, validators=[MinValueValidator(1)],
         help_text='The maximum number of days that iterations of this scenario should run.', )
      ## Outputs requested:
     save_all_daily_outputs = models.BooleanField(default=False,
@@ -565,7 +565,7 @@ class OutputSettings(models.Model):
                  (False, 'Save all daily output only for a specified number of iterations')),
         help_text='Indicates if daily outputs should be stored for every iteration.', )
     maximum_iterations_for_daily_output = models.PositiveIntegerField(default=3, blank=True, null=True,
-        validators=[MinValueValidator(3),],
+        validators=[MinValueValidator(3)],
         help_text='The number of iterations for which daily outputs should be stored The minimum value is 3.', )
     daily_states_filename = models.CharField(max_length=255, blank=True, null=True,
         help_text='The file name to output a plain text file with the state of each unit on each day of each iteration.', )
@@ -585,7 +585,6 @@ class OutputSettings(models.Model):
         help_text='Disable this to ignore entered vaccination costs.', )
     cost_track_zone_surveillance = models.BooleanField(default=True,
         help_text='Disable this to ignore entered zone surveillance costs.', )
-
 
     def clean_fields(self, exclude=None):
         self.daily_states_filename = clean_filename(self.daily_states_filename)
