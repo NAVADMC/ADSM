@@ -45,12 +45,27 @@ def getPdf( xml ):
 
 	args = {'equation_type': pdfType.capitalize(), 'name': name}
 
-	if pdfType == 'point':
+	if pdfType == 'beta-pert':
+		args['equation_type'] = 'BetaPERT'
+		args['min'] = float( firstChild.find( './min' ).text )
+		args['mode'] = float( firstChild.find( './mode' ).text )
+		args['max'] = float( firstChild.find( './max' ).text )
+	elif pdfType == 'gamma':
+		args['alpha'] = float( firstChild.find( './alpha' ).text )
+		args['beta'] = float( firstChild.find( './beta' ).text )
+	elif pdfType == 'inverse-gaussian':
+		args['equation_type'] = 'Inverse Gaussian'
+		args['mean'] = float( firstChild.find( './mu' ).text )
+		args['shape'] = float( firstChild.find( './lambda' ).text )		
+	elif pdfType == 'point':
 		args['mode'] = float( firstChild.text )
 	elif pdfType == 'triangular':
 		args['min'] = float( firstChild.find( './a' ).text )
 		args['mode'] = float( firstChild.find( './c' ).text )
 		args['max'] = float( firstChild.find( './b' ).text )
+	elif pdfType == 'weibull':
+		args['alpha'] = float( firstChild.find( './alpha' ).text )
+		args['beta'] = float( firstChild.find( './beta' ).text )
 	else:
 		print( pdfType )
 		raise NotImplementedError
