@@ -10,6 +10,7 @@ pip install django-extras
 pip install django-debug-toolbar
 pip install south
 pip install selenium  # only necessary for testing
+pip install cherrypy # local host server
 pip install cx-freeze  # only necessary for creating executables
 
 
