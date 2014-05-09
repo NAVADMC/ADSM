@@ -45,7 +45,12 @@ def getPdf( xml ):
 
 	args = {'equation_type': pdfType.capitalize(), 'name': name}
 
-	if pdfType == 'beta-pert':
+	if pdfType == 'beta':
+		args['alpha'] = float( firstChild.find( './alpha' ).text )
+		args['beta'] = float( firstChild.find( './beta' ).text )
+		args['location'] = float( firstChild.find( './location' ).text )
+		args['scale'] = float( firstChild.find( './scale' ).text )
+	elif pdfType == 'beta-pert':
 		args['equation_type'] = 'BetaPERT'
 		args['min'] = float( firstChild.find( './min' ).text )
 		args['mode'] = float( firstChild.find( './mode' ).text )
@@ -57,6 +62,11 @@ def getPdf( xml ):
 		args['equation_type'] = 'Inverse Gaussian'
 		args['mean'] = float( firstChild.find( './mu' ).text )
 		args['shape'] = float( firstChild.find( './lambda' ).text )		
+	elif pdfType == 'loglogistic':
+		args['equation_type'] = 'LogLogistic'
+		args['location'] = float( firstChild.find( './location' ).text )
+		args['scale'] = float( firstChild.find( './scale' ).text )
+		args['shape'] = float( firstChild.find( './shape' ).text )
 	elif pdfType == 'point':
 		args['mode'] = float( firstChild.text )
 	elif pdfType == 'triangular':
@@ -266,7 +276,10 @@ def main():
 			delay = getPdf( el.find( './delay' ) )
 		else:
 			delay = zeroDelay
-		probInfect = float( el.find( './prob-infect' ).text )
+		if el.find( './prob-infect' ) != None:
+			probInfect = float( el.find( './prob-infect' ).text )
+		else:
+			probInfect = 0
 		try:
 			latentCanInfect = getBool( el.find( './latent-units-can-infect' ) )
 		except AttributeError:
