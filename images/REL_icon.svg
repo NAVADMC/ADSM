@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="11cm" height="11cm" viewBox="-3 -3 205 205" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="0" y="0" width="200" height="200"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 5; stroke: #000000" x="0" y="0" width="200" height="200"/>
+  </g>
+  <polyline style="fill: none; fill-opacity:0; stroke-width: 5; stroke-dasharray: 8; stroke: #000000" points="20,140 80,120 140,40 180,40 "/>
+  <g>
+    <ellipse style="fill: #ff0000" cx="80" cy="120" rx="10" ry="10"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ff0000" cx="80" cy="120" rx="10" ry="10"/>
+  </g>
+  <g>
+    <ellipse style="fill: #ff0000" cx="140" cy="40" rx="10" ry="10"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ff0000" cx="140" cy="40" rx="10" ry="10"/>
+  </g>
+  <g>
+    <ellipse style="fill: #ff0000" cx="180" cy="40" rx="10" ry="10"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ff0000" cx="180" cy="40" rx="10" ry="10"/>
+  </g>
+  <g>
+    <ellipse style="fill: #ff0000" cx="20" cy="140" rx="10" ry="10"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ff0000" cx="20" cy="140" rx="10" ry="10"/>
+  </g>
+</svg>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="4cm" height="4cm" viewBox="80 40 80 80" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <ellipse style="fill: #00ff00" cx="120" cy="80" rx="40" ry="40"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2.35099e-37; stroke: #00ff00" cx="120" cy="80" rx="40" ry="40"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="120" y="83.9">
+      <tspan x="120" y="83.9"></tspan>
+    </text>
+  </g>
+</svg>

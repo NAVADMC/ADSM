@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="27cm" height="17cm" viewBox="59 -42 534 331" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 15; stroke: #000000" cx="240" cy="168" rx="120" ry="120"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="240" y="171.9">
+      <tspan x="240" y="171.9"></tspan>
+    </text>
+  </g>
+  <g>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 3; stroke: #000000" cx="404" cy="80" rx="120" ry="120"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="404" y="83.9">
+      <tspan x="404" y="83.9"></tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="60" y="60" width="176" height="52"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="60" y="60" width="176" height="52"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="148" y="73.6">
+      <tspan x="148" y="73.6">Detection of disease in unit</tspan>
+      <tspan x="148" y="89.6">A triggers a vaccination ring</tspan>
+      <tspan x="148" y="105.6">on day 10</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="356" y="172" width="180" height="52"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="356" y="172" width="180" height="52"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="446" y="185.6">
+      <tspan x="446" y="185.6">Unit B has a maximum</tspan>
+      <tspan x="446" y="201.6">vaccination frequency of 15</tspan>
+      <tspan x="446" y="217.6">days</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="412" y="-20" width="180" height="50"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="412" y="-20" width="180" height="50"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="502" y="-7.4">
+      <tspan x="502" y="-7.4">Detection of disease in unit</tspan>
+      <tspan x="502" y="8.6">C triggers a vaccination ring</tspan>
+      <tspan x="502" y="24.6">on day 20</tspan>
+    </text>
+  </g>
+  <g>
+    <ellipse style="fill: #000000" cx="240" cy="168" rx="8" ry="8"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2.35099e-37; stroke: #000000" cx="240" cy="168" rx="8" ry="8"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="240" y="171.9">
+      <tspan x="240" y="171.9"></tspan>
+    </text>
+  </g>
+  <g>
+    <ellipse style="fill: #000000" cx="404" cy="80" rx="8" ry="8"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2.35099e-37; stroke: #000000" cx="404" cy="80" rx="8" ry="8"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="404" y="83.9">
+      <tspan x="404" y="83.9"></tspan>
+    </text>
+  </g>
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 148,112 A 102.214,102.214 0 0 0 221.133,166.633"/>
+    <polygon style="fill: #000000" points="220.671,172.201 231.003,167.929 221.385,162.227 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="220.671,172.201 231.003,167.929 221.385,162.227 "/>
+  </g>
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 422.843,78.317 A 134.087,134.087 0 0 0 502,30"/>
+    <polygon style="fill: #000000" points="422.366,73.7909 412.994,79.8872 423.494,83.727 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="422.366,73.7909 412.994,79.8872 423.494,83.727 "/>
+  </g>
+  <g>
+    <ellipse style="fill: #7f7f7f" cx="320" cy="120" rx="8" ry="8"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2.35099e-37; stroke: #7f7f7f" cx="320" cy="120" rx="8" ry="8"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="320" y="123.9">
+      <tspan x="320" y="123.9"></tspan>
+    </text>
+  </g>
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 446,172 A 116.296,116.296 0 0 0 338.877,118.629"/>
+    <polygon style="fill: #000000" points="337.978,113.185 328.985,119.828 339.695,123.037 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="337.978,113.185 328.985,119.828 339.695,123.037 "/>
+  </g>
+</svg>

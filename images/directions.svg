@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="25cm" height="10cm" viewBox="15 4 489 189" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <path style="fill: #bfe5ff" d="M 400 100 C 410,90 432,68 442,58 C 418,34 382,34 358,58 C 368,68 390,90 400,100z"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #bfe5ff" d="M 400 100 C 410,90 432,68 442,58 C 418,34 382,34 358,58 C 368,68 390,90 400,100"/>
+  </g>
+  <g>
+    <path style="fill: #bfe5ff" d="M 120 100 C 130,110 152,132 162,142 C 138,166 102,166 78,142 C 88,132 110,110 120,100z"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #bfe5ff" d="M 120 100 C 130,110 152,132 162,142 C 138,166 102,166 78,142 C 88,132 110,110 120,100"/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="120" y="20">
+    <tspan x="120" y="20">0/360</tspan>
+  </text>
+  <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" cx="120" cy="100" rx="60" ry="60"/>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="200" y="105">
+    <tspan x="200" y="105">90</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="120" y="190">
+    <tspan x="120" y="190">180</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="40" y="105">
+    <tspan x="40" y="105">270</tspan>
+  </text>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="190" y1="100" x2="170" y2="100"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="120" y1="150" x2="120" y2="170"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="120" y1="30" x2="120" y2="50"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="70" y1="100" x2="50" y2="100"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="70" y1="50" x2="84.6446" y2="64.6446"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="170" y1="50" x2="155.355" y2="64.6446"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="170" y1="150" x2="155.355" y2="135.355"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="70" y1="150" x2="84.6446" y2="135.355"/>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:italic;font-weight:normal" x="180" y="160">
+    <tspan x="180" y="160">start</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:italic;font-weight:normal" x="60" y="160">
+    <tspan x="60" y="160">end</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="400" y="20">
+    <tspan x="400" y="20">0/360</tspan>
+  </text>
+  <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" cx="400" cy="100" rx="60" ry="60"/>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="480" y="105">
+    <tspan x="480" y="105">90</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="400" y="190">
+    <tspan x="400" y="190">180</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="320" y="105">
+    <tspan x="320" y="105">270</tspan>
+  </text>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="470" y1="100" x2="450" y2="100"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="400" y1="150" x2="400" y2="170"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="400" y1="30" x2="400" y2="50"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="350" y1="100" x2="330" y2="100"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="350" y1="50" x2="364.644" y2="64.6446"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="450" y1="50" x2="435.356" y2="64.6446"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="450" y1="150" x2="435.356" y2="135.355"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="350" y1="150" x2="364.644" y2="135.355"/>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:italic;font-weight:normal" x="340" y="40">
+    <tspan x="340" y="40">start</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:italic;font-weight:normal" x="460" y="40">
+    <tspan x="460" y="40">end</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #cc0000" cx="120" cy="100" rx="5" ry="5"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #cc0000" cx="120" cy="100" rx="5" ry="5"/>
+  </g>
+  <g>
+    <ellipse style="fill: #cc0000" cx="400" cy="100" rx="5" ry="5"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #cc0000" cx="400" cy="100" rx="5" ry="5"/>
+  </g>
+  <text font-size="10.56" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="120" y="85">
+    <tspan x="120" y="85">source</tspan>
+  </text>
+  <text font-size="9.03111" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="120" y="121">
+    <tspan x="120" y="121">area</tspan>
+    <tspan x="120" y="132.289">at risk</tspan>
+    <tspan x="120" y="143.578">of exposure</tspan>
+  </text>
+  <text font-size="10.56" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="400" y="120">
+    <tspan x="400" y="120">source</tspan>
+  </text>
+  <text font-size="9.03111" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="400" y="64">
+    <tspan x="400" y="64">area at risk of</tspan>
+    <tspan x="400" y="75.2889">exposure</tspan>
+  </text>
+  <text font-size="8" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="144" y="12">
+    <tspan x="144" y="12">o</tspan>
+  </text>
+  <text font-size="8" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="424" y="12">
+    <tspan x="424" y="12">o</tspan>
+  </text>
+  <text font-size="8" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="44" y="96">
+    <tspan x="44" y="96">o</tspan>
+  </text>
+  <text font-size="8" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="138" y="182">
+    <tspan x="138" y="182">o</tspan>
+  </text>
+  <text font-size="8" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="222" y="96">
+    <tspan x="222" y="96">o</tspan>
+  </text>
+  <text font-size="8" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="324" y="96">
+    <tspan x="324" y="96">o</tspan>
+  </text>
+  <text font-size="8" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="418" y="182">
+    <tspan x="418" y="182">o</tspan>
+  </text>
+  <text font-size="8" style="fill: #000000;text-anchor:middle;font-family:monospace;font-style:normal;font-weight:normal" x="502" y="96">
+    <tspan x="502" y="96">o</tspan>
+  </text>
+</svg>

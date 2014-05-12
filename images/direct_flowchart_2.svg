@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="60cm" height="97cm" viewBox="-421 -361 1183 1922" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <polygon style="fill: #ffffff" points="320,520 420,460 520,520 420,580 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="320,520 420,460 520,520 420,580 "/>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="-200,240 -100,180 0,240 -100,300 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-200,240 -100,180 0,240 -100,300 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="100" y="60" width="160" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="100" y="60" width="160" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="180" y="87.6">
+      <tspan x="180" y="87.6">Take the first contact</tspan>
+      <tspan x="180" y="103.6">from the list: it currently</tspan>
+      <tspan x="180" y="119.6">has just a source</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="180" y1="-180" x2="180" y2="-131"/>
+    <polygon style="fill: #000000" points="175,-131 180,-121 185,-131 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="175,-131 180,-121 185,-131 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="-100" y="240">
+    <tspan x="-100" y="240">Is the list of possible</tspan>
+    <tspan x="-100" y="256">recipients empty?</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="180" y1="140" x2="180" y2="189"/>
+    <polygon style="fill: #000000" points="175,189 180,199 185,189 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="175,189 180,199 185,189 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-100,300 -100,380 89,380.473 "/>
+    <polygon style="fill: #000000" points="88.9875,385.472 99,380.498 89.0125,375.473 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="88.9875,385.472 99,380.498 89.0125,375.473 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="-80" y="320">
+    <tspan x="-80" y="320">NO</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="300" y="-80">
+    <tspan x="300" y="-80">NO</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="-80" y="160">
+    <tspan x="-80" y="160">YES</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="100" y="820" width="160" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="100" y="820" width="160" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="180" y="847.6">
+      <tspan x="180" y="847.6">Record an exposure</tspan>
+      <tspan x="180" y="863.6">from the source to the</tspan>
+      <tspan x="180" y="879.6">recipient</tspan>
+    </text>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="540" y="500">
+    <tspan x="540" y="500">YES</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="100" y="-260" width="160" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="100" y="-260" width="160" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="180" y="-232.4">
+      <tspan x="180" y="-232.4">Start at the beginning</tspan>
+      <tspan x="180" y="-216.4">of a list of contacts</tspan>
+      <tspan x="180" y="-200.4">to generate</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="180" y1="-320" x2="180" y2="-271"/>
+    <polygon style="fill: #000000" points="175,-271 180,-261 185,-271 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="175,-271 180,-261 185,-271 "/>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="80,1020 180,960 280,1020 180,1080 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="80,1020 180,960 280,1020 180,1080 "/>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="80,-60 180,-120 280,-60 180,0 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="80,-60 180,-120 280,-60 180,0 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="180" y="-65.5">
+    <tspan x="180" y="-65.5">Are there contacts</tspan>
+    <tspan x="180" y="-49.5">remaining in the list?</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="180" y1="0" x2="180" y2="49"/>
+    <polygon style="fill: #000000" points="175,49 180,59 185,49 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="175,49 180,59 185,49 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="160" y="20">
+    <tspan x="160" y="20">YES</tspan>
+  </text>
+  <g>
+    <path style="fill: #ffffff" d="M 380 -80 L 460,-80 C 471.046,-80 480,-71.0457 480,-60 C 480,-48.9543 471.046,-40 460,-40 L 380,-40 C 368.954,-40 360,-48.9543 360,-60 C 360,-71.0457 368.954,-80 380,-80z"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 380 -80 L 460,-80 C 471.046,-80 480,-71.0457 480,-60 C 480,-48.9543 471.046,-40 460,-40 L 380,-40 C 368.954,-40 360,-48.9543 360,-60 C 360,-71.0457 368.954,-80 380,-80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="420" y="-56">
+      <tspan x="420" y="-56">STOP</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="280" y1="-60" x2="349" y2="-60"/>
+    <polygon style="fill: #000000" points="349,-55 359,-60 349,-65 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="349,-55 359,-60 349,-65 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="400" y="600">
+    <tspan x="400" y="600">NO</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="180" y1="421" x2="180" y2="469"/>
+    <polygon style="fill: #000000" points="175,469 180,479 185,469 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="175,469 180,479 185,469 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-100,40 -100,-150 169,-150 "/>
+    <polygon style="fill: #000000" points="169,-145 179,-150 169,-155 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="169,-145 179,-150 169,-155 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="60" y="200" width="240" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="60" y="200" width="240" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="180" y="219.6">
+      <tspan x="180" y="219.6">Create a list of possible recipients of</tspan>
+      <tspan x="180" y="235.6">the desired production type, which have</tspan>
+      <tspan x="180" y="251.6">not been destroyed or quarantined,</tspan>
+      <tspan x="180" y="267.6">and are not the source unit</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="60" y1="240" x2="11" y2="240"/>
+    <polygon style="fill: #000000" points="11,235 1,240 11,245 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="11,235 1,240 11,245 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-180" y="40" width="160" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="-180" y="40" width="160" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="-100" y="75.6">
+      <tspan x="-100" y="75.6">Drop the contact:do not</tspan>
+      <tspan x="-100" y="91.6">record an exposure</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-100" y1="180" x2="-100" y2="131"/>
+    <polygon style="fill: #000000" points="-95,131 -100,121 -105,131 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-95,131 -100,121 -105,131 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="100" y="480" width="160" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="100" y="480" width="160" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="180" y="499.6">
+      <tspan x="180" y="499.6">Choose the recipient(s)</tspan>
+      <tspan x="180" y="515.6"> whose distance from the</tspan>
+      <tspan x="180" y="531.6"> source is closest to the</tspan>
+      <tspan x="180" y="547.6">desired distance</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="100" y="340" width="160" height="81"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="100" y="340" width="160" height="81"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="180" y="368.1">
+      <tspan x="180" y="368.1">Sample a number from</tspan>
+      <tspan x="180" y="384.1">the movement distance</tspan>
+      <tspan x="180" y="400.1">distribution</tspan>
+    </text>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="420" y="510">
+    <tspan x="420" y="510">Is there more than 1</tspan>
+    <tspan x="420" y="526">recipient at exactly the same</tspan>
+    <tspan x="420" y="542">distance?</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="260" y1="520" x2="309" y2="520"/>
+    <polygon style="fill: #000000" points="309,525 319,520 309,515 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="309,525 319,520 309,515 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="580" y="820" width="160" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="580" y="820" width="160" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="660" y="847.6">
+      <tspan x="660" y="847.6">Choose 1 recipient </tspan>
+      <tspan x="660" y="863.6">randomly, giving</tspan>
+      <tspan x="660" y="879.6">preference to larger units</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="580" y1="860" x2="431" y2="860"/>
+    <polygon style="fill: #000000" points="431,855 421,860 431,865 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="431,855 421,860 431,865 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="180" y1="900" x2="180" y2="949"/>
+    <polygon style="fill: #000000" points="175,949 180,959 185,949 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="175,949 180,959 185,949 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="180" y="1015">
+    <tspan x="180" y="1015">Is the recipient</tspan>
+    <tspan x="180" y="1031">Susceptible?</tspan>
+    <tspan x="180" y="1047"></tspan>
+  </text>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="80,1020 -300,1020 -300,-150 -111,-150 "/>
+    <polygon style="fill: #000000" points="-111,-145 -101,-150 -111,-155 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-111,-145 -101,-150 -111,-155 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="60" y="1000">
+    <tspan x="60" y="1000">NO</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="100" y="1140" width="160" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="100" y="1140" width="160" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="180" y="1175.6">
+      <tspan x="180" y="1175.6">Sample a random</tspan>
+      <tspan x="180" y="1191.6">number r from 0 to 1</tspan>
+    </text>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="80,1340 180,1280 280,1340 180,1400 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="80,1340 180,1280 280,1340 180,1400 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="180" y1="1080" x2="180" y2="1129"/>
+    <polygon style="fill: #000000" points="175,1129 180,1139 185,1129 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="175,1129 180,1139 185,1129 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="200" y="1100">
+    <tspan x="200" y="1100">YES</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="180" y="1329">
+    <tspan x="180" y="1329">Is r less than the</tspan>
+    <tspan x="180" y="1345">probability of infection</tspan>
+    <tspan x="180" y="1361">given exposure?</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="100" y="1460" width="160" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="100" y="1460" width="160" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="180" y="1487.6">
+      <tspan x="180" y="1487.6">The recipient is infected: it</tspan>
+      <tspan x="180" y="1503.6">will become Latent after a</tspan>
+      <tspan x="180" y="1519.6">shipping delay</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="180" y1="1400" x2="180" y2="1449"/>
+    <polygon style="fill: #000000" points="175,1449 180,1459 185,1449 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="175,1449 180,1459 185,1449 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="180" y1="1220" x2="180" y2="1269"/>
+    <polygon style="fill: #000000" points="175,1269 180,1279 185,1269 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="175,1269 180,1279 185,1269 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="200" y="1420">
+    <tspan x="200" y="1420">YES</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="60" y="1320">
+    <tspan x="60" y="1320">NO</tspan>
+  </text>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="80,1340 -360,1340 -360,-150 -311,-150 "/>
+    <polygon style="fill: #000000" points="-311,-145 -301,-150 -311,-155 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-311,-145 -301,-150 -311,-155 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="180,1540 180,1560 -420,1560 -420,-150 -371,-150 "/>
+    <polygon style="fill: #000000" points="-371,-145 -361,-150 -371,-155 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-371,-145 -361,-150 -371,-155 "/>
+  </g>
+  <g>
+    <ellipse style="fill: #ffffff" cx="180" cy="-340" rx="20" ry="20"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" cx="180" cy="-340" rx="20" ry="20"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="180" y="-336.1">
+      <tspan x="180" y="-336.1">1</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="580" y="480" width="160" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="580" y="480" width="160" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="660" y="507.6">
+      <tspan x="660" y="507.6">Remove recipients</tspan>
+      <tspan x="660" y="523.6"> where contact would</tspan>
+      <tspan x="660" y="539.6">  violate zone rules</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="520" y1="520" x2="569" y2="520"/>
+    <polygon style="fill: #000000" points="569,525 579,520 569,515 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="569,525 579,520 569,515 "/>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="560,660 660,600 760,660 660,720 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="560,660 660,600 760,660 660,720 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="660" y="654">
+    <tspan x="660" y="654">Is the list of</tspan>
+    <tspan x="660" y="670">recipients now empty?</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="660" y1="560" x2="660" y2="589"/>
+    <polygon style="fill: #000000" points="655,589 660,599 665,589 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="655,589 660,599 665,589 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="540" y="640">
+    <tspan x="540" y="640">YES</tspan>
+  </text>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="560" y1="660" x2="430" y2="660"/>
+  <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 430,660 A 10,10 0 1 0 410,660"/>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="420" y1="580" x2="420" y2="689"/>
+    <polygon style="fill: #000000" points="415,689 420,699 425,689 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="415,689 420,699 425,689 "/>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="320,760 420,700 520,760 420,820 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="320,760 420,700 520,760 420,820 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="420" y="753">
+    <tspan x="420" y="753">Would contact with</tspan>
+    <tspan x="420" y="769">the recipient violate</tspan>
+    <tspan x="420" y="785">zone rules?</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="660" y1="720" x2="660" y2="809"/>
+    <polygon style="fill: #000000" points="655,809 660,819 665,809 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="655,809 660,819 665,809 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="680" y="740">
+    <tspan x="680" y="740">NO</tspan>
+  </text>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="420,820 420,860 271,860 "/>
+    <polygon style="fill: #000000" points="271,855 261,860 271,865 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="271,855 261,860 271,865 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="400" y="840">
+    <tspan x="400" y="840">NO</tspan>
+  </text>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="410,660 -240,660 -240,80 -191,80 "/>
+    <polygon style="fill: #000000" points="-191,85 -181,80 -191,75 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-191,85 -181,80 -191,75 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="280" y="740">
+    <tspan x="280" y="740">YES</tspan>
+  </text>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="320,760 -240,760 -240,671 "/>
+    <polygon style="fill: #000000" points="-235,671 -240,661 -245,671 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-235,671 -240,661 -245,671 "/>
+  </g>
+</svg>

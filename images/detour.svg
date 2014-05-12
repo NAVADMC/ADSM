@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="30cm" height="14cm" viewBox="-1 -1 591 261" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="0" y="0" width="260" height="260"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.705556; stroke: #000000" x="0" y="0" width="260" height="260"/>
+  </g>
+  <g>
+    <ellipse style="fill: #d83737" cx="130" cy="130" rx="30" ry="30"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #d83737" cx="130" cy="130" rx="30" ry="30"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="50" y="150">
+    <tspan x="50" y="150">A</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #000000" cx="50" cy="130" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="50" cy="130" rx="4" ry="4"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="130" y="40">
+    <tspan x="130" y="40">Disease-free</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="130" y="120">
+    <tspan x="130" y="120">High-risk</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="210" y="150">
+    <tspan x="210" y="150">B</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #000000" cx="210" cy="130" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="210" cy="130" rx="4" ry="4"/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="200" y="200">
+    <tspan x="200" y="200"></tspan>
+  </text>
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 53.9915 130 C 103.991,130 90,170 130,170 C 170,170 160,130 196.264,130"/>
+    <polygon style="fill: #000000" points="203.764,130 193.764,135 196.264,130 193.764,125 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="203.764,130 193.764,135 196.264,130 193.764,125 "/>
+  </g>
+  <text font-size="48" style="fill: #28cc28;text-anchor:middle;font-family:webdings;font-style:normal;font-weight:normal" x="130" y="212">
+    <tspan x="130" y="212">✓</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="330" y="0" width="260" height="260"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.705556; stroke: #000000" x="330" y="0" width="260" height="260"/>
+  </g>
+  <g>
+    <ellipse style="fill: #d83737" cx="460" cy="130" rx="70" ry="70"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #d83737" cx="460" cy="130" rx="70" ry="70"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="460" y="40">
+    <tspan x="460" y="40">Disease-free</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="565" y="150">
+    <tspan x="565" y="150">B</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #000000" cx="560" cy="130" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="560" cy="130" rx="4" ry="4"/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="530" y="200">
+    <tspan x="530" y="200"></tspan>
+  </text>
+  <text font-size="48" style="fill: #28cc28;text-anchor:middle;font-family:webdings;font-style:normal;font-weight:normal" x="460" y="252">
+    <tspan x="460" y="252">✓</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #ffffff" cx="460" cy="130" rx="30" ry="30"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffffff" cx="460" cy="130" rx="30" ry="30"/>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="385,205 385,55 460,130 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffffff" points="385,205 385,55 460,130 "/>
+  </g>
+  <g>
+    <ellipse style="fill: #d83737" cx="425" cy="95" rx="20" ry="20"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #d83737" cx="425" cy="95" rx="20" ry="20"/>
+  </g>
+  <g>
+    <ellipse style="fill: #d83737" cx="425" cy="165" rx="20" ry="20"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #d83737" cx="425" cy="165" rx="20" ry="20"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="460" y="90">
+    <tspan x="460" y="90">High-risk</tspan>
+  </text>
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 455.997 130 C 390.997,130 395,155 395,170 C 395,185 420,210 460,210 C 500,210 540,175 553.5,141.846"/>
+    <polygon style="fill: #000000" points="556.329,134.899 557.188,146.047 553.5,141.846 547.927,142.275 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="556.329,134.899 557.188,146.047 553.5,141.846 547.927,142.275 "/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="460" y="150">
+    <tspan x="460" y="150">A</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #000000" cx="460" cy="130" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="460" cy="130" rx="4" ry="4"/>
+  </g>
+</svg>

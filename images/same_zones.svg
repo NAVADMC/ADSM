@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="24cm" height="23cm" viewBox="-1 -1 461 441" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="0" y="0" width="460" height="440"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.705556; stroke: #000000" x="0" y="0" width="460" height="440"/>
+  </g>
+  <g>
+    <ellipse style="fill: #ffa500" cx="130" cy="130" rx="70" ry="70"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffa500" cx="130" cy="130" rx="70" ry="70"/>
+  </g>
+  <g>
+    <ellipse style="fill: #d83737" cx="130" cy="130" rx="30" ry="30"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #d83737" cx="130" cy="130" rx="30" ry="30"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="130" y="150">
+    <tspan x="130" y="150">A</tspan>
+    <tspan x="130" y="170">(cattle)</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #000000" cx="130" cy="130" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="130" cy="130" rx="4" ry="4"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="230" y="40">
+    <tspan x="230" y="40">Disease-free</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="130" y="85">
+    <tspan x="130" y="85">Low-risk</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="130" y="120">
+    <tspan x="130" y="120">High-risk</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #ffa500" cx="330" cy="130" rx="70" ry="70"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffa500" cx="330" cy="130" rx="70" ry="70"/>
+  </g>
+  <g>
+    <ellipse style="fill: #d83737" cx="330" cy="130" rx="30" ry="30"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #d83737" cx="330" cy="130" rx="30" ry="30"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="330" y="150">
+    <tspan x="330" y="150">B</tspan>
+    <tspan x="330" y="170">(swine)</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #000000" cx="330" cy="130" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="330" cy="130" rx="4" ry="4"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="330" y="85">
+    <tspan x="330" y="85">Low-risk</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="330" y="120">
+    <tspan x="330" y="120">High-risk</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #ffa500" cx="130" cy="330" rx="70" ry="70"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffa500" cx="130" cy="330" rx="70" ry="70"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="130" y="350">
+    <tspan x="130" y="350">A</tspan>
+    <tspan x="130" y="370">(cattle)</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #000000" cx="130" cy="330" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="130" cy="330" rx="4" ry="4"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="130" y="285">
+    <tspan x="130" y="285">Low-risk</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #ffa500" cx="330" cy="330" rx="70" ry="70"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffa500" cx="330" cy="330" rx="70" ry="70"/>
+  </g>
+  <g>
+    <ellipse style="fill: #d83737" cx="330.411" cy="330" rx="50.4114" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #d83737" cx="330.411" cy="330" rx="50.4114" ry="50"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="330" y="350">
+    <tspan x="330" y="350">B</tspan>
+    <tspan x="330" y="370">(swine)</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #000000" cx="330" cy="330" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="330" cy="330" rx="4" ry="4"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="330" y="285">
+    <tspan x="330" y="285">Low-risk</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="330" y="320">
+    <tspan x="330" y="320">High-risk</tspan>
+  </text>
+  <text font-size="48" style="fill: #28cc28;text-anchor:middle;font-family:webdings;font-style:normal;font-weight:normal" x="232" y="184">
+    <tspan x="232" y="184">✓</tspan>
+  </text>
+  <text font-size="40" style="fill: #ff0000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="420" y="390">
+    <tspan x="420" y="390">✗</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="230" y="140">
+    <tspan x="230" y="140">(a)</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="40" y="350">
+    <tspan x="40" y="350">(b)</tspan>
+  </text>
+  <text font-size="40" style="fill: #ff0000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="40" y="390">
+    <tspan x="40" y="390">✗</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="420" y="350">
+    <tspan x="420" y="350">(c)</tspan>
+  </text>
+</svg>

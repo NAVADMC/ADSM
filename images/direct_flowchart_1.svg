@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="30cm" height="61cm" viewBox="-141 -501 589 1203" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <polygon style="fill: #ffffff" points="40,260 140,200 240,260 140,320 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="40,260 140,200 240,260 140,320 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="60" y="60" width="160" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="60" y="60" width="160" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="140" y="95.6">
+      <tspan x="140" y="95.6">Take the next unit from</tspan>
+      <tspan x="140" y="111.6">the list in sequence</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="140" y1="-180" x2="140" y2="-131"/>
+    <polygon style="fill: #000000" points="135,-131 140,-121 145,-131 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="135,-131 140,-121 145,-131 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="140" y="255">
+    <tspan x="140" y="255">Is it Latent, Infectious</tspan>
+    <tspan x="140" y="271">Subclinical, or Infectious</tspan>
+    <tspan x="140" y="287">Clinical?</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="140" y1="140" x2="140" y2="189"/>
+    <polygon style="fill: #000000" points="135,189 140,199 145,189 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="135,189 140,199 145,189 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="40,260 -20,260 -20,-150 129,-150 "/>
+    <polygon style="fill: #000000" points="129,-145 139,-150 129,-155 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="129,-145 139,-150 129,-155 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="20" y="240">
+    <tspan x="20" y="240">NO</tspan>
+  </text>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="140,640 140,700 -140,700 -140,-150 -91,-150 "/>
+    <polygon style="fill: #000000" points="-91,-145 -81,-150 -91,-155 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-91,-145 -81,-150 -91,-155 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="260" y="-80">
+    <tspan x="260" y="-80">NO</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="120" y="340">
+    <tspan x="120" y="340">YES</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="60" y="560" width="160" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="60" y="560" width="160" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="140" y="579.6">
+      <tspan x="140" y="579.6">Sample a number N from</tspan>
+      <tspan x="140" y="595.6">a Poisson distribution</tspan>
+      <tspan x="140" y="611.6">whose mean is the</tspan>
+      <tspan x="140" y="627.6">movement rate</tspan>
+    </text>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="20" y="420">
+    <tspan x="20" y="420">YES</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:arial;font-style:normal;font-weight:normal" x="320" y="620">
+    <tspan x="320" y="620">Build a list of the</tspan>
+    <tspan x="320" y="636">number of movements</tspan>
+    <tspan x="320" y="652">from each unit</tspan>
+  </text>
+  <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="441,596.242 301,596.242 301,676.242 441,676.242 "/>
+  <g>
+    <rect style="fill: #ffffff" x="60" y="-260" width="160" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="60" y="-260" width="160" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="140" y="-224.4">
+      <tspan x="140" y="-224.4">Start at the beginning</tspan>
+      <tspan x="140" y="-208.4">of a list of all units</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="140" y1="-320" x2="140" y2="-271"/>
+    <polygon style="fill: #000000" points="135,-271 140,-261 145,-271 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="135,-271 140,-261 145,-271 "/>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="40,440 140,380 240,440 140,500 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="40,440 140,380 240,440 140,500 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="140" y="445">
+    <tspan x="140" y="445">Is it quarantined?</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="140" y1="320" x2="140" y2="369"/>
+    <polygon style="fill: #000000" points="135,369 140,379 145,369 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="135,369 140,379 145,369 "/>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="40,-60 140,-120 240,-60 140,0 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="40,-60 140,-120 240,-60 140,0 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="140" y="-60">
+    <tspan x="140" y="-60">Are there units remaining</tspan>
+    <tspan x="140" y="-44">in the list?</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="140" y1="0" x2="140" y2="49"/>
+    <polygon style="fill: #000000" points="135,49 140,59 145,49 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="135,49 140,59 145,49 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="120" y="20">
+    <tspan x="120" y="20">YES</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="240" y1="-60" x2="309" y2="-60"/>
+    <polygon style="fill: #000000" points="309,-55 319,-60 309,-65 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="309,-55 319,-60 309,-65 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="120" y="520">
+    <tspan x="120" y="520">NO</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="140" y1="500" x2="140" y2="549"/>
+    <polygon style="fill: #000000" points="135,549 140,559 145,549 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="135,549 140,559 145,549 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="40,440 -80,440 -80,-150 -31,-150 "/>
+    <polygon style="fill: #000000" points="-31,-145 -21,-150 -31,-155 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-31,-145 -21,-150 -31,-155 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="60" y="-400" width="160" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="60" y="-400" width="160" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:normal" x="140" y="-372.4">
+      <tspan x="140" y="-372.4">Adjust the movement</tspan>
+      <tspan x="140" y="-356.4">rate based on days since</tspan>
+      <tspan x="140" y="-340.4">first detection</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="140" y1="-460" x2="140" y2="-411"/>
+    <polygon style="fill: #000000" points="135,-411 140,-401 145,-411 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="135,-411 140,-401 145,-411 "/>
+  </g>
+  <g>
+    <path style="fill: #ffffff" d="M 100 -500 L 180,-500 C 191.046,-500 200,-491.046 200,-480 C 200,-468.954 191.046,-460 180,-460 L 100,-460 C 88.9543,-460 80,-468.954 80,-480 C 80,-491.046 88.9543,-500 100,-500z"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 100 -500 L 180,-500 C 191.046,-500 200,-491.046 200,-480 C 200,-468.954 191.046,-460 180,-460 L 100,-460 C 88.9543,-460 80,-468.954 80,-480 C 80,-491.046 88.9543,-500 100,-500"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="140" y="-476">
+      <tspan x="140" y="-476">START</tspan>
+    </text>
+  </g>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 10; stroke: #000000" x1="220" y1="600" x2="300" y2="640"/>
+  <g>
+    <ellipse style="fill: #ffffff" cx="340" cy="-60" rx="20" ry="20"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" cx="340" cy="-60" rx="20" ry="20"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="340" y="-56.1">
+      <tspan x="340" y="-56.1">1</tspan>
+    </text>
+  </g>
+</svg>
