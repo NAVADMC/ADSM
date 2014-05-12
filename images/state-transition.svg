@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="35cm" height="33cm" viewBox="-341 -1 682 651" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 254.634,181.782 A 298.353,298.353 0 0 0 7.86871e-14,40"/>
+    <polygon style="fill: #000000" points="250.832,183.713 264.536,199.114 259.692,179.076 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="250.832,183.713 264.536,199.114 259.692,179.076 "/>
+  </g>
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 238.111,523.644 A 302.13,302.13 0 0 0 280,240"/>
+    <polygon style="fill: #000000" points="234.905,520.819 225.652,539.242 242.486,527.341 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="234.905,520.819 225.652,539.242 242.486,527.341 "/>
+  </g>
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M -106.538,622.273 A 296.899,296.899 0 0 0 180,580"/>
+    <polygon style="fill: #000000" points="-104.701,618.429 -124.95,614.562 -108.903,627.504 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-104.701,618.429 -124.95,614.562 -108.903,627.504 "/>
+  </g>
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M -298.226,300.713 A 304.89,304.89 0 0 0 -180,580"/>
+    <polygon style="fill: #000000" points="-294.032,301.565 -295.188,280.982 -303.854,299.688 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-294.032,301.565 -295.188,280.982 -303.854,299.688 "/>
+  </g>
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M -80.4331,49.6614 A 287.123,287.123 0 0 0 -280,240"/>
+    <polygon style="fill: #000000" points="-79.6974,53.8324 -60.9824,45.1867 -81.5642,44.0082 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-79.6974,53.8324 -60.9824,45.1867 -81.5642,44.0082 "/>
+  </g>
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 40.6233,182.278 A 100,100 0 0 0 30,80"/>
+    <polygon style="fill: #000000" points="38.6,180.2 30.6,199.2 46.6,186.2 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="38.6,180.2 30.6,199.2 46.6,186.2 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="125.858" y1="545.858" x2="68.9914" y2="488.991"/>
+    <polygon style="fill: #000000" points="72.5269,485.456 54.8493,474.849 65.4559,492.527 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="72.5269,485.456 54.8493,474.849 65.4559,492.527 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="0" y1="280" x2="0" y2="379"/>
+    <polygon style="fill: #000000" points="-5,379 0,399 5,379 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-5,379 0,399 5,379 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-125.858" y1="545.858" x2="-68.9914" y2="488.991"/>
+    <polygon style="fill: #000000" points="-65.4559,492.527 -54.8493,474.849 -72.5269,485.456 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-65.4559,492.527 -54.8493,474.849 -72.5269,485.456 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="240" y="400" width="100" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffffff" x="240" y="400" width="100" height="40"/>
+    <text font-size="16" style="fill: #00a800;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="290" y="414.5">
+      <tspan x="290" y="414.5">Natural</tspan>
+      <tspan x="290" y="434.5">progression</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="10" y="100" width="100" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffffff" x="10" y="100" width="100" height="60"/>
+    <text font-size="16" style="fill: #0000a8;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="60" y="114.5">
+      <tspan x="60" y="114.5">Vaccination</tspan>
+      <tspan x="60" y="134.5">(delayed</tspan>
+      <tspan x="60" y="154.5">transition)</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="150" y="90" width="80" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffffff" x="150" y="90" width="80" height="40"/>
+    <text font-size="16" style="fill: #cc0000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="190" y="104.5">
+      <tspan x="190" y="104.5">Effective</tspan>
+      <tspan x="190" y="124.5">exposure</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-225.858" y1="274.142" x2="-75.7696" y2="406.132"/>
+    <polygon style="fill: #000000" points="-79.0715,409.887 -60.7509,419.34 -72.4677,402.377 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-79.0715,409.887 -60.7509,419.34 -72.4677,402.377 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="225.858" y1="274.142" x2="75.7696" y2="406.132"/>
+    <polygon style="fill: #000000" points="72.4677,402.377 60.7509,419.34 79.0715,409.887 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="72.4677,402.377 60.7509,419.34 79.0715,409.887 "/>
+  </g>
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M -40.6233,97.7222 A 100,100 0 0 0 -30,200"/>
+    <polygon style="fill: #000000" points="-38.6,99.8 -30.6,80.8 -46.6,93.8 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-38.6,99.8 -30.6,80.8 -46.6,93.8 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="110" y="320" width="100" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffffff" x="110" y="320" width="100" height="20"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="160" y="334.5">
+      <tspan x="160" y="334.5">Destruction</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-50" y="320" width="100" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffffff" x="-50" y="320" width="100" height="20"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="0" y="334.5">
+      <tspan x="0" y="334.5">Destruction</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-40" y="0" width="80" height="80"/>
+    <path style="fill: #ffffff" d="M -40,0 A 20,20 0 0 0 -60,20 L -40,20 z"/>
+    <path style="fill: #ffffff" d="M 60,20 A 20,20 0 0 0 40,0 L 40,20 z"/>
+    <rect style="fill: #ffffff" x="-60" y="20" width="120" height="40"/>
+    <path style="fill: #ffffff" d="M -60,60 A 20,20 0 0 0 -40,80 L -40,60 z"/>
+    <path style="fill: #ffffff" d="M 40,80 A 20,20 0 0 0 60,60 L 40,60 z"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-40" y1="0" x2="40" y2="0"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-40" y1="80" x2="40" y2="80"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M -40,0 A 20,20 0 0 0 -60,20"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 60,20 A 20,20 0 0 0 40,0"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-60" y1="20" x2="-60" y2="60"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="60" y1="20" x2="60" y2="60"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M -60,60 A 20,20 0 0 0 -40,80"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 40,80 A 20,20 0 0 0 60,60"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="0" y="44.5">
+      <tspan x="0" y="44.5">SUSCEPTIBLE</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #000000" x="-40" y="400" width="80" height="80"/>
+    <path style="fill: #000000" d="M -40,400 A 20,20 0 0 0 -60,420 L -40,420 z"/>
+    <path style="fill: #000000" d="M 60,420 A 20,20 0 0 0 40,400 L 40,420 z"/>
+    <rect style="fill: #000000" x="-60" y="420" width="120" height="40"/>
+    <path style="fill: #000000" d="M -60,460 A 20,20 0 0 0 -40,480 L -40,460 z"/>
+    <path style="fill: #000000" d="M 40,480 A 20,20 0 0 0 60,460 L 40,460 z"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-40" y1="400" x2="40" y2="400"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-40" y1="480" x2="40" y2="480"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M -40,400 A 20,20 0 0 0 -60,420"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 60,420 A 20,20 0 0 0 40,400"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-60" y1="420" x2="-60" y2="460"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="60" y1="420" x2="60" y2="460"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M -60,460 A 20,20 0 0 0 -40,480"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 40,480 A 20,20 0 0 0 60,460"/>
+    <text font-size="17.6" style="fill: #ffffff;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="0" y="444.95">
+      <tspan x="0" y="444.95">DESTROYED</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #0000a8" x="-40" y="200" width="80" height="80"/>
+    <path style="fill: #0000a8" d="M -40,200 A 20,20 0 0 0 -60,220 L -40,220 z"/>
+    <path style="fill: #0000a8" d="M 60,220 A 20,20 0 0 0 40,200 L 40,220 z"/>
+    <rect style="fill: #0000a8" x="-60" y="220" width="120" height="40"/>
+    <path style="fill: #0000a8" d="M -60,260 A 20,20 0 0 0 -40,280 L -40,260 z"/>
+    <path style="fill: #0000a8" d="M 40,280 A 20,20 0 0 0 60,260 L 40,260 z"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000a8" x1="-40" y1="200" x2="40" y2="200"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000a8" x1="-40" y1="280" x2="40" y2="280"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000a8" d="M -40,200 A 20,20 0 0 0 -60,220"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000a8" d="M 60,220 A 20,20 0 0 0 40,200"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000a8" x1="-60" y1="220" x2="-60" y2="260"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000a8" x1="60" y1="220" x2="60" y2="260"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000a8" d="M -60,260 A 20,20 0 0 0 -40,280"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #0000a8" d="M 40,280 A 20,20 0 0 0 60,260"/>
+    <text font-size="17.6" style="fill: #ffffff;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="0" y="233.95">
+      <tspan x="0" y="233.95">VACCINE</tspan>
+      <tspan x="0" y="255.95">IMMUNE</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #e5e500" x="240" y="200" width="80" height="80"/>
+    <path style="fill: #e5e500" d="M 240,200 A 20,20 0 0 0 220,220 L 240,220 z"/>
+    <path style="fill: #e5e500" d="M 340,220 A 20,20 0 0 0 320,200 L 320,220 z"/>
+    <rect style="fill: #e5e500" x="220" y="220" width="120" height="40"/>
+    <path style="fill: #e5e500" d="M 220,260 A 20,20 0 0 0 240,280 L 240,260 z"/>
+    <path style="fill: #e5e500" d="M 320,280 A 20,20 0 0 0 340,260 L 320,260 z"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e5e500" x1="240" y1="200" x2="320" y2="200"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e5e500" x1="240" y1="280" x2="320" y2="280"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e5e500" d="M 240,200 A 20,20 0 0 0 220,220"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e5e500" d="M 340,220 A 20,20 0 0 0 320,200"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e5e500" x1="220" y1="220" x2="220" y2="260"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e5e500" x1="340" y1="220" x2="340" y2="260"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e5e500" d="M 220,260 A 20,20 0 0 0 240,280"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e5e500" d="M 320,280 A 20,20 0 0 0 340,260"/>
+    <text font-size="17.6" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="280" y="244.95">
+      <tspan x="280" y="244.95">LATENT</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #cc0000" x="-220" y="540" width="80" height="80"/>
+    <path style="fill: #cc0000" d="M -220,540 A 20,20 0 0 0 -240,560 L -220,560 z"/>
+    <path style="fill: #cc0000" d="M -120,560 A 20,20 0 0 0 -140,540 L -140,560 z"/>
+    <rect style="fill: #cc0000" x="-240" y="560" width="120" height="40"/>
+    <path style="fill: #cc0000" d="M -240,600 A 20,20 0 0 0 -220,620 L -220,600 z"/>
+    <path style="fill: #cc0000" d="M -140,620 A 20,20 0 0 0 -120,600 L -140,600 z"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #cc0000" x1="-220" y1="540" x2="-140" y2="540"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #cc0000" x1="-220" y1="620" x2="-140" y2="620"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #cc0000" d="M -220,540 A 20,20 0 0 0 -240,560"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #cc0000" d="M -120,560 A 20,20 0 0 0 -140,540"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #cc0000" x1="-240" y1="560" x2="-240" y2="600"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #cc0000" x1="-120" y1="560" x2="-120" y2="600"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #cc0000" d="M -240,600 A 20,20 0 0 0 -220,620"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #cc0000" d="M -140,620 A 20,20 0 0 0 -120,600"/>
+    <text font-size="17.6" style="fill: #ffffff;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="-180" y="573.95">
+      <tspan x="-180" y="573.95">INFECTIOUS</tspan>
+      <tspan x="-180" y="595.95">CLINICAL</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #e59900" x="139.375" y="540" width="81.25" height="80"/>
+    <path style="fill: #e59900" d="M 139.375,540 A 20,20 0 0 0 119.375,560 L 139.375,560 z"/>
+    <path style="fill: #e59900" d="M 240.625,560 A 20,20 0 0 0 220.625,540 L 220.625,560 z"/>
+    <rect style="fill: #e59900" x="119.375" y="560" width="121.25" height="40"/>
+    <path style="fill: #e59900" d="M 119.375,600 A 20,20 0 0 0 139.375,620 L 139.375,600 z"/>
+    <path style="fill: #e59900" d="M 220.625,620 A 20,20 0 0 0 240.625,600 L 220.625,600 z"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e59900" x1="139.375" y1="540" x2="220.625" y2="540"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e59900" x1="139.375" y1="620" x2="220.625" y2="620"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e59900" d="M 139.375,540 A 20,20 0 0 0 119.375,560"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e59900" d="M 240.625,560 A 20,20 0 0 0 220.625,540"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e59900" x1="119.375" y1="560" x2="119.375" y2="600"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e59900" x1="240.625" y1="560" x2="240.625" y2="600"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e59900" d="M 119.375,600 A 20,20 0 0 0 139.375,620"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #e59900" d="M 220.625,620 A 20,20 0 0 0 240.625,600"/>
+    <text font-size="17.6" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="180" y="573.95">
+      <tspan x="180" y="573.95">INFECTIOUS</tspan>
+      <tspan x="180" y="595.95">SUBCLINICAL</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #00a800" x="-320" y="200" width="80" height="80"/>
+    <path style="fill: #00a800" d="M -320,200 A 20,20 0 0 0 -340,220 L -320,220 z"/>
+    <path style="fill: #00a800" d="M -220,220 A 20,20 0 0 0 -240,200 L -240,220 z"/>
+    <rect style="fill: #00a800" x="-340" y="220" width="120" height="40"/>
+    <path style="fill: #00a800" d="M -340,260 A 20,20 0 0 0 -320,280 L -320,260 z"/>
+    <path style="fill: #00a800" d="M -240,280 A 20,20 0 0 0 -220,260 L -240,260 z"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #00a800" x1="-320" y1="200" x2="-240" y2="200"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #00a800" x1="-320" y1="280" x2="-240" y2="280"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #00a800" d="M -320,200 A 20,20 0 0 0 -340,220"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #00a800" d="M -220,220 A 20,20 0 0 0 -240,200"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #00a800" x1="-340" y1="220" x2="-340" y2="260"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #00a800" x1="-220" y1="220" x2="-220" y2="260"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #00a800" d="M -340,260 A 20,20 0 0 0 -320,280"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #00a800" d="M -240,280 A 20,20 0 0 0 -220,260"/>
+    <text font-size="17.6" style="fill: #ffffff;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="-280" y="233.95">
+      <tspan x="-280" y="233.95">NATURALLY</tspan>
+      <tspan x="-280" y="255.95">IMMUNE</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-210" y="320" width="100" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffffff" x="-210" y="320" width="100" height="20"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="-160" y="334.5">
+      <tspan x="-160" y="334.5">Destruction</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-150" y="510" width="100" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffffff" x="-150" y="510" width="100" height="20"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="-100" y="524.5">
+      <tspan x="-100" y="524.5">Destruction</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="50" y="510" width="100" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffffff" x="50" y="510" width="100" height="20"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="100" y="524.5">
+      <tspan x="100" y="524.5">Destruction</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-50" y="610" width="100" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffffff" x="-50" y="610" width="100" height="40"/>
+    <text font-size="16" style="fill: #00a800;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="0" y="624.5">
+      <tspan x="0" y="624.5">Natural</tspan>
+      <tspan x="0" y="644.5">progression</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-340" y="400" width="100" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffffff" x="-340" y="400" width="100" height="40"/>
+    <text font-size="16" style="fill: #00a800;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="-290" y="414.5">
+      <tspan x="-290" y="414.5">Natural</tspan>
+      <tspan x="-290" y="434.5">progression</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-230" y="90" width="100" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffffff" x="-230" y="90" width="100" height="40"/>
+    <text font-size="16" style="fill: #00a800;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="-180" y="104.5">
+      <tspan x="-180" y="104.5">Natural</tspan>
+      <tspan x="-180" y="124.5">progression</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-90" y="130" width="100" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffffff" x="-90" y="130" width="100" height="40"/>
+    <text font-size="16" style="fill: #00a800;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="-40" y="144.5">
+      <tspan x="-40" y="144.5">Natural</tspan>
+      <tspan x="-40" y="164.5">progression</tspan>
+    </text>
+  </g>
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M -54.1422,74.1422 A 322.865,322.865 0 0 0 -64.3232,387.529"/>
+    <polygon style="fill: #000000" points="-69.2199,390.409 -54.6559,405 -60.6402,385.272 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-69.2199,390.409 -54.6559,405 -60.6402,385.272 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-170" y="230" width="100" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #ffffff" x="-170" y="230" width="100" height="20"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:arial;font-style:normal;font-weight:700" x="-120" y="244.5">
+      <tspan x="-120" y="244.5">Destruction</tspan>
+    </text>
+  </g>
+</svg>
