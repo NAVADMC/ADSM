@@ -1,4 +1,4 @@
-/** @file conflict_resolver.h
+/** @file population_model.h
  *
  * @author Aaron Reeves <Aaron.Reeves@colostate.edu><br>
  *   Animal Population Health Institute<br>
@@ -16,10 +16,10 @@
  * any later version.
  */
 
-#ifndef CONFLICT_RESOLVER_H
-#define CONFLICT_RESOLVER_H
+#ifndef POPULATION_MODEL_H
+#define POPULATION_MODEL_H
 
-adsm_module_t *conflict_resolver_new (sqlite3 *, UNT_unit_list_t *,
-                                      projPJ, ZON_zone_list_t *);
+adsm_module_t *population_model_new (sqlite3 *, UNT_unit_list_t *,
+                                     projPJ, ZON_zone_list_t *);
 
 #endif
