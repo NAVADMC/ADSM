@@ -641,10 +641,10 @@ class ZoneEffectOnProductionType(models.Model):
         help_text='Zone for which this event occurred.', )
     production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
-    zone_indirect_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
-        help_text='Function the describes indirect movement rate.', )
     zone_direct_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Function the describes direct movement rate.', )
+    zone_indirect_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
+        help_text='Function the describes indirect movement rate.', )
     zone_detection_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], default=1.0,
         help_text='Multiplier for the probability of observing clinical signs in units of this production type in this zone.', )
     cost_of_surveillance_per_animal_day = MoneyField(default=0.0,
