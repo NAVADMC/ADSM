@@ -73,26 +73,29 @@ body>section {
 #setupMenu ul {
     list-style: none;
     padding-left: 0;
-    margin-left: 12px;
+}
+
+#setupMenu li {
+    padding-top: 4px;
 }
 
 #setupMenu a {
-    color: #006;
+    color: black;
     display:block;
     text-decoration: none;
     background-color: #EEE;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: bold;
-    line-height: 30px;
+    line-height: 35px;
     padding-left: 5px;
 }
 
 #setupMenu ul a {
-    font-size: 14px;
+    font-weight: normal;
 }
 
 #setupMenu ul ul a {
-    font-size: 12px;
+    background-color: #EEE;
 }
 
 #setupMenu a:hover {
