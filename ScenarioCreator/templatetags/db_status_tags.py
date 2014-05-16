@@ -18,7 +18,7 @@ def completed(itemcount):
     if itemcount:
         return 'completed '
         # return 'class="completed "><span class="badge pull-right">%i</span' % len(itemcount)
-    return ''
+    return 'incomplete'
 
 
 class FormCompleted(Node):

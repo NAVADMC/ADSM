@@ -83,7 +83,7 @@ body>section {
     color: black;
     display:block;
     text-decoration: none;
-    background-color: #EEE;
+    background-color: #E4E4E4;
     font-size: 18px;
     font-weight: bold;
     line-height: 35px;
@@ -92,20 +92,28 @@ body>section {
 
 #setupMenu ul a {
     font-weight: normal;
+    background-color: #EEEEEE;
 }
 
 #setupMenu ul ul a {
-    background-color: #EEE;
+    background-color: #FFFFFF;
 }
 
 #setupMenu a:hover {
     background-color: #FFF;
 }
 
+#setupMenu .active {
+    background-color: #B1B1B1
+}
+
 #setupMenu span {
-    background-color: #FFDD4A;
     width: 5px;
     height: 35px;
+}
+
+#setupMenu .incomplete {
+background-color: #FFDD4A;
 }
 
 #setupMenu .completed, .completed {
