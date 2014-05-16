@@ -7,6 +7,13 @@ register = template.Library()
 
 
 @register.filter()
+def active(target_address):
+    if not target_address:  #TODO: Placeholder
+        return 'active '
+    return ''
+
+
+@register.filter()
 def completed(itemcount):
     if itemcount:
         return 'completed '
