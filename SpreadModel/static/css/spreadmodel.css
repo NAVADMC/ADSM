@@ -102,10 +102,15 @@ body>section {
     background-color: #FFF;
 }
 
-#setupMenu .completed, .completed {
-    background-color: #D0D0D0;
+#setupMenu span {
+    background-color: #FFDD4A;
+    width: 5px;
+    height: 35px;
 }
 
+#setupMenu .completed, .completed {
+    background-color: #B6F3A7;
+}
 
 .btn-add {
     background: none;
