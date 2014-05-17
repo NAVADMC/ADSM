@@ -120,6 +120,24 @@ background-color: #FFDD4A;
     background-color: #B6F3A7;
 }
 
+#RunSimulation {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 250px;
+}
+
+#RunSimulation a {
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+}
+
+#RunSimulation .glyphicon {
+    font-size: 30px;
+    vertical-align: middle;
+}
+
 .btn-add {
     background: none;
     padding:0;
@@ -172,7 +190,7 @@ select {
 
 }
 
-.glyphicon {
+#file_list .delete-button {
     color: dimgrey;
 }
 
