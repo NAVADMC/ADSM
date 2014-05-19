@@ -16,9 +16,9 @@
     <form class="ajax" method="post" action="/setup/SaveScenario/">
         <div class="buttonHolder">
             {% spaceless %}
-            <a id="new_scenario" href="/setup/NewScenario/" class="btn"><span class="glyphicon glyphicon-file"></span> new</a>
-            <a href="/setup/Workspace/" id="open_dialog" class="btn"><span class="glyphicon glyphicon-folder-open"></span>&nbsp&nbsp open</a>
-            <input type="Submit" value="save" class="btn {{ unsaved_changes|completed }}">
+            <a href="/setup/NewScenario/" class="btn"><span class="glyphicon glyphicon-file"></span> new</a>
+            <a href="/setup/Workspace/"  class="btn"><span class="glyphicon glyphicon-folder-open"></span>&nbsp&nbsp open</a>
+            <button type="submit" class="btn {{ unsaved_changes|completed }}"><span class="glyphicon glyphicon-floppy-disk"></span>&nbsp save</button>
             {% endspaceless %}
         </div>
         <h1 class="filename">

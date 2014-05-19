@@ -25,8 +25,12 @@ header {
     border-bottom: 4px solid black;
 }
 
-header a, header input {
+header a, header button {
     line-height: 35px;
+}
+
+header .btn {
+    padding: 8px 12px 8px 12px;
 }
 
 header h1 {
@@ -169,12 +173,6 @@ body>section {
     /*vertical-align: middle;*/
 }
 
-.btn-add {
-    background: none;
-    padding:0;
-    border-width: 0;
-    color: #007700;
-}
 
 .btn {
     font-style: italic;
@@ -183,6 +181,15 @@ body>section {
     background-color: #00477f;
     border-radius: 0;
     border: 0px;
+}
+
+.btn-add {
+    background: none;
+    padding: 0 0 6px 3px;
+    border-width: 0;
+    color: #007700;
+    vertical-align: middle;
+    margin: 8px 0;
 }
 
 textarea {
