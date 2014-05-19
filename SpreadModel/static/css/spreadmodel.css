@@ -8,36 +8,51 @@ h1 {
     font-size: 22pt;
 }
 
+a {
+    color: #7cb9ff;
+}
+
+li {
+    font-size: 14pt;
+}
+
 header {
     position: fixed;
     background-color: white;
     width: 100%;
-    height: 50px;
+    height: 44px;
     top: 0;
-    border-bottom: 2px solid #EEE;
+    border-bottom: 4px solid black;
+}
+
+header a, header input {
+    line-height: 35px;
 }
 
 header h1 {
-    line-height: 50px;
-    margin: 0 10px;
-    color: #555;
+    margin: 0 0px;
     float: left;
-    width: 83px;
+}
+
+header div {
+    width: 220px;
+    overflow:auto;
+    float: left;
 }
 
 .filename {
     float: left;
     width: 350px;
+    padding: 0 20px;
 }
 
 .filename input {
     border: none;
-    height: 47px;
 }
 
 header form {
     float: left;
-    width: 840px;
+    width: 940px;
 }
 
 /*header .alert {*/
@@ -57,18 +72,18 @@ header #admin_link {
 
 body>nav {
     position: fixed;
-    top: 50px;
+    top: 44px;
     bottom: 0;
     left: 0;
-    width: 250px;
+    width: 220px;
     overflow: auto;
     /*background-color: #DDD;*/
 }
 
 body>section {
-    margin-top: 50px;
+    margin-top: 44px;
     padding-top: 0px;
-    margin-left: 250px;
+    margin-left:  220px;
     padding-left: 20px;
 }
 #setupMenu {
@@ -134,7 +149,7 @@ body>section {
     position: fixed;
     bottom: 0;
     left: 0;
-    width: 250px;
+    width:  220px;
 }
 
 #RunSimulation a {
@@ -158,7 +173,11 @@ body>section {
 }
 
 .btn {
-    margin: 8px;
+    margin: 3px 1px 3px 1px;
+    color: #ffffff;
+    background-color: #00477f;
+    border-radius: 0;
+    border: 0px;
 }
 
 textarea {
