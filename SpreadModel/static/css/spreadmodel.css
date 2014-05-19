@@ -1,5 +1,11 @@
 body {
     font-family: 'Source Sans Pro', sans-serif;
+    font-size: 10pt;
+    font-weight: 400;
+}
+
+h1 {
+    font-size: 22pt;
 }
 
 header {
@@ -12,10 +18,11 @@ header {
 }
 
 header h1 {
-    font-size: 24px;
     line-height: 50px;
     margin: 0 10px;
     color: #555;
+    float: left;
+    width: 83px;
 }
 
 .filename {
@@ -26,11 +33,6 @@ header h1 {
 .filename input {
     border: none;
     height: 47px;
-}
-
-header h1 {
-    float: left;
-    width: 83px;
 }
 
 header form {
@@ -72,6 +74,7 @@ body>section {
 #setupMenu {
     list-style: none;
     padding-left: 0;
+    margin-bottom: 54px;
 }
 
 #setupMenu ul {
@@ -88,14 +91,14 @@ body>section {
     display:block;
     text-decoration: none;
     background-color: #E4E4E4;
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 14pt;
+    font-weight: 600;
     line-height: 35px;
     padding-left: 5px;
 }
 
 #setupMenu ul a {
-    font-weight: normal;
+    font-weight: 400;
     background-color: #EEEEEE;
 }
 
@@ -117,7 +120,10 @@ body>section {
 }
 
 #setupMenu .incomplete {
-background-color: #FFDD4A;
+    font-weight: 600;
+    font-style: italic;
+    color: #999;
+    background-color: #FFDD4A;
 }
 
 #setupMenu .completed, .completed {
@@ -139,7 +145,9 @@ background-color: #FFDD4A;
 
 #RunSimulation .glyphicon {
     font-size: 30px;
-    vertical-align: middle;
+    display: relative;
+    top: 6px;
+    /*vertical-align: middle;*/
 }
 
 .btn-add {
@@ -174,7 +182,6 @@ select {
 
 #file_list ul {
     list-style-type: none;
-    font-size: 20px;
 }
 
 #file_list li {
