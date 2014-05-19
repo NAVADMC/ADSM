@@ -55,6 +55,10 @@ header form {
     width: 940px;
 }
 
+.btn.completed {  /*This is flipped incomplete/completed because of the way python is storing it*/
+    background-color: #7cb9ff;
+}
+
 /*header .alert {*/
     /*float: left;*/
     /*margin-top: 5px;*/
@@ -173,7 +177,8 @@ body>section {
 }
 
 .btn {
-    margin: 3px 1px 3px 1px;
+    font-style: italic;
+    margin: 3px 1px 0px 1px;
     color: #ffffff;
     background-color: #00477f;
     border-radius: 0;

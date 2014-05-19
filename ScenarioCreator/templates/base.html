@@ -9,15 +9,16 @@
     <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-dialog.js"></script>
     <script src="{{ STATIC_URL }}js/spreadmodel.js"></script>
+    {% load db_status_tags %}
 </head>
 <body>
 <header>
     <form class="ajax" method="post" action="/setup/SaveScenario/">
         <div class="buttonHolder">
             {% spaceless %}
-            <a id="new_scenario" href="/setup/NewScenario/" class="btn btn-primary button white">New </a>
-            <input type="Submit" value="Save" class="btn btn-primary button white">
-            <a href="/setup/Workspace/" id="open_dialog" class="btn btn-primary button white">Open</a>
+            <a id="new_scenario" href="/setup/NewScenario/" class="btn"><span class="glyphicon glyphicon-file"></span> new</a>
+            <a href="/setup/Workspace/" id="open_dialog" class="btn"><span class="glyphicon glyphicon-folder-open"></span>&nbsp&nbsp open</a>
+            <input type="Submit" value="save" class="btn {{ unsaved_changes|completed }}">
             {% endspaceless %}
         </div>
         <h1 class="filename">
