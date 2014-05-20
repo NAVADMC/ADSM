@@ -448,13 +448,28 @@ def download_scenario(request, target):
     return response
 
 
-def upload_scenario(request):
+def handle_file_upload(request):
     uploaded_file = request.FILES['file']
     filename = uploaded_file._name
     with open(workspace(filename), 'wb+') as destination:
         for chunk in uploaded_file.chunks():
             destination.write(chunk)
+    return filename
+
+def upload_scenario(request):
+    handle_file_upload(request)
     return redirect('/setup/Workspace/')
+
+
+def upload_population(request):
+    filename = handle_file_upload(request)  # now we know the file is in the workspace
+    form = PopulationForm(None)  # blank
+    form.source_file = filename
+    # wait for file upload
+    form.save()
+    unsaved_changes(True)
+    # wait for Population parsing (up to 5 minutes)
+    return redirect('/setup/Population/1')
 
 
 def run_simulation(request):
