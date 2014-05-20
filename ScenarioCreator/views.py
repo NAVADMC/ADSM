@@ -433,6 +433,19 @@ def new_scenario(request):
     return redirect('/setup/Scenario/1/')
 
 
+def copy_scenario(request, target):
+    copy_name = target + ' - Copy'  #re.sub(r'(.*)\.sqlite3', r'\6 - Copy\.sqlite3', target)
+    print("Copying ", target, "to", copy_name)
+    shutil.copy(workspace_path(target), workspace_path(copy_name))
+    return redirect('/setup/Workspace/')
+
+
+def download_scenario(request, target):
+    file_path = workspace_path(target)
+    with open(file_path, "rb") as f:
+        return HttpResponse(f, mimetype="application/octet-stream")  #"sqlite/application")
+
+
 def run_simulation(request):
     #execute system commands here
     return render(request, 'ScenarioCreator/SimulationProgress.html', basic_context())

@@ -9,8 +9,8 @@
         {% for file in db_files %}
             <li><a href="/setup/OpenScenario/{{ file }}/">{{ file }}</a>
                 <a href="#" class="delete-button" data-remove-file="{{ file }}"><img src="{{ STATIC_URL }}icons/delete.png" class="icon pull-right"></a>
-                <a href="/setup/Copy/{{ file }}.sqlite3" ><img src="{{ STATIC_URL }}icons/copy.png" class="icon pull-right"></a>
-                <a href="/setup/Download/{{ file }}.sqlite3" ><img src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
+                <a href="/setup/Copy/{{ file }}" ><img src="{{ STATIC_URL }}icons/copy.png" class="icon pull-right"></a>
+                <a href="/setup/Download/{{ file }}" ><img src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
                 </li>
         {% endfor %}
     </ul>
