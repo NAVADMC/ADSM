@@ -223,10 +223,7 @@ select {
 
 #file_list li {
     text-decoration: none;
-}
-
-#file_list li:nth-child(even) {
-    background-color: #ddd;
+    border-bottom: 2px solid #d9d9d9;
 }
 
 #file_list {
@@ -234,8 +231,9 @@ select {
     max-width: 600px
 }
 
-#file_list .delete-button {
-    color: dimgrey;
+#file_list .icon {
+    margin-top: 5px;
+    margin-left: 15px;
 }
 
 body .modal-dialog {
