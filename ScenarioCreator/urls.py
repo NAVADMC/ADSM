@@ -40,6 +40,7 @@ urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
                                          "url('^DeleteScenario/(?P<target>[\w\s-]+)/$', 'ScenarioCreator.views.delete_scenario')",
                                          "url('^Download/(?P<target>[\w\s-]+)/$', 'ScenarioCreator.views.download_scenario')",
                                          "url('^Copy/(?P<target>[\w\s-]+)/$', 'ScenarioCreator.views.copy_scenario')",
+                                         "url('^Upload/$', 'ScenarioCreator.views.upload_scenario')",
                                          "url('^RunSimulation/$', 'ScenarioCreator.views.run_simulation')",
                                         ])
 

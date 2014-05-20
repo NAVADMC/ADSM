@@ -448,6 +448,15 @@ def download_scenario(request, target):
     return response
 
 
+def upload_scenario(request):
+    uploaded_file = request.FILES['file']
+    filename = uploaded_file._name
+    with open(workspace(filename), 'wb+') as destination:
+        for chunk in uploaded_file.chunks():
+            destination.write(chunk)
+    return redirect('/setup/Workspace/')
+
+
 def run_simulation(request):
     #execute system commands here
     return render(request, 'ScenarioCreator/SimulationProgress.html', basic_context())
