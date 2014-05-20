@@ -6,15 +6,19 @@
     <h1>{{ title }}</h1>
 
     <h4>Upload a Scenario File (sqlite3)</h4>
-    <input type="file" name="file" file-upload="">
-    <p class="help-block">You can upload a file from anywhere on your computer and it will be imported to the workspace.</p>
+    <form id="file-upload" method="post" action="/setup/UploadScenario/">
+        <input type="file" name="file" file-upload="">
+        <button type="submit" class="btn btn-primary">Upload Scenario &nbsp<img src="{{ STATIC_URL }}icons/upload.png" class="icon"></button>
+        <p class="help-block">You can upload a file from anywhere on your computer and it will be imported to the workspace.</p>
+    </form>
 
+    <h3>Available Scenarios:</h3>
     <ul id="file_list">
         {% for file in db_files %}
             <li><a href="/setup/OpenScenario/{{ file }}/">{{ file }}</a>
-                <a href="#" class="delete-button" data-remove-file="{{ file }}"><img src="{{ STATIC_URL }}icons/delete.png" class="icon pull-right"></a>
-                <a href="/setup/Copy/{{ file }}" ><img src="{{ STATIC_URL }}icons/copy.png" class="icon pull-right"></a>
-                <a href="/setup/Download/{{ file }}" ><img src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
+                <a href="#" class="delete-button" data-remove-file="{{ file }}"><img src="{{ STATIC_URL }}icons/delete.png" alt="Delete" class="icon pull-right"></a>
+                <a href="/setup/Copy/{{ file }}" ><img alt="Copy" src="{{ STATIC_URL }}icons/copy.png" class="icon pull-right"></a>
+                <a href="/setup/Download/{{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
                 </li>
         {% endfor %}
     </ul>

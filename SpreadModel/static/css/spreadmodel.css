@@ -6,6 +6,7 @@ body {
 
 h1 {
     font-size: 22pt;
+    margin-bottom: 20px;
 }
 
 a {
@@ -240,9 +241,21 @@ select {
     max-width: 600px
 }
 
+#file_list a {
+    color: black;
+}
+
+#file_list a:hover {
+    color: #7cb9ff;;
+}
+
 #file_list .icon {
     margin-top: 5px;
     margin-left: 15px;
+}
+
+#file-upload input, button {
+    display: inline;
 }
 
 body .modal-dialog {
