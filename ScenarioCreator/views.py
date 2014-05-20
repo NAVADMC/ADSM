@@ -469,7 +469,12 @@ def upload_population(request):
     form.save()
     unsaved_changes(True)
     # wait for Population parsing (up to 5 minutes)
-    return redirect('/setup/Population/1')
+    return redirect('/setup/Population/')
+
+
+def population(request):
+    # if Population.objects.exists(id=1):
+    return render(request, 'ScenarioCreator/Population.html', basic_context())
 
 
 def run_simulation(request):
