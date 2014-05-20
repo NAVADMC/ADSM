@@ -16,6 +16,11 @@ li {
     font-size: 14pt;
 }
 
+.icon {
+    max-height: 20px;
+    max-width: 20px;
+}
+
 header {
     position: fixed;
     background-color: white;
@@ -26,11 +31,12 @@ header {
 }
 
 header a, header button {
+    height: 35px;
     line-height: 35px;
 }
 
 header .btn {
-    padding: 8px 12px 8px 12px;
+    padding: 8px 10px 8px 10px;
 }
 
 header h1 {
@@ -225,11 +231,7 @@ select {
 
 #file_list {
     margin-top: 20px;
-    width: 50%
-}
-
-.controls ul {
-
+    max-width: 600px
 }
 
 #file_list .delete-button {
