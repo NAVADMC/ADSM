@@ -3,7 +3,11 @@
 {% load crispy_forms_tags  %}
 
 {% block content %}
-<h1>{{ title }}</h1>
+    <h1>{{ title }}</h1>
+
+    <h4>Upload a Scenario File (sqlite3)</h4>
+    <input type="file" name="file" file-upload="">
+    <p class="help-block">You can upload a file from anywhere on your computer and it will be imported to the workspace.</p>
 
     <ul id="file_list">
         {% for file in db_files %}

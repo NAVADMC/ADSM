@@ -59,15 +59,12 @@ header div {
 .filename input {
     border: none;
     width: 100%;
+    color: #666;
 }
 
 header form {
     float: left;
     width: 940px;
-}
-
-.btn.completed {  /*This is flipped incomplete/completed because of the way python is storing it*/
-    background-color: #7cb9ff;
 }
 
 /*header .alert {*/
@@ -185,7 +182,6 @@ body>section {
     font-style: italic;
     margin: 3px 1px 0px 1px;
     color: #ffffff;
-    background-color: #00477f;
     border-radius: 0;
     border: 0px;
 }
@@ -197,6 +193,18 @@ body>section {
     color: #007700;
     vertical-align: middle;
     margin: 8px 0;
+}
+
+.btn-primary {
+    background-color: #00477f;
+}
+
+.btn-danger {
+    background-color: darkred;
+}
+
+.btn.completed {  /*This is flipped incomplete/completed because of the way python is storing it*/
+    background-color: #7cb9ff;
 }
 
 textarea {
