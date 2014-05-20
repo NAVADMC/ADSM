@@ -442,8 +442,10 @@ def copy_scenario(request, target):
 
 def download_scenario(request, target):
     file_path = workspace_path(target)
-    with open(file_path, "rb") as f:
-        return HttpResponse(f, mimetype="application/octet-stream")  #"sqlite/application")
+    f = open(file_path, "rb")
+    response = HttpResponse(f, content_type="application/x-sqllite")
+    response['Content-Disposition'] = 'attachment; filename="' + target + '.sqlite3"'
+    return response
 
 
 def run_simulation(request):

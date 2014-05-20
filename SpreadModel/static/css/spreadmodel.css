@@ -52,12 +52,13 @@ header div {
 
 .filename {
     float: left;
-    width: 350px;
+    width: 700px;
     padding: 0 20px;
 }
 
 .filename input {
     border: none;
+    width: 100%;
 }
 
 header form {
