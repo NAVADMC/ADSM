@@ -468,12 +468,17 @@ def upload_population(request):
     model.save()
     unsaved_changes(True)
     # wait for Population parsing (up to 5 minutes)
-    return redirect('/setup/Population/1')
+    return redirect('/setup/Population/')
 
 
 def population(request):
-    # if Population.objects.exists(id=1):
-    return render(request, 'ScenarioCreator/Population.html', basic_context())
+    """"See also Pagination https://docs.djangoproject.com/en/dev/topics/pagination/"""
+    context = basic_context()
+    if Population.objects.filter(id=1).exists():
+        FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated)
+        initialized_formset = FarmSet(queryset=Unit.objects.all().order_by('initial_state')[:100])
+        context['formset'] = initialized_formset
+    return render(request, 'ScenarioCreator/Population.html', context)
 
 
 def run_simulation(request):
