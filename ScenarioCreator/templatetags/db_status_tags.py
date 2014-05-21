@@ -7,11 +7,18 @@ register = template.Library()
 
 
 @register.filter()
+def active(target_address):
+    if not target_address:  #TODO: Placeholder
+        return 'active '
+    return ''
+
+
+@register.filter()
 def completed(itemcount):
     if itemcount:
         return 'completed '
         # return 'class="completed "><span class="badge pull-right">%i</span' % len(itemcount)
-    return ''
+    return 'incomplete'
 
 
 class FormCompleted(Node):

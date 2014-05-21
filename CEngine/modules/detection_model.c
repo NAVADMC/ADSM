@@ -73,6 +73,7 @@
 #define handle_new_day_event detection_model_handle_new_day_event
 #define handle_exam_event detection_model_handle_exam_event
 #define handle_public_announcement_event detection_model_handle_public_announcement_event
+#define handle_detection_event detection_model_handle_detection_event
 
 #include "module.h"
 #include "module_util.h"
@@ -92,9 +93,9 @@
 
 
 
-#define NEVENTS_LISTENED_FOR 3
+#define NEVENTS_LISTENED_FOR 4
 EVT_event_type_t events_listened_for[] = {
-  EVT_NewDay, EVT_PublicAnnouncement, EVT_Exam };
+  EVT_NewDay, EVT_PublicAnnouncement, EVT_Exam, EVT_Detection };
 
 
 
@@ -120,9 +121,7 @@ typedef struct
     particular multiplier. */
   gboolean outbreak_known;
   int public_announcement_day;
-  gboolean *detected;
-  unsigned int nunits; /**< Number of units.  Stored here because it is also
-    the length of the detected flag array. */
+  GHashTable *detected;
   double *prob_report_from_awareness; /**< An array with the probability of
     reporting due to one value per production type.  The array is initialized
     in the reset function, and the values are re-calculated each day once an
@@ -211,11 +210,11 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
                  unit->official_id,
                  unit->production_type_name,
                  zone->name,
-                 UNT_state_name[unit->state], local_data->detected[i] ? "already" : "not");
+                 UNT_state_name[unit->state], g_hash_table_contains(local_data->detected, unit) ? "already" : "not");
       #endif
       /* Check whether the unit has already been detected.  If so, go on to the
        * next unit. */
-      if (local_data->detected[i])
+      if (g_hash_table_contains(local_data->detected, unit))
         continue;
 
       /* Compute the probability that the disease would be noticed, based
@@ -254,7 +253,7 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
                              EVT_new_detection_event (unit, event->day,
                                                       ADSM_DetectionClinicalSigns,
                                                       ADSM_TestUnspecified));
-          local_data->detected[unit->index] = TRUE;
+          g_hash_table_add (local_data->detected, unit);
         }
       else
         {
@@ -312,11 +311,11 @@ handle_exam_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
              unit->official_id,
              unit->production_type_name,
              UNT_state_name[unit->state],
-             local_data->detected[unit->index] ? "already" : "not");
+             g_hash_table_contains (local_data->detected, unit) ? "already" : "not");
   #endif
 
   /* Check whether the unit has already been detected.  If so, abort. */
-  if (local_data->detected[unit->index])
+  if (g_hash_table_contains (local_data->detected, unit))
     goto end;
 
   /* Check whether the unit is showing clinical signs of disease. */
@@ -343,7 +342,7 @@ handle_exam_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
                              EVT_new_detection_event (unit, event->day,
                                                       ADSM_DetectionClinicalSigns,
                                                       ADSM_TestUnspecified));
-          local_data->detected[unit->index] = TRUE;
+          g_hash_table_add (local_data->detected, unit);
         }
       else
         {
@@ -405,6 +404,36 @@ handle_public_announcement_event (struct adsm_module_t_ *self,
 
 
 /**
+ * Other modules may be capable of producing detection events (for example, the
+ * test module). If they do, record the detection so that this module does not
+ * issue duplicates on subsequent days.
+ *
+ * @param self this module.
+ * @param event a detection event.
+ */
+void
+handle_detection_event (struct adsm_module_t_ *self,
+                        EVT_detection_event_t * event)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_detection_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  g_hash_table_add (local_data->detected, event->unit);
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_detection_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
+
+
+
+/**
  * Runs this model.
  *
  * Side effects: may change the state of one or more units in list.
@@ -434,6 +463,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
       break;
     case EVT_PublicAnnouncement:
       handle_public_announcement_event (self, &(event->u.public_announcement));
+      break;
+    case EVT_Detection:
+      handle_detection_event (self, &(event->u.detection));
       break;
     default:
       g_error
@@ -465,8 +497,7 @@ reset (struct adsm_module_t_ *self)
 #endif
 
   local_data = (local_data_t *) (self->model_data);
-  for (i = 0; i < local_data->nunits; i++)
-    local_data->detected[i] = FALSE;
+  g_hash_table_remove_all (local_data->detected);
   local_data->outbreak_known = FALSE;
   local_data->public_announcement_day = 0;
 
@@ -583,7 +614,7 @@ local_free (struct adsm_module_t_ *self)
     g_free (local_data->zone_multiplier[i]);
   g_free (local_data->zone_multiplier);
 
-  g_free (local_data->detected);
+  g_hash_table_destroy (local_data->detected);
   g_free (local_data->prob_report_from_awareness);
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
@@ -773,9 +804,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         local_data->zone_multiplier[i][j] = 1.0;
     }
 
-  /* Initialize the array of detected flags (one per unit) to all FALSE. */
-  local_data->nunits = UNT_unit_list_length (units);
-  local_data->detected = g_new0 (gboolean, local_data->nunits);
+  /* Initialize the set of detected units. */
+  local_data->detected = g_hash_table_new (NULL, NULL);
   /* No outbreak has been announced yet. */
   local_data->outbreak_known = FALSE;
   local_data->public_announcement_day = 0;

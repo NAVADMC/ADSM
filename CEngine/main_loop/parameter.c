@@ -173,57 +173,59 @@ PAR_get_PDF_callback (void *data, int ncols, char **value, char **colname)
     g_string_free (s, TRUE);    
   #endif
   equation_type = value[0];
-  if (strcmp (equation_type, "Point") == 0)
+  if (strcmp (equation_type, "Beta") == 0)
     {
-      double mode;
+      double alpha, beta, location, scale;
+
+      errno = 0;
+      alpha = strtod (value[6], NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      beta = strtod (value[8], NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      location = strtod (value[9], NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      scale = strtod (value[10], NULL);
+      g_assert (errno != ERANGE);
+
+      dist = PDF_new_beta_dist (alpha, beta, location, scale);
+    }
+  else if (strcmp (equation_type, "BetaPERT") == 0)
+    {
+      double min, mode, max;
+
+      errno = 0;
+      min = strtod (value[3], NULL);
+      g_assert (errno != ERANGE);
+
       errno = 0;
       mode = strtod (value[4], NULL);
-      if (errno == ERANGE)
-        {
-          g_error ("point distribution parameter \"%s\" is not a number", value[4]);
-        }
-      dist = PDF_new_point_dist (mode);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      max = strtod (value[5], NULL);
+      g_assert (errno != ERANGE);
+
+      dist = PDF_new_beta_pert_dist (min, mode, max);
     }
-  else if (strcmp (equation_type, "Triangular") == 0)
+  else if (strcmp (equation_type, "Gamma") == 0)
     {
-      double a,c,b;
+      double alpha, beta;
 
       errno = 0;
-      a = strtod (value[3], NULL);
+      alpha = strtod (value[6], NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      c = strtod (value[4], NULL);
+      beta = strtod (value[8], NULL);
       g_assert (errno != ERANGE);
 
-      errno = 0;
-      b = strtod (value[5], NULL);
-      g_assert (errno != ERANGE);
-
-      dist = PDF_new_triangular_dist (a, c, b);
-    }
-  else if (strcmp (equation_type, "Piecewise") == 0)
-    {
-      guint rel_id;
-      PAR_get_relchart_callback_args_t build;
-      char *query;
-      char *sqlerr;
-
-      rel_id = 0; /* Filling this in for now just to prevent an uninitialized
-        variable warning */
-      build.x = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
-      build.y = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
-      query = g_strdup_printf ("SELECT x,y FROM ScenarioCreator_relationalfunction fn,ScenarioCreator_relationalpoint pt WHERE fn.id=%u AND pt.relational_function_id=fn.id ORDER BY _point_order", rel_id);
-      sqlite3_exec (args->db, query, PAR_get_relchart_callback, &build, &sqlerr);
-      if (sqlerr)
-        {
-          g_error ("%s", sqlerr);
-        }
-      g_free (query);
-
-      dist = PDF_new_piecewise_dist (build.x->len, (double *)(build.x->data), (double *)(build.y->data));
-      g_array_free (build.x, /* free_segment = */ TRUE);
-      g_array_free (build.y, /* free_segment = */ TRUE);
+      dist = PDF_new_gamma_dist (alpha, beta);
     }
   else if (strcmp (equation_type, "Histogram") == 0)
     {
@@ -260,6 +262,104 @@ PAR_get_PDF_callback (void *data, int ncols, char **value, char **colname)
 
       dist = PDF_new_histogram_dist (h);
       gsl_histogram_free (h);   
+    }
+  else if (strcmp (equation_type, "Inverse Gaussian") == 0)
+    {
+      double mu, lambda;
+
+      errno = 0;
+      mu = strtod (value[1], NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      lambda = strtod (value[11], NULL);
+      g_assert (errno != ERANGE);
+
+      dist = PDF_new_inverse_gaussian_dist (mu, lambda);
+    }
+  else if (strcmp (equation_type, "LogLogistic") == 0)
+    {
+      double location, scale, shape;
+
+      errno = 0;
+      location = strtod (value[9], NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      scale = strtod (value[10], NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      shape = strtod (value[11], NULL);
+      g_assert (errno != ERANGE);
+
+      dist = PDF_new_loglogistic_dist (location, scale, shape);
+    }
+  else if (strcmp (equation_type, "Piecewise") == 0)
+    {
+      guint rel_id;
+      PAR_get_relchart_callback_args_t build;
+      char *query;
+      char *sqlerr;
+
+      rel_id = 0; /* Filling this in for now just to prevent an uninitialized
+        variable warning */
+      build.x = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
+      build.y = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
+      query = g_strdup_printf ("SELECT x,y FROM ScenarioCreator_relationalfunction fn,ScenarioCreator_relationalpoint pt WHERE fn.id=%u AND pt.relational_function_id=fn.id ORDER BY _point_order", rel_id);
+      sqlite3_exec (args->db, query, PAR_get_relchart_callback, &build, &sqlerr);
+      if (sqlerr)
+        {
+          g_error ("%s", sqlerr);
+        }
+      g_free (query);
+
+      dist = PDF_new_piecewise_dist (build.x->len, (double *)(build.x->data), (double *)(build.y->data));
+      g_array_free (build.x, /* free_segment = */ TRUE);
+      g_array_free (build.y, /* free_segment = */ TRUE);
+    }
+  else if (strcmp (equation_type, "Point") == 0)
+    {
+      double mode;
+      errno = 0;
+      mode = strtod (value[4], NULL);
+      if (errno == ERANGE)
+        {
+          g_error ("point distribution parameter \"%s\" is not a number", value[4]);
+        }
+      dist = PDF_new_point_dist (mode);
+    }
+  else if (strcmp (equation_type, "Triangular") == 0)
+    {
+      double a,c,b;
+
+      errno = 0;
+      a = strtod (value[3], NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      c = strtod (value[4], NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      b = strtod (value[5], NULL);
+      g_assert (errno != ERANGE);
+
+      dist = PDF_new_triangular_dist (a, c, b);
+    }
+  else if (strcmp (equation_type, "Weibull") == 0)
+    {
+      double alpha, beta;
+
+      errno = 0;
+      alpha = strtod (value[6], NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      beta = strtod (value[8], NULL);
+      g_assert (errno != ERANGE);
+
+      dist = PDF_new_weibull_dist (alpha, beta);
     }
   else
     {
@@ -327,19 +427,6 @@ PAR_get_PDF (sqlite3 *db, guint id)
       dist = PDF_new_gaussian_dist (mean, stddev);
       goto end;
     }
-  e = scew_element_by_name (fn_param, "inverse-gaussian");
-  if (e)
-    {
-      double mu, lambda;
-
-      errno = 0;
-      mu = strtod (scew_element_contents (scew_element_by_name (e, "mu")), NULL);
-      g_assert (errno != ERANGE);
-      lambda = strtod (scew_element_contents (scew_element_by_name (e, "lambda")), NULL);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_inverse_gaussian_dist (mu, lambda);
-      goto end;
-    }
   e = scew_element_by_name (fn_param, "poisson");
   if (e)
     {
@@ -349,64 +436,6 @@ PAR_get_PDF (sqlite3 *db, guint id)
       mean = strtod (scew_element_contents (scew_element_by_name (e, "mean")), NULL);
       g_assert (errno != ERANGE);
       dist = PDF_new_poisson_dist (mean);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "beta");
-  if (e)
-    {
-      double alpha, beta, location, scale;
-
-      errno = 0;
-      alpha = strtod (scew_element_contents (scew_element_by_name (e, "alpha")), NULL);
-      g_assert (errno != ERANGE);
-      beta = strtod (scew_element_contents (scew_element_by_name (e, "beta")), NULL);
-      g_assert (errno != ERANGE);
-      location = strtod (scew_element_contents (scew_element_by_name (e, "location")), NULL);
-      g_assert (errno != ERANGE);
-      scale = strtod (scew_element_contents (scew_element_by_name (e, "scale")), NULL);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_beta_dist (alpha, beta, location, scale);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "beta-pert");
-  if (e)
-    {
-      double min, mode, max;
-
-      errno = 0;
-      min = strtod (scew_element_contents (scew_element_by_name (e, "min")), NULL);
-      g_assert (errno != ERANGE);
-      mode = strtod (scew_element_contents (scew_element_by_name (e, "mode")), NULL);
-      g_assert (errno != ERANGE);
-      max = strtod (scew_element_contents (scew_element_by_name (e, "max")), NULL);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_beta_pert_dist (min, mode, max);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "gamma");
-  if (e)
-    {
-      double alpha, beta;
-
-      errno = 0;
-      alpha = strtod (scew_element_contents (scew_element_by_name (e, "alpha")), NULL);
-      g_assert (errno != ERANGE);
-      beta = strtod (scew_element_contents (scew_element_by_name (e, "beta")), NULL);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_gamma_dist (alpha, beta);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "weibull");
-  if (e)
-    {
-      double alpha, beta;
-
-      errno = 0;
-      alpha = strtod (scew_element_contents (scew_element_by_name (e, "alpha")), NULL);
-      g_assert (errno != ERANGE);
-      beta = strtod (scew_element_contents (scew_element_by_name (e, "beta")), NULL);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_weibull_dist (alpha, beta);
       goto end;
     }
   e = scew_element_by_name (fn_param, "exponential");
@@ -444,21 +473,6 @@ PAR_get_PDF (sqlite3 *db, guint id)
       scale = strtod (scew_element_contents (scew_element_by_name (e, "scale")), NULL);
       g_assert (errno != ERANGE);
       dist = PDF_new_logistic_dist (location, scale);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "loglogistic");
-  if (e)
-    {
-      double location, scale, shape;
-
-      errno = 0;
-      location = strtod (scew_element_contents (scew_element_by_name (e, "location")), NULL);
-      g_assert (errno != ERANGE);
-      scale = strtod (scew_element_contents (scew_element_by_name (e, "scale")), NULL);
-      g_assert (errno != ERANGE);
-      shape = strtod (scew_element_contents (scew_element_by_name (e, "shape")), NULL);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_loglogistic_dist (location, scale, shape);
       goto end;
     }
   e = scew_element_by_name (fn_param, "lognormal");

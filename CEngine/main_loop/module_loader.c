@@ -41,7 +41,6 @@
 #include "apparent_events_table_writer.h"
 #include "basic_destruction_model.h"
 #include "basic_zone_focus_model.h"
-#include "conflict_resolver.h"
 #include "contact_recorder_model.h"
 #include "contact_spread_model.h"
 #include "destruction_monitor.h"
@@ -55,6 +54,7 @@
 #include "exposures_table_writer.h"
 #include "full_table_writer.h"
 #include "infection_monitor.h"
+#include "population_model.h"
 #include "quarantine_model.h"
 #include "resources_and_implementation_of_controls_model.h"
 #include "ring_destruction_model.h"
@@ -329,8 +329,8 @@ adsm_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
         }
     }
 
-  /* Conflict resolver is always added. */
-  g_ptr_array_add (tmp_models, conflict_resolver_new (NULL, units, projection, zones));
+  /* Population model is always added. */
+  g_ptr_array_add (tmp_models, population_model_new (NULL, units, projection, zones));
 
   #if DEBUG
     for (i = 0; i < tmp_models->len; i++)

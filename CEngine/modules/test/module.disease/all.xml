@@ -1763,3 +1763,51 @@
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0.0</td></tr>
   </output>
 </variable-test>
+
+<deterministic-test>
+  <category>disease</category>
+  <short-name>prevalence used for 2 production types</short-name>
+
+  <description>
+    In this test, prevalence is used for 2 production types, and units of both
+    production types cause disease spread by direct contact. This test is
+    included to check for the presence of a bug that caused prevalence charts
+    for all but the first production type to be ignored. (The bug was
+    introduced in a development version and was never in a release version.)
+  </description>
+
+  <author>&lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>13 May 2014</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>6units_2</population-file>
+
+  <parameter-file>prevalence_2_prodtypes</parameter-file>
+
+  <parameter-description>
+    For both production types, the latent period lasts 1 day, the infectious
+    clinical period lasts 2 days, and the immune period lasts 1 day. Cattle
+    units have 1 outgoing direct contact per day to another cattle unit 1 km
+    away. Pig units have 1 outgoing direct contact per day to another pig unit
+    1 km away.  The prevalence is given by a chart that increases linearly
+    from 0 to 7.  There is no detection or control measures.
+    
+    What should happen:
+    - On day 1 units 0 and 1 will be Latent.
+    - On day 2 units 0 and 1 will be Infectious Clinical. They will each have
+      1 outgoing contact, but on this day their prevalence will be too low to
+      cause infection.
+    - On day 3 units 0 and 1 will be Infectious Clinical. They will each have
+      1 outgoing contact, and on this day their prevalence will be high enough
+      to cause infection.
+    - On day 4 units 2 and 5 will be Latent. The test is stopped at this day
+      because we are not concerned with secondary spread.      
+  </parameter-description>
+
+  <output>
+    <tr><td>L L S S S S</td></tr>
+    <tr><td>C C S S S S</td></tr>
+    <tr><td>C C S S S S</td></tr>
+    <tr><td>N N L S S L</td></tr>
+  </output>
+</deterministic-test>

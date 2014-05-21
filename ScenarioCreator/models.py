@@ -67,7 +67,18 @@ def choice_char_from_value(value, map_tuple):
             return key
     return None
 
-frequency = chc("never", "once", "daily", "weekly", "monthly", "yearly")
+def clean_filename(filename):
+    filename = filename.strip()  # whitespace
+    if filename:
+        fname = workspace(filename)
+        if os.path.isfile(fname):  # Already exists?
+            raise ValidationError("File already exists: " + fname)
+        try:  # valid filename?  permissions?
+            os.access(fname, os.W_OK)  #I'm not opening a file because that creates a blank one
+        except:
+            raise ValidationError("Cannot write to " + fname)
+    return filename
+
 sqlite_keywords = ['abort', 'action', 'add', 'after', 'all', 'alter', 'analyze', 'and', 'as', 'asc', 'attach', 'autoincrement', 'before', 'begin', 'between', 'by', 'cascade', 'case', 'cast', 'check', 'collate', 'column', 'commit', 'conflict', 'constraint', 'create', 'cross', 'current_date', 'current_time', 'current_timestamp', 'database', 'default', 'deferrable', 'deferred', 'delete', 'desc', 'detach', 'distinct', 'drop', 'each', 'else', 'end', 'escape', 'except', 'exclusive', 'exists', 'explain', 'fail', 'for', 'foreign', 'from', 'full', 'glob', 'group', 'having', 'if', 'ignore', 'immediate', 'in', 'index', 'indexed', 'initially', 'inner', 'insert', 'instead', 'intersect', 'into', 'is', 'isnull', 'join', 'key', 'left', 'like', 'limit', 'match', 'natural', 'no', 'not', 'notnull', 'null', 'of', 'offset', 'on', 'or', 'order', 'outer', 'plan', 'pragma', 'primary', 'query', 'raise', 'recursive', 'references', 'regexp', 'reindex', 'release', 'rename', 'replace', 'restrict', 'right', 'rollback', 'row', 'savepoint', 'select', 'set', 'table', 'temp', 'temporary', 'then', 'to', 'transaction', 'trigger', 'union', 'unique', 'update', 'using', 'vacuum', 'values', 'view', 'virtual', 'when', 'where', 'with', 'without']
 
 
@@ -242,12 +253,10 @@ class RelationalFunction(Function):
 
 class RelationalPoint(models.Model):
     relational_function = models.ForeignKey(RelationalFunction)
-    x = models.FloatField(validators=[MinValueValidator(0.0)],
-        help_text='The x value of the point.', )
-    y = models.FloatField(validators=[MinValueValidator(0.0)],
-        help_text='The y value of the point.', )
+    x = models.FloatField(validators=[MinValueValidator(0.0)], )
+    y = models.FloatField(validators=[MinValueValidator(0.0)], )
     def __str__(self):
-        return 'Point(%s, %s)' % (self.x, self.y)
+        return '%i Point(%s, %s)' % (self.relational_function.id, self.x, self.y)
 
 
 class ControlMasterPlan(models.Model):
@@ -462,7 +471,7 @@ class DiseaseProgressionAssignment(models.Model):
 
 
 class DiseaseSpread(models.Model):
-    name = models.CharField(max_length=255, blank=True, null=True, )
+    name = models.CharField(max_length=255,)
     _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0],
                                  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
                                  help_text='Parent disease whose spreading characteristics this describes.')
@@ -478,11 +487,11 @@ class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indire
         help_text='Code indicating the mechanism of the disease spread.', )
     subclinical_animals_can_infect_others = models.BooleanField(default=False,
         help_text='Indicates if subclinical units of the source type can spread disease by direct or indirect contact. ', )
-    contact_rate = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    contact_rate = models.FloatField(validators=[MinValueValidator(0.0)],
         help_text='The average contact rate (in recipient units per source unit per day) for direct or indirect contact models.', )
     use_fixed_contact_rate = models.BooleanField(default=False,
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
-    infection_probability = PercentField(blank=True, null=True,
+    infection_probability = PercentField(
         help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
     distance_distribution = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the shipment distances for direct and indirect contact models.', )
@@ -514,10 +523,10 @@ class DirectSpread(AbstractSpread):
 class AirborneSpread(DiseaseSpread):
     _spread_method_code = models.CharField(max_length=255, default='other',
         help_text='Code indicating the mechanism of the disease spread.', )
-    spread_1km_probability = PercentField(blank=True, null=True,
+    spread_1km_probability = PercentField(
         help_text='The probability that disease will be spread to unit 1 km away from the source unit.', )
     max_distance = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='The maximum distance in KM of airborne spread.', )
+        help_text='The maximum distance in KM of airborne spread.  Only used in Exponential Airborne Decay.', )
     wind_direction_start = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=0,
         help_text='The start angle in degrees of the predominate wind direction for airborne spread.', )
     #TODO: This doesn't keep start and end from crossing each other.
@@ -540,7 +549,7 @@ class Scenario(models.Model):
 
 class OutputSettings(models.Model):
     _scenario = models.ForeignKey('Scenario', default=lambda: Scenario.objects.get_or_create(id=1)[0],)  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
-    iterations = models.PositiveIntegerField(blank=True, null=True,
+    iterations = models.PositiveIntegerField(validators=[MinValueValidator(1)],
         help_text='The number of iterations of this scenario that should be run', )
     stop_criteria = models.CharField(max_length=255, default='disease-end',
         help_text='The criterion used to end each iteration.',
@@ -548,14 +557,15 @@ class OutputSettings(models.Model):
                  ('first-detection', 'Stop when the first detection occurs.'),
                  ('outbreak-end', 'Stop when there are no more latent or infectious units and all control activities are finished'),
                  ('stop-days', 'Stop after a specified number of days')))
-    days = models.PositiveIntegerField(blank=True, null=True,
+    days = models.PositiveIntegerField(blank=True, null=True, validators=[MinValueValidator(1)],
         help_text='The maximum number of days that iterations of this scenario should run.', )
      ## Outputs requested:
     save_all_daily_outputs = models.BooleanField(default=False,
         choices=((True, 'Save all daily output fo every iteration (warning: this option may produce very large scenario files)'),
                  (False, 'Save all daily output only for a specified number of iterations')),
         help_text='Indicates if daily outputs should be stored for every iteration.', )
-    maximum_iterations_for_daily_output = models.PositiveIntegerField(default=3, blank=True, null=True,  # TODO: validate min(3,x)
+    maximum_iterations_for_daily_output = models.PositiveIntegerField(default=3, blank=True, null=True,
+        validators=[MinValueValidator(3)],
         help_text='The number of iterations for which daily outputs should be stored The minimum value is 3.', )
     daily_states_filename = models.CharField(max_length=255, blank=True, null=True,
         help_text='The file name to output a plain text file with the state of each unit on each day of each iteration.', )
@@ -575,22 +585,14 @@ class OutputSettings(models.Model):
         help_text='Disable this to ignore entered vaccination costs.', )
     cost_track_zone_surveillance = models.BooleanField(default=True,
         help_text='Disable this to ignore entered zone surveillance costs.', )
+
+    def clean_fields(self, exclude=None):
+        self.daily_states_filename = clean_filename(self.daily_states_filename)
+        self.map_directory = clean_filename(self.map_directory)
+
+
     def __str__(self):
         return "Output Settings"
-
-
-class CustomOutputs(OutputSettings):
-    """This is an unimplemented feature based on looking at the XML spec"""
-    all_units_states = models.CharField(default="never", max_length=50, choices=frequency, )
-    num_units_in_each_state = models.CharField(default="never", max_length=50, choices=frequency, )
-    num_units_in_each_state_by_production_type = models.CharField(default="never", max_length=50, choices=frequency, )
-    num_animals_in_each_state = models.CharField(default="never", max_length=50, choices=frequency, )
-    num_animals_in_each_state_by_production_type = models.CharField(default="never", max_length=50, choices=frequency, )
-    disease_duration = models.CharField(default="never", max_length=50, choices=frequency, )
-    outbreak_duration = models.CharField(default="never", max_length=50, choices=frequency, )
-    clock_time = models.CharField(default="never", max_length=50, choices=frequency, )
-    tsdU = models.CharField(default="never", max_length=50, choices=frequency, )
-    tsdA = models.CharField(default="never", max_length=50, choices=frequency, )
 
 
 class ProductionType(models.Model):
@@ -639,10 +641,10 @@ class ZoneEffectOnProductionType(models.Model):
         help_text='Zone for which this event occurred.', )
     production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
-    zone_indirect_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
-        help_text='Function the describes indirect movement rate.', )
     zone_direct_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Function the describes direct movement rate.', )
+    zone_indirect_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
+        help_text='Function the describes indirect movement rate.', )
     zone_detection_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], default=1.0,
         help_text='Multiplier for the probability of observing clinical signs in units of this production type in this zone.', )
     cost_of_surveillance_per_animal_day = MoneyField(default=0.0,

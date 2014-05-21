@@ -10,9 +10,11 @@ from django.conf import settings
 import re
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from Settings.models import SmSession
-from django.forms.models import inlineformset_factory
 from django.forms.models import modelformset_factory
+from django.forms.models import inlineformset_factory
 
+
+edge_cases = ['RelationalPoint']
 
 def spaces_for_camel_case(text):
     return re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
@@ -39,9 +41,17 @@ def activeSession():
     return os.path.basename(full_path)
 
 
+def simulation_ready_to_run(context):
+    context = dict(context)
+    # excluded statuses that shouldn't be blocking a simulation run
+    for key in ['filename', 'unsaved_changes', 'IndirectSpreads', 'AirborneSpreads', 'ProbabilityFunctions', 'RelationalFunctions']:
+        context.pop(key, None)
+    return all(context.values())
+
+
 def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
     PT_count = ProductionType.objects.count()
-    return {'filename': scenario_filename(),
+    context =  {'filename': scenario_filename(),
             'unsaved_changes': unsaved_changes(),
             'Scenario': Scenario.objects.count(),
             'OutputSetting': OutputSettings.objects.count(),
@@ -54,7 +64,7 @@ def basic_context():  # TODO: This might not be performant... but it's nice to h
             'DirectSpreads': DirectSpread.objects.count(),
             'IndirectSpreads': IndirectSpread.objects.count(),
             'AirborneSpreads': AirborneSpread.objects.count(),
-            'Transmissions': ProductionTypePairTransmission.objects.count() == PT_count ** 2 and PT_count, #Fixed false complete status when there are no Production Types
+            'Transmissions': ProductionTypePairTransmission.objects.count() >= PT_count ** 2 and PT_count, #Fixed false complete status when there are no Production Types
             'ControlMasterPlan': ControlMasterPlan.objects.count(),
             'Protocols': ControlProtocol.objects.count(),
             'ProtocolAssignments': ProtocolAssignment.objects.count(),
@@ -62,6 +72,8 @@ def basic_context():  # TODO: This might not be performant... but it's nice to h
             'ZoneEffects': ZoneEffectOnProductionType.objects.count(),
             'ProbabilityFunctions': ProbabilityFunction.objects.count(),
             'RelationalFunctions': RelationalFunction.objects.count()}
+    context['Simulation'] = simulation_ready_to_run(context)
+    return context
 
 
 def home(request):
@@ -91,7 +103,7 @@ def disease_spread(request):
             instances = initialized_formset.save()
             print(instances)
             unsaved_changes(True)
-            return redirect('/setup/DiseaseSpread/')  # update these numbers after database save because they've changed
+            return redirect(request.path)  # update these numbers after database save because they've changed
     except ValidationError:
         initialized_formset = SpreadSet(queryset=ProductionTypePairTransmission.objects.all())
     context['formset'] = initialized_formset
@@ -152,6 +164,57 @@ def assign_progressions(request):
         return redirect(request.path)
 
 
+def initialize_relational_form(context, primary_key, request):
+    if not primary_key:
+        model = RelationalFunction()
+        main_form = RelationalFunctionForm(request.POST or None)
+    else:
+        model = RelationalFunction.objects.get(id=primary_key)
+        main_form = RelationalFunctionForm(request.POST or None, instance=model)
+        context['model_link'] = '/setup/RelationalFunction/' + primary_key + '/'
+    context['form'] = main_form
+    context['model'] = model
+    return context
+
+
+def deepcopy_points(request, primary_key, created_instance):
+    queryset = RelationalPoint.objects.filter(relational_function_id=primary_key)
+    for point in queryset:  # iterating over points already in DB
+        point = RelationalPoint(relational_function=created_instance, x=point.x, y=point.y) # copy with new parent
+        point.save()  # This assumes that things in the database are already valid, so doesn't call is_valid()
+    queryset = RelationalPoint.objects.filter(relational_function_id=created_instance.id)
+    formset = PointFormSet(queryset=queryset) # this queryset does not include anything the user typed in, during the copy operation
+    return formset
+
+
+def relational_function(request, primary_key=None, doCopy=False):
+    """This handles the edge case of saving, copying, and creating Relational Functions.  RFs are different from any
+    other model in ADSM in that they have a list of RelationalPoints.  These points are listed alongside the normal form.
+    Rendering this page means render a form, then a formset of points.  Saving is more complex because the points also
+    foreignkey back to the RelationalFunction which must be created before it can be referenced.
+
+    It is possible to integrate this code back into the standard new / edit / copy views by checking for
+    context['formset'].  The extra logic for formsets could be kicked in only when one or more formsets are present."""
+    context = basic_context()
+    context = initialize_relational_form(context, primary_key, request)
+    context['formset'] = PointFormSet(instance=context['model'])
+    if context['form'].is_valid():
+        unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
+        if doCopy:
+            context['form'].instance.pk = None  # This will cause a new instance to be created
+            created_instance = context['form'].save()
+            context['formset'] = deepcopy_points(request, primary_key, created_instance)
+            return redirect('/setup/RelationalFunction/%i/' % created_instance.id)
+        else:
+            created_instance = context['form'].save()
+            context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
+        if context['formset'].is_valid():
+            context['formset'].save()
+            return redirect('/setup/RelationalFunction/%i/' % created_instance.id)
+    context['title'] = "Create a Relational Function"
+    return render(request, 'ScenarioCreator/RelationalFunction.html', context)
+
+
 def save_new_instance(initialized_form, request):
     model_instance = initialized_form.save()  # write to database
     unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
@@ -188,6 +251,8 @@ def initialize_from_existing_model(primary_key, request):
 '''New / Edit / Copy trio that are called from URLs'''
 def new_entry(request):
     model_name, form = get_model_name_and_form(request)
+    if model_name == 'RelationalFunction':
+        return relational_function(request)
     initialized_form = form(request.POST or None)
     context = basic_context()
     context['form'] = initialized_form
@@ -197,6 +262,9 @@ def new_entry(request):
 
 def edit_entry(request, primary_key):
     model_name, form = get_model_name_and_form(request)
+    if model_name == 'RelationalFunction':
+        return relational_function(request, primary_key)
+
     try:
         initialized_form, model_name = initialize_from_existing_model(primary_key, request)
     except ObjectDoesNotExist:
@@ -214,6 +282,8 @@ def edit_entry(request, primary_key):
 
 def copy_entry(request, primary_key):
     model_name, form = get_model_name_and_form(request)
+    if model_name == 'RelationalFunction':
+        return relational_function(request, primary_key, doCopy=True)
     try:
         initialized_form, model_name = initialize_from_existing_model(primary_key, request)
     except ObjectDoesNotExist:
@@ -361,6 +431,49 @@ def new_scenario(request):
                  load_initial_data=False)
     scenario_filename("Untitled Scenario")
     return redirect('/setup/Scenario/1/')
+
+
+def copy_scenario(request, target):
+    copy_name = target + ' - Copy'  #re.sub(r'(.*)\.sqlite3', r'\6 - Copy\.sqlite3', target)
+    print("Copying ", target, "to", copy_name)
+    shutil.copy(workspace_path(target), workspace_path(copy_name))
+    return redirect('/setup/Workspace/')
+
+
+def download_scenario(request, target):
+    file_path = workspace_path(target)
+    f = open(file_path, "rb")
+    response = HttpResponse(f, content_type="application/x-sqllite")
+    response['Content-Disposition'] = 'attachment; filename="' + target + '.sqlite3"'
+    return response
+
+
+def handle_file_upload(request):
+    uploaded_file = request.FILES['file']
+    filename = uploaded_file._name
+    with open(workspace(filename), 'wb+') as destination:
+        for chunk in uploaded_file.chunks():
+            destination.write(chunk)
+    return filename
+
+def upload_scenario(request):
+    handle_file_upload(request)
+    return redirect('/setup/Workspace/')
+
+
+def upload_population(request):
+    filename = handle_file_upload(request)  # now we know the file is in the workspace
+    model = Population(source_file=filename)
+    # wait for file upload
+    model.save()
+    unsaved_changes(True)
+    # wait for Population parsing (up to 5 minutes)
+    return redirect('/setup/Population/1')
+
+
+def population(request):
+    # if Population.objects.exists(id=1):
+    return render(request, 'ScenarioCreator/Population.html', basic_context())
 
 
 def run_simulation(request):
