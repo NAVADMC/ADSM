@@ -21,3 +21,12 @@ SpreadModel uses to databases specified in ScenarioCreator/router.py.   Settings
 
 Migrations are created using:
     python manage.py schemamigration ScenarioCreator --auto
+
+Google Server Production Deploy:
+sudo su
+screen -r   (Ctrl+C to stop server) or (Ctrl+A  K   to kill the screen)
+source /home/anaconda/bin/activate py3k
+(make sure you have the production_server submodule)
+    git submodule init
+    git submodule update
+python manage.py runproductionserver --serve_static=collect --pid_file=server.pid --port=80
