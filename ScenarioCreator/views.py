@@ -463,13 +463,12 @@ def upload_scenario(request):
 
 def upload_population(request):
     filename = handle_file_upload(request)  # now we know the file is in the workspace
-    form = PopulationForm(None)  # blank
-    form.source_file = filename
+    model = Population(source_file=filename)
     # wait for file upload
-    form.save()
+    model.save()
     unsaved_changes(True)
     # wait for Population parsing (up to 5 minutes)
-    return redirect('/setup/Population/')
+    return redirect('/setup/Population/1')
 
 
 def population(request):
