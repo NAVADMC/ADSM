@@ -45,6 +45,10 @@ header h1 {
     float: left;
 }
 
+header h2 {
+    margin-top: 3px;
+}
+
 header div {
     width: 220px;
     overflow:auto;
