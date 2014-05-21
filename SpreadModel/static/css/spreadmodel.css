@@ -263,7 +263,7 @@ body .modal-dialog {
     margin-left: 25%;
 }
 
-.controls ul li label {
+.controls ul li label {  /*Radio buttons on multi-choice fields are giant without this */
     font-size: 10pt;
     font-weight: 400;
 }
