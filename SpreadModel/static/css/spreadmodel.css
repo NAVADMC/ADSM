@@ -1,37 +1,75 @@
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 10pt;
+    font-weight: 400;
+}
+
+h1 {
+    font-size: 22pt;
+    margin-bottom: 20px;
+}
+
+a {
+    color: #7cb9ff;
+}
+
+li {
+    font-size: 14pt;
+}
+
+.icon {
+    max-height: 20px;
+    max-width: 20px;
+}
+
 header {
     position: fixed;
     background-color: white;
     width: 100%;
-    height: 50px;
+    height: 44px;
     top: 0;
-    border-bottom: 2px solid #EEE;
+    border-bottom: 4px solid black;
+}
+
+header a, header button {
+    height: 35px;
+    line-height: 35px;
+}
+
+header .btn {
+    padding: 8px 10px 8px 10px;
 }
 
 header h1 {
-    font-size: 24px;
-    line-height: 50px;
-    margin: 0 10px;
-    color: #555;
+    margin: 0 0px;
+    float: left;
+}
+
+header h2 {
+    margin-top: 3px;
+}
+
+header div {
+    width: 220px;
+    overflow:auto;
+    float: left;
 }
 
 .filename {
     float: left;
-    width: 350px;
+    width: 700px;
+    padding: 0 20px;
 }
 
 .filename input {
     border: none;
-    height: 47px;
-}
-
-header h1 {
-    float: left;
-    width: 83px;
+    width: 100%;
+    color: #666;
 }
 
 header form {
     float: left;
-    width: 840px;
+    width: 940px;
 }
 
 /*header .alert {*/
@@ -51,68 +89,127 @@ header #admin_link {
 
 body>nav {
     position: fixed;
-    top: 50px;
+    top: 44px;
     bottom: 0;
     left: 0;
-    width: 250px;
+    width: 220px;
     overflow: auto;
     /*background-color: #DDD;*/
 }
 
 body>section {
-    margin-top: 50px;
+    margin-top: 44px;
     padding-top: 0px;
-    margin-left: 250px;
+    margin-left:  220px;
     padding-left: 20px;
 }
 #setupMenu {
     list-style: none;
     padding-left: 0;
+    margin-bottom: 54px;
 }
 
 #setupMenu ul {
     list-style: none;
     padding-left: 0;
-    margin-left: 12px;
+}
+
+#setupMenu li {
+    padding-top: 4px;
 }
 
 #setupMenu a {
-    color: #006;
+    color: black;
     display:block;
     text-decoration: none;
-    background-color: #EEE;
-    font-size: 16px;
-    font-weight: bold;
-    line-height: 30px;
+    background-color: #E4E4E4;
+    font-size: 14pt;
+    font-weight: 600;
+    line-height: 35px;
     padding-left: 5px;
 }
 
 #setupMenu ul a {
-    font-size: 14px;
+    font-weight: 400;
+    background-color: #EEEEEE;
 }
 
 #setupMenu ul ul a {
-    font-size: 12px;
+    background-color: #FFFFFF;
 }
 
 #setupMenu a:hover {
     background-color: #FFF;
 }
 
-#setupMenu .completed, .completed {
-    background-color: #D0D0D0;
+#setupMenu .active {
+    background-color: #B1B1B1
 }
 
+#setupMenu span {
+    width: 5px;
+    height: 35px;
+}
+
+#setupMenu .incomplete {
+    font-weight: 600;
+    font-style: italic;
+    color: #999;
+    background-color: #FFDD4A;
+}
+
+#setupMenu .completed, .completed {
+    background-color: #B6F3A7;
+}
+
+#RunSimulation {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width:  220px;
+}
+
+#RunSimulation a {
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+}
+
+#RunSimulation .glyphicon {
+    font-size: 30px;
+    display: relative;
+    top: 6px;
+    /*vertical-align: middle;*/
+}
+
+
+.btn {
+    font-style: italic;
+    margin: 3px 1px 0px 1px;
+    color: #ffffff;
+    border-radius: 0;
+    border: 0px;
+}
 
 .btn-add {
     background: none;
-    padding:0;
+    padding: 0 0 6px 3px;
     border-width: 0;
     color: #007700;
+    vertical-align: middle;
+    margin: 8px 0;
 }
 
-.btn {
-    margin: 8px;
+.btn-primary {
+    background-color: #00477f;
+}
+
+.btn-danger {
+    background-color: darkred;
+}
+
+.btn.completed {  /*This is flipped incomplete/completed because of the way python is storing it*/
+    background-color: #7cb9ff;
 }
 
 textarea {
@@ -136,26 +233,36 @@ select {
 
 #file_list ul {
     list-style-type: none;
-    font-size: 20px;
 }
 
 #file_list li {
     text-decoration: none;
-}
-
-#file_list li:nth-child(even) {
-    background-color: #ddd;
+    border-bottom: 2px solid #d9d9d9;
 }
 
 #file_list {
     margin-top: 20px;
-    width: 50%
+    max-width: 600px
 }
 
-.controls ul {
-
+#file_list a {
+    color: black;
 }
 
-.glyphicon {
-    color: dimgrey;
+#file_list a:hover {
+    color: #7cb9ff;;
+}
+
+#file_list .icon {
+    margin-top: 5px;
+    margin-left: 15px;
+}
+
+#file-upload input, button {
+    display: inline;
+}
+
+body .modal-dialog {
+    width: 50%;
+    margin-left: 25%;
 }

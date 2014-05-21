@@ -1,29 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <title>ADSM - Animal Disease Spread Model</title>
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,400italic,600italic' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/spreadmodel.css" />
     <script src="{{ STATIC_URL }}js/jquery-2.1.0.min.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-dialog.js"></script>
     <script src="{{ STATIC_URL }}js/spreadmodel.js"></script>
+    {% load db_status_tags %}
 </head>
 <body>
 <header>
     <form class="ajax" method="post" action="/setup/SaveScenario/">
+        <div class="buttonHolder">
+            {% spaceless %}
+            <a href="/setup/NewScenario/" class="btn btn-primary"><img src="{{ STATIC_URL }}icons/new.png" class="icon"> new</a>
+            <a href="/setup/Workspace/"  class="btn btn-primary"><img src="{{ STATIC_URL }}icons/open.png" class="icon">&nbsp open</a>
+            <button type="submit" class="btn btn-primary {{ unsaved_changes|completed }}"><img src="{{ STATIC_URL }}icons/save.png" class="icon">&nbsp save</button>
+            {% endspaceless %}
+        </div>
         <h1 class="filename">
-            <img src="{{STATIC_URL}}icons/icon_4743/icon_4743.svg" width=32 height=32 alt=""/>
             <input type="text" name="filename" value="{{ filename }}">
         </h1>
-        <h1><a id="new_scenario" href="/setup/NewScenario/" class="btn btn-primary button white">New </a></h1>
-        <h1><input type="Submit" value="Save" class="btn btn-primary button white"></h1>
-{#        <div class="alert alert-info alert-dismissable">#}
-{#            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>#}
-{#            <strong>Success!</strong> File saved to {{ filename }}#}
-{#        </div>#}
-        <h1><a href="/setup/Workspace/" id="open_dialog" class="btn btn-primary button white">Open</a></h1>
+            {#        <div class="alert alert-info alert-dismissable">#}
+            {#            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>#}
+            {#            <strong>Success!</strong> File saved to {{ filename }}#}
+            {#        </div>#}
     </form>
+    <h2>Animal Disease Spread Model</h2>
     <a href="/admin/" id="admin_link">Advanced Panel</a>
 </header>
 {% block main %}

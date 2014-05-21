@@ -1,0 +1,3 @@
+[submodule "production_server"]
+	path = production_server
+	url = josiah@newline.us:/home/projects/django_production_server.git

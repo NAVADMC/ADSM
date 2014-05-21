@@ -60,5 +60,7 @@ EXTRA_DIST = detected_1.xml detected_1_w_vars.xml \
   test_result_and_self_reporting_same_day.xml \
   test_result_and_self_reporting_same_day2.xml \
   test_result_after_self_reporting.xml \
+  self_reporting_after_positive_test_result.xml \
+  self_reporting_after_negative_test_result.xml \
   trace_back_count_exams.xml \
   inf_at_first_det_1.xml inf_at_first_det_2.xml inf_at_first_det_no_det.xml

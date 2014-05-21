@@ -2,7 +2,7 @@
 ModelForm -> models.py.  This basic layout can be overridden by declaring an __init__ with a self.helper Layout.
 See DirectSpread for an example.  More complex widgets and layouts are accessible from there.
 All forms now have their "submit" button restored and you can choose custom layouts.  ControlProtocol has tabs."""
-
+from django.forms.models import inlineformset_factory
 
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Field, Hidden
@@ -26,13 +26,12 @@ class FixedSelect(Select):
     def get_context(self, name, value, attrs=None, choices=()):
         context = super(FixedSelect, self).get_context(name, value, attrs)
         context['value'] = value
-        context['value_name'] = [x[1] for x in self.choices if x[0] == value][0]  # first match
+        context['value_name'] = ([x[1] for x in self.choices if x[0] == value] + [''])[0]  # first match
         return context
 
 
 def submit_button():
-    return ButtonHolder(Submit('submit', 'Submit', css_class='button white'),
-                        HTML(open('ScenarioCreator/templates/ScenarioCreator/EditButtons.html', 'r').read()))
+    return ButtonHolder(HTML(open('ScenarioCreator/templates/ScenarioCreator/EditButtons.html', 'r').read()))
 
 
 class BaseForm(ModelForm):
@@ -69,19 +68,9 @@ class UnitForm(BaseForm):
         widgets = {'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'})}
 
 
-class FunctionForm(BaseForm):
-    class Meta:
-        model = Function
-
-
 class ProbabilityFunctionForm(BaseForm):
     class Meta:
         model = ProbabilityFunction
-
-
-class RelationalFunctionForm(BaseForm):
-    class Meta:
-        model = RelationalFunction
 
 
 class RelationalPointForm(BaseForm):
@@ -89,6 +78,25 @@ class RelationalPointForm(BaseForm):
         model = RelationalPoint
         exclude = []
         widgets = {'relational_function': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
+
+
+PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint)
+
+
+class RelationalFunctionForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            'name',
+            'x_axis_units',
+            'y_axis_units',
+            'notes'
+        )
+        return super().__init__(*args, **kwargs)
+
+    class Meta:
+        model = RelationalFunction
 
 
 class ControlMasterPlanForm(BaseForm):
@@ -134,11 +142,11 @@ class ControlProtocolForm(BaseForm):
                     'use_tracing',
                     'trace_direct_forward',
                     'trace_direct_back',
-                    AppendedText('direct_trace_success_rate', '%'),
+                    AppendedText('direct_trace_success_rate', 'example: 0.37 = 37%'),
                     'direct_trace_period',
                     'trace_indirect_forward',
                     'trace_indirect_back',
-                    AppendedText('indirect_trace_success', '%'),
+                    AppendedText('indirect_trace_success', 'example: 0.37 = 37%'),
                     'indirect_trace_period',
                     'trace_result_delay',
                     'direct_trace_is_a_zone_trigger',
@@ -240,7 +248,7 @@ class IndirectSpreadForm(BaseForm):
             'subclinical_animals_can_infect_others',
             'use_fixed_contact_rate',
             'contact_rate',
-            AppendedText('infection_probability', '%'),
+            AppendedText('infection_probability', 'example: 0.37 = 37%'),
             'distance_distribution',
             'transport_delay',
             'movement_control',
@@ -265,7 +273,7 @@ class DirectSpreadForm(BaseForm):
             'subclinical_animals_can_infect_others',
             'use_fixed_contact_rate',
             'contact_rate',
-            AppendedText('infection_probability', '%'),
+            AppendedText('infection_probability', 'example: 0.37 = 37%'),
             'distance_distribution',
             'transport_delay',
             'movement_control',
@@ -286,7 +294,7 @@ class AirborneSpreadForm(BaseForm):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'name',
-            AppendedText('spread_1km_probability', '%'),
+            AppendedText('spread_1km_probability', 'example: 0.37 = 37%'),
             'max_distance',
             'wind_direction_start',
             'wind_direction_end',

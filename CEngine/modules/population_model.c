@@ -1,4 +1,4 @@
-/** @file conflict_resolver.c
+/** @file population_model.c
  * A special module, always loaded, that encapsulates the list of units.  It
  * gathers requests for changes to units and disambiguates the results of
  * (potentially) conflicting requests.
@@ -22,21 +22,20 @@
 #endif
 
 /* To avoid name clashes when multiple modules have the same interface. */
-#define new conflict_resolver_new
-#define run conflict_resolver_run
-#define reset conflict_resolver_reset
-#define events_listened_for conflict_resolver_events_listened_for
-#define local_free conflict_resolver_free
-#define handle_before_each_simulation_event conflict_resolver_handle_before_each_simulation_event
-#define handle_midnight_event conflict_resolver_handle_midnight_event
-#define handle_new_day_event conflict_resolver_handle_new_day_event
-#define handle_declaration_of_vaccine_delay_event conflict_resolver_handle_declaration_of_vaccine_delay_event
-#define handle_attempt_to_infect_event conflict_resolver_handle_attempt_to_infect_event
-#define handle_vaccination_event conflict_resolver_handle_vaccination_event
-#define handle_destruction_event conflict_resolver_handle_destruction_event
-#define handle_end_of_day_event conflict_resolver_handle_end_of_day_event
-#define EVT_free_event_as_GFunc conflict_resolver_EVT_free_event_as_GFunc
-#define resolve_conflicts conflict_resolver_resolve_conflicts
+#define new population_model_new
+#define run population_model_run
+#define reset population_model_reset
+#define events_listened_for population_model_events_listened_for
+#define local_free population_model_free
+#define handle_before_each_simulation_event population_model_handle_before_each_simulation_event
+#define handle_midnight_event population_model_handle_midnight_event
+#define handle_new_day_event population_model_handle_new_day_event
+#define handle_declaration_of_vaccine_delay_event population_model_handle_declaration_of_vaccine_delay_event
+#define handle_attempt_to_infect_event population_model_handle_attempt_to_infect_event
+#define handle_vaccination_event population_model_handle_vaccination_event
+#define handle_destruction_event population_model_handle_destruction_event
+#define handle_end_of_day_event population_model_handle_end_of_day_event
+#define EVT_free_event_as_GFunc population_model_EVT_free_event_as_GFunc
 
 #include "module.h"
 
@@ -53,7 +52,7 @@
 #endif
 
 #include "general.h"
-#include "conflict_resolver.h"
+#include "population_model.h"
 
 #ifdef COGRID
 double trunc ( double x )
@@ -65,7 +64,7 @@ double trunc ( double x )
 double trunc (double);
 #endif
 
-#define MODEL_NAME "conflict-resolver"
+#define MODEL_NAME "population-model"
 
 
 
@@ -376,7 +375,7 @@ resolve_conflicts_args_t;
 
 
 /**
- * Resolve any conflicts between infection and vaccinatior or destruction for a
+ * Resolve any conflicts between infection and vaccination or destruction for a
  * single unit.  This function is typed as a GHFunc so that it can be called
  * for each key (unit index) in the attempts_to_infect table.
  *
@@ -595,7 +594,7 @@ local_free (struct adsm_module_t_ *self)
 
 
 /**
- * Returns a new conflict resolver model.
+ * Returns a new population model.
  */
 adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
@@ -638,4 +637,4 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   return self;
 }
 
-/* end of file conflict_resolver.c */
+/* end of file population_model.c */

@@ -27,6 +27,7 @@
 #define events_listened_for test_monitor_events_listened_for
 #define local_free test_monitor_free
 #define handle_before_any_simulations_event test_monitor_handle_before_any_simulations_event
+#define handle_new_day_event test_monitor_handle_new_day_event
 #define handle_test_event test_monitor_handle_test_event
 #define handle_test_result_event test_monitor_handle_test_result_event
 
@@ -43,9 +44,9 @@
 
 
 
-#define NEVENTS_LISTENED_FOR 3
+#define NEVENTS_LISTENED_FOR 4
 EVT_event_type_t events_listened_for[] = { EVT_BeforeAnySimulations,
-EVT_Test, EVT_TestResult };
+EVT_NewDay, EVT_Test, EVT_TestResult };
 
 
 
@@ -57,6 +58,14 @@ typedef struct
   RPT_reporting_t *cumul_nunits_tested_by_reason;
   RPT_reporting_t *cumul_nunits_tested_by_prodtype;
   RPT_reporting_t *cumul_nunits_tested_by_reason_and_prodtype;
+  RPT_reporting_t *nunits_truepos;
+  RPT_reporting_t *nunits_truepos_by_prodtype;
+  RPT_reporting_t *nunits_trueneg;
+  RPT_reporting_t *nunits_trueneg_by_prodtype;
+  RPT_reporting_t *nunits_falsepos;
+  RPT_reporting_t *nunits_falsepos_by_prodtype;
+  RPT_reporting_t *nunits_falseneg;
+  RPT_reporting_t *nunits_falseneg_by_prodtype;
   RPT_reporting_t *cumul_nunits_truepos;
   RPT_reporting_t *cumul_nunits_truepos_by_prodtype;
   RPT_reporting_t *cumul_nunits_trueneg;
@@ -106,6 +115,42 @@ handle_before_any_simulations_event (struct adsm_module_t_ *self,
   /* We don't free the pointer array, that will be done when the event is freed
    * after all interested modules have processed it. */
 
+  return;
+}
+
+
+
+/**
+ * On each new day, zero the daily counts of true positives, false positives,
+ * etc.
+ *
+ * @param self this module.
+ */
+void
+handle_new_day_event (struct adsm_module_t_ *self)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_new_day_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+
+  /* Zero the daily counts. */
+  RPT_reporting_zero (local_data->nunits_truepos);
+  RPT_reporting_zero (local_data->nunits_truepos_by_prodtype);
+  RPT_reporting_zero (local_data->nunits_trueneg);
+  RPT_reporting_zero (local_data->nunits_trueneg_by_prodtype);
+  RPT_reporting_zero (local_data->nunits_falsepos);
+  RPT_reporting_zero (local_data->nunits_falsepos_by_prodtype);
+  RPT_reporting_zero (local_data->nunits_falseneg);
+  RPT_reporting_zero (local_data->nunits_falseneg_by_prodtype);
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
+  #endif
+  
   return;
 }
 
@@ -226,11 +271,15 @@ handle_test_result_event (struct adsm_module_t_ * self,
     {
       if (event->correct)
         {
+          RPT_reporting_add_integer (local_data->nunits_truepos, 1, NULL);
+          RPT_reporting_add_integer1 (local_data->nunits_truepos_by_prodtype, 1, unit->production_type_name);
           RPT_reporting_add_integer (local_data->cumul_nunits_truepos, 1, NULL);
           RPT_reporting_add_integer1 (local_data->cumul_nunits_truepos_by_prodtype, 1, unit->production_type_name);
         }
       else
         {
+          RPT_reporting_add_integer (local_data->nunits_falsepos, 1, NULL);
+          RPT_reporting_add_integer1 (local_data->nunits_falsepos_by_prodtype, 1, unit->production_type_name);
           RPT_reporting_add_integer (local_data->cumul_nunits_falsepos, 1, NULL);
           RPT_reporting_add_integer1 (local_data->cumul_nunits_falsepos_by_prodtype, 1, unit->production_type_name);
         }
@@ -239,11 +288,15 @@ handle_test_result_event (struct adsm_module_t_ * self,
     {
       if (event->correct)
         {
+          RPT_reporting_add_integer (local_data->nunits_trueneg, 1, NULL);
+          RPT_reporting_add_integer1 (local_data->nunits_trueneg_by_prodtype, 1, unit->production_type_name);
           RPT_reporting_add_integer (local_data->cumul_nunits_trueneg, 1, NULL);
           RPT_reporting_add_integer1 (local_data->cumul_nunits_trueneg_by_prodtype, 1, unit->production_type_name);
         }
       else
         {
+          RPT_reporting_add_integer (local_data->nunits_falseneg, 1, NULL);
+          RPT_reporting_add_integer1 (local_data->nunits_falseneg_by_prodtype, 1, unit->production_type_name);
           RPT_reporting_add_integer (local_data->cumul_nunits_falseneg, 1, NULL);
           RPT_reporting_add_integer1 (local_data->cumul_nunits_falseneg_by_prodtype, 1, unit->production_type_name);
         }
@@ -278,6 +331,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
     {
     case EVT_BeforeAnySimulations:
       handle_before_any_simulations_event (self, queue);
+      break;
+    case EVT_NewDay:
+      handle_new_day_event (self);
       break;
     case EVT_Test:
       handle_test_event (self, &(event->u.test));
@@ -353,25 +409,11 @@ local_free (struct adsm_module_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  RPT_free_reporting (local_data->cumul_nunits_tested);
-  RPT_free_reporting (local_data->cumul_nunits_tested_by_reason);
-  RPT_free_reporting (local_data->cumul_nunits_tested_by_prodtype);
-  RPT_free_reporting (local_data->cumul_nunits_tested_by_reason_and_prodtype);
-  RPT_free_reporting (local_data->cumul_nunits_truepos);
-  RPT_free_reporting (local_data->cumul_nunits_truepos_by_prodtype);
-  RPT_free_reporting (local_data->cumul_nunits_trueneg);
-  RPT_free_reporting (local_data->cumul_nunits_trueneg_by_prodtype);
-  RPT_free_reporting (local_data->cumul_nunits_falsepos);
-  RPT_free_reporting (local_data->cumul_nunits_falsepos_by_prodtype);
-  RPT_free_reporting (local_data->cumul_nunits_falseneg);
-  RPT_free_reporting (local_data->cumul_nunits_falseneg_by_prodtype);
-  RPT_free_reporting (local_data->cumul_nanimals_tested);
-  RPT_free_reporting (local_data->cumul_nanimals_tested_by_reason);
-  RPT_free_reporting (local_data->cumul_nanimals_tested_by_prodtype);
-  RPT_free_reporting (local_data->cumul_nanimals_tested_by_reason_and_prodtype);
-
   g_free (local_data);
-  g_ptr_array_free (self->outputs, TRUE);
+  /* Because a free function was specified when creating the pointer array
+   * self->outputs, freeing self->outputs will also properly dispose of all
+   * of the output variables contained in the array. */
+  g_ptr_array_free (self->outputs, /* free_seg = */ TRUE);
   g_free (self);
 
 #if DEBUG
@@ -403,7 +445,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->name = MODEL_NAME;
   self->events_listened_for = events_listened_for;
   self->nevents_listened_for = NEVENTS_LISTENED_FOR;
-  self->outputs = g_ptr_array_new ();
+  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
   self->model_data = local_data;
   self->run = run;
   self->reset = reset;
@@ -423,6 +465,32 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     RPT_new_reporting ("tstcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_tested_by_reason_and_prodtype =
     RPT_new_reporting ("tstcU", RPT_group, RPT_daily);
+
+  g_ptr_array_add (self->outputs,
+    local_data->nunits_truepos =
+      RPT_new_reporting ("tstnUTruePos", RPT_integer, RPT_daily));
+  g_ptr_array_add (self->outputs,
+    local_data->nunits_truepos_by_prodtype =
+      RPT_new_reporting ("tstnUTruePos", RPT_group, RPT_daily));
+  g_ptr_array_add (self->outputs,
+    local_data->nunits_trueneg =
+      RPT_new_reporting ("tstnUTrueNeg", RPT_integer, RPT_daily));
+  g_ptr_array_add (self->outputs,
+    local_data->nunits_trueneg_by_prodtype =
+      RPT_new_reporting ("tstnUTrueNeg", RPT_group, RPT_daily));
+  g_ptr_array_add (self->outputs,
+    local_data->nunits_falsepos =
+      RPT_new_reporting ("tstnUFalsePos", RPT_integer, RPT_daily));
+  g_ptr_array_add (self->outputs,
+    local_data->nunits_falsepos_by_prodtype =
+      RPT_new_reporting ("tstnUFalsePos", RPT_group, RPT_daily));
+  g_ptr_array_add (self->outputs,
+    local_data->nunits_falseneg =
+      RPT_new_reporting ("tstnUFalseNeg", RPT_integer, RPT_daily));
+  g_ptr_array_add (self->outputs,
+    local_data->nunits_falseneg_by_prodtype =
+      RPT_new_reporting ("tstnUFalseNeg", RPT_group, RPT_daily));
+
   local_data->cumul_nunits_truepos =
     RPT_new_reporting ("tstcUTruePos", RPT_integer, RPT_daily);
   local_data->cumul_nunits_truepos_by_prodtype =
@@ -472,6 +540,10 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     {
       prodtype_name = (char *) g_ptr_array_index (local_data->production_types, i);
       RPT_reporting_set_integer1 (local_data->cumul_nunits_tested_by_prodtype, 0, prodtype_name);
+      RPT_reporting_set_integer1 (local_data->nunits_truepos_by_prodtype, 0, prodtype_name);
+      RPT_reporting_set_integer1 (local_data->nunits_trueneg_by_prodtype, 0, prodtype_name);
+      RPT_reporting_set_integer1 (local_data->nunits_falsepos_by_prodtype, 0, prodtype_name);
+      RPT_reporting_set_integer1 (local_data->nunits_falseneg_by_prodtype, 0, prodtype_name);
       RPT_reporting_set_integer1 (local_data->cumul_nunits_truepos_by_prodtype, 0, prodtype_name);
       RPT_reporting_set_integer1 (local_data->cumul_nunits_trueneg_by_prodtype, 0, prodtype_name);
       RPT_reporting_set_integer1 (local_data->cumul_nunits_falsepos_by_prodtype, 0, prodtype_name);

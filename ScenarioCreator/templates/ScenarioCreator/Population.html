@@ -1,0 +1,14 @@
+{% extends 'ScenarioCreator/navigationPane.html' %}
+{% load floppyforms %}
+{% load crispy_forms_tags  %}
+
+{% block content %}
+<h1 id="title">Load a Population</h1>
+    <form id="file-upload" method="post" action="/setup/UploadPopulation/" enctype="multipart/form-data">
+        <input type="file" name="file" accept="application/x-sqlite3" file-upload="">
+        <button type="submit" class="btn btn-primary">Upload a Population &nbsp<img src="{{ STATIC_URL }}icons/upload.png" class="icon"></button>
+        <p class="help-block">You can upload a file from anywhere on your computer and it will be imported to the ADSM workspace.</p>
+    </form>
+{#    {% crispy form %}#}
+
+{% endblock %}

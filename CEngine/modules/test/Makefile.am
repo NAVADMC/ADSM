@@ -59,7 +59,7 @@ miniadsm_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/main_lo
   $(top_srcdir)/wml/wml.c $(top_srcdir)/wml/wml.h \
   $(top_srcdir)/modules/module.h $(top_srcdir)/modules/module.c \
   $(top_srcdir)/modules/module_util.c $(top_srcdir)/modules/module_util.h \
-  $(top_srcdir)/modules/conflict_resolver.c $(top_srcdir)/modules/conflict_resolver.h \
+  $(top_srcdir)/modules/population_model.c $(top_srcdir)/modules/population_model.h \
   $(top_srcdir)/modules/disease_model.c $(top_srcdir)/modules/disease_model.h \
   $(top_srcdir)/modules/contact_spread_model.c $(top_srcdir)/modules/contact_spread_model.h \
   $(top_srcdir)/modules/contact_recorder_model.c $(top_srcdir)/modules/contact_recorder_model.h \
