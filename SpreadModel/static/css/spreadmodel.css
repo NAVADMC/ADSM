@@ -139,7 +139,7 @@ body>section {
 }
 
 #setupMenu a:hover {
-    background-color: #FFF;
+    width: 215px;
 }
 
 #setupMenu .active {
@@ -230,6 +230,7 @@ select {
     margin: 8px 0;
 }
 
+/**********************/
 
 #file_list li {
     text-decoration: none;
@@ -256,6 +257,25 @@ select {
 
 #file-upload input, button {
     display: inline;
+}
+
+/**************************/
+
+#farm_list {
+    margin-bottom: 10px;
+}
+
+#farm_list table{
+    display: block;
+    max-height: 500px;
+    width: 800px;
+    overflow-y: scroll;
+}
+
+#farm_list input, select{
+    border: none;
+    padding: 0px;
+    margin: 0px;
 }
 
 body .modal-dialog {
