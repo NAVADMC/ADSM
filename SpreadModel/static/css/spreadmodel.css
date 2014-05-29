@@ -208,7 +208,7 @@ body>section {
     background-color: darkred;
 }
 
-.btn.completed {  /*This is flipped incomplete/completed because of the way python is storing it*/
+.btn.unsaved {
     background-color: #7cb9ff;
 }
 

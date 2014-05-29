@@ -52,7 +52,7 @@ $(function(){
 
 
 var check_file_saved = function(){
-    if( $('body header form div button').hasClass('completed'))
+    if( $('body header form div button').hasClass('unsaved'))
     {
         var filename = $('body header form .filename input').attr('value')
         var dialog = new BootstrapDialog.show({
