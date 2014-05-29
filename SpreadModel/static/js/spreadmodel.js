@@ -51,7 +51,33 @@ $(function(){
 
 
 
-
+var check_file_saved = function(){
+    if( $('body header form div button').hasClass('completed'))
+    {
+        var filename = $('body header form .filename input').attr('value')
+        var dialog = new BootstrapDialog.show({
+            title: 'Unsaved Scenario Confirmation',
+            type: BootstrapDialog.TYPE_WARNING,
+            message: 'Would you like to save your changes to <strong>' + filename + '</strong> before proceeding?',
+            buttons: [
+                {
+                    label: 'Don\'t Save',
+                    cssClass: 'btn',
+                    action: function(dialog){
+                        dialog.close();
+                    }
+                },
+                {
+                    label: 'Save',
+                    cssClass: 'btn-primary',
+                    action: function(dialog){
+                        $('header form').submit();
+                    }
+                }
+            ]
+        });
+    }
+};
 
 var modelModal = {
 

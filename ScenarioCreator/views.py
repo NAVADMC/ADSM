@@ -301,6 +301,7 @@ def delete_entry(request, primary_key):
     model_name, form = get_model_name_and_form(request)
     model = form.Meta.model
     model.objects.filter(pk=primary_key).delete()
+    unsaved_changes(True)
     return redirect('/setup/%s/new/' % model_name)
 
 
@@ -351,12 +352,6 @@ def workspace_path(target):
 
 
 def file_dialog(request):
-    # try:
-    # print( "Saving ", scenario_filename())
-    # if scenario_filename():
-    #     save_scenario(request, scenario_filename())  # Save the file that's already open
-    # except ValueError:
-    #     pass  # New scenario
     db_files = glob("./workspace/*.sqlite3")
     db_files = map(lambda f: os.path.splitext(os.path.basename(f))[0], db_files)  # remove directory and extension
     context = basic_context()
@@ -369,13 +364,10 @@ def save_scenario(request):
     """Save to the existing session of a new file name if target is provided
     """
     target = request.POST['filename']
-    if target:
-        scenario_filename(target)
-        print('Copying database to', target)
-        shutil.copy(activeSession(), workspace_path(target))
-        unsaved_changes(False)  # File is now in sync
-    else:
-        raise ValueError('You need to select a file path to save first')
+    scenario_filename(target)
+    print('Copying database to', target)
+    shutil.copy(activeSession(), workspace_path(target))
+    unsaved_changes(False)  # File is now in sync
     return redirect('/setup/Scenario/1/')
 
 
@@ -455,6 +447,7 @@ def handle_file_upload(request):
         for chunk in uploaded_file.chunks():
             destination.write(chunk)
     return filename
+
 
 def upload_scenario(request):
     handle_file_upload(request)
