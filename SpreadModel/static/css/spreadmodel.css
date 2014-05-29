@@ -272,7 +272,7 @@ select {
     overflow-y: scroll;
 }
 
-#farm_list input, select{
+#farm_list input, #farm_list select{
     border: none;
     padding: 0px;
     margin: 0px;
