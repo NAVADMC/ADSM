@@ -3,8 +3,8 @@ https://pypi.python.org/pypi/pip#downloads
 
 Please note that SpreadModel is built against Python 3.3 which is incompatible with Python 2.x.
 
-pip install django  # 1.6
-pip install django-floppyforms
+pip install django==1.6
+pip install django-floppyforms==1.1
 pip install django-crispy-forms
 pip install django-extras
 pip install django-debug-toolbar
