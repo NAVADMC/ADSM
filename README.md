@@ -14,7 +14,7 @@ pip install cherrypy # local host server
 pip install cx-freeze  # only necessary for creating executables
 
 git clone https://github.com/NAVADMC/SpreadModel.git
-git submodule init
+git submodule init   # this fills out the 'production_server'
 git submodule update
 
 

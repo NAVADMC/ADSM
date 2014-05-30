@@ -287,6 +287,9 @@ select {
 th .sortControls{
     opacity:0;
 }
+.sortControls a {
+    color: darkgray;
+}
 th:hover .sortControls{
     opacity:1;
 }
