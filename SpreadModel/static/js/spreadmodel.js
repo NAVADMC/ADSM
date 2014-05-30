@@ -49,14 +49,6 @@ $(function(){
         });
     })
 
-    $('#farm_list thead th').click(function(){
-        var sort_by = $(this).contents().text().toLowerCase().replace(' ', '_')
-        if(window.location.getParameter('sort_by') == sort_by){
-            sort_by = '-' + sort_by
-        }
-        console.log(sort_by)
-        window.location = '/setup/Population/?sort_by=' + sort_by
-    })
 })
 
 
