@@ -14,8 +14,6 @@ from django.forms.models import modelformset_factory
 from django.forms.models import inlineformset_factory
 
 
-edge_cases = ['RelationalPoint']
-
 def spaces_for_camel_case(text):
     return re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
 
@@ -116,10 +114,7 @@ def disease_spread(request):
     return render(request, 'ScenarioCreator/FormSet.html', context)
 
 
-def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request):
-    """FormSet is pre-populated with existing assignments and it detects and fills in missing
-    assignments with a blank form with production type filled in."""
-
+def save_formset_failed(MyFormSet, TargetModel, context, request):
     try:
         initialized_formset = MyFormSet(request.POST, request.FILES, queryset=TargetModel.objects.all())
         if initialized_formset.is_valid():
@@ -128,13 +123,24 @@ def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, miss
             unsaved_changes(True)
             context['formset'] = initialized_formset
             return False
+        return True
     except ValidationError:
+        return True
+
+
+def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request):
+    """FormSet is pre-populated with existing assignments and it detects and fills in missing
+    assignments with a blank form with production type filled in."""
+
+    if not save_formset_failed(MyFormSet, TargetModel, context, request):
+        return False
+    else:
         forms = MyFormSet(queryset=TargetModel.objects.all())
         for index, pt in enumerate(missing):
             index += TargetModel.objects.count()
             forms[index].fields['production_type'].initial = pt.id
         context['formset'] = forms
-    return True
+        return True
 
 
 def assign_protocols(request):
@@ -467,8 +473,10 @@ def upload_population(request):
 def population(request):
     """"See also Pagination https://docs.djangoproject.com/en/dev/topics/pagination/"""
     context = basic_context()
+    FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated)
+    if not save_formset_failed(FarmSet, Unit, context, request):
+        return redirect(request.path)
     if Population.objects.filter(id=1).exists():
-        FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated)
         initialized_formset = FarmSet(queryset=Unit.objects.all().order_by('initial_state')[:100])
         context['formset'] = initialized_formset
     return render(request, 'ScenarioCreator/Population.html', context)
