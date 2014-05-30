@@ -114,7 +114,7 @@ def disease_spread(request):
     return render(request, 'ScenarioCreator/FormSet.html', context)
 
 
-def save_formset_failed(MyFormSet, TargetModel, context, request):
+def save_formset_succeeded(MyFormSet, TargetModel, context, request):
     try:
         initialized_formset = MyFormSet(request.POST, request.FILES, queryset=TargetModel.objects.all())
         if initialized_formset.is_valid():
@@ -122,52 +122,44 @@ def save_formset_failed(MyFormSet, TargetModel, context, request):
             print(instances)
             unsaved_changes(True)
             context['formset'] = initialized_formset
-            return False
-        return True
+            return True
+        return False
     except ValidationError:
-        return True
+        return False
 
 
 def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request):
     """FormSet is pre-populated with existing assignments and it detects and fills in missing
     assignments with a blank form with production type filled in."""
-
-    if not save_formset_failed(MyFormSet, TargetModel, context, request):
-        return False
+    if save_formset_succeeded(MyFormSet, TargetModel, context, request):
+        return redirect(request.path)
     else:
         forms = MyFormSet(queryset=TargetModel.objects.all())
         for index, pt in enumerate(missing):
             index += TargetModel.objects.count()
             forms[index].fields['production_type'].initial = pt.id
         context['formset'] = forms
-        return True
+        return render(request, 'ScenarioCreator/FormSet.html', context)
 
 
 def assign_protocols(request):
     context = basic_context()
     missing = ProductionType.objects.filter(protocolassignment__isnull=True)
     ProtocolSet = modelformset_factory(ProtocolAssignment, extra=len(missing), form=ProtocolAssignmentForm)
-    if populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request):
-        context['title'] = 'Assign a Control Protocol to each Production Type'
-        return render(request, 'ScenarioCreator/FormSet.html', context)
-    else:
-        return redirect(request.path)
+    context['title'] = 'Assign a Control Protocol to each Production Type'
+    return populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request)
 
 
 def assign_progressions(request):
     """FormSet is pre-populated with existing assignments and it detects and fills in missing
     assignments with a blank form with production type filled in."""
-
     context = basic_context()
     missing = ProductionType.objects.filter(diseaseprogressionassignment__isnull=True)
     ProgressionSet = modelformset_factory(DiseaseProgressionAssignment,
-                                     extra=len(missing),
-                                     form=DiseaseProgressionAssignmentForm)
-    if populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request):
-        context['title'] = 'Set what Progression each Production Type has with the Disease'
-        return render(request, 'ScenarioCreator/FormSet.html', context)
-    else:
-        return redirect(request.path)
+                                          extra=len(missing),
+                                          form=DiseaseProgressionAssignmentForm)
+    context['title'] = 'Set what Progression each Production Type has with the Disease'
+    return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request)
 
 
 def initialize_relational_form(context, primary_key, request):
@@ -474,7 +466,7 @@ def population(request):
     """"See also Pagination https://docs.djangoproject.com/en/dev/topics/pagination/"""
     context = basic_context()
     FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated)
-    if not save_formset_failed(FarmSet, Unit, context, request):
+    if save_formset_succeeded(FarmSet, Unit, context, request):
         return redirect(request.path)
     if Population.objects.filter(id=1).exists():
         initialized_formset = FarmSet(queryset=Unit.objects.all().order_by('initial_state')[:100])
