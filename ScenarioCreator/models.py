@@ -101,21 +101,28 @@ class Population(models.Model):
     def import_population(self):
         if not self.source_file:
             return
+
+        from Settings.models import SmSession
+        session = SmSession.objects.get(pk=1)
+
         start_time = time.process_time()  # perf_counter() would also work
-        print("Parsing ", self.source_file)
+        session.set_population_upload_status("Parsing")
+        # print("Parsing ", self.source_file)
         p = ScenarioCreator.parser.PopulationParser(self.source_file)
-        print("Parsing to Dictionary")
+        # print("Parsing to Dictionary")
         data = p.parse_to_dictionary()
-        print("Creating objects")
+        session.set_population_upload_status("Creating objects")
         total = len(data)
-        django_objects = []
+
+        unit_objects = []
         for index, entry_dict in enumerate(data):
             entry_dict['_population'] = self
-            django_objects.append(Unit.create(**entry_dict))
-            if index % 4000 == 0:  # random.randrange(1001) == 1000:
-                progress = index  # len(django_objects)
-                print("Creating", progress, "objects:", "{:.1%}".format(progress / total))
-        Unit.objects.bulk_create(django_objects)
+            unit_objects.append(Unit.create(**entry_dict))
+            if index % 2000 == 0:
+                progress = index
+                session.set_population_upload_status("Creating %s objects:" % total, (progress / total))
+        session.set_population_upload_status("Processing file", 100)
+        Unit.objects.bulk_create(unit_objects)
         execution_time = (time.process_time() - start_time)
         print("Done creating", '{:,}'.format(len(data)), "Units took %i seconds" % (execution_time))
 
