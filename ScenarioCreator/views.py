@@ -469,7 +469,8 @@ def population(request):
     if save_formset_succeeded(FarmSet, Unit, context, request):
         return redirect(request.path)
     if Population.objects.filter(id=1).exists():
-        initialized_formset = FarmSet(queryset=Unit.objects.all().order_by('initial_state')[:100])
+        sort_type = request.GET.get('sort_by', 'initial_state')
+        initialized_formset = FarmSet(queryset=Unit.objects.all().order_by(sort_type)[:100])
         context['formset'] = initialized_formset
     return render(request, 'ScenarioCreator/Population.html', context)
 
