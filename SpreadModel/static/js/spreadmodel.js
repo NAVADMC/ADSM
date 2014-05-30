@@ -1,3 +1,4 @@
+
 $(function(){
     $('body').on('click', '.btn-add', function(){
         var $selector = $($(this).attr('rel'));
@@ -50,6 +51,9 @@ $(function(){
 
     $('#farm_list thead th').click(function(){
         var sort_by = $(this).contents().text().toLowerCase().replace(' ', '_')
+        if(window.location.getParameter('sort_by') == sort_by){
+            sort_by = '-' + sort_by
+        }
         console.log(sort_by)
         window.location = '/setup/Population/?sort_by=' + sort_by
     })
@@ -83,7 +87,8 @@ var check_file_saved = function(){
             ]
         });
     }
-};
+}
+
 
 var modelModal = {
 
@@ -157,3 +162,29 @@ var modelModal = {
                 </div>')
 }
 
+//This adds the getParameter utility to the window.location prototype
+if (!window.location.getParameter ) {
+    window.location.getParameter = function(key) {
+        function parseParams() {
+            var params = {},
+                e,
+                a = /\+/g,  // Regex for replacing addition symbol with a space
+                r = /([^&=]+)=?([^&]*)/g,
+                d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
+                q = window.location.search.substring(1);
+
+            while (e = r.exec(q))
+                if (typeof params[d(e[1])] == 'array') params[d(e[1])].push(d(e[2]))
+                else if (params[d(e[1])]) params[d(e[1])] = [params[d(e[1])],d(e[2])]
+                else params[d(e[1])] = d(e[2]);
+
+            return params;
+        }
+
+        if (!this.queryStringParams)
+            this.queryStringParams = parseParams();
+
+        if (key) return this.queryStringParams[key];
+        else return this.queryStringParams;
+    };
+}
