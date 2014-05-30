@@ -107,6 +107,8 @@ ZON_zone_list_t *
 ZON_new_zone_list (unsigned int membership_length)
 {
   ZON_zone_list_t *zones;
+  ZON_zone_t *background_zone;
+  ZON_zone_fragment_t *fragment;
 
   zones = g_new (ZON_zone_list_t, 1);
   zones->list = g_ptr_array_new ();
@@ -117,6 +119,15 @@ ZON_new_zone_list (unsigned int membership_length)
     zones->membership = g_new0 (ZON_zone_fragment_t *, membership_length);
   zones->membership_length = membership_length;
   zones->pending_foci = g_queue_new ();
+
+  /* Pre-create a "background" zone. */
+  background_zone = ZON_new_zone ("Background", 0.0);
+  /* This zone contains a special fragment that doesn't map to a polygon/
+   * contour. */
+  fragment = ZON_new_fragment (background_zone, -1);
+   g_queue_push_tail (background_zone->fragments, fragment);
+  g_ptr_array_add (zones->list, background_zone);
+
   return zones;
 }
 
@@ -167,95 +178,22 @@ ptr_array_insert (GPtrArray * array, guint i, gpointer data)
 unsigned int
 ZON_zone_list_append (ZON_zone_list_t * zones, ZON_zone_t * zone)
 {
-  int i, j;
-  gboolean has_background_zone;
-  unsigned int nzones;
-  ZON_zone_t *existing_zone;
-  ZON_zone_fragment_t *fragment;
+  int index;
 
 #if DEBUG
   g_debug ("----- ENTER ZON_zone_list_append");
 #endif
 
-  nzones = ZON_zone_list_length (zones);
-  has_background_zone = (nzones > 0);
+  /* The zone list automatically contains a "background" zone in the last
+   * position. Append in the position before that. */
+  index = ZON_zone_list_length (zones) - 1;
+  ptr_array_insert (zones->list, index, zone);
 
-  if (zone->radius < EPSILON && has_background_zone)
-    {
-      /* This zone claims to be the "background" zone.  Since a background
-       * zone (with no name) is created automatically before any zone
-       * parameters are loaded, use this zone's name if the background
-       * zone's name is currently blank. */
-      existing_zone = ZON_zone_list_get (zones, nzones - 1);
-      if (g_utf8_strlen (existing_zone->name, -1) == 0)
-        {
-          #if DEBUG
-            g_debug ("setting name of background zone to \"%s\"", zone->name);
-          #endif
-          g_free (existing_zone->name);
-          existing_zone->name = zone->name;
-        }
-      else
-        {
-          #if DEBUG
-            g_debug ("there is already a background zone named \"%s\", ignoring zone \"%s\"",
-                     existing_zone->name, zone->name);
-          #endif
-          ;
-        }
-      i = nzones - 1;
-      goto end;
-    }
-
-  /* If we are adding the background zone, create a special fragment that
-   * doesn't map to a polygon/contour. */
-  if (zone->radius < EPSILON)
-    {
-      fragment = ZON_new_fragment (zone, -1);
-      g_queue_push_tail (zone->fragments, fragment);
-    }
-
-  /* If the zone's surveillance level is -1, meaning that the parameter was
-   * omitted, set the level as one greater (a priority one lower) than any 
-   * existing zone. */
-  if (zone->level == -1)
-    {
-      if (nzones > 1)
-        zone->level = ZON_zone_list_get (zones, nzones - 2)->level + 1;
-      else
-        zone->level = 1;
-    }
-
-  /* Find the correct spot to insert the zone in the zone list. */
-  for (i = 0; i < nzones; i++)
-    {
-      existing_zone = ZON_zone_list_get (zones, i);
-      if (existing_zone->level == zone->level)
-        {
-          #if DEBUG
-            g_debug ("zones \"%s\" and \"%s\" have the same level (%i)",
-                     existing_zone->name, zone->name, zone->level);
-          #endif
-          for (j = i; j < nzones; j++)
-            ZON_zone_list_get (zones, j)->level++;
-          break;
-        }
-      else if (existing_zone->level > zone->level)
-        break;
-    }
-
-  #if DEBUG
-    g_debug ("new zone \"%s\" will be inserted into list at position %i", zone->name, i);
-  #endif
-
-  ptr_array_insert (zones->list, i, zone);
-
-end:
 #if DEBUG
   g_debug ("----- EXIT ZON_zone_list_append");
 #endif
 
-  return i;
+  return index;
 }
 
 
@@ -487,14 +425,11 @@ ZON_zone_list_get_background (ZON_zone_list_t * zones)
  *
  * @param name a text label for the zone.  The name is copied and can be freed
  *   after calling this function.
- * @param level the priority level of the zone.  Must be >= 1.  Lower numbers
- *   will probably correspond to a smaller radius and a higher surveillance
- *   level.
  * @param radius the radius of the circle drawn around each new focus.
  * @return a pointer to a newly-created, initialized ZON_zone_t structure.
  */
 ZON_zone_t *
-ZON_new_zone (char *name, int level, double radius)
+ZON_new_zone (char *name, double radius)
 {
   ZON_zone_t *z;
 
@@ -504,7 +439,7 @@ ZON_new_zone (char *name, int level, double radius)
 
   z = g_new (ZON_zone_t, 1);
   z->name = g_strdup (name);
-  z->level = level;
+  z->level = -1; /* Will be filled in later when added to a zone list. */
   z->radius = radius;
   z->radius_sq = radius * radius;
   z->epsilon_sq = (radius + EPSILON) * (radius + EPSILON) - z->radius_sq;

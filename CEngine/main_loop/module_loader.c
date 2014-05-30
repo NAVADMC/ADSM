@@ -291,6 +291,8 @@ adsm_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                        destruction_monitor_new (parameter_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
                        destruction_list_monitor_new (parameter_db, units, projection, zones));
+      g_ptr_array_add (tmp_models,
+                       zone_monitor_new (parameter_db, units, projection, zones));
       if (include_detection)
         {
           g_ptr_array_add (tmp_models,
@@ -307,11 +309,6 @@ adsm_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
         {
           g_ptr_array_add (tmp_models,
                            test_monitor_new (parameter_db, units, projection, zones));
-        }
-      if (include_zones)
-        {
-          g_ptr_array_add (tmp_models,
-                           zone_monitor_new (parameter_db, units, projection, zones));
         }
       if (include_vaccination)
         {
