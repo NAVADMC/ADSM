@@ -453,13 +453,20 @@ def upload_scenario(request):
 
 
 def upload_population(request):
+    from Settings.models import SmSession
+    session = SmSession.objects.get(pk=1)
+    if 'GET' in request.method:
+        json = '{"status": "%s", "percent": "%s"}' % (session.population_upload_status, session.population_upload_percent*100)
+        return HttpResponse(json, mimetype="application/json")
+
+    session.set_population_upload_status("Processing file")
     filename = handle_file_upload(request)  # now we know the file is in the workspace
     model = Population(source_file=filename)
-    # wait for file upload
     model.save()
     unsaved_changes(True)
     # wait for Population parsing (up to 5 minutes)
-    return redirect('/setup/Population/')
+    session.reset_population_upload_status()
+    return HttpResponse('{"status": "complete", "redirect": "/setup/Population/"}', mimetype="application/json")
 
 
 def population(request):
