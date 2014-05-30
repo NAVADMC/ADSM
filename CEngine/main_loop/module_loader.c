@@ -272,7 +272,7 @@ adsm_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
                        resources_and_implementation_of_controls_model_new (parameter_db, units, projection, zones));
     }
   
-  if (PAR_get_boolean (parameter_db, "SELECT daily_states_filename IS NOT NULL FROM ScenarioCreator_outputsettings"))
+  if (PAR_get_boolean (parameter_db, "SELECT daily_states_filename IS NOT NULL AND daily_states_filename != '' FROM ScenarioCreator_outputsettings"))
     {
       g_ptr_array_add (tmp_models,
                        state_table_writer_new (parameter_db, units, projection, zones));
