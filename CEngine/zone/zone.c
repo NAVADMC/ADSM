@@ -124,10 +124,10 @@ ZON_new_zone_list (unsigned int membership_length)
 
 /**
  * A function to insert a pointer at an arbitrary position in a GLib Pointer
- * Array, since GLib itself doesn't have such a function.
- */
-void
-g_ptr_array_insert (GPtrArray * array, guint i, gpointer data)
+ * Array. GLib 2.40 and higher has such a function (g_ptr_array_insert) but the
+ * highest version available for Windows as of this comment is 2.34. */
+static void
+ptr_array_insert (GPtrArray * array, guint i, gpointer data)
 {
   guint old_len;
   guint j;
@@ -248,7 +248,7 @@ ZON_zone_list_append (ZON_zone_list_t * zones, ZON_zone_t * zone)
     g_debug ("new zone \"%s\" will be inserted into list at position %i", zone->name, i);
   #endif
 
-  g_ptr_array_insert (zones->list, i, zone);
+  ptr_array_insert (zones->list, i, zone);
 
 end:
 #if DEBUG
