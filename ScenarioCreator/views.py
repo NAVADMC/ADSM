@@ -471,13 +471,15 @@ def upload_population(request):
 
 def population(request):
     """"See also Pagination https://docs.djangoproject.com/en/dev/topics/pagination/"""
+    from django.db.models import Q
     context = basic_context()
     FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated)
     if save_formset_succeeded(FarmSet, Unit, context, request):
         return redirect(request.path)
     if Population.objects.filter(id=1).exists():
         sort_type = request.GET.get('sort_by', 'initial_state')
-        initialized_formset = FarmSet(queryset=Unit.objects.all().order_by(sort_type)[:100])
+        # request.GET.getlist('paramname')
+        initialized_formset = FarmSet(queryset=Unit.objects.filter(Q(production_type__name='B') & Q(longitude__lte=-8.2)).order_by(sort_type)[:100])
         context['formset'] = initialized_formset
     return render(request, 'ScenarioCreator/Population.html', context)
 

@@ -171,7 +171,7 @@ class Unit(models.Model):
 
     @classmethod
     def create(cls, **kwargs):
-        for key in kwargs:  #Convert values into their proper type
+        for key in kwargs:  # Convert values into their proper type
             if key == 'production_type':
                 kwargs[key] = ProductionType.objects.get_or_create(name=kwargs[key])[0]
             elif key in ('latitude', 'longitude'):
@@ -182,6 +182,26 @@ class Unit(models.Model):
                 kwargs[key] = choice_char_from_value(kwargs[key], Unit._meta.get_field_by_name('initial_state')[0]._choices) or 'S'
         unit = cls(**kwargs)
         return unit
+
+    @classmethod
+    def filter_by(cls, params):
+        queryset = cls.objects.all().filter(Active=True)
+
+        keys = ['latitude__gte', 'latitude__eq', 'latitude__lte', 'longitude__gte', 'longitude__eq',
+                'longitude__lte', 'initial_size__gte', 'initial_size__eq', 'initial_size__lte',  # 3 permutations for each number field
+                'production_type__name', 'initial_state']
+        for key in params:
+            if key not in keys:
+                raise KeyError("Unexpected key", key)
+            else:
+                params[key] = ''.join(c for c in params[key] if c.isdigit() or c == '.')
+
+        for x in ['production_type__name', 'initial_state']:
+            if x in params:
+                value = params.pop(x)
+                arg_wrapper = {x: value}
+                queryset = queryset.filter(**arg_wrapper)
+        return queryset.filter(**params).distinct()
 
     def __str__(self):
         return "Unit(%s: (%s, %s)" % (self.production_type, self.latitude, self.longitude)
