@@ -469,6 +469,17 @@ def upload_population(request):
     return HttpResponse('{"status": "complete", "redirect": "/setup/Population/"}', mimetype="application/json")
 
 
+def filtering_params(request):
+    params = {}
+    keys = ['latitude__gte', 'latitude__eq', 'latitude__lte', 'longitude__gte', 'longitude__eq',
+            'longitude__lte', 'initial_size__gte', 'initial_size__eq', 'initial_size__lte',  # 3 permutations for each number field
+            'production_type__name', 'initial_state']
+    for key in keys:  # loops through params and stacks filters in an AND fashion
+        if key in request.GET:
+            params[key] = request.GET.get(key)
+    return params
+
+
 def population(request):
     """"See also Pagination https://docs.djangoproject.com/en/dev/topics/pagination/"""
     from django.db.models import Q
@@ -478,8 +489,11 @@ def population(request):
         return redirect(request.path)
     if Population.objects.filter(id=1).exists():
         sort_type = request.GET.get('sort_by', 'initial_state')
-        # request.GET.getlist('paramname')
-        initialized_formset = FarmSet(queryset=Unit.objects.filter(Q(production_type__name='B') & Q(longitude__lte=-8.2)).order_by(sort_type)[:100])
+        query_filter = Q()
+        params = filtering_params(request)
+        for key, value in params.items():
+            query_filter = query_filter & Q(**{key: value})
+        initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:100])
         context['formset'] = initialized_formset
     return render(request, 'ScenarioCreator/Population.html', context)
 
