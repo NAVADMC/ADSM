@@ -181,3 +181,37 @@ if (!window.location.getParameter ) {
         else return this.queryStringParams;
     };
 }
+
+/* This watches for the first column select which determines what the Farms are being filtered by.
+It inserts a new row from the example templates with the correct value and input types.  Values of
+these selects are used below to construct a query URL. */
+$(document).on('change', '#farm_filter td:first-child select', function(){
+    if( $(this).val() ){
+        $(this).parents('tr').before($('#farm_filter_templates #' + $(this).val()).clone());
+        $('#farm_filter option[value=' + $(this).val() +']').attr("disabled","disabled");
+    }
+
+    if( !$(this).parents('tr').is(':last-child') ){
+        $(this).parents('tr').remove();
+        $('#farm_filter option[value=' + $(this).val() +']').removeAttr("disabled");
+    }
+    else{
+        $(this).val('')
+    }
+});
+
+/*Construct a query URL based on the value of the filter selects*/
+$(document).on('change', '#farm_filter select, #farm_filter input', function(){
+    //build URL
+    var filters = $('#farm_filter tr').map(function(){
+        if($(this).attr('id')){
+            var middle = $(this).find('td:nth-child(2) select').length ? $(this).find('td:nth-child(2) select').val(): '';
+            return $(this).attr('id') + middle + '=' + $(this).find('td:nth-child(3) input, td:nth-child(3) select').val();
+        }
+    });
+    console.log('?' + filters.get().join('&') + ' #farm_list')
+    //get it with AJAX
+    $('#farm_list').parent('form').load('?' + filters.get().join('&') + ' #farm_list' );
+    //insert new HTML
+
+});

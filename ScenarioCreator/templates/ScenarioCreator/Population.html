@@ -20,7 +20,7 @@
     <table id="farm_filter_templates" hidden>
         <tr id="production_type__name">
             <td><select name="filter1">
-                <option value="None">----------</option>
+                <option value="">----------</option>
                 <option value="production_type__name" selected>Production Type</option>
                 <option value="latitude">Latitude</option>
                 <option value="longitude">Longitude</option>
@@ -36,7 +36,7 @@
         </tr>
         <tr id="initial_state">
             <td><select name="filter1">
-                <option value="None">----------</option>
+                <option value="">----------</option>
                 <option value="production_type__name">Production Type</option>
                 <option value="latitude">Latitude</option>
                 <option value="longitude">Longitude</option>
@@ -53,7 +53,7 @@
 
         <tr id="initial_size">
             <td><select name="filter1">
-                <option value="None">----------</option>
+                <option value="">----------</option>
                 <option value="production_type__name">Production Type</option>
                 <option value="latitude">Latitude</option>
                 <option value="longitude">Longitude</option>
@@ -69,7 +69,7 @@
 
         <tr id="longitude">
             <td><select name="filter1">
-                <option value="None">----------</option>
+                <option value="">----------</option>
                 <option value="production_type__name">Production Type</option>
                 <option value="latitude">Latitude</option>
                 <option value="longitude" selected>Longitude</option>
@@ -84,7 +84,7 @@
         </tr>
         <tr id="latitude">
             <td><select name="filter1">
-                <option value="None">----------</option>
+                <option value="">----------</option>
                 <option value="production_type__name">Production Type</option>
                 <option value="latitude" selected>Latitude</option>
                 <option value="longitude">Longitude</option>
@@ -101,7 +101,7 @@
 
         <tr>
             <td><select name="filter1">
-                <option value="None">----------</option>
+                <option value="">----------</option>
                 <option value="production_type__name">Production Type</option>
                 <option value="latitude">Latitude</option>
                 <option value="longitude">Longitude</option>
@@ -112,7 +112,7 @@
     <table id="farm_filter"><tbody>
         <tr>
             <td><select name="filter1">
-                <option value="None">----------</option>
+                <option value="">----------</option>
                 <option value="production_type__name">Production Type</option>
                 <option value="latitude">Latitude</option>
                 <option value="longitude">Longitude</option>
@@ -122,9 +122,7 @@
     </tbody></table>
 
 
-    <form method="post">
     <form method="post" action="/setup/UploadPopulation/" enctype="multipart/form-data">
-    {#    {% crispy form %}#}
         <div id="farm_list">  {#So it can be targetted by CSS #}
             {% include "ScenarioCreator/EmbeddedFormset.html" %}
         </div>
