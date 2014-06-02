@@ -183,20 +183,6 @@ class Unit(models.Model):
         unit = cls(**kwargs)
         return unit
 
-    # @classmethod
-    # def filter_by(cls, params):
-    #     queryset = cls.objects.all()
-    #     keys = ['latitude__gte', 'latitude__eq', 'latitude__lte', 'longitude__gte', 'longitude__eq',
-    #             'longitude__lte', 'initial_size__gte', 'initial_size__eq', 'initial_size__lte',  # 3 permutations for each number field
-    #             'production_type__name', 'initial_state']
-    #     for x in keys:  # loops through params and stacks filters in an AND fashion
-    #         if x in params:
-    #             value = params.pop(x)
-    #             arg_wrapper = {x: value}  # to turn x from a string value into a python logical argument
-    #             queryset = queryset.filter(**arg_wrapper)
-    #     # return queryset.filter(**params).distinct()
-    #     return queryset
-
     def __str__(self):
         return "Unit(%s: (%s, %s)" % (self.production_type, self.latitude, self.longitude)
 
