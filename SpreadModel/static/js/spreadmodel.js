@@ -98,11 +98,12 @@ var modelModal = {
 
     ajax_success: function(modal, selectInput){
         return function(data) {
-            console.log('ajax_success', modal, selectInput, data)
-            selectInput.find('option').removeAttr('selected');
-            selectInput.append($('<option value="'+data['pk']+'" selected>'+data['title'] + '</option>'));// update original select input
-            modal.modal('hide');// close modal
-        }
+            console.log('ajax_success', modal, selectInput, data);
+            $('select[data-new-item-url="' + selectInput.attr('data-new-item-url') + '"]')
+                .append($('<option value="'+data['pk']+'">'+data['title'] + '</option>')); // Add option to all similar selects
+            selectInput.val(data['pk']); // select option for select that was originally clicked
+            modal.modal('hide');
+        };
     },
 
     validation_error: function(modal){
