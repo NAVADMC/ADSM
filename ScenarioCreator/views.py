@@ -11,6 +11,7 @@ import re
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from Settings.models import SmSession
 from django.forms.models import modelformset_factory
+from django.db.models import Q
 from django.forms.models import inlineformset_factory
 
 
@@ -470,19 +471,32 @@ def upload_population(request):
 
 
 def filtering_params(request):
+    """Collects the list of parameters to filter by.  Because of the way this is setup:
+    1) Only keys mentioned in this list will be used (security, functionality).
+    2) Only one filter for each choice key can be used (e.g. only one production_type__name)"""
     params = {}
     keys = ['latitude__gte', 'latitude__eq', 'latitude__lte', 'longitude__gte', 'longitude__eq',
             'longitude__lte', 'initial_size__gte', 'initial_size__eq', 'initial_size__lte',  # 3 permutations for each number field
             'production_type__name', 'initial_state']
-    for key in keys:  # loops through params and stacks filters in an AND fashion
+    for key in keys:
         if key in request.GET:
             params[key] = request.GET.get(key)
     return params
 
 
+def filter_info(request, params):
+    """Provides the information necessary for Javascript to fully construct a set of filters for Population"""
+    info = {}
+    # each select option
+    info['select_fields'] = {'production_type__name': [x.name for x in ProductionType.objects.all()],
+                             'initial_state': Unit.initial_state_choices}
+    info['numeric_fields'] = ["latitude","longitude", "initial_size"]
+    info['remaining_filters'] = [x for x in info['select_fields'] if x not in params.keys()] #TODO: add numeric_fields
+    return info
+
+
 def population(request):
     """"See also Pagination https://docs.djangoproject.com/en/dev/topics/pagination/"""
-    from django.db.models import Q
     context = basic_context()
     FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated)
     if save_formset_succeeded(FarmSet, Unit, context, request):
@@ -491,10 +505,11 @@ def population(request):
         sort_type = request.GET.get('sort_by', 'initial_state')
         query_filter = Q()
         params = filtering_params(request)
-        for key, value in params.items():
+        for key, value in params.items():  # loops through params and stacks filters in an AND fashion
             query_filter = query_filter & Q(**{key: value})
         initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:100])
         context['formset'] = initialized_formset
+        context['filter_info'] = filter_info(request, params)
     return render(request, 'ScenarioCreator/Population.html', context)
 
 

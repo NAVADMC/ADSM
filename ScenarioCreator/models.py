@@ -135,15 +135,16 @@ class Unit(models.Model):
         help_text='The latitude used to georeference this unit.', )
     longitude = LongitudeField(
         help_text='The longitude used to georeference this unit.', )
+    initial_state_choices = (('S', 'Susceptible'),
+               ('L', 'Latent'),
+               ('B', 'Infectious Subclinical'),
+               ('C', 'Infectious Clinical'),
+               ('N', 'Naturally Immune'),
+               ('V', 'Vaccine Immune'),
+               ('D', 'Destroyed'))
     initial_state = models.CharField(max_length=255, default='S',
                                      help_text='Code indicating the actual disease state of the unit at the beginning of the simulation.',
-                                     choices=(('S', 'Susceptible'),
-                                              ('L', 'Latent'),
-                                              ('B', 'Infectious Subclinical'),
-                                              ('C', 'Infectious Clinical'),
-                                              ('N', 'Naturally Immune'),
-                                              ('V', 'Vaccine Immune'),
-                                              ('D', 'Destroyed')))
+                                     choices=initial_state_choices)
     days_in_initial_state = models.IntegerField(blank=True, null=True,
         help_text='The number of days that the unit will remain in its initial state unless preempted by other events.', )
     days_left_in_initial_state = models.IntegerField(blank=True, null=True,
