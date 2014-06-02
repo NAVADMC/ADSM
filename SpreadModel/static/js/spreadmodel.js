@@ -1,10 +1,15 @@
 
 $(function(){
-    $('body').on('click', '.btn-add', function(){
-        var $selector = $($(this).attr('rel'));
-        var model = $selector.attr('name'); // field name
-        modelModal.show(model, $selector);
-    })
+    $(document).on('mousedown', '[data-new-item-url]', function(e){
+            $(this).prop('last-selected', $(this).val()); // cache old selection
+    });
+    $(document).on('change', '[data-new-item-url]', function(e){
+        if ($(this).val() == "data-add-new") {
+            e.preventDefault();
+            $(this).val($(this).prop('last-selected')); //undo selection
+            modelModal.show($(this));
+        }
+    });
 
     $('[data-toggle-controller]').each(function(){
         var controller = '[name=' + $(this).attr('data-toggle-controller') + ']'
@@ -99,8 +104,8 @@ var modelModal = {
     ajax_success: function(modal, selectInput){
         return function(data) {
             console.log('ajax_success', modal, selectInput, data);
-            $('select[data-new-item-url="' + selectInput.attr('data-new-item-url') + '"]')
-                .append($('<option value="'+data['pk']+'">'+data['title'] + '</option>')); // Add option to all similar selects
+            $('select[data-new-item-url="' + selectInput.attr('data-new-item-url') + '"] [value="data-add-new"]')
+                .before($('<option value="'+data['pk']+'">'+data['title'] + '</option>')); // Add option to all similar selects
             selectInput.val(data['pk']); // select option for select that was originally clicked
             modal.modal('hide');
         };
@@ -115,16 +120,15 @@ var modelModal = {
         }
     },
 
-    show: function(model, selectInput) {
+    show: function(selectInput) {
         var self = this;
         var modal = this.template.clone();
-        modal.attr('id', model+'_modal');
+        modal.attr('id', selectInput.attr('name') + '_modal');
         var url = selectInput.attr('data-new-item-url');
         $.get(url, function(newForm){
             var $newForm = $($.parseHTML(newForm));
 
             modal.find('.modal-title').html($newForm.find('#title').html());
-            console.log($newForm)
             var $form = $newForm.not('header, nav').find('form');
             $form.find('.buttonHolder').remove();
             modal.find('.modal-body').html($form);
@@ -134,7 +138,7 @@ var modelModal = {
             });
 
             modal.modal('show');
-        })
+        });
 
         },
     template: $('<div class="modal fade">\
