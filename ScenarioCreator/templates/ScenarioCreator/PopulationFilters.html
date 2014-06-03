@@ -1,0 +1,102 @@
+    <h4 class="pull-left">Filter By: &nbsp</h4>
+    <table id="farm_filter_templates" hidden>
+        <tr id="production_type__name">
+            <td><select>
+                <option value="">----------</option>
+                <option value="production_type__name" selected>Production Type</option>
+                <option value="latitude">Latitude</option>
+                <option value="longitude">Longitude</option>
+                <option value="initial_state">Initial State</option>
+                <option value="initial_size">Initial Size</option>
+            </select></td>
+            <td> = </td>
+            <td><select name="production_type__name">
+                {% for option in filter_info.select_fields.production_type__name %}
+	                <option value="{{ option }}">{{ option }}</option>
+                {% endfor %}
+                </select></td>
+        </tr>
+        <tr id="initial_state">
+            <td><select>
+                <option value="">----------</option>
+                <option value="production_type__name">Production Type</option>
+                <option value="latitude">Latitude</option>
+                <option value="longitude">Longitude</option>
+                <option value="initial_state" selected>Initial State</option>
+                <option value="initial_size">Initial Size</option>
+            </select></td>
+            <td> = </td>
+            <td><select name="state">
+                {% for option in filter_info.select_fields.initial_state %}
+	                <option value="{{ option.0 }}">{{ option.1 }}</option>
+                {% endfor %}
+                </select></td>
+        </tr>
+
+        <tr id="initial_size">
+            <td><select>
+                <option value="">----------</option>
+                <option value="production_type__name">Production Type</option>
+                <option value="latitude">Latitude</option>
+                <option value="longitude">Longitude</option>
+                <option value="initial_state">Initial State</option>
+                <option value="initial_size" selected>Initial Size</option>
+            </select></td>
+            <td><strong>Min:&nbsp;</strong></td>
+            <td><input step="any" type="number"></td>
+            <td><strong>Max:&nbsp;</strong></td>
+            <td><input step="any" type="number"></td>
+        </tr>
+
+        <tr id="longitude">
+            <td><select>
+                <option value="">----------</option>
+                <option value="production_type__name">Production Type</option>
+                <option value="latitude">Latitude</option>
+                <option value="longitude" selected>Longitude</option>
+                <option value="initial_state">Initial State</option>
+                <option value="initial_size" >Initial Size</option>
+            </select></td>
+            <td><strong>Min:&nbsp;</strong></td>
+            <td><input step="any" type="number"></td>
+            <td><strong>Max:&nbsp;</strong></td>
+            <td><input step="any" type="number"></td>
+        </tr>
+        <tr id="latitude">
+            <td><select>
+                <option value="">----------</option>
+                <option value="production_type__name">Production Type</option>
+                <option value="latitude" selected>Latitude</option>
+                <option value="longitude">Longitude</option>
+                <option value="initial_state">Initial State</option>
+                <option value="initial_size" >Initial Size</option>
+            </select></td>
+            <td><strong>Min:&nbsp;</strong></td>
+            <td><input step="any" type="number"></td>
+            <td><strong>Max:&nbsp;</strong></td>
+            <td><input step="any" type="number"></td>
+        </tr>
+
+
+        <tr>
+            <td><select>
+                <option value="">----------</option>
+                <option value="production_type__name">Production Type</option>
+                <option value="latitude">Latitude</option>
+                <option value="longitude">Longitude</option>
+                <option value="initial_state">Initial State</option>
+                <option value="initial_size">Initial Size</option>
+            </select></td></tr>
+    </table>
+    <table id="farm_filter"><tbody>
+        <tr>
+            <td><select name="filter1">
+                <option value="">----------</option>
+                <option value="production_type__name">Production Type</option>
+                <option value="latitude">Latitude</option>
+                <option value="longitude">Longitude</option>
+                <option value="initial_state">Initial State</option>
+                <option value="initial_size">Initial Size</option>
+            </select></td></tr>
+    </tbody></table>
+

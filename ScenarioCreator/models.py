@@ -101,21 +101,28 @@ class Population(models.Model):
     def import_population(self):
         if not self.source_file:
             return
+
+        from Settings.models import SmSession
+        session = SmSession.objects.get(pk=1)
+
         start_time = time.process_time()  # perf_counter() would also work
-        print("Parsing ", self.source_file)
+        session.set_population_upload_status("Parsing")
+        # print("Parsing ", self.source_file)
         p = ScenarioCreator.parser.PopulationParser(self.source_file)
-        print("Parsing to Dictionary")
+        # print("Parsing to Dictionary")
         data = p.parse_to_dictionary()
-        print("Creating objects")
+        session.set_population_upload_status("Creating objects")
         total = len(data)
-        django_objects = []
+
+        unit_objects = []
         for index, entry_dict in enumerate(data):
             entry_dict['_population'] = self
-            django_objects.append(Unit.create(**entry_dict))
-            if index % 4000 == 0:  # random.randrange(1001) == 1000:
-                progress = index  # len(django_objects)
-                print("Creating", progress, "objects:", "{:.1%}".format(progress / total))
-        Unit.objects.bulk_create(django_objects)
+            unit_objects.append(Unit.create(**entry_dict))
+            if index % 2000 == 0:
+                progress = index
+                session.set_population_upload_status("Creating %s objects:" % total, (progress / total))
+        session.set_population_upload_status("Processing file", 100)
+        Unit.objects.bulk_create(unit_objects)
         execution_time = (time.process_time() - start_time)
         print("Done creating", '{:,}'.format(len(data)), "Units took %i seconds" % (execution_time))
 
@@ -128,15 +135,16 @@ class Unit(models.Model):
         help_text='The latitude used to georeference this unit.', )
     longitude = LongitudeField(
         help_text='The longitude used to georeference this unit.', )
+    initial_state_choices = (('S', 'Susceptible'),
+               ('L', 'Latent'),
+               ('B', 'Infectious Subclinical'),
+               ('C', 'Infectious Clinical'),
+               ('N', 'Naturally Immune'),
+               ('V', 'Vaccine Immune'),
+               ('D', 'Destroyed'))
     initial_state = models.CharField(max_length=255, default='S',
                                      help_text='Code indicating the actual disease state of the unit at the beginning of the simulation.',
-                                     choices=(('S', 'Susceptible'),
-                                              ('L', 'Latent'),
-                                              ('B', 'Infectious Subclinical'),
-                                              ('C', 'Infectious Clinical'),
-                                              ('N', 'Naturally Immune'),
-                                              ('V', 'Vaccine Immune'),
-                                              ('D', 'Destroyed')))
+                                     choices=initial_state_choices)
     days_in_initial_state = models.IntegerField(blank=True, null=True,
         help_text='The number of days that the unit will remain in its initial state unless preempted by other events.', )
     days_left_in_initial_state = models.IntegerField(blank=True, null=True,
@@ -164,7 +172,7 @@ class Unit(models.Model):
 
     @classmethod
     def create(cls, **kwargs):
-        for key in kwargs:  #Convert values into their proper type
+        for key in kwargs:  # Convert values into their proper type
             if key == 'production_type':
                 kwargs[key] = ProductionType.objects.get_or_create(name=kwargs[key])[0]
             elif key in ('latitude', 'longitude'):

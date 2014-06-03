@@ -732,7 +732,7 @@ set_params (void *data, int ncols, char **value, char **colname)
       radius = 0;
     }
 
-  zone = ZON_new_zone (name, /* level = */ -1, radius);
+  zone = ZON_new_zone (name, radius);
   g_free (name);
 
   /* Add the zone object to the zone list. */

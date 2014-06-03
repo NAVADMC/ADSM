@@ -688,7 +688,6 @@ run_sim_main (const char *population_file,
   RAN_gen_t *rng;
   unsigned int nzones;
   ZON_zone_list_t *zones;
-  ZON_zone_t *zone;
   int i;                     /* loop counter */
   gboolean active_infections_yesterday, active_infections_today,
     pending_actions, pending_infections, disease_end_recorded,
@@ -815,14 +814,11 @@ run_sim_main (const char *population_file,
   g_ptr_array_add (reporting_vars, clock_time);
   g_ptr_array_add (reporting_vars, version);
 
-  /* Pre-create a "background" zone. */
   zones = ZON_new_zone_list (nunits);
-  zone = ZON_new_zone ("", -1, 0.0);
 #ifdef USE_SC_GUILIB
   zone->_unitDays = NULL;
   zone->_animalDays = NULL;
 #endif
-  ZON_zone_list_append (zones, zone);
 
   /* Get the simulation parameters. */
   nmodels =

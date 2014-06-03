@@ -28,7 +28,7 @@
     </zone-model>
 
     <zone-model>
-      <name>Bäckgroünd</name>
+      <name>Background</name>
       <radius>
         <value>0</value>
         <units><xdf:unit>km</xdf:unit></units>
