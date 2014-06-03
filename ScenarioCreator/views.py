@@ -11,10 +11,9 @@ import re
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from Settings.models import SmSession
 from django.forms.models import modelformset_factory
+from django.db.models import Q
 from django.forms.models import inlineformset_factory
 
-
-edge_cases = ['RelationalPoint']
 
 def spaces_for_camel_case(text):
     return re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
@@ -116,10 +115,7 @@ def disease_spread(request):
     return render(request, 'ScenarioCreator/FormSet.html', context)
 
 
-def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request):
-    """FormSet is pre-populated with existing assignments and it detects and fills in missing
-    assignments with a blank form with production type filled in."""
-
+def save_formset_succeeded(MyFormSet, TargetModel, context, request):
     try:
         initialized_formset = MyFormSet(request.POST, request.FILES, queryset=TargetModel.objects.all())
         if initialized_formset.is_valid():
@@ -127,41 +123,44 @@ def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, miss
             print(instances)
             unsaved_changes(True)
             context['formset'] = initialized_formset
-            return False
+            return True
+        return False
     except ValidationError:
+        return False
+
+
+def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request):
+    """FormSet is pre-populated with existing assignments and it detects and fills in missing
+    assignments with a blank form with production type filled in."""
+    if save_formset_succeeded(MyFormSet, TargetModel, context, request):
+        return redirect(request.path)
+    else:
         forms = MyFormSet(queryset=TargetModel.objects.all())
         for index, pt in enumerate(missing):
             index += TargetModel.objects.count()
             forms[index].fields['production_type'].initial = pt.id
         context['formset'] = forms
-    return True
+        return render(request, 'ScenarioCreator/FormSet.html', context)
 
 
 def assign_protocols(request):
     context = basic_context()
     missing = ProductionType.objects.filter(protocolassignment__isnull=True)
     ProtocolSet = modelformset_factory(ProtocolAssignment, extra=len(missing), form=ProtocolAssignmentForm)
-    if populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request):
-        context['title'] = 'Assign a Control Protocol to each Production Type'
-        return render(request, 'ScenarioCreator/FormSet.html', context)
-    else:
-        return redirect(request.path)
+    context['title'] = 'Assign a Control Protocol to each Production Type'
+    return populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request)
 
 
 def assign_progressions(request):
     """FormSet is pre-populated with existing assignments and it detects and fills in missing
     assignments with a blank form with production type filled in."""
-
     context = basic_context()
     missing = ProductionType.objects.filter(diseaseprogressionassignment__isnull=True)
     ProgressionSet = modelformset_factory(DiseaseProgressionAssignment,
-                                     extra=len(missing),
-                                     form=DiseaseProgressionAssignmentForm)
-    if populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request):
-        context['title'] = 'Set what Progression each Production Type has with the Disease'
-        return render(request, 'ScenarioCreator/FormSet.html', context)
-    else:
-        return redirect(request.path)
+                                          extra=len(missing),
+                                          form=DiseaseProgressionAssignmentForm)
+    context['title'] = 'Set what Progression each Production Type has with the Disease'
+    return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request)
 
 
 def initialize_relational_form(context, primary_key, request):
@@ -301,6 +300,7 @@ def delete_entry(request, primary_key):
     model_name, form = get_model_name_and_form(request)
     model = form.Meta.model
     model.objects.filter(pk=primary_key).delete()
+    unsaved_changes(True)
     return redirect('/setup/%s/new/' % model_name)
 
 
@@ -351,12 +351,6 @@ def workspace_path(target):
 
 
 def file_dialog(request):
-    # try:
-    # print( "Saving ", scenario_filename())
-    # if scenario_filename():
-    #     save_scenario(request, scenario_filename())  # Save the file that's already open
-    # except ValueError:
-    #     pass  # New scenario
     db_files = glob("./workspace/*.sqlite3")
     db_files = map(lambda f: os.path.splitext(os.path.basename(f))[0], db_files)  # remove directory and extension
     context = basic_context()
@@ -369,13 +363,10 @@ def save_scenario(request):
     """Save to the existing session of a new file name if target is provided
     """
     target = request.POST['filename']
-    if target:
-        scenario_filename(target)
-        print('Copying database to', target)
-        shutil.copy(activeSession(), workspace_path(target))
-        unsaved_changes(False)  # File is now in sync
-    else:
-        raise ValueError('You need to select a file path to save first')
+    scenario_filename(target)
+    print('Copying database to', target)
+    shutil.copy(activeSession(), workspace_path(target))
+    unsaved_changes(False)  # File is now in sync
     return redirect('/setup/Scenario/1/')
 
 
@@ -456,24 +447,70 @@ def handle_file_upload(request):
             destination.write(chunk)
     return filename
 
+
 def upload_scenario(request):
     handle_file_upload(request)
     return redirect('/setup/Workspace/')
 
 
 def upload_population(request):
+    from Settings.models import SmSession
+    session = SmSession.objects.get(pk=1)
+    if 'GET' in request.method:
+        json = '{"status": "%s", "percent": "%s"}' % (session.population_upload_status, session.population_upload_percent*100)
+        return HttpResponse(json, mimetype="application/json")
+
+    session.set_population_upload_status("Processing file")
     filename = handle_file_upload(request)  # now we know the file is in the workspace
     model = Population(source_file=filename)
-    # wait for file upload
     model.save()
     unsaved_changes(True)
     # wait for Population parsing (up to 5 minutes)
-    return redirect('/setup/Population/1')
+    session.reset_population_upload_status()
+    return HttpResponse('{"status": "complete", "redirect": "/setup/Population/"}', mimetype="application/json")
+
+
+def filtering_params(request):
+    """Collects the list of parameters to filter by.  Because of the way this is setup:
+    1) Only keys mentioned in this list will be used (security, functionality).
+    2) Only one filter for each choice key can be used (e.g. only one production_type__name)"""
+    params = {}
+    keys = ['latitude__gte', 'latitude__eq', 'latitude__lte', 'longitude__gte', 'longitude__eq',
+            'longitude__lte', 'initial_size__gte', 'initial_size__eq', 'initial_size__lte',  # 3 permutations for each number field
+            'production_type__name', 'initial_state']
+    for key in keys:
+        if key in request.GET:
+            params[key] = request.GET.get(key)
+    return params
+
+
+def filter_info(request, params):
+    """Provides the information necessary for Javascript to fully construct a set of filters for Population"""
+    info = {}
+    # each select option
+    info['select_fields'] = {'production_type__name': [x.name for x in ProductionType.objects.all()],
+                             'initial_state': Unit.initial_state_choices}
+    info['numeric_fields'] = ["latitude","longitude", "initial_size"]
+    info['remaining_filters'] = [x for x in info['select_fields'] if x not in params.keys()] #TODO: add numeric_fields
+    return info
 
 
 def population(request):
-    # if Population.objects.exists(id=1):
-    return render(request, 'ScenarioCreator/Population.html', basic_context())
+    """"See also Pagination https://docs.djangoproject.com/en/dev/topics/pagination/"""
+    context = basic_context()
+    FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated)
+    if save_formset_succeeded(FarmSet, Unit, context, request):
+        return redirect(request.path)
+    if Population.objects.filter(id=1).exists():
+        sort_type = request.GET.get('sort_by', 'initial_state')
+        query_filter = Q()
+        params = filtering_params(request)
+        for key, value in params.items():  # loops through params and stacks filters in an AND fashion
+            query_filter = query_filter & Q(**{key: value})
+        initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:30])
+        context['formset'] = initialized_formset
+        context['filter_info'] = filter_info(request, params)
+    return render(request, 'ScenarioCreator/Population.html', context)
 
 
 def run_simulation(request):

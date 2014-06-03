@@ -4125,11 +4125,11 @@
 
   <output>
     <tr>
-      <td>unitsInZoneBäckgroünd</td>
+      <td>unitsInZoneBackground</td>
       <td>unitsInZoneLöwRïsk</td>
       <td>unitsInZoneHïghRïsk</td>
       <td>desnUAll</td>
-      <td>animalDaysInZoneBäckgroünd</td>
+      <td>animalDaysInZoneBackground</td>
       <td>animalDaysInZoneLöwRïsk</td>
       <td>animalDaysInZoneHïghRïsk</td>
     </tr>

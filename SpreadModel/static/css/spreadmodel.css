@@ -13,6 +13,11 @@ a {
     color: #7cb9ff;
 }
 
+ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
 li {
     font-size: 14pt;
 }
@@ -101,17 +106,12 @@ body>section {
     margin-top: 44px;
     padding-top: 0px;
     margin-left:  220px;
-    padding-left: 20px;
+    padding-left: 40px;
 }
 #setupMenu {
     list-style: none;
     padding-left: 0;
     margin-bottom: 54px;
-}
-
-#setupMenu ul {
-    list-style: none;
-    padding-left: 0;
 }
 
 #setupMenu li {
@@ -139,7 +139,7 @@ body>section {
 }
 
 #setupMenu a:hover {
-    background-color: #FFF;
+    width: 215px;
 }
 
 #setupMenu .active {
@@ -208,7 +208,7 @@ body>section {
     background-color: darkred;
 }
 
-.btn.completed {  /*This is flipped incomplete/completed because of the way python is storing it*/
+.btn.unsaved {
     background-color: #7cb9ff;
 }
 
@@ -230,10 +230,7 @@ select {
     margin: 8px 0;
 }
 
-
-#file_list ul {
-    list-style-type: none;
-}
+/**********************/
 
 #file_list li {
     text-decoration: none;
@@ -262,7 +259,55 @@ select {
     display: inline;
 }
 
+/**************************/
+
+#farm_list {
+    margin-bottom: 10px;
+}
+
+#farm_list{
+    display: inline-block;
+    max-height: 500px;
+    max-width: 800px;
+    overflow-y: auto;
+    padding-right: 20px; /*for windows scrollbar*/
+}
+
+#farm_list input, #farm_list select{
+    border: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+#farm_list th{
+    /*border: 1px solid black;*/
+    padding: 2px 8px 2px 0;
+    background: linear-gradient(to bottom, rgba(249,249,249,1) 0%,rgba(224,224,224,1) 100%);
+}
+
+th .sortControls{
+    opacity:0;
+}
+.sortControls a {
+    color: darkgray;
+}
+th:hover .sortControls{
+    opacity:1;
+}
+.sortControls a{
+    opacity:0.7;
+}
+.sortControls a:hover{
+    opacity:1;
+}
+
+
 body .modal-dialog {
     width: 50%;
     margin-left: 25%;
+}
+
+.controls ul li label {  /*Radio buttons on multi-choice fields are giant without this */
+    font-size: 10pt;
+    font-weight: 400;
 }

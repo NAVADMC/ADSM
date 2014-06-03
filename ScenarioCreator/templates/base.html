@@ -18,7 +18,7 @@
             {% spaceless %}
             <a href="/setup/NewScenario/" class="btn btn-primary"><img src="{{ STATIC_URL }}icons/new.png" class="icon"> new</a>
             <a href="/setup/Workspace/"  class="btn btn-primary"><img src="{{ STATIC_URL }}icons/open.png" class="icon">&nbsp open</a>
-            <button type="submit" class="btn btn-primary {{ unsaved_changes|completed }}"><img src="{{ STATIC_URL }}icons/save.png" class="icon">&nbsp save</button>
+            <button type="submit" class="btn btn-primary {% if unsaved_changes %} unsaved {% endif %}}"><img src="{{ STATIC_URL }}icons/save.png" class="icon">&nbsp save</button>
             {% endspaceless %}
         </div>
         <h1 class="filename">

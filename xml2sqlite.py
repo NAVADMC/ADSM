@@ -258,9 +258,9 @@ def main():
 	for el in xml.findall( './/zone-model' ):
 		name = ( el.find( './name' ).text )
 		radius = float( el.find( './radius/value' ).text )
-
-		zone = Zone( zone_description=name, zone_radius=radius )
-		zone.save()
+		if radius > 0:
+			zone = Zone( zone_description=name, zone_radius=radius )
+			zone.save()
 	# end of loop over <zone-model> elements
 
 	for el in xml.findall( './/contact-spread-model' ):
