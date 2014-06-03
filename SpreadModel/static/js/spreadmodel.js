@@ -159,31 +159,12 @@ var modelModal = {
                 </div>')
 }
 
-//This adds the getParameter utility to the window.location prototype
-if (!window.location.getParameter ) {
-    window.location.getParameter = function(key) {
-        function parseParams() {
-            var params = {},
-                e,
-                a = /\+/g,  // Regex for replacing addition symbol with a space
-                r = /([^&=]+)=?([^&]*)/g,
-                d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
-                q = window.location.search.substring(1);
-
-            while (e = r.exec(q))
-                if (typeof params[d(e[1])] == 'array') params[d(e[1])].push(d(e[2]))
-                else if (params[d(e[1])]) params[d(e[1])] = [params[d(e[1])],d(e[2])]
-                else params[d(e[1])] = d(e[2]);
-
-            return params;
-        }
-
-        if (!this.queryStringParams)
-            this.queryStringParams = parseParams();
-
-        if (key) return this.queryStringParams[key];
-        else return this.queryStringParams;
-    };
+/*Utility function for getting a GET parameter from the current URL*/
+function getQueryParam(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
 
@@ -241,12 +222,10 @@ function update_population_filter_and_sort(sort_by) {
     } else{ //sort_by already provided
         var sorting = 'sort_by=' + sort_by;
     }
-    console.log(window.location, document.location, sorting);
     var new_url = '?' + population_filter_string();//build URL
-    new_url = new_url + sorting
-    console.log(new_url);
+    new_url = new_url + sorting;
     //get it with AJAX and insert new HTML with load()
-    window.history.pushState('', 'Population Filters', new_url); //update URL bar state
+    window.history.replaceState('', 'Population Filters', new_url); //TODO Bug: update URL bar state
     $('#farm_list').parent().load(new_url + ' #farm_list');
 }
 
@@ -255,7 +234,6 @@ $(document).on('change', '#farm_filter select, #farm_filter input', function(){
 });
 
 $(document).on('click', '#farm_list .sortControls a', function(event){
-//$('#farm_list .sortControls a').click(function(){
-    update_population_filter_and_sort($(this).attr('sort_by'));
-    event.stopPropagation()
+    update_population_filter_and_sort($(this).attr('data-sort-by'));
+    event.preventDefault()
 });
