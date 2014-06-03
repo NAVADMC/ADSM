@@ -126,14 +126,14 @@ var population_filter_string = function(){
 function update_population_filter_and_sort(sort_by) {
     if(sort_by === undefined){ //try and find it in the URL
         var sorting = getQueryParam('sort_by') ?
-            'sort_by=' + getQueryParam('sort_by') : '';//TODO: Bug: loses previous state somehow #95
+            'sort_by=' + getQueryParam('sort_by') : '';
     } else{ //sort_by already provided
         var sorting = 'sort_by=' + sort_by;
     }
     var new_url = '?' + population_filter_string();//build URL
     new_url = new_url + sorting;
     //get it with AJAX and insert new HTML with load()
-    window.history.replaceState('', 'Population Filters', new_url); //TODO Bug: update URL bar state
+    window.history.replaceState('', 'Population Filters', new_url);
     $('#farm_list').parent().load(new_url + ' #farm_list');
 }
 
