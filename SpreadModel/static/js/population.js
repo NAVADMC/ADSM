@@ -1,6 +1,13 @@
 
 
 $(function(){
+    $('#submit-id-submit').attr('disabled', 'disabled');
+
+    $(document).one('change', '#farm_list input, #farm_list select', function(){
+        $('#submit-id-submit').removeAttr('disabled').addClass('unsaved');
+    });
+
+
     var progressBar = $('<div class="progress-bar" style="width: 0%;"></div>');
     var progressStatus = $('<div class="progress-status">Upload starting...</div>');
     var progressInterval;

@@ -204,12 +204,19 @@ body>section {
     background-color: #00477f;
 }
 
+.btn-primary.disabled, .btn-primary[disabled] {
+    background-color: #7B8893;
+}
 .btn-danger {
     background-color: darkred;
 }
 
 .btn.unsaved {
     background-color: #7cb9ff;
+}
+
+.btn.unsaved:hover {
+    background-color: #479DFF;
 }
 
 textarea {
