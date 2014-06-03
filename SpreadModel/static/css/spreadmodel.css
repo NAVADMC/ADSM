@@ -265,11 +265,12 @@ select {
     margin-bottom: 10px;
 }
 
-#farm_list table{
-    display: block;
+#farm_list{
+    display: inline-block;
     max-height: 500px;
-    width: 800px;
-    overflow-y: scroll;
+    max-width: 800px;
+    overflow-y: auto;
+    padding-right: 20px; /*for windows scrollbar*/
 }
 
 #farm_list input, #farm_list select{

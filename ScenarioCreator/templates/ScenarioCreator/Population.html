@@ -3,6 +3,8 @@
 {% load crispy_forms_tags  %}
 
 {% block content %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/population.js"></script>
+
 {% if not Population %}
     <h1 id="title">Load a Population</h1>
     <form id="file-upload" method="post" action="/setup/UploadPopulation/" enctype="multipart/form-data">
@@ -10,8 +12,6 @@
         <button type="submit" class="btn btn-primary">Upload a Population &nbsp<img src="{{ STATIC_URL }}icons/upload.png" class="icon"></button>
         <p class="help-block">You can upload a file from anywhere on your computer and it will be imported to the ADSM workspace.</p>
     </form>
-
-    <script type="text/javascript" src="{{ STATIC_URL }}js/population_uploader.js"></script>
 
 {% else %}
     <h1>Current Units:</h1>
