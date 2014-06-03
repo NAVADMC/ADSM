@@ -1,3 +1,4 @@
+{# Similar to EmbeddedFormset but includes links for sorting by column #}
     {{ formset.non_form_errors.as_ul }}
     {{ formset.management_form }}
     <table id="formset" class="form">
@@ -5,7 +6,12 @@
             {% if forloop.first %}
                 <thead><tr>
                     {% for field in form.visible_fields %}
-                        <th>{{ field.label|capfirst }}</th>
+                        <th>{{ field.label|capfirst }}
+                            <span class="sortControls">
+                                <a href="?sort_by=-{{field.name}}"><i class="glyphicon-arrow-up glyphicon"></i></a>
+                                <a href="?sort_by={{field.name}}"><i class="glyphicon-arrow-down glyphicon"></i></a>
+                            </span>
+                        </th>
                     {% endfor %}
                 </tr></thead>
             {% endif %}
