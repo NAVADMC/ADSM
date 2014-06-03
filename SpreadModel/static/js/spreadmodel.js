@@ -211,7 +211,8 @@ $(document).on('change', '#farm_filter select, #farm_filter input', function(){
     //build URL
     var filters = $('#farm_filter tr').map(function(){
         if($(this).find('td:nth-child(3) select').length) { //state select field
-            return $(this).attr('id') + '=' + $(this).find('td:nth-child(3) select').val(); //must be a select
+            var str = $(this).attr('id') + '=' + $(this).find('td:nth-child(3) select').val(); //must be a select
+            return str.replace(/ /g, '%20'); // global replace
         }
         else { //this must be a numeric filter, because of the input field
             var name = $(this).attr('id');
