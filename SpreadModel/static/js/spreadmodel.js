@@ -192,8 +192,10 @@ $(document).on('change', '#farm_filter td:first-child select', function(){
     }
 
     if( !$(this).parents('tr').is(':last-child') ){
-        $(this).parents('tr').remove();
-        $('#farm_filter option[value=' + $(this).val() +']').removeAttr("disabled");
+        var my_row = $(this).parents('tr')
+        var prev_val = my_row.attr('id')
+        $('#farm_filter option[value=' + prev_val +']').removeAttr("disabled");
+        my_row.remove();
     }
     else{
         $(this).val('')
@@ -204,14 +206,11 @@ $(document).on('change', '#farm_filter td:first-child select', function(){
 $(document).on('change', '#farm_filter select, #farm_filter input', function(){
     //build URL
     var filters = $('#farm_filter tr').map(function(){
-        if($(this).attr('id')){
+        if($(this).find('td:nth-child(3) input, td:nth-child(3) select').val()){
             var middle = $(this).find('td:nth-child(2) select').length ? $(this).find('td:nth-child(2) select').val(): '';
             return $(this).attr('id') + middle + '=' + $(this).find('td:nth-child(3) input, td:nth-child(3) select').val();
         }
     });
-    console.log('?' + filters.get().join('&') + ' #farm_list')
-    //get it with AJAX
-    $('#farm_list').parent('form').load('?' + filters.get().join('&') + ' #farm_list' );
-    //insert new HTML
-
+    //get it with AJAX and insert new HTML with load()
+    $('#farm_list').parent().load('?' + filters.get().join('&') + ' #farm_list' );
 });
