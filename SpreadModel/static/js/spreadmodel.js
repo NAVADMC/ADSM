@@ -193,7 +193,7 @@ $(document).on('change', '#farm_filter td:first-child select', function(){
 
     if( !$(this).parents('tr').is(':last-child') ){
         var my_row = $(this).parents('tr')
-        var prev_val = my_row.attr('id')
+        var prev_val = my_row.attr('id') //re-enable filter option after it's removed
         $('#farm_filter option[value=' + prev_val +']').removeAttr("disabled");
         my_row.remove();
     }
@@ -206,11 +206,24 @@ $(document).on('change', '#farm_filter td:first-child select', function(){
 $(document).on('change', '#farm_filter select, #farm_filter input', function(){
     //build URL
     var filters = $('#farm_filter tr').map(function(){
-        if($(this).find('td:nth-child(3) input, td:nth-child(3) select').val()){
-            var middle = $(this).find('td:nth-child(2) select').length ? $(this).find('td:nth-child(2) select').val(): '';
-            return $(this).attr('id') + middle + '=' + $(this).find('td:nth-child(3) input, td:nth-child(3) select').val();
+        if($(this).find('td:nth-child(3) select').length) { //state select field
+            return $(this).attr('id') + '=' + $(this).find('td:nth-child(3) select').val(); //must be a select
+        }
+        else { //this must be a numeric filter, because of the input field
+            var name = $(this).attr('id');
+            var minimum = $(this).find('td:nth-child(3) input').val() ? //empty string if no value
+                name + '__gte=' + $(this).find('td:nth-child(3) input').val() : '';
+            console.log(minimum)
+            var maximum = $(this).find('td:nth-child(5) input').val() ? //empty string if no value
+                name + '__lte=' + $(this).find('td:nth-child(5) input').val() : '';
+            console.log(maximum)
+            if(minimum && maximum) //if both are present, we need to stick an & between them
+                return minimum + "&" + maximum;
+            else
+                return  minimum + maximum; // return one or the other or a blank string if neither
         }
     });
     //get it with AJAX and insert new HTML with load()
+    console.log('?' + filters.get().join('&') + ' #farm_list')
     $('#farm_list').parent().load('?' + filters.get().join('&') + ' #farm_list' );
 });
