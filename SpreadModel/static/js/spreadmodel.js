@@ -186,6 +186,7 @@ if (!window.location.getParameter ) {
     };
 }
 
+
 /* This watches for the first column select which determines what the Farms are being filtered by.
 It inserts a new row from the example templates with the correct value and input types.  Values of
 these selects are used below to construct a query URL. */
@@ -206,9 +207,11 @@ $(document).on('change', '#farm_filter td:first-child select', function(){
     }
 });
 
-/*Construct a query URL based on the value of the filter selects*/
-$(document).on('change', '#farm_filter select, #farm_filter input', function(){
-    //build URL
+
+/*Construct a query URL based on the value of the filter selects.  Two major types are
+* 1) choice selects = fairly simple
+* 2) numeric input = have both min and max fields and require additional handling*/
+var population_filter_string = function(){
     var filters = $('#farm_filter tr').map(function(){
         if($(this).find('td:nth-child(3) select').length) { //state select field
             var str = $(this).attr('id') + '=' + $(this).find('td:nth-child(3) select').val(); //must be a select
@@ -218,17 +221,41 @@ $(document).on('change', '#farm_filter select, #farm_filter input', function(){
             var name = $(this).attr('id');
             var minimum = $(this).find('td:nth-child(3) input').val() ? //empty string if no value
                 name + '__gte=' + $(this).find('td:nth-child(3) input').val() : '';
-            console.log(minimum)
             var maximum = $(this).find('td:nth-child(5) input').val() ? //empty string if no value
                 name + '__lte=' + $(this).find('td:nth-child(5) input').val() : '';
-            console.log(maximum)
-            if(minimum && maximum) //if both are present, we need to stick an & between them
+            if(minimum.length && maximum.length) //if both are present, we need to stick an & between them
                 return minimum + "&" + maximum;
             else
                 return  minimum + maximum; // return one or the other or a blank string if neither
         }
     });
+    var new_url = filters.get().join('&');
+    return new_url;
+}
+
+/*Updates the page and URL with the latest filter and sort settings.*/
+function update_population_filter_and_sort(sort_by) {
+    if(sort_by === undefined){ //try and find it in the URL
+        var sorting = window.location.getParameter('sort_by') ?
+            'sort_by=' + window.location.getParameter('sort_by') : '';//TODO: Bug: loses previous state somehow #95
+    } else{ //sort_by already provided
+        var sorting = 'sort_by=' + sort_by;
+    }
+    console.log(window.location, document.location, sorting);
+    var new_url = '?' + population_filter_string();//build URL
+    new_url = new_url + sorting
+    console.log(new_url);
     //get it with AJAX and insert new HTML with load()
-    console.log('?' + filters.get().join('&') + ' #farm_list')
-    $('#farm_list').parent().load('?' + filters.get().join('&') + ' #farm_list' );
+    window.history.pushState('', 'Population Filters', new_url); //update URL bar state
+    $('#farm_list').parent().load(new_url + ' #farm_list');
+}
+
+$(document).on('change', '#farm_filter select, #farm_filter input', function(){
+    update_population_filter_and_sort();
+});
+
+$(document).on('click', '#farm_list .sortControls a', function(event){
+//$('#farm_list .sortControls a').click(function(){
+    update_population_filter_and_sort($(this).attr('sort_by'));
+    event.stopPropagation()
 });
