@@ -507,7 +507,7 @@ def population(request):
         params = filtering_params(request)
         for key, value in params.items():  # loops through params and stacks filters in an AND fashion
             query_filter = query_filter & Q(**{key: value})
-        initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:100])
+        initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:30])
         context['formset'] = initialized_formset
         context['filter_info'] = filter_info(request, params)
     return render(request, 'ScenarioCreator/Population.html', context)
