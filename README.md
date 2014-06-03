@@ -27,9 +27,9 @@ Migrations are created using:
 
 Google Server Production Deploy:
 sudo su
-screen -r   (Ctrl+C to stop server) or (Ctrl+A  K   to kill the screen)
-source /home/anaconda/bin/activate py3k
-# make sure you have the production_server submodule
-    git submodule init
-    git submodule update
+screen -r   (Ctrl+C to stop server and reuse the screen) or (Ctrl+A  K   to kill the screen and start from scratch)
+git pull
+git submodule update
+source /home/anaconda/bin/activate py3k    #only necessary once
+python manage.py collectstatic
 python manage.py runproductionserver --serve_static=collect --pid_file=server.pid --port=80
