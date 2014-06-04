@@ -15,7 +15,7 @@
             </div>
             <div id="sub-model{{forloop.counter}}" class="panel-collapse collapse in" style="height: auto;">
                 <ul id="file_list">
-                    <li><a href="/setup/{{model.class}}/new/"> + New {{ model.name }}</a>
+                    <li><a href="/setup/{{model.class}}/new/"><i> + New {{ model.name }}</i></a>
 
                     {% for entry in model.entries %}
                         <li><a href="/setup/{{model.class}}/{{entry.pk}}/">{{ entry }}</a>
