@@ -6,33 +6,32 @@
         <ul id="setupMenu">
             <li><a href="/setup/Scenario/1/" class="{{ "Scenario"|active }}">
                 <span class="pull-right {{Scenario|completed}}"> </span>Scenario Description</a></li>
-            <li><a href="/setup/Population/" class="{{"Population"|active}}">
+            <li><a href="/setup/Populations/" class="{{"Population"|active}}">
                 <span class="pull-right {{Population|completed}}"> </span>Population</a></li>
             <li><a href="/setup/Disease/1/" class="{{"Disease"|active}}">
                 <span class="pull-right {{Disease|completed}}"> </span>Disease</a>
-                <ul><li><a href="/setup/DiseaseProgression/new/" class="{{"DiseaseProgression"|active}}">
+                <ul><li><a href="/setup/DiseaseProgression/" class="{{"DiseaseProgression"|active}}">
                     <span class="pull-right {{Progressions|completed}}"> </span>Disease Progression</a>
                     <ul><li><a href="/setup/AssignProgressions/" class="{{"AssignProgressions"|active}}">
-                <span class="pull-right {{ProgressionAssignment|completed}}"> </span>Progression Assignment</a></li></ul></li>
+                        <span class="pull-right {{ProgressionAssignment|completed}}"> </span>Assign Progression</a></li></ul></li>
                     <li><a href="/setup/DiseaseSpread/" class="{{"DiseaseSpread"|active}}">
-                <span class="pull-right {{DirectSpreads|completed}}"> </span>Disease Spread</a></li>
-{#TODO: Use all Spread types#}
+                        <span class="pull-right {{DirectSpreads|completed}}"> </span>Add Disease Spread</a>
+                        <ul><li><a href="/setup/AssignSpreads/" class="{{"AssignSpreads"|active}}">
+                            <span class="pull-right {{DirectSpreads|completed}}"> </span>Assign Disease Spread</a></li></ul></li>
                 </ul></li>
             <li><a href="/setup/ControlMasterPlan/1/" class="{{"ControlMasterPlan"|active }}">
                 <span class="pull-right {{ControlMasterPlan|completed}}"> </span>Controls</a>
                 <ul><li><a href="/setup/AssignProtocols/" class="{{"AssignProtocols"|active}}">
                     <span class="pull-right {{ProtocolAssignments|completed}}"> </span>Protocol Assignments</a></li>
-                    <li><a href="/setup/ControlProtocol/new/" class="{{"ControlProtocol"|active}}">
+                    <li><a href="/setup/ControlProtocol/" class="{{"ControlProtocol"|active}}">
                         <span class="pull-right {{Protocols|completed}}"> </span>Control Protocol</a></li>
-                    <li><a href="/setup/Zone/new/" class="{{"Zone"|active}}">
+                    <li><a href="/setup/Zone/" class="{{"Zone"|active}}">
                         <span class="pull-right {{Zones|completed}}"> </span>Zones</a>
-                        <ul><li><a href="/setup/ZoneEffectOnProductionType/new/" class="{{"ZoneEffectOnProductionType"|active}}">
+                        <ul><li><a href="/setup/ZoneEffectOnProductionType/" class="{{"ZoneEffectOnProductionType"|active}}">
                             <span class="pull-right {{ZoneEffects|completed}}"> </span>Zone Effects</a></li></ul></li>
                 </ul></li>
-            <li><a href="/setup/ProbabilityFunction/new/" class="{{"ProbabilityFunction"|active}}">
-                <span class="pull-right {{ProbabilityFunctions|completed}}"> </span>Probability Functions</a></li>
-            <li><a href="/setup/RelationalFunction/new/" class="{{"RelationalFunction"|active}}">
-                <span class="pull-right {{RelationalFunctions|completed}}"> </span>Relational Functions</a></li>
+            <li><a href="/setup/Function/" class="{{"ProbabilityFunction"|active}}">
+                <span class="pull-right {{ProbabilityFunctions|completed}}"> </span>Functions</a></li>
             <li><a href="/setup/OutputSettings/1/" class="{{"OutputSettings"|active }}">
                 <span class="pull-right {{OutputSetting|completed}}"> </span>Output Settings</a></li>
             <li id="RunSimulation"><a href="/setup/RunSimulation/" class="{{"RunSimulation"|active}} {{Simulation|completed}}">

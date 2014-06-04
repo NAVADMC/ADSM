@@ -5,7 +5,12 @@ body {
 }
 
 h1 {
-    font-size: 22pt;
+    font-size: 14pt;
+    font-weight: 600;
+    margin-left: -15px;
+}
+
+h1, h2, h3, h4 {
     margin-bottom: 20px;
 }
 
@@ -64,6 +69,8 @@ header div {
     float: left;
     width: 700px;
     padding: 0 20px;
+    font-size: 20pt;
+    font-weight: 400;
 }
 
 .filename input {
@@ -104,7 +111,7 @@ body>nav {
 
 body>section {
     margin-top: 44px;
-    padding-top: 0px;
+    padding-top: 1px;
     margin-left:  220px;
     padding-left: 40px;
 }
@@ -126,7 +133,7 @@ body>section {
     font-size: 14pt;
     font-weight: 600;
     line-height: 35px;
-    padding-left: 5px;
+    padding-left: 8px;
 }
 
 #setupMenu ul a {
@@ -204,12 +211,19 @@ body>section {
     background-color: #00477f;
 }
 
+.btn-primary.disabled, .btn-primary[disabled] {
+    background-color: #7B8893;
+}
 .btn-danger {
     background-color: darkred;
 }
 
 .btn.unsaved {
     background-color: #7cb9ff;
+}
+
+.btn.unsaved:hover {
+    background-color: #479DFF;
 }
 
 textarea {
@@ -238,12 +252,14 @@ select {
 }
 
 #file_list {
-    margin-top: 20px;
+    margin-top: 5px;
+    margin-bottom: 27px;
     max-width: 600px
 }
 
 #file_list a {
     color: black;
+    text-decoration: none;
 }
 
 #file_list a:hover {
@@ -307,7 +323,28 @@ body .modal-dialog {
     margin-left: 25%;
 }
 
+.type-warning {
+    font-size: 14pt;
+}
+
 .controls ul li label {  /*Radio buttons on multi-choice fields are giant without this */
     font-size: 10pt;
     font-weight: 400;
+}
+
+.model-banner {
+    background-color: #00477f;
+    border:5px solid #00477f;
+    color: white;
+    font-size: 14pt;
+    max-width: 600px;
+    line-height: 27px;
+}
+
+.model-banner a{
+    color:white;
+}
+
+a.collapsed img {
+    -webkit-transform: scaleY(-1);
 }

@@ -15,34 +15,38 @@ whether it is a model or not."""
 def generate_urls_from_models(input_file, extra_urls=()):
     assert hasattr(extra_urls, '__getitem__')
     lines = open(input_file, 'r').readlines()
-    model_strings = []
+    model_strings = extra_urls  # extra_urls is placed first so that they take precedence over auto-urls
     for line in lines:
         if 'class' in line[:5]:
             model_name = re.split('\W+', line)[1]
-            model_strings.append("url('^" + model_name + "/new/$', 'ScenarioCreator.views.new_entry')")
+            model_strings.append("url('^" + model_name + "/$',                      'ScenarioCreator.views.model_list')")
+            model_strings.append("url('^" + model_name + "/new/$',                  'ScenarioCreator.views.new_entry')")
             model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry')")
             model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/copy/$', 'ScenarioCreator.views.copy_entry')")
             model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/delete/$', 'ScenarioCreator.views.delete_entry')")
 
-    model_strings += extra_urls
     output = "patterns('', " + ",\n         ".join(model_strings) + ")"
     return eval(output)
 
 
 urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
-                                        ["url('^DiseaseSpread/$', 'ScenarioCreator.views.disease_spread')",
+                                        ["url('^AssignSpreads/$', 'ScenarioCreator.views.disease_spread')",
                                          "url('^AssignProtocols/$', 'ScenarioCreator.views.assign_protocols')",
                                          "url('^AssignProgressions/$', 'ScenarioCreator.views.assign_progressions')",
-                                         "url('^Population/$', 'ScenarioCreator.views.population')",
+
+                                         "url('^Populations/$', 'ScenarioCreator.views.population')",
+                                         "url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population')",
+
                                          "url('^SaveScenario/$', 'ScenarioCreator.views.save_scenario')",
                                          "url('^NewScenario/$', 'ScenarioCreator.views.new_scenario')",
                                          "url('^Workspace/$', 'ScenarioCreator.views.file_dialog')",
-                                         "url('^OpenScenario/(?P<target>[\w\s-]+)/$', 'ScenarioCreator.views.open_scenario')",
-                                         "url('^DeleteScenario/(?P<target>[\w\s-]+)/$', 'ScenarioCreator.views.delete_scenario')",
-                                         "url('^Download/(?P<target>[\w\s-]+)/$', 'ScenarioCreator.views.download_scenario')",
-                                         "url('^Copy/(?P<target>[\w\s-]+)/$', 'ScenarioCreator.views.copy_scenario')",
+
+                                         "url('^OpenScenario/(?P<target>.+)/$', 'ScenarioCreator.views.open_scenario')",
+                                         "url('^DeleteFile/(?P<target>.+)/$', 'ScenarioCreator.views.delete_file')",
+                                         "url('^Download/(?P<target>.+)/$', 'ScenarioCreator.views.download_file')",
+                                         "url('^Copy/(?P<target>.+)/$', 'ScenarioCreator.views.copy_file')",
                                          "url('^Upload/$', 'ScenarioCreator.views.upload_scenario')",
-                                         "url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population')",
+
                                          "url('^RunSimulation/$', 'ScenarioCreator.views.run_simulation')",
                                         ])
 

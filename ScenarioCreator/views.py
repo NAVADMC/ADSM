@@ -8,6 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.db import connections
 from django.conf import settings
 import re
+from ScenarioCreator.models import * # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from Settings.models import SmSession
 from django.forms.models import modelformset_factory
@@ -48,7 +49,7 @@ def simulation_ready_to_run(context):
     return all(context.values())
 
 
-def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
+def basic_context():
     PT_count = ProductionType.objects.count()
     context =  {'filename': scenario_filename(),
             'unsaved_changes': unsaved_changes(),
@@ -61,9 +62,7 @@ def basic_context():  # TODO: This might not be performant... but it's nice to h
             'Progressions': DiseaseProgression.objects.count(),
             'ProgressionAssignment': DiseaseProgressionAssignment.objects.count() == PT_count and PT_count, #Fixed false complete status when there are no Production Types
             'DirectSpreads': DirectSpread.objects.count(),
-            'IndirectSpreads': IndirectSpread.objects.count(),
-            'AirborneSpreads': AirborneSpread.objects.count(),
-            'Transmissions': ProductionTypePairTransmission.objects.count() >= PT_count ** 2 and PT_count, #Fixed false complete status when there are no Production Types
+            'AssignSpreads': ProductionTypePairTransmission.objects.count() >= PT_count and PT_count, #Fixed false complete status when there are no Production Types
             'ControlMasterPlan': ControlMasterPlan.objects.count(),
             'Protocols': ControlProtocol.objects.count(),
             'ProtocolAssignments': ProtocolAssignment.objects.count(),
@@ -224,7 +223,7 @@ def save_new_instance(initialized_form, request):
                'model': model_name,
                'status': 'success'}
         return HttpResponse(json.dumps(msg), content_type="application/json")
-    return redirect('/setup/%s/%i/' % (model_name, model_instance.pk))  # redirect to edit URL
+    return redirect('/setup/%s/' % model_name)  # redirect to edit URL
 
 
 def new_form(request, initialized_form, context):
@@ -239,6 +238,13 @@ def get_model_name_and_form(request):
     return model_name, form
 
 
+def get_model_name_and_model(request):
+    """A slight variation on get_mode_name_and_form useful for cases where you don't want a form"""
+    model_name = re.split('\W+', request.path)[2]  # Second word in the URL
+    model = globals()[model_name]  # IMPORTANT: depends on naming convention
+    return model_name, model
+
+
 def initialize_from_existing_model(primary_key, request):
     """Raises an ObjectDoesNotExist exception when the primary_key is invalid"""
     model_name, form_class = get_model_name_and_form(request)
@@ -247,7 +253,7 @@ def initialize_from_existing_model(primary_key, request):
     return initialized_form, model_name
 
 
-'''New / Edit / Copy trio that are called from URLs'''
+'''New / Edit / Copy / Delete / List that are called from model generated URLs'''
 def new_entry(request):
     model_name, form = get_model_name_and_form(request)
     if model_name == 'RelationalFunction':
@@ -297,11 +303,39 @@ def copy_entry(request, primary_key):
 
 
 def delete_entry(request, primary_key):
-    model_name, form = get_model_name_and_form(request)
-    model = form.Meta.model
+    model_name, model = get_model_name_and_model(request)
     model.objects.filter(pk=primary_key).delete()
     unsaved_changes(True)
-    return redirect('/setup/%s/new/' % model_name)
+    return redirect('/setup/%s/' % model_name)
+
+
+def list_per_model(model_name, model):
+    context = {}
+    context['entries'] = model.objects.all()[:200]  # just in case someone accesses the Unit list or something big
+    context['class'] = model_name
+    context['name'] = spaces_for_camel_case(model_name)
+    return context
+
+
+def model_list(request):
+    model_name, model = get_model_name_and_model(request)
+    context = basic_context()
+    context['title'] = "Create " + spaces_for_camel_case(model_name) + "s"  # pluralize
+    context['models'] = []
+    abstract_models = {
+        'Function':
+            [('RelationalFunction', RelationalFunction),
+             ('ProbabilityFunction', ProbabilityFunction)],
+        'DiseaseSpread':
+            [('DirectSpread', DirectSpread),
+             ('IndirectSpread', IndirectSpread),
+             ('AirborneSpread', AirborneSpread)]}
+    if model_name in abstract_models.keys():
+        for local_name, local_model in abstract_models[model_name]:
+            context['models'].append(list_per_model(local_name, local_model))
+    else:
+        context['models'].append(list_per_model(model_name, model))
+    return render(request, 'ScenarioCreator/ModelList.html', context)
 
 
 '''Utility Views for UI'''
@@ -346,13 +380,16 @@ def delete_entry(request, primary_key):
 
 
 def workspace_path(target):
-    return "./workspace/"+target+".sqlite3"
-    #os.path.join(BASE_DIR, 'settings.sqlite3')
+    return "./workspace/"+target
+
+
+def file_list(extension=''):
+    db_files = glob("./workspace/*" + extension)
+    return map(lambda f: os.path.basename(f), db_files)  # remove directory and extension
 
 
 def file_dialog(request):
-    db_files = glob("./workspace/*.sqlite3")
-    db_files = map(lambda f: os.path.splitext(os.path.basename(f))[0], db_files)  # remove directory and extension
+    db_files = file_list(".sqlite3")
     context = basic_context()
     context['db_files'] = db_files
     context['title'] = 'Select a new Scenario to Open'
@@ -383,15 +420,14 @@ def update_db_version():
     print('Done creating database')
 
 
-def delete_scenario(request, target):
+def delete_file(request, target):
     print("Deleting", target)
     os.remove(workspace_path(target))
     print("Done")
-    return redirect('/setup/Workspace')
+    return redirect('/setup/Workspace')  # TODO: refresh instead of redirecting
 
 
 def open_scenario(request, target):
-    # if os.path.isfile(workspace_path(target)):
     print("Copying ", workspace_path(target), "to", activeSession())
     shutil.copy(workspace_path(target), activeSession())
     scenario_filename(target)
@@ -424,18 +460,18 @@ def new_scenario(request):
     return redirect('/setup/Scenario/1/')
 
 
-def copy_scenario(request, target):
-    copy_name = target + ' - Copy'  #re.sub(r'(.*)\.sqlite3', r'\6 - Copy\.sqlite3', target)
+def copy_file(request, target):
+    copy_name = re.sub(r'(?P<name>.*)\.(?P<ext>.*)', r'\g<name> - Copy.\g<ext>', target)
     print("Copying ", target, "to", copy_name)
     shutil.copy(workspace_path(target), workspace_path(copy_name))
     return redirect('/setup/Workspace/')
 
 
-def download_scenario(request, target):
+def download_file(request, target):
     file_path = workspace_path(target)
     f = open(file_path, "rb")
-    response = HttpResponse(f, content_type="application/x-sqllite")
-    response['Content-Disposition'] = 'attachment; filename="' + target + '.sqlite3"'
+    response = HttpResponse(f, content_type="application/x-sqlite")  # TODO: generic content type
+    response['Content-Disposition'] = 'attachment; filename="' + target
     return response
 
 
@@ -458,16 +494,16 @@ def upload_population(request):
     session = SmSession.objects.get(pk=1)
     if 'GET' in request.method:
         json = '{"status": "%s", "percent": "%s"}' % (session.population_upload_status, session.population_upload_percent*100)
-        return HttpResponse(json, mimetype="application/json")
+        return HttpResponse(json, content_type="application/json")
 
     session.set_population_upload_status("Processing file")
-    filename = handle_file_upload(request)  # now we know the file is in the workspace
+    filename = request.POST.get('filename') if 'filename' in request.POST else handle_file_upload(request)
     model = Population(source_file=filename)
     model.save()
     unsaved_changes(True)
     # wait for Population parsing (up to 5 minutes)
     session.reset_population_upload_status()
-    return HttpResponse('{"status": "complete", "redirect": "/setup/Population/"}', mimetype="application/json")
+    return HttpResponse('{"status": "complete", "redirect": "/setup/Populations/"}', content_type="application/json")
 
 
 def filtering_params(request):
@@ -510,6 +546,9 @@ def population(request):
         initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:30])
         context['formset'] = initialized_formset
         context['filter_info'] = filter_info(request, params)
+    else:
+        xml_files = file_list(".xml")
+        context['xml_files'] = xml_files
     return render(request, 'ScenarioCreator/Population.html', context)
 
 
