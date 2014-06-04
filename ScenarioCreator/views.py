@@ -8,6 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.db import connections
 from django.conf import settings
 import re
+from ScenarioCreator.models import * # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from Settings.models import SmSession
 from django.forms.models import modelformset_factory
@@ -61,9 +62,7 @@ def basic_context():
             'Progressions': DiseaseProgression.objects.count(),
             'ProgressionAssignment': DiseaseProgressionAssignment.objects.count() == PT_count and PT_count, #Fixed false complete status when there are no Production Types
             'DirectSpreads': DirectSpread.objects.count(),
-            'IndirectSpreads': IndirectSpread.objects.count(),
-            'AirborneSpreads': AirborneSpread.objects.count(),
-            'Transmissions': ProductionTypePairTransmission.objects.count() >= PT_count ** 2 and PT_count, #Fixed false complete status when there are no Production Types
+            'AssignSpreads': ProductionTypePairTransmission.objects.count() >= PT_count and PT_count, #Fixed false complete status when there are no Production Types
             'ControlMasterPlan': ControlMasterPlan.objects.count(),
             'Protocols': ControlProtocol.objects.count(),
             'ProtocolAssignments': ProtocolAssignment.objects.count(),
@@ -239,6 +238,13 @@ def get_model_name_and_form(request):
     return model_name, form
 
 
+def get_model_name_and_model(request):
+    """A slight variation on get_mode_name_and_form useful for cases where you don't want a form"""
+    model_name = re.split('\W+', request.path)[2]  # Second word in the URL
+    model = globals()[model_name]  # IMPORTANT: depends on naming convention
+    return model_name, model
+
+
 def initialize_from_existing_model(primary_key, request):
     """Raises an ObjectDoesNotExist exception when the primary_key is invalid"""
     model_name, form_class = get_model_name_and_form(request)
@@ -297,21 +303,38 @@ def copy_entry(request, primary_key):
 
 
 def delete_entry(request, primary_key):
-    model_name, form = get_model_name_and_form(request)
-    model = form.Meta.model
+    model_name, model = get_model_name_and_model(request)
     model.objects.filter(pk=primary_key).delete()
     unsaved_changes(True)
     return redirect('/setup/%s/' % model_name)
 
 
-def model_list(request):
-    model_name, form = get_model_name_and_form(request)
-    model = form.Meta.model
-    context = basic_context()
+def list_per_model(model_name, model):
+    context = {}
     context['entries'] = model.objects.all()[:200]  # just in case someone accesses the Unit list or something big
-    context['model'] = model_name
-    context['model_name'] = spaces_for_camel_case(model_name)
+    context['class'] = model_name
+    context['name'] = spaces_for_camel_case(model_name)
+    return context
+
+
+def model_list(request):
+    model_name, model = get_model_name_and_model(request)
+    context = basic_context()
     context['title'] = "Create " + spaces_for_camel_case(model_name) + "s"  # pluralize
+    context['models'] = []
+    abstract_models = {
+        'Function':
+            [('RelationalFunction', RelationalFunction),
+             ('ProbabilityFunction', ProbabilityFunction)],
+        'DiseaseSpread':
+            [('DirectSpread', DirectSpread),
+             ('IndirectSpread', IndirectSpread),
+             ('AirborneSpread', AirborneSpread)]}
+    if model_name in abstract_models.keys():
+        for local_name, local_model in abstract_models[model_name]:
+            context['models'].append(list_per_model(local_name, local_model))
+    else:
+        context['models'].append(list_per_model(model_name, model))
     return render(request, 'ScenarioCreator/ModelList.html', context)
 
 

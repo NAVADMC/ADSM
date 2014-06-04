@@ -658,7 +658,7 @@ class ZoneEffectOnProductionType(models.Model):
     cost_of_surveillance_per_animal_day = MoneyField(default=0.0,
         help_text='Cost of surveillance per animal per day in this zone.', )
     def __str__(self):
-        return "%s Zone -> %s" % (self.zone, self.production_type)
+        return "%s Zone -> %s" % (self.zone.zone_description, self.production_type)
 
 
 class ReadAllCodes(models.Model):
