@@ -33,16 +33,20 @@ urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
                                         ["url('^DiseaseSpread/$', 'ScenarioCreator.views.disease_spread')",
                                          "url('^AssignProtocols/$', 'ScenarioCreator.views.assign_protocols')",
                                          "url('^AssignProgressions/$', 'ScenarioCreator.views.assign_progressions')",
+
                                          "url('^Population/$', 'ScenarioCreator.views.population')",
+                                         "url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population')",
+
                                          "url('^SaveScenario/$', 'ScenarioCreator.views.save_scenario')",
                                          "url('^NewScenario/$', 'ScenarioCreator.views.new_scenario')",
                                          "url('^Workspace/$', 'ScenarioCreator.views.file_dialog')",
-                                         "url('^OpenScenario/(?P<target>[\w\s-]+)/$', 'ScenarioCreator.views.open_scenario')",
-                                         "url('^DeleteScenario/(?P<target>[\w\s-]+)/$', 'ScenarioCreator.views.delete_scenario')",
-                                         "url('^Download/(?P<target>[\w\s-]+)/$', 'ScenarioCreator.views.download_scenario')",
-                                         "url('^Copy/(?P<target>[\w\s-]+)/$', 'ScenarioCreator.views.copy_scenario')",
+
+                                         "url('^OpenScenario/(?P<target>.+)/$', 'ScenarioCreator.views.open_scenario')",
+                                         "url('^DeleteScenario/(?P<target>.+)/$', 'ScenarioCreator.views.delete_scenario')",
+                                         "url('^Download/(?P<target>.+)/$', 'ScenarioCreator.views.download_file')",
+                                         "url('^Copy/(?P<target>.+)/$', 'ScenarioCreator.views.copy_file')",
                                          "url('^Upload/$', 'ScenarioCreator.views.upload_scenario')",
-                                         "url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population')",
+
                                          "url('^RunSimulation/$', 'ScenarioCreator.views.run_simulation')",
                                         ])
 

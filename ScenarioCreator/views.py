@@ -346,13 +346,16 @@ def delete_entry(request, primary_key):
 
 
 def workspace_path(target):
-    return "./workspace/"+target+".sqlite3"
-    #os.path.join(BASE_DIR, 'settings.sqlite3')
+    return "./workspace/"+target
+
+
+def file_list(extension=''):
+    db_files = glob("./workspace/*" + extension)
+    return map(lambda f: os.path.basename(f), db_files)  # remove directory and extension
 
 
 def file_dialog(request):
-    db_files = glob("./workspace/*.sqlite3")
-    db_files = map(lambda f: os.path.splitext(os.path.basename(f))[0], db_files)  # remove directory and extension
+    db_files = file_list(".sqlite3")
     context = basic_context()
     context['db_files'] = db_files
     context['title'] = 'Select a new Scenario to Open'
@@ -391,7 +394,6 @@ def delete_scenario(request, target):
 
 
 def open_scenario(request, target):
-    # if os.path.isfile(workspace_path(target)):
     print("Copying ", workspace_path(target), "to", activeSession())
     shutil.copy(workspace_path(target), activeSession())
     scenario_filename(target)
@@ -424,18 +426,18 @@ def new_scenario(request):
     return redirect('/setup/Scenario/1/')
 
 
-def copy_scenario(request, target):
-    copy_name = target + ' - Copy'  #re.sub(r'(.*)\.sqlite3', r'\6 - Copy\.sqlite3', target)
+def copy_file(request, target):
+    copy_name = re.sub(r'(?P<name>.*)\.(?P<ext>.*)', r'\g<name> - Copy.\g<ext>', target)
     print("Copying ", target, "to", copy_name)
     shutil.copy(workspace_path(target), workspace_path(copy_name))
     return redirect('/setup/Workspace/')
 
 
-def download_scenario(request, target):
+def download_file(request, target):
     file_path = workspace_path(target)
     f = open(file_path, "rb")
-    response = HttpResponse(f, content_type="application/x-sqllite")
-    response['Content-Disposition'] = 'attachment; filename="' + target + '.sqlite3"'
+    response = HttpResponse(f, content_type="application/x-sqlite")  # TODO: generic content type
+    response['Content-Disposition'] = 'attachment; filename="' + target
     return response
 
 
@@ -511,8 +513,7 @@ def population(request):
         context['formset'] = initialized_formset
         context['filter_info'] = filter_info(request, params)
     else:
-        xml_files = glob("./workspace/*.xml")
-        xml_files = map(lambda f: os.path.splitext(os.path.basename(f))[0], xml_files)  # remove directory and extension
+        xml_files = file_list(".xml")
         context['xml_files'] = xml_files
     return render(request, 'ScenarioCreator/Population.html', context)
 
