@@ -345,6 +345,6 @@ body .modal-dialog {
     color:white;
 }
 
-.flipped {
+a.collapsed img {
     -webkit-transform: scaleY(-1);
 }
