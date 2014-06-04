@@ -5,6 +5,7 @@
 {% block content %}
     <h1>{{ title }}</h1>
 
+    <div class="model-banner">{{ model_name }}<span class="pull-right"><img src="{{ STATIC_URL }}icons/collapse.png" alt="collapse" class="icon"/></span></div>
     <ul id="file_list">
         <li><a href="/setup/{{model}}/new/"> + New {{ model_name }}</a>
 
@@ -16,4 +17,7 @@
         {% endfor %}
     </ul>
 
+    <p></p>
+
+    <p class="help-text">{{ help_text }}</p>
 {% endblock %}

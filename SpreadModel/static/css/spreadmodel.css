@@ -5,7 +5,11 @@ body {
 }
 
 h1 {
-    font-size: 22pt;
+    font-size: 14pt;
+    font-weight: 600;
+}
+
+h1, h2, h3, h4 {
     margin-bottom: 20px;
 }
 
@@ -104,7 +108,7 @@ body>nav {
 
 body>section {
     margin-top: 44px;
-    padding-top: 0px;
+    padding-top: 1px;
     margin-left:  220px;
     padding-left: 40px;
 }
@@ -245,7 +249,7 @@ select {
 }
 
 #file_list {
-    margin-top: 20px;
+    margin-top: 5px;
     max-width: 600px
 }
 
@@ -321,4 +325,13 @@ body .modal-dialog {
 .controls ul li label {  /*Radio buttons on multi-choice fields are giant without this */
     font-size: 10pt;
     font-weight: 400;
+}
+
+.model-banner {
+    background-color: #00477f;
+    border:5px solid #00477f;
+    color: white;
+    font-size: 14pt;
+    max-width: 600px;
+    line-height: 27px;
 }
