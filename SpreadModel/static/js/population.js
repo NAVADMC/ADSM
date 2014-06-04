@@ -1,4 +1,48 @@
+var progressBar = (function(){
 
+    var progressBar = $('<div class="progress-bar" style="width: 0%;"></div>');
+    var progressStatus = $('<div class="progress-status">Upload starting...</div>');
+    var progressInterval;
+
+    var progressChecker =  function() {
+        $.get('/setup/UploadPopulation/', function(data){
+            if (data.percent <= 0) {
+                var newWidth = progressBar.width() < 100 ? progressBar.width()+2 : null;
+                setStatus(data.status, newWidth);
+            } else if (data.percent >= 100) {
+                var newWidth = progressBar.width() < 500 ? progressBar.width()+1 : null;
+                setStatus(data.status, newWidth);
+            } else {
+                setStatus(data.status + " " + Math.round(data.percent*100)/100 + "%", (data.percent*0.7 + 20));
+            }
+        });
+    };
+
+    var setStatus = function(text, width) {
+        console.log(width)
+        if (text)
+            progressStatus.html(text);
+        if (typeof(width) == "number")
+            progressBar.css('width', width + "%");
+    };
+
+    return {
+        'show': function(){
+            $('#load_population_widget')
+                .hide()
+                .after($('<div class="progress progress-striped active" style="width:500px"></div>')
+                    .append(progressBar))
+                .after(progressStatus);
+        },
+        'startProgressChecker': function() {
+            progressInterval = progressInterval || setInterval(progressChecker, 500);
+        },
+        'stopProgressChecker': function() {
+            clearInterval(progressInterval);
+        },
+        'setStatus': setStatus
+    };
+})();
 
 $(function(){
     $('#submit-id-submit').attr('disabled', 'disabled');
@@ -8,9 +52,14 @@ $(function(){
     });
 
 
-    var progressBar = $('<div class="progress-bar" style="width: 0%;"></div>');
-    var progressStatus = $('<div class="progress-status">Upload starting...</div>');
-    var progressInterval;
+    $(document).on('click','.ajax-post', function(e) {
+        e.preventDefault();
+        $.post($(this).attr('href'), $(this).data(), completeHandler);
+        progressBar.show();
+        progressBar.setStatus('Loading...', 10);
+        progressBar.startProgressChecker();
+    });
+
 
     $('#file-upload').on('submit', function(e){
         e.preventDefault();
@@ -33,41 +82,22 @@ $(function(){
             contentType: false,
             processData: false
         });
-        $('#file-upload').hide().after($('<div class="progress progress-striped active" style="width:500px"></div>').append(progressBar)).after(progressStatus);
+        progressBar.show();
     });
     var progressHandler = function(progress) {
         var percent_uploaded = (progress.loaded/progress.total)*100;
-        progressStatus.html('Loading file ' + Math.round(percent_uploaded) + '%');
-        progressBar.css('width', percent_uploaded*0.1 + "%");
+        progressBar.setStatus('Loading file ' + Math.round(percent_uploaded) + '%', percent_uploaded*0.1);
         if (progress.loaded == progress.total) {
-            progressInterval = setInterval(progressChecker, 500);
+            progressBar.startProgressChecker();
         }
     };
     var completeHandler = function(e) {
-        clearInterval(progressInterval);
+        progressBar.stopProgressChecker();
         window.location = e.redirect;
     };
     var errorHandler = function(e) {
         console.log('error', e);
-        clearInterval(progressInterval);
-    };
-    var progressChecker = function() {
-        $.get('/setup/UploadPopulation/', function(data){
-            if (data.percent <= 0) {
-                progressStatus.html(data.status);
-                if (progressBar.width() < 100) {
-                    progressBar.width(progressBar.width()+2);
-                }
-            } else if (data.percent >= 100) {
-                progressStatus.html(data.status);
-                if (progressBar.width() < 500) {
-                    progressBar.width(progressBar.width()+1);
-                }
-            } else {
-                progressStatus.html(data.status + " " + Math.round(data.percent*100)/100 + "%");
-                progressBar.css('width', (data.percent*0.7 + 20) + "%");
-            }
-        });
+        progressBar.stopProgressChecker();
     };
 });
 

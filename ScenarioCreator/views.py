@@ -458,16 +458,16 @@ def upload_population(request):
     session = SmSession.objects.get(pk=1)
     if 'GET' in request.method:
         json = '{"status": "%s", "percent": "%s"}' % (session.population_upload_status, session.population_upload_percent*100)
-        return HttpResponse(json, mimetype="application/json")
+        return HttpResponse(json, content_type="application/json")
 
     session.set_population_upload_status("Processing file")
-    filename = handle_file_upload(request)  # now we know the file is in the workspace
+    filename = request.POST.get('filename') if 'filename' in request.POST else handle_file_upload(request)
     model = Population(source_file=filename)
     model.save()
     unsaved_changes(True)
     # wait for Population parsing (up to 5 minutes)
     session.reset_population_upload_status()
-    return HttpResponse('{"status": "complete", "redirect": "/setup/Population/"}', mimetype="application/json")
+    return HttpResponse('{"status": "complete", "redirect": "/setup/Population/"}', content_type="application/json")
 
 
 def filtering_params(request):
@@ -510,6 +510,10 @@ def population(request):
         initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:30])
         context['formset'] = initialized_formset
         context['filter_info'] = filter_info(request, params)
+    else:
+        xml_files = glob("./workspace/*.xml")
+        xml_files = map(lambda f: os.path.splitext(os.path.basename(f))[0], xml_files)  # remove directory and extension
+        context['xml_files'] = xml_files
     return render(request, 'ScenarioCreator/Population.html', context)
 
 
