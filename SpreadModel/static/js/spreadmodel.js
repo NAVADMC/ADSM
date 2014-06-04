@@ -28,13 +28,13 @@ $(function(){
         $(this).parent('form').submit();
     })
 
-    $('[data-remove-file]').click(function(){
-        var filename = $(this).attr('data-remove-file')
-        var link = '/setup/DeleteScenario/' + filename
+    $('[data-delete-link]').click(function(){
+        var link = $(this).attr('data-delete-link')
+        var object_name = link.split('/').slice(-1)[0]
         var dialog = new BootstrapDialog.show({
             title: 'Delete Scenario Confirmation',
             type: BootstrapDialog.TYPE_WARNING,
-            message: 'Are you sure you want to delete <strong>' + filename + '</strong>?',
+            message: 'Are you sure you want to delete <strong>' + object_name + '</strong>?',
             buttons: [
                 {
                     label: 'Cancel',
