@@ -342,3 +342,7 @@ body .modal-dialog {
 .model-banner a{
     color:white;
 }
+
+.flipped {
+    -webkit-transform: scaleY(-1);
+}

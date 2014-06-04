@@ -54,6 +54,13 @@ $(function(){
         });
     })
 
+    $('a:has([data-toggle="flipped"])').click(function(){
+        var child = $(this).find('[data-toggle="flipped"]');
+        if(child.hasClass('flipped'))
+            child.removeClass('flipped');
+        else
+            child.addClass('flipped');
+    })
 })
 
 
