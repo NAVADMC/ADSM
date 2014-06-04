@@ -534,7 +534,7 @@ def filter_info(request, params):
 def population(request):
     """"See also Pagination https://docs.djangoproject.com/en/dev/topics/pagination/"""
     context = basic_context()
-    FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated)
+    FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated, can_delete=True)
     if save_formset_succeeded(FarmSet, Unit, context, request):
         return redirect(request.path)
     if Population.objects.filter(id=1).exists():
