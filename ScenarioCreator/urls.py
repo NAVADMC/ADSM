@@ -15,7 +15,7 @@ whether it is a model or not."""
 def generate_urls_from_models(input_file, extra_urls=()):
     assert hasattr(extra_urls, '__getitem__')
     lines = open(input_file, 'r').readlines()
-    model_strings = []
+    model_strings = extra_urls  # extra_urls is placed first so that they take precedence over auto-urls
     for line in lines:
         if 'class' in line[:5]:
             model_name = re.split('\W+', line)[1]
@@ -25,7 +25,6 @@ def generate_urls_from_models(input_file, extra_urls=()):
             model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/copy/$', 'ScenarioCreator.views.copy_entry')")
             model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/delete/$', 'ScenarioCreator.views.delete_entry')")
 
-    model_strings += extra_urls
     output = "patterns('', " + ",\n         ".join(model_strings) + ")"
     return eval(output)
 

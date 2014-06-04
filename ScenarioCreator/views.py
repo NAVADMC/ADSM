@@ -48,7 +48,7 @@ def simulation_ready_to_run(context):
     return all(context.values())
 
 
-def basic_context():  # TODO: This might not be performant... but it's nice to have a live status
+def basic_context():
     PT_count = ProductionType.objects.count()
     context =  {'filename': scenario_filename(),
             'unsaved_changes': unsaved_changes(),
