@@ -19,7 +19,8 @@ def generate_urls_from_models(input_file, extra_urls=()):
     for line in lines:
         if 'class' in line[:5]:
             model_name = re.split('\W+', line)[1]
-            model_strings.append("url('^" + model_name + "/new/$', 'ScenarioCreator.views.new_entry')")
+            model_strings.append("url('^" + model_name + "/$',                      'ScenarioCreator.views.model_list')")
+            model_strings.append("url('^" + model_name + "/new/$',                  'ScenarioCreator.views.new_entry')")
             model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry')")
             model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/copy/$', 'ScenarioCreator.views.copy_entry')")
             model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/delete/$', 'ScenarioCreator.views.delete_entry')")
@@ -34,7 +35,7 @@ urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
                                          "url('^AssignProtocols/$', 'ScenarioCreator.views.assign_protocols')",
                                          "url('^AssignProgressions/$', 'ScenarioCreator.views.assign_progressions')",
 
-                                         "url('^Population/$', 'ScenarioCreator.views.population')",
+                                         "url('^Populations/$', 'ScenarioCreator.views.population')",
                                          "url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population')",
 
                                          "url('^SaveScenario/$', 'ScenarioCreator.views.save_scenario')",

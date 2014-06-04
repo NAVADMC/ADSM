@@ -1,0 +1,19 @@
+{% extends 'ScenarioCreator/navigationPane.html' %}
+{% load floppyforms %}
+{% load crispy_forms_tags  %}
+
+{% block content %}
+    <h1>{{ title }}</h1>
+
+    <ul id="file_list">
+        <li><a href="/setup/{{model}}/new/"> + New {{ model_name }}</a>
+
+        {% for entry in entries %}
+            <li><a href="/setup/{{model}}/{{entry.pk}}/">{{ entry }}</a>
+                <a href="/setup/{{model}}/{{entry.pk}}/delete/" class="delete-button" data-remove-entry="{{model}}/{{entry.pk}}"><img src="{{ STATIC_URL }}icons/delete.png" alt="Delete" class="icon pull-right"></a>
+                <a href="/setup/{{model}}/{{entry.pk}}/copy/" ><img alt="Copy" src="{{ STATIC_URL }}icons/copy.png" class="icon pull-right"></a>
+                </li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}

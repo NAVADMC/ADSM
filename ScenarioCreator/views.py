@@ -224,7 +224,7 @@ def save_new_instance(initialized_form, request):
                'model': model_name,
                'status': 'success'}
         return HttpResponse(json.dumps(msg), content_type="application/json")
-    return redirect('/setup/%s/%i/' % (model_name, model_instance.pk))  # redirect to edit URL
+    return redirect('/setup/%s/' % model_name)  # redirect to edit URL
 
 
 def new_form(request, initialized_form, context):
@@ -247,7 +247,7 @@ def initialize_from_existing_model(primary_key, request):
     return initialized_form, model_name
 
 
-'''New / Edit / Copy trio that are called from URLs'''
+'''New / Edit / Copy / Delete / List that are called from model generated URLs'''
 def new_entry(request):
     model_name, form = get_model_name_and_form(request)
     if model_name == 'RelationalFunction':
@@ -301,7 +301,18 @@ def delete_entry(request, primary_key):
     model = form.Meta.model
     model.objects.filter(pk=primary_key).delete()
     unsaved_changes(True)
-    return redirect('/setup/%s/new/' % model_name)
+    return redirect('/setup/%s/' % model_name)
+
+
+def model_list(request):
+    model_name, form = get_model_name_and_form(request)
+    model = form.Meta.model
+    context = basic_context()
+    context['entries'] = model.objects.all()[:200]  # just in case someone accesses the Unit list or something big
+    context['model'] = model_name
+    context['model_name'] = spaces_for_camel_case(model_name)
+    context['title'] = "Create " + spaces_for_camel_case(model_name) + "s"  # pluralize
+    return render(request, 'ScenarioCreator/ModelList.html', context)
 
 
 '''Utility Views for UI'''
@@ -469,7 +480,7 @@ def upload_population(request):
     unsaved_changes(True)
     # wait for Population parsing (up to 5 minutes)
     session.reset_population_upload_status()
-    return HttpResponse('{"status": "complete", "redirect": "/setup/Population/"}', content_type="application/json")
+    return HttpResponse('{"status": "complete", "redirect": "/setup/Populations/"}', content_type="application/json")
 
 
 def filtering_params(request):
