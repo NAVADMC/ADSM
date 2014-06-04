@@ -338,3 +338,7 @@ body .modal-dialog {
     max-width: 600px;
     line-height: 27px;
 }
+
+.model-banner a{
+    color:white;
+}
