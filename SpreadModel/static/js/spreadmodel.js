@@ -158,3 +158,7 @@ var modelModal = {
                   </div>\
                 </div>')
 }
+
+$(document).on('click', '[data-click-toggle]', function(){
+    $(this).toggleClass($(this).attr('data-click-toggle'))
+})

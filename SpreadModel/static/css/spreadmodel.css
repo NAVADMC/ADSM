@@ -348,3 +348,13 @@ body .modal-dialog {
 a.collapsed img {
     -webkit-transform: scaleY(-1);
 }
+
+th {
+    font-size: 14pt;
+}
+
+.selected {
+    font-weight: 600;
+    font-style: italic;
+    /*background-color: #cccccc;*/
+}
