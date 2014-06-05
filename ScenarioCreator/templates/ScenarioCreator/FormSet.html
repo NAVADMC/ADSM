@@ -3,19 +3,22 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
+    <script src="{{ STATIC_URL }}js/many-to-many-widget.js"></script>
 
     <h1 id="title">{{ title }}</h1>
 
 <form method="post" action="">
     {{ formset.management_form }}
     <table>
-        <tr>
-            {% for key, value in formset.0.fields.items %}
-                {% if value.label %}
-                    <th><h4>{{value.label}}</h4></th>
-                {% endif %}
-            {% endfor %}
-        </tr>
+        <thead>
+            <tr>
+                {% for key, value in formset.0.fields.items %}
+                    {% if value.label %}
+                        <th><h4>{{value.label}}</h4></th>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        </thead>
         <tbody>
             {% for form in formset %}
                 {{form.id}}
