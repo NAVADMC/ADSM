@@ -41,39 +41,6 @@ def activeSession():
     return os.path.basename(full_path)
 
 
-def simulation_ready_to_run(context):
-    context = dict(context)
-    # excluded statuses that shouldn't be blocking a simulation run
-    for key in ['filename', 'unsaved_changes', 'IndirectSpreads', 'AirborneSpreads', 'ProbabilityFunctions', 'RelationalFunctions']:
-        context.pop(key, None)
-    return all(context.values())
-
-
-def basic_context():
-    PT_count = ProductionType.objects.count()
-    context =  {'filename': scenario_filename(),
-            'unsaved_changes': unsaved_changes(),
-            'Scenario': Scenario.objects.count(),
-            'OutputSetting': OutputSettings.objects.count(),
-            'Population': Population.objects.count(),
-            'ProductionTypes': PT_count,
-            'Farms': Unit.objects.count(),
-            'Disease': Disease.objects.count(),
-            'Progressions': DiseaseProgression.objects.count(),
-            'ProgressionAssignment': DiseaseProgressionAssignment.objects.count() == PT_count and PT_count, #Fixed false complete status when there are no Production Types
-            'DirectSpreads': DirectSpread.objects.count(),
-            'AssignSpreads': ProductionTypePairTransmission.objects.count() >= PT_count and PT_count, #Fixed false complete status when there are no Production Types
-            'ControlMasterPlan': ControlMasterPlan.objects.count(),
-            'Protocols': ControlProtocol.objects.count(),
-            'ProtocolAssignments': ProtocolAssignment.objects.count(),
-            'Zones': Zone.objects.count(),
-            'ZoneEffects': ZoneEffectOnProductionType.objects.count(),
-            'ProbabilityFunctions': ProbabilityFunction.objects.count(),
-            'RelationalFunctions': RelationalFunction.objects.count()}
-    context['Simulation'] = simulation_ready_to_run(context)
-    return context
-
-
 def home(request):
     return redirect('/setup/Scenario/1/')
 
@@ -91,7 +58,6 @@ def extra_forms_needed():
 
 
 def disease_spread(request):
-    context = basic_context()
     extra_count, missing = extra_forms_needed()
     SpreadSet = modelformset_factory(ProductionTypePairTransmission, extra=extra_count, form=ProductionTypePairTransmissionForm)
 
@@ -102,9 +68,10 @@ def disease_spread(request):
             print(instances)
             unsaved_changes(True)
             return redirect(request.path)  # update these numbers after database save because they've changed
+
     except ValidationError:
         initialized_formset = SpreadSet(queryset=ProductionTypePairTransmission.objects.all())
-    context['formset'] = initialized_formset
+    context = {'formset': initialized_formset}
     for index, pt in enumerate(missing):
         index += ProductionTypePairTransmission.objects.count()
         context['formset'][index].fields['source_production_type'].initial = pt.id
@@ -143,22 +110,20 @@ def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, miss
 
 
 def assign_protocols(request):
-    context = basic_context()
     missing = ProductionType.objects.filter(protocolassignment__isnull=True)
     ProtocolSet = modelformset_factory(ProtocolAssignment, extra=len(missing), form=ProtocolAssignmentForm)
-    context['title'] = 'Assign a Control Protocol to each Production Type'
+    context = {'title': 'Assign a Control Protocol to each Production Type'}
     return populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request)
 
 
 def assign_progressions(request):
     """FormSet is pre-populated with existing assignments and it detects and fills in missing
     assignments with a blank form with production type filled in."""
-    context = basic_context()
     missing = ProductionType.objects.filter(diseaseprogressionassignment__isnull=True)
     ProgressionSet = modelformset_factory(DiseaseProgressionAssignment,
                                           extra=len(missing),
                                           form=DiseaseProgressionAssignmentForm)
-    context['title'] = 'Set what Progression each Production Type has with the Disease'
+    context = {'title': 'Set what Progression each Production Type has with the Disease'}
     return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request)
 
 
@@ -193,8 +158,7 @@ def relational_function(request, primary_key=None, doCopy=False):
 
     It is possible to integrate this code back into the standard new / edit / copy views by checking for
     context['formset'].  The extra logic for formsets could be kicked in only when one or more formsets are present."""
-    context = basic_context()
-    context = initialize_relational_form(context, primary_key, request)
+    context = initialize_relational_form({}, primary_key, request)
     context['formset'] = PointFormSet(instance=context['model'])
     if context['form'].is_valid():
         unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
@@ -259,9 +223,7 @@ def new_entry(request):
     if model_name == 'RelationalFunction':
         return relational_function(request)
     initialized_form = form(request.POST or None)
-    context = basic_context()
-    context['form'] = initialized_form
-    context['title'] = "Create a new " + spaces_for_camel_case(model_name)
+    context = {'form': initialized_form, 'title': "Create a new " + spaces_for_camel_case(model_name)}
     return new_form(request, initialized_form, context)
 
 
@@ -278,10 +240,9 @@ def edit_entry(request, primary_key):
         initialized_form.save()  # write instance updates to database
         unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
 
-    context = basic_context()
-    context['form'] = initialized_form
-    context['title'] = "Edit a " + spaces_for_camel_case(model_name)
-    context['model_link'] = '/setup/' + model_name + '/' + primary_key + '/'
+    context = {'form': initialized_form,
+               'title': "Edit a " + spaces_for_camel_case(model_name),
+               'model_link': '/setup/' + model_name + '/' + primary_key + '/'}
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
@@ -296,9 +257,8 @@ def copy_entry(request, primary_key):
     if initialized_form.is_valid() and request.method == 'POST':
         initialized_form.instance.pk = None  # This will cause a new instance to be created
         return save_new_instance(initialized_form, request)
-    context = basic_context()
-    context['form'] = initialized_form
-    context['title'] = "Copy a " + spaces_for_camel_case(model_name)
+    context = {'form': initialized_form,
+               'title': "Copy a " + spaces_for_camel_case(model_name)}
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
@@ -310,18 +270,16 @@ def delete_entry(request, primary_key):
 
 
 def list_per_model(model_name, model):
-    context = {}
-    context['entries'] = model.objects.all()[:200]  # just in case someone accesses the Unit list or something big
-    context['class'] = model_name
-    context['name'] = spaces_for_camel_case(model_name)
+    context = {'entries': model.objects.all()[:200],
+               'class': model_name,
+               'name': spaces_for_camel_case(model_name)}
     return context
 
 
 def model_list(request):
     model_name, model = get_model_name_and_model(request)
-    context = basic_context()
-    context['title'] = "Create " + spaces_for_camel_case(model_name) + "s"  # pluralize
-    context['models'] = []
+    context = {'title': "Create " + spaces_for_camel_case(model_name) + "s",
+               'models': []}
     abstract_models = {
         'Function':
             [('RelationalFunction', RelationalFunction),
@@ -390,9 +348,8 @@ def file_list(extension=''):
 
 def file_dialog(request):
     db_files = file_list(".sqlite3")
-    context = basic_context()
-    context['db_files'] = db_files
-    context['title'] = 'Select a new Scenario to Open'
+    context = {'db_files': db_files,
+               'title': 'Select a new Scenario to Open'}
     return render(request, 'ScenarioCreator/workspace.html', context)
 
 
@@ -533,7 +490,7 @@ def filter_info(request, params):
 
 def population(request):
     """"See also Pagination https://docs.djangoproject.com/en/dev/topics/pagination/"""
-    context = basic_context()
+    context = {}
     FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated, can_delete=True)
     if save_formset_succeeded(FarmSet, Unit, context, request):
         return redirect(request.path)
@@ -554,4 +511,4 @@ def population(request):
 
 def run_simulation(request):
     #execute system commands here
-    return render(request, 'ScenarioCreator/SimulationProgress.html', basic_context())
+    return render(request, 'ScenarioCreator/SimulationProgress.html', {})
