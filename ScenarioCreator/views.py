@@ -71,7 +71,7 @@ def disease_spread(request):
     assignment_set = production_type_permutations()
     SpreadSet = modelformset_factory(ProductionTypePairTransmission, extra=0, form=ProductionTypePairTransmissionForm)
     try:
-        initialized_formset = SpreadSet(request.POST, request.FILES, queryset=assignment_set)
+        initialized_formset = SpreadSet(request.POST, request.FILES, queryset=ProductionTypePairTransmission.objects.all())
         if initialized_formset.is_valid():
             instances = initialized_formset.save()
             print(instances)
@@ -79,7 +79,7 @@ def disease_spread(request):
             return redirect(request.path)  # update these numbers after database save because they've changed
 
     except ValidationError:
-        initialized_formset = SpreadSet(queryset=assignment_set)
+        initialized_formset = SpreadSet(queryset=ProductionTypePairTransmission.objects.all())
     context = {'formset': initialized_formset}
     context['title'] = 'How does Disease spread from one Production Type to another?'
     return render(request, 'ScenarioCreator/FormSet.html', context)

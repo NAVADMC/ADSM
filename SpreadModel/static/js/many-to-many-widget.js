@@ -214,7 +214,6 @@ many_to_many_widget = (function(form_state){
 
     function update_state_inputs(){
         var filters = construct_filter($(this).closest('tr'))
-        console.log('column_number', $(this).closest('td'))
         var col_name = get_column_name($(this).closest('td').index()+1)
         var values = {} //we have to wrap it for a variable dict key
         values[col_name] = $(this).val() // variable key name
