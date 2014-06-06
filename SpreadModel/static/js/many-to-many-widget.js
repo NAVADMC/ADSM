@@ -136,26 +136,27 @@ many_to_many_widget = (function(form_state){
             if(header_information[1][row_index]) //check if there's something in the second column (could be ragged)
                 row.append($('<td>').append(column.clone())); // column contains select
             else
-                row.append($('<td>'));//blank cell TODO: is a blank cell necessary?
+                row.append($('<td>'));//blank cell
         })
         return row;
     }
 
     function create_body_rows() {
         var tbody = $('<tbody>');
-        var header_information = []
+        var header_information = [];
         $('section form table tbody tr:last-child th').each(function (index) {
-            header_information[index] = $(this).find('option').map(extract_options)
+            header_information[index] = $(this).find('option').map(extract_options);
         })
 
-        var column_information = []
+        var column_information = [];
         $('section form table tbody tr:last-child td').each(function (index) {//copy the select
-            column_information[index] = $(this).find('select').clone().val('')// you will need to scrub id and name later
+            column_information[index] = $(this).find('select').clone()
+                .val('').removeAttr('id');
         });
 
-        var num_rows = Math.max(header_information[0].length, header_information[1].length) //
+        var num_rows = Math.max(header_information[0].length, header_information[1].length);
         for (var i = 0; i < num_rows; i++) {
-            tbody.append(render_row(header_information, column_information, i))
+            tbody.append(render_row(header_information, column_information, i));
         }
         return tbody;
     }
@@ -164,21 +165,24 @@ many_to_many_widget = (function(form_state){
         var print = $('section form table thead tr:nth-child(1) th:nth-child('+column_index+')').text()
         return print.toLowerCase().replace(/\s/g, "_")
     }
+
     var render = function(){
         my_table = $('<table>').append($('section form table thead').clone());
         insert_select_buttons();
         insert_bulk_selectors();
         my_table.append(create_body_rows())
-        update_input_states() //called from events normally, but we want to initialize
+        update_display_inputs() //called from events normally, but we want to initialize
 
         $('section form').before(my_table); //finally, insert everything into the DOM
+        //register event listener
+        my_table.find('tbody select').on('change', update_state_inputs)
     };
 
     /*Creates a filter using any selected items from the first column and the matching row header
     on the second column. */
     var construct_filter = function (row) {
-        var filter = {}
-        var sources_selected = $('tbody th:first-child .selected').map(function(){return $(this).attr('data-pk')})
+        var filter = {};
+        var sources_selected = $('tbody th:first-child .selected').map(function(){return $(this).attr('data-pk')});
         filter[get_column_name(1)] = sources_selected.length ? sources_selected :
             [$(row).find('th:first-child span').attr('data-pk')];
         filter[get_column_name(2)] = [$(row).find('th:nth-child(2) span').attr('data-pk')];
@@ -188,7 +192,7 @@ many_to_many_widget = (function(form_state){
 
     /*Ensures that the state of the displayed widget is consistent with form_state for the appropriate
     * row / column pairs.*/
-    function update_input_states(){
+    function update_display_inputs(){
         my_table.find('tbody tr').each(function(row_index, row){
             var filter = construct_filter(row)
             var row_values = form_state.get_consensus(filter);
@@ -203,19 +207,27 @@ many_to_many_widget = (function(form_state){
         })
     };
 
+    function update_state_inputs(){
+        var filters = construct_filter($(this).closest('tr'))
+        console.log('column_number', $(this).closest('td'))
+        var col_name = get_column_name($(this).closest('td').index()+1)
+        var values = {} //we have to wrap it for a variable dict key
+        values[col_name] = $(this).val() // variable key name
+        form_state.set(filters, values)
+    }
 
     //bulk apply
     function bulk_apply($bulk_selector){
         var column_number = $bulk_selector.closest('td').index() + 1
-        var destinations_selected = $('tbody th:nth-child(2) .selected').map(function(){return $(this).attr('data-pk')})
+        var destinations_selected = $('tbody th:nth-child(2) .selected')
         if( !destinations_selected.length )//empty =>  Drop .selected criteria and treat the whole column as selected
             $bulk_selector.closest('table').find('tbody :nth-child('+column_number+') :input')
-                .val($bulk_selector.val()) //set all values in the whole column
+                .val($bulk_selector.val()).trigger('change'); //set all values in the whole column
         else{
             $bulk_selector.closest('table').find('tbody tr').each(function(){ //for each row
                 if($(this).find('th:nth-child(2) .selected').length)   //if destination .selected
                     $(this).find('td:nth-child('+column_number+') :input')  //set the input value
-                        .val($bulk_selector.val());
+                        .val($bulk_selector.val()).trigger('change');
             })
         }
     }
@@ -227,8 +239,9 @@ many_to_many_widget = (function(form_state){
     return {
         'render': render,
         'get_column_name': get_column_name,
-        'update_input_states': update_input_states,
-        'bulk_apply': bulk_apply
+        'update_display_inputs': update_display_inputs,
+        'bulk_apply': bulk_apply,
+        'update_state_inputs': update_state_inputs
     }
 })(form_state)
 
@@ -237,7 +250,7 @@ many_to_many_widget = (function(form_state){
 
     /*EVENT HOOKS*/
     $(document).on('click', '[data-click-toggle]', function(){ //update every click
-        many_to_many_widget.update_input_states();
+        many_to_many_widget.update_display_inputs();
     });
     $(document).on('change', 'thead select', function(){ //update every click
         //TODO: add "Apply" button
@@ -247,12 +260,12 @@ many_to_many_widget = (function(form_state){
     $(document).on('click', 'button.select-all', function(){
         var col = $(this).closest('td').index()+1;
         $(this).closest('table').find('tbody tr :nth-child('+col+') span').addClass('selected')
-        many_to_many_widget.update_input_states();
+        many_to_many_widget.update_display_inputs();
     })
     $(document).on('click', 'button.deselect', function(){
         var col = $(this).closest('td').index()+1;
         $(this).closest('table').find('tbody tr :nth-child('+col+') span').removeClass('selected')
-        many_to_many_widget.update_input_states();
+        many_to_many_widget.update_display_inputs();
     })
 
 });
