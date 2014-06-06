@@ -240,9 +240,20 @@ many_to_many_widget = (function(form_state){
         many_to_many_widget.update_input_states();
     });
     $(document).on('change', 'thead select', function(){ //update every click
-        console.log($(this).index())
+        //TODO: add "Apply" button
         many_to_many_widget.bulk_apply($(this));
     });
+
+    $(document).on('click', 'button.select-all', function(){
+        var col = $(this).closest('td').index()+1;
+        $(this).closest('table').find('tbody tr :nth-child('+col+') span').addClass('selected')
+        many_to_many_widget.update_input_states();
+    })
+    $(document).on('click', 'button.deselect', function(){
+        var col = $(this).closest('td').index()+1;
+        $(this).closest('table').find('tbody tr :nth-child('+col+') span').removeClass('selected')
+        many_to_many_widget.update_input_states();
+    })
 
 });
 
