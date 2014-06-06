@@ -57,12 +57,21 @@ def extra_forms_needed():
     return extra_count, missing
 
 
-def disease_spread(request):
-    extra_count, missing = extra_forms_needed()
-    SpreadSet = modelformset_factory(ProductionTypePairTransmission, extra=extra_count, form=ProductionTypePairTransmissionForm)
+def production_type_permutations():
+    spread_assignments = []
+    pts = list(ProductionType.objects.all())
+    for source in pts:
+        for destination in pts:
+            spread_assignments.append(ProductionTypePairTransmission.objects.get_or_create(
+                source_production_type=source, destination_production_type=destination)[0])  # first index is object
+    return spread_assignments
 
+
+def disease_spread(request):
+    assignment_set = production_type_permutations()
+    SpreadSet = modelformset_factory(ProductionTypePairTransmission, extra=0, form=ProductionTypePairTransmissionForm)
     try:
-        initialized_formset = SpreadSet(request.POST, request.FILES, queryset=ProductionTypePairTransmission.objects.all())
+        initialized_formset = SpreadSet(request.POST, request.FILES, queryset=assignment_set)
         if initialized_formset.is_valid():
             instances = initialized_formset.save()
             print(instances)
@@ -70,13 +79,8 @@ def disease_spread(request):
             return redirect(request.path)  # update these numbers after database save because they've changed
 
     except ValidationError:
-        initialized_formset = SpreadSet(queryset=ProductionTypePairTransmission.objects.all())
+        initialized_formset = SpreadSet(queryset=assignment_set)
     context = {'formset': initialized_formset}
-    for index, pt in enumerate(missing):
-        index += ProductionTypePairTransmission.objects.count()
-        context['formset'][index].fields['source_production_type'].initial = pt.id
-        context['formset'][index].fields['destination_production_type'].initial = pt.id
-
     context['title'] = 'How does Disease spread from one Production Type to another?'
     return render(request, 'ScenarioCreator/FormSet.html', context)
 
