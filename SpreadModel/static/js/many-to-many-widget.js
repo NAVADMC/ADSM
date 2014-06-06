@@ -86,10 +86,15 @@ form_state = (function(form){
                 $('#'+input_name).val(variables[key]);
             }
         })
+        save();
     };
 
+    var save = debounce(function() {
+        $.post('', form.serialize())
+    }, 500); //interval = 500 milliseconds
+
     return {
-        'save': function(){$.post('', form.serialize())},
+        'save': save,
         'get':  get,
         'set':  set,
         'get_consensus': get_consensus
