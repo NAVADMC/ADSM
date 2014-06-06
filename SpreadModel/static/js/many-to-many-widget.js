@@ -94,11 +94,10 @@ many_to_many_widget = (function(form_state){
 
     function insert_bulk_selectors() {
         $('section form table tbody tr:last-child td').each(function (index) {
-            if (index > 1) {//3D: we want to skip the first two columns (source, destination)
-                var bulk_select = $(this).find('select').clone()
-                bulk_select.attr('id', bulk_select.attr('id').replace(form_prefix, 'bulk-')).val("");
-                my_table.find('thead tr:nth-child(2)').append($('<td>').append(bulk_select)); //sensitive selector
-            }
+            //headers source and destination are skipped because they are not <td>
+            var bulk_select = $(this).find('select').clone()
+            bulk_select.attr('id', bulk_select.attr('id').replace(form_prefix, 'bulk-')).val("");
+            my_table.find('thead tr:nth-child(2)').append($('<td>').append(bulk_select)); //sensitive selector
         });
     }
 
@@ -109,35 +108,38 @@ many_to_many_widget = (function(form_state){
         }
     }
 
-    function render_row(column_information, row_index){
+    function render_row(header_information, column_information, row_index){
         var row = $('<tr>')
+        for(var col_index in [0,1]) //list row headers from header_information
+            row.append($('<th>').append('<span data-click-toggle="selected" data-pk="'+
+                header_information[col_index][row_index][1] + '">' +
+                header_information[col_index][row_index][0] + '</span>')); //column contains row list
+
+        console.log(row_index, column_information)
         $.each(column_information, function(col_index, column){//for each column
-            var td = $('<td>');
-            if(col_index < 2){
-                td.append('<span data-click-toggle="selected" data-pk="'+ column[row_index][1] + '">' + column[row_index][0] + '</span>'); //column contains row list
-            }
-            else if(column_information[1][row_index]){ //check if there's something in the second column (could be ragged)
-                td.append(column.clone()); // column contains select
-            }
-            row.append(td);
+            if(header_information[1][row_index]) //check if there's something in the second column (could be ragged)
+                row.append($('<td>').append(column.clone())); // column contains select
+            else
+                row.append($('<td>'));//blank cell TODO: is a blank cell necessary?
         })
         return row;
     }
 
     function create_body_rows() {
         var tbody = $('<tbody>');
+        var header_information = []
+        $('section form table tbody tr:last-child th').each(function (index) {
+            header_information[index] = $(this).find('option').map(extract_options)
+        })
+
         var column_information = []
-        $('section form table tbody tr:last-child td').each(function (index) {
-            if (index < 2) {//first two columns
-                column_information[index] = $(this).find('option').map(extract_options)
-            }
-            else {//for remaining columns, copy the select
-                column_information[index] = $(this).find('select').clone().val('')// you will need to scrub id and name later
-            }
+        $('section form table tbody tr:last-child td').each(function (index) {//copy the select
+            column_information[index] = $(this).find('select').clone().val('')// you will need to scrub id and name later
         });
-        var num_rows = Math.max(column_information[0].length, column_information[1].length) //
+
+        var num_rows = Math.max(header_information[0].length, header_information[1].length) //
         for (var i = 0; i < num_rows; i++) {
-            tbody.append(render_row(column_information, i))
+            tbody.append(render_row(header_information, column_information, i))
         }
         return tbody;
     }
@@ -151,26 +153,30 @@ many_to_many_widget = (function(form_state){
         insert_select_buttons();
         insert_bulk_selectors();
         my_table.append(create_body_rows())
-        update_data() //called from events normally, but we want to initialize
+        update_input_states() //called from events normally, but we want to initialize
 
         $('section form').before(my_table); //finally, insert everything into the DOM
     };
 
+    var construct_filter = function (row) {
+        var filter = {}
+        $(row).find('th').each(function(column_index, column){
+            var column_name = get_column_name(column_index+1);//column name
+            var value = $(column).find('span').attr('data-pk');
+            filter[column_name] = value;
+        })
+        return filter
+    };
+
     /*Ensures that the state of the displayed widget is consistent with form_state for the appropriate
     * row / column pairs.*/
-    function update_data(){
+    function update_input_states(){
         my_table.find('tbody tr').each(function(row_index, row){
-            var filter = {}
+            var filter = construct_filter(row)
             $(row).find('td').each(function(column_index, column){
-                var column_name = get_column_name(column_index+1);//column name
-                if(column_index < 2){
-                    var value = $(column).find('span').attr('data-pk');
-                    filter[column_name] = value;
-                } else {
-                    var row_values = form_state.get(filter)[0]; //we only need the first match (should only be one)
-                    console.log(row_values)
-                    $(column).find(':input').val(row_values[column_name]) //set the select to the matching formset select
-                }
+                var column_name = get_column_name(column_index+3);//+3 = +1 (not zero indexed) + 2 for the two row headers
+                var row_values = form_state.get(filter)[0]; //we only need the first match (should only be one)
+                $(column).find(':input').val(row_values[column_name]) //set the select to the matching formset select
             })
         })
     };
@@ -185,11 +191,11 @@ many_to_many_widget = (function(form_state){
     return {
         'render': render,
         'get_column_name': get_column_name,
-        'update_data': update_data
+        'update_input_states': update_input_states
     }
 })(form_state)
 
-//    headerify_columns1_2();
+    headerify_columns1_2();
     many_to_many_widget.render();
 });
 
