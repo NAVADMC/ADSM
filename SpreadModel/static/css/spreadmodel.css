@@ -353,8 +353,14 @@ th {
     font-size: 14pt;
 }
 
+table tbody span {
+    width: 139px;
+    line-height: 21px;
+    display: block;
+}
+
 .selected {
     font-weight: 600;
     font-style: italic;
-    /*background-color: #cccccc;*/
+    background-color: #d7f5ff;
 }

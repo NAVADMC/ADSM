@@ -8,6 +8,12 @@ var form_state;
 var many_to_many_widget;
 var form_prefix = /form-(\d+)-/g;
 
+function headerify_columns1_2() {
+    $('tbody tr td:nth-child(-n+2)').replaceWith(function (i, html) {
+        return '<th>' + html + '</th>';
+    });
+}
+
 $(function(){
 
 //state object
@@ -183,8 +189,7 @@ many_to_many_widget = (function(form_state){
     }
 })(form_state)
 
-
-
-many_to_many_widget.render();
+//    headerify_columns1_2();
+    many_to_many_widget.render();
 });
 
