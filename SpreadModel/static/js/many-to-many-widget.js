@@ -225,7 +225,7 @@ many_to_many_widget = (function(form_state){
         var column_number = $bulk_selector.closest('td').index() + 1
         var destinations_selected = $('tbody th:nth-child(2) .selected')
         if( !destinations_selected.length )//empty =>  Drop .selected criteria and treat the whole column as selected
-            $bulk_selector.closest('table').find('tbody :nth-child('+column_number+') :input')
+            $bulk_selector.closest('table').find('tbody tr :nth-child('+column_number+') :input')
                 .val($bulk_selector.val()).trigger('change'); //set all values in the whole column
         else{
             $bulk_selector.closest('table').find('tbody tr').each(function(){ //for each row
