@@ -39,21 +39,37 @@ form_state = (function(form){
         if(typeof filters != "object"){
             throw new TypeError("Must be an object containing, (field, value) pairs");
         }
-        var matching_row = [];
+        var matching_rows = [];
         form.find('tbody tr').each(function(){
             var row_data = format_form_array($(this).find(':input').serializeArray());
             var pass = true;
             $.each( filters, function( key, value ) {
+                if(! value instanceof Array){
+                    value = [value];//ensure array
+                }
                 if(!row_data.hasOwnProperty(key))
                     return pass = false;
-                else if(row_data[key] != value)
+                else if($.inArray(row_data[key], value) == -1) //key not in value
                     return pass = false;
             })// we have gotten through all filters with matching value == test passed
             if( pass ){
-                matching_row.push(row_data);
+                matching_rows.push(row_data);
             }
         });
-        return matching_row
+        return matching_rows
+    };
+
+    var get_consensus = function(filters){
+        var matching_rows = get(filters);
+        var consensus_row = matching_rows[0];//TODO: handle empty
+        $.each(matching_rows, function(row_index, row_values){
+            $.each(row_values, function(key, value){
+                if(consensus_row[key] != value){ //inconsistency
+                    consensus_row[key] = 'differs'
+                }
+            })
+        });
+        return consensus_row
     };
 
     //This will set all rows that meets the filters criteria.  You can pass in multiple input variables
@@ -75,7 +91,8 @@ form_state = (function(form){
     return {
         'save': function(){$.post('', form.serialize())},
         'get':  get,
-        'set':  set
+        'set':  set,
+        'get_consensus': get_consensus
     };
 })($('section form'));
 
@@ -115,7 +132,6 @@ many_to_many_widget = (function(form_state){
                 header_information[col_index][row_index][1] + '">' +
                 header_information[col_index][row_index][0] + '</span>')); //column contains row list
 
-        console.log(row_index, column_information)
         $.each(column_information, function(col_index, column){//for each column
             if(header_information[1][row_index]) //check if there's something in the second column (could be ragged)
                 row.append($('<td>').append(column.clone())); // column contains select
@@ -158,13 +174,15 @@ many_to_many_widget = (function(form_state){
         $('section form').before(my_table); //finally, insert everything into the DOM
     };
 
+    /*Creates a filter using any selected items from the first column and the matching row header
+    on the second column. */
     var construct_filter = function (row) {
         var filter = {}
-        $(row).find('th').each(function(column_index, column){
-            var column_name = get_column_name(column_index+1);//column name
-            var value = $(column).find('span').attr('data-pk');
-            filter[column_name] = value;
-        })
+        var sources_selected = $('tbody th:first-child .selected').map(function(){return $(this).attr('data-pk')})
+        filter[get_column_name(1)] = sources_selected.length ? sources_selected :
+            [$(row).find('th:first-child span').attr('data-pk')];
+        filter[get_column_name(2)] = [$(row).find('th:nth-child(2) span').attr('data-pk')];
+        //TODO: assumption may not apply to zones
         return filter
     };
 
@@ -173,16 +191,34 @@ many_to_many_widget = (function(form_state){
     function update_input_states(){
         my_table.find('tbody tr').each(function(row_index, row){
             var filter = construct_filter(row)
+            var row_values = form_state.get_consensus(filter);
             $(row).find('td').each(function(column_index, column){
                 var column_name = get_column_name(column_index+3);//+3 = +1 (not zero indexed) + 2 for the two row headers
-                var row_values = form_state.get(filter)[0]; //we only need the first match (should only be one)
-                $(column).find(':input').val(row_values[column_name]) //set the select to the matching formset select
+                $(column).find('select option.differs').remove();
+                if(row_values[column_name] == 'differs'){
+                    $(column).find('select').append('<option class="differs" value="differs">- Differs -</option>');
+                }
+                $(column).find(':input').val(row_values[column_name]); //set the select to the matching formset select
             })
         })
     };
 
 
     //bulk apply
+    function bulk_apply($bulk_selector){
+        var column_number = $bulk_selector.closest('td').index() + 1
+        var destinations_selected = $('tbody th:nth-child(2) .selected').map(function(){return $(this).attr('data-pk')})
+        if( !destinations_selected.length )//empty =>  Drop .selected criteria and treat the whole column as selected
+            $bulk_selector.closest('table').find('tbody :nth-child('+column_number+') :input')
+                .val($bulk_selector.val()) //set all values in the whole column
+        else{
+            $bulk_selector.closest('table').find('tbody tr').each(function(){ //for each row
+                if($(this).find('th:nth-child(2) .selected').length)   //if destination .selected
+                    $(this).find('td:nth-child('+column_number+') :input')  //set the input value
+                        .val($bulk_selector.val());
+            })
+        }
+    }
     //select source
     //select destination
     //main selects under bulk need an event watcher for incongruous source values == "varies" <option>
@@ -191,11 +227,22 @@ many_to_many_widget = (function(form_state){
     return {
         'render': render,
         'get_column_name': get_column_name,
-        'update_input_states': update_input_states
+        'update_input_states': update_input_states,
+        'bulk_apply': bulk_apply
     }
 })(form_state)
 
     headerify_columns1_2();
     many_to_many_widget.render();
+
+    /*EVENT HOOKS*/
+    $(document).on('click', '[data-click-toggle]', function(){ //update every click
+        many_to_many_widget.update_input_states();
+    });
+    $(document).on('change', 'thead select', function(){ //update every click
+        console.log($(this).index())
+        many_to_many_widget.bulk_apply($(this));
+    });
+
 });
 
