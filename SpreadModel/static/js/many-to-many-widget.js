@@ -119,7 +119,8 @@ many_to_many_widget = (function(form_state){
             //headers source and destination are skipped because they are not <td>
             var bulk_select = $(this).find('select').clone()
             bulk_select.attr('id', bulk_select.attr('id').replace(form_prefix, 'bulk-')).val("");
-            my_table.find('thead tr:nth-child(2)').append($('<td>').append(bulk_select)); //sensitive selector
+            var button = $('<button>Apply</button>').addClass('bulk-apply')
+            my_table.find('thead tr:nth-child(2)').append($('<td>').append(bulk_select).append(button)); //sensitive selector
         });
     }
 
@@ -271,6 +272,13 @@ many_to_many_widget = (function(form_state){
         $(this).closest('table').find('tbody tr :nth-child('+col+') span').removeClass('selected')
         many_to_many_widget.update_display_inputs();
     })
+    $(document).on('click', 'button.bulk-apply', function(){
+        var selector = $(this).closest('td').find('select');
+        console.log(selector);
+        $(selector).trigger('change');
+    })
+
+
 
 });
 
