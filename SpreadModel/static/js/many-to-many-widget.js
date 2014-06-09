@@ -268,7 +268,6 @@ many_to_many_widget = (function(form_state){
         many_to_many_widget.update_display_inputs();
     });
     $(document).on('change', 'thead select', function(){ //update every click
-        //TODO: add "Apply" button
         many_to_many_widget.bulk_apply($(this));
     });
 
@@ -288,6 +287,8 @@ many_to_many_widget = (function(form_state){
         $(selector).trigger('change');
     })
 
+    /*nth-child range  nth-child(n+4):nth-child(-n+8)
+     * use to track previous click and index of current shift+click */
 
 
 });

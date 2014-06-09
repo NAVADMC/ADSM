@@ -82,7 +82,7 @@ def disease_spread(request):
         initialized_formset = SpreadSet(queryset=ProductionTypePairTransmission.objects.all())
     context = {'formset': initialized_formset}
     context['title'] = 'How does Disease spread from one Production Type to another?'
-    return render(request, 'ScenarioCreator/FormSet.html', context)
+    return render(request, 'ScenarioCreator/AssignSpread.html', context)
 
 
 def save_formset_succeeded(MyFormSet, TargetModel, context, request):

@@ -236,9 +236,11 @@ td, th {
     padding-right: 10px;
 }
 
-th {
+th, td label{
     padding-right: 20px;
+    font-size: 14pt;
 }
+
 
 select {
     margin: 8px 4px;
@@ -349,18 +351,14 @@ a.collapsed img {
     -webkit-transform: scaleY(-1);
 }
 
-th {
-    font-size: 14pt;
-}
-
 table tbody span {
     width: 139px;
     line-height: 21px;
     display: block;
 }
 
-table tbody *:hover { /*necessary in addtion to disableSelection() to preserve cursor appearance*/
-    cursor: default;
+table tbody span:hover { /*necessary in addtion to disableSelection() to preserve cursor appearance*/
+    cursor: pointer;
 }
 
 .selected {
