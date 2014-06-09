@@ -143,11 +143,13 @@ many_to_many_widget = (function(form_state){
 
     function render_row(header_information, column_information, row_index){
         var row = $('<tr>')
-        for(var col_index in [0,1]) //list row headers from header_information
-            row.append($('<th>').append('<span data-click-toggle="selected" data-pk="'+
+        for(var col_index in [0,1]){ //list row headers from header_information
+            var th = $('<th>').append('<span data-click-toggle="selected" data-pk="'+
                 header_information[col_index][row_index][1] + '">' +
-                header_information[col_index][row_index][0] + '</span>').disableSelection()); //column contains row list
-
+                header_information[col_index][row_index][0] + '</span>').disableSelection()
+            th.addClass('relevant');
+            row.append(th); //column contains row list
+        }
         $.each(column_information, function(col_index, column){//for each column
             if(header_information[1][row_index]) //check if there's something in the second column (could be ragged)
                 row.append($('<td>').append(column.clone())); // column contains select
@@ -246,46 +248,66 @@ many_to_many_widget = (function(form_state){
             })
         }
     }
-    //select source
-    //select destination
-    //main selects under bulk need an event watcher for incongruous source values == "varies" <option>
+
     //draw arrows
+
+    function highlight_hints_events() {
+        $(document).on('mouseover', 'tbody td', function () {
+            var row = $(this).closest('tr');
+            $(row).find('th:nth-child(2) span').addClass('highlight');
+            var second_column = my_table.find('tbody th:nth-child(2)');
+            second_column.removeClass('relevant');
+        });
+        $(document).on('mouseout', 'tbody td', function () {
+            var row = $(this).closest('tr');
+            $(row).find('th:nth-child(2) span').removeClass('highlight')
+            var second_column = my_table.find('tbody th:nth-child(2)');
+            second_column.addClass('relevant');
+        });
+    }
+
+    function register_event_hooks(){
+        /*EVENT HOOKS*/
+        $(document).on('click', '[data-click-toggle]', function(){ //update every click
+            many_to_many_widget.update_display_inputs();
+        });
+        $(document).on('change', 'thead select', function(){ //update every click
+            many_to_many_widget.bulk_apply($(this));
+        });
+
+        $(document).on('click', 'button.select-all', function(){
+            var col = $(this).closest('td').index()+1;
+            $(this).closest('table').find('tbody tr :nth-child('+col+') span').addClass('selected')
+            many_to_many_widget.update_display_inputs();
+        })
+        $(document).on('click', 'button.deselect', function(){
+            var col = $(this).closest('td').index()+1;
+            $(this).closest('table').find('tbody tr :nth-child('+col+') span').removeClass('selected')
+            many_to_many_widget.update_display_inputs();
+        })
+        $(document).on('click', 'button.bulk-apply', function(){
+            var selector = $(this).closest('td').find('select');
+            console.log(selector);
+            $(selector).trigger('change');
+        })
+
+        highlight_hints_events();
+    }
 
     return {
         'render': render,
         'get_column_name': get_column_name,
         'update_display_inputs': update_display_inputs,
         'bulk_apply': bulk_apply,
-        'update_state_inputs': update_state_inputs
+        'update_state_inputs': update_state_inputs,
+        'register_event_hooks': register_event_hooks
     }
 })(form_state)
 
     headerify_columns1_2();
     many_to_many_widget.render();
+    many_to_many_widget.register_event_hooks();
 
-    /*EVENT HOOKS*/
-    $(document).on('click', '[data-click-toggle]', function(){ //update every click
-        many_to_many_widget.update_display_inputs();
-    });
-    $(document).on('change', 'thead select', function(){ //update every click
-        many_to_many_widget.bulk_apply($(this));
-    });
-
-    $(document).on('click', 'button.select-all', function(){
-        var col = $(this).closest('td').index()+1;
-        $(this).closest('table').find('tbody tr :nth-child('+col+') span').addClass('selected')
-        many_to_many_widget.update_display_inputs();
-    })
-    $(document).on('click', 'button.deselect', function(){
-        var col = $(this).closest('td').index()+1;
-        $(this).closest('table').find('tbody tr :nth-child('+col+') span').removeClass('selected')
-        many_to_many_widget.update_display_inputs();
-    })
-    $(document).on('click', 'button.bulk-apply', function(){
-        var selector = $(this).closest('td').find('select');
-        console.log(selector);
-        $(selector).trigger('change');
-    })
 
     /*nth-child range  nth-child(n+4):nth-child(-n+8)
      * use to track previous click and index of current shift+click */
