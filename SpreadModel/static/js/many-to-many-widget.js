@@ -252,15 +252,20 @@ many_to_many_widget = (function(form_state){
     //draw arrows
 
     function highlight_hints_events() {
+        function highlight_source_if_blank() {
+            var sources_selected = $('tbody th:first-child .selected')
+            return sources_selected.length ? '' : '-n+'; //will also select the first column
+        }
+
         $(document).on('mouseover', 'tbody td', function () {
             var row = $(this).closest('tr');
-            $(row).find('th:nth-child(2) span').addClass('highlight');
+            $(row).find('th:nth-child('+highlight_source_if_blank()+'2) span').addClass('highlight');
             var second_column = my_table.find('tbody th:nth-child(2)');
             second_column.removeClass('relevant');
         });
         $(document).on('mouseout', 'tbody td', function () {
             var row = $(this).closest('tr');
-            $(row).find('th:nth-child(2) span').removeClass('highlight')
+            $(row).find('th:nth-child('+highlight_source_if_blank()+'2) span').removeClass('highlight')
             var second_column = my_table.find('tbody th:nth-child(2)');
             second_column.addClass('relevant');
         });
