@@ -8,6 +8,16 @@ var form_state;
 var many_to_many_widget;
 var form_prefix = /form-(\d+)-/g;
 
+(function($){
+    $.fn.disableSelection = function() {
+        return this
+            .attr('unselectable', 'on')
+            .css('user-select', 'none')
+            .css('-webkit-user-select', 'none')
+            .on('selectstart', false);
+    };
+})(jQuery);
+
 function headerify_columns1_2() {
     $('tbody tr td:nth-child(-n+2)').replaceWith(function (i, html) {
         return '<th>' + html + '</th>';
@@ -136,7 +146,7 @@ many_to_many_widget = (function(form_state){
         for(var col_index in [0,1]) //list row headers from header_information
             row.append($('<th>').append('<span data-click-toggle="selected" data-pk="'+
                 header_information[col_index][row_index][1] + '">' +
-                header_information[col_index][row_index][0] + '</span>')); //column contains row list
+                header_information[col_index][row_index][0] + '</span>').disableSelection()); //column contains row list
 
         $.each(column_information, function(col_index, column){//for each column
             if(header_information[1][row_index]) //check if there's something in the second column (could be ragged)

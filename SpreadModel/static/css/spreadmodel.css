@@ -359,6 +359,10 @@ table tbody span {
     display: block;
 }
 
+table tbody *:hover { /*necessary in addtion to disableSelection() to preserve cursor appearance*/
+    cursor: default;
+}
+
 .selected {
     font-weight: 600;
     background-color: #d7f5ff;
