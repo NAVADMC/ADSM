@@ -115,9 +115,10 @@ var modelModal = {
 
     validation_error: function(modal){
         return function(data) {
-            console.log('validation_error', modal, data)
-            var $form = $(data).find('form');
-            $form.find('button[type=submit]').remove();
+            console.log('validation_error:\n')//, modal, data)
+            var $form = $(data).find('form:not(.ajax)');
+            $form.find('.buttonHolder').remove();
+//            $form.find('button[type=submit]').remove();
             modal.find('.modal-body').html($form);
         }
     },
@@ -129,9 +130,9 @@ var modelModal = {
         var url = selectInput.attr('data-new-item-url');
         $.get(url, function(newForm){
             var $newForm = $($.parseHTML(newForm));
-
+            var $form = $newForm.find('form:not(.ajax)')//$($newForm[17]);//$newForm.find('section form');//$($newForm[17])for some odd reason .find('section') is not working but [17] is the index of 'section'
+            console.log($form, $newForm);
             modal.find('.modal-title').html($newForm.find('#title').html());
-            var $form = $newForm.not('header, nav').find('form');
             $form.find('.buttonHolder').remove();
             modal.find('.modal-body').html($form);
             $('body').append(modal);
