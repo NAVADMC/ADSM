@@ -2,6 +2,10 @@ function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTim
 
 
 $(function(){
+//    $(document).on('click', 'header .buttonholder a', function(){ //currently "Save is a button, not <a>.  This would be annoying otherwise
+//        check_file_saved();
+//    })
+
     $(document).on('mousedown', '[data-new-item-url]', function(e){
             $(this).prop('last-selected', $(this).val()); // cache old selection
     });

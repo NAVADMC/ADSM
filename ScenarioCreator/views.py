@@ -30,8 +30,8 @@ def unsaved_changes(new_value=None):
 
 def scenario_filename(new_value=None):
     session = SmSession.objects.get_or_create(id=1)[0]  # This keeps track of the state for all views and is used by basic_context
-    if new_value is not None:  # you can still set it to ''
-        session.scenario_filename = new_value
+    if new_value:
+        session.scenario_filename = new_value.replace('.sqlite3', '')
         session.save()
     return session.scenario_filename
 
@@ -369,7 +369,8 @@ def save_scenario(request):
     target = request.POST['filename']
     scenario_filename(target)
     print('Copying database to', target)
-    shutil.copy(activeSession(), workspace_path(target))
+    full_path = workspace_path(target) + ".sqlite3" if target[-8:] != '.sqlite3' else workspace_path(target)
+    shutil.copy(activeSession(), full_path)
     unsaved_changes(False)  # File is now in sync
     return redirect('/setup/Scenario/1/')
 
