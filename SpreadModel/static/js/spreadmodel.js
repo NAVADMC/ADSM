@@ -113,13 +113,17 @@ var modelModal = {
         };
     },
 
+    populate_modal_body: function ($newForm, modal) {
+        var $form = $newForm.find('form:not(.ajax)');
+        $form.find('.buttonHolder').remove();
+        modal.find('.modal-body').html($form);
+        return $form;
+    },
+
     validation_error: function(modal){
         return function(data) {
             console.log('validation_error:\n')//, modal, data)
-            var $form = $(data).find('form:not(.ajax)');
-            $form.find('.buttonHolder').remove();
-//            $form.find('button[type=submit]').remove();
-            modal.find('.modal-body').html($form);
+            this.populate_modal_body($(data), modal);
         }
     },
 
@@ -130,11 +134,8 @@ var modelModal = {
         var url = selectInput.attr('data-new-item-url');
         $.get(url, function(newForm){
             var $newForm = $($.parseHTML(newForm));
-            var $form = $newForm.find('form:not(.ajax)')//$($newForm[17]);//$newForm.find('section form');//$($newForm[17])for some odd reason .find('section') is not working but [17] is the index of 'section'
-            console.log($form, $newForm);
+            var $form = self.populate_modal_body($newForm, modal);
             modal.find('.modal-title').html($newForm.find('#title').html());
-            $form.find('.buttonHolder').remove();
-            modal.find('.modal-body').html($form);
             $('body').append(modal);
             modal.find('.modal-footer .btn-primary').on('click', function() {
                 self.ajax_submit($form, url, self.ajax_success(modal, selectInput), self.validation_error(modal));

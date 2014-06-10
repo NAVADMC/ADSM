@@ -176,9 +176,19 @@ def relational_function(request, primary_key=None, doCopy=False):
             context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
         if context['formset'].is_valid():
             context['formset'].save()
+            if request.is_ajax():
+                return ajax_success(created_instance, "RelationalFunction")
             return redirect('/setup/RelationalFunction/%i/' % created_instance.id)
     context['title'] = "Create a Relational Function"
     return render(request, 'ScenarioCreator/RelationalFunction.html', context)
+
+
+def ajax_success(model_instance, model_name):
+    msg = {'pk': model_instance.pk,
+           'title': spaces_for_camel_case(str(model_instance)),
+           'model': model_name,
+           'status': 'success'}
+    return HttpResponse(json.dumps(msg), content_type="application/json")
 
 
 def save_new_instance(initialized_form, request):
@@ -186,11 +196,7 @@ def save_new_instance(initialized_form, request):
     unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
     model_name = model_instance.__class__.__name__
     if request.is_ajax():
-        msg = {'pk': model_instance.pk,
-               'title': spaces_for_camel_case(str(model_instance)),
-               'model': model_name,
-               'status': 'success'}
-        return HttpResponse(json.dumps(msg), content_type="application/json")
+        return ajax_success(model_instance, model_name)
     return redirect('/setup/%s/' % model_name)  # redirect to edit URL
 
 
