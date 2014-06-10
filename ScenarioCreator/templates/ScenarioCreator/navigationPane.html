@@ -4,37 +4,37 @@
 {% block main %}
     <nav>
         <ul id="setupMenu">
-            <li><a href="/setup/Scenario/1/" class="{{ "Scenario"|active }}">
+            <li><a href="/setup/Scenario/1/" class="{{ "Scenario"|active:active_link}}">
                 <span class="pull-right {{Scenario|completed}}"> </span>Scenario Description</a></li>
-            <li><a href="/setup/Populations/" class="{{"Population"|active}}">
+            <li><a href="/setup/Populations/" class="{{"Populations"|active:active_link}}">
                 <span class="pull-right {{Population|completed}}"> </span>Population</a></li>
-            <li><a href="/setup/Disease/1/" class="{{"Disease"|active}}">
+            <li><a href="/setup/Disease/1/" class="{{"Disease"|active:active_link}}">
                 <span class="pull-right {{Disease|completed}}"> </span>Disease</a>
-                <ul><li><a href="/setup/DiseaseProgression/" class="{{"DiseaseProgression"|active}}">
+                <ul><li><a href="/setup/DiseaseProgression/" class="{{"DiseaseProgression"|active:active_link}}">
                     <span class="pull-right {{Progressions|completed}}"> </span>Disease Progression</a>
-                    <ul><li><a href="/setup/AssignProgressions/" class="{{"AssignProgressions"|active}}">
+                    <ul><li><a href="/setup/AssignProgressions/" class="{{"AssignProgressions"|active:active_link}}">
                         <span class="pull-right {{ProgressionAssignment|completed}}"> </span>Assign Progression</a></li></ul></li>
-                    <li><a href="/setup/DiseaseSpread/" class="{{"DiseaseSpread"|active}}">
+                    <li><a href="/setup/DiseaseSpread/" class="{{"DiseaseSpread"|active:active_link}}">
                         <span class="pull-right {{DirectSpreads|completed}}"> </span>Add Disease Spread</a>
-                        <ul><li><a href="/setup/AssignSpreads/" class="{{"AssignSpreads"|active}}">
+                        <ul><li><a href="/setup/AssignSpreads/" class="{{"AssignSpreads"|active:active_link}}">
                             <span class="pull-right {{DirectSpreads|completed}}"> </span>Assign Disease Spread</a></li></ul></li>
                 </ul></li>
-            <li><a href="/setup/ControlMasterPlan/1/" class="{{"ControlMasterPlan"|active }}">
+            <li><a href="/setup/ControlMasterPlan/1/" class="{{"ControlMasterPlan"|active:active_link}}">
                 <span class="pull-right {{ControlMasterPlan|completed}}"> </span>Controls</a>
-                <ul><li><a href="/setup/AssignProtocols/" class="{{"AssignProtocols"|active}}">
+                <ul><li><a href="/setup/AssignProtocols/" class="{{"AssignProtocols"|active:active_link}}">
                     <span class="pull-right {{ProtocolAssignments|completed}}"> </span>Protocol Assignments</a></li>
-                    <li><a href="/setup/ControlProtocol/" class="{{"ControlProtocol"|active}}">
+                    <li><a href="/setup/ControlProtocol/" class="{{"ControlProtocol"|active:active_link}}">
                         <span class="pull-right {{Protocols|completed}}"> </span>Control Protocol</a></li>
-                    <li><a href="/setup/Zone/" class="{{"Zone"|active}}">
+                    <li><a href="/setup/Zone/" class="{{"Zone"|active:active_link}}">
                         <span class="pull-right {{Zones|completed}}"> </span>Zones</a>
-                        <ul><li><a href="/setup/ZoneEffectOnProductionType/" class="{{"ZoneEffectOnProductionType"|active}}">
+                        <ul><li><a href="/setup/ZoneEffectOnProductionType/" class="{{"ZoneEffectOnProductionType"|active:active_link}}">
                             <span class="pull-right {{ZoneEffects|completed}}"> </span>Zone Effects</a></li></ul></li>
                 </ul></li>
-            <li><a href="/setup/Function/" class="{{"ProbabilityFunction"|active}}">
+            <li><a href="/setup/Function/" class="{{"Function"|active:active_link}}">
                 <span class="pull-right {{ProbabilityFunctions|completed}}"> </span>Functions</a></li>
-            <li><a href="/setup/OutputSettings/1/" class="{{"OutputSettings"|active }}">
+            <li><a href="/setup/OutputSettings/1/" class="{{"OutputSettings"|active:active_link}}">
                 <span class="pull-right {{OutputSetting|completed}}"> </span>Output Settings</a></li>
-            <li id="RunSimulation"><a href="/setup/RunSimulation/" class="{{"RunSimulation"|active}} {{Simulation|completed}}">
+            <li id="RunSimulation"><a href="/setup/RunSimulation/" class="{{"RunSimulation"|active:active_link}} {{Simulation|completed}}">
                 Run Simulation <i class="glyphicon glyphicon-play"></i></a></li>
         </ul>
     </nav>

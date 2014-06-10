@@ -236,12 +236,14 @@ td, th {
     padding-right: 10px;
 }
 
-th {
+th, td label{
     padding-right: 20px;
+    font-size: 14pt;
 }
 
+
 select {
-    margin: 8px 0;
+    margin: 8px 4px;
 }
 
 /**********************/
@@ -347,4 +349,19 @@ body .modal-dialog {
 
 a.collapsed img {
     -webkit-transform: scaleY(-1);
+}
+
+table tbody span {
+    width: 139px;
+    line-height: 21px;
+    display: block;
+}
+
+table tbody span:hover { /*necessary in addtion to disableSelection() to preserve cursor appearance*/
+    cursor: pointer;
+}
+
+.relevant .selected, .highlight { /*column is relevant and user has selected the row for many-to many-widget.js*/
+    font-weight: 600;
+    background-color: #d7f5ff;
 }

@@ -65,7 +65,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.static",
     "django.core.context_processors.tz",
     "django.contrib.messages.context_processors.messages",
-    "django.core.context_processors.request"
+    "django.core.context_processors.request",
+    "ScenarioCreator.context_processor.basic_context"
 )
 
 ROOT_URLCONF = 'SpreadModel.urls'

@@ -7,8 +7,8 @@ register = template.Library()
 
 
 @register.filter()
-def active(target_address):
-    if not target_address:  #TODO: Placeholder
+def active(target_address, url):
+    if target_address.lower() == url.lower():
         return 'active '
     return ''
 
