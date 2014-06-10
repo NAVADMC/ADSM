@@ -286,7 +286,7 @@ select {
 #farm_list{
     display: inline-block;
     max-height: 500px;
-    max-width: 800px;
+    max-width: 900px;
     overflow-y: auto;
     padding-right: 20px; /*for windows scrollbar*/
 }
@@ -299,8 +299,10 @@ select {
 
 #farm_list th{
     /*border: 1px solid black;*/
+    font-size: 12pt;
     padding: 2px 8px 2px 0;
     background: linear-gradient(to bottom, rgba(249,249,249,1) 0%,rgba(224,224,224,1) 100%);
+    white-space: nowrap;
 }
 
 th .sortControls{
