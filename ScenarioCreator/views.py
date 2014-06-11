@@ -352,7 +352,7 @@ def workspace_path(target):
 
 
 def file_list(extension=''):
-    db_files = glob("./workspace/*" + extension)
+    db_files = sorted(glob("./workspace/*" + extension), key=lambda s: s.lower())  # alphabetical, no case
     return map(lambda f: os.path.basename(f), db_files)  # remove directory and extension
 
 
