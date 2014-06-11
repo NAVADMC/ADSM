@@ -2,6 +2,10 @@ function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTim
 
 
 $(function(){
+    $(document).on('click', '[data-click-toggle]', function(){
+        $(this).toggleClass($(this).attr('data-click-toggle'));
+    });
+
     $(document).on('submit', '.ajax', function(evt){
         evt.preventDefault();
         $.post($(this).attr('action'), $(this).serialize());
@@ -189,7 +193,3 @@ var modelModal = {
                   </div>\
                 </div>')
 }
-
-$(document).on('click', '[data-click-toggle]', function(){
-    $(this).toggleClass($(this).attr('data-click-toggle'))
-})

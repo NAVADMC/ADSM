@@ -28,11 +28,10 @@ $(function(){
 
 //state object
 form_state = (function(form){
-    var state = {};
+    var recentClick = {};
     //load done by views.py queryset
-    //list Assignments already in DB
-    //serialize -> POST
-    //get(source destination)
+    //list Assignments already in DB  //done by views.py
+    //serialize -> POST   //standard formset views.py
 
     var format_form_array = function(serialized_array){
         var row = {};
@@ -272,8 +271,24 @@ many_to_many_widget = (function(form_state){
 
     function register_event_hooks(){
         /*EVENT HOOKS*/
-        $(document).on('click', '[data-click-toggle]', function(){ //update every click
+        var prev_click;
+        $(document).on('click', '[data-click-toggle]', function(event){ //update every click
+            if(event.shiftKey && prev_click) { //Shift-Click
+                var col_index = $(this).closest('th').index() + 1;
+                if(col_index == $(prev_click).closest('th').index() + 1){//verify they're in the same column
+                    var j = $(prev_click).closest('tr').index(); //row numbers
+                    var k = $(this).closest('tr').index();
+                    var start_row = Math.min(j,k) + 1;
+                    var end_row = Math.max(j,k) + 1;
+                    /*nth-child range  nth-child(n+4):nth-child(-n+8)
+                    * everything between previous click and index of current shift+click */
+                    var rows = $('tbody tr:nth-child(n+'+start_row+'):nth-child(-n+'+end_row+') th:nth-child('+col_index+') span');
+                    rows.addClass('selected');
+                    console.log(col_index, start_row, end_row, rows);
+                }
+             }
             many_to_many_widget.update_display_inputs();
+            prev_click = this;
         });
         $(document).on('change', 'thead select', function(){ //update every click
             many_to_many_widget.bulk_apply($(this));
@@ -311,11 +326,6 @@ many_to_many_widget = (function(form_state){
     headerify_columns1_2();
     many_to_many_widget.render();
     many_to_many_widget.register_event_hooks();
-
-
-    /*nth-child range  nth-child(n+4):nth-child(-n+8)
-     * use to track previous click and index of current shift+click */
-
 
 });
 
