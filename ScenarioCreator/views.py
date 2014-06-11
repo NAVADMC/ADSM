@@ -288,8 +288,6 @@ def list_per_model(model_name, model):
 
 def model_list(request):
     model_name, model = get_model_name_and_model(request)
-    context = {'title': "Create " + spaces_for_camel_case(model_name) + "s",
-               'models': []}
     abstract_models = {
         'Function':
             [('RelationalFunction', RelationalFunction),
@@ -298,6 +296,11 @@ def model_list(request):
             [('DirectSpread', DirectSpread),
              ('IndirectSpread', IndirectSpread),
              ('AirborneSpread', AirborneSpread)]}
+    for key, value in abstract_models.items():  # fix for child models (DirectSpread, RelationalFunction) returning to the wrong place
+        if model_name in [x[0] for x in value]:
+            model_name = key
+    context = {'title': "Create " + spaces_for_camel_case(model_name) + "s",
+               'models': []}
     if model_name in abstract_models.keys():
         for local_name, local_model in abstract_models[model_name]:
             context['models'].append(list_per_model(local_name, local_model))

@@ -192,8 +192,7 @@ many_to_many_widget = (function(form_state){
         update_display_inputs() //called from events normally, but we want to initialize
 
         $('section form').before(my_table); //finally, insert everything into the DOM
-        //register event listener
-        my_table.find('tbody select').on('change', update_state_inputs)
+        my_table.find('tbody select').on('change', update_state_inputs)//register event listener
     };
 
     /*Creates a filter using any selected items from the first column and the matching row header
