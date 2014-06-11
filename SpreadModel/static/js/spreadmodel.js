@@ -2,9 +2,24 @@ function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTim
 
 
 $(function(){
-//    $(document).on('click', 'header .buttonholder a', function(){ //currently "Save is a button, not <a>.  This would be annoying otherwise
-//        check_file_saved();
-//    })
+    $(document).on('submit', '.ajax', function(evt){
+        evt.preventDefault();
+        $.post($(this).attr('action'), $(this).serialize());
+        //TODO: handle success / failure messages
+        //    $(this).removeClass('unsaved');
+    })
+
+
+    $(document).on('click', 'header .buttonHolder a', function(evt){ //currently "Save is a button, not <a>.  This would be annoying otherwise
+        var dialog = check_file_saved();
+        console.log(dialog);
+        if(dialog){
+            evt.preventDefault();
+            var link = $(this).attr('href');
+            dialog.$modal.on('hidden.bs.modal', function(){
+                window.location = link})
+        }
+    })
 
     $(document).on('mousedown', '[data-new-item-url]', function(e){
             $(this).prop('last-selected', $(this).val()); // cache old selection
@@ -84,11 +99,12 @@ var check_file_saved = function(){
                     label: 'Save',
                     cssClass: 'btn-primary',
                     action: function(dialog){
-                        $('header form').submit();
+                        $.post($('header form').attr('action'), $('header form').serialize(), function(){dialog.close()});//ajax
                     }
                 }
             ]
         });
+        return dialog;
     }
 }
 
