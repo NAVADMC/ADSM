@@ -16,6 +16,17 @@ from django.db.models import Q
 from django.forms.models import inlineformset_factory
 
 
+# Useful descriptions of some of the model relations that affect how they are displayed in the views
+singletons = ['Scenario', 'Population', 'Disease', 'ControlMasterPlan', 'OutputSettings']
+abstract_models = {
+    'Function':
+        [('RelationalFunction', RelationalFunction),
+         ('ProbabilityFunction', ProbabilityFunction)],
+    'DiseaseSpread':
+        [('DirectSpread', DirectSpread),
+         ('IndirectSpread', IndirectSpread),
+         ('AirborneSpread', AirborneSpread)]}
+
 def spaces_for_camel_case(text):
     return re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
 
@@ -234,6 +245,10 @@ def new_entry(request):
         return relational_function(request)
     initialized_form = form(request.POST or None)
     context = {'form': initialized_form, 'title': "Create a new " + spaces_for_camel_case(model_name)}
+    if model_name not in singletons:
+        context['model_link'] = '/setup/' + model_name + '/'
+        context['pretty_name'] = spaces_for_camel_case(promote_to_abstract_parent(model_name))
+
     return new_form(request, initialized_form, context)
 
 
@@ -251,8 +266,12 @@ def edit_entry(request, primary_key):
         unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
 
     context = {'form': initialized_form,
-               'title': "Edit a " + spaces_for_camel_case(model_name),
-               'model_link': '/setup/' + model_name + '/' + primary_key + '/'}
+               'title': str(initialized_form.instance),
+               'pretty_name': spaces_for_camel_case(promote_to_abstract_parent(model_name))}
+    if model_name not in singletons:
+        context['model_link'] = '/setup/' + model_name + '/' + primary_key + '/'
+    else:  # for singletons, don't list the specific name, just the type
+        context['title'] = 'Edit the ' + spaces_for_camel_case(model_name)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
@@ -286,19 +305,16 @@ def list_per_model(model_name, model):
     return context
 
 
-def model_list(request):
-    model_name, model = get_model_name_and_model(request)
-    abstract_models = {
-        'Function':
-            [('RelationalFunction', RelationalFunction),
-             ('ProbabilityFunction', ProbabilityFunction)],
-        'DiseaseSpread':
-            [('DirectSpread', DirectSpread),
-             ('IndirectSpread', IndirectSpread),
-             ('AirborneSpread', AirborneSpread)]}
+def promote_to_abstract_parent(model_name):
     for key, value in abstract_models.items():  # fix for child models (DirectSpread, RelationalFunction) returning to the wrong place
         if model_name in [x[0] for x in value]:
             model_name = key
+    return model_name
+
+
+def model_list(request):
+    model_name, model = get_model_name_and_model(request)
+    model_name = promote_to_abstract_parent(model_name)
     context = {'title': "Create " + spaces_for_camel_case(model_name) + "s",
                'models': []}
     if model_name in abstract_models.keys():

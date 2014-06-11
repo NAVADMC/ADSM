@@ -2,6 +2,7 @@ __author__ = 'Josiah Seaman'
 
 from django import template
 from django.template.base import Node
+import re
 
 register = template.Library()
 
@@ -19,6 +20,11 @@ def completed(itemcount):
         return 'completed '
         # return 'class="completed "><span class="badge pull-right">%i</span' % len(itemcount)
     return 'incomplete'
+
+
+@register.filter()
+def parent_link(model_link):
+    return re.sub(r"/\d+/", '', model_link).replace(r"/new/", '')
 
 
 class FormCompleted(Node):

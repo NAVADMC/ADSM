@@ -1,9 +1,14 @@
 {% extends 'ScenarioCreator/navigationPane.html' %}
 {% load floppyforms %}
 {% load crispy_forms_tags  %}
+{% load db_status_tags %}
 
 {% block content %}
-<h1 id="title">{{ title }}</h1>
+<h1 id="title">
+    {% if model_link %}
+        <a href="{{ model_link|parent_link }}">List {{ pretty_name }}s</a> &nbsp;> &nbsp;
+    {% endif %}
+    {{ title }}</h1>
 
 <form method="post">
     {% crispy form %}

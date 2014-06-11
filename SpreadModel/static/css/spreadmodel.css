@@ -18,6 +18,11 @@ a {
     color: #7cb9ff;
 }
 
+a:hover {
+    color: #7cb9ff;
+    /*with underline*/
+}
+
 ul {
     list-style-type: none;
     padding-left: 0;
