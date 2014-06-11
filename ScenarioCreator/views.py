@@ -191,6 +191,7 @@ def relational_function(request, primary_key=None, doCopy=False):
                 return ajax_success(created_instance, "RelationalFunction")
             return redirect('/setup/RelationalFunction/%i/' % created_instance.id)
     context['title'] = "Create a Relational Function"
+    add_breadcrumb_context(context, "RelationalFunction")
     return render(request, 'ScenarioCreator/RelationalFunction.html', context)
 
 
@@ -245,11 +246,19 @@ def new_entry(request):
         return relational_function(request)
     initialized_form = form(request.POST or None)
     context = {'form': initialized_form, 'title': "Create a new " + spaces_for_camel_case(model_name)}
-    if model_name not in singletons:
-        context['model_link'] = '/setup/' + model_name + '/'
-        context['pretty_name'] = spaces_for_camel_case(promote_to_abstract_parent(model_name))
+    add_breadcrumb_context(context, model_name)
 
     return new_form(request, initialized_form, context)
+
+
+def add_breadcrumb_context(context, model_name, primary_key=None):
+    context['pretty_name'] = spaces_for_camel_case(promote_to_abstract_parent(model_name))
+    if model_name not in singletons:
+        context['model_link'] = '/setup/' + model_name + '/'
+        if primary_key is not None:
+            context['model_link'] += primary_key + '/'
+    else:  # for singletons, don't list the specific name, just the type
+        context['title'] = 'Edit the ' + spaces_for_camel_case(model_name)
 
 
 def edit_entry(request, primary_key):
@@ -266,12 +275,8 @@ def edit_entry(request, primary_key):
         unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
 
     context = {'form': initialized_form,
-               'title': str(initialized_form.instance),
-               'pretty_name': spaces_for_camel_case(promote_to_abstract_parent(model_name))}
-    if model_name not in singletons:
-        context['model_link'] = '/setup/' + model_name + '/' + primary_key + '/'
-    else:  # for singletons, don't list the specific name, just the type
-        context['title'] = 'Edit the ' + spaces_for_camel_case(model_name)
+               'title': str(initialized_form.instance)}
+    add_breadcrumb_context(context, model_name, primary_key)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
