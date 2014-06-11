@@ -6,9 +6,12 @@ $(function(){
         evt.preventDefault();
         $.post($(this).attr('action'), $(this).serialize());
         //TODO: handle success / failure messages
-        //    $(this).removeClass('unsaved');
+        $(this).trigger('saved');
     })
 
+    $(document).on('saved', 'form:has(.unsaved)', function(){ //fixes 'Save' button with wrong color state
+        $(this).find('.unsaved').removeClass('unsaved');
+    })
 
     $(document).on('click', 'header .buttonHolder a', function(evt){ //currently "Save is a button, not <a>.  This would be annoying otherwise
         var dialog = check_file_saved();
