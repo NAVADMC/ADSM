@@ -21,6 +21,7 @@
                 </ul></li>
             <li><a href="/setup/ControlMasterPlan/1/" class="{{"ControlMasterPlan"|active:active_link}}">
                 <span class="pull-right {{ControlMasterPlan|completed}}"> </span>Controls</a>
+                {% if controls_enabled %}
                 <ul><li><a href="/setup/ControlProtocol/" class="{{"ControlProtocol"|active:active_link}}">
                         <span class="pull-right {{Protocols|completed}}"> </span>Control Protocol</a></li>
                     <li><a href="/setup/AssignProtocols/" class="{{"AssignProtocols"|active:active_link}}">
@@ -29,7 +30,8 @@
                         <span class="pull-right {{Zones|completed}}"> </span>Zones</a>
                         <ul><li><a href="/setup/ZoneEffectOnProductionType/" class="{{"ZoneEffectOnProductionType"|active:active_link}}">
                             <span class="pull-right {{ZoneEffects|completed}}"> </span>Zone Effects</a></li></ul></li>
-                </ul></li>
+                </ul> {% endif %}
+            </li>
             <li><a href="/setup/Function/" class="{{"Function"|active:active_link}}">
                 <span class="pull-right {{ProbabilityFunctions|completed}}"> </span>Functions</a></li>
             <li><a href="/setup/OutputSettings/1/" class="{{"OutputSettings"|active:active_link}}">

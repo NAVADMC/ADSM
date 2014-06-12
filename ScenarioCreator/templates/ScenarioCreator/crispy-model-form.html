@@ -4,6 +4,8 @@
 {% load db_status_tags %}
 
 {% block content %}
+    <script>$(document).ready(check_disabled_controls)</script>
+
 <h1 id="title">
     {% if model_link %}
         <a href="{{ model_link|parent_link }}">List {{ pretty_name }}s</a> &nbsp;> &nbsp;

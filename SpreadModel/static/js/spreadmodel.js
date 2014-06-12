@@ -1,6 +1,22 @@
 function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTimeout(d),d=setTimeout(function(){d=null,c||a.apply(e,f)},b),c&&!d&&a.apply(e,f)}};
 
 
+function check_disabled_controls() {
+    /*Disables all the inputs on the Control Master Plan if the disable_all check box is checked on page load */
+    var form = $('section form');
+    var $checkbox = form.find('#id_disable_all_controls');
+    console.log("Checking", $checkbox)
+    if($checkbox.length){
+        if ($checkbox.is(':checked')) {
+            form.children('div:not(#div_id_name, #div_id_disable_all_controls)').each(function (index, value) {
+                $(value).attr('disabled', 'disabled')
+                $(value).find(':input').attr('disabled', true);
+            });
+        }
+    }//else do nothing
+};
+
+
 $(function(){
     $(document).on('click', '[data-click-toggle]', function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
@@ -84,7 +100,18 @@ $(function(){
                 }
             ]
         });
-    })
+    });
+
+
+    $('#id_disable_all_controls').change(function(event){
+        //toggle global disabled state and submit form.  views.py will update the context and redirect
+        //It is important to un-disable fields before submit so that their values go to the DB
+        $(this).closest('form').children().each(function (index, value) {
+            $(value).removeAttr('disabled');
+            $(value).find(':input').removeAttr('disabled');//remove disabled
+        });
+        $(this).closest('form').submit();//will cause page reload
+    });
 
 })
 

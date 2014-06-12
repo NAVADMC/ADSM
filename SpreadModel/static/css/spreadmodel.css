@@ -372,3 +372,8 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     font-weight: 600;
     background-color: #d7f5ff;
 }
+
+/*Disabled control fields: include text labels*/
+*[disabled] {
+    opacity: .5;
+}

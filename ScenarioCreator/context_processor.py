@@ -38,4 +38,5 @@ def basic_context(request):
                'active_link': re.split('\W+', request.path)[2],
                }
     context['Simulation'] = simulation_ready_to_run(context)
+    context['controls_enabled'] = ControlMasterPlan.objects.filter(disable_all_controls=False).count() > 0
     return context
