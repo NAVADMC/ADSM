@@ -106,6 +106,7 @@ $(function(){
     $('#id_disable_all_controls').change(function(event){
         //toggle global disabled state and submit form.  views.py will update the context and redirect
         //It is important to un-disable fields before submit so that their values go to the DB
+        //Josiah: I'm not entirely happy with the jumpiness of this solution, but it does satisfy Issue #79
         $(this).closest('form').children().each(function (index, value) {
             $(value).removeAttr('disabled');
             $(value).find(':input').removeAttr('disabled');//remove disabled
