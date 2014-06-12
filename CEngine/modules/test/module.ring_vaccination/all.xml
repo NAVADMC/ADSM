@@ -5497,3 +5497,95 @@
     <tr><td>D</td>  <td>D</td>  <td>S</td></tr>
   </output>
 </deterministic-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>vaccination request from exam, cancellation from test</short-name>
+
+  <description>
+    This test shows a bug that was discovered in April 2014. The test will not
+    fail if run once with the random number generator “fixed”, but it will fail
+    if run many times without the random number generator fixed.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 June 2014</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_sheep_infected</population-file>
+
+  <parameter-file>vacc_request_from_exam_cancellation_from_test</parameter-file>
+
+  <parameter-description>
+    For sheep, the latent period lasts 1 day, the infectious subclinical period
+    lasts 1 day, the infectious clinical period lasts 1 day. For cattle, the
+    latent period lasts 1 day and the infectious clinical period lasts 2 days.
+    For pigs, the latent period lasts 1 day and the infectious clinical period
+    lasts 3 days. Immunity lasts 10 days for all types.
+
+    For sheep, the probability of detection vs. the number of days a unit has
+    been showing clinical signs is fixed at 1. The probability of reporting vs.
+    the number of days since a public announcement of an outbreak is also fixed
+    at 1. For cattle and pigs, the probability of detection vs. the number of
+    days a unit has been showing clinical signs is fixed at 0.4, and the
+    probability of reporting vs. the number of days since a public announcement
+    of an outbreak is fixed at 1.
+
+    When a diseased unit is detected, a trace out of direct contacts is
+    initiated. The probability of success is 100% but there is a 3-day delay
+    for trace results. Units identified by trace are examined for clinical
+    signs; probability of detection is 2x the normal probability for
+    self-reporting. If the exam does not detect clinical signs, a lab test is
+    done. Tests have 100% sensitivity and specificity, and test results are
+    available immediately.
+
+    When a diseased pig unit is detected, all units within 15 km will be
+    vaccinated, excluding detected ones. The delay to immunity is 2 days, and
+    the immunity lasts 5 days. The authorities can vaccinate 3 units per day.
+
+    There is no spread or destruction.
+
+    What should happen:
+     - On day 1 unit 0 (sheep) will be Latent.
+     - On day 2 unit 0 will be Infectious Subclinical. It will expose and
+       infect units 1 and 2 by direct contact.
+     - On day 3 unit 0 will be Infectious Clinical. It will be detected and a
+       trace of direct contacts will be initiated. Units 1 and 2 will be
+       Latent.
+     - On day 4 units 1 and 2 will be Infectious Clinical, but the probability
+       of detection is too low for them to be detected.
+     - On day 5 units 1 and 2 will be Infectious Clinical, but the probability
+       of detection is too low for them to be detected.
+     - On day 6 unit 1 (cattle) will be Naturally Immune and unit 2 (pigs) will
+       still be Infectious Clinical. The probability of detection for unit 2 is
+       still too low for it to be detected. The results of the trace initiated
+       on day 3 will become available and cause both units 1 and 2 to be
+       examined. Unit 2 will be detected, which will trigger a vaccination ring
+       that includes unit 1. Unit 1 will not be detected by clinical signs (it
+       is immune now) so it will be tested. The test will come back positive
+       and that will cancel the request for vaccination of unit 1. It is at
+       this point that the bug will show, because the vaccination list monitor
+       may process the “vaccination canceled” event before it processes the
+       “request for vaccination” event.
+     - Nothing more of interest happens on day 7.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>adqnUAll</td>
+      <td>detnUSheep</td>
+      <td>trnUAll</td>
+      <td>detnUClin</td>
+      <td>detnUTest</td>
+      <td>vacwUAll</td>
+    </tr>
+    <!-- adqnUAll  detnUSheep  trnUAll   detnUClin  detnUTest   vacwUAll   -->
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>2</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>2</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>4</td> <td>1</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>

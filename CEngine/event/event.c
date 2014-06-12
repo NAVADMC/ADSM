@@ -568,8 +568,8 @@ EVT_detection_event_to_string (EVT_detection_event_t * event)
   char *chararray;
 
   s = g_string_new (NULL);
-  g_string_sprintf (s, "<Detection event unit=\"%s\" day=%i>", event->unit->official_id,
-                    event->day);
+  g_string_sprintf (s, "<Detection event unit=\"%s\" day=%i by %s>", event->unit->official_id,
+                    event->day, ADSM_detection_reason_abbrev[event->means]);
   /* don't return the wrapper object */
   chararray = s->str;
   g_string_free (s, FALSE);
