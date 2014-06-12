@@ -39,6 +39,16 @@ def unsaved_changes(new_value=None):
     return session.unsaved_changes
 
 
+def add_breadcrumb_context(context, model_name, primary_key=None):
+    context['pretty_name'] = spaces_for_camel_case(promote_to_abstract_parent(model_name))
+    if model_name not in singletons:
+        context['model_link'] = '/setup/' + model_name + '/'
+        if primary_key is not None:
+            context['model_link'] += primary_key + '/'
+    else:  # for singletons, don't list the specific name, just the type
+        context['title'] = 'Edit the ' + spaces_for_camel_case(model_name)
+
+
 def scenario_filename(new_value=None):
     session = SmSession.objects.get_or_create(id=1)[0]  # This keeps track of the state for all views and is used by basic_context
     if new_value:
@@ -209,7 +219,9 @@ def save_new_instance(initialized_form, request):
     model_name = model_instance.__class__.__name__
     if request.is_ajax():
         return ajax_success(model_instance, model_name)
-    return redirect('/setup/%s/' % model_name)  # redirect to edit URL
+    if model_name in singletons:
+        return redirect('/setup/%s/1/' % model_name)
+    return redirect('/setup/%s/' % model_name)  # redirect to list URL
 
 
 def new_form(request, initialized_form, context):
@@ -249,16 +261,6 @@ def new_entry(request):
     add_breadcrumb_context(context, model_name)
 
     return new_form(request, initialized_form, context)
-
-
-def add_breadcrumb_context(context, model_name, primary_key=None):
-    context['pretty_name'] = spaces_for_camel_case(promote_to_abstract_parent(model_name))
-    if model_name not in singletons:
-        context['model_link'] = '/setup/' + model_name + '/'
-        if primary_key is not None:
-            context['model_link'] += primary_key + '/'
-    else:  # for singletons, don't list the specific name, just the type
-        context['title'] = 'Edit the ' + spaces_for_camel_case(model_name)
 
 
 def edit_entry(request, primary_key):
