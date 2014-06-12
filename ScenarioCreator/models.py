@@ -268,14 +268,14 @@ class RelationalPoint(models.Model):
 
 
 class ControlMasterPlan(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(default="Control Master Plan", max_length=255)
     disable_all_controls = models.BooleanField(default=False,
         help_text='Disable all Control activities for this simulation run.  Normally used temporarily to test uncontrolled disease spread.')
     destruction_program_delay = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
     destruction_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text="The relational function used to define the daily destruction capacity.", )
-    destruction_priority_order = models.CharField(max_length=255,
+    destruction_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
         help_text='The primary priority order for destruction.',
         choices=priority_choices(), )
     destruction_reason_order = models.CharField(max_length=255,
@@ -287,11 +287,11 @@ class ControlMasterPlan(models.Model):
         help_text='The number of clinical units which must be detected before the initiation of a vaccination program.', )
     vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the daily vaccination capacity.', )
-    vaccination_priority_order = models.CharField(max_length=255,
+    vaccination_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
         help_text='A string that identifies the primary priority order for vaccination.',
         choices=priority_choices(), )
     def __str__(self):
-        return str(self.name) + ": Control Master Plan"
+        return str(self.name)
 
 
 class ControlProtocol(models.Model):
@@ -557,7 +557,7 @@ class Scenario(models.Model):
 
 class OutputSettings(models.Model):
     _scenario = models.ForeignKey('Scenario', default=lambda: Scenario.objects.get_or_create(id=1)[0],)  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
-    iterations = models.PositiveIntegerField(validators=[MinValueValidator(1)],
+    iterations = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)],
         help_text='The number of iterations of this scenario that should be run', )
     stop_criteria = models.CharField(max_length=255, default='disease-end',
         help_text='The criterion used to end each iteration.',
