@@ -5,6 +5,8 @@
 
 {% block content %}
     <script>$(document).ready(check_disabled_controls)</script>
+{#    {% if model_name == "Probability Function" %}#}
+    <script src="{{ STATIC_URL }}js/probability-functions.js"></script>
 
 <h1 id="title">
     {% if model_link %}

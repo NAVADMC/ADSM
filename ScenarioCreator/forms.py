@@ -334,8 +334,9 @@ class OutputSettingsForm(BaseForm):
         model = OutputSettings
         exclude = ['_scenario']
         widgets = {'save_all_daily_outputs': RadioSelect(),
-            'maximum_iterations_for_daily_output': NumberInput(attrs={'data-visibility-controller': 'save_all_daily_outputs',
-                                                                      'data-required-value': 'False'}),
+            'maximum_iterations_for_daily_output': NumberInput(
+                attrs={'data-visibility-controller': 'save_all_daily_outputs',
+                       'data-required-value': 'False'}),
             'days': NumberInput(
                 attrs={'data-visibility-controller': 'stop_criteria',
                        'data-required-value': 'stop-days'})

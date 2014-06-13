@@ -212,18 +212,18 @@ class ProbabilityFunction(Function):
         choices=chc("Beta", "BetaPERT", "Bernoulli", "Binomial", "Discrete Uniform",
                     "Exponential", "Fixed Value", "Gamma", "Gaussian", "Histogram", "Hypergeometric",
                     "Inverse Gaussian", "Logistic", "LogLogistic", "Lognormal",
-                    "NegativeBinomial", "Pareto", "Pearson5", "Piecewise", "Poisson",
+                    "Negative Binomial", "Pareto", "Pearson 5", "Piecewise", "Poisson",
                     "Triangular", "Uniform", "Weibull"))
     mean = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='The mean for probability density function types Gaussian, Lognormal, Possoin, and Exponential.', )
+        help_text='The mean for probability density function types Inverse Gaussian, Gaussian, Lognormal, Possoin, and Exponential.', )
     std_dev = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='The mean for probability density function types Gaussian and Lognormal.', )
+        help_text='The mean for probability density function types Inverse Gaussian, Gaussian and Lognormal.', )
     min = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='The minimum for probability density function types Uniform, Triangular, Beta, and BetaPERT.', )
+        help_text='The minimum for probability density function types Discrete Uniform, Uniform, Triangular, Beta, and BetaPERT.', )
     mode = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='The Mode for probability density function types Fixed Value, Triangular, and BetaPERT.', )
     max = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='The maximum value for probability density function types Uniform, Triangular, Beta, and BetaPERT.', )
+        help_text='The maximum value for probability density function types Discrete Uniform, Uniform, Triangular, Beta, and BetaPERT.', )
     alpha = models.FloatField(blank=True, null=True,
         help_text='The alpha parameter for probability density function types Gamma, Weibull, and Pearson 5 or the alpha1 parameter for Beta probability density functions.', )
     alpha2 = models.FloatField(blank=True, null=True,
@@ -231,11 +231,11 @@ class ProbabilityFunction(Function):
     beta = models.FloatField(blank=True, null=True,
         help_text='The beta parameter for probability density function types Gamma, Weibull, and Pearson 5.', )
     location = models.FloatField(blank=True, null=True,
-        help_text='The location parameter for probability density function types Logistic and Loglogistic.', )
+        help_text='The location parameter for probability density function types Logistic and LogLogistic.', )
     scale = models.FloatField(blank=True, null=True,
-        help_text='The scale parameter for probability density function types Logistic and Loglogistic.', )
+        help_text='The scale parameter for probability density function types Logistic and LogLogistic.', )
     shape = models.FloatField(blank=True, null=True,
-        help_text='The shape parameter for probability density function types Loglogistic, Inverse, and Gaussian.', )
+        help_text='The shape parameter for probability density function types LogLogistic, Inverse Gaussian, and Gaussian.', )
     n = models.PositiveIntegerField(validators=[MinValueValidator(0)], blank=True, null=True,
         help_text='The n parameter for probability density function types Binomial and Hypergeometric.', )
     p = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(1.0)], blank=True, null=True,
