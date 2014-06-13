@@ -56,4 +56,5 @@ EXTRA_DIST = radius_0.xml radius_0_w_vars.xml radius_0.5.xml radius_1.xml \
  initially_vimmune_avg_wait.xml \
  in_queue_twice.xml in_queue_twice_1_canceled.xml in_queue_twice_both_canceled.xml \
  cancel_max_wait_0.xml cancel_max_wait_1.xml \
- same_unit_detected_twice_check_vacc_threshold.xml
+ same_unit_detected_twice_check_vacc_threshold.xml \
+ vacc_request_from_exam_cancellation_from_test.xml
