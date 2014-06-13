@@ -200,6 +200,9 @@ var modelModal = {
             });
 
             modal.modal('show');
+            $(modal).on('hidden.bs.modal', function(){
+                $(this).remove(); // deletes it from the DOM so it doesn't get cluttered
+            })
         });
 
         },
