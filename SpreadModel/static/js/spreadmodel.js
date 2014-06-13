@@ -43,8 +43,8 @@ $(function(){
         }
     });
 
-    $('[data-toggle-controller]').each(function(){
-        var controller = '[name=' + $(this).attr('data-toggle-controller') + ']'
+    $('[data-visibility-controller]').each(function(){
+        var controller = '[name=' + $(this).attr('data-visibility-controller') + ']'
         var hide_target = $(this).parents('.control-group')
         var required_value = $(this).attr('data-required-value') || 'True'
         $('body').on('change', controller, function(){
@@ -54,7 +54,13 @@ $(function(){
                 hide_target.hide()
             }
         });
-        $(controller).trigger('change');
+        $(controller).each(function(index, elem){ //each because radio buttons have multiple elem, same name
+            if($(elem).attr('type') != 'radio' || elem.hasAttribute('checked')){
+                //radio buttons are multiple elements with the same name, we only want to fire if its actually checked
+                $(elem).trigger('change');
+            }
+        });
+        $(hide_target).css('margin-left', '26px');
     })
 
     $("#open_file").change(function(){
