@@ -37,8 +37,6 @@ $(function(){
     });
     $(document).on('change', '[data-new-item-url]', function(e){
         if ($(this).val() == "data-add-new") {
-            e.preventDefault();
-            $(this).val($(this).prop('last-selected')); //undo selection
             modelModal.show($(this));
         }
     });
@@ -91,6 +89,12 @@ $(function(){
                 }
             ]
         });
+    });
+
+    $(document).on('click', 'select + a i', function(event){
+        var select = $(this).closest('.control-group').find('select');
+        modelModal.show(select);
+        event.preventDefault();
     });
 
 
@@ -182,11 +186,15 @@ var modelModal = {
         var modal = this.template.clone();
         modal.attr('id', selectInput.attr('name') + '_modal');
         var url = selectInput.attr('data-new-item-url');
+        if(selectInput.val() != 'data-add-new')
+            url = url.replace('new', selectInput.val());//will edit already existing model
+
         $.get(url, function(newForm){
             var $newForm = $($.parseHTML(newForm));
             var $form = self.populate_modal_body($newForm, modal);
             modal.find('.modal-title').html($newForm.find('#title').html());
             $('body').append(modal);
+            $('#id_equation_type').trigger('change'); //see also probability-functions.js
             modal.find('.modal-footer .btn-primary').on('click', function() {
                 self.ajax_submit($form, url, self.ajax_success(modal, selectInput), self.validation_error(modal));
             });

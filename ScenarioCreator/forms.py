@@ -79,6 +79,8 @@ class UnitFormAbbreviated(BaseForm):
 class ProbabilityFunctionForm(BaseForm):
     class Meta:
         model = ProbabilityFunction
+        widgets = {'graph': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
+
 
 
 class RelationalPointForm(BaseForm):

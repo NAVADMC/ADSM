@@ -2,7 +2,7 @@
 
 $(document).ready( function(){
 
-    $('#id_equation_type').on('change', function(){
+    $(document).on('change', '#id_equation_type', function(){
         var equation_type = $(this).val()
         var fields = $(this).closest('.control-group').nextAll('.control-group');
         fields.each(function(index, control_group){
