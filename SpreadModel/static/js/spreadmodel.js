@@ -217,7 +217,6 @@ function check_disabled_controls() {
     /*Disables all the inputs on the Control Master Plan if the disable_all check box is checked on page load */
     var form = $('section form');
     var $checkbox = form.find('#id_disable_all_controls');
-    console.log("Checking", $checkbox)
     if($checkbox.length){
         if ($checkbox.is(':checked')) {
             form.children('div:not(#div_id_name, #div_id_disable_all_controls)').each(function (index, value) {
