@@ -61,7 +61,16 @@ typedef struct
     If the unit is not awaiting vaccination, it will not be present in the
     table.  If it is awaiting vaccination, its associated value will be an
     integer (cast to a gpointer using GINT_TO_POINTER) indicating how many
-    times the unit is in queue. */
+    times the unit is in queue.
+    
+    Note that because the simulator's main event loop randomly chooses the next
+    event to process from the waiting events, it is possible sometimes to
+    receive a VaccinationCanceled event before the corresponding
+    CommitmentToVaccinate. In this case, the number in the table will go
+    (briefly) negative. But by the end of a simulation day, no negative numbers
+    should remain. This is checked when handling a NewDay event. */
+  guint num_negative;
+
   unsigned int peak_nunits;
   double peak_nanimals;
   unsigned int peak_wait;
@@ -140,6 +149,11 @@ handle_new_day_event (struct adsm_module_t_ *self)
 
   local_data = (local_data_t *) (self->model_data);
 
+  if (local_data->num_negative != 0)
+    {
+      g_error ("%s: unpaired cancellations remain", MODEL_NAME);
+    }
+
   RPT_reporting_add_integer (local_data->unit_days_in_queue,
                              local_data->unique_units_awaiting_vaccination,
                              NULL);
@@ -170,7 +184,7 @@ handle_commitment_to_vaccinate_event (struct adsm_module_t_ *self,
   local_data_t *local_data;
   UNT_unit_t *unit;
   gpointer p;
-  int count;
+  int old_count, new_count;
   unsigned int nunits;
   double nanimals;
 
@@ -186,46 +200,75 @@ handle_commitment_to_vaccinate_event (struct adsm_module_t_ *self,
   p = g_hash_table_lookup (local_data->status, unit);
   if (p == NULL)
     {
-      g_hash_table_insert (local_data->status, unit, GINT_TO_POINTER(1));
+      /* This unit is not in the table. Add it with a count of 1. */
+      old_count = 0;
+      new_count = 1;
+      g_hash_table_insert (local_data->status, unit, GINT_TO_POINTER(new_count));
       local_data->unique_units_awaiting_vaccination += 1;
       local_data->unique_animals_awaiting_vaccination += (double)(unit->size);
     }
   else
     {
-      count = GPOINTER_TO_INT(p);
-      g_hash_table_insert (local_data->status, unit, GINT_TO_POINTER(count+1));
+      /* This unit is in the table, with either
+       * - a positive count, indicating CommitmentToVaccinate events that have
+       *   not yet been matched to a Vaccination or VaccinationCanceled event
+       * - a negative count, indicating VaccinationCanceled events that have
+       *   not yet been matched to a CommitmentToVaccinate event (this can
+       *   happen because of the randomization of event selection from the
+       *   event queue)
+       * But note that the unit *cannot* have a count of 0. */
+      old_count = GPOINTER_TO_INT(p);
+      g_assert (old_count != 0);
+      new_count = old_count + 1;
+      if (new_count == 0)
+        {
+          /* This CommitmentToVaccinate just paired up with an unpaired cancel,
+           * and no more unpaired cancels remain, so we can remove this unit
+           * from the hash table. */
+          g_hash_table_remove (local_data->status, unit);
+          g_assert (local_data->num_negative >= 1);
+          local_data->num_negative -= 1;
+        }
+      else
+        {
+          g_hash_table_insert (local_data->status, unit, GINT_TO_POINTER(new_count));
+        }
     }
 
-  if (NULL != adsm_queue_unit_for_vaccination)
+  if (new_count >= 1)
     {
-      adsm_queue_unit_for_vaccination (unit->index);
-    }
+      /* Inform the GUI of the commitment to vaccinate. */
+      if (NULL != adsm_queue_unit_for_vaccination)
+        {
+         adsm_queue_unit_for_vaccination (unit->index);
+        }
 
-  /* Increment the counts of vaccinations still to do. */
-  RPT_reporting_add_integer (local_data->nunits_awaiting_vaccination, 1, NULL);
-  if (local_data->nunits_awaiting_vaccination_by_prodtype->frequency != RPT_never)
-    RPT_reporting_add_integer1 (local_data->nunits_awaiting_vaccination_by_prodtype, 1,
-                                unit->production_type_name);
-  nunits = RPT_reporting_get_integer (local_data->nunits_awaiting_vaccination, NULL);
-  if (nunits > local_data->peak_nunits)
-    {
-      local_data->peak_nunits = nunits;
-      RPT_reporting_set_integer (local_data->peak_nunits_awaiting_vaccination, nunits, NULL);
-      RPT_reporting_set_integer (local_data->peak_nunits_awaiting_vaccination_day, event->day, NULL);
-    }
+      /* Increment the counts of vaccinations still to do. */
+      RPT_reporting_add_integer (local_data->nunits_awaiting_vaccination, 1, NULL);
+      if (local_data->nunits_awaiting_vaccination_by_prodtype->frequency != RPT_never)
+        RPT_reporting_add_integer1 (local_data->nunits_awaiting_vaccination_by_prodtype, 1,
+                                    unit->production_type_name);
+      nunits = RPT_reporting_get_integer (local_data->nunits_awaiting_vaccination, NULL);
+      if (nunits > local_data->peak_nunits)
+        {
+          local_data->peak_nunits = nunits;
+          RPT_reporting_set_integer (local_data->peak_nunits_awaiting_vaccination, nunits, NULL);
+          RPT_reporting_set_integer (local_data->peak_nunits_awaiting_vaccination_day, event->day, NULL);
+        }
 
-  RPT_reporting_add_real (local_data->nanimals_awaiting_vaccination, (double)(unit->size), NULL);
-  if (local_data->nanimals_awaiting_vaccination_by_prodtype->frequency != RPT_never)
-    RPT_reporting_add_real1 (local_data->nanimals_awaiting_vaccination_by_prodtype,
-                             (double)(unit->size), unit->production_type_name);
-  nanimals = RPT_reporting_get_real (local_data->nanimals_awaiting_vaccination, NULL);
-  if (nanimals > local_data->peak_nanimals)
-    {
-      local_data->peak_nanimals = nanimals;
-      RPT_reporting_set_real (local_data->peak_nanimals_awaiting_vaccination, nanimals,
-                                 NULL);
-      RPT_reporting_set_integer (local_data->peak_nanimals_awaiting_vaccination_day, event->day,
-                                 NULL);
+      RPT_reporting_add_real (local_data->nanimals_awaiting_vaccination, (double)(unit->size), NULL);
+      if (local_data->nanimals_awaiting_vaccination_by_prodtype->frequency != RPT_never)
+        RPT_reporting_add_real1 (local_data->nanimals_awaiting_vaccination_by_prodtype,
+                                 (double)(unit->size), unit->production_type_name);
+      nanimals = RPT_reporting_get_real (local_data->nanimals_awaiting_vaccination, NULL);
+      if (nanimals > local_data->peak_nanimals)
+        {
+          local_data->peak_nanimals = nanimals;
+          RPT_reporting_set_real (local_data->peak_nanimals_awaiting_vaccination, nanimals,
+                                     NULL);
+          RPT_reporting_set_integer (local_data->peak_nanimals_awaiting_vaccination_day, event->day,
+                                     NULL);
+        }
     }
 
 #if DEBUG
@@ -280,6 +323,7 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
 
       /* Mark the unit as no longer on a waiting list. */
       count = GPOINTER_TO_INT(p);
+      g_assert (count >= 1);
       if (count == 1)
         {
           g_hash_table_remove (local_data->status, unit);
@@ -322,7 +366,7 @@ handle_vaccination_canceled_event (struct adsm_module_t_ *self,
   local_data_t *local_data;
   UNT_unit_t *unit;
   gpointer p;
-  int count;
+  int old_count, new_count;
   UNT_control_t update;
 #if DEBUG
   g_debug ("----- ENTER handle_vaccination_canceled_event (%s)", MODEL_NAME);
@@ -331,43 +375,74 @@ handle_vaccination_canceled_event (struct adsm_module_t_ *self,
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
 
-  /* Inform the GUI of the cancellation. */
-  update.unit_index = unit->index;
-  update.day_commitment_made = event->day_commitment_made;
-  update.reason = 0; /* This is unused for "vaccination canceled" events */
-  
-#ifdef USE_SC_GUILIB
-  sc_cancel_unit_vaccination( event->day, unit, update );
-#else  
-  if (NULL != adsm_cancel_unit_vaccination)
-    {
-      adsm_cancel_unit_vaccination (update);
-    }
-#endif  
-
-  /* Mark the unit as no longer on a waiting list. */
   p = g_hash_table_lookup (local_data->status, unit);
-  g_assert (p != NULL);
-  count = GPOINTER_TO_INT(p);
-  if (count == 1)
+  if (p == NULL)
     {
-      g_hash_table_remove (local_data->status, unit);
-      local_data->unique_units_awaiting_vaccination -= 1;
-      local_data->unique_animals_awaiting_vaccination -= (double)(unit->size);
-    }
+      /* This unit is not in the table. This VaccinationCanceled event is an
+       * "unpaired cancel" that must be matched with a CommitmentToVaccinate
+       * before the next simulation day. */
+      old_count = 0;
+      new_count = -1;
+      g_hash_table_insert (local_data->status, unit, GINT_TO_POINTER(new_count));      
+      local_data->num_negative += 1;
+    }   
   else
-    g_hash_table_insert (local_data->status, unit, GINT_TO_POINTER(count-1));
+    {
+      /* This unit is in the table, with either
+       * - a positive count, indicating CommitmentToVaccinate events that have
+       *   not yet been matched to a Vaccination or VaccinationCanceled event
+       * - a negative count, indicating VaccinationCanceled events that have
+       *   not yet been matched to a CommitmentToVaccinate event (this can
+       *   happen because of the randomization of event selection from the
+       *   event queue)
+       * But note that the unit *cannot* have a count of 0. */
+      old_count = GPOINTER_TO_INT(p);
+      g_assert (old_count != 0);
+      new_count = old_count - 1; 
+      /* If this unit had exactly 1 CommitmentToVaccinate, then this cancel
+       * removes the unit from the hash table. */
+      if (new_count == 0)
+        {
+          g_hash_table_remove (local_data->status, unit);
+          local_data->unique_units_awaiting_vaccination -= 1;
+          local_data->unique_animals_awaiting_vaccination -= (double)(unit->size);
+        }
+      else
+        {
+          g_hash_table_insert (local_data->status, unit, GINT_TO_POINTER(new_count));
+        }
+    }
 
-  /* Decrement the counts of vaccinations still to do. */
-  RPT_reporting_sub_integer (local_data->nunits_awaiting_vaccination, 1, NULL);
-  if (local_data->nunits_awaiting_vaccination_by_prodtype->frequency != RPT_never)
-    RPT_reporting_sub_integer1 (local_data->nunits_awaiting_vaccination_by_prodtype, 1,
-                                unit->production_type_name);
+  /* If we're dealing with unpaired cancels, don't inform the GUI or update the
+   * output variables. Unpaired cancels should all go away by the end of the
+   * day (this is verified in handle_new_day_event). */
+  if (new_count >= 0)
+    {
+      /* Inform the GUI of the cancellation. */
+      update.unit_index = unit->index;
+      update.day_commitment_made = event->day_commitment_made;
+      update.reason = 0; /* This is unused for "vaccination canceled" events */
+  
+      #ifdef USE_SC_GUILIB
+        sc_cancel_unit_vaccination( event->day, unit, update );
+      #else  
+        if (NULL != adsm_cancel_unit_vaccination)
+          {
+            adsm_cancel_unit_vaccination (update);
+          }
+      #endif
 
-  RPT_reporting_sub_real (local_data->nanimals_awaiting_vaccination, (double)(unit->size), NULL);
-  if (local_data->nanimals_awaiting_vaccination_by_prodtype->frequency != RPT_never)
-    RPT_reporting_sub_real1 (local_data->nanimals_awaiting_vaccination_by_prodtype,
-                             (double)(unit->size), unit->production_type_name);
+      /* Decrement the counts of vaccinations still to do. */
+      RPT_reporting_sub_integer (local_data->nunits_awaiting_vaccination, 1, NULL);
+      if (local_data->nunits_awaiting_vaccination_by_prodtype->frequency != RPT_never)
+        RPT_reporting_sub_integer1 (local_data->nunits_awaiting_vaccination_by_prodtype, 1,
+                                    unit->production_type_name);
+
+      RPT_reporting_sub_real (local_data->nanimals_awaiting_vaccination, (double)(unit->size), NULL);
+      if (local_data->nanimals_awaiting_vaccination_by_prodtype->frequency != RPT_never)
+        RPT_reporting_sub_real1 (local_data->nanimals_awaiting_vaccination_by_prodtype,
+                                 (double)(unit->size), unit->production_type_name);
+    }
 
 #if DEBUG
   g_debug ("----- EXIT handle_vaccination_canceled_event (%s)", MODEL_NAME);
@@ -441,6 +516,7 @@ reset (struct adsm_module_t_ *self)
   local_data = (local_data_t *) (self->model_data);
 
   g_hash_table_remove_all (local_data->status);
+  local_data->num_negative = 0;
 
   RPT_reporting_zero (local_data->nunits_awaiting_vaccination);
   RPT_reporting_zero (local_data->nunits_awaiting_vaccination_by_prodtype);
