@@ -133,14 +133,6 @@ struct _ZON_zone_fragment_t
 
 
 
-typedef struct
-{
-  double x, y;
-}
-ZON_pending_focus_t;
-
-
-
 /** A list of zones. */
 typedef struct
 {
@@ -151,11 +143,6 @@ typedef struct
     being in the "background" zone. */
   unsigned int membership_length; /**< Length of the membership array. */
   gboolean use_rtree_index;
-  GQueue *pending_foci; /**< A list of foci that have yet to be added.  Each
-    item in the queue will be a ZON_pending_focus struct.  Because the events
-    in one simulation day should be considered to happen simultaneously,
-    changes to a zone are not processed mid-day; instead, they are stored and
-    applied all at once later. */
 }
 ZON_zone_list_t;
 
@@ -186,7 +173,6 @@ unsigned int ZON_zone_list_append (ZON_zone_list_t *, ZON_zone_t *);
 #define ZON_zone_list_get(Z,I) ((ZON_zone_t*)g_ptr_array_index(Z->list,I))
 
 void ZON_zone_list_reset (ZON_zone_list_t *);
-void ZON_zone_list_add_focus (ZON_zone_list_t *, double x, double y);
 
 ZON_zone_fragment_t *ZON_zone_list_get_background (ZON_zone_list_t *);
 
