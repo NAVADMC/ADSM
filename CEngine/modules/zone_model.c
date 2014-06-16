@@ -72,6 +72,11 @@ typedef struct
 {
   UNT_unit_list_t * units;
   ZON_zone_list_t * zones;
+  GQueue *pending_foci; /**< A list of foci that have yet to be added.  Each
+    item in the queue will be a (UNT_unit_t *).  Because the events in one
+    simulation day should be considered to happen simultaneously, changes to a
+    zone are not processed mid-day; instead, they are stored and applied all at
+    once at Midnight. */
 }
 local_data_t;
 
@@ -373,7 +378,7 @@ handle_request_for_zone_focus_event (struct adsm_module_t_ *self,
 #if DEBUG
   g_debug ("adding pending zone focus at x=%g, y=%g", unit->x, unit->y);
 #endif
-  ZON_zone_list_add_focus (zones, unit->x, unit->y);
+  g_queue_push_tail (local_data->pending_foci, unit);
 
 #ifdef USE_SC_GUILIB
   sc_make_zone_focus( event->day, unit );
@@ -404,9 +409,10 @@ handle_midnight_event (struct adsm_module_t_ *self,
                        ZON_zone_list_t * zones,
                        EVT_midnight_event_t * event)
 {
+  local_data_t *local_data;
   unsigned int nzones;
   double x, y;
-  ZON_pending_focus_t *pending_focus;
+  UNT_unit_t *pending_focus;
   callback_t callback_data;
   ZON_zone_t *zone;
   double distance;
@@ -446,15 +452,16 @@ handle_midnight_event (struct adsm_module_t_ *self,
   nHitsPoly = g_new0( int, report_array_size );
 #endif
 
-  while (!g_queue_is_empty (zones->pending_foci))
+  local_data = (local_data_t *) (self->model_data);
+
+  while (!g_queue_is_empty (local_data->pending_foci))
     {
-      pending_focus = (ZON_pending_focus_t *) g_queue_pop_head (zones->pending_foci);
+      pending_focus = (UNT_unit_t *) g_queue_pop_head (local_data->pending_foci);
       x = pending_focus->x;
       y = pending_focus->y;
       #if DEBUG
         g_debug ("focus to add at x=%g, y=%g", x, y);
       #endif
-      g_free (pending_focus);
 
       /* Update the shape of each zone, and get pointers to the zone fragments
        * in which the focus lies. */
@@ -610,11 +617,18 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 void
 reset (struct adsm_module_t_ *self)
 {
+  local_data_t *local_data;
+
 #if DEBUG
   g_debug ("----- ENTER reset (%s)", MODEL_NAME);
 #endif
 
-  /* Nothing to do. */
+  local_data = (local_data_t *) (self->model_data);
+
+  /* Empty the list of pending zone foci.  We just need to free the queue nodes
+   * themselves, not the UNT_unit_t structures that they point to. */
+  while (!g_queue_is_empty (local_data->pending_foci))
+    g_queue_pop_head (local_data->pending_foci);
 
 #if DEBUG
   g_debug ("----- EXIT reset (%s)", MODEL_NAME);
@@ -676,6 +690,11 @@ local_free (struct adsm_module_t_ *self)
   RPT_free_reporting (local_data->num_holes_filled);
   RPT_free_reporting (local_data->cumul_num_holes_filled);
 #endif
+
+  /* When freeing pending_foci, we just need to free the queue structure
+   * itself, not the UNT_unit_t structures that each queue node points to. */
+  g_queue_free (local_data->pending_foci);
+
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
   g_free (self);
@@ -782,6 +801,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   local_data->units = units;
   local_data->zones = zones;
+  local_data->pending_foci = g_queue_new ();
 
   /* Call the set_params function to read the production type combination
    * specific parameters. */

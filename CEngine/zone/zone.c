@@ -118,7 +118,6 @@ ZON_new_zone_list (unsigned int membership_length)
   else
     zones->membership = g_new0 (ZON_zone_fragment_t *, membership_length);
   zones->membership_length = membership_length;
-  zones->pending_foci = g_queue_new ();
 
   /* Pre-create a "background" zone. */
   background_zone = ZON_new_zone ("Background", 0.0);
@@ -213,56 +212,23 @@ ZON_zone_list_reset (ZON_zone_list_t *zones)
   g_debug ("----- ENTER ZON_zone_list_reset");
 #endif
 
-  if (zones == NULL)
-    goto end;
+  if (zones != NULL)
+    {
+      nzones = ZON_zone_list_length (zones);
 
-  nzones = ZON_zone_list_length (zones);
+      for (i = 0; i < nzones; i++)
+        ZON_reset (ZON_zone_list_get (zones, i));
 
-  for (i = 0; i < nzones; i++)
-    ZON_reset (ZON_zone_list_get (zones, i));
+      background_zone = ZON_zone_list_get_background (zones);
+      for (i = 0; i < zones->membership_length; i++)
+        zones->membership[i] = background_zone;
+    }
 
-  background_zone = ZON_zone_list_get_background (zones);
-  for (i = 0; i < zones->membership_length; i++)
-    zones->membership[i] = background_zone;
-        
-  /* Empty the list of pending zone foci. */
-  while (!g_queue_is_empty (zones->pending_foci))
-    g_free ((ZON_pending_focus_t *) g_queue_pop_head (zones->pending_foci));
-
-end:
 #if DEBUG
   g_debug ("----- EXIT ZON_zone_list_reset");
 #endif
 
   return;
-}
-
-
-
-/**
- * Adds a new focus to the list of pending foci.
- *
- * @param zones a zone list.
- * @param x the x-coordinate of the focus (corresponds to longitude).
- * @param y the y-coordinate of the focus (corresponds to latitude).
- */
-void
-ZON_zone_list_add_focus (ZON_zone_list_t * zones, double x, double y)
-{
-  ZON_pending_focus_t *pending_focus;
-
-#if DEBUG
-  g_debug ("----- ENTER ZON_zone_list_add_focus");
-#endif
-
-  pending_focus = g_new (ZON_pending_focus_t, 1);
-  pending_focus->x = x;
-  pending_focus->y = y;
-  g_queue_push_tail (zones->pending_foci, pending_focus);
-
-#if DEBUG
-  g_debug ("----- EXIT ZON_zone_list_add_focus");
-#endif
 }
 
 
@@ -348,37 +314,28 @@ ZON_free_zone_list (ZON_zone_list_t * zones)
   ZON_zone_t *zone;
   unsigned int nzones;
   int i;
-  ZON_pending_focus_t *pending_focus;
 
 #if DEBUG
   g_debug ("----- ENTER ZON_free_zone_list");
 #endif
 
-  if (zones == NULL)
-    goto end;
-
-  /* Free the dynamic parts of each zone structure. */
-  nzones = ZON_zone_list_length (zones);
-  for (i = 0; i < nzones; i++)
+  if (zones != NULL)
     {
-      zone = ZON_zone_list_get (zones, i);
-      ZON_free_zone (zone);
+      /* Free the dynamic parts of each zone structure. */
+      nzones = ZON_zone_list_length (zones);
+      for (i = 0; i < nzones; i++)
+        {
+          zone = ZON_zone_list_get (zones, i);
+          ZON_free_zone (zone);
+        }
+      g_ptr_array_free (zones->list, TRUE);
+
+      if (zones->membership != NULL)
+        g_free (zones->membership);
+
+      g_free (zones);
     }
-  g_ptr_array_free (zones->list, TRUE);
 
-  if (zones->membership != NULL)
-    g_free (zones->membership);
-
-  while (!g_queue_is_empty (zones->pending_foci))
-    {
-      pending_focus = (ZON_pending_focus_t *) g_queue_pop_head (zones->pending_foci);
-      g_free (pending_focus);
-    }
-  g_queue_free (zones->pending_foci);
-
-  g_free (zones);
-
-end:
 #if DEBUG
   g_debug ("----- EXIT ZON_free_zone_list");
 #endif
