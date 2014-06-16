@@ -71,14 +71,14 @@ ZON_zone_fragment_t *
 ZON_new_fragment (ZON_zone_t * parent, int contour)
 {
   ZON_zone_fragment_t *fragment;
-#if DEBUG
-  static int current_id = 0;
-#endif
+  #if DEBUG
+    static int current_id = 0;
+  #endif
 
   fragment = g_new (ZON_zone_fragment_t, 1);
-#if DEBUG
-  fragment->id = current_id++;
-#endif
+  #if DEBUG
+    fragment->id = current_id++;
+  #endif
   fragment->parent = parent;
   fragment->contour = contour;
   fragment->nests_in = NULL;
@@ -179,18 +179,18 @@ ZON_zone_list_append (ZON_zone_list_t * zones, ZON_zone_t * zone)
 {
   int index;
 
-#if DEBUG
-  g_debug ("----- ENTER ZON_zone_list_append");
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER ZON_zone_list_append");
+  #endif
 
   /* The zone list automatically contains a "background" zone in the last
    * position. Append in the position before that. */
   index = ZON_zone_list_length (zones) - 1;
   ptr_array_insert (zones->list, index, zone);
 
-#if DEBUG
-  g_debug ("----- EXIT ZON_zone_list_append");
-#endif
+  #if DEBUG
+    g_debug ("----- EXIT ZON_zone_list_append");
+  #endif
 
   return index;
 }
@@ -208,9 +208,9 @@ ZON_zone_list_reset (ZON_zone_list_t *zones)
   unsigned int nzones, i;
   ZON_zone_fragment_t *background_zone;
 
-#if DEBUG
-  g_debug ("----- ENTER ZON_zone_list_reset");
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER ZON_zone_list_reset");
+  #endif
 
   if (zones != NULL)
     {
@@ -224,9 +224,9 @@ ZON_zone_list_reset (ZON_zone_list_t *zones)
         zones->membership[i] = background_zone;
     }
 
-#if DEBUG
-  g_debug ("----- EXIT ZON_zone_list_reset");
-#endif
+  #if DEBUG
+    g_debug ("----- EXIT ZON_zone_list_reset");
+  #endif
 
   return;
 }
@@ -283,9 +283,9 @@ ZON_fprintf_zone_list (FILE * stream, ZON_zone_list_t * zones)
   char *s;
   int nchars_written;
 
-#if DEBUG
-  g_debug ("----- ENTER ZON_fprintf_zone_list");
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER ZON_fprintf_zone_list");
+  #endif
 
   if (!stream)
     stream = stdout;
@@ -294,9 +294,9 @@ ZON_fprintf_zone_list (FILE * stream, ZON_zone_list_t * zones)
   nchars_written = fprintf (stream, "%s", s);
   free (s);
 
-#if DEBUG
-  g_debug ("----- EXIT ZON_fprintf_zone_list");
-#endif
+  #if DEBUG
+    g_debug ("----- EXIT ZON_fprintf_zone_list");
+  #endif
 
   return nchars_written;
 }
@@ -315,9 +315,9 @@ ZON_free_zone_list (ZON_zone_list_t * zones)
   unsigned int nzones;
   int i;
 
-#if DEBUG
-  g_debug ("----- ENTER ZON_free_zone_list");
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER ZON_free_zone_list");
+  #endif
 
   if (zones != NULL)
     {
@@ -336,9 +336,9 @@ ZON_free_zone_list (ZON_zone_list_t * zones)
       g_free (zones);
     }
 
-#if DEBUG
-  g_debug ("----- EXIT ZON_free_zone_list");
-#endif
+  #if DEBUG
+    g_debug ("----- EXIT ZON_free_zone_list");
+  #endif
   return;
 }
 
@@ -390,9 +390,9 @@ ZON_new_zone (char *name, double radius)
 {
   ZON_zone_t *z;
 
-#if DEBUG
-  g_debug ("----- ENTER ZON_new_zone");
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER ZON_new_zone");
+  #endif
 
   z = g_new (ZON_zone_t, 1);
   z->name = g_strdup (name);
@@ -409,45 +409,18 @@ ZON_new_zone (char *name, double radius)
   z->area = 0;
   z->perimeter = 0;
   z->nholes_filled = 0;
-#ifdef USE_SC_GUILIB
-  z->max_area = 0.0;
-  z->max_day = 0;
-  z->_unitDays = g_hash_table_new( g_direct_hash, g_direct_equal );
-  z->_animalDays = g_hash_table_new( g_direct_hash, g_direct_equal );
-#endif
+  #ifdef USE_SC_GUILIB
+    z->max_area = 0.0;
+    z->max_day = 0;
+    z->_unitDays = g_hash_table_new( g_direct_hash, g_direct_equal );
+    z->_animalDays = g_hash_table_new( g_direct_hash, g_direct_equal );
+  #endif
 
-#if DEBUG
-  g_debug ("----- EXIT ZON_new_zone");
-#endif
+  #if DEBUG
+    g_debug ("----- EXIT ZON_new_zone");
+  #endif
 
   return z;
-}
-
-
-
-/**
- * Returns a deep copy of a zone.
- *
- * @param zone a zone to be copied.
- * @return a pointer to a newly-created, initialized ZON_zone_t structure.
- */
-ZON_zone_t *
-ZON_clone_zone (ZON_zone_t * zone)
-{
-  ZON_zone_t *clone;
-
-#if DEBUG
-  g_debug ("----- ENTER ZON_clone_zone");
-#endif
-
-  clone = g_new (ZON_zone_t, 1);
-  clone->name = g_strdup (zone->name);
-
-#if DEBUG
-  g_debug ("----- ENTER ZON_clone_zone");
-#endif
-
-  return clone;
 }
 
 

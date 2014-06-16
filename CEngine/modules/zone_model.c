@@ -137,10 +137,10 @@ typedef struct
   ZON_zone_fragment_t **fragment_containing_focus;
   gpc_vertex_list *hole;
   ZON_zone_fragment_t *hole_fragment;
-#if DEBUG
-  int *n_search_hits;
-  int zone_index;
-#endif
+  #if DEBUG
+    int *n_search_hits;
+    int zone_index;
+  #endif
 } callback_t;
 
 
@@ -162,21 +162,21 @@ check_circle_and_rezone (int id, gpointer arg)
   int current_level;
   int i;
   UNT_zone_t zone_update;
-#if DEBUG
-  gboolean update_zones = TRUE;
-  GString *s;
-#endif
+  #if DEBUG
+    gboolean update_zones = TRUE;
+    GString *s;
+  #endif
 
-#if DEBUG
-  g_debug ("----- ENTER check_circle_and_rezone");
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER check_circle_and_rezone");
+  #endif
 
   callback_data = (callback_t *) arg;
   unit = UNT_unit_list_get (callback_data->units, id);
 
-#if DEBUG
-  g_debug ("checking unit \"%s\"", unit->official_id);
-#endif
+  #if DEBUG
+    g_debug ("checking unit \"%s\"", unit->official_id);
+  #endif
 
   distance_sq = GIS_distance_sq (unit->x, unit->y,
                                  callback_data->x, callback_data->y);
@@ -191,66 +191,66 @@ check_circle_and_rezone (int id, gpointer arg)
       if (distance_sq - zone->radius_sq <= zone->epsilon_sq)
         {
           /* The unit is inside this zone ring. */
-#if DEBUG
-          g_debug ("unit \"%s\" is inside the radius (%.2g km) for zone \"%s\" (level %i)",
-                   unit->official_id, zone->radius, zone->name, zone->level);
+          #if DEBUG
+            g_debug ("unit \"%s\" is inside the radius (%.2g km) for zone \"%s\" (level %i)",
+                     unit->official_id, zone->radius, zone->name, zone->level);
 
-          callback_data->n_search_hits[i]++;
-#endif
+            callback_data->n_search_hits[i]++;
+          #endif
           /* update_zones is ignored, unless testing and debugging are being conducted. */
-#if DEBUG
-          if( TRUE == update_zones )
-            {
-#endif
-              /* Find out the surveillance level of the zone the unit is currently
-               * in.  If the unit is currently in a lower-priority level (the level
-               * number is higher), update the unit's zone membership. */
-              current_fragment = zones->membership[unit->index];
-              current_level = current_fragment->parent->level;
-              if (current_level > zone->level)
-                {
-#if DEBUG
-                  s = g_string_new (NULL);
-                  g_string_printf (s, "unit \"%s\" was in zone \"%s\" (level %i)",
-                                   unit->official_id, current_fragment->parent->name, current_level);
-#endif
-                  zones->membership[unit->index] = callback_data->fragment_containing_focus[i];
+          #if DEBUG
+            if( TRUE == update_zones )
+              {
+          #endif
+                /* Find out the surveillance level of the zone the unit is currently
+                 * in.  If the unit is currently in a lower-priority level (the level
+                 * number is higher), update the unit's zone membership. */
+                current_fragment = zones->membership[unit->index];
+                current_level = current_fragment->parent->level;
+                if (current_level > zone->level)
+                  {
+                    #if DEBUG
+                      s = g_string_new (NULL);
+                      g_string_printf (s, "unit \"%s\" was in zone \"%s\" (level %i)",
+                                       unit->official_id, current_fragment->parent->name, current_level);
+                    #endif
+                    zones->membership[unit->index] = callback_data->fragment_containing_focus[i];
 
-                  zone_update.unit_index = unit->index;
-                  zone_update.zone_level = zone->level;
-				  
-#ifdef USE_SC_GUILIB
-                  sc_record_zone_change( unit, zone );
-#else				  
-                  if( NULL != adsm_record_zone_change )
-                    {
-                      adsm_record_zone_change( zone_update );
-                    };
-#endif				  
-#if DEBUG
-                  g_string_append_printf (s, ", now in zone \"%s\" (level %i)",
-                                          zone->name, zone->level);
-                  g_debug ("%s", s->str);
-                  g_string_free (s, TRUE);
-#endif
-                }
-              else
-                {
-#if DEBUG
-                  g_debug ("unit \"%s\" remains in zone \"%s\" (level %i)",
-                           unit->official_id, current_fragment->parent->name, current_level);
-#endif
-                }
-#if DEBUG
-            }
-#endif
+                    zone_update.unit_index = unit->index;
+                    zone_update.zone_level = zone->level;
+
+                    #ifdef USE_SC_GUILIB
+                      sc_record_zone_change( unit, zone );
+                    #else				  
+                      if( NULL != adsm_record_zone_change )
+                        {
+                          adsm_record_zone_change( zone_update );
+                        };
+                    #endif				  
+                    #if DEBUG
+                      g_string_append_printf (s, ", now in zone \"%s\" (level %i)",
+                                              zone->name, zone->level);
+                      g_debug ("%s", s->str);
+                      g_string_free (s, TRUE);
+                    #endif
+                  }
+                else
+                  {
+                    #if DEBUG
+                      g_debug ("unit \"%s\" remains in zone \"%s\" (level %i)",
+                               unit->official_id, current_fragment->parent->name, current_level);
+                    #endif
+                  }
+          #if DEBUG
+              }
+          #endif
           break;
         }
     }
 
-#if DEBUG
-  g_debug ("----- EXIT check_circle_and_rezone");
-#endif
+  #if DEBUG
+    g_debug ("----- EXIT check_circle_and_rezone");
+  #endif
 
   return;
 }
@@ -272,21 +272,21 @@ check_poly_and_rezone (int id, gpointer arg)
   ZON_zone_list_t *zones;
   int current_level;
   UNT_zone_t zone_update;
-#if DEBUG
-  gboolean update_zones = TRUE;
-  GString *s;
-#endif
+  #if DEBUG
+    gboolean update_zones = TRUE;
+    GString *s;
+  #endif
 
-#if DEBUG
-  g_debug ("----- ENTER check_poly_and_rezone");
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER check_poly_and_rezone");
+  #endif
 
   callback_data = (callback_t *) arg;
   unit = UNT_unit_list_get (callback_data->units, id);
 
-#if DEBUG
-  g_debug ("checking unit \"%s\"", unit->official_id);
-#endif
+  #if DEBUG
+    g_debug ("checking unit \"%s\"", unit->official_id);
+  #endif
 
   poly = callback_data->hole;
 
@@ -294,59 +294,59 @@ check_poly_and_rezone (int id, gpointer arg)
   if (GIS_point_in_contour (poly, unit->x, unit->y))
     {
       zone = callback_data->hole_fragment->parent;
-#if DEBUG
-      g_debug ("unit \"%s\" is inside the hole in zone \"%s\" (level %i)",
-               unit->official_id, zone->name, zone->level);
+      #if DEBUG
+        g_debug ("unit \"%s\" is inside the hole in zone \"%s\" (level %i)",
+                 unit->official_id, zone->name, zone->level);
 
-      callback_data->n_search_hits[callback_data->zone_index]++;
-#endif
+        callback_data->n_search_hits[callback_data->zone_index]++;
+      #endif
 
       /* update_zones is ignored, unless testing and debugging are being conducted. */
-#if DEBUG
-      if( TRUE == update_zones )
-        {
-#endif
-          /* Find out the surveillance level of the zone the unit is currently in.
-           * If the unit is currently in a lower-priority level (the level number
-           * number is higher), update the unit's zone membership. */
-          zones = callback_data->zones;
-          current_fragment = zones->membership[unit->index];
-          current_level = current_fragment->parent->level;
-          if (current_level > zone->level)
-            {
-#if DEBUG
-              s = g_string_new (NULL);
-              g_string_printf (s, "unit \"%s\" was in zone \"%s\" (level %i)",
-                               unit->official_id, current_fragment->parent->name, current_level);
-#endif
-              zones->membership[unit->index] = callback_data->hole_fragment;
+      #if DEBUG
+        if( TRUE == update_zones )
+          {
+        #endif
+            /* Find out the surveillance level of the zone the unit is currently in.
+             * If the unit is currently in a lower-priority level (the level number
+             * number is higher), update the unit's zone membership. */
+            zones = callback_data->zones;
+            current_fragment = zones->membership[unit->index];
+            current_level = current_fragment->parent->level;
+            if (current_level > zone->level)
+              {
+                #if DEBUG
+                  s = g_string_new (NULL);
+                  g_string_printf (s, "unit \"%s\" was in zone \"%s\" (level %i)",
+                                   unit->official_id, current_fragment->parent->name, current_level);
+                #endif
+                zones->membership[unit->index] = callback_data->hole_fragment;
 
-              zone_update.unit_index = unit->index;
-              zone_update.zone_level = zone->level;
-			  
-#ifdef USE_SC_GUILIB
-			  sc_record_zone_change( unit, zone );
-#else			  
-			  if( NULL != adsm_record_zone_change )
-                {
-                  adsm_record_zone_change( zone_update );
-                };
-#endif			  
+                zone_update.unit_index = unit->index;
+                zone_update.zone_level = zone->level;
 
-#if DEBUG
-              g_string_append_printf (s, ", now in zone \"%s\" (level %i)", zone->name, zone->level);
-              g_debug ("%s", s->str);
-              g_string_free (s, TRUE);
-#endif
-            }
-#if DEBUG
-        }
-#endif
+                #ifdef USE_SC_GUILIB
+                  sc_record_zone_change( unit, zone );
+                #else			  
+			      if( NULL != adsm_record_zone_change )
+                    {
+                      adsm_record_zone_change( zone_update );
+                    };
+                #endif			  
+
+                #if DEBUG
+                  g_string_append_printf (s, ", now in zone \"%s\" (level %i)", zone->name, zone->level);
+                  g_debug ("%s", s->str);
+                  g_string_free (s, TRUE);
+                #endif
+              }
+        #if DEBUG
+          }
+        #endif
     }
 
-#if DEBUG
-  g_debug ("----- EXIT check_poly_and_rezone");
-#endif
+  #if DEBUG
+    g_debug ("----- EXIT check_poly_and_rezone");
+  #endif
 
   return;
 }
@@ -369,27 +369,27 @@ handle_request_for_zone_focus_event (struct adsm_module_t_ *self,
   local_data_t *local_data;
   UNT_unit_t *unit;
 
-#if DEBUG
-  g_debug ("----- ENTER handle_request_for_zone_focus_event (%s)", MODEL_NAME);
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER handle_request_for_zone_focus_event (%s)", MODEL_NAME);
+  #endif
 
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
-#if DEBUG
-  g_debug ("adding pending zone focus at x=%g, y=%g", unit->x, unit->y);
-#endif
+  #if DEBUG
+    g_debug ("adding pending zone focus at x=%g, y=%g", unit->x, unit->y);
+  #endif
   g_queue_push_tail (local_data->pending_foci, unit);
 
-#ifdef USE_SC_GUILIB
-  sc_make_zone_focus( event->day, unit );
-#else
-  if( NULL != adsm_make_zone_focus )
-    adsm_make_zone_focus (unit->index);
-#endif
+  #ifdef USE_SC_GUILIB
+    sc_make_zone_focus( event->day, unit );
+  #else
+    if( NULL != adsm_make_zone_focus )
+      adsm_make_zone_focus (unit->index);
+  #endif
 
-#if DEBUG
-  g_debug ("----- EXIT handle_request_for_zone_focus_event (%s)", MODEL_NAME);
-#endif
+  #if DEBUG
+    g_debug ("----- EXIT handle_request_for_zone_focus_event (%s)", MODEL_NAME);
+  #endif
 }
 
 
@@ -423,34 +423,33 @@ handle_midnight_event (struct adsm_module_t_ *self,
   double hole_size;
   int i, j;
 
-#if DEBUG
-  int report_array_size;
-  int *nHitsCircle;
-  int *nHitsPoly;
-#endif
+  #if DEBUG
+    int report_array_size;
+    int *nHitsCircle;
+    int *nHitsPoly;
+  #endif
 
-  
-#if DEBUG
-  g_debug ("----- ENTER handle_midnight_event (%s)", MODEL_NAME);
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER handle_midnight_event (%s)", MODEL_NAME);
+  #endif
 
   /* If there is just a "background" zone, we have nothing to do. */
   nzones = ZON_zone_list_length (zones);
   if (nzones == 1)
     {
-#if DEBUG
-      g_debug ("there is only a background zone, nothing to do");
-#endif
+      #if DEBUG
+        g_debug ("there is only a background zone, nothing to do");
+      #endif
       goto end;
     }
 
-#if DEBUG
-  /* For debugging purposes, these arrays can be used to count the number of 
-   * search hits produced by each mechanism. */
-  report_array_size = nzones - 1;
-  nHitsCircle = g_new0( int, report_array_size );
-  nHitsPoly = g_new0( int, report_array_size );
-#endif
+  #if DEBUG
+    /* For debugging purposes, these arrays can be used to count the number of 
+     * search hits produced by each mechanism. */
+    report_array_size = nzones - 1;
+    nHitsCircle = g_new0( int, report_array_size );
+    nHitsPoly = g_new0( int, report_array_size );
+  #endif
 
   local_data = (local_data_t *) (self->model_data);
 
@@ -493,9 +492,9 @@ handle_midnight_event (struct adsm_module_t_ *self,
       /* The search area should be the radius of the largest zone.  Remember
        * that the largest zone is the next-to-last item in the zone list. */
       distance = ZON_zone_list_get (zones, nzones - 2)->radius + EPSILON;
-#if DEBUG
-      callback_data.n_search_hits = nHitsCircle;
-#endif
+      #if DEBUG
+        callback_data.n_search_hits = nHitsCircle;
+      #endif
       spatial_search_circle_by_xy (units->spatial_index, x, y, distance,
                                    check_circle_and_rezone, &callback_data);
 
@@ -547,23 +546,23 @@ handle_midnight_event (struct adsm_module_t_ *self,
       g_free (holes);
     }                           /* end of loop over pending foci */
 
-#if DEBUG
-  if( NULL != adsm_report_search_hits )
-    {
-      for( i = 0; i < report_array_size; ++i )
-        adsm_report_search_hits( ZON_zone_list_get( zones, i )->level,
-                                        nHitsCircle[i], nHitsCircle[i],
-                                        nHitsPoly[i], nHitsPoly[i] );
-    }
+  #if DEBUG
+    if( NULL != adsm_report_search_hits )
+      {
+        for( i = 0; i < report_array_size; ++i )
+          adsm_report_search_hits( ZON_zone_list_get( zones, i )->level,
+                                   nHitsCircle[i], nHitsCircle[i],
+                                   nHitsPoly[i], nHitsPoly[i] );
+      }
 
-  g_free( nHitsCircle );
-  g_free( nHitsPoly );
-#endif
+    g_free( nHitsCircle );
+    g_free( nHitsPoly );
+  #endif
 
 end:
-#if DEBUG
-  g_debug ("----- EXIT handle_midnight_event (%s)", MODEL_NAME);
-#endif
+  #if DEBUG
+    g_debug ("----- EXIT handle_midnight_event (%s)", MODEL_NAME);
+  #endif
 
   return;
 }
@@ -584,9 +583,9 @@ void
 run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
      ZON_zone_list_t * zones, EVT_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
-#if DEBUG
-  g_debug ("----- ENTER run (%s)", MODEL_NAME);
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER run (%s)", MODEL_NAME);
+  #endif
 
   switch (event->type)
     {
@@ -602,9 +601,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
          MODEL_NAME, EVT_event_type_name[event->type]);
     }
 
-#if DEBUG
-  g_debug ("----- EXIT run (%s)", MODEL_NAME);
-#endif
+  #if DEBUG
+    g_debug ("----- EXIT run (%s)", MODEL_NAME);
+  #endif
 }
 
 
@@ -619,9 +618,9 @@ reset (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
-#if DEBUG
-  g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER reset (%s)", MODEL_NAME);
+  #endif
 
   local_data = (local_data_t *) (self->model_data);
 
@@ -630,9 +629,9 @@ reset (struct adsm_module_t_ *self)
   while (!g_queue_is_empty (local_data->pending_foci))
     g_queue_pop_head (local_data->pending_foci);
 
-#if DEBUG
-  g_debug ("----- EXIT reset (%s)", MODEL_NAME);
-#endif
+  #if DEBUG
+    g_debug ("----- EXIT reset (%s)", MODEL_NAME);
+  #endif
 }
 
 
@@ -679,17 +678,17 @@ local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
 
-#if DEBUG
-  g_debug ("----- ENTER free (%s)", MODEL_NAME);
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER free (%s)", MODEL_NAME);
+  #endif
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-#if 0
-  RPT_free_reporting (local_data->num_fragments);
-  RPT_free_reporting (local_data->num_holes_filled);
-  RPT_free_reporting (local_data->cumul_num_holes_filled);
-#endif
+  #if 0
+    RPT_free_reporting (local_data->num_fragments);
+    RPT_free_reporting (local_data->num_holes_filled);
+    RPT_free_reporting (local_data->cumul_num_holes_filled);
+  #endif
 
   /* When freeing pending_foci, we just need to free the queue structure
    * itself, not the UNT_unit_t structures that each queue node points to. */
@@ -699,9 +698,9 @@ local_free (struct adsm_module_t_ *self)
   g_ptr_array_free (self->outputs, TRUE);
   g_free (self);
 
-#if DEBUG
-  g_debug ("----- EXIT free (%s)", MODEL_NAME);
-#endif
+  #if DEBUG
+    g_debug ("----- EXIT free (%s)", MODEL_NAME);
+  #endif
 }
 
 
@@ -724,9 +723,9 @@ set_params (void *data, int ncols, char **value, char **colname)
   double radius;
   ZON_zone_t *zone = NULL;
 
-#if DEBUG
-  g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
+  #endif
 
   self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
@@ -757,9 +756,9 @@ set_params (void *data, int ncols, char **value, char **colname)
   /* Add the zone object to the zone list. */
   ZON_zone_list_append (local_data->zones, zone);
 
-#if DEBUG
-  g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
-#endif
+  #if DEBUG
+    g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
+  #endif
 
   return 0;
 }
@@ -777,9 +776,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data_t *local_data;
   char *sqlerr;
 
-#if DEBUG
-  g_debug ("----- ENTER new (%s)", MODEL_NAME);
-#endif
+  #if DEBUG
+    g_debug ("----- ENTER new (%s)", MODEL_NAME);
+  #endif
 
   self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
@@ -813,9 +812,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       g_error ("%s", sqlerr);
     }
 
-#if DEBUG
-  g_debug ("----- EXIT new (%s)", MODEL_NAME);
-#endif
+  #if DEBUG
+    g_debug ("----- EXIT new (%s)", MODEL_NAME);
+  #endif
 
   return self;
 }
