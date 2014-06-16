@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="21cm" height="11cm" viewBox="-1 9 402 213" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="0" y="10" width="400" height="210"/>
+  <g>
+    <ellipse style="fill: #bfbfbf" cx="300" cy="115" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="300" cy="115" rx="50" ry="50"/>
+  </g>
+  <g>
+    <ellipse style="fill: #bfbfbf" cx="100" cy="155" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="100" cy="155" rx="50" ry="50"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="20" y="40">
+    <tspan x="20" y="40">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="20" y="120">
+    <tspan x="20" y="120">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="20" y="80">
+    <tspan x="20" y="80">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="20" y="160">
+    <tspan x="20" y="160">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="20" y="200">
+    <tspan x="20" y="200">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="60" y="40">
+    <tspan x="60" y="40">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="60" y="120">
+    <tspan x="60" y="120">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="60" y="80">
+    <tspan x="60" y="80">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="60" y="160">
+    <tspan x="60" y="160">1</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="60" y="200">
+    <tspan x="60" y="200">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="100" y="40">
+    <tspan x="100" y="40">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="100" y="120">
+    <tspan x="100" y="120">1</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="100" y="80">
+    <tspan x="100" y="80">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #c80000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="100" y="160">
+    <tspan x="100" y="160">1</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="100" y="200">
+    <tspan x="100" y="200">1</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="140" y="40">
+    <tspan x="140" y="40">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="140" y="120">
+    <tspan x="140" y="120">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="140" y="80">
+    <tspan x="140" y="80">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="140" y="160">
+    <tspan x="140" y="160">1</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="140" y="200">
+    <tspan x="140" y="200">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="180" y="40">
+    <tspan x="180" y="40">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="180" y="120">
+    <tspan x="180" y="120">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="180" y="80">
+    <tspan x="180" y="80">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="180" y="160">
+    <tspan x="180" y="160">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="180" y="200">
+    <tspan x="180" y="200">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="220" y="40">
+    <tspan x="220" y="40">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="220" y="120">
+    <tspan x="220" y="120">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="220" y="80">
+    <tspan x="220" y="80">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="220" y="160">
+    <tspan x="220" y="160">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="220" y="200">
+    <tspan x="220" y="200">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="260" y="40">
+    <tspan x="260" y="40">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="260" y="120">
+    <tspan x="260" y="120">1</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="260" y="80">
+    <tspan x="260" y="80">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="260" y="160">
+    <tspan x="260" y="160">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="260" y="200">
+    <tspan x="260" y="200">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="300" y="40">
+    <tspan x="300" y="40">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #c80000;text-anchor:middle;font-family:Bitstream Vera Sans;font-style:normal;font-weight:700" x="300" y="120">
+    <tspan x="300" y="120">1</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="300" y="80">
+    <tspan x="300" y="80">1</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="300" y="160">
+    <tspan x="300" y="160">1</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="300" y="200">
+    <tspan x="300" y="200">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="340" y="40">
+    <tspan x="340" y="40">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="340" y="120">
+    <tspan x="340" y="120">1</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="340" y="80">
+    <tspan x="340" y="80">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="340" y="160">
+    <tspan x="340" y="160">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="340" y="200">
+    <tspan x="340" y="200">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="380" y="40">
+    <tspan x="380" y="40">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="380" y="120">
+    <tspan x="380" y="120">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="380" y="80">
+    <tspan x="380" y="80">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="380" y="160">
+    <tspan x="380" y="160">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="380" y="200">
+    <tspan x="380" y="200">2</tspan>
+  </text>
+</svg>

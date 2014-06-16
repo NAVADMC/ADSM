@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="56cm" height="13cm" viewBox="-1 -1 1102 243" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="0" y="0" width="340" height="240"/>
+  <g>
+    <ellipse style="fill: #c80000" cx="170" cy="80" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #c80000" cx="170" cy="80" rx="50" ry="50"/>
+  </g>
+  <g>
+    <ellipse style="fill: #bfbfbf" cx="90" cy="170" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="90" cy="170" rx="50" ry="50"/>
+  </g>
+  <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="170" cy="80" rx="50" ry="50"/>
+  <g>
+    <ellipse style="fill: #bfbfbf" cx="250" cy="170" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="250" cy="170" rx="50" ry="50"/>
+  </g>
+  <text font-size="32" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="300" y="40">
+    <tspan x="300" y="40">+1</tspan>
+  </text>
+  <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="380" y="0" width="340" height="240"/>
+  <g>
+    <ellipse style="fill: #bfbfbf" cx="470" cy="170" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #bfbfbf" cx="470" cy="170" rx="50" ry="50"/>
+  </g>
+  <g>
+    <ellipse style="fill: #bfbfbf" cx="630" cy="170" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="630" cy="170" rx="50" ry="50"/>
+  </g>
+  <text font-size="32" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="680" y="40">
+    <tspan x="680" y="40">+0</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #c80000" cx="520" cy="110" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="520" cy="110" rx="50" ry="50"/>
+  </g>
+  <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="470" cy="170" rx="50" ry="50"/>
+  <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="760" y="0" width="340" height="240"/>
+  <g>
+    <ellipse style="fill: #bfbfbf" cx="850" cy="170" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #bfbfbf" cx="850" cy="170" rx="50" ry="50"/>
+  </g>
+  <g>
+    <ellipse style="fill: #bfbfbf" cx="1010" cy="170" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #bfbfbf" cx="1010" cy="170" rx="50" ry="50"/>
+  </g>
+  <text font-size="32" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="1060" y="40">
+    <tspan x="1060" y="40">-1</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #c80000" cx="930" cy="170" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="930" cy="170" rx="50" ry="50"/>
+  </g>
+  <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="850" cy="170" rx="50" ry="50"/>
+  <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="1010" cy="170" rx="50" ry="50"/>
+</svg>

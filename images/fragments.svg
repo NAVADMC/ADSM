@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="42cm" height="24cm" viewBox="-1 -41 822 475" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="440" y="-40" width="380" height="320"/>
+  <g>
+    <ellipse style="fill: #bfbfbf" cx="530" cy="170" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #bfbfbf" cx="530" cy="170" rx="50" ry="50"/>
+  </g>
+  <g>
+    <ellipse style="fill: #bfbfbf" cx="630" cy="70" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #bfbfbf" cx="630" cy="70" rx="50" ry="50"/>
+  </g>
+  <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="0" y="-40" width="380" height="320"/>
+  <g>
+    <ellipse style="fill: #c80000" cx="580" cy="120" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="580" cy="120" rx="50" ry="50"/>
+  </g>
+  <g>
+    <ellipse style="fill: #bfbfbf" cx="90" cy="170" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="90" cy="170" rx="50" ry="50"/>
+  </g>
+  <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="530" cy="170" rx="50" ry="50"/>
+  <g>
+    <ellipse style="fill: #bfbfbf" cx="290" cy="170" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="290" cy="170" rx="50" ry="50"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="90" y="160">
+    <tspan x="90" y="160">A</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #bfbfbf" cx="190" cy="70" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="190" cy="70" rx="50" ry="50"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="190" y="60">
+    <tspan x="190" y="60">B</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="290" y="160">
+    <tspan x="290" y="160">C</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="140" y="110">
+    <tspan x="140" y="110">D</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #000000" cx="190" cy="70" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="190" cy="70" rx="4" ry="4"/>
+  </g>
+  <g>
+    <ellipse style="fill: #000000" cx="140" cy="120" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="140" cy="120" rx="4" ry="4"/>
+  </g>
+  <g>
+    <ellipse style="fill: #000000" cx="90" cy="170" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="90" cy="170" rx="4" ry="4"/>
+  </g>
+  <g>
+    <ellipse style="fill: #000000" cx="290" cy="170" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="290" cy="170" rx="4" ry="4"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="160" y="330">
+    <tspan x="160" y="330">A</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:start;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="30" y="330">
+    <tspan x="30" y="330">Units</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="210" y="330">
+    <tspan x="210" y="330">B</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="260" y="330">
+    <tspan x="260" y="330">C</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="310" y="330">
+    <tspan x="310" y="330">D</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="90" y="240">
+    <tspan x="90" y="240">Fragment 1</tspan>
+    <tspan x="90" y="260">Contour 1</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="290" y="240">
+    <tspan x="290" y="240">Fragment 3</tspan>
+    <tspan x="290" y="260">Contour 3</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="160" y="380">
+    <tspan x="160" y="380">1</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="210" y="380">
+    <tspan x="210" y="380">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="260" y="380">
+    <tspan x="260" y="380">3</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="160" y="430">
+    <tspan x="160" y="430">1</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="210" y="430">
+    <tspan x="210" y="430">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="260" y="430">
+    <tspan x="260" y="430">3</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #bfbfbf" cx="730" cy="170" rx="50" ry="50"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="730" cy="170" rx="50" ry="50"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="530" y="160">
+    <tspan x="530" y="160">A</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="630" y="60">
+    <tspan x="630" y="60">B</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="730" y="160">
+    <tspan x="730" y="160">C</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="580" y="110">
+    <tspan x="580" y="110">D</tspan>
+  </text>
+  <g>
+    <ellipse style="fill: #000000" cx="630" cy="70" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="630" cy="70" rx="4" ry="4"/>
+  </g>
+  <g>
+    <ellipse style="fill: #000000" cx="580" cy="120" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="580" cy="120" rx="4" ry="4"/>
+  </g>
+  <g>
+    <ellipse style="fill: #000000" cx="530" cy="170" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="530" cy="170" rx="4" ry="4"/>
+  </g>
+  <g>
+    <ellipse style="fill: #000000" cx="730" cy="170" rx="4" ry="4"/>
+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" cx="730" cy="170" rx="4" ry="4"/>
+  </g>
+  <text font-size="16" style="fill: #000000;text-anchor:start;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="470" y="330">
+    <tspan x="470" y="330">Units</tspan>
+  </text>
+  <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="160" y1="335" x2="160" y2="365"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="210" y1="335" x2="210" y2="365"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="260" y1="335" x2="260" y2="365"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="160" y1="385" x2="160" y2="415"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="210" y1="385" x2="210" y2="415"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="260" y1="385" x2="260" y2="415"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="600" y1="335" x2="600" y2="365"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="650" y1="335" x2="650" y2="365"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="700" y1="335" x2="700" y2="365"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="750" y1="335" x2="600" y2="365"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="700" y1="385" x2="700" y2="415"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="600" y1="385" x2="625" y2="415"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="650" y1="385" x2="625" y2="415"/>
+  <ellipse style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" cx="630" cy="70" rx="50" ry="50"/>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="600" y="330">
+    <tspan x="600" y="330">A</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="650" y="330">
+    <tspan x="650" y="330">B</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="700" y="330">
+    <tspan x="700" y="330">C</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="750" y="330">
+    <tspan x="750" y="330">D</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="600" y="380">
+    <tspan x="600" y="380">1</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="650" y="380">
+    <tspan x="650" y="380">2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="700" y="380">
+    <tspan x="700" y="380">3</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="625" y="430">
+    <tspan x="625" y="430">4</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="700" y="430">
+    <tspan x="700" y="430">3</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="530" y="240">
+    <tspan x="530" y="240">Fragment 1</tspan>
+    <tspan x="530" y="260">Contour 4</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="630" y="10">
+    <tspan x="630" y="10">Fragment 2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="190" y="-10">
+    <tspan x="190" y="-10">Fragment 2</tspan>
+    <tspan x="190" y="10">Contour 2</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:start;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="30" y="380">
+    <tspan x="30" y="380">Fragments</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:start;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="30" y="430">
+    <tspan x="30" y="430">Contours</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:start;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="470" y="430">
+    <tspan x="470" y="430">Contours</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:start;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="470" y="380">
+    <tspan x="470" y="380">Fragments</tspan>
+  </text>
+  <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:bitstream vera sans;font-style:normal;font-weight:700" x="730" y="240">
+    <tspan x="730" y="240">Fragment 3</tspan>
+    <tspan x="730" y="260">Contour 3</tspan>
+  </text>
+</svg>
