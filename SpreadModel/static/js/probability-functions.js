@@ -9,9 +9,11 @@ $(document).ready( function(){
             var help_text = $(control_group).find('.help-block').first().text();
             if(help_text.toLowerCase().match(equation_type.toLowerCase())){
                 $(control_group).show();
+                $(control_group).find(':input').attr('required', 'required');
             }
             else {
                 $(control_group).hide();
+                $(control_group).find(':input').removeAttr('required');
             }
         });
     });
