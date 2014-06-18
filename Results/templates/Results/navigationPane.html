@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load db_status_tags %}
+
+{% block main %}
+    <nav>
+        <ul id="setupMenu">
+            <li><a href="/results/Population/" class="{{"Population"|active:active_link}}">Population</a></li>
+            <li><a href="/results/Disease/" class="{{"Disease"|active:active_link}}">Disease</a>
+                <ul><li><a href="/results/Exposures/" class="{{"Exposures"|active:active_link}}">Exposures</a></li>
+                    <li><a href="/results/Infections/" class="{{"Infections"|active:active_link}}">Infections</a></li>
+                    <li><a href="/results/Morbidity/" class="{{"Morbidity"|active:active_link}}">Morbidity</a></li>
+                </ul></li>
+            <li><a href="/results/ControlActivity/" class="{{"ControlActivity"|active:active_link}}">Control Activity</a>
+                <ul><li><a href="/results/Detection/" class="{{"Detection"|active:active_link}}">Detection</a></li>
+                    <li><a href="/results/Tracing/" class="{{"Tracing"|active:active_link}}">Tracing</a></li>
+                    <li><a href="/results/Testing/" class="{{"Testing"|active:active_link}}">Testing</a></li>
+                    <li><a href="/results/Destruction/" class="{{"Destruction"|active:active_link}}">Destruction</a></li>
+                    <li><a href="/results/Vaccination/" class="{{"Vaccination"|active:active_link}}">Vaccination</a></li>
+                    <li><a href="/results/Zones/" class="{{"Zones"|active:active_link}}">Zones</a></li></ul> </li>
+            <li><a href="/results/Cost/" class="{{"Cost"|active:active_link}}">Cost Accounting</a></li>
+
+            <li id="RunSimulation"><a href="/results/Inputs/" class="{{"Inputs"|active:active_link}} completed">
+               <i class="glyphicon glyphicon-play icon-flipped"></i> Back to Inputs </a></li>
+        </ul>
+    </nav>
+    <section>
+        {% block content %}
+
+        {% endblock %}
+    </section>
+{% endblock %}

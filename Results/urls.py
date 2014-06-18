@@ -30,5 +30,7 @@ urlpatterns = generate_urls_from_models('Results/models.py',
                                          "url('^Workspace/$', 'ScenarioCreator.views.file_dialog')",  # Same as Input side
                                          "url('^Download/(?P<target>.+)/$', 'ScenarioCreator.views.download_file')",  # Same as Input side
                                          "url('^Inputs/$', 'Results.views.back_to_inputs')",
+                                         "url('^RunSimulation/$', 'Results.views.run_simulation')",
+
                                         ])
 

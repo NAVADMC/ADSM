@@ -46,7 +46,5 @@ urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
                                          "url('^Download/(?P<target>.+)/$', 'ScenarioCreator.views.download_file')",
                                          "url('^Copy/(?P<target>.+)/$', 'ScenarioCreator.views.copy_file')",
                                          "url('^Upload/$', 'ScenarioCreator.views.upload_scenario')",
-
-                                         "url('^RunSimulation/$', 'ScenarioCreator.views.run_simulation')",
                                         ])
 

@@ -1,17 +1,11 @@
 from glob import glob
 import json
-import os
 import shutil
-from threading import Thread
-import threading
 from django.core.management import call_command
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db import connections
 from django.conf import settings
-import re
-import subprocess
-from Results.models import PingTest
 from ScenarioCreator.models import * # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from Settings.models import SmSession
@@ -549,32 +543,3 @@ def population(request):
         context['xml_files'] = xml_files
     return render(request, 'ScenarioCreator/Population.html', context)
 
-
-def append_clean_ping(line, ping_objects):
-    line = line.decode("utf-8").strip()
-    if 'Reply from ' in line:
-        print(line)
-        ping_objects.append(line)
-
-
-class Simulation(threading.Thread):
-    """execute system commands in a separate thread"""
-    def run(self):
-        simulation = subprocess.Popen(['ping', 'google.com', '-n', '40'], stdout=subprocess.PIPE)
-        ping_lines = []
-        while simulation.poll() is None:  # simulation is still running
-            append_clean_ping(simulation.stdout.readline(), ping_lines)  # This blocks until it receives a newline.
-            if len(ping_lines) > 4:
-                PingTest.objects.bulk_create(ping_lines)
-                ping_lines = []
-        # When the subprocess terminates there might be unconsumed output that still needs to be processed.
-        append_clean_ping(simulation.stdout.read(), ping_lines)
-        PingTest.objects.bulk_create(ping_lines)
-
-
-def run_simulation(request):
-    context = {'display_output_nav': True,
-               'outputs_done': False,}
-    sim = Simulation()
-    context['output'] = sim.start() # starts a new thread
-    return render(request, 'ScenarioCreator/SimulationProgress.html', context)
