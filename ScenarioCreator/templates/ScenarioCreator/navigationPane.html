@@ -4,6 +4,7 @@
 {% block main %}
     <nav>
         <ul id="setupMenu">
+        {% if not display_output_nav %}
             <li><a href="/setup/Scenario/1/" class="{{ "Scenario"|active:active_link}}">
                 <span class="pull-right {{Scenario|completed}}"> </span>Scenario Description</a></li>
             <li><a href="/setup/Populations/" class="{{"Populations"|active:active_link}}">
@@ -38,6 +39,16 @@
                 <span class="pull-right {{OutputSetting|completed}}"> </span>Output Settings</a></li>
             <li id="RunSimulation"><a href="/setup/RunSimulation/" class="{{"RunSimulation"|active:active_link}} {{Simulation|completed}}">
                 Run Simulation <i class="glyphicon glyphicon-play"></i></a></li>
+        {% else %}
+            <li><a href="/results/Population/" class="{{"Population"|active:active_link}}">Population</a></li>
+            <li><a href="/results/Exposures/" class="{{"Exposures"|active:active_link}}">Exposures</a></li>
+            <li><a href="/results/Infections/" class="{{"Infections"|active:active_link}}">Infections</a></li>
+            <li><a href="/results/ControlActivity/" class="{{"ControlActivity"|active:active_link}}">Control Activity</a>
+                <ul><li><a href="/results/Zones/" class="{{"Zones"|active:active_link}}">Zones</a></li></ul> </li>
+            
+            <li id="RunSimulation"><a href="/results/Inputs/" class="{{"Inputs"|active:active_link}} completed">
+               <i class="glyphicon glyphicon-play icon-flipped"></i> Back to Inputs </a></li>
+        {% endif %}
         </ul>
     </nav>
     <section>

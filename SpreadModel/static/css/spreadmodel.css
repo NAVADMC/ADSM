@@ -358,6 +358,10 @@ a.collapsed img {
     -webkit-transform: scaleY(-1);
 }
 
+.icon-flipped {
+    -webkit-transform: scaleX(-1);
+}
+
 table tbody span {
     width: 139px;
     line-height: 21px;

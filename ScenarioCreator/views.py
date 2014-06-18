@@ -547,5 +547,7 @@ def population(request):
 
 
 def run_simulation(request):
+    context = {'display_output_nav': True,
+               'outputs_done': False,}
     #execute system commands here
-    return render(request, 'ScenarioCreator/SimulationProgress.html', {})
+    return render(request, 'ScenarioCreator/SimulationProgress.html', context)
