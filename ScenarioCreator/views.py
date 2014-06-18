@@ -8,6 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.db import connections
 from django.conf import settings
 import re
+import subprocess
 from ScenarioCreator.models import * # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from Settings.models import SmSession
@@ -550,4 +551,14 @@ def run_simulation(request):
     context = {'display_output_nav': True,
                'outputs_done': False,}
     #execute system commands here
+    simulation = subprocess.Popen(['ping', 'google.com', '-n', '10'], stdout=subprocess.PIPE)
+    output = []
+    while simulation.poll() is None:
+        line = simulation.stdout.readline().decode("utf-8").strip()  # This blocks until it receives a newline.
+        if line:
+            print(line)
+            output.append(line)
+    # When the subprocess terminates there might be unconsumed output that still needs to be processed.
+    output.append(simulation.stdout.read().decode("utf-8").strip())
+    context['output'] = '\n'.join(output)
     return render(request, 'ScenarioCreator/SimulationProgress.html', context)

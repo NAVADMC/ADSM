@@ -37,6 +37,9 @@ def basic_context(request):
                'url': request.path,
                'active_link': re.split('\W+', request.path)[2],
                }
+
+    if 'results/' in request.path:  # viewing output page
+        context['display_output_nav'] = True
     context['Simulation'] = simulation_ready_to_run(context)
     context['controls_enabled'] = ControlMasterPlan.objects.filter(disable_all_controls=False).count() > 0
     return context

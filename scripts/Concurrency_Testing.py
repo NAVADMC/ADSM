@@ -8,6 +8,28 @@
 # <codecell>
 
 import subprocess
+simulation = subprocess.Popen(['ping', 'google.com', '-n','10'], stdout=subprocess.PIPE)
+output = []
+while simulation.poll() is None:
+    l = simulation.stdout.readline().decode("utf-8").strip() # This blocks until it receives a newline.
+    if l:
+        print(l)
+        output.append(l)
+print( simulation.stdout.read().decode("utf-8"))
+# When the subprocess terminates there might be unconsumed output 
+# that still needs to be processed.
+# print(output)
+
+# <codecell>
+
+
+# <codecell>
+
+''.strip()
+
+# <codecell>
+
+import subprocess
 subprocess.call(['sqlite3.exe', '--help'])
 
 # <codecell>
