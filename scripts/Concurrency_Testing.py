@@ -61,6 +61,38 @@ subprocess.check_output(['ipconfig'])
 
 # <codecell>
 
+import threading
+import datetime
+import time
+
+class TestThread(threading.Thread):
+    def run(self):
+        while True:
+            print(datetime.datetime.now(), threading.current_thread() )
+            time.sleep(1)
+    
+    def call_me(self):
+        print("I'm",  threading.current_thread())
+    
+
+# <codecell>
+
+threading.current_thread()
+
+# <codecell>
+
+t = TestThread()
+t.start()
+
+# <codecell>
+
+t.call_me()
+
+# <codecell>
+
+
+# <codecell>
+
 import concurrent.futures
 import urllib.request
 
@@ -140,6 +172,36 @@ rc = Client()
 # <markdowncell>
 
 # Doesn't work because I haven't set up security.
+
+# <markdowncell>
+
+# 
+# 
+# 
+# 
+
+# <codecell>
+
+
+# <codecell>
+
+import subprocess
+import sys
+
+cmd = 'ipconfig'
+def pipe_test():
+    process = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+
+    while True:
+        out = process.stdout.read(1)
+        if out == '' :#and process.poll() != None
+            break
+        if out != '':
+            print(out)
+#             sys.stdout.flush()
+            
 
 # <codecell>
 
