@@ -1,5 +1,20 @@
 from django.db import models
 from ScenarioCreator.models import ProductionType, Zone, Unit
+import re
+
+class CmdManager(models.Manager):
+    def create(self, cmd_string, **kwargs):
+        cmd_string = re.sub(r'Reply from |bytes=|ms|time=|:', '', cmd_string)  # clean up extras
+        ip, bytes, time, ignore = cmd_string.split()
+        return super().create(ip=ip, bytes=bytes, time=time)
+
+
+class PingTest(models.Model):
+    ip = models.IPAddressField()
+    bytes = models.IntegerField()
+    time = models.IntegerField()
+
+    objects = CmdManager()
 
 
 class OutDailyByProductionType(models.Model):

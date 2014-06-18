@@ -25,12 +25,13 @@ print( simulation.stdout.read().decode("utf-8"))
 
 # <codecell>
 
-''.strip()
+import re
+cmd_string = 'Reply from 74.125.225.161: bytes=32 time=24ms TTL=55'
+ip, bytes, time, ignore =  re.sub(r'Reply from |bytes=|ms|time=|:', '', cmd_string).split()
+print(ip, bytes, time, ignore)
 
 # <codecell>
 
-import subprocess
-subprocess.call(['sqlite3.exe', '--help'])
 
 # <codecell>
 
