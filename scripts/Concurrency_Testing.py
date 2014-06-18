@@ -22,6 +22,7 @@ print( simulation.stdout.read().decode("utf-8"))
 
 # <codecell>
 
+if a = True: print('hi')
 
 # <codecell>
 

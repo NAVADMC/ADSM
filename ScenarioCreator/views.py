@@ -550,22 +550,26 @@ def population(request):
     return render(request, 'ScenarioCreator/Population.html', context)
 
 
-def create_from_string(line):
+def append_clean_ping(line, ping_objects):
     line = line.decode("utf-8").strip()
     if 'Reply from ' in line:
         print(line)
-        PingTest.objects.create(line)
-    #otherwise ignore
+        ping_objects.append(line)
+
 
 class Simulation(threading.Thread):
     """execute system commands in a separate thread"""
     def run(self):
         simulation = subprocess.Popen(['ping', 'google.com', '-n', '40'], stdout=subprocess.PIPE)
-        while simulation.poll() is None:
-            line = simulation.stdout.readline()  # This blocks until it receives a newline.
-            create_from_string(line)
+        ping_lines = []
+        while simulation.poll() is None:  # simulation is still running
+            append_clean_ping(simulation.stdout.readline(), ping_lines)  # This blocks until it receives a newline.
+            if len(ping_lines) > 4:
+                PingTest.objects.bulk_create(ping_lines)
+                ping_lines = []
         # When the subprocess terminates there might be unconsumed output that still needs to be processed.
-        create_from_string(simulation.stdout.read())
+        append_clean_ping(simulation.stdout.read(), ping_lines)
+        PingTest.objects.bulk_create(ping_lines)
 
 
 def run_simulation(request):

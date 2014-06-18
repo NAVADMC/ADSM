@@ -8,6 +8,14 @@ class CmdManager(models.Manager):
         ip, bytes, time, ignore = cmd_string.split()
         return super().create(ip=ip, bytes=bytes, time=time)
 
+    def bulk_create(self, cmd_strings, *args, **kwargs):
+        ping_test_objects = []
+        for cmd_string in cmd_strings:
+            cmd_string = re.sub(r'Reply from |bytes=|ms|time=|:', '', cmd_string)  # clean up extras
+            ip, bytes, time, ignore = cmd_string.split()
+            ping_test_objects.append(PingTest(ip=ip, bytes=bytes, time=time))  # Probably don't want to specifically say PingGest(), in case we ever have the manager on another object type
+        return super().bulk_create(ping_test_objects)
+
 
 class PingTest(models.Model):
     ip = models.IPAddressField()
