@@ -7,7 +7,8 @@ $(document).ready( function(){
         var fields = $(this).closest('.control-group').nextAll('.control-group');
         fields.each(function(index, control_group){
             var help_text = $(control_group).find('.help-block').first().text();
-            if(help_text.toLowerCase().match(equation_type.toLowerCase())){
+            var functions = help_text.toLowerCase().match(/(\w[\w\s]*)(?=[,\.])/g);
+            if(functions.indexOf(equation_type.toLowerCase()) >= 0){
                 $(control_group).show();
                 $(control_group).find(':input').attr('required', 'required');
             }

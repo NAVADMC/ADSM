@@ -215,43 +215,43 @@ class ProbabilityFunction(Function):
                     "Negative Binomial", "Pareto", "Pearson 5", "Piecewise", "Poisson",
                     "Triangular", "Uniform", "Weibull"))
     mean = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='The mean for probability density function types Inverse Gaussian, Gaussian, Lognormal, Possoin, and Exponential.', )
+        help_text='Functions: Inverse Gaussian, Gaussian, Lognormal, Poisson, Exponential.', )
     std_dev = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='The mean for probability density function types Inverse Gaussian, Gaussian and Lognormal.', )
+        help_text='Functions: Gaussian, Lognormal.', )
     min = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='The minimum for probability density function types Discrete Uniform, Uniform, Triangular, Beta, and BetaPERT.', )
+        help_text='Functions: Discrete Uniform, Uniform, Triangular, Beta, BetaPERT.', )
     mode = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='The Mode for probability density function types Fixed Value, Triangular, and BetaPERT.', )
+        help_text='Functions: Fixed Value, Triangular, BetaPERT.', )
     max = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='The maximum value for probability density function types Discrete Uniform, Uniform, Triangular, Beta, and BetaPERT.', )
+        help_text='Functions: Discrete Uniform, Uniform, Triangular, Beta, BetaPERT.', )
     alpha = models.FloatField(blank=True, null=True,
-        help_text='The alpha parameter for probability density function types Gamma, Weibull, and Pearson 5 or the alpha1 parameter for Beta probability density functions.', )
+        help_text='Functions: Gamma, Weibull, Pearson 5, Beta.', )
     alpha2 = models.FloatField(blank=True, null=True,
-        help_text='The alpha2 parameter for Beta probability density function types.', )
+        help_text='Functions: Beta.', )
     beta = models.FloatField(blank=True, null=True,
-        help_text='The beta parameter for probability density function types Gamma, Weibull, and Pearson 5.', )
+        help_text='Functions: Gamma, Weibull, Pearson 5.', )
     location = models.FloatField(blank=True, null=True,
-        help_text='The location parameter for probability density function types Logistic and LogLogistic.', )
+        help_text='Functions: Logistic, LogLogistic.', )
     scale = models.FloatField(blank=True, null=True,
-        help_text='The scale parameter for probability density function types Logistic and LogLogistic.', )
+        help_text='Functions: Logistic, LogLogistic.', )
     shape = models.FloatField(blank=True, null=True,
-        help_text='The shape parameter for probability density function types LogLogistic, Inverse Gaussian, and Gaussian.', )
+        help_text='Functions: LogLogistic, Inverse Gaussian.', )
     n = models.PositiveIntegerField(validators=[MinValueValidator(0)], blank=True, null=True,
-        help_text='The n parameter for probability density function types Binomial and Hypergeometric.', )
+        help_text='Functions: Hypergeometric.', )
     p = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(1.0)], blank=True, null=True,
-        help_text='The p parameter for probability density function types Negative Binomial and Bernoulli.', )
+        help_text='Functions: Binomial, Negative Binomial, Bernoulli.', )
     m = models.PositiveIntegerField(validators=[MinValueValidator(0)], blank=True, null=True,
-        help_text='The m parameter for probability density function type Hypergeometric.', )
+        help_text='Functions: Hypergeometric.', )
     d = models.PositiveIntegerField(validators=[MinValueValidator(0)], blank=True, null=True,
-        help_text='The d parameter for probability density function type Hypergeometric.', )
+        help_text='Functions: Hypergeometric.', )
     theta = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='The Theta parameter for probability density function type Pareto.', )
+        help_text='Functions: Pareto.', )
     a = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='The a parameter for probability density function type Pareto.', )
+        help_text='Functions:Pareto.', )
     s = models.PositiveIntegerField(validators=[MinValueValidator(0)], blank=True, null=True,
-        help_text='The s parameter for probability density function type Negative Binomial.', )
+        help_text='Functions: Binomial, Negative Binomial.', )
     graph = models.ForeignKey('RelationalFunction', blank=True, null=True,
-        help_text='A series of points used in Histogram and Piecewise functions.')
+        help_text='A series of points used in: Histogram, Piecewise.')
 
 
 class RelationalFunction(Function):
