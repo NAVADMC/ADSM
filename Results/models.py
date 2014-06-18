@@ -2,6 +2,7 @@ from django.db import models
 from ScenarioCreator.models import ProductionType, Zone, Unit
 import re
 
+
 class CmdManager(models.Manager):
     def create(self, cmd_string, **kwargs):
         cmd_string = re.sub(r'Reply from |bytes=|ms|time=|:', '', cmd_string)  # clean up extras
@@ -11,7 +12,7 @@ class CmdManager(models.Manager):
     def bulk_create(self, cmd_strings, *args, **kwargs):
         ping_test_objects = []
         for cmd_string in cmd_strings:
-            cmd_string = re.sub(r'Reply from |bytes=|ms|time=|:', '', cmd_string)  # clean up extras
+            cmd_string = re.sub(r'Reply from |bytes=|ms|time|=|<|:', '', cmd_string)  # clean up extras
             ip, bytes, time, ignore = cmd_string.split()
             ping_test_objects.append(PingTest(ip=ip, bytes=bytes, time=time))  # Probably don't want to specifically say PingGest(), in case we ever have the manager on another object type
         return super().bulk_create(ping_test_objects)
@@ -23,6 +24,9 @@ class PingTest(models.Model):
     time = models.IntegerField()
 
     objects = CmdManager()
+
+    def __str__(self):
+        return "(%s, %s, %s)" % (self.ip, self.bytes, self.time)
 
 
 class OutDailyByProductionType(models.Model):
