@@ -210,11 +210,11 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
                  unit->official_id,
                  unit->production_type_name,
                  zone->name,
-                 UNT_state_name[unit->state], g_hash_table_contains(local_data->detected, unit) ? "already" : "not");
+                 UNT_state_name[unit->state], g_hash_table_lookup(local_data->detected, unit) ? "already" : "not");
       #endif
       /* Check whether the unit has already been detected.  If so, go on to the
        * next unit. */
-      if (g_hash_table_contains(local_data->detected, unit))
+      if (g_hash_table_lookup(local_data->detected, unit))
         continue;
 
       /* Compute the probability that the disease would be noticed, based
@@ -253,7 +253,7 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
                              EVT_new_detection_event (unit, event->day,
                                                       ADSM_DetectionClinicalSigns,
                                                       ADSM_TestUnspecified));
-          g_hash_table_add (local_data->detected, unit);
+          g_hash_table_insert (local_data->detected, unit, GINT_TO_POINTER(1));
         }
       else
         {
@@ -311,11 +311,11 @@ handle_exam_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
              unit->official_id,
              unit->production_type_name,
              UNT_state_name[unit->state],
-             g_hash_table_contains (local_data->detected, unit) ? "already" : "not");
+             g_hash_table_lookup (local_data->detected, unit) ? "already" : "not");
   #endif
 
   /* Check whether the unit has already been detected.  If so, abort. */
-  if (g_hash_table_contains (local_data->detected, unit))
+  if (g_hash_table_lookup (local_data->detected, unit))
     goto end;
 
   /* Check whether the unit is showing clinical signs of disease. */
@@ -342,7 +342,7 @@ handle_exam_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
                              EVT_new_detection_event (unit, event->day,
                                                       ADSM_DetectionClinicalSigns,
                                                       ADSM_TestUnspecified));
-          g_hash_table_add (local_data->detected, unit);
+          g_hash_table_insert (local_data->detected, unit, GINT_TO_POINTER(1));
         }
       else
         {
@@ -422,7 +422,7 @@ handle_detection_event (struct adsm_module_t_ *self,
   #endif
 
   local_data = (local_data_t *) (self->model_data);
-  g_hash_table_add (local_data->detected, event->unit);
+  g_hash_table_insert (local_data->detected, event->unit, GINT_TO_POINTER(1));
 
   #if DEBUG
     g_debug ("----- EXIT handle_detection_event (%s)", MODEL_NAME);
