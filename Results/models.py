@@ -29,7 +29,7 @@ class PingTest(models.Model):
         return "(%s, %s, %s)" % (self.ip, self.bytes, self.time)
 
 
-class OutDailyByProductionType(models.Model):
+class DailyByProductionType(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
     production_type = models.ForeignKey(ProductionType,
@@ -334,7 +334,7 @@ class OutDailyByProductionType(models.Model):
         help_text='Total number of new zone foci created around units of the indicated type over the course of an iteration', )
 
 
-class OutDailyByZone(models.Model):
+class DailyByZone(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
     day = models.IntegerField(blank=True, null=True,
@@ -347,7 +347,7 @@ class OutDailyByZone(models.Model):
         help_text='In Kilometers', )
 
 
-class OutDailyByZoneAndProductionType(models.Model):
+class DailyByZoneAndProductionType(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
     day = models.IntegerField(blank=True, null=True,
@@ -366,7 +366,7 @@ class OutDailyByZoneAndProductionType(models.Model):
         help_text='Count of animals of the given production type in the zone', )
 
 
-class OutDailyEvents(models.Model):
+class DailyEvents(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
     day = models.IntegerField(blank=True, null=True,
@@ -385,7 +385,7 @@ class OutDailyEvents(models.Model):
         help_text='For trace events this field indicates if the attempted trace succeeded.', )
 
 
-class OutDailyExposures(models.Model):
+class DailyExposures(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
     day = models.IntegerField(blank=True, null=True,
@@ -412,7 +412,7 @@ class OutDailyExposures(models.Model):
         help_text='Disease state of the exposed unit when the exposure occurred.', )
 
 
-class OutEpidemicCurves(models.Model):
+class EpidemicCurves(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
     day = models.IntegerField(blank=True, null=True,
@@ -433,7 +433,7 @@ class OutEpidemicCurves(models.Model):
         help_text='APPARENT INFECTIOUS UNITS', )
 
 
-class OutGeneral(models.Model):
+class General(models.Model):
     simulation_start_time = models.DateTimeField(max_length=255, blank=True,
         help_text='The actual clock time according to the system clock of when the simulation started.', )
     simulation_end_time = models.DateTimeField(max_length=255, blank=True,
@@ -444,7 +444,7 @@ class OutGeneral(models.Model):
         help_text='Number of the NAADSM Version used to run the simulation.', )
 
 
-class OutIteration(models.Model):
+class Iteration(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
     disease_ended = models.NullBooleanField(blank=True, null=True,
@@ -483,7 +483,7 @@ class OutIteration(models.Model):
         help_text='Average number of days spent in queue for vaccination by each unit that was vaccinated over the course of the iteration', )
 
 
-class OutIterationByUnit(models.Model):
+class IterationByUnit(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
     unit = models.ForeignKey(Unit,
@@ -498,7 +498,7 @@ class OutIterationByUnit(models.Model):
         help_text='Day that a unit went in to the final status for an iteration', )
 
 
-class OutIterationByProductionType(models.Model):
+class IterationByProductionType(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
     production_type = models.ForeignKey(ProductionType,
@@ -731,7 +731,7 @@ class OutIterationByProductionType(models.Model):
         help_text='Day of last detection of an infected unit in the specified iteration', )
 
 
-class OutIterationByZone(models.Model):
+class IterationByZone(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
     zone = models.ForeignKey(Zone,
@@ -750,7 +750,7 @@ class OutIterationByZone(models.Model):
         help_text='Perimeter (in kilometers) of the indicated zone at the end of an iteration', )
 
 
-class OutIterationByZoneAndProductionType(models.Model):
+class IterationByZoneAndProductionType(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
     zone = models.ForeignKey(Zone,
@@ -765,7 +765,7 @@ class OutIterationByZoneAndProductionType(models.Model):
         help_text='Total cost associated with surveillance in a zone over the course of an iteration.', )
 
 
-class OutIterationCosts(models.Model):
+class IterationCosts(models.Model):
     iteration = models.IntegerField(blank=True, null=True,
         help_text='The iteration during which the outputs in this records where generated.', )
     production_type = models.ForeignKey(ProductionType,

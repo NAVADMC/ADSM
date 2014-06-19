@@ -23,7 +23,7 @@ def append_clean_ping(line, ping_objects):
 
 def run_iteration(iteration_number):
     print("Running", iteration_number)
-    simulation = subprocess.Popen(['ping', 'nyx', '-n', '50'], stdout=subprocess.PIPE)
+    simulation = subprocess.Popen(['ping', 'nyx', '-n', '5'], stdout=subprocess.PIPE)
     ping_lines = []
     while simulation.poll() is None:  # simulation is still running
         append_clean_ping(simulation.stdout.readline(), ping_lines)  # This blocks until it receives a newline.
@@ -41,7 +41,7 @@ class Simulation(threading.Thread):
     Saturate the computer's processors with parallel simulation iterations"""
     def run(self):
         with ProcessPoolExecutor() as executor:
-            exit_statuses = executor.map(run_iteration, list(range(100)))
+            exit_statuses = executor.map(run_iteration, list(range(5)))
             print(exit_statuses)
 
 
