@@ -2,7 +2,7 @@ from concurrent.futures import ProcessPoolExecutor
 import threading
 from django.shortcuts import render, get_object_or_404, redirect
 import subprocess
-from Results.models import PingTest
+from Results.models import OutputManager, create_from_line
 
 
 def back_to_inputs(request):
@@ -14,35 +14,46 @@ def population(request):
     return redirect('/setup/')
 
 
-def append_clean_ping(line, ping_objects):
-    line = line.decode("utf-8").strip()
-    if 'Reply from ' in line:
-        print(line)
-        ping_objects.append(line)
+def append_non_empty_lines(line, output_lines):
+    line = line.strip()
+    if len(line):
+        output_lines += line.split('\n')  # the last entry can be more than one line
 
 
-def run_iteration(iteration_number):
-    print("Running", iteration_number)
-    simulation = subprocess.Popen(['ping', 'nyx', '-n', '5'], stdout=subprocess.PIPE)
-    ping_lines = []
+def read_unicode_line(simulation):
+    return simulation.stdout.readline().decode("utf-8")
+
+
+def simulation_process():
+    print("Running")
+    simulation = subprocess.Popen(['adsm.exe', '-p', r'workspace\Population_Ireland.xml', 'activeSession.sqlite3'], stdout=subprocess.PIPE)
+    output_lines = []
+    headers = read_unicode_line(simulation)  # first line should be the column headers
+    print(headers)
     while simulation.poll() is None:  # simulation is still running
-        append_clean_ping(simulation.stdout.readline(), ping_lines)  # This blocks until it receives a newline.
-        if len(ping_lines) > 900:
-            PingTest.objects.bulk_create(ping_lines)
-            ping_lines = []
+        line = read_unicode_line(simulation)
+        append_non_empty_lines(line, output_lines)  # This blocks until it receives a newline.
+        create_from_line(line)
+        # if len(output_lines) > 900:
+        #     PingTest.objects.bulk_create(output_lines)
+        #     output_lines = []
     # When the subprocess terminates there might be unconsumed output that still needs to be processed.
-    append_clean_ping(simulation.stdout.read(), ping_lines)
-    PingTest.objects.bulk_create(ping_lines)
-    return '%i: Success' % iteration_number
+    append_non_empty_lines(simulation.stdout.read().decode("utf-8"), output_lines)
+    # PingTest.objects.bulk_create(output_lines)
+    print("Output Lines: ", len(output_lines))
+    for line in output_lines[-10:]:
+        print(line)
+    return '%i: Success' % 1
 
 
 class Simulation(threading.Thread):
     """execute system commands in a separate thread so as not to interrupt the webpage.
     Saturate the computer's processors with parallel simulation iterations"""
     def run(self):
-        with ProcessPoolExecutor() as executor:
-            exit_statuses = executor.map(run_iteration, list(range(5)))
-            print(exit_statuses)
+        print(simulation_process())
+        # with ProcessPoolExecutor() as executor:
+        #     exit_statuses = executor.map(run_iteration, list(range(5)))
+        #     print(exit_statuses)
 
 
 def run_simulation(request):

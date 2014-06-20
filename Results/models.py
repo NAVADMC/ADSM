@@ -3,7 +3,11 @@ from ScenarioCreator.models import ProductionType, Zone, Unit
 import re
 
 
-class CmdManager(models.Manager):
+def create_from_line( line):
+    pass
+
+
+class OutputManager(models.Manager):
     def create(self, cmd_string, **kwargs):
         cmd_string = re.sub(r'Reply from |bytes=|ms|time=|:', '', cmd_string)  # clean up extras
         ip, bytes, time, ignore = cmd_string.split()
@@ -23,7 +27,7 @@ class PingTest(models.Model):
     bytes = models.IntegerField()
     time = models.IntegerField()
 
-    objects = CmdManager()
+    objects = OutputManager()
 
     def __str__(self):
         return "(%s, %s, %s)" % (self.ip, self.bytes, self.time)
