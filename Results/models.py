@@ -14,34 +14,41 @@ Model Declarations: Each model creates a table in sqlite3 and a 'model' for tabl
  The code in scripts/Output_Table.py (.ipynb) was used to generate these name declarations.  Also, if you're reading this
  doc and you don't know about IPython Notebooks, go get IPython Notebooks."""
 
+
 def create_from_line(line):
     pass
 
 
-class OutputManager(models.Manager):
-    def create(self, cmd_string, **kwargs):
-        cmd_string = re.sub(r'Reply from |bytes=|ms|time=|:', '', cmd_string)  # clean up extras
-        ip, bytes, time, ignore = cmd_string.split()
-        return super().create(ip=ip, bytes=bytes, time=time)
+class OutputManager():
+    def __init__(self, header_line):
+        self.headers = header_line.split(',')
 
     def bulk_create(self, cmd_strings, *args, **kwargs):
-        ping_test_objects = []
+        report_objects = []
         for cmd_string in cmd_strings:
-            cmd_string = re.sub(r'Reply from |bytes=|ms|time|=|<|:', '', cmd_string)  # clean up extras
-            ip, bytes, time, ignore = cmd_string.split()
-            ping_test_objects.append(PingTest(ip=ip, bytes=bytes, time=time))  # Probably don't want to specifically say PingGest(), in case we ever have the manager on another object type
-        return super().bulk_create(ping_test_objects)
+            sparse_values = {}
+            values = cmd_string.split(',')
+            pairs = zip(self.headers, values)
+            for key, value in pairs:
+                if value and value != '0':
+                    sparse_values[key] = int(value)
+            report_objects.append(DailyReport(sparse_dict=str(sparse_values)))
+
+        for obj in report_objects:
+            print(obj)  #.save()
+        # return super().bulk_create(report_objects)
 
 
-class PingTest(models.Model):
-    ip = models.IPAddressField()
-    bytes = models.IntegerField()
-    time = models.IntegerField()
+class DailyReport(models.Model):
+    sparse_dict = models.TextField()
+    # to get the dictionary object back:
+    # import ast
+    # ast.literal_eval("{'muffin' : 'lolz', 'foo' : 'kitty'}")
 
-    objects = OutputManager()
+    # objects = OutputManager()
 
     def __str__(self):
-        return "(%s, %s, %s)" % (self.ip, self.bytes, self.time)
+        return self.sparse_dict
 
 
 def printable_name(underscores_name):
@@ -454,9 +461,9 @@ class EpidemicCurves(models.Model):
 
 
 class General(models.Model):
-    simulationStartTime = models.DateTimeField(max_length=255, blank=True, db_column='simulation_start_time', verbose_name=printable_name('simulation_start_time'),
+    simulationStartTime = models.DateTimeField(blank=True, null=True, db_column='simulation_start_time', verbose_name=printable_name('simulation_start_time'),
         help_text='The actual clock time according to the system clock of when the simulation started.', )
-    simulationEndTime = models.DateTimeField(max_length=255, blank=True, db_column='simulation_end_time', verbose_name=printable_name('simulation_end_time'),
+    simulationEndTime = models.DateTimeField(blank=True, null=True, db_column='simulation_end_time', verbose_name=printable_name('simulation_end_time'),
         help_text='The actual clock time according to the system clock of when the simulation ended.', )
     completedIterations = models.IntegerField(blank=True, null=True, db_column='completed_iterations', verbose_name=printable_name('completed_iterations'),
         help_text='Number of iterations completed during the simulation run.', )

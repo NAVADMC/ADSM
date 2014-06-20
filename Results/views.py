@@ -29,20 +29,18 @@ def simulation_process():
     simulation = subprocess.Popen(['adsm.exe', '-p', r'workspace\Population_Ireland.xml', 'activeSession.sqlite3'], stdout=subprocess.PIPE)
     output_lines = []
     headers = read_unicode_line(simulation)  # first line should be the column headers
-    print(headers)
+    parser = OutputManager(headers)
     while simulation.poll() is None:  # simulation is still running
         line = read_unicode_line(simulation)
         append_non_empty_lines(line, output_lines)  # This blocks until it receives a newline.
         create_from_line(line)
-        # if len(output_lines) > 900:
-        #     PingTest.objects.bulk_create(output_lines)
-        #     output_lines = []
+        if len(output_lines) > 900:
+            parser.bulk_create(output_lines)
+            output_lines = []
     # When the subprocess terminates there might be unconsumed output that still needs to be processed.
     append_non_empty_lines(simulation.stdout.read().decode("utf-8"), output_lines)
-    # PingTest.objects.bulk_create(output_lines)
+    parser.bulk_create(output_lines)
     print("Output Lines: ", len(output_lines))
-    for line in output_lines[-10:]:
-        print(line)
     return '%i: Success' % 1
 
 
