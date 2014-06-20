@@ -20,6 +20,7 @@
 #endif
 
 #include "parameter.h"
+#include "sqlite3_exec_dict.h"
 #include <glib.h>
 
 #if STDC_HEADERS
@@ -51,30 +52,34 @@ PAR_get_relchart_callback_args_t;
  *
  * @param loc location of a PAR_get_relchart_callback_args_t object into which
  *  to accumulate the x-y pairs.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-PAR_get_relchart_callback (void *loc, int ncols, char **value, char **colname)
+PAR_get_relchart_callback (void *loc, GHashTable *dict)
 {
+  int ncols;
   PAR_get_relchart_callback_args_t *build;
+  char *x_as_text, *y_as_text;
   double x, y;
   
+  ncols = g_hash_table_size (dict);  
   g_assert (ncols == 2);
   build = (PAR_get_relchart_callback_args_t *) loc;
   errno = 0;
-  x = strtod (value[0], NULL);
+  x_as_text = g_hash_table_lookup (dict, "x");
+  x = strtod (x_as_text, NULL);
   if (errno == ERANGE)
     {
-      g_error ("relationship chart point \"%s\" is not a number", value[0]);
+      g_error ("relationship chart point \"%s\" is not a number", x_as_text);
     }
   errno = 0;
-  y = strtod (value[1], NULL);
+  y_as_text = g_hash_table_lookup (dict, "y");
+  y = strtod (y_as_text, NULL);
   if (errno == ERANGE)
     {
-      g_error ("relationship chart point \"%s\" is not a number", value[1]);
+      g_error ("relationship chart point \"%s\" is not a number", y_as_text);
     }
   g_array_append_val (build->x, x);
   g_array_append_val (build->y, y);
@@ -106,7 +111,7 @@ PAR_get_relchart (sqlite3 *db, guint id)
   build.x = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
   build.y = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
   query = g_strdup_printf ("SELECT x,y FROM ScenarioCreator_relationalfunction fn,ScenarioCreator_relationalpoint pt WHERE fn.id=%u AND pt.relational_function_id=fn.id ORDER BY x ASC", id);
-  sqlite3_exec (db, query, PAR_get_relchart_callback, &build, &sqlerr);
+  sqlite3_exec_dict (db, query, PAR_get_relchart_callback, &build, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
@@ -140,57 +145,42 @@ PAR_get_PDF_callback_args_t;
  * Retrieves a probability distribution function parameter from the database.
  *
  * @param data pointer to a PAR_get_PDF_callback_args_t structure.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-PAR_get_PDF_callback (void *data, int ncols, char **value, char **colname)
+PAR_get_PDF_callback (void *data, GHashTable *dict)
 {
+  int ncols;
   PAR_get_PDF_callback_args_t *args;
   PDF_dist_t *dist = NULL;
   char *equation_type;
-  #if DEBUG
-    GString *s;
-    int i;
-  #endif
-  
+
+  ncols = g_hash_table_size (dict);  
   g_assert (ncols == 19);
 
   args = (PAR_get_PDF_callback_args_t *)data;
 
-  #if DEBUG
-    s = g_string_new ("[");
-    for (i = 0; i < ncols; i++)
-      {
-        if (i > 0)
-          g_string_append_c (s, ',');
-        g_string_append_printf (s, "%s=%s", colname[i], value[i]);
-      }
-    g_string_append_c (s, ']');    
-    g_debug ("query returned %s", s->str);
-    g_string_free (s, TRUE);    
-  #endif
-  equation_type = value[0];
+  equation_type = g_hash_table_lookup (dict, "equation_type");
   if (strcmp (equation_type, "Beta") == 0)
     {
       double alpha, beta, location, scale;
 
       errno = 0;
-      alpha = strtod (value[6], NULL);
+      alpha = strtod (g_hash_table_lookup (dict, "alpha"), NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      beta = strtod (value[8], NULL);
+      beta = strtod (g_hash_table_lookup (dict, "beta"), NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      location = strtod (value[9], NULL);
+      location = strtod (g_hash_table_lookup (dict, "location"), NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      scale = strtod (value[10], NULL);
+      scale = strtod (g_hash_table_lookup (dict, "scale"), NULL);
       g_assert (errno != ERANGE);
 
       dist = PDF_new_beta_dist (alpha, beta, location, scale);
@@ -200,15 +190,15 @@ PAR_get_PDF_callback (void *data, int ncols, char **value, char **colname)
       double min, mode, max;
 
       errno = 0;
-      min = strtod (value[3], NULL);
+      min = strtod (g_hash_table_lookup (dict, "min"), NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      mode = strtod (value[4], NULL);
+      mode = strtod (g_hash_table_lookup (dict, "mode"), NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      max = strtod (value[5], NULL);
+      max = strtod (g_hash_table_lookup (dict, "max"), NULL);
       g_assert (errno != ERANGE);
 
       dist = PDF_new_beta_pert_dist (min, mode, max);
@@ -218,11 +208,11 @@ PAR_get_PDF_callback (void *data, int ncols, char **value, char **colname)
       double alpha, beta;
 
       errno = 0;
-      alpha = strtod (value[6], NULL);
+      alpha = strtod (g_hash_table_lookup (dict, "alpha"), NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      beta = strtod (value[8], NULL);
+      beta = strtod (g_hash_table_lookup (dict, "beta"), NULL);
       g_assert (errno != ERANGE);
 
       dist = PDF_new_gamma_dist (alpha, beta);
@@ -242,7 +232,7 @@ PAR_get_PDF_callback (void *data, int ncols, char **value, char **colname)
       build.x = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
       build.y = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
       query = g_strdup_printf ("SELECT x,y FROM ScenarioCreator_relationalfunction fn,ScenarioCreator_relationalpoint pt WHERE fn.id=%u AND pt.relational_function_id=fn.id ORDER BY _point_order", rel_id);
-      sqlite3_exec (args->db, query, PAR_get_relchart_callback, &build, &sqlerr);
+      sqlite3_exec_dict (args->db, query, PAR_get_relchart_callback, &build, &sqlerr);
       if (sqlerr)
         {
           g_error ("%s", sqlerr);
@@ -268,11 +258,11 @@ PAR_get_PDF_callback (void *data, int ncols, char **value, char **colname)
       double mu, lambda;
 
       errno = 0;
-      mu = strtod (value[1], NULL);
+      mu = strtod (g_hash_table_lookup (dict, "mean"), NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      lambda = strtod (value[11], NULL);
+      lambda = strtod (g_hash_table_lookup (dict, "shape"), NULL);
       g_assert (errno != ERANGE);
 
       dist = PDF_new_inverse_gaussian_dist (mu, lambda);
@@ -282,15 +272,15 @@ PAR_get_PDF_callback (void *data, int ncols, char **value, char **colname)
       double location, scale, shape;
 
       errno = 0;
-      location = strtod (value[9], NULL);
+      location = strtod (g_hash_table_lookup (dict, "location"), NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      scale = strtod (value[10], NULL);
+      scale = strtod (g_hash_table_lookup (dict, "scale"), NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      shape = strtod (value[11], NULL);
+      shape = strtod (g_hash_table_lookup (dict, "shape"), NULL);
       g_assert (errno != ERANGE);
 
       dist = PDF_new_loglogistic_dist (location, scale, shape);
@@ -307,7 +297,7 @@ PAR_get_PDF_callback (void *data, int ncols, char **value, char **colname)
       build.x = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
       build.y = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
       query = g_strdup_printf ("SELECT x,y FROM ScenarioCreator_relationalfunction fn,ScenarioCreator_relationalpoint pt WHERE fn.id=%u AND pt.relational_function_id=fn.id ORDER BY _point_order", rel_id);
-      sqlite3_exec (args->db, query, PAR_get_relchart_callback, &build, &sqlerr);
+      sqlite3_exec_dict (args->db, query, PAR_get_relchart_callback, &build, &sqlerr);
       if (sqlerr)
         {
           g_error ("%s", sqlerr);
@@ -320,12 +310,14 @@ PAR_get_PDF_callback (void *data, int ncols, char **value, char **colname)
     }
   else if (strcmp (equation_type, "Point") == 0)
     {
+      char *mode_as_text;
       double mode;
       errno = 0;
-      mode = strtod (value[4], NULL);
+      mode_as_text = g_hash_table_lookup (dict, "mode");
+      mode = strtod (mode_as_text, NULL);
       if (errno == ERANGE)
         {
-          g_error ("point distribution parameter \"%s\" is not a number", value[4]);
+          g_error ("point distribution parameter \"%s\" is not a number", mode_as_text);
         }
       dist = PDF_new_point_dist (mode);
     }
@@ -334,15 +326,15 @@ PAR_get_PDF_callback (void *data, int ncols, char **value, char **colname)
       double a,c,b;
 
       errno = 0;
-      a = strtod (value[3], NULL);
+      a = strtod (g_hash_table_lookup (dict, "min"), NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      c = strtod (value[4], NULL);
+      c = strtod (g_hash_table_lookup (dict, "mode"), NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      b = strtod (value[5], NULL);
+      b = strtod (g_hash_table_lookup (dict, "max"), NULL);
       g_assert (errno != ERANGE);
 
       dist = PDF_new_triangular_dist (a, c, b);
@@ -352,11 +344,11 @@ PAR_get_PDF_callback (void *data, int ncols, char **value, char **colname)
       double alpha, beta;
 
       errno = 0;
-      alpha = strtod (value[6], NULL);
+      alpha = strtod (g_hash_table_lookup (dict, "alpha"), NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      beta = strtod (value[8], NULL);
+      beta = strtod (g_hash_table_lookup (dict, "beta"), NULL);
       g_assert (errno != ERANGE);
 
       dist = PDF_new_weibull_dist (alpha, beta);
@@ -392,7 +384,7 @@ PAR_get_PDF (sqlite3 *db, guint id)
   args.db = db;
   args.dist = NULL;
   query = g_strdup_printf ("SELECT equation_type,mean,std_dev,min,mode,max,alpha,alpha2,beta,location,scale,shape,n,p,m,d,theta,a,s FROM ScenarioCreator_probabilityfunction WHERE id=%u", id);
-  sqlite3_exec (db, query, PAR_get_PDF_callback, &args, &sqlerr);
+  sqlite3_exec_dict (db, query, PAR_get_PDF_callback, &args, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
