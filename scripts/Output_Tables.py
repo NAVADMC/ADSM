@@ -1203,6 +1203,13 @@ line
 
 # <codecell>
 
+def printable_name(underscores_name):
+    spaced = re.sub(r'_', r' ', underscores_name)
+    return spaced.title()  # capitalize
+printable_name('ugly_underscores_of_oblivion')
+
+# <codecell>
+
 
 # <codecell>
 
@@ -1221,7 +1228,7 @@ def reorganize_names(old_blocks):
             else:
 #                 print(class_name, db_name, django_name, block[matching_lines[0]], end='\n\n')
                 line = block[matching_lines[0]].replace(django_name, db_name) # does not side effect the original
-                line += " db_column='" + django_name + "', "
+                line += " db_column='" + django_name + "', verbose_name=printable_name('"+django_name+"'), "
                 block[matching_lines[0]] = line
     print("Trouble:", trouble_makers)
     return code_blocks
