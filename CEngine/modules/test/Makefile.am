@@ -40,6 +40,7 @@ noinst_PROGRAMS = miniadsm shell shell2 fcmp
 miniadsm_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/main_loop.c \
   $(top_srcdir)/main_loop/module_loader.c $(top_srcdir)/main_loop/module_loader.h \
   $(top_srcdir)/main_loop/event_manager.c $(top_srcdir)/main_loop/event_manager.h \
+  $(top_srcdir)/main_loop/sqlite3_exec_dict.c $(top_srcdir)/main_loop/sqlite3_exec_dict.h \
   $(top_srcdir)/main_loop/parameter.c $(top_srcdir)/main_loop/parameter.h \
   $(top_srcdir)/main_loop/adsm.c $(top_srcdir)/main_loop/adsm.h \
   $(top_srcdir)/replace/replace.c $(top_srcdir)/replace/replace.h \

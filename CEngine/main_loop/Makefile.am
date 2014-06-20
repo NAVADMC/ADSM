@@ -26,6 +26,7 @@ include_HEADERS = adsm.h
 lib_LIBRARIES = libadsm.a
 libadsm_a_SOURCES = main_loop.c module_loader.c module_loader.h \
   event_manager.c event_manager.h \
+  sqlite3_exec_dict.c sqlite3_exec_dict.h \
   parameter.c parameter.h \
   adsm.c adsm.h \
   $(top_srcdir)/replace/replace.c $(top_srcdir)/replace/replace.h \
