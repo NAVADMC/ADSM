@@ -19,16 +19,33 @@ Please note that ADSM is built against Python 3.3 which is incompatible with Pyt
     git submodule update
 
 ##Migrations
-ADSM uses to databases specified in ScenarioCreator/router.py.   Settings.sqlite3 is the "default" database that 
+ADSM uses to databases specified in ScenarioCreator/router.py.   settings.sqlite3 is the "default" database that
 will be synced with all the stuff we don't want to change.  It doesn't have south migration tables at the moment. 
 The --database=scenario_db points to the file activeSession.sqlite3 and is declared in SpreadModel/settings.py and 
 contains the apps "ScenarioCreator", "Results", and "south" which we want to change and reload every time we open a 
 scenario.  If you rune syncdb it will say you need to run migrate for the other apps.  This command specifies the 
-migration is directed at the non-default database.  
-`python manage.py migrate --database=scenario_db`
+migration is directed at the non-default database.  It's critical to specify the database for apps otherwise it will
+  say "no such table: south_migrationhistory".
+```
+python manage.py migrate --database=scenario_db
+python manage.py migrate Results --database=scenario_db
+python manage.py migrate ScenarioCreator --database=scenario_db
+```
 
 Migrations are created using:
 `python manage.py schemamigration ScenarioCreator --auto`
+
+###Initial Migrations
+If you want to reset the migration history, this will break backwards compatibility with people's saved files.  You
+will need to:
+1) Make sure all your files are on the same migration.
+2) Delete migration files (not the directory)
+3) `python manage.py schemamigration Results --initial`
+4) `python manage.py migrate Results --database=scenario_db --fake --delete-ghost-migrations`
+5) I've also found creating a "New Scenario" works well:  http://127.0.0.1:8000/setup/NewScenario/
+
+It's important that when you migrate you specify the database= because south does not use Django routers correctly.
+
 
 
 ##Google Server Production Deploy:
