@@ -19,24 +19,22 @@ def create_from_line(line):
     pass
 
 
-class OutputManager():
-    def __init__(self, header_line):
-        self.headers = header_line.split(',')
-
-    def bulk_create(self, cmd_strings, *args, **kwargs):
+class OutputManager(models.Manager):
+    def bulk_create(self, header_line, cmd_strings, *args, **kwargs):
+        headers = header_line.split(',')
         report_objects = []
         for cmd_string in cmd_strings:
             sparse_values = {}
             values = cmd_string.split(',')
-            pairs = zip(self.headers, values)
+            pairs = zip(headers, values)
             for key, value in pairs:
                 if value and value != '0':
                     sparse_values[key] = int(value)
             report_objects.append(DailyReport(sparse_dict=str(sparse_values)))
 
-        for obj in report_objects:
-            print(obj)  #.save()
-        # return super().bulk_create(report_objects)
+        # for obj in report_objects:
+        #     print(obj)  #.save()
+        return super().bulk_create(report_objects)
 
 
 class DailyReport(models.Model):
@@ -45,7 +43,7 @@ class DailyReport(models.Model):
     # import ast
     # ast.literal_eval("{'muffin' : 'lolz', 'foo' : 'kitty'}")
 
-    # objects = OutputManager()
+    objects = OutputManager()
 
     def __str__(self):
         return self.sparse_dict
