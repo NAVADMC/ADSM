@@ -40,7 +40,7 @@
 
   <herd>
     <id>4</id>
-    <production-type>_Dogsheep_</production-type>
+    <production-type>_Swine_</production-type>
     <size>109</size>
     <location>
       <latitude>52.95</latitude>
@@ -62,7 +62,7 @@
 
   <herd>
     <id>6</id>
-    <production-type>_Bulldog_</production-type>
+    <production-type>_Bull_</production-type>
     <size>27</size>
     <location>
       <latitude>52.9586</latitude>
@@ -84,7 +84,7 @@
 
   <herd>
     <id>8</id>
-    <production-type>_Brownsheep_</production-type>
+    <production-type>_Swine_</production-type>
     <size>80</size>
     <location>
       <latitude>52.95</latitude>
@@ -106,7 +106,7 @@
 
   <herd>
     <id>10</id>
-    <production-type>_Bulldog_</production-type>
+    <production-type>_Bull_</production-type>
     <size>77</size>
     <location>
       <latitude>52.95</latitude>
@@ -150,7 +150,7 @@
 
   <herd>
     <id>14</id>
-    <production-type>_Doe_</production-type>
+    <production-type>_Swine_</production-type>
     <size>92</size>
     <location>
       <latitude>52.9328</latitude>
@@ -161,7 +161,7 @@
 
   <herd>
     <id>15</id>
-    <production-type>_Dogsheep_</production-type>
+    <production-type>_Swine_</production-type>
     <size>192</size>
     <location>
       <latitude>52.9586</latitude>
@@ -183,7 +183,7 @@
 
   <herd>
     <id>17</id>
-    <production-type>_Brownsheep_</production-type>
+    <production-type>_Swine_</production-type>
     <size>134</size>
     <location>
       <latitude>52.9414</latitude>
@@ -205,7 +205,7 @@
 
   <herd>
     <id>19</id>
-    <production-type>_Brownsheep_</production-type>
+    <production-type>_Swine_</production-type>
     <size>226</size>
     <location>
       <latitude>52.95</latitude>
@@ -216,7 +216,7 @@
 
   <herd>
     <id>20</id>
-    <production-type>_Pig_</production-type>
+    <production-type>_Swine_</production-type>
     <size>139</size>
     <location>
       <latitude>52.9414</latitude>
@@ -227,7 +227,7 @@
 
   <herd>
     <id>21</id>
-    <production-type>_Bulldog_</production-type>
+    <production-type>_Bull_</production-type>
     <size>10</size>
     <location>
       <latitude>52.95</latitude>

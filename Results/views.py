@@ -2,7 +2,7 @@ from concurrent.futures import ProcessPoolExecutor
 import threading
 from django.shortcuts import render, get_object_or_404, redirect
 import subprocess
-from Results.models import OutputManager, create_from_line, DailyReport
+from Results.models import OutputManager, DailyReport
 
 
 def back_to_inputs(request):
@@ -33,7 +33,6 @@ def simulation_process():
     while simulation.poll() is None:  # simulation is still running
         line = read_unicode_line(simulation)
         append_non_empty_lines(line, output_lines)  # This blocks until it receives a newline.
-        create_from_line(line)
         if len(output_lines) > 900:
             DailyReport.objects.bulk_create(headers, output_lines)
             output_lines = []

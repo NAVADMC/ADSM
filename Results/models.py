@@ -15,8 +15,18 @@ Model Declarations: Each model creates a table in sqlite3 and a 'model' for tabl
  doc and you don't know about IPython Notebooks, go get IPython Notebooks."""
 
 
-def create_from_line(line):
-    pass
+def printable_name(underscores_name):
+    spaced = re.sub(r'_', r' ', underscores_name)
+    return spaced.title()  # capitalize
+
+
+class OutputBaseModel(models.Model):
+    def iter(self):
+        for i in self._meta.get_all_field_names():
+            yield (i, getattr(self, i))
+    # This lets; you; do:
+    # for field, val in myModel:
+    #     print( field, val)
 
 
 class OutputManager(models.Manager):
@@ -30,15 +40,16 @@ class OutputManager(models.Manager):
             for key, value in pairs:
                 if value and value != '0':
                     sparse_values[key] = int(value)
-            report_objects.append(DailyReport(sparse_dict=str(sparse_values)))
+            report_objects.append(DailyReport(sparse_dict=str(sparse_values), full_line=cmd_string))
 
         # for obj in report_objects:
         #     print(obj)  #.save()
         return super().bulk_create(report_objects)
 
 
-class DailyReport(models.Model):
+class DailyReport(OutputBaseModel):
     sparse_dict = models.TextField()
+    full_line = models.TextField()
     # to get the dictionary object back:
     # import ast
     # ast.literal_eval("{'muffin' : 'lolz', 'foo' : 'kitty'}")
@@ -49,23 +60,50 @@ class DailyReport(models.Model):
         return self.sparse_dict
 
 
-def printable_name(underscores_name):
-    spaced = re.sub(r'_', r' ', underscores_name)
-    return spaced.title()  # capitalize
+class SpreadGroup(OutputBaseModel):
+    UAll = models.IntegerField(blank=True, null=True, verbose_name="Unit All Spread Types")
+    UDir = models.IntegerField(blank=True, null=True, verbose_name="Unit Direct")
+    UInd = models.IntegerField(blank=True, null=True, verbose_name="Unit Indirect")
+    UAir = models.IntegerField(blank=True, null=True, verbose_name="Unit Air")
+
+    AAll = models.IntegerField(blank=True, null=True, verbose_name="Animal All Spread Types")
+    ADir = models.IntegerField(blank=True, null=True, verbose_name="Animal Direct")
+    AInd = models.IntegerField(blank=True, null=True, verbose_name="Animal Indirect")
+    AAir = models.IntegerField(blank=True, null=True, verbose_name="Animal Air")
+    # TODO: Not storing cumulative at the moment, since it can be computed
 
 
-class DailyByProductionType(models.Model):
+class DetectionGroup(object):
+    blank = models.IntegerField(blank=True, null=True, verbose_name="either method")  # 'blank' should be a special case in the parser
+    Clin = models.IntegerField(blank=True, null=True, verbose_name="Detection from Clinical signs")
+    Test = models.IntegerField(blank=True, null=True, verbose_name="Detection from Examination")
+
+
+class DailyByProductionType(OutputBaseModel):
     iteration = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('iteration'),
         help_text='The iteration during which the outputs in this records where generated.', )
     production_type = models.ForeignKey(ProductionType,
         help_text='The identifier of the production type that these outputs apply to.', )
-
-class DailyByZoneAndProductionType(models.Model):
-    pass
-
-class DailyByZone(models.Model):
-    pass
+    exp = models.ForeignKey(SpreadGroup, blank=True, null=True, verbose_name="Exposures")
+    inf = models.ForeignKey(SpreadGroup, blank=True, null=True, verbose_name="Infections")
+    firstDetection = models.ForeignKey(DetectionGroup, blank=True, null=True, verbose_name="First Detection")
+    lastDetection = models.ForeignKey(DetectionGroup, blank=True, null=True, verbose_name="Last Detection")
 
 
-class DailyControls(models.Model):
-    pass
+
+
+class DailyByZoneAndProductionType(OutputBaseModel):
+    filler = models.IntegerField(blank=True, null=True, )
+
+
+class DailyByZone(OutputBaseModel):
+    filler = models.IntegerField(blank=True, null=True, )
+
+
+class DailyControls(OutputBaseModel):
+    filler = models.IntegerField(blank=True, null=True, )
+
+
+class Iteration(OutputBaseModel):
+    headers = models.TextField()
+

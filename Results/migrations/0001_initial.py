@@ -8,938 +8,142 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        db.execute(
+            """declare @cmd varchar(4000)
+declare cmds cursor for
+select 'drop table [' + Table_Name + ']'
+from INFORMATION_SCHEMA.TABLES
+where Table_Name like 'prefix%'
+
+open cmds
+while 1=1
+begin
+    fetch cmds into @cmd
+    if @@fetch_status != 0 break
+    exec(@cmd)
+end
+close cmds;
+deallocate cmds""")
+#             """SELECT 'DROP TABLE "' + TABLE_NAME + '"'
+# FROM INFORMATION_SCHEMA.TABLES
+# WHERE TABLE_NAME LIKE 'Results_%'";""")  # Drop the entire App before creating it fresh
+
+        # Adding model 'OutputBaseModel'
+        db.create_table('Results_outputbasemodel', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+        ))
+        db.send_create_signal('Results', ['OutputBaseModel'])
+
+        # Adding model 'DailyReport'
+        db.create_table('Results_dailyreport', (
+            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(unique=True, to=orm['Results.OutputBaseModel'], primary_key=True)),
+            ('sparse_dict', self.gf('django.db.models.fields.TextField')()),
+            ('full_line', self.gf('django.db.models.fields.TextField')()),
+        ))
+        db.send_create_signal('Results', ['DailyReport'])
 
         # Adding model 'DailyByProductionType'
         db.create_table('Results_dailybyproductiontype', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='iteration')),
+            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(unique=True, to=orm['Results.OutputBaseModel'], primary_key=True)),
+            ('iteration', self.gf('django.db.models.fields.IntegerField')(db_column='iteration', null=True, blank=True)),
             ('production_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ProductionType'])),
-            ('day', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='day')),
-            ('tsdUSusc', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_daily_unit_susceptible')),
-            ('tsdASusc', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_daily_animal_susceptible')),
-            ('tsdULat', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_daily_unit_latent')),
-            ('tsdALat', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_daily_animal_latent')),
-            ('tsdUSubc', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_daily_unit_subclinical')),
-            ('tsdASubc', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_daily_animal_subclinical')),
-            ('tsdUClin', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_daily_unit_clinical')),
-            ('tsdAClin', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_daily_animal_clinical')),
-            ('tsdUNImm', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_daily_unit_nat_immune')),
-            ('tsdANImm', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_daily_animal_nat_immune')),
-            ('tsdUVImm', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_daily_unit_vac_immune')),
-            ('tsdAVImm', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_daily_animal_vac_immune')),
-            ('tsdUDest', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_daily_unit_destroyed')),
-            ('tsdADest', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_daily_animal_destroyed')),
-            ('tscUSusc', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_unit_susceptible')),
-            ('tscASusc', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_animal_susceptible')),
-            ('tscULat', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_unit_latent')),
-            ('tscALat', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_animal_latent')),
-            ('tscUSubc', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_unit_subclinical')),
-            ('tscASubc', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_animal_subclinical')),
-            ('tscUClin', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_unit_clinical')),
-            ('tscAClin', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_animal_clinical')),
-            ('tscUNImm', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_unit_nat_immune')),
-            ('tscANImm', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_animal_nat_immune')),
-            ('tscUVImm', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_unit_vac_immune')),
-            ('tscAVImm', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_animal_vac_immune')),
-            ('tscUDest', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_unit_destroyed')),
-            ('tscADest', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_animal_destroyed')),
-            ('infnUAir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_new_unit_air')),
-            ('infnAAir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_new_animal_air')),
-            ('infnUDir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_new_unit_dir')),
-            ('infnADir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_new_animal_dir')),
-            ('infnUInd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_new_unit_ind')),
-            ('infnAInd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_new_animal_ind')),
-            ('infcUIni', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_unit_initial')),
-            ('infcAIni', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_animal_initial')),
-            ('infcUAir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_unit_air')),
-            ('infcAAir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_animal_air')),
-            ('infcUDir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_unit_dir')),
-            ('infcADir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_animal_dir')),
-            ('infcUInd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_unit_ind')),
-            ('infcAInd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_animal_ind')),
-            ('expcUDir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exposed_cum_unit_dir')),
-            ('expcADir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exposed_cum_animal_dir')),
-            ('expcUInd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exposed_cum_unit_ind')),
-            ('expcAInd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exposed_cum_animal_ind')),
-            ('trcUDirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_dir_fwd')),
-            ('trcADirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_dir_fwd')),
-            ('trcUIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_ind_fwd')),
-            ('trcAIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_ind_fwd')),
-            ('trcUDirpFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_dir_p_fwd')),
-            ('trcADirpFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_dir_p_fwd')),
-            ('trcUIndpFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_ind_p_fwd')),
-            ('trcAIndpFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_ind_p_fwd')),
-            ('tocUDirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_origin_cum_unit_dir_fwd')),
-            ('tocUIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_origin_cum_unit_ind_fwd')),
-            ('tocUDirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_origin_cum_unit_dir_back')),
-            ('tocUIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_origin_cum_unit_ind_back')),
-            ('trnUDirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_new_unit_dir_fwd')),
-            ('trnADirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_new_animal_dir_fwd')),
-            ('trnUIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_new_unit_ind_fwd')),
-            ('trnAIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_new_animal_ind_fwd')),
-            ('trcUDirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_dir_back')),
-            ('trcADirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_dir_back')),
-            ('trcUIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_ind_back')),
-            ('trcAIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_ind_back')),
-            ('trcUDirpBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_dir_p_back')),
-            ('trcADirpBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_dir_p_back')),
-            ('trcUIndpBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_ind_p_back')),
-            ('trcAIndpBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_ind_p_back')),
-            ('trnUDirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_new_unit_dir_back')),
-            ('trnADirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_new_animal_dir_back')),
-            ('trnUIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_new_u_ind_back')),
-            ('trnAIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_new_animal_ind_back')),
-            ('tonUDirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_origin_new_unit_dir_fwd')),
-            ('tonUIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_origin_new_unit_ind_fwd')),
-            ('tonUDirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_origin_new_unit_dir_back')),
-            ('tonUIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_origin_new_unit_ind_back')),
-            ('exmcUDirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_unit_dir_fwd')),
-            ('exmcADirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_animal_dir_fwd')),
-            ('exmcUIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_unit_ind_fwd')),
-            ('exmcAIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_animal_ind_fwd')),
-            ('exmcUDirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_unit_dir_back')),
-            ('exmcADirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_animal_dir_back')),
-            ('exmcUIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_unit_ind_back')),
-            ('exmcAIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_animal_ind_back')),
-            ('exmnUAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_new_unit_all')),
-            ('exmnAAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_new_animal_all')),
-            ('tstcUDirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_dir_fwd')),
-            ('tstcADirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_dir_fwd')),
-            ('tstcUIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_ind_fwd')),
-            ('tstcAIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_ind_fwd')),
-            ('tstcUDirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_dir_back')),
-            ('tstcADirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_dir_back')),
-            ('tstcUIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_ind_back')),
-            ('tstcAIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_ind_back')),
-            ('tstcUTruePos', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_true_pos')),
-            ('tstcATruePos', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_true_pos')),
-            ('tstnUTruePos', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_new_unit_true_pos')),
-            ('tstnATruePos', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_new_animal_true_pos')),
-            ('tstcUTrueNeg', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_true_neg')),
-            ('tstcATrueNeg', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_true_neg')),
-            ('tstnUTrueNeg', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_new_unit_true_neg')),
-            ('tstnATrueNeg', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_new_animal_true_neg')),
-            ('tstcUFalsePos', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_false_pos')),
-            ('tstcAFalsePos', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_false_pos')),
-            ('tstnUFalsePos', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_new_unit_false_pos')),
-            ('tstnAFalsePos', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_new_animal_false_pos')),
-            ('tstcUFalseNeg', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_false_neg')),
-            ('tstcAFalseNeg', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_false_neg')),
-            ('tstnUFalseNeg', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_new_unit_false_neg')),
-            ('tstnAFalseNeg', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_new_animal_false_neg')),
-            ('detnUClin', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='detect_new_unit_clin')),
-            ('detnAClin', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='detect_new_animal_clin')),
-            ('detcUClin', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='detect_cum_unit_clin')),
-            ('detcAClin', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='detect_cum_animal_clin')),
-            ('detnUTest', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='detect_new_unit_test')),
-            ('detnATest', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='detect_new_animal_test')),
-            ('detcUTest', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='detect_cum_unit_test')),
-            ('detcATest', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='detect_cum_animal_test')),
-            ('descUIni', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_unit_initial')),
-            ('descAIni', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_animal_initial')),
-            ('descUDet', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_unit_detect')),
-            ('descADet', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_animal_detect')),
-            ('descUDirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_unit_dir_fwd')),
-            ('descADirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_animal_dir_fwd')),
-            ('descUIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_unit_ind_fwd')),
-            ('descAIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_animal_ind_fwd')),
-            ('descUDirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_unit_dir_back')),
-            ('descADirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_animal_dir_back')),
-            ('descUIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_unit_ind_back')),
-            ('descAIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_animal_ind_back')),
-            ('descURing', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_unit_ring')),
-            ('descARing', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_animal_ring')),
-            ('desnUAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_new_unit_all')),
-            ('desnAAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_new_animal_all')),
-            ('deswUAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_wait_unit_all')),
-            ('deswAAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_wait_animal_all')),
-            ('vaccUIni', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_cum_unit_initial')),
-            ('vaccAIni', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_cum_animal_initial')),
-            ('vaccURing', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_cum_unit_ring')),
-            ('vaccARing', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_cum_animal_ring')),
-            ('vacnUAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_new_unit_all')),
-            ('vacnAAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_new_animal_all')),
-            ('vacwUAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_wait_unit_all')),
-            ('vacwAAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_wait_animal_all')),
-            ('zonnFoci', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='zone_new_foci')),
-            ('zoncFoci', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='zone_cum_foci')),
         ))
         db.send_create_signal('Results', ['DailyByProductionType'])
 
-        # Adding model 'DailyByZone'
-        db.create_table('Results_dailybyzone', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='iteration')),
-            ('day', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='day')),
-            ('zone', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.Zone'])),
-            ('zoneArea', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='zone_area')),
-            ('zonePerimeter', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='zone_perimeter')),
-        ))
-        db.send_create_signal('Results', ['DailyByZone'])
-
         # Adding model 'DailyByZoneAndProductionType'
         db.create_table('Results_dailybyzoneandproductiontype', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='iteration')),
-            ('day', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='day')),
-            ('zone', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.Zone'])),
-            ('production_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ProductionType'])),
-            ('unitDaysInZone', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='unit_days_in_zone')),
-            ('animalDaysInZone', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='animal_days_in_zone')),
-            ('unitsInZone', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='units_in_zone')),
-            ('animalsInZone', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='animals_in_zone')),
+            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(unique=True, to=orm['Results.OutputBaseModel'], primary_key=True)),
+            ('filler', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
         ))
         db.send_create_signal('Results', ['DailyByZoneAndProductionType'])
 
-        # Adding model 'DailyEvents'
-        db.create_table('Results_dailyevents', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='iteration')),
-            ('day', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='day')),
-            ('event', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='event')),
-            ('unit', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.Unit'])),
-            ('zone', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.Zone'])),
-            ('eventCode', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True, db_column='event_code')),
-            ('newStateCode', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True, db_column='new_state_code')),
-            ('testResultCode', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True, db_column='test_result_code')),
+        # Adding model 'DailyByZone'
+        db.create_table('Results_dailybyzone', (
+            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(unique=True, to=orm['Results.OutputBaseModel'], primary_key=True)),
+            ('filler', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
         ))
-        db.send_create_signal('Results', ['DailyEvents'])
+        db.send_create_signal('Results', ['DailyByZone'])
 
-        # Adding model 'DailyExposures'
-        db.create_table('Results_dailyexposures', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='iteration')),
-            ('day', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='day')),
-            ('exposure', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exposure')),
-            ('initiatedDay', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='initiated_day')),
-            ('exposed_unit', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.Unit'], related_name='events_where_unit_was_exposed')),
-            ('exposed_zone', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.Zone'], related_name='events_that_exposed_this_zone')),
-            ('exposing_unit', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.Unit'], related_name='events_where_unit_exposed_others')),
-            ('exposing_zone', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.Zone'], related_name='events_that_exposed_others')),
-            ('spreadMethodCode', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True, db_column='spread_method_code')),
-            ('isAdequate', self.gf('django.db.models.fields.NullBooleanField')(blank=True, null=True, db_column='is_adequate')),
-            ('exposingUnitStatusCode', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True, db_column='exposing_unit_status_code')),
-            ('exposedUnitStatusCode', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True, db_column='exposed_unit_status_code')),
+        # Adding model 'DailyControls'
+        db.create_table('Results_dailycontrols', (
+            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(unique=True, to=orm['Results.OutputBaseModel'], primary_key=True)),
+            ('filler', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
         ))
-        db.send_create_signal('Results', ['DailyExposures'])
-
-        # Adding model 'EpidemicCurves'
-        db.create_table('Results_epidemiccurves', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='iteration')),
-            ('day', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='day')),
-            ('production_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ProductionType'])),
-            ('infectedUnits', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infected_units')),
-            ('infectedAnimals', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infected_animals')),
-            ('detectedUnits', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='detected_units')),
-            ('detectedAnimals', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='detected_animals')),
-            ('infectiousUnits', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infectious_units')),
-            ('apparentInfectiousUnits', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='apparent_infectious_units')),
-        ))
-        db.send_create_signal('Results', ['EpidemicCurves'])
-
-        # Adding model 'General'
-        db.create_table('Results_general', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('simulationStartTime', self.gf('django.db.models.fields.DateTimeField')(blank=True, null=True, db_column='simulation_start_time')),
-            ('simulationEndTime', self.gf('django.db.models.fields.DateTimeField')(blank=True, null=True, db_column='simulation_end_time')),
-            ('completedIterations', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='completed_iterations')),
-            ('version', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True, db_column='version')),
-        ))
-        db.send_create_signal('Results', ['General'])
+        db.send_create_signal('Results', ['DailyControls'])
 
         # Adding model 'Iteration'
         db.create_table('Results_iteration', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='iteration')),
-            ('diseaseEnded', self.gf('django.db.models.fields.NullBooleanField')(blank=True, null=True, db_column='disease_ended')),
-            ('diseaseEndDay', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='disease_end_day')),
-            ('breakEnded', self.gf('django.db.models.fields.NullBooleanField')(blank=True, null=True, db_column='outbreak_ended')),
-            ('breakEndDay', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='outbreak_end_day')),
-            ('zoneFociCreated', self.gf('django.db.models.fields.NullBooleanField')(blank=True, null=True, db_column='zone_foci_created')),
-            ('deswUMax', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_wait_unit_max')),
-            ('deswUMaxDay', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_wait_unit_max_day')),
-            ('deswAMax', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='destroy_wait_animal_max')),
-            ('deswAMaxDay', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_wait_animal_max_day')),
-            ('deswUTimeMax', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_wait_unit_time_max')),
-            ('deswUTimeAvg', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='destroy_wait_unit_time_avg')),
-            ('vacwUMax', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_wait_unit_max')),
-            ('vacwUMaxDay', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_wait_unit_max_day')),
-            ('vacwAMax', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='vac_wait_animal_max')),
-            ('vacwAMaxDay', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_wait_animal_max_day')),
-            ('vacwUTimeMax', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_wait_unit_time_max')),
-            ('vacwUTimeAvg', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='vac_wait_unit_time_avg')),
+            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(unique=True, to=orm['Results.OutputBaseModel'], primary_key=True)),
+            ('headers', self.gf('django.db.models.fields.TextField')()),
         ))
         db.send_create_signal('Results', ['Iteration'])
 
-        # Adding model 'IterationByProductionType'
-        db.create_table('Results_iterationbyproductiontype', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='iteration')),
-            ('production_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ProductionType'])),
-            ('tscUSusc', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_unit_susceptible')),
-            ('tscASusc', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_animal_susceptible')),
-            ('tscULat', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_unit_latent')),
-            ('tscALat', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_animal_latent')),
-            ('tscUSubc', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_unit_subclinical')),
-            ('tscASubc', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_animal_subclinical')),
-            ('tscUClin', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_unit_clinical')),
-            ('tscAClin', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_animal_clinical')),
-            ('tscUNImm', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_unit_nat_immune')),
-            ('tscANImm', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_animal_nat_immune')),
-            ('tscUVImm', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_unit_vac_immune')),
-            ('tscAVImm', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_animal_vac_immune')),
-            ('tscUDest', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_unit_destroyed')),
-            ('tscADest', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='transition_state_cum_animal_destroyed')),
-            ('infcUIni', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_unit_initial')),
-            ('infcAIni', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_animal_initial')),
-            ('infcUAir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_unit_air')),
-            ('infcAAir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_animal_air')),
-            ('infcUDir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_unit_dir')),
-            ('infcADir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_animal_dir')),
-            ('infcUInd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_unit_ind')),
-            ('infcAInd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='infection_cum_animal_ind')),
-            ('expcUDir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exposed_cum_unit_dir')),
-            ('expcADir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exposed_cum_animal_dir')),
-            ('expcUInd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exposed_cum_unit_ind')),
-            ('expcAInd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exposed_cum_animal_ind')),
-            ('trcUDirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_dir_fwd')),
-            ('trcADirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_dir_fwd')),
-            ('trcUIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_ind_fwd')),
-            ('trcAIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_ind_fwd')),
-            ('trcUDirpFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_dir_p_fwd')),
-            ('trcADirpFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_dir_pfwd')),
-            ('trcUIndpFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_ind_p_fwd')),
-            ('trcAIndpFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_ind_p_fwd')),
-            ('trcUDirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_dir_back')),
-            ('trcADirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_dir_back')),
-            ('trcUIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_ind_back')),
-            ('trcAIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_ind_back')),
-            ('trcUDirpBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_dir_p_back')),
-            ('trcADirpBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_dir_pback')),
-            ('trcUIndpBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_unit_ind_p_back')),
-            ('trcAIndpBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_cum_animal_ind_p_back')),
-            ('tocUDirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_origin_cum_unit_dir_fwd')),
-            ('tocUIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_origin_cum_unit_ind_fwd')),
-            ('tocUDirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_origin_cum_unit_dir_back')),
-            ('tocUIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='trace_origin_cum_unit_ind_back')),
-            ('exmcUDirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_unit_dir_fwd')),
-            ('exmcADirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_animal_dir_fwd')),
-            ('exmcUIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_unit_ind_fwd')),
-            ('exmcAIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_animal_ind_fwd')),
-            ('exmcUDirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_unit_dir_back')),
-            ('exmcADirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_animal_dir_back')),
-            ('exmcUIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_unit_ind_back')),
-            ('exmcAIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='exam_cum_animal_ind_back')),
-            ('tstcUDirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_dir_fwd')),
-            ('tstcADirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_dir_fwd')),
-            ('tstcUIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_ind_fwd')),
-            ('tstcAIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_ind_fwd')),
-            ('tstcUDirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_dir_back')),
-            ('tstcADirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_dir_back')),
-            ('tstcUIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_ind_back')),
-            ('tstcAIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_ind_back')),
-            ('tstcUTruePos', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_true_pos')),
-            ('tstcATruePos', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_true_pos')),
-            ('tstcUTrueNeg', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_true_neg')),
-            ('tstcATrueNeg', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_true_neg')),
-            ('tstcUFalsePos', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_false_pos')),
-            ('tstcAFalsePos', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_false_pos')),
-            ('tstcUFalseNeg', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_unit_false_neg')),
-            ('tstcAFalseNeg', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='test_cum_animal_false_neg')),
-            ('detcUClin', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='detect_cum_unit_clin')),
-            ('detcAClin', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='detect_cum_animal_clin')),
-            ('detcUTest', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='detect_cum_unit_test')),
-            ('detcATest', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='detect_cum_animal_test')),
-            ('descUIni', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_unit_initial')),
-            ('descAIni', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_animal_initial')),
-            ('descUDet', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_unit_detect')),
-            ('descADet', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_animal_detect')),
-            ('descUDirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_unit_dir_fwd')),
-            ('descADirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_animal_dir_fwd')),
-            ('descUIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_unit_ind_fwd')),
-            ('descAIndFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_animal_ind_fwd')),
-            ('descUDirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_unit_dir_back')),
-            ('descADirBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_animal_dir_back')),
-            ('descUIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_unit_ind_back')),
-            ('descAIndBack', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_animal_ind_back')),
-            ('descURing', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_unit_ring')),
-            ('descARing', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_cum_animal_ring')),
-            ('deswUMax', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_wait_unit_max')),
-            ('deswAMax', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_wait_animal_max')),
-            ('deswUMaxDay', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_wait_unit_max_day')),
-            ('deswAMaxDay', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_wait_animal_max_day')),
-            ('deswUTimeMax', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='destroy_wait_unit_time_max')),
-            ('deswUTimeAvg', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='destroy_wait_unit_time_avg')),
-            ('deswUDaysInQueue', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='destroy_wait_unit_days_in_queue')),
-            ('deswADaysInQueue', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='destroy_wait_animal_days_in_queue')),
-            ('vaccUIni', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_cum_unit_initial')),
-            ('vaccAIni', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_cum_animal_initial')),
-            ('vaccURing', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_cum_unit_ring')),
-            ('vaccARing', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_cum_animal_ring')),
-            ('vacwUMax', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_wait_unit_max')),
-            ('vacwAMax', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='vac_wait_animal_max')),
-            ('vacwUMaxDay', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_wait_unit_max_day')),
-            ('vacwAMaxDay', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_wait_animal_max_day')),
-            ('vacwUTimeMax', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='vac_wait_unit_time_max')),
-            ('vacwUTimeAvg', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='vac_wait_unit_time_avg')),
-            ('zoncFoci', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='zone_cum_foci')),
-            ('firstDetection', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='first_detection')),
-            ('firstDetUInf', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='first_det_unit_inf')),
-            ('firstDetAInf', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='first_detect_animal_inf')),
-            ('firstDestruction', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='first_destruction')),
-            ('firstVaccination', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='first_vaccination')),
-            ('lastDetection', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='last_detection')),
-        ))
-        db.send_create_signal('Results', ['IterationByProductionType'])
-
-        # Adding model 'IterationByUnit'
-        db.create_table('Results_iterationbyunit', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='iteration')),
-            ('unit', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.Unit'])),
-            ('lastStatusCode', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True, db_column='last_status_code')),
-            ('lastStatusDay', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='last_status_day')),
-            ('lastControlStateCode', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True, db_column='last_control_state_code')),
-            ('lastControlStateDay', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='last_control_state_day')),
-        ))
-        db.send_create_signal('Results', ['IterationByUnit'])
-
-        # Adding model 'IterationByZone'
-        db.create_table('Results_iterationbyzone', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='iteration')),
-            ('zone', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.Zone'])),
-            ('maxZoneArea', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='max_zone_area')),
-            ('maxZoneAreaDay', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='max_zone_area_day')),
-            ('finalZoneArea', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='final_zone_area')),
-            ('maxZonePerimeter', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='max_zone_perimeter')),
-            ('maxZonePerimeterDay', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='max_zone_perimeter_day')),
-            ('finalZonePerimeter', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='final_zone_perimeter')),
-        ))
-        db.send_create_signal('Results', ['IterationByZone'])
-
-        # Adding model 'IterationByZoneAndProductionType'
-        db.create_table('Results_iterationbyzoneandproductiontype', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='iteration')),
-            ('zone', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.Zone'])),
-            ('production_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ProductionType'])),
-            ('unitDaysInZone', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='unit_days_in_zone')),
-            ('animalDaysInZone', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='animal_days_in_zone')),
-            ('costSurveillance', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='cost_surveillance')),
-        ))
-        db.send_create_signal('Results', ['IterationByZoneAndProductionType'])
-
-        # Adding model 'IterationCosts'
-        db.create_table('Results_iterationcosts', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True, db_column='iteration')),
-            ('production_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ProductionType'])),
-            ('destrAppraisal', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='destroy_appraisal')),
-            ('destrCleaning', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='destroy_cleaning')),
-            ('destrEuthanasia', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='destroy_euthanasia')),
-            ('destrIndemnification', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='destroy_indemnification')),
-            ('destrDisposal', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='destroy_disposal')),
-            ('vaccSetup', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='vac_cum_setup')),
-            ('vaccVaccination', self.gf('django.db.models.fields.FloatField')(blank=True, null=True, db_column='vac_cum_vaccination')),
-        ))
-        db.send_create_signal('Results', ['IterationCosts'])
-
 
     def backwards(self, orm):
+        # Deleting model 'OutputBaseModel'
+        db.delete_table('Results_outputbasemodel')
+
+        # Deleting model 'DailyReport'
+        db.delete_table('Results_dailyreport')
 
         # Deleting model 'DailyByProductionType'
         db.delete_table('Results_dailybyproductiontype')
 
-        # Deleting model 'DailyByZone'
-        db.delete_table('Results_dailybyzone')
-
         # Deleting model 'DailyByZoneAndProductionType'
         db.delete_table('Results_dailybyzoneandproductiontype')
 
-        # Deleting model 'DailyEvents'
-        db.delete_table('Results_dailyevents')
+        # Deleting model 'DailyByZone'
+        db.delete_table('Results_dailybyzone')
 
-        # Deleting model 'DailyExposures'
-        db.delete_table('Results_dailyexposures')
-
-        # Deleting model 'EpidemicCurves'
-        db.delete_table('Results_epidemiccurves')
-
-        # Deleting model 'General'
-        db.delete_table('Results_general')
+        # Deleting model 'DailyControls'
+        db.delete_table('Results_dailycontrols')
 
         # Deleting model 'Iteration'
         db.delete_table('Results_iteration')
 
-        # Deleting model 'IterationByProductionType'
-        db.delete_table('Results_iterationbyproductiontype')
-
-        # Deleting model 'IterationByUnit'
-        db.delete_table('Results_iterationbyunit')
-
-        # Deleting model 'IterationByZone'
-        db.delete_table('Results_iterationbyzone')
-
-        # Deleting model 'IterationByZoneAndProductionType'
-        db.delete_table('Results_iterationbyzoneandproductiontype')
-
-        # Deleting model 'IterationCosts'
-        db.delete_table('Results_iterationcosts')
-
 
     models = {
         'Results.dailybyproductiontype': {
-            'Meta': {'object_name': 'DailyByProductionType'},
-            'day': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'day'"}),
-            'descADet': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_animal_detect'"}),
-            'descADirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_animal_dir_back'"}),
-            'descADirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_animal_dir_fwd'"}),
-            'descAIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_animal_ind_back'"}),
-            'descAIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_animal_ind_fwd'"}),
-            'descAIni': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_animal_initial'"}),
-            'descARing': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_animal_ring'"}),
-            'descUDet': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_unit_detect'"}),
-            'descUDirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_unit_dir_back'"}),
-            'descUDirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_unit_dir_fwd'"}),
-            'descUIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_unit_ind_back'"}),
-            'descUIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_unit_ind_fwd'"}),
-            'descUIni': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_unit_initial'"}),
-            'descURing': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_unit_ring'"}),
-            'desnAAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_new_animal_all'"}),
-            'desnUAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_new_unit_all'"}),
-            'deswAAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_animal_all'"}),
-            'deswUAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_unit_all'"}),
-            'detcAClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'detect_cum_animal_clin'"}),
-            'detcATest': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'detect_cum_animal_test'"}),
-            'detcUClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'detect_cum_unit_clin'"}),
-            'detcUTest': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'detect_cum_unit_test'"}),
-            'detnAClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'detect_new_animal_clin'"}),
-            'detnATest': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'detect_new_animal_test'"}),
-            'detnUClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'detect_new_unit_clin'"}),
-            'detnUTest': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'detect_new_unit_test'"}),
-            'exmcADirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_animal_dir_back'"}),
-            'exmcADirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_animal_dir_fwd'"}),
-            'exmcAIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_animal_ind_back'"}),
-            'exmcAIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_animal_ind_fwd'"}),
-            'exmcUDirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_unit_dir_back'"}),
-            'exmcUDirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_unit_dir_fwd'"}),
-            'exmcUIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_unit_ind_back'"}),
-            'exmcUIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_unit_ind_fwd'"}),
-            'exmnAAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_new_animal_all'"}),
-            'exmnUAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_new_unit_all'"}),
-            'expcADir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exposed_cum_animal_dir'"}),
-            'expcAInd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exposed_cum_animal_ind'"}),
-            'expcUDir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exposed_cum_unit_dir'"}),
-            'expcUInd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exposed_cum_unit_ind'"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'infcAAir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_animal_air'"}),
-            'infcADir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_animal_dir'"}),
-            'infcAInd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_animal_ind'"}),
-            'infcAIni': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_animal_initial'"}),
-            'infcUAir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_unit_air'"}),
-            'infcUDir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_unit_dir'"}),
-            'infcUInd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_unit_ind'"}),
-            'infcUIni': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_unit_initial'"}),
-            'infnAAir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_new_animal_air'"}),
-            'infnADir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_new_animal_dir'"}),
-            'infnAInd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_new_animal_ind'"}),
-            'infnUAir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_new_unit_air'"}),
-            'infnUDir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_new_unit_dir'"}),
-            'infnUInd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_new_unit_ind'"}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'iteration'"}),
-            'production_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.ProductionType']"}),
-            'tocUDirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_origin_cum_unit_dir_back'"}),
-            'tocUDirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_origin_cum_unit_dir_fwd'"}),
-            'tocUIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_origin_cum_unit_ind_back'"}),
-            'tocUIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_origin_cum_unit_ind_fwd'"}),
-            'tonUDirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_origin_new_unit_dir_back'"}),
-            'tonUDirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_origin_new_unit_dir_fwd'"}),
-            'tonUIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_origin_new_unit_ind_back'"}),
-            'tonUIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_origin_new_unit_ind_fwd'"}),
-            'trcADirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_dir_back'"}),
-            'trcADirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_dir_fwd'"}),
-            'trcADirpBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_dir_p_back'"}),
-            'trcADirpFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_dir_p_fwd'"}),
-            'trcAIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_ind_back'"}),
-            'trcAIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_ind_fwd'"}),
-            'trcAIndpBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_ind_p_back'"}),
-            'trcAIndpFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_ind_p_fwd'"}),
-            'trcUDirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_dir_back'"}),
-            'trcUDirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_dir_fwd'"}),
-            'trcUDirpBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_dir_p_back'"}),
-            'trcUDirpFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_dir_p_fwd'"}),
-            'trcUIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_ind_back'"}),
-            'trcUIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_ind_fwd'"}),
-            'trcUIndpBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_ind_p_back'"}),
-            'trcUIndpFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_ind_p_fwd'"}),
-            'trnADirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_new_animal_dir_back'"}),
-            'trnADirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_new_animal_dir_fwd'"}),
-            'trnAIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_new_animal_ind_back'"}),
-            'trnAIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_new_animal_ind_fwd'"}),
-            'trnUDirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_new_unit_dir_back'"}),
-            'trnUDirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_new_unit_dir_fwd'"}),
-            'trnUIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_new_u_ind_back'"}),
-            'trnUIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_new_unit_ind_fwd'"}),
-            'tscAClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_animal_clinical'"}),
-            'tscADest': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_animal_destroyed'"}),
-            'tscALat': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_animal_latent'"}),
-            'tscANImm': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_animal_nat_immune'"}),
-            'tscASubc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_animal_subclinical'"}),
-            'tscASusc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_animal_susceptible'"}),
-            'tscAVImm': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_animal_vac_immune'"}),
-            'tscUClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_unit_clinical'"}),
-            'tscUDest': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_unit_destroyed'"}),
-            'tscULat': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_unit_latent'"}),
-            'tscUNImm': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_unit_nat_immune'"}),
-            'tscUSubc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_unit_subclinical'"}),
-            'tscUSusc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_unit_susceptible'"}),
-            'tscUVImm': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_unit_vac_immune'"}),
-            'tsdAClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_daily_animal_clinical'"}),
-            'tsdADest': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_daily_animal_destroyed'"}),
-            'tsdALat': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_daily_animal_latent'"}),
-            'tsdANImm': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_daily_animal_nat_immune'"}),
-            'tsdASubc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_daily_animal_subclinical'"}),
-            'tsdASusc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_daily_animal_susceptible'"}),
-            'tsdAVImm': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_daily_animal_vac_immune'"}),
-            'tsdUClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_daily_unit_clinical'"}),
-            'tsdUDest': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_daily_unit_destroyed'"}),
-            'tsdULat': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_daily_unit_latent'"}),
-            'tsdUNImm': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_daily_unit_nat_immune'"}),
-            'tsdUSubc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_daily_unit_subclinical'"}),
-            'tsdUSusc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_daily_unit_susceptible'"}),
-            'tsdUVImm': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_daily_unit_vac_immune'"}),
-            'tstcADirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_dir_back'"}),
-            'tstcADirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_dir_fwd'"}),
-            'tstcAFalseNeg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_false_neg'"}),
-            'tstcAFalsePos': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_false_pos'"}),
-            'tstcAIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_ind_back'"}),
-            'tstcAIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_ind_fwd'"}),
-            'tstcATrueNeg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_true_neg'"}),
-            'tstcATruePos': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_true_pos'"}),
-            'tstcUDirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_dir_back'"}),
-            'tstcUDirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_dir_fwd'"}),
-            'tstcUFalseNeg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_false_neg'"}),
-            'tstcUFalsePos': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_false_pos'"}),
-            'tstcUIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_ind_back'"}),
-            'tstcUIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_ind_fwd'"}),
-            'tstcUTrueNeg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_true_neg'"}),
-            'tstcUTruePos': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_true_pos'"}),
-            'tstnAFalseNeg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_new_animal_false_neg'"}),
-            'tstnAFalsePos': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_new_animal_false_pos'"}),
-            'tstnATrueNeg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_new_animal_true_neg'"}),
-            'tstnATruePos': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_new_animal_true_pos'"}),
-            'tstnUFalseNeg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_new_unit_false_neg'"}),
-            'tstnUFalsePos': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_new_unit_false_pos'"}),
-            'tstnUTrueNeg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_new_unit_true_neg'"}),
-            'tstnUTruePos': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_new_unit_true_pos'"}),
-            'vaccAIni': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_cum_animal_initial'"}),
-            'vaccARing': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_cum_animal_ring'"}),
-            'vaccUIni': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_cum_unit_initial'"}),
-            'vaccURing': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_cum_unit_ring'"}),
-            'vacnAAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_new_animal_all'"}),
-            'vacnUAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_new_unit_all'"}),
-            'vacwAAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_wait_animal_all'"}),
-            'vacwUAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_wait_unit_all'"}),
-            'zoncFoci': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'zone_cum_foci'"}),
-            'zonnFoci': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'zone_new_foci'"})
-        },
-        'Results.dailybyzone': {
-            'Meta': {'object_name': 'DailyByZone'},
-            'day': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'day'"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'iteration'"}),
-            'zone': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.Zone']"}),
-            'zoneArea': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'zone_area'"}),
-            'zonePerimeter': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'zone_perimeter'"})
-        },
-        'Results.dailybyzoneandproductiontype': {
-            'Meta': {'object_name': 'DailyByZoneAndProductionType'},
-            'animalDaysInZone': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'animal_days_in_zone'"}),
-            'animalsInZone': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'animals_in_zone'"}),
-            'day': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'day'"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'iteration'"}),
-            'production_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.ProductionType']"}),
-            'unitDaysInZone': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'unit_days_in_zone'"}),
-            'unitsInZone': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'units_in_zone'"}),
-            'zone': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.Zone']"})
-        },
-        'Results.dailyevents': {
-            'Meta': {'object_name': 'DailyEvents'},
-            'day': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'day'"}),
-            'event': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'event'"}),
-            'eventCode': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True', 'db_column': "'event_code'"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'iteration'"}),
-            'newStateCode': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True', 'db_column': "'new_state_code'"}),
-            'testResultCode': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True', 'db_column': "'test_result_code'"}),
-            'unit': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.Unit']"}),
-            'zone': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.Zone']"})
-        },
-        'Results.dailyexposures': {
-            'Meta': {'object_name': 'DailyExposures'},
-            'day': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'day'"}),
-            'exposedUnitStatusCode': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True', 'db_column': "'exposed_unit_status_code'"}),
-            'exposed_unit': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.Unit']", 'related_name': "'events_where_unit_was_exposed'"}),
-            'exposed_zone': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.Zone']", 'related_name': "'events_that_exposed_this_zone'"}),
-            'exposingUnitStatusCode': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True', 'db_column': "'exposing_unit_status_code'"}),
-            'exposing_unit': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.Unit']", 'related_name': "'events_where_unit_exposed_others'"}),
-            'exposing_zone': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.Zone']", 'related_name': "'events_that_exposed_others'"}),
-            'exposure': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exposure'"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'initiatedDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'initiated_day'"}),
-            'isAdequate': ('django.db.models.fields.NullBooleanField', [], {'blank': 'True', 'null': 'True', 'db_column': "'is_adequate'"}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'iteration'"}),
-            'spreadMethodCode': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True', 'db_column': "'spread_method_code'"})
-        },
-        'Results.epidemiccurves': {
-            'Meta': {'object_name': 'EpidemicCurves'},
-            'apparentInfectiousUnits': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'apparent_infectious_units'"}),
-            'day': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'day'"}),
-            'detectedAnimals': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'detected_animals'"}),
-            'detectedUnits': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'detected_units'"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'infectedAnimals': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infected_animals'"}),
-            'infectedUnits': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infected_units'"}),
-            'infectiousUnits': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infectious_units'"}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'iteration'"}),
+            'Meta': {'object_name': 'DailyByProductionType', '_ormbases': ['Results.OutputBaseModel']},
+            'iteration': ('django.db.models.fields.IntegerField', [], {'db_column': "'iteration'", 'null': 'True', 'blank': 'True'}),
+            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'unique': 'True', 'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True'}),
             'production_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.ProductionType']"})
         },
-        'Results.general': {
-            'Meta': {'object_name': 'General'},
-            'completedIterations': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'completed_iterations'"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'simulationEndTime': ('django.db.models.fields.DateTimeField', [], {'blank': 'True', 'null': 'True', 'db_column': "'simulation_end_time'"}),
-            'simulationStartTime': ('django.db.models.fields.DateTimeField', [], {'blank': 'True', 'null': 'True', 'db_column': "'simulation_start_time'"}),
-            'version': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True', 'db_column': "'version'"})
+        'Results.dailybyzone': {
+            'Meta': {'object_name': 'DailyByZone', '_ormbases': ['Results.OutputBaseModel']},
+            'filler': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'unique': 'True', 'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True'})
+        },
+        'Results.dailybyzoneandproductiontype': {
+            'Meta': {'object_name': 'DailyByZoneAndProductionType', '_ormbases': ['Results.OutputBaseModel']},
+            'filler': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'unique': 'True', 'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True'})
+        },
+        'Results.dailycontrols': {
+            'Meta': {'object_name': 'DailyControls', '_ormbases': ['Results.OutputBaseModel']},
+            'filler': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'unique': 'True', 'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True'})
+        },
+        'Results.dailyreport': {
+            'Meta': {'object_name': 'DailyReport', '_ormbases': ['Results.OutputBaseModel']},
+            'full_line': ('django.db.models.fields.TextField', [], {}),
+            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'unique': 'True', 'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True'}),
+            'sparse_dict': ('django.db.models.fields.TextField', [], {})
         },
         'Results.iteration': {
-            'Meta': {'object_name': 'Iteration'},
-            'breakEndDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'outbreak_end_day'"}),
-            'breakEnded': ('django.db.models.fields.NullBooleanField', [], {'blank': 'True', 'null': 'True', 'db_column': "'outbreak_ended'"}),
-            'deswAMax': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_animal_max'"}),
-            'deswAMaxDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_animal_max_day'"}),
-            'deswUMax': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_unit_max'"}),
-            'deswUMaxDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_unit_max_day'"}),
-            'deswUTimeAvg': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_unit_time_avg'"}),
-            'deswUTimeMax': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_unit_time_max'"}),
-            'diseaseEndDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'disease_end_day'"}),
-            'diseaseEnded': ('django.db.models.fields.NullBooleanField', [], {'blank': 'True', 'null': 'True', 'db_column': "'disease_ended'"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'iteration'"}),
-            'vacwAMax': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_wait_animal_max'"}),
-            'vacwAMaxDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_wait_animal_max_day'"}),
-            'vacwUMax': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_wait_unit_max'"}),
-            'vacwUMaxDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_wait_unit_max_day'"}),
-            'vacwUTimeAvg': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_wait_unit_time_avg'"}),
-            'vacwUTimeMax': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_wait_unit_time_max'"}),
-            'zoneFociCreated': ('django.db.models.fields.NullBooleanField', [], {'blank': 'True', 'null': 'True', 'db_column': "'zone_foci_created'"})
+            'Meta': {'object_name': 'Iteration', '_ormbases': ['Results.OutputBaseModel']},
+            'headers': ('django.db.models.fields.TextField', [], {}),
+            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'unique': 'True', 'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True'})
         },
-        'Results.iterationbyproductiontype': {
-            'Meta': {'object_name': 'IterationByProductionType'},
-            'descADet': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_animal_detect'"}),
-            'descADirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_animal_dir_back'"}),
-            'descADirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_animal_dir_fwd'"}),
-            'descAIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_animal_ind_back'"}),
-            'descAIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_animal_ind_fwd'"}),
-            'descAIni': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_animal_initial'"}),
-            'descARing': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_animal_ring'"}),
-            'descUDet': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_unit_detect'"}),
-            'descUDirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_unit_dir_back'"}),
-            'descUDirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_unit_dir_fwd'"}),
-            'descUIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_unit_ind_back'"}),
-            'descUIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_unit_ind_fwd'"}),
-            'descUIni': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_unit_initial'"}),
-            'descURing': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cum_unit_ring'"}),
-            'deswADaysInQueue': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_animal_days_in_queue'"}),
-            'deswAMax': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_animal_max'"}),
-            'deswAMaxDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_animal_max_day'"}),
-            'deswUDaysInQueue': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_unit_days_in_queue'"}),
-            'deswUMax': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_unit_max'"}),
-            'deswUMaxDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_unit_max_day'"}),
-            'deswUTimeAvg': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_unit_time_avg'"}),
-            'deswUTimeMax': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_wait_unit_time_max'"}),
-            'detcAClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'detect_cum_animal_clin'"}),
-            'detcATest': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'detect_cum_animal_test'"}),
-            'detcUClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'detect_cum_unit_clin'"}),
-            'detcUTest': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'detect_cum_unit_test'"}),
-            'exmcADirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_animal_dir_back'"}),
-            'exmcADirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_animal_dir_fwd'"}),
-            'exmcAIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_animal_ind_back'"}),
-            'exmcAIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_animal_ind_fwd'"}),
-            'exmcUDirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_unit_dir_back'"}),
-            'exmcUDirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_unit_dir_fwd'"}),
-            'exmcUIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_unit_ind_back'"}),
-            'exmcUIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exam_cum_unit_ind_fwd'"}),
-            'expcADir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exposed_cum_animal_dir'"}),
-            'expcAInd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exposed_cum_animal_ind'"}),
-            'expcUDir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exposed_cum_unit_dir'"}),
-            'expcUInd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'exposed_cum_unit_ind'"}),
-            'firstDestruction': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'first_destruction'"}),
-            'firstDetAInf': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'first_detect_animal_inf'"}),
-            'firstDetUInf': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'first_det_unit_inf'"}),
-            'firstDetection': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'first_detection'"}),
-            'firstVaccination': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'first_vaccination'"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'infcAAir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_animal_air'"}),
-            'infcADir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_animal_dir'"}),
-            'infcAInd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_animal_ind'"}),
-            'infcAIni': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_animal_initial'"}),
-            'infcUAir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_unit_air'"}),
-            'infcUDir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_unit_dir'"}),
-            'infcUInd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_unit_ind'"}),
-            'infcUIni': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'infection_cum_unit_initial'"}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'iteration'"}),
-            'lastDetection': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'last_detection'"}),
-            'production_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.ProductionType']"}),
-            'tocUDirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_origin_cum_unit_dir_back'"}),
-            'tocUDirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_origin_cum_unit_dir_fwd'"}),
-            'tocUIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_origin_cum_unit_ind_back'"}),
-            'tocUIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_origin_cum_unit_ind_fwd'"}),
-            'trcADirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_dir_back'"}),
-            'trcADirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_dir_fwd'"}),
-            'trcADirpBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_dir_pback'"}),
-            'trcADirpFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_dir_pfwd'"}),
-            'trcAIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_ind_back'"}),
-            'trcAIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_ind_fwd'"}),
-            'trcAIndpBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_ind_p_back'"}),
-            'trcAIndpFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_animal_ind_p_fwd'"}),
-            'trcUDirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_dir_back'"}),
-            'trcUDirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_dir_fwd'"}),
-            'trcUDirpBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_dir_p_back'"}),
-            'trcUDirpFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_dir_p_fwd'"}),
-            'trcUIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_ind_back'"}),
-            'trcUIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_ind_fwd'"}),
-            'trcUIndpBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_ind_p_back'"}),
-            'trcUIndpFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'trace_cum_unit_ind_p_fwd'"}),
-            'tscAClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_animal_clinical'"}),
-            'tscADest': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_animal_destroyed'"}),
-            'tscALat': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_animal_latent'"}),
-            'tscANImm': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_animal_nat_immune'"}),
-            'tscASubc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_animal_subclinical'"}),
-            'tscASusc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_animal_susceptible'"}),
-            'tscAVImm': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_animal_vac_immune'"}),
-            'tscUClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_unit_clinical'"}),
-            'tscUDest': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_unit_destroyed'"}),
-            'tscULat': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_unit_latent'"}),
-            'tscUNImm': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_unit_nat_immune'"}),
-            'tscUSubc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_unit_subclinical'"}),
-            'tscUSusc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_unit_susceptible'"}),
-            'tscUVImm': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'transition_state_cum_unit_vac_immune'"}),
-            'tstcADirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_dir_back'"}),
-            'tstcADirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_dir_fwd'"}),
-            'tstcAFalseNeg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_false_neg'"}),
-            'tstcAFalsePos': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_false_pos'"}),
-            'tstcAIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_ind_back'"}),
-            'tstcAIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_ind_fwd'"}),
-            'tstcATrueNeg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_true_neg'"}),
-            'tstcATruePos': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_animal_true_pos'"}),
-            'tstcUDirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_dir_back'"}),
-            'tstcUDirFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_dir_fwd'"}),
-            'tstcUFalseNeg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_false_neg'"}),
-            'tstcUFalsePos': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_false_pos'"}),
-            'tstcUIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_ind_back'"}),
-            'tstcUIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_ind_fwd'"}),
-            'tstcUTrueNeg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_true_neg'"}),
-            'tstcUTruePos': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'test_cum_unit_true_pos'"}),
-            'vaccAIni': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_cum_animal_initial'"}),
-            'vaccARing': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_cum_animal_ring'"}),
-            'vaccUIni': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_cum_unit_initial'"}),
-            'vaccURing': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_cum_unit_ring'"}),
-            'vacwAMax': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_wait_animal_max'"}),
-            'vacwAMaxDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_wait_animal_max_day'"}),
-            'vacwUMax': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_wait_unit_max'"}),
-            'vacwUMaxDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_wait_unit_max_day'"}),
-            'vacwUTimeAvg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_wait_unit_time_avg'"}),
-            'vacwUTimeMax': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_wait_unit_time_max'"}),
-            'zoncFoci': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'zone_cum_foci'"})
-        },
-        'Results.iterationbyunit': {
-            'Meta': {'object_name': 'IterationByUnit'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'iteration'"}),
-            'lastControlStateCode': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True', 'db_column': "'last_control_state_code'"}),
-            'lastControlStateDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'last_control_state_day'"}),
-            'lastStatusCode': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True', 'db_column': "'last_status_code'"}),
-            'lastStatusDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'last_status_day'"}),
-            'unit': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.Unit']"})
-        },
-        'Results.iterationbyzone': {
-            'Meta': {'object_name': 'IterationByZone'},
-            'finalZoneArea': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'final_zone_area'"}),
-            'finalZonePerimeter': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'final_zone_perimeter'"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'iteration'"}),
-            'maxZoneArea': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'max_zone_area'"}),
-            'maxZoneAreaDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'max_zone_area_day'"}),
-            'maxZonePerimeter': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'max_zone_perimeter'"}),
-            'maxZonePerimeterDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'max_zone_perimeter_day'"}),
-            'zone': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.Zone']"})
-        },
-        'Results.iterationbyzoneandproductiontype': {
-            'Meta': {'object_name': 'IterationByZoneAndProductionType'},
-            'animalDaysInZone': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'animal_days_in_zone'"}),
-            'costSurveillance': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'cost_surveillance'"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'iteration'"}),
-            'production_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.ProductionType']"}),
-            'unitDaysInZone': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'unit_days_in_zone'"}),
-            'zone': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.Zone']"})
-        },
-        'Results.iterationcosts': {
-            'Meta': {'object_name': 'IterationCosts'},
-            'destrAppraisal': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_appraisal'"}),
-            'destrCleaning': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_cleaning'"}),
-            'destrDisposal': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_disposal'"}),
-            'destrEuthanasia': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_euthanasia'"}),
-            'destrIndemnification': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'destroy_indemnification'"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True', 'db_column': "'iteration'"}),
-            'production_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.ProductionType']"}),
-            'vaccSetup': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_cum_setup'"}),
-            'vaccVaccination': ('django.db.models.fields.FloatField', [], {'blank': 'True', 'null': 'True', 'db_column': "'vac_cum_vaccination'"})
-        },
-        'ScenarioCreator.population': {
-            'Meta': {'object_name': 'Population'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'source_file': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'})
+        'Results.outputbasemodel': {
+            'Meta': {'object_name': 'OutputBaseModel'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'ScenarioCreator.productiontype': {
             'Meta': {'object_name': 'ProductionType'},
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True', 'null': 'True'}),
+            'description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '255', 'unique': 'True'})
-        },
-        'ScenarioCreator.unit': {
-            'Meta': {'object_name': 'Unit'},
-            '_cum_destroyed': ('django.db.models.fields.PositiveIntegerField', [], {'blank': 'True', 'null': 'True'}),
-            '_cum_detected': ('django.db.models.fields.PositiveIntegerField', [], {'blank': 'True', 'null': 'True'}),
-            '_cum_infected': ('django.db.models.fields.PositiveIntegerField', [], {'blank': 'True', 'null': 'True'}),
-            '_cum_vaccinated': ('django.db.models.fields.PositiveIntegerField', [], {'blank': 'True', 'null': 'True'}),
-            '_final_control_state_code': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            '_final_detection_state_code': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            '_final_state_code': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            '_population': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.Population']"}),
-            'days_in_initial_state': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'days_left_in_initial_state': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'initial_size': ('django.db.models.fields.PositiveIntegerField', [], {}),
-            'initial_state': ('django.db.models.fields.CharField', [], {'max_length': '255', 'default': "'S'"}),
-            'latitude': ('django_extras.db.models.fields.LatitudeField', [], {}),
-            'longitude': ('django_extras.db.models.fields.LongitudeField', [], {}),
-            'production_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.ProductionType']"}),
-            'user_defined_1': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'user_defined_2': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'user_defined_3': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'user_defined_4': ('django.db.models.fields.TextField', [], {'blank': 'True'})
-        },
-        'ScenarioCreator.zone': {
-            'Meta': {'object_name': 'Zone'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'zone_description': ('django.db.models.fields.TextField', [], {}),
-            'zone_radius': ('django.db.models.fields.FloatField', [], {})
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'})
         }
     }
 
