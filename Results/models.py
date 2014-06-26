@@ -106,7 +106,7 @@ class TraceGroup(object):
     AIndp = models.IntegerField(blank=True, null=True, verbose_name="Animals Indirect Spread Possible")
 
 
-class ExamGroup(object):
+class TestTriggerGroup(object):
     UAll = models.IntegerField(blank=True, null=True, verbose_name="Units from Any Cause")
     URing = models.IntegerField(blank=True, null=True, verbose_name="Units because of Ring")
     UDirFwd = models.IntegerField(blank=True, null=True, verbose_name="Units because of Direct Forward trace")
@@ -124,6 +124,13 @@ class ExamGroup(object):
     ADet = models.IntegerField(blank=True, null=True, verbose_name="Animals ")
 
 
+class TestOutcomeGroup(object):
+    UTruePos = models.IntegerField(blank=True, null=True, verbose_name="Units True Positives")
+    UFalsePos = models.IntegerField(blank=True, null=True, verbose_name="Units False Positives")
+    UTrueNeg = models.IntegerField(blank=True, null=True, verbose_name="Units True Negatives")
+    UFalseNeg = models.IntegerField(blank=True, null=True, verbose_name="Units False Negatives")
+
+
 class DailyByProductionType(OutputBaseModel):
     iteration = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('iteration'),
         help_text='The iteration during which the outputs in this records where generated.', )
@@ -135,7 +142,11 @@ class DailyByProductionType(OutputBaseModel):
     lastDetection = models.ForeignKey(DetectionBracketGroup, blank=True, null=True, verbose_name="Last Detection")
     det = models.ForeignKey(DetectionGroup, blank=True, null=True, verbose_name="Detections")
     tr = models.ForeignKey(TraceGroup, blank=True, null=True, verbose_name="Traces")
-    exm = models.ForeignKey(ExamGroup, blank=True, null=True, verbose_name="Examinations")
+    exm = models.ForeignKey(TestTriggerGroup, blank=True, null=True, verbose_name="Examinations")
+    #tstcU uses the TestTriggerGroup because of the overlap in Directional causes
+    tstcU = models.ForeignKey(TestTriggerGroup, blank=True, null=True, verbose_name="Lab Test Triggers")
+    #we need a second model to catch True/False Pos/Neg results
+    tst = models.ForeignKey(TestOutcomeGroup, blank=True, null=True, verbose_name="Lab Test Outcomes")
 
 
 

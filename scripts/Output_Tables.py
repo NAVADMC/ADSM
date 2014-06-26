@@ -1620,7 +1620,8 @@ print(re.sub(r'All_', '_', close))  # special rule implemented
 # <u>exm Grammar exception</u>
 # =====================
 # When 'All' is followed by a Production Type, remove the word 'All'.
-# re.sub(r'All_', '_', close)
+# `re.sub(r'All_', '_', close)`  The database will follow the expected format that includes "All" in these cases, but the exception will need to be added to the switcher that take CEngine output and finds the DB match.
+# * Same rule applies to `tstcA`
 
 # <codecell>
 
@@ -1631,6 +1632,83 @@ explain.update({'DirFwd':'because of Direct Forward trace',
                 'IndBack':'because of Indirect Back trace', 
                 'Ring':'because of Ring'})
 stat_group_code(grammar)
+
+# <headingcell level=3>
+
+# tst Header
+
+# <codecell>
+
+matching_headers('tst')
+
+# <codecell>
+
+grammars['tst'] = ['tstnU', 'tstcU', 'tstcA']  # references the three exclusive branches
+grammars['tstnU'] = [('TruePos', 'FalsePos', 'TrueNeg','FalseNeg'), ('','_Bull_','_Swine_')]  # first part only
+grammars['tstcU'] = [('All', 'DirFwd','IndFwd','DirBack','IndBack', 'TruePos','FalsePos','TrueNeg','FalseNeg'), ('','_Bull_','_Swine_')]  # direction and pos/neg are exclusive
+grammars['tstcA'] = [('All','DirFwd','IndFwd','DirBack','IndBack'), ('','_Bull_','_Swine_')]  # direction and pos/neg are exclusive
+
+4*3 + 8*3 + 5*3
+
+# <codecell>
+
+def combo_set(*prefixes):
+    combos = set()
+    for prefix in prefixes:
+        tree = grammars[prefix]
+        parts = product(*tree)
+        combos = combos.union({prefix + ''.join(line) for line in parts})
+    return combos
+
+# <codecell>
+
+the54 = combo_set(*grammars['tst'])
+len(combo_set(*grammars['tst']))
+
+# <codecell>
+
+def subset_check(full_list, sub_list):
+    print("Subset Check:", set(sub_list).issubset(set(full_list)))
+    stragglers = set(sub_list) - set(full_list).intersection(set(sub_list))
+    return stragglers
+
+# <codecell>
+
+x = [h for h in cause_sweep if 'tst' in h]
+subset_check(x, the54)
+# x
+
+# <markdowncell>
+
+# The four that don't match here are from the exm grammar exception about 'All' already noted above.  
+# So what are we still missing?
+
+# <codecell>
+
+subset_check(x, the54)
+
+# <markdowncell>
+
+# That's the same exception as before.  We're done.
+
+# <codecell>
+
+explain.update({'TruePos':'True Positives', 'FalsePos':'False Positives', 'TrueNeg':'True Negatives','FalseNeg':'False Negatives'})
+
+# <codecell>
+
+stat_group_code([('U',), ('TruePos', 'FalsePos', 'TrueNeg','FalseNeg')])
+
+# <markdowncell>
+
+#    
+# ##firstVaccination
+
+# <codecell>
+
+
+# <codecell>
+
 
 # <codecell>
 
