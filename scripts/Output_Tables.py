@@ -1506,7 +1506,14 @@ print(len(cause_sweep))
 
 # <codecell>
 
-[h for h in cause_sweep if 'exp' in h]
+def matching_headers(prefix):
+    matches = [h for h in cause_sweep if h.startswith(prefix)]
+    print('\n'.join(matches))
+    print('Total:', len(matches))
+
+# <codecell>
+
+matching_headers('exp')
 
 # <codecell>
 
@@ -1514,24 +1521,128 @@ grammars = {'exp': [('c', 'n'), ('U', 'A'), ('', 'Dir', 'Ind', 'Air'), ('All', '
 
 # <codecell>
 
-len([h for h in cause_sweep if 'exp' in h])  # 128 means that all combinations are displayed = 2*2*4*3 = 48
+matching_headers('etection')
 
 # <codecell>
 
-[h for h in cause_sweep if 'etection' in h]
+grammars['firstDetection'] = [('', 'Clin', 'Test'), ('', '_Bull_', '_Swine_')]# 18 = 2*3*3
 
 # <codecell>
 
-grammars['firstDetection'] = [('', 'Clin', 'Test'), ('', '_Bull_', '_Swine_')]
-len([h for h in cause_sweep if 'etection' in h])  # 18 = 2*3*3
+matching_headers('det')
 
 # <codecell>
 
-[h for h in cause_sweep if 'det' in h]
+print(2*2*3*3)  # There are two unnaccounted for in this set
 
 # <codecell>
 
-len([h for h in cause_sweep if 'det' in h])
+grammars['det'] = [('c', 'n'), ('U', 'A'), ('All', 'Clin', 'Test'), ('', '_Bull_', '_Swine_')]
+
+# <codecell>
+
+from collections import defaultdict
+a = {'All':'from Either method', 'Clin':'from Clinical signs', 'Test': 'from Lab Tests', 'U':'Units', 'A':'Animals', 'p':'Possible',
+     'Dir': 'Direct Spread', 'Ind':'Indirect Spread', 'Air':'Airborne Spread'}
+explain = defaultdict(lambda: '', a)
+
+# <codecell>
+
+for a in ('U', 'A'):
+    for b in ('All', 'Clin', 'Test'):
+        print('    '+a+b+ ' = models.IntegerField(blank=True, null=True, verbose_name="'+explain[b]+'")')
+
+# <codecell>
+
+for a in ('U', 'A'):
+    for b, verbose in (('All','from Either method'), ('Clin','from Clinical signs'), ('Test', 'from Lab Tests')):
+        print('    '+a+b+ ' = models.IntegerField(blank=True, null=True, verbose_name="'+verbose+'")')
+
+# <codecell>
+
+matching_headers('tr')
+
+# <codecell>
+
+grammars['tr'] = [('n','c'), ('U', 'A'), ('All', 'Dir', 'Ind'), ('', '_Bull_', '_Swine_'), ('', 'p')]  # 2*3*3*2
+print(2*2*3*3*2)
+
+# <codecell>
+
+grammar =  [('U', 'A'), ('All', 'Dir', 'Ind'), ('', 'p')]
+def not_as_cool_as_product(grammar):
+    result = []
+    for possibilities in grammar:
+        if len(result) == 0:
+            result = list(possibilities)
+        else:
+            temp = list(result)
+            result = []
+            for suffix in possibilities:
+                result += [a+suffix for a in temp]
+    return result
+not_as_cool_as_product(grammar)
+
+# <codecell>
+
+from itertools import product, combinations, permutations
+list(product(('U', 'A'), ('All', 'Dir', 'Ind'), ('', '_Bull_', '_Swine_')))
+
+# <codecell>
+
+def stat_group_code(grammar):
+    combos = product(*grammar)
+    for line in combos:
+        explanation = ' '.join([explain[part] for part in line])
+        print('    '+''.join(line)+ ' = models.IntegerField(blank=True, null=True, verbose_name="'+explanation+'")')
+
+# <codecell>
+
+stat_group_code( [('U', 'A'), ('All', 'Dir', 'Ind'), ('', 'p')] )
+
+# <codecell>
+
+matching_headers('exm')
+
+# <codecell>
+
+grammars['exm'] = [('n','c'), ('U','A'), ('All','Ring','DirFwd','IndFwd','DirBack','IndBack','Det'), ('','_Bull_','_Swine_')]
+print(2*2*7*3)
+
+# <codecell>
+
+combos = product(('n','c'), ('U','A'), ('All','Ring','DirFwd','IndFwd','DirBack','IndBack','Det'), ('','_Bull_','_Swine_'))
+close = '\nexm'.join([''.join(line) for line in combos])
+print(re.sub(r'All_', '_', close))  # special rule implemented
+
+# <markdowncell>
+
+# <u>exm Grammar exception</u>
+# =====================
+# When 'All' is followed by a Production Type, remove the word 'All'.
+# re.sub(r'All_', '_', close)
+
+# <codecell>
+
+grammar = [('U','A'), ('All','Ring','DirFwd','IndFwd','DirBack','IndBack','Det')]
+explain.update({'DirFwd':'because of Direct Forward trace', 
+                'IndFwd':'because of Indirect Forward trace', 
+                'DirBack':'because of Direct Back trace', 
+                'IndBack':'because of Indirect Back trace', 
+                'Ring':'because of Ring'})
+stat_group_code(grammar)
+
+# <codecell>
+
+
+# <headingcell level=2>
+
+# Fields I couln't grammarify
+
+# <markdowncell>
+
+# detcUqAll  
+# detOccurred
 
 # <codecell>
 

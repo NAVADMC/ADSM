@@ -73,10 +73,55 @@ class SpreadGroup(OutputBaseModel):
     # TODO: Not storing cumulative at the moment, since it can be computed
 
 
-class DetectionGroup(object):
+class DetectionBracketGroup(object):
     blank = models.IntegerField(blank=True, null=True, verbose_name="either method")  # 'blank' should be a special case in the parser
     Clin = models.IntegerField(blank=True, null=True, verbose_name="Detection from Clinical signs")
-    Test = models.IntegerField(blank=True, null=True, verbose_name="Detection from Examination")
+    Test = models.IntegerField(blank=True, null=True, verbose_name="Detection from Lab Tests")
+    # TODO: Not storing cumulative at the moment, since it can be computed
+
+
+class DetectionGroup(object):
+    UAll = models.IntegerField(blank=True, null=True, verbose_name="Units from Either method")
+    UClin = models.IntegerField(blank=True, null=True, verbose_name="Units from Clinical signs")
+    UTest = models.IntegerField(blank=True, null=True, verbose_name="Units from Lab Tests")
+
+    AAll = models.IntegerField(blank=True, null=True, verbose_name="Animals from Either method")
+    AClin = models.IntegerField(blank=True, null=True, verbose_name="Animals from Clinical signs")
+    ATest = models.IntegerField(blank=True, null=True, verbose_name="Animals from Lab Tests")
+
+
+class TraceGroup(object):
+    UAll = models.IntegerField(blank=True, null=True, verbose_name="Units from Either method ")
+    UAllp = models.IntegerField(blank=True, null=True, verbose_name="Units from Either method Possible")
+    UDir = models.IntegerField(blank=True, null=True, verbose_name="Units Direct Spread ")
+    UDirp = models.IntegerField(blank=True, null=True, verbose_name="Units Direct Spread Possible")
+    UInd = models.IntegerField(blank=True, null=True, verbose_name="Units Indirect Spread ")
+    UIndp = models.IntegerField(blank=True, null=True, verbose_name="Units Indirect Spread Possible")
+
+    AAll = models.IntegerField(blank=True, null=True, verbose_name="Animals from Either method ")
+    AAllp = models.IntegerField(blank=True, null=True, verbose_name="Animals from Either method Possible")
+    ADir = models.IntegerField(blank=True, null=True, verbose_name="Animals Direct Spread ")
+    ADirp = models.IntegerField(blank=True, null=True, verbose_name="Animals Direct Spread Possible")
+    AInd = models.IntegerField(blank=True, null=True, verbose_name="Animals Indirect Spread ")
+    AIndp = models.IntegerField(blank=True, null=True, verbose_name="Animals Indirect Spread Possible")
+
+
+class ExamGroup(object):
+    UAll = models.IntegerField(blank=True, null=True, verbose_name="Units from Any Cause")
+    URing = models.IntegerField(blank=True, null=True, verbose_name="Units because of Ring")
+    UDirFwd = models.IntegerField(blank=True, null=True, verbose_name="Units because of Direct Forward trace")
+    UIndFwd = models.IntegerField(blank=True, null=True, verbose_name="Units because of Indirect Forward trace")
+    UDirBack = models.IntegerField(blank=True, null=True, verbose_name="Units because of Direct Back trace")
+    UIndBack = models.IntegerField(blank=True, null=True, verbose_name="Units because of Indirect Back trace")
+    UDet = models.IntegerField(blank=True, null=True, verbose_name="Units ")
+
+    AAll = models.IntegerField(blank=True, null=True, verbose_name="Animals from Any Cause")
+    ARing = models.IntegerField(blank=True, null=True, verbose_name="Animals because of Ring")
+    ADirFwd = models.IntegerField(blank=True, null=True, verbose_name="Animals because of Direct Forward trace")
+    AIndFwd = models.IntegerField(blank=True, null=True, verbose_name="Animals because of Indirect Forward trace")
+    ADirBack = models.IntegerField(blank=True, null=True, verbose_name="Animals because of Direct Back trace")
+    AIndBack = models.IntegerField(blank=True, null=True, verbose_name="Animals because of Indirect Back trace")
+    ADet = models.IntegerField(blank=True, null=True, verbose_name="Animals ")
 
 
 class DailyByProductionType(OutputBaseModel):
@@ -86,9 +131,11 @@ class DailyByProductionType(OutputBaseModel):
         help_text='The identifier of the production type that these outputs apply to.', )
     exp = models.ForeignKey(SpreadGroup, blank=True, null=True, verbose_name="Exposures")
     inf = models.ForeignKey(SpreadGroup, blank=True, null=True, verbose_name="Infections")
-    firstDetection = models.ForeignKey(DetectionGroup, blank=True, null=True, verbose_name="First Detection")
-    lastDetection = models.ForeignKey(DetectionGroup, blank=True, null=True, verbose_name="Last Detection")
-
+    firstDetection = models.ForeignKey(DetectionBracketGroup, blank=True, null=True, verbose_name="First Detection")
+    lastDetection = models.ForeignKey(DetectionBracketGroup, blank=True, null=True, verbose_name="Last Detection")
+    det = models.ForeignKey(DetectionGroup, blank=True, null=True, verbose_name="Detections")
+    tr = models.ForeignKey(TraceGroup, blank=True, null=True, verbose_name="Traces")
+    exm = models.ForeignKey(ExamGroup, blank=True, null=True, verbose_name="Examinations")
 
 
 
