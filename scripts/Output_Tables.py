@@ -2022,16 +2022,134 @@ for field in fields:
 
 # <markdowncell>
 
-# detcUqAll  
-# detOccurred
+# detcUqAll
 
-# <markdowncell>
+# <codecell>
 
-# vaccOccurred
 
-# <markdowncell>
+# <headingcell level=1>
 
-# destrOccurred
+# Outputs that don't match any prefix so far
+
+# <codecell>
+
+prefixes = '''expnU
+expcU
+expnA
+expcA
+infnU
+infcU
+infnA
+infcA
+firstDetection
+lastDetection
+detnU
+detcU
+detnA
+detcA
+trnUp
+trnU
+trcUp
+trcU
+trnAp
+trnA
+trcAp
+trcA
+exmnU
+exmcU
+exmnA
+exmcA
+tstcU
+tstcA
+firstVaccination
+vacnU
+vaccU
+vacnA
+vaccA
+firstDestruction
+desnU
+descU
+desnA
+descA
+tsdUSusc
+tsdULat
+tsdUSubc
+tsdUClin
+tsdUNImm
+tsdUVImm
+tsdUDest
+tsdASusc
+tsdALat
+tsdASubc
+tsdAClin
+tsdANImm
+tsdAVImm
+tsdADest
+tstcUTruePos
+tstcUTrueNeg
+tstcUFalsePos
+tstcUFalseNeg
+vacwU
+vacwA
+deswU
+deswA
+unitsInZone
+unitDaysInZone
+animalDaysInZone
+zoneArea
+maxZoneArea
+maxZoneAreaDay
+zonePerimeter
+maxZonePerimeter
+maxZonePerimeterDay
+diseaseDuration
+adqnU
+adqcU
+detOccurred
+costSurveillance
+vaccOccurred
+vacwUMax
+vacwUMaxDay
+vacwUDaysInQueue
+vacwUTimeAvg
+vacwUTimeMax
+vacwAMax
+vacwAMaxDay
+vacwADaysInQueue
+vaccSetup
+vaccVaccination
+vaccSubtotal
+destrOccurred
+deswUMax
+deswUMaxDay
+deswUDaysInQueue
+deswUTimeAvg
+deswUTimeMax
+deswAMax
+deswAMaxDay
+deswADaysInQueue
+destrAppraisal
+destrEuthanasia
+destrIndemnification
+destrDisposal
+destrCleaning
+destrSubtotal
+outbreakDuration
+costsTotal
+tsd
+tst'''.split()
+
+# <codecell>
+
+print('\n'.join([h for h in cause_sweep if not any([covered in h for covered in prefixes])]))
+
+# <codecell>
+
+grammars['tsd']
+
+# <codecell>
+
+grammars['tst']
 
 # <codecell>
 

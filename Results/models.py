@@ -220,7 +220,6 @@ class DailyByProductionType(OutputBaseModel):
     #tstcU uses the TestTriggerGroup because of the overlap in Directional causes
     tstc = models.ForeignKey(TestTriggerGroup, blank=True, null=True, verbose_name="Lab Test Triggers")
 
-
     #This group of two was so small I didn't think it warranted a group object
     firstVaccination = models.IntegerField(    blank=True, null=True, verbose_name="First Vaccination")
     firstVaccinationRing = models.IntegerField(blank=True, null=True, verbose_name="First Vaccination caused by a Ring")
@@ -271,6 +270,9 @@ class DailyByZone(OutputBaseModel):
     zonePerimeter       = models.IntegerField(blank=True, null=True, verbose_name=printable_name('zonePerimeter'))
     maxZonePerimeter    = models.IntegerField(blank=True, null=True, verbose_name=printable_name('maxZonePerimeter'))
     maxZonePerimeterDay = models.IntegerField(blank=True, null=True, verbose_name=printable_name('maxZonePerimeterDay'))
+    finalZoneArea       = models.IntegerField(blank=True, null=True, verbose_name=printable_name('finalZoneArea'))
+    finalZonePerimeter  = models.IntegerField(blank=True, null=True, verbose_name=printable_name('finalZonePerimeter'))
+    num_separate_areas  = models.IntegerField(blank=True, null=True, verbose_name=printable_name('num_separate_areas'))
 
 
 class DailyControls(OutputBaseModel):
@@ -313,8 +315,8 @@ class DailyControls(OutputBaseModel):
     destrSubtotal        = models.IntegerField(blank=True, null=True, verbose_name=printable_name('destrSubtotal'))
     outbreakDuration     = models.IntegerField(blank=True, null=True, verbose_name=printable_name('outbreakDuration'))
     costsTotal           = models.IntegerField(blank=True, null=True, verbose_name=printable_name('costsTotal'))
-
-
-class Iteration(OutputBaseModel):
-    headers = models.TextField()
-
+    firstDetUInfAll      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('Units Infected at First Detection'))
+    firstDetAInfAll      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('Animals Infected at First Detection'))
+    ratio                = models.IntegerField(blank=True, null=True, verbose_name=printable_name('ratio'))
+    average_prevalence   = models.IntegerField(blank=True, null=True, verbose_name=printable_name('average_prevalence'))
+    detcUqAll            = models.IntegerField(blank=True, null=True, verbose_name=printable_name('detcUqAll'))
