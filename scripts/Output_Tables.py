@@ -1946,8 +1946,72 @@ grammars['animalDaysInZone'] = grammars['unitsInZone']
 for field in ['zoneArea','maxZoneArea','maxZoneAreaDay','zonePerimeter','maxZonePerimeter','maxZonePerimeterDay']:
     matching_headers(field)
 
+# <markdowncell>
+
+# Nothing intersting going on here.
+
+# <headingcell level=2>
+
+# DailyControls Headers
+
 # <codecell>
 
+matching_headers('adq')
+
+# <codecell>
+
+for field in ['diseaseDuration','adqnU','adqcU','detOccurred','costSurveillance','vaccOccurred','vacwUMax','vacwUMaxDay','vacwUDaysInQueue']:
+    matching_headers(field)
+
+# <codecell>
+
+matching_headers('costSurveillance')
+
+# <markdowncell>
+
+# Probably missing because I didn't specify costs
+
+# <codecell>
+
+fields = '''vacwUTimeAvg
+vacwUTimeMax
+vacwAMax
+vacwAMaxDay
+vacwADaysInQueue
+vaccSetup
+vaccVaccination
+vaccSubtotal
+destrOccurred
+deswUMax
+deswUMaxDay
+deswUDaysInQueue
+deswUTimeAvg
+deswUTimeMax
+deswAMax
+deswAMaxDay
+deswADaysInQueue
+destrAppraisal
+destrEuthanasia
+destrIndemnification'''.split()
+
+# <codecell>
+
+for field in fields:
+    matching_headers(field)
+
+# <markdowncell>
+
+# A couple missing fields.  I'll stick to Neil's notes and assume that they are missing because of settings.
+
+# <codecell>
+
+fields = '''destrDisposal
+destrCleaning
+destrSubtotal
+outbreakDuration
+costsTotal'''.split()
+for field in fields:
+    matching_headers(field)
 
 # <codecell>
 

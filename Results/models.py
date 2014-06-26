@@ -21,6 +21,7 @@ def printable_name(underscores_name):
     underscores_name = re.sub(r'([a-z])([A-Z])', r'\1_\2', underscores_name).lower()  # convert from camel case
     spaced = re.sub(r'_', r' ', underscores_name)
     return spaced.title()  # capitalize
+    #TODO: Add the explain[] dictionary to the printable names, split on spaces, and look for matching strings
 
 
 class OutputBaseModel(models.Model):
@@ -273,7 +274,45 @@ class DailyByZone(OutputBaseModel):
 
 
 class DailyControls(OutputBaseModel):
-    filler = models.IntegerField(blank=True, null=True, )
+    iteration = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('iteration'),
+        help_text='The iteration during which the outputs in this records where generated.', )
+    day = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('day'),
+        help_text='The day in this iteration during which the outputs in this records where generated.', )
+
+    diseaseDuration      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('diseaseDuration'))
+    adqnU                = models.IntegerField(blank=True, null=True, verbose_name=printable_name('adqnU'))
+    adqcU                = models.IntegerField(blank=True, null=True, verbose_name=printable_name('adqcU'))
+    detOccurred          = models.IntegerField(blank=True, null=True, verbose_name=printable_name('detOccurred'))
+    costSurveillance     = models.IntegerField(blank=True, null=True, verbose_name=printable_name('costSurveillance'))
+    vaccOccurred         = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vaccOccurred'))
+    vacwUMax             = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwUMax'))
+    vacwUMaxDay          = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwUMaxDay'))
+    vacwUDaysInQueue     = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwUDaysInQueue'))
+    vacwUTimeAvg         = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwUTimeAvg'))
+    vacwUTimeMax         = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwUTimeMax'))
+    vacwAMax             = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwAMax'))
+    vacwAMaxDay          = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwAMaxDay'))
+    vacwADaysInQueue     = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwADaysInQueue'))
+    vaccSetup            = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vaccSetup'))
+    vaccVaccination      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vaccVaccination'))
+    vaccSubtotal         = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vaccSubtotal'))
+    destrOccurred        = models.IntegerField(blank=True, null=True, verbose_name=printable_name('destrOccurred'))
+    deswUMax             = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswUMax'))
+    deswUMaxDay          = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswUMaxDay'))
+    deswUDaysInQueue     = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswUDaysInQueue'))
+    deswUTimeAvg         = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswUTimeAvg'))
+    deswUTimeMax         = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswUTimeMax'))
+    deswAMax             = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswAMax'))
+    deswAMaxDay          = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswAMaxDay'))
+    deswADaysInQueue     = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswADaysInQueue'))
+    destrAppraisal       = models.IntegerField(blank=True, null=True, verbose_name=printable_name('destrAppraisal'))
+    destrEuthanasia      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('destrEuthanasia'))
+    destrIndemnification = models.IntegerField(blank=True, null=True, verbose_name=printable_name('destrIndemnification'))
+    destrDisposal        = models.IntegerField(blank=True, null=True, verbose_name=printable_name('destrDisposal'))
+    destrCleaning        = models.IntegerField(blank=True, null=True, verbose_name=printable_name('destrCleaning'))
+    destrSubtotal        = models.IntegerField(blank=True, null=True, verbose_name=printable_name('destrSubtotal'))
+    outbreakDuration     = models.IntegerField(blank=True, null=True, verbose_name=printable_name('outbreakDuration'))
+    costsTotal           = models.IntegerField(blank=True, null=True, verbose_name=printable_name('costsTotal'))
 
 
 class Iteration(OutputBaseModel):
