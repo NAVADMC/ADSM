@@ -77,7 +77,7 @@ class SpreadGroup(OutputBaseModel):
 
 
 class DetectionBracketGroup(OutputBaseModel):
-    _blank_ = models.IntegerField(blank=True, null=True, verbose_name="either method")  #TODO: '_blank_' should be a special case in the parser
+    _blank = models.IntegerField(blank=True, null=True, verbose_name="either method")  #TODO: '_blank' should be a special case in the parser
     Clin = models.IntegerField(blank=True, null=True, verbose_name="Detection from Clinical signs")
     Test = models.IntegerField(blank=True, null=True, verbose_name="Detection from Lab Tests")
 
@@ -166,7 +166,7 @@ class WaitGroup(OutputBaseModel):
 
 
 class DestructionGroup(OutputBaseModel):
-    _blank_ = models.IntegerField(blank=True, null=True, verbose_name="All")
+    _blank = models.IntegerField(blank=True, null=True, verbose_name="All")
     All = models.IntegerField(blank=True, null=True, verbose_name="All")
     Unsp = models.IntegerField(blank=True, null=True, verbose_name="Unspecified")
     Ring = models.IntegerField(blank=True, null=True, verbose_name="because of Ring")
@@ -206,34 +206,34 @@ class DailyByProductionType(OutputBaseModel):
     production_type = models.ForeignKey(ProductionType, verbose_name=printable_name('production_type'),
         help_text='The identifier of the production type that these outputs apply to.', )
 
-    exp = models.ForeignKey(SpreadGroup, blank=True, null=True, verbose_name="Exposures")
-    inf = models.ForeignKey(SpreadGroup, blank=True, null=True, verbose_name="Infections")
-    firstDetection = models.ForeignKey(DetectionBracketGroup, blank=True, null=True, verbose_name="First Detection")
-    lastDetection = models.ForeignKey(DetectionBracketGroup, blank=True, null=True, verbose_name="Last Detection")
-    det = models.ForeignKey(DetectionGroup, blank=True, null=True, verbose_name="Detections")
-    tr = models.ForeignKey(TraceGroup, blank=True, null=True, verbose_name="Traces")
-    exm = models.ForeignKey(TestTriggerGroup, blank=True, null=True, verbose_name="Examinations")
+    exp = models.ForeignKey(SpreadGroup, related_name='+', blank=True, null=True, verbose_name="Exposures")
+    inf = models.ForeignKey(SpreadGroup, related_name='+', blank=True, null=True, verbose_name="Infections")
+    firstDetection = models.ForeignKey(DetectionBracketGroup, related_name='+', blank=True, null=True, verbose_name="First Detection")
+    lastDetection = models.ForeignKey(DetectionBracketGroup, related_name='+', blank=True, null=True, verbose_name="Last Detection")
+    det = models.ForeignKey(DetectionGroup, related_name='+', blank=True, null=True, verbose_name="Detections")
+    tr = models.ForeignKey(TraceGroup, related_name='+', blank=True, null=True, verbose_name="Traces")
+    exm = models.ForeignKey(TestTriggerGroup, related_name='+', blank=True, null=True, verbose_name="Examinations")
 
     #we need a second model to catch True/False Pos/Neg results
     #TODO: Check for 'n' or 'c' next.  This is going to need very particular switching to catch the tstnUTruePos, tstcUTruePos, tstcUDirFwd
-    tst = models.ForeignKey(TestOutcomeGroup, blank=True, null=True, verbose_name="Lab Test Outcomes")
+    tst = models.ForeignKey(TestOutcomeGroup, related_name='+', blank=True, null=True, verbose_name="Lab Test Outcomes")
     #tstcU uses the TestTriggerGroup because of the overlap in Directional causes
-    tstc = models.ForeignKey(TestTriggerGroup, blank=True, null=True, verbose_name="Lab Test Triggers")
+    tstc = models.ForeignKey(TestTriggerGroup, related_name='+', blank=True, null=True, verbose_name="Lab Test Triggers")
 
     #This group of two was so small I didn't think it warranted a group object
     firstVaccination = models.IntegerField(    blank=True, null=True, verbose_name="First Vaccination")
     firstVaccinationRing = models.IntegerField(blank=True, null=True, verbose_name="First Vaccination caused by a Ring")
 
-    vac = models.ForeignKey(VaccinationGroup, blank=True, null=True, verbose_name="Vaccinations")
-    vacw = models.ForeignKey(WaitGroup, blank=True, null=True, verbose_name="Vaccination Wait")
+    vac = models.ForeignKey(VaccinationGroup, related_name='+', blank=True, null=True, verbose_name="Vaccinations")
+    vacw = models.ForeignKey(WaitGroup, related_name='+', blank=True, null=True, verbose_name="Vaccination Wait")
 
-    firstDestruction = models.ForeignKey(DestructionGroup, blank=True, null=True, verbose_name="First Destruction")
+    firstDestruction = models.ForeignKey(DestructionGroup, related_name='+', blank=True, null=True, verbose_name="First Destruction")
     #These two separate U and A so that they can use the same Group object as firstDestruction
-    descU = models.ForeignKey(DestructionGroup, blank=True, null=True, verbose_name="Destruction of Units")
-    descA = models.ForeignKey(DestructionGroup, blank=True, null=True, verbose_name="Destruction of Animals")
-    desw = models.ForeignKey(WaitGroup, blank=True, null=True, verbose_name="Destruction Wait")
+    descU = models.ForeignKey(DestructionGroup, related_name='+', blank=True, null=True, verbose_name="Destruction of Units")
+    descA = models.ForeignKey(DestructionGroup, related_name='+', blank=True, null=True, verbose_name="Destruction of Animals")
+    desw = models.ForeignKey(WaitGroup, related_name='+', blank=True, null=True, verbose_name="Destruction Wait")
 
-    tsd = models.ForeignKey(StateGroup, blank=True, null=True, verbose_name="Transition State Daily")
+    tsd = models.ForeignKey(StateGroup, related_name='+', blank=True, null=True, verbose_name="Transition State Daily")
 
 
 #####END DailyByProductionType######
@@ -251,8 +251,8 @@ class DailyByZoneAndProductionType(OutputBaseModel):
     zone = models.ForeignKey(Zone, verbose_name=printable_name('zone'),
         help_text='The identifier of the zone that these outputs apply to.', )
 
-    unitsInZone = models.IntegerField(blank=True, null=True, verbose_name=printable_name('unitsInZone'))
-    unitDaysInZone = models.IntegerField(blank=True, null=True, verbose_name=printable_name('unitDaysInZone'))
+    unitsInZone      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('unitsInZone'))
+    unitDaysInZone   = models.IntegerField(blank=True, null=True, verbose_name=printable_name('unitDaysInZone'))
     animalDaysInZone = models.IntegerField(blank=True, null=True, verbose_name=printable_name('animalDaysInZone'))
 
 
