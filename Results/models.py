@@ -18,6 +18,7 @@ Model Declarations: Each model creates a table in sqlite3 and a 'model' for tabl
 
 
 def printable_name(underscores_name):
+    underscores_name = re.sub(r'([a-z])([A-Z])', r'\1_\2', underscores_name).lower()  # convert from camel case
     spaced = re.sub(r'_', r' ', underscores_name)
     return spaced.title()  # capitalize
 
@@ -140,26 +141,26 @@ class VaccinationGroup(OutputBaseModel):
     ARing = models.IntegerField(blank=True, null=True, verbose_name="Animals because of Ring")
 
 
-class VaccinationWaitGroup(OutputBaseModel):
-    vacwUAll = models.IntegerField(blank=True, null=True,
+class WaitGroup(OutputBaseModel):
+    UAll = models.IntegerField(blank=True, null=True,
         help_text="")
-    vacwAAll = models.IntegerField(blank=True, null=True,
+    AAll = models.IntegerField(blank=True, null=True,
         help_text="")
-    vacwUMax = models.IntegerField(blank=True, null=True,
-        help_text="Maximum number of units in queue for vaccination on any given day over the course of the iteration")
-    vacwUMaxDay = models.IntegerField(blank=True, null=True,
-        help_text="The first simulation day on which the maximum number of units in queue for vaccination was reached")
-    vacwAMax = models.IntegerField(blank=True, null=True,
-        help_text="Maximum number of animals in queue for vaccination on any given day over the course of the iteration")
-    vacwAMaxDay = models.IntegerField(blank=True, null=True,
-        help_text="The first simulation day on which the maximum number of animals in queue for vaccination was reached")
-    vacwUTimeMax = models.IntegerField(blank=True, null=True,
-        help_text="Maximum number of days spent in queue for vaccination by any single unit over the course of the iteration")
-    vacwUTimeAvg = models.IntegerField(blank=True, null=True,
-        help_text="Average number of days spent in queue for vaccination by each unit that was vaccinated over the course of the iteration")
-    vacwUDaysInQueue = models.IntegerField(blank=True, null=True,
+    UMax = models.IntegerField(blank=True, null=True,
+        help_text="Maximum number of units in queue for <action> on any given day over the course of the iteration")
+    UMaxDay = models.IntegerField(blank=True, null=True,
+        help_text="The first simulation day on which the maximum number of units in queue for <action> was reached")
+    AMax = models.IntegerField(blank=True, null=True,
+        help_text="Maximum number of animals in queue for <action> on any given day over the course of the iteration")
+    AMaxDay = models.IntegerField(blank=True, null=True,
+        help_text="The first simulation day on which the maximum number of animals in queue for <action> was reached")
+    UTimeMax = models.IntegerField(blank=True, null=True,
+        help_text="Maximum number of days spent in queue for <action> by any single unit over the course of the iteration")
+    UTimeAvg = models.IntegerField(blank=True, null=True,
+        help_text="Average number of days spent in queue for <action> by each unit that was vaccinated over the course of the iteration")
+    UDaysInQueue = models.IntegerField(blank=True, null=True,
         help_text="Number of Unit Days waiting in Queue")
-    vacwADaysInQueue = models.IntegerField(blank=True, null=True,
+    ADaysInQueue = models.IntegerField(blank=True, null=True,
         help_text="Number of Animal Days waiting in Queue")
 
 
@@ -176,11 +177,34 @@ class DestructionGroup(OutputBaseModel):
     IndBack = models.IntegerField(blank=True, null=True, verbose_name="because of Indirect Back trace")
 
 
+class StateGroup(OutputBaseModel):
+    # Note that the ProductionType is in the middle of this field:
+    # grammars['tsd'] = [('U','A'), ('','_Bull_','_Swine_'), ('Susc','Lat','Subc','Clin','NImm','VImm','Dest')]
+    USusc = models.IntegerField(blank=True, null=True, verbose_name="Units Susceptible")  # Possibly "Units became Susceptible"
+    ULat = models.IntegerField(blank=True, null=True, verbose_name="Units Latent")
+    USubc = models.IntegerField(blank=True, null=True, verbose_name="Units Subclinical")
+    UClin = models.IntegerField(blank=True, null=True, verbose_name="Units Clinical")
+    UNImm = models.IntegerField(blank=True, null=True, verbose_name="Units Natural Immune")
+    UVImm = models.IntegerField(blank=True, null=True, verbose_name="Units Vaccine Immune")
+    UDest = models.IntegerField(blank=True, null=True, verbose_name="Units Destroyed")
+
+    ASusc = models.IntegerField(blank=True, null=True, verbose_name="Animals Susceptible")
+    ALat = models.IntegerField(blank=True, null=True, verbose_name="Animals Latent")
+    ASubc = models.IntegerField(blank=True, null=True, verbose_name="Animals Subclinical")
+    AClin = models.IntegerField(blank=True, null=True, verbose_name="Animals Clinical")
+    ANImm = models.IntegerField(blank=True, null=True, verbose_name="Animals Natural Immune")
+    AVImm = models.IntegerField(blank=True, null=True, verbose_name="Animals Vaccine Immune")
+    ADest = models.IntegerField(blank=True, null=True, verbose_name="Animals Destroyed")
+
+
 class DailyByProductionType(OutputBaseModel):
     iteration = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('iteration'),
         help_text='The iteration during which the outputs in this records where generated.', )
-    production_type = models.ForeignKey(ProductionType,
+    day = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('day'),
+        help_text='The day in this iteration during which the outputs in this records where generated.', )
+    production_type = models.ForeignKey(ProductionType, verbose_name=printable_name('production_type'),
         help_text='The identifier of the production type that these outputs apply to.', )
+
     exp = models.ForeignKey(SpreadGroup, blank=True, null=True, verbose_name="Exposures")
     inf = models.ForeignKey(SpreadGroup, blank=True, null=True, verbose_name="Infections")
     firstDetection = models.ForeignKey(DetectionBracketGroup, blank=True, null=True, verbose_name="First Detection")
@@ -188,34 +212,64 @@ class DailyByProductionType(OutputBaseModel):
     det = models.ForeignKey(DetectionGroup, blank=True, null=True, verbose_name="Detections")
     tr = models.ForeignKey(TraceGroup, blank=True, null=True, verbose_name="Traces")
     exm = models.ForeignKey(TestTriggerGroup, blank=True, null=True, verbose_name="Examinations")
-    #tstcU uses the TestTriggerGroup because of the overlap in Directional causes
-    tstc = models.ForeignKey(TestTriggerGroup, blank=True, null=True, verbose_name="Lab Test Triggers")
+
     #we need a second model to catch True/False Pos/Neg results
     #TODO: Check for 'n' or 'c' next.  This is going to need very particular switching to catch the tstnUTruePos, tstcUTruePos, tstcUDirFwd
     tst = models.ForeignKey(TestOutcomeGroup, blank=True, null=True, verbose_name="Lab Test Outcomes")
+    #tstcU uses the TestTriggerGroup because of the overlap in Directional causes
+    tstc = models.ForeignKey(TestTriggerGroup, blank=True, null=True, verbose_name="Lab Test Triggers")
+
 
     #This group of two was so small I didn't think it warranted a group object
     firstVaccination = models.IntegerField(    blank=True, null=True, verbose_name="First Vaccination")
     firstVaccinationRing = models.IntegerField(blank=True, null=True, verbose_name="First Vaccination caused by a Ring")
 
     vac = models.ForeignKey(VaccinationGroup, blank=True, null=True, verbose_name="Vaccinations")
-    vacw = models.ForeignKey(VaccinationWaitGroup, blank=True, null=True, verbose_name="Vaccination Wait")
+    vacw = models.ForeignKey(WaitGroup, blank=True, null=True, verbose_name="Vaccination Wait")
 
     firstDestruction = models.ForeignKey(DestructionGroup, blank=True, null=True, verbose_name="First Destruction")
     #These two separate U and A so that they can use the same Group object as firstDestruction
     descU = models.ForeignKey(DestructionGroup, blank=True, null=True, verbose_name="Destruction of Units")
     descA = models.ForeignKey(DestructionGroup, blank=True, null=True, verbose_name="Destruction of Animals")
+    desw = models.ForeignKey(WaitGroup, blank=True, null=True, verbose_name="Destruction Wait")
+
+    tsd = models.ForeignKey(StateGroup, blank=True, null=True, verbose_name="Transition State Daily")
 
 
+#####END DailyByProductionType######
 
+#####BEGIN DailyByZoneAndProductionType######
 
 
 class DailyByZoneAndProductionType(OutputBaseModel):
-    filler = models.IntegerField(blank=True, null=True, )
+    iteration = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('iteration'),
+        help_text='The iteration during which the outputs in this records where generated.', )
+    day = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('day'),
+        help_text='The day in this iteration during which the outputs in this records where generated.', )
+    production_type = models.ForeignKey(ProductionType, verbose_name=printable_name('production_type'),
+        help_text='The identifier of the production type that these outputs apply to.', )
+    zone = models.ForeignKey(Zone, verbose_name=printable_name('zone'),
+        help_text='The identifier of the zone that these outputs apply to.', )
+
+    unitsInZone = models.IntegerField(blank=True, null=True, verbose_name=printable_name('unitsInZone'))
+    unitDaysInZone = models.IntegerField(blank=True, null=True, verbose_name=printable_name('unitDaysInZone'))
+    animalDaysInZone = models.IntegerField(blank=True, null=True, verbose_name=printable_name('animalDaysInZone'))
 
 
 class DailyByZone(OutputBaseModel):
-    filler = models.IntegerField(blank=True, null=True, )
+    iteration = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('iteration'),
+        help_text='The iteration during which the outputs in this records where generated.', )
+    day = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('day'),
+        help_text='The day in this iteration during which the outputs in this records where generated.', )
+    zone = models.ForeignKey(Zone, verbose_name=printable_name('zone'),
+        help_text='The identifier of the zone that these outputs apply to.', )
+
+    zoneArea            = models.IntegerField(blank=True, null=True, verbose_name=printable_name('zoneArea'))
+    maxZoneArea         = models.IntegerField(blank=True, null=True, verbose_name=printable_name('maxZoneArea'))
+    maxZoneAreaDay      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('maxZoneAreaDay'))
+    zonePerimeter       = models.IntegerField(blank=True, null=True, verbose_name=printable_name('zonePerimeter'))
+    maxZonePerimeter    = models.IntegerField(blank=True, null=True, verbose_name=printable_name('maxZonePerimeter'))
+    maxZonePerimeterDay = models.IntegerField(blank=True, null=True, verbose_name=printable_name('maxZonePerimeterDay'))
 
 
 class DailyControls(OutputBaseModel):

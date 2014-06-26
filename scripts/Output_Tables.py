@@ -1724,7 +1724,7 @@ matching_headers('vacw')
 
 # <markdowncell>
 
-# This one defies grammar.  I'm just going to stick it in the model VaccinationWaitGroup as is.
+# This one defies grammar.  I'm just going to stick it in the model WaitGroup as is.
 
 # <codecell>
 
@@ -1735,9 +1735,10 @@ grammars['vacc'] = [('U','A'), ('All','Ini','Ring'), ('','_Bull_','_Swine_')]
 
 # <codecell>
 
+from io import StringIO
+import sys
+
 class Capturing(list):
-    from io import StringIO
-    import sys
     def __enter__(self):
         self._stdout = sys.stdout
         sys.stdout = self._stringio = StringIO()
@@ -1826,6 +1827,127 @@ subset_check(combo_set('des'), x)
 # <headingcell level=3>
 
 # desw Headers
+
+# <codecell>
+
+matching_headers('desw')
+
+# <codecell>
+
+grammars['desw'] = grammars['vacw']  #same structure, same python Group model used
+
+# <headingcell level=1>
+
+# ByProductionType Header Grammars
+
+# <headingcell level=2>
+
+# tsd Headers
+
+# <codecell>
+
+matching_headers('tsd')
+
+# <codecell>
+
+grammars['tsd'] = [('U','A'), ('','_Bull_','_Swine_'), ('Susc','Lat','Subc','Clin','NImm','VImm','Dest')]
+
+# <codecell>
+
+def set_equality_check(prefix):
+    x = [h for h in cause_sweep if prefix in h ]
+    a = subset_check(x, combo_set(prefix))
+    b = subset_check(combo_set(prefix), x)
+    return (a, b)
+
+set_equality_check('tsd')
+
+# <codecell>
+
+explain.update({'Susc':'Susceptible', 'Lat':'Latent', 'Subc':'Subclinical', 'Clin':'Clinical', 'NImm':'Natural Immune', 'VImm':'Vaccine Immune', 'Dest':'Destroyed'})
+
+# <codecell>
+
+stat_group_code([('U','A'), ('Susc','Lat','Subc','Clin','NImm','VImm','Dest')])
+
+# <markdowncell>
+
+#   
+
+# <markdowncell>
+
+# Just making sure I got everything
+
+# <codecell>
+
+matching_headers('vacw')
+
+# <codecell>
+
+grammars['desw']
+
+# <headingcell level=1>
+
+# DailyByZoneAndProductionType
+
+# <codecell>
+
+matching_headers('unitsInZone')
+
+# <codecell>
+
+ZONES = ('Background', 'HighRisk', 'MediumRisk')
+PT = ('', '_Bull_', '_Swine_')
+grammars['unitsInZone'] = [ZONES, PT]
+combo_set('unitsInZone')
+
+# <codecell>
+
+set_equality_check('unitsInZone')
+
+# <headingcell level=3>
+
+# unitDaysInZone Headers
+
+# <codecell>
+
+matching_headers('unitDaysInZone')
+
+# <markdowncell>
+
+# Same as before.
+
+# <codecell>
+
+grammars['unitDaysInZone'] = grammars['unitsInZone']
+
+# <codecell>
+
+re.sub(r'([a-z])([A-Z])', r'\1_\2', 'unitDaysInZone').lower()
+
+# <codecell>
+
+matching_headers('animalDaysInZone')
+
+# <codecell>
+
+grammars['animalDaysInZone'] = grammars['unitsInZone']
+
+# <markdowncell>
+
+# Same as before
+
+# <headingcell level=1>
+
+# DailyByZone Headers
+
+# <codecell>
+
+for field in ['zoneArea','maxZoneArea','maxZoneAreaDay','zonePerimeter','maxZonePerimeter','maxZonePerimeterDay']:
+    matching_headers(field)
+
+# <codecell>
+
 
 # <codecell>
 
