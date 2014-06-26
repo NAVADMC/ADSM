@@ -1506,8 +1506,10 @@ print(len(cause_sweep))
 
 # <codecell>
 
-def matching_headers(prefix):
+def matching_headers(prefix, exclude=None):
     matches = [h for h in cause_sweep if h.startswith(prefix)]
+    if exclude is not None:
+        matches = [m for m in matches if exclude not in m]
     print('\n'.join(matches))
     print('Total:', len(matches))
 
@@ -1706,9 +1708,124 @@ stat_group_code([('U',), ('TruePos', 'FalsePos', 'TrueNeg','FalseNeg')])
 
 # <codecell>
 
+matching_headers('firstVaccination')
 
 # <codecell>
 
+grammars['firstVaccination'] = [('','Ring'), ('','_Bull_','_Swine_')]
+
+# <headingcell level=2>
+
+# vac Headers
+
+# <codecell>
+
+matching_headers('vacw')
+
+# <markdowncell>
+
+# This one defies grammar.  I'm just going to stick it in the model VaccinationWaitGroup as is.
+
+# <codecell>
+
+grammars['vac'] = ['vacw', 'vacn', 'vacc']
+grammars['vacw'] = [('U','A'), ('All','Max','MaxDay','TimeMax','TimeAvg','DaysInQueue'), ('','_Bull_','_Swine_')]
+grammars['vacn'] = [('U','A'), ('All','Ini','Ring'), ('','_Bull_','_Swine_')]
+grammars['vacc'] = [('U','A'), ('All','Ini','Ring'), ('','_Bull_','_Swine_')]
+
+# <codecell>
+
+class Capturing(list):
+    from io import StringIO
+    import sys
+    def __enter__(self):
+        self._stdout = sys.stdout
+        sys.stdout = self._stringio = StringIO()
+        return self
+    def __exit__(self, *args):
+        self.extend(self._stringio.getvalue().splitlines())
+        sys.stdout = self._stdout
+
+# <codecell>
+
+with Capturing() as print_out:
+    matching_headers('vac')
+x = [x for x in print_out[:-1] if 'vacw' not in x]
+print(len(x))
+x
+
+# <codecell>
+
+explain['Ini'] = 'Initially'
+
+# <codecell>
+
+stat_group_code([('U','A'), ('All','Ini','Ring')])
+
+# <codecell>
+
+
+# <headingcell level=2>
+
+# firstDestruction
+
+# <codecell>
+
+matching_headers('firstDestruction')
+
+# <codecell>
+
+grammars['firstDestruction'] = [('','Unsp','Ring','Det','Ini','DirFwd','IndFwd','DirBack','IndBack'), ('','_Bull_','_Swine_')]
+9*3
+
+# <codecell>
+
+x = [h for h in cause_sweep if 'firstDestruction' in h]
+subset_check(x, combo_set('firstDestruction'))
+subset_check(combo_set('firstDestruction'), x)
+
+# <markdowncell>
+
+# **Perfect Match**
+
+# <codecell>
+
+explain.update({'Unsp':'Unspecified', 'Det':'because of Detection'})
+
+# <codecell>
+
+stat_group_code([('','Unsp','Ring','Det','Ini','DirFwd','IndFwd','DirBack','IndBack')])
+
+# <markdowncell>
+
+#   
+# ##des Headers
+
+# <codecell>
+
+matching_headers('des', 'desw')
+
+# <codecell>
+
+grammars['des'] = [('n','c'), ('U','A'), ('All','Unsp','Ring','Det','Ini','DirFwd','IndFwd','DirBack','IndBack'), ('','_Bull_','_Swine_')]
+len(combo_set('des'))
+
+# <codecell>
+
+x = [h for h in cause_sweep if 'des' in h and 'desw' not in h]
+subset_check(x, combo_set('des'))
+
+# <codecell>
+
+subset_check(combo_set('des'), x)
+
+# <markdowncell>
+
+# This is a correct match.  Same exception as before, plus the `destrOccurred` which has been added to the unaccounted list
+
+# <headingcell level=3>
+
+# desw Headers
 
 # <codecell>
 
@@ -1721,6 +1838,14 @@ stat_group_code([('U',), ('TruePos', 'FalsePos', 'TrueNeg','FalseNeg')])
 
 # detcUqAll  
 # detOccurred
+
+# <markdowncell>
+
+# vaccOccurred
+
+# <markdowncell>
+
+# destrOccurred
 
 # <codecell>
 
