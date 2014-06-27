@@ -8,15 +8,9 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'OutputBaseModel'
-        db.create_table('Results_outputbasemodel', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-        ))
-        db.send_create_signal('Results', ['OutputBaseModel'])
-
         # Adding model 'DailyReport'
         db.create_table('Results_dailyreport', (
-            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['Results.OutputBaseModel'], primary_key=True, unique=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('sparse_dict', self.gf('django.db.models.fields.TextField')()),
             ('full_line', self.gf('django.db.models.fields.TextField')()),
         ))
@@ -24,7 +18,7 @@ class Migration(SchemaMigration):
 
         # Adding model 'SpreadGroup'
         db.create_table('Results_spreadgroup', (
-            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['Results.OutputBaseModel'], primary_key=True, unique=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('UAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('UDir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('UInd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
@@ -38,7 +32,7 @@ class Migration(SchemaMigration):
 
         # Adding model 'DetectionBracketGroup'
         db.create_table('Results_detectionbracketgroup', (
-            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['Results.OutputBaseModel'], primary_key=True, unique=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('_blank', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('Clin', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('Test', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
@@ -47,7 +41,7 @@ class Migration(SchemaMigration):
 
         # Adding model 'DetectionGroup'
         db.create_table('Results_detectiongroup', (
-            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['Results.OutputBaseModel'], primary_key=True, unique=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('UAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('UClin', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('UTest', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
@@ -59,7 +53,7 @@ class Migration(SchemaMigration):
 
         # Adding model 'TraceGroup'
         db.create_table('Results_tracegroup', (
-            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['Results.OutputBaseModel'], primary_key=True, unique=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('UAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('UAllp', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('UDir', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
@@ -77,7 +71,7 @@ class Migration(SchemaMigration):
 
         # Adding model 'TestTriggerGroup'
         db.create_table('Results_testtriggergroup', (
-            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['Results.OutputBaseModel'], primary_key=True, unique=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('UAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('URing', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('UDirFwd', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
@@ -97,7 +91,7 @@ class Migration(SchemaMigration):
 
         # Adding model 'TestOutcomeGroup'
         db.create_table('Results_testoutcomegroup', (
-            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['Results.OutputBaseModel'], primary_key=True, unique=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('UTruePos', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('UFalsePos', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('UTrueNeg', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
@@ -107,7 +101,7 @@ class Migration(SchemaMigration):
 
         # Adding model 'VaccinationGroup'
         db.create_table('Results_vaccinationgroup', (
-            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['Results.OutputBaseModel'], primary_key=True, unique=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('UAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('UIni', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('URing', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
@@ -119,7 +113,7 @@ class Migration(SchemaMigration):
 
         # Adding model 'WaitGroup'
         db.create_table('Results_waitgroup', (
-            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['Results.OutputBaseModel'], primary_key=True, unique=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('UAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('AAll', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('UMax', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
@@ -135,7 +129,7 @@ class Migration(SchemaMigration):
 
         # Adding model 'DestructionGroup'
         db.create_table('Results_destructiongroup', (
-            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['Results.OutputBaseModel'], primary_key=True, unique=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('_blank', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('All', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('Unsp', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
@@ -151,7 +145,7 @@ class Migration(SchemaMigration):
 
         # Adding model 'StateGroup'
         db.create_table('Results_stategroup', (
-            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['Results.OutputBaseModel'], primary_key=True, unique=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('USusc', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('ULat', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('USubc', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
@@ -171,36 +165,36 @@ class Migration(SchemaMigration):
 
         # Adding model 'DailyByProductionType'
         db.create_table('Results_dailybyproductiontype', (
-            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['Results.OutputBaseModel'], primary_key=True, unique=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, db_column='iteration', null=True)),
-            ('day', self.gf('django.db.models.fields.IntegerField')(blank=True, db_column='iteration', null=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
+            ('day', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('production_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ProductionType'])),
-            ('exp', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.SpreadGroup'], blank=True, related_name='+', null=True)),
-            ('inf', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.SpreadGroup'], blank=True, related_name='+', null=True)),
-            ('firstDetection', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.DetectionBracketGroup'], blank=True, related_name='+', null=True)),
-            ('lastDetection', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.DetectionBracketGroup'], blank=True, related_name='+', null=True)),
-            ('det', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.DetectionGroup'], blank=True, related_name='+', null=True)),
-            ('tr', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.TraceGroup'], blank=True, related_name='+', null=True)),
-            ('exm', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.TestTriggerGroup'], blank=True, related_name='+', null=True)),
-            ('tst', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.TestOutcomeGroup'], blank=True, related_name='+', null=True)),
-            ('tstc', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.TestTriggerGroup'], blank=True, related_name='+', null=True)),
+            ('exp', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.SpreadGroup'], related_name='+')),
+            ('inf', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.SpreadGroup'], related_name='+')),
+            ('firstDetection', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.DetectionBracketGroup'], related_name='+')),
+            ('lastDetection', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.DetectionBracketGroup'], related_name='+')),
+            ('det', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.DetectionGroup'], related_name='+')),
+            ('tr', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.TraceGroup'], related_name='+')),
+            ('exm', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.TestTriggerGroup'], related_name='+')),
+            ('tst', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.TestOutcomeGroup'], related_name='+')),
+            ('tstc', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.TestTriggerGroup'], related_name='+')),
             ('firstVaccination', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('firstVaccinationRing', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
-            ('vac', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.VaccinationGroup'], blank=True, related_name='+', null=True)),
-            ('vacw', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.WaitGroup'], blank=True, related_name='+', null=True)),
-            ('firstDestruction', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.DestructionGroup'], blank=True, related_name='+', null=True)),
-            ('descU', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.DestructionGroup'], blank=True, related_name='+', null=True)),
-            ('descA', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.DestructionGroup'], blank=True, related_name='+', null=True)),
-            ('desw', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.WaitGroup'], blank=True, related_name='+', null=True)),
-            ('tsd', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['Results.StateGroup'], blank=True, related_name='+', null=True)),
+            ('vac', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.VaccinationGroup'], related_name='+')),
+            ('vacw', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.WaitGroup'], related_name='+')),
+            ('firstDestruction', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.DestructionGroup'], related_name='+')),
+            ('descU', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.DestructionGroup'], related_name='+')),
+            ('descA', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.DestructionGroup'], related_name='+')),
+            ('desw', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.WaitGroup'], related_name='+')),
+            ('tsd', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['Results.StateGroup'], related_name='+')),
         ))
         db.send_create_signal('Results', ['DailyByProductionType'])
 
         # Adding model 'DailyByZoneAndProductionType'
         db.create_table('Results_dailybyzoneandproductiontype', (
-            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['Results.OutputBaseModel'], primary_key=True, unique=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, db_column='iteration', null=True)),
-            ('day', self.gf('django.db.models.fields.IntegerField')(blank=True, db_column='iteration', null=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
+            ('day', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('production_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ProductionType'])),
             ('zone', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.Zone'])),
             ('unitsInZone', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
@@ -211,9 +205,9 @@ class Migration(SchemaMigration):
 
         # Adding model 'DailyByZone'
         db.create_table('Results_dailybyzone', (
-            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['Results.OutputBaseModel'], primary_key=True, unique=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, db_column='iteration', null=True)),
-            ('day', self.gf('django.db.models.fields.IntegerField')(blank=True, db_column='iteration', null=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
+            ('day', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('zone', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.Zone'])),
             ('zoneArea', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('maxZoneArea', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
@@ -229,9 +223,9 @@ class Migration(SchemaMigration):
 
         # Adding model 'DailyControls'
         db.create_table('Results_dailycontrols', (
-            ('outputbasemodel_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['Results.OutputBaseModel'], primary_key=True, unique=True)),
-            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, db_column='iteration', null=True)),
-            ('day', self.gf('django.db.models.fields.IntegerField')(blank=True, db_column='iteration', null=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('iteration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
+            ('day', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('diseaseDuration', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('adqnU', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
             ('adqcU', self.gf('django.db.models.fields.IntegerField')(blank=True, null=True)),
@@ -276,9 +270,6 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        # Deleting model 'OutputBaseModel'
-        db.delete_table('Results_outputbasemodel')
-
         # Deleting model 'DailyReport'
         db.delete_table('Results_dailyreport')
 
@@ -327,65 +318,65 @@ class Migration(SchemaMigration):
 
     models = {
         'Results.dailybyproductiontype': {
-            'Meta': {'object_name': 'DailyByProductionType', '_ormbases': ['Results.OutputBaseModel']},
-            'day': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'db_column': "'iteration'", 'null': 'True'}),
-            'descA': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.DestructionGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
-            'descU': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.DestructionGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
-            'desw': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.WaitGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
-            'det': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.DetectionGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
-            'exm': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.TestTriggerGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
-            'exp': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.SpreadGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
-            'firstDestruction': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.DestructionGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
-            'firstDetection': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.DetectionBracketGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
+            'Meta': {'object_name': 'DailyByProductionType'},
+            'day': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
+            'descA': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.DestructionGroup']", 'related_name': "'+'"}),
+            'descU': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.DestructionGroup']", 'related_name': "'+'"}),
+            'desw': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.WaitGroup']", 'related_name': "'+'"}),
+            'det': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.DetectionGroup']", 'related_name': "'+'"}),
+            'exm': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.TestTriggerGroup']", 'related_name': "'+'"}),
+            'exp': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.SpreadGroup']", 'related_name': "'+'"}),
+            'firstDestruction': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.DestructionGroup']", 'related_name': "'+'"}),
+            'firstDetection': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.DetectionBracketGroup']", 'related_name': "'+'"}),
             'firstVaccination': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'firstVaccinationRing': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'inf': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.SpreadGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'db_column': "'iteration'", 'null': 'True'}),
-            'lastDetection': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.DetectionBracketGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
-            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True', 'unique': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'inf': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.SpreadGroup']", 'related_name': "'+'"}),
+            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
+            'lastDetection': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.DetectionBracketGroup']", 'related_name': "'+'"}),
             'production_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.ProductionType']"}),
-            'tr': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.TraceGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
-            'tsd': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.StateGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
-            'tst': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.TestOutcomeGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
-            'tstc': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.TestTriggerGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
-            'vac': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.VaccinationGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'}),
-            'vacw': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['Results.WaitGroup']", 'blank': 'True', 'related_name': "'+'", 'null': 'True'})
+            'tr': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.TraceGroup']", 'related_name': "'+'"}),
+            'tsd': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.StateGroup']", 'related_name': "'+'"}),
+            'tst': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.TestOutcomeGroup']", 'related_name': "'+'"}),
+            'tstc': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.TestTriggerGroup']", 'related_name': "'+'"}),
+            'vac': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.VaccinationGroup']", 'related_name': "'+'"}),
+            'vacw': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'null': 'True', 'to': "orm['Results.WaitGroup']", 'related_name': "'+'"})
         },
         'Results.dailybyzone': {
-            'Meta': {'object_name': 'DailyByZone', '_ormbases': ['Results.OutputBaseModel']},
-            'day': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'db_column': "'iteration'", 'null': 'True'}),
+            'Meta': {'object_name': 'DailyByZone'},
+            'day': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'finalZoneArea': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'finalZonePerimeter': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'db_column': "'iteration'", 'null': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'maxZoneArea': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'maxZoneAreaDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'maxZonePerimeter': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'maxZonePerimeterDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'num_separate_areas': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True', 'unique': 'True'}),
             'zone': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.Zone']"}),
             'zoneArea': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'zonePerimeter': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'})
         },
         'Results.dailybyzoneandproductiontype': {
-            'Meta': {'object_name': 'DailyByZoneAndProductionType', '_ormbases': ['Results.OutputBaseModel']},
+            'Meta': {'object_name': 'DailyByZoneAndProductionType'},
             'animalDaysInZone': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'day': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'db_column': "'iteration'", 'null': 'True'}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'db_column': "'iteration'", 'null': 'True'}),
-            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True', 'unique': 'True'}),
+            'day': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'production_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.ProductionType']"}),
             'unitDaysInZone': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'unitsInZone': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'zone': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.Zone']"})
         },
         'Results.dailycontrols': {
-            'Meta': {'object_name': 'DailyControls', '_ormbases': ['Results.OutputBaseModel']},
+            'Meta': {'object_name': 'DailyControls'},
             'adqcU': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'adqnU': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'average_prevalence': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'costSurveillance': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'costsTotal': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'day': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'db_column': "'iteration'", 'null': 'True'}),
+            'day': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'destrAppraisal': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'destrCleaning': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'destrDisposal': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
@@ -406,9 +397,9 @@ class Migration(SchemaMigration):
             'diseaseDuration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'firstDetAInfAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'firstDetUInfAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'db_column': "'iteration'", 'null': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'iteration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'outbreakDuration': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True', 'unique': 'True'}),
             'ratio': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'vaccOccurred': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'vaccSetup': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
@@ -424,9 +415,9 @@ class Migration(SchemaMigration):
             'vacwUTimeMax': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'})
         },
         'Results.dailyreport': {
-            'Meta': {'object_name': 'DailyReport', '_ormbases': ['Results.OutputBaseModel']},
+            'Meta': {'object_name': 'DailyReport'},
             'full_line': ('django.db.models.fields.TextField', [], {}),
-            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True', 'unique': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'sparse_dict': ('django.db.models.fields.TextField', [], {})
         },
         'Results.destructiongroup': {
@@ -437,31 +428,27 @@ class Migration(SchemaMigration):
             'IndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'IndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'Ini': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'Meta': {'object_name': 'DestructionGroup', '_ormbases': ['Results.OutputBaseModel']},
+            'Meta': {'object_name': 'DestructionGroup'},
             'Ring': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'Unsp': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             '_blank': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True', 'unique': 'True'})
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'Results.detectionbracketgroup': {
             'Clin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'Meta': {'object_name': 'DetectionBracketGroup', '_ormbases': ['Results.OutputBaseModel']},
+            'Meta': {'object_name': 'DetectionBracketGroup'},
             'Test': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             '_blank': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True', 'unique': 'True'})
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'Results.detectiongroup': {
             'AAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'AClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'ATest': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'Meta': {'object_name': 'DetectionGroup', '_ormbases': ['Results.OutputBaseModel']},
+            'Meta': {'object_name': 'DetectionGroup'},
             'UAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UTest': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True', 'unique': 'True'})
-        },
-        'Results.outputbasemodel': {
-            'Meta': {'object_name': 'OutputBaseModel'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'Results.spreadgroup': {
@@ -469,12 +456,12 @@ class Migration(SchemaMigration):
             'AAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'ADir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'AInd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'Meta': {'object_name': 'SpreadGroup', '_ormbases': ['Results.OutputBaseModel']},
+            'Meta': {'object_name': 'SpreadGroup'},
             'UAir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UDir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UInd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True', 'unique': 'True'})
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'Results.stategroup': {
             'AClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
@@ -484,7 +471,7 @@ class Migration(SchemaMigration):
             'ASubc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'ASusc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'AVImm': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'Meta': {'object_name': 'StateGroup', '_ormbases': ['Results.OutputBaseModel']},
+            'Meta': {'object_name': 'StateGroup'},
             'UClin': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UDest': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'ULat': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
@@ -492,15 +479,15 @@ class Migration(SchemaMigration):
             'USubc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'USusc': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UVImm': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True', 'unique': 'True'})
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'Results.testoutcomegroup': {
-            'Meta': {'object_name': 'TestOutcomeGroup', '_ormbases': ['Results.OutputBaseModel']},
+            'Meta': {'object_name': 'TestOutcomeGroup'},
             'UFalseNeg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UFalsePos': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UTrueNeg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UTruePos': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True', 'unique': 'True'})
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'Results.testtriggergroup': {
             'AAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
@@ -510,7 +497,7 @@ class Migration(SchemaMigration):
             'AIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'AIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'ARing': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'Meta': {'object_name': 'TestTriggerGroup', '_ormbases': ['Results.OutputBaseModel']},
+            'Meta': {'object_name': 'TestTriggerGroup'},
             'UAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UDet': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UDirBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
@@ -518,7 +505,7 @@ class Migration(SchemaMigration):
             'UIndBack': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UIndFwd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'URing': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True', 'unique': 'True'})
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'Results.tracegroup': {
             'AAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
@@ -527,44 +514,44 @@ class Migration(SchemaMigration):
             'ADirp': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'AInd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'AIndp': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'Meta': {'object_name': 'TraceGroup', '_ormbases': ['Results.OutputBaseModel']},
+            'Meta': {'object_name': 'TraceGroup'},
             'UAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UAllp': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UDir': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UDirp': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UInd': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UIndp': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True', 'unique': 'True'})
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'Results.vaccinationgroup': {
             'AAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'AIni': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'ARing': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'Meta': {'object_name': 'VaccinationGroup', '_ormbases': ['Results.OutputBaseModel']},
+            'Meta': {'object_name': 'VaccinationGroup'},
             'UAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UIni': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'URing': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True', 'unique': 'True'})
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'Results.waitgroup': {
             'AAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'ADaysInQueue': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'AMax': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'AMaxDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'Meta': {'object_name': 'WaitGroup', '_ormbases': ['Results.OutputBaseModel']},
+            'Meta': {'object_name': 'WaitGroup'},
             'UAll': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UDaysInQueue': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UMax': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UMaxDay': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UTimeAvg': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
             'UTimeMax': ('django.db.models.fields.IntegerField', [], {'blank': 'True', 'null': 'True'}),
-            'outputbasemodel_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['Results.OutputBaseModel']", 'primary_key': 'True', 'unique': 'True'})
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'ScenarioCreator.productiontype': {
             'Meta': {'object_name': 'ProductionType'},
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True', 'null': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '255', 'unique': 'True'})
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'})
         },
         'ScenarioCreator.zone': {
             'Meta': {'object_name': 'Zone'},

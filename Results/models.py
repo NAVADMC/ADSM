@@ -31,6 +31,8 @@ class OutputBaseModel(models.Model):
     # This lets; you; do:
     # for field, val in myModel:
     #     print( field, val)
+    class Meta:
+        abstract = True
 
 
 class OutputManager(models.Manager):
@@ -199,9 +201,9 @@ class StateGroup(OutputBaseModel):
 
 
 class DailyByProductionType(OutputBaseModel):
-    iteration = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('iteration'),
+    iteration = models.IntegerField(blank=True, null=True, verbose_name=printable_name('iteration'),
         help_text='The iteration during which the outputs in this records where generated.', )
-    day = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('day'),
+    day = models.IntegerField(blank=True, null=True, verbose_name=printable_name('day'),
         help_text='The day in this iteration during which the outputs in this records where generated.', )
     production_type = models.ForeignKey(ProductionType, verbose_name=printable_name('production_type'),
         help_text='The identifier of the production type that these outputs apply to.', )
@@ -242,9 +244,9 @@ class DailyByProductionType(OutputBaseModel):
 
 
 class DailyByZoneAndProductionType(OutputBaseModel):
-    iteration = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('iteration'),
+    iteration = models.IntegerField(blank=True, null=True, verbose_name=printable_name('iteration'),
         help_text='The iteration during which the outputs in this records where generated.', )
-    day = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('day'),
+    day = models.IntegerField(blank=True, null=True, verbose_name=printable_name('day'),
         help_text='The day in this iteration during which the outputs in this records where generated.', )
     production_type = models.ForeignKey(ProductionType, verbose_name=printable_name('production_type'),
         help_text='The identifier of the production type that these outputs apply to.', )
@@ -257,9 +259,9 @@ class DailyByZoneAndProductionType(OutputBaseModel):
 
 
 class DailyByZone(OutputBaseModel):
-    iteration = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('iteration'),
+    iteration = models.IntegerField(blank=True, null=True, verbose_name=printable_name('iteration'),
         help_text='The iteration during which the outputs in this records where generated.', )
-    day = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('day'),
+    day = models.IntegerField(blank=True, null=True, verbose_name=printable_name('day'),
         help_text='The day in this iteration during which the outputs in this records where generated.', )
     zone = models.ForeignKey(Zone, verbose_name=printable_name('zone'),
         help_text='The identifier of the zone that these outputs apply to.', )
@@ -276,9 +278,9 @@ class DailyByZone(OutputBaseModel):
 
 
 class DailyControls(OutputBaseModel):
-    iteration = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('iteration'),
+    iteration = models.IntegerField(blank=True, null=True, verbose_name=printable_name('iteration'),
         help_text='The iteration during which the outputs in this records where generated.', )
-    day = models.IntegerField(blank=True, null=True, db_column='iteration', verbose_name=printable_name('day'),
+    day = models.IntegerField(blank=True, null=True, verbose_name=printable_name('day'),
         help_text='The day in this iteration during which the outputs in this records where generated.', )
 
     diseaseDuration      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('diseaseDuration'))
