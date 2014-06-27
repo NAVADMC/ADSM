@@ -210,7 +210,7 @@ class DailyByProductionType(OutputBaseModel):
         help_text='The iteration during which the outputs in this records where generated.', )
     day = models.IntegerField(blank=True, null=True, verbose_name=printable_name('day'),
         help_text='The day in this iteration during which the outputs in this records where generated.', )
-    production_type = models.ForeignKey(ProductionType, verbose_name=printable_name('production_type'),
+    production_type = models.ForeignKey(ProductionType, blank=True, null=True, verbose_name=printable_name('production_type'),
         help_text='The identifier of the production type that these outputs apply to.', )
 
     exp = models.ForeignKey(SpreadGroup, related_name='+', blank=True, null=True, verbose_name="Exposures")
@@ -253,9 +253,9 @@ class DailyByZoneAndProductionType(OutputBaseModel):
         help_text='The iteration during which the outputs in this records where generated.', )
     day = models.IntegerField(blank=True, null=True, verbose_name=printable_name('day'),
         help_text='The day in this iteration during which the outputs in this records where generated.', )
-    production_type = models.ForeignKey(ProductionType, verbose_name=printable_name('production_type'),
+    production_type = models.ForeignKey(ProductionType, blank=True, null=True, verbose_name=printable_name('production_type'),
         help_text='The identifier of the production type that these outputs apply to.', )
-    zone = models.ForeignKey(Zone, verbose_name=printable_name('zone'),
+    zone = models.ForeignKey(Zone, blank=True, null=True, verbose_name=printable_name('zone'),
         help_text='The identifier of the zone that these outputs apply to.', )
 
     unitsInZone      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('unitsInZone'))
@@ -268,7 +268,7 @@ class DailyByZone(OutputBaseModel):
         help_text='The iteration during which the outputs in this records where generated.', )
     day = models.IntegerField(blank=True, null=True, verbose_name=printable_name('day'),
         help_text='The day in this iteration during which the outputs in this records where generated.', )
-    zone = models.ForeignKey(Zone, verbose_name=printable_name('zone'),
+    zone = models.ForeignKey(Zone, blank=True, null=True, verbose_name=printable_name('zone'),
         help_text='The identifier of the zone that these outputs apply to.', )
 
     zoneArea            = models.IntegerField(blank=True, null=True, verbose_name=printable_name('zoneArea'))

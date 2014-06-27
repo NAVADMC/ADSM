@@ -32,12 +32,14 @@ def match_DailyByZone(c_header_name, day, iteration, value):
         return False
     if zone == 'Background':
         zone_key = None
+    else:
+        zone_key = Zone.objects.get(name=zone)
 
-    table = Results.models.DailyControls()
+    table = Results.models.DailyByZone()
     for name, obj in table:
         if str(name) == str(c_header_name):
             print("==Storing==", name, obj, value)
-            table_instance = type(table).objects.get_or_create(iteration=iteration, day=day)[0]
+            table_instance = type(table).objects.get_or_create(iteration=iteration, day=day, zone=zone_key)[0]
             setattr(table_instance, name, value)
             table_instance.save()
             return True
@@ -45,6 +47,7 @@ def match_DailyByZone(c_header_name, day, iteration, value):
 
 
 def save_value_to_proper_field(c_header_name, value, iteration, day):
+    c_header_name = re.sub('-', '_', c_header_name)  #TODO: a couple of names use hyphens.  Preferrably have them renamed on the C side
         # Results.models.DailyByZoneAndProductionType(), Results.models.DailyByZone(), Results.models.DailyByProductionType()]
     # DailyByProductionType is listed last because it has the most compositing.
 
