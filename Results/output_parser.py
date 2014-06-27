@@ -1,7 +1,11 @@
 from ast import literal_eval
+from collections import namedtuple
 import re
+from django.db.models import ForeignKey
 import Results.models
 from ScenarioCreator.models import Zone, ProductionType
+
+GrammarPath = namedtuple('GrammarPath', ['prefix', 'group_class', 'suffix'])
 
 
 def camel_case_spaces(zone_description):
@@ -73,7 +77,6 @@ def match_DailyByZoneAndProductionType(c_header_name, day, iteration, value):
 
     for name, obj in table:
         if str(name) == str(c_header_name):
-            print('==Storing==', name)
             table_instance = type(table).objects.get_or_create(iteration=iteration, day=day, zone=target_zone, production_type=pt)[0]
             setattr(table_instance, name, value)
             table_instance.save()
@@ -81,21 +84,71 @@ def match_DailyByZoneAndProductionType(c_header_name, day, iteration, value):
     return False
 
 
+def match_DailyByProductionType(c_header_name, day, iteration, value, composite_field_map):
+    possible_pts = {x.name for x in ProductionType.objects.all()}
+    c_header_name, pt = extract_name(c_header_name, possible_pts)
+    matching_composites = [x for x in composite_field_map.keys() if c_header_name == x]
+    if not matching_composites:  # it only belongs on this table if it matches a field name
+        return False
+    if len(matching_composites) > 1:  # this happens with the p suffix
+        print('  **Multiple matches:', matching_composites)
 
-def save_value_to_proper_field(c_header_name, value, iteration, day):
-    c_header_name = re.sub('-', '_', c_header_name)  #TODO: a couple of names use hyphens.  Preferrably have them renamed on the C side
-        # Results.models.DailyByZoneAndProductionType(), Results.models.DailyByZone(), Results.models.DailyByProductionType()]
 
-
-    if match_DailyControls(c_header_name, day, iteration, value) or \
-            match_DailyByZone(c_header_name, day, iteration, value) or \
-            match_DailyByZoneAndProductionType(c_header_name, day, iteration, value):# or \
-            # match_DailyByProductionType(c_header_name, day, iteration, value):  # DailyByProductionType is listed last because it has the most compositing.
+    try:  # handles the '' blank case in Production Type
+        pt = ProductionType.objects.get(name=pt)
+    except:
         pass
-    # else:
-    #     print("-No match for:", c_header_name)
-    # getattr(type(self.instance), field).field.rel.to
-    # parentObj._meta.get_field('myField').rel.to
+
+    table = Results.models.DailyByProductionType()
+    field_name = matching_composites[0]
+    path = composite_field_map[field_name]
+    table_instance = type(table).objects.get_or_create(iteration=iteration, day=day, production_type=pt)[0]
+    if isinstance(path, str):
+        setattr(table_instance, field_name, value)
+        table_instance.save()
+        return True
+    elif isinstance(path, GrammarPath):
+        stat_group = getattr(table_instance, path.prefix)
+        if not stat_group:  # we need to create the first statGroup attached to the Foreign key
+            saved_instance = path.group_class()
+            saved_instance.save()
+            setattr(table_instance, path.prefix, saved_instance)
+            stat_group = getattr(table_instance, path.prefix)
+        setattr(stat_group, path.suffix, value)
+        stat_group.save()
+        table_instance.save()
+        return True
+
+    return False
+
+
+def save_value_to_proper_field(c_header_name, value, iteration, day, composite_field_map):
+    c_header_name = re.sub('-', '_', c_header_name)  #TODO: a couple of names use hyphens.  Preferrably have them renamed on the C side
+
+    return match_DailyControls(c_header_name, day, iteration, value) or \
+            match_DailyByZone(c_header_name, day, iteration, value) or \
+            match_DailyByZoneAndProductionType(c_header_name, day, iteration, value) or \
+            match_DailyByProductionType(c_header_name, day, iteration, value, composite_field_map)  # DailyByProductionType is listed last because it has the most compositing.
+
+
+def not_blank(suffix):
+    if suffix != '_blank':
+        return suffix
+    return ''
+
+
+def build_composite_field_map():
+    road_map = {}
+    for prefix, field in Results.models.DailyByProductionType():
+        if prefix not in ('iteration', 'day', 'production_type'):  # skip the selector fields
+            if isinstance(field, ForeignKey):
+                group_class = field.rel.to
+                for suffix, suffix_field in group_class():
+                    road_map[prefix+'n'+not_blank(suffix)] = GrammarPath(prefix, group_class, suffix)  # 'n' represents New and is assumed in most fields
+            else:
+                road_map[prefix] = prefix
+
+    return road_map
 
 
 def populate_db_from_daily_report(sparse_info):
@@ -108,5 +161,14 @@ def populate_db_from_daily_report(sparse_info):
     del sparse_info['Run']
     day = sparse_info['Day']
     del sparse_info['Day']
+
+    composite_field_map = build_composite_field_map()
+    successes = []
+    failures = []
     for c_header_name, value in sparse_info.items():
-        save_value_to_proper_field(c_header_name, value, iteration, day)
+        if save_value_to_proper_field(c_header_name, value, iteration, day, composite_field_map):
+            successes.append(c_header_name)
+        else:
+            failures.append(c_header_name)
+    print('successes', len(successes))
+    print('failures', len(failures))

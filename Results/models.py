@@ -84,7 +84,7 @@ class SpreadGroup(OutputBaseModel):
 
 
 class DetectionBracketGroup(OutputBaseModel):
-    _blank = models.IntegerField(blank=True, null=True, verbose_name="either method")  #TODO: '_blank' should be a special case in the parser
+    _blank = models.IntegerField(blank=True, null=True, verbose_name="either method")
     Clin = models.IntegerField(blank=True, null=True, verbose_name="Detection from Clinical signs")
     Test = models.IntegerField(blank=True, null=True, verbose_name="Detection from Lab Tests")
 
@@ -221,11 +221,11 @@ class DailyByProductionType(OutputBaseModel):
     tr = models.ForeignKey(TraceGroup, related_name='+', blank=True, null=True, verbose_name="Traces")
     exm = models.ForeignKey(TestTriggerGroup, related_name='+', blank=True, null=True, verbose_name="Examinations")
 
-    #we need a second model to catch True/False Pos/Neg results
-    #TODO: Check for 'n' or 'c' next.  This is going to need very particular switching to catch the tstnUTruePos, tstcUTruePos, tstcUDirFwd
-    tst = models.ForeignKey(TestOutcomeGroup, related_name='+', blank=True, null=True, verbose_name="Lab Test Outcomes")
     #tstcU uses the TestTriggerGroup because of the overlap in Directional causes
     tstc = models.ForeignKey(TestTriggerGroup, related_name='+', blank=True, null=True, verbose_name="Lab Test Triggers")
+    #TODO: Check for 'n' or 'c' next.  This is going to need very particular switching to catch the tstnUTruePos, tstcUTruePos, tstcUDirFwd
+    #we need a second model to catch True/False Pos/Neg results
+    tst = models.ForeignKey(TestOutcomeGroup, related_name='+', blank=True, null=True, verbose_name="Lab Test Outcomes")
 
     #This group of two was so small I didn't think it warranted a group object
     firstVaccination = models.IntegerField(    blank=True, null=True, verbose_name="First Vaccination")
