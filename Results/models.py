@@ -262,6 +262,9 @@ class DailyByZoneAndProductionType(OutputBaseModel):
     unitDaysInZone   = models.IntegerField(blank=True, null=True, verbose_name=printable_name('unitDaysInZone'))
     animalDaysInZone = models.IntegerField(blank=True, null=True, verbose_name=printable_name('animalDaysInZone'))
 
+    def __str__(self):
+        return "%i, %i: %s and %s" % (self.iteration, self.day, self.production_type or "All Types", self.zone or "Background")
+
 
 class DailyByZone(OutputBaseModel):
     iteration = models.IntegerField(blank=True, null=True, verbose_name=printable_name('iteration'),

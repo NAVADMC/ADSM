@@ -1,14 +1,13 @@
 from ast import literal_eval
 import re
 import Results.models
-from ScenarioCreator.models import Zone
+from ScenarioCreator.models import Zone, ProductionType
 
 
 def match_DailyControls(c_header_name, day, iteration, value):
     table = Results.models.DailyControls()
     for name, obj in table:
         if str(name) == str(c_header_name):
-            print("==Storing==", name, obj, value)
             table_instance = type(table).objects.get_or_create(iteration=iteration, day=day)[0]
             setattr(table_instance, name, value)
             table_instance.save()
@@ -42,8 +41,31 @@ def match_DailyByZone(c_header_name, day, iteration, value):
     table = Results.models.DailyByZone()
     for name, obj in table:
         if str(name) == str(c_header_name):
-            print("==Storing==", name, obj, value)
             table_instance = type(table).objects.get_or_create(iteration=iteration, day=day, zone=target_zone)[0]
+            setattr(table_instance, name, value)
+            table_instance.save()
+            return True
+    return False
+
+
+def match_DailyByZoneAndProductionType(c_header_name, day, iteration, value):
+    possible_zones = {x.zone_description for x in Zone.objects.all()}.union({'Background'})
+    possible_pts = {x.name for x in ProductionType.objects.all()}
+    c_header_name, zone = extract_name(c_header_name, possible_zones)
+    c_header_name, pt = extract_name(c_header_name, possible_pts)
+    if not zone or not pt:  # it only belongs on this table if it matches both
+        return False
+    target_zone = None
+
+    if zone != 'Background':
+        target_zone = Zone.objects.get(zone_description=zone)  # we don't want to get_or_create because I want to keep "Background" out of the DB.
+    pt = ProductionType.objects.get(name=pt)  # TODO: handle the '' blank case in Production Type
+
+    table = Results.models.DailyByZoneAndProductionType()
+    for name, obj in table:
+        if str(name) == str(c_header_name):
+            print('==Storing==', name)
+            table_instance = type(table).objects.get_or_create(iteration=iteration, day=day, zone=target_zone, production_type=pt)[0]
             setattr(table_instance, name, value)
             table_instance.save()
             return True
@@ -55,8 +77,9 @@ def save_value_to_proper_field(c_header_name, value, iteration, day):
         # Results.models.DailyByZoneAndProductionType(), Results.models.DailyByZone(), Results.models.DailyByProductionType()]
     # DailyByProductionType is listed last because it has the most compositing.
 
-    # match_DailyControls(c_header_name, day, iteration, value) or \
-    if match_DailyByZone(c_header_name, day, iteration, value):
+    if match_DailyControls(c_header_name, day, iteration, value) or \
+            match_DailyByZone(c_header_name, day, iteration, value) or \
+            match_DailyByZoneAndProductionType(c_header_name, day, iteration, value):
         print("Match found for:", c_header_name)
     # else:
     #     print("-No match for:", c_header_name)
