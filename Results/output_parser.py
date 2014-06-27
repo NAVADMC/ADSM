@@ -4,17 +4,6 @@ import Results.models
 from ScenarioCreator.models import Zone, ProductionType
 
 
-def match_DailyControls(c_header_name, day, iteration, value):
-    table = Results.models.DailyControls()
-    for name, obj in table:
-        if str(name) == str(c_header_name):
-            table_instance = type(table).objects.get_or_create(iteration=iteration, day=day)[0]
-            setattr(table_instance, name, value)
-            table_instance.save()
-            return True
-    return False
-
-
 def camel_case_spaces(zone_description):
     return re.sub(r' (\w)', lambda match: match.group(1).upper(), zone_description)
 
@@ -29,7 +18,25 @@ def extract_name(c_header_name, possibilities):
     return c_header_name, None
 
 
+def match_DailyControls(c_header_name, day, iteration, value):
+    table = Results.models.DailyControls()
+    if not any([c_header_name.startswith(x[0]) for x in table]):  # it only belongs on this table if it matches a field name
+        return False
+
+    for name, obj in table:
+        if str(name) == str(c_header_name):
+            table_instance = type(table).objects.get_or_create(iteration=iteration, day=day)[0]
+            setattr(table_instance, name, value)
+            table_instance.save()
+            return True
+    return False
+
+
 def match_DailyByZone(c_header_name, day, iteration, value):
+    table = Results.models.DailyByZone()
+    if not any([c_header_name.startswith(x[0]) for x in table]):  # it only belongs on this table if it matches a field name
+        return False
+
     possibilities = {x.zone_description for x in Zone.objects.all()}.union({'Background'})
     c_header_name, zone = extract_name(c_header_name, possibilities)
     if not zone:
@@ -38,7 +45,6 @@ def match_DailyByZone(c_header_name, day, iteration, value):
     if zone != 'Background':
         target_zone = Zone.objects.get(zone_description=zone)  # we don't want to get_or_create because I want to keep "Background" out of the DB.
 
-    table = Results.models.DailyByZone()
     for name, obj in table:
         if str(name) == str(c_header_name):
             table_instance = type(table).objects.get_or_create(iteration=iteration, day=day, zone=target_zone)[0]
@@ -49,19 +55,22 @@ def match_DailyByZone(c_header_name, day, iteration, value):
 
 
 def match_DailyByZoneAndProductionType(c_header_name, day, iteration, value):
+    table = Results.models.DailyByZoneAndProductionType()
+    if not any([c_header_name.startswith(x[0]) for x in table]):  # it only belongs on this table if it matches a field name
+        return False
+
     possible_zones = {x.zone_description for x in Zone.objects.all()}.union({'Background'})
     possible_pts = {x.name for x in ProductionType.objects.all()}
     c_header_name, zone = extract_name(c_header_name, possible_zones)
     c_header_name, pt = extract_name(c_header_name, possible_pts)
-    if not zone or not pt:  # it only belongs on this table if it matches both
-        return False
-    target_zone = None
 
+    target_zone = None
     if zone != 'Background':
         target_zone = Zone.objects.get(zone_description=zone)  # we don't want to get_or_create because I want to keep "Background" out of the DB.
-    pt = ProductionType.objects.get(name=pt)  # TODO: handle the '' blank case in Production Type
+    try:  # handles the '' blank case in Production Type
+        pt = ProductionType.objects.get(name=pt)
+    except: pass
 
-    table = Results.models.DailyByZoneAndProductionType()
     for name, obj in table:
         if str(name) == str(c_header_name):
             print('==Storing==', name)
@@ -72,15 +81,17 @@ def match_DailyByZoneAndProductionType(c_header_name, day, iteration, value):
     return False
 
 
+
 def save_value_to_proper_field(c_header_name, value, iteration, day):
     c_header_name = re.sub('-', '_', c_header_name)  #TODO: a couple of names use hyphens.  Preferrably have them renamed on the C side
         # Results.models.DailyByZoneAndProductionType(), Results.models.DailyByZone(), Results.models.DailyByProductionType()]
-    # DailyByProductionType is listed last because it has the most compositing.
+
 
     if match_DailyControls(c_header_name, day, iteration, value) or \
             match_DailyByZone(c_header_name, day, iteration, value) or \
-            match_DailyByZoneAndProductionType(c_header_name, day, iteration, value):
-        print("Match found for:", c_header_name)
+            match_DailyByZoneAndProductionType(c_header_name, day, iteration, value):# or \
+            # match_DailyByProductionType(c_header_name, day, iteration, value):  # DailyByProductionType is listed last because it has the most compositing.
+        pass
     # else:
     #     print("-No match for:", c_header_name)
     # getattr(type(self.instance), field).field.rel.to
