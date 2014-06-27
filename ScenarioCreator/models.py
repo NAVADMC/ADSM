@@ -636,12 +636,12 @@ class ProductionTypePairTransmission(models.Model):
 
 
 class Zone(models.Model):
-    zone_description = models.TextField(
+    name = models.TextField(
         help_text='Description of the zone', )
-    zone_radius = models.FloatField(validators=[MinValueValidator(0.0)],
+    radius = models.FloatField(validators=[MinValueValidator(0.0)],
         help_text='Radius in kilometers of the zone', )
     def __str__(self):
-        return "%s: %skm" % (self.zone_description, self.zone_radius)
+        return "%s: %skm" % (self.name, self.radius)
 
 
 class ZoneEffectOnProductionType(models.Model):
@@ -658,7 +658,7 @@ class ZoneEffectOnProductionType(models.Model):
     cost_of_surveillance_per_animal_day = MoneyField(default=0.0,
         help_text='Cost of surveillance per animal per day in this zone.', )
     def __str__(self):
-        return "%s Zone -> %s" % (self.zone.zone_description, self.production_type)
+        return "%s Zone -> %s" % (self.zone.name, self.production_type)
 
 
 class ReadAllCodes(models.Model):

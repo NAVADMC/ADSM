@@ -805,7 +805,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read the production type combination
    * specific parameters. */
   sqlite3_exec (params,
-                "SELECT zone_description,zone_radius FROM ScenarioCreator_zone ORDER BY zone_radius",
+                "SELECT name,zone_radius FROM ScenarioCreator_zone ORDER BY zone_radius",
                 set_params, self, &sqlerr);
   if (sqlerr)
     {

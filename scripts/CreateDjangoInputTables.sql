@@ -182,7 +182,7 @@ wind_direction_end		int
 
 
 create table inzone (
-zone_description	text	not null,
+name	text	not null,
 zone_radius		real	not null
 );
 
