@@ -2172,6 +2172,10 @@ recent_headers = "Run,Day,outbreakDuration,zoneAreaHighRisk,zoneAreaMediumRisk,m
 
 set(recent_headers) == set(cause_sweep)
 
+# <headingcell level=4>
+
+# Migrations for other database will need to be handled manually, or a more programmatic "reset" needs to be created for Results.
+
 # <codecell>
 
 

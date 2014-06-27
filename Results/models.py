@@ -284,8 +284,8 @@ class DailyControls(OutputBaseModel):
         help_text='The day in this iteration during which the outputs in this records where generated.', )
 
     diseaseDuration      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('diseaseDuration'))
-    adqnU                = models.IntegerField(blank=True, null=True, verbose_name=printable_name('adqnU'))
-    adqcU                = models.IntegerField(blank=True, null=True, verbose_name=printable_name('adqcU'))
+    adqnU                = models.IntegerField(blank=True, null=True, verbose_name=printable_name('New Units Adequately Exposed'))
+    adqcU                = models.IntegerField(blank=True, null=True, verbose_name=printable_name('Cumulative Units Adequately Exposed'))
     detOccurred          = models.IntegerField(blank=True, null=True, verbose_name=printable_name('detOccurred'))
     costSurveillance     = models.IntegerField(blank=True, null=True, verbose_name=printable_name('costSurveillance'))
     vaccOccurred         = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vaccOccurred'))
