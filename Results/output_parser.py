@@ -16,23 +16,28 @@ def match_DailyControls(c_header_name, day, iteration, value):
     return False
 
 
+def camel_case_spaces(zone_description):
+    return re.sub(r' (\w)', lambda match: match.group(1).upper(), zone_description)
+
+
 def extract_name(c_header_name, possibilities):
     """Returns the header with the name clipped out and the matching name if it is in the list of possibilities.
      Use for extracting zone and production type names from CEngine output."""
     for name in possibilities:
-        if name in c_header_name:
-            shortened = re.sub(name, '', c_header_name)
+        if camel_case_spaces(name) in c_header_name:  # It's important to camelCase this to match C output
+            shortened = re.sub(camel_case_spaces(name), '', c_header_name)
             return shortened, name
     return c_header_name, None
 
 
 def match_DailyByZone(c_header_name, day, iteration, value):
-    c_header_name, zone = extract_name(c_header_name, {x.name for x in Zone.objects.all()}.union({'Background'}))
+    possibilities = {x.zone_description for x in Zone.objects.all()}.union({'Background'})
+    c_header_name, zone = extract_name(c_header_name, possibilities)
     if not zone:
         return False
     target_zone = None
     if zone != 'Background':
-        target_zone = Zone.objects.get(name=zone)  # we don't want to get_or_create because I want to keep "Background" out of the DB.
+        target_zone = Zone.objects.get(zone_description=zone)  # we don't want to get_or_create because I want to keep "Background" out of the DB.
 
     table = Results.models.DailyByZone()
     for name, obj in table:
