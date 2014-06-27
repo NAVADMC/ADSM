@@ -30,16 +30,15 @@ def match_DailyByZone(c_header_name, day, iteration, value):
     c_header_name, zone = extract_name(c_header_name, {x.name for x in Zone.objects.all()}.union({'Background'}))
     if not zone:
         return False
-    if zone == 'Background':
-        zone_key = None
-    else:
-        zone_key = Zone.objects.get(name=zone)
+    target_zone = None
+    if zone != 'Background':
+        target_zone = Zone.objects.get(name=zone)  # we don't want to get_or_create because I want to keep "Background" out of the DB.
 
     table = Results.models.DailyByZone()
     for name, obj in table:
         if str(name) == str(c_header_name):
             print("==Storing==", name, obj, value)
-            table_instance = type(table).objects.get_or_create(iteration=iteration, day=day, zone=zone_key)[0]
+            table_instance = type(table).objects.get_or_create(iteration=iteration, day=day, zone=target_zone)[0]
             setattr(table_instance, name, value)
             table_instance.save()
             return True
@@ -51,12 +50,11 @@ def save_value_to_proper_field(c_header_name, value, iteration, day):
         # Results.models.DailyByZoneAndProductionType(), Results.models.DailyByZone(), Results.models.DailyByProductionType()]
     # DailyByProductionType is listed last because it has the most compositing.
 
-
-    if match_DailyControls(c_header_name, day, iteration, value) or \
-            match_DailyByZone(c_header_name, day, iteration, value):
+    # match_DailyControls(c_header_name, day, iteration, value) or \
+    if match_DailyByZone(c_header_name, day, iteration, value):
         print("Match found for:", c_header_name)
-    else:
-        print("-No match for:", c_header_name)
+    # else:
+    #     print("-No match for:", c_header_name)
     # getattr(type(self.instance), field).field.rel.to
     # parentObj._meta.get_field('myField').rel.to
 
