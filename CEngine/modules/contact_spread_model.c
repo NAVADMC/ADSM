@@ -1758,7 +1758,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_zone_params function to read the zone/production type
    * combination specific parameters. */
   sqlite3_exec (params,
-                "SELECT zone.name,prodtype.name,\"direct\",zone_direct_movement_id FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectonproductiontype pairing WHERE zone.id=pairing.zone_id AND prodtype.id=pairing.production_type_id AND zone_direct_movement_id IS NOT NULL UNION SELECT zone.name,prodtype.name,\"indirect\",zone_indirect_movement_id FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectonproductiontype pairing WHERE zone.id=pairing.zone_id AND prodtype.id=pairing.production_type_id AND zone_indirect_movement_id IS NOT NULL",
+                "SELECT zone.zone_description,prodtype.name,\"direct\",zone_direct_movement_id FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectonproductiontype pairing WHERE zone.id=pairing.zone_id AND prodtype.id=pairing.production_type_id AND zone_direct_movement_id IS NOT NULL UNION SELECT zone.zone_description,prodtype.name,\"indirect\",zone_indirect_movement_id FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectonproductiontype pairing WHERE zone.id=pairing.zone_id AND prodtype.id=pairing.production_type_id AND zone_indirect_movement_id IS NOT NULL",
                 set_zone_params, self, &sqlerr);
   if (sqlerr)
     {
