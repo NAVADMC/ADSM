@@ -1571,22 +1571,6 @@ print(2*2*3*3*2)
 
 # <codecell>
 
-grammar =  [('U', 'A'), ('All', 'Dir', 'Ind'), ('', 'p')]
-def not_as_cool_as_product(grammar):
-    result = []
-    for possibilities in grammar:
-        if len(result) == 0:
-            result = list(possibilities)
-        else:
-            temp = list(result)
-            result = []
-            for suffix in possibilities:
-                result += [a+suffix for a in temp]
-    return result
-not_as_cool_as_product(grammar)
-
-# <codecell>
-
 from itertools import product, combinations, permutations
 list(product(('U', 'A'), ('All', 'Dir', 'Ind'), ('', '_Bull_', '_Swine_')))
 
@@ -2200,6 +2184,167 @@ successes= ['expnUDir_Bull_', 'detnUAll', 'trnUDir_Swine_p', 'tstnUTruePos_Swine
 failures= ['infnUIni_Bull_', 'infnAIni_Swine_', 'infnAIni', 'infnUIni', 'infnAIni_Bull_', 'infnUIni_Swine_']
 
 print(len(successes), len(failures))
+
+# <codecell>
+
+import copy
+grammar_backup = copy.deepcopy(grammars)
+
+# <codecell>
+
+sorted(grammars.keys())
+
+# <codecell>
+
+DailyByZoneAndProductionType = {'animalDaysInZone':grammars['animalDaysInZone'], 'unitDaysInZone': grammars['unitDaysInZone'], 'unitsInZone':grammars['unitsInZone']}
+
+# <codecell>
+
+del grammars['animalDaysInZone']
+del grammars['unitDaysInZone']
+del grammars['unitsInZone']
+grammars
+
+# <codecell>
+
+sorted(grammars.keys())
+
+# <codecell>
+
+grammars['lastDetection'] = grammars['firstDetection']
+
+# <codecell>
+
+grammars['tst']
+
+# <markdowncell>
+
+# We'll want to delete the Production Type tuple from the grammar for generation.  We already know everything inside grammars pertains solely to DailyByProductionType.
+
+# <codecell>
+
+[(key, grammars[key]) for key in ['tstnU', 'tstcU', 'tstcA']]
+
+# <codecell>
+
+del grammars['tst']
+
+# <codecell>
+
+grammars['vac']
+
+# <codecell>
+
+[(key, grammars[key]) for key in ['vacw', 'vacn', 'vacc']]
+
+# <codecell>
+
+del grammars['vac']
+
+# <codecell>
+
+sorted(grammars.keys())
+
+# <headingcell level=1>
+
+# Generating a new Flat DailyByProductionType
+
+# <codecell>
+
+sorted(explain.keys())
+
+# <codecell>
+
+explain.update({
+ 'des':'Destruction',
+ 'desw': 'Destruction Wait Time',
+ 'det': 'Detection',
+ 'exm': 'Examination',
+ 'exp': 'Exposure',
+ 'firstDestruction': "First Destruction",
+ 'firstDetection': "First Detection",
+ 'firstVaccination': 'First Vaccination',
+ 'lastDetection': "Last Detection",
+ 'tr': 'Trace',
+ 'tsd': 'Transition State Daily',
+ 'tstcA': 'Lab Test Cumulative Animals',
+ 'tstcU': 'Lab Test Cumulative Units',
+ 'tstnU': 'Lab Test New Units',
+ 'vacc': 'Vaccination Cumulative',
+ 'vacn': 'Vaccination New',
+ 'vacw': 'Vaccination Wait Time'
+})
+
+# <codecell>
+
+grammars['vacw']
+
+# <codecell>
+
+explain.update({
+'All': 'For Any Reason', 
+'Max': 'Max', 
+'MaxDay': 'Day with Max', 
+'TimeMax': 'Max Time', 
+'TimeAvg': 'Average Time', 
+'DaysInQueue': 'Days in Queue'
+})
+
+# <codecell>
+
+PT_All = ('All', '_Bull_', '_Swine_')
+
+# <codecell>
+
+def flat_stat_code(prefix, grammar):
+    combos = product([prefix], *grammar)
+    for line in combos:
+        explanation = ' '.join([explain[part] for part in line])
+        print_line = '    '+''.join(line)+ ' = models.IntegerField(blank=True, null=True, verbose_name="'+explanation+'")'
+        print(re.sub(r'(\w)  (\w)', r'\1 \2', print_line))
+
+# <codecell>
+
+def generate_DailyByProductionType():
+    for key in sorted(grammars.keys()): # Alphabetical order keeps it nicely sorted except firstDetection and lastDetection
+        field_grammar = copy.deepcopy(grammars[key]) # we don't want to side effect this
+        try: field_grammar.remove(PT_All)
+        except: pass
+        try: field_grammar.remove(PT)
+        except: pass
+        flat_stat_code(key, field_grammar)
+
+# <codecell>
+
+generate_DailyByProductionType()
+
+# <codecell>
+
+
+# <codecell>
+
+
+# <codecell>
+
+
+# <codecell>
+
+
+# <codecell>
+
+def wrap_text(width):
+    tandem = list(re.sub(r'\n    ', ';', block))
+    for index in range(len(tandem)):
+        if index % width == 0:
+            tandem[index] = '\n'
+    print(''.join(tandem))
+
+# <codecell>
+
+from IPython.html.widgets import interact, interactive, fixed
+from IPython.html import widgets
+from IPython.display import clear_output, display, HTML
+interact(wrap_text, width=100)
 
 # <codecell>
 
