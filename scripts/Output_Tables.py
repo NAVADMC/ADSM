@@ -2324,7 +2324,7 @@ def flat_stat_code(prefix, grammar):
 
 # <codecell>
 
-def generate_DailyByProductionType():
+def generate_grammar_code(grammars=grammars):
     for key in sorted(grammars.keys()): # Alphabetical order keeps it nicely sorted except firstDetection and lastDetection
         field_grammar = copy.deepcopy(grammars[key]) # we don't want to side effect this
         try: field_grammar.remove(PT_All)
@@ -2335,14 +2335,7 @@ def generate_DailyByProductionType():
 
 # <codecell>
 
-generate_DailyByProductionType()
-
-# <codecell>
-
-'vacw' in grammars
-
-# <codecell>
-
+DailyByZoneAndProductionType
 
 # <codecell>
 
@@ -2355,22 +2348,37 @@ generate_DailyByProductionType()
 
 # <codecell>
 
+matching_headers('desw')
+
+# <markdowncell>
+
+# Looks like there's a minor problem with desw expecting production type breakdown
 
 # <codecell>
 
-def wrap_text(width):
-    tandem = list(re.sub(r'\n    ', ';', block))
-    for index in range(len(tandem)):
-        if index % width == 0:
-            tandem[index] = '\n'
-    print(''.join(tandem))
+grammars['desw'] = [('U', 'A'),
+ ('All', '_Bull_', '_Swine_')]
 
 # <codecell>
 
-from IPython.html.widgets import interact, interactive, fixed
-from IPython.html import widgets
-from IPython.display import clear_output, display, HTML
-interact(wrap_text, width=100)
+DailyControls = {'desw': [('U', 'A'),
+ ('Max', 'MaxDay', 'TimeMax', 'TimeAvg', 'DaysInQueue'),]}
+
+# <codecell>
+
+generate_grammar_code()
+
+# <codecell>
+
+generate_grammar_code(DailyControls)
+
+# <codecell>
+
+matching_headers('tsdU')
+
+# <markdowncell>
+
+# This is a problem because the prodution type is inserted in the middle.  Solution: replace PT and PT_all with an underscores, then instead of appending the production type, replace('_', pt)
 
 # <codecell>
 

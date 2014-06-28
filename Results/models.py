@@ -44,15 +44,16 @@ class OutputManager(models.Manager):
     def bulk_create(self, header_line, cmd_strings, *args, **kwargs):
         headers = header_line.split(',')
         report_objects = []
+        parser = Results.output_parser.DailyParser()
         for cmd_string in cmd_strings:
-            sparse_values = {}
             values = cmd_string.split(',')
             pairs = zip(headers, values)
-            for key, value in pairs:
-                if value:# and value != '0':
-                    sparse_values[key] = int(value)
+            sparse_values = {a: int(b) if b else -1 for a, b in pairs}
+            # for key, value in pairs:
+            #     if value:# and value != '0':
+            #         sparse_values[key] = int(value)
             report_objects.append(DailyReport(sparse_dict=str(sparse_values), full_line=cmd_string))
-            Results.output_parser.populate_db_from_daily_report(sparse_values)
+            parser.populate_db_from_daily_report(sparse_values)
         # for obj in report_objects:
         #     print(obj)  #.save()
         return super().bulk_create(report_objects)
@@ -115,18 +116,8 @@ class DailyByProductionType(OutputBaseModel):
     descAIndFwd = models.IntegerField(blank=True, null=True, verbose_name="Destruction Animals because of Indirect Forward trace")
     descADirBack = models.IntegerField(blank=True, null=True, verbose_name="Destruction Animals because of Direct Back trace")
     descAIndBack = models.IntegerField(blank=True, null=True, verbose_name="Destruction Animals because of Indirect Back trace")
-    deswUAll = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Units For Any Reason")
-    deswUMax = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Units Max")
-    deswUMaxDay = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Units Day with Max")
-    deswUTimeMax = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Units Max Time")
-    deswUTimeAvg = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Units Average Time")
-    deswUDaysInQueue = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Units Days in Queue")
-    deswAAll = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Animals For Any Reason")
-    deswAMax = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Animals Max")
-    deswAMaxDay = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Animals Day with Max")
-    deswATimeMax = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Animals Max Time")
-    deswATimeAvg = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Animals Average Time")
-    deswADaysInQueue = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Animals Days in Queue")
+    deswU = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Units")
+    deswA = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Animals")
     detcUAll = models.IntegerField(blank=True, null=True, verbose_name="Detection Units For Any Reason")
     detcUClin = models.IntegerField(blank=True, null=True, verbose_name="Detection Units Clinical")
     detcUTest = models.IntegerField(blank=True, null=True, verbose_name="Detection Units from Lab Tests")
@@ -368,14 +359,18 @@ class DailyControls(OutputBaseModel):
     vaccVaccination      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vaccVaccination'))
     vaccSubtotal         = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vaccSubtotal'))
     destrOccurred        = models.IntegerField(blank=True, null=True, verbose_name=printable_name('destrOccurred'))
-    deswUMax             = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswUMax'))
-    deswUMaxDay          = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswUMaxDay'))
-    deswUDaysInQueue     = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswUDaysInQueue'))
-    deswUTimeAvg         = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswUTimeAvg'))
-    deswUTimeMax         = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswUTimeMax'))
-    deswAMax             = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswAMax'))
-    deswAMaxDay          = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswAMaxDay'))
-    deswADaysInQueue     = models.IntegerField(blank=True, null=True, verbose_name=printable_name('deswADaysInQueue'))
+
+    deswUMax = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Units Max")
+    deswUMaxDay = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Units Day with Max")
+    deswUTimeMax = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Units Max Time")
+    deswUTimeAvg = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Units Average Time")
+    deswUDaysInQueue = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Units Days in Queue")
+    deswAMax = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Animals Max")
+    deswAMaxDay = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Animals Day with Max")
+    deswATimeMax = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Animals Max Time")
+    deswATimeAvg = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Animals Average Time")
+    deswADaysInQueue = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Animals Days in Queue")
+
     destrAppraisal       = models.IntegerField(blank=True, null=True, verbose_name=printable_name('destrAppraisal'))
     destrEuthanasia      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('destrEuthanasia'))
     destrIndemnification = models.IntegerField(blank=True, null=True, verbose_name=printable_name('destrIndemnification'))
