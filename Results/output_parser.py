@@ -144,7 +144,13 @@ def build_composite_field_map():
             if isinstance(field, ForeignKey):
                 group_class = field.rel.to
                 for suffix, suffix_field in group_class():
-                    road_map[prefix+'n'+not_blank(suffix)] = GrammarPath(prefix, group_class, suffix)  # 'n' represents New and is assumed in most fields
+                    path = GrammarPath(prefix, group_class, suffix)
+                    road_map[prefix + not_blank(suffix)] = path
+                    road_map[prefix+'n'+not_blank(suffix)] = path  # 'n' represents New and is assumed in most fields
+                    all_plus_pt_case = (prefix + not_blank(suffix)).replace('All', '')
+                    if all_plus_pt_case not in road_map.keys():
+                        road_map[all_plus_pt_case] = path
+                        road_map[(prefix+'n'+not_blank(suffix)).replace('All', '')] = path
             else:
                 road_map[prefix] = prefix
 
@@ -168,7 +174,8 @@ def populate_db_from_daily_report(sparse_info):
     for c_header_name, value in sparse_info.items():
         if save_value_to_proper_field(c_header_name, value, iteration, day, composite_field_map):
             successes.append(c_header_name)
-        else:
+        elif 'c' not in [c_header_name[2], c_header_name[3]]:
             failures.append(c_header_name)
     print('successes', len(successes))
     print('failures', len(failures))
+    print(failures)

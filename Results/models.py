@@ -76,11 +76,13 @@ class SpreadGroup(OutputBaseModel):
     UDir = models.IntegerField(blank=True, null=True, verbose_name="Unit Direct")
     UInd = models.IntegerField(blank=True, null=True, verbose_name="Unit Indirect")
     UAir = models.IntegerField(blank=True, null=True, verbose_name="Unit Air")
+    UIni = models.IntegerField(blank=True, null=True, verbose_name="Unit Initial")
 
     AAll = models.IntegerField(blank=True, null=True, verbose_name="Animal All Spread Types")
     ADir = models.IntegerField(blank=True, null=True, verbose_name="Animal Direct")
     AInd = models.IntegerField(blank=True, null=True, verbose_name="Animal Indirect")
     AAir = models.IntegerField(blank=True, null=True, verbose_name="Animal Air")
+    AIni = models.IntegerField(blank=True, null=True, verbose_name="Unit Initial")
 
 
 class DetectionBracketGroup(OutputBaseModel):
@@ -236,8 +238,8 @@ class DailyByProductionType(OutputBaseModel):
 
     firstDestruction = models.ForeignKey(DestructionGroup, related_name='+', blank=True, null=True, verbose_name="First Destruction")
     #These two separate U and A so that they can use the same Group object as firstDestruction
-    descU = models.ForeignKey(DestructionGroup, related_name='+', blank=True, null=True, verbose_name="Destruction of Units")
-    descA = models.ForeignKey(DestructionGroup, related_name='+', blank=True, null=True, verbose_name="Destruction of Animals")
+    desnU = models.ForeignKey(DestructionGroup, related_name='+', blank=True, null=True, verbose_name="Destruction of Units")
+    desnA = models.ForeignKey(DestructionGroup, related_name='+', blank=True, null=True, verbose_name="Destruction of Animals")
     desw = models.ForeignKey(WaitGroup, related_name='+', blank=True, null=True, verbose_name="Destruction Wait")
 
     tsd = models.ForeignKey(StateGroup, related_name='+', blank=True, null=True, verbose_name="Transition State Daily")
