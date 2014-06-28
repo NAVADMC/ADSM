@@ -2145,6 +2145,17 @@ grammars['firstVaccination']
 
 # <codecell>
 
+matching_headers('inf')
+
+# <codecell>
+
+grammars['inf'] = [('c', 'n'),
+ ('U', 'A'),
+ ('', 'Ini', 'Dir', 'Ind', 'Air'),
+ ('All', '_Bull_', '_Swine_')]
+
+# <codecell>
+
 
 # <headingcell level=2>
 
@@ -2243,6 +2254,10 @@ del grammars['vac']
 
 # <codecell>
 
+grammars['inf'] = grammars['exp']
+
+# <codecell>
+
 sorted(grammars.keys())
 
 # <headingcell level=1>
@@ -2274,6 +2289,10 @@ explain.update({
  'vacn': 'Vaccination New',
  'vacw': 'Vaccination Wait Time'
 })
+
+# <codecell>
+
+explain['inf'] = 'Infection'
 
 # <codecell>
 
@@ -2320,12 +2339,19 @@ generate_DailyByProductionType()
 
 # <codecell>
 
+'vacw' in grammars
 
 # <codecell>
 
 
 # <codecell>
 
+
+# <codecell>
+
+#failures 4
+#['expnAAll', 'expnUAll', 'infnAAll', 'infnUAll']
+[x for x in combo_set('exp') if 'expnUAll' in x]
 
 # <codecell>
 

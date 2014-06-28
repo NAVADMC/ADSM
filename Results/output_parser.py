@@ -8,6 +8,10 @@ from ScenarioCreator.models import Zone, ProductionType
 GrammarPath = namedtuple('GrammarPath', ['prefix', 'group_class', 'suffix'])
 
 
+possible_zones = {x.zone_description for x in Zone.objects.all()}.union({'Background'})
+possible_pts = {x.name for x in ProductionType.objects.all()}
+
+
 def camel_case_spaces(zone_description):
     return re.sub(r' (\w)', lambda match: match.group(1).upper(), zone_description)
 
@@ -137,24 +141,22 @@ def not_blank(suffix):
     return ''
 
 
-def build_composite_field_map():
+def build_composite_field_map(table):
     road_map = {}
-    for prefix, field in Results.models.DailyByProductionType():
-        if prefix not in ('iteration', 'day', 'production_type'):  # skip the selector fields
-            if isinstance(field, ForeignKey):
-                group_class = field.rel.to
-                for suffix, suffix_field in group_class():
-                    path = GrammarPath(prefix, group_class, suffix)
-                    road_map[prefix + not_blank(suffix)] = path
-                    road_map[prefix+'n'+not_blank(suffix)] = path  # 'n' represents New and is assumed in most fields
-                    all_plus_pt_case = (prefix + not_blank(suffix)).replace('All', '')
-                    if all_plus_pt_case not in road_map.keys():
-                        road_map[all_plus_pt_case] = path
-                        road_map[(prefix+'n'+not_blank(suffix)).replace('All', '')] = path
-            else:
-                road_map[prefix] = prefix
+    for prefix, field in table:
+        if prefix not in ('iteration', 'day', 'production_type', 'zone'):  # skip the selector fields
+            road_map[prefix] = prefix
+            pref_all = prefix.replace('All', '')
+            if pref_all not in road_map:
+                road_map[pref_all] = prefix  # special case where C removes All when suffixed by a Production Type
 
     return road_map
+
+
+def stripped_field(c_header_name):
+    c_header_name, zone = extract_name(c_header_name, possible_zones)
+    c_header_name, pt = extract_name(c_header_name, possible_pts)
+    return c_header_name
 
 
 def populate_db_from_daily_report(sparse_info):
@@ -168,14 +170,42 @@ def populate_db_from_daily_report(sparse_info):
     day = sparse_info['Day']
     del sparse_info['Day']
 
-    composite_field_map = build_composite_field_map()
-    successes = []
+    #refresh the values already declared at the top of this file.
+    globals()['possible_zones'] = {x.zone_description for x in Zone.objects.all()}.union({'Background'})
+    globals()['possible_pts'] = {x.name for x in ProductionType.objects.all()}
+
+    tables = [Results.models.DailyByProductionType(), Results.models.DailyByZone(),
+              Results.models.DailyByZoneAndProductionType(), Results.models.DailyControls()]
+    field_map = {table: build_composite_field_map(table) for table in tables}
+
+    #construct the set of tables we're going to use for this day
+    daily_by_pt = {pt.name: Results.models.DailyByProductionType(production_type=pt, iteration=iteration, day=day) for pt in ProductionType.objects.all()}
+    daily_by_zone = {zone.zone_description: Results.models.DailyByZone(zone=zone, iteration=iteration, day=day) for zone in Zone.objects.all()}
+    daily_by_pt_zone = {}  # same as above, the double loop was a bit much for a dict comprehension
+    for pt in ProductionType.objects.all():
+        for zone in Zone.objects.all():
+            #stored by immutable tuple
+            daily_by_pt_zone[(pt.name, zone.zone_description)] = \
+                Results.models.DailyByZoneAndProductionType(production_type=pt, zone=zone, iteration=iteration, day=day)
+
     failures = []
-    for c_header_name, value in sparse_info.items():
-        if save_value_to_proper_field(c_header_name, value, iteration, day, composite_field_map):
-            successes.append(c_header_name)
-        elif 'c' not in [c_header_name[2], c_header_name[3]]:
-            failures.append(c_header_name)
-    print('successes', len(successes))
+    for pt in daily_by_pt:
+        matching_fields = [field for field in sparse_info if pt in field]  # fields with this production type in them
+        for field in matching_fields:  # Populate DailyByProductionType
+            setattr(daily_by_pt[pt], stripped_field(field),  sparse_info[field])
+        #for each zone
+            #create and populate DailyByZoneAndProductionType
+        daily_by_pt[pt].save()
+    #for each zone
+        #populate DailyByZone
+    #populate DailyControls
+
+    #whatever is left is a failure
+
+    # for c_header_name, value in sparse_info.items():
+    #     if save_value_to_proper_field(c_header_name, value, iteration, day, composite_field_map):
+    #         successes.append(c_header_name)
+    #     elif 'c' not in [c_header_name[2], c_header_name[3]]:
+    #         failures.append(c_header_name)
     print('failures', len(failures))
     print(failures)
