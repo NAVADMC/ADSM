@@ -2888,7 +2888,7 @@ PDF_lognormal_dist_to_string (PDF_lognormal_dist_t * dist)
  * @return a pointer to a newly-created PDF_dist_t structure.
  */
 PDF_dist_t *
-PDF_new_negative_binomial_dist (double s, double p)
+PDF_new_negative_binomial_dist (unsigned int s, double p)
 {
   PDF_dist_t *dist;
   PDF_negative_binomial_dist_t *t;    /* part specific to this distribution */
@@ -2903,7 +2903,7 @@ PDF_new_negative_binomial_dist (double s, double p)
   dist->has_inf_upper_tail = TRUE;
   dist->discrete = TRUE;
   t = &(dist->u.negative_binomial);
-  t->s = s;
+  t->s = (double) s;
   t->p = p;
 
 #if DEBUG
@@ -2928,7 +2928,7 @@ PDF_negative_binomial_dist_to_string (PDF_negative_binomial_dist_t * dist)
   char *chararray;
 
   s = g_string_new (NULL);
-  g_string_sprintf (s, "<negative binomial probability distribution\n s=%.2g p=%.2g>",
+  g_string_sprintf (s, "<negative binomial probability distribution\n s=%g p=%.2g>",
                     dist->s, dist->p);
   /* don't return the wrapper object */
   chararray = s->str;

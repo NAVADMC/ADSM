@@ -172,15 +172,15 @@ PAR_get_PDF_callback (void *data, GHashTable *dict)
       g_assert (errno != ERANGE);
 
       errno = 0;
-      beta = strtod (g_hash_table_lookup (dict, "beta"), NULL);
+      beta = strtod (g_hash_table_lookup (dict, "alpha2"), NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      location = strtod (g_hash_table_lookup (dict, "location"), NULL);
+      location = strtod (g_hash_table_lookup (dict, "min"), NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      scale = strtod (g_hash_table_lookup (dict, "scale"), NULL);
+      scale = strtod (g_hash_table_lookup (dict, "max"), NULL);
       g_assert (errno != ERANGE);
 
       dist = PDF_new_beta_dist (alpha, beta, location, scale);
@@ -203,6 +203,79 @@ PAR_get_PDF_callback (void *data, GHashTable *dict)
 
       dist = PDF_new_beta_pert_dist (min, mode, max);
     }
+  else if (strcmp (equation_type, "Bernoulli") == 0)
+    {
+      double p;
+
+      errno = 0;
+      p = strtod (g_hash_table_lookup (dict, "p"), NULL);
+      g_assert (errno != ERANGE);
+      g_assert ((0.0 < p) && (p < 1.0));
+
+      dist = PDF_new_bernoulli_dist (p);
+    }
+  else if (strcmp (equation_type, "Binomial") == 0)
+    {
+      long tmp;
+      unsigned int n;
+      double p;
+
+      errno = 0;
+      tmp = strtol (g_hash_table_lookup (dict, "s"), NULL, 10); /* base 10 */
+      g_assert (errno != ERANGE);
+      g_assert (tmp > 0);
+      g_assert (tmp <= UINT_MAX);
+      n = (unsigned int) tmp;
+
+      errno = 0;
+      p = strtod (g_hash_table_lookup (dict, "p"), NULL);
+      g_assert (errno != ERANGE);
+      g_assert ((0.0 < p) && (p < 1.0));
+
+      dist = PDF_new_binomial_dist (n, p);
+    }
+  else if (strcmp (equation_type, "Discrete Uniform") == 0)
+    {
+      long tmp;
+      int min, max;
+
+      errno = 0;
+      tmp = strtol (g_hash_table_lookup (dict, "min"), NULL, 10); /* base 10 */
+      g_assert (errno != ERANGE);
+      g_assert (tmp <= INT_MAX);
+      min = (int) tmp;
+
+      errno = 0;
+      tmp = strtol (g_hash_table_lookup (dict, "max"), NULL, 10); /* base 10 */
+      g_assert (errno != ERANGE);
+      g_assert (tmp <= INT_MAX);
+      max = (int) tmp;
+
+      dist = PDF_new_discrete_uniform_dist (min, max);
+    }
+  else if (strcmp (equation_type, "Exponential") == 0)
+    {
+      double mean;
+
+      errno = 0;
+      mean = strtod (g_hash_table_lookup (dict, "mean"), NULL);
+      g_assert (errno != ERANGE);
+
+      dist = PDF_new_exponential_dist (mean);
+    }
+  else if (strcmp (equation_type, "Fixed Value") == 0)
+    {
+      char *mode_as_text;
+      double mode;
+      errno = 0;
+      mode_as_text = g_hash_table_lookup (dict, "mode");
+      mode = strtod (mode_as_text, NULL);
+      if (errno == ERANGE)
+        {
+          g_error ("fixed value distribution parameter \"%s\" is not a number", mode_as_text);
+        }
+      dist = PDF_new_point_dist (mode);
+    }
   else if (strcmp (equation_type, "Gamma") == 0)
     {
       double alpha, beta;
@@ -216,6 +289,20 @@ PAR_get_PDF_callback (void *data, GHashTable *dict)
       g_assert (errno != ERANGE);
 
       dist = PDF_new_gamma_dist (alpha, beta);
+    }
+  else if (strcmp (equation_type, "Gaussian") == 0)
+    {
+      double mu, sigma;
+
+      errno = 0;
+      mu = strtod (g_hash_table_lookup (dict, "mean"), NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      sigma = strtod (g_hash_table_lookup (dict, "std_dev"), NULL);
+      g_assert (errno != ERANGE);
+
+      dist = PDF_new_gaussian_dist (mu, sigma);
     }
   else if (strcmp (equation_type, "Histogram") == 0)
     {
@@ -253,6 +340,36 @@ PAR_get_PDF_callback (void *data, GHashTable *dict)
       dist = PDF_new_histogram_dist (h);
       gsl_histogram_free (h);   
     }
+  else if (strcmp (equation_type, "Hypergeometric") == 0)
+    {
+      long tmp;
+      unsigned int n, d, m;
+
+      errno = 0;
+      tmp = strtol (g_hash_table_lookup (dict, "n"), NULL, 10); /* base 10 */
+      g_assert (errno != ERANGE);
+      g_assert (0 <= tmp && tmp <= UINT_MAX);
+      n = (unsigned int) tmp;
+
+      errno = 0;
+      tmp = strtol (g_hash_table_lookup (dict, "d"), NULL, 10); /* base 10 */
+      g_assert (errno != ERANGE);
+      g_assert (0 <= tmp && tmp <= UINT_MAX);
+      d = (unsigned int) tmp;
+
+      errno = 0;
+      tmp = strtol (g_hash_table_lookup (dict, "m"), NULL, 10); /* base 10 */
+      g_assert (errno != ERANGE);
+      g_assert (0 <= tmp && tmp <= UINT_MAX);
+      m = (unsigned int) tmp;
+
+      /* Parameter restrictions (from Vose) */
+      g_assert (0 < n && n <= m);
+      g_assert (0 < d && d <= m);
+      g_assert (m > 0);
+      
+      PDF_new_hypergeometric_dist (d, m - d, n);
+    }
   else if (strcmp (equation_type, "Inverse Gaussian") == 0)
     {
       double mu, lambda;
@@ -266,6 +383,20 @@ PAR_get_PDF_callback (void *data, GHashTable *dict)
       g_assert (errno != ERANGE);
 
       dist = PDF_new_inverse_gaussian_dist (mu, lambda);
+    }
+  else if (strcmp (equation_type, "Logistic") == 0)
+    {
+      double location, scale;
+
+      errno = 0;
+      location = strtod (g_hash_table_lookup (dict, "location"), NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      scale = strtod (g_hash_table_lookup (dict, "scale"), NULL);
+      g_assert (errno != ERANGE);
+
+      dist = PDF_new_logistic_dist (location, scale);
     }
   else if (strcmp (equation_type, "LogLogistic") == 0)
     {
@@ -284,6 +415,71 @@ PAR_get_PDF_callback (void *data, GHashTable *dict)
       g_assert (errno != ERANGE);
 
       dist = PDF_new_loglogistic_dist (location, scale, shape);
+    }
+  else if (strcmp (equation_type, "Lognormal") == 0)
+    {
+      double zeta, sigma;
+
+      errno = 0;
+      zeta = strtod (g_hash_table_lookup (dict, "mean"), NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      sigma = strtod (g_hash_table_lookup (dict, "std_dev"), NULL);
+      g_assert (errno != ERANGE);
+
+      dist = PDF_new_lognormal_dist (zeta, sigma);
+    }
+  else if (strcmp (equation_type, "Negative Binomial") == 0)
+    {
+      long tmp;
+      unsigned int s;
+      double p;
+
+      errno = 0;
+      tmp = strtol (g_hash_table_lookup (dict, "s"), NULL, 10); /* base 10 */
+      g_assert (errno != ERANGE);
+      g_assert (0 < tmp && tmp <= UINT_MAX);
+      s = (unsigned int) tmp;
+
+      errno = 0;
+      p = strtod (g_hash_table_lookup (dict, "p"), NULL);
+      g_assert (errno != ERANGE);
+      g_assert ((0.0 < p) && (p < 1.0));
+
+      dist = PDF_new_negative_binomial_dist (s, p);
+    }
+  else if (strcmp (equation_type, "Pareto") == 0)
+    {
+      double theta, a;
+
+      errno = 0;
+      theta = strtod (g_hash_table_lookup (dict, "theta"), NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      a = strtod (g_hash_table_lookup (dict, "a"), NULL);
+      g_assert (errno != ERANGE);
+
+      /* Parameter restrictions (from Vose) */
+      g_assert (theta > 0);
+      g_assert (a > 0);
+
+      PDF_new_pareto_dist (theta, a);
+    }
+  else if (strcmp (equation_type, "Pearson 5") == 0)
+    {
+      double alpha, beta;
+
+      errno = 0;
+      alpha = strtod (g_hash_table_lookup (dict, "alpha"), NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      beta = strtod (g_hash_table_lookup (dict, "beta"), NULL);
+      g_assert (errno != ERANGE);
+
+      dist = PDF_new_pearson5_dist (alpha, beta);
     }
   else if (strcmp (equation_type, "Piecewise") == 0)
     {
@@ -308,18 +504,15 @@ PAR_get_PDF_callback (void *data, GHashTable *dict)
       g_array_free (build.x, /* free_segment = */ TRUE);
       g_array_free (build.y, /* free_segment = */ TRUE);
     }
-  else if (strcmp (equation_type, "Point") == 0)
+  else if (strcmp (equation_type, "Poisson") == 0)
     {
-      char *mode_as_text;
-      double mode;
+      double mean;
+
       errno = 0;
-      mode_as_text = g_hash_table_lookup (dict, "mode");
-      mode = strtod (mode_as_text, NULL);
-      if (errno == ERANGE)
-        {
-          g_error ("point distribution parameter \"%s\" is not a number", mode_as_text);
-        }
-      dist = PDF_new_point_dist (mode);
+      mean = strtod (g_hash_table_lookup (dict, "mean"), NULL);
+      g_assert (errno != ERANGE);
+
+      dist = PDF_new_poisson_dist (mean);
     }
   else if (strcmp (equation_type, "Triangular") == 0)
     {
@@ -338,6 +531,20 @@ PAR_get_PDF_callback (void *data, GHashTable *dict)
       g_assert (errno != ERANGE);
 
       dist = PDF_new_triangular_dist (a, c, b);
+    }
+  else if (strcmp (equation_type, "Uniform") == 0)
+    {
+      double a, b;
+
+      errno = 0;
+      a = strtod (g_hash_table_lookup (dict, "min"), NULL);
+      g_assert (errno != ERANGE);
+
+      errno = 0;
+      b = strtod (g_hash_table_lookup (dict, "max"), NULL);
+      g_assert (errno != ERANGE);
+
+      dist = PDF_new_uniform_dist (a, b);
     }
   else if (strcmp (equation_type, "Weibull") == 0)
     {
@@ -390,188 +597,6 @@ PAR_get_PDF (sqlite3 *db, guint id)
       g_error ("%s", sqlerr);
     }
   g_free (query);
-
-  /* Find out what kind of distribution it is. */
-/*
-  e = scew_element_by_name (fn_param, "uniform");
-  if (e)
-    {
-      double a, b;
-
-      errno = 0;
-      a = strtod (scew_element_contents (scew_element_by_name (e, "a")), NULL);
-      g_assert (errno != ERANGE);
-      b = strtod (scew_element_contents (scew_element_by_name (e, "b")), NULL);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_uniform_dist (a, b);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "gaussian");
-  if (e)
-    {
-      double mean, stddev;
-
-      errno = 0;
-      mean = strtod (scew_element_contents (scew_element_by_name (e, "mean")), NULL);
-      g_assert (errno != ERANGE);
-      stddev = strtod (scew_element_contents (scew_element_by_name (e, "stddev")), NULL);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_gaussian_dist (mean, stddev);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "poisson");
-  if (e)
-    {
-      double mean;
-
-      errno = 0;
-      mean = strtod (scew_element_contents (scew_element_by_name (e, "mean")), NULL);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_poisson_dist (mean);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "exponential");
-  if (e)
-    {
-      double mean;
-
-      errno = 0;
-      mean = strtod (scew_element_contents (scew_element_by_name (e, "mean")), NULL);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_exponential_dist (mean);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "pearson5");
-  if (e)
-    {
-      double alpha, beta;
-
-      errno = 0;
-      alpha = strtod (scew_element_contents (scew_element_by_name (e, "alpha")), NULL);
-      g_assert (errno != ERANGE);
-      beta = strtod (scew_element_contents (scew_element_by_name (e, "beta")), NULL);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_pearson5_dist (alpha, beta);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "logistic");
-  if (e)
-    {
-      double location, scale;
-
-      errno = 0;
-      location = strtod (scew_element_contents (scew_element_by_name (e, "location")), NULL);
-      g_assert (errno != ERANGE);
-      scale = strtod (scew_element_contents (scew_element_by_name (e, "scale")), NULL);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_logistic_dist (location, scale);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "lognormal");
-  if (e)
-    {
-      double zeta, sigma;
-
-      errno = 0;
-      zeta = strtod (scew_element_contents (scew_element_by_name (e, "zeta")), NULL);
-      g_assert (errno != ERANGE);
-      sigma = strtod (scew_element_contents (scew_element_by_name (e, "sigma")), NULL);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_lognormal_dist (zeta, sigma);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "negative-binomial");
-  if (e)
-    {
-      double s, p;
-
-      errno = 0;
-      s = strtol (scew_element_contents (scew_element_by_name (e, "s")), NULL, 10);
-      g_assert (errno != ERANGE);
-      g_assert (s > 0);
-      p = strtod (scew_element_contents (scew_element_by_name (e, "p")), NULL);
-      g_assert (errno != ERANGE);
-      g_assert ((0.0 < p) && (p < 1.0));
-      dist = PDF_new_negative_binomial_dist (s, p);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "pareto");
-  if (e)
-    {
-      double theta, a;
-
-      errno = 0;
-      theta = strtod (scew_element_contents (scew_element_by_name (e, "theta")), NULL);
-      g_assert (errno != ERANGE);
-      a = strtol (scew_element_contents (scew_element_by_name (e, "a")), NULL, 10);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_pareto_dist (theta, a);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "bernoulli");
-  if (e)
-    {
-      double p;
-
-      errno = 0;
-      p = strtod (scew_element_contents (scew_element_by_name (e, "p")), NULL);
-      g_assert (errno != ERANGE);
-      g_assert ((0.0 < p) && (p < 1.0));
-      dist = PDF_new_bernoulli_dist (p);
-      goto end;
-    } 
-  e = scew_element_by_name (fn_param, "binomial");
-  if (e)
-    {
-      double n, p;
-
-      errno = 0;
-      n = strtol (scew_element_contents (scew_element_by_name (e, "n")), NULL, 10);
-      g_assert (errno != ERANGE);
-      g_assert (n > 0);
-      p = strtod (scew_element_contents (scew_element_by_name (e, "p")), NULL);
-      g_assert (errno != ERANGE);
-      g_assert ((0.0 < p) && (p < 1.0));
-      dist = PDF_new_binomial_dist (n, p);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "discrete-uniform");
-  if (e)
-    {
-      double min, max;
-
-      errno = 0;
-      min = strtol (scew_element_contents (scew_element_by_name (e, "min")), NULL, 10);
-      g_assert (errno != ERANGE);
-      max = strtol (scew_element_contents (scew_element_by_name (e, "max")), NULL, 10);
-      g_assert (errno != ERANGE);
-      dist = PDF_new_discrete_uniform_dist (min, max);
-      goto end;
-    }
-  e = scew_element_by_name (fn_param, "hypergeometric");
-  if (e)
-    {
-       n1 = d
-       n2 = m - d
-       t = n
-      
-      int n1, n2, t, m;
-
-      errno = 0;
-      n1 = strtol (scew_element_contents (scew_element_by_name (e, "d")), NULL, 10);
-      g_assert (errno != ERANGE);
-      g_assert (0 < n1);
-      m = strtol (scew_element_contents (scew_element_by_name (e, "m")), NULL, 10);
-      g_assert (errno != ERANGE);
-      g_assert (0 < m);
-      n2 = m - n1;
-      t = strtol (scew_element_contents (scew_element_by_name (e, "n")), NULL, 10);
-      g_assert (errno != ERANGE);
-      g_assert ((0 < t) && (t < (n1 + n2)));
-      dist = PDF_new_hypergeometric_dist (n1, n2, t);
-      goto end;
-    }
-*/
 
 #if DEBUG
   g_debug ("----- EXIT PAR_get_PDF");
