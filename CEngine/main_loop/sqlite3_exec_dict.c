@@ -40,7 +40,7 @@ int intermediate_callback (void *loc, int ncols,
       g_hash_table_replace (dict, colname[i], value[i]);
     }
 
-  args->callback (user_data, dict);
+  return args->callback (user_data, dict);
 }
 
 
