@@ -47,31 +47,73 @@ def getPdf( xml ):
 
 	if pdfType == 'beta':
 		args['alpha'] = float( firstChild.find( './alpha' ).text )
-		args['beta'] = float( firstChild.find( './beta' ).text )
-		args['location'] = float( firstChild.find( './location' ).text )
-		args['scale'] = float( firstChild.find( './scale' ).text )
+		args['alpha2'] = float( firstChild.find( './beta' ).text )
+		args['min'] = float( firstChild.find( './location' ).text )
+		args['max'] = float( firstChild.find( './scale' ).text )
 	elif pdfType == 'beta-pert':
 		args['equation_type'] = 'BetaPERT'
 		args['min'] = float( firstChild.find( './min' ).text )
 		args['mode'] = float( firstChild.find( './mode' ).text )
 		args['max'] = float( firstChild.find( './max' ).text )
+	elif pdfType == 'binomial':
+		args['n'] = float( firstChild.find( './n' ).text )
+		args['p'] = float( firstChild.find( './p' ).text )
+	elif pdfType == 'discrete-uniform':
+		args['equation_type'] = 'Discrete Uniform'
+		args['min'] = float( firstChild.find( './min' ).text )
+		args['max'] = float( firstChild.find( './max' ).text )
+	elif pdfType == 'exponential':
+		args['mean'] = float( firstChild.find( './mean' ).text )
 	elif pdfType == 'gamma':
 		args['alpha'] = float( firstChild.find( './alpha' ).text )
 		args['beta'] = float( firstChild.find( './beta' ).text )
+	elif pdfType == 'gaussian':
+		args['mean'] = float( firstChild.find( './mean' ).text )
+		args['std_dev'] = float( firstChild.find( './stddev' ).text )
+	elif pdfType == 'histogram':
+		raise NotImplementedError
+	elif pdfType == 'hypergeometric':
+		args['n'] = float( firstChild.find( './n' ).text )
+		args['d'] = float( firstChild.find( './d' ).text )
+		args['m'] = float( firstChild.find( './m' ).text )
 	elif pdfType == 'inverse-gaussian':
 		args['equation_type'] = 'Inverse Gaussian'
 		args['mean'] = float( firstChild.find( './mu' ).text )
 		args['shape'] = float( firstChild.find( './lambda' ).text )		
+	elif pdfType == 'logistic':
+		args['location'] = float( firstChild.find( './location' ).text )
+		args['scale'] = float( firstChild.find( './scale' ).text )
 	elif pdfType == 'loglogistic':
 		args['equation_type'] = 'LogLogistic'
 		args['location'] = float( firstChild.find( './location' ).text )
 		args['scale'] = float( firstChild.find( './scale' ).text )
 		args['shape'] = float( firstChild.find( './shape' ).text )
+	elif pdfType == 'lognormal':
+		args['mean'] = float( firstChild.find( './zeta' ).text )
+		args['std_dev'] = float( firstChild.find( './sigma' ).text )
+	elif pdfType == 'negative-binomial':
+		args['equation_type'] = 'Negative Binomial'
+		args['s'] = float( firstChild.find( './s' ).text )
+		args['p'] = float( firstChild.find( './p' ).text )
+	elif pdfType == 'pareto':
+		args['theta'] = float( firstChild.find( './theta' ).text )
+		args['a'] = float( firstChild.find( './a' ).text )
+	elif pdfType == 'pearson5':
+		args['equation_type'] = 'Pearson 5'
+		args['alpha'] = float( firstChild.find( './alpha' ).text )
+		args['beta'] = float( firstChild.find( './beta' ).text )
+	elif pdfType == 'piecewise':
+		raise NotImplementedError
 	elif pdfType == 'point':
 		args['mode'] = float( firstChild.text )
+	elif pdfType == 'poisson':
+		args['mean'] = float( firstChild.find( './mean' ).text )
 	elif pdfType == 'triangular':
 		args['min'] = float( firstChild.find( './a' ).text )
 		args['mode'] = float( firstChild.find( './c' ).text )
+		args['max'] = float( firstChild.find( './b' ).text )
+	elif pdfType == 'uniform':
+		args['min'] = float( firstChild.find( './a' ).text )
 		args['max'] = float( firstChild.find( './b' ).text )
 	elif pdfType == 'weibull':
 		args['alpha'] = float( firstChild.find( './alpha' ).text )
