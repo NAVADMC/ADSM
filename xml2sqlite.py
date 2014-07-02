@@ -365,7 +365,7 @@ def readParameters( parameterFileName ):
 		name = ( el.find( './name' ).text )
 		radius = float( el.find( './radius/value' ).text )
 		if radius > 0:
-			zone = Zone( zone_description=name, zone_radius=radius )
+			zone = Zone( name=name, radius=radius )
 			zone.save()
 	# end of loop over <zone-model> elements
 
@@ -453,7 +453,7 @@ def readParameters( parameterFileName ):
 
 		for fromTypeName in fromTypeNames:
 			effect, created = ZoneEffectOnProductionType.objects.get_or_create(
-			  zone = Zone.objects.get( zone_description=zoneName ),
+			  zone = Zone.objects.get( name=zoneName ),
 			  production_type = ProductionType.objects.get( name=fromTypeName )
 			)
 			if contactType == 'direct' or contactType == 'both':
@@ -503,7 +503,7 @@ def readParameters( parameterFileName ):
 			if 'zone' in el.attrib:
 				zoneName = el.attrib['zone']
 				effect, created = ZoneEffectOnProductionType.objects.get_or_create(
-				  zone = Zone.objects.get( zone_description=zoneName ),
+				  zone = Zone.objects.get( name=zoneName ),
 				  production_type = ProductionType.objects.get( name=typeName )
 				)
 				effect.zone_detection_multiplier = multiplier
@@ -1236,7 +1236,7 @@ def readParameters( parameterFileName ):
 				# assigned to this combination of production type and zone,
 				# retrieve it; otherwise, create a new one.
 				effect, created = ZoneEffectOnProductionType.objects.get_or_create(
-				  zone = Zone.objects.get( zone_description=zoneName ),
+				  zone = Zone.objects.get( name=zoneName ),
 				  production_type = ProductionType.objects.get( name=typeName )
 				)
 				effect.cost_of_surveillance_per_animal_day = surveillance
