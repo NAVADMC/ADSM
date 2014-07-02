@@ -2380,6 +2380,18 @@ matching_headers('tsdU')
 
 # This is a problem because the prodution type is inserted in the middle.  Solution: replace PT and PT_all with an underscores, then instead of appending the production type, replace('_', pt)
 
+# <markdowncell>
+
+# Wait, that won't work because Django forbids trailing underscores in field names.
+
+# <codecell>
+
+matching_headers('-')
+
+# <codecell>
+
+[x for x in cause_sweep if '-' in x]
+
 # <codecell>
 
 

@@ -608,11 +608,13 @@ class ProductionType(models.Model):
     description = models.TextField(blank=True, null=True)
 
     def clean_fields(self, exclude=None):
-        if re.findall(r'\W', self.name) or self.name.lower() in sqlite_keywords:
+        if re.findall(r'\W', self.name) or self.name.lower() in sqlite_keywords + 'All Ind Dir Air'.split():
             print("Conflicts:", re.findall(r'\W', self.name))
             raise ValidationError(self.name + " must only have alpha-numeric characters.  Keywords not allowed.")
         if re.match(r'[0-9]', self.name[0]):
             raise ValidationError(self.name + " cannot start with a number.")
+        if self.name in [z.zone_description for z in Zone.objects.all()]:  # forbid zone names
+            raise ValidationError("You really shouldn't have matching Zone and Production Type names.  It makes the output confusing.")
 
     def __str__(self):
         return self.name
@@ -640,6 +642,11 @@ class Zone(models.Model):
         help_text='Description of the zone', )
     zone_radius = models.FloatField(validators=[MinValueValidator(0.0)],
         help_text='Radius in kilometers of the zone', )
+
+    def clean_fields(self, exclude=None):
+        if self.zone_description in [pt.name for pt in ProductionType.objects.all()]:
+            raise ValidationError("Don't use matching Production Type and Zone names.  It makes the output confusing.")
+
     def __str__(self):
         return "%s: %skm" % (self.zone_description, self.zone_radius)
 
