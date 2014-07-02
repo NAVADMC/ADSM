@@ -14,6 +14,7 @@ from django.conf import settings
 from django.core.management import call_command
 import xml.etree.ElementTree as ET
 import warnings
+from pyproj import Proj
 
 
 
@@ -178,6 +179,13 @@ def readPopulation( populationFileName ):
 	for code, fullName in Unit.initial_state_choices:
 		stateCodes[fullName] = code
 
+	# Are the locations given in projected coordinates? If so, create an object
+	# that can convert them to lat-long.
+	projection = None
+	srs = xml.find( './spatial_reference/PROJ4' )
+	if srs != None:
+		projection = Proj( srs.text )			
+
 	for el in xml.findall( './/herd' ):
 		description = el.find( './id' )
 		if description == None:
@@ -191,8 +199,13 @@ def readPopulation( populationFileName ):
 			productionType = ProductionType( name=typeName )
 			productionType.save()
 		size = int( el.find( './size' ).text )
-		lat = float( el.find( './location/latitude' ).text )
-		long = float( el.find( './location/longitude' ).text )
+		if not projection:
+			lat = float( el.find( './location/latitude' ).text )
+			long = float( el.find( './location/longitude' ).text )
+		else:
+			x = float( el.find( './location/x' ).text )
+			y = float( el.find( './location/y' ).text )
+			long, lat = projection( x, y, inverse=True )
 
 		state = el.find( './status' ).text
 		if state not in stateCodes.values():
