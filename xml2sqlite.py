@@ -106,6 +106,7 @@ def getPdf( xml ):
 	elif pdfType == 'piecewise':
 		raise NotImplementedError
 	elif pdfType == 'point':
+		args['equation_type'] = 'Fixed Value'
 		args['mode'] = float( firstChild.text )
 	elif pdfType == 'poisson':
 		args['mean'] = float( firstChild.find( './mean' ).text )
@@ -326,7 +327,7 @@ def readParameters( parameterFileName ):
 
 	# Create a PDF that always returns 0. Will be used as the default when the
 	# transport delay PDF is missing.
-	zeroDelay = ProbabilityFunction( equation_type='Point', mode=0 )
+	zeroDelay = ProbabilityFunction( equation_type='Fixed Value', mode=0 )
 	zeroDelay.save()
 
 	for el in xml.findall( './/airborne-spread-model' ) + xml.findall( './/airborne-spread-exponential-model' ):
