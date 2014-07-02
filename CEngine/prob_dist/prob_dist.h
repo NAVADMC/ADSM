@@ -403,7 +403,7 @@ PDF_dist_t *PDF_new_pearson5_dist (double alpha, double beta);
 PDF_dist_t *PDF_new_logistic_dist (double location, double scale);
 PDF_dist_t *PDF_new_loglogistic_dist (double location, double scale, double shape);
 PDF_dist_t *PDF_new_lognormal_dist (double zeta, double sigma);
-PDF_dist_t *PDF_new_negative_binomial_dist (double s, double p);
+PDF_dist_t *PDF_new_negative_binomial_dist (unsigned int s, double p);
 PDF_dist_t *PDF_new_pareto_dist (double theta, double a);
 PDF_dist_t *PDF_new_bernoulli_dist (double p);
 PDF_dist_t *PDF_new_binomial_dist (unsigned int n, double p);

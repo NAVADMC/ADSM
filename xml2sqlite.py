@@ -14,6 +14,7 @@ from django.conf import settings
 from django.core.management import call_command
 import xml.etree.ElementTree as ET
 import warnings
+from pyproj import Proj
 
 
 
@@ -47,31 +48,73 @@ def getPdf( xml ):
 
 	if pdfType == 'beta':
 		args['alpha'] = float( firstChild.find( './alpha' ).text )
-		args['beta'] = float( firstChild.find( './beta' ).text )
-		args['location'] = float( firstChild.find( './location' ).text )
-		args['scale'] = float( firstChild.find( './scale' ).text )
+		args['alpha2'] = float( firstChild.find( './beta' ).text )
+		args['min'] = float( firstChild.find( './location' ).text )
+		args['max'] = float( firstChild.find( './scale' ).text )
 	elif pdfType == 'beta-pert':
 		args['equation_type'] = 'BetaPERT'
 		args['min'] = float( firstChild.find( './min' ).text )
 		args['mode'] = float( firstChild.find( './mode' ).text )
 		args['max'] = float( firstChild.find( './max' ).text )
+	elif pdfType == 'binomial':
+		args['n'] = float( firstChild.find( './n' ).text )
+		args['p'] = float( firstChild.find( './p' ).text )
+	elif pdfType == 'discrete-uniform':
+		args['equation_type'] = 'Discrete Uniform'
+		args['min'] = float( firstChild.find( './min' ).text )
+		args['max'] = float( firstChild.find( './max' ).text )
+	elif pdfType == 'exponential':
+		args['mean'] = float( firstChild.find( './mean' ).text )
 	elif pdfType == 'gamma':
 		args['alpha'] = float( firstChild.find( './alpha' ).text )
 		args['beta'] = float( firstChild.find( './beta' ).text )
+	elif pdfType == 'gaussian':
+		args['mean'] = float( firstChild.find( './mean' ).text )
+		args['std_dev'] = float( firstChild.find( './stddev' ).text )
+	elif pdfType == 'histogram':
+		raise NotImplementedError
+	elif pdfType == 'hypergeometric':
+		args['n'] = float( firstChild.find( './n' ).text )
+		args['d'] = float( firstChild.find( './d' ).text )
+		args['m'] = float( firstChild.find( './m' ).text )
 	elif pdfType == 'inverse-gaussian':
 		args['equation_type'] = 'Inverse Gaussian'
 		args['mean'] = float( firstChild.find( './mu' ).text )
 		args['shape'] = float( firstChild.find( './lambda' ).text )		
+	elif pdfType == 'logistic':
+		args['location'] = float( firstChild.find( './location' ).text )
+		args['scale'] = float( firstChild.find( './scale' ).text )
 	elif pdfType == 'loglogistic':
 		args['equation_type'] = 'LogLogistic'
 		args['location'] = float( firstChild.find( './location' ).text )
 		args['scale'] = float( firstChild.find( './scale' ).text )
 		args['shape'] = float( firstChild.find( './shape' ).text )
+	elif pdfType == 'lognormal':
+		args['mean'] = float( firstChild.find( './zeta' ).text )
+		args['std_dev'] = float( firstChild.find( './sigma' ).text )
+	elif pdfType == 'negative-binomial':
+		args['equation_type'] = 'Negative Binomial'
+		args['s'] = float( firstChild.find( './s' ).text )
+		args['p'] = float( firstChild.find( './p' ).text )
+	elif pdfType == 'pareto':
+		args['theta'] = float( firstChild.find( './theta' ).text )
+		args['a'] = float( firstChild.find( './a' ).text )
+	elif pdfType == 'pearson5':
+		args['equation_type'] = 'Pearson 5'
+		args['alpha'] = float( firstChild.find( './alpha' ).text )
+		args['beta'] = float( firstChild.find( './beta' ).text )
+	elif pdfType == 'piecewise':
+		raise NotImplementedError
 	elif pdfType == 'point':
 		args['mode'] = float( firstChild.text )
+	elif pdfType == 'poisson':
+		args['mean'] = float( firstChild.find( './mean' ).text )
 	elif pdfType == 'triangular':
 		args['min'] = float( firstChild.find( './a' ).text )
 		args['mode'] = float( firstChild.find( './c' ).text )
+		args['max'] = float( firstChild.find( './b' ).text )
+	elif pdfType == 'uniform':
+		args['min'] = float( firstChild.find( './a' ).text )
 		args['max'] = float( firstChild.find( './b' ).text )
 	elif pdfType == 'weibull':
 		args['alpha'] = float( firstChild.find( './alpha' ).text )
@@ -126,18 +169,75 @@ def getBool( xml ):
 
 
 
-def main():
-	# Make sure the database has all the correct tables.
-	call_command('syncdb', verbosity=0)
+def readPopulation( populationFileName ):
+	fp = open( populationFileName, 'rb' )
+	xml = ET.parse( fp ).getroot()
+	fp.close()
 
-	# sys.stdin is implicitly treated as having whatever encoding is returned
-	# by locale.getpreferredencoding(). That can cause problems: for example,
-	# if locale.getpreferredencoding() returns 'UTF-8' and the XML file we are
-	# reading is ISO-8859-1, then reads from sys.stdin will fail (even if the
-	# XML file properly declares its encoding). Using sys.stdin.detach() makes
-	# the input stream get treated as binary, and then it's up to ET.parse() to
-	# figure out the XML file's encoding.
-	xml = ET.parse( sys.stdin.detach() ).getroot()
+	# Create a dictionary to remap long state names to one-letter codes.
+	stateCodes = {}
+	for code, fullName in Unit.initial_state_choices:
+		stateCodes[fullName] = code
+		stateCodes[fullName.replace( ' ', '' )] = code
+
+	# Are the locations given in projected coordinates? If so, create an object
+	# that can convert them to lat-long.
+	projection = None
+	srs = xml.find( './spatial_reference/PROJ4' )
+	if srs != None:
+		projection = Proj( srs.text )			
+
+	for el in xml.findall( './/herd' ):
+		description = el.find( './id' )
+		if description == None:
+			description = ''
+		else:
+			description = description.text
+		typeName = el.find( './production-type' ).text
+		try:
+			productionType = ProductionType.objects.get( name=typeName )
+		except ProductionType.DoesNotExist:
+			productionType = ProductionType( name=typeName )
+			productionType.save()
+		size = int( el.find( './size' ).text )
+		if not projection:
+			lat = float( el.find( './location/latitude' ).text )
+			long = float( el.find( './location/longitude' ).text )
+		else:
+			x = float( el.find( './location/x' ).text )
+			y = float( el.find( './location/y' ).text )
+			long, lat = projection( x, y, inverse=True )
+
+		state = el.find( './status' ).text
+		if state not in stateCodes.values():
+			try:
+				state = stateCodes[state]
+			except KeyError:
+				raise Exception( '%s is not a valid state' % state )
+		daysInState = None
+		daysLeftInState = None
+
+		unit = Unit(
+		  production_type = productionType,
+		  latitude = lat,
+		  longitude = long,
+		  initial_state = state,
+		  days_in_initial_state = daysInState,
+		  days_left_in_initial_state = daysLeftInState,
+		  initial_size = size,
+		  user_defined_1 = description
+		)
+		unit.save()
+	# end of loop over units in XML file
+	
+	return # from readPopulation
+
+
+
+def readParameters( parameterFileName ):
+	fp = open( parameterFileName, 'rb' )
+	xml = ET.parse( fp ).getroot()
+	fp.close()
 
 	useEconomic = (xml.find( './/economic-model' ) != None)
 	scenario = Scenario(
@@ -166,8 +266,10 @@ def main():
     )
 	outputSettings.save()
 
-	# Gather the production type names into a set.
-	productionTypeNames = set()
+	# Make a set containing all production type names. Initialize with the
+	# names already found in readPopulation, then add any new ones found in the
+	# parameters file.
+	productionTypeNames = set( [productionType.name for productionType in ProductionType.objects.all()] )
 	for el in xml.findall( './/*[@production-type]' ):
 		productionTypeNames.update( getProductionTypes( el, 'production-type', [] ) )
 	for el in xml.findall( './/*[@to-production-type]' ):
@@ -179,8 +281,11 @@ def main():
 	if '' in productionTypeNames:
 		productionTypeNames.remove( '' )
 	for name in productionTypeNames:
-		productionType = ProductionType( name=name )
-		productionType.save()
+		try:
+			productionType = ProductionType.objects.get( name=name )
+		except ProductionType.DoesNotExist:
+			productionType = ProductionType( name=name )
+			productionType.save()
 
 	useAirborneExponentialDecay = (xml.find( './/airborne-spread-exponential-model' ) != None)
 	disease = Disease(
@@ -1138,6 +1243,20 @@ def main():
 		# end of loop over production types covered by this <economic-model> element
 	# end of loop over <economic-model> elements
 
+	return # from readParameters
+
+
+
+def main():
+	# Make sure the database has all the correct tables.
+	call_command('syncdb', verbosity=0)
+
+	populationFileName = sys.argv[1]
+	readPopulation( populationFileName )
+
+	parameterFileName = sys.argv[2]
+	readParameters( parameterFileName )
+
 
 
 if __name__ == "__main__":
@@ -1145,7 +1264,7 @@ if __name__ == "__main__":
 	# because "settings" must be filled in before models is imported, and
 	# import statements are allowed only at the top level in Python, not inside
 	# functions.
-	dbName = sys.argv[1]
+	dbName = sys.argv[3]
 	settings.configure(
 	  INSTALLED_APPS = ('ScenarioCreator',),
 	  DATABASES = {
