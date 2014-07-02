@@ -562,8 +562,7 @@ PAR_get_PDF_callback (void *data, GHashTable *dict)
     }
   else
     {
-      g_warning ("%s distribution not supported", equation_type);
-      g_assert_not_reached();
+      g_error ("%s distribution not supported", equation_type);
     }
   args->dist = dist;
   return 0;
