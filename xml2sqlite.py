@@ -168,18 +168,62 @@ def getBool( xml ):
 
 
 
-def main():
-	# Make sure the database has all the correct tables.
-	call_command('syncdb', verbosity=0)
+def readPopulation( populationFileName ):
+	fp = open( populationFileName, 'rb' )
+	xml = ET.parse( fp ).getroot()
+	fp.close()
 
-	# sys.stdin is implicitly treated as having whatever encoding is returned
-	# by locale.getpreferredencoding(). That can cause problems: for example,
-	# if locale.getpreferredencoding() returns 'UTF-8' and the XML file we are
-	# reading is ISO-8859-1, then reads from sys.stdin will fail (even if the
-	# XML file properly declares its encoding). Using sys.stdin.detach() makes
-	# the input stream get treated as binary, and then it's up to ET.parse() to
-	# figure out the XML file's encoding.
-	xml = ET.parse( sys.stdin.detach() ).getroot()
+	# Create a dictionary to remap long state names to one-letter codes.
+	stateCodes = {}
+	for code, fullName in Unit.initial_state_choices:
+		stateCodes[fullName] = code
+
+	for el in xml.findall( './/herd' ):
+		description = el.find( './id' )
+		if description == None:
+			description = ''
+		else:
+			description = description.text
+		typeName = el.find( './production-type' ).text
+		try:
+			productionType = ProductionType.objects.get( name=typeName )
+		except ProductionType.DoesNotExist:
+			productionType = ProductionType( name=typeName )
+			productionType.save()
+		size = int( el.find( './size' ).text )
+		lat = float( el.find( './location/latitude' ).text )
+		long = float( el.find( './location/longitude' ).text )
+
+		state = el.find( './status' ).text
+		if state not in stateCodes.values():
+			try:
+				state = stateCodes[state]
+			except KeyError:
+				raise Exception( '%s is not a valid state' % state )
+		daysInState = None
+		daysLeftInState = None
+
+		unit = Unit(
+		  production_type = productionType,
+		  latitude = lat,
+		  longitude = long,
+		  initial_state = state,
+		  days_in_initial_state = daysInState,
+		  days_left_in_initial_state = daysLeftInState,
+		  initial_size = size,
+		  user_defined_1 = description
+		)
+		unit.save()
+	# end of loop over units in XML file
+	
+	return # from readPopulation
+
+
+
+def readParameters( parameterFileName ):
+	fp = open( parameterFileName, 'rb' )
+	xml = ET.parse( fp ).getroot()
+	fp.close()
 
 	useEconomic = (xml.find( './/economic-model' ) != None)
 	scenario = Scenario(
@@ -208,8 +252,10 @@ def main():
     )
 	outputSettings.save()
 
-	# Gather the production type names into a set.
-	productionTypeNames = set()
+	# Make a set containing all production type names. Initialize with the
+	# names already found in readPopulation, then add any new ones found in the
+	# parameters file.
+	productionTypeNames = set( [productionType.name for productionType in ProductionType.objects.all()] )
 	for el in xml.findall( './/*[@production-type]' ):
 		productionTypeNames.update( getProductionTypes( el, 'production-type', [] ) )
 	for el in xml.findall( './/*[@to-production-type]' ):
@@ -221,8 +267,11 @@ def main():
 	if '' in productionTypeNames:
 		productionTypeNames.remove( '' )
 	for name in productionTypeNames:
-		productionType = ProductionType( name=name )
-		productionType.save()
+		try:
+			productionType = ProductionType.objects.get( name=name )
+		except ProductionType.DoesNotExist:
+			productionType = ProductionType( name=name )
+			productionType.save()
 
 	useAirborneExponentialDecay = (xml.find( './/airborne-spread-exponential-model' ) != None)
 	disease = Disease(
@@ -1180,6 +1229,20 @@ def main():
 		# end of loop over production types covered by this <economic-model> element
 	# end of loop over <economic-model> elements
 
+	return # from readParameters
+
+
+
+def main():
+	# Make sure the database has all the correct tables.
+	call_command('syncdb', verbosity=0)
+
+	populationFileName = sys.argv[1]
+	readPopulation( populationFileName )
+
+	parameterFileName = sys.argv[2]
+	readParameters( parameterFileName )
+
 
 
 if __name__ == "__main__":
@@ -1187,7 +1250,7 @@ if __name__ == "__main__":
 	# because "settings" must be filled in before models is imported, and
 	# import statements are allowed only at the top level in Python, not inside
 	# functions.
-	dbName = sys.argv[1]
+	dbName = sys.argv[3]
 	settings.configure(
 	  INSTALLED_APPS = ('ScenarioCreator',),
 	  DATABASES = {
