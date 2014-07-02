@@ -200,7 +200,6 @@ class ControlProtocolForm(BaseForm):
                     'trigger_vaccination_ring',
                     'vaccination_ring_radius',
                     'vaccination_priority',
-                    'vaccinate_retrospective_days',
                     ),
                 Tab('Cost Accounting',
                     'use_cost_accounting',

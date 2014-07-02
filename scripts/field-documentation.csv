@@ -132,8 +132,7 @@ test_indirect_back_traces, BooleanField, Indicator that diagnostic testing shoul
 test_specificity, FloatField, Test Specificity for units of this production type
 test_sensitivity, FloatField, Test Sensitivity for units of this production type
 test_delay_pdf, ForeignKey, Function that describes the delay in obtaining test results.
-vaccinate_retrospective_days, IntegerField, Number of days in retrospect that should be used to determine which herds to vaccinate.
-use_cost_accounting, BooleanField, 
+use_cost_accounting, BooleanField,
 cost_of_destruction_appraisal_per_unit, = MoneyField, The cost associated with appraisal for each destroyed unit of this type.
 cost_of_destruction_cleaning_per_unit, = MoneyField, The cost associated with cleaning and disinfection for each destroyed unit of this type.
 cost_of_euthanasia_per_animal, = MoneyField, The cost associated with euthanizing each destroyed animal of this type.

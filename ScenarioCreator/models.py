@@ -290,6 +290,8 @@ class ControlMasterPlan(models.Model):
     vaccination_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
         help_text='A string that identifies the primary priority order for vaccination.',
         choices=priority_choices(), )
+    # vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True,
+    #     help_text='Number of days in retrospect that should be used to determine which herds to vaccinate.', )
     def __str__(self):
         return str(self.name)
 
@@ -397,8 +399,6 @@ class ControlProtocol(models.Model):
         help_text='Test Sensitivity for units of this production type', )
     test_delay = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Function that describes the delay in obtaining test results.', )
-    vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True,
-        help_text='Number of days in retrospect that should be used to determine which herds to vaccinate.', )
     use_cost_accounting = models.BooleanField(default=False, )
     cost_of_destruction_appraisal_per_unit = MoneyField(default=0.0,
         help_text='The cost associated with appraisal for each destroyed unit of this type.', )
