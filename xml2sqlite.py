@@ -178,6 +178,7 @@ def readPopulation( populationFileName ):
 	stateCodes = {}
 	for code, fullName in Unit.initial_state_choices:
 		stateCodes[fullName] = code
+		stateCodes[fullName.replace( ' ', '' )] = code
 
 	# Are the locations given in projected coordinates? If so, create an object
 	# that can convert them to lat-long.
