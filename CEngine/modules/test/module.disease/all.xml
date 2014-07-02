@@ -1450,7 +1450,7 @@
       <td>tsdUNImm</td>
       <td>tsdUVImm</td>
       <td>tsdUDest</td>
-      <td>average-prevalence</td>
+      <td>averagePrevalence</td>
     </tr>
     <tr><td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1.0</td></tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1.0</td></tr>
@@ -1499,7 +1499,7 @@
       <td>tsdUNImm</td>
       <td>tsdUVImm</td>
       <td>tsdUDest</td>
-      <td>average-prevalence</td>
+      <td>averagePrevalence</td>
     </tr>
     <tr><td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0.5</td></tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0.5</td></tr>
@@ -1549,7 +1549,7 @@
       <td>tsdUNImm</td>
       <td>tsdUVImm</td>
       <td>tsdUDest</td>
-      <td>average-prevalence</td>
+      <td>averagePrevalence</td>
     </tr>
     <tr><td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0.25</td></tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0.75</td></tr>
@@ -1601,7 +1601,7 @@
       <td>tsdUNImm</td>
       <td>tsdUVImm</td>
       <td>tsdUDest</td>
-      <td>average-prevalence</td>
+      <td>averagePrevalence</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0.75</td></tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0.75</td></tr>
@@ -1652,7 +1652,7 @@
       <td>tsdUNImm</td>
       <td>tsdUVImm</td>
       <td>tsdUDest</td>
-      <td>average-prevalence</td>
+      <td>averagePrevalence</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0.75</td></tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0.25</td></tr>
@@ -1702,7 +1702,7 @@
       <td>tsdUNImm</td>
       <td>tsdUVImm</td>
       <td>tsdUDest</td>
-      <td>average-prevalence</td>
+      <td>averagePrevalence</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0.75</td></tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0.25</td></tr>
@@ -1754,7 +1754,7 @@
       <td>tsdUNImm</td>
       <td>tsdUVImm</td>
       <td>tsdUDest</td>
-      <td>average-prevalence</td>
+      <td>averagePrevalence</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0.83333</td></tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0.83333</td></tr>

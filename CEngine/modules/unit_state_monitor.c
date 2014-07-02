@@ -343,7 +343,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->num_animals_in_state_by_prodtype =
     RPT_new_reporting ("tsdA", RPT_group, RPT_daily);
   local_data->avg_prevalence =
-    RPT_new_reporting ("average-prevalence", RPT_real, RPT_daily);
+    RPT_new_reporting ("averagePrevalence", RPT_real, RPT_daily);
   local_data->last_day_of_disease =
     RPT_new_reporting ("diseaseDuration", RPT_integer, RPT_daily);
   g_ptr_array_add (self->outputs, local_data->num_units_in_state);

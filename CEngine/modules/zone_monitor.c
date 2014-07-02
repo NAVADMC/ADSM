@@ -570,7 +570,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->max_perimeter_day = RPT_new_reporting ("maxZonePerimeterDay", RPT_group, RPT_daily);
   local_data->final_perimeter = RPT_new_reporting ("finalZonePerimeter", RPT_group, RPT_daily);
   local_data->num_separate_areas =
-    RPT_new_reporting ("num-separate-areas", RPT_group, RPT_daily);
+    RPT_new_reporting ("numSeparateAreas", RPT_group, RPT_daily);
   local_data->num_units = RPT_new_reporting ("unitsInZone", RPT_group, RPT_daily);
   local_data->num_units_by_prodtype = RPT_new_reporting ("unitsInZone", RPT_group, RPT_daily);
   local_data->num_unit_days = RPT_new_reporting ("unitDaysInZone", RPT_group, RPT_daily);
