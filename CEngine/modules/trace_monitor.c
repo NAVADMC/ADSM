@@ -84,10 +84,6 @@ typedef struct
   RPT_reporting_t *cumul_nanimals_traced_by_contacttype;
   RPT_reporting_t *cumul_nanimals_traced_by_prodtype;
   RPT_reporting_t *cumul_nanimals_traced_by_contacttype_and_prodtype;
-  /* These two arrays are needed to form variable names like "trcUDirp" and
-   * "trcUIndPigsp". */
-  char *contact_type_name_with_p[ADSM_NCONTACT_TYPES];
-  char **production_type_name_with_p;
 }
 local_data_t;
 
@@ -234,44 +230,44 @@ handle_trace_result_event (struct adsm_module_t_ *self, EVT_trace_result_event_t
   drill_down_list[0] = contact_type_name;
 
   /* Record a potentially traced contact. */
-  drill_down_list[1] = local_data->production_type_name_with_p[identified_unit->production_type];
+  drill_down_list[1] = identified_unit->production_type_name;
   RPT_reporting_add_integer (local_data->nunits_potentially_traced, 1, NULL);
   if (local_data->nunits_potentially_traced_by_contacttype->frequency != RPT_never)
     RPT_reporting_add_integer1 (local_data->nunits_potentially_traced_by_contacttype,
-                                1, local_data->contact_type_name_with_p[event->contact_type]);
+                                1, contact_type_name);
   if (local_data->nunits_potentially_traced_by_prodtype->frequency != RPT_never)
     RPT_reporting_add_integer1 (local_data->nunits_potentially_traced_by_prodtype,
-                                1, local_data->production_type_name_with_p[identified_unit->production_type]);
+                                1, identified_unit->production_type_name);
   if (local_data->nunits_potentially_traced_by_contacttype_and_prodtype->frequency != RPT_never)
     RPT_reporting_add_integer (local_data->nunits_potentially_traced_by_contacttype_and_prodtype,
                                1, drill_down_list);
   RPT_reporting_add_integer (local_data->cumul_nunits_potentially_traced, 1, NULL);
   if (local_data->cumul_nunits_potentially_traced_by_contacttype->frequency != RPT_never)
     RPT_reporting_add_integer1 (local_data->cumul_nunits_potentially_traced_by_contacttype,
-                                1, local_data->contact_type_name_with_p[event->contact_type]);
+                                1, contact_type_name);
   if (local_data->cumul_nunits_potentially_traced_by_prodtype->frequency != RPT_never)
     RPT_reporting_add_integer1 (local_data->cumul_nunits_potentially_traced_by_prodtype,
-                                1, local_data->production_type_name_with_p[identified_unit->production_type]);
+                                1, identified_unit->production_type_name);
   if (local_data->cumul_nunits_potentially_traced_by_contacttype_and_prodtype->frequency != RPT_never)
     RPT_reporting_add_integer (local_data->cumul_nunits_potentially_traced_by_contacttype_and_prodtype,
                                1, drill_down_list);
   RPT_reporting_add_integer (local_data->nanimals_potentially_traced, identified_unit->size, NULL);
   if (local_data->nanimals_potentially_traced_by_contacttype->frequency != RPT_never)
     RPT_reporting_add_integer1 (local_data->nanimals_potentially_traced_by_contacttype,
-                                identified_unit->size, local_data->contact_type_name_with_p[event->contact_type]);
+                                identified_unit->size, contact_type_name);
   if (local_data->nanimals_potentially_traced_by_prodtype->frequency != RPT_never)
     RPT_reporting_add_integer1 (local_data->nanimals_potentially_traced_by_prodtype,
-                                identified_unit->size, local_data->production_type_name_with_p[identified_unit->production_type]);
+                                identified_unit->size, identified_unit->production_type_name);
   if (local_data->nanimals_potentially_traced_by_contacttype_and_prodtype->frequency != RPT_never)
     RPT_reporting_add_integer (local_data->nanimals_potentially_traced_by_contacttype_and_prodtype,
                                identified_unit->size, drill_down_list);
   RPT_reporting_add_integer (local_data->cumul_nanimals_potentially_traced, identified_unit->size, NULL);
   if (local_data->cumul_nanimals_potentially_traced_by_contacttype->frequency != RPT_never)
     RPT_reporting_add_integer1 (local_data->cumul_nanimals_potentially_traced_by_contacttype,
-                                identified_unit->size, local_data->contact_type_name_with_p[event->contact_type]);
+                                identified_unit->size, contact_type_name);
   if (local_data->cumul_nanimals_potentially_traced_by_prodtype->frequency != RPT_never)
     RPT_reporting_add_integer1 (local_data->cumul_nanimals_potentially_traced_by_prodtype,
-                                identified_unit->size, local_data->production_type_name_with_p[identified_unit->production_type]);
+                                identified_unit->size, identified_unit->production_type_name);
   if (local_data->cumul_nanimals_potentially_traced_by_contacttype_and_prodtype->frequency != RPT_never)
     RPT_reporting_add_integer (local_data->cumul_nanimals_potentially_traced_by_contacttype_and_prodtype,
                                identified_unit->size, drill_down_list);
@@ -279,7 +275,6 @@ handle_trace_result_event (struct adsm_module_t_ *self, EVT_trace_result_event_t
   if (event->traced == TRUE)
     {
       /* Record a successfully traced contact. */
-      drill_down_list[1] = identified_unit->production_type_name;
       RPT_reporting_add_integer (local_data->nunits_traced, 1, NULL);
       if (local_data->nunits_traced_by_contacttype->frequency != RPT_never)
         RPT_reporting_add_integer1 (local_data->nunits_traced_by_contacttype,
@@ -420,7 +415,6 @@ void
 local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
-  unsigned int i;
 
 #if DEBUG
   g_debug ("----- ENTER free (%s)", MODEL_NAME);
@@ -462,12 +456,6 @@ local_free (struct adsm_module_t_ *self)
   RPT_free_reporting (local_data->cumul_nanimals_traced_by_prodtype);
   RPT_free_reporting (local_data->cumul_nanimals_traced_by_contacttype_and_prodtype);
 
-  for (i = ADSM_DirectContact; i <= ADSM_IndirectContact; i++)
-    g_free (local_data->contact_type_name_with_p[i]);
-  for (i = 0; i < local_data->production_types->len; i++)
-    g_free (local_data->production_type_name_with_p[i]);
-  g_free (local_data->production_type_name_with_p);
-  
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
   g_free (self);
@@ -516,21 +504,21 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projections,
   self->free = local_free;
 
   local_data->nunits_potentially_traced =
-    RPT_new_reporting ("trnUAllp", RPT_integer, RPT_daily);
+    RPT_new_reporting ("trpnUAll", RPT_integer, RPT_daily);
   local_data->nunits_potentially_traced_by_contacttype =
-    RPT_new_reporting ("trnU", RPT_group, RPT_daily);
+    RPT_new_reporting ("trpnU", RPT_group, RPT_daily);
   local_data->nunits_potentially_traced_by_prodtype =
-    RPT_new_reporting ("trnU", RPT_group, RPT_daily);
+    RPT_new_reporting ("trpnU", RPT_group, RPT_daily);
   local_data->nunits_potentially_traced_by_contacttype_and_prodtype =
-    RPT_new_reporting ("trnU", RPT_group, RPT_daily);
+    RPT_new_reporting ("trpnU", RPT_group, RPT_daily);
   local_data->cumul_nunits_potentially_traced =
-    RPT_new_reporting ("trcUAllp", RPT_integer, RPT_daily);
+    RPT_new_reporting ("trpcUAllp", RPT_integer, RPT_daily);
   local_data->cumul_nunits_potentially_traced_by_contacttype =
-    RPT_new_reporting ("trcU", RPT_group, RPT_daily);
+    RPT_new_reporting ("trpcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_potentially_traced_by_prodtype =
-    RPT_new_reporting ("trcU", RPT_group, RPT_daily);
+    RPT_new_reporting ("trpcU", RPT_group, RPT_daily);
   local_data->cumul_nunits_potentially_traced_by_contacttype_and_prodtype =
-    RPT_new_reporting ("trcU", RPT_group, RPT_daily);
+    RPT_new_reporting ("trpcU", RPT_group, RPT_daily);
   local_data->nunits_traced =
     RPT_new_reporting ("trnUAll", RPT_integer, RPT_daily);
   local_data->nunits_traced_by_contacttype =
@@ -548,21 +536,21 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projections,
   local_data->cumul_nunits_traced_by_contacttype_and_prodtype =
     RPT_new_reporting ("trcU", RPT_group, RPT_daily);
   local_data->nanimals_potentially_traced =
-    RPT_new_reporting ("trnAAllp", RPT_integer, RPT_daily);
+    RPT_new_reporting ("trpnAAll", RPT_integer, RPT_daily);
   local_data->nanimals_potentially_traced_by_contacttype =
-    RPT_new_reporting ("trnA", RPT_group, RPT_daily);
+    RPT_new_reporting ("trpnA", RPT_group, RPT_daily);
   local_data->nanimals_potentially_traced_by_prodtype =
-    RPT_new_reporting ("trnA", RPT_group, RPT_daily);
+    RPT_new_reporting ("trpnA", RPT_group, RPT_daily);
   local_data->nanimals_potentially_traced_by_contacttype_and_prodtype =
-    RPT_new_reporting ("trnA", RPT_group, RPT_daily);
+    RPT_new_reporting ("trpnA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_potentially_traced =
-    RPT_new_reporting ("trcAAllp", RPT_integer, RPT_daily);
+    RPT_new_reporting ("trpcAAllp", RPT_integer, RPT_daily);
   local_data->cumul_nanimals_potentially_traced_by_contacttype =
-    RPT_new_reporting ("trcA", RPT_group, RPT_daily);
+    RPT_new_reporting ("trpcA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_potentially_traced_by_prodtype =
-    RPT_new_reporting ("trcA", RPT_group, RPT_daily);
+    RPT_new_reporting ("trpcA", RPT_group, RPT_daily);
   local_data->cumul_nanimals_potentially_traced_by_contacttype_and_prodtype =
-    RPT_new_reporting ("trcA", RPT_group, RPT_daily);
+    RPT_new_reporting ("trpcA", RPT_group, RPT_daily);
   local_data->nanimals_traced =
     RPT_new_reporting ("trnAAll", RPT_integer, RPT_daily);
   local_data->nanimals_traced_by_contacttype =
@@ -619,32 +607,20 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projections,
   /* These are the outputs broken down by contact type. */
   for (i = ADSM_DirectContact; i <= ADSM_IndirectContact; i++)
     {
-      /* Make a copy of each contact type name, but with "p" appended.  We need
-       * this to form variables like "trcUDirp" and "trcUIndp". */
-      local_data->contact_type_name_with_p[i] =
-        g_strdup_printf ("%sp", ADSM_contact_type_abbrev[i]);
-      
-      contact_type_name = local_data->contact_type_name_with_p[i];
+      contact_type_name = ADSM_contact_type_abbrev[i];
       RPT_reporting_add_integer1 (local_data->nunits_potentially_traced_by_contacttype, 0, contact_type_name);
       RPT_reporting_add_integer1 (local_data->cumul_nunits_potentially_traced_by_contacttype, 0, contact_type_name);
       RPT_reporting_add_integer1 (local_data->nanimals_potentially_traced_by_contacttype, 0, contact_type_name);
       RPT_reporting_add_integer1 (local_data->cumul_nanimals_potentially_traced_by_contacttype, 0, contact_type_name);
-      contact_type_name = ADSM_contact_type_abbrev[i];
       RPT_reporting_add_integer1 (local_data->nunits_traced_by_contacttype, 0, contact_type_name);
       RPT_reporting_add_integer1 (local_data->cumul_nunits_traced_by_contacttype, 0, contact_type_name);
       RPT_reporting_add_integer1 (local_data->nanimals_traced_by_contacttype, 0, contact_type_name);
       RPT_reporting_add_integer1 (local_data->cumul_nanimals_traced_by_contacttype, 0, contact_type_name);
     }
   /* These are the outputs broken down by production type. */
-  local_data->production_type_name_with_p = g_new0 (char *, local_data->production_types->len);
   for (i = 0; i < local_data->production_types->len; i++)
     {
-      /* Make a copy of each production type name, but with "p" appended.  We
-       * need this to form variables like "trcUCattlep". */
-       local_data->production_type_name_with_p[i] =
-         g_strdup_printf ("%sp", (char *) g_ptr_array_index (local_data->production_types, i));
-      
-      prodtype_name = local_data->production_type_name_with_p[i];
+      prodtype_name = (char *) g_ptr_array_index (local_data->production_types, i);
       RPT_reporting_add_integer1 (local_data->nunits_potentially_traced_by_prodtype, 0, prodtype_name);
       RPT_reporting_add_integer1 (local_data->cumul_nunits_potentially_traced_by_prodtype, 0, prodtype_name);
       RPT_reporting_add_integer1 (local_data->nanimals_potentially_traced_by_prodtype, 0, prodtype_name);
@@ -661,12 +637,11 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projections,
       drill_down_list[0] = ADSM_contact_type_abbrev[i];
       for (j = 0; j < local_data->production_types->len; j++)
         {
-          drill_down_list[1] = local_data->production_type_name_with_p[j];
+          drill_down_list[1] = (char *) g_ptr_array_index (local_data->production_types, j);
           RPT_reporting_add_integer (local_data->nunits_potentially_traced_by_contacttype_and_prodtype, 0, drill_down_list);
           RPT_reporting_add_integer (local_data->cumul_nunits_potentially_traced_by_contacttype_and_prodtype, 0, drill_down_list);
           RPT_reporting_add_integer (local_data->nanimals_potentially_traced_by_contacttype_and_prodtype, 0, drill_down_list);
           RPT_reporting_add_integer (local_data->cumul_nanimals_potentially_traced_by_contacttype_and_prodtype, 0, drill_down_list);
-          drill_down_list[1] = (char *) g_ptr_array_index (local_data->production_types, j);
           RPT_reporting_add_integer (local_data->nunits_traced_by_contacttype_and_prodtype, 0, drill_down_list);
           RPT_reporting_add_integer (local_data->cumul_nunits_traced_by_contacttype_and_prodtype, 0, drill_down_list);
           RPT_reporting_add_integer (local_data->nanimals_traced_by_contacttype_and_prodtype, 0, drill_down_list);
