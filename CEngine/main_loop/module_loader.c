@@ -109,9 +109,9 @@ get_exit_condition (char *exit_condition_text)
 
 
 /**
- * Instantiates a set of modules based on information in a parameter database.
+ * Instantiates a set of modules based on information in a scenario database.
  *
- * @param parameter_db a connection to the parameter database.
+ * @param scenario_db a connection to the scenario database.
  * @param units a list of units.
  * @param projection the map projection used to convert the units from latitude
  *   and longitude and x and y.
@@ -123,15 +123,14 @@ get_exit_condition (char *exit_condition_text)
  *   the simulation.
  * @param models a location in which to store the address of the array of
  *   pointers to models.
- * @param outputs a list of output variables to report.  Their names should
- *   correspond to output elements in the parameter file.
+ * @param outputs a list of output variables to report.
  * @param _exit_conditions a location in which to store a set of flags
  *   (combined with bitwise-or) specifying when the simulation should end
  *   (e.g., at the first detection, or when all disease is gone).
  * @return the number of models loaded.
  */
 int
-adsm_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
+adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
                    projPJ projection, ZON_zone_list_t * zones,
                    unsigned int *ndays, unsigned int *nruns,
                    adsm_module_t *** models, GPtrArray * outputs,
@@ -159,170 +158,170 @@ adsm_load_modules (sqlite3 *parameter_db, UNT_unit_list_t * units,
   g_debug ("----- ENTER adsm_load_models");
 #endif
 
-  *ndays = (unsigned int) PAR_get_int (parameter_db, "SELECT days FROM ScenarioCreator_outputsettings");
-  *nruns = (unsigned int) PAR_get_int (parameter_db, "SELECT iterations FROM ScenarioCreator_outputsettings");
+  *ndays = (unsigned int) PAR_get_int (scenario_db, "SELECT days FROM ScenarioCreator_outputsettings");
+  *nruns = (unsigned int) PAR_get_int (scenario_db, "SELECT iterations FROM ScenarioCreator_outputsettings");
   
   /*  This isn't a mandatory parameter.  If this field is NULL, the default is
       STOP_NORMAL. */
-  *_exit_conditions = get_exit_condition (PAR_get_text (parameter_db, "SELECT stop_criteria FROM ScenarioCreator_outputsettings"));
+  *_exit_conditions = get_exit_condition (PAR_get_text (scenario_db, "SELECT stop_criteria FROM ScenarioCreator_outputsettings"));
 
   /* Instantiate modules based on which features are active in the scenario. */
   tmp_models = g_ptr_array_new();
 
-  if (PAR_get_int (parameter_db, "SELECT COUNT(*) FROM ScenarioCreator_diseaseprogressionassignment") >= 1)
+  if (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_diseaseprogressionassignment") >= 1)
     {
       g_ptr_array_add (tmp_models,
-                       disease_model_new (parameter_db, units, projection, zones));
+                       disease_model_new (scenario_db, units, projection, zones));
     }
 
-  if (PAR_get_boolean (parameter_db, "SELECT include_airborne_spread FROM ScenarioCreator_disease"))
+  if (PAR_get_boolean (scenario_db, "SELECT include_airborne_spread FROM ScenarioCreator_disease"))
     {
       g_ptr_array_add (tmp_models,
-                       airborne_spread_model_new (parameter_db, units, projection, zones));
+                       airborne_spread_model_new (scenario_db, units, projection, zones));
     }
 
-  disable_all_controls = PAR_get_boolean (parameter_db, "SELECT disable_all_controls FROM ScenarioCreator_controlmasterplan");
+  disable_all_controls = PAR_get_boolean (scenario_db, "SELECT disable_all_controls FROM ScenarioCreator_controlmasterplan");
 
-  include_zones = (!disable_all_controls) && (PAR_get_int (parameter_db, "SELECT COUNT(*) FROM ScenarioCreator_zone") >= 1);
+  include_zones = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_zone") >= 1);
   if (include_zones)
     {
       g_ptr_array_add (tmp_models,
-                       zone_model_new (parameter_db, units, projection, zones));
+                       zone_model_new (scenario_db, units, projection, zones));
     }
 
-  if (PAR_get_boolean (parameter_db, "SELECT include_contact_spread FROM ScenarioCreator_disease"))
+  if (PAR_get_boolean (scenario_db, "SELECT include_contact_spread FROM ScenarioCreator_disease"))
     {
       g_ptr_array_add (tmp_models,
-                       contact_spread_model_new (parameter_db, units, projection, zones));
+                       contact_spread_model_new (scenario_db, units, projection, zones));
     }
 
-  include_detection = (!disable_all_controls) && (PAR_get_int (parameter_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND use_detection=1") >= 1);
+  include_detection = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND use_detection=1") >= 1);
   if (include_detection)
     {
       g_ptr_array_add (tmp_models,
-                       detection_model_new (parameter_db, units, projection, zones));
+                       detection_model_new (scenario_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
-                       quarantine_model_new (parameter_db, units, projection, zones));
+                       quarantine_model_new (scenario_db, units, projection, zones));
     }
 
   if (include_zones && include_detection)
     {
       g_ptr_array_add (tmp_models,
-                       basic_zone_focus_model_new (parameter_db, units, projection, zones));
+                       basic_zone_focus_model_new (scenario_db, units, projection, zones));
     }
 
-  include_tracing = (!disable_all_controls) && (PAR_get_int (parameter_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND use_tracing=1") >= 1);
+  include_tracing = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND use_tracing=1") >= 1);
   if (include_tracing)
     {
       g_ptr_array_add (tmp_models,
-                       contact_recorder_model_new (parameter_db, units, projection, zones));
+                       contact_recorder_model_new (scenario_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
-                       trace_model_new (parameter_db, units, projection, zones));
+                       trace_model_new (scenario_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
-                       trace_quarantine_model_new (parameter_db, units, projection, zones));
+                       trace_quarantine_model_new (scenario_db, units, projection, zones));
     }
 
   if (include_zones && include_tracing)
     {
       g_ptr_array_add (tmp_models,
-                       trace_zone_focus_model_new (parameter_db, units, projection, zones));
+                       trace_zone_focus_model_new (scenario_db, units, projection, zones));
     }
 
-  include_exams = (!disable_all_controls) && (PAR_get_int (parameter_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND (examine_direct_back_traces=1 OR examine_direct_forward_traces=1 OR examine_indirect_back_traces=1 OR examine_indirect_forward_traces = 1)") >= 1);
+  include_exams = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND (examine_direct_back_traces=1 OR examine_direct_forward_traces=1 OR examine_indirect_back_traces=1 OR examine_indirect_forward_traces = 1)") >= 1);
   if (include_exams)
     {
       g_ptr_array_add (tmp_models,
-                       trace_exam_model_new (parameter_db, units, projection, zones));
+                       trace_exam_model_new (scenario_db, units, projection, zones));
     }
 
-  include_testing = (!disable_all_controls) && (PAR_get_int (parameter_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND use_testing=1") >= 1);
+  include_testing = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND use_testing=1") >= 1);
   if (include_testing)
     {
       g_ptr_array_add (tmp_models,
-                       test_model_new (parameter_db, units, projection, zones));
+                       test_model_new (scenario_db, units, projection, zones));
     }
 
-  include_vaccination = (!disable_all_controls) && (PAR_get_int (parameter_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND vaccine_immune_period_id IS NOT NULL") >= 1);
+  include_vaccination = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND vaccine_immune_period_id IS NOT NULL") >= 1);
   if (include_vaccination)
     {
       g_ptr_array_add (tmp_models,
-                       vaccine_model_new (parameter_db, units, projection, zones));
+                       vaccine_model_new (scenario_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
-                       ring_vaccination_model_new (parameter_db, units, projection, zones));
+                       ring_vaccination_model_new (scenario_db, units, projection, zones));
     }
 
-  include_destruction = (!disable_all_controls) && (PAR_get_int (parameter_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND (use_destruction=1 OR destruction_is_a_ring_target=1 OR destroy_direct_back_traces=1 OR destroy_direct_forward_traces=1 OR destroy_indirect_back_traces=1 OR destroy_indirect_forward_traces=1)") >= 1);
+  include_destruction = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND (use_destruction=1 OR destruction_is_a_ring_target=1 OR destroy_direct_back_traces=1 OR destroy_direct_forward_traces=1 OR destroy_indirect_back_traces=1 OR destroy_indirect_forward_traces=1)") >= 1);
   if (include_destruction)
     {
       g_ptr_array_add (tmp_models,
-                       basic_destruction_model_new (parameter_db, units, projection, zones));
+                       basic_destruction_model_new (scenario_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
-                       ring_destruction_model_new (parameter_db, units, projection, zones));
+                       ring_destruction_model_new (scenario_db, units, projection, zones));
     }
 
   if (include_tracing && include_destruction)
     {
       g_ptr_array_add (tmp_models,
-                       trace_destruction_model_new (parameter_db, units, projection, zones));
+                       trace_destruction_model_new (scenario_db, units, projection, zones));
     }
 
   if (include_detection || include_vaccination || include_destruction)
     {
       g_ptr_array_add (tmp_models,
-                       resources_and_implementation_of_controls_model_new (parameter_db, units, projection, zones));
+                       resources_and_implementation_of_controls_model_new (scenario_db, units, projection, zones));
     }
   
-  if (PAR_get_boolean (parameter_db, "SELECT daily_states_filename IS NOT NULL AND daily_states_filename != '' FROM ScenarioCreator_outputsettings"))
+  if (PAR_get_boolean (scenario_db, "SELECT daily_states_filename IS NOT NULL AND daily_states_filename != '' FROM ScenarioCreator_outputsettings"))
     {
       g_ptr_array_add (tmp_models,
-                       state_table_writer_new (parameter_db, units, projection, zones));
+                       state_table_writer_new (scenario_db, units, projection, zones));
     }
   else
     {
       g_ptr_array_add (tmp_models,
-                       full_table_writer_new (parameter_db, units, projection, zones));
+                       full_table_writer_new (scenario_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
-                       unit_state_monitor_new (parameter_db, units, projection, zones));
+                       unit_state_monitor_new (scenario_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
-                       exposure_monitor_new (parameter_db, units, projection, zones));
+                       exposure_monitor_new (scenario_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
-                       infection_monitor_new (parameter_db, units, projection, zones));
+                       infection_monitor_new (scenario_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
-                       destruction_monitor_new (parameter_db, units, projection, zones));
+                       destruction_monitor_new (scenario_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
-                       destruction_list_monitor_new (parameter_db, units, projection, zones));
+                       destruction_list_monitor_new (scenario_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
-                       zone_monitor_new (parameter_db, units, projection, zones));
+                       zone_monitor_new (scenario_db, units, projection, zones));
       if (include_detection)
         {
           g_ptr_array_add (tmp_models,
-                           detection_monitor_new (parameter_db, units, projection, zones));
+                           detection_monitor_new (scenario_db, units, projection, zones));
           g_ptr_array_add (tmp_models,
-                           trace_monitor_new (parameter_db, units, projection, zones));
+                           trace_monitor_new (scenario_db, units, projection, zones));
         }
       if (include_exams)
         {
           g_ptr_array_add (tmp_models,
-                           exam_monitor_new (parameter_db, units, projection, zones));
+                           exam_monitor_new (scenario_db, units, projection, zones));
         }
       if (include_testing)
         {
           g_ptr_array_add (tmp_models,
-                           test_monitor_new (parameter_db, units, projection, zones));
+                           test_monitor_new (scenario_db, units, projection, zones));
         }
       if (include_vaccination)
         {
           g_ptr_array_add (tmp_models,
-                           vaccination_monitor_new (parameter_db, units, projection, zones));
+                           vaccination_monitor_new (scenario_db, units, projection, zones));
           g_ptr_array_add (tmp_models,
-                           vaccination_list_monitor_new (parameter_db, units, projection, zones));
+                           vaccination_list_monitor_new (scenario_db, units, projection, zones));
         }
 
-      include_economic = PAR_get_boolean (parameter_db, "SELECT (cost_track_zone_surveillance=1 OR cost_track_vaccination=1 OR cost_track_destruction=1) FROM ScenarioCreator_outputsettings");
+      include_economic = PAR_get_boolean (scenario_db, "SELECT (cost_track_zone_surveillance=1 OR cost_track_vaccination=1 OR cost_track_destruction=1) FROM ScenarioCreator_outputsettings");
       if (include_economic)
         {
           g_ptr_array_add (tmp_models,
-                           economic_model_new (parameter_db, units, projection, zones));
+                           economic_model_new (scenario_db, units, projection, zones));
         }
     }
 

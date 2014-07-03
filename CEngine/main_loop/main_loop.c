@@ -635,11 +635,11 @@ default_projection (UNT_unit_list_t * units)
 
 #ifdef USE_SC_GUILIB
 DLL_API void
-run_sim_main (sqlite3 *parameter_db,
+run_sim_main (sqlite3 *scenario_db,
               const char *output_dir, double fixed_rng_value, int verbosity, int seed, char *production_type_file)
 #else
 DLL_API void
-run_sim_main (sqlite3 *parameter_db,
+run_sim_main (sqlite3 *scenario_db,
               const char *output_dir, double fixed_rng_value, int verbosity, int seed)
 #endif
 {
@@ -730,11 +730,11 @@ run_sim_main (sqlite3 *parameter_db,
 #ifdef USE_SC_GUILIB
   if ( NULL != production_type_file )
   {
-    production_types = PRT_load_production_type_list ( parameter_db );
+    production_types = PRT_load_production_type_list ( scenario_db );
   };
 #endif
   /* Get the list of units. */
-  units = UNT_load_unit_list (parameter_db);
+  units = UNT_load_unit_list (scenario_db);
   nunits = UNT_unit_list_length (units);
 
 #if DEBUG
@@ -780,8 +780,8 @@ run_sim_main (sqlite3 *parameter_db,
 
   /* Get the simulation parameters. */
   nmodels =
-    adsm_load_modules (parameter_db, units, units->projection, zones,
-                              &ndays, &nruns, &models, reporting_vars, &exit_conditions );
+    adsm_load_modules (scenario_db, units, units->projection, zones,
+                       &ndays, &nruns, &models, reporting_vars, &exit_conditions );
   nzones = ZON_zone_list_length (zones);
 
   /* The clock time reporting variable is special -- it can only be reported
@@ -820,7 +820,7 @@ run_sim_main (sqlite3 *parameter_db,
     gsl_rng_set (gsl_format_rng, seed + me.rank);
   else
     {
-      seed = PAR_get_int (parameter_db, "SELECT (CASE WHEN random_seed IS NULL THEN -1 ELSE random_seed END) FROM ScenarioCreator_Scenario");
+      seed = PAR_get_int (scenario_db, "SELECT (CASE WHEN random_seed IS NULL THEN -1 ELSE random_seed END) FROM ScenarioCreator_Scenario");
       if (seed >= 0)
         {
           gsl_rng_set (gsl_format_rng, seed + me.rank);
@@ -835,7 +835,7 @@ run_sim_main (sqlite3 *parameter_db,
     gsl_rng_set (gsl_format_rng, seed);
   else
     {
-      seed = PAR_get_int (parameter_db, "SELECT (CASE WHEN random_seed IS NULL THEN -1 ELSE random_seed END) FROM ScenarioCreator_Scenario");
+      seed = PAR_get_int (scenario_db, "SELECT (CASE WHEN random_seed IS NULL THEN -1 ELSE random_seed END) FROM ScenarioCreator_Scenario");
       if (seed >= 0)
         {
           gsl_rng_set (gsl_format_rng, seed);

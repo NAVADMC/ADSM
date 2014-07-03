@@ -31,7 +31,7 @@ int
 main (int argc, char *argv[])
 {
   int verbosity = 0;
-  const char *parameter_db_name = NULL;
+  const char *scenario_db_name = NULL;
   const char *output_dir = NULL;
   double fixed_rng_value = -1;
   int seed = -1;
@@ -45,7 +45,7 @@ main (int argc, char *argv[])
     { NULL }
   };
   int sqlerr;
-  sqlite3 *parameter_db;
+  sqlite3 *scenario_db;
 
 #if HAVE_MPI && !CANCEL_MPI
   /* Initialize MPI. */
@@ -80,28 +80,28 @@ main (int argc, char *argv[])
       g_error ("option parsing failed: %s\n", option_error->message);
     }
   if (argc >= 1)
-    parameter_db_name = argv[1];
+    scenario_db_name = argv[1];
   else
     {
-      g_error ("Need name of parameter database");
+      g_error ("Need name of scenario database");
     }
   g_option_context_free (context);
 
-  sqlerr = sqlite3_open_v2 (parameter_db_name, &parameter_db, SQLITE_OPEN_READONLY, NULL);
+  sqlerr = sqlite3_open_v2 (scenario_db_name, &scenario_db, SQLITE_OPEN_READONLY, NULL);
   if (sqlerr !=  SQLITE_OK)
     {
-      g_error ("Error opening parameter database: %s", sqlite3_errstr (sqlerr));
+      g_error ("Error opening scenario database: %s", sqlite3_errstr (sqlerr));
     }
 
 #ifdef USE_SC_GUILIB
-  run_sim_main (parameter_db,
+  run_sim_main (scenario_db,
                 (char *)output_dir,
                 fixed_rng_value,
                 verbosity,
                 seed,
                 production_type_file);
 #else
-  run_sim_main (parameter_db,
+  run_sim_main (scenario_db,
                 (char *)output_dir,
                 fixed_rng_value,
                 verbosity,
@@ -112,7 +112,7 @@ main (int argc, char *argv[])
   MPI_Finalize ();
 #endif
 
-  sqlite3_close (parameter_db);
+  sqlite3_close (scenario_db);
 
   return EXIT_SUCCESS;
 }
