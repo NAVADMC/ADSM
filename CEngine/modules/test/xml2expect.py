@@ -116,8 +116,7 @@ expect_after {
 		category = getText (test.getElementsByTagName ("category")[0])
 		parameterFileName = getText (test.getElementsByTagName ("parameter-file")[0])
 		populationFileName = getText (test.getElementsByTagName ("population-file")[0])
-		print 'set params "test/module.%s/%s_%s.sqlite3"' % (category, parameterFileName, populationFileName)
-		print 'set herds "test/%s.xml"' % (populationFileName)
+		print 'set scenario "test/module.%s/%s_%s.sqlite3"' % (category, parameterFileName, populationFileName)
 
 		table = test.getElementsByTagName ("output")[0]
 		print 'set states {'
@@ -126,7 +125,7 @@ expect_after {
 		print '}'
 
 		shortName = getText (test.getElementsByTagName ("short-name")[0])
-		print 'progress_test $params $herds $states "%s"' % shortName
+		print 'progress_test $scenario $states "%s"' % shortName
 
 	# Print the stochastic herd-state tests.
 	tests = doc.getElementsByTagName ("stochastic-test")
@@ -145,8 +144,7 @@ expect_after {
 		category = getText (test.getElementsByTagName ("category")[0])
 		parameterFileName = getText (test.getElementsByTagName ("parameter-file")[0])
 		populationFileName = getText (test.getElementsByTagName ("population-file")[0])
-		print 'set params "test/module.%s/%s_%s.sqlite3"' % (category, parameterFileName, populationFileName)
-		print 'set herds "test/%s.xml"' % (populationFileName)
+		print 'set scenario "test/module.%s/%s_%s.sqlite3"' % (category, parameterFileName, populationFileName)
 
 		tables = test.getElementsByTagName ("output")
 		print 'set states {'
@@ -158,7 +156,7 @@ expect_after {
 		print '}'
 
 		shortName = getText (test.getElementsByTagName ("short-name")[0])
-		print 'stochastic_progress_test $params $herds $states "%s"' % shortName
+		print 'stochastic_progress_test $scenario $states "%s"' % shortName
 
 	# Print the deterministic output variable tests.
 	tests = doc.getElementsByTagName ("variable-test")
@@ -177,8 +175,7 @@ expect_after {
 		category = getText (test.getElementsByTagName ("category")[0])
 		parameterFileName = getText (test.getElementsByTagName ("parameter-file")[0])
 		populationFileName = getText (test.getElementsByTagName ("population-file")[0])
-		print 'set params "test/module.%s/%s_%s.sqlite3"' % (category, parameterFileName, populationFileName)
-		print 'set herds "test/%s.xml"' % (populationFileName)
+		print 'set scenario "test/module.%s/%s_%s.sqlite3"' % (category, parameterFileName, populationFileName)
 
 		table = test.getElementsByTagName ("output")[0]
 		rows = table.getElementsByTagName ("tr")
@@ -194,7 +191,7 @@ expect_after {
 		print '}'
 
 		shortName = getText (test.getElementsByTagName ("short-name")[0])
-		print 'variable_test $params $herds $values "%s"' % shortName
+		print 'variable_test $scenario $values "%s"' % shortName
 
 	# Print the stochastic output variable tests.
 	tests = doc.getElementsByTagName ("stochastic-variable-test")
@@ -213,8 +210,7 @@ expect_after {
 		category = getText (test.getElementsByTagName ("category")[0])
 		parameterFileName = getText (test.getElementsByTagName ("parameter-file")[0])
 		populationFileName = getText (test.getElementsByTagName ("population-file")[0])
-		print 'set params "test/module.%s/%s_%s.sqlite3"' % (category, parameterFileName, populationFileName)
-		print 'set herds "test/%s.xml"' % (populationFileName)
+		print 'set scenario "test/module.%s/%s_%s.sqlite3"' % (category, parameterFileName, populationFileName)
 		tables = test.getElementsByTagName ("output")
 
 		print 'set values {'
@@ -233,7 +229,7 @@ expect_after {
 		print '}'
 
 		shortName = getText (test.getElementsByTagName ("short-name")[0])
-		print 'stochastic_variable_test $params $herds $values "%s"' % shortName
+		print 'stochastic_variable_test $scenario $values "%s"' % shortName
 
 
 

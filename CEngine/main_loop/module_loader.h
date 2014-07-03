@@ -23,7 +23,7 @@
 
 
 /* Prototypes. */
-int adsm_load_modules (sqlite3 *parameter_db,
+int adsm_load_modules (sqlite3 *scenario_db,
                        UNT_unit_list_t *, projPJ, ZON_zone_list_t *,
                        unsigned int *ndays, unsigned int *nruns,
                        adsm_module_t *** models, GPtrArray * outputs, guint *_exit_conditions);
