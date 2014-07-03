@@ -215,8 +215,12 @@ def readPopulation( populationFileName ):
 				state = stateCodes[state]
 			except KeyError:
 				raise Exception( '%s is not a valid state' % state )
-		daysInState = None
-		daysLeftInState = None
+		daysInState = el.find( './days-in-status' )
+		if daysInState != None:
+			daysInState = int( daysInState.text )
+		daysLeftInState = el.find( './days-left-in-status' )
+		if daysLeftInState != None:
+			daysLeftInState = int( daysLeftInState.text )
 
 		unit = Unit(
 		  production_type = productionType,
