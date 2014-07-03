@@ -11,7 +11,7 @@ def camel_case_spaces(name_with_spaces):
 
 
 class DailyParser():
-    possible_zones = {x.zone_description for x in Zone.objects.all()}.union({'Background'})
+    possible_zones = {x.name for x in Zone.objects.all()}.union({'Background'})
     possible_pts = {x.name for x in ProductionType.objects.all()}
     failures = set()
 
@@ -55,12 +55,12 @@ class DailyParser():
         daily_instances = {}
         daily_instances["DailyByProductionType"] = {camel_case_spaces(pt.name):
             Results.models.DailyByProductionType(production_type=pt, iteration=iteration, day=day) for pt in ProductionType.objects.all()}
-        daily_instances["DailyByZone"] = {camel_case_spaces(zone.zone_description):
+        daily_instances["DailyByZone"] = {camel_case_spaces(zone.name):
                                               Results.models.DailyByZone(zone=zone, iteration=iteration, day=day) for zone in Zone.objects.all()}
         daily_by_pt_zone = {}  # same as above, the double loop was a bit much for a dict comprehension
         for pt in ProductionType.objects.all():
             for zone in Zone.objects.all():  # key is just concatenated
-                daily_by_pt_zone[camel_case_spaces(pt.name + zone.zone_description)] = \
+                daily_by_pt_zone[camel_case_spaces(pt.name + zone.name)] = \
                     Results.models.DailyByZoneAndProductionType(production_type=pt, zone=zone, iteration=iteration, day=day)
         daily_instances["DailyByZoneAndProductionType"] = daily_by_pt_zone
         daily_instances["DailyControls"] = {'': Results.models.DailyControls(iteration=iteration, day=day)}  # there's only one of these

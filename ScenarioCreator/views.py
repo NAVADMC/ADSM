@@ -8,7 +8,7 @@ from django.db import connections
 from django.conf import settings
 from ScenarioCreator.models import * # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
-from Settings.models import SmSession
+from Settings.models import SmSession, unsaved_changes
 from django.forms.models import modelformset_factory
 from django.db.models import Q
 from django.forms.models import inlineformset_factory
@@ -27,14 +27,6 @@ abstract_models = {
 
 def spaces_for_camel_case(text):
     return re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
-
-
-def unsaved_changes(new_value=None):
-    session = SmSession.objects.get_or_create(id=1)[0]  # This keeps track of the state for all views and is used by basic_context
-    if new_value is not None:  # you can still set it to False
-        session.unsaved_changes = new_value
-        session.save()
-    return session.unsaved_changes
 
 
 def add_breadcrumb_context(context, model_name, primary_key=None):
@@ -94,7 +86,6 @@ def disease_spread(request):
         if initialized_formset.is_valid():
             instances = initialized_formset.save()
             print(instances)
-            unsaved_changes(True)
             return redirect(request.path)  # update these numbers after database save because they've changed
 
     except ValidationError:
@@ -110,7 +101,6 @@ def save_formset_succeeded(MyFormSet, TargetModel, context, request):
         if initialized_formset.is_valid():
             instances = initialized_formset.save()
             print(instances)
-            unsaved_changes(True)
             context['formset'] = initialized_formset
             return True
         return False
@@ -184,7 +174,6 @@ def relational_function(request, primary_key=None, doCopy=False):
     context = initialize_relational_form({}, primary_key, request)
     context['formset'] = PointFormSet(instance=context['model'])
     if context['form'].is_valid():
-        unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
         if doCopy:
             context['form'].instance.pk = None  # This will cause a new instance to be created
             created_instance = context['form'].save()
@@ -213,7 +202,6 @@ def ajax_success(model_instance, model_name):
 
 def save_new_instance(initialized_form, request):
     model_instance = initialized_form.save()  # write to database
-    unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
     model_name = model_instance.__class__.__name__
     if request.is_ajax():
         return ajax_success(model_instance, model_name)
@@ -272,7 +260,6 @@ def edit_entry(request, primary_key):
         return redirect('/setup/%s/new/' % model_name)
     if initialized_form.is_valid() and request.method == 'POST':
         initialized_form.save()  # write instance updates to database
-        unsaved_changes(True)  # Changes have been made to the database that haven't been saved out to a file
 
     context = {'form': initialized_form,
                'title': str(initialized_form.instance)}
@@ -491,7 +478,6 @@ def upload_population(request):
     filename = request.POST.get('filename') if 'filename' in request.POST else handle_file_upload(request)
     model = Population(source_file=filename)
     model.save()
-    unsaved_changes(True)
     # wait for Population parsing (up to 5 minutes)
     session.reset_population_upload_status()
     return HttpResponse('{"status": "complete", "redirect": "/setup/Populations/"}', content_type="application/json")

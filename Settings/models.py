@@ -19,3 +19,11 @@ class SmSession(models.Model):
         self.population_upload_status = None
         self.population_upload_percent = 0
         self.save()
+
+
+def unsaved_changes(new_value=None):
+    session = SmSession.objects.get_or_create(id=1)[0]  # This keeps track of the state for all views and is used by basic_context
+    if new_value is not None:  # you can still set it to False
+        session.unsaved_changes = new_value
+        session.save()
+    return session.unsaved_changes
