@@ -17,4 +17,14 @@ import re
 
 # <codecell>
 
+daily_instances = {table_name:{} for table_name in ["DailyByProductionType", "DailyByZone"]}
+
+# <codecell>
+
+current = daily_instances["DailyByProductionType"]
+current['a'] = 'initialized'
+daily_instances
+
+# <codecell>
+
 

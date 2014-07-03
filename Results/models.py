@@ -42,6 +42,7 @@ class OutputBaseModel(models.Model):
 
 class OutputManager(models.Manager):
     def bulk_create(self, header_line, cmd_strings, *args, **kwargs):
+        # header_line = re.sub(r'trp(\w+)', r'tr\1p', header_line)  # TODO: temporary fix for p ordering
         headers = header_line.split(',')
         report_objects = []
         parser = Results.output_parser.DailyParser()
@@ -332,7 +333,7 @@ class DailyByZone(OutputBaseModel):
     maxZonePerimeterDay = models.IntegerField(blank=True, null=True, verbose_name=printable_name('maxZonePerimeterDay'))
     finalZoneArea       = models.IntegerField(blank=True, null=True, verbose_name=printable_name('finalZoneArea'))
     finalZonePerimeter  = models.IntegerField(blank=True, null=True, verbose_name=printable_name('finalZonePerimeter'))
-    num_separate_areas  = models.IntegerField(blank=True, null=True, verbose_name=printable_name('num_separate_areas'))
+    numSeparateAreas  = models.IntegerField(blank=True, null=True, verbose_name=printable_name('number of separate areas'))
 
 
 class DailyControls(OutputBaseModel):
@@ -347,14 +348,6 @@ class DailyControls(OutputBaseModel):
     detOccurred          = models.IntegerField(blank=True, null=True, verbose_name=printable_name('detOccurred'))
     costSurveillance     = models.IntegerField(blank=True, null=True, verbose_name=printable_name('costSurveillance'))
     vaccOccurred         = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vaccOccurred'))
-    vacwUMax             = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwUMax'))
-    vacwUMaxDay          = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwUMaxDay'))
-    vacwUDaysInQueue     = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwUDaysInQueue'))
-    vacwUTimeAvg         = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwUTimeAvg'))
-    vacwUTimeMax         = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwUTimeMax'))
-    vacwAMax             = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwAMax'))
-    vacwAMaxDay          = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwAMaxDay'))
-    vacwADaysInQueue     = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vacwADaysInQueue'))
     vaccSetup            = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vaccSetup'))
     vaccVaccination      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vaccVaccination'))
     vaccSubtotal         = models.IntegerField(blank=True, null=True, verbose_name=printable_name('vaccSubtotal'))
@@ -382,7 +375,7 @@ class DailyControls(OutputBaseModel):
     firstDetUInfAll      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('Units Infected at First Detection'))
     firstDetAInfAll      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('Animals Infected at First Detection'))
     ratio                = models.IntegerField(blank=True, null=True, verbose_name=printable_name('ratio'))
-    average_prevalence   = models.IntegerField(blank=True, null=True, verbose_name=printable_name('average_prevalence'))
+    averagePrevalence   = models.IntegerField(blank=True, null=True, verbose_name=printable_name('average_prevalence'))
     detcUqAll            = models.IntegerField(blank=True, null=True, verbose_name=printable_name('detcUqAll'))
 
 

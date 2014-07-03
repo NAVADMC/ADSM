@@ -12,7 +12,7 @@ def camel_case_spaces(name_with_spaces):
 
 class DailyParser():
     possible_zones = {x.name for x in Zone.objects.all()}.union({'Background'})
-    possible_pts = {x.name for x in ProductionType.objects.all()}
+    possible_pts = {x.name for x in ProductionType.objects.all()}.union({''})
     failures = set()
 
     def extract_name(self, c_header_name, possibilities):
@@ -40,31 +40,51 @@ class DailyParser():
         c_header_name, pt = self.extract_name(c_header_name, self.possible_pts)
         return c_header_name
 
-    def populate_tables_with_matching_fields(self, class_name, instance_dict, sparse_info):
-        field_map = self.build_composite_field_map(getattr(Results.models, class_name)() )  # creates a table instance
-        for suffix_key in instance_dict:  # create and populate DailyByZoneAndProductionType
-            for field in field_map:
-                if field + suffix_key in sparse_info:
-                    setattr(instance_dict[suffix_key], field_map[field], sparse_info[field + suffix_key])
-                    #TODO: handle trailing 'p' in some cases
-                else:
-                    self.failures.add(field+suffix_key)
+    def populate_tables_with_matching_fields(self, model_class_name, instance_dict, sparse_info):
+        """Populates all combinations of a particular table in one go.  This method must be called once for each
+        model class that you want populated.
+        model_class_name: named of table defined in Results.models
+        instance_dict: a dictionary containing one instance of every combination of parameters.  Keys are the "suffix" e.g. _Bull_HighRisk
+        sparse_info: Dictionary containing all the key, value pairs that the simulation put out
+        field_map: Keys are all column names to match to (prefix only), values are exact field name in that model.  The distinction allows
+            the program to map multiple columns onto the same field.  There are some special cases where column name is not exactly field + suffix.
+        """
+        field_map = self.build_composite_field_map(getattr(Results.models, model_class_name)() )  # creates a table instance
+        for suffix_key in instance_dict:  # For each combination: DailyByZoneAndProductionType with (Bull_HighRisk), (Swine_MediumRisk), etc.
+            for column_name in field_map:
+                if column_name + suffix_key in sparse_info:
+                    model_field = field_map[column_name]
+                    setattr(instance_dict[suffix_key], model_field, sparse_info[column_name + suffix_key])
+                    try:
+                        self.failures.remove(column_name + suffix_key)
+                    except KeyError:
+                        print('Error: Column was assigned twice.  Second copy in %s.%s for output column %s.' % (model_class_name, model_field, column_name + suffix_key))
             instance_dict[suffix_key].save()
 
+
     def construct_combinatorial_instances(self, day, iteration):
-        daily_instances = {}
-        daily_instances["DailyByProductionType"] = {camel_case_spaces(pt.name):
-            Results.models.DailyByProductionType(production_type=pt, iteration=iteration, day=day) for pt in ProductionType.objects.all()}
-        daily_instances["DailyByZone"] = {camel_case_spaces(zone.name):
-                                              Results.models.DailyByZone(zone=zone, iteration=iteration, day=day) for zone in Zone.objects.all()}
-        daily_by_pt_zone = {}  # same as above, the double loop was a bit much for a dict comprehension
-        for pt in ProductionType.objects.all():
-            for zone in Zone.objects.all():  # key is just concatenated
-                daily_by_pt_zone[camel_case_spaces(pt.name + zone.name)] = \
+        daily_instances = {table_name:{} for table_name in ["DailyByProductionType", "DailyByZone", "DailyByZoneAndProductionType", "DailyControls"]}
+
+        daily_by_pt = daily_instances["DailyByProductionType"]
+        for pt_name in self.possible_pts:
+            pt = ProductionType.objects.filter(name=pt_name).first()  # obj or None
+            daily_by_pt[camel_case_spaces(pt_name)] = \
+                Results.models.DailyByProductionType(production_type=pt, iteration=iteration, day=day)
+
+        daily_instances["DailyByZone"] = {camel_case_spaces(zone_name):
+            Results.models.DailyByZone(zone=Zone.objects.filter(name=zone_name).first(), iteration=iteration, day=day) for zone_name in self.possible_zones}
+
+        daily_by_pt_zone = daily_instances["DailyByZoneAndProductionType"]
+        for pt_name in self.possible_pts:
+            pt = ProductionType.objects.filter(name=pt_name).first()
+            for zone_name in self.possible_zones:
+                zone = Zone.objects.filter(name=zone_name).first()
+                daily_by_pt_zone[camel_case_spaces(zone_name + pt_name)] = \
                     Results.models.DailyByZoneAndProductionType(production_type=pt, zone=zone, iteration=iteration, day=day)
-        daily_instances["DailyByZoneAndProductionType"] = daily_by_pt_zone
+
         daily_instances["DailyControls"] = {'': Results.models.DailyControls(iteration=iteration, day=day)}  # there's only one of these
         return daily_instances
+
 
     def populate_db_from_daily_report(self, sparse_info):
         """Parses the C Engine stdout and populates the appropriate models with the information.  Takes one line
@@ -77,16 +97,15 @@ class DailyParser():
         day = sparse_info['Day']
         del sparse_info['Day']
 
+        self.failures = set(sparse_info.keys())  # whatever is left is a failure
+
         #construct the set of tables we're going to use for this day
         daily_instances = self.construct_combinatorial_instances(day, iteration)
 
         for class_name in daily_instances:
             self.populate_tables_with_matching_fields(class_name, daily_instances[class_name], sparse_info)  # there was a lot of preamble to get this line to work
-        #whatever is left is a failure
-
-        # c_header_name = re.sub('-', '_', c_header_name)  #TODO: a couple of names use hyphens.  Preferrably have them renamed on the C side
 
         print('failures', len(self.failures))
-        print(self.failures)
+        print(sorted(self.failures))
 
 
