@@ -85,10 +85,9 @@ sqlite_keywords = ['abort', 'action', 'add', 'after', 'all', 'alter', 'analyze',
 
 
 class BaseModel(models.Model):
-    def save(self, raw=False, force_insert=False,
-             force_update=False, using=None, update_fields=None):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         Settings.models.unsaved_changes(True)  # avoid infinite loop by ensuring unsaved_changes doesn't call BaseModel from SmSession
-        return super().save(raw, force_insert, force_update, using, update_fields)
+        return super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
         abstract = True
