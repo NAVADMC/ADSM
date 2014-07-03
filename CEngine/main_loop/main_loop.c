@@ -242,34 +242,6 @@
  *
  * <table>
  *   <tr>
- *     <td><b>Component:</b></td> <td>Expat</a></td>
- *   </tr>
- *   <tr>
- *     <td><b>Used for:</b></td> <td>reading XML files</td>
- *   </tr>
- *   <tr>
- *     <td><b>Author:</b></td> <td>James Clark</td>
- *   </tr>
- *   <tr>
- *     <td><b>License:</b></td>
- *     <td>
- *       "Permission is hereby granted, free of charge, to ... deal in the
- *       Software without restriction, including without limitation the rights
- *       to use, copy, modify, merge, publish, distribute, sublicense, and/or
- *       sell copies of the Software"
- *       [<a href="expat-COPYING.txt">read full text</a>]
- *     </td>
- *   </tr>
- *   <tr>
- *     <td><b>Website:</b></td>
- *     <td>
- *       <a href="http://expat.sourceforge.net/">http://expat.sourceforge.net/</a>
- *     </td>
- *   </tr>
- * </table>
- *
- * <table>
- *   <tr>
  *     <td><b>Component:</b></td> <td>R-tree library</a></td>
  *   </tr>
  *   <tr>
@@ -663,13 +635,11 @@ default_projection (UNT_unit_list_t * units)
 
 #ifdef USE_SC_GUILIB
 DLL_API void
-run_sim_main (const char *population_file,
-              sqlite3 *parameter_db,
+run_sim_main (sqlite3 *parameter_db,
               const char *output_dir, double fixed_rng_value, int verbosity, int seed, char *production_type_file)
 #else
 DLL_API void
-run_sim_main (const char *population_file,
-              sqlite3 *parameter_db,
+run_sim_main (sqlite3 *parameter_db,
               const char *output_dir, double fixed_rng_value, int verbosity, int seed)
 #endif
 {
@@ -760,31 +730,19 @@ run_sim_main (const char *population_file,
 #ifdef USE_SC_GUILIB
   if ( NULL != production_type_file )
   {
-    production_types = PRT_load_production_type_list ( production_type_file );
+    production_types = PRT_load_production_type_list ( parameter_db );
   };
 #endif
   /* Get the list of units. */
-  if (population_file)
-    {
-#ifdef USE_SC_GUILIB
-      units = UNT_load_unit_list ( population_file, production_types );
-#else
-      units = UNT_load_unit_list ( population_file );
-#endif
-      nunits = UNT_unit_list_length (units);
-    }
-  else
-    {
-      units = NULL;
-      nunits = 0;
-    }
+  units = UNT_load_unit_list (parameter_db);
+  nunits = UNT_unit_list_length (units);
 
 #if DEBUG
   g_debug ("%i units read", nunits);
 #endif
   if (nunits == 0)
     {
-      g_error ("no units in file %s", population_file);
+      g_error ("no units in scenario database");
     }
 
   /* Project the unit locations onto a flat map, if they aren't already. */

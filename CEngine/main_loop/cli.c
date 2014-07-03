@@ -32,24 +32,16 @@ main (int argc, char *argv[])
 {
   int verbosity = 0;
   const char *parameter_db_name = NULL;
-  const char *population_file = NULL;
-#ifdef USE_SC_GUILIB
-  const char *production_type_file = NULL;
-#endif
   const char *output_dir = NULL;
   double fixed_rng_value = -1;
   int seed = -1;
   GError *option_error = NULL;
   GOptionContext *context;
   GOptionEntry options[] = {
-    { "population-file", 'p', 0, G_OPTION_ARG_FILENAME, &population_file, "Population file", NULL },
     { "verbosity", 'V', 0, G_OPTION_ARG_INT, &verbosity, "Message verbosity level (0 = simulation output only, 1 = all debugging output)", NULL },
     { "output-dir", 'o', 0, G_OPTION_ARG_FILENAME, &output_dir, "Output directory", NULL },
     { "fixed-random-value", 'r', 0, G_OPTION_ARG_DOUBLE, &fixed_rng_value, "Fixed number to use instead of random numbers", NULL },
     { "rng-seed", 's', 0, G_OPTION_ARG_INT, &seed, "Seed used to initialize the random number generator", NULL },
-#ifdef USE_SC_GUILIB
-    { "production-types", 't', 0, G_OPTION_ARG_FILENAME, &production_type_file, "File containing production types used in this scenario", NULL },
-#endif
     { NULL }
   };
   int sqlerr;
@@ -87,7 +79,7 @@ main (int argc, char *argv[])
     {
       g_error ("option parsing failed: %s\n", option_error->message);
     }
-  if (argc >= 2)
+  if (argc >= 1)
     parameter_db_name = argv[1];
   else
     {
@@ -102,16 +94,14 @@ main (int argc, char *argv[])
     }
 
 #ifdef USE_SC_GUILIB
-  run_sim_main ((char *)population_file,
-                parameter_db,
+  run_sim_main (parameter_db,
                 (char *)output_dir,
                 fixed_rng_value,
                 verbosity,
                 seed,
                 production_type_file);
 #else
-  run_sim_main ((char *)population_file,
-                parameter_db,
+  run_sim_main (parameter_db,
                 (char *)output_dir,
                 fixed_rng_value,
                 verbosity,

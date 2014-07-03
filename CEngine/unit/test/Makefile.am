@@ -13,6 +13,7 @@ AM_YFLAGS = -d -v
 noinst_PROGRAMS = shell
 shell_SOURCES = shell.y scanner.l ../unit.c \
   $(top_srcdir)/rel_chart/rel_chart.c \
+  $(top_srcdir)/main_loop/sqlite3_exec_dict.c \
   $(top_srcdir)/replace/replace.c
 if USE_SC_GUILIB
   shell_SOURCES += $(top_srcdir)/general/general.c \
@@ -22,7 +23,7 @@ if USE_SC_GUILIB
     $(top_srcdir)/sc_guilib/sc_guilib_outputs.c \
     $(top_srcdir)/sc_guilib/sc_database.c
 endif
-shell_LDADD = @GLIB_LIBS@ @GSL_LIBS@
+shell_LDADD = @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@
 if HAVE_MPI
   shell_LDADD += @MPI_LIBS@
 endif

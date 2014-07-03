@@ -47,6 +47,7 @@
 #include "spatial_search.h"
 #include <glib.h>
 #include <proj_api.h>
+#include <sqlite3.h>
 
 #ifdef USE_SC_GUILIB
 #  include <production_type_data.h>
@@ -268,11 +269,9 @@ UNT_unit_list_t;
 UNT_unit_list_t *UNT_new_unit_list (void);
 
 #ifdef USE_SC_GUILIB 
-  UNT_unit_list_t *UNT_load_unit_list ( const char *filename, GPtrArray *production_types );
-  UNT_unit_list_t *UNT_load_unit_list_from_channel (GIOChannel *channel, const char *filename, GPtrArray *production_types);  
+  UNT_unit_list_t *UNT_load_unit_list ( sqlite3 *, GPtrArray *production_types );
 #else
-  UNT_unit_list_t *UNT_load_unit_list (const char *filename);
-  UNT_unit_list_t *UNT_load_unit_list_from_channel (GIOChannel *channel, const char *filename);
+  UNT_unit_list_t *UNT_load_unit_list (sqlite3 *);
 #endif
 
 

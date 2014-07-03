@@ -38,12 +38,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include "unit.h"
-#include <expat.h>
-/* Expat 1.95 has this constant on my Debian system, but not on Hammerhead's
- * Red Hat system.  ?? */
-#ifndef XML_STATUS_ERROR
-#  define XML_STATUS_ERROR 0
-#endif
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <stdlib.h>
@@ -768,634 +763,6 @@ UNT_unit_unproject (UNT_unit_t * unit, projPJ projection)
 
 
 /**
- * A special structure for passing a partially completed unit list to Expat's
- * tag handler functions.
- */
-typedef struct
-{
-  UNT_unit_list_t *units;
-  UNT_unit_t *unit;
-  GString *s; /**< for gathering character data */
-  char *filename; /**< for reporting the XML file's name in errors */
-  XML_Parser parser; /**< for reporting the line number in errors */
-  gboolean list_has_latlon; /**< TRUE if we have found a unit in the file with
-    its location given as latitude and longitude. */
-  gboolean list_has_xy; /**< TRUE if we have found a unit in the file with its
-    location given as x and y coordinates.  list_has_latlon and list_has_xy
-    cannot both be true. */
-  gboolean unit_has_lat; /**< TRUE if we have found a latitude element in the
-    unit currently being read, FALSE otherwise. */
-  gboolean unit_has_lon; /**< TRUE if we have found a longitude element in the
-    unit currently being read, FALSE otherwise. */
-  gboolean unit_has_x; /**< TRUE if we have found an x-coordinate element in
-    the unit currently being read, FALSE otherwise. */
-  gboolean unit_has_y; /**< TRUE if we have found a y-coordinate element in the
-    unit currently being read, FALSE otherwise. */
-}
-UNT_partial_unit_list_t;
-
-
-
-/**
- * Character data handler for an Expat population file parser.  Accumulates the
- * complete text for an XML element (which may come in pieces).
- *
- * @param userData a pointer to a UNT_partial_unit_list_t structure, cast to a
- *   void pointer.
- * @param s complete or partial character data from an XML element.
- * @param len the length of the character data.
- */
-static void
-charData (void *userData, const XML_Char * s, int len)
-{
-  UNT_partial_unit_list_t *partial;
-
-  partial = (UNT_partial_unit_list_t *) userData;
-  g_string_append_len (partial->s, s, len);
-}
-
-
-
-/**
- * Start element handler for an Expat population file parser.  Creates a new unit
- * when it encounters a \<herd\> tag.
- *
- * @param userData a pointer to a UNT_partial_unit_list_t structure, cast to a
- *   void pointer.
- * @param name the tag's name.
- * @param atts the tag's attributes.
- */
-static void
-startElement (void *userData, const char *name, const char **atts)
-{
-  UNT_partial_unit_list_t *partial;
-
-  partial = (UNT_partial_unit_list_t *) userData;
-  if (strcmp (name, "herds") == 0)
-    {
-      partial->list_has_latlon = partial->list_has_xy = FALSE;
-    }
-  if (strcmp (name, "herd") == 0)
-    {
-      partial->unit = UNT_new_unit (0, NULL, 1, 0, 0);
-      partial->unit_has_lat = partial->unit_has_lon = FALSE;
-      partial->unit_has_x = partial->unit_has_y = FALSE;
-    }
-  return;
-}
-
-
-
-/**
- * End element handler for an Expat population file parser.
- *
- * When it encounters an \</id\>, \</production-type\>, \</size\>,
- * \</latitude\>, \</longitude\>, or \</status\> tag, it fills in the
- * corresponding field in the unit most recently created by startElement and
- * clears the character data buffer.  This function issues a warning and fills
- * in a reasonable default value when fields are missing or invalid.
- *
- * When it encounters a \</herd\> tag, it adds the just-completed unit to the
- * unit list.
- *
- * @param userData a pointer to a UNT_partial_unit_list_t structure, cast to a
- *   void pointer.
- * @param name the tag's name.
- */
-static void
-endElement (void *userData, const char *name)
-{
-  UNT_partial_unit_list_t *partial;
-  char *filename;
-  XML_Parser parser;
-
-  partial = (UNT_partial_unit_list_t *) userData;
-  filename = partial->filename;
-  parser = partial->parser;
-
-  /* id tag */
-
-  if (strcmp (name, "id") == 0)
-    {
-      char *tmp;
-      tmp = g_strdup (partial->s->str);
-      g_strstrip (tmp);
-      /* Expat stores the text as UTF-8.  Convert to ISO-8859-1. */
-      partial->unit->official_id = g_convert_with_fallback (tmp, -1, "ISO-8859-1", "UTF-8", "?", NULL, NULL, NULL);
-      g_assert (partial->unit->official_id != NULL);
-      g_free (tmp);
-      g_string_truncate (partial->s, 0);
-    }
-
-  /* production-type tag */
-
-  else if (strcmp (name, "production-type") == 0)
-    {
-      GPtrArray *production_type_names;
-#ifdef USE_SC_GUILIB
-      GPtrArray *production_type_ids;
-#endif
-      gchar *tmp;
-      int i;
-
-      /* Expat stores the text as UTF-8. */
-      tmp = g_utf8_normalize (partial->s->str, -1, G_NORMALIZE_DEFAULT);
-      g_assert (tmp != NULL);
-      g_strstrip (tmp);
-      production_type_names = partial->units->production_type_names;
-#ifdef USE_SC_GUILIB
-      production_type_ids = partial->units->production_types;
-      /*  duplicate the production type names into the old production_type_names
-       *  list.  This will run only one time. */
-      if ( 0 >= production_type_names->len )
-      {
-      g_debug ("Building production_type_names list\n");
-
-        for (i = 0; i < production_type_ids->len; i++)
-          {
-            g_ptr_array_add (production_type_names, g_strdup( ((PRT_production_type_data_t*)(g_ptr_array_index (production_type_ids, i )) )->name));
-          };
-      }
-      g_debug ("Finding production type name in production_type_ids list\n");
-
-      for (i = 0; i < production_type_ids->len; i++)
-        {
-          if (g_utf8_collate (tmp, ((PRT_production_type_data_t*)(g_ptr_array_index (production_type_ids, i)) )->name  ) == 0)
-	  {
-#ifdef DEBUG
-	    g_debug ("Found production type: %s, production-type-id: %i, at index: %i\n", ((PRT_production_type_data_t*)(g_ptr_array_index (production_type_ids, i)) )->name, ((PRT_production_type_data_t*)(g_ptr_array_index (production_type_ids, i)) )->id, i );
-#endif
-             break;
-	   };
-        }
-
-      if ( i >= production_type_ids->len )
-      {
-        /*  We have a problem, this production type was never defined ...
-         *  we don't have any of the details necessary to use the SRC_GUILIB
-         *  reporting */
-          g_log (G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL,
-                 "  this productin type was never defined, can not proceed \"%s\"", tmp2);
-        g_assert( 0 == 1 );
-      }
-#else
-      for (i = 0; i < production_type_names->len; i++)
-        {
-          if (g_utf8_collate (tmp, g_ptr_array_index (production_type_names, i)) == 0)
-            break;
-        }
-      if (i == production_type_names->len)
-        {
-          /* We haven't encountered this production type before; add its name to
-           * the list. */
-          g_ptr_array_add (production_type_names, tmp);
-          #if DEBUG
-            g_debug ("  adding new production type \"%s\"", tmp);
-          #endif
-        }
-#endif
-      else
-        g_free (tmp);
-
-      partial->unit->production_type = i;
-
-#ifdef USE_SC_GUILIB
-      partial->unit->production_types = partial->units->production_types;
-#endif
-      partial->unit->production_type_name = g_ptr_array_index (production_type_names, i);
-      g_string_truncate (partial->s, 0);
-    }
-
-  /* size tag */
-
-  else if (strcmp (name, "size") == 0)
-    {
-      long int size;
-      char *tmp, *endptr;
-
-      tmp = g_strdup (partial->s->str);
-      g_strstrip (tmp);
-
-      errno = 0;
-      size = strtol (tmp, &endptr, 0);
-      if (tmp[0] == '\0')
-        {
-          g_warning ("size missing on line %lu of %s, setting to 1",
-                     (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          size = 1;
-        }
-      else if (errno == ERANGE || errno == EINVAL)
-        {
-          g_warning ("size is too large a number (\"%s\") on line %lu of %s, setting to 1",
-                     tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          size = 1;
-          errno = 0;
-        }
-      else if (*endptr != '\0')
-        {
-          g_warning ("size is not a number (\"%s\") on line %lu of %s, setting to 1",
-                     tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          size = 1;
-        }
-      else if (size < 1)
-        {
-          g_warning ("size cannot be less than 1 (\"%s\") on line %lu of %s, setting to 1",
-                     tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          size = 1;
-        }
-      partial->unit->size = (unsigned int) size;
-      g_free (tmp);
-      g_string_truncate (partial->s, 0);
-    }
-
-  /* latitude tag */
-
-  else if (strcmp (name, "latitude") == 0)
-    {
-      double lat;
-      char *tmp, *endptr;
-
-      if (partial->list_has_xy)
-        g_error ("cannot mix lat/lon and x/y locations on line %lu of %s",
-                 (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-      partial->list_has_latlon = TRUE;
-
-      tmp = g_strdup (partial->s->str);
-      g_strstrip (tmp);
-
-      lat = strtod (tmp, &endptr);
-      if (tmp[0] == '\0')
-        {
-          g_warning ("latitude missing on line %lu of %s, setting to 0",
-                     (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          lat = 0;
-        }
-      else if (errno == ERANGE)
-        {
-          g_warning ("latitude is too large a number (\"%s\") on line %lu of %s, setting to 0",
-                     tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          lat = 0;
-          errno = 0;
-        }
-      else if (endptr == tmp)
-        {
-          g_warning ("latitude is not a number (\"%s\") on line %lu of %s, setting to 0",
-                     tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          lat = 0;
-        }
-      UNT_unit_set_latitude (partial->unit, lat);
-      partial->unit_has_lat = TRUE;
-      /* If we have latitude and longitude and a projection, fill in x and y. */
-      if (partial->unit_has_lat && partial->unit_has_lon && partial->units->projection != NULL)
-        UNT_unit_project (partial->unit, partial->units->projection);
-      g_free (tmp);
-      g_string_truncate (partial->s, 0);
-    }
-
-  /* longitude tag */
-
-  else if (strcmp (name, "longitude") == 0)
-    {
-      double lon;
-      char *tmp, *endptr;
-
-      if (partial->list_has_xy)
-        g_error ("cannot mix lat/lon and x/y locations on line %lu of %s",
-                 (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-      partial->list_has_latlon = TRUE;
-
-      tmp = g_strdup (partial->s->str);
-      g_strstrip (tmp);
-
-      lon = strtod (tmp, &endptr);
-      if (tmp[0] == '\0')
-        {
-          g_warning ("longitude missing on line %lu of %s, setting to 0",
-                     (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          lon = 0;
-        }
-      else if (errno == ERANGE)
-        {
-          g_warning ("longitude is too large a number (\"%s\") on line %lu of %s, setting to 0",
-                     tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          lon = 0;
-          errno = 0;
-        }
-      else if (endptr == tmp)
-        {
-          g_warning ("longitude is not a number (\"%s\") on line %lu of %s, setting to 0",
-                     tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          lon = 0;
-        }
-      UNT_unit_set_longitude (partial->unit, lon);
-      partial->unit_has_lon = TRUE;
-      /* If we have latitude and longitude and a projection, fill in x and y. */
-      if (partial->unit_has_lat && partial->unit_has_lon && partial->units->projection != NULL)
-        UNT_unit_project (partial->unit, partial->units->projection);
-      g_free (tmp);
-      g_string_truncate (partial->s, 0);
-    }
-
-  /* x tag */
-
-  else if (strcmp (name, "x") == 0)
-    {
-      double x;
-      char *tmp, *endptr;
-
-      if (partial->list_has_latlon)
-        g_error ("cannot mix lat/lon and x/y locations on line %lu of %s",
-                 (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-      partial->list_has_xy = TRUE;
-
-      tmp = g_strdup (partial->s->str);
-      g_strstrip (tmp);
-
-      x = strtod (tmp, &endptr);
-      if (tmp[0] == '\0')
-        {
-          g_warning ("x-coordinate missing on line %lu of %s, setting to 0",
-                     (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          x = 0;
-        }
-      else if (errno == ERANGE)
-        {
-          g_warning ("x-coordinate is too large a number (\"%s\") on line %lu of %s, setting to 0",
-                     tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          x = 0;
-          errno = 0;
-        }
-      else if (endptr == tmp)
-        {
-          g_warning ("x-coordinate is not a number (\"%s\") on line %lu of %s, setting to 0",
-                     tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          x = 0;
-        }
-      partial->unit->x = x;
-      partial->unit_has_x = TRUE;
-      /* If we have x and y and a projection, fill in latitude and longitude. */
-      if (partial->unit_has_x && partial->unit_has_y && partial->units->projection != NULL)
-        UNT_unit_unproject (partial->unit, partial->units->projection);
-      g_free (tmp);
-      g_string_truncate (partial->s, 0);
-    }
-
-  /* y tag */
-
-  else if (strcmp (name, "y") == 0)
-    {
-      double y;
-      char *tmp, *endptr;
-
-      if (partial->list_has_latlon)
-        g_error ("cannot mix lat/lon and x/y locations on line %lu of %s",
-                 (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-      partial->list_has_xy = TRUE;
-
-      tmp = g_strdup (partial->s->str);
-      g_strstrip (tmp);
-
-      y = strtod (tmp, &endptr);
-      if (tmp[0] == '\0')
-        {
-          g_warning ("y-coordinate missing on line %lu of %s, setting to 0",
-                     (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          y = 0;
-        }
-      else if (errno == ERANGE)
-        {
-          g_warning ("y-coordinate is too large a number (\"%s\") on line %lu of %s, setting to 0",
-                     tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          y = 0;
-          errno = 0;
-        }
-      else if (endptr == tmp)
-        {
-          g_warning ("y-coordinate is not a number (\"%s\") on line %lu of %s, setting to 0",
-                     tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          y = 0;
-        }
-      partial->unit->y = y;
-      partial->unit_has_y = TRUE;
-      /* If we have x and y and a projection, fill in latitude and longitude. */
-      if (partial->unit_has_x && partial->unit_has_y && partial->units->projection != NULL)
-        UNT_unit_unproject (partial->unit, partial->units->projection);
-      g_free (tmp);
-      g_string_truncate (partial->s, 0);
-    }
-
-  /* status tag */
-
-  else if (strcmp (name, "status") == 0)
-    {
-      UNT_state_t state;
-      char *tmp, *endptr;
-
-      /* According to the XML Schema, status is allowed to be a numeric code or
-       * a string. */
-      tmp = g_strdup (partial->s->str);
-      g_strstrip (tmp);
-
-      if (tmp[0] == '\0')
-        {
-          g_warning ("state missing on line %lu of %s, setting to Susceptible",
-                     (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          state = Susceptible;
-        }
-      else if (isdigit (tmp[0]))
-        {
-          /* If it starts with a number, assume it is a numeric code. */
-          state = (UNT_state_t) strtol (tmp, &endptr, 0);
-          if (errno == EINVAL || errno == ERANGE || *endptr != '\0'
-              || state >= UNT_NSTATES)
-            {
-              g_warning
-                ("\"%s\" is not a valid numeric state code on line %lu of %s, setting to 0 (Susceptible)",
-                 tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-              state = Susceptible;
-            }
-        }
-      else if (strcasecmp (tmp, "S") == 0 || strcasecmp (tmp, "Susceptible") == 0)
-        state = Susceptible;
-      else if (strcasecmp (tmp, "L") == 0
-               || strcasecmp (tmp, "Latent") == 0 || strcasecmp (tmp, "Incubating") == 0)
-        state = Latent;
-      else if (strcasecmp (tmp, "B") == 0
-               || strcasecmp (tmp, "Infectious Subclinical") == 0
-               || strcasecmp (tmp, "InfectiousSubclinical") == 0
-               || strcasecmp (tmp, "Inapparent Shedding") == 0
-               || strcasecmp (tmp, "InapparentShedding") == 0)
-        state = InfectiousSubclinical;
-      else if (strcasecmp (tmp, "C") == 0
-               || strcasecmp (tmp, "Infectious Clinical") == 0
-               || strcasecmp (tmp, "InfectiousClinical") == 0)
-        state = InfectiousClinical;
-      else if (strcasecmp (tmp, "N") == 0
-               || strcasecmp (tmp, "Naturally Immune") == 0
-               || strcasecmp (tmp, "NaturallyImmune") == 0)
-        state = NaturallyImmune;
-      else if (strcasecmp (tmp, "V") == 0
-               || strcasecmp (tmp, "Vaccine Immune") == 0 || strcasecmp (tmp, "VaccineImmune") == 0)
-        state = VaccineImmune;
-      else if (strcasecmp (tmp, "D") == 0
-               || strcasecmp (tmp, "Dead") == 0 || strcasecmp (tmp, "Destroyed") == 0)
-        state = Destroyed;
-      else
-        {
-          g_warning ("\"%s\" is not a valid unit state on line %lu of %s, setting to Susceptible",
-                     tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          state = Susceptible;
-        }
-      partial->unit->state = partial->unit->initial_state = state;
-#ifdef USE_SC_GUILIB
-	  if ( state == Destroyed )
-		partial->unit->apparent_status = asDestroyed;
-	  else if ( state == VaccineImmune )
-		partial->unit->apparent_status = asVaccinated;
-	  else
-		partial->unit->apparent_status = asUnknown;
-
-	  partial->unit->apparent_status_day = 0;
-#endif
-      g_free (tmp);
-      g_string_truncate (partial->s, 0);
-    }
-
-  /* days-in-status tag */
-
-  else if (strcmp (name, "days-in-status") == 0)
-    {
-      long int days;
-      char *tmp, *endptr;
-
-      tmp = g_strdup (partial->s->str);
-      g_strstrip (tmp);
-
-      errno = 0;
-      days = strtol (tmp, &endptr, 0);
-      if (tmp[0] == '\0')
-        {
-          g_warning ("days-in-status missing on line %lu of %s, setting to 0",
-                     (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          days = 0;
-        }
-      else if (errno == ERANGE || errno == EINVAL)
-        {
-          g_warning
-            ("days-in-status is too large a number (\"%s\") on line %lu of %s, setting to 0",
-             tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          days = 0;
-          errno = 0;
-        }
-      else if (*endptr != '\0')
-        {
-          g_warning ("days-in-status is not a number (\"%s\") on line %lu of %s, setting to 0",
-                     tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          days = 0;
-        }
-      else if (days < 0)
-        {
-          g_warning
-            ("days-in-status cannot be negative (\"%s\") on line %lu of %s, setting to 0", tmp,
-             (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          days = 0;
-        }
-      partial->unit->days_in_initial_state = (int) days;
-      g_free (tmp);
-      g_string_truncate (partial->s, 0);
-    }
-
-  /* days-left-in-status tag */
-
-  else if (strcmp (name, "days-left-in-status") == 0)
-    {
-      long int days;
-      char *tmp, *endptr;
-
-      tmp = g_strdup (partial->s->str);
-      g_strstrip (tmp);
-
-      errno = 0;
-      days = strtol (tmp, &endptr, 0);
-      if (tmp[0] == '\0')
-        {
-          g_warning ("days-left-in-status missing on line %lu of %s, setting to 0",
-                     (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          days = 0;
-        }
-      else if (errno == ERANGE || errno == EINVAL)
-        {
-          g_warning
-            ("days-left-in-status is too large a number (\"%s\") on line %lu of %s, setting to 0",
-             tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          days = 0;
-          errno = 0;
-        }
-      else if (*endptr != '\0')
-        {
-          g_warning ("days-left-in-status is not a number (\"%s\") on line %lu of %s, setting to 0",
-                     tmp, (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          days = 0;
-        }
-      else if (days < 0)
-        {
-          g_warning
-            ("days-left-in-status cannot be negative (\"%s\") on line %lu of %s, setting to 0", tmp,
-             (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-          days = 0;
-        }
-      partial->unit->days_left_in_initial_state = (int) days;
-      g_free (tmp);
-      g_string_truncate (partial->s, 0);
-    }
-
-  /* herd tag */
-
-  else if (strcmp (name, "herd") == 0)
-    {
-#ifdef FIX_ME                   // FIX ME: the function call below causes the app to crash
-#if DEBUG
-      char *s;
-      s = UNT_unit_to_string (partial->unit);   // FIX ME: This function fails.
-      g_debug ("completed unit =\n%s", s);
-      free (s);
-#endif
-#endif
-      UNT_unit_list_append (partial->units, partial->unit);
-      UNT_free_unit (partial->unit, FALSE);
-    }
-
-  /* PROJ4 tag */
-
-  else if (strcmp (name, "PROJ4") == 0)
-    {
-      projPJ projection;
-      char *tmp;
-#if DEBUG
-      char *s;
-#endif
-
-      tmp = g_strdup (partial->s->str);
-      g_strstrip (tmp);
-      projection = pj_init_plus (tmp);
-      if (!projection)
-        {
-          g_error ("could not create map projection object: %s", pj_strerrno(pj_errno));
-        }
-#if DEBUG
-      s = pj_get_def (projection, 0);
-      g_debug ("projection = %s", s);
-      free (s);
-#endif
-      partial->units->projection = projection;
-      g_free (tmp);
-      g_string_truncate (partial->s, 0);
-    }
-}
-
-
-
-/**
  * Returns a text representation of a unit.
  *
  * @param unit a unit.
@@ -1585,151 +952,194 @@ UNT_unit_list_project (UNT_unit_list_t * units, projPJ projection)
 }
 
 
-
 /**
- * Loads a unit list from a file.  Use UNT_unit_list_project() to convert the
- * lats and lons to a flat map.  Also, a bounding rectangle has not been
- * computed; use either UNT_unit_list_unoriented_bounding_box() or
- * UNT_unit_list_oriented_bounding_box to fill that in.
+ * Retrieves one unit from the database.
  *
- * @param filename a file name.
- * @return a unit list.
+ * @param data pointer to a UNT_unit_list_t structure.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
+ * @return 0
  */
-UNT_unit_list_t *
-#ifdef USE_SC_GUILIB
-UNT_load_unit_list (const char *filename, GPtrArray *production_types)
-#else
-UNT_load_unit_list (const char *filename)
-#endif
+static int
+UNT_load_unit_callback (void *data, GHashTable *dict)
 {
-  GIOChannel *channel;
-  GError *error = NULL;
   UNT_unit_list_t *units;
+  UNT_unit_t *unit;
+  GPtrArray *production_type_names;
+  char *production_type_name;
+  unsigned int i;
+  UNT_production_type_t production_type_id;
+  unsigned int size;
 
-#if DEBUG
-  g_debug ("----- ENTER UNT_load_unit_list");
-#endif
+  units = (UNT_unit_list_t *) data;
 
-  channel = g_io_channel_new_file (filename, "r", &error);
-  if (channel == NULL)
+  /* Production type */
+  production_type_names = units->production_type_names;
+  production_type_name = g_hash_table_lookup (dict, "name");
+  for (i = 0; i < production_type_names->len; i++)
     {
-      g_error ("could not open file \"%s\": %s", filename, error->message);
+      if (g_utf8_collate (production_type_name,
+                          g_ptr_array_index (production_type_names, i)) == 0)
+        {
+          break;
+        }
     }
-#ifdef USE_SC_GUILIB
-  /* Treat the channel as binary data, since we'll leave it to the XML parser
-   * to figure out the encoding. */
-  g_io_channel_set_encoding (channel, NULL, &error);
-  units = UNT_load_unit_list_from_channel (channel, filename, production_types);
-#else
-  units = UNT_load_unit_list_from_channel (channel, filename);
-#endif
-  g_io_channel_shutdown (channel, /* flush = */ FALSE, &error);
+  if (i == production_type_names->len)
+    {
+      /* We haven't encountered this production type before; add its name to
+       * the list. */
+      g_ptr_array_add (production_type_names, g_strdup(production_type_name));
+      #if DEBUG
+        g_debug ("  adding new production type \"%s\"", production_type_name);
+      #endif
+    }
+  /* This next assignment loses the pointer to the production type name in the
+   * row returned by the query. But that is OK, because that string is owned
+   * by and will be freed by the SQLite library. */
+  production_type_name = (char *) g_ptr_array_index (production_type_names, i);
+  production_type_id = i;
 
-#if DEBUG
-  g_debug ("----- EXIT UNT_load_unit_list");
-#endif
-  return units;
+  /* Size */
+  {
+    long tmp;
+    errno = 0;
+    tmp = strtol (g_hash_table_lookup (dict, "initial_size"), NULL, 10); /* base 10 */
+    g_assert (errno != ERANGE && errno != EINVAL);
+    g_assert (1 <= tmp && tmp <= UINT_MAX);
+    size = (unsigned int) tmp;
+  }
+
+  unit = UNT_new_unit (production_type_id, production_type_name, size, 0, 0);
+
+  /* Location */
+  {
+    double lat, lon;
+
+    errno = 0;
+    lat = strtod (g_hash_table_lookup (dict, "latitude"), NULL);
+    g_assert (errno != ERANGE);
+    UNT_unit_set_latitude (unit, lat);
+
+    errno = 0;
+    lon = strtod (g_hash_table_lookup (dict, "longitude"), NULL);
+    g_assert (errno != ERANGE);
+    UNT_unit_set_longitude (unit, lon);
+  }
+
+  /* Initial state */
+  {
+    char *state_code;
+    UNT_state_t state;
+    
+    state_code = g_hash_table_lookup (dict, "initial_state");
+    if (g_ascii_strncasecmp (state_code, "S", 1) == 0)
+      state = Susceptible;
+    else if (g_ascii_strncasecmp (state_code, "L", 1) == 0)
+      state = Latent;
+    else if (g_ascii_strncasecmp (state_code, "B", 1) == 0)
+      state = InfectiousSubclinical;
+    else if (g_ascii_strncasecmp (state_code, "C", 1) == 0)
+      state = InfectiousClinical;
+    else if (g_ascii_strncasecmp (state_code, "N", 1) == 0)
+      state = NaturallyImmune;
+    else if (g_ascii_strncasecmp (state_code, "V", 1) == 0)
+      state = VaccineImmune;
+    else if (g_ascii_strncasecmp (state_code, "D", 1) == 0)
+      state = Destroyed;
+    else
+      {
+        g_warning ("\"%s\" is not a valid unit state, defaulting to Susceptible",
+                   state_code);
+        state = Susceptible;
+      }
+
+    unit->state = unit->initial_state = state;
+    #ifdef USE_SC_GUILIB
+	  if ( state == Destroyed )
+		unit->apparent_status = asDestroyed;
+	  else if ( state == VaccineImmune )
+		unit->apparent_status = asVaccinated;
+	  else
+		unit->apparent_status = asUnknown;
+
+	  unit->apparent_status_day = 0;
+	#endif
+  }
+  
+  /* Official ID (arbitrary name attached to this unit) */
+  unit->official_id = g_strdup (g_hash_table_lookup (dict, "user_defined_1"));
+
+  /* days-in-status and days-left-in-status tags */
+  {
+    char *days;
+    long tmp;
+
+    days = g_hash_table_lookup (dict, "days_in_initial_state");
+    if (days != NULL)
+      {
+        errno = 0;
+        tmp = strtol (days, NULL, /* base */ 10);
+        g_assert (errno != ERANGE && errno != EINVAL);
+        g_assert (0 <= tmp && tmp <= INT_MAX);
+        unit->days_in_initial_state = (int) tmp;
+      }
+
+    days = g_hash_table_lookup (dict, "days_left_in_initial_state");        
+    if (days != NULL)
+      {
+        errno = 0;
+        tmp = strtol (days, NULL, /* base */ 10);
+        g_assert (errno != ERANGE && errno != EINVAL);
+        g_assert (0 <= tmp && tmp <= INT_MAX);
+        unit->days_left_in_initial_state = (int) tmp;
+      }
+  }
+
+  UNT_unit_list_append (units, unit);
+  UNT_free_unit (unit, FALSE);
+
+  return 0;
 }
 
 
 
 /**
- * Loads a unit list from an open GIOChannel.
+ * Loads a unit list from a scenario database.  Use UNT_unit_list_project() to
+ * convert the lats and lons to a flat map.  Also, a bounding rectangle has not
+ * been computed; use either UNT_unit_list_unoriented_bounding_box() or
+ * UNT_unit_list_oriented_bounding_box to fill that in.
  *
- * @param channel a GIOChannel.  If NULL, defaults to stdin.  This function does not
- *   close the channel; that is the caller's responsibility.
- * @param filename a file name, if known, for reporting in error messages.  Use
- *   NULL if the file name is not known.
+ * @param db a scenario database.
  * @return a unit list.
  */
 UNT_unit_list_t *
 #ifdef USE_SC_GUILIB
-UNT_load_unit_list_from_channel (GIOChannel *channel, const char *filename, GPtrArray *production_types)
+UNT_load_unit_list (sqlite3 *db, GPtrArray *production_types)
 #else
-UNT_load_unit_list_from_channel (GIOChannel *channel, const char *filename)
+UNT_load_unit_list (sqlite3 *db)
 #endif
 {
   UNT_unit_list_t *units;
-  UNT_partial_unit_list_t to_pass;
-  XML_Parser parser;            /* to read the file */
-  int xmlerr;
-  GString *linebuf;
-  gsize linelen;
-  GIOStatus status;
-  GError *error = NULL;
+  char *sqlerr;
 
 #if DEBUG
-  g_debug ("----- ENTER UNT_load_unit_list_from_stream");
+  g_debug ("----- ENTER UNT_load_unit_list");
 #endif
 
-  if (channel == NULL)
-    {
-      #ifdef G_OS_UNIX
-        channel = g_io_channel_unix_new (STDIN_FILENO);
-      #endif
-      #ifdef G_OS_WIN32
-        channel = g_io_channel_win32_new_fd (STDIN_FILENO);
-      #endif
-    }
-  if (filename == NULL)
-    filename = "input";
-
   units = UNT_new_unit_list ();
-
 #ifdef USE_SC_GUILIB
   units->production_types = production_types;
 #endif
 
-  parser = XML_ParserCreate (NULL);
-  if (parser == NULL)
+  sqlite3_exec_dict (db, "SELECT name,latitude,longitude,initial_state,days_in_initial_state,days_left_in_initial_state,initial_size,user_defined_1 FROM ScenarioCreator_unit unit,ScenarioCreator_productiontype prodtype where unit.production_type_id=prodtype.id",
+                     UNT_load_unit_callback, units, &sqlerr);
+  if (sqlerr)
     {
-      g_warning ("failed to create parser for reading file of units");
-      goto end;
+      g_error ("%s", sqlerr);
     }
 
-  to_pass.units = units;
-  to_pass.unit = NULL;
-  to_pass.s = g_string_new (NULL);
-  to_pass.filename = (char *)filename;
-  to_pass.parser = parser;
-
-  XML_SetUserData (parser, &to_pass);
-  XML_SetElementHandler (parser, startElement, endElement);
-  XML_SetCharacterDataHandler (parser, charData);
-
-  linebuf = g_string_new(NULL);
-
-  while (1)
-    {
-      status = g_io_channel_read_line_string (channel, linebuf, &linelen, &error);
-      if (status == G_IO_STATUS_EOF || status == G_IO_STATUS_ERROR)
-        {
-          xmlerr = XML_Parse (parser, NULL, 0, 1);
-          if (xmlerr == XML_STATUS_ERROR)
-            {
-              g_error ("%s at line %lu in %s",
-                       XML_ErrorString (XML_GetErrorCode (parser)),
-                       (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-            }
-          break;
-        }
-      xmlerr = XML_Parse (parser, linebuf->str, linelen, 0);
-      if (xmlerr == XML_STATUS_ERROR)
-        {
-          g_error ("%s at line %lu in %s",
-                   XML_ErrorString (XML_GetErrorCode (parser)),
-                   (unsigned long) XML_GetCurrentLineNumber (parser), filename);
-        }
-    }
-
-  /* Clean up. */
-  XML_ParserFree (parser);
-  g_string_free (to_pass.s, TRUE);
-  g_string_free (linebuf, TRUE);
-
-end:
 #if DEBUG
-  g_debug ("----- EXIT UNT_load_unit_list_from_stream");
+  g_debug ("----- EXIT UNT_load_unit_list");
 #endif
   return units;
 }

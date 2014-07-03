@@ -97,8 +97,6 @@ AM_PATH_GSL(1.4,[have_gsl=true],AC_MSG_ERROR(cannot continue without GSL))
 AC_SUBST(GSL_CFLAGS)
 AC_SUBST(GSL_LIBS)
 
-AC_CHECK_LIB(expat,XML_Parse,,AC_MSG_ERROR(cannot continue without expat))
-
 if test "X${have_pkgconfig}" = Xyes
 then
   PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3], ,AC_MSG_ERROR(cannot continue without SQLite3))

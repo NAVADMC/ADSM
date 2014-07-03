@@ -239,14 +239,12 @@ UNT_zone_t;
 /* Function to start the simulation */
 #ifdef USE_SC_GUILIB
 DLL_API void
-run_sim_main (const char *population_file,
-              sqlite3 *parameter_db,
+run_sim_main (sqlite3 *parameter_db,
               const char *output_dir,
               double fixed_rng_value, int verbosity, int seed, char *production_type_file);
 #else
 DLL_API void
-run_sim_main (const char *population_file,
-              sqlite3 *parameter_db,
+run_sim_main (sqlite3 *parameter_db,
               const char *output_dir,
               double fixed_rng_value, int verbosity, int seed);
 #endif
