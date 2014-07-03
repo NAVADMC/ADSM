@@ -83,8 +83,7 @@ sqlite_keywords = ['abort', 'action', 'add', 'after', 'all', 'alter', 'analyze',
 
 
 class DynamicBlob(models.Model):
-    zone_perimeters = models.CharField(max_length=255, blank=True,
-        help_text='', )  # polygons?
+    zone_perimeters = models.CharField(max_length=255, blank=True, help_text='', )  # polygons?
 
 
 class Population(models.Model):
@@ -613,7 +612,7 @@ class ProductionType(models.Model):
             raise ValidationError(self.name + " must only have alpha-numeric characters.  Keywords not allowed.")
         if re.match(r'[0-9]', self.name[0]):
             raise ValidationError(self.name + " cannot start with a number.")
-        if self.name in [z.zone_description for z in Zone.objects.all()]:  # forbid zone names
+        if self.name in [z.name for z in Zone.objects.all()]:  # forbid zone names
             raise ValidationError("You really shouldn't have matching Zone and Production Type names.  It makes the output confusing.")
 
     def __str__(self):
@@ -638,17 +637,17 @@ class ProductionTypePairTransmission(models.Model):
 
 
 class Zone(models.Model):
-    zone_description = models.TextField(
+    name = models.TextField(
         help_text='Description of the zone', )
-    zone_radius = models.FloatField(validators=[MinValueValidator(0.0)],
+    radius = models.FloatField(validators=[MinValueValidator(0.0)],
         help_text='Radius in kilometers of the zone', )
 
     def clean_fields(self, exclude=None):
-        if self.zone_description in [pt.name for pt in ProductionType.objects.all()]:
+        if self.name in [pt.name for pt in ProductionType.objects.all()]:
             raise ValidationError("Don't use matching Production Type and Zone names.  It makes the output confusing.")
 
     def __str__(self):
-        return "%s: %skm" % (self.zone_description, self.zone_radius)
+        return "%s: %skm" % (self.name, self.radius)
 
 
 class ZoneEffectOnProductionType(models.Model):
@@ -665,7 +664,7 @@ class ZoneEffectOnProductionType(models.Model):
     cost_of_surveillance_per_animal_day = MoneyField(default=0.0,
         help_text='Cost of surveillance per animal per day in this zone.', )
     def __str__(self):
-        return "%s Zone -> %s" % (self.zone.zone_description, self.production_type)
+        return "%s Zone -> %s" % (self.zone.name, self.production_type)
 
 
 class ReadAllCodes(models.Model):

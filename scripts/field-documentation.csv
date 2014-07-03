@@ -246,8 +246,8 @@ indirect_contact_spread_model, ForeignKey, Disease spread mechanism used to mode
 airborne_contact_spread_model, ForeignKey, Disease spread mechanism used to model spread by airborne spread between these types.
 
 class Zone
-zone_description, TextField, Description of the zone
-zone_radius, FloatField, Radius in kilometers of the zone
+name, TextField, Description of the zone
+radius, FloatField, Radius in kilometers of the zone
 
 class ZoneEffectOnProductionType
 zone, ForeignKey, Zone for which this event occurred.
