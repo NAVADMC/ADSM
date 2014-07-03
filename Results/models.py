@@ -42,8 +42,8 @@ class OutputBaseModel(models.Model):
 
 class OutputManager(models.Manager):
     def bulk_create(self, header_line, cmd_strings, *args, **kwargs):
-        # header_line = re.sub(r'trp(\w+)', r'tr\1p', header_line)  # TODO: temporary fix for p ordering
-        headers = header_line.split(',')
+        header_line = re.sub(r'trp([^,_]+)', r'tr\1p', header_line)  # TODO: temporary fix for p ordering
+        headers = header_line.strip().split(',')  # there was a trailing /r/n to remove
         report_objects = []
         parser = Results.output_parser.DailyParser()
         for cmd_string in cmd_strings:

@@ -2654,7 +2654,73 @@ len(dailyPT)
 
 # <codecell>
 
-[key for key, value in grammars.items() if PT_All in value]
+[(key, value) for key, value in grammars.items() if PT_All in value]
+
+# <codecell>
+
+grammars['exp'] = [('c', 'n'),
+ ('U', 'A'),
+ ('', 'Dir', 'Ind', 'Air'),
+ ('', '_Bull_', '_Swine_')]
+
+# <codecell>
+
+[x for x in '''expnUAll
+expnUDir
+expnUInd
+expnUAir
+expnU_Bull_
+expnU_Swine_
+expnUDir_Bull_
+expnUDir_Swine_
+expnUInd_Bull_
+expnUInd_Swine_
+expnUAir_Bull_
+expnUAir_Swine_
+expcUAll
+expcUDir
+expcUInd
+expcUAir
+expcU_Bull_
+expcU_Swine_
+expcUDir_Bull_
+expcUDir_Swine_
+expcUInd_Bull_
+expcUInd_Swine_
+expcUAir_Bull_
+expcUAir_Swine_
+expnAAll
+expnADir
+expnAInd
+expnAAir
+expnA_Bull_
+expnA_Swine_
+expnADir_Bull_
+expnADir_Swine_
+expnAInd_Bull_
+expnAInd_Swine_
+expnAAir_Bull_
+expnAAir_Swine_
+expcAAll
+expcADir
+expcAInd
+expcAAir
+expcA_Bull_
+expcA_Swine_
+expcADir_Bull_
+expcADir_Swine_
+expcAInd_Bull_
+expcAInd_Swine_
+expcAAir_Bull_
+expcAAir_Swine_'''.split() if 'All' in x]
+
+# <codecell>
+
+[x for x in cause_sweep if 'inf' in x and 'All' in x]
+
+# <codecell>
+
+'asdhjk, asdajk, asda\r\n'.strip()
 
 # <codecell>
 

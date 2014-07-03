@@ -50,15 +50,18 @@ class DailyParser():
             the program to map multiple columns onto the same field.  There are some special cases where column name is not exactly field + suffix.
         """
         field_map = self.build_composite_field_map(getattr(Results.models, model_class_name)() )  # creates a table instance
-        for suffix_key in instance_dict:  # For each combination: DailyByZoneAndProductionType with (Bull_HighRisk), (Swine_MediumRisk), etc.
-            for column_name in field_map:
+        for suffix_key, instance in instance_dict.items():  # For each combination: DailyByZoneAndProductionType with (Bull_HighRisk), (Swine_MediumRisk), etc.
+            for column_name, model_field in field_map.items():
+                if suffix_key == '' and model_class_name == 'DailyByProductionType' \
+                        and column_name in 'deswU deswA expnU expcU expnA expcA infnU infcU infnA infcA'.split():
+                    column_name = column_name + "All"  # sometimes columns use "All" instead of ''
                 if column_name + suffix_key in sparse_info:
-                    model_field = field_map[column_name]
-                    setattr(instance_dict[suffix_key], model_field, sparse_info[column_name + suffix_key])
+                    setattr(instance, model_field, sparse_info[column_name + suffix_key])
                     try:
                         self.failures.remove(column_name + suffix_key)
                     except KeyError:
                         print('Error: Column was assigned twice.  Second copy in %s.%s for output column %s.' % (model_class_name, model_field, column_name + suffix_key))
+
             instance_dict[suffix_key].save()
 
 
