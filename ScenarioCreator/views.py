@@ -8,7 +8,7 @@ from django.db import connections
 from django.conf import settings
 from ScenarioCreator.models import * # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
-from Settings.models import SmSession
+from Settings.models import SmSession, unsaved_changes
 from django.forms.models import modelformset_factory
 from django.db.models import Q
 from django.forms.models import inlineformset_factory
@@ -27,14 +27,6 @@ abstract_models = {
 
 def spaces_for_camel_case(text):
     return re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
-
-
-def unsaved_changes(new_value=None):
-    session = SmSession.objects.get_or_create(id=1)[0]  # This keeps track of the state for all views and is used by basic_context
-    if new_value is not None:  # you can still set it to False
-        session.unsaved_changes = new_value
-        session.save()
-    return session.unsaved_changes
 
 
 def add_breadcrumb_context(context, model_name, primary_key=None):

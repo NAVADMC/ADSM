@@ -37,6 +37,7 @@ from ScenarioCreator.custom_fields import PercentField
 import re
 import time
 import ScenarioCreator.parser
+import Settings.models
 
 
 def chc(*choice_list):
@@ -67,6 +68,7 @@ def choice_char_from_value(value, map_tuple):
             return key
     return None
 
+
 def clean_filename(filename):
     filename = filename.strip()  # whitespace
     if filename:
@@ -74,7 +76,7 @@ def clean_filename(filename):
         if os.path.isfile(fname):  # Already exists?
             raise ValidationError("File already exists: " + fname)
         try:  # valid filename?  permissions?
-            os.access(fname, os.W_OK)  #I'm not opening a file because that creates a blank one
+            os.access(fname, os.W_OK)  # I'm not opening a file because that creates a blank one
         except:
             raise ValidationError("Cannot write to " + fname)
     return filename
@@ -82,11 +84,21 @@ def clean_filename(filename):
 sqlite_keywords = ['abort', 'action', 'add', 'after', 'all', 'alter', 'analyze', 'and', 'as', 'asc', 'attach', 'autoincrement', 'before', 'begin', 'between', 'by', 'cascade', 'case', 'cast', 'check', 'collate', 'column', 'commit', 'conflict', 'constraint', 'create', 'cross', 'current_date', 'current_time', 'current_timestamp', 'database', 'default', 'deferrable', 'deferred', 'delete', 'desc', 'detach', 'distinct', 'drop', 'each', 'else', 'end', 'escape', 'except', 'exclusive', 'exists', 'explain', 'fail', 'for', 'foreign', 'from', 'full', 'glob', 'group', 'having', 'if', 'ignore', 'immediate', 'in', 'index', 'indexed', 'initially', 'inner', 'insert', 'instead', 'intersect', 'into', 'is', 'isnull', 'join', 'key', 'left', 'like', 'limit', 'match', 'natural', 'no', 'not', 'notnull', 'null', 'of', 'offset', 'on', 'or', 'order', 'outer', 'plan', 'pragma', 'primary', 'query', 'raise', 'recursive', 'references', 'regexp', 'reindex', 'release', 'rename', 'replace', 'restrict', 'right', 'rollback', 'row', 'savepoint', 'select', 'set', 'table', 'temp', 'temporary', 'then', 'to', 'transaction', 'trigger', 'union', 'unique', 'update', 'using', 'vacuum', 'values', 'view', 'virtual', 'when', 'where', 'with', 'without']
 
 
+class BaseModel(models.Model):
+    def save(self, raw=False, force_insert=False,
+             force_update=False, using=None, update_fields=None):
+        Settings.models.unsaved_changes(True)  # avoid infinite loop by ensuring unsaved_changes doesn't call BaseModel from SmSession
+        return super().save(raw, force_insert, force_update, using, update_fields)
+
+    class Meta:
+        abstract = True
+
+
 class DynamicBlob(models.Model):
     zone_perimeters = models.CharField(max_length=255, blank=True, help_text='', )  # polygons?
 
 
-class Population(models.Model):
+class Population(BaseModel):
     source_file = models.CharField(max_length=255, blank=True)  # source_file made generic CharField so Django doesn't try to copy and save the raw file
 
     def clean_fields(self, exclude=None):
@@ -126,7 +138,7 @@ class Population(models.Model):
         print("Done creating", '{:,}'.format(len(data)), "Units took %i seconds" % (execution_time))
 
 
-class Unit(models.Model):
+class Unit(BaseModel):
     _population = models.ForeignKey(Population, default=lambda: Population.objects.get_or_create(id=1)[0], )  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
     production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
@@ -187,7 +199,7 @@ class Unit(models.Model):
         return "Unit(%s: (%s, %s)" % (self.production_type, self.latitude, self.longitude)
 
 
-class Function(models.Model):
+class Function(BaseModel):
     """Function is a model that defines either a Probability Distribution Function (pdf) or
  a relational function (relid) depending on which child class is used.  """
     name = models.CharField(max_length=255,
@@ -258,7 +270,7 @@ class RelationalFunction(Function):
         help_text='Specifies the descriptive units for the x axis in relational functions.', )
 
 
-class RelationalPoint(models.Model):
+class RelationalPoint(BaseModel):
     relational_function = models.ForeignKey(RelationalFunction)
     x = models.FloatField(validators=[MinValueValidator(0.0)], )
     y = models.FloatField(validators=[MinValueValidator(0.0)], )
@@ -266,7 +278,7 @@ class RelationalPoint(models.Model):
         return '%i Point(%s, %s)' % (self.relational_function.id, self.x, self.y)
 
 
-class ControlMasterPlan(models.Model):
+class ControlMasterPlan(BaseModel):
     name = models.CharField(default="Control Master Plan", max_length=255)
     disable_all_controls = models.BooleanField(default=False,
         help_text='Disable all Control activities for this simulation run.  Normally used temporarily to test uncontrolled disease spread.')
@@ -295,7 +307,7 @@ class ControlMasterPlan(models.Model):
         return str(self.name)
 
 
-class ControlProtocol(models.Model):
+class ControlProtocol(BaseModel):
     name = models.CharField(max_length=255,
         help_text='Name your Protocol so you can recognize it later. Ex:"Quarantine"',)
     use_detection = models.BooleanField(default=False,
@@ -417,7 +429,7 @@ class ControlProtocol(models.Model):
         return "Protocol: %s" % (self.name, )
 
 
-class ProtocolAssignment(models.Model):
+class ProtocolAssignment(BaseModel):
     _master_plan = models.ForeignKey('ControlMasterPlan',
                                      default=lambda: ControlMasterPlan.objects.get_or_create(id=1)[0],
                                      # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
@@ -432,7 +444,7 @@ class ProtocolAssignment(models.Model):
         return "%s applied to %s" % (self.control_protocol, self.production_type)
 
 
-class Disease(models.Model):
+class Disease(BaseModel):
     name = models.CharField(max_length=255,
         help_text='Name of the Disease')
     disease_description = models.TextField(blank=True)
@@ -448,7 +460,7 @@ class Disease(models.Model):
         return self.name
 
 
-class DiseaseProgression(models.Model):
+class DiseaseProgression(BaseModel):
     name = models.CharField(max_length=255,
         help_text="Examples: Severe Progression, FMD Long Incubation")
     _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0], )  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
@@ -467,7 +479,7 @@ class DiseaseProgression(models.Model):
         return self.name
 
 
-class DiseaseProgressionAssignment(models.Model):
+class DiseaseProgressionAssignment(BaseModel):
     production_type = models.ForeignKey('ProductionType', unique=True,
         help_text='The production type that these outputs apply to.', )
     progression = models.ForeignKey('DiseaseProgression', blank=True, null=True) # can be excluded from disease progression
@@ -477,7 +489,7 @@ class DiseaseProgressionAssignment(models.Model):
         return "%s have %s progression characteristics" % (self.production_type, self.progression) if self.progression else "No Progression"
 
 
-class DiseaseSpread(models.Model):
+class DiseaseSpread(BaseModel):
     name = models.CharField(max_length=255,)
     _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0],
                                  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
@@ -543,7 +555,7 @@ class AirborneSpread(DiseaseSpread):
         return "%s %i" % (self.name, self.id)
 
 
-class Scenario(models.Model):
+class Scenario(BaseModel):
     description = models.TextField(blank=True,
         help_text='The description of the scenario.', )
     language = models.CharField(default='en', choices=(('en', "English"), ('es', "Spanish")), max_length=255, blank=True,
@@ -554,7 +566,7 @@ class Scenario(models.Model):
         return "Scenario: %s" % (self.description, )
 
 
-class OutputSettings(models.Model):
+class OutputSettings(BaseModel):
     _scenario = models.ForeignKey('Scenario', default=lambda: Scenario.objects.get_or_create(id=1)[0],)  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
     iterations = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)],
         help_text='The number of iterations of this scenario that should be run', )
@@ -602,7 +614,7 @@ class OutputSettings(models.Model):
         return "Output Settings"
 
 
-class ProductionType(models.Model):
+class ProductionType(BaseModel):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
 
@@ -619,7 +631,7 @@ class ProductionType(models.Model):
         return self.name
 
 
-class ProductionTypePairTransmission(models.Model):
+class ProductionTypePairTransmission(BaseModel):
     source_production_type = models.ForeignKey(ProductionType, related_name='used_as_sources',
         help_text='The Production type that will be the source type for this production type combination.', )
     destination_production_type = models.ForeignKey(ProductionType, related_name='used_as_destinations',
@@ -636,7 +648,7 @@ class ProductionTypePairTransmission(models.Model):
         return "%s -> %s" % (self.source_production_type, self.destination_production_type)
 
 
-class Zone(models.Model):
+class Zone(BaseModel):
     name = models.TextField(
         help_text='Description of the zone', )
     radius = models.FloatField(validators=[MinValueValidator(0.0)],
@@ -650,7 +662,7 @@ class Zone(models.Model):
         return "%s: %skm" % (self.name, self.radius)
 
 
-class ZoneEffectOnProductionType(models.Model):
+class ZoneEffectOnProductionType(BaseModel):
     zone = models.ForeignKey(Zone,
         help_text='Zone for which this event occurred.', )
     production_type = models.ForeignKey('ProductionType',
@@ -667,7 +679,7 @@ class ZoneEffectOnProductionType(models.Model):
         return "%s Zone -> %s" % (self.zone.name, self.production_type)
 
 
-class ReadAllCodes(models.Model):
+class ReadAllCodes(BaseModel):
     _code = models.CharField(max_length=255,
         help_text='Actual code used in the simulation', )
     _code_type = models.CharField(max_length=255,
@@ -676,7 +688,7 @@ class ReadAllCodes(models.Model):
         help_text='Description of the code type.', )
 
 
-class ReadAllCodeTypes(models.Model):
+class ReadAllCodeTypes(BaseModel):
     _code_type = models.CharField(max_length=255,
         help_text='Type of code', )
     _code_type_description = models.TextField()
