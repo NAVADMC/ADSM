@@ -186,7 +186,7 @@ def readPopulation( populationFileName ):
 	projection = None
 	srs = xml.find( './spatial_reference/PROJ4' )
 	if srs != None:
-		projection = Proj( srs.text )			
+		projection = Proj( srs.text, preserve_units=True )			
 
 	for el in xml.findall( './/herd' ):
 		description = el.find( './id' )
