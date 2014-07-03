@@ -121,14 +121,13 @@ proc simvaroutput_string_to_list { s } {
 #   from a simulation.
 #
 # Parameters:
-#   params   parameter file name
-#   herds    herds file name
+#   scenario scenario database name
 #   answer   the correct sequence of states
 #   test     a name to report in passes/fails (default = "progress")
 # Returns:
 #   nothing
 #
-proc progress_test { params herds answer {test "progress"} } {
+proc progress_test { scenario answer {test "progress"} } {
 	global prompt
 	global tablelinespat
 	global state_code
@@ -136,7 +135,7 @@ proc progress_test { params herds answer {test "progress"} } {
 
 	set true_ndays [llength $answer]
 	set true_nherds [llength [lindex $answer 0]]
-	send "$herds $params\n"
+	send "$scenario\n"
 	expect {
 		-re "($tablelinespat).*$prompt$" {
 			set output [simvaroutput_string_to_list $expect_out(1,string)]
@@ -186,8 +185,7 @@ proc progress_test { params herds answer {test "progress"} } {
 #   expected frequencies.
 #
 # Parameters:
-#   params       parameter file name
-#   herds        herds file name
+#   scenario     scenario database name
 #   answer       a list of (frequency, sequence of states) lists
 #   test         a name to report in passes/fails (default = "stochastic_progress")
 #   iterations   (default = 100)
@@ -195,7 +193,7 @@ proc progress_test { params herds answer {test "progress"} } {
 # Returns:
 #   nothing
 #
-proc stochastic_progress_test { params herds answer {test "stochastic_progress"} {iterations 100} {tol 0.05}} {
+proc stochastic_progress_test { scenario answer {test "stochastic_progress"} {iterations 100} {tol 0.05}} {
 	global prompt
 	global tablelinespat
 	global state_code
@@ -221,7 +219,7 @@ proc stochastic_progress_test { params herds answer {test "stochastic_progress"}
 	}
 	
 	for {set i 0} {$i < $iterations} {incr i} {
-		send "stochastic $herds $params\n"
+		send "stochastic $scenario\n"
 
 		expect {
 			-re "($tablelinespat).*$prompt$" {
@@ -398,14 +396,13 @@ proc set_difference { a b } {
 # variable_test -- tests that an output variable has the correct value.
 #
 # Parameters:
-#   params       parameter file name
-#   herds        herds file name
+#   scenario     scenario database name
 #   answer       a list of (variable name, sequence of values) lists
 #   test         a name to report in passes/fails (default = "variable")
 # Returns:
 #   nothing
 #
-proc variable_test { params herds answer {test "variable"}} {
+proc variable_test { scenario answer {test "variable"}} {
 	global prompt
 	global tablelinespat
 	global epsilon
@@ -413,7 +410,7 @@ proc variable_test { params herds answer {test "variable"}} {
 
 	set true_nvars [llength $answer]
 	set true_ndays [expr [llength [lindex $answer 0]] - 1]
-	send "$herds $params\n"
+	send "$scenario\n"
 	expect {
 		-re "($tablelinespat).*$prompt$" {
 			set output [simvaroutput_string_to_list $expect_out(1,string)]
@@ -474,8 +471,7 @@ proc variable_test { params herds answer {test "variable"}} {
 #   expected frequencies.
 #
 # Parameters:
-#   params       parameter file name
-#   herds        herds file name
+#   scenario     scenario database name
 #   answer       a list of (frequency, (variable name, sequence of values)) lists
 #   test         a name to report in passes/fails (default = "stochastic_variable")
 #   iterations   (default = 100)
@@ -483,7 +479,7 @@ proc variable_test { params herds answer {test "variable"}} {
 # Returns:
 #   nothing
 #
-proc stochastic_variable_test { params herds answer {test "stochastic_variable"} {iterations 100} {tol 0.05}} {
+proc stochastic_variable_test { scenario answer {test "stochastic_variable"} {iterations 100} {tol 0.05}} {
 	global prompt
 	global tablelinespat
 	global epsilon
@@ -508,7 +504,7 @@ proc stochastic_variable_test { params herds answer {test "stochastic_variable"}
 	}
 	
 	for {set i 0} {$i < $iterations} {incr i} {
-		send "stochastic $herds $params\n"
+		send "stochastic $scenario\n"
 		expect {
 			-re "($tablelinespat).*$prompt$" {
 				set output [simvaroutput_string_to_list $expect_out(1,string)]
