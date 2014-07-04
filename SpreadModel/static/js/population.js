@@ -6,6 +6,7 @@ var progressBar = (function(){
 
     var progressChecker =  function() {
         $.get('/setup/UploadPopulation/', function(data){
+            console.log(data)
             if (data.percent <= 0) {
                 var newWidth = progressBar.width() < 100 ? progressBar.width()+2 : null;
                 setStatus(data.status, newWidth);
@@ -19,11 +20,12 @@ var progressBar = (function(){
     };
 
     var setStatus = function(text, width) {
-        console.log(width)
         if (text)
             progressStatus.html(text);
-        if (typeof(width) == "number")
+        if (typeof(width) == "number"){
+//            console.log(width)
             progressBar.css('width', width + "%");
+        }
     };
 
     return {
@@ -85,7 +87,7 @@ $(function(){
         progressBar.show();
     });
     var progressHandler = function(progress) {
-        var percent_uploaded = (progress.loaded/progress.total)*100;
+        var percent_uploaded = (progress.loaded / progress.total)*100;
         progressBar.setStatus('Loading file ' + Math.round(percent_uploaded) + '%', percent_uploaded*0.1);
         if (progress.loaded == progress.total) {
             progressBar.startProgressChecker();
