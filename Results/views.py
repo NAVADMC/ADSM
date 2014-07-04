@@ -26,7 +26,7 @@ def read_unicode_line(simulation):
 
 def simulation_process():
     print("Running")
-    simulation = subprocess.Popen(['adsm.exe', '-p', r'workspace\Roundtrip.xml', 'activeSession.sqlite3'], stdout=subprocess.PIPE)
+    simulation = subprocess.Popen(['adsm.exe', 'activeSession.sqlite3'], stdout=subprocess.PIPE)
     output_lines = []
     headers = read_unicode_line(simulation)  # first line should be the column headers
     print(headers)
