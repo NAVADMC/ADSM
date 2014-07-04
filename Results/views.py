@@ -1,8 +1,10 @@
 from concurrent.futures import ProcessPoolExecutor
 import threading
+from django.forms.models import modelformset_factory
 from django.shortcuts import render, get_object_or_404, redirect
 import subprocess
 from Results.models import OutputManager, DailyReport
+from Results.forms import *
 from ScenarioCreator.views import get_model_name_and_model, spaces_for_camel_case, list_per_model
 
 
@@ -61,16 +63,30 @@ def run_simulation(request):
     return render(request, 'Results/SimulationProgress.html', context)
 
 
-def list_per_model(model_name, model, iteration=1):
-    context = {'entries': model.objects.filter(iteration=iteration)[:200],
-               'class': model_name,
-               'name': spaces_for_camel_case(model_name)}
+def list_entries(model_name, model, iteration=1):
+    return model.objects.filter(iteration=iteration)[:200],
     return context
 
 
+def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request):
+    """FormSet is pre-populated with existing assignments and it detects and fills in missing
+    assignments with a blank form with production type filled in."""
+
+
+def result_table(request, model_class, model_form):
+    """  """
+    ResultSet = modelformset_factory(model_class, extra=0, form=model_form)
+    context = {'title': 'Results'}
+    context['formset'] = ResultSet(queryset=model_class.objects.all())
+    return render(request, 'ScenarioCreator/FormSet.html', context)
+
+
 def model_list(request):
-    model_name, model = get_model_name_and_model(request, 'Results')
-    context = {'title': spaces_for_camel_case(model_name),
-               'models': [list_per_model(model_name, model)]}
-    return render(request, 'ScenarioCreator/ModelList.html', context)
+    model_name, model = get_model_name_and_model(request)
+    return result_table(request, model, globals()[model_name+'Form'])
+    # context = {'title': spaces_for_camel_case(model_name),
+    #            'class': model_name,
+    #            'name': spaces_for_camel_case(model_name),
+    #            'entries': list_entries(model_name, model)}
+    # return render(request, 'Results/ResultTable.html', context)
 

@@ -3,7 +3,6 @@ ModelForm -> models.py.  This basic layout can be overridden by declaring an __i
 See DirectSpread for an example.  More complex widgets and layouts are accessible from there.
 All forms now have their "submit" button restored and you can choose custom layouts.  ControlProtocol has tabs."""
 from django.forms.models import inlineformset_factory
-
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Field, Hidden
 from django.core.exceptions import ObjectDoesNotExist
