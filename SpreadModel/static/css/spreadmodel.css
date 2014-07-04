@@ -216,6 +216,11 @@ body>section {
     background-color: #00477f;
 }
 
+.btn-primary :focus {
+    background-color: #00477f;
+    border-color: #3276b1;
+}
+
 .btn-primary.disabled, .btn-primary[disabled] {
     background-color: #7B8893;
 }
