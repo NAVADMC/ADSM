@@ -153,8 +153,8 @@ handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event,
       RPT_reporting_add_integer1 (local_data->num_units_in_state, 1, UNT_state_name[state]);
       RPT_reporting_add_integer1 (local_data->num_animals_in_state, unit->size,
                                   UNT_state_name[state]);
-      drill_down_list[0] = unit->production_type_name;
-      drill_down_list[1] = UNT_state_name[state];
+      drill_down_list[0] = UNT_state_name[state];
+      drill_down_list[1] = unit->production_type_name;
       RPT_reporting_add_integer (local_data->num_units_in_state_by_prodtype, 1, drill_down_list);
       RPT_reporting_add_integer (local_data->num_animals_in_state_by_prodtype, unit->size,
                                  drill_down_list);
@@ -360,10 +360,10 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     {
       RPT_reporting_set_integer1 (local_data->num_units_in_state, 0, UNT_state_name[i]);
       RPT_reporting_set_integer1 (local_data->num_animals_in_state, 0, UNT_state_name[i]);
-      drill_down_list[1] = UNT_state_name[i];
+      drill_down_list[0] = UNT_state_name[i];
       for (j = 0; j < n; j++)
         {
-          drill_down_list[0] = (char *) g_ptr_array_index (units->production_type_names, j);
+          drill_down_list[1] = (char *) g_ptr_array_index (units->production_type_names, j);
           RPT_reporting_set_integer (local_data->num_units_in_state_by_prodtype, 0, drill_down_list);
           RPT_reporting_set_integer (local_data->num_animals_in_state_by_prodtype, 0, drill_down_list);
         }
