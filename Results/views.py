@@ -33,13 +33,13 @@ def simulation_process():
     while simulation.poll() is None:  # simulation is still running
         line = read_unicode_line(simulation)
         append_non_empty_lines(line, output_lines)  # This blocks until it receives a newline.
-        if len(output_lines) > 900:
+        if len(output_lines) > 9:
             DailyReport.objects.bulk_create(headers, output_lines)
             output_lines = []
     # When the subprocess terminates there might be unconsumed output that still needs to be processed.
     append_non_empty_lines(simulation.stdout.read().decode("utf-8"), output_lines)  # notice read() not readline()
     DailyReport.objects.bulk_create(headers, output_lines)
-    print("Output Lines: ", len(output_lines))
+    print("Simulation completed in", len(output_lines), 'days')
     return '%i: Success' % 1
 
 
