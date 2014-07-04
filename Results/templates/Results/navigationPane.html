@@ -4,11 +4,13 @@
 {% block main %}
     <nav>
         <ul id="setupMenu">
-            <li><a href="/results/Population/" class="{{"Population"|active:active_link}}">Population</a></li>
-            <li><a href="/results/Disease/" class="{{"Disease"|active:active_link}}">Disease</a>
-                <ul><li><a href="/results/Exposures/" class="{{"Exposures"|active:active_link}}">Exposures</a></li>
-                    <li><a href="/results/Infections/" class="{{"Infections"|active:active_link}}">Infections</a></li>
-                    <li><a href="/results/Morbidity/" class="{{"Morbidity"|active:active_link}}">Morbidity</a></li>
+            <li><a href="/results/DailyByProductionType/" class="{{"DailyByProductionType"|active:active_link}}">Production Type</a>
+                <ul><li><a href="/results/DailyByProductionType/exp/" class="{{"exp"|active:active_link}}">Exposures</a></li>
+                    <li><a href="/results/DailyByProductionType/inf/" class="{{"inf"|active:active_link}}">Infections</a></li>
+                    <li><a href="/results/DailyByProductionType/des/" class="{{"des"|active:active_link}}">Destruction</a></li>
+                    <li><a href="/results/DailyByProductionType/exm/" class="{{"exm"|active:active_link}}">Exams</a></li>
+                    <li><a href="/results/DailyByProductionType/tst/" class="{{"tst"|active:active_link}}">Lab Tests</a></li>
+                    <li><a href="/results/DailyByProductionType/tr/"  class="{{"tr" |active:active_link}}">Tracing</a></li>
                 </ul></li>
             <li><a href="/results/ControlActivity/" class="{{"ControlActivity"|active:active_link}}">Control Activity</a>
                 <ul><li><a href="/results/Detection/" class="{{"Detection"|active:active_link}}">Detection</a></li>

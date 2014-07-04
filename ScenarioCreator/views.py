@@ -1,17 +1,23 @@
 from glob import glob
+import inspect
 import json
+import os
 import shutil
+import sys
+import re
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core.management import call_command
 from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
 from django.db import connections
 from django.conf import settings
-from ScenarioCreator.models import * # This is absolutely necessary for dynamic form loading
-from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
+from ScenarioCreator.forms import ProductionTypePairTransmissionForm, ProtocolAssignmentForm, DiseaseProgressionAssignmentForm, RelationalFunctionForm, \
+    PointFormSet, UnitFormAbbreviated
+from ScenarioCreator.models import RelationalFunction, ProbabilityFunction, DirectSpread, IndirectSpread, AirborneSpread, ProductionType, \
+    ProductionTypePairTransmission, ProtocolAssignment, DiseaseProgressionAssignment, RelationalPoint, Population, workspace, Unit
 from Settings.models import SmSession, unsaved_changes
 from django.forms.models import modelformset_factory
 from django.db.models import Q
-from django.forms.models import inlineformset_factory
 
 
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
@@ -218,14 +224,16 @@ def new_form(request, initialized_form, context):
 
 def get_model_name_and_form(request):
     model_name = re.split('\W+', request.path)[2]  # Second word in the URL
-    form = globals()[model_name + 'Form']  # IMPORTANT: depends on naming convention
+    form = [obj for name, obj in inspect.getmembers(sys.modules['ScenarioCreator.forms'], lambda x: inspect.isclass(x))
+            if name == model_name+'Form'][0]
     return model_name, form
 
 
-def get_model_name_and_model(request):
+def get_model_name_and_model(request, app_name='ScenarioCreator'):
     """A slight variation on get_mode_name_and_form useful for cases where you don't want a form"""
     model_name = re.split('\W+', request.path)[2]  # Second word in the URL
-    model = globals()[model_name]  # IMPORTANT: depends on naming convention
+    models = inspect.getmembers(sys.modules[app_name+'.models'], inspect.isclass)
+    model = [obj for name, obj in models if name == model_name][0]  # could raise an Exception if your imports aren't setup right
     return model_name, model
 
 

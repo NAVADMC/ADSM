@@ -3,6 +3,7 @@ import threading
 from django.shortcuts import render, get_object_or_404, redirect
 import subprocess
 from Results.models import OutputManager, DailyReport
+from ScenarioCreator.views import get_model_name_and_model, spaces_for_camel_case, list_per_model
 
 
 def back_to_inputs(request):
@@ -58,3 +59,18 @@ def run_simulation(request):
     sim = Simulation()
     sim.start() # starts a new thread
     return render(request, 'Results/SimulationProgress.html', context)
+
+
+def list_per_model(model_name, model, iteration=1):
+    context = {'entries': model.objects.filter(iteration=iteration)[:200],
+               'class': model_name,
+               'name': spaces_for_camel_case(model_name)}
+    return context
+
+
+def model_list(request):
+    model_name, model = get_model_name_and_model(request, 'Results')
+    context = {'title': spaces_for_camel_case(model_name),
+               'models': [list_per_model(model_name, model)]}
+    return render(request, 'ScenarioCreator/ModelList.html', context)
+
