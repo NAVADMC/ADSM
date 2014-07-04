@@ -915,7 +915,7 @@
 
   <output>
     <tr>
-      <td>trpnUAll</td>
+      <td>trnUAllp</td>
       <td>trnUAll</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
@@ -1065,7 +1065,7 @@
 
   <output>
     <tr>
-      <td>trpnUAll</td>
+      <td>trnUAllp</td>
       <td>trnUAll</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
@@ -1174,7 +1174,7 @@
 
   <output>
     <tr>
-      <td>trpnUAll</td>
+      <td>trnUAllp</td>
       <td>trnUAll</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
@@ -1253,7 +1253,7 @@
 
   <output>
     <tr>
-      <td>trpnUAll</td>
+      <td>trnUAllp</td>
       <td>trnUAll</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
@@ -1315,15 +1315,15 @@
   <output>
     <tr>
       <td>desnUAll</td>
-      <td>trpnUAll</td>
-      <td>trpnUDir</td>
-      <td>trpnUInd</td>
-      <td>trpnUBeefCattle</td>
-      <td>trpnUPigs</td>
-      <td>trpnUDirBeefCattle</td>
-      <td>trpnUDirPigs</td>
-      <td>trpnUIndBeefCattle</td>
-      <td>trpnUIndPigs</td>
+      <td>trnUAllp</td>
+      <td>trnUDirp</td>
+      <td>trnUIndp</td>
+      <td>trnUpBeefCattle</td>
+      <td>trnUpPigs</td>
+      <td>trnUDirpBeefCattle</td>
+      <td>trnUDirpPigs</td>
+      <td>trnUIndpBeefCattle</td>
+      <td>trnUIndpPigs</td>
       <td>trnUAll</td>
       <td>trnUDir</td>
       <td>trnUInd</td>
@@ -1381,15 +1381,15 @@
   <output>
     <tr>
       <td>desnUAll</td>
-      <td>trpnAAll</td>
-      <td>trpnADir</td>
-      <td>trpnAInd</td>
-      <td>trpnABeefCattle</td>
-      <td>trpnAPigs</td>
-      <td>trpnADirBeefCattle</td>
-      <td>trpnADirPigs</td>
-      <td>trpnAIndBeefCattle</td>
-      <td>trpnAIndPigs</td>
+      <td>trnAAllp</td>
+      <td>trnADirp</td>
+      <td>trnAIndp</td>
+      <td>trnApBeefCattle</td>
+      <td>trnApPigs</td>
+      <td>trnADirpBeefCattle</td>
+      <td>trnADirpPigs</td>
+      <td>trnAIndpBeefCattle</td>
+      <td>trnAIndpPigs</td>
       <td>trnAAll</td>
       <td>trnADir</td>
       <td>trnAInd</td>
@@ -4984,30 +4984,30 @@
   <output>
     <tr>
       <!-- Large table because of the 7 production types. -->
-      <td>trpnUAll</td> <!-- Potential traces -->
-      <td>trpnUDir</td> <!-- broken down by contact type -->
-      <td>trpnUInd</td>
-      <td>trpnUA</td> <!-- broken down by production type -->
-      <td>trpnUB</td>
-      <td>trpnUC</td>
-      <td>trpnUD</td>
-      <td>trpnUE</td>
-      <td>trpnUF</td>
-      <td>trpnUG</td>
-      <td>trpnUDirA</td> <!-- broken down by contact type and production type -->
-      <td>trpnUDirB</td>
-      <td>trpnUDirC</td>
-      <td>trpnUDirD</td>
-      <td>trpnUDirE</td>
-      <td>trpnUDirF</td>
-      <td>trpnUDirG</td>
-      <td>trpnUIndA</td>
-      <td>trpnUIndB</td>
-      <td>trpnUIndC</td>
-      <td>trpnUIndD</td>
-      <td>trpnUIndE</td>
-      <td>trpnUIndF</td>
-      <td>trpnUIndG</td>
+      <td>trnUAllp</td> <!-- Potential traces -->
+      <td>trnUDirp</td> <!-- broken down by contact type -->
+      <td>trnUIndp</td>
+      <td>trnUpA</td> <!-- broken down by production type -->
+      <td>trnUpB</td>
+      <td>trnUpC</td>
+      <td>trnUpD</td>
+      <td>trnUpE</td>
+      <td>trnUpF</td>
+      <td>trnUpG</td>
+      <td>trnUDirpA</td> <!-- broken down by contact type and production type -->
+      <td>trnUDirpB</td>
+      <td>trnUDirpC</td>
+      <td>trnUDirpD</td>
+      <td>trnUDirpE</td>
+      <td>trnUDirpF</td>
+      <td>trnUDirpG</td>
+      <td>trnUIndpA</td>
+      <td>trnUIndpB</td>
+      <td>trnUIndpC</td>
+      <td>trnUIndpD</td>
+      <td>trnUIndpE</td>
+      <td>trnUIndpF</td>
+      <td>trnUIndpG</td>
       <td>trnUAll</td> <!-- Actual traces -->
       <td>trnUDir</td> <!-- broken down by contact type -->
       <td>trnUInd</td>
@@ -5151,30 +5151,30 @@
   <output>
     <tr>
       <!-- Large table because of the 7 production types. -->
-      <td>trpnUAll</td> <!-- Potential traces -->
-      <td>trpnUDir</td> <!-- broken down by contact type -->
-      <td>trpnUInd</td>
-      <td>trpnUA</td> <!-- broken down by production type -->
-      <td>trpnUB</td>
-      <td>trpnUC</td>
-      <td>trpnUD</td>
-      <td>trpnUE</td>
-      <td>trpnUF</td>
-      <td>trpnUG</td>
-      <td>trpnUDirA</td> <!-- broken down by contact type and production type -->
-      <td>trpnUDirB</td>
-      <td>trpnUDirC</td>
-      <td>trpnUDirD</td>
-      <td>trpnUDirE</td>
-      <td>trpnUDirF</td>
-      <td>trpnUDirG</td>
-      <td>trpnUIndA</td>
-      <td>trpnUIndB</td>
-      <td>trpnUIndC</td>
-      <td>trpnUIndD</td>
-      <td>trpnUIndE</td>
-      <td>trpnUIndF</td>
-      <td>trpnUIndG</td>
+      <td>trnUAllp</td> <!-- Potential traces -->
+      <td>trnUDirp</td> <!-- broken down by contact type -->
+      <td>trnUIndp</td>
+      <td>trnUpA</td> <!-- broken down by production type -->
+      <td>trnUpB</td>
+      <td>trnUpC</td>
+      <td>trnUpD</td>
+      <td>trnUpE</td>
+      <td>trnUpF</td>
+      <td>trnUpG</td>
+      <td>trnUDirpA</td> <!-- broken down by contact type and production type -->
+      <td>trnUDirpB</td>
+      <td>trnUDirpC</td>
+      <td>trnUDirpD</td>
+      <td>trnUDirpE</td>
+      <td>trnUDirpF</td>
+      <td>trnUDirpG</td>
+      <td>trnUIndpA</td>
+      <td>trnUIndpB</td>
+      <td>trnUIndpC</td>
+      <td>trnUIndpD</td>
+      <td>trnUIndpE</td>
+      <td>trnUIndpF</td>
+      <td>trnUIndpG</td>
       <td>trnUAll</td> <!-- Actual traces -->
       <td>trnUDir</td> <!-- broken down by contact type -->
       <td>trnUInd</td>
@@ -5314,30 +5314,30 @@
   <output>
     <tr>
       <!-- Large table because of the 7 production types. -->
-      <td>trpnUAll</td> <!-- Potential traces -->
-      <td>trpnUDir</td> <!-- broken down by contact type -->
-      <td>trpnUInd</td>
-      <td>trpnUA</td> <!-- broken down by production type -->
-      <td>trpnUB</td>
-      <td>trpnUC</td>
-      <td>trpnUD</td>
-      <td>trpnUE</td>
-      <td>trpnUF</td>
-      <td>trpnUG</td>
-      <td>trpnUDirA</td> <!-- broken down by contact type and production type -->
-      <td>trpnUDirB</td>
-      <td>trpnUDirC</td>
-      <td>trpnUDirD</td>
-      <td>trpnUDirE</td>
-      <td>trpnUDirF</td>
-      <td>trpnUDirG</td>
-      <td>trpnUIndA</td>
-      <td>trpnUIndB</td>
-      <td>trpnUIndC</td>
-      <td>trpnUIndD</td>
-      <td>trpnUIndE</td>
-      <td>trpnUIndF</td>
-      <td>trpnUIndG</td>
+      <td>trnUAllp</td> <!-- Potential traces -->
+      <td>trnUDirp</td> <!-- broken down by contact type -->
+      <td>trnUIndp</td>
+      <td>trnUpA</td> <!-- broken down by production type -->
+      <td>trnUpB</td>
+      <td>trnUpC</td>
+      <td>trnUpD</td>
+      <td>trnUpE</td>
+      <td>trnUpF</td>
+      <td>trnUpG</td>
+      <td>trnUDirpA</td> <!-- broken down by contact type and production type -->
+      <td>trnUDirpB</td>
+      <td>trnUDirpC</td>
+      <td>trnUDirpD</td>
+      <td>trnUDirpE</td>
+      <td>trnUDirpF</td>
+      <td>trnUDirpG</td>
+      <td>trnUIndpA</td>
+      <td>trnUIndpB</td>
+      <td>trnUIndpC</td>
+      <td>trnUIndpD</td>
+      <td>trnUIndpE</td>
+      <td>trnUIndpF</td>
+      <td>trnUIndpG</td>
       <td>trnUAll</td> <!-- Actual traces -->
       <td>trnUDir</td> <!-- broken down by contact type -->
       <td>trnUInd</td>
@@ -6662,7 +6662,7 @@
   <output>
     <tr>
       <td>detnUAll</td>
-      <td>trpnUAll</td>
+      <td>trnUAllp</td>
       <td>trnUAll</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
@@ -6792,7 +6792,7 @@
   <output>
     <tr>
       <td>detnUAll</td>
-      <td>trpnUAll</td>
+      <td>trnUAllp</td>
       <td>trnUAll</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
