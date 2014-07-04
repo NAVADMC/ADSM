@@ -41,5 +41,5 @@ def basic_context(request):
     if 'results/' in request.path:  # viewing output page
         context['display_output_nav'] = True
     context['Simulation'] = simulation_ready_to_run(context)
-    context['controls_enabled'] = ControlMasterPlan.objects.filter(disable_all_controls=False).count() > 0
+    context['controls_enabled'] = ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0
     return context
