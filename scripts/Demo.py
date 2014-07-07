@@ -118,13 +118,6 @@ for column, name in matches:
 
 # <codecell>
 
-for line in text:
-    print(a,b,x)
-    print()
-[line for line in text]
-
-# <codecell>
-
 'words here there'.split()
 # ','.join('words    here   \n  there'.split())
 
@@ -161,10 +154,11 @@ csv.list_dialects()
 
 # <codecell>
 
-
-with open('clean_100row.csv', 'wb') as csvfile:
+import csv
+with open('clean_100row.csv', 'w', newline='') as csvfile:
     spamwriter = csv.writer(csvfile, delimiter=',',
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    csvfile.write(','.join(headers) +'\n')
     for row in data:
         spamwriter.writerow(row)
 
