@@ -55,6 +55,7 @@ def extract_exposure_record(line):
         record = match.group(0)
         preceeding_text = line[0: match.start()]
         column_number = preceeding_text.count(',')
+        print(column_number)
         better_pipes = re.sub(',', '|', record)
         new_text = re.sub(record, better_pipes, new_text)  # delete the record from the raw text
         
@@ -161,6 +162,12 @@ with open('clean_100row.csv', 'w', newline='') as csvfile:
     csvfile.write(','.join(headers) +'\n')
     for row in data:
         spamwriter.writerow(row)
+
+# <codecell>
+
+
+# <codecell>
+
 
 # <codecell>
 
