@@ -43,7 +43,7 @@ $(function(){
 
     $('[data-visibility-controller]').each(function(){
         var controller = '[name=' + $(this).attr('data-visibility-controller') + ']'
-        var hide_target = $(this).parents('.control-group')
+        var hide_target = $(this).parents('.control-group, td')
         var required_value = $(this).attr('data-required-value') || 'True'
         $('body').on('change', controller, function(){
             if($(this).val() == required_value){
@@ -92,7 +92,7 @@ $(function(){
     });
 
     $(document).on('click', 'select + a i', function(event){
-        var select = $(this).closest('.control-group').find('select');
+        var select = $(this).closest('.control-group, td').find('select');
         modelModal.show(select);
         event.preventDefault();
     });
