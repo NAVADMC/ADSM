@@ -588,7 +588,7 @@ class OutputSettings(BaseModel):
                  ('first-detection', 'Stop when the first detection occurs.'),
                  ('outbreak-end', 'Stop when there are no more latent or infectious units and all control activities are finished'),
                  ('stop-days', 'Stop after a specified number of days')))
-    days = models.PositiveIntegerField(blank=True, null=True, validators=[MinValueValidator(1)],
+    days = models.PositiveIntegerField(default=1825, validators=[MinValueValidator(1)],
         help_text='The maximum number of days that iterations of this scenario should run.', )
      ## Outputs requested:
     save_all_daily_outputs = models.BooleanField(default=False,
@@ -620,7 +620,8 @@ class OutputSettings(BaseModel):
     def clean_fields(self, exclude=None):
         self.daily_states_filename = clean_filename(self.daily_states_filename)
         self.map_directory = clean_filename(self.map_directory)
-
+        if self.stop_criteria != 'stop-days':
+            self.days = 1825  # 5 year maximum simulation time
 
     def __str__(self):
         return "Output Settings"

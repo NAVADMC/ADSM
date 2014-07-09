@@ -189,3 +189,4 @@ htmlcov
 /*.csv
 
 /activeSession.sqlite3
+/scripts/Pandas
