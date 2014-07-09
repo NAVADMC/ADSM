@@ -4,6 +4,7 @@ from django.db.models import Max
 from django.forms.models import modelformset_factory
 from django.shortcuts import render, get_object_or_404, redirect
 import subprocess
+import time
 from Results.forms import *
 from ScenarioCreator.views import get_model_name_and_model, spaces_for_camel_case, list_per_model
 
@@ -26,24 +27,22 @@ def non_empty_lines(line):
 
 
 def simulation_process():
-    print("Running")
-    simulation = subprocess.Popen(['adsm.exe', 'activeSession.sqlite3'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    start = time.time()
+    simulation = subprocess.Popen(['adsm.exe', 'activeSession.sqlite3'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
     headers = simulation.stdout.readline().decode("utf-8")  # first line should be the column headers
     print(headers)
     parser = Results.output_parser.DailyParser(headers)
 
-    while simulation.poll() is None:  # simulation is still running
-        try:
-            outs, errs = simulation.communicate(timeout=30)  # seconds
-        except subprocess.TimeoutExpired:
-            simulation.kill()
-            outs, errs = simulation.communicate()
-        if errs:
-            print(errs)
-        parser.parse_daily_strings(non_empty_lines(outs))
+    for line in iter(simulation.stdout.readline, b''):
+        print(line)
+        parser.parse_daily_strings(non_empty_lines(line))
+    outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
+    if errors:  # this will only print out error messages after the simulation has halted
+        print(errors)
     # TODO: When the subprocess terminates there might be unconsumed output that still needs to be processed.
-    print("Simulation completed in", DailyControls.objects.aggregate(Max('day'))['day__max'], 'days')
-    return '%i: Success' % 1
+    end = time.time()
+    print("Simulation completed in", end - start, 'seconds')
+    return '%i: Success' % 1  # make this iteration number
 
 
 class Simulation(threading.Thread):
