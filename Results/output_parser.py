@@ -122,6 +122,7 @@ class DailyParser():
             values = cmd_string.split(',')
             if len(values):
                 pairs = zip(self.headers, values)
+                # Issue #145
                 sparse_values = {a: int(float(b)) if b else -1 for a, b in pairs}  # TODO: 2 floats out of 2,000 fields... better way to handle it?
                 Results.models.DailyReport(sparse_dict=str(sparse_values), full_line=cmd_string).save()
                 self.populate_db_from_daily_report(sparse_values)
