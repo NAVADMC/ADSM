@@ -1,7 +1,6 @@
 from ast import literal_eval
 from collections import namedtuple
 import re
-from django.db.models import ForeignKey
 import Results.models
 from ScenarioCreator.models import Zone, ProductionType
 
@@ -14,6 +13,10 @@ class DailyParser():
     possible_zones = {x.name for x in Zone.objects.all()}.union({'Background'})
     possible_pts = {x.name for x in ProductionType.objects.all()}.union({''})
     failures = set()
+
+    def __init__(self, header_line):
+        self.headers = header_line.strip().split(',')  # there was a trailing /r/n to remove
+
 
     def extract_name(self, c_header_name, possibilities):
         """Returns the header with the name clipped out and the matching name if it is in the list of possibilities.
@@ -114,3 +117,11 @@ class DailyParser():
             print("Done parsing Day", day, "Iteration", iteration)
 
 
+    def parse_daily_strings(self, cmd_strings):
+        for cmd_string in cmd_strings:
+            values = cmd_string.split(',')
+            if len(values):
+                pairs = zip(self.headers, values)
+                sparse_values = {a: int(float(b)) if b else -1 for a, b in pairs}  # TODO: 2 floats out of 2,000 fields... better way to handle it?
+                Results.models.DailyReport(sparse_dict=str(sparse_values), full_line=cmd_string).save()
+                self.populate_db_from_daily_report(sparse_values)

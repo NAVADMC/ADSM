@@ -40,24 +40,6 @@ class OutputBaseModel(models.Model):
         abstract = True
 
 
-class OutputManager(models.Manager):
-    def bulk_create(self, header_line, cmd_strings, *args, **kwargs):
-        headers = header_line.strip().split(',')  # there was a trailing /r/n to remove
-        report_objects = []
-        parser = Results.output_parser.DailyParser()
-        for cmd_string in cmd_strings:
-            values = cmd_string.split(',')
-            pairs = zip(headers, values)
-            sparse_values = {a: int(b) if b else -1 for a, b in pairs}
-            # for key, value in pairs:
-            #     if value:# and value != '0':
-            #         sparse_values[key] = int(value)
-            report_objects.append(DailyReport(sparse_dict=str(sparse_values), full_line=cmd_string))
-            parser.populate_db_from_daily_report(sparse_values)
-        # for obj in report_objects:
-        #     print(obj)  #.save()
-        return super().bulk_create(report_objects)
-
 
 class DailyReport(OutputBaseModel):
     sparse_dict = models.TextField()
@@ -65,8 +47,6 @@ class DailyReport(OutputBaseModel):
     # to get the dictionary object back:
     # import ast
     # ast.literal_eval("{'muffin' : 'lolz', 'foo' : 'kitty'}")
-
-    objects = OutputManager()
 
     def __str__(self):
         return self.sparse_dict
