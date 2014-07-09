@@ -1,12 +1,17 @@
 from concurrent.futures import ProcessPoolExecutor
 import threading
-from django.db.models import Max
 from django.forms.models import modelformset_factory
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 import subprocess
 import time
 from Results.forms import *
-from ScenarioCreator.views import get_model_name_and_model, spaces_for_camel_case, list_per_model
+from ScenarioCreator.views import get_model_name_and_model
+from ScenarioCreator.models import Unit
+
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+import pandas as pd
 
 
 def back_to_inputs(request):
@@ -14,8 +19,15 @@ def back_to_inputs(request):
     return redirect('/setup/')
 
 
-def population(request):
-    return redirect('/setup/')
+def population_png(request):
+    latlong = [(u.latitude, u.longitude) for u in Unit.objects.all()]
+    df = pd.DataFrame.from_records(latlong, )
+    df.columns = ['Latitude', 'Longitude']
+    fig = df.plot('Longitude', 'Latitude', kind='scatter', color='black', figsize=(6.5, 6)).figure
+
+    response = HttpResponse(content_type='image/png')
+    FigureCanvas(fig).print_png(response)
+    return response
 
 
 def non_empty_lines(line):

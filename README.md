@@ -60,3 +60,19 @@ It's important that when you migrate you specify the database= because south doe
 ##OS - specific Branches
 _Branches: Windows, Linux, Mac-OSX_  
 Never merge from OS specific branches back into master.  Changes made in these branches should be OS-specific and stay isolated.  Any general changes should be made in master and applied to the other branches by merging.
+
+### Matplotlib and Numpy Dependencies
+`pip install pyparsing`
+http://stackoverflow.com/questions/17658092/unable-to-find-vcvarsall-bat-using-python-3-3-in-windows-8
+http://www.microsoft.com/en-us/download/confirmation.aspx?id=15336
+Installing Matplotlib and Numpy turned into a serious problem because of compiler dependencies on Visual Studio.  My ultimate solution was to copy directories
+out of my Anaconda install (same Python version 3.3) and into my Python33 directory that ADSM is using.
+* PyQt4
+ * sip.pyd
+* pandas
+* jinja2
+* sqlparse
+* dateutil
+* numpy
+* matplotlib
+I'm just leaving these notes here til I come up with a more reliable solution.
