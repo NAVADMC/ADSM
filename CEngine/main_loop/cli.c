@@ -35,6 +35,7 @@ main (int argc, char *argv[])
   const char *output_dir = NULL;
   double fixed_rng_value = -1;
   int seed = -1;
+  int starting_iteration_number = -1;
   GError *option_error = NULL;
   GOptionContext *context;
   GOptionEntry options[] = {
@@ -42,6 +43,7 @@ main (int argc, char *argv[])
     { "output-dir", 'o', 0, G_OPTION_ARG_FILENAME, &output_dir, "Output directory", NULL },
     { "fixed-random-value", 'r', 0, G_OPTION_ARG_DOUBLE, &fixed_rng_value, "Fixed number to use instead of random numbers", NULL },
     { "rng-seed", 's', 0, G_OPTION_ARG_INT, &seed, "Seed used to initialize the random number generator", NULL },
+    { "iteration-number", 'i', 0, G_OPTION_ARG_INT, &starting_iteration_number, "Number of the first iteration", NULL },
     { NULL }
   };
   int sqlerr;
@@ -99,13 +101,15 @@ main (int argc, char *argv[])
                 fixed_rng_value,
                 verbosity,
                 seed,
+                starting_iteration_number,
                 production_type_file);
 #else
   run_sim_main (scenario_db,
                 (char *)output_dir,
                 fixed_rng_value,
                 verbosity,
-                seed);
+                seed,
+                starting_iteration_number);
 #endif
 
 #if HAVE_MPI && !CANCEL_MPI

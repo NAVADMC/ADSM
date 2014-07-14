@@ -139,15 +139,17 @@ EVT_output_dir_event_to_string (EVT_output_dir_event_t * event)
 /**
  * Creates a new "before each simulation" event.
  *
+ * @param iteration_number the number that identifies this iteration
  * @return a pointer to a newly-created EVT_event_t structure.
  */
 EVT_event_t *
-EVT_new_before_each_simulation_event (void)
+EVT_new_before_each_simulation_event (int iteration_number)
 {
   EVT_event_t *event;
 
   event = g_new (EVT_event_t, 1);
   event->type = EVT_BeforeEachSimulation;
+  event->u.before_each_simulation.iteration_number = iteration_number;
   return event;
 }
 
@@ -159,9 +161,10 @@ EVT_new_before_each_simulation_event (void)
  * @return a string.
  */
 char *
-EVT_before_each_simulation_event_to_string (void)
+EVT_before_each_simulation_event_to_string (EVT_before_each_simulation_event_t * event)
 {
-  return g_strdup ("<Before each simulation event>");
+  return g_strdup_printf ("<Before each simulation event iteration_number=%d>",
+                          event->iteration_number);
 }
 
 
@@ -1621,7 +1624,7 @@ EVT_event_to_string (EVT_event_t * event)
       s = EVT_output_dir_event_to_string (&(event->u.output_dir));
       break;
     case EVT_BeforeEachSimulation:
-      s = EVT_before_each_simulation_event_to_string ();
+      s = EVT_before_each_simulation_event_to_string (&(event->u.before_each_simulation));
       break;
     case EVT_DeclarationOfVaccinationReasons:
       s =

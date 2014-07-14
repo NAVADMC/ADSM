@@ -636,14 +636,16 @@ default_projection (UNT_unit_list_t * units)
 #ifdef USE_SC_GUILIB
 DLL_API void
 run_sim_main (sqlite3 *scenario_db,
-              const char *output_dir, double fixed_rng_value, int verbosity, int seed, char *production_type_file)
+              const char *output_dir, double fixed_rng_value, int verbosity, int seed,
+              int starting_iteration_number, char *production_type_file)
 #else
 DLL_API void
 run_sim_main (sqlite3 *scenario_db,
-              const char *output_dir, double fixed_rng_value, int verbosity, int seed)
+              const char *output_dir, double fixed_rng_value, int verbosity, int seed,
+              int starting_iteration_number)
 #endif
 {
-  unsigned int ndays, nruns, day, run;
+  unsigned int ndays, nruns, day, run, iteration_number;
   RPT_reporting_t *last_day_of_outbreak;
   RPT_reporting_t *clock_time;
   RPT_reporting_t *version;
@@ -882,9 +884,16 @@ run_sim_main (sqlite3 *scenario_db,
     adsm_create_event (manager, EVT_new_output_dir_event((char *)output_dir), units, zones, rng);
   adsm_create_event (manager, EVT_new_declaration_of_outputs_event(reporting_vars), units, zones, rng);
 
+  /* The starting iteration number is -1 by default, indicating that the caller
+   * did not request a specific starting iteration number. */
+  if (starting_iteration_number >= 1)
+    iteration_number = starting_iteration_number;
+  else
+    iteration_number = 1;
+
   /* Begin the loop over the specified number of iterations. */
   adsm_create_event (manager, EVT_new_before_any_simulations_event(), units, zones, rng);
-  for (run = 0; run < nruns; run++)
+  for (run = 0; run < nruns; run++, iteration_number++)
     {
 
 #if defined( USE_MPI ) && !CANCEL_MPI
@@ -942,7 +951,11 @@ run_sim_main (sqlite3 *scenario_db,
       disease_end_recorded = FALSE;
       early_exit = FALSE;
 
-      adsm_create_event (manager, EVT_new_before_each_simulation_event(), units, zones, rng);
+      /* The starting iteration number is -1 by default, indicating that the
+       * caller did not request a specific starting iteration number. */
+      adsm_create_event (manager,
+                         EVT_new_before_each_simulation_event(iteration_number),
+                         units, zones, rng);
 
       /* Run the iteration. */
       start_time = time (NULL);

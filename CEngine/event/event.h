@@ -112,7 +112,7 @@ EVT_output_dir_event_t;
  */
 typedef struct
 {
-  int dummy; /**< to avoid a "struct has no members" warning */
+  int iteration_number;
 }
 EVT_before_each_simulation_event_t;
 
@@ -540,7 +540,7 @@ typedef struct
 /* Prototypes. */
 EVT_event_t *EVT_new_before_any_simulations_event (void);
 EVT_event_t *EVT_new_output_dir_event (char *);
-EVT_event_t *EVT_new_before_each_simulation_event (void);
+EVT_event_t *EVT_new_before_each_simulation_event (int iteration_number);
 EVT_event_t *EVT_new_declaration_of_vaccination_reasons_event (GPtrArray * reasons);
 EVT_event_t *EVT_new_declaration_of_vaccine_delay_event (UNT_production_type_t,
                                                          char * production_type_name,

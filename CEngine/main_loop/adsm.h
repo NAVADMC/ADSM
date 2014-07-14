@@ -241,12 +241,15 @@ UNT_zone_t;
 DLL_API void
 run_sim_main (sqlite3 *scenario_db,
               const char *output_dir,
-              double fixed_rng_value, int verbosity, int seed, char *production_type_file);
+              double fixed_rng_value, int verbosity, int seed,
+              int starting_iteration_number,
+              char *production_type_file);
 #else
 DLL_API void
 run_sim_main (sqlite3 *scenario_db,
               const char *output_dir,
-              double fixed_rng_value, int verbosity, int seed);
+              double fixed_rng_value, int verbosity, int seed,
+              int starting_iteration_number);
 #endif
 
 

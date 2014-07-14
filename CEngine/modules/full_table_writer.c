@@ -150,9 +150,6 @@ handle_before_any_simulations_event (struct adsm_module_t_ * self,
 
   local_data = (local_data_t *) (self->model_data);
 
-  /* This count will be incremented for each new simulation. */
-  local_data->run_number = 0;
-
   local_data->printed_header = FALSE;
 
   if (local_data->channel_is_stdout)
@@ -215,10 +212,12 @@ handle_declaration_of_outputs_event (struct adsm_module_t_ * self,
 /**
  * Before each simulation, this module increments its "run number".
  *
+ * @event a Before Each Simulation event.
  * @param self the model.
  */
 void
-handle_before_each_simulation_event (struct adsm_module_t_ * self)
+handle_before_each_simulation_event (struct adsm_module_t_ * self,
+                                     EVT_before_each_simulation_event_t * event)
 {
   local_data_t *local_data;
 
@@ -227,7 +226,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ * self)
 #endif
 
   local_data = (local_data_t *) (self->model_data);
-  local_data->run_number++;
+  local_data->run_number = event->iteration_number;
 
 #if DEBUG
   g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -411,7 +410,7 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
       handle_declaration_of_outputs_event (self, &(event->u.declaration_of_outputs));
       break;
     case EVT_BeforeEachSimulation:
-      handle_before_each_simulation_event (self);
+      handle_before_each_simulation_event (self, &(event->u.before_each_simulation));
       break;
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day));
