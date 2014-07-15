@@ -19,15 +19,17 @@ def back_to_inputs(request):
     return redirect('/setup/')
 
 
-def population_png(request):
-    latlong = [(u.latitude, u.longitude) for u in Unit.objects.all()]
-    df = pd.DataFrame.from_records(latlong, )
-    df.columns = ['Latitude', 'Longitude']
-    fig = df.plot('Longitude', 'Latitude', kind='scatter', color='black', figsize=(6.5, 6)).figure
-
+def HttpFigure(fig):
     response = HttpResponse(content_type='image/png')
     FigureCanvas(fig).print_png(response)
     return response
+
+
+def population_png(request):
+    latlong = [(u.latitude, u.longitude) for u in Unit.objects.all()]
+    df = pd.DataFrame.from_records(latlong, columns=['Latitude', 'Longitude'])
+    fig = df.plot('Longitude', 'Latitude', kind='scatter', color='black', figsize=(6.5, 6)).figure
+    return HttpFigure(fig)
 
 
 def non_empty_lines(line):
