@@ -7,7 +7,7 @@ import subprocess
 import time
 from Results.forms import *
 from ScenarioCreator.views import get_model_name_and_model
-from ScenarioCreator.models import Unit
+from ScenarioCreator.models import Unit, OutputSettings
 
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -15,7 +15,7 @@ import pandas as pd
 
 
 def back_to_inputs(request):
-    # Modal confirmation: "Modifying Inputs will delete any Results created and require you to re-run the simulation"
+    # TODO: Modal confirmation: "Modifying Inputs will delete any Results created and require you to re-run the simulation"
     return redirect('/setup/')
 
 
@@ -40,39 +40,48 @@ def non_empty_lines(line):
     return output_lines
 
 
-def simulation_process():
+def simulation_process(iteration_number):
     start = time.time()
-    simulation = subprocess.Popen(['adsm.exe', 'activeSession.sqlite3'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
+    print("Starting {Process}")
+
+    print('adsm.exe', '-i', iteration_number, 'activeSession.sqlite3', start)
+    simulation = subprocess.Popen(['adsm.exe', '-i', str(iteration_number), 'activeSession.sqlite3'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
     headers = simulation.stdout.readline().decode("utf-8")  # first line should be the column headers
     print(headers)
     parser = Results.output_parser.DailyParser(headers)
 
-    for line in iter(simulation.stdout.readline, b''):
+    print("Starting loop")
+    for line in iter(simulation.stdout.readline, b''):  #
         print(line)
         parser.parse_daily_strings(non_empty_lines(line))
     outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
     if errors:  # this will only print out error messages after the simulation has halted
         print(errors)
     # TODO: When the subprocess terminates there might be unconsumed output that still needs to be processed.
+    # (I haven't seen evidence of uncaught output 10 days after writing it)
     end = time.time()
     print("Simulation completed in", end - start, 'seconds')
-    return '%i: Success' % 1  # make this iteration number
+    return '%i: Success' % iteration_number
 
 
 class Simulation(threading.Thread):
     """execute system commands in a separate thread so as not to interrupt the webpage.
     Saturate the computer's processors with parallel simulation iterations"""
+    def __init__(self, max_iteration, **kwargs):
+        self.max_iteration = max_iteration
+        super().__init__(**kwargs)
+
     def run(self):
-        print(simulation_process())
-        # with ProcessPoolExecutor() as executor:
-        #     exit_statuses = executor.map(run_iteration, list(range(5)))
-        #     print(exit_statuses)
+        # print(simulation_process())
+        with ProcessPoolExecutor() as executor:
+            for exit_status in executor.map(simulation_process, range(1, self.max_iteration+1)):
+                print(exit_status)
 
 
 def run_simulation(request):
-    context = {'outputs_done': False,}
-    sim = Simulation()
-    sim.start() # starts a new thread
+    context = {'outputs_done': False}
+    sim = Simulation(OutputSettings.objects.all().first().iterations)
+    sim.start()  # starts a new thread
     return render(request, 'Results/SimulationProgress.html', context)
 
 
