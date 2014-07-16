@@ -887,7 +887,12 @@ run_sim_main (sqlite3 *scenario_db,
   /* The starting iteration number is -1 by default, indicating that the caller
    * did not request a specific starting iteration number. */
   if (starting_iteration_number >= 1)
-    iteration_number = starting_iteration_number;
+    {
+      iteration_number = starting_iteration_number;
+      /* Also, when a starting iteration number is given, run for only 1
+       * iteration. */
+      nruns = 1;
+    }
   else
     iteration_number = 1;
 
