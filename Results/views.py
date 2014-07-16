@@ -42,30 +42,25 @@ def non_empty_lines(line):
 
 def simulation_process(iteration_number):
     start = time.time()
-    print("Starting {Process}")
-
-    print('adsm.exe', '-i', iteration_number, 'activeSession.sqlite3', start)
+    # print('adsm.exe', '-i', iteration_number, 'activeSession.sqlite3', start)
     simulation = subprocess.Popen(['adsm.exe', '-i', str(iteration_number), 'activeSession.sqlite3'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
     headers = simulation.stdout.readline().decode("utf-8")  # first line should be the column headers
-    print(headers)
+    # print(headers)
     parser = Results.output_parser.DailyParser(headers)
 
-    print("Starting loop")
     for line in iter(simulation.stdout.readline, b''):  #
-        print(line)
         parser.parse_daily_strings(non_empty_lines(line))
     outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
     if errors:  # this will only print out error messages after the simulation has halted
         print(errors)
     # TODO: When the subprocess terminates there might be unconsumed output that still needs to be processed.
-    # (I haven't seen evidence of uncaught output 10 days after writing it)
+    # (I haven't seen evidence of uncaught output since 10 days after writing it)
     end = time.time()
-    print("Simulation completed in", end - start, 'seconds')
     return '%i: Success' % iteration_number
 
 
 class Simulation(threading.Thread):
-    """execute system commands in a separate thread so as not to interrupt the webpage.
+    """Execute system commands in a separate thread so as not to interrupt the webpage.
     Saturate the computer's processors with parallel simulation iterations"""
     def __init__(self, max_iteration, **kwargs):
         self.max_iteration = max_iteration
@@ -73,21 +68,22 @@ class Simulation(threading.Thread):
 
     def run(self):
         # print(simulation_process())
+        statuses = []
         with ProcessPoolExecutor() as executor:
             for exit_status in executor.map(simulation_process, range(1, self.max_iteration+1)):
-                print(exit_status)
+                statuses.append(exit_status)
+        print(statuses)
 
 
 def run_simulation(request):
     context = {'outputs_done': False}
-    sim = Simulation(OutputSettings.objects.all().first().iterations)
+    sim = Simulation(6)#OutputSettings.objects.all().first().iterations)
     sim.start()  # starts a new thread
     return render(request, 'Results/SimulationProgress.html', context)
 
 
 def list_entries(model_name, model, iteration=1):
     return model.objects.filter(iteration=iteration)[:200],
-    return context
 
 
 def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request):

@@ -113,9 +113,6 @@ class DailyParser():
 
         if len(self.failures):
             print('Unable to match columns: ', len(self.failures), sorted(self.failures))
-        else:
-            print("Done parsing Day", day, "Iteration", iteration)
-
 
     def parse_daily_strings(self, cmd_strings):
         for cmd_string in cmd_strings:
