@@ -94,6 +94,7 @@ main (int argc, char *argv[])
     {
       g_error ("Error opening scenario database: %s", sqlite3_errstr (sqlerr));
     }
+  sqlite3_busy_timeout (scenario_db, 30 * 60 * 1000 /* 30 minutes, given in milliseconds */);
 
 #ifdef USE_SC_GUILIB
   run_sim_main (scenario_db,
