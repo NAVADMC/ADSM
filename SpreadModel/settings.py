@@ -46,7 +46,7 @@ INSTALLED_APPS = (
     'ScenarioCreator',
     'Results',
     'Settings',
-    'production_server',
+    'django_production_server',
 )
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
