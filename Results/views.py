@@ -87,7 +87,12 @@ def list_entries(model_name, model, iteration=1):
 
 
 def graph_field_png(request, model_name, field_name, iteration):
-    return population_png(request)
+    time_series = list(DailyByProductionType.objects.filter(iteration=iteration, production_type=None)
+                       .order_by('day').values_list('day', field_name))
+    df = pd.DataFrame.from_records(time_series, columns=['day', field_name])
+    df = df.set_index('day')
+    fig = df.plot(figsize=(6.5, 6)).figure
+    return HttpFigure(fig)
 
 
 def graph_field(request, model_name, field_name, iteration):
