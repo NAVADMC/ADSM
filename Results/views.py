@@ -77,7 +77,7 @@ class Simulation(threading.Thread):
 
 def run_simulation(request):
     context = {'outputs_done': False}
-    sim = Simulation(6)#OutputSettings.objects.all().first().iterations)
+    sim = Simulation(OutputSettings.objects.all().first().iterations)
     sim.start()  # starts a new thread
     return render(request, 'Results/SimulationProgress.html', context)
 
