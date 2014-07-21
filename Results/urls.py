@@ -27,10 +27,12 @@ def generate_urls_from_models(input_file, extra_urls=()):
 
 urlpatterns = generate_urls_from_models('Results/models.py',
                                         ["url('^Population.png$', 'Results.views.population_png')",
+                                         "url('^RunSimulation/$', 'Results.views.run_simulation')",
+                                         "url('^(?P<model_name>\w+)/(?P<field_name>\w+)/(?P<iteration>)\d+/$', 'Results.views.graph_field')",
+                                         "url('^(?P<model_name>\w+)/(?P<field_name>\w+)/(?P<iteration>)\d+/Graph\.png$', 'Results.views.graph_field_png')",
                                          "url('^Workspace/$', 'ScenarioCreator.views.file_dialog')",  # Same as Input side
                                          "url('^Download/(?P<target>.+)/$', 'ScenarioCreator.views.download_file')",  # Same as Input side
                                          "url('^Inputs/$', 'Results.views.back_to_inputs')",
-                                         "url('^RunSimulation/$', 'Results.views.run_simulation')",
 
                                         ])
 

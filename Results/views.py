@@ -86,9 +86,14 @@ def list_entries(model_name, model, iteration=1):
     return model.objects.filter(iteration=iteration)[:200],
 
 
-def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request):
-    """FormSet is pre-populated with existing assignments and it detects and fills in missing
-    assignments with a blank form with production type filled in."""
+def graph_field_png(request, model_name, field_name, iteration):
+    return population_png(request)
+
+
+def graph_field(request, model_name, field_name, iteration):
+    context = {'title': "Graph of %s %s %s" % (model_name, field_name, iteration),
+               'image_link': request.path + 'Graph.png'}
+    return render(request, 'Results/Graph.html', context)
 
 
 def result_table(request, model_name, model_class, model_form, graph_links=False):
