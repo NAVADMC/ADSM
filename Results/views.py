@@ -91,7 +91,7 @@ def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, miss
     assignments with a blank form with production type filled in."""
 
 
-def result_table(request, model_class, model_form, graph_links=False):
+def result_table(request, model_name, model_class, model_form, graph_links=False):
     """  """
     ResultSet = modelformset_factory(model_class, extra=0, form=model_form)
     context = {'title': 'Results'}
@@ -100,17 +100,16 @@ def result_table(request, model_class, model_form, graph_links=False):
         return render(request, 'Results/FormSet.html', context)
     else:
         context['formset'] = ResultSet(queryset=model_class.objects.all().order_by('iteration', 'day')[:5])
-        context['ProductionTypes'] = ProductionType.objects.all()
         context['Zones'] = Zone.objects.all()
-        context['max_days'] = model_class.objects.aggregate(Max('day'))
-        context['max_iterations'] = model_class.objects.aggregate(Max('iteration'))
-
+        context['iterations'] = model_class.objects.values_list('iteration', flat=True).distinct()
+        context['model_name'] = model_name
+        context['excluded_fields'] = ['production_type', 'day', 'iteration', 'id', 'pk']
         return render(request, 'Results/GraphLinks.html', context)
 
 
 def model_list(request):
     model_name, model = get_model_name_and_model(request)
-    return result_table(request, model, globals()[model_name+'Form'], True)
+    return result_table(request, model_name, model, globals()[model_name+'Form'], True)
     # context = {'title': spaces_for_camel_case(model_name),
     #            'class': model_name,
     #            'name': spaces_for_camel_case(model_name),

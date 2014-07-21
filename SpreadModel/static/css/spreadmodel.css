@@ -251,6 +251,18 @@ th, td label{
     font-size: 12pt;
 }
 
+.result-table {
+    table-layout: fixed;
+}
+
+.result-table tr th:first-child {
+    width: 400px;
+}
+
+.result-table thead tr th {
+    font-size: 16pt;
+    font-weight: bold;
+}
 
 select {
     margin: 8px 4px;
