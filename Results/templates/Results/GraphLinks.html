@@ -1,0 +1,36 @@
+{% extends 'Results/navigationPane.html' %}
+{% load floppyforms %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <h1 id="title">{{ title }}</h1>
+
+<form method="post" action="">
+    {{ formset.management_form }}
+    <table>
+        <thead>
+            <tr>
+                {% for key, value in formset.0.fields.items %}
+                    {% if value.label %}
+                        <th>{{value.label}}</th>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for form in formset %}
+                {{form.id}}
+                <tr>
+                    {% form form using %}{# needed to push the context for the formconfig #}
+                        {% for field in form.visible_fields %}
+                            <td>{% block widget %}{% formfield field %}{% endblock %}</td>
+                        {% endfor %}
+                    {% endform %}
+                </tr>
+            {% endfor %}
+     </tbody>
+    </table>
+    <input type="submit" name="submit" value="Submit" class="btn btn-primary button white" id="submit-id-submit">
+</form>
+
+{% endblock %}
