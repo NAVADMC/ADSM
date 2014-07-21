@@ -76,3 +76,13 @@ out of my Anaconda install (same Python version 3.3) and into my Python33 direct
 * numpy
 * matplotlib
 I'm just leaving these notes here til I come up with a more reliable solution.
+
+
+Bryan: These are the items I used for getting the project to run smoothly on a new Python3.3 installation on Windows. Some of the items above are not needed.
+http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy
+http://www.lfd.uci.edu/~gohlke/pythonlibs/#pandas
+http://www.lfd.uci.edu/~gohlke/pythonlibs/#matplotlib
+pip install git+https://github.com/josiahseaman/django-extras
+pip install python-dateutil
+pip install pyparsing
+pip install pytz
