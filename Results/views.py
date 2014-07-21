@@ -95,8 +95,8 @@ def result_table(request, model_class, model_form):
     """  """
     ResultSet = modelformset_factory(model_class, extra=0, form=model_form)
     context = {'title': 'Results'}
-    context['formset'] = ResultSet(queryset=model_class.objects.all())
-    return render(request, 'ScenarioCreator/FormSet.html', context)
+    context['formset'] = ResultSet(queryset=model_class.objects.all().order_by('iteration', 'day')[:50])
+    return render(request, 'Results/FormSet.html', context)
 
 
 def model_list(request):
