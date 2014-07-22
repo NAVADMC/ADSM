@@ -358,3 +358,9 @@ class DailyControls(OutputBaseModel):
     detcUqAll            = models.IntegerField(blank=True, null=True, verbose_name=printable_name('detcUqAll'))
 
 
+
+
+def delete_all_outputs():
+    output_models = [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType]
+    for model in output_models:
+        model.objects.all().delete()

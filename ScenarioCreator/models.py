@@ -100,6 +100,8 @@ def delete_repo(sender, instance, **kwargs):
 class BaseModel(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         Settings.models.unsaved_changes(True)  # avoid infinite loop by ensuring unsaved_changes doesn't call BaseModel from SmSession
+        from Results.models import delete_all_outputs  # I quickly get circular imports if this is higher up
+        delete_all_outputs()
         return super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
