@@ -138,7 +138,7 @@ def result_table(request, model_name, model_class, model_form, graph_links=False
     else:
         context['formset'] = ResultSet(queryset=model_class.objects.all().order_by('iteration', 'day')[:5])
         context['Zones'] = Zone.objects.all()
-        context['iterations'] = list_of_iterations()
+        context['iterations'] = list_of_iterations()[:10]  # It's pointless to display links to more than the first 10 iterations, there can be thousands
         context['model_name'] = model_name
         context['excluded_fields'] = ['production_type', 'day', 'iteration', 'id', 'pk']
         return render(request, 'Results/GraphLinks.html', context)
