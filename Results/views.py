@@ -42,10 +42,9 @@ def non_empty_lines(line):
 
 def simulation_process(iteration_number):
     start = time.time()
-    # print('adsm.exe', '-i', iteration_number, 'activeSession.sqlite3', start)
     simulation = subprocess.Popen(['adsm.exe', '-i', str(iteration_number), 'activeSession.sqlite3'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
     headers = simulation.stdout.readline().decode("utf-8")  # first line should be the column headers
-    print(headers)
+    # print(headers)
     parser = Results.output_parser.DailyParser(headers)
 
     for line in iter(simulation.stdout.readline, b''):  #

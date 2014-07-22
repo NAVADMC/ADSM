@@ -11,6 +11,7 @@
         <thead>
             <tr>
                 <th>Iteration:</th>
+                <th>(All)</th>
                 {% for iteration in iterations %}
                     <th>{{iteration}}</th>
                 {% endfor %}
@@ -23,6 +24,9 @@
                         {% if value.label %}
                             <th>{{value.label}}</th>
                         {% endif %}
+                            <td>
+                                <a href="/results/{{ model_name }}/{{ key }}/"> {{ key }} </a> {#All Daily Samples#}
+                            </td>
                         {% for iteration in iterations %}
                             <td>
                                 <a href="/results/{{ model_name }}/{{ key }}/{{ iteration }}/"> {{ key }} </a>
