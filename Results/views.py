@@ -87,10 +87,20 @@ def list_entries(model_name, model, iteration=1):
 
 
 def graph_field_png(request, model_name, field_name, iteration):
-    time_series = list(DailyByProductionType.objects.filter(iteration=iteration, production_type=None)
-                       .order_by('day').values_list('day', field_name))
-    df = pd.DataFrame.from_records(time_series, columns=['day', field_name])
-    df = df.set_index('day')
+    model = globals()[model_name]
+
+    pts = dict(ProductionType.objects.all().values_list('name', 'id'))  # Tuples need to be turned into dict
+    pts['All'] = None
+    lines = [list(model.objects.filter(iteration=iteration, production_type=None)
+                 .order_by('day').values_list('day', flat=True))]  # Start with day index
+    for name in pts.keys():  # add one for each Production Type and "All"
+        lines.append(list(model.objects.filter(iteration=iteration, production_type_id=pts[name])
+                           .order_by('day').values_list(field_name, flat=True)))
+
+    print(lines)
+    time_series = zip(*lines)
+    df = pd.DataFrame.from_records(time_series, columns=['Day'] + list(pts.keys()))  # keys should be same ordering as the for loop above
+    df = df.set_index('Day')
     fig = df.plot(figsize=(6.5, 6)).figure
     return HttpFigure(fig)
 
