@@ -74,8 +74,15 @@ class Simulation(threading.Thread):
         print(statuses)
 
 
+def delete_all_outputs():
+    output_models = [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType]
+    for model in output_models:
+        model.objects.all().delete()
+
+
 def run_simulation(request):
     context = {'outputs_done': False}
+    delete_all_outputs()
     sim = Simulation(OutputSettings.objects.all().first().iterations)
     sim.start()  # starts a new thread
     return render(request, 'Results/SimulationProgress.html', context)
