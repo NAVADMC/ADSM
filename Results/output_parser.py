@@ -9,6 +9,16 @@ def camel_case_spaces(name_with_spaces):
     return re.sub(r' (\w)', lambda match: match.group(1).upper(), name_with_spaces)
 
 
+def number(string):
+    try:
+        return int(string)
+    except:
+        try:
+            return float(string)
+        except:
+            return -1
+
+
 class DailyParser():
     possible_zones = {x.name for x in Zone.objects.all()}.union({'Background'})
     possible_pts = {x.name for x in ProductionType.objects.all()}.union({''})
@@ -119,7 +129,6 @@ class DailyParser():
             values = cmd_string.split(',')
             if len(values):
                 pairs = zip(self.headers, values)
-                # Issue #145
-                sparse_values = {a: int(float(b)) if b else -1 for a, b in pairs}  # TODO: 2 floats out of 2,000 fields... better way to handle it?
+                sparse_values = {a: number(b) for a, b in pairs}
                 Results.models.DailyReport(sparse_dict=str(sparse_values), full_line=cmd_string).save()
                 self.populate_db_from_daily_report(sparse_values)
