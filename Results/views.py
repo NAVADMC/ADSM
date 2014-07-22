@@ -45,7 +45,7 @@ def simulation_process(iteration_number):
     # print('adsm.exe', '-i', iteration_number, 'activeSession.sqlite3', start)
     simulation = subprocess.Popen(['adsm.exe', '-i', str(iteration_number), 'activeSession.sqlite3'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
     headers = simulation.stdout.readline().decode("utf-8")  # first line should be the column headers
-    # print(headers)
+    print(headers)
     parser = Results.output_parser.DailyParser(headers)
 
     for line in iter(simulation.stdout.readline, b''):  #
@@ -86,26 +86,44 @@ def list_entries(model_name, model, iteration=1):
     return model.objects.filter(iteration=iteration)[:200],
 
 
-def graph_field_png(request, model_name, field_name, iteration):
+def list_of_iterations():
+    return list(DailyControls.objects.values_list('iteration', flat=True).distinct())
+
+
+def create_time_series_lines(field_name, model, production_types, iteration=''):  # Django assigns iteration='' when there's nothing
+    lines = []
+    if iteration:  # Break down lines by production type for only one iteration
+        columns = ['Day'] + list(production_types.keys())
+        for name in production_types.keys():  # add one for each Production Type and "All"
+            lines.append(list(model.objects.filter(iteration=iteration, production_type_id=production_types[name])
+                              .order_by('day').values_list(field_name, flat=True)))
+    else:  # This is a time plot of all iterations.
+        columns = ['Day'] + ["Iteration " + str(it) for it in list_of_iterations()]
+        for iteration in list_of_iterations():
+            lines.append(list(model.objects.filter(iteration=iteration, production_type=None)  # Only show the "All" Production Type
+                              .order_by('day').values_list(field_name, flat=True)))
+    return lines, columns
+
+
+def graph_field_png(request, model_name, field_name, iteration=None):
     model = globals()[model_name]
 
-    pts = dict(ProductionType.objects.all().values_list('name', 'id'))  # Tuples need to be turned into dict
-    pts['All'] = None
-    lines = [list(model.objects.filter(iteration=iteration, production_type=None)
-                 .order_by('day').values_list('day', flat=True))]  # Start with day index
-    for name in pts.keys():  # add one for each Production Type and "All"
-        lines.append(list(model.objects.filter(iteration=iteration, production_type_id=pts[name])
-                           .order_by('day').values_list(field_name, flat=True)))
+    production_types = dict(ProductionType.objects.all().values_list('name', 'id'))  # Tuples need to be turned into dict
+    production_types['All'] = None
+    lines, columns = create_time_series_lines(field_name, model, production_types, iteration)
+    lines.insert(0, list(range(model.objects.all().aggregate(Max('day'))['day__max'])))  # Start with day index
 
-    print(lines)
     time_series = zip(*lines)
-    df = pd.DataFrame.from_records(time_series, columns=['Day'] + list(pts.keys()))  # keys should be same ordering as the for loop above
+    df = pd.DataFrame.from_records(time_series, columns=columns)  # keys should be same ordering as the for loop above
     df = df.set_index('Day')
+    #TODO: if there are more than 20 iterations, hide or truncate the legend
     fig = df.plot(figsize=(6.5, 6)).figure
     return HttpFigure(fig)
 
 
-def graph_field(request, model_name, field_name, iteration):
+def graph_field(request, model_name, field_name, iteration=None):
+    if not iteration:
+        print("Blank Iteration:", request.path)
     context = {'title': "Graph of %s %s %s" % (model_name, field_name, iteration),
                'image_link': request.path + 'Graph.png'}
     return render(request, 'Results/Graph.html', context)
@@ -121,7 +139,7 @@ def result_table(request, model_name, model_class, model_form, graph_links=False
     else:
         context['formset'] = ResultSet(queryset=model_class.objects.all().order_by('iteration', 'day')[:5])
         context['Zones'] = Zone.objects.all()
-        context['iterations'] = model_class.objects.values_list('iteration', flat=True).distinct()
+        context['iterations'] = list_of_iterations()
         context['model_name'] = model_name
         context['excluded_fields'] = ['production_type', 'day', 'iteration', 'id', 'pk']
         return render(request, 'Results/GraphLinks.html', context)
