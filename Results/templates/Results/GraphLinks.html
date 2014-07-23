@@ -25,11 +25,11 @@
                             <th>{{value.label}}</th>
                         {% endif %}
                             <td>
-                                <a href="/results/{{ model_name }}/{{ key }}/"> {{ key }} </a> {#All Daily Samples#}
+                                <a href="/results/{{ model_name }}/{{ key }}/"> {{ key|truncatechars:10 }} </a> {#All Daily Samples#}
                             </td>
                         {% for iteration in iterations %}
                             <td>
-                                <a href="/results/{{ model_name }}/{{ key }}/{{ iteration }}/"> {{ key }} </a>
+                                <a href="/results/{{ model_name }}/{{ key }}/{{ iteration }}/"> {{ key|truncatechars:10 }} </a>
                             </td>
                         {% endfor %}
                     </tr>
