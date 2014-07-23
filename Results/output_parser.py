@@ -20,12 +20,11 @@ def number(string):
 
 
 class DailyParser():
-    possible_zones = {x.name for x in Zone.objects.all()}.union({'Background'})
-    possible_pts = {x.name for x in ProductionType.objects.all()}.union({''})
-    failures = set()
-
     def __init__(self, header_line):
         self.headers = header_line.strip().split(',')  # there was a trailing /r/n to remove
+        self.possible_zones = {x.name for x in Zone.objects.all()}.union({'Background'})
+        self.possible_pts = {x.name for x in ProductionType.objects.all()}.union({''})
+        self.failures = set()
 
 
     def extract_name(self, c_header_name, possibilities):
