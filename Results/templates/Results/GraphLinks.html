@@ -19,7 +19,7 @@
         </thead>
         <tbody>
             {% for key, value in formset.0.fields.items %}
-                {% if not key in excluded_fields %}
+                {% if not key in excluded_fields and not key in empty_fields%}
                     <tr>
                         {% if value.label %}
                             <th>{{value.label}}</th>
@@ -35,9 +35,18 @@
                     </tr>
                 {% endif %}
             {% endfor %}
-
      </tbody>
     </table>
+    {% if empty_fields %}
+        <h1>Empty Fields:</h1>
+        <ul class="minor">
+            {% for key, value in formset.0.fields.items %}
+                {% if key in empty_fields and value.label %}
+                    <li>{{value.label}}</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% endif %}
 </form>
 
 {% endblock %}

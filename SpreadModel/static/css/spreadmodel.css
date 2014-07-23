@@ -264,6 +264,14 @@ th, td label{
     font-weight: bold;
 }
 
+ul.minor {
+    list-style-type: circle;
+    color: #808080;
+}
+ul.minor li {
+    font-size: 11pt;
+}
+
 select {
     margin: 8px 4px;
 }
