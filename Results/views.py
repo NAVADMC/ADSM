@@ -145,16 +145,18 @@ def graph_field(request, model_name, field_name, iteration=None):
 
 
 def result_table(request, model_name, model_class, model_form, graph_links=False):
-    """  """
+    """Displays a table with links to all possible graphs of each field, for every iteration.
+       Issue #127"""
     ResultSet = modelformset_factory(model_class, extra=0, form=model_form)
-    context = {'title': 'Results'}
-    if not graph_links:
+    iterations = list_of_iterations()
+    context = {'title': 'Results from %i Iterations' % len(iterations)}
+    if not graph_links:  # Old behavior with a number table, only first 50 entries, useful for debug
         context['formset'] = ResultSet(queryset=model_class.objects.all().order_by('iteration', 'day')[:50])
         return render(request, 'Results/FormSet.html', context)
-    else:
+    else:  # New Behavior with links to a graph for every field
         context['formset'] = ResultSet(queryset=model_class.objects.all().order_by('iteration', 'day')[:5])
         context['Zones'] = Zone.objects.all()
-        context['iterations'] = list_of_iterations()[:10]  # It's pointless to display links to more than the first 10 iterations, there can be thousands
+        context['iterations'] = iterations[:10]  # It's pointless to display links to more than the first 10 iterations, there can be thousands
         context['model_name'] = model_name
         context['excluded_fields'] = ['production_type', 'day', 'iteration', 'id', 'pk']
         return render(request, 'Results/GraphLinks.html', context)
