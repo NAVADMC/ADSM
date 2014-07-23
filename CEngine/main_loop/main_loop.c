@@ -809,7 +809,15 @@ run_sim_main (sqlite3 *scenario_db,
 #endif
 
 
-  /* Initialize the pseudo-random number generator. */
+  /* Initialize the pseudo-random number generator. The seed is taken from the
+   * "seed" argument to run_sim_main() if specified there, then from the
+   * database if specified there, and finally from the system time.
+   *
+   * In parallel setups, we want to avoid more than one process starting with
+   * the same seed. In an MPI setup, we add the rank to the starting seed. In a
+   * non-MPI setup, if the "starting_iteration_number" argument to
+   * run_sim_main() is specified, then we add that *minus one* to the starting
+   * seed. */
   gsl_rng_env_setup();
   gsl_format_rng = gsl_rng_alloc (gsl_rng_taus2);
 #ifdef USE_SC_GUILIB
@@ -818,6 +826,7 @@ run_sim_main (sqlite3 *scenario_db,
   else
     gsl_rng_set (gsl_format_rng, _scenario.random_seed );
 #elsif HAVE_MPI && !CANCEL_MPI
+  /* MPI setup */
   if (seed >= 0)
     gsl_rng_set (gsl_format_rng, seed + me.rank);
   else
@@ -833,20 +842,33 @@ run_sim_main (sqlite3 *scenario_db,
         }
     }
 #else
-  if (seed >= 0)
-    gsl_rng_set (gsl_format_rng, seed);
-  else
-    {
-      seed = PAR_get_int (scenario_db, "SELECT (CASE WHEN random_seed IS NULL THEN -1 ELSE random_seed END) FROM ScenarioCreator_Scenario");
-      if (seed >= 0)
-        {
-          gsl_rng_set (gsl_format_rng, seed);
-        }
-      else
-        {
-          gsl_rng_set (gsl_format_rng, time(NULL));
-        }
-    }
+  /* Non-MPI setup */
+  {
+    int offset;
+    /* The starting iteration number is -1 by default, indicating that the caller
+     * did not request a specific starting iteration number. */
+    if (starting_iteration_number >= 1)
+      offset = starting_iteration_number - 1;
+    else
+      offset = 0;
+
+    if (seed >= 0)
+      {
+        gsl_rng_set (gsl_format_rng, seed + offset);
+      }
+    else
+      {
+        seed = PAR_get_int (scenario_db, "SELECT (CASE WHEN random_seed IS NULL THEN -1 ELSE random_seed END) FROM ScenarioCreator_Scenario");
+        if (seed >= 0)
+          {
+            gsl_rng_set (gsl_format_rng, seed + offset);
+          }
+        else
+          {
+            gsl_rng_set (gsl_format_rng, time(NULL) + offset);
+          }
+      }
+  }
 #endif
   rng = RAN_new_generator (gsl_format_rng);
   if (fixed_rng_value >= 0 && fixed_rng_value < 1)
