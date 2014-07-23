@@ -9,7 +9,8 @@ from Results.forms import *
 from ScenarioCreator.views import get_model_name_and_model
 from ScenarioCreator.models import Unit, OutputSettings
 from django.db.models import Max
-
+import matplotlib.pyplot as plt
+from matplotlib import gridspec
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import pandas as pd
 
@@ -117,10 +118,21 @@ def graph_field_png(request, model_name, field_name, iteration=None):
     lines.insert(0, list(range(model.objects.all().aggregate(Max('day'))['day__max'])))  # Start with day index
 
     time_series = zip(*lines)
-    df = pd.DataFrame.from_records(time_series, columns=columns)  # keys should be same ordering as the for loop above
-    df = df.set_index('Day')
+    time_data = pd.DataFrame.from_records(time_series, columns=columns)  # keys should be same ordering as the for loop above
+    time_data = time_data.set_index('Day')
     #TODO: if there are more than 20 iterations, hide or truncate the legend
-    fig = df.plot(figsize=(6.5, 6)).figure
+
+    fig = plt.figure(figsize=(8, 6))
+    gs = gridspec.GridSpec(1, 2, width_ratios=[4, 1])
+    axes = [plt.subplot(gs[0]), ]
+    axes.append(plt.subplot(gs[1], sharey=axes[0]))
+
+    time_data.plot(figsize=(8.5, 6), ax=axes[0])
+    last_day = time_data.tail(1).T
+    last_day.boxplot(ax=axes[1])
+    axes[0].legend().set_visible(False)
+    plt.tight_layout()
+
     return HttpFigure(fig)
 
 
