@@ -1,3 +1,7 @@
 <div class="buttonHolder">
-    <button type="submit" class="btn btn-primary button white" id="submit-id-submit">Save changes</button>
+    {% if outputs_computed %}
+        <button type="submit" class="btn btn-danger button white" id="submit-id-submit">Delete Results and Save changes</button>
+    {% else %}
+        <button type="submit" class="btn btn-primary button white" id="submit-id-submit">Save changes</button>
+    {% endif %}
 </div>

@@ -2,15 +2,15 @@ import re
 from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Population, Unit, Disease, DiseaseProgression, \
     DiseaseProgressionAssignment, DirectSpread, ProductionTypePairTransmission, ControlMasterPlan, ControlProtocol, \
     ProtocolAssignment, Zone, ZoneEffectOnProductionType, ProbabilityFunction, RelationalFunction
+from Results.models import DailyControls
 from ScenarioCreator.views import scenario_filename, unsaved_changes
 
 
 def simulation_ready_to_run(context):
-    context = dict(context)
-    # excluded statuses that shouldn't be blocking a simulation run
-    for key in ['filename', 'unsaved_changes', 'IndirectSpreads', 'AirborneSpreads', 'ProbabilityFunctions', 'RelationalFunctions']:
-        context.pop(key, None)
-    return all(context.values())
+    relevant_keys = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment','DirectSpreads',
+                     'AssignSpreads',  'ControlMasterPlan', 'Protocols', 'ProtocolAssignments', 'Zones', 'ZoneEffects']
+    status_lights = [value for key, value in context.items() if key in relevant_keys]
+    return all(status_lights)  # All green status_lights  (It's a metaphor)
 
 
 def basic_context(request):
@@ -36,10 +36,9 @@ def basic_context(request):
                'RelationalFunctions': RelationalFunction.objects.count(),
                'url': request.path,
                'active_link': re.split('\W+', request.path)[2],
+               'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
+               'outputs_computed': DailyControls.objects.all().count() > 0
                }
 
-    if 'results/' in request.path:  # viewing output page
-        context['display_output_nav'] = True
-    context['Simulation'] = simulation_ready_to_run(context)
-    context['controls_enabled'] = ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0
+    context['Simulation_ready'] = simulation_ready_to_run(context)
     return context

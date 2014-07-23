@@ -74,12 +74,15 @@ class Simulation(threading.Thread):
         print(statuses)
 
 
+def results_home(request):
+    return render(request, 'Results/SimulationProgress.html', {})
+
+
 def run_simulation(request):
-    context = {'outputs_done': False}
     delete_all_outputs()
     sim = Simulation(OutputSettings.objects.all().first().iterations)
     sim.start()  # starts a new thread
-    return render(request, 'Results/SimulationProgress.html', context)
+    return results_home(request)
 
 
 def list_entries(model_name, model, iteration=1):

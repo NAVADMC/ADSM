@@ -37,8 +37,15 @@
             <li><a href="/setup/OutputSettings/1/" class="{{"OutputSettings"|active:active_link}}">
                 <span class="pull-right {{OutputSetting|completed}}"> </span>Output Settings</a></li>
 
-            <li id="RunSimulation"><a href="/results/RunSimulation/" class="{{"RunSimulation"|active:active_link}} {{Simulation|completed}}">
-                Run Simulation <i class="glyphicon glyphicon-play"></i></a></li>
+            <li id="RunSimulation">
+                {% if outputs_computed %}
+                    <a href="/results/" class="completed ">
+                    View Results <i class="glyphicon glyphicon-play"></i></a>
+                {% else %}
+                    <a href="/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
+                    Run Simulation <i class="glyphicon glyphicon-play"></i></a>
+                {% endif %}
+            </li>
         </ul>
     </nav>
     <section>
