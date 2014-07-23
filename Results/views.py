@@ -144,6 +144,15 @@ def graph_field(request, model_name, field_name, iteration=None):
     return render(request, 'Results/Graph.html', context)
 
 
+def empty_fields(model_class):
+    rejected_fields = []
+    maximums_dict = model_class.objects.all().aggregate(*[Max(field) for field in model_class._meta.get_all_field_names()])
+    for key, value in maximums_dict.items():
+        if value is None or value <= 0:
+            rejected_fields.append(key[:-5])  # 5 characters in '__max'
+    return rejected_fields
+
+
 def result_table(request, model_name, model_class, model_form, graph_links=False):
     """Displays a table with links to all possible graphs of each field, for every iteration.
        Issue #127"""
@@ -159,6 +168,8 @@ def result_table(request, model_name, model_class, model_form, graph_links=False
         context['iterations'] = iterations[:10]  # It's pointless to display links to more than the first 10 iterations, there can be thousands
         context['model_name'] = model_name
         context['excluded_fields'] = ['production_type', 'day', 'iteration', 'id', 'pk']
+        context['excluded_fields'] += empty_fields(model_class)
+        print(context['excluded_fields'])
         return render(request, 'Results/GraphLinks.html', context)
 
 
