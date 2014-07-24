@@ -14,19 +14,22 @@ Please note that ADSM is built against Python 3.3 which is incompatible with Pyt
     pip install cherrypy # local host server
     pip install cx_freeze  # only necessary for creating executables https://pypi.python.org/pypi/cx_Freeze NOTE: Needed to edit C:\Python33\Scripts\cxfreeze and csfreeze-quickstart to point to correct interpreter!
 
+    pip install git+https://github.com/josiahseaman/django-extras  
+    pip install python-dateutil  
+    pip install pyparsing  
+    pip install pytz  
+
     git clone https://github.com/NAVADMC/SpreadModel.git
     git submodule init   # this fills out the 'production_server'
     git submodule update
 
 ### Matplotlib and Numpy Dependencies
-For a new Python3.3 installation on Windows, you will need to download these binaries:
-http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy
-http://www.lfd.uci.edu/~gohlke/pythonlibs/#pandas
-http://www.lfd.uci.edu/~gohlke/pythonlibs/#matplotlib
-    pip install git+https://github.com/josiahseaman/django-extras
-    pip install python-dateutil
-    pip install pyparsing
-    pip install pytz
+For a new Python3.3 installation on Windows, you will need to download these binaries:  
+Either `pip install pandas` or download and install these pacakages:
+http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy  
+http://www.lfd.uci.edu/~gohlke/pythonlibs/#pandas  
+http://www.lfd.uci.edu/~gohlke/pythonlibs/#matplotlib  
+
 
 ##Migrations
 ADSM uses to databases specified in ScenarioCreator/router.py.   settings.sqlite3 is the "default" database that
