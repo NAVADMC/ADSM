@@ -402,7 +402,7 @@ def delete_file(request, target):
     print("Deleting", target)
     os.remove(workspace_path(target))
     print("Done")
-    return redirect('/setup/Workspace')  # TODO: refresh instead of redirecting
+    return HttpResponse()
 
 
 def open_scenario(request, target):
@@ -421,8 +421,8 @@ def new_scenario(request):
     print("Deleting", activeSession())
     try:
         os.remove(activeSession())
-    except:
-        pass  # the file may not exist anyways
+    except BaseException as ex:
+        print(ex)  # the file may not exist anyways
     #creates a new blank file by migrate / syncdb
     call_command('syncdb',
                  # verbosity=0,
