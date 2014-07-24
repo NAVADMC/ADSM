@@ -592,32 +592,25 @@ class OutputSettings(BaseModel):
                  ('stop-days', 'Stop after a specified number of days')))
     days = models.PositiveIntegerField(default=1825, validators=[MinValueValidator(1)],
         help_text='The maximum number of days that iterations of this scenario should run.', )
-     ## Outputs requested:
-    save_all_daily_outputs = models.BooleanField(default=False,
-        choices=((True, 'Save all daily output fo every iteration (warning: this option may produce very large scenario files)'),
-                 (False, 'Save all daily output only for a specified number of iterations')),
-        help_text='Indicates if daily outputs should be stored for every iteration.', )
-    maximum_iterations_for_daily_output = models.PositiveIntegerField(default=3, blank=True, null=True,
-        validators=[MinValueValidator(3)],
-        help_text='The number of iterations for which daily outputs should be stored The minimum value is 3.', )
-    daily_states_filename = models.CharField(max_length=255, blank=True, null=True,
-        help_text='The file name to output a plain text file with the state of each unit on each day of each iteration.', )
-    save_daily_events = models.BooleanField(default=False,
-        help_text='Indicates if all events should be recorded in the scenario database.', )
-    save_daily_exposures = models.BooleanField(default=False,
-        help_text='Indicates if all exposures should be recorded in the scenario database.', )
-    save_iteration_outputs_for_units = models.BooleanField(default=False,
-        help_text='Indicates if iteration outputs for units should be recorded in the scenario database.', )
-    write_map_output = models.BooleanField(default=False,
-        help_text='Indicates if map outputs for units should be recorded in the scenario database.', )
-    map_directory = models.CharField(max_length=255, blank=True, null=True,
-        help_text='File path of the desired location for the output file.', )
+    ## Cost Tracking
     cost_track_destruction = models.BooleanField(default=True,
         help_text='Disable this to ignore entered destruction costs.', )
     cost_track_vaccination = models.BooleanField(default=True,
         help_text='Disable this to ignore entered vaccination costs.', )
     cost_track_zone_surveillance = models.BooleanField(default=True,
         help_text='Disable this to ignore entered zone surveillance costs.', )
+
+    ## Outputs requested:
+    save_daily_unit_states = models.BooleanField(default=False,
+        help_text='Create a plain text file with the state of each unit on each day of each iteration.', )
+    save_daily_events = models.BooleanField(default=False,
+        help_text='Save all daily events in a supplemental file.', )
+    save_daily_exposures = models.BooleanField(default=False,
+        help_text='Save all exposures in a supplemental file.', )
+    save_iteration_outputs_for_units = models.BooleanField(default=False,
+        help_text='Save all iteration outputs for units in a supplemental file.', )
+    save_map_output = models.BooleanField(default=False,
+        help_text='Create map outputs for units in supplemental directory.', )
 
     def clean_fields(self, exclude=None):
         self.daily_states_filename = clean_filename(self.daily_states_filename)

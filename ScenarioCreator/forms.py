@@ -3,8 +3,8 @@ ModelForm -> models.py.  This basic layout can be overridden by declaring an __i
 See DirectSpread for an example.  More complex widgets and layouts are accessible from there.
 All forms now have their "submit" button restored and you can choose custom layouts.  ControlProtocol has tabs."""
 from django.forms.models import inlineformset_factory
-from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
-from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Field, Hidden
+from crispy_forms.bootstrap import TabHolder, Tab, AppendedText, Accordion
+from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Field, Hidden, MultiField
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import OperationalError  # OperationalError is for initial manage.py syncdb
 from ScenarioCreator.models import *
@@ -330,13 +330,30 @@ class ScenarioForm(BaseForm):
 
 
 class OutputSettingsForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            'iterations',
+            'stop_criteria',
+            'days',
+            HTML(r"<h4>Cost Tracking</h4>"),
+            'cost_track_destruction',
+            'cost_track_vaccination',
+            'cost_track_zone_surveillance',
+            HTML(r"<h4>Supplemental Outputs</h4>"),
+            'save_daily_unit_states',
+            'save_daily_events',
+            'save_daily_exposures',
+            'save_iteration_outputs_for_units',
+            'save_map_output',
+            submit_button()
+        )
+        return super().__init__(*args, **kwargs)
+
     class Meta:
         model = OutputSettings
         exclude = ['_scenario']
-        widgets = {'save_all_daily_outputs': RadioSelect(),
-            'maximum_iterations_for_daily_output': NumberInput(
-                attrs={'data-visibility-controller': 'save_all_daily_outputs',
-                       'data-required-value': 'False'}),
+        widgets = {
             'days': NumberInput(
                 attrs={'data-visibility-controller': 'stop_criteria',
                        'data-required-value': 'stop-days'})
