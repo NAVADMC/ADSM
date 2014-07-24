@@ -43,7 +43,7 @@ urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
 
                                          "url('^OpenScenario/(?P<target>[\w\s\-\.]+)/$', 'ScenarioCreator.views.open_scenario')",  # includes .extension
                                          r"url('^DeleteFile/$', 'ScenarioCreator.views.delete_file')",
-                                         r"url('^Download/(?P<target>[\w\s\-\.]+)/$', 'ScenarioCreator.views.download_file')",
+                                         r"url('^Download/(?P<target>[\w\s\-\./]+)/$', 'ScenarioCreator.views.download_file')",
                                          "url('^Copy/(?P<target>[\w\s\-\.]+)/$', 'ScenarioCreator.views.copy_file')",
                                          "url('^Upload/$', 'ScenarioCreator.views.upload_scenario')",
                                         ])

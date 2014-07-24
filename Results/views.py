@@ -186,7 +186,6 @@ def result_table(request, model_name, model_class, model_form, graph_links=False
         context['model_name'] = model_name
         context['excluded_fields'] = ['production_type', 'day', 'iteration', 'id', 'pk']
         context['empty_fields'] = empty_fields(model_class)
-        print(context['excluded_fields'])
         return render(request, 'Results/GraphLinks.html', context)
 
 
