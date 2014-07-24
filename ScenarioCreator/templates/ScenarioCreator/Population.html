@@ -18,8 +18,8 @@
         <ul id="file_list">
             {% for file in xml_files %}
                 <li><a href="/setup/UploadPopulation/" class="ajax-post" data-filename="{{ file }}">{{ file }}</a>
-                    <a href="#" class="delete-button" data-delete-link="/setup/DeleteFile/{{ file }}"><img src="{{ STATIC_URL }}icons/delete.png" alt="Delete" class="icon pull-right"></a>
-                    <a href="/setup/Download/{{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
+                    <a href="#" class="delete-button" data-delete-link="{{ file }}"><img src="{{ STATIC_URL }}icons/delete.png" alt="Delete" class="icon pull-right"></a>
+                    <a href="/setup/Download/{{ file }}/" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
                     </li>
             {% endfor %}
         </ul>

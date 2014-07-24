@@ -398,7 +398,8 @@ def update_db_version():
     print('Done creating database')
 
 
-def delete_file(request, target):
+def delete_file(request):
+    target = request.POST['target']
     print("Deleting", target)
     os.remove(workspace_path(target))
     print("Done")
