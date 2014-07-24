@@ -12,7 +12,7 @@ Please note that ADSM is built against Python 3.3 which is incompatible with Pyt
     pip install south
     pip install selenium  # only necessary for testing
     pip install cherrypy # local host server
-    pip install cx-freeze  # only necessary for creating executables
+    pip install cx_freeze  # only necessary for creating executables https://pypi.python.org/pypi/cx_Freeze NOTE: Needed to edit C:\Python33\Scripts\cxfreeze and csfreeze-quickstart to point to correct interpreter!
 
     git clone https://github.com/NAVADMC/SpreadModel.git
     git submodule init   # this fills out the 'production_server'
@@ -70,3 +70,23 @@ It's important that when you migrate you specify the database= because south doe
 ##OS - specific Branches
 _Branches: Windows, Linux, Mac-OSX_  
 Never merge from OS specific branches back into master.  Changes made in these branches should be OS-specific and stay isolated.  Any general changes should be made in master and applied to the other branches by merging.
+
+
+##Bryan's Notes on Installing Python3.3 in Linux:
+    sudo apt-get build-dep python3.2
+    sudo apt-get install libreadline-dev libncurses5-dev libssl1.0.0 tk8.5-dev zlib1g-dev liblzma-dev
+    wget http://python.org/ftp/python/3.3.3/Python-3.3.3.tgz
+    tar xvfz Python-3.3.3.tgz
+    cd Python-3.3.3
+    ./configure --prefix=/opt/python3.3
+    make
+    sudo make install
+    wget https://bootstrap.pypa.io/ez_setup.py -O - | sudo /opt/python3.3/bin/python3.3
+    wget https://bootstrap.pypa.io/get-pip.py -O - | sudo /opt/python3.3/bin/python3.3
+
+    ##For setting up the virtualenv for daily use:
+        /opt/python3.3/bin/pyvenv ~/py33
+        source ~/py33/bin/activate
+        wget http://python-distribute.org/distribute_setup.py -O - | python
+        easy_insatll pip
+
