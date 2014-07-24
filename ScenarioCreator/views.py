@@ -360,7 +360,7 @@ def model_list(request):
 
 
 def workspace_path(target):
-    return "./workspace/"+target
+    return os.path.join("workspace", target)
 
 
 def file_list(extension=''):
@@ -381,7 +381,7 @@ def save_scenario(request):
     target = request.POST['filename']
     scenario_filename(target)
     print('Copying database to', target)
-    full_path = workspace_path(target) + ".sqlite3" if target[-8:] != '.sqlite3' else workspace_path(target)
+    full_path = workspace_path(target) + ('.sqlite3' if target[-8:] != '.sqlite3' else '')
     shutil.copy(activeSession(), full_path)
     unsaved_changes(False)  # File is now in sync
     return redirect('/setup/Scenario/1/')

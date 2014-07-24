@@ -1,12 +1,13 @@
 from concurrent.futures import ProcessPoolExecutor
+import os
 import threading
 from django.forms.models import modelformset_factory
 from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
 import subprocess
 import time
 from Results.forms import *
-from ScenarioCreator.views import get_model_name_and_model
+from ScenarioCreator.views import get_model_name_and_model, scenario_filename
 from ScenarioCreator.models import Unit, OutputSettings
 from django.db.models import Max
 import matplotlib.pyplot as plt
@@ -41,9 +42,23 @@ def non_empty_lines(line):
     return output_lines
 
 
+def prepare_supplemental_output_directory():
+    """Creates a directory with the same name as the Scenario and directs the Simulation to store supplemental files in the new directory"""
+    output_args = []
+    if any(OutputSettings.objects.values('save_daily_unit_states', 'save_daily_events', 'save_daily_exposures', 'save_iteration_outputs_for_units',
+                                         'save_map_output')[0].values()):  # any of these settings would justify an output directory
+        output_dir = os.path.join('workspace', scenario_filename())  # this does not have the .sqlite3 suffix
+        output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm.exe
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+    return output_args
+
+
 def simulation_process(iteration_number):
     start = time.time()
-    simulation = subprocess.Popen(['adsm.exe', '-i', str(iteration_number), 'activeSession.sqlite3'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
+    output_args = prepare_supplemental_output_directory()
+    simulation = subprocess.Popen(['adsm.exe', '-i', str(iteration_number), 'activeSession.sqlite3'] + output_args,
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
     headers = simulation.stdout.readline().decode("utf-8")  # first line should be the column headers
     # print(headers)
     parser = Results.output_parser.DailyParser(headers)
@@ -56,7 +71,7 @@ def simulation_process(iteration_number):
     # TODO: When the subprocess terminates there might be unconsumed output that still needs to be processed.
     # (I haven't seen evidence of uncaught output since 10 days after writing it)
     end = time.time()
-    return '%i: Success' % iteration_number
+    return '%i: Success in %i seconds' % (iteration_number, end-start)
 
 
 class Simulation(threading.Thread):

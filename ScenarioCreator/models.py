@@ -613,8 +613,6 @@ class OutputSettings(BaseModel):
         help_text='Create map outputs for units in supplemental directory.', )
 
     def clean_fields(self, exclude=None):
-        self.daily_states_filename = clean_filename(self.daily_states_filename)
-        self.map_directory = clean_filename(self.map_directory)
         if self.stop_criteria != 'stop-days':
             self.days = 1825  # 5 year maximum simulation time
 
