@@ -1,4 +1,5 @@
 from concurrent.futures import ProcessPoolExecutor
+from glob import glob
 import threading
 from django.forms.models import modelformset_factory
 from django.http import HttpResponse
@@ -89,7 +90,10 @@ class Simulation(threading.Thread):
 
 
 def results_home(request):
-    return render(request, 'Results/SimulationProgress.html', {})
+    path_ex = os.path.join("workspace", scenario_filename(), "*.txt")
+    context = {'supplemental_files': [re.sub(r'workspace/?', '', re.sub(r'\\', '/', path)) for path in glob(path_ex)]}
+    # TODO: value dict file sizes
+    return render(request, 'Results/SimulationProgress.html', context)
 
 
 def run_simulation(request):

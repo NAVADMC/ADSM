@@ -8,6 +8,23 @@
     <img src="/results/Population.png" alt="Unit Locations"/>
     <p>Locations of all Units in the simulation</p>
 
+    {% if supplemental_files %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Supplemental Output Files</h3>
+            </div>
+            <div class="panel-body">
+                <ul id="file_list">
+                    {% for file in supplemental_files %}
+                        <li>{{ file }}
+                            <a href="#" class="delete-button" data-delete-link="/setup/DeleteFile/{{ file }}"><img src="{{ STATIC_URL }}icons/delete.png" alt="Delete" class="icon pull-right"></a>
+                            <a href="/setup/Download/{{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
+                            </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
     <ul>
         <li>Validation of whole scenario</li>
         <li>Simulation run X out of 40 iterations</li>

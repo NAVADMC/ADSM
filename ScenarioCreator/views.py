@@ -352,6 +352,9 @@ def model_list(request):
 
 
 def workspace_path(target):
+    if '/' in target or '\\' in target:
+        parts = re.split(r'/+\\+', target)  # the slashes here are coming in from URL so they probably don't match os.path.split()
+        return os.path.join("workspace", *parts)
     return os.path.join("workspace", target)
 
 
