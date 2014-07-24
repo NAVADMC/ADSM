@@ -1,18 +1,18 @@
 from glob import glob
 import json
-import shutil
+
 from django.core.management import call_command
 from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
 from django.db import connections
 from django.conf import settings
-from Results.models import *
-from ScenarioCreator.models import * # This is absolutely necessary for dynamic form loading
-from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
-from Settings.models import SmSession, unsaved_changes
 from django.forms.models import modelformset_factory
 from django.db.models import Q
-from django.forms.models import inlineformset_factory
+
+from Results.models import *  # This is absolutely necessary for dynamic form loading
+from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
+from Settings.models import unsaved_changes, scenario_filename
+
 
 
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
@@ -38,14 +38,6 @@ def add_breadcrumb_context(context, model_name, primary_key=None):
             context['model_link'] += primary_key + '/'
     else:  # for singletons, don't list the specific name, just the type
         context['title'] = 'Edit the ' + spaces_for_camel_case(model_name)
-
-
-def scenario_filename(new_value=None):
-    session = SmSession.objects.get_or_create(id=1)[0]  # This keeps track of the state for all views and is used by basic_context
-    if new_value:
-        session.scenario_filename = new_value.replace('.sqlite3', '')
-        session.save()
-    return session.scenario_filename
 
 
 def activeSession():

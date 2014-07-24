@@ -27,3 +27,11 @@ def unsaved_changes(new_value=None):
         session.unsaved_changes = new_value
         session.save()
     return session.unsaved_changes
+
+
+def scenario_filename(new_value=None):
+    session = SmSession.objects.get_or_create(id=1)[0]  # This keeps track of the state for all views and is used by basic_context
+    if new_value:
+        session.scenario_filename = new_value.replace('.sqlite3', '')
+        session.save()
+    return session.scenario_filename

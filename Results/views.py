@@ -1,23 +1,21 @@
 from concurrent.futures import ProcessPoolExecutor
-import os
 import threading
 from django.forms.models import modelformset_factory
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 import subprocess
 import time
-from Results.forms import *
-from ScenarioCreator.views import get_model_name_and_model, scenario_filename
 from ScenarioCreator.models import Unit, OutputSettings
 from django.db.models import Max
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import pandas as pd
+from Results.forms import *  # necessary for globals()[model_name + 'Form']
+from Results.models import *  # necessary
 
 
 def back_to_inputs(request):
-    # TODO: Modal confirmation: "Modifying Inputs will delete any Results created and require you to re-run the simulation"
     return redirect('/setup/')
 
 
@@ -98,7 +96,7 @@ def run_simulation(request):
     delete_all_outputs()
     sim = Simulation(OutputSettings.objects.all().first().iterations)
     sim.start()  # starts a new thread
-    return results_home(request)
+    return redirect('/results/')
 
 
 def list_entries(model_name, model, iteration=1):
@@ -186,6 +184,13 @@ def result_table(request, model_name, model_class, model_form, graph_links=False
         context['empty_fields'] = empty_fields(model_class)
         print(context['excluded_fields'])
         return render(request, 'Results/GraphLinks.html', context)
+
+
+def get_model_name_and_model(request):
+    """A slight variation on get_mode_name_and_form useful for cases where you don't want a form"""
+    model_name = re.split('\W+', request.path)[2]  # Second word in the URL
+    model = globals()[model_name]  # IMPORTANT: depends on import *
+    return model_name, model
 
 
 def model_list(request):

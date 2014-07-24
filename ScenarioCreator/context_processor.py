@@ -3,7 +3,8 @@ from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Pop
     DiseaseProgressionAssignment, DirectSpread, ProductionTypePairTransmission, ControlMasterPlan, ControlProtocol, \
     ProtocolAssignment, Zone, ZoneEffectOnProductionType, ProbabilityFunction, RelationalFunction
 from Results.models import DailyControls
-from ScenarioCreator.views import scenario_filename, unsaved_changes
+from ScenarioCreator.views import unsaved_changes
+from Settings.models import scenario_filename
 
 
 def simulation_ready_to_run(context):
