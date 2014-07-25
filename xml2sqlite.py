@@ -1271,7 +1271,7 @@ if __name__ == "__main__":
 	# functions.
 	dbName = sys.argv[3]
 	settings.configure(
-	  INSTALLED_APPS = ('ScenarioCreator',),
+	  INSTALLED_APPS = ('ScenarioCreator', 'Settings', 'Results'),
 	  DATABASES = {
 	    'default': {
 	      'NAME': dbName,
