@@ -92,7 +92,7 @@ main (int argc, char *argv[])
   sqlerr = sqlite3_open_v2 (scenario_db_name, &scenario_db, SQLITE_OPEN_READONLY, NULL);
   if (sqlerr !=  SQLITE_OK)
     {
-      g_error ("Error opening scenario database: %s", sqlite3_errstr (sqlerr));
+      g_error ("Error opening scenario database: %s", sqlite3_errmsg (scenario_db));
     }
   sqlite3_busy_timeout (scenario_db, 30 * 60 * 1000 /* 30 minutes, given in milliseconds */);
 
