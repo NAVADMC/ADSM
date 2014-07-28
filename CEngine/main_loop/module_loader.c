@@ -270,59 +270,76 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
       g_ptr_array_add (tmp_models,
                        resources_and_implementation_of_controls_model_new (scenario_db, units, projection, zones));
     }
-  
-  if (PAR_get_boolean (scenario_db, "SELECT daily_states_filename IS NOT NULL AND daily_states_filename != '' FROM ScenarioCreator_outputsettings"))
+
+  /* Main output, the table of output variable values. */
+  g_ptr_array_add (tmp_models,
+                   full_table_writer_new (scenario_db, units, projection, zones));
+  g_ptr_array_add (tmp_models,
+                   unit_state_monitor_new (scenario_db, units, projection, zones));
+  g_ptr_array_add (tmp_models,
+                   exposure_monitor_new (scenario_db, units, projection, zones));
+  g_ptr_array_add (tmp_models,
+                   infection_monitor_new (scenario_db, units, projection, zones));
+  g_ptr_array_add (tmp_models,
+                   destruction_monitor_new (scenario_db, units, projection, zones));
+  g_ptr_array_add (tmp_models,
+                   destruction_list_monitor_new (scenario_db, units, projection, zones));
+  g_ptr_array_add (tmp_models,
+                   zone_monitor_new (scenario_db, units, projection, zones));
+  if (include_detection)
+    {
+      g_ptr_array_add (tmp_models,
+                       detection_monitor_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (tmp_models,
+                       trace_monitor_new (scenario_db, units, projection, zones));
+    }
+  if (include_exams)
+    {
+      g_ptr_array_add (tmp_models,
+                       exam_monitor_new (scenario_db, units, projection, zones));
+    }
+  if (include_testing)
+    {
+      g_ptr_array_add (tmp_models,
+                       test_monitor_new (scenario_db, units, projection, zones));
+    }
+  if (include_vaccination)
+    {
+      g_ptr_array_add (tmp_models,
+                       vaccination_monitor_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (tmp_models,
+                       vaccination_list_monitor_new (scenario_db, units, projection, zones));
+    }
+
+  include_economic = PAR_get_boolean (scenario_db, "SELECT (cost_track_zone_surveillance=1 OR cost_track_vaccination=1 OR cost_track_destruction=1) FROM ScenarioCreator_outputsettings");
+  if (include_economic)
+    {
+      g_ptr_array_add (tmp_models,
+                       economic_model_new (scenario_db, units, projection, zones));
+    }
+
+  /* Supplemental outputs. */
+  if (PAR_get_boolean (scenario_db, "SELECT (save_daily_unit_states=1) FROM ScenarioCreator_outputsettings"))
     {
       g_ptr_array_add (tmp_models,
                        state_table_writer_new (scenario_db, units, projection, zones));
     }
-  else
+  if (PAR_get_boolean (scenario_db, "SELECT (save_daily_exposures=1) FROM ScenarioCreator_outputsettings"))
     {
       g_ptr_array_add (tmp_models,
-                       full_table_writer_new (scenario_db, units, projection, zones));
+                       exposures_table_writer_new (scenario_db, units, projection, zones));
+    }
+  if (PAR_get_boolean (scenario_db, "SELECT (save_daily_events=1) FROM ScenarioCreator_outputsettings"))
+    {
       g_ptr_array_add (tmp_models,
-                       unit_state_monitor_new (scenario_db, units, projection, zones));
+                       apparent_events_table_writer_new (scenario_db, units, projection, zones));
+    }
+  if (PAR_get_boolean (scenario_db, "SELECT (save_map_output=1) FROM ScenarioCreator_outputsettings"))
+    {
       g_ptr_array_add (tmp_models,
-                       exposure_monitor_new (scenario_db, units, projection, zones));
+                       weekly_gis_writer_new (scenario_db, units, projection, zones));
       g_ptr_array_add (tmp_models,
-                       infection_monitor_new (scenario_db, units, projection, zones));
-      g_ptr_array_add (tmp_models,
-                       destruction_monitor_new (scenario_db, units, projection, zones));
-      g_ptr_array_add (tmp_models,
-                       destruction_list_monitor_new (scenario_db, units, projection, zones));
-      g_ptr_array_add (tmp_models,
-                       zone_monitor_new (scenario_db, units, projection, zones));
-      if (include_detection)
-        {
-          g_ptr_array_add (tmp_models,
-                           detection_monitor_new (scenario_db, units, projection, zones));
-          g_ptr_array_add (tmp_models,
-                           trace_monitor_new (scenario_db, units, projection, zones));
-        }
-      if (include_exams)
-        {
-          g_ptr_array_add (tmp_models,
-                           exam_monitor_new (scenario_db, units, projection, zones));
-        }
-      if (include_testing)
-        {
-          g_ptr_array_add (tmp_models,
-                           test_monitor_new (scenario_db, units, projection, zones));
-        }
-      if (include_vaccination)
-        {
-          g_ptr_array_add (tmp_models,
-                           vaccination_monitor_new (scenario_db, units, projection, zones));
-          g_ptr_array_add (tmp_models,
-                           vaccination_list_monitor_new (scenario_db, units, projection, zones));
-        }
-
-      include_economic = PAR_get_boolean (scenario_db, "SELECT (cost_track_zone_surveillance=1 OR cost_track_vaccination=1 OR cost_track_destruction=1) FROM ScenarioCreator_outputsettings");
-      if (include_economic)
-        {
-          g_ptr_array_add (tmp_models,
-                           economic_model_new (scenario_db, units, projection, zones));
-        }
+                       summary_gis_writer_new (scenario_db, units, projection, zones));
     }
 
   /* Population model is always added. */
