@@ -24,6 +24,9 @@
 
 #include "adsm.h"
 #include "general.h"
+#include <sys/stat.h>
+#include <errno.h>
+#include <string.h>
 
 
 
@@ -88,6 +91,22 @@ main (int argc, char *argv[])
       g_error ("Need name of scenario database");
     }
   g_option_context_free (context);
+
+  /* If an output directory was specified, and that directory does not exist,
+   * create the directory. */
+  errno = 0;
+  {
+    if (output_dir != NULL)
+      {
+        gint errcode;
+        errcode = g_mkdir_with_parents (output_dir, S_IRUSR + S_IWUSR + S_IXUSR);
+        if (errcode != 0)
+          {
+            g_error ("could not create output directory \"%s\": %s",
+                     output_dir, strerror(errno));
+          }
+      }
+  }
 
   sqlerr = sqlite3_open_v2 (scenario_db_name, &scenario_db, SQLITE_OPEN_READONLY, NULL);
   if (sqlerr !=  SQLITE_OK)
