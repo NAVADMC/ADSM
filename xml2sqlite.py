@@ -250,10 +250,6 @@ def readParameters( parameterFileName ):
 	)
 	scenario.save()
 
-	if xml.find( './/state-table-writer' ) != None:
-		statesFile = '-'
-	else:
-		statesFile = None
 	if xml.find( './exit-condition/first-detection' ) != None:
 		earlyExitCondition = 'first-detection'
 	elif xml.find( './exit-condition/disease-end' ) != None:
@@ -264,7 +260,10 @@ def readParameters( parameterFileName ):
       iterations = int( xml.find( './num-runs' ).text ),
       days = int( xml.find( './num-days' ).text ),
       stop_criteria = earlyExitCondition,
-      daily_states_filename = statesFile,
+      save_daily_unit_states = (xml.find( './/state-table-writer' ) != None),
+      save_daily_events = (xml.find( './/apparent-events-table-writer' ) != None),
+      save_daily_exposures = (xml.find( './/exposures-table-writer' ) != None),
+      save_map_output = (xml.find( './/weekly-gis-writer' ) != None or xml.find( './/summary-gis-writer' ) != None),
       cost_track_zone_surveillance = (xml.find( './/economic-model/surveillance' ) != None),
 	  cost_track_vaccination = (xml.find( './/economic-model/vaccination' ) != None),
 	  cost_track_destruction = (xml.find( './/economic-model/euthanasia' ) != None)
