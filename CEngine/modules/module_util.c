@@ -269,41 +269,32 @@ g_queue_free_as_GDestroyNotify (gpointer data)
 
 
 /**
- * Modify a provided output file name.  If the program is compiled without MPI
- * support, this just returns a string copy of <i>filename</i>.  If the program
- * is compiled with MPI support, this inserts the node number just before the
- * file extension, or at the end of the filename if there is no file extension.
+ * Modify a provided file name.  Inserts the given number just before the file
+ * extension, or at the end of the filename if there is no file extension.
  */
 char *
-adsm_insert_node_number_into_filename (const char *filename)
+adsm_insert_number_into_filename (const char *filename, int number)
 {
-#if HAVE_MPI && !CANCEL_MPI
   GString *s;
   char *last_dot;
-  char *chararray;
 
   s = g_string_new (NULL);
   last_dot = rindex (filename, '.');
   if (last_dot == NULL)
     {
-      /* No file extension; just append the MPI node number. */
-      g_string_printf (s, "%s%i", filename, me.rank);
+      /* No file extension; just append the number. */
+      g_string_printf (s, "%s%i", filename, number);
     }
   else
     {
-      /* Insert the MPI node number just before the extension. */
+      /* Insert the number just before the extension. */
       g_string_insert_len (s, -1, filename, last_dot - filename);
-      g_string_append_printf (s, "%i", me.rank);
+      g_string_append_printf (s, "%i", number);
       g_string_insert_len (s, -1, last_dot, strlen (filename) - (last_dot - filename));
     }
 
   /* don't return the wrapper object */
-  chararray = s->str;
-  g_string_free (s, FALSE);
-  return chararray;
-#else
-  return g_strdup (filename);
-#endif
+  return g_string_free (s, FALSE);
 }
 
 

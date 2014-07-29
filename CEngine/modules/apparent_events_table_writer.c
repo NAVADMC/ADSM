@@ -29,7 +29,6 @@
 #define to_string apparent_events_table_writer_to_string
 #define local_free apparent_events_table_writer_free
 #define handle_output_dir_event apparent_events_table_writer_handle_output_dir_event
-#define handle_before_any_simulations_event apparent_events_table_writer_handle_before_any_simulations_event
 #define handle_before_each_simulation_event apparent_events_table_writer_handle_before_each_simulation_event
 #define handle_detection_event apparent_events_table_writer_handle_detection_event
 #define handle_exam_event apparent_events_table_writer_handle_exam_event
@@ -64,10 +63,9 @@
 
 
 
-#define NEVENTS_LISTENED_FOR 9
+#define NEVENTS_LISTENED_FOR 8
 EVT_event_type_t events_listened_for[] = {
   EVT_OutputDirectory,
-  EVT_BeforeAnySimulations,
   EVT_BeforeEachSimulation,
   EVT_Detection,
   EVT_Exam,
@@ -82,9 +80,8 @@ EVT_event_type_t events_listened_for[] = {
 /* Specialized information for this model. */
 typedef struct
 {
-  char *filename; /* with the .csv extension */
+  char *filename; /* The base filename, with the .csv extension */
   GIOChannel *channel; /* The open file. */
-  gboolean channel_is_stdout;
   int run_number;
   GString *buf;
 }
@@ -94,7 +91,7 @@ local_data_t;
 
 /**
  * Responds to an "output directory" event by prepending the directory to the
- * its output filename.
+ * base output filename.
  *
  * @param self this module.
  * @param event an output directory event.
@@ -111,15 +108,13 @@ handle_output_dir_event (struct adsm_module_t_ * self,
 #endif
 
   local_data = (local_data_t *) (self->model_data);
-  if (local_data->channel_is_stdout == FALSE)
-    {
-      tmp = local_data->filename;
-      local_data->filename = g_build_filename (event->output_dir, tmp, NULL);
-      g_free (tmp);
-      #if DEBUG
-        g_debug ("filename is now %s", local_data->filename);
-      #endif
-    }
+
+  tmp = local_data->filename;
+  local_data->filename = g_build_filename (event->output_dir, tmp, NULL);
+  g_free (tmp);
+  #if DEBUG
+    g_debug ("filename is now %s", local_data->filename);
+  #endif
 
 #if DEBUG
   g_debug ("----- EXIT handle_output_dir_event (%s)", MODEL_NAME);
@@ -130,72 +125,52 @@ handle_output_dir_event (struct adsm_module_t_ * self,
 
 
 /**
- * Before any simulations, this module sets the run number to zero, opens its
- * output file and writes the table header.
+ * Before each simulation, this module opens its output file and writes the
+ * table header.
  *
  * @param self the model.
+ * @param event a "Before Each Simulation" event.
  */
 void
-handle_before_any_simulations_event (struct adsm_module_t_ * self)
+handle_before_each_simulation_event (struct adsm_module_t_ * self,
+                                     EVT_before_each_simulation_event_t * event)
 {
   local_data_t *local_data;
+  char *tmp_filename;
   GError *error = NULL;
-
-#if DEBUG
-  g_debug ("----- ENTER handle_before_any_simulations_event (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-  if (local_data->channel_is_stdout)
-    {
-      #ifdef G_OS_UNIX
-        local_data->channel = g_io_channel_unix_new (STDOUT_FILENO);
-      #endif
-      #ifdef G_OS_WIN32
-        local_data->channel = g_io_channel_win32_new_fd (STDOUT_FILENO);
-      #endif
-    }
-  else
-    {
-      local_data->channel = g_io_channel_new_file (local_data->filename, "w", &error);
-      if (local_data->channel == NULL)
-        {
-          g_error ("%s: %s error when attempting to open file \"%s\"",
-                   MODEL_NAME, error->message, local_data->filename);
-        }
-    }
-  g_io_channel_write_chars (local_data->channel,
-                            "Run,Day,Type,Reason,ID,Production type,Size,Lat,Lon,Zone\n",
-                            -1 /* assume null-terminated string */,
-                            NULL, &error);
-  g_io_channel_flush (local_data->channel, &error);
-
-  /* This count will be incremented for each new simulation. */
-  local_data->run_number = 0;
-
-#if DEBUG
-  g_debug ("----- EXIT handle_before_any_simulations_event (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
- * Before each simulation, this module increments its "run number".
- *
- * @param self the model.
- */
-void
-handle_before_each_simulation_event (struct adsm_module_t_ * self)
-{
-  local_data_t *local_data;
 
 #if DEBUG
   g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
 #endif
 
   local_data = (local_data_t *) (self->model_data);
-  local_data->run_number++;
+  local_data->run_number = event->iteration_number;
+
+  /* If there is a file open from the previous simulation, flush and close that
+   * file. */
+  if (local_data->channel != NULL)
+    {
+      g_io_channel_shutdown (local_data->channel, /* flush = */ TRUE, &error);
+      local_data->channel = NULL;
+    }
+
+  /* Make a new filename that includes the iteration number. */
+  tmp_filename = adsm_insert_number_into_filename (local_data->filename, event->iteration_number);
+
+  local_data->channel = g_io_channel_new_file (tmp_filename, "w", &error);
+  if (local_data->channel == NULL)
+    {
+      g_error ("%s: %s error when attempting to open file \"%s\"",
+               MODEL_NAME, error->message, local_data->filename);
+    }
+
+  g_free (tmp_filename);
+
+  g_io_channel_write_chars (local_data->channel,
+                            "Run,Day,Type,Reason,ID,Production type,Size,Lat,Lon,Zone\n",
+                            -1 /* assume null-terminated string */,
+                            NULL, &error);
+  g_io_channel_flush (local_data->channel, &error);
 
 #if DEBUG
   g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -550,11 +525,8 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
     case EVT_OutputDirectory:
       handle_output_dir_event (self, &(event->u.output_dir));
       break;
-    case EVT_BeforeAnySimulations:
-      handle_before_any_simulations_event (self);
-      break;
     case EVT_BeforeEachSimulation:
-      handle_before_each_simulation_event (self);
+      handle_before_each_simulation_event (self, &(event->u.before_each_simulation));
       break;
     case EVT_Detection:
       handle_detection_event (self, &(event->u.detection), zones);
@@ -652,10 +624,10 @@ local_free (struct adsm_module_t_ *self)
   local_data = (local_data_t *) (self->model_data);
 
   /* Flush and close the file. */
-  if (local_data->channel_is_stdout)
-    g_io_channel_flush (local_data->channel, &error);
-  else
-    g_io_channel_shutdown (local_data->channel, /* flush = */ TRUE, &error);
+  if (local_data->channel != NULL)
+    {
+      g_io_channel_shutdown (local_data->channel, /* flush = */ TRUE, &error);
+    }
 
   /* Free the dynamically-allocated parts. */
   g_string_free (local_data->buf, TRUE);
@@ -703,40 +675,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
-  /* Get the filename for the table.  If the filename is omitted, blank, '-',
-   * or 'stdout' (case insensitive), then the table is written to standard
-   * output. */
-  if (TRUE)
-    {
-      local_data->filename = g_strdup ("stdout"); /* just so we have something
-        to display, and to free later */
-      local_data->channel_is_stdout = TRUE;    
-    }
-  else
-    {
-      local_data->filename = NULL; /* PAR_get_text (e); */
-      if (local_data->filename == NULL
-          || g_ascii_strcasecmp (local_data->filename, "") == 0
-          || g_ascii_strcasecmp (local_data->filename, "-") == 0
-          || g_ascii_strcasecmp (local_data->filename, "stdout") == 0)
-        {
-          local_data->channel_is_stdout = TRUE;
-        }
-      else
-        {
-          char *tmp;
-          if (!g_str_has_suffix(local_data->filename, ".csv"))
-            {
-              tmp = local_data->filename;
-              local_data->filename = g_strdup_printf("%s.csv", tmp);
-              g_free(tmp);
-            }
-          tmp = local_data->filename;
-          local_data->filename = adsm_insert_node_number_into_filename (local_data->filename);
-          g_free(tmp);
-          local_data->channel_is_stdout = FALSE;
-        }
-    }
+  local_data->filename = g_strdup ("daily_events_.csv");
+  local_data->channel = NULL;
 
   local_data->buf = g_string_new (NULL);
 
