@@ -68,13 +68,15 @@ It's important that when you migrate you specify the database= because south doe
 
 
 ##Google Server Production Deploy:
-    sudo su
+Ensure that you start server in a screen.  `screen -r` To avoid `sudo` Google server is forwarding port 80 to 8080.  You need
+to be in the py33 virtual env.  That only needs to be done once.
+
     screen -r   (Ctrl+C to stop server and reuse the screen) or (Ctrl+A  K   to kill the screen and start from scratch)
     git pull
     git submodule update
-    source /home/anaconda/bin/activate py3k    #only necessary once
+    source /home/josiah/py33/bin/activate 
     python manage.py collectstatic
-    python manage.py runproductionserver --serve_static=collect --pid_file=server.pid --port=80
+    python manage.py runproductionserver --serve_static=collect --pid_file=server.pid --port=8080 
 
 ##OS - specific Branches
 _Branches: Windows, Linux, Mac-OSX_  
