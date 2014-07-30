@@ -9,12 +9,18 @@ import subprocess
 import time
 from ScenarioCreator.models import Unit, OutputSettings
 from django.db.models import Max
+from Results.forms import *  # necessary for globals()[model_name + 'Form']
+from Results.models import *  # necessary
+import Results.output_parser
+
+# Force matplotlib to not use any Xwindows backend.
+import matplotlib
+matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import pandas as pd
-from Results.forms import *  # necessary for globals()[model_name + 'Form']
-from Results.models import *  # necessary
 
 
 def back_to_inputs(request):
