@@ -1,5 +1,6 @@
 from concurrent.futures import ProcessPoolExecutor
 from glob import glob
+import platform
 import threading
 from django.forms.models import modelformset_factory
 from django.http import HttpResponse
@@ -56,7 +57,9 @@ def prepare_supplemental_output_directory():
 def simulation_process(iteration_number):
     start = time.time()
     output_args = prepare_supplemental_output_directory()
-    simulation = subprocess.Popen(['adsm.exe', '-i', str(iteration_number), 'activeSession.sqlite3'] + output_args,
+    executables = {"Windows": 'adsm.exe', "Linux": 'adsm'}
+    system_executable = executables[platform.system()]  #TODO: KeyError
+    simulation = subprocess.Popen([system_executable, '-i', str(iteration_number), 'activeSession.sqlite3'] + output_args,
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
     headers = simulation.stdout.readline().decode("utf-8")  # first line should be the column headers
     # print(headers)
