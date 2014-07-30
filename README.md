@@ -75,6 +75,9 @@ to be in the py33 virtual env.  That only needs to be done once.
     git pull
     git submodule update
     source /home/josiah/py33/bin/activate 
+    cd CEngine
+    make
+    cd ..
     python manage.py collectstatic
     python manage.py runproductionserver --serve_static=collect --pid_file=server.pid --port=8080 
 
