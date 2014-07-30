@@ -19,8 +19,7 @@ Search/Replace:
     description = CharField(max_length=255,  ->   description = TextField(
 
 Search: "id =" these should be ForeignKeys.  You have to do these manually since they
- require judgement calls.  Example: distance_distribution = models.ForeignKey(ProbabilityFunction, related_name='+')
-"""
+ require judgement calls.  Example: distance_distribution = models.ForeignKey(ProbabilityFunction, related_name='+')"""
 
 
 def lowercase_a_file(filename):
@@ -54,8 +53,7 @@ def add_if_foreign_key(foreign_keys, line):
         foreign_keys.append(entry)
     return foreign_keys
 
-"""This generator assumes that there are no blank lines before the end of the class model definition.
- This means that if you def functions inside your class there must not be any blank lines between them."""
+"""This generator assumes that there are no blank lines before the end of the class model definition. This means that if you def functions inside your class there must not be any blank lines between them."""
 
 
 def handle_field_inheritance(excluded_fields, foreign_keys, model_, parent_model, parent_model_cache):
@@ -147,3 +145,4 @@ if __name__ == '__main__':
     generate_forms_with_hidden_fields_and_ForeignKeys('../ScenarioCreator/models.py', 'auto-forms.py')
     # switch_to_boolean_fields('../ScenarioCreator/models.py', 'auto-models.py')
     # generate_urls_from_models('../ScenarioCreator/models.py', 'auto-urls.py')
+

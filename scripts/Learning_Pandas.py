@@ -9,6 +9,10 @@
 
 # <codecell>
 
+import pandas as pd
+
+# <codecell>
+
 %pylab inline
 import pandas as pd
 
@@ -66,12 +70,6 @@ orig_data[orig_data.columns[421]]
 
 # Nothing has leaked into the next column.
 # Ok, I'm impressed, it looks like it captured the commas inside the quotes correctly without the need to change the file.
-
-# <codecell>
-
-mask = orig_data.isin(['Polygons','POLYGONS'])  #Not working
-mask[mask == True] #Not working
-orig_data[orig_data.columns.str.contains('POLYGON')]
 
 # <codecell>
 
@@ -163,10 +161,6 @@ structure.get_level_values('Production Type')
 # <codecell>
 
 s['Swine']
-
-# <codecell>
-
-s['Surveillance']
 
 # <codecell>
 
@@ -422,6 +416,31 @@ leaders.reset_index().pivot(index='year', columns='name', values='percent')
 
 fig = leaders.reset_index().pivot(index='year', columns='name', values='percent').plot().figure
 fig.set_size_inches(18.5, 10.5)
+
+# <codecell>
+
+data_set_by_name("Corina", girl_names).plot()
+
+# <codecell>
+
+data_set_by_name("Josiah", boy_names).plot()
+
+# <codecell>
+
+data_set_by_name("Karina", girl_names).plot()
+
+# <codecell>
+
+data_set_by_name("Marshall", boy_names).plot()
+
+# <codecell>
+
+data_set_by_name("John", boy_names).plot()
+
+# <codecell>
+
+display(boy_names)
+print('hi')
 
 # <codecell>
 
