@@ -5,6 +5,7 @@ import threading
 from django.forms.models import modelformset_factory
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.conf import settings
 import subprocess
 import time
 from ScenarioCreator.models import Unit, OutputSettings
@@ -64,7 +65,7 @@ def simulation_process(iteration_number):
     start = time.time()
     output_args = prepare_supplemental_output_directory()
     executables = {"Windows": 'adsm.exe', "Linux": 'adsm'}
-    system_executable = executables[platform.system()]  #TODO: KeyError
+    system_executable = os.path.join(settings.BASE_DIR, executables[platform.system()])  #TODO: KeyError
     simulation = subprocess.Popen([system_executable, '-i', str(iteration_number), 'activeSession.sqlite3'] + output_args,
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
     headers = simulation.stdout.readline().decode("utf-8")  # first line should be the column headers
