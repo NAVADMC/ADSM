@@ -28,6 +28,16 @@ Changes made in ScenarioCreator/models.py propagate to the script output
 Limit foreignkey choices with a dictionary filter on field values:
                      limit_choices_to={'is_staff': True}
 """
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from future.builtins import str
+from future.builtins import super
+from future.builtins import int
+from future import standard_library
+standard_library.install_hooks()
+from future.builtins import object
 import os
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -104,7 +114,7 @@ class BaseModel(models.Model):
         delete_all_outputs()
         return super().save(force_insert, force_update, using, update_fields)
 
-    class Meta:
+    class Meta(object):
         abstract = True
 
 
@@ -221,7 +231,7 @@ class Function(BaseModel):
     x_axis_units = models.CharField(max_length=255, default="Days",
         help_text='Specifies the descriptive units for the x axis in relational functions.', )
     notes = models.TextField(blank=True, null=True, help_text='', )
-    class Meta:
+    class Meta(object):
         abstract = True
     def __str__(self):
         return self.name
@@ -511,7 +521,7 @@ class DiseaseSpread(BaseModel):
         # This is in Disease because of simulation restrictions
     transport_delay = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the shipment delays for the indicated production type.', )
-    class Meta:
+    class Meta(object):
         abstract = True
 
 
@@ -530,7 +540,7 @@ class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indire
         help_text='Defines the shipment distances for direct and indirect contact models.', )
     movement_control = models.ForeignKey(RelationalFunction, related_name='+',
         help_text='Relational function used to define movement control effects for the indicated production types combinations.', )
-    class Meta:
+    class Meta(object):
         abstract = True
 
 
@@ -648,7 +658,7 @@ class ProductionTypePairTransmission(BaseModel):
         help_text='Disease spread mechanism used to model spread by indirect contact between these types.', )
     airborne_spread = models.ForeignKey(AirborneSpread, related_name='airborne_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by airborne spread between these types.', )
-    class Meta:
+    class Meta(object):
         unique_together = ('source_production_type', 'destination_production_type',)
     def __str__(self):
         return "%s -> %s" % (self.source_production_type, self.destination_production_type)

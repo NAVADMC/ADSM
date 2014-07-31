@@ -2,6 +2,15 @@
 ModelForm -> models.py.  This basic layout can be overridden by declaring an __init__ with a self.helper Layout.
 See DirectSpread for an example.  More complex widgets and layouts are accessible from there.
 All forms now have their "submit" button restored and you can choose custom layouts.  ControlProtocol has tabs."""
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future.builtins import super
+from future.builtins import open
+from future import standard_library
+standard_library.install_hooks()
+from future.builtins import object
 from django.forms.models import inlineformset_factory
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText, Accordion
 from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Field, Hidden, MultiField
@@ -43,7 +52,7 @@ class BaseForm(ModelForm):
 
 
 class DynamicBlobForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = DynamicBlob
 
 
@@ -56,19 +65,19 @@ class PopulationForm(BaseForm):
             submit_button()
         )
         return super().__init__(*args, **kwargs)
-    class Meta:
+    class Meta(object):
         model = Population
 
 
 class UnitForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = Unit
         exclude = ['_population', '_final_state_code', '_final_control_state_code', '_final_detection_state_code', '_cum_infected', '_cum_detected', '_cum_destroyed', '_cum_vaccinated']
         widgets = {'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'})}
 
 
 class UnitFormAbbreviated(BaseForm):
-    class Meta:
+    class Meta(object):
         model = Unit
         exclude = ['days_in_initial_state', 'days_left_in_initial_state', 'user_defined_1', 'user_defined_2',
                    'user_defined_3', 'user_defined_4', '_population', '_final_state_code', '_final_control_state_code',
@@ -76,14 +85,14 @@ class UnitFormAbbreviated(BaseForm):
 
 
 class ProbabilityFunctionForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = ProbabilityFunction
         widgets = {'graph': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
 
 class RelationalPointForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = RelationalPoint
         exclude = []
         widgets = {'relational_function': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
@@ -104,12 +113,12 @@ class RelationalFunctionForm(BaseForm):
         )
         return super().__init__(*args, **kwargs)
 
-    class Meta:
+    class Meta(object):
         model = RelationalFunction
 
 
 class ControlMasterPlanForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = ControlMasterPlan
         exclude = []
         widgets = {'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
@@ -117,7 +126,7 @@ class ControlMasterPlanForm(BaseForm):
 
 
 class ProtocolAssignmentForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = ProtocolAssignment
         exclude = ['_master_plan', ]
         widgets = {'_master_plan': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlMasterPlan/new/'}),
@@ -126,7 +135,7 @@ class ProtocolAssignmentForm(BaseForm):
 
 
 class DiseaseProgressionAssignmentForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = DiseaseProgressionAssignment
         widgets = {'production_type': FixedSelect(),
                    'progression': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseProgression/new/'})}
@@ -216,7 +225,7 @@ class ControlProtocolForm(BaseForm):
             submit_button()
         )
         return super().__init__(*args, **kwargs)
-    class Meta:
+    class Meta(object):
         model = ControlProtocol
         widgets = {'detection_probability_for_observed_time_in_clinical': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'detection_probability_report_vs_first_detection': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
@@ -226,12 +235,12 @@ class ControlProtocolForm(BaseForm):
 
 
 class DiseaseForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = Disease
 
 
 class DiseaseProgressionForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = DiseaseProgression
         exclude = ['_disease']
         try:
@@ -263,7 +272,7 @@ class IndirectSpreadForm(BaseForm):
             submit_button()
         )
         return super().__init__(*args, **kwargs)
-    class Meta:
+    class Meta(object):
         model = IndirectSpread
         exclude = ['_spread_method_code', '_disease']
         widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
@@ -288,7 +297,7 @@ class DirectSpreadForm(BaseForm):
             submit_button()
         )
         return super().__init__(*args, **kwargs)
-    class Meta:
+    class Meta(object):
         model = DirectSpread
         exclude = ['_spread_method_code', '_disease']
         widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
@@ -310,7 +319,7 @@ class AirborneSpreadForm(BaseForm):
             submit_button()
         )
         return super().__init__(*args, **kwargs)
-    class Meta:
+    class Meta(object):
         model = AirborneSpread
         exclude = ['_spread_method_code', '_disease']
         try:
@@ -324,7 +333,7 @@ class AirborneSpreadForm(BaseForm):
 
 
 class ScenarioForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = Scenario
         exclude = ['language', 'use_fixed_random_seed', 'random_seed']
 
@@ -350,7 +359,7 @@ class OutputSettingsForm(BaseForm):
         )
         return super().__init__(*args, **kwargs)
 
-    class Meta:
+    class Meta(object):
         model = OutputSettings
         exclude = ['_scenario']
         widgets = {
@@ -361,12 +370,12 @@ class OutputSettingsForm(BaseForm):
 
 
 class ProductionTypeForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = ProductionType
 
 
 class ProductionTypePairTransmissionForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = ProductionTypePairTransmission
         widgets = {
                    # 'source_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
@@ -377,12 +386,12 @@ class ProductionTypePairTransmissionForm(BaseForm):
 
 
 class ZoneForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = Zone
 
 
 class ZoneEffectOnProductionTypeForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = ZoneEffectOnProductionType
         widgets = {'zone': AddOrSelect(attrs={'data-new-item-url': '/setup/Zone/new/'}),
                    # 'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),  # Probably don't want users adding new PTs
@@ -391,12 +400,12 @@ class ZoneEffectOnProductionTypeForm(BaseForm):
 
 
 class ReadAllCodesForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = ReadAllCodes
         exclude = ['_code', '_code_type', '_code_description']
 
 
 class ReadAllCodeTypesForm(BaseForm):
-    class Meta:
+    class Meta(object):
         model = ReadAllCodeTypes
         exclude = ['_code_type', '_code_type_description']

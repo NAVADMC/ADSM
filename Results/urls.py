@@ -1,5 +1,12 @@
 """URLs is entirely procedural based on the contents of models.py.
 This has the advantage that urls automatically update as the models change or are renamed."""
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future.builtins import open
+from future import standard_library
+standard_library.install_hooks()
 
 import re
 

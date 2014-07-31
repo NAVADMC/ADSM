@@ -1,3 +1,13 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from future.builtins import int
+from future.builtins import zip
+from future.builtins import str
+from future import standard_library
+standard_library.install_hooks()
+from future.builtins import object
 from ast import literal_eval
 from collections import namedtuple
 import re
@@ -19,7 +29,7 @@ def number(string):
             return -1
 
 
-class DailyParser():
+class DailyParser(object):
     def __init__(self, header_line):
         self.headers = header_line.strip().split(',')  # there was a trailing /r/n to remove
         self.possible_zones = {x.name for x in Zone.objects.all()}.union({'Background'})

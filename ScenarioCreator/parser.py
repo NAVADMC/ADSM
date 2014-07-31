@@ -1,3 +1,14 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future.builtins import zip
+from future.builtins import next
+from future.builtins import open
+from future.builtins import dict
+from future import standard_library
+standard_library.install_hooks()
+from future.builtins import object
 import ScenarioCreator.models
 
 __author__ = 'Josiah'
@@ -8,7 +19,7 @@ def gettext(elem):
     return ",".join(elem.itertext())
 
 
-class PopulationParser:
+class PopulationParser(object):
     model_labels = ['user_defined_1', 'production_type', 'latitude', 'longitude', 'initial_state', 'initial_size']
     xml_fields   = ['id',             'production-type', 'latitude', 'longitude', 'status',        'size']
     text_fields = list(zip(model_labels, xml_fields))

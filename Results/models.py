@@ -1,3 +1,10 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_hooks()
+from future.builtins import object
 import os
 from django.db import models
 import shutil
@@ -38,7 +45,7 @@ class OutputBaseModel(models.Model):
     # This lets; you; do:
     # for field, val in myModel:
     #     print( field, val)
-    class Meta:
+    class Meta(object):
         abstract = True
 
 

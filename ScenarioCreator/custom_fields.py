@@ -1,3 +1,11 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from future.builtins import super
+from future.builtins import str
+from future import standard_library
+standard_library.install_hooks()
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from south.modelsinspector import add_introspection_rules
