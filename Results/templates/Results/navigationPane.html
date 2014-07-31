@@ -6,21 +6,22 @@
         <ul id="setupMenu">
             <li><a href="/results/" class="{{""|active:active_link}}">Results Home</a></li>
             <li><a href="/results/DailyByProductionType/" class="{{"DailyByProductionType"|active:active_link}}">Production Type</a>
-                <ul><li><a href="/results/DailyByProductionType/exp/" class="{{"exp"|active:active_link}}">Exposures</a></li>
-                    <li><a href="/results/DailyByProductionType/inf/" class="{{"inf"|active:active_link}}">Infections</a></li>
-                    <li><a href="/results/DailyByProductionType/des/" class="{{"des"|active:active_link}}">Destruction</a></li>
-                    <li><a href="/results/DailyByProductionType/exm/" class="{{"exm"|active:active_link}}">Exams</a></li>
-                    <li><a href="/results/DailyByProductionType/tst/" class="{{"tst"|active:active_link}}">Lab Tests</a></li>
-                    <li><a href="/results/DailyByProductionType/tr/"  class="{{"tr" |active:active_link}}">Tracing</a></li>
+                <ul><li><a href="/results/DailyByProductionType/prefix/exp/" class="{{"exp"|active:active_link}}">Exposures</a></li>
+                    <li><a href="/results/DailyByProductionType/prefix/inf/" class="{{"inf"|active:active_link}}">Infections</a></li>
+                    <li><a href="/results/DailyByProductionType/prefix/des/" class="{{"des"|active:active_link}}">Destruction</a></li>
+                    <li><a href="/results/DailyByProductionType/prefix/exm/" class="{{"exm"|active:active_link}}">Exams</a></li>
+                    <li><a href="/results/DailyByProductionType/prefix/tst/" class="{{"tst"|active:active_link}}">Lab Tests</a></li>
+                    <li><a href="/results/DailyByProductionType/prefix/tr/"  class="{{"tr" |active:active_link}}">Tracing</a></li>
                 </ul></li>
-            <li><a href="/results/ControlActivity/" class="{{"ControlActivity"|active:active_link}}">Control Activity</a>
-                <ul><li><a href="/results/Detection/" class="{{"Detection"|active:active_link}}">Detection</a></li>
-                    <li><a href="/results/Tracing/" class="{{"Tracing"|active:active_link}}">Tracing</a></li>
-                    <li><a href="/results/Testing/" class="{{"Testing"|active:active_link}}">Testing</a></li>
-                    <li><a href="/results/Destruction/" class="{{"Destruction"|active:active_link}}">Destruction</a></li>
-                    <li><a href="/results/Vaccination/" class="{{"Vaccination"|active:active_link}}">Vaccination</a></li>
-                    <li><a href="/results/Zones/" class="{{"Zones"|active:active_link}}">Zones</a></li></ul> </li>
-            <li><a href="/results/Cost/" class="{{"Cost"|active:active_link}}">Cost Accounting</a></li>
+            <li><a href="/results/DailyByZoneAndProductionType/" class="{{"DailyByZoneAndProductionType"|active:active_link}}">Zone and Production Type</a></li>
+            <li><a href="/results/DailyByZone/" class="{{"DailyByZone"|active:active_link}}">Zones</a></li>
+            <li><a href="/results/DailyControls/" class="{{"ControlActivity"|active:active_link}}">Control Activity</a>
+                <ul>
+                    <li><a href="/results/DailyControls/prefix/dest/" class="{{"Detection"|active:active_link}}">Destruction</a></li>
+                    <li><a href="/results/DailyControls/prefix/desw/" class="{{"Detection"|active:active_link}}">Destruction Wait</a></li>
+                    <li><a href="/results/DailyControls/prefix/vac/" class="{{"Vaccination"|active:active_link}}">Vaccination</a></li>
+                    </ul></li>
+{#            <li><a href="/results/Cost/" class="{{"Cost"|active:active_link}}">Cost Accounting</a></li>#}
 
             <li id="RunSimulation"><a href="/results/Inputs/" class="{{"Inputs"|active:active_link}} completed">
                <i class="glyphicon glyphicon-play icon-flipped"></i> Back to Inputs </a></li>

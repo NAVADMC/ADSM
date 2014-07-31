@@ -25,7 +25,8 @@ def generate_urls_from_models(input_file, extra_urls=()):
     for line in lines:
         if 'class' in line[:5]:
             model_name = re.split('\W+', line)[1]
-            model_strings.append("url('^" + model_name + "/$',                      'Results.views.model_list')")
+            model_strings.append("url('^" + model_name + "/$',                          'Results.views.model_list')")
+            model_strings.append("url('^" + model_name + "/prefix/(?P<prefix>\w{1,4})/$',  'Results.views.filtered_list')")
             # model_strings.append("url('^" + model_name + "/(?P<primary_key>\d+)/$', 'Results.views.edit_entry')")
 
     output = "patterns('', " + ",\n         ".join(model_strings) + ")"

@@ -182,16 +182,17 @@ def graph_field(request, model_name, field_name, iteration=None):
     return render(request, 'Results/Graph.html', context)
 
 
-def empty_fields(model_class):
+def empty_fields(model_class, excluded_fields):
     rejected_fields = []
-    maximums_dict = model_class.objects.all().aggregate(*[Max(field) for field in model_class._meta.get_all_field_names()])
+    target_fields = [field for field in model_class._meta.get_all_field_names() if field not in excluded_fields]
+    maximums_dict = model_class.objects.all().aggregate(*[Max(field) for field in target_fields])
     for key, value in maximums_dict.items():
         if value is None or value <= 0:
             rejected_fields.append(key[:-5])  # 5 characters in '__max'
     return rejected_fields
 
 
-def result_table(request, model_name, model_class, model_form, graph_links=False):
+def result_table(request, model_name, model_class, model_form, graph_links=False, prefix=''):
     """Displays a table with links to all possible graphs of each field, for every iteration.
        Issue #127"""
     ResultSet = modelformset_factory(model_class, extra=0, form=model_form)
@@ -205,8 +206,9 @@ def result_table(request, model_name, model_class, model_form, graph_links=False
         context['Zones'] = Zone.objects.all()
         context['iterations'] = iterations[:10]  # It's pointless to display links to more than the first 10 iterations, there can be thousands
         context['model_name'] = model_name
-        context['excluded_fields'] = ['production_type', 'day', 'iteration', 'id', 'pk']
-        context['empty_fields'] = empty_fields(model_class)
+        context['excluded_fields'] = ['zone', 'production_type', 'day', 'iteration', 'id', 'pk']
+        context['excluded_fields'] += [field for field in model_class._meta.get_all_field_names() if not field.startswith(prefix)]
+        context['empty_fields'] = empty_fields(model_class, context['excluded_fields'])
         return render(request, 'Results/GraphLinks.html', context)
 
 
@@ -225,4 +227,11 @@ def model_list(request):
     #            'name': spaces_for_camel_case(model_name),
     #            'entries': list_entries(model_name, model)}
     # return render(request, 'Results/ResultTable.html', context)
+
+
+def filtered_list(request, prefix):
+    model_name, model = get_model_name_and_model(request)
+    return result_table(request, model_name, model, globals()[model_name + 'Form'], True, prefix)
+
+
 
