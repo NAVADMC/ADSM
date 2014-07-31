@@ -338,8 +338,6 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
     {
       g_ptr_array_add (tmp_models,
                        weekly_gis_writer_new (scenario_db, units, projection, zones));
-      g_ptr_array_add (tmp_models,
-                       summary_gis_writer_new (scenario_db, units, projection, zones));
     }
 
   /* Population model is always added. */

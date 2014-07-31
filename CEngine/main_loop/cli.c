@@ -94,18 +94,23 @@ main (int argc, char *argv[])
 
   /* If an output directory was specified, and that directory does not exist,
    * create the directory. */
-  errno = 0;
   {
-    if (output_dir != NULL)
+    /* There will be a "map_output" directory inside the output directory
+     * too. We can make the output directory and the subdirectory inside with
+     * one call to g_mkdir_with_parents. */
+    gint errcode;
+    gchar *map_output_dir;
+    if (output_dir == NULL)
+      map_output_dir = g_strdup ("map_output");
+    else
+      map_output_dir = g_build_filename (output_dir, "map_output", NULL);
+    errcode = g_mkdir_with_parents (map_output_dir, S_IRUSR + S_IWUSR + S_IXUSR);
+    if (errcode != 0)
       {
-        gint errcode;
-        errcode = g_mkdir_with_parents (output_dir, S_IRUSR + S_IWUSR + S_IXUSR);
-        if (errcode != 0)
-          {
-            g_error ("could not create output directory \"%s\": %s",
-                     output_dir, strerror(errno));
-          }
+        g_error ("could not create output directory \"%s\": %s",
+                 map_output_dir, strerror(errno));
       }
+    g_free (map_output_dir);
   }
 
   sqlerr = sqlite3_open_v2 (scenario_db_name, &scenario_db, SQLITE_OPEN_READONLY, NULL);

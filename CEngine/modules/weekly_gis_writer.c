@@ -29,9 +29,11 @@
 #define to_string weekly_gis_writer_to_string
 #define local_free weekly_gis_writer_free
 #define handle_output_dir_event weekly_gis_writer_handle_output_dir_event
+#define handle_before_each_simulation_event weekly_gis_writer_handle_before_each_simulation_event
 #define handle_new_day_event weekly_gis_writer_handle_new_day_event
 
 #include "module.h"
+#include "module_util.h"
 #include <shapefil.h>
 #include <string.h>
 
@@ -42,9 +44,10 @@
 
 
 
-#define NEVENTS_LISTENED_FOR 2
+#define NEVENTS_LISTENED_FOR 3
 EVT_event_type_t events_listened_for[] = {
   EVT_OutputDirectory,
+  EVT_BeforeEachSimulation,
   EVT_NewDay
 };
 
@@ -70,6 +73,8 @@ typedef struct
     the width of the name field in the ArcView attribute (.dbf) file. */
   guint max_zone_name_length; /**< The length of the longest zone name. Used to
     set the width of the name field in the ArcView attribute (.dbf) file. */
+  int run_number;
+  gboolean include_zones;
 }
 local_data_t;
 
@@ -105,6 +110,34 @@ handle_output_dir_event (struct adsm_module_t_ * self,
   #if DEBUG
     g_debug ("----- EXIT handle_output_dir_event (%s)", MODEL_NAME);
   #endif
+  return;
+}
+
+
+
+/**
+ * Before each simulation, this module records the iteration number.
+ *
+ * @param self this module.
+ * @param event a "Before Each Simulation" event.
+ */
+void
+handle_before_each_simulation_event (struct adsm_module_t_ * self,
+                                     EVT_before_each_simulation_event_t * event)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  local_data->run_number = event->iteration_number;
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+  
   return;
 }
 
@@ -228,14 +261,18 @@ write_units_shapefile (local_data_t *local_data,
    * the units, and the .dbf file, containing the numeric and text attributes
    * attached to the units. */
 
-  shape_filename = g_strdup_printf ("%s_day%04i.shp", local_data->base_filename, day);
+  shape_filename =
+    g_strdup_printf ("%s_%i_day%04i.shp", local_data->base_filename,
+                     local_data->run_number, day);
   #if DEBUG
     g_debug ("creating new shapefile \"%s\"", shape_filename);
   #endif
   shape_file = SHPCreate (shape_filename, SHPT_POINT); /* will contain points */
   g_assert (shape_file != NULL);
 
-  dbf_filename = g_strdup_printf ("%s_day%04i.dbf", local_data->base_filename, day);
+  dbf_filename =
+    g_strdup_printf ("%s_%i_day%04i.dbf", local_data->base_filename,
+                     local_data->run_number, day);
   #if DEBUG
     g_debug ("creating new attributes file \"%s\"", dbf_filename);
   #endif
@@ -364,14 +401,18 @@ write_zones_shapefile (local_data_t *local_data,
    * the units, and the .dbf file, containing the numeric and text attributes
    * attached to the units. */
 
-  shape_filename = g_strdup_printf ("%s_zones_day%04i.shp", local_data->base_filename, day);
+  shape_filename =
+    g_strdup_printf ("%s_%i_zones_day%04i.shp", local_data->base_filename,
+                     local_data->run_number, day);
   #if DEBUG
     g_debug ("creating new shapefile \"%s\"", shape_filename);
   #endif
   shape_file = SHPCreate (shape_filename, SHPT_POLYGON);
   g_assert (shape_file != NULL);
 
-  dbf_filename = g_strdup_printf ("%s_zones_day%04i.dbf", local_data->base_filename, day);
+  dbf_filename =
+    g_strdup_printf ("%s_%i_zones_day%04i.dbf", local_data->base_filename,
+                     local_data->run_number, day);
   #if DEBUG
     g_debug ("creating new attributes file \"%s\"", dbf_filename);
   #endif
@@ -499,7 +540,10 @@ handle_new_day_event (struct adsm_module_t_ * self,
   if ((local_data->seen_day_1 < 2) && (event->day % 7 == 1))
     {
       write_units_shapefile (local_data, units, event->day);
-      write_zones_shapefile (local_data, zones, event->day);
+      if (local_data->include_zones)
+        {
+          write_zones_shapefile (local_data, zones, event->day);
+        }
     }
     
   #if DEBUG
@@ -533,6 +577,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
     {
     case EVT_OutputDirectory:
       handle_output_dir_event (self, &(event->u.output_dir));
+      break;
+    case EVT_BeforeEachSimulation:
+      handle_before_each_simulation_event (self, &(event->u.before_each_simulation));
       break;
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day), units, zones);
@@ -632,56 +679,6 @@ local_free (struct adsm_module_t_ *self)
 
 
 /**
- * Set the parameters for this module.
- */
-void
-set_params (struct adsm_module_t_ *self, sqlite3 * params)
-{
-  local_data_t *local_data;
-
-  #if DEBUG
-    g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
-  #endif
-
-  local_data = (local_data_t *) (self->model_data);
-
-  /* Get the base filename for the ArcView files.  If the filename is omitted
-   * or blank, then "weekly_gis" is used. */
-  local_data->base_filename = NULL;
-  if (FALSE)
-    {
-      local_data->base_filename = NULL; /* PAR_get_text (e); */
-      if (local_data->base_filename != NULL
-          && g_ascii_strcasecmp (local_data->base_filename, "") == 0)
-        {
-          g_free (local_data->base_filename);
-          local_data->base_filename = NULL;
-        }
-    }
-  if (local_data->base_filename == NULL)
-    local_data->base_filename = g_strdup ("weekly_gis");
-
-  /* If there is a ".shp" already at the end of the filename, remove it. */
-  if (g_str_has_suffix (local_data->base_filename, ".shp")) 
-    {
-      char *tmp;
-      size_t len;
-      len = strlen (local_data->base_filename);
-      tmp = local_data->base_filename;
-      local_data->base_filename = g_strndup (local_data->base_filename, len-4);
-      g_free (tmp);
-    }
-
-  #if DEBUG
-    g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
-  #endif
-
-  return;
-}
-
-
-
-/**
  * Returns a new weekly GIS writer.
  */
 adsm_module_t *
@@ -719,6 +716,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->max_prod_type_length = max_prod_type_length (units->production_type_names);
   local_data->max_unit_id_length = max_unit_id_length (units);
   local_data->max_zone_name_length = max_zone_name_length (zones);
+  local_data->base_filename = g_build_filename("map_output", "weekly_gis", NULL);
+  local_data->include_zones = (ZON_zone_list_length(zones) > 1);
 
   #if DEBUG
     g_debug ("----- EXIT new (%s)", MODEL_NAME);
