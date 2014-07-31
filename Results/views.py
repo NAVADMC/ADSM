@@ -39,6 +39,11 @@ def back_to_inputs(request):
     return redirect('/setup/')
 
 
+def forceAspect(ax, aspect=1):
+    xleft, xright, yup, ydown = ax.get_extent()
+    ax.set_aspect(abs((xright-xleft)/(ydown-yup))/aspect)
+
+
 def HttpFigure(fig):
     response = HttpResponse(content_type='image/png')
     FigureCanvas(fig).print_png(response)
@@ -48,8 +53,9 @@ def HttpFigure(fig):
 def population_png(request):
     latlong = [(u.latitude, u.longitude) for u in Unit.objects.all()]
     df = pd.DataFrame.from_records(latlong, columns=['Latitude', 'Longitude'])
-    fig = df.plot('Longitude', 'Latitude', kind='scatter', color='black', figsize=(6.5, 6)).figure
-    return HttpFigure(fig)
+    axis = df.plot('Longitude', 'Latitude', kind='scatter', color='black')
+    forceAspect(axis)
+    return HttpFigure(axis.figure)
 
 
 def non_empty_lines(line):
@@ -165,7 +171,7 @@ def graph_field_png(request, model_name, field_name, iteration=None):
     axes = [plt.subplot(gs[0]), ]
     axes.append(plt.subplot(gs[1], sharey=axes[0]))
 
-    time_data.plot(figsize=(8.5, 6), ax=axes[0])
+    time_data.plot(ax=axes[0])
     last_day = time_data.tail(1).T
     last_day.boxplot(ax=axes[1])
     axes[0].legend().set_visible(False)
