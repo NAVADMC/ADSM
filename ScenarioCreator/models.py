@@ -112,7 +112,7 @@ class BaseModel(models.Model):
         Settings.models.unsaved_changes(True)  # avoid infinite loop by ensuring unsaved_changes doesn't call BaseModel from SmSession
         from Results.models import delete_all_outputs  # I quickly get circular imports if this is higher up
         delete_all_outputs()
-        return super().save(force_insert, force_update, using, update_fields)
+        return super(BaseModel, self).save(force_insert, force_update, using, update_fields)
 
     class Meta(object):
         abstract = True
@@ -134,13 +134,10 @@ class Population(BaseModel):
         self.import_population()  # Population must be saved to db so that it can be foreignkeyed
 
     def import_population(self):
-        if not self.source_file:
-            return
-
         from Settings.models import SmSession
         session = SmSession.objects.get(pk=1)
 
-        start_time = time.process_time()  # perf_counter() would also work
+        start_time = time.clock()  # perf_counter() would also work
         session.set_population_upload_status("Parsing")
         # print("Parsing ", self.source_file)
         p = ScenarioCreator.parser.PopulationParser(self.source_file)
@@ -158,7 +155,7 @@ class Population(BaseModel):
                 session.set_population_upload_status("Creating %s objects:" % total, (float(progress) / total))
         session.set_population_upload_status("Preparing data", 100)
         Unit.objects.bulk_create(unit_objects)
-        execution_time = (time.process_time() - start_time)
+        execution_time = (time.clock() - start_time)
         print("Done creating", '{:,}'.format(len(data)), "Units took %i seconds" % (execution_time))
 
 

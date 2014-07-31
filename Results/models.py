@@ -375,5 +375,5 @@ def delete_all_outputs():
         model.objects.all().delete()
     try:
         shutil.rmtree(os.path.join('workspace', scenario_filename()))
-    except FileNotFoundError:
+    except:
         pass  # because the folder doesn't exist (which is fine)

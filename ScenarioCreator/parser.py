@@ -7,6 +7,8 @@ from future.builtins import next
 from future.builtins import open
 from future.builtins import dict
 from future import standard_library
+import os
+
 standard_library.install_hooks()
 from future.builtins import object
 import ScenarioCreator.models
@@ -26,6 +28,9 @@ class PopulationParser(object):
 
     def __init__(self, filename):
         filepath = ScenarioCreator.models.workspace(filename)
+        if not os.path.isfile(filepath):
+            raise OSError("'" + filepath + "' is not a file.")
+
         try:
             contents = open(filepath, encoding="utf-8").read()
             contents.replace('encoding="UTF-16" ?', 'encoding="utf-8"?', 1)
@@ -35,9 +40,12 @@ class PopulationParser(object):
             contents.replace('encoding="UTF-16" ?', 'encoding="utf-8"?', 1)
             # print(contents[:500])
             contents.encode("utf-8", errors='xmlcharrefreplace')
-        tree = ET.ElementTree(ET.fromstring(contents))
-        self.top_level = tree.getroot()
-        self.population = []
+        if contents:
+            tree = ET.ElementTree(ET.fromstring(contents))
+            self.top_level = tree.getroot()
+            self.population = []
+        else:
+            raise EOFError("File Read returned a blank string.")
 
     def parse_to_dictionary(self):
         self.parse_text_fields(self.text_fields)
