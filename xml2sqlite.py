@@ -6,6 +6,15 @@ programmatically.
 
 This script avoids direct SQL manipulation and instead uses the models.py file
 defined for the SpreadModel project for all object creation."""
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from future.builtins import open
+from future.builtins import int
+from future.builtins import filter
+from future import standard_library
+standard_library.install_hooks()
 
 
 

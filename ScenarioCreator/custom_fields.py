@@ -30,8 +30,9 @@ class PercentField(models.FloatField):
 add_introspection_rules([], ["^ScenarioCreator\.custom_fields\.PercentField"])
 
 
-class PercentFieldLiteral(models.FloatField, metaclass=models.SubfieldBase):
+class PercentFieldLiteral(models.FloatField):
     """ Currently not used. Float field that ensures field value is in the range 0-100. """
+    __metaclass__ = models.SubfieldBase
     default_validators = [
         MinValueValidator(1),
         MaxValueValidator(100)]

@@ -99,7 +99,7 @@ class Simulation(threading.Thread):
     Saturate the computer's processors with parallel simulation iterations"""
     def __init__(self, max_iteration, **kwargs):
         self.max_iteration = max_iteration
-        super().__init__(**kwargs)
+        super(self, threading.Thread).__init__(**kwargs)
 
     def run(self):
         # print(simulation_process())
