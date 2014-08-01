@@ -132,27 +132,58 @@ def list_of_iterations():
     return list(DailyControls.objects.values_list('iteration', flat=True).distinct())
 
 
-def create_time_series_lines(field_name, model, production_types, iteration=''):  # Django assigns iteration='' when there's nothing
-    lines = []
+def breakdown_dictionary(iterate_pt, iterate_zone):
+    production_types, zones = {}, {}
+    if iterate_pt:
+        production_types = dict(ProductionType.objects.all().values_list('name', 'id'))  # Tuples need to be turned into dict
+        production_types['All'] = None
+    if iterate_zone:
+        zones = dict(Zone.objects.all().values_list('name', 'id'))  # Tuples need to be turned into dict
+        zones['Background'] = None
+    return production_types, zones
+
+
+def construct_iterating_combination_filter_dictionary(iterate_pt, iterate_zone, iteration):
+    """Truth table of iterate_pt and iterate_zone gives you four values.  One for each Daily Model.  
+    Whether or not iteration is specified raises it to 8 combinations of possible filters used."""
+    production_types, zones = breakdown_dictionary(iterate_pt, iterate_zone)
+    filter_sequence = []
     if iteration:  # Break down lines by production type for only one iteration
-        columns = ['Day'] + list(production_types.keys())
-        for name in production_types.keys():  # add one for each Production Type and "All"
-            lines.append(list(model.objects.filter(iteration=iteration, production_type_id=production_types[name])
-                              .order_by('day').values_list(field_name, flat=True)))
+        columns = ['Day'] + list(production_types.keys())  # TODO: filter by a particular zone for ZoneAndProductionType
+        if production_types:
+            for name in production_types.keys():  # add one for each Production Type and "All"
+                filter_sequence.append({'iteration': iteration, 'production_type_id': production_types[name]})
+        else:
+            filter_sequence.append(iteration=iteration)  # TODO: Zone=...
     else:  # This is a time plot of all iterations.
         columns = ['Day'] + ["Iteration " + str(it) for it in list_of_iterations()]
-        for iteration in list_of_iterations():
-            lines.append(list(model.objects.filter(iteration=iteration, production_type=None)  # Only show the "All" Production Type
-                              .order_by('day').values_list(field_name, flat=True)))
+        for nth_iteration in list_of_iterations():
+            if production_types:
+                filter_sequence.append({'iteration': nth_iteration, 'production_type': None})
+            else:
+                filter_sequence.append({'iteration': nth_iteration})
+    if len(columns) == 1:
+        columns.append("Field")  # There are cases where we don't get a list for columns to use as labels
+    return filter_sequence, columns
+
+
+def create_time_series_lines(field_name, model, iterate_pt, iterate_zone, iteration=''):  # Django assigns iteration='' when there's nothing
+    filter_sequence, columns = construct_iterating_combination_filter_dictionary(iterate_pt, iterate_zone, iteration)
+    lines = []
+    for filter_dict in filter_sequence:
+        lines.append(list(model.objects.filter(**filter_dict).order_by('day').values_list(field_name, flat=True)))
+
     return lines, columns
 
 
 def graph_field_png(request, model_name, field_name, iteration=None):
     model = globals()[model_name]
+    iterate_pt, iterate_zone = {"DailyByProductionType": (True, False),
+                                "DailyByZoneAndProductionType": (True, True),
+                                "DailyByZone": (False, True),
+                                "DailyControls": (False, False)}[model_name]
 
-    production_types = dict(ProductionType.objects.all().values_list('name', 'id'))  # Tuples need to be turned into dict
-    production_types['All'] = None
-    lines, columns = create_time_series_lines(field_name, model, production_types, iteration)
+    lines, columns = create_time_series_lines(field_name, model, iterate_pt, iterate_zone, iteration)
     lines.insert(0, list(range(model.objects.all().aggregate(Max('day'))['day__max'])))  # Start with day index
 
     time_series = zip(*lines)
@@ -168,7 +199,8 @@ def graph_field_png(request, model_name, field_name, iteration=None):
     time_data.plot(ax=axes[0])
     last_day = time_data.tail(1).T
     last_day.boxplot(ax=axes[1])
-    axes[0].legend().set_visible(False)
+    if len(columns) > 6:
+        axes[0].legend().set_visible(False)
     plt.tight_layout()
 
     return HttpFigure(fig)
