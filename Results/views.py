@@ -48,7 +48,7 @@ def HttpFigure(fig):
 def population_png(request):
     latlong = [(u.latitude, u.longitude) for u in Unit.objects.all()]
     df = pd.DataFrame.from_records(latlong, columns=['Latitude', 'Longitude'])
-    axis = df.plot('Longitude', 'Latitude', kind='scatter', color='black', return_type='axes')
+    axis = df.plot('Longitude', 'Latitude', kind='scatter', color='black')
     return HttpFigure(axis.figure)
 
 
@@ -99,7 +99,7 @@ class Simulation(threading.Thread):
     Saturate the computer's processors with parallel simulation iterations"""
     def __init__(self, max_iteration, **kwargs):
         self.max_iteration = max_iteration
-        super(self, threading.Thread).__init__(**kwargs)
+        super(Simulation, self).__init__(**kwargs)
 
     def run(self):
         # print(simulation_process())
