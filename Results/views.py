@@ -48,7 +48,7 @@ def HttpFigure(fig):
 def population_png(request):
     latlong = [(u.latitude, u.longitude) for u in Unit.objects.all()]
     df = pd.DataFrame.from_records(latlong, columns=['Latitude', 'Longitude'])
-    axis = df.plot('Longitude', 'Latitude', kind='scatter', color='black')
+    axis = df.plot('Longitude', 'Latitude', kind='scatter', color='black', return_type='axes')
     return HttpFigure(axis.figure)
 
 
@@ -198,7 +198,7 @@ def graph_field_png(request, model_name, field_name, iteration=None):
 
     time_data.plot(ax=axes[0])
     last_day = time_data.tail(1).T
-    last_day.boxplot(ax=axes[1])
+    last_day.boxplot(ax=axes[1], return_type='axes')
     if len(columns) > 6:
         axes[0].legend().set_visible(False)
     plt.tight_layout()
