@@ -22,7 +22,7 @@ def gettext(elem):
 
 
 class PopulationParser(object):
-    model_labels = ['user_defined_1', 'production_type', 'latitude', 'longitude', 'initial_state', 'initial_size']
+    model_labels = ['user_notes', 'production_type', 'latitude', 'longitude', 'initial_state', 'initial_size']
     xml_fields   = ['id',             'production-type', 'latitude', 'longitude', 'status',        'size']
     text_fields = list(zip(model_labels, xml_fields))
 

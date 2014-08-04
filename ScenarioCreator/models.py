@@ -180,27 +180,10 @@ class Unit(BaseModel):
     days_in_initial_state = models.IntegerField(blank=True, null=True,
         help_text='The number of days that the unit will remain in its initial state unless preempted by other events.', )
     days_left_in_initial_state = models.IntegerField(blank=True, null=True,
-        help_text='', )
+        help_text='Used for setting up scripted scenarios.', )
     initial_size = models.PositiveIntegerField(
         help_text='The number of animals in the unit.', )
-    _final_state_code = models.CharField(max_length=255, blank=True,
-        help_text='Code indicating the actual disease state of the unit at the end of the simulation.', )
-    _final_control_state_code = models.CharField(max_length=255, blank=True,
-        help_text='', )
-    _final_detection_state_code = models.CharField(max_length=255, blank=True,
-        help_text='', )
-    _cum_infected = models.PositiveIntegerField(blank=True, null=True,
-        help_text='The total number of iterations in which this unit became infected.', )
-    _cum_detected = models.PositiveIntegerField(blank=True, null=True,
-        help_text='The total number of iterations in which this unit was detected.', )
-    _cum_destroyed = models.PositiveIntegerField(blank=True, null=True,
-        help_text='The total number of iterations in which this unit was destroyed.', )
-    _cum_vaccinated = models.PositiveIntegerField(blank=True, null=True,
-        help_text='The total number of iterations in which this unit was vaccinated.', )
-    user_defined_1 = models.TextField(blank=True)
-    user_defined_2 = models.TextField(blank=True)
-    user_defined_3 = models.TextField(blank=True)
-    user_defined_4 = models.TextField(blank=True)
+    user_notes = models.TextField(blank=True)
 
     @classmethod
     def create(cls, **kwargs):

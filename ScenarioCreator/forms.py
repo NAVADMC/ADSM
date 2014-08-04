@@ -72,23 +72,20 @@ class PopulationForm(BaseForm):
 class UnitForm(BaseForm):
     class Meta(object):
         model = Unit
-        exclude = ['_population', '_final_state_code', '_final_control_state_code', '_final_detection_state_code', '_cum_infected', '_cum_detected', '_cum_destroyed', '_cum_vaccinated']
+        exclude = ['_population', ]
         widgets = {'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'})}
 
 
 class UnitFormAbbreviated(BaseForm):
     class Meta(object):
         model = Unit
-        exclude = ['days_in_initial_state', 'days_left_in_initial_state', 'user_defined_1', 'user_defined_2',
-                   'user_defined_3', 'user_defined_4', '_population', '_final_state_code', '_final_control_state_code',
-                   '_final_detection_state_code', '_cum_infected', '_cum_detected', '_cum_destroyed', '_cum_vaccinated']
+        exclude = ['days_in_initial_state', 'days_left_in_initial_state', 'user_notes']
 
 
 class ProbabilityFunctionForm(BaseForm):
     class Meta(object):
         model = ProbabilityFunction
         widgets = {'graph': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
-
 
 
 class RelationalPointForm(BaseForm):
