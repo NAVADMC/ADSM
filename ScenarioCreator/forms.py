@@ -48,7 +48,7 @@ class BaseForm(ModelForm):
             self.helper = FormHelper()
             fields_and_submit = list(self.base_fields.keys()) + [submit_button()]
             self.helper.layout = Layout(*fields_and_submit)
-        return super().__init__(*args, **kwargs)
+        return super(BaseForm, self).__init__(*args, **kwargs)
 
 
 class DynamicBlobForm(BaseForm):
@@ -64,7 +64,7 @@ class PopulationForm(BaseForm):
             'source_file',
             submit_button()
         )
-        return super().__init__(*args, **kwargs)
+        return super(PopulationForm, self).__init__(*args, **kwargs)
     class Meta(object):
         model = Population
 
@@ -111,7 +111,7 @@ class RelationalFunctionForm(BaseForm):
             'y_axis_units',
             'notes'
         )
-        return super().__init__(*args, **kwargs)
+        return super(RelationalFunctionForm, self).__init__(*args, **kwargs)
 
     class Meta(object):
         model = RelationalFunction
@@ -224,7 +224,7 @@ class ControlProtocolForm(BaseForm):
             ),
             submit_button()
         )
-        return super().__init__(*args, **kwargs)
+        return super(ControlProtocolForm, self).__init__(*args, **kwargs)
     class Meta(object):
         model = ControlProtocol
         widgets = {'detection_probability_for_observed_time_in_clinical': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
@@ -271,7 +271,7 @@ class IndirectSpreadForm(BaseForm):
             'movement_control',
             submit_button()
         )
-        return super().__init__(*args, **kwargs)
+        return super(IndirectSpreadForm, self).__init__(*args, **kwargs)
     class Meta(object):
         model = IndirectSpread
         exclude = ['_spread_method_code', '_disease']
@@ -296,7 +296,7 @@ class DirectSpreadForm(BaseForm):
             'movement_control',
             submit_button()
         )
-        return super().__init__(*args, **kwargs)
+        return super(DirectSpreadForm, self).__init__(*args, **kwargs)
     class Meta(object):
         model = DirectSpread
         exclude = ['_spread_method_code', '_disease']
@@ -318,7 +318,7 @@ class AirborneSpreadForm(BaseForm):
             'transport_delay',
             submit_button()
         )
-        return super().__init__(*args, **kwargs)
+        return super(AirborneSpreadForm, self).__init__(*args, **kwargs)
     class Meta(object):
         model = AirborneSpread
         exclude = ['_spread_method_code', '_disease']
@@ -357,7 +357,7 @@ class OutputSettingsForm(BaseForm):
             'save_map_output',
             submit_button()
         )
-        return super().__init__(*args, **kwargs)
+        return super(OutputSettingsForm, self).__init__(*args, **kwargs)
 
     class Meta(object):
         model = OutputSettings
