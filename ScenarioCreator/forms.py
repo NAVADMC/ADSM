@@ -391,7 +391,6 @@ class ZoneEffectOnProductionTypeForm(BaseForm):
     class Meta(object):
         model = ZoneEffectOnProductionType
         widgets = {'zone': AddOrSelect(attrs={'data-new-item-url': '/setup/Zone/new/'}),
-                   # 'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),  # Probably don't want users adding new PTs
                    'zone_indirect_movement': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'zone_direct_movement': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
