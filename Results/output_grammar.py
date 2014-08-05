@@ -95,7 +95,6 @@ def explain(field_name, explained_parts=None):
     """Recursively breaks a field name down into parts and explains each piece.  If you're having trouble
     with this method after adding new fields, you'll need to modify explanations{} to have longer prefixes,
     or modify this algorithm so that it doesn't shortcut down a dead end."""
-    return ''
     if explained_parts is None:  # It's import you don't initialize this in the signature, it side-effects the result since [] is mutable
         explained_parts = []
     if not field_name:
