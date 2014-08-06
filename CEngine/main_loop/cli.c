@@ -95,15 +95,15 @@ main (int argc, char *argv[])
   /* If an output directory was specified, and that directory does not exist,
    * create the directory. */
   {
-    /* There will be a "map_output" directory inside the output directory
-     * too. We can make the output directory and the subdirectory inside with
-     * one call to g_mkdir_with_parents. */
+    /* There will be a "Map" directory inside the output directory too. We can
+     * make the output directory and the subdirectory inside with one call to
+     * g_mkdir_with_parents. */
     gint errcode;
     gchar *map_output_dir;
     if (output_dir == NULL)
-      map_output_dir = g_strdup ("map_output");
+      map_output_dir = g_strdup ("Map");
     else
-      map_output_dir = g_build_filename (output_dir, "map_output", NULL);
+      map_output_dir = g_build_filename (output_dir, "Map", NULL);
     errcode = g_mkdir_with_parents (map_output_dir, S_IRUSR + S_IWUSR + S_IXUSR);
     if (errcode != 0)
       {
