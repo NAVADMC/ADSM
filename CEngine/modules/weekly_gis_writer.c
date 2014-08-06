@@ -716,7 +716,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->max_prod_type_length = max_prod_type_length (units->production_type_names);
   local_data->max_unit_id_length = max_unit_id_length (units);
   local_data->max_zone_name_length = max_zone_name_length (zones);
-  local_data->base_filename = g_build_filename("map_output", "weekly_gis", NULL);
+  local_data->base_filename = g_build_filename("Map", "weekly_gis", NULL);
   local_data->include_zones = (ZON_zone_list_length(zones) > 1);
 
   #if DEBUG
