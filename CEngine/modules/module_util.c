@@ -279,7 +279,7 @@ adsm_insert_number_into_filename (const char *filename, int number)
   char *last_dot;
 
   s = g_string_new (NULL);
-  last_dot = rindex (filename, '.');
+  last_dot = strrchr (filename, '.');
   if (last_dot == NULL)
     {
       /* No file extension; just append the number. */
