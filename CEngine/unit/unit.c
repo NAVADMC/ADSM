@@ -1067,7 +1067,7 @@ UNT_load_unit_callback (void *data, GHashTable *dict)
   }
   
   /* Official ID (arbitrary name attached to this unit) */
-  unit->official_id = g_strdup (g_hash_table_lookup (dict, "user_defined_1"));
+  unit->official_id = g_strdup (g_hash_table_lookup (dict, "user_notes"));
 
   /* days-in-status and days-left-in-status tags */
   {
@@ -1131,7 +1131,7 @@ UNT_load_unit_list (sqlite3 *db)
   units->production_types = production_types;
 #endif
 
-  sqlite3_exec_dict (db, "SELECT name,latitude,longitude,initial_state,days_in_initial_state,days_left_in_initial_state,initial_size,user_defined_1 FROM ScenarioCreator_unit unit,ScenarioCreator_productiontype prodtype where unit.production_type_id=prodtype.id",
+  sqlite3_exec_dict (db, "SELECT name,latitude,longitude,initial_state,days_in_initial_state,days_left_in_initial_state,initial_size,user_notes FROM ScenarioCreator_unit unit,ScenarioCreator_productiontype prodtype where unit.production_type_id=prodtype.id",
                      UNT_load_unit_callback, units, &sqlerr);
   if (sqlerr)
     {

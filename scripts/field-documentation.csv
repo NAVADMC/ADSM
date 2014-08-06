@@ -27,10 +27,7 @@ _cum_infected, IntegerField, The total number of iterations in which this unit b
 _cum_detected, IntegerField, The total number of iterations in which this unit was detected.
 _cum_destroyed, IntegerField, The total number of iterations in which this unit was destroyed.
 _cum_vaccinated, IntegerField, The total number of iterations in which this unit was vaccinated.
-user_defined_1, TextField, 
-user_defined_2, TextField, 
-user_defined_3, TextField, 
-user_defined_4, TextField, 
+user_notes, TextField
 
 class Function
 name, CharField, User-assigned name for each function.

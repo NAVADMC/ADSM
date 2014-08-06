@@ -31,7 +31,7 @@ _cum_infected		int ,
 _cum_detected		int ,		
 _cum_destroyed		int ,		
 _cum_vaccinated		int ,
-user_defined_1		text,  -- the user defineds are based on 
+user_notes		text,  -- the user defineds are based on 
 user_defined_2		text,  -- the conversation with shaun about 
 user_defined_3		text,  -- about keeping original identifer 
 user_defined_4		text

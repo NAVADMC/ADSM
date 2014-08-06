@@ -239,7 +239,7 @@ def readPopulation( populationFileName ):
 		  days_in_initial_state = daysInState,
 		  days_left_in_initial_state = daysLeftInState,
 		  initial_size = size,
-		  user_defined_1 = description
+		  user_notes = description
 		)
 		unit.save()
 	# end of loop over units in XML file
