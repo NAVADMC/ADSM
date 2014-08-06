@@ -47,6 +47,7 @@ urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
                                          "url('^SaveScenario/$', 'ScenarioCreator.views.save_scenario')",
                                          "url('^NewScenario/$', 'ScenarioCreator.views.new_scenario')",
                                          "url('^Workspace/$', 'ScenarioCreator.views.file_dialog')",
+                                         "url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario')",
 
                                          "url('^OpenScenario/(?P<target>[\w\s\-\.]+)/$', 'ScenarioCreator.views.open_scenario')",  # includes .extension
                                          r"url('^DeleteFile/$', 'ScenarioCreator.views.delete_file')",

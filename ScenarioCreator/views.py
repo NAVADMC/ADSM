@@ -534,3 +534,6 @@ def population(request):
         context['xml_files'] = xml_files
     return render(request, 'ScenarioCreator/Population.html', context)
 
+
+def validate_scenario(request):
+    return render(request, 'ScenarioCreator/Validation.html', {})

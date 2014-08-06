@@ -14,9 +14,7 @@ from Settings.models import scenario_filename
 
 
 def simulation_ready_to_run(context):
-    relevant_keys = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment','DirectSpreads',
-                     'AssignSpreads',  'ControlMasterPlan', 'Protocols', 'ProtocolAssignments', 'Zones', 'ZoneEffects']
-    status_lights = [value for key, value in context.items() if key in relevant_keys]
+    status_lights = [ready for name, ready in context['relevant_keys'].items()]  # The value here is a tuple which includes the name see basic_context()
     return all(status_lights)  # All green status_lights  (It's a metaphor)
 
 
@@ -44,8 +42,11 @@ def basic_context(request):
                'url': request.path,
                'active_link': re.split('\W+', request.path)[2],
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
-               'outputs_computed': DailyControls.objects.all().count() > 0
+               'outputs_computed': DailyControls.objects.all().count() > 0,
                }
-
+    
+    validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment',
+                         'DirectSpreads', 'AssignSpreads', 'ControlMasterPlan', 'Protocols', 'ProtocolAssignments', 'Zones', 'ZoneEffects']
+    context['relevant_keys'] = {name: context[name] for name in validation_models}
     context['Simulation_ready'] = simulation_ready_to_run(context)
     return context

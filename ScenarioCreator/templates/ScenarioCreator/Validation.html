@@ -1,0 +1,20 @@
+{% extends 'ScenarioCreator/navigationPane.html' %}
+{% load floppyforms %}
+{% load crispy_forms_tags  %}
+
+{% block content %}
+
+<h1>Whole Scenario Validation</h1>
+    
+<h3>Missing forms</h3>
+    <p>The following either don't exist or have a missing copies (in the case of assignment):</p>
+    <ul class="validation-checklist">
+        {% for name, ready in relevant_keys.items %}
+            {% if not ready %}
+                <li>{{ name }}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+
+{% endblock %}

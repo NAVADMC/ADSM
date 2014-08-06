@@ -42,9 +42,19 @@
                     <a href="/results/" class="completed ">
                     View Results <i class="glyphicon glyphicon-play"></i></a>
                 {% else %}
-                    <a href="/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
-                    Run Simulation <i class="glyphicon glyphicon-play"></i></a>
-                {% endif %}
+                    {% if Simulation_ready %}
+                        <a href="/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
+                        Run Simulation <i class="glyphicon glyphicon-play"></i></a>
+                    {% else %}
+                        {% if "ValidateScenario"|active:active_link %}
+                                <a href="/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
+                                Force Run Simulation <i class="glyphicon glyphicon-play"></i></a>
+                            {% else %}
+                                <a href="/setup/ValidateScenario/" class=" {{Simulation_ready|completed}}">
+                                Validate Scenario <i class="glyphicon glyphicon-play"></i></a>
+                        {% endif %}
+                    {% endif %}
+            {% endif %}
             </li>
         </ul>
     </nav>
