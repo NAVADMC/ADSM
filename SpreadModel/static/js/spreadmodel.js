@@ -69,7 +69,7 @@ $(function(){
         var link = $(this).attr('data-delete-link')
         var object_name = link.split('/').slice(-1)[0]
         var dialog = new BootstrapDialog.show({
-            title: 'Delete Scenario Confirmation',
+            title: 'Delete Confirmation',
             type: BootstrapDialog.TYPE_WARNING,
             message: 'Are you sure you want to delete <strong>' + object_name + '</strong>?',
             buttons: [
@@ -84,7 +84,7 @@ $(function(){
                     label: 'Delete',
                     cssClass: 'btn-danger',
                     action: function(dialog){
-                        $.post('/setup/DeleteFile/', {'target':link}).done(function(){window.location.reload()});
+                        $.post(link).done(function(){window.location.reload()});
                     }
                 }
             ]
