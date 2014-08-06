@@ -1,6 +1,142 @@
 # -*- coding: utf-8 -*-
 # <nbformat>3.0</nbformat>
 
+# <headingcell level=1>
+
+# Final Solution
+
+# <codecell>
+
+from collections import defaultdict
+tmp_dict = {'A': 'Animals',
+            'U': 'Units',
+            'n': 'New',
+            'c': 'Cumulative',
+            'w': 'Wait',
+            'Clin': 'from Clinical signs',  # This gets overridden by 'Clinical' below... not a big deal, but not perfect
+            'Test': 'from Lab Tests',
+            'p': 'Possible',
+            'Dir': 'Direct Spread',
+            'Ind': 'Indirect Spread',
+            'Air': 'Airborne Spread',
+            'des': 'Destruction',
+            'desw': 'Destruction Wait Time',
+            'det': 'Detection',
+            'exm': 'Examination',
+            'exp': 'Exposure',
+            'firstDestruction': "First Destruction",
+            'firstDetection': "First Detection",
+            'firstVaccination': 'First Vaccination',
+            'lastDetection': "Last Detection",
+            'tr': 'Trace',
+            'tsd': 'Transition State Daily',
+            'tstcA': 'Lab Test Cumulative Animals',
+            'tstcU': 'Lab Test Cumulative Units',
+            'tstnU': 'Lab Test New Units',
+            'vacc': 'Vaccination Cumulative',
+            'vacn': 'Vaccination New',
+            'vacw': 'Vaccination Wait Time',
+            'inf': 'Infection',
+            'All': 'For Any Reason',
+            'Max': 'Max',
+            'MaxDay': 'Day with Max',
+            'TimeMax': 'Max Time',
+            'TimeAvg': 'Average Time',
+            'DaysInQueue': 'Days in Queue',
+            'DirFwd': 'because of Direct Forward trace',
+            'IndFwd': 'because of Indirect Forward trace',
+            'DirBack': 'because of Direct Back trace',
+            'IndBack': 'because of Indirect Back trace',
+            'Ring': 'because of Ring',
+            'Ini': 'Initially',
+            'TruePos': 'True Positives',
+            'FalsePos': 'False Positives',
+            'TrueNeg': 'True Negatives',
+            'FalseNeg': 'False Negatives',
+            'Unsp': 'Unspecified',
+            'Det': 'because of Detection',
+            'Susc': 'Susceptible',
+            'Lat': 'Latent',
+            'Subc': 'Subclinical',
+            'Clin': 'Clinical',
+            'NImm': 'Natural Immune',
+            'VImm': 'Vaccine Immune',
+            'Dest': 'Destroyed',
+}
+explanations = defaultdict(lambda: '', tmp_dict)
+
+#For DailyByProductionType model only
+grammars = {'exp': [('c', 'n'), ('U', 'A'), ('', 'Dir', 'Ind', 'Air'), ('All', 'Cattle', 'Swine')],
+            'firstDetection': [('', 'Clin', 'Test'), ('', 'Cattle', 'Swine')],
+            'lastDetection': [('', 'Clin', 'Test'), ('', 'Cattle', 'Swine')],
+            'det': [('c', 'n'), ('U', 'A'), ('All', 'Clin', 'Test'), ('', 'Cattle', 'Swine')],
+            'tr': [('n', 'c'), ('U', 'A'), ('All', 'Dir', 'Ind'), ('', 'p'), ('', 'Cattle', 'Swine')],
+            'exm': [('n', 'c'), ('U', 'A'), ('All', 'Ring', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack', 'Det'), ('', 'Cattle', 'Swine')],
+            'tstnU': [('TruePos', 'FalsePos', 'TrueNeg', 'FalseNeg'), ('', 'Cattle', 'Swine')],
+            'tstcU': [('All', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack', 'TruePos', 'FalsePos', 'TrueNeg', 'FalseNeg'), ('', 'Cattle', 'Swine')],
+            'tstcA': [('All', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack'), ('', 'Cattle', 'Swine')],
+            'firstVaccination': [('', 'Ring'), ('', 'Cattle', 'Swine')],
+            'vacw': [('U', 'A'), ('All', 'Max', 'MaxDay', 'TimeMax', 'TimeAvg', 'DaysInQueue'), ('', 'Cattle', 'Swine')],
+            'vacn': [('U', 'A'), ('All', 'Ini', 'Ring'), ('', 'Cattle', 'Swine')],
+            'vacc': [('U', 'A'), ('All', 'Ini', 'Ring'), ('', 'Cattle', 'Swine')],
+            'firstDestruction': [('', 'Unsp', 'Ring', 'Det', 'Ini', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack'), ('', 'Cattle', 'Swine')],
+            'des': [('n', 'c'), ('U', 'A'), ('All', 'Unsp', 'Ring', 'Det', 'Ini', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack'), ('', 'Cattle', 'Swine')],
+            'tsd': [('U', 'A'), ('Susc', 'Lat', 'Subc', 'Clin', 'NImm', 'VImm', 'Dest'), ('', 'Cattle', 'Swine')],
+            'inf': [('c', 'n'), ('U', 'A'), ('', 'Ini', 'Dir', 'Ind', 'Air'), ('All', 'Cattle', 'Swine')],
+            'desw': [('U', 'A'), ('All', 'Cattle', 'Swine')],
+}
+fields = " desnUAll desnUUnsp desnURing desnUDet desnUIni desnUDirFwd desnUIndFwd desnUDirBack desnUIndBack desnAAll desnAUnsp desnARing desnADet desnAIni desnADirFwd desnAIndFwd desnADirBack desnAIndBack descUAll descUUnsp descURing descUDet descUIni descUDirFwd descUIndFwd descUDirBack descUIndBack descAAll descAUnsp descARing descADet descAIni descADirFwd descAIndFwd descADirBack descAIndBack deswU deswA detcUAll detcUClin detcUTest detcAAll detcAClin detcATest detnUAll detnUClin detnUTest detnAAll detnAClin detnATest exmnUAll exmnURing exmnUDirFwd exmnUIndFwd exmnUDirBack exmnUIndBack exmnUDet exmnAAll exmnARing exmnADirFwd exmnAIndFwd exmnADirBack exmnAIndBack exmnADet exmcUAll exmcURing exmcUDirFwd exmcUIndFwd exmcUDirBack exmcUIndBack exmcUDet exmcAAll exmcARing exmcADirFwd exmcAIndFwd exmcADirBack exmcAIndBack exmcADet expcU expcUDir expcUInd expcUAir expcA expcADir expcAInd expcAAir expnU expnUDir expnUInd expnUAir expnA expnADir expnAInd expnAAir firstDestruction firstDestructionUnsp firstDestructionRing firstDestructionDet firstDestructionIni firstDestructionDirFwd firstDestructionIndFwd firstDestructionDirBack firstDestructionIndBack firstDetection firstDetectionClin firstDetectionTest firstVaccination firstVaccinationRing infcU infcUIni infcUDir infcUInd infcUAir infcA infcAIni infcADir infcAInd infcAAir infnU infnUIni infnUDir infnUInd infnUAir infnA infnAIni infnADir infnAInd infnAAir lastDetection lastDetectionClin lastDetectionTest trnUAll trnUAllp trnUDir trnUDirp trnUInd trnUIndp trnAAll trnAAllp trnADir trnADirp trnAInd trnAIndp trcUAll trcUAllp trcUDir trcUDirp trcUInd trcUIndp trcAAll trcAAllp trcADir trcADirp trcAInd trcAIndp tsdUSusc tsdULat tsdUSubc tsdUClin tsdUNImm tsdUVImm tsdUDest tsdASusc tsdALat tsdASubc tsdAClin tsdANImm tsdAVImm tsdADest tstcAAll tstcADirFwd tstcAIndFwd tstcADirBack tstcAIndBack tstcUAll tstcUDirFwd tstcUIndFwd tstcUDirBack tstcUIndBack tstcUTruePos tstcUFalsePos tstcUTrueNeg tstcUFalseNeg tstnUTruePos tstnUFalsePos tstnUTrueNeg tstnUFalseNeg vaccUAll vaccUIni vaccURing vaccAAll vaccAIni vaccARing vacnUAll vacnUIni vacnURing vacnAAll vacnAIni vacnARing vacwUAll vacwUMax vacwUMaxDay vacwUTimeMax vacwUTimeAvg vacwUDaysInQueue vacwAAll vacwAMax vacwAMaxDay vacwATimeMax vacwATimeAvg vacwADaysInQueue".split()
+
+# <codecell>
+
+def push_explanation(field_name, start, explanation=None):
+    if not explanation:
+        explanation = []
+    explanation.append(explanations[start])
+    return field_name.replace(start, '', 1), explanation
+
+def explain2(field_name):
+    start = sorted([k for k in grammars.keys() if field_name.startswith(k)], key=len)
+    start = start[-1]  #last one is the longest
+    grammar = grammars[start]
+    field_name, explanation = push_explanation(field_name, start)
+    for piece in grammar[:-1]:  #skip production type tuple at the end
+        for option in piece:
+            if field_name.startswith(option):
+                field_name, explanation = push_explanation(field_name, option, explanation)
+                break # go up on for loop level
+    return field_name, explanation
+explain2('detcUClin')
+
+# <codecell>
+
+def explain(field_name, explained_parts=None):
+    """Recursively breaks a field name down into parts and explains each piece.  If you're having trouble
+    with this method after adding new fields, you'll need to modify explanations{} to have longer prefixes,
+    or modify this algorithm so that it doesn't shortcut down a dead end."""
+    if explained_parts is None:  # It's import you don't initialize this in the signature, it side-effects the result since [] is mutable
+        explained_parts = []
+    if not field_name:
+        return ' '.join(explained_parts)
+
+    if field_name in explanations.keys():  # shortcut the larger cases
+        explained_parts.append(explanations[field_name])  # at the beginning
+        return explain('', explained_parts)
+
+    for suffix in explanations.keys():
+        if field_name.startswith(suffix):
+            explained_parts.append(explanations[suffix])  # at the beginning
+            return explain(field_name[len(suffix) : ], explained_parts)
+    #If we reach here it is because there's a string that couldn't be explained
+    raise ValueError("Got a field name that doesn't match anything in explanations: %s, %s" % (str(explained_parts), str(field_name)))
+    
+results = [explain(x) for x in fields]
+list(filter(lambda desc: len(desc) < 20, results))
+
+# <headingcell level=1>
+
+# All the work that led up to Final Solution
+
 # <codecell>
 
 import re
