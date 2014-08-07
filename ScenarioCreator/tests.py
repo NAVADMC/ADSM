@@ -51,7 +51,7 @@ class ModelUtilsTest(TestCase):
 
     def test_population_link(self):
         index = Unit.objects.count()
-        p = Population(source_file='Population_Ireland.xml')
+        p = Population(source_file='Population_Grid.xml')
         p.save()
         self.assertGreater( Unit.objects.count(), index, "No new Units were added")
         self.assertEqual( Unit.objects.get(id=index+1)._population, p, "New Unit should link back to newest Population object")

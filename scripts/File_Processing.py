@@ -3,7 +3,7 @@
 
 # <codecell>
 
-xml_file = open('../workspace/Population_Ireland.xml', 'r')
+xml_file = open('../workspace/Population_Grid.xml', 'r')
 
 # <codecell>
 
