@@ -197,6 +197,8 @@ def readPopulation( populationFileName ):
 	if srs != None:
 		projection = Proj( srs.text, preserve_units=True )			
 
+	population = Population()
+	population.save()
 	for el in xml.findall( './/herd' ):
 		description = el.find( './id' )
 		if description == None:
@@ -232,6 +234,7 @@ def readPopulation( populationFileName ):
 			daysLeftInState = int( daysLeftInState.text )
 
 		unit = Unit(
+		  _population = population,
 		  production_type = productionType,
 		  latitude = lat,
 		  longitude = long,
