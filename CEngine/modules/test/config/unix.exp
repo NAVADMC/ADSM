@@ -410,7 +410,7 @@ proc variable_test { scenario answer {test "variable"}} {
 
 	set true_nvars [llength $answer]
 	set true_ndays [expr [llength [lindex $answer 0]] - 1]
-	send "$scenario\n"
+	send "variables $scenario\n"
 	expect {
 		-re "($tablelinespat).*$prompt$" {
 			set output [simvaroutput_string_to_list $expect_out(1,string)]
@@ -504,7 +504,7 @@ proc stochastic_variable_test { scenario answer {test "stochastic_variable"} {it
 	}
 	
 	for {set i 0} {$i < $iterations} {incr i} {
-		send "stochastic $scenario\n"
+		send "stochastic variables $scenario\n"
 		expect {
 			-re "($tablelinespat).*$prompt$" {
 				set output [simvaroutput_string_to_list $expect_out(1,string)]
