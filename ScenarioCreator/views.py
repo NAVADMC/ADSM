@@ -481,7 +481,7 @@ def upload_population(request):
 
     session.set_population_upload_status("Processing file")
     filename = request.POST.get('filename') if 'filename' in request.POST else handle_file_upload(request)
-    model = Population(source_file=filename)
+    model = Population(source_file=workspace(filename))
     model.save()
     # wait for Population parsing (up to 5 minutes)
     session.reset_population_upload_status()

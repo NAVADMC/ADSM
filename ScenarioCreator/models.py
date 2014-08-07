@@ -80,6 +80,7 @@ def choice_char_from_value(value, map_tuple):
 
 
 def clean_filename(filename):
+    #TODO: this appears to be dead code, but it's very well written...
     filename = filename.strip()  # whitespace
     if filename:
         fname = workspace(filename)
@@ -125,13 +126,10 @@ class DynamicBlob(models.Model):
 class Population(BaseModel):
     source_file = models.CharField(max_length=255, blank=True)  # source_file made generic CharField so Django doesn't try to copy and save the raw file
 
-    def clean_fields(self, exclude=None):
-        if self.source_file and not os.path.isfile(workspace(self.source_file)):
-            raise ValidationError(self.source_file + " is not a file in the workspace.")
-
     def save(self, *args, **kwargs):
         super(Population, self).save(*args, **kwargs)
-        self.import_population()  # Population must be saved to db so that it can be foreignkeyed
+        if self.source_file:
+            self.import_population()  # Population must be saved to db so that it can be foreignkeyed
 
     def import_population(self):
         from Settings.models import SmSession
@@ -139,9 +137,7 @@ class Population(BaseModel):
 
         start_time = time.clock()  # perf_counter() would also work
         session.set_population_upload_status("Parsing")
-        # print("Parsing ", self.source_file)
         p = ScenarioCreator.parser.PopulationParser(self.source_file)
-        # print("Parsing to Dictionary")
         data = p.parse_to_dictionary()
         session.set_population_upload_status("Creating objects")
         total = len(data)

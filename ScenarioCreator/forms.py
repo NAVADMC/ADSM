@@ -65,6 +65,7 @@ class PopulationForm(BaseForm):
             submit_button()
         )
         return super(PopulationForm, self).__init__(*args, **kwargs)
+
     class Meta(object):
         model = Population
 

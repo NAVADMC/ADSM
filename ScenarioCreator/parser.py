@@ -11,7 +11,6 @@ import os
 
 standard_library.install_hooks()
 from future.builtins import object
-import ScenarioCreator.models
 
 __author__ = 'Josiah'
 import xml.etree.ElementTree as ET
@@ -27,7 +26,7 @@ class PopulationParser(object):
     text_fields = list(zip(model_labels, xml_fields))
 
     def __init__(self, filename):
-        filepath = ScenarioCreator.models.workspace(filename)
+        filepath = filename
         if not os.path.isfile(filepath):
             raise OSError("'" + filepath + "' is not a file.")
 
