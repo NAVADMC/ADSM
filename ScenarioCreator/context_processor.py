@@ -11,6 +11,7 @@ from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Pop
 from Results.models import DailyControls
 from ScenarioCreator.views import unsaved_changes
 from Settings.models import scenario_filename
+from django.db.models import F
 
 
 def simulation_ready_to_run(context):
@@ -31,7 +32,11 @@ def basic_context(request):
                'Progressions': DiseaseProgression.objects.count(),
                'ProgressionAssignment': DiseaseProgressionAssignment.objects.count() == PT_count and PT_count, #Fixed false complete status when there are no Production Types
                'DirectSpreads': DirectSpread.objects.count(),
-               'AssignSpreads': ProductionTypePairTransmission.objects.count() >= PT_count and PT_count, #Fixed false complete status when there are no Production Types
+               'AssignSpreads': PT_count and
+                                ProductionTypePairTransmission.objects.filter(
+                                    source_production_type=F('destination_production_type'),
+                                    direct_contact_spread__isnull=False)
+                                    .count() >= PT_count,
                'ControlMasterPlan': ControlMasterPlan.objects.count(),
                'Protocols': ControlProtocol.objects.count(),
                'ProtocolAssignments': ProtocolAssignment.objects.count(),
