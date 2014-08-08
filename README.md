@@ -9,9 +9,10 @@ Please note that ADSM is built against Python 3.3 which is incompatible with Pyt
     pip install django-crispy-forms
     pip install django-extras
     pip install south==0.8.4
+    pip install future
+    pip install futures  # This isn't a mistake, they're seriously two different packages. We're very futuristic here.
     pip install selenium  # only necessary for testing
-    pip install cherrypy # local host server
-    pip install cx_freeze  # only necessary for creating executables https://pypi.python.org/pypi/cx_Freeze NOTE: Needed to edit C:\Python33\Scripts\cxfreeze and csfreeze-quickstart to point to correct interpreter!
+    pip install cherrypy==3.5.0 --no-use-wheel # local host server
 
     pip install python-dateutil  
     pip install pyparsing  
@@ -22,14 +23,14 @@ Please note that ADSM is built against Python 3.3 which is incompatible with Pyt
     git submodule update
 
 ### Matplotlib and Numpy Dependencies
-For a new Python3.3 installation on Windows, you will need to download these binaries:  
-Either  
+For non-Windows machines:
 
     pip install numpy
     sudo apt-get build-dep python-matplotlib
     pip install matplotlib
     pip install pandas
-or download and install these pacakages:
+
+For a new Python3.3 installation on Windows, you will need to download and install these binaries:  
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy  
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#pandas  
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#matplotlib  
@@ -72,7 +73,7 @@ to be in the py33 virtual env.  That only needs to be done once.
     screen -r   (Ctrl+C to stop server and reuse the screen) or (Ctrl+A  K   to kill the screen and start from scratch)
     git pull
     git submodule update
-    source /home/josiah/py33/bin/activate 
+    #source /home/josiah/py33/bin/activate 
     cd CEngine
     make
     cd ..
@@ -102,3 +103,6 @@ Never merge from OS specific branches back into master.  Changes made in these b
         wget http://python-distribute.org/distribute_setup.py -O - | python
         easy_insatll pip
 
+###CX_Freeze
+only necessary for creating executables https://pypi.python.org/pypi/cx_Freeze
+Needed to edit C:\Python33\Scripts\cxfreeze and csfreeze-quickstart to point to correct interpreter!
