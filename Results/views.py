@@ -46,7 +46,7 @@ def HttpFigure(fig):
 def population_png(request):
     latlong = [(u.latitude, u.longitude) for u in Unit.objects.all()]
     df = pd.DataFrame.from_records(latlong, columns=['Latitude', 'Longitude'])
-    axis = df.plot('Longitude', 'Latitude', kind='scatter', color='black')
+    axis = df.plot('Longitude', 'Latitude', kind='scatter', color='black', figsize=(4.5, 4))
     return HttpFigure(axis.figure)
 
 
@@ -114,7 +114,7 @@ def results_home(request):
     # TODO: value dict file sizes
     if DailyControls.objects.all().count() > 0:
         context['summary'] = Results.summary.summarize_results()
-        context['iterations'] = ' '.join([str(i) for i in list_of_iterations()])
+        context['iterations'] = len(list_of_iterations())
     return render(request, 'Results/SimulationProgress.html', context)
 
 
