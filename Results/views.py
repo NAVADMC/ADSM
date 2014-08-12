@@ -114,6 +114,7 @@ def results_home(request):
     # TODO: value dict file sizes
     if DailyControls.objects.all().count() > 0:
         context['summary'] = Results.summary.summarize_results()
+        context['iterations'] = ' '.join([str(i) for i in list_of_iterations()])
     return render(request, 'Results/SimulationProgress.html', context)
 
 

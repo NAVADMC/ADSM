@@ -52,7 +52,7 @@ def name_and_value(field_name, model=DailyByProductionType):
 
 def summarize_results():
     summary = OrderedDict()
-    summary["Unit Summary"] = {
+    summary["Unit (Animal) Summary"] = {
         name_and_value("infcU"),
         name_and_value("firstDetUInfAll", DailyControls),
         name_and_value("descUAll"),
