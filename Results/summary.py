@@ -50,18 +50,22 @@ def name_and_value(field_name, model=DailyByProductionType):
     return name(field_name, model), field_summary(field_name, model)
 
 
+def pair(unit_pair, animal_number):
+    return unit_pair[0], "%i (%i)" % (unit_pair[1], animal_number)
+
+
 def summarize_results():
     summary = OrderedDict()
     summary["Unit (Animal) Summary"] = {
-        name_and_value("infcU"),
-        name_and_value("firstDetUInfAll", DailyControls),
-        name_and_value("descUAll"),
-        name_and_value("vaccUAll")}
-    summary["Animal Summary"] = {
-        name_and_value("infcA"),
-        name_and_value("firstDetAInfAll", DailyControls),
-        name_and_value("descAAll"),
-        name_and_value("vaccAAll")}
+        pair(name_and_value("infcU"), field_summary("infcA")),
+        pair(name_and_value("firstDetUInfAll", DailyControls), field_summary("firstDetAInfAll", DailyControls)),
+        pair(name_and_value("descUAll"), field_summary("descAAll")),
+        pair(name_and_value("vaccUAll"), field_summary("vaccAAll"))}
+    # summary["Animal Summary"] = {
+    #     name_and_value("infcA"),
+    #     name_and_value("firstDetAInfAll", DailyControls),
+    #     name_and_value("descAAll"),
+    #     name_and_value("vaccAAll")}
     summary["Days Summary"] = {
         name_and_value("outbreakDuration", DailyControls),
         name_and_value("diseaseDuration", DailyControls),
