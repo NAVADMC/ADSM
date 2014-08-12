@@ -4,14 +4,22 @@ body {
     font-weight: 400;
 }
 
-h1 {
-    font-size: 16pt;
+h1, h2, h3, h4 {
+    font-size: 14pt;
     font-weight: 600;
+}
+
+section h1 {
+    font-size: 16pt;
     margin-left: -15px;
 }
 
-h1, h2, h3, h4 {
+section h1, section h2 {
     margin-bottom: 20px;
+}
+
+h3, h4 {
+    font-weight: 400;
 }
 
 a {
@@ -21,15 +29,6 @@ a {
 a:hover {
     color: #7cb9ff;
     /*with underline*/
-}
-
-ul {
-    list-style-type: none;
-    padding-left: 0;
-}
-
-li {
-    font-size: 14pt;
 }
 
 .icon {
@@ -120,13 +119,16 @@ body>section {
     margin-left:  220px;
     padding-left: 40px;
 }
+
 #setupMenu {
     list-style: none;
     padding-left: 0;
     margin-bottom: 54px;
 }
 
-#setupMenu li {
+#setupMenu h2, #setupMenu h3, #setupMenu h4 {
+    margin-top: 0;
+    margin-bottom: 0; /* These are meant to stack */
     padding-top: 4px;
 }
 
@@ -135,18 +137,16 @@ body>section {
     display:block;
     text-decoration: none;
     background-color: #E4E4E4;
-    font-size: 14pt;
-    font-weight: 600;
     line-height: 35px;
     padding-left: 8px;
 }
 
-#setupMenu ul a {
+#setupMenu h3 a {
     font-weight: 400;
     background-color: #EEEEEE;
 }
 
-#setupMenu ul ul a {
+#setupMenu h4 a {
     background-color: #FFFFFF;
 }
 
@@ -279,6 +279,7 @@ select {
 /**********************/
 
 #file_list li {
+    font-size: 14pt;
     text-decoration: none;
     border-bottom: 2px solid #d9d9d9;
 }

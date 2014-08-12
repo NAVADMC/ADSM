@@ -2,34 +2,30 @@
 {% load db_status_tags %}
 
 {% block main %}
-    <nav>
-        <ul id="setupMenu">
-            <li><a href="/results/" class="{{""|active:active_link}}">Results Home</a></li>
-            <li><a href="/results/DailyByProductionType/" class="{{"DailyByProductionType"|active:active_link}}">Production Type</a>
-                <ul><li><a href="/results/DailyByProductionType/prefix/exp/" class="{{"exp"|active:active_link}}">Exposures</a></li>
-                    <li><a href="/results/DailyByProductionType/prefix/inf/" class="{{"inf"|active:active_link}}">Infections</a></li>
-                    <li><a href="/results/DailyByProductionType/prefix/des/" class="{{"des"|active:active_link}}">Destruction</a></li>
-                    <li><a href="/results/DailyByProductionType/prefix/exm/" class="{{"exm"|active:active_link}}">Exams</a></li>
-                    <li><a href="/results/DailyByProductionType/prefix/tst/" class="{{"tst"|active:active_link}}">Lab Tests</a></li>
-                    <li><a href="/results/DailyByProductionType/prefix/tr/"  class="{{"tr" |active:active_link}}">Tracing</a></li>
-                </ul></li>
-            <li><a href="/results/DailyByZoneAndProductionType/" class="{{"DailyByZoneAndProductionType"|active:active_link}}">Zone and Production Type</a></li>
-            <li><a href="/results/DailyByZone/" class="{{"DailyByZone"|active:active_link}}">Zones</a></li>
-            <li><a href="/results/DailyControls/" class="{{"ControlActivity"|active:active_link}}">Control Activity</a>
-                <ul>
-                    <li><a href="/results/DailyControls/prefix/dest/" class="{{"Detection"|active:active_link}}">Destruction</a></li>
-                    <li><a href="/results/DailyControls/prefix/desw/" class="{{"Detection"|active:active_link}}">Destruction Wait</a></li>
-                    <li><a href="/results/DailyControls/prefix/vac/" class="{{"Vaccination"|active:active_link}}">Vaccination</a></li>
-                    </ul></li>
-{#            <li><a href="/results/Cost/" class="{{"Cost"|active:active_link}}">Cost Accounting</a></li>#}
+    <nav id="setupMenu">
+		<h2><a href="/results/" class="{{""|active:active_link}}">Results Home</a></h2>
+		<h2><a href="/results/DailyByProductionType/" class="{{"DailyByProductionType"|active:active_link}}">Production Type</a></h2>
+            <h3><a href="/results/DailyByProductionType/prefix/exp/" class="{{"exp"|active:active_link}}">Exposures</a></h3>
+            <h3><a href="/results/DailyByProductionType/prefix/inf/" class="{{"inf"|active:active_link}}">Infections</a></h3>
+            <h3><a href="/results/DailyByProductionType/prefix/des/" class="{{"des"|active:active_link}}">Destruction</a></h3>
+            <h3><a href="/results/DailyByProductionType/prefix/exm/" class="{{"exm"|active:active_link}}">Exams</a></h3>
+            <h3><a href="/results/DailyByProductionType/prefix/tst/" class="{{"tst"|active:active_link}}">Lab Tests</a></h3>
+            <h3><a href="/results/DailyByProductionType/prefix/tr/"  class="{{"tr" |active:active_link}}">Tracing</a></h3>
+		<h2><a href="/results/DailyByZoneAndProductionType/" class="{{"DailyByZoneAndProductionType"|active:active_link}}">Zone and Production Type</a></h2>
+		<h2><a href="/results/DailyByZone/" class="{{"DailyByZone"|active:active_link}}">Zones</a></h2>
+		<h2><a href="/results/DailyControls/" class="{{"ControlActivity"|active:active_link}}">Control Activity</a></h2>
+            <h3><a href="/results/DailyControls/prefix/dest/" class="{{"Detection"|active:active_link}}">Destruction</a></h3>
+            <h3><a href="/results/DailyControls/prefix/desw/" class="{{"Detection"|active:active_link}}">Destruction Wait</a></h3>
+            <h3><a href="/results/DailyControls/prefix/vac/" class="{{"Vaccination"|active:active_link}}">Vaccination</a></h3>
+{#      <h2><a href="/results/Cost/" class="{{"Cost"|active:active_link}}">Cost Accounting</a></h2>#}
 
-            <li id="RunSimulation"><a href="/results/Inputs/" class="{{"Inputs"|active:active_link}} completed">
-               <i class="glyphicon glyphicon-play icon-flipped"></i> Back to Inputs </a></li>
-        </ul>
+		<h2 id="RunSimulation"><a href="/results/Inputs/" class="{{"Inputs"|active:active_link}} completed">
+		   <i class="glyphicon glyphicon-play icon-flipped"></i> Back to Inputs </a></h2>
+         
     </nav>
     <section>
         {% block content %}
 
         {% endblock %}
     </section>
-{% endblock %}
+{% endblock %}h2
