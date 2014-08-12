@@ -142,6 +142,24 @@ def assign_progressions(request):
     return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request)
 
 
+def collect_backlinks(model_instance):
+    from django.contrib.admin.util import NestedObjects
+    collector = NestedObjects(using='scenario_db')  # or specific database
+    collector.collect([model_instance])
+    dependants = collector.nested()  # fun fact: spelling differs between America and Brittain
+    print("Found related models:", dependants)
+    links = {}
+    for direct_reference in dependants[1:][0]:  # only iterates over the top level
+        print(direct_reference)
+        if not isinstance(direct_reference, list):  # Points are obvious, don't include them
+            try:  # not everything has a name attr
+                links[str(direct_reference)] = '/setup/%s/%i/' % (direct_reference.__class__, direct_reference.pk)
+            except:
+                links['%s:%i' % (type(direct_reference), direct_reference.pk)] = '/setup/%s/%i/' % (direct_reference.__class__, direct_reference.pk)
+    print(links)
+    return links
+
+
 def initialize_relational_form(context, primary_key, request):
     if not primary_key:
         model = RelationalFunction()
@@ -152,6 +170,7 @@ def initialize_relational_form(context, primary_key, request):
         context['model_link'] = '/setup/RelationalFunction/' + primary_key + '/'
     context['form'] = main_form
     context['model'] = model
+    context['backlinks'] = collect_backlinks(model)
     return context
 
 
@@ -266,6 +285,10 @@ def edit_entry(request, primary_key):
     context = {'form': initialized_form,
                'title': str(initialized_form.instance)}
     add_breadcrumb_context(context, model_name, primary_key)
+
+    if model_name == 'ProbabilityFunction':
+        context['backlinks'] = collect_backlinks(initialized_form.instance)
+
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 

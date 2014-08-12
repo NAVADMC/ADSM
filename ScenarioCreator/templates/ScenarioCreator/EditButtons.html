@@ -1,3 +1,16 @@
+    <h3>Used in:</h3>
+    {{ backlinks }}
+{% if backlinks %}
+    <ul>
+    {% if not backlinks.items %}
+        <em>Not used</em>
+    {% endif %}
+    {% for text, link in backlinks.items %}
+        <li><a href="{{ link }}">{{ text }}</a></li>
+    {% endfor %}
+    </ul>    
+{% endif %}
+
 <div class="buttonHolder">
     {% if outputs_computed %}
         <button type="submit" class="btn btn-danger button white" id="submit-id-submit">Delete Results and Save changes</button>
