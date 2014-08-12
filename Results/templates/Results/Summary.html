@@ -1,0 +1,13 @@
+
+<h3>Summary of Iterations</h3>
+<h4>Ierations Completed: {{ iterations }}</h4>
+
+{% for header, body in summary.items %}
+    <h3>{{ header }}</h3>
+    <ul>
+    {% for field, number in body %}
+        <li>{{ field }}: {{ number }}</li>
+    {% endfor %}
+    </ul>
+    
+{% endfor %}

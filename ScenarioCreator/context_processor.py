@@ -20,23 +20,23 @@ def simulation_ready_to_run(context):
 
 
 def basic_context(request):
-    PT_count = ProductionType.objects.count()
+    pt_count = ProductionType.objects.count()
     context = {'filename': scenario_filename(),
                'unsaved_changes': unsaved_changes(),
                'Scenario': Scenario.objects.count(),
                'OutputSetting': OutputSettings.objects.count(),
                'Population': Population.objects.count(),
-               'ProductionTypes': PT_count,
+               'ProductionTypes': pt_count,
                'Farms': Unit.objects.count(),
                'Disease': Disease.objects.count(),
                'Progressions': DiseaseProgression.objects.count(),
-               'ProgressionAssignment': DiseaseProgressionAssignment.objects.count() == PT_count and PT_count, #Fixed false complete status when there are no Production Types
+               'ProgressionAssignment': DiseaseProgressionAssignment.objects.count() == pt_count and pt_count,
                'DirectSpreads': DirectSpread.objects.count(),
-               'AssignSpreads': PT_count and
+               'AssignSpreads': pt_count and
                                 ProductionTypePairTransmission.objects.filter(
                                     source_production_type=F('destination_production_type'),
                                     direct_contact_spread__isnull=False)
-                                    .count() >= PT_count,
+                                    .count() >= pt_count,
                'ControlMasterPlan': ControlMasterPlan.objects.count(),
                'Protocols': ControlProtocol.objects.count(),
                'ProtocolAssignments': ProtocolAssignment.objects.count(),
@@ -49,7 +49,7 @@ def basic_context(request):
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
                'outputs_computed': DailyControls.objects.all().count() > 0,
                }
-    
+
     validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment',
                          'DirectSpreads', 'AssignSpreads', 'ControlMasterPlan', 'Protocols', 'ProtocolAssignments', 'Zones', 'ZoneEffects']
     context['relevant_keys'] = {name: context[name] for name in validation_models}

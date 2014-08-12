@@ -24,11 +24,9 @@ from django.db.models import Max
 from Results.forms import *  # necessary for globals()[model_name + 'Form']
 from Results.models import *  # necessary
 import Results.output_parser
-
-# Force matplotlib to not use any Xwindows backend.
+from Results.summary import list_of_iterations, summarize_results
 import matplotlib
-matplotlib.use('Agg')
-
+matplotlib.use('Agg')# Force matplotlib to not use any Xwindows backend.
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -114,6 +112,8 @@ def results_home(request):
     path_ex = os.path.join("workspace", scenario_filename(), "*.txt")
     context = {'supplemental_files': [re.sub(r'workspace/?', '', re.sub(r'\\', '/', path)) for path in glob(path_ex)]}
     # TODO: value dict file sizes
+    if DailyControls.objects.all().count() > 0:
+        context['summary'] = Results.summary.summarize_results()
     return render(request, 'Results/SimulationProgress.html', context)
 
 
@@ -126,10 +126,6 @@ def run_simulation(request):
 
 def list_entries(model_name, model, iteration=1):
     return model.objects.filter(iteration=iteration)[:200],
-
-
-def list_of_iterations():
-    return list(DailyControls.objects.values_list('iteration', flat=True).distinct())
 
 
 def breakdown_dictionary(iterate_pt, iterate_zone):
