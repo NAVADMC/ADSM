@@ -56,22 +56,17 @@ def pair(unit_pair, animal_number):
 
 def summarize_results():
     summary = OrderedDict()
-    summary["Unit (Animal) Summary"] = {
+    summary["Unit (Animal) Summary"] = [
         pair(name_and_value("infcU"), field_summary("infcA")),
         pair(name_and_value("firstDetUInfAll", DailyControls), field_summary("firstDetAInfAll", DailyControls)),
         pair(name_and_value("descUAll"), field_summary("descAAll")),
-        pair(name_and_value("vaccUAll"), field_summary("vaccAAll"))}
-    # summary["Animal Summary"] = {
-    #     name_and_value("infcA"),
-    #     name_and_value("firstDetAInfAll", DailyControls),
-    #     name_and_value("descAAll"),
-    #     name_and_value("vaccAAll")}
-    summary["Days Summary"] = {
+        pair(name_and_value("vaccUAll"), field_summary("vaccAAll"))]
+    summary["Days Summary"] = [
         name_and_value("outbreakDuration", DailyControls),
         name_and_value("diseaseDuration", DailyControls),
         name_and_value("firstDetection"),
         name_and_value("firstVaccination"),
-        name_and_value("firstDestruction")}
-    summary["Zone Summary"] = {name_and_value("maxZoneArea", DailyByZone)}
+        name_and_value("firstDestruction"),
+        name_and_value("maxZoneArea", DailyByZone)]
 
     return summary
