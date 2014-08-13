@@ -394,12 +394,18 @@ class ZoneForm(BaseForm):
         model = Zone
 
 
-class ZoneEffectOnProductionTypeForm(BaseForm):
+class ZoneEffectForm(BaseForm):
     class Meta(object):
-        model = ZoneEffectOnProductionType
-        widgets = {'zone': AddOrSelect(attrs={'data-new-item-url': '/setup/Zone/new/'}),
-                   'zone_indirect_movement': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+        model = ZoneEffect
+        widgets = {'zone_indirect_movement': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'zone_direct_movement': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
+
+
+class ZoneEffectAssignmentForm(BaseForm):
+    class Meta(object):
+        model = ZoneEffectAssignment
+        widgets = {'zone': AddOrSelect(attrs={'data-new-item-url': '/setup/Zone/new/'}),
+                   'effect': AddOrSelect(attrs={'data-new-item-url': '/setup/ZoneEffect/new/'})}
 
 
 class ReadAllCodesForm(BaseForm):

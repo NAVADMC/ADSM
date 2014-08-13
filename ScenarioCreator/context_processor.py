@@ -7,7 +7,7 @@ standard_library.install_hooks()
 import re
 from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Population, Unit, Disease, DiseaseProgression, \
     DiseaseProgressionAssignment, DirectSpread, ProductionTypePairTransmission, ControlMasterPlan, ControlProtocol, \
-    ProtocolAssignment, Zone, ZoneEffectOnProductionType, ProbabilityFunction, RelationalFunction
+    ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
 from Results.models import DailyControls
 from ScenarioCreator.views import unsaved_changes
 from Settings.models import scenario_filename
@@ -41,7 +41,8 @@ def basic_context(request):
                'Protocols': ControlProtocol.objects.count(),
                'ProtocolAssignments': ProtocolAssignment.objects.count(),
                'Zones': Zone.objects.count(),
-               'ZoneEffects': ZoneEffectOnProductionType.objects.count(),
+               'ZoneEffects': ZoneEffect.objects.count(),
+               'ZoneEffectAssignments': ZoneEffectAssignment.objects.count() >= Zone.objects.count(),
                'ProbabilityFunctions': ProbabilityFunction.objects.count(),
                'RelationalFunctions': RelationalFunction.objects.count(),
                'url': request.path,
@@ -51,7 +52,8 @@ def basic_context(request):
                }
 
     validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment',
-                         'DirectSpreads', 'AssignSpreads', 'ControlMasterPlan', 'Protocols', 'ProtocolAssignments', 'Zones', 'ZoneEffects']
+                         'DirectSpreads', 'AssignSpreads', 'ControlMasterPlan', 'Protocols', 'ProtocolAssignments', 'Zones', 'ZoneEffects',
+                         'ZoneEffectAssignments']
     context['relevant_keys'] = {name: context[name] for name in validation_models}
     context['Simulation_ready'] = simulation_ready_to_run(context)
     return context

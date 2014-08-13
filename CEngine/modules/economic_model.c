@@ -938,7 +938,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_zone_params function to read the zone/production type
    * combination specific parameters. */
   sqlite3_exec (params,
-                "SELECT zone.name,prodtype.name,cost_of_surveillance_per_animal_day FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectonproductiontype pairing WHERE zone.id=pairing.zone_id AND prodtype.id=pairing.production_type_id",
+                "SELECT zone.name,prodtype.name,cost_of_surveillance_per_animal_day FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffect pairing WHERE zone.id=pairing.zone_id AND prodtype.id=pairing.production_type_id",
                 set_zone_params, self, &sqlerr);
   if (sqlerr)
     {

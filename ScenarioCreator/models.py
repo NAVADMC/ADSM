@@ -654,11 +654,8 @@ class Zone(BaseModel):
         return "%s: %skm" % (self.name, self.radius)
 
 
-class ZoneEffectOnProductionType(BaseModel):
-    zone = models.ForeignKey(Zone,
-        help_text='Zone for which this event occurred.', )
-    production_type = models.ForeignKey('ProductionType',
-        help_text='The production type that these outputs apply to.', )
+class ZoneEffect(BaseModel):
+    name = models.CharField(max_length=255, blank=True, null=True)
     zone_direct_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Function the describes direct movement rate.', )
     zone_indirect_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
@@ -667,8 +664,21 @@ class ZoneEffectOnProductionType(BaseModel):
         help_text='Multiplier for the probability of observing clinical signs in units of this production type in this zone.', )
     cost_of_surveillance_per_animal_day = MoneyField(default=0.0,
         help_text='Cost of surveillance per animal per day in this zone.', )
+
     def __str__(self):
-        return "%s Zone -> %s" % (self.zone.name, self.production_type)
+        return self.name
+
+
+class ZoneEffectAssignment(BaseModel):
+    zone = models.ForeignKey(Zone,
+        help_text='Zone for which this event occurred.', )
+    production_type = models.ForeignKey('ProductionType',
+        help_text='The production type that these outputs apply to.', )
+    effect = models.ForeignKey(ZoneEffect,
+        help_text='Describes what effect this Zone has on this Production Type.')
+
+    def __str__(self):
+        return "%s Zone -> %s = %s" % (self.zone.name, self.production_type, self.effect.name)
 
 
 class ReadAllCodes(BaseModel):

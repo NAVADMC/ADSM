@@ -246,7 +246,7 @@ class Zone
 name, TextField, Description of the zone
 radius, FloatField, Radius in kilometers of the zone
 
-class ZoneEffectOnProductionType
+class ZoneEffect
 zone, ForeignKey, Zone for which this event occurred.
 production_type, ForeignKey, The production type that these outputs apply to.
 zone_indirect_movement_relid, ForeignKey, Function the describes indirect movement rate.

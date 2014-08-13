@@ -462,7 +462,7 @@ def readParameters( parameterFileName ):
 		movementControl = getRelChart( el.find( './movement-control' ) )
 
 		for fromTypeName in fromTypeNames:
-			effect, created = ZoneEffectOnProductionType.objects.get_or_create(
+			effect, created = ZoneEffect.objects.get_or_create(
 			  zone = Zone.objects.get( name=zoneName ),
 			  production_type = ProductionType.objects.get( name=fromTypeName )
 			)
@@ -517,7 +517,7 @@ def readParameters( parameterFileName ):
 		for typeName in typeNames:
 			if 'zone' in el.attrib:
 				zoneName = el.attrib['zone']
-				effect, created = ZoneEffectOnProductionType.objects.get_or_create(
+				effect, created = ZoneEffect.objects.get_or_create(
 				  zone = Zone.objects.get( name=zoneName ),
 				  production_type = ProductionType.objects.get( name=typeName )
 				)
@@ -1247,10 +1247,10 @@ def readParameters( parameterFileName ):
 
 			if 'zone' in el.attrib and surveillance != None:
 				zoneName = el.attrib['zone']
-				# If a ZoneEffectOnProductionType object has already been
+				# If a ZoneEffect object has already been
 				# assigned to this combination of production type and zone,
 				# retrieve it; otherwise, create a new one.
-				effect, created = ZoneEffectOnProductionType.objects.get_or_create(
+				effect, created = ZoneEffect.objects.get_or_create(
 				  zone = Zone.objects.get( name=zoneName ),
 				  production_type = ProductionType.objects.get( name=typeName )
 				)
