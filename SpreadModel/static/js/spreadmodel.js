@@ -41,7 +41,7 @@ $(function(){
         }
     });
 
-    $('[data-visibility-controller]').each(function(){
+    /*$('[data-visibility-controller]').each(function(){
         var controller = '[name=' + $(this).attr('data-visibility-controller') + ']'
         var hide_target = $(this).parents('.control-group, td')
         var required_value = $(this).attr('data-required-value') || 'True'
@@ -59,8 +59,43 @@ $(function(){
             }
         });
         $(hide_target).css('margin-left', '26px');
-    })
+    }) */
 
+    
+    $('[data-visibility-controller]').each(function(){
+        var controller = '[name=' + $(this).attr('data-visibility-controller') + ']'
+        var hide_target = $(this).parents('.control-group')
+        if (hide_target.length == 0){  //Sometimes it's not in a form group
+            hide_target = $(this)
+        }
+        var disabled_value = $(this).attr('data-disabled-value')
+        var required_value = $(this).attr('data-required-value')
+
+        $('body').on('change', controller, function(){
+            if($(this).val() == disabled_value){
+                hide_target.hide()
+            }else{
+                if (typeof required_value !== 'undefined'){ //required value is specified
+                    if($(this).val() == required_value || $(this).val() == ''){
+                        hide_target.show()
+                    }else{
+                        console.log("Hiding", hide_target)
+                        hide_target.hide()
+                    }
+                }else{
+                    hide_target.show()
+                }
+            }
+        })
+        $(controller).each(function(index, elem){ //each because radio buttons have multiple elem, same name
+            if($(elem).attr('type') != 'radio' || elem.hasAttribute('checked')){
+                //radio buttons are multiple elements with the same name, we only want to fire if its actually checked
+                $(elem).trigger('change');
+            }
+        });
+        $(hide_target).css('margin-left', '26px');
+    })
+    
     $("#open_file").change(function(){
         $(this).parent('form').submit();
     })

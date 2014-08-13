@@ -495,8 +495,8 @@ class DiseaseSpread(BaseModel):
                                  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
                                  help_text='Parent disease whose spreading characteristics this describes.')
         # This is in Disease because of simulation restrictions
-    transport_delay = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
-        help_text='Relational function used to define the shipment delays for the indicated production type.', )
+    transport_delay = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True, default=None,  # This will be hidden if it's defaulted
+        help_text='WARNING: THIS FIELD IS NOT RECOMMENDED BY ADSM and will be removed in later versions. Consider setting this to "-----".', )
     class Meta(object):
         abstract = True
 

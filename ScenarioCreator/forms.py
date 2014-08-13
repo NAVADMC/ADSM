@@ -276,7 +276,9 @@ class IndirectSpreadForm(BaseForm):
         widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
+                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
+                                                         'data-visibility-controller': 'transport_delay',
+                                                         'data-disabled-value': ''})}  # should lock itself invisible if null
 
 
 class DirectSpreadForm(BaseForm):
@@ -301,7 +303,9 @@ class DirectSpreadForm(BaseForm):
         widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
+                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
+                                                         'data-visibility-controller': 'transport_delay',
+                                                         'data-disabled-value': ''})}  # should lock itself invisible if null
 
 
 class AirborneSpreadForm(BaseForm):
@@ -327,7 +331,9 @@ class AirborneSpreadForm(BaseForm):
             pass
         widgets = {'_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
+                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
+                                                         'data-visibility-controller': 'transport_delay',
+                                                         'data-disabled-value': ''})}  # should lock itself invisible if null
 
 
 class ScenarioForm(BaseForm):
