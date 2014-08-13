@@ -40,6 +40,8 @@ urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
                                         ["url('^AssignSpreads/$', 'ScenarioCreator.views.disease_spread')",
                                          "url('^AssignProtocols/$', 'ScenarioCreator.views.assign_protocols')",
                                          "url('^AssignProgressions/$', 'ScenarioCreator.views.assign_progressions')",
+                                         "url('^AssignZoneEffects/$', 'ScenarioCreator.views.zone_effects')",
+                                         
 
                                          "url('^Populations/$', 'ScenarioCreator.views.population')",
                                          "url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population')",

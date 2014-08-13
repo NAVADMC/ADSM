@@ -16,7 +16,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('zone', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.Zone'])),
             ('production_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ProductionType'])),
-            ('effect', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ZoneEffect'])),
+            ('effect', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ScenarioCreator.ZoneEffect'], blank=True, null=True)),
         ))
         db.send_create_signal('ScenarioCreator', ['ZoneEffectAssignment'])
 
@@ -339,7 +339,7 @@ class Migration(SchemaMigration):
         },
         'ScenarioCreator.zoneeffectassignment': {
             'Meta': {'object_name': 'ZoneEffectAssignment'},
-            'effect': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.ZoneEffect']"}),
+            'effect': ('django.db.models.fields.related.ForeignKey', [], {'null': 'True', 'blank': 'True', 'to': "orm['ScenarioCreator.ZoneEffect']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'production_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.ProductionType']"}),
             'zone': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ScenarioCreator.Zone']"})

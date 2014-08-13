@@ -97,6 +97,22 @@ def disease_spread(request):
     return render(request, 'ScenarioCreator/AssignSpread.html', context)
 
 
+def zone_effects(request):
+    SpreadSet = modelformset_factory(ZoneEffectAssignment, extra=0, form=ZoneEffectAssignmentForm)
+    try:
+        initialized_formset = SpreadSet(request.POST, request.FILES, queryset=ZoneEffectAssignment.objects.all())
+        if initialized_formset.is_valid():
+            instances = initialized_formset.save()
+            print(instances)
+            return redirect(request.path)  # update these numbers after database save because they've changed
+
+    except ValidationError:
+        initialized_formset = SpreadSet(queryset=ZoneEffectAssignment.objects.all())
+    context = {'formset': initialized_formset,
+               'title': 'What Effect does a Zone have on each Production Type?'}
+    return render(request, 'ScenarioCreator/AssignSpread.html', context)
+
+
 def save_formset_succeeded(MyFormSet, TargetModel, context, request):
     try:
         initialized_formset = MyFormSet(request.POST, request.FILES, queryset=TargetModel.objects.all())

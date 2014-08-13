@@ -674,11 +674,11 @@ class ZoneEffectAssignment(BaseModel):
         help_text='Zone for which this event occurred.', )
     production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
-    effect = models.ForeignKey(ZoneEffect,
+    effect = models.ForeignKey(ZoneEffect, blank=True, null=True,
         help_text='Describes what effect this Zone has on this Production Type.')
 
     def __str__(self):
-        return "%s Zone -> %s = %s" % (self.zone.name, self.production_type, self.effect.name)
+        return "%s Zone -> %s = %s" % (self.zone.name, self.production_type, self.effect.name if self.effect else "None")
 
 
 class ReadAllCodes(BaseModel):
