@@ -1565,10 +1565,15 @@ set_params (void *data, int ncols, char **value, char **colname)
       g_assert (PDF_cdf (-EPSILON, p->distance_dist) == 0);
     }
 
-  errno = 0;
-  pdf_id = strtol (value[6], NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);
-  p->shipping_delay = PAR_get_PDF (params, pdf_id);
+  if (value[6] != NULL)
+    {
+      errno = 0;
+      pdf_id = strtol (value[6], NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);
+      p->shipping_delay = PAR_get_PDF (params, pdf_id);
+    }
+  else
+    p->shipping_delay = PDF_new_point_dist (0);
 
   errno = 0;
   p->prob_infect = strtod (value[7], NULL);

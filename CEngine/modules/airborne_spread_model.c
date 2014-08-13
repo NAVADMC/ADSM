@@ -914,10 +914,15 @@ set_params (void *data, int ncols, char **value, char **colname)
   if (p->max_spread > local_data->max_spread[from_production_type])
     local_data->max_spread[from_production_type] = p->max_spread;
 
-  errno = 0;
-  pdf_id = strtol (value[6], NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);
-  p->delay = PAR_get_PDF (params, pdf_id);
+  if (value[6] != NULL)
+    {
+      errno = 0;
+      pdf_id = strtol (value[6], NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);
+      p->delay = PAR_get_PDF (params, pdf_id);
+    }
+  else
+    p->delay = PDF_new_point_dist (0);
 
 #if DEBUG
   g_debug ("----- EXIT set_params (%s)", MODEL_NAME);

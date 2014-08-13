@@ -340,11 +340,6 @@ def readParameters( parameterFileName ):
 		# end of loop over production types covered by this <disease-model> element
 	# end of loop over <disease-model> elements
 
-	# Create a PDF that always returns 0. Will be used as the default when the
-	# transport delay PDF is missing.
-	zeroDelay = ProbabilityFunction( equation_type='Fixed Value', mode=0 )
-	zeroDelay.save()
-
 	for el in xml.findall( './/airborne-spread-model' ) + xml.findall( './/airborne-spread-exponential-model' ):
 		if useAirborneExponentialDecay:
 			maxDistance = 0
@@ -353,7 +348,7 @@ def readParameters( parameterFileName ):
 		if el.find( './delay' ) != None:
 			delay = getPdf( el.find( './delay' ) )
 		else:
-			delay = zeroDelay
+			delay = None
 		airborneSpread = AirborneSpread(
 		  _disease = disease,
 		  max_distance = maxDistance,
@@ -396,7 +391,7 @@ def readParameters( parameterFileName ):
 		if el.find( './delay' ) != None:
 			delay = getPdf( el.find( './delay' ) )
 		else:
-			delay = zeroDelay
+			delay = None
 		if el.find( './prob-infect' ) != None:
 			probInfect = float( el.find( './prob-infect' ).text )
 		else:
@@ -499,6 +494,11 @@ def readParameters( parameterFileName ):
 	if useDetection or useTracing or useVaccination or useDestruction:
 		plan = ControlMasterPlan()
 		plan.save()
+
+	# Create a PDF that always returns 0. Will be used as the default for the
+	# test delay PDF.
+	zeroDelay = ProbabilityFunction( equation_type='Fixed Value', mode=0 )
+	zeroDelay.save()
 
 	for el in xml.findall( './/detection-model' ):
 		# <detection-model> elements come in 2 forms. The first form, with a
