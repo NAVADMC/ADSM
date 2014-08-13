@@ -149,13 +149,15 @@ def collect_backlinks(model_instance):
     dependants = collector.nested()  # fun fact: spelling differs between America and Brittain
     print("Found related models:", dependants)
     links = {}
-    for direct_reference in dependants[1:][0]:  # only iterates over the top level
-        print(direct_reference)
-        if not isinstance(direct_reference, list):  # Points are obvious, don't include them
-            try:  # not everything has a name attr
-                links[str(direct_reference)] = '/setup/%s/%i/' % (direct_reference.__class__, direct_reference.pk)
-            except:
-                links['%s:%i' % (type(direct_reference), direct_reference.pk)] = '/setup/%s/%i/' % (direct_reference.__class__, direct_reference.pk)
+    if len(dependants[1:]):
+        for direct_reference in dependants[1:][0]:  # only iterates over the top level
+            if not isinstance(direct_reference, list) and not isinstance(direct_reference, RelationalPoint):  # Points are obvious, don't include them
+                name = direct_reference.__class__.__name__
+                try:  # not everything has a name attr
+                    links[str(direct_reference)] = '/setup/%s/%i/' % (name, direct_reference.pk)
+                except:
+                    links['%s:%i' % (name, direct_reference.pk)] = \
+                        '/setup/%s/%i/' % (name, direct_reference.pk)
     print(links)
     return links
 
@@ -171,6 +173,7 @@ def initialize_relational_form(context, primary_key, request):
     context['form'] = main_form
     context['model'] = model
     context['backlinks'] = collect_backlinks(model)
+    context['deletable'] = True
     return context
 
 
@@ -288,6 +291,7 @@ def edit_entry(request, primary_key):
 
     if model_name == 'ProbabilityFunction':
         context['backlinks'] = collect_backlinks(initialized_form.instance)
+        context['deletable'] = True
 
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 

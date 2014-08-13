@@ -1,13 +1,9 @@
-    <h3>Used in:</h3>
-    {{ backlinks }}
 {% if backlinks %}
+    <h3>Referenced by:</h3>
     <ul>
-    {% if not backlinks.items %}
-        <em>Not used</em>
-    {% endif %}
-    {% for text, link in backlinks.items %}
-        <li><a href="{{ link }}">{{ text }}</a></li>
-    {% endfor %}
+        {% for text, link in backlinks.items %}
+            <li><a href="{{ link }}">{{ text }}</a></li>
+        {% endfor %}
     </ul>    
 {% endif %}
 
@@ -16,5 +12,10 @@
         <button type="submit" class="btn btn-danger button white" id="submit-id-submit">Delete Results and Save changes</button>
     {% else %}
         <button type="submit" class="btn btn-primary button white" id="submit-id-submit">Save changes</button>
+    {% endif %}
+    {% if backlinks %}
+        <button type="submit" disabled class="btn btn-danger button">Remove References before Deleting</button>
+    {% elif deletable %}
+        <a href="delete/" class="btn btn-danger button">Delete</a>
     {% endif %}
 </div>
