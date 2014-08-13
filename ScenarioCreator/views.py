@@ -173,7 +173,7 @@ def initialize_relational_form(context, primary_key, request):
     context['form'] = main_form
     context['model'] = model
     context['backlinks'] = collect_backlinks(model)
-    context['deletable'] = True
+    context['deletable'] = 'delete/'
     return context
 
 
@@ -291,7 +291,7 @@ def edit_entry(request, primary_key):
 
     if model_name == 'ProbabilityFunction':
         context['backlinks'] = collect_backlinks(initialized_form.instance)
-        context['deletable'] = True
+        context['deletable'] = 'delete/'
 
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
@@ -555,6 +555,7 @@ def population(request):
         initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:30])
         context['formset'] = initialized_formset
         context['filter_info'] = filter_info(request, params)
+        context['deletable'] = '/setup/Population/1/delete/'
     else:
         xml_files = file_list(".xml")
         context['xml_files'] = xml_files
