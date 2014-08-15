@@ -479,10 +479,24 @@ def readParameters( parameterFileName ):
 		movementControl = getRelChart( el.find( './movement-control' ) )
 
 		for fromTypeName in fromTypeNames:
-			effect, created = ZoneEffect.objects.get_or_create(
-			  zone = Zone.objects.get( name=zoneName ),
-			  production_type = ProductionType.objects.get( name=fromTypeName )
-			)
+			# If a ZoneEffect object has already been assigned to this
+			# combination of zone and production type, retrieve it; otherwise,
+			# create a new one.
+			try:
+				assignment = ZoneEffectAssignment.objects.get(
+				  zone__name=zoneName,
+				  production_type__name=fromTypeName
+				)
+				effect = assignment.effect
+			except ZoneEffectAssignment.DoesNotExist:
+				effect = ZoneEffect()
+				effect.save()
+				assignment = ZoneEffectAssignment(
+				  zone = Zone.objects.get( name=zoneName ),
+				  production_type = ProductionType.objects.get( name=fromTypeName ),
+				  effect = effect
+				)
+				assignment.save()
 			if contactType == 'direct' or contactType == 'both':
 				effect.zone_direct_movement = movementControl
 			if contactType == 'indirect' or contactType == 'both':
@@ -534,10 +548,24 @@ def readParameters( parameterFileName ):
 		for typeName in typeNames:
 			if 'zone' in el.attrib:
 				zoneName = el.attrib['zone']
-				effect, created = ZoneEffect.objects.get_or_create(
-				  zone = Zone.objects.get( name=zoneName ),
-				  production_type = ProductionType.objects.get( name=typeName )
-				)
+				# If a ZoneEffect object has already been assigned to this
+				# combination of zone and production type, retrieve it; otherwise,
+				# create a new one.
+				try:
+					assignment = ZoneEffectAssignment.objects.get(
+					  zone__name=zoneName,
+					  production_type__name=typeName
+					)
+					effect = assignment.effect
+				except ZoneEffectAssignment.DoesNotExist:
+					effect = ZoneEffect()
+					effect.save()
+					assignment = ZoneEffectAssignment(
+					  zone = Zone.objects.get( name=zoneName ),
+					  production_type = ProductionType.objects.get( name=typeName ),
+					  effect = effect
+					)
+					assignment.save()
 				effect.zone_detection_multiplier = multiplier
 				effect.save()
 			else:
@@ -1267,10 +1295,21 @@ def readParameters( parameterFileName ):
 				# If a ZoneEffect object has already been
 				# assigned to this combination of production type and zone,
 				# retrieve it; otherwise, create a new one.
-				effect, created = ZoneEffect.objects.get_or_create(
-				  zone = Zone.objects.get( name=zoneName ),
-				  production_type = ProductionType.objects.get( name=typeName )
-				)
+				try:
+					assignment = ZoneEffectAssignment.objects.get(
+					  zone__name=zoneName,
+					  production_type__name=typeName
+					)
+					effect = assignment.effect
+				except ZoneEffectAssignment.DoesNotExist:
+					effect = ZoneEffect()
+					effect.save()
+					assignment = ZoneEffectAssignment(
+					  zone = Zone.objects.get( name=zoneName ),
+					  production_type = ProductionType.objects.get( name=typeName ),
+					  effect = effect
+					)
+					assignment.save()
 				effect.cost_of_surveillance_per_animal_day = surveillance
 				effect.save()
 		# end of loop over production types covered by this <economic-model> element
