@@ -84,7 +84,21 @@ def getPdf( xml ):
 		args['mean'] = float( firstChild.find( './mean' ).text )
 		args['std_dev'] = float( firstChild.find( './stddev' ).text )
 	elif pdfType == 'histogram':
-		raise NotImplementedError
+		graph = RelationalFunction()
+		graph.save()
+		x0s = [float(el.text) for el in firstChild.findall( './x0' )]
+		x1s = [float(el.text) for el in firstChild.findall( './x1' )]
+		ps = [float(el.text) for el in firstChild.findall( './p' )]
+		# Make sure the upper x-bound of each bin equals the lower x-bound of
+		# the next bin.
+		assert x0s[1:] == x1s[:-1] 
+		for i in range( len( x0s ) ):
+			point = RelationalPoint( relational_function = graph, x = x0s[i], y = ps[i] )
+			point.save()
+		# Final point, y is always 0
+		point = RelationalPoint( relational_function = graph, x = x1s[-1], y = 0 )
+		point.save()
+		args['graph'] = graph
 	elif pdfType == 'hypergeometric':
 		args['n'] = float( firstChild.find( './n' ).text )
 		args['d'] = float( firstChild.find( './d' ).text )
