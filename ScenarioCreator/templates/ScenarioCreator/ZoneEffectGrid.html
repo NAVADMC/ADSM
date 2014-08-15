@@ -1,0 +1,38 @@
+{% extends 'ScenarioCreator/navigationPane.html' %}
+{% load floppyforms %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <script src="{{ STATIC_URL }}js/many-to-many-widget.js"></script>
+
+    <h1 id="title">{{ title }}</h1>
+
+<form method="post" action="">
+    {{ formset.management_form }}
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                {% for zone in zones %}
+                    <th>{{zone.name}}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row_label, form_list in grid_forms %}
+                <tr><th>{{ row_label }}</th>
+                    {% for form in form_list %}
+                        {% form form using %}{# needed to push the context for the formconfig #}
+                            {% for field in form.visible_fields %}
+                                <td> {{form.id}} {% block widget %}{% formfield field %}{% endblock %}</td>
+                            {% endfor %}
+                        {% endform %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+     </tbody>
+    </table>
+    <input type="submit" name="submit" value="Submit" class="btn btn-primary button white" id="submit-id-submit">
+</form>
+
+{% endblock %}

@@ -404,6 +404,7 @@ class ZoneEffectForm(BaseForm):
 class ZoneEffectAssignmentForm(BaseForm):
     class Meta(object):
         model = ZoneEffectAssignment
+        exclude = ['zone', 'production_type']
         widgets = {'zone': AddOrSelect(attrs={'data-new-item-url': '/setup/Zone/new/'}),
                    'effect': AddOrSelect(attrs={'data-new-item-url': '/setup/ZoneEffect/new/'})}
 

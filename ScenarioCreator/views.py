@@ -35,6 +35,7 @@ abstract_models = {
          ('IndirectSpread', IndirectSpread),
          ('AirborneSpread', AirborneSpread)]}
 
+
 def spaces_for_camel_case(text):
     return re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
 
@@ -92,25 +93,24 @@ def disease_spread(request):
 
     except ValidationError:
         initialized_formset = SpreadSet(queryset=ProductionTypePairTransmission.objects.all())
-    context = {'formset': initialized_formset}
-    context['title'] = 'How does Disease spread from one Production Type to another?'
+    context = {'formset': initialized_formset,
+               'title': 'How does Disease spread from one Production Type to another?'}
     return render(request, 'ScenarioCreator/AssignSpread.html', context)
 
 
 def zone_effects(request):
-    SpreadSet = modelformset_factory(ZoneEffectAssignment, extra=0, form=ZoneEffectAssignmentForm)
-    try:
-        initialized_formset = SpreadSet(request.POST, request.FILES, queryset=ZoneEffectAssignment.objects.all())
-        if initialized_formset.is_valid():
-            instances = initialized_formset.save()
-            print(instances)
-            return redirect(request.path)  # update these numbers after database save because they've changed
-
-    except ValidationError:
-        initialized_formset = SpreadSet(queryset=ZoneEffectAssignment.objects.all())
-    context = {'formset': initialized_formset,
-               'title': 'What Effect does a Zone have on each Production Type?'}
-    return render(request, 'ScenarioCreator/AssignSpread.html', context)
+    grid_forms = []
+    for pt in ProductionType.objects.all():
+        row = [pt.name, [] ]  # label and empty list
+        for zone in Zone.objects.all():
+            instance = ZoneEffectAssignment.objects.get_or_create(production_type=pt, zone=zone)[0]
+            row[1].append(ZoneEffectAssignmentForm(instance=instance))
+        grid_forms.append(row)
+    # form.is_valid()
+    context = {'grid_forms': grid_forms,
+               'title': 'What Effect does a Zone have on each Production Type?',
+               'zones': Zone.objects.all()}
+    return render(request, 'ScenarioCreator/ZoneEffectGrid.html', context)
 
 
 def save_formset_succeeded(MyFormSet, TargetModel, context, request):
