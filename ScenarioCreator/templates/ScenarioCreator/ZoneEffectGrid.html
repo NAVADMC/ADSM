@@ -3,7 +3,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <script src="{{ STATIC_URL }}js/many-to-many-widget.js"></script>
+    <script src="{{ STATIC_URL }}js/zone_effect_grid.js"></script>
 
     <h1 id="title">{{ title }}</h1>
 
@@ -22,7 +22,12 @@
                     {% for form in form_list %}
                         {% form form using %}{# needed to push the context for the formconfig #}
                             {% for field in form.visible_fields %}{# Technically this is only one field #}
-                                <td> {{form.id}} {% block widget %}{% formfield field %}{% endblock %}</td>
+                                <td class="zone_grid_cell">
+                                    <form>
+                                    <p hidden="true" class="hidden-pk">{{ form.pk }}</p>
+                                    {% block widget %}{% formfield field %}{% endblock %}
+                                    </form>
+                                </td>
                             {% endfor %}
                         {% endform %}
                     {% endfor %}

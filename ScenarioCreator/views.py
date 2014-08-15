@@ -104,10 +104,12 @@ def zone_effects(request):
         row = [pt.name, [] ]  # label and empty list
         for zone in Zone.objects.all():
             instance = ZoneEffectAssignment.objects.get_or_create(production_type=pt, zone=zone)[0]
-            row[1].append(ZoneEffectAssignmentForm(instance=instance))
+            form = ZoneEffectAssignmentForm(instance=instance)
+            setattr(form, 'pk', instance.pk)  # adding the pk so the javascript can call back
+            row[1].append(form)
         grid_forms.append(row)
         
-    # form.is_valid()
+
     context = {'grid_forms': grid_forms,
                'title': 'What Effect does a Zone have on each Production Type?',
                'zones': Zone.objects.all()}
