@@ -8,7 +8,6 @@ $(function(){
         var form = $(this).find('form')
         var selector = $(this).find('select')
         $(selector).change(function(event){
-            console.log("Updating pk " + pk);
             $.post('/setup/ZoneEffectAssignment/'+ pk +'/', form.serialize() );  // ajax
         })
     })
