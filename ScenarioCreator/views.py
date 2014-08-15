@@ -106,6 +106,7 @@ def zone_effects(request):
             instance = ZoneEffectAssignment.objects.get_or_create(production_type=pt, zone=zone)[0]
             row[1].append(ZoneEffectAssignmentForm(instance=instance))
         grid_forms.append(row)
+        
     # form.is_valid()
     context = {'grid_forms': grid_forms,
                'title': 'What Effect does a Zone have on each Production Type?',
