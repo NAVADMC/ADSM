@@ -46,7 +46,10 @@ def getPdf( xml ):
 	firstChild = list( xml )[0]
 	if firstChild.tag == 'probability-density-function':
 		# New style
-		name = firstChild.attrib['name']
+		try:
+			name = firstChild.attrib['name']
+		except KeyError:
+			name = ''
 		firstChild = list( firstChild )[0]
 		# Now "firstChild" is the PDF element
 	else:
