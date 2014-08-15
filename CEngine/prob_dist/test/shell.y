@@ -712,10 +712,15 @@ silent_log_handler (const gchar * log_domain, GLogLevelFlags log_level,
 int
 main (int argc, char *argv[])
 {
+  gsl_rng *gsl_format_rng;
+
   g_log_set_handler ("prob_dist", G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG, silent_log_handler, NULL);
 
   /* Initialize the pseudo-random number generator. */
-  rng = RAN_new_generator (-1);
+  gsl_rng_env_setup();
+  gsl_format_rng = gsl_rng_alloc (gsl_rng_taus2);
+  gsl_rng_set (gsl_format_rng, time(NULL));
+  rng = RAN_new_generator (gsl_format_rng);
 
   printf (PROMPT);
   if (yyin == NULL)
