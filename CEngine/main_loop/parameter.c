@@ -158,7 +158,7 @@ PAR_get_PDF_callback (void *data, GHashTable *dict)
   char *equation_type;
 
   ncols = g_hash_table_size (dict);  
-  g_assert (ncols == 19);
+  g_assert (ncols == 20);
 
   args = (PAR_get_PDF_callback_args_t *)data;
 
@@ -314,11 +314,18 @@ PAR_get_PDF_callback (void *data, GHashTable *dict)
       gsl_histogram *h;
       double *range;
 
-      rel_id = 0; /* Filling this in for now just to prevent an uninitialized
-        variable warning */
+      errno = 0;
+      rel_id = strtol (g_hash_table_lookup (dict, "graph_id"), NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);  
       build.x = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
       build.y = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
-      query = g_strdup_printf ("SELECT x,y FROM ScenarioCreator_relationalfunction fn,ScenarioCreator_relationalpoint pt WHERE fn.id=%u AND pt.relational_function_id=fn.id ORDER BY _point_order", rel_id);
+      query =
+        g_strdup_printf ("SELECT x,y "
+                         "FROM ScenarioCreator_relationalfunction fn,ScenarioCreator_relationalpoint pt "
+                         "WHERE fn.id=%u "
+                         "AND pt.relational_function_id=fn.id "
+                         "ORDER BY x",
+                         rel_id);
       sqlite3_exec_dict (args->db, query, PAR_get_relchart_callback, &build, &sqlerr);
       if (sqlerr)
         {
@@ -589,7 +596,7 @@ PAR_get_PDF (sqlite3 *db, guint id)
 
   args.db = db;
   args.dist = NULL;
-  query = g_strdup_printf ("SELECT equation_type,mean,std_dev,min,mode,max,alpha,alpha2,beta,location,scale,shape,n,p,m,d,theta,a,s FROM ScenarioCreator_probabilityfunction WHERE id=%u", id);
+  query = g_strdup_printf ("SELECT equation_type,mean,std_dev,min,mode,max,alpha,alpha2,beta,location,scale,shape,n,p,m,d,theta,a,s,graph_id FROM ScenarioCreator_probabilityfunction WHERE id=%u", id);
   sqlite3_exec_dict (db, query, PAR_get_PDF_callback, &args, &sqlerr);
   if (sqlerr)
     {
