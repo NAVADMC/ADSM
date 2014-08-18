@@ -140,32 +140,52 @@ def breakdown_dictionary(iterate_pt, iterate_zone):
     return production_types, zones
 
 
-def construct_iterating_combination_filter_dictionary(iterate_pt, iterate_zone, iteration):
-    """Truth table of iterate_pt and iterate_zone gives you four values.  One for each Daily Model.  
+def construct_iterating_combination_filter_dictionary(iteration, iterate_pt, iterate_zone):
+    """Truth table of iterate_pt and iterate_zone gives you four values.  One for each Daily Model.
     Whether or not iteration is specified raises it to 8 combinations of possible filters used."""
     production_types, zones = breakdown_dictionary(iterate_pt, iterate_zone)
     filter_sequence = []
-    if iteration:  # Break down lines by production type for only one iteration
-        columns = ['Day'] + list(production_types.keys())  # TODO: filter by a particular zone for ZoneAndProductionType
-        if production_types:
-            for name in production_types.keys():  # add one for each Production Type and "All"
-                filter_sequence.append({'iteration': iteration, 'production_type_id': production_types[name]})
-        else:
-            filter_sequence.append(iteration=iteration)  # TODO: Zone=...
-    else:  # This is a time plot of all iterations.
-        columns = ['Day'] + ["Iteration " + str(it) for it in list_of_iterations()]
+    columns = ['Day']
+    if iteration:  # 1__ Break down lines by production type for only one iteration
+        if production_types:  # 11_
+            columns += list(production_types.keys())
+            if iterate_zone:  # 111
+                pass  # TODO: This absolutely needs to only filter one single zone, not iterate_zones for DailyByZoneAndProductionType
+            else:  # 110
+                for name in production_types.keys():  # add one for each Production Type and "All"
+                    filter_sequence.append({'iteration': iteration, 'production_type_id': production_types[name]})
+                
+        else:  # 10_
+            if iterate_zone:  # 101 specific iteration of DailyByZone
+                columns += list(zones.keys())
+                for name in zones.keys():  # add one for each Zone and "Background"
+                    filter_sequence.append({'iteration': iteration, 'zone_id': zones[name]})
+            else:  # 100 specific iteration of DailyControl field
+                columns.append("Field")
+                filter_sequence.append({'iteration': iteration},)  # TODO: Zone=...
+            
+    else:  # 0__ This is a summary time plot of all iterations.
+        columns += ["Iteration " + str(it) for it in list_of_iterations()]  # columns names are always the same,
+        # Different graph settings still only get to inject one time line graph per iteration
+        biggest_zone = Zone.objects.all().order_by('-radius').first()  # the only "summary" zone stats to be displayed
         for nth_iteration in list_of_iterations():
-            if production_types:
-                filter_sequence.append({'iteration': nth_iteration, 'production_type': None})
-            else:
-                filter_sequence.append({'iteration': nth_iteration})
-    if len(columns) == 1:
-        columns.append("Field")  # There are cases where we don't get a list for columns to use as labels
+            if production_types:  # 01_ "All Production Type"
+                if iterate_zone:  # 011 "All Production Type" and biggest_zone
+                    filter_sequence.append({'iteration': nth_iteration, 'production_type': None, 'zone': biggest_zone})
+                else:  # 010
+                    filter_sequence.append({'iteration': nth_iteration, 'production_type': None})
+                
+            else:  # 00_
+                if iterate_zone:  #001 DailyByZone
+                    filter_sequence.append({'iteration': nth_iteration, 'zone': biggest_zone})
+                else:  # 000 DailyControls
+                    filter_sequence.append({'iteration': nth_iteration})  
+
     return filter_sequence, columns
 
 
 def create_time_series_lines(field_name, model, iterate_pt, iterate_zone, iteration=''):  # Django assigns iteration='' when there's nothing
-    filter_sequence, columns = construct_iterating_combination_filter_dictionary(iterate_pt, iterate_zone, iteration)
+    filter_sequence, columns = construct_iterating_combination_filter_dictionary(iteration, iterate_pt, iterate_zone)
     lines = []
     for filter_dict in filter_sequence:
         lines.append(list(model.objects.filter(**filter_dict).order_by('day').values_list(field_name, flat=True)))
