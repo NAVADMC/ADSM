@@ -284,7 +284,6 @@ def readParameters( parameterFileName ):
 	xml = ET.parse( fp ).getroot()
 	fp.close()
 
-	useEconomic = (xml.find( './/economic-model' ) != None)
 	scenario = Scenario(
 	  description = xml.find( './description' ).text
 	)
