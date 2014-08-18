@@ -136,7 +136,8 @@ def breakdown_dictionary(iterate_pt, iterate_zone):
         production_types['All'] = None
     if iterate_zone:
         zones = dict(Zone.objects.all().values_list('name', 'id'))  # Tuples need to be turned into dict
-        zones['Background'] = None
+        if iterate_pt:  # Background is only included in DailyByZoneAndProductionType.  See Issue #198
+            zones['Background'] = None
     return production_types, zones
 
 
@@ -216,7 +217,7 @@ def graph_field_png(request, model_name, field_name, iteration=None):
     time_data.plot(ax=axes[0])
     last_day = time_data.tail(1).T
     last_day.boxplot(ax=axes[1], return_type='axes')
-    if len(columns) > 6:
+    if len(columns) > 11:
         axes[0].legend().set_visible(False)
     plt.tight_layout()
 
