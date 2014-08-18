@@ -40,7 +40,15 @@ def getProductionTypes( xml, attributeName, allowedNames ):
 
 
 
-def getPdf( xml ):
+def sequence( tag ):
+	n = 1
+	while True:
+		yield '%s%i' % (tag, n)
+		n += 1
+
+
+
+def getPdf( xml, nameGenerator ):
 	"""Returns a ProbabilityFunction object corresponding to the XML."""
 	assert isinstance( xml, ET.Element )
 	firstChild = list( xml )[0]
@@ -49,11 +57,11 @@ def getPdf( xml ):
 		try:
 			name = firstChild.attrib['name']
 		except KeyError:
-			name = ''
+			name = next( nameGenerator )
 		firstChild = list( firstChild )[0]
 		# Now "firstChild" is the PDF element
 	else:
-		name = ''
+		name = next( nameGenerator )
 	pdfType = firstChild.tag
 
 	args = {'equation_type': pdfType.capitalize(), 'name': name}
@@ -84,7 +92,7 @@ def getPdf( xml ):
 		args['mean'] = float( firstChild.find( './mean' ).text )
 		args['std_dev'] = float( firstChild.find( './stddev' ).text )
 	elif pdfType == 'histogram':
-		graph = RelationalFunction()
+		graph = RelationalFunction( name=name + ' histogram data' )
 		graph.save()
 		x0s = [float(el.text) for el in firstChild.findall( './x0' )]
 		x1s = [float(el.text) for el in firstChild.findall( './x1' )]
@@ -156,13 +164,16 @@ def getPdf( xml ):
 
 
 
-def getRelChart( xml ):
+def getRelChart( xml, nameGenerator ):
 	"""Returns a RelationalFunction object corresponding to the XML."""
 	assert isinstance( xml, ET.Element )
 	firstChild = list( xml )[0]
 	if firstChild.tag == 'relational-function':
 		# New style
-		name = firstChild.attrib['name']
+		try:
+			name = firstChild.attrib['name']
+		except KeyError:
+			name = next( nameGenerator )
 		relChart = RelationalFunction( name=name )
 		relChart.save()
 		for xyPair in firstChild.findall( './value' ):
@@ -174,7 +185,7 @@ def getRelChart( xml ):
 			point.save()
 	else:
 		# Old style
-		relChart = RelationalFunction( name='' )
+		relChart = RelationalFunction( name=next( nameGenerator ) )
 		relChart.save()
 		values = [float( el.text ) for el in xml.findall( './/value' )]
 		while values:
@@ -328,13 +339,18 @@ def readParameters( parameterFileName ):
 	)
 	disease.save()
 
+	# Create a sequence to be used to give names to unnamed PDFs.
+	pdfNameSequence = sequence( 'PDF' )
+	# Create a sequence to be used to give names to unnamed relational charts.
+	relChartNameSequence = sequence( 'Rel' )
+
 	for el in xml.findall( './/disease-model' ):
-		latentPeriod = getPdf( el.find( './latent-period' ) )
-		subclinicalPeriod = getPdf( el.find( './infectious-subclinical-period' ) )
-		clinicalPeriod = getPdf( el.find( './infectious-clinical-period' ) )
-		immunePeriod = getPdf( el.find( './immunity-period' ) )
+		latentPeriod = getPdf( el.find( './latent-period' ), pdfNameSequence )
+		subclinicalPeriod = getPdf( el.find( './infectious-subclinical-period' ), pdfNameSequence )
+		clinicalPeriod = getPdf( el.find( './infectious-clinical-period' ), pdfNameSequence )
+		immunePeriod = getPdf( el.find( './immunity-period' ), pdfNameSequence )
 		if el.find( './prevalence' ) != None:
-			prevalence = getRelChart( el.find( './prevalence' ) )
+			prevalence = getRelChart( el.find( './prevalence' ), relChartNameSequence )
 		else:
 			prevalence = None
 		diseaseProgression = DiseaseProgression(
@@ -363,7 +379,7 @@ def readParameters( parameterFileName ):
 		else:
 			maxDistance = float( el.find( './max-spread/value' ).text )
 		if el.find( './delay' ) != None:
-			delay = getPdf( el.find( './delay' ) )
+			delay = getPdf( el.find( './delay' ), pdfNameSequence )
 		else:
 			delay = None
 		airborneSpread = AirborneSpread(
@@ -404,9 +420,9 @@ def readParameters( parameterFileName ):
 			contactRate = float( el.find( './fixed-movement-rate/value' ).text )
 		else:
 			contactRate = float( el.find( './movement-rate/value' ).text )
-		distance = getPdf( el.find( './distance' ) )
+		distance = getPdf( el.find( './distance' ), pdfNameSequence )
 		if el.find( './delay' ) != None:
-			delay = getPdf( el.find( './delay' ) )
+			delay = getPdf( el.find( './delay' ), pdfNameSequence )
 		else:
 			delay = None
 		if el.find( './prob-infect' ) != None:
@@ -421,7 +437,7 @@ def readParameters( parameterFileName ):
 			subclinicalCanInfect = getBool( el.find( './subclinical-units-can-infect' ) )
 		except AttributeError:
 			subclinicalCanInfect = True # default
-		movementControl = getRelChart( el.find( './movement-control' ) )
+		movementControl = getRelChart( el.find( './movement-control' ), relChartNameSequence )
 
 		if el.attrib['contact-type'] == 'direct':
 			contactSpreadModel = DirectSpread(
@@ -476,7 +492,7 @@ def readParameters( parameterFileName ):
 		else:
 			contactType = 'both'
 		zoneName = el.attrib['zone']
-		movementControl = getRelChart( el.find( './movement-control' ) )
+		movementControl = getRelChart( el.find( './movement-control' ), relChartNameSequence )
 
 		for fromTypeName in fromTypeNames:
 			# If a ZoneEffect object has already been assigned to this
@@ -541,8 +557,8 @@ def readParameters( parameterFileName ):
 		if 'zone' in el.attrib:
 			multiplier = float( el.find( './zone-prob-multiplier' ).text )
 		else:
-			observing = getRelChart( el.find( './prob-report-vs-time-clinical' ) )
-			reporting = getRelChart( el.find( './prob-report-vs-time-since-outbreak' ) )
+			observing = getRelChart( el.find( './prob-report-vs-time-clinical' ), relChartNameSequence )
+			reporting = getRelChart( el.find( './prob-report-vs-time-since-outbreak' ), relChartNameSequence )
 
 		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		for typeName in typeNames:
@@ -597,7 +613,7 @@ def readParameters( parameterFileName ):
 			direction = 'both'
 		traceSuccess = float( el.find( './trace-success' ).text )
 		if el.find( './trace-delay' ) != None:
-			traceDelay = getPdf( el.find( './trace-delay' ) )
+			traceDelay = getPdf( el.find( './trace-delay' ), pdfNameSequence )
 		else:
 			traceDelay = zeroDelay # default
 
@@ -733,7 +749,7 @@ def readParameters( parameterFileName ):
 	for el in xml.findall( './/test-model' ):
 		sensitivity = float( el.find( './sensitivity' ).text )
 		specificity = float( el.find( './specificity' ).text )
-		delay = getPdf( el.find( './delay' ) )
+		delay = getPdf( el.find( './delay' ), pdfNameSequence )
 		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		for typeName in typeNames:
 			# If a ControlProtocol object has already been assigned to this
@@ -826,7 +842,7 @@ def readParameters( parameterFileName ):
 	productionTypesWithVaccineEffectsDefined = set()
 	for el in xml.findall( './/vaccine-model' ):
 		delay = int( el.find( './delay/value' ).text )
-		immunityPeriod = getPdf( el.find( './immunity-period' ) )
+		immunityPeriod = getPdf( el.find( './immunity-period' ), pdfNameSequence )
 
 		typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
 		for typeName in typeNames:
@@ -1137,7 +1153,7 @@ def readParameters( parameterFileName ):
 	for el in xml.findall( './/resources-and-implementation-of-controls-model' ):
 		if useDestruction:
 			plan.destruction_program_delay = int( el.find( './destruction-program-delay/value' ).text )
-			plan.destruction_capacity = getRelChart( el.find( './destruction-capacity' ) )
+			plan.destruction_capacity = getRelChart( el.find( './destruction-capacity' ), relChartNameSequence )
 			try:
 				order = el.find( './destruction-priority-order' ).text.strip()
 			except AttributeError:
@@ -1180,7 +1196,7 @@ def readParameters( parameterFileName ):
 				plan.units_detected_before_triggering_vaccination = int( el.find( './vaccination-program-delay' ).text )
 			except AttributeError:
 				plan.units_detected_before_triggering_vaccination = 1 # default
-			plan.vaccination_capacity = getRelChart( el.find( './vaccination-capacity' ) )
+			plan.vaccination_capacity = getRelChart( el.find( './vaccination-capacity' ), relChartNameSequence )
 			order = el.find( './vaccination-priority-order' ).text.strip()
 			# The XML did not put spaces after the commas, but the Django
 			# model does.
