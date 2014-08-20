@@ -102,14 +102,14 @@ UNT_apparent_status_t;
  *
  * @sa UNT_change_request_type_t
  */
-#define UNT_NCHANGE_REQUEST_TYPES 4
+#define UNT_NCHANGE_REQUEST_TYPES 2
 
 /**
  * Actions/changes that can be made to a unit.
  */
 typedef enum
 {
-  Infect, Vaccinate, Quarantine, Destroy
+  Infect, Vaccinate
 }
 UNT_change_request_type_t;
 
@@ -136,33 +136,6 @@ UNT_vaccinate_change_request_t;
 
 
 
-/** A request to quarantine a unit. */
-typedef struct
-{
-  int dummy;
-}
-UNT_quarantine_change_request_t;
-
-
-
-/** A request to lift the quarantine on a unit. */
-typedef struct
-{
-  int dummy;
-}
-UNT_lift_quarantine_change_request_t;
-
-
-
-/** A request to destroy a unit. */
-typedef struct
-{
-  int dummy;
-}
-UNT_destroy_change_request_t;
-
-
-
 /** A supertype for all change requests. */
 typedef struct
 {
@@ -171,9 +144,6 @@ typedef struct
   {
     UNT_infect_change_request_t infect;
     UNT_vaccinate_change_request_t vaccinate;
-    UNT_quarantine_change_request_t quarantine;
-    UNT_lift_quarantine_change_request_t lift_quarantine;
-    UNT_destroy_change_request_t destroy;
   }
   u;
 }
@@ -219,6 +189,8 @@ typedef struct
   REL_chart_t *prevalence_curve;
 
   GSList *change_requests;
+  gboolean destroy_change_request;
+  gboolean quarantine_change_request;
   
 #ifdef USE_SC_GUILIB  
   /*  This field is used on the SC version if the user wants to 

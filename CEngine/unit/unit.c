@@ -409,72 +409,14 @@ UNT_apply_vaccinate_change_request (UNT_unit_t * unit,
 
 
 /**
- * Creates a new quarantine change request.
- *
- * @return a pointer to a newly-created UNT_change_request_t structure.
- */
-UNT_change_request_t *
-UNT_new_quarantine_change_request (void)
-{
-  UNT_change_request_t *request;
-
-  request = g_new (UNT_change_request_t, 1);
-  request->type = Quarantine;
-  return request;
-}
-
-
-
-/**
- * Carries out a quarantine change request.
- *
- * @param unit a unit.
- * @param request a quarantine change request.
- */
-void
-UNT_apply_quarantine_change_request (UNT_unit_t * unit, UNT_quarantine_change_request_t * request)
-{
-#if DEBUG
-  g_debug ("----- ENTER UNT_apply_quarantine_change_request");
-#endif
-
-  unit->quarantined = TRUE;
-
-#if DEBUG
-  g_debug ("----- EXIT UNT_apply_quarantine_change_request");
-#endif
-}
-
-
-
-/**
- * Creates a new destruction change request.
- *
- * @return a pointer to a newly-created UNT_change_request_t structure.
- */
-UNT_change_request_t *
-UNT_new_destroy_change_request (void)
-{
-  UNT_change_request_t *request;
-
-  request = g_new (UNT_change_request_t, 1);
-  request->type = Destroy;
-  return request;
-}
-
-
-
-/**
  * Carries out a destruction change request.
  *
  * @param unit a unit.
- * @param request a destruction change request.
  * @param infectious_units a list of infectious units, which may change as a
  *   result of this operation.
  */
 void
 UNT_apply_destroy_change_request (UNT_unit_t * unit,
-                                  UNT_destroy_change_request_t * request,
                                   GHashTable *infectious_units)
 {
 #if DEBUG
@@ -513,12 +455,6 @@ UNT_apply_change_request (UNT_unit_t * unit,
       break;
     case Vaccinate:
       UNT_apply_vaccinate_change_request (unit, &(request->u.vaccinate), infectious_units);
-      break;
-    case Quarantine:
-      UNT_apply_quarantine_change_request (unit, &(request->u.quarantine));
-      break;
-    case Destroy:
-      UNT_apply_destroy_change_request (unit, &(request->u.destroy), infectious_units);
       break;
     default:
       g_assert_not_reached ();
@@ -577,6 +513,8 @@ UNT_unit_clear_change_requests (UNT_unit_t * unit)
   g_slist_foreach (unit->change_requests, UNT_free_change_request_as_GFunc, NULL);
   g_slist_free (unit->change_requests);
   unit->change_requests = NULL;
+  unit->destroy_change_request = FALSE;
+  unit->quarantine_change_request = FALSE;
 }
 
 
@@ -654,6 +592,8 @@ UNT_new_unit (UNT_production_type_t production_type,
   unit->in_disease_cycle = FALSE;
   unit->prevalence_curve = NULL;
   unit->change_requests = NULL;
+  unit->quarantine_change_request = FALSE;
+  unit->destroy_change_request = FALSE;
   
 #ifdef USE_SC_GUILIB
   unit->production_types = NULL;
@@ -1398,16 +1338,19 @@ UNT_step (UNT_unit_t * unit, GHashTable *infectious_units)
   old_state = unit->state;
   unit->days_in_state++;
 
-  /* Apply requested changes in the order in which they occur. */
+  if (unit->quarantine_change_request)
+    unit->quarantined = TRUE;
 
+  if (unit->destroy_change_request)
+    UNT_apply_destroy_change_request (unit, infectious_units);
+
+  /* Apply requested changes in the order in which they occur. */
   for (iter = unit->change_requests; iter != NULL; iter = g_slist_next (iter))
     {
       request = (UNT_change_request_t *) (iter->data);
       UNT_apply_change_request (unit, request, infectious_units);
     }
   UNT_unit_clear_change_requests (unit);
-
-  /* Quarantine doesn't conflict with anything. */
 
   /* Take any delayed transitions. */
   if (unit->in_vaccine_cycle)
@@ -1543,7 +1486,7 @@ UNT_vaccinate (UNT_unit_t * unit, int delay, int immunity_period)
 void
 UNT_quarantine (UNT_unit_t * unit)
 {
-  UNT_unit_add_change_request (unit, UNT_new_quarantine_change_request ());
+  unit->quarantine_change_request = TRUE;
 }
 
 
@@ -1556,7 +1499,7 @@ UNT_quarantine (UNT_unit_t * unit)
 void
 UNT_destroy (UNT_unit_t * unit)
 {
-  UNT_unit_add_change_request (unit, UNT_new_destroy_change_request ());
+  unit->destroy_change_request = TRUE;
 }
 
 
