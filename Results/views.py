@@ -183,7 +183,7 @@ def construct_iterating_combination_filter_dictionary(iteration, iterate_pt, ite
                     filter_sequence.append({'iteration': nth_iteration, 'production_type': None})
                 
             else:  # 00_
-                if iterate_zone:  #001 DailyByZone
+                if iterate_zone:  # 001 DailyByZone
                     filter_sequence.append({'iteration': nth_iteration, 'zone': active_zone})
                 else:  # 000 DailyControls
                     filter_sequence.append({'iteration': nth_iteration})  
@@ -218,7 +218,13 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     gs = gridspec.GridSpec(1, 2, width_ratios=[4, 1])
     axes = [plt.subplot(gs[0]), ]
     axes.append(plt.subplot(gs[1], sharey=axes[0]))
-
+    # Manually scale zone graphs based on the Max for any zone (universal value)
+    if "Zone" in model_name:
+        ymax = model.objects.filter(zone__isnull=False).aggregate(  # It's important to filter out Background stats from this Max
+            Max(field_name))[field_name + '__max'] * 1.05
+        axes[0].set_ylim(0.0, ymax)
+        axes[1].set_ylim(0.0, ymax)
+    
     time_data.plot(ax=axes[0])
     last_day = time_data.tail(1).T
     last_day.boxplot(ax=axes[1], return_type='axes')
@@ -230,20 +236,23 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     return HttpFigure(fig)
 
 
-def graph_field(request, model_name, field_name, iteration=None):
-    if not iteration:
-        print("Blank Iteration:", request.path)
-    context = {'title': "Graph of %s %s %s" % (model_name, field_name, iteration),
-               'image_links': [request.path + 'Graph.png']}
-    return render(request, 'Results/Graph.html', context)
-
-
-def zone_and_pt(request, field_name, iteration=None):
+def graph_field_by_zone(request, model_name, field_name, iteration=None):
     links = [request.path + zone + '/Graph.png' for zone in Zone.objects.all().values_list('name', flat=True)]
-    context = {'title': "Graph of %s in %s iteration %s" % (field_name, "Zone and Production Type", iteration),
+    iter_str = "iteration " + str(iteration) if iteration else 'for all iterations'
+    context = {'title': "Graph of %s in %s %s" % (field_name, model_name, iter_str),
                'image_links': links}
     return render(request, 'Results/Graph.html', context)
 
+
+def graph_field(request, model_name, field_name, iteration=None):
+    if model_name in ['DailyByZoneAndProductionType', 'DailyByZone']:
+        return graph_field_by_zone(request, model_name, field_name, iteration)
+    if not iteration:
+        print("Blank Iteration:", request.path)
+    iter_str = "iteration " + str(iteration) if iteration else 'for all iterations'
+    context = {'title': "Graph of %s in %s %s" % (field_name, model_name, iter_str),
+               'image_links': [request.path + 'Graph.png']}
+    return render(request, 'Results/Graph.html', context)
 
 
 def empty_fields(model_class, excluded_fields):
