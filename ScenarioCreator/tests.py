@@ -49,6 +49,19 @@ class ModelUtilsTest(TestCase):
     def test_squish(self):
         self.assertEqual('thefeanciestevar', squish_name('  The FeanCiest Evar  '))
 
+    def test_population_source_file_invalid(self):
+        p = Population(source_file='Population_Grid.xml')
+        with self.assertRaises(OSError):
+            p.save()
+
+    def test_population_source_file_blank(self):
+        unit_count = Unit.objects.all().count()
+        p = Population(source_file='')
+
+        p.save()
+
+        self.assertEqual(unit_count, Unit.objects.all().count())
+
     def test_population_link(self):
         index = Unit.objects.count()
         p = Population(source_file='workspace/Population_Grid.xml')
