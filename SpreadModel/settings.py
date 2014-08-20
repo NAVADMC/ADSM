@@ -117,3 +117,7 @@ USE_TZ = True
 STATIC_ROOT = BASE_DIR + '/static/'
 STATICFILES_DIRS = (BASE_DIR + '/SpreadModel/static/', )
 STATIC_URL = '/static/'
+
+# Skip migrations for tests
+# must be done due to --database=scenario_db flag for migrations
+SOUTH_TESTS_MIGRATE = False
