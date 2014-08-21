@@ -26,40 +26,30 @@ class PopulationParser(object):
     text_fields = list(zip(model_labels, xml_fields))
 
     def __init__(self, filename):
-        filepath = filename
-        if not os.path.isfile(filepath):
-            raise OSError("'" + filepath + "' is not a file.")
+        if not os.path.isfile(filename):
+            raise OSError("'" + filename + "' is not a file.")
 
-        try:
-            contents = open(filepath, encoding="utf-8").read()
-            contents.replace('encoding="UTF-16" ?', 'encoding="utf-8"?', 1)
-            # print(contents[:500])
-        except UnicodeDecodeError:
-            contents = open(filepath, encoding="utf-16").read()
-            contents.replace('encoding="UTF-16" ?', 'encoding="utf-8"?', 1)
-            # print(contents[:500])
-            contents.encode("utf-8", errors='xmlcharrefreplace')
-        if contents:
-            tree = ET.ElementTree(ET.fromstring(contents))
-            self.top_level = tree.getroot()
-            self.population = []
-        else:
+        if not os.path.getsize(filename):
             raise EOFError("File Read returned a blank string.")
 
+        tree = ET.ElementTree(file=filename)
+        self.top_level = tree.getroot()
+        self.population = []
+
     def parse_to_dictionary(self):
-        self.parse_text_fields(self.text_fields)
+        self.__parse_text_fields(self.text_fields)
         return self.population
 
-    def parse_text_fields(self, text_fields):
+    def __parse_text_fields(self, text_fields):
         for herd in self.top_level.iter('herd'):
             self.population.append( dict() ) #empty
             for t in text_fields:
                 if isinstance(t, tuple):
-                    self.populate_text_field(herd, *t)
+                    self.__populate_text_field(herd, *t)
                 else:
-                    self.populate_text_field(herd, t)
+                    self.__populate_text_field(herd, t)
 
-    def populate_text_field(self, herd, field_name, xml_name=''):
+    def __populate_text_field(self, herd, field_name, xml_name=''):
         if not xml_name:
             xml_name = field_name
         try:

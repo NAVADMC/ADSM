@@ -10,6 +10,7 @@ from django.test import TestCase
 
 # Create your tests here.
 from ScenarioCreator.models import Scenario, choice_char_from_value, squish_name, Unit, Population, ProductionType
+from ScenarioCreator.parser import PopulationParser
 
 updatedPost = {'description': 'Updated Description', "naadsm_version": '3.2.19', "language": 'en', "num_runs": '10',
                "num_days": '40', 'scenario_name': 'sample'}
@@ -68,6 +69,79 @@ class ModelUtilsTest(TestCase):
         p.save()
         self.assertGreater( Unit.objects.count(), index, "No new Units were added")
         self.assertEqual( Unit.objects.get(id=index+1)._population, p, "New Unit should link back to newest Population object")
+
+
+class PopulationParserTestCase(TestCase):
+    def test_parser_load_invalid_file(self):
+        with self.assertRaises(OSError):
+            PopulationParser('Invalid_File.xml')
+
+    def test_parser_load_blank_file(self):
+        with self.assertRaises(EOFError) as e:
+            p = PopulationParser('workspace/Blank.xml')
+
+        self.assertEqual(str(e.exception), "File Read returned a blank string.")
+
+    def test_parser_load_utf8(self):
+        expected_results = {
+            'user_notes': '1',
+            'initial_size': '84',
+            'latitude': '52.9672',
+            'longitude': '-8.201',
+            'production_type': 'B',
+            'initial_state': 'Susceptible',
+        }
+        p = PopulationParser('workspace/Population_Test_UTF8.xml')
+
+        results = p.parse_to_dictionary()
+
+        self.assertEqual(len(results), 1)
+        self.assertDictEqual(results[0], expected_results)
+
+    def test_parser_load_utf16(self):
+        expected_results = {
+            'user_notes': '\u5f71\u97ff\u3092\u53d7\u3051\u3084\u3059\u3044',
+            'initial_size': '84',
+            'latitude': '52.9672',
+            'longitude': '-8.201',
+            'production_type': 'B',
+            'initial_state': 'Susceptible',
+        }
+        p = PopulationParser('workspace/Population_Test_UTF16.xml')
+
+        results = p.parse_to_dictionary()
+
+        self.assertEqual(len(results), 1)
+        self.assertDictEqual(results[0], expected_results)
+
+    def test_parser_multiple_herds(self):
+        expected_results = [
+            {
+                'user_notes': '1',
+                'initial_size': '84',
+                'latitude': '52.9672',
+                'longitude': '-8.201',
+                'production_type': 'B',
+                'initial_state': 'Susceptible',
+            },
+            {
+                'user_notes': '2',
+                'initial_size': '64',
+                'latitude': '52.9672',
+                'longitude': '-8.21',
+                'production_type': 'B',
+                'initial_state': 'Susceptible',
+            },
+        ]
+
+        p = PopulationParser('workspace/Population_Test_Multiple.xml')
+
+        results = p.parse_to_dictionary()
+
+        self.assertEqual(len(results), 2)
+        self.assertDictEqual(results[0], expected_results[0])
+        self.assertDictEqual(results[1], expected_results[1])
+
 
 class CleanTest(unittest.TestCase):
     def test_production_type_names(self):
