@@ -27,7 +27,6 @@
 #define reset zone_monitor_reset
 #define events_listened_for zone_monitor_events_listened_for
 #define local_free zone_monitor_free
-#define handle_before_any_simulations_event zone_monitor_handle_before_any_simulations_event
 #define handle_new_day_event zone_monitor_handle_new_day_event
 
 #include "module.h"
@@ -80,43 +79,6 @@ typedef struct
   RPT_reporting_t *num_animal_days_by_prodtype;
 }
 local_data_t;
-
-
-
-/**
- * Before any simulations, this module announces the outputs it tracks, in case
- * other modules want to use or aggregate those outputs.
- *
- * @param self this module.
- * @param queue for any new events the model creates.
- */
-void
-handle_before_any_simulations_event (struct adsm_module_t_ * self,
-                                     EVT_event_queue_t * queue)
-{
-  GPtrArray *outputs;
-  unsigned int i;
-
-#if DEBUG
-  g_debug ("----- ENTER handle_before_any_simulations_event (%s)", MODEL_NAME);
-#endif
-
-  /* Create a GPtrArray containing pointers to all the outputs this module
-   * tracks. */
-  outputs = g_ptr_array_new ();
-  for (i = 0; i < self->outputs->len; i++)
-    g_ptr_array_add (outputs, g_ptr_array_index (self->outputs, i));
-  EVT_event_enqueue (queue, EVT_new_declaration_of_outputs_event (outputs));
-
-  /* Note that we don't clean up the GPtrArray.  It will be freed along with
-   * the declaration event after all interested sub-models have processed the
-   * event. */
-
-#if DEBUG
-  g_debug ("----- EXIT handle_before_any_simulations_event (%s)", MODEL_NAME);
-#endif
-  return;
-}
 
 
 
@@ -265,7 +227,7 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
   switch (event->type)
     {
     case EVT_BeforeAnySimulations:
-      handle_before_any_simulations_event (self, queue);
+      adsm_declare_outputs (self, queue);
       break;
     case EVT_NewDay:
       handle_new_day_event (self, units, zones, &(event->u.new_day));

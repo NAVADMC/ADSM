@@ -157,5 +157,6 @@ int adsm_model_fprintf (FILE *, struct adsm_module_t_ *);
 int adsm_model_printf (struct adsm_module_t_ *);
 gboolean adsm_model_answer_yes (struct adsm_module_t_ *);
 gboolean adsm_model_answer_no (struct adsm_module_t_ *);
+void adsm_declare_outputs (struct adsm_module_t_ *, EVT_event_queue_t *);
 
 #endif /* !MODULE_H */

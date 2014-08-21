@@ -128,4 +128,37 @@ adsm_model_answer_no (struct adsm_module_t_ * self)
   return FALSE;
 }
 
+
+
+/**
+ * Creates a Declaration Of Outputs event containing all of the modules' output
+ * variables, and submits that event to an event queue.
+ *
+ * @param self a module
+ * @param queue an event queue
+ */
+void
+adsm_declare_outputs (struct adsm_module_t_ * self, EVT_event_queue_t * queue)
+{
+  GPtrArray *output_list;
+  unsigned int i;
+
+  if (self->outputs->len > 0)
+    {
+      output_list = g_ptr_array_new ();
+      for (i = 0; i < self->outputs->len; i++)
+        {
+          g_ptr_array_add (output_list, g_ptr_array_index (self->outputs, i));
+        }
+      EVT_event_enqueue (queue, EVT_new_declaration_of_outputs_event (output_list));
+      /* Note that we don't clean up the GPtrArray.  It will be freed along
+       * with the declaration event after all interested modules have processed
+       * the event. */
+    }
+
+  return;
+}
+
+
+
 /* end of file module.c */

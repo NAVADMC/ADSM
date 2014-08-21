@@ -23,7 +23,6 @@
 #define events_listened_for unit_state_monitor_events_listened_for
 #define to_string unit_state_monitor_to_string
 #define local_free unit_state_monitor_free
-#define handle_before_any_simulations_event unit_state_monitor_handle_before_any_simulations_event
 #define handle_new_day_event unit_state_monitor_handle_new_day_event
 
 #include "module.h"
@@ -71,40 +70,6 @@ typedef struct
   gboolean disease_end_recorded;
 }
 local_data_t;
-
-
-
-/**
- * Before any simulations, this module announces the output variables it is
- * recording.
- *
- * @param self this module.
- * @param queue for any new events this function creates.
- */
-void
-handle_before_any_simulations_event (struct adsm_module_t_ *self,
-                                     EVT_event_queue_t *queue)
-{
-  unsigned int n, i;
-  RPT_reporting_t *output;
-  GPtrArray *outputs = NULL;
-
-  n = self->outputs->len;
-  for (i = 0; i < n; i++)
-    {
-      output = (RPT_reporting_t *) g_ptr_array_index (self->outputs, i);
-      if (outputs == NULL)
-        outputs = g_ptr_array_new();
-      g_ptr_array_add (outputs, output);
-    }
-
-  if (outputs != NULL)
-    EVT_event_enqueue (queue, EVT_new_declaration_of_outputs_event (outputs));
-  /* We don't free the pointer array, that will be done when the event is freed
-   * after all interested modules have processed it. */
-
-  return;
-}
 
 
 
@@ -207,7 +172,7 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
   switch (event->type)
     {
     case EVT_BeforeAnySimulations:
-      handle_before_any_simulations_event (self, queue);
+      adsm_declare_outputs (self, queue);
       break;
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day), units);
