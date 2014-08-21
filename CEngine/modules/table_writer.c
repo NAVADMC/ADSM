@@ -210,10 +210,6 @@ handle_declaration_of_outputs_event (struct adsm_module_t_ * self,
     {
       output = (RPT_reporting_t *) g_ptr_array_index (event->outputs, i);
 
-      /* Skip the outputs that are never reported. */
-      if (output->frequency == RPT_never)
-        continue;
-
       /* Get the output in "flattened" form. */
       subvars = RPT_reporting_flatten (output);
             

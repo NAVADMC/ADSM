@@ -46,37 +46,16 @@ const char *RPT_type_name[] = {
 
 
 /**
- * Names for the possible reporting frequencies for an output variable,
- * terminated with a NULL sentinel.
- *
- * @sa RPT_frequency_t
- */
-const char *RPT_frequency_name[] = { "never", "once", "daily", NULL };
-
-
-
-/**
- * The number of days between reporting, corresponding to the possible
- * reporting frequencies for an output variable.
- *
- * @sa RPT_frequency_t
- */
-const int RPT_frequency_day[] = { 0, 0, 1 };
-
-
-
-/**
  * Creates a new output variable structure.
  *
  * @param name the variable's name.  Should not contain commas, single quotes
  *   ('), double quotes ("), newlines, or carriage returns.  The text is copied
  *   so the original string can be freed after calling this function.
  * @param type the variable's data type.
- * @param frequency how often the variable is reported.
  * @return a pointer to a newly-created, initialized RPT_reporting_t structure.
  */
 RPT_reporting_t *
-RPT_new_reporting (const char *name, RPT_type_t type, RPT_frequency_t frequency)
+RPT_new_reporting (const char *name, RPT_type_t type)
 {
   RPT_reporting_t *reporting;
 
@@ -106,8 +85,6 @@ RPT_new_reporting (const char *name, RPT_type_t type, RPT_frequency_t frequency)
     default:
       g_assert_not_reached ();
     }
-  reporting->frequency = frequency;
-  reporting->days = RPT_frequency_day[frequency];
   reporting->is_null = FALSE;
 
   return reporting;
@@ -596,12 +573,8 @@ RPT_reporting_to_string (RPT_reporting_t * reporting)
   char *chararray;
 
   s = g_string_new (NULL);
-  g_string_printf (s, "<%s output variable \"%s\"",
+  g_string_printf (s, "<%s output variable \"%s\">",
                    RPT_type_name[reporting->type], reporting->name);
-
-  g_string_append_printf (s, " \n reported %s ", RPT_frequency_name[reporting->frequency]);
-
-  g_string_append_c (s, '>');
 
   /* don't return the wrapper object */
   chararray = s->str;
@@ -683,21 +656,6 @@ RPT_free_reporting_as_GDestroyNotify (gpointer data)
 
 
 /**
- * Sets the reporting frequency for an output variable.
- *
- * @param reporting an output variable.
- * @param frequency how often the variable is reported.
- */
-void
-RPT_reporting_set_frequency (RPT_reporting_t * reporting, RPT_frequency_t frequency)
-{
-  reporting->frequency = frequency;
-  reporting->days = RPT_frequency_day[frequency];
-}
-
-
-
-/**
  * Sets the value of an integer output variable.
  *
  * @param reporting an output variable.
@@ -731,13 +689,11 @@ RPT_reporting_set_integer (RPT_reporting_t * reporting, long value, const char *
           if (subelement_name[1] == NULL)
             /* The current subelement name is the last one in the list; the
              * next output variable down will be an integer variable. */
-            subelement = RPT_new_reporting (subelement_name[0], RPT_integer,
-                                            reporting->frequency);
+            subelement = RPT_new_reporting (subelement_name[0], RPT_integer);
           else
             /* There are more subelement names in the list; the next output
              * variable down will be another group variable. */
-            subelement = RPT_new_reporting (subelement_name[0], RPT_group,
-                                            reporting->frequency);
+            subelement = RPT_new_reporting (subelement_name[0], RPT_group);
           g_datalist_set_data_full (group, subelement_name[0], subelement,
                                     RPT_free_reporting_as_GDestroyNotify);
         }
@@ -782,8 +738,7 @@ RPT_reporting_set_integer1 (RPT_reporting_t * reporting, long value, const char 
       /* If there isn't already a subelement by this name, create one. */
       if (subelement == NULL)
         {
-          subelement = RPT_new_reporting (subelement_name, RPT_integer,
-                                          reporting->frequency);
+          subelement = RPT_new_reporting (subelement_name, RPT_integer);
           g_datalist_set_data_full (group, subelement_name, subelement,
                                     RPT_free_reporting_as_GDestroyNotify);
         }
@@ -830,13 +785,11 @@ RPT_reporting_add_integer (RPT_reporting_t * reporting, long value, const char *
           if (subelement_name[1] == NULL)
             /* The current subelement name is the last one in the list; the
              * next output variable down will be an integer variable. */
-            subelement = RPT_new_reporting (subelement_name[0], RPT_integer,
-                                            reporting->frequency);
+            subelement = RPT_new_reporting (subelement_name[0], RPT_integer);
           else
             /* There are more subelement names in the list; the next output
              * variable down will be another group variable. */
-            subelement = RPT_new_reporting (subelement_name[0], RPT_group,
-                                            reporting->frequency);
+            subelement = RPT_new_reporting (subelement_name[0], RPT_group);
           g_datalist_set_data_full (group, subelement_name[0], subelement,
                                     RPT_free_reporting_as_GDestroyNotify);
         }
@@ -881,8 +834,7 @@ RPT_reporting_add_integer1 (RPT_reporting_t * reporting, long value, const char 
       /* If there isn't already a subelement by this name, create one. */
       if (subelement == NULL)
         {
-          subelement = RPT_new_reporting (subelement_name, RPT_integer,
-                                          reporting->frequency);
+          subelement = RPT_new_reporting (subelement_name, RPT_integer);
           g_datalist_set_data_full (group, subelement_name, subelement,
                                     RPT_free_reporting_as_GDestroyNotify);
         }
@@ -1006,13 +958,11 @@ RPT_reporting_set_real (RPT_reporting_t * reporting, double value, const char **
           if (subelement_name[1] == NULL)
             /* The current subelement name is the last one in the list; the
              * next output variable down will be an real variable. */
-            subelement = RPT_new_reporting (subelement_name[0], RPT_real,
-                                            reporting->frequency);
+            subelement = RPT_new_reporting (subelement_name[0], RPT_real);
           else
             /* There are more subelement names in the list; the next output
              * variable down will be another group variable. */
-            subelement = RPT_new_reporting (subelement_name[0], RPT_group,
-                                            reporting->frequency);
+            subelement = RPT_new_reporting (subelement_name[0], RPT_group);
           g_datalist_set_data_full (group, subelement_name[0], subelement,
                                     RPT_free_reporting_as_GDestroyNotify);
         }
@@ -1057,8 +1007,7 @@ RPT_reporting_set_real1 (RPT_reporting_t * reporting, double value, const char *
       /* If there isn't already a subelement by this name, create one. */
       if (subelement == NULL)
         {
-          subelement = RPT_new_reporting (subelement_name, RPT_real,
-                                          reporting->frequency);
+          subelement = RPT_new_reporting (subelement_name, RPT_real);
           g_datalist_set_data_full (group, subelement_name, subelement,
                                     RPT_free_reporting_as_GDestroyNotify);
         }
@@ -1105,13 +1054,11 @@ RPT_reporting_add_real (RPT_reporting_t * reporting, double value, const char **
           if (subelement_name[1] == NULL)
             /* The current subelement name is the last one in the list; the
              * next output variable down will be an integer variable. */
-            subelement = RPT_new_reporting (subelement_name[0], RPT_real,
-                                            reporting->frequency);
+            subelement = RPT_new_reporting (subelement_name[0], RPT_real);
           else
             /* There are more subelement names in the list; the next output
              * variable down will be another group variable. */
-            subelement = RPT_new_reporting (subelement_name[0], RPT_group,
-                                            reporting->frequency);
+            subelement = RPT_new_reporting (subelement_name[0], RPT_group);
           g_datalist_set_data_full (group, subelement_name[0], subelement,
                                     RPT_free_reporting_as_GDestroyNotify);
         }
@@ -1156,8 +1103,7 @@ RPT_reporting_add_real1 (RPT_reporting_t * reporting, double value, const char *
       /* If there isn't already a subelement by this name, create one. */
       if (subelement == NULL)
         {
-          subelement = RPT_new_reporting (subelement_name, RPT_real,
-                                          reporting->frequency);
+          subelement = RPT_new_reporting (subelement_name, RPT_real);
           g_datalist_set_data_full (group, subelement_name, subelement,
                                     RPT_free_reporting_as_GDestroyNotify);
         }
@@ -1310,13 +1256,11 @@ RPT_reporting_set_null (RPT_reporting_t * reporting, const char **subelement_nam
           if (subelement_name[1] == NULL)
             /* The current subelement name is the last one in the list; the
              * next output variable down will be an integer variable. */
-            subelement = RPT_new_reporting (subelement_name[0], RPT_integer,
-                                            reporting->frequency);
+            subelement = RPT_new_reporting (subelement_name[0], RPT_integer);
           else
             /* There are more subelement names in the list; the next output
              * variable down will be another group variable. */
-            subelement = RPT_new_reporting (subelement_name[0], RPT_group,
-                                            reporting->frequency);
+            subelement = RPT_new_reporting (subelement_name[0], RPT_group);
           g_datalist_set_data_full (group, subelement_name[0], subelement,
                                     RPT_free_reporting_as_GDestroyNotify);
         }
@@ -1361,8 +1305,7 @@ RPT_reporting_set_null1 (RPT_reporting_t * reporting, const char *subelement_nam
       /* If there isn't already a subelement by this name, create one. */
       if (subelement == NULL)
         {
-          subelement = RPT_new_reporting (subelement_name, RPT_integer,
-                                          reporting->frequency);
+          subelement = RPT_new_reporting (subelement_name, RPT_integer);
           g_datalist_set_data_full (group, subelement_name, subelement,
                                     RPT_free_reporting_as_GDestroyNotify);
         }
@@ -1577,44 +1520,6 @@ RPT_reporting_zero (RPT_reporting_t * reporting)
 
 
 /**
- * Returns the RPT_frequency_t matching a given string.
- *
- * @param s a string.
- * @return the RPT_frequency_t enumeration value matching <i>s</i>, or
- *   RPT_never if s does not match any enumeration value.
- */
-RPT_frequency_t
-RPT_string_to_frequency (const char *s)
-{
-  RPT_frequency_t type;
-
-  for (type = RPT_once; type < RPT_NFREQUENCIES; type++)
-    if (strcmp (RPT_frequency_name[type], s) == 0)
-      return type;
-
-  return RPT_never;
-}
-
-
-
-/**
- * Reports whether an output variable should be reported on the given day,
- * FALSE otherwise.
- *
- * @param reporting an output variable.
- * @param day a day.
- * @return TRUE if the variable should be reported on the given day, FALSE
- *   otherwise.
- */
-gboolean
-RPT_reporting_due (RPT_reporting_t * reporting, unsigned int day)
-{
-  return (reporting->days) > 0 && (day % reporting->days == 0);
-}
-
-
-
-/**
  * This function is meant to be used with the foreach function of a GLib Keyed
  * Data List, specifically, the Keyed Data List used to store output variables
  * with sub-variables.  The function receives an output variable.  If the
@@ -1739,7 +1644,7 @@ RPT_clone_reporting (RPT_reporting_t * original)
 
   if (original != NULL)
     {
-      copy = RPT_new_reporting (original->name, original->type, original->frequency);
+      copy = RPT_new_reporting (original->name, original->type);
       copy->is_null = original->is_null;
       switch (original->type)
         {

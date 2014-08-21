@@ -765,9 +765,9 @@ run_sim_main (sqlite3 *scenario_db,
   /* Initialize the reporting variables, and bundle them together so they can
    * easily be sent to a function for initialization. */
   last_day_of_outbreak =
-    RPT_new_reporting ("outbreakDuration", RPT_integer, RPT_daily);
-  clock_time = RPT_new_reporting ("clock-time", RPT_real, RPT_never);
-  version = RPT_new_reporting ("version", RPT_group, RPT_never);
+    RPT_new_reporting ("outbreakDuration", RPT_integer);
+  clock_time = RPT_new_reporting ("clock-time", RPT_real);
+  version = RPT_new_reporting ("version", RPT_group);
   split_version (PACKAGE_VERSION, version);
   reporting_vars = g_ptr_array_new ();
   g_ptr_array_add (reporting_vars, last_day_of_outbreak);
@@ -785,15 +785,6 @@ run_sim_main (sqlite3 *scenario_db,
     adsm_load_modules (scenario_db, units, units->projection, zones,
                        &ndays, &nruns, &models, reporting_vars, &exit_conditions );
   nzones = ZON_zone_list_length (zones);
-
-  /* The clock time reporting variable is special -- it can only be reported
-   * once (at the end of each simulation) or never. */
-  if (clock_time->frequency != RPT_never && clock_time->frequency != RPT_once)
-    {
-      g_warning ("clock-time cannot be reported %s; it will reported at the end of each simulation",
-                 RPT_frequency_name[clock_time->frequency]);
-      RPT_reporting_set_frequency (clock_time, RPT_once);
-    }
 
 #if HAVE_MPI && !CANCEL_MPI
   /* Increase the number of runs to divide evenly by the number of processors,
@@ -1155,7 +1146,6 @@ run_sim_main (sqlite3 *scenario_db,
             {
               finish_time = time (NULL);
               RPT_reporting_set_real (clock_time, (double) (finish_time - start_time), NULL);
-              adsm_create_event (manager, EVT_new_last_day_event (day), units, zones, rng);
             }
           adsm_create_event (manager, EVT_new_end_of_day2_event (day, early_exit || day == ndays), units, zones, rng);
 

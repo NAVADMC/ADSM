@@ -83,7 +83,6 @@ int charpos = 0, tokenpos = 0;
   "add"                     { ADJUST; return ADD; }
   "subtract"                { ADJUST; return SUBTRACT; }
   "get"                     { ADJUST; return GET; }
-  "daily"                   { ADJUST; return DAILY; }
   "t" {
     ADJUST;
     yylval.bval = TRUE;

@@ -37,25 +37,6 @@ extern const char *RPT_type_name[];
 
 
 /**
- * Number of reporting frequencies.
- *
- * @sa RPT_frequency_t
- */
-#define RPT_NFREQUENCIES 3
-
-/**
- * Reporting frequencies.
- */
-typedef enum
-{
-  RPT_never, RPT_once, RPT_daily
-}
-RPT_frequency_t;
-extern const char *RPT_frequency_name[];
-
-
-
-/**
  * An output variable.
  */
 typedef struct
@@ -65,8 +46,6 @@ typedef struct
   RPT_type_t type; /**< The type of variable.  For variables with categories,
     this will be RPT_group; use RPT_reporting_get_type() to find the base type
     (RPT_integer or RPT_real) of the variable. */
-  RPT_frequency_t frequency; /**< How frequently the variable is reported. */
-  int days;
   gboolean is_null; /**< If TRUE, this variable has no meaningful value.  Used
     in cases like the day of first detection, where there is no meaningful
     numeric value until detection occurs, or R0, where there is no meaningful
@@ -79,7 +58,7 @@ RPT_reporting_t;
 
 /* Prototypes. */
 
-RPT_reporting_t *RPT_new_reporting (const char *name, RPT_type_t, RPT_frequency_t);
+RPT_reporting_t *RPT_new_reporting (const char *name, RPT_type_t);
 void RPT_free_reporting (RPT_reporting_t *);
 char *RPT_reporting_to_string (RPT_reporting_t *);
 char *RPT_reporting_value_to_string (RPT_reporting_t *, char *format);
@@ -89,8 +68,6 @@ GPtrArray *RPT_reporting_values_as_strings (RPT_reporting_t *);
 int RPT_fprintf_reporting (FILE *, RPT_reporting_t *);
 
 #define RPT_printf_reporting(R) RPT_fprintf_reporting(stdout,R)
-
-void RPT_reporting_set_frequency (RPT_reporting_t *, RPT_frequency_t);
 
 void RPT_reporting_set_integer (RPT_reporting_t *, long, const char **);
 void RPT_reporting_set_integer1 (RPT_reporting_t *, long, const char *);
@@ -116,7 +93,6 @@ long RPT_reporting_get_integer1 (RPT_reporting_t *, const char *);
 double RPT_reporting_get_real (RPT_reporting_t *, const char **);
 double RPT_reporting_get_real1 (RPT_reporting_t *, const char *);
 
-RPT_frequency_t RPT_string_to_frequency (const char *);
 gboolean RPT_reporting_due (RPT_reporting_t *, unsigned int day);
 RPT_type_t RPT_reporting_get_type (RPT_reporting_t *);
 RPT_reporting_t *RPT_clone_reporting (RPT_reporting_t *);

@@ -25,11 +25,10 @@
  * The commands are:
  * <ul>
  *   <li>
- *     <code>variable (name,frequency)</code>
+ *     <code>variable (name)</code>
  *
- *     Creates a new output variable.  The first argument may be any string,
- *     e.g., <code>"x"</code>, <code>"variable_1"</code>.  The frequency must
- *     be one of <code>never</code>, <code>once</code>, or <code>daily</code>.
+ *     Creates a new output variable.  The argument may be any string,
+ *     e.g., <code>"x"</code>, <code>"variable_1"</code>.
  *   <li>
  *     <code>set (value,category,sub-category,...)</code>
  *
@@ -81,7 +80,6 @@ char errmsg[BUFFERSIZE];
 
 RPT_reporting_t *current_variable = NULL;
 char *tentative_name = NULL;
-RPT_frequency_t tentative_freq = RPT_never;
 
 
 
@@ -94,19 +92,16 @@ void g_free_as_GFunc (gpointer data, gpointer user_data);
   int ival;
   double fval;
   char *sval;
-  RPT_frequency_t frval;
   GSList *lval;
 }
 
 %token VARIABLE SET ADD SUBTRACT GET
-%token DAILY WEEKLY MONTHLY YEARLY
 %token LPAREN RPAREN COMMA
 %token <ival> INT
 %token <fval> REAL
 %token <sval> STRING
 %token <bval> BOOL
 %type <fval> real
-%type <frval> frequency
 %type <lval> string_list
 
 %%
@@ -125,26 +120,17 @@ command :
   ;
 
 new_command :
-    VARIABLE LPAREN STRING COMMA frequency COMMA BOOL RPAREN
+    VARIABLE LPAREN STRING RPAREN
     {
       RPT_free_reporting (current_variable);
       current_variable = NULL;
 
       /* The variable will be created when it is first assigned to and we can
-       * see its type.  Until then, just record the name and reporting
-       * frequency. */
+       * see its type.  Until then, just record the name. */
       tentative_name = $3;
-      tentative_freq = $5;
 
       printf ("%s", PROMPT);
       fflush (stdout);
-    }
-  ;
-
-frequency:
-    DAILY
-    {
-      $$ = RPT_daily;
     }
   ;
 
@@ -155,7 +141,7 @@ set_command:
       char *s;
 
       RPT_free_reporting (current_variable);
-      current_variable = RPT_new_reporting (tentative_name, RPT_integer, tentative_freq);
+      current_variable = RPT_new_reporting (tentative_name, RPT_integer);
       RPT_reporting_set_integer (current_variable, $3, NULL);
       s = RPT_reporting_value_to_string (current_variable, NULL);
       printf ("%s\n%s", s, PROMPT);
@@ -178,7 +164,7 @@ set_command:
 	{
 	  printf ("creating new group var\n");
 	  fflush (stdout);
-	  current_variable = RPT_new_reporting (tentative_name, RPT_group, tentative_freq);
+	  current_variable = RPT_new_reporting (tentative_name, RPT_group);
 	}
 
       /* Copy the subcategories into an array. */
@@ -218,7 +204,7 @@ add_command:
       char *s;
 
       if (current_variable == NULL)
-	current_variable = RPT_new_reporting (tentative_name, RPT_integer, tentative_freq);
+        current_variable = RPT_new_reporting (tentative_name, RPT_integer);
       RPT_reporting_add_integer (current_variable, $3, NULL);
       s = RPT_reporting_value_to_string (current_variable, NULL);
       printf ("%s\n%s", s, PROMPT);
@@ -232,7 +218,7 @@ add_command:
       GSList *iter;
 
       if (current_variable == NULL)
-	current_variable = RPT_new_reporting (tentative_name, RPT_group, tentative_freq);
+        current_variable = RPT_new_reporting (tentative_name, RPT_group);
 
       /* Copy the subcategories into an array. */
       drill_down_list = g_new (char *, g_slist_length ($5) + 1);
@@ -263,7 +249,7 @@ subtract_command:
 
       /* Integer, no subcategories. */
       if (current_variable == NULL)
-	current_variable = RPT_new_reporting (tentative_name, RPT_integer, tentative_freq);
+	current_variable = RPT_new_reporting (tentative_name, RPT_integer);
       RPT_reporting_sub_integer (current_variable, $3, NULL);
       s = RPT_reporting_value_to_string (current_variable, NULL);
       printf ("%s\n%s", s, PROMPT);
@@ -277,7 +263,7 @@ subtract_command:
       GSList *iter;
 
       if (current_variable == NULL)
-	current_variable = RPT_new_reporting (tentative_name, RPT_group, tentative_freq);
+        current_variable = RPT_new_reporting (tentative_name, RPT_group);
 
       /* Copy the subcategories into an array. */
       drill_down_list = g_new (char *, g_slist_length ($5) + 1);

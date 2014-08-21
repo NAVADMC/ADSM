@@ -29,7 +29,6 @@
 #define local_free zone_monitor_free
 #define handle_before_any_simulations_event zone_monitor_handle_before_any_simulations_event
 #define handle_new_day_event zone_monitor_handle_new_day_event
-#define handle_last_day_event zone_monitor_handle_last_day_event
 
 #include "module.h"
 #include "gis.h"
@@ -53,9 +52,8 @@
 
 
 
-#define NEVENTS_LISTENED_FOR 3
-EVT_event_type_t events_listened_for[] = { EVT_BeforeAnySimulations, EVT_NewDay,
-  EVT_LastDay };
+#define NEVENTS_LISTENED_FOR 2
+EVT_event_type_t events_listened_for[] = { EVT_BeforeAnySimulations, EVT_NewDay };
 
 
 
@@ -135,7 +133,6 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
                       ZON_zone_list_t * zones, EVT_new_day_event_t * event)
 {
   local_data_t *local_data;
-  gboolean area_due, perimeter_due, num_areas_due, num_units_due;
   int i;
   ZON_zone_t *zone, *next_smaller_zone;
   double area;
@@ -150,253 +147,98 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 
   local_data = (local_data_t *) (self->model_data);
 
-  area_due = local_data->area->frequency == RPT_daily
-             || local_data->max_area_day->frequency != RPT_never;
-  perimeter_due = local_data->perimeter->frequency == RPT_daily
-                  || local_data->max_perimeter_day->frequency != RPT_never;
-  num_areas_due = RPT_reporting_due (local_data->num_separate_areas, event->day);
-  num_units_due = (RPT_reporting_due (local_data->num_units, event->day)
-                   || RPT_reporting_due (local_data->num_units_by_prodtype, event->day));
-
   for (i = 0; i < local_data->nzones - 1; i++)
     {
       zone = ZON_zone_list_get (zones, i);
 
-      if (area_due)
-        {
-          area = ZON_update_area (zone);
-          RPT_reporting_set_real1 (local_data->area, area, zone->name);
-        }
+      area = ZON_update_area (zone);
+      RPT_reporting_set_real1 (local_data->area, area, zone->name);
 
-      if (perimeter_due)
+      perimeter = ZON_update_perimeter (zone);
+      RPT_reporting_set_real1 (local_data->perimeter, perimeter, zone->name);
+      /* If the zone has grown, record the new maximum perimeter. */
+      if (perimeter > 0
+          && (RPT_reporting_is_null1 (local_data->max_perimeter, zone->name)
+              || (perimeter > RPT_reporting_get_real1 (local_data->max_perimeter, zone->name))))
         {
-          perimeter = ZON_update_perimeter (zone);
-          RPT_reporting_set_real1 (local_data->perimeter, perimeter, zone->name);
-          /* If the zone has grown, record the new maximum perimeter. */
-          if (perimeter > 0
-              && (RPT_reporting_is_null1 (local_data->max_perimeter, zone->name)
-                  || (perimeter > RPT_reporting_get_real1 (local_data->max_perimeter, zone->name))))
-            {
-              RPT_reporting_set_real1 (local_data->max_perimeter, perimeter, zone->name);
-              RPT_reporting_set_integer1 (local_data->max_perimeter_day, event->day, zone->name);
-            } 
-            
-			    if (NULL != adsm_record_zone_perimeter)
-			     adsm_record_zone_perimeter (zone->level, perimeter);           
-        }
+          RPT_reporting_set_real1 (local_data->max_perimeter, perimeter, zone->name);
+          RPT_reporting_set_integer1 (local_data->max_perimeter_day, event->day, zone->name);
+        } 
+        
+      if (NULL != adsm_record_zone_perimeter)
+        adsm_record_zone_perimeter (zone->level, perimeter);           
 
-      if (num_areas_due)
-        RPT_reporting_set_integer1 (local_data->num_separate_areas,
-                                    zone->poly->num_contours, zone->name);
+      RPT_reporting_set_integer1 (local_data->num_separate_areas,
+                                  zone->poly->num_contours, zone->name);
     }
 
   /* In the loop above, the area of each zone polygon was computed.  But since
    * zones are nested inside of each other, that's not exactly what we want:
    * we want the area displayed for an "outer" zone to exclude the area of the
-   * smaller "inner" zones.  So we do that computation here. */
-  if (area_due)
+   * smaller "inner" zones.  So we do that computation here.
+   *
+   * Start with the next-to-last zone, because the last one is the
+   * "background" zone. */
+  for (i = local_data->nzones - 2; i >= 0; i--)
     {
-      /* Start with the next-to-last zone, because the last one is the
-       * "background" zone. */
-      for (i = local_data->nzones - 2; i >= 0; i--)
+      zone = ZON_zone_list_get (zones, i);
+      if (i > 0)
         {
-          zone = ZON_zone_list_get (zones, i);
-          if (i > 0)
-            {
-              next_smaller_zone = ZON_zone_list_get (zones, i - 1);
-              zone->area -= next_smaller_zone->area;
-              RPT_reporting_set_real1 (local_data->area, zone->area, zone->name);
-            }
-          /* If the zone has grown, record the new maximum area. */
-          if (zone->area > 0
-              && (RPT_reporting_is_null1 (local_data->max_area_day, zone->name)
-                  || (zone->area > RPT_reporting_get_real1 (local_data->max_area, zone->name))))
-            {
-              RPT_reporting_set_real1 (local_data->max_area, zone->area, zone->name);
-              RPT_reporting_set_integer1 (local_data->max_area_day, event->day, zone->name);
-            }
-#ifdef USE_SC_GUILIB
-		      sc_record_zone_area( event->day, zone );
-#else		  
-          if (NULL != adsm_record_zone_area)     
-			     adsm_record_zone_area (zone->level, zone->area);
-#endif		  
+          next_smaller_zone = ZON_zone_list_get (zones, i - 1);
+          zone->area -= next_smaller_zone->area;
+          RPT_reporting_set_real1 (local_data->area, zone->area, zone->name);
         }
-
-      /* Don't forget to report the smallest zone to the GUI! */
-      zone = ZON_zone_list_get (zones, 0);		  
-#ifdef USE_SC_GUILIB
-      sc_record_zone_area( event->day, zone );
-#else		  
-      if (NULL != adsm_record_zone_area)
-        {  
+      /* If the zone has grown, record the new maximum area. */
+      if (zone->area > 0
+          && (RPT_reporting_is_null1 (local_data->max_area_day, zone->name)
+              || (zone->area > RPT_reporting_get_real1 (local_data->max_area, zone->name))))
+        {
+          RPT_reporting_set_real1 (local_data->max_area, zone->area, zone->name);
+          RPT_reporting_set_integer1 (local_data->max_area_day, event->day, zone->name);
+        }
+      #ifdef USE_SC_GUILIB
+        sc_record_zone_area( event->day, zone );
+      #else
+        if (NULL != adsm_record_zone_area)     
           adsm_record_zone_area (zone->level, zone->area);
-        };
-#endif	  
+      #endif
     }
 
-  if (num_units_due
-      || local_data->num_unit_days->frequency != RPT_never
-      || local_data->num_animal_days->frequency != RPT_never)
+  /* Don't forget to report the smallest zone to the GUI! */
+  zone = ZON_zone_list_get (zones, 0);		  
+  #ifdef USE_SC_GUILIB
+    sc_record_zone_area( event->day, zone );
+  #else		  
+    if (NULL != adsm_record_zone_area)
+      {  
+        adsm_record_zone_area (zone->level, zone->area);
+      };
+  #endif
+
+  nunits = zones->membership_length;
+  RPT_reporting_zero (local_data->num_units);
+  RPT_reporting_zero (local_data->num_units_by_prodtype);
+  for (i = 0; i < nunits; i++)
     {
-      nunits = zones->membership_length;
-      RPT_reporting_zero (local_data->num_units);
-      RPT_reporting_zero (local_data->num_units_by_prodtype);
-      for (i = 0; i < nunits; i++)
+      zone = zones->membership[i]->parent;
+      RPT_reporting_add_integer1 (local_data->num_units, 1, zone->name);
+      unit = UNT_unit_list_get (units, i);
+      drill_down_list[0] = zone->name;
+      drill_down_list[1] = unit->production_type_name;
+      RPT_reporting_add_integer (local_data->num_units_by_prodtype, 1, drill_down_list);
+      if (unit->state != Destroyed)
         {
-          zone = zones->membership[i]->parent;
-          RPT_reporting_add_integer1 (local_data->num_units, 1, zone->name);
-          unit = UNT_unit_list_get (units, i);
-          drill_down_list[0] = zone->name;
-          drill_down_list[1] = unit->production_type_name;
-          RPT_reporting_add_integer (local_data->num_units_by_prodtype, 1, drill_down_list);
-          if (unit->state != Destroyed)
-            {
-              RPT_reporting_add_integer1 (local_data->num_unit_days, 1, zone->name);
-              RPT_reporting_add_integer1 (local_data->num_animal_days, unit->size, zone->name);
-              RPT_reporting_add_integer (local_data->num_unit_days_by_prodtype, 1,
-                                         drill_down_list);
-              RPT_reporting_add_integer (local_data->num_animal_days_by_prodtype, unit->size,
-                                         drill_down_list);
-            }
+          RPT_reporting_add_integer1 (local_data->num_unit_days, 1, zone->name);
+          RPT_reporting_add_integer1 (local_data->num_animal_days, unit->size, zone->name);
+          RPT_reporting_add_integer (local_data->num_unit_days_by_prodtype, 1,
+                                     drill_down_list);
+          RPT_reporting_add_integer (local_data->num_animal_days_by_prodtype, unit->size,
+                                     drill_down_list);
         }
     }
 
 #if DEBUG
   g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
- * Responds to a last day event by computing output variables that are only
- * needed on the last day.
- *
- * @param self the model.
- * @param units a list of units.
- * @param zones a list of zones.
- * @param event a last day event.
- */
-void
-handle_last_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
-                       ZON_zone_list_t * zones, EVT_last_day_event_t * event)
-{
-  local_data_t *local_data;
-  gboolean skip_area, skip_perimeter, skip_num_areas, skip_num_units;
-  int i;
-  ZON_zone_t *zone, *next_smaller_zone;
-  double area;
-  double perimeter;
-  unsigned int nunits;
-  UNT_unit_t *unit;
-  const char *drill_down_list[3] = { NULL, NULL, NULL };
-
-#if DEBUG
-  g_debug ("----- ENTER handle_last_day_event (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-
-  /* Some of the output variables are computationally intensive.  If they're
-   * reported "never", or if they were already computed today by
-   * handle_new_day_event, don't bother to compute them. */
-  skip_area = local_data->final_area->frequency == RPT_never
-    && local_data->area->frequency == RPT_never
-    && local_data->max_area->frequency == RPT_never;
-  skip_perimeter = local_data->final_perimeter->frequency == RPT_never
-    && local_data->perimeter->frequency == RPT_never
-    && local_data->max_perimeter->frequency == RPT_never;
-  skip_num_areas = local_data->num_separate_areas->frequency == RPT_never
-    || RPT_reporting_due (local_data->num_separate_areas, event->day);
-  skip_num_units = local_data->num_units->frequency == RPT_never
-    || (RPT_reporting_due (local_data->num_units, event->day)
-        && RPT_reporting_due (local_data->num_units_by_prodtype, event->day));
-
-  /* We don't have to worry about num_unit_days or num_animal_days because,
-   * unless they are set to be reported "never", they will be updated every day
-   * by handle_new_day_event. */
-
-  for (i = 0; i < local_data->nzones - 1; i++)
-    {
-      zone = ZON_zone_list_get (zones, i);
-
-      if (!skip_area)
-        {
-          area = ZON_update_area (zone);
-          RPT_reporting_set_real1 (local_data->area, area, zone->name);
-        }
-
-      if (!skip_perimeter)
-        {
-          perimeter = ZON_update_perimeter (zone);
-          RPT_reporting_set_real1 (local_data->perimeter, perimeter, zone->name);
-          if (local_data->final_perimeter->frequency != RPT_never)
-            {
-              RPT_reporting_set_real1 (local_data->final_perimeter, perimeter, zone->name);
-            }
-          /* If the zone has grown, record the new maximum perimeter. */
-          if (perimeter > 0
-              && (RPT_reporting_is_null1 (local_data->max_perimeter, zone->name)
-                  || (perimeter > RPT_reporting_get_real1 (local_data->max_perimeter, zone->name))))
-            {
-              RPT_reporting_set_real1 (local_data->max_perimeter, perimeter, zone->name);
-              RPT_reporting_set_integer1 (local_data->max_perimeter_day, event->day, zone->name);
-            }
-          RPT_reporting_set_real1 (local_data->final_perimeter, perimeter, zone->name);
-        }
-
-      if (!skip_num_areas)
-        RPT_reporting_set_integer1 (local_data->num_separate_areas,
-                                    zone->poly->num_contours, zone->name);
-    }
-
-  if (!skip_area)
-    {
-      /* Start with the next-to-last zone, because the last one is the
-       * "background" zone. */
-      for (i = local_data->nzones - 2; i >= 0; i--)
-        {
-          zone = ZON_zone_list_get (zones, i);
-          if (i > 0)
-            {
-              next_smaller_zone = ZON_zone_list_get (zones, i - 1);
-              zone->area -= next_smaller_zone->area;
-              RPT_reporting_set_real1 (local_data->area, zone->area, zone->name);
-            }
-          if (local_data->final_area->frequency != RPT_never)
-            {
-              RPT_reporting_set_real1 (local_data->final_area, zone->area, zone->name);
-            }
-          /* If the zone has grown, record the new maximum area. */
-          if (zone->area > 0
-              && (RPT_reporting_is_null1 (local_data->max_area_day, zone->name)
-                  || (zone->area > RPT_reporting_get_real1 (local_data->max_area, zone->name))))
-            {
-              RPT_reporting_set_real1 (local_data->max_area, zone->area, zone->name);
-              RPT_reporting_set_integer1 (local_data->max_area_day, event->day, zone->name);
-            }
-        }
-    }
-
-  if (!skip_num_units)
-    {
-      nunits = zones->membership_length;
-      RPT_reporting_zero (local_data->num_units);    
-      RPT_reporting_zero (local_data->num_units_by_prodtype);    
-      for (i = 0; i < nunits; i++)
-        {
-          zone = zones->membership[i]->parent;
-          RPT_reporting_add_integer1 (local_data->num_units, 1, zone->name);
-          unit = UNT_unit_list_get (units, i);
-          drill_down_list[0] = zone->name;
-          drill_down_list[1] = unit->production_type_name;
-          RPT_reporting_add_integer (local_data->num_units_by_prodtype, 1, drill_down_list);
-        }
-    }
-
-#if DEBUG
-  g_debug ("----- EXIT handle_last_day_event (%s)", MODEL_NAME);
 #endif
 }
 
@@ -427,9 +269,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
       break;
     case EVT_NewDay:
       handle_new_day_event (self, units, zones, &(event->u.new_day));
-      break;
-    case EVT_LastDay:
-      handle_last_day_event (self, units, zones, &(event->u.last_day));
       break;
     default:
       g_error
@@ -561,22 +400,22 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
-  local_data->area = RPT_new_reporting ("zoneArea", RPT_group, RPT_daily);
-  local_data->max_area = RPT_new_reporting ("maxZoneArea", RPT_group, RPT_daily);
-  local_data->max_area_day = RPT_new_reporting ("maxZoneAreaDay", RPT_group, RPT_daily);
-  local_data->final_area = RPT_new_reporting ("finalZoneArea", RPT_group, RPT_daily);
-  local_data->perimeter = RPT_new_reporting ("zonePerimeter", RPT_group, RPT_daily);
-  local_data->max_perimeter = RPT_new_reporting ("maxZonePerimeter", RPT_group, RPT_daily);
-  local_data->max_perimeter_day = RPT_new_reporting ("maxZonePerimeterDay", RPT_group, RPT_daily);
-  local_data->final_perimeter = RPT_new_reporting ("finalZonePerimeter", RPT_group, RPT_daily);
+  local_data->area = RPT_new_reporting ("zoneArea", RPT_group);
+  local_data->max_area = RPT_new_reporting ("maxZoneArea", RPT_group);
+  local_data->max_area_day = RPT_new_reporting ("maxZoneAreaDay", RPT_group);
+  local_data->final_area = RPT_new_reporting ("finalZoneArea", RPT_group);
+  local_data->perimeter = RPT_new_reporting ("zonePerimeter", RPT_group);
+  local_data->max_perimeter = RPT_new_reporting ("maxZonePerimeter", RPT_group);
+  local_data->max_perimeter_day = RPT_new_reporting ("maxZonePerimeterDay", RPT_group);
+  local_data->final_perimeter = RPT_new_reporting ("finalZonePerimeter", RPT_group);
   local_data->num_separate_areas =
-    RPT_new_reporting ("numSeparateAreas", RPT_group, RPT_daily);
-  local_data->num_units = RPT_new_reporting ("unitsInZone", RPT_group, RPT_daily);
-  local_data->num_units_by_prodtype = RPT_new_reporting ("unitsInZone", RPT_group, RPT_daily);
-  local_data->num_unit_days = RPT_new_reporting ("unitDaysInZone", RPT_group, RPT_daily);
-  local_data->num_unit_days_by_prodtype = RPT_new_reporting ("unitDaysInZone", RPT_group, RPT_daily);
-  local_data->num_animal_days = RPT_new_reporting ("animalDaysInZone", RPT_group, RPT_daily);
-  local_data->num_animal_days_by_prodtype = RPT_new_reporting ("animalDaysInZone", RPT_group, RPT_daily);
+    RPT_new_reporting ("numSeparateAreas", RPT_group);
+  local_data->num_units = RPT_new_reporting ("unitsInZone", RPT_group);
+  local_data->num_units_by_prodtype = RPT_new_reporting ("unitsInZone", RPT_group);
+  local_data->num_unit_days = RPT_new_reporting ("unitDaysInZone", RPT_group);
+  local_data->num_unit_days_by_prodtype = RPT_new_reporting ("unitDaysInZone", RPT_group);
+  local_data->num_animal_days = RPT_new_reporting ("animalDaysInZone", RPT_group);
+  local_data->num_animal_days_by_prodtype = RPT_new_reporting ("animalDaysInZone", RPT_group);
   g_ptr_array_add (self->outputs, local_data->area);
   g_ptr_array_add (self->outputs, local_data->max_area);
   g_ptr_array_add (self->outputs, local_data->max_area_day);

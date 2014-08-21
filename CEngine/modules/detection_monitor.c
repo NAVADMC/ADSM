@@ -127,12 +127,9 @@ handle_before_any_simulations_event (struct adsm_module_t_ *self,
   for (i = 0; i < n; i++)
     {
       output = (RPT_reporting_t *) g_ptr_array_index (self->outputs, i);
-      if (output->frequency != RPT_never)
-        {
-          if (outputs == NULL)
-            outputs = g_ptr_array_new();
-          g_ptr_array_add (outputs, output);
-        }
+      if (outputs == NULL)
+        outputs = g_ptr_array_new();
+      g_ptr_array_add (outputs, output);
     }
 
   if (outputs != NULL)
@@ -275,15 +272,11 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
       drill_down_list[1] = unit->production_type_name;
       if (RPT_reporting_is_null (local_data->first_detection_by_means_and_prodtype, drill_down_list))
         RPT_reporting_set_integer (local_data->first_detection_by_means_and_prodtype, event->day, drill_down_list);
-      if (local_data->last_detection_by_means_and_prodtype->frequency != RPT_never)
-        RPT_reporting_set_integer (local_data->last_detection_by_means_and_prodtype, event->day, drill_down_list);
+      RPT_reporting_set_integer (local_data->last_detection_by_means_and_prodtype, event->day, drill_down_list);
       RPT_reporting_add_integer (local_data->nunits_detected_by_means_and_prodtype, 1, drill_down_list);
-      if (local_data->nanimals_detected_by_means_and_prodtype->frequency != RPT_never)
-        RPT_reporting_add_integer (local_data->nanimals_detected_by_means_and_prodtype, unit->size, drill_down_list);
-      if (local_data->cumul_nunits_detected_by_means_and_prodtype->frequency != RPT_never)
-        RPT_reporting_add_integer (local_data->cumul_nunits_detected_by_means_and_prodtype, 1, drill_down_list);
-      if (local_data->cumul_nanimals_detected_by_means_and_prodtype->frequency != RPT_never)
-        RPT_reporting_add_integer (local_data->cumul_nanimals_detected_by_means_and_prodtype, unit->size, drill_down_list);
+      RPT_reporting_add_integer (local_data->nanimals_detected_by_means_and_prodtype, unit->size, drill_down_list);
+      RPT_reporting_add_integer (local_data->cumul_nunits_detected_by_means_and_prodtype, 1, drill_down_list);
+      RPT_reporting_add_integer (local_data->cumul_nanimals_detected_by_means_and_prodtype, unit->size, drill_down_list);
 
       previous_detection = g_new (count_and_means_t, 1);
       previous_detection->count = 1;
@@ -337,12 +330,9 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
               drill_down_list[0] = previous_detection->means;
               drill_down_list[1] = unit->production_type_name;
               RPT_reporting_sub_integer (local_data->nunits_detected_by_means_and_prodtype, 1, drill_down_list);
-              if (local_data->nanimals_detected_by_means_and_prodtype->frequency != RPT_never)
-                RPT_reporting_sub_integer (local_data->nanimals_detected_by_means_and_prodtype, unit->size, drill_down_list);
-              if (local_data->cumul_nunits_detected_by_means_and_prodtype->frequency != RPT_never)
-                RPT_reporting_sub_integer (local_data->cumul_nunits_detected_by_means_and_prodtype, 1, drill_down_list);
-              if (local_data->cumul_nanimals_detected_by_means_and_prodtype->frequency != RPT_never)
-                RPT_reporting_sub_integer (local_data->cumul_nanimals_detected_by_means_and_prodtype, unit->size, drill_down_list);
+              RPT_reporting_sub_integer (local_data->nanimals_detected_by_means_and_prodtype, unit->size, drill_down_list);
+              RPT_reporting_sub_integer (local_data->cumul_nunits_detected_by_means_and_prodtype, 1, drill_down_list);
+              RPT_reporting_sub_integer (local_data->cumul_nanimals_detected_by_means_and_prodtype, unit->size, drill_down_list);
               if (RPT_reporting_get_integer (local_data->nunits_detected_by_means_and_prodtype, drill_down_list) == 0)
                 {
                   /* We counted detections by a particular combination of means
@@ -375,15 +365,11 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
               drill_down_list[0] = means;
               if (RPT_reporting_is_null (local_data->first_detection_by_means_and_prodtype, drill_down_list))
                 RPT_reporting_set_integer (local_data->first_detection_by_means_and_prodtype, event->day, drill_down_list);
-              if (local_data->last_detection_by_means_and_prodtype->frequency != RPT_never)
-                RPT_reporting_set_integer (local_data->last_detection_by_means_and_prodtype, event->day, drill_down_list);
+              RPT_reporting_set_integer (local_data->last_detection_by_means_and_prodtype, event->day, drill_down_list);
               RPT_reporting_add_integer (local_data->nunits_detected_by_means_and_prodtype, 1, drill_down_list);
-              if (local_data->nanimals_detected_by_means_and_prodtype->frequency != RPT_never)
-                RPT_reporting_add_integer (local_data->nanimals_detected_by_means_and_prodtype, unit->size, drill_down_list);
-              if (local_data->cumul_nunits_detected_by_means_and_prodtype->frequency != RPT_never)
-                RPT_reporting_add_integer (local_data->cumul_nunits_detected_by_means_and_prodtype, 1, drill_down_list);
-              if (local_data->cumul_nanimals_detected_by_means_and_prodtype->frequency != RPT_never)
-                RPT_reporting_add_integer (local_data->cumul_nanimals_detected_by_means_and_prodtype, unit->size, drill_down_list);
+              RPT_reporting_add_integer (local_data->nanimals_detected_by_means_and_prodtype, unit->size, drill_down_list);
+              RPT_reporting_add_integer (local_data->cumul_nunits_detected_by_means_and_prodtype, 1, drill_down_list);
+              RPT_reporting_add_integer (local_data->cumul_nanimals_detected_by_means_and_prodtype, unit->size, drill_down_list);
             } /* end of case where previously recorded means of detection is replaced */
           else
             {
@@ -593,57 +579,57 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->detection_occurred =
-    RPT_new_reporting ("detOccurred", RPT_integer, RPT_daily);
+    RPT_new_reporting ("detOccurred", RPT_integer);
   local_data->first_detection =
-    RPT_new_reporting ("firstDetection", RPT_integer, RPT_daily);
+    RPT_new_reporting ("firstDetection", RPT_integer);
   local_data->first_detection_by_means =
-    RPT_new_reporting ("firstDetection", RPT_group, RPT_daily);
+    RPT_new_reporting ("firstDetection", RPT_group);
   local_data->first_detection_by_prodtype =
-    RPT_new_reporting ("firstDetection", RPT_group, RPT_daily);
+    RPT_new_reporting ("firstDetection", RPT_group);
   local_data->first_detection_by_means_and_prodtype =
-    RPT_new_reporting ("firstDetection", RPT_group, RPT_daily);
+    RPT_new_reporting ("firstDetection", RPT_group);
   local_data->last_detection =
-    RPT_new_reporting ("lastDetection", RPT_integer, RPT_daily);
+    RPT_new_reporting ("lastDetection", RPT_integer);
   local_data->last_detection_by_means =
-    RPT_new_reporting ("lastDetection", RPT_group, RPT_daily);
+    RPT_new_reporting ("lastDetection", RPT_group);
   local_data->last_detection_by_prodtype =
-    RPT_new_reporting ("lastDetection", RPT_group, RPT_daily);
+    RPT_new_reporting ("lastDetection", RPT_group);
   local_data->last_detection_by_means_and_prodtype =
-    RPT_new_reporting ("lastDetection", RPT_group, RPT_daily);
+    RPT_new_reporting ("lastDetection", RPT_group);
   local_data->nunits_detected =
-    RPT_new_reporting ("detnUAll", RPT_integer, RPT_daily);
+    RPT_new_reporting ("detnUAll", RPT_integer);
   local_data->nunits_detected_by_means =
-    RPT_new_reporting ("detnU", RPT_group, RPT_daily);
+    RPT_new_reporting ("detnU", RPT_group);
   local_data->nunits_detected_by_prodtype =
-    RPT_new_reporting ("detnU", RPT_group, RPT_daily);
+    RPT_new_reporting ("detnU", RPT_group);
   local_data->nunits_detected_by_means_and_prodtype =
-    RPT_new_reporting ("detnU", RPT_group, RPT_daily);
+    RPT_new_reporting ("detnU", RPT_group);
   local_data->nanimals_detected =
-    RPT_new_reporting ("detnAAll", RPT_integer, RPT_daily);
+    RPT_new_reporting ("detnAAll", RPT_integer);
   local_data->nanimals_detected_by_means =
-    RPT_new_reporting ("detnA", RPT_group, RPT_daily);
+    RPT_new_reporting ("detnA", RPT_group);
   local_data->nanimals_detected_by_prodtype =
-    RPT_new_reporting ("detnA", RPT_group, RPT_daily);
+    RPT_new_reporting ("detnA", RPT_group);
   local_data->nanimals_detected_by_means_and_prodtype =
-    RPT_new_reporting ("detnA", RPT_group, RPT_daily);
+    RPT_new_reporting ("detnA", RPT_group);
   local_data->cumul_nunits_detected =
-    RPT_new_reporting ("detcUAll", RPT_integer, RPT_daily);
+    RPT_new_reporting ("detcUAll", RPT_integer);
   local_data->cumul_nunits_detected_by_means =
-    RPT_new_reporting ("detcU", RPT_group, RPT_daily);
+    RPT_new_reporting ("detcU", RPT_group);
   local_data->cumul_nunits_detected_by_prodtype =
-    RPT_new_reporting ("detcU", RPT_group, RPT_daily);
+    RPT_new_reporting ("detcU", RPT_group);
   local_data->cumul_nunits_detected_by_means_and_prodtype =
-    RPT_new_reporting ("detcU", RPT_group, RPT_daily);
+    RPT_new_reporting ("detcU", RPT_group);
   local_data->cumul_nunits_detected_uniq =
-    RPT_new_reporting ("detcUqAll", RPT_integer, RPT_daily);
+    RPT_new_reporting ("detcUqAll", RPT_integer);
   local_data->cumul_nanimals_detected =
-    RPT_new_reporting ("detcAAll", RPT_integer, RPT_daily);
+    RPT_new_reporting ("detcAAll", RPT_integer);
   local_data->cumul_nanimals_detected_by_means =
-    RPT_new_reporting ("detcA", RPT_group, RPT_daily);
+    RPT_new_reporting ("detcA", RPT_group);
   local_data->cumul_nanimals_detected_by_prodtype =
-    RPT_new_reporting ("detcA", RPT_group, RPT_daily);
+    RPT_new_reporting ("detcA", RPT_group);
   local_data->cumul_nanimals_detected_by_means_and_prodtype =
-    RPT_new_reporting ("detcA", RPT_group, RPT_daily);
+    RPT_new_reporting ("detcA", RPT_group);
   g_ptr_array_add (self->outputs, local_data->detection_occurred);
   g_ptr_array_add (self->outputs, local_data->first_detection);
   g_ptr_array_add (self->outputs, local_data->first_detection_by_means);

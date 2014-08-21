@@ -98,12 +98,9 @@ handle_before_any_simulations_event (struct adsm_module_t_ *self,
   for (i = 0; i < n; i++)
     {
       output = (RPT_reporting_t *) g_ptr_array_index (self->outputs, i);
-      if (output->frequency != RPT_never)
-        {
-          if (outputs == NULL)
-            outputs = g_ptr_array_new();
-          g_ptr_array_add (outputs, output);
-        }
+      if (outputs == NULL)
+        outputs = g_ptr_array_new();
+      g_ptr_array_add (outputs, output);
     }
 
   if (outputs != NULL)
@@ -240,17 +237,13 @@ handle_destruction_event (struct adsm_module_t_ *self, EVT_destruction_event_t *
   RPT_reporting_add_integer1 (local_data->num_animals_destroyed_by_reason, unit->size, event->reason);
   RPT_reporting_add_integer1 (local_data->cumul_num_units_destroyed_by_reason, 1, event->reason);
   RPT_reporting_add_integer1 (local_data->cumul_num_animals_destroyed_by_reason, unit->size, event->reason);
-  if (local_data->num_units_destroyed_by_reason_and_prodtype->frequency != RPT_never)
-    RPT_reporting_add_integer (local_data->num_units_destroyed_by_reason_and_prodtype, 1, drill_down_list);
-  if (local_data->num_animals_destroyed_by_reason_and_prodtype->frequency != RPT_never)
-    RPT_reporting_add_integer (local_data->num_animals_destroyed_by_reason_and_prodtype, unit->size,
-                               drill_down_list);
-  if (local_data->cumul_num_units_destroyed_by_reason_and_prodtype->frequency != RPT_never)
-    RPT_reporting_add_integer (local_data->cumul_num_units_destroyed_by_reason_and_prodtype, 1,
-                               drill_down_list);
-  if (local_data->cumul_num_animals_destroyed_by_reason_and_prodtype->frequency != RPT_never)
-    RPT_reporting_add_integer (local_data->cumul_num_animals_destroyed_by_reason_and_prodtype, unit->size,
-                               drill_down_list);
+  RPT_reporting_add_integer (local_data->num_units_destroyed_by_reason_and_prodtype, 1, drill_down_list);
+  RPT_reporting_add_integer (local_data->num_animals_destroyed_by_reason_and_prodtype, unit->size,
+                             drill_down_list);
+  RPT_reporting_add_integer (local_data->cumul_num_units_destroyed_by_reason_and_prodtype, 1,
+                             drill_down_list);
+  RPT_reporting_add_integer (local_data->cumul_num_animals_destroyed_by_reason_and_prodtype, unit->size,
+                             drill_down_list);
 
 #if DEBUG
   g_debug ("----- EXIT handle_destruction_event (%s)", MODEL_NAME);
@@ -431,47 +424,47 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->destruction_occurred =
-    RPT_new_reporting ("destrOccurred", RPT_integer, RPT_daily);
+    RPT_new_reporting ("destrOccurred", RPT_integer);
   local_data->first_destruction =
-    RPT_new_reporting ("firstDestruction", RPT_integer, RPT_daily);
+    RPT_new_reporting ("firstDestruction", RPT_integer);
   local_data->first_destruction_by_reason =
-    RPT_new_reporting ("firstDestruction", RPT_group, RPT_daily);
+    RPT_new_reporting ("firstDestruction", RPT_group);
   local_data->first_destruction_by_prodtype =
-    RPT_new_reporting ("firstDestruction", RPT_group, RPT_daily);
+    RPT_new_reporting ("firstDestruction", RPT_group);
   local_data->first_destruction_by_reason_and_prodtype =
-    RPT_new_reporting ("firstDestruction", RPT_group, RPT_daily);
+    RPT_new_reporting ("firstDestruction", RPT_group);
   local_data->num_units_destroyed =
-    RPT_new_reporting ("desnUAll", RPT_integer, RPT_daily);
+    RPT_new_reporting ("desnUAll", RPT_integer);
   local_data->num_units_destroyed_by_reason =
-    RPT_new_reporting ("desnU", RPT_group, RPT_daily);
+    RPT_new_reporting ("desnU", RPT_group);
   local_data->num_units_destroyed_by_prodtype =
-    RPT_new_reporting ("desnU", RPT_group, RPT_daily);
+    RPT_new_reporting ("desnU", RPT_group);
   local_data->num_units_destroyed_by_reason_and_prodtype =
-    RPT_new_reporting ("desnU", RPT_group, RPT_daily);
+    RPT_new_reporting ("desnU", RPT_group);
   local_data->cumul_num_units_destroyed =
-    RPT_new_reporting ("descUAll", RPT_integer, RPT_daily);
+    RPT_new_reporting ("descUAll", RPT_integer);
   local_data->cumul_num_units_destroyed_by_reason =
-    RPT_new_reporting ("descU", RPT_group, RPT_daily);
+    RPT_new_reporting ("descU", RPT_group);
   local_data->cumul_num_units_destroyed_by_prodtype =
-    RPT_new_reporting ("descU", RPT_group, RPT_daily);
+    RPT_new_reporting ("descU", RPT_group);
   local_data->cumul_num_units_destroyed_by_reason_and_prodtype =
-    RPT_new_reporting ("descU", RPT_group, RPT_daily);
+    RPT_new_reporting ("descU", RPT_group);
   local_data->num_animals_destroyed =
-    RPT_new_reporting ("desnAAll", RPT_integer, RPT_daily);
+    RPT_new_reporting ("desnAAll", RPT_integer);
   local_data->num_animals_destroyed_by_reason =
-    RPT_new_reporting ("desnA", RPT_group, RPT_daily);
+    RPT_new_reporting ("desnA", RPT_group);
   local_data->num_animals_destroyed_by_prodtype =
-    RPT_new_reporting ("desnA", RPT_group, RPT_daily);
+    RPT_new_reporting ("desnA", RPT_group);
   local_data->num_animals_destroyed_by_reason_and_prodtype =
-    RPT_new_reporting ("desnA", RPT_group, RPT_daily);
+    RPT_new_reporting ("desnA", RPT_group);
   local_data->cumul_num_animals_destroyed =
-    RPT_new_reporting ("descAAll", RPT_integer, RPT_daily);
+    RPT_new_reporting ("descAAll", RPT_integer);
   local_data->cumul_num_animals_destroyed_by_reason =
-    RPT_new_reporting ("descA", RPT_group, RPT_daily);
+    RPT_new_reporting ("descA", RPT_group);
   local_data->cumul_num_animals_destroyed_by_prodtype =
-    RPT_new_reporting ("descA", RPT_group, RPT_daily);
+    RPT_new_reporting ("descA", RPT_group);
   local_data->cumul_num_animals_destroyed_by_reason_and_prodtype =
-    RPT_new_reporting ("descA", RPT_group, RPT_daily);
+    RPT_new_reporting ("descA", RPT_group);
   g_ptr_array_add (self->outputs, local_data->destruction_occurred);
   g_ptr_array_add (self->outputs, local_data->first_destruction);
   g_ptr_array_add (self->outputs, local_data->first_destruction_by_reason);

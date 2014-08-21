@@ -93,12 +93,9 @@ handle_before_any_simulations_event (struct adsm_module_t_ *self,
   for (i = 0; i < n; i++)
     {
       output = (RPT_reporting_t *) g_ptr_array_index (self->outputs, i);
-      if (output->frequency != RPT_never)
-        {
-          if (outputs == NULL)
-            outputs = g_ptr_array_new();
-          g_ptr_array_add (outputs, output);
-        }
+      if (outputs == NULL)
+        outputs = g_ptr_array_new();
+      g_ptr_array_add (outputs, output);
     }
 
   if (outputs != NULL)
@@ -335,17 +332,17 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->num_units_in_state =
-    RPT_new_reporting ("tsdU", RPT_group, RPT_daily);
+    RPT_new_reporting ("tsdU", RPT_group);
   local_data->num_units_in_state_by_prodtype =
-    RPT_new_reporting ("tsdU", RPT_group, RPT_daily);
+    RPT_new_reporting ("tsdU", RPT_group);
   local_data->num_animals_in_state =
-    RPT_new_reporting ("tsdA", RPT_group, RPT_daily);
+    RPT_new_reporting ("tsdA", RPT_group);
   local_data->num_animals_in_state_by_prodtype =
-    RPT_new_reporting ("tsdA", RPT_group, RPT_daily);
+    RPT_new_reporting ("tsdA", RPT_group);
   local_data->avg_prevalence =
-    RPT_new_reporting ("averagePrevalence", RPT_real, RPT_daily);
+    RPT_new_reporting ("averagePrevalence", RPT_real);
   local_data->last_day_of_disease =
-    RPT_new_reporting ("diseaseDuration", RPT_integer, RPT_daily);
+    RPT_new_reporting ("diseaseDuration", RPT_integer);
   g_ptr_array_add (self->outputs, local_data->num_units_in_state);
   g_ptr_array_add (self->outputs, local_data->num_units_in_state_by_prodtype);
   g_ptr_array_add (self->outputs, local_data->num_animals_in_state);

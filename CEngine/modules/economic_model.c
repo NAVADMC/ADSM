@@ -152,12 +152,9 @@ handle_before_any_simulations_event (struct adsm_module_t_ *self,
   for (i = 0; i < n; i++)
     {
       output = (RPT_reporting_t *) g_ptr_array_index (self->outputs, i);
-      if (output->frequency != RPT_never)
-        {
-          if (outputs == NULL)
-            outputs = g_ptr_array_new();
-          g_ptr_array_add (outputs, output);
-        }
+      if (outputs == NULL)
+        outputs = g_ptr_array_new();
+      g_ptr_array_add (outputs, output);
     }
 
   if (outputs != NULL)
@@ -202,11 +199,7 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 
   /* This is an expensive cost calculation, so only do it if the user
    * will see any benefit from it. */
-  if ((local_data->surveillance_cost_param) &&
-      (/*(local_data->surveillance_cost->frequency != RPT_never ) ||
-       (local_data->total_cost->frequency != RPT_never) ||*/
-       (local_data->cumul_surveillance_cost->frequency != RPT_never ) ||
-       (local_data->cumul_total_cost->frequency != RPT_never)))
+  if (local_data->surveillance_cost_param)
     {
       double **surveillance_cost_param = local_data->surveillance_cost_param;
       unsigned int nunits = zones->membership_length;
@@ -882,27 +875,27 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     RPT_new_reporting ("surveillance-cost", RPT_real, RPT_never);
   */
   local_data->cumul_total_cost =
-    RPT_new_reporting ("costsTotal", RPT_real, RPT_daily);
+    RPT_new_reporting ("costsTotal", RPT_real);
   local_data->cumul_appraisal_cost =
-    RPT_new_reporting ("destrAppraisal", RPT_real, RPT_daily);
+    RPT_new_reporting ("destrAppraisal", RPT_real);
   local_data->cumul_euthanasia_cost =
-    RPT_new_reporting ("destrEuthanasia", RPT_real, RPT_daily);
+    RPT_new_reporting ("destrEuthanasia", RPT_real);
   local_data->cumul_indemnification_cost =
-    RPT_new_reporting ("destrIndemnification", RPT_real, RPT_daily);
+    RPT_new_reporting ("destrIndemnification", RPT_real);
   local_data->cumul_carcass_disposal_cost =
-    RPT_new_reporting ("destrDisposal", RPT_real, RPT_daily);
+    RPT_new_reporting ("destrDisposal", RPT_real);
   local_data->cumul_cleaning_disinfecting_cost =
-    RPT_new_reporting ("destrCleaning", RPT_real, RPT_daily);
+    RPT_new_reporting ("destrCleaning", RPT_real);
   local_data->cumul_destruction_subtotal =
-    RPT_new_reporting ("destrSubtotal", RPT_real, RPT_daily);
+    RPT_new_reporting ("destrSubtotal", RPT_real);
   local_data->cumul_vaccination_setup_cost =
-    RPT_new_reporting ("vaccSetup", RPT_real, RPT_daily);
+    RPT_new_reporting ("vaccSetup", RPT_real);
   local_data->cumul_vaccination_cost =
-    RPT_new_reporting ("vaccVaccination", RPT_real, RPT_daily);
+    RPT_new_reporting ("vaccVaccination", RPT_real);
   local_data->cumul_vaccination_subtotal =
-    RPT_new_reporting ("vaccSubtotal", RPT_real, RPT_daily);
+    RPT_new_reporting ("vaccSubtotal", RPT_real);
   local_data->cumul_surveillance_cost =
-    RPT_new_reporting ("costSurveillance", RPT_real, RPT_daily);
+    RPT_new_reporting ("costSurveillance", RPT_real);
   /*
   g_ptr_array_add (self->outputs, local_data->total_cost);
   g_ptr_array_add (self->outputs, local_data->appraisal_cost);

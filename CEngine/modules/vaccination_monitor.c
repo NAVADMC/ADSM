@@ -75,8 +75,6 @@ typedef struct
   RPT_reporting_t *cumul_num_animals_vaccinated_by_reason;
   RPT_reporting_t *cumul_num_animals_vaccinated_by_prodtype;
   RPT_reporting_t *cumul_num_animals_vaccinated_by_reason_and_prodtype;
-  gboolean reasons_declared;
-  gboolean first_day;
 }
 local_data_t;
 
@@ -101,12 +99,9 @@ handle_before_any_simulations_event (struct adsm_module_t_ *self,
   for (i = 0; i < n; i++)
     {
       output = (RPT_reporting_t *) g_ptr_array_index (self->outputs, i);
-      if (output->frequency != RPT_never)
-        {
-          if (outputs == NULL)
-            outputs = g_ptr_array_new();
-          g_ptr_array_add (outputs, output);
-        }
+      if (outputs == NULL)
+        outputs = g_ptr_array_new();
+      g_ptr_array_add (outputs, output);
     }
 
   if (outputs != NULL)
@@ -149,18 +144,6 @@ handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event)
       RPT_reporting_zero (local_data->num_animals_vaccinated_by_reason_and_prodtype);
     }
 
-  /* If no reasons for vaccination have been declared, turn off the first-
-   * vaccination-by-reason output variables. */
-  if (local_data->first_day == TRUE)
-    {
-      local_data->first_day = FALSE;
-      if (local_data->reasons_declared == FALSE)
-        {
-           RPT_reporting_set_frequency (local_data->first_vaccination_by_reason, RPT_never);
-           RPT_reporting_set_frequency (local_data->first_vaccination_by_reason_and_prodtype, RPT_never);
-        }
-    }
-
 #if DEBUG
   g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
 #endif
@@ -194,8 +177,6 @@ handle_declaration_of_vaccination_reasons_event (struct adsm_module_t_ *self,
   /* If any potential reason is not already present in our reporting variables,
    * add it, with an initial count of 0 vaccinations. */
   n = event->reasons->len;
-  if (n > 0)
-    local_data->reasons_declared = TRUE;
   for (i = 0; i < n; i++)
     {
       reason = (char *) g_ptr_array_index (event->reasons, i);
@@ -314,17 +295,13 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
   RPT_reporting_add_integer1 (local_data->num_animals_vaccinated_by_reason, unit->size, event->reason);
   RPT_reporting_add_integer1 (local_data->cumul_num_units_vaccinated_by_reason, 1, event->reason);
   RPT_reporting_add_integer1 (local_data->cumul_num_animals_vaccinated_by_reason, unit->size, event->reason);
-  if (local_data->num_units_vaccinated_by_reason_and_prodtype->frequency != RPT_never)
-    RPT_reporting_add_integer (local_data->num_units_vaccinated_by_reason_and_prodtype, 1, drill_down_list);
-  if (local_data->num_animals_vaccinated_by_reason_and_prodtype->frequency != RPT_never)
-    RPT_reporting_add_integer (local_data->num_animals_vaccinated_by_reason_and_prodtype, unit->size,
-                               drill_down_list);
-  if (local_data->cumul_num_units_vaccinated_by_reason_and_prodtype->frequency != RPT_never)
-    RPT_reporting_add_integer (local_data->cumul_num_units_vaccinated_by_reason_and_prodtype, 1,
-                               drill_down_list);
-  if (local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype->frequency != RPT_never)
-    RPT_reporting_add_integer (local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype, unit->size,
-                               drill_down_list);
+  RPT_reporting_add_integer (local_data->num_units_vaccinated_by_reason_and_prodtype, 1, drill_down_list);
+  RPT_reporting_add_integer (local_data->num_animals_vaccinated_by_reason_and_prodtype, unit->size,
+                             drill_down_list);
+  RPT_reporting_add_integer (local_data->cumul_num_units_vaccinated_by_reason_and_prodtype, 1,
+                             drill_down_list);
+  RPT_reporting_add_integer (local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype, unit->size,
+                             drill_down_list);
 
 #if DEBUG
   g_debug ("----- EXIT handle_vaccination_event (%s)", MODEL_NAME);
@@ -510,47 +487,47 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->vaccination_occurred =
-    RPT_new_reporting ("vaccOccurred", RPT_integer, RPT_daily);
+    RPT_new_reporting ("vaccOccurred", RPT_integer);
   local_data->first_vaccination =
-    RPT_new_reporting ("firstVaccination", RPT_integer, RPT_daily);
+    RPT_new_reporting ("firstVaccination", RPT_integer);
   local_data->first_vaccination_by_reason =
-    RPT_new_reporting ("firstVaccination", RPT_group, RPT_daily);
+    RPT_new_reporting ("firstVaccination", RPT_group);
   local_data->first_vaccination_by_prodtype =
-    RPT_new_reporting ("firstVaccination", RPT_group, RPT_daily);
+    RPT_new_reporting ("firstVaccination", RPT_group);
   local_data->first_vaccination_by_reason_and_prodtype =
-    RPT_new_reporting ("firstVaccination", RPT_group, RPT_daily);
+    RPT_new_reporting ("firstVaccination", RPT_group);
   local_data->num_units_vaccinated =
-    RPT_new_reporting ("vacnUAll", RPT_integer, RPT_daily);
+    RPT_new_reporting ("vacnUAll", RPT_integer);
   local_data->num_units_vaccinated_by_reason =
-    RPT_new_reporting ("vacnU", RPT_group, RPT_daily);
+    RPT_new_reporting ("vacnU", RPT_group);
   local_data->num_units_vaccinated_by_prodtype =
-    RPT_new_reporting ("vacnU", RPT_group, RPT_daily);
+    RPT_new_reporting ("vacnU", RPT_group);
   local_data->num_units_vaccinated_by_reason_and_prodtype =
-    RPT_new_reporting ("vacnU", RPT_group, RPT_daily);
+    RPT_new_reporting ("vacnU", RPT_group);
   local_data->cumul_num_units_vaccinated =
-    RPT_new_reporting ("vaccUAll", RPT_integer, RPT_daily);
+    RPT_new_reporting ("vaccUAll", RPT_integer);
   local_data->cumul_num_units_vaccinated_by_reason =
-    RPT_new_reporting ("vaccU", RPT_group, RPT_daily);
+    RPT_new_reporting ("vaccU", RPT_group);
   local_data->cumul_num_units_vaccinated_by_prodtype =
-    RPT_new_reporting ("vaccU", RPT_group, RPT_daily);
+    RPT_new_reporting ("vaccU", RPT_group);
   local_data->cumul_num_units_vaccinated_by_reason_and_prodtype =
-    RPT_new_reporting ("vaccU", RPT_group, RPT_daily);
+    RPT_new_reporting ("vaccU", RPT_group);
   local_data->num_animals_vaccinated =
-    RPT_new_reporting ("vacnAAll", RPT_integer, RPT_daily);
+    RPT_new_reporting ("vacnAAll", RPT_integer);
   local_data->num_animals_vaccinated_by_reason =
-    RPT_new_reporting ("vacnA", RPT_group, RPT_daily);
+    RPT_new_reporting ("vacnA", RPT_group);
   local_data->num_animals_vaccinated_by_prodtype =
-    RPT_new_reporting ("vacnA", RPT_group, RPT_daily);
+    RPT_new_reporting ("vacnA", RPT_group);
   local_data->num_animals_vaccinated_by_reason_and_prodtype =
-    RPT_new_reporting ("vacnA", RPT_group, RPT_daily);
+    RPT_new_reporting ("vacnA", RPT_group);
   local_data->cumul_num_animals_vaccinated =
-    RPT_new_reporting ("vaccAAll", RPT_integer, RPT_daily);
+    RPT_new_reporting ("vaccAAll", RPT_integer);
   local_data->cumul_num_animals_vaccinated_by_reason =
-    RPT_new_reporting ("vaccA", RPT_group, RPT_daily);
+    RPT_new_reporting ("vaccA", RPT_group);
   local_data->cumul_num_animals_vaccinated_by_prodtype =
-    RPT_new_reporting ("vaccA", RPT_group, RPT_daily);
+    RPT_new_reporting ("vaccA", RPT_group);
   local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype =
-    RPT_new_reporting ("vaccA", RPT_group, RPT_daily);
+    RPT_new_reporting ("vaccA", RPT_group);
   g_ptr_array_add (self->outputs, local_data->vaccination_occurred);
   g_ptr_array_add (self->outputs, local_data->first_vaccination);
   g_ptr_array_add (self->outputs, local_data->first_vaccination_by_reason);
@@ -597,9 +574,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       RPT_reporting_add_integer (local_data->num_animals_vaccinated_by_reason_and_prodtype, 0, drill_down_list);
       RPT_reporting_add_integer (local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype, 0, drill_down_list);
     }
-
-  local_data->reasons_declared = FALSE;
-  local_data->first_day = TRUE;
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

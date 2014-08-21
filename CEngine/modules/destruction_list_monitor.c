@@ -100,12 +100,9 @@ handle_before_any_simulations_event (struct adsm_module_t_ *self,
   for (i = 0; i < n; i++)
     {
       output = (RPT_reporting_t *) g_ptr_array_index (self->outputs, i);
-      if (output->frequency != RPT_never)
-        {
-          if (outputs == NULL)
-            outputs = g_ptr_array_new();
-          g_ptr_array_add (outputs, output);
-        }
+      if (outputs == NULL)
+        outputs = g_ptr_array_new();
+      g_ptr_array_add (outputs, output);
     }
 
   if (outputs != NULL)
@@ -184,9 +181,8 @@ handle_commitment_to_destroy_event (struct adsm_module_t_ *self,
 
       /* Increment the count of units awaiting destruction. */
       RPT_reporting_add_integer (local_data->nunits_awaiting_destruction, 1, NULL);
-      if (local_data->nunits_awaiting_destruction_by_prodtype->frequency != RPT_never)
-        RPT_reporting_add_integer1 (local_data->nunits_awaiting_destruction_by_prodtype, 1,
-                                    unit->production_type_name);
+      RPT_reporting_add_integer1 (local_data->nunits_awaiting_destruction_by_prodtype, 1,
+                                  unit->production_type_name);
       nunits = RPT_reporting_get_integer (local_data->nunits_awaiting_destruction, NULL);
       if (nunits > local_data->peak_nunits)
         {
@@ -197,9 +193,8 @@ handle_commitment_to_destroy_event (struct adsm_module_t_ *self,
 
       /* Increment the count of animals awaiting destruction. */
       RPT_reporting_add_integer (local_data->nanimals_awaiting_destruction, unit->size, NULL);
-      if (local_data->nanimals_awaiting_destruction_by_prodtype->frequency != RPT_never)
-        RPT_reporting_add_integer1 (local_data->nanimals_awaiting_destruction_by_prodtype,
-                                    unit->size, unit->production_type_name);
+      RPT_reporting_add_integer1 (local_data->nanimals_awaiting_destruction_by_prodtype,
+                                  unit->size, unit->production_type_name);
       nanimals = RPT_reporting_get_integer (local_data->nanimals_awaiting_destruction, NULL);
       if (nanimals > local_data->peak_nanimals)
         {
@@ -263,13 +258,11 @@ handle_destruction_event (struct adsm_module_t_ *self, EVT_destruction_event_t *
 
       /* Decrement the counts of units and animals awaiting destruction. */
       RPT_reporting_sub_integer (local_data->nunits_awaiting_destruction, 1, NULL);
-      if (local_data->nunits_awaiting_destruction_by_prodtype->frequency != RPT_never)
-        RPT_reporting_sub_integer1 (local_data->nunits_awaiting_destruction_by_prodtype, 1,
-                                    unit->production_type_name);
+      RPT_reporting_sub_integer1 (local_data->nunits_awaiting_destruction_by_prodtype, 1,
+                                  unit->production_type_name);
       RPT_reporting_sub_integer (local_data->nanimals_awaiting_destruction, unit->size, NULL);
-      if (local_data->nanimals_awaiting_destruction_by_prodtype->frequency != RPT_never)
-        RPT_reporting_sub_integer1 (local_data->nanimals_awaiting_destruction_by_prodtype,
-                                    unit->size, unit->production_type_name);
+      RPT_reporting_sub_integer1 (local_data->nanimals_awaiting_destruction_by_prodtype,
+                                  unit->size, unit->production_type_name);
     }
 
 #if DEBUG
@@ -442,29 +435,29 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->nunits_awaiting_destruction =
-    RPT_new_reporting ("deswUAll", RPT_integer, RPT_daily);
+    RPT_new_reporting ("deswUAll", RPT_integer);
   local_data->nunits_awaiting_destruction_by_prodtype =
-    RPT_new_reporting ("deswU", RPT_group, RPT_daily);
+    RPT_new_reporting ("deswU", RPT_group);
   local_data->nanimals_awaiting_destruction =
-    RPT_new_reporting ("deswAAll", RPT_integer, RPT_daily);
+    RPT_new_reporting ("deswAAll", RPT_integer);
   local_data->nanimals_awaiting_destruction_by_prodtype =
-    RPT_new_reporting ("deswA", RPT_group, RPT_daily);
+    RPT_new_reporting ("deswA", RPT_group);
   local_data->peak_nunits_awaiting_destruction =
-    RPT_new_reporting ("deswUMax", RPT_integer, RPT_daily);
+    RPT_new_reporting ("deswUMax", RPT_integer);
   local_data->peak_nunits_awaiting_destruction_day =
-    RPT_new_reporting ("deswUMaxDay", RPT_integer, RPT_daily);
+    RPT_new_reporting ("deswUMaxDay", RPT_integer);
   local_data->peak_nanimals_awaiting_destruction =
-    RPT_new_reporting ("deswAMax", RPT_integer, RPT_daily);
+    RPT_new_reporting ("deswAMax", RPT_integer);
   local_data->peak_nanimals_awaiting_destruction_day =
-    RPT_new_reporting ("deswAMaxDay", RPT_integer, RPT_daily);
+    RPT_new_reporting ("deswAMaxDay", RPT_integer);
   local_data->peak_wait_time =
-    RPT_new_reporting ("deswUTimeMax", RPT_integer, RPT_daily);
+    RPT_new_reporting ("deswUTimeMax", RPT_integer);
   local_data->average_wait_time =
-    RPT_new_reporting ("deswUTimeAvg", RPT_real, RPT_daily);
+    RPT_new_reporting ("deswUTimeAvg", RPT_real);
   local_data->unit_days_in_queue =
-    RPT_new_reporting ("deswUDaysInQueue", RPT_integer, RPT_daily);
+    RPT_new_reporting ("deswUDaysInQueue", RPT_integer);
   local_data->animal_days_in_queue =
-    RPT_new_reporting ("deswADaysInQueue", RPT_integer, RPT_daily);
+    RPT_new_reporting ("deswADaysInQueue", RPT_integer);
   g_ptr_array_add (self->outputs, local_data->nunits_awaiting_destruction);
   g_ptr_array_add (self->outputs, local_data->nunits_awaiting_destruction_by_prodtype);
   g_ptr_array_add (self->outputs, local_data->nanimals_awaiting_destruction);

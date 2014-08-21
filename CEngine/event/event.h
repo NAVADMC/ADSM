@@ -72,7 +72,6 @@ typedef enum
   EVT_Vaccination, EVT_RequestForDestruction, EVT_CommitmentToDestroy,
   EVT_Destruction, EVT_RequestForZoneFocus, EVT_EndOfDay,
   EVT_EndOfDay2,
-  EVT_LastDay,
   EVT_Midnight,
   EVT_NEVENT_TYPES
 }
@@ -506,7 +505,6 @@ typedef struct
     EVT_request_for_zone_focus_event_t request_for_zone_focus;
     EVT_end_of_day_event_t end_of_day;
     EVT_end_of_day2_event_t end_of_day2;
-    EVT_last_day_event_t last_day;
     EVT_midnight_event_t midnight;
   }
   u;
@@ -601,7 +599,6 @@ EVT_event_t *EVT_new_request_for_zone_focus_event (UNT_unit_t *,
                                                    int day, char *reason);
 EVT_event_t *EVT_new_end_of_day_event (int day, gboolean done);
 EVT_event_t *EVT_new_end_of_day2_event (int day, gboolean done);
-EVT_event_t *EVT_new_last_day_event (int day);
 EVT_event_t *EVT_new_midnight_event (int day);
 
 void EVT_free_event (EVT_event_t *);

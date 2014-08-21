@@ -57,7 +57,6 @@ const char *EVT_event_type_name[] = {
   "CommitmentToDestroy", "Destruction",
   "RequestForZoneFocus", "EndOfDay",
   "EndOfDay2",
-  "LastDay",
   "Midnight",
   NULL
 };
@@ -1324,47 +1323,6 @@ EVT_end_of_day2_event_to_string (EVT_end_of_day2_event_t * event)
 
 
 /**
- * Creates a new "last day" event.
- *
- * @param day the day of the simulation.
- * @return a pointer to a newly-created EVT_event_t structure.
- */
-EVT_event_t *
-EVT_new_last_day_event (int day)
-{
-  EVT_event_t *event;
-
-  event = g_new (EVT_event_t, 1);
-  event->type = EVT_LastDay;
-  event->u.last_day.day = day;
-  return event;
-}
-
-
-
-/**
- * Returns a text representation of a last day event.
- *
- * @param event a last day event.
- * @return a string.
- */
-char *
-EVT_last_day_event_to_string (EVT_last_day_event_t * event)
-{
-  GString *s;
-  char *chararray;
-
-  s = g_string_new (NULL);
-  g_string_sprintf (s, "<Last day event day=%i>", event->day);
-  /* don't return the wrapper object */
-  chararray = s->str;
-  g_string_free (s, FALSE);
-  return chararray;
-}
-
-
-
-/**
  * Creates a new "midnight" event.
  *
  * @param day the day of the simulation.
@@ -1441,7 +1399,6 @@ EVT_free_event (EVT_event_t * event)
     case EVT_RequestForZoneFocus:
     case EVT_EndOfDay:
     case EVT_EndOfDay2:
-    case EVT_LastDay:
     case EVT_Midnight:
       /* No dynamically-allocated parts to free. */
       break;
@@ -1646,9 +1603,6 @@ EVT_event_to_string (EVT_event_t * event)
       break;
     case EVT_EndOfDay2:
       s = EVT_end_of_day2_event_to_string (&(event->u.end_of_day2));
-      break;
-    case EVT_LastDay:
-      s = EVT_last_day_event_to_string (&(event->u.last_day));
       break;
     case EVT_Midnight:
       s = EVT_midnight_event_to_string (&(event->u.midnight));
