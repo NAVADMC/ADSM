@@ -181,7 +181,7 @@ typedef struct
     movement_control[contact_type][zone->level-1][source_production_type]
     to get a pointer to a particular chart. */
   GPtrArray *pending_infections; /**< An array to store delayed contacts.  Each
-    item in the array is a GQueue of Infection and Exposure events.  (Actually
+    item in the array is a GQueue of Exposure events.  (Actually
     a singly-linked list would suffice, but the GQueue syntax is much more
     readable than the GSList syntax.)  An index "rotates" through the array, so
     an event that is to happen in 1 day is placed in the GQueue that is 1 place
@@ -517,10 +517,7 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
       pending_event = (EVT_event_t *) g_queue_pop_head (q);
 #ifndef WIN_DLL
       /* Double-check that the event is coming out on the correct day. */
-      if (pending_event->type == EVT_Exposure)
-        g_assert (pending_event->u.exposure.day == event->day);
-      else
-        g_assert (pending_event->u.attempt_to_infect.day == event->day);
+      g_assert (pending_event->u.exposure.day == event->day);
 #endif
       EVT_event_enqueue (queue, pending_event);
       local_data->npending_infections--;
@@ -600,7 +597,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
   unsigned int zone_index;
   REL_chart_t *control_chart;
   int nexposures;
-  EVT_event_t *exposure, *attempt_to_infect;
+  EVT_event_t *exposure;
   callback_t callback_data;
   double distance;              /* between two units being considered */
   gboolean contact_forbidden;
@@ -1055,19 +1052,6 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
                                    unit2->official_id);
 #endif
                           new_infections = new_infections + 1;
-                          attempt_to_infect = EVT_new_attempt_to_infect_event (unit1, unit2,
-                                                                               event->day,
-                                                                               contact_type);
-                          if (shipping_delay <= 0)
-                            EVT_event_enqueue (queue, attempt_to_infect);
-                          else
-                          {
-                            attempt_to_infect->u.attempt_to_infect.day += shipping_delay;
-                            /* The queue to add the delayed infection to was already
-                             * found above. */
-                            g_queue_push_tail (q, attempt_to_infect);
-                            local_data->npending_infections++;
-                          };
                         }
                         else
                         {

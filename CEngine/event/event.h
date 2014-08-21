@@ -65,7 +65,7 @@ typedef enum
   EVT_DeclarationOfVaccinationReasons,
   EVT_DeclarationOfVaccineDelay,
   EVT_DeclarationOfOutputs,
-  EVT_NewDay, EVT_Exposure, EVT_AttemptToInfect, EVT_Infection,
+  EVT_NewDay, EVT_Exposure, EVT_Infection,
   EVT_Detection, EVT_PublicAnnouncement, EVT_Exam, EVT_AttemptToTrace,
   EVT_TraceResult, EVT_Test, EVT_TestResult, EVT_RequestForVaccination,
   EVT_CommitmentToVaccinate, EVT_VaccinationCanceled,
@@ -181,31 +181,19 @@ typedef struct
   gboolean adequate;
   int initiated_day;
   int delay;
-}
-EVT_exposure_event_t;
-
-
-
-/** An "attempt to infect" event. */
-typedef struct
-{
-  UNT_unit_t *infecting_unit;
-  UNT_unit_t *infected_unit;
-  int day; /**< day of the simulation */
-  ADSM_contact_type contact_type;
-  UNT_state_t override_initial_state; /**< when using an infection event to
+  UNT_state_t override_initial_state; /**< when using an exposure event to
     specify an in-progress infection, set this to the unit's state (Latent,
     InfectiousSubclinical, or InfectiousClinical). */
-  int override_days_in_state; /**< when using an infection event to specify an
+  int override_days_in_state; /**< when using an exposure event to specify an
     in-progress infection, use a non-zero value here to give the number of days
     a unit has been in its current state. */
-  int override_days_left_in_state; /**< when using an infection event to
+  int override_days_left_in_state; /**< when using an exposure event to
     specify an in-progress infection, use a non-zero value here to give the
     number of days until the unit transitions to the next state.  A zero value
     means that the number should be chosen from the probability distributions
     given in the disease model parameters. */
 }
-EVT_attempt_to_infect_event_t;
+EVT_exposure_event_t;
 
 
 
@@ -500,7 +488,6 @@ typedef struct
     EVT_declaration_of_outputs_event_t declaration_of_outputs;
     EVT_new_day_event_t new_day;
     EVT_exposure_event_t exposure;
-    EVT_attempt_to_infect_event_t attempt_to_infect;
     EVT_infection_event_t infection;
     EVT_detection_event_t detection;
     EVT_public_announcement_event_t public_announcement;

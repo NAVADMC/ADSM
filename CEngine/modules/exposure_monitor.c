@@ -171,41 +171,44 @@ handle_exposure_event (struct adsm_module_t_ *self, EVT_exposure_event_t * event
 
   cause = ADSM_contact_type_abbrev[event->contact_type];
                                 
-  update.src_index = exposing_unit->index;
-  update.src_state = (ADSM_disease_state) exposing_unit->state;
-  update.dest_index = exposed_unit->index;
-  update.dest_state = (ADSM_disease_state) exposed_unit->state;
-  
-  update.initiated_day = (int) event->initiated_day;
-  update.finalized_day = (int) event->initiated_day + event->delay;
-  
-  if( TRUE == event->adequate )
-    update.is_adequate = ADSM_SuccessTrue;
-  else
-    update.is_adequate = ADSM_SuccessFalse;
-  
-  switch (event->contact_type)
+  /* No exposing unit means this is an initially infected unit. */
+  if (exposing_unit != NULL)
     {
-      case ADSM_DirectContact:
-      case ADSM_IndirectContact:
-      case ADSM_AirborneSpread:
-        update.exposure_method = event->contact_type;
-        break;      
-      default:
-        /* If this condition occurs, someone forgot something. */
-        g_error( "An unrecognized exposure mechanism (%s) occurred in handle_exposure_event", cause );
-        update.exposure_method = 0;     
-    }
+      update.src_index = exposing_unit->index;
+      update.src_state = (ADSM_disease_state) exposing_unit->state;
+      update.dest_index = exposed_unit->index;
+      update.dest_state = (ADSM_disease_state) exposed_unit->state;
+  
+      update.initiated_day = (int) event->initiated_day;
+      update.finalized_day = (int) event->initiated_day + event->delay;
+  
+      if( TRUE == event->adequate )
+        update.is_adequate = ADSM_SuccessTrue;
+      else
+        update.is_adequate = ADSM_SuccessFalse;
+  
+      switch (event->contact_type)
+        {
+          case ADSM_DirectContact:
+          case ADSM_IndirectContact:
+          case ADSM_AirborneSpread:
+            update.exposure_method = event->contact_type;
+            break;      
+          default:
+            /* If this condition occurs, someone forgot something. */
+            g_error( "An unrecognized exposure mechanism (%s) occurred in handle_exposure_event", cause );
+            update.exposure_method = 0;     
+        }
 
-      
-#ifdef USE_SC_GUILIB
-  sc_expose_unit( exposed_unit, update );
-#else	  
-  if (NULL != adsm_expose_unit)
-    {
-      adsm_expose_unit (update);
+    #ifdef USE_SC_GUILIB
+      sc_expose_unit( exposed_unit, update );
+    #else	  
+      if (NULL != adsm_expose_unit)
+        {
+          adsm_expose_unit (update);
+        }
+    #endif  
     }
-#endif  
 
 #if UNDEFINED
   printf ("unit at index %d exposed by method %s\n", event->exposed_unit->index, cause);

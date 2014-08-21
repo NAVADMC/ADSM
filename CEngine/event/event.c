@@ -49,7 +49,7 @@ const char *EVT_event_type_name[] = {
   "DeclarationOfVaccinationReasons",
   "DeclarationOfVaccineDelay",
   "DeclarationOfOutputs",
-  "NewDay", "Exposure", "AttemptToInfect", "Infection", "Detection",
+  "NewDay", "Exposure", "Infection", "Detection",
   "PublicAnnouncement", "Exam", "AttemptToTrace", "TraceResult", "Test",
   "TestResult",
   "RequestForVaccination", "CommitmentToVaccinate", "VaccinationCanceled",
@@ -382,6 +382,12 @@ EVT_new_exposure_event (UNT_unit_t * exposing_unit, UNT_unit_t * exposed_unit,
   event->u.exposure.adequate = adequate;
   event->u.exposure.initiated_day = day;
   event->u.exposure.delay = delay;
+  /* The following three items cause this to be a normal infection, one that
+   * starts from the start rather than being added to the simulation in-
+   * progress. */
+  event->u.exposure.override_initial_state = Latent;
+  event->u.exposure.override_days_in_state = 0;
+  event->u.exposure.override_days_left_in_state = 0;
   return event;
 }
 
@@ -397,69 +403,22 @@ char *
 EVT_exposure_event_to_string (EVT_exposure_event_t * event)
 {
   GString *s;
-  char *chararray;
 
   s = g_string_new (NULL);
-  g_string_sprintf (s, "<Exposure event units=\"%s\"->\"%s\" (%s) day=%i traceable=%i>",
-                    event->exposing_unit->official_id,
-                    event->exposed_unit->official_id,
-                    ADSM_contact_type_name[event->contact_type], event->day, event->traceable);
-  /* don't return the wrapper object */
-  chararray = s->str;
-  g_string_free (s, FALSE);
-  return chararray;
-}
+  if (event->exposing_unit == NULL)
+    g_string_printf (s, "<Exposure event unit=\"%s\"",
+                     event->exposed_unit->official_id);
+  else
+    g_string_printf (s, "<Exposure event units=\"%s\"->\"%s\"",
+                     event->exposing_unit->official_id,
+                     event->exposed_unit->official_id);
 
-
-
-/**
- * Creates a new "attempt to infect" event.
- *
- * @return a pointer to a newly-created EVT_event_t structure.
- */
-EVT_event_t *
-EVT_new_attempt_to_infect_event (UNT_unit_t * infecting_unit,
-                                 UNT_unit_t * infected_unit, int day,
-                                 ADSM_contact_type contact_type)
-{
-  EVT_event_t *event;
-
-  event = g_new (EVT_event_t, 1);
-  event->type = EVT_AttemptToInfect;
-  event->u.attempt_to_infect.infecting_unit = infecting_unit;
-  event->u.attempt_to_infect.infected_unit = infected_unit;
-  event->u.attempt_to_infect.day = day;
-  event->u.attempt_to_infect.contact_type = contact_type;
-  /* The following three items cause this to be a normal infection, one that
-   * starts from the start rather than being added to the simulation in-
-   * progress. */
-  event->u.attempt_to_infect.override_initial_state = Latent;
-  event->u.attempt_to_infect.override_days_in_state = 0;
-  event->u.attempt_to_infect.override_days_left_in_state = 0;
-
-  return event;
-}
-
-
-
-/**
- * Returns a text representation of an attempt to infect event.
- *
- * @param event an attempt to infect event.
- * @return a string.
- */
-char *
-EVT_attempt_to_infect_event_to_string (EVT_attempt_to_infect_event_t * event)
-{
-  GString *s;
-  char *chararray;
-
-  s = g_string_new (NULL);
-  g_string_sprintf (s, "<Attempt to infect event unit=\"%s\" day=%i",
-                    event->infected_unit->official_id, event->day);
+  g_string_append_printf (s, " (%s) day=%i traceable=%i",
+                          ADSM_contact_type_name[event->contact_type],
+                          event->day, event->traceable);
   if (event->override_initial_state > Susceptible)
     {
-      g_string_append_printf (s, "\n start %s", UNT_state_name[event->override_initial_state]);
+      g_string_append_printf (s, " start %s", UNT_state_name[event->override_initial_state]);
  
       if (event->override_days_in_state > 0)
         g_string_append_printf (s, " %i days elapsed", event->override_days_in_state);
@@ -470,9 +429,7 @@ EVT_attempt_to_infect_event_to_string (EVT_attempt_to_infect_event_t * event)
   g_string_append_c (s, '>');
 
   /* don't return the wrapper object */
-  chararray = s->str;
-  g_string_free (s, FALSE);
-  return chararray;
+  return g_string_free (s, /* free_segment = */ FALSE);
 }
 
 
@@ -1466,7 +1423,6 @@ EVT_free_event (EVT_event_t * event)
     case EVT_DeclarationOfVaccineDelay:
     case EVT_NewDay:
     case EVT_Exposure:
-    case EVT_AttemptToInfect:
     case EVT_Infection:
     case EVT_Detection:
     case EVT_PublicAnnouncement:
@@ -1534,17 +1490,9 @@ EVT_clone_event (EVT_event_t * event)
         e = &(event->u.exposure);
         clone = EVT_new_exposure_event (e->exposing_unit, e->exposed_unit,
                                         e->day, e->contact_type, e->traceable, e->adequate, e->delay);
-        break;
-      }
-    case EVT_AttemptToInfect:
-      {
-        EVT_attempt_to_infect_event_t *e;
-        e = &(event->u.attempt_to_infect);
-        clone = EVT_new_attempt_to_infect_event (e->infecting_unit,
-                                                 e->infected_unit, e->day, e->contact_type);
-        clone->u.attempt_to_infect.override_initial_state = e->override_initial_state;
-        clone->u.attempt_to_infect.override_days_in_state = e->override_days_in_state;
-        clone->u.attempt_to_infect.override_days_left_in_state = e->override_days_left_in_state;
+        clone->u.exposure.override_initial_state = e->override_initial_state;
+        clone->u.exposure.override_days_in_state = e->override_days_in_state;
+        clone->u.exposure.override_days_left_in_state = e->override_days_left_in_state;
         break;
       }
     case EVT_RequestForVaccination:
@@ -1644,9 +1592,6 @@ EVT_event_to_string (EVT_event_t * event)
       break;
     case EVT_Exposure:
       s = EVT_exposure_event_to_string (&(event->u.exposure));
-      break;
-    case EVT_AttemptToInfect:
-      s = EVT_attempt_to_infect_event_to_string (&(event->u.attempt_to_infect));
       break;
     case EVT_Infection:
       s = EVT_infection_event_to_string (&(event->u.infection));
