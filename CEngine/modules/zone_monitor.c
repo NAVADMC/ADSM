@@ -63,13 +63,7 @@ typedef struct
   projPJ projection; /* The map projection used to convert the units' latitudes
     and longitudes to x-y coordinates */
   RPT_reporting_t *area;
-  RPT_reporting_t *max_area;
-  RPT_reporting_t *max_area_day;
-  RPT_reporting_t *final_area;
   RPT_reporting_t *perimeter;
-  RPT_reporting_t *max_perimeter;
-  RPT_reporting_t *max_perimeter_day;
-  RPT_reporting_t *final_perimeter;
   RPT_reporting_t *num_separate_areas;
   RPT_reporting_t *num_units;
   RPT_reporting_t *num_units_by_prodtype;
@@ -96,7 +90,7 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 {
   local_data_t *local_data;
   int i;
-  ZON_zone_t *zone, *next_smaller_zone;
+  ZON_zone_t *zone;
   double area;
   double perimeter;
   unsigned int nunits;
@@ -118,15 +112,6 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 
       perimeter = ZON_update_perimeter (zone);
       RPT_reporting_set_real1 (local_data->perimeter, perimeter, zone->name);
-      /* If the zone has grown, record the new maximum perimeter. */
-      if (perimeter > 0
-          && (RPT_reporting_is_null1 (local_data->max_perimeter, zone->name)
-              || (perimeter > RPT_reporting_get_real1 (local_data->max_perimeter, zone->name))))
-        {
-          RPT_reporting_set_real1 (local_data->max_perimeter, perimeter, zone->name);
-          RPT_reporting_set_integer1 (local_data->max_perimeter_day, event->day, zone->name);
-        } 
-        
       if (NULL != adsm_record_zone_perimeter)
         adsm_record_zone_perimeter (zone->level, perimeter);           
 
@@ -143,20 +128,13 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
    * "background" zone. */
   for (i = local_data->nzones - 2; i >= 0; i--)
     {
+      ZON_zone_t *next_smaller_zone;
       zone = ZON_zone_list_get (zones, i);
       if (i > 0)
         {
           next_smaller_zone = ZON_zone_list_get (zones, i - 1);
           zone->area -= next_smaller_zone->area;
           RPT_reporting_set_real1 (local_data->area, zone->area, zone->name);
-        }
-      /* If the zone has grown, record the new maximum area. */
-      if (zone->area > 0
-          && (RPT_reporting_is_null1 (local_data->max_area_day, zone->name)
-              || (zone->area > RPT_reporting_get_real1 (local_data->max_area, zone->name))))
-        {
-          RPT_reporting_set_real1 (local_data->max_area, zone->area, zone->name);
-          RPT_reporting_set_integer1 (local_data->max_area_day, event->day, zone->name);
         }
       #ifdef USE_SC_GUILIB
         sc_record_zone_area( event->day, zone );
@@ -262,13 +240,7 @@ reset (struct adsm_module_t_ *self)
   local_data = (local_data_t *) (self->model_data);
   /* RPT_reporting_zero preserves sub-cateogories but sets all numbers to 0. */
   RPT_reporting_zero (local_data->area);
-  RPT_reporting_zero (local_data->max_area);
-  RPT_reporting_set_null (local_data->max_area_day, NULL);
-  RPT_reporting_set_null (local_data->final_area, NULL);
   RPT_reporting_zero (local_data->perimeter);
-  RPT_reporting_zero (local_data->max_perimeter);
-  RPT_reporting_set_null (local_data->max_perimeter_day, NULL);
-  RPT_reporting_set_null (local_data->final_perimeter, NULL);
   RPT_reporting_zero (local_data->num_separate_areas);
   RPT_reporting_zero (local_data->num_units);
   RPT_reporting_zero (local_data->num_units_by_prodtype);
@@ -301,13 +273,7 @@ local_free (struct adsm_module_t_ *self)
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
   RPT_free_reporting (local_data->area);
-  RPT_free_reporting (local_data->max_area);
-  RPT_free_reporting (local_data->max_area_day);
-  RPT_free_reporting (local_data->final_area);
   RPT_free_reporting (local_data->perimeter);
-  RPT_free_reporting (local_data->max_perimeter);
-  RPT_free_reporting (local_data->max_perimeter_day);
-  RPT_free_reporting (local_data->final_perimeter);
   RPT_free_reporting (local_data->num_separate_areas);
   RPT_free_reporting (local_data->num_units);
   RPT_free_reporting (local_data->num_units_by_prodtype);
@@ -363,13 +329,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->area = RPT_new_reporting ("zoneArea", RPT_group);
-  local_data->max_area = RPT_new_reporting ("maxZoneArea", RPT_group);
-  local_data->max_area_day = RPT_new_reporting ("maxZoneAreaDay", RPT_group);
-  local_data->final_area = RPT_new_reporting ("finalZoneArea", RPT_group);
   local_data->perimeter = RPT_new_reporting ("zonePerimeter", RPT_group);
-  local_data->max_perimeter = RPT_new_reporting ("maxZonePerimeter", RPT_group);
-  local_data->max_perimeter_day = RPT_new_reporting ("maxZonePerimeterDay", RPT_group);
-  local_data->final_perimeter = RPT_new_reporting ("finalZonePerimeter", RPT_group);
   local_data->num_separate_areas =
     RPT_new_reporting ("numSeparateAreas", RPT_group);
   local_data->num_units = RPT_new_reporting ("unitsInZone", RPT_group);
@@ -379,13 +339,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->num_animal_days = RPT_new_reporting ("animalDaysInZone", RPT_group);
   local_data->num_animal_days_by_prodtype = RPT_new_reporting ("animalDaysInZone", RPT_group);
   g_ptr_array_add (self->outputs, local_data->area);
-  g_ptr_array_add (self->outputs, local_data->max_area);
-  g_ptr_array_add (self->outputs, local_data->max_area_day);
-  g_ptr_array_add (self->outputs, local_data->final_area);
   g_ptr_array_add (self->outputs, local_data->perimeter);
-  g_ptr_array_add (self->outputs, local_data->max_perimeter);
-  g_ptr_array_add (self->outputs, local_data->max_perimeter_day);
-  g_ptr_array_add (self->outputs, local_data->final_perimeter);
   g_ptr_array_add (self->outputs, local_data->num_separate_areas);
   g_ptr_array_add (self->outputs, local_data->num_units);
   g_ptr_array_add (self->outputs, local_data->num_units_by_prodtype);
@@ -393,8 +347,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_ptr_array_add (self->outputs, local_data->num_unit_days_by_prodtype);
   g_ptr_array_add (self->outputs, local_data->num_animal_days);
   g_ptr_array_add (self->outputs, local_data->num_animal_days_by_prodtype);
-
-  /* Set the reporting frequency for the output variables. */
 
   local_data->nzones = ZON_zone_list_length (zones);
   local_data->projection = projection;
@@ -408,13 +360,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       if (i < local_data->nzones - 1)
         {
           RPT_reporting_set_real1 (local_data->area, 0, zone->name);
-          RPT_reporting_set_real1 (local_data->max_area, 0, zone->name);
-          RPT_reporting_set_integer1 (local_data->max_area_day, 0, zone->name);
-          RPT_reporting_set_real1 (local_data->final_area, 0, zone->name);
           RPT_reporting_set_real1 (local_data->perimeter, 0, zone->name);
-          RPT_reporting_set_real1 (local_data->max_perimeter, 0, zone->name);
-          RPT_reporting_set_integer1 (local_data->max_perimeter_day, 0, zone->name);
-          RPT_reporting_set_real1 (local_data->final_perimeter, 0, zone->name);
           RPT_reporting_set_integer1 (local_data->num_separate_areas, 0, zone->name);
         }
       RPT_reporting_set_integer1 (local_data->num_units, 0, zone->name);

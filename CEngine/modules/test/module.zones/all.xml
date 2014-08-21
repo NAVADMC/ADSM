@@ -2258,22 +2258,16 @@
   <output>
     <tr>
       <td>zoneAreaHighRisk</td>
-      <td>maxZoneAreaHighRisk</td>
-      <td>maxZoneAreaDayHighRisk</td>
-      <td>finalZoneAreaHighRisk</td>
       <td>zonePerimeterHighRisk</td>
-      <td>maxZonePerimeterHighRisk</td>
-      <td>maxZonePerimeterDayHighRisk</td>
-      <td>finalZonePerimeterHighRisk</td>
     </tr>
-    <!--    Area (sq km)                                           |    Perimeter (km)                                          -->
-    <tr>    <td>0</td>      <td>0</td>   <td></td>       <td></td>      <td>0</td>      <td>0</td>   <td></td>       <td></td></tr>
-    <tr>    <td>0</td>      <td>0</td>   <td></td>       <td></td>      <td>0</td>      <td>0</td>   <td></td>       <td></td></tr>
-    <tr>    <td>0</td>      <td>0</td>   <td></td>       <td></td>      <td>0</td>      <td>0</td>   <td></td>       <td></td></tr>
-    <tr> <td>9.82</td>   <td>9.82</td>  <td>4</td>       <td></td>  <td>15.71</td>  <td>15.71</td>  <td>4</td>       <td></td></tr>
-    <tr> <td>9.82</td>   <td>9.82</td>  <td>4</td>       <td></td>  <td>15.71</td>  <td>15.71</td>  <td>4</td>       <td></td></tr>
-    <tr><td>14.05</td>  <td>14.05</td>  <td>6</td>       <td></td>  <td>17.99</td>  <td>17.99</td>  <td>6</td>       <td></td></tr>
-    <tr><td>14.05</td>  <td>14.05</td>  <td>6</td>  <td>14.05</td>  <td>17.99</td>  <td>17.99</td>  <td>6</td>  <td>17.99</td></tr>
+    <!--  Area (sq km)  Perimeter (km) -->
+    <tr>    <td>0</td>      <td>0</td></tr>
+    <tr>    <td>0</td>      <td>0</td></tr>
+    <tr>    <td>0</td>      <td>0</td></tr>
+    <tr> <td>9.82</td>  <td>15.71</td></tr>
+    <tr> <td>9.82</td>  <td>15.71</td></tr>
+    <tr><td>14.05</td>  <td>17.99</td></tr>
+    <tr><td>14.05</td>  <td>17.99</td></tr>
   </output>
 </variable-test>
 
@@ -3801,9 +3795,6 @@
     
     area = 2 * (pi*5.5&lt;sup&gt;2&lt;/sup&gt;*(360-2*theta)/360 + 5*5.5*sin(theta))
     = 186.98 square km.
-
-    Note that maxZoneAreaDay should have no value until a zone is established,
-    and finalZoneArea should have no value until the end of the simulation.
   </parameter-description>
 
   <diagram>1_zone_2_foci_merge_w_triangle</diagram>
@@ -3811,14 +3802,11 @@
   <output>
     <tr>
       <td>zoneAreaHighRisk</td>
-      <td>maxZoneAreaHighRisk</td>
-      <td>maxZoneAreaDayHighRisk</td>
-      <td>finalZoneAreaHighRisk</td>
     </tr>
-    <tr>     <td>0</td>       <td>0</td>   <td></td>        <td></td></tr>
-    <tr>     <td>0</td>       <td>0</td>   <td></td>        <td></td></tr>
-    <tr><td>186.98</td>  <td>186.98</td>  <td>3</td>        <td></td></tr>
-    <tr><td>186.98</td>  <td>186.98</td>  <td>3</td>  <td>186.98</td></tr>
+    <tr>     <td>0</td></tr>
+    <tr>     <td>0</td></tr>
+    <tr><td>186.98</td></tr>
+    <tr><td>186.98</td></tr>
   </output>
 </variable-test>
 
@@ -4077,10 +4065,6 @@
     theta = arccos(5/5.5)
     
     perimeter = 2 * pi*5.5*2 * (360-2*theta)/360 = 59.66 km.
-
-    Note that maxZonePerimeterDay should have no value until a zone is
-    established, and finalZonePerimeter should have no value until the end of
-    the simulation.
   </parameter-description>
 
   <diagram>1_zone_2_foci_merge_w_triangle</diagram>
@@ -4088,14 +4072,11 @@
   <output>
     <tr>
       <td>zonePerimeterHighRisk</td>
-      <td>maxZonePerimeterHighRisk</td>
-      <td>maxZonePerimeterDayHighRisk</td>
-      <td>finalZonePerimeterHighRisk</td>
     </tr>
-    <tr>    <td>0</td>      <td>0</td>   <td></td>       <td></td></tr>
-    <tr>    <td>0</td>      <td>0</td>   <td></td>       <td></td></tr>
-    <tr><td>59.66</td>  <td>59.66</td>  <td>3</td>       <td></td></tr>
-    <tr><td>59.66</td>  <td>59.66</td>  <td>3</td>  <td>59.66</td></tr>
+    <tr>    <td>0</td></tr>
+    <tr>    <td>0</td></tr>
+    <tr><td>59.66</td></tr>
+    <tr><td>59.66</td></tr>
   </output>
 </variable-test>
 
