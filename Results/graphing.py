@@ -140,7 +140,7 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     time_data = pd.DataFrame.from_records(time_series, columns=columns)  # keys should be same ordering as the for loop above
     time_data = time_data.set_index('Day')
 
-    fig = plt.figure(figsize=(8, 6))
+    fig = plt.figure(figsize=(6, 4))
     gs = gridspec.GridSpec(1, 2, width_ratios=[4, 1])
     axes = [plt.subplot(gs[0]), ]
     axes.append(plt.subplot(gs[1], sharey=axes[0]))
@@ -153,7 +153,7 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     time_data.plot(ax=axes[0])
     
     boxplot_raw = collect_boxplot_data(lines, model, field_name)  # This uses the original lines because the ragged shape is important
-    boxplot_data = pd.DataFrame(pd.Series(boxplot_raw), columns=['Units'])
+    boxplot_data = pd.DataFrame(pd.Series(boxplot_raw), columns=['Distribution'])
     boxplot_data.boxplot(ax=axes[1], return_type='axes')
     #if there are more than 11 iterations, hide or truncate the legend
     if len(columns) > 11:
