@@ -8,6 +8,8 @@ from future.builtins import super
 from future.builtins import range
 from future.builtins import str
 from future import standard_library
+from itertools import zip_longest
+
 standard_library.install_hooks()
 from concurrent.futures import ProcessPoolExecutor
 from glob import glob
@@ -200,6 +202,18 @@ def create_time_series_lines(field_name, model, iterate_pt, iterate_zone, iterat
     return lines, columns
 
 
+def extend_last_day_lines(lines):
+    """Turns the ragged edge caused by different iterations ending on different days into
+    a series of flat lines at their ending value.  Implemented for Issue #159"""
+    time_series = []
+    max_size = max([len(x) for x in lines])
+    for line in lines:
+        last_value = line[-1]
+        missing_values = max_size - len(line)
+        time_series.append(line + [last_value] * missing_values)
+    return list(zip(*time_series))
+
+
 def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     model = globals()[model_name]
     iterate_pt, iterate_zone = {"DailyByProductionType": (True, False),
@@ -208,9 +222,9 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
                                 "DailyControls": (False, False)}[model_name]
 
     lines, columns = create_time_series_lines(field_name, model, iterate_pt, iterate_zone, iteration=iteration, zone=zone)
-    lines.insert(0, list(range(model.objects.all().aggregate(Max('day'))['day__max'])))  # Start with day index
+    lines.insert(0, list(range(1, model.objects.all().aggregate(Max('day'))['day__max'] + 1)))  # Start with day index
 
-    time_series = zip(*lines)
+    time_series = extend_last_day_lines(lines)
     time_data = pd.DataFrame.from_records(time_series, columns=columns)  # keys should be same ordering as the for loop above
     time_data = time_data.set_index('Day')
 
