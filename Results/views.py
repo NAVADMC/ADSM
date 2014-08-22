@@ -2,6 +2,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import division
 from __future__ import absolute_import
+from collections import defaultdict
 from future.builtins import *
 from future import standard_library
 standard_library.install_hooks()
@@ -147,11 +148,22 @@ def result_table(request, model_name, model_class, model_form, graph_links=False
     else:  # New Behavior with links to a graph for every field
         context['formset'] = ResultSet(queryset=model_class.objects.all().order_by('iteration', 'day')[:5])
         context['Zones'] = Zone.objects.all()
-        context['iterations'] = iterations[:10]  # It's pointless to display links to more than the first 10 iterations, there can be thousands
+        context['iterations'] = iterations[:5]  # It's pointless to display links to more than the first 10 iterations, there can be thousands
         context['model_name'] = model_name
         context['excluded_fields'] = ['zone', 'production_type', 'day', 'iteration', 'id', 'pk']
         context['excluded_fields'] += [field for field in model_class._meta.get_all_field_names() if not field.startswith(prefix)]
         context['empty_fields'] = empty_fields(model_class, context['excluded_fields'])
+        headers = {DailyByProductionType: [("Exposures", "exp"),  # this mapping is also embedded in navigationPanel.html
+                                           ("Infections", "inf"),
+                                           ("Destruction", "des"),
+                                           ("Exams", "exm"),
+                                           ("Lab Tests", "tst"),
+                                           ("Tracing", "tr")],
+                   DailyControls: [("Destruction", 'dest'),
+                                   ("Destruction Wait", 'desw'),
+                                   ("Vaccination", 'vac')]}
+        headers = defaultdict(lambda: [('', '')], headers)
+        context['headers'] = headers[model_class]
         return render(request, 'Results/GraphLinks.html', context)
 
 

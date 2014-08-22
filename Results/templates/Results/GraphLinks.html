@@ -7,36 +7,41 @@
 
 <form method="post" action="">
     {{ formset.management_form }}
-    <table class="result-table">
-        <thead>
-            <tr>
-                <th>Iteration:</th>
-                <th>(All)</th>
-                {% for iteration in iterations %}
-                    <th>{{iteration}}</th>
+
+    {% for label, prefix in headers %}
+        <h1>{{ label }}</h1>
+        <table class="result-table">
+            <thead>
+                <tr>
+                    <th><span class="pull-right">Iteration:</span></th>
+                    <th>(All)</th>
+                    {% for iteration in iterations %}
+                        <th>{{iteration}}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for key, value in formset.0.fields.items %}
+                    {% if prefix in key and key not in excluded_fields and key not in empty_fields%}
+                        <tr>
+                            {% if value.label %}
+                                <th>{{value.label}}</th>
+                            {% endif %}
+                                <td>
+                                    <a href="/results/{{ model_name }}/{{ key }}/"> {{ key|truncatechars:10 }} </a> {#All Daily Samples#}
+                                </td>
+                            {% for iteration in iterations %}
+                                <td>
+                                    <a href="/results/{{ model_name }}/{{ key }}/{{ iteration }}/"> {{ key|truncatechars:10 }} </a>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endif %}
                 {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for key, value in formset.0.fields.items %}
-                {% if not key in excluded_fields and not key in empty_fields%}
-                    <tr>
-                        {% if value.label %}
-                            <th>{{value.label}}</th>
-                        {% endif %}
-                            <td>
-                                <a href="/results/{{ model_name }}/{{ key }}/"> {{ key|truncatechars:10 }} </a> {#All Daily Samples#}
-                            </td>
-                        {% for iteration in iterations %}
-                            <td>
-                                <a href="/results/{{ model_name }}/{{ key }}/{{ iteration }}/"> {{ key|truncatechars:10 }} </a>
-                            </td>
-                        {% endfor %}
-                    </tr>
-                {% endif %}
-            {% endfor %}
-     </tbody>
-    </table>
+         </tbody>
+        </table>           
+    {% endfor %}
+
     {% if empty_fields %}
         <h1>Empty Fields:</h1>
         <ul class="minor">
