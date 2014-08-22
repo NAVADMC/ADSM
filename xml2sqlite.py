@@ -543,7 +543,7 @@ def readParameters( parameterFileName ):
 
 	# Create a PDF that always returns 0. Will be used as the default for the
 	# test delay PDF.
-	zeroDelay = ProbabilityFunction( equation_type='Fixed Value', mode=0 )
+	zeroDelay = ProbabilityFunction( name='Zero delay', equation_type='Fixed Value', mode=0 )
 	zeroDelay.save()
 
 	for el in xml.findall( './/detection-model' ):
