@@ -286,7 +286,7 @@ int UNT_fprintf_unit (FILE *, UNT_unit_t *);
 #define UNT_printf_unit(H) UNT_fprintf_unit(stdout,H)
 
 void UNT_reset (UNT_unit_t *);
-void UNT_step (UNT_unit_t *, GHashTable *infectious_units);
+UNT_state_t UNT_step (UNT_unit_t *, GHashTable *infectious_units);
 void UNT_infect (UNT_unit_t *, int latent_period,
                  int infectious_subclinical_period,
                  int infectious_clinical_period,

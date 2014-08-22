@@ -58,6 +58,7 @@ const char *EVT_event_type_name[] = {
   "RequestForZoneFocus", "EndOfDay",
   "EndOfDay2",
   "Midnight",
+  "UnitStateChange",
   NULL
 };
 
@@ -1364,6 +1365,55 @@ EVT_midnight_event_to_string (EVT_midnight_event_t * event)
 
 
 /**
+ * Creates a new "unit state change" event.
+ *
+ * @return a pointer to a newly-created EVT_event_t structure.
+ */
+EVT_event_t *
+EVT_new_unit_state_change_event (UNT_unit_t * unit,
+                                 UNT_state_t old_state,
+                                 UNT_state_t new_state,
+                                 int day)
+{
+  EVT_event_t *event;
+
+  event = g_new (EVT_event_t, 1);
+  event->type = EVT_UnitStateChange;
+  event->u.unit_state_change.unit = unit;
+  event->u.unit_state_change.old_state = old_state;
+  event->u.unit_state_change.new_state = new_state;
+  event->u.unit_state_change.day = day;
+
+  return event;
+}
+
+
+
+/**
+ * Returns a text representation of a unit state change event.
+ *
+ * @param event a unit state change event.
+ * @return a string.
+ */
+char *
+EVT_unit_state_change_event_to_string (EVT_unit_state_change_event_t * event)
+{
+  GString *s;
+
+  s = g_string_new (NULL);
+  g_string_sprintf (s, "<Unit state change event unit=\"%s\" %s->%s day=%i>",
+                    event->unit->official_id,
+                    UNT_state_name[event->old_state],
+                    UNT_state_name[event->new_state],
+                    event->day);
+
+  /* don't return the wrapper object */
+  return g_string_free (s, FALSE);
+}
+
+
+
+/**
  * Deletes an event from memory.
  *
  * @param event an event.
@@ -1400,6 +1450,7 @@ EVT_free_event (EVT_event_t * event)
     case EVT_EndOfDay:
     case EVT_EndOfDay2:
     case EVT_Midnight:
+    case EVT_UnitStateChange:
       /* No dynamically-allocated parts to free. */
       break;
     case EVT_OutputDirectory:
@@ -1606,6 +1657,9 @@ EVT_event_to_string (EVT_event_t * event)
       break;
     case EVT_Midnight:
       s = EVT_midnight_event_to_string (&(event->u.midnight));
+      break;
+    case EVT_UnitStateChange:
+      s = EVT_unit_state_change_event_to_string (&(event->u.unit_state_change));
       break;
     default:
       g_assert_not_reached ();

@@ -73,6 +73,7 @@ typedef enum
   EVT_Destruction, EVT_RequestForZoneFocus, EVT_EndOfDay,
   EVT_EndOfDay2,
   EVT_Midnight,
+  EVT_UnitStateChange,
   EVT_NEVENT_TYPES
 }
 EVT_event_type_t;
@@ -473,6 +474,18 @@ EVT_midnight_event_t;
 
 
 
+/** A "unit state change" event. */
+typedef struct
+{
+  UNT_unit_t *unit;
+  UNT_state_t old_state;
+  UNT_state_t new_state;
+  int day; /**< simulation day on which the new state applies */
+}
+EVT_unit_state_change_event_t;
+
+
+
 /** A supertype for all events. */
 typedef struct
 {
@@ -506,6 +519,7 @@ typedef struct
     EVT_end_of_day_event_t end_of_day;
     EVT_end_of_day2_event_t end_of_day2;
     EVT_midnight_event_t midnight;
+    EVT_unit_state_change_event_t unit_state_change;
   }
   u;
 }
@@ -600,6 +614,10 @@ EVT_event_t *EVT_new_request_for_zone_focus_event (UNT_unit_t *,
 EVT_event_t *EVT_new_end_of_day_event (int day, gboolean done);
 EVT_event_t *EVT_new_end_of_day2_event (int day, gboolean done);
 EVT_event_t *EVT_new_midnight_event (int day);
+EVT_event_t *EVT_new_unit_state_change_event (UNT_unit_t *,
+                                              UNT_state_t old_state,
+                                              UNT_state_t new_state,
+                                              int day);
 
 void EVT_free_event (EVT_event_t *);
 EVT_event_t *EVT_clone_event (EVT_event_t *);

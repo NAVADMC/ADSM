@@ -235,6 +235,7 @@ handle_midnight_event (struct adsm_module_t_ *self,
   local_data_t *local_data;
   unsigned int nunits, i;
   UNT_unit_t *unit;
+  UNT_state_t old_state, new_state;
 
 #if DEBUG
   g_debug ("----- ENTER handle_midnight_event (%s)", MODEL_NAME);
@@ -245,8 +246,17 @@ handle_midnight_event (struct adsm_module_t_ *self,
   for (i = 0; i < nunits; i++)
     {
       unit = UNT_unit_list_get (units, i);
+      old_state = unit->state;
       /* _iteration is a global variable defined in general.c */
-      UNT_step (unit, _iteration.infectious_units);
+      new_state = UNT_step (unit, _iteration.infectious_units);
+      if (old_state != new_state)
+        {
+          EVT_event_enqueue (queue,
+                             EVT_new_unit_state_change_event (unit,
+                                                              old_state,
+                                                              new_state,
+                                                              event->day));
+        }
     }
 
 #if DEBUG

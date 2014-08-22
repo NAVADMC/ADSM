@@ -1327,8 +1327,9 @@ UNT_reset (UNT_unit_t * unit)
  *
  * @param unit a unit.
  * @param infectious_units the set of infectious units.
+ * @return the state of the unit.
  */
-void
+UNT_state_t
 UNT_step (UNT_unit_t * unit, GHashTable *infectious_units)
 {
   UNT_state_t old_state;
@@ -1425,7 +1426,7 @@ UNT_step (UNT_unit_t * unit, GHashTable *infectious_units)
 #endif
     }
 
-  return;
+  return unit->state;
 }
 
 
