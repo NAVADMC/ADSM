@@ -39,7 +39,7 @@ urlpatterns = generate_urls_from_models(
      "url('^RunSimulation/$', 'Results.views.run_simulation')",
      "url('^Population.png$', 'Results.views.population_png')",
      "url('^(?P<model_name>\w+)/(?P<field_name>\w+)/(?P<iteration>\d*)/?$', 'Results.views.graph_field')",  # optional iteration argument
-     "url('^(?P<model_name>\w+)/(?P<field_name>\w+)/(?P<iteration>\d*)/?(?P<zone>[^/]*)/?Graph\.png$', 'Results.views.graph_field_png')",
+     "url('^(?P<model_name>\w+)/(?P<field_name>\w+)/(?P<iteration>\d*)/?(?P<zone>[^/]*)/?Graph\.png$', 'Results.graphing.graph_field_png')",
      "url('^Workspace/$', 'ScenarioCreator.views.file_dialog')",  # Same as Input side
      "url('^Download/(?P<target>.+)/$', 'ScenarioCreator.views.download_file')",  # Same as Input side
      "url('^Inputs/$', 'Results.views.back_to_inputs')",
