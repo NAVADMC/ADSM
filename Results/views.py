@@ -18,9 +18,9 @@ import time
 from ScenarioCreator.models import OutputSettings
 from django.db.models import Max
 from Results.models import *  # necessary
+from Results.forms import *  # necessary
 import Results.output_parser
 from Results.summary import list_of_iterations, summarize_results
-
 
 
 def back_to_inputs(request):

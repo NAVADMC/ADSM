@@ -1,13 +1,13 @@
 from django.http import HttpResponse
 from django.db.models import Max
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from ScenarioCreator.models import Unit, ProductionType, Zone
+from itertools import chain
 from Results.summary import list_of_iterations
 from Results.models import *  # necessary for globals()
 import matplotlib
 matplotlib.use('Agg')  # Force matplotlib to not use any Xwindows backend.
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import pandas as pd
 
 
@@ -95,18 +95,36 @@ def create_time_series_lines(field_name, model, iterate_pt, iterate_zone, iterat
     return lines, columns
 
 
-def extend_last_day_lines(lines):
+def extend_last_day_lines(lines, model, field_name):
     """Turns the ragged edge caused by different iterations ending on different days into
     a series of flat lines at their ending value.  Implemented for Issue #159"""
     time_series = []
     max_size = max([len(x) for x in lines])
     time_series.append(range(1, max_size + 1))  # Start with day index
-
+    cumulative_field = 'new' not in model._meta.get_field_by_name(field_name)[0].verbose_name.lower()
+        
     for line in lines:
-        last_value = line[-1]
+        if cumulative_field:
+            last_value = line[-1]
+        else:  # This field is non-cumulative, default to zero
+            last_value = 0
         missing_values = max_size - len(line)
         time_series.append(line + [last_value] * missing_values)
     return list(zip(*time_series))
+
+
+def collect_boxplot_data(ragged_lines, model, field_name):
+    """Returns a tuple with all the data necessary to make a boxplot distribution.  For 'cumulative' fields,
+    this is the last day.  For non-cumulative, it is the range of non-blank values.  Issue #159:
+    https://github.com/NAVADMC/SpreadModel/issues/159#issuecomment-53058264"""
+    explanation = model._meta.get_field_by_name(field_name)[0].verbose_name
+    if 'new' in explanation.lower():  # This field is non-cumulative, default to zero
+        print("Accumulating data for", explanation)
+        boxplot_data = tuple(chain(*ragged_lines))  # pile together all the data, but don't include trailing zeroes
+    else:  # this field is cumulative
+        print("Slicing last day for", explanation)
+        boxplot_data = (line[-1] for line in ragged_lines)  # only last day is relevant
+    return boxplot_data
 
 
 def graph_field_png(request, model_name, field_name, iteration='', zone=''):
@@ -117,8 +135,8 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
                                 "DailyControls": (False, False)}[model_name]
 
     lines, columns = create_time_series_lines(field_name, model, iterate_pt, iterate_zone, iteration=iteration, zone=zone)
-
-    time_series = extend_last_day_lines(lines)
+    
+    time_series = extend_last_day_lines(lines, model, field_name)
     time_data = pd.DataFrame.from_records(time_series, columns=columns)  # keys should be same ordering as the for loop above
     time_data = time_data.set_index('Day')
 
@@ -132,10 +150,11 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
             Max(field_name))[field_name + '__max'] * 1.05
         axes[0].set_ylim(0.0, ymax)
         axes[1].set_ylim(0.0, ymax)
-    
     time_data.plot(ax=axes[0])
-    last_day = time_data.tail(1).T
-    last_day.boxplot(ax=axes[1], return_type='axes')
+    
+    boxplot_raw = collect_boxplot_data(lines, model, field_name)  # This uses the original lines because the ragged shape is important
+    boxplot_data = pd.DataFrame(pd.Series(boxplot_raw), columns=['Units'])
+    boxplot_data.boxplot(ax=axes[1], return_type='axes')
     #if there are more than 11 iterations, hide or truncate the legend
     if len(columns) > 11:
         axes[0].legend().set_visible(False)
