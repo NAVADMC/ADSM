@@ -8,7 +8,7 @@ from future.builtins import object
 import os
 from django.db import models
 import shutil
-from ScenarioCreator.models import ProductionType, Zone
+from ScenarioCreator.models import ProductionType, Zone, Unit
 import re
 from Settings.models import scenario_filename
 from Results.output_grammar import explain
@@ -368,10 +368,20 @@ class DailyControls(OutputBaseModel):
     detcUqAll            = models.IntegerField(blank=True, null=True, verbose_name=printable_name('detcUqAll'))
 
 
+class UnitStats(OutputBaseModel):
+    unit = models.OneToOneField(Unit, help_text='Pointer back to the input Unit (lat/long) these stats are for.')
+    cumulative_infected = models.PositiveIntegerField(default=0,
+        help_text='The total number of iterations in which this unit became infected.', )
+    cumulative_zone_focus = models.PositiveIntegerField(default=0,
+        help_text='The total number of iterations in which this unit was a zone focus.', )
+    cumulative_destroyed = models.PositiveIntegerField(default=0,
+        help_text='The total number of iterations in which this unit was destroyed.', )
+    cumulative_vaccinated = models.PositiveIntegerField(default=0,
+        help_text='The total number of iterations in which this unit was vaccinated.', )
 
 
 def delete_all_outputs():
-    output_models = [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType]
+    output_models = [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats]
     for model in output_models:
         model.objects.all().delete()
     try:
