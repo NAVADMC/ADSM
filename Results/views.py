@@ -136,6 +136,23 @@ def empty_fields(model_class, excluded_fields):
     return rejected_fields
 
 
+def class_specific_headers(model_class, prefix):
+    headers = {DailyByProductionType: [("Exposures", "exp"),  # this mapping is also embedded in navigationPanel.html
+                                       ("Infections", "inf"),
+                                       ("Destruction", "des"),
+                                       ("Exams", "exm"),
+                                       ("Lab Tests", "tst"),
+                                       ("Tracing", "tr")],
+               DailyControls: [("Destruction", 'dest'),
+                               ("Destruction Wait", 'desw'),
+                               ("Vaccination", 'vac')]}
+    headers = defaultdict(lambda: [('', '')], headers)
+    headers = headers[model_class]  # select by class
+    if prefix:  # filter if there's a prefix
+        headers = [item for item in headers if item[1] == prefix]
+    return headers
+
+
 def result_table(request, model_name, model_class, model_form, graph_links=False, prefix=''):
     """Displays a table with links to all possible graphs of each field, for every iteration.
        Issue #127"""
@@ -153,17 +170,7 @@ def result_table(request, model_name, model_class, model_form, graph_links=False
         context['excluded_fields'] = ['zone', 'production_type', 'day', 'iteration', 'id', 'pk']
         context['excluded_fields'] += [field for field in model_class._meta.get_all_field_names() if not field.startswith(prefix)]
         context['empty_fields'] = empty_fields(model_class, context['excluded_fields'])
-        headers = {DailyByProductionType: [("Exposures", "exp"),  # this mapping is also embedded in navigationPanel.html
-                                           ("Infections", "inf"),
-                                           ("Destruction", "des"),
-                                           ("Exams", "exm"),
-                                           ("Lab Tests", "tst"),
-                                           ("Tracing", "tr")],
-                   DailyControls: [("Destruction", 'dest'),
-                                   ("Destruction Wait", 'desw'),
-                                   ("Vaccination", 'vac')]}
-        headers = defaultdict(lambda: [('', '')], headers)
-        context['headers'] = headers[model_class]
+        context['headers'] = class_specific_headers(model_class, prefix)
         return render(request, 'Results/GraphLinks.html', context)
 
 
