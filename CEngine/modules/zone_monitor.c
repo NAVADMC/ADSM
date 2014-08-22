@@ -28,6 +28,7 @@
 #define events_listened_for zone_monitor_events_listened_for
 #define local_free zone_monitor_free
 #define handle_new_day_event zone_monitor_handle_new_day_event
+#define handle_request_for_zone_focus_event zone_monitor_handle_request_for_zone_focus_event
 
 #include "module.h"
 #include "gis.h"
@@ -51,8 +52,12 @@
 
 
 
-#define NEVENTS_LISTENED_FOR 2
-EVT_event_type_t events_listened_for[] = { EVT_BeforeAnySimulations, EVT_NewDay };
+#define NEVENTS_LISTENED_FOR 3
+EVT_event_type_t events_listened_for[] = {
+  EVT_BeforeAnySimulations,
+  EVT_RequestForZoneFocus,
+  EVT_NewDay
+};
 
 
 
@@ -71,8 +76,36 @@ typedef struct
   RPT_reporting_t *num_unit_days_by_prodtype;
   RPT_reporting_t *num_animal_days;
   RPT_reporting_t *num_animal_days_by_prodtype;
+  gboolean seen_request_for_zone_focus;
 }
 local_data_t;
+
+
+
+/**
+ * Responds to a request for zone focus event by setting a flag indicating that
+ * the area and perimeter will have to be re-calculated.
+ *
+ * @param self this module.
+ */
+void
+handle_request_for_zone_focus_event (struct adsm_module_t_ *self)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_request_for_zone_focus_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  local_data->seen_request_for_zone_focus = TRUE;
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_request_for_zone_focus_event (%s)", MODEL_NAME);
+  #endif
+  
+  return;
+}
 
 
 
@@ -103,57 +136,64 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 
   local_data = (local_data_t *) (self->model_data);
 
-  for (i = 0; i < local_data->nzones - 1; i++)
+  /* Recalculate the area and perimeter only if the seen_request_for_zone_focus
+   * flag is set. */
+  if (local_data->seen_request_for_zone_focus)
     {
-      zone = ZON_zone_list_get (zones, i);
-
-      area = ZON_update_area (zone);
-      RPT_reporting_set_real1 (local_data->area, area, zone->name);
-
-      perimeter = ZON_update_perimeter (zone);
-      RPT_reporting_set_real1 (local_data->perimeter, perimeter, zone->name);
-      if (NULL != adsm_record_zone_perimeter)
-        adsm_record_zone_perimeter (zone->level, perimeter);           
-
-      RPT_reporting_set_integer1 (local_data->num_separate_areas,
-                                  zone->poly->num_contours, zone->name);
-    }
-
-  /* In the loop above, the area of each zone polygon was computed.  But since
-   * zones are nested inside of each other, that's not exactly what we want:
-   * we want the area displayed for an "outer" zone to exclude the area of the
-   * smaller "inner" zones.  So we do that computation here.
-   *
-   * Start with the next-to-last zone, because the last one is the
-   * "background" zone. */
-  for (i = local_data->nzones - 2; i >= 0; i--)
-    {
-      ZON_zone_t *next_smaller_zone;
-      zone = ZON_zone_list_get (zones, i);
-      if (i > 0)
+      for (i = 0; i < local_data->nzones - 1; i++)
         {
-          next_smaller_zone = ZON_zone_list_get (zones, i - 1);
-          zone->area -= next_smaller_zone->area;
-          RPT_reporting_set_real1 (local_data->area, zone->area, zone->name);
+          zone = ZON_zone_list_get (zones, i);
+
+          area = ZON_update_area (zone);
+          RPT_reporting_set_real1 (local_data->area, area, zone->name);
+
+          perimeter = ZON_update_perimeter (zone);
+          RPT_reporting_set_real1 (local_data->perimeter, perimeter, zone->name);
+          if (NULL != adsm_record_zone_perimeter)
+            adsm_record_zone_perimeter (zone->level, perimeter);           
+
+          RPT_reporting_set_integer1 (local_data->num_separate_areas,
+                                      zone->poly->num_contours, zone->name);
         }
+
+      /* In the loop above, the area of each zone polygon was computed.  But since
+       * zones are nested inside of each other, that's not exactly what we want:
+       * we want the area displayed for an "outer" zone to exclude the area of the
+       * smaller "inner" zones.  So we do that computation here.
+       *
+       * Start with the next-to-last zone, because the last one is the
+       * "background" zone. */
+      for (i = local_data->nzones - 2; i >= 0; i--)
+        {
+          ZON_zone_t *next_smaller_zone;
+          zone = ZON_zone_list_get (zones, i);
+          if (i > 0)
+            {
+              next_smaller_zone = ZON_zone_list_get (zones, i - 1);
+              zone->area -= next_smaller_zone->area;
+              RPT_reporting_set_real1 (local_data->area, zone->area, zone->name);
+            }
+          #ifdef USE_SC_GUILIB
+            sc_record_zone_area( event->day, zone );
+          #else
+            if (NULL != adsm_record_zone_area)     
+              adsm_record_zone_area (zone->level, zone->area);
+          #endif
+        }
+
+      /* Don't forget to report the smallest zone to the GUI! */
+      zone = ZON_zone_list_get (zones, 0);		  
       #ifdef USE_SC_GUILIB
         sc_record_zone_area( event->day, zone );
-      #else
-        if (NULL != adsm_record_zone_area)     
-          adsm_record_zone_area (zone->level, zone->area);
+      #else		  
+        if (NULL != adsm_record_zone_area)
+          {  
+            adsm_record_zone_area (zone->level, zone->area);
+          };
       #endif
-    }
-
-  /* Don't forget to report the smallest zone to the GUI! */
-  zone = ZON_zone_list_get (zones, 0);		  
-  #ifdef USE_SC_GUILIB
-    sc_record_zone_area( event->day, zone );
-  #else		  
-    if (NULL != adsm_record_zone_area)
-      {  
-        adsm_record_zone_area (zone->level, zone->area);
-      };
-  #endif
+      
+      local_data->seen_request_for_zone_focus = FALSE;
+    } /* end of if seen_request_for_zone_focus flag is set */
 
   nunits = zones->membership_length;
   RPT_reporting_zero (local_data->num_units);
@@ -207,6 +247,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
     case EVT_BeforeAnySimulations:
       adsm_declare_outputs (self, queue);
       break;
+    case EVT_RequestForZoneFocus:
+      handle_request_for_zone_focus_event (self);
+      break;
     case EVT_NewDay:
       handle_new_day_event (self, units, zones, &(event->u.new_day));
       break;
@@ -248,6 +291,8 @@ reset (struct adsm_module_t_ *self)
   RPT_reporting_zero (local_data->num_unit_days_by_prodtype);
   RPT_reporting_zero (local_data->num_animal_days);
   RPT_reporting_zero (local_data->num_animal_days_by_prodtype);
+
+  local_data->seen_request_for_zone_focus = FALSE;
 
 #if DEBUG
   g_debug ("----- EXIT reset (%s)", MODEL_NAME);
