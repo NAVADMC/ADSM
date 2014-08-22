@@ -15,7 +15,7 @@ register = template.Library()
 
 @register.filter()
 def active(target_address, url):
-    if target_address.lower() == url.lower():
+    if target_address.lower() in url.lower():
         return 'active '
     return ''
 

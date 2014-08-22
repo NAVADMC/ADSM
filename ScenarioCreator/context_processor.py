@@ -46,7 +46,7 @@ def basic_context(request):
                'ProbabilityFunctions': ProbabilityFunction.objects.count(),
                'RelationalFunctions': RelationalFunction.objects.count(),
                'url': request.path,
-               'active_link': re.split('\W+', request.path)[2],
+               'active_link': '/'.join(re.split('\W+', request.path)[2:]),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
                'outputs_computed': DailyControls.objects.all().count() > 0,
                }
