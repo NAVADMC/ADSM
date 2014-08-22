@@ -173,7 +173,7 @@ typedef struct
   double *max_spread;
   double *size_factor;
   GPtrArray *pending_infections; /**< An array to store delayed contacts.  Each
-    item in the array is a GQueue of Infection and Exposure events.  (Actually
+    item in the array is a GQueue of Exposure events.  (Actually
     a singly-linked list would suffice, but the GQueue syntax is much more
     readable than the GSList syntax.)  An index "rotates" through the array, so
     an event that is to happen in 1 day is placed in the GQueue that is 1 place
@@ -294,7 +294,7 @@ check_and_infect (int id, gpointer arg)
   double max_spread, distance, heading;
   double distance_factor, unit1_size_factor, unit2_size_factor;
   int day;
-  EVT_event_t *exposure, *attempt_to_infect;
+  EVT_event_t *exposure;
   RAN_gen_t *rng;
   double r, P;
   int delay;
@@ -406,40 +406,10 @@ check_and_infect (int id, gpointer arg)
       q = (GQueue *) g_ptr_array_index (local_data->pending_infections, delay_index);
       g_queue_push_tail (q, exposure);
       local_data->npending_exposures++;
-    }
-  
-  /* If the exposure was effective (i.e., the exposure is adequate and the 
-   * recipient is susceptible), then queue an attempt to infect. */
-
-  if( (TRUE == exposure_is_adequate) && (unit2->state == Susceptible) ) 
-    {
-      attempt_to_infect =
-        EVT_new_attempt_to_infect_event (unit1, unit2, day, ADSM_AirborneSpread);
-
-      if (delay <= 0)
-        {
-          EVT_event_enqueue (callback_data->queue, attempt_to_infect);
-          #if DEBUG
-            g_debug ("  r (%g) < P (%g), target unit infected", r, P);
-          #endif
-        }
-      else
-        {
-          attempt_to_infect->u.attempt_to_infect.day = day + delay;
-          
-          /* The queue to add the delayed infection to was already found above. */
-          g_queue_push_tail (q, attempt_to_infect);
-          local_data->npending_infections++;
-          #if DEBUG
-            g_debug ("  r (%g) < P (%g), target unit will be infected on day %i",
-                     r, P, day + delay);
-          #endif
-        }
-    }
-  else
-    {
+      if (exposure_is_adequate)
+        local_data->npending_infections++;
       #if DEBUG
-        g_debug ("  r (%g) >= P (%g), target unit not infected", r, P);
+        g_debug ("npending_exposures now %u, npending_infections now %u", local_data->npending_exposures, local_data->npending_infections);
       #endif
     }
 
@@ -495,16 +465,15 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
       pending_event = (EVT_event_t *) g_queue_pop_head (q);
 #ifndef WIN_DLL
       /* Double-check that the event is coming out on the correct day. */
-      if (pending_event->type == EVT_Exposure)
-        g_assert (pending_event->u.exposure.day == event->day);
-      else
-        g_assert (pending_event->u.attempt_to_infect.day == event->day);
+      g_assert (pending_event->u.exposure.day == event->day);
 #endif
       EVT_event_enqueue (queue, pending_event);
-      if (pending_event->type == EVT_Exposure)
-        local_data->npending_exposures--;
-      else if (pending_event->type == EVT_AttemptToInfect)
+      local_data->npending_exposures--;
+      if (pending_event->u.exposure.adequate)
         local_data->npending_infections--;
+      #if DEBUG
+        g_debug ("npending_exposures now %u, npending_infections now %u", local_data->npending_exposures, local_data->npending_infections);
+      #endif
     }
 
   /* Initialize a data structure used by the callback function. */

@@ -5,6 +5,7 @@
 {% block content %}
     <h1 id="title">{{ title }}</h1>
 
-    <img src="{{ image_link }}" alt="Graph of {{ title }}"/>
-
+    {% for img_link in image_links %}
+        <img src="{{ img_link }}" alt="Graph of {{ title }}"/>
+    {% endfor %}
 {% endblock %}

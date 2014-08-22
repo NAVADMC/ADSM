@@ -22,7 +22,7 @@
         <units><xdf:unit>day</xdf:unit></units>
       </infectious-clinical-period>
       <immunity-period>
-        <point>5</point>
+        <point>6</point>
         <units><xdf:unit>day</xdf:unit></units>
       </immunity-period>
     </disease-model>

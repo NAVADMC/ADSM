@@ -294,7 +294,7 @@
 
   <parameter-description>
     The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
-    accompany infectiousness immediately, and immunity lasts 5 days.
+    accompany infectiousness immediately, and immunity lasts 6 days.
     
     The probability of airborne spread at 1 km is 0.808, and the maximum
     distance of airborne spread is 25 km.  These parameters give a 0.505
@@ -304,17 +304,16 @@
   </parameter-description>
 
   <output>
-    <tr><td>Latent</td>              <td>Susceptible</td></tr>
-    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
-    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
-    <tr><td>NaturallyImmune</td>     <td>Susceptible</td></tr>
-    <tr><td>NaturallyImmune</td>     <td>Latent</td></tr>
-    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
-    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
-    <!-- Delayed exposures on days 8 and 9, then one last day where nothing happens. -->
-    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
-    <tr><td>Susceptible</td>         <td>NaturallyImmune</td></tr>
-    <tr><td>Susceptible</td>         <td>NaturallyImmune</td></tr>
+    <tr><td>L S</td></tr>
+    <tr><td>C S</td></tr>
+    <tr><td>C S</td></tr>
+    <tr><td>N S</td></tr>
+    <tr><td>N L</td></tr>
+    <tr><td>N C</td></tr>
+    <tr><td>N C</td></tr>
+    <tr><td>N N</td></tr> <!-- Delayed exposure to unit 1, but it's immune -->
+    <tr><td>N N</td></tr> <!-- Delayed exposure to unit 1, but it's immune -->
+    <tr><td>S N</td></tr>
   </output>
 </deterministic-test>
 
@@ -337,7 +336,7 @@
 
   <parameter-description>
     The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
-    accompany infectiousness immediately, and immunity lasts 5 days.
+    accompany infectiousness immediately, and immunity lasts 8 days.
     
     The probability of airborne spread at 1 km is 0.808, and the maximum
     distance of airborne spread is 25 km.  These parameters give a 0.505
@@ -347,19 +346,18 @@
   </parameter-description>
 
   <output>
-    <tr><td>Latent</td>              <td>Susceptible</td></tr>
-    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
-    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
-    <tr><td>NaturallyImmune</td>     <td>Susceptible</td></tr>
-    <tr><td>NaturallyImmune</td>     <td>Susceptible</td></tr>
-    <tr><td>NaturallyImmune</td>     <td>Latent</td></tr>
-    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
-    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
-    <!-- Delayed exposures on days 10 and 11, then one last day where nothing happens. -->
-    <tr><td>Susceptible</td>         <td>NaturallyImmune</td></tr>
-    <tr><td>Susceptible</td>         <td>NaturallyImmune</td></tr>
-    <tr><td>Susceptible</td>         <td>NaturallyImmune</td></tr>
-    <tr><td>Susceptible</td>         <td>NaturallyImmune</td></tr>
+    <tr><td>L S</td></tr>
+    <tr><td>C S</td></tr>
+    <tr><td>C S</td></tr>
+    <tr><td>N S</td></tr>
+    <tr><td>N S</td></tr>
+    <tr><td>N L</td></tr>
+    <tr><td>N C</td></tr>
+    <tr><td>N C</td></tr>
+    <tr><td>N N</td></tr>
+    <tr><td>N N</td></tr> <!-- Delayed exposure to unit 1, but it's immune -->
+    <tr><td>N N</td></tr> <!-- Delayed exposure to unit 1, but it's immune -->
+    <tr><td>S N</td></tr>
   </output>
 </deterministic-test>
 

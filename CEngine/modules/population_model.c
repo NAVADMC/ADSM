@@ -31,7 +31,7 @@
 #define handle_midnight_event population_model_handle_midnight_event
 #define handle_new_day_event population_model_handle_new_day_event
 #define handle_declaration_of_vaccine_delay_event population_model_handle_declaration_of_vaccine_delay_event
-#define handle_attempt_to_infect_event population_model_handle_attempt_to_infect_event
+#define handle_exposure_event population_model_handle_exposure_event
 #define handle_vaccination_event population_model_handle_vaccination_event
 #define handle_destruction_event population_model_handle_destruction_event
 #define handle_end_of_day_event population_model_handle_end_of_day_event
@@ -71,7 +71,7 @@ double trunc (double);
 #define NEVENTS_LISTENED_FOR 7
 EVT_event_type_t events_listened_for[] = { EVT_BeforeEachSimulation, EVT_Midnight,
   EVT_DeclarationOfVaccineDelay,
-  EVT_AttemptToInfect, EVT_Vaccination, EVT_Destruction,
+  EVT_Exposure, EVT_Vaccination, EVT_Destruction,
   EVT_EndOfDay
 };
 
@@ -80,7 +80,7 @@ EVT_event_type_t events_listened_for[] = { EVT_BeforeEachSimulation, EVT_Midnigh
 /* Specialized information for this model. */
 typedef struct
 {
-  GHashTable *attempts_to_infect; /**< Gathers attempts to infect.  Keys are
+  GHashTable *adequate_exposures; /**< Gathers adequate exposures.  Keys are
     indices into the unit list (unsigned int), values are GSLists. */
   GHashTable *vacc_or_dest; /**< Gathers vaccinations and/or destructions that
     may conflict with infections.  Keys are units (UNT_unit_t *), values are
@@ -181,10 +181,13 @@ handle_before_each_simulation_event (struct adsm_module_t_ * self,
         case InfectiousSubclinical:
         case InfectiousClinical:
         case NaturallyImmune:
-          event = EVT_new_infection_event (NULL, unit, 0, ADSM_InitiallyInfected);
-          event->u.infection.override_initial_state = unit->initial_state;
-          event->u.infection.override_days_in_state = unit->days_in_initial_state;
-          event->u.infection.override_days_left_in_state = unit->days_left_in_initial_state;
+          event = EVT_new_exposure_event (NULL, unit, 0, ADSM_InitiallyInfected,
+                                          /* traceable = */ FALSE,
+                                          /* adequate = */ TRUE,
+                                          /* delay = */ 0);
+          event->u.exposure.override_initial_state = unit->initial_state;
+          event->u.exposure.override_days_in_state = unit->days_in_initial_state;
+          event->u.exposure.override_days_left_in_state = unit->days_left_in_initial_state;
           EVT_event_enqueue (queue, event);
           break;
         case VaccineImmune:
@@ -254,34 +257,37 @@ handle_midnight_event (struct adsm_module_t_ *self,
 
 
 /**
- * Responds to an attempt to infect event by recording it.
+ * Responds to an adequate exposure event by recording it.
  *
  * @param self the model.
- * @param event an attempt to infect event.
+ * @param event an exposure event.
  */
 void
-handle_attempt_to_infect_event (struct adsm_module_t_ *self, EVT_event_t * event)
+handle_exposure_event (struct adsm_module_t_ *self, EVT_event_t * event)
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
 
 #if DEBUG
-  g_debug ("----- ENTER handle_attempt_to_infect_event (%s)", MODEL_NAME);
+  g_debug ("----- ENTER handle_exposure_event (%s)", MODEL_NAME);
 #endif
 
-  local_data = (local_data_t *) (self->model_data);
-  unit = event->u.attempt_to_infect.infected_unit;
-  g_hash_table_insert (local_data->attempts_to_infect,
-                       GUINT_TO_POINTER(unit->index),
-                       g_slist_prepend (g_hash_table_lookup (local_data->attempts_to_infect, GUINT_TO_POINTER(unit->index)),
-                                        EVT_clone_event (event)));
-#if DEBUG
-  g_debug ("now %u attempt(s) to infect unit \"%s\"",
-           g_slist_length (g_hash_table_lookup (local_data->attempts_to_infect, GUINT_TO_POINTER(unit->index))), unit->official_id);
-#endif
+  if (event->u.exposure.adequate == TRUE)
+    {
+      local_data = (local_data_t *) (self->model_data);
+      unit = event->u.exposure.exposed_unit;
+      g_hash_table_insert (local_data->adequate_exposures,
+                           GUINT_TO_POINTER(unit->index),
+                           g_slist_prepend (g_hash_table_lookup (local_data->adequate_exposures, GUINT_TO_POINTER(unit->index)),
+                                            EVT_clone_event (event)));
+      #if DEBUG
+        g_debug ("now %u adequate exposures to unit \"%s\"",
+                 g_slist_length (g_hash_table_lookup (local_data->adequate_exposures, GUINT_TO_POINTER(unit->index))), unit->official_id);
+      #endif
+    }
 
 #if DEBUG
-  g_debug ("----- EXIT handle_attempt_to_infect_event (%s)", MODEL_NAME);
+  g_debug ("----- EXIT handle_exposure_event (%s)", MODEL_NAME);
 #endif
 
 }
@@ -377,7 +383,7 @@ resolve_conflicts_args_t;
 /**
  * Resolve any conflicts between infection and vaccination or destruction for a
  * single unit.  This function is typed as a GHFunc so that it can be called
- * for each key (unit index) in the attempts_to_infect table.
+ * for each key (unit index) in the adequate_exposures table.
  *
  * @param key a unit (UNT_unit_t * cast to a gpointer).
  * @param value a list of attempts to infect (GSList * in which each list node
@@ -389,14 +395,14 @@ resolve_conflicts (gpointer key, gpointer value, gpointer user_data)
 {
   resolve_conflicts_args_t *args;
   UNT_unit_t *unit;
-  GSList *attempts_to_infect;
+  GSList *adequate_exposures;
   unsigned int n;
   unsigned int attempt_num;
   EVT_event_t *attempt, *e;
 
   args = (resolve_conflicts_args_t *) user_data;
   unit = UNT_unit_list_get (args->units, GPOINTER_TO_UINT(key));
-  attempts_to_infect = (GSList *) value;
+  adequate_exposures = (GSList *) value;
 
   /* If vaccination (with 0 delay to immunity) or destruction has occurred,
    * cancel the infection with probability 1/2.  Note that vaccination and
@@ -413,33 +419,33 @@ resolve_conflicts (gpointer key, gpointer value, gpointer user_data)
     {
       /* An infection is going to go ahead.  If there is more than one
        * competing cause of infection, choose one randomly. */
-      n = g_slist_length (attempts_to_infect);
+      n = g_slist_length (adequate_exposures);
       if (n > 1)
         {
           attempt_num = (unsigned int) trunc (RAN_num (args->rng) * n);
-          attempt = (EVT_event_t *) (g_slist_nth (attempts_to_infect, attempt_num)->data);
+          attempt = (EVT_event_t *) (g_slist_nth (adequate_exposures, attempt_num)->data);
         }
       else
         {
-          attempt = (EVT_event_t *) (attempts_to_infect->data);
+          attempt = (EVT_event_t *) (adequate_exposures->data);
         }
-      e = EVT_new_infection_event (attempt->u.attempt_to_infect.infecting_unit,
+      e = EVT_new_infection_event (attempt->u.exposure.exposing_unit,
                                    unit,
-                                   attempt->u.attempt_to_infect.day,
-                                   attempt->u.attempt_to_infect.contact_type);
+                                   attempt->u.exposure.day,
+                                   attempt->u.exposure.contact_type);
       e->u.infection.override_initial_state =
-        attempt->u.attempt_to_infect.override_initial_state;
+        attempt->u.exposure.override_initial_state;
       e->u.infection.override_days_in_state =
-        attempt->u.attempt_to_infect.override_days_in_state;
+        attempt->u.exposure.override_days_in_state;
       e->u.infection.override_days_left_in_state =
-        attempt->u.attempt_to_infect.override_days_left_in_state;
+        attempt->u.exposure.override_days_left_in_state;
       EVT_event_enqueue (args->queue, e);
     }
   /* Free the list of attempts to infect this unit.  This leaves a dangling
    * pointer in the hash table, but that's OK, because the hash table will be
    * cleared out at the end of handle_end_of_day_event. */
-  g_slist_foreach (attempts_to_infect, EVT_free_event_as_GFunc, NULL);
-  g_slist_free (attempts_to_infect);
+  g_slist_foreach (adequate_exposures, EVT_free_event_as_GFunc, NULL);
+  g_slist_free (adequate_exposures);
   return;
 }
 
@@ -470,11 +476,11 @@ handle_end_of_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
   resolve_conflicts_args.vacc_or_dest = local_data->vacc_or_dest;
   resolve_conflicts_args.rng = rng;
   resolve_conflicts_args.queue = queue;
-  g_hash_table_foreach (local_data->attempts_to_infect, resolve_conflicts, &resolve_conflicts_args);
+  g_hash_table_foreach (local_data->adequate_exposures, resolve_conflicts, &resolve_conflicts_args);
   /* Each value (list of attempts to infect a particular unit) in the
-   * attempts_to_infect table got freed by resolve_conflicts.  But we still
+   * adequate_exposures table got freed by resolve_conflicts.  But we still
    * need to clear all the keys (unit indices) from that table. */
-  g_hash_table_remove_all (local_data->attempts_to_infect);
+  g_hash_table_remove_all (local_data->adequate_exposures);
   g_hash_table_remove_all (local_data->vacc_or_dest);
 
 #if DEBUG
@@ -513,8 +519,8 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
     case EVT_DeclarationOfVaccineDelay:
       handle_declaration_of_vaccine_delay_event (self, &(event->u.declaration_of_vaccine_delay));
       break;
-    case EVT_AttemptToInfect:
-      handle_attempt_to_infect_event (self, event);
+    case EVT_Exposure:
+      handle_exposure_event (self, event);
       break;
     case EVT_Vaccination:
       handle_vaccination_event (self, &(event->u.vaccination));
@@ -576,7 +582,7 @@ local_free (struct adsm_module_t_ *self)
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
 
-  g_hash_table_destroy (local_data->attempts_to_infect);
+  g_hash_table_destroy (local_data->adequate_exposures);
   g_hash_table_destroy (local_data->vacc_or_dest);
 
   /* Free the list of vaccine delay flags. */
@@ -625,7 +631,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
-  local_data->attempts_to_infect = g_hash_table_new (g_direct_hash, g_direct_equal);
+  local_data->adequate_exposures = g_hash_table_new (g_direct_hash, g_direct_equal);
   local_data->vacc_or_dest = g_hash_table_new (g_direct_hash, g_direct_equal);
   local_data->production_types = units->production_type_names;
   local_data->vaccine_0_delay = g_new0 (gboolean, units->production_type_names->len);

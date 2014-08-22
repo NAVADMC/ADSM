@@ -33,7 +33,6 @@ def printable_name(underscores_name):
     underscores_name = re.sub(r'([a-z])([A-Z])', r'\1_\2', underscores_name).lower()  # convert from camel case
     spaced = re.sub(r'_', r' ', underscores_name)
     return spaced.title()  # capitalize
-    #TODO: Add the explain[] dictionary to the printable names, split on spaces, and look for matching strings
 
 
 class OutputBaseModel(models.Model):

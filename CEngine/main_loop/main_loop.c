@@ -983,6 +983,11 @@ run_sim_main (sqlite3 *scenario_db,
       adsm_create_event (manager,
                          EVT_new_before_each_simulation_event(iteration_number),
                          units, zones, rng);
+      /* Create an End Of Day event for day "0" to make the population module
+       * process the initially infected/initially vaccine immune units. */
+      adsm_create_event (manager,
+                         EVT_new_end_of_day_event(0, /* done = */ FALSE),
+                         units, zones, rng);
 
       /* Run the iteration. */
       start_time = time (NULL);
