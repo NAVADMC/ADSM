@@ -117,3 +117,14 @@ USE_TZ = True
 STATIC_ROOT = BASE_DIR + '/static/'
 STATICFILES_DIRS = (BASE_DIR + '/SpreadModel/static/', )
 STATIC_URL = '/static/'
+
+from django.db.backends.signals import connection_created
+from django.dispatch import receiver
+
+
+@receiver(connection_created)
+def activate_write_ahead_mode(sender, connection, **kwargs):
+    """Enable integrity constraint with sqlite."""
+    if connection.vendor == 'sqlite' or connection.vendor == 'sqlite3':
+        cursor = connection.cursor()
+        cursor.execute('PRAGMA journal_mode = WAL;')

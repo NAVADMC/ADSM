@@ -78,10 +78,9 @@ class Simulation(threading.Thread):
         super(Simulation, self).__init__(**kwargs)
 
     def run(self):
-        # print(simulation_process())
         statuses = []
         with ProcessPoolExecutor() as executor:
-            for exit_status in executor.map(simulation_process, range(1, self.max_iteration+1)):
+            for exit_status in executor.map(simulation_process, range(1, self.max_iteration + 1)):
                 statuses.append(exit_status)
         print(statuses)
 
@@ -96,8 +95,20 @@ def results_home(request):
     return render(request, 'Results/SimulationProgress.html', context)
 
 
+def create_blank_unit_stats():
+    """This is intended to run before the simulation has a chance to complete and begin writing output.
+    I've set this up before the ProcessPoolExecutor call to avoid a race condition."""
+    python_objs = []
+    print("Starting Unit Stat creation")
+    for unit in Unit.objects.all():  # or .filter(unitstats__isnull=True)
+        python_objs.append(UnitStats(unit=unit))
+    UnitStats.objects.bulk_create(python_objs)
+    print("Finished Unit Stat creation")
+
+
 def run_simulation(request):
     delete_all_outputs()
+    create_blank_unit_stats()  # create UnitStats before we risk the simulation writing to them
     sim = Simulation(OutputSettings.objects.all().first().iterations)
     sim.start()  # starts a new thread
     return redirect('/results/')
