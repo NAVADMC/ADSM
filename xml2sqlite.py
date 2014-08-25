@@ -96,9 +96,9 @@ def getPdf( xml, nameGenerator ):
 	elif pdfType == 'histogram':
 		graph = RelationalFunction( name=name + ' histogram data' )
 		graph.save()
-		x0s = [float(el.text) for el in firstChild.findall( './x0' )]
-		x1s = [float(el.text) for el in firstChild.findall( './x1' )]
-		ps = [float(el.text) for el in firstChild.findall( './p' )]
+		x0s = [float(el.text) for el in firstChild.findall( './/x0' )]
+		x1s = [float(el.text) for el in firstChild.findall( './/x1' )]
+		ps = [float(el.text) for el in firstChild.findall( './/p' )]
 		# Make sure the upper x-bound of each bin equals the lower x-bound of
 		# the next bin.
 		assert x0s[1:] == x1s[:-1] 
