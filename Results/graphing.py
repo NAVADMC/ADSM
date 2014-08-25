@@ -19,6 +19,43 @@ def HttpFigure(fig):
     return response
 
 
+def rstyle(axis):
+    """Styles x,y axes to appear like ggplot2
+    Must be called after all plot and axis manipulation operations have been
+    carried out (needs to know final tick spacing) """
+    #Set the style of the major and minor grid lines, filled blocks
+    axis.grid(True, 'major', color='w', linestyle='-', linewidth=1.4)
+    axis.grid(True, 'minor', color='0.99', linestyle='-', linewidth=0.7)
+    # axis.patch.set_facecolor('0.90')  # uncomment to add a subtle grid
+    axis.set_axisbelow(True)
+
+    """This code is currently disabled because I don't want to add a pylab dependency"""
+    #Set minor tick spacing to 1/2 of the major ticks
+    # axis.yaxis.set_major_locator((plticker.MultipleLocator(base=3000.0)))
+    
+    #Remove axis border
+    for child in axis.get_children():
+        if isinstance(child, matplotlib.spines.Spine):
+            child.set_alpha(0)
+       
+    #Restyle the tick lines
+    for line in axis.get_xticklines() + axis.get_yticklines():
+        line.set_markersize(5)
+        line.set_color("gray")
+        line.set_markeredgewidth(1.4)
+    
+    #Remove the minor tick lines    
+    for line in (axis.xaxis.get_ticklines(minor=True) + 
+                 axis.yaxis.get_ticklines(minor=True)):
+        line.set_markersize(0)
+    
+    #Only show bottom left ticks, pointing out of axis
+    plt.rcParams['xtick.direction'] = 'out'
+    plt.rcParams['ytick.direction'] = 'out'
+    axis.xaxis.set_ticks_position('bottom')
+    axis.yaxis.set_ticks_position('left')
+
+
 def population_png(request):
     latlong = [(u.latitude, u.longitude) for u in Unit.objects.all()]
     df = pd.DataFrame.from_records(latlong, columns=['Latitude', 'Longitude'])
@@ -146,13 +183,17 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     iter_str = ", iteration " + str(iteration) if iteration else 'for all iterations'
     title = "%s in \n%s %s" % (explanation, spaces_for_camel_case(model_name), iter_str)
     
-    fig = plt.figure(figsize=(6, 4), dpi=100, tight_layout=True)
+    # plt.xkcd(scale=.5, randomness=1)
+    fig = plt.figure(figsize=(6, 4), dpi=100, tight_layout=True, facecolor='w')
     gs = gridspec.GridSpec(1, 2, width_ratios=[6, 1])
     time_graph = fig.add_subplot(gs[0], title=title)
     boxplot_graph = fig.add_subplot(gs[1], sharey=time_graph, )
     # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
+    plt.locator_params(nbins=4)
     plt.setp(boxplot_graph.get_yticklabels(), visible=False)
-    plt.subplots_adjust(wspace=.05)
+    for axis in [time_graph, boxplot_graph]:
+        rstyle(axis)
+
 
     # Manually scale zone graphs based on the Max for any zone (universal value)
     if "Zone" in model_name:
