@@ -113,7 +113,7 @@ main (int argc, char *argv[])
     g_free (map_output_dir);
   }
 
-  sqlerr = sqlite3_open_v2 (scenario_db_name, &scenario_db, SQLITE_OPEN_READONLY, NULL);
+  sqlerr = sqlite3_open_v2 (scenario_db_name, &scenario_db, SQLITE_OPEN_READWRITE, NULL);
   if (sqlerr !=  SQLITE_OK)
     {
       g_error ("Error opening scenario database: %s", sqlite3_errmsg (scenario_db));

@@ -595,6 +595,8 @@ UNT_new_unit (UNT_production_type_t production_type,
   unit->quarantine_change_request = FALSE;
   unit->destroy_change_request = FALSE;
   
+  unit->db_id = 0;
+  
 #ifdef USE_SC_GUILIB
   unit->production_types = NULL;
   unit->ever_infected = FALSE;
@@ -1009,6 +1011,16 @@ UNT_load_unit_callback (void *data, GHashTable *dict)
   /* Official ID (arbitrary name attached to this unit) */
   unit->official_id = g_strdup (g_hash_table_lookup (dict, "user_notes"));
 
+  /* Database ID */
+  {
+    long tmp;
+    errno = 0;
+    tmp = strtol (g_hash_table_lookup (dict, "id"), NULL, 10); /* base 10 */
+    g_assert (errno != ERANGE && errno != EINVAL);
+    g_assert (1 <= tmp && tmp <= G_MAXUINT);
+    unit->db_id = (guint) tmp;
+  }
+
   /* days-in-status and days-left-in-status tags */
   {
     char *days;
@@ -1071,7 +1083,7 @@ UNT_load_unit_list (sqlite3 *db)
   units->production_types = production_types;
 #endif
 
-  sqlite3_exec_dict (db, "SELECT name,latitude,longitude,initial_state,days_in_initial_state,days_left_in_initial_state,initial_size,user_notes FROM ScenarioCreator_unit unit,ScenarioCreator_productiontype prodtype where unit.production_type_id=prodtype.id",
+  sqlite3_exec_dict (db, "SELECT unit.id,name,latitude,longitude,initial_state,days_in_initial_state,days_left_in_initial_state,initial_size,user_notes FROM ScenarioCreator_unit unit,ScenarioCreator_productiontype prodtype where unit.production_type_id=prodtype.id",
                      UNT_load_unit_callback, units, &sqlerr);
   if (sqlerr)
     {

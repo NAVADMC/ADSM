@@ -71,6 +71,7 @@
 #include "trace_quarantine_model.h"
 #include "trace_zone_focus_model.h"
 #include "unit_state_monitor.h"
+#include "unit_stats_writer.h"
 #include "vaccination_monitor.h"
 #include "vaccination_list_monitor.h"
 #include "vaccine_model.h"
@@ -137,7 +138,6 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
                    guint *_exit_conditions )
 {
   GPtrArray *tmp_models;
-  adsm_module_t *model;
   gboolean disable_all_controls;
   gboolean include_zones;
   gboolean include_detection;
@@ -151,6 +151,7 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
   int i;                        /* loop counter */
   unsigned int nzones;
 #if DEBUG
+  adsm_module_t *model;
   char *s;
 #endif
 
@@ -333,6 +334,11 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
     {
       g_ptr_array_add (tmp_models,
                        apparent_events_table_writer_new (scenario_db, units, projection, zones));
+    }
+  if (PAR_get_boolean (scenario_db, "SELECT (save_iteration_outputs_for_units=1) FROM ScenarioCreator_outputsettings"))
+    {
+      g_ptr_array_add (tmp_models,
+                       unit_stats_writer_new (scenario_db, units, projection, zones));
     }
   if (PAR_get_boolean (scenario_db, "SELECT (save_map_output=1) FROM ScenarioCreator_outputsettings"))
     {

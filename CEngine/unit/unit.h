@@ -192,6 +192,8 @@ typedef struct
   gboolean destroy_change_request;
   gboolean quarantine_change_request;
   
+  guint db_id; /* Database ID */
+  
 #ifdef USE_SC_GUILIB  
   /*  This field is used on the SC version if the user wants to 
       write out the iteration summaries, as would be found in the Windows

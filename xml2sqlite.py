@@ -302,6 +302,7 @@ def readParameters( parameterFileName ):
       save_daily_unit_states = (xml.find( './/state-table-writer' ) != None),
       save_daily_events = (xml.find( './/apparent-events-table-writer' ) != None),
       save_daily_exposures = (xml.find( './/exposures-table-writer' ) != None),
+      save_iteration_outputs_for_units = True,
       save_map_output = (xml.find( './/weekly-gis-writer' ) != None or xml.find( './/summary-gis-writer' ) != None),
       cost_track_zone_surveillance = (xml.find( './/economic-model/surveillance' ) != None),
 	  cost_track_vaccination = (xml.find( './/economic-model/vaccination' ) != None),
@@ -1334,6 +1335,13 @@ def readParameters( parameterFileName ):
 
 
 
+def initResults():
+	for unit in Unit.objects.all():
+		unitStats = UnitStats( unit=unit )
+		unitStats.save()
+
+
+
 def main():
 	# Make sure the database has all the correct tables.
 	call_command('syncdb', verbosity=0)
@@ -1343,6 +1351,11 @@ def main():
 
 	parameterFileName = sys.argv[2]
 	readParameters( parameterFileName )
+
+	# The Results UnitStats objects must be initialized after the parameters,
+	# because saving a change to the Population or Scenario objects will delete
+	# all Results.
+	initResults()
 
 
 
@@ -1363,6 +1376,6 @@ if __name__ == "__main__":
 	    }
 	  }
 	)
-	from django.db import models
 	from ScenarioCreator.models import *
+	from Results.models import *
 	main()
