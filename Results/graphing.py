@@ -185,11 +185,12 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     
     # plt.xkcd(scale=.5, randomness=1)
     fig = plt.figure(figsize=(6, 4), dpi=100, tight_layout=True, facecolor='w')
+    matplotlib.rcParams.update({'font.size': 10})
     gs = gridspec.GridSpec(1, 2, width_ratios=[6, 1])
     time_graph = fig.add_subplot(gs[0], title=title)
     boxplot_graph = fig.add_subplot(gs[1], sharey=time_graph, )
-    # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
     plt.locator_params(nbins=4)
+    # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
     plt.setp(boxplot_graph.get_yticklabels(), visible=False)
     for axis in [time_graph, boxplot_graph]:
         rstyle(axis)
