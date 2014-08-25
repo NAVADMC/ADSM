@@ -25,6 +25,8 @@ import xml.etree.ElementTree as ET
 import warnings
 from pyproj import Proj
 
+CREATE_AT_A_TIME = 500 # for bulk object creation
+
 
 
 def getProductionTypes( xml, attributeName, allowedNames ):
@@ -227,6 +229,7 @@ def readPopulation( populationFileName ):
 
 	population = Population()
 	population.save()
+	bulkUnits = []
 	for el in xml.findall( './/herd' ):
 		description = el.find( './id' )
 		if description == None:
@@ -261,7 +264,7 @@ def readPopulation( populationFileName ):
 		if daysLeftInState != None:
 			daysLeftInState = int( daysLeftInState.text )
 
-		unit = Unit(
+		bulkUnits.append( Unit(
 		  _population = population,
 		  production_type = productionType,
 		  latitude = lat,
@@ -271,10 +274,14 @@ def readPopulation( populationFileName ):
 		  days_left_in_initial_state = daysLeftInState,
 		  initial_size = size,
 		  user_notes = description
-		)
-		unit.save()
+		))
+		if len( bulkUnits ) >= CREATE_AT_A_TIME:
+			Unit.objects.bulk_create( bulkUnits )
+			bulkUnits = []
 	# end of loop over units in XML file
-	
+	if bulkUnits:
+		Unit.objects.bulk_create( bulkUnits )
+
 	return # from readPopulation
 
 
@@ -1336,9 +1343,14 @@ def readParameters( parameterFileName ):
 
 
 def initResults():
+	bulkUnitStats = []
 	for unit in Unit.objects.all():
-		unitStats = UnitStats( unit=unit )
-		unitStats.save()
+		bulkUnitStats.append( UnitStats( unit=unit ) )
+		if len( bulkUnitStats ) >= CREATE_AT_A_TIME:
+			UnitStats.objects.bulk_create( bulkUnitStats )
+			bulkUnitStats = []
+	if bulkUnitStats:
+		UnitStats.objects.bulk_create( bulkUnitStats )
 
 
 
