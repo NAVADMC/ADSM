@@ -202,18 +202,19 @@ var modelModal = {
         };
     },
 
-    populate_modal_body: function ($newForm, modal) {
+    populate_modal_body: function($newForm, modal) {
         var $form = $newForm.find('form:not(.ajax)');
         $form.find('.buttonHolder').remove();
         modal.find('.modal-body').html($form);
         return $form;
     },
 
-    validation_error: function(modal){
+    validation_error: function(modal) {
+        var self = this;
         return function(data) {
-            console.log('validation_error:\n')//, modal, data)
-            this.populate_modal_body($(data), modal);
-        }
+            console.log('validation_error:\n');
+            self.populate_modal_body($(data), modal);
+        };
     },
 
     show: function(selectInput) {
