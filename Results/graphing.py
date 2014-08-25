@@ -4,6 +4,8 @@ from itertools import chain
 from Results.summary import list_of_iterations
 from Results.models import *  # necessary for globals()
 import matplotlib
+from ScenarioCreator.views import spaces_for_camel_case
+
 matplotlib.use('Agg')  # Force matplotlib to not use any Xwindows backend.
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
@@ -86,7 +88,11 @@ def construct_iterating_combination_filter_dictionary(iteration, iterate_pt, ite
     return filter_sequence, columns
 
 
-def create_time_series_lines(field_name, model, iterate_pt, iterate_zone, iteration='', zone=''):  # Django assigns iteration='' when there's nothing
+def create_time_series_lines(field_name, model, iteration='', zone=''):  # Django assigns iteration='' when there's nothing
+    iterate_pt, iterate_zone = {DailyByProductionType: (True, False),
+                                DailyByZoneAndProductionType: (True, True),
+                                DailyByZone: (False, True),
+                                DailyControls: (False, False)}[model]
     filter_sequence, columns = construct_iterating_combination_filter_dictionary(iteration, iterate_pt, iterate_zone, zone=zone)
     lines = []
     for filter_dict in filter_sequence:
@@ -113,51 +119,55 @@ def extend_last_day_lines(lines, model, field_name):
     return list(zip(*time_series))
 
 
-def collect_boxplot_data(ragged_lines, model, field_name):
+def field_is_cumulative(explanation):
+    return 'new' not in explanation.lower()
+
+
+def collect_boxplot_data(ragged_lines, explanation):
     """Returns a tuple with all the data necessary to make a boxplot distribution.  For 'cumulative' fields,
     this is the last day.  For non-cumulative, it is the range of non-blank values.  Issue #159:
     https://github.com/NAVADMC/SpreadModel/issues/159#issuecomment-53058264"""
-    explanation = model._meta.get_field_by_name(field_name)[0].verbose_name
-    if 'new' in explanation.lower():  # This field is non-cumulative, default to zero
-        print("Accumulating data for", explanation)
+    if not field_is_cumulative(explanation):  # This field is non-cumulative, default to zero
         boxplot_data = tuple(chain(*ragged_lines))  # pile together all the data, but don't include trailing zeroes
     else:  # this field is cumulative
-        print("Slicing last day for", explanation)
         boxplot_data = (line[-1] for line in ragged_lines)  # only last day is relevant
     return boxplot_data
 
 
 def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     model = globals()[model_name]
-    iterate_pt, iterate_zone = {"DailyByProductionType": (True, False),
-                                "DailyByZoneAndProductionType": (True, True),
-                                "DailyByZone": (False, True),
-                                "DailyControls": (False, False)}[model_name]
-
-    lines, columns = create_time_series_lines(field_name, model, iterate_pt, iterate_zone, iteration=iteration, zone=zone)
+    lines, columns = create_time_series_lines(field_name, model, iteration=iteration, zone=zone)
     
     time_series = extend_last_day_lines(lines, model, field_name)
     time_data = pd.DataFrame.from_records(time_series, columns=columns)  # keys should be same ordering as the for loop above
     time_data = time_data.set_index('Day')
 
-    fig = plt.figure(figsize=(6, 4))
-    gs = gridspec.GridSpec(1, 2, width_ratios=[4, 1])
-    axes = [plt.subplot(gs[0]), ]
-    axes.append(plt.subplot(gs[1], sharey=axes[0]))
+    explanation = model._meta.get_field_by_name(field_name)[0].verbose_name
+    iter_str = ", iteration " + str(iteration) if iteration else 'for all iterations'
+    title = "%s in \n%s %s" % (explanation, spaces_for_camel_case(model_name), iter_str)
+    
+    fig = plt.figure(figsize=(6, 4), dpi=100, tight_layout=True)
+    gs = gridspec.GridSpec(1, 2, width_ratios=[6, 1])
+    time_graph = fig.add_subplot(gs[0], title=title)
+    boxplot_graph = fig.add_subplot(gs[1], sharey=time_graph, )
+    # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
+    plt.setp(boxplot_graph.get_yticklabels(), visible=False)
+    plt.subplots_adjust(wspace=.05)
+
     # Manually scale zone graphs based on the Max for any zone (universal value)
     if "Zone" in model_name:
         ymax = model.objects.filter(zone__isnull=False).aggregate(  # It's important to filter out Background stats from this Max
             Max(field_name))[field_name + '__max'] * 1.05
-        axes[0].set_ylim(0.0, ymax)
-        axes[1].set_ylim(0.0, ymax)
-    time_data.plot(ax=axes[0])
+        time_graph.set_ylim(0.0, ymax)
+        boxplot_graph.set_ylim(0.0, ymax)
+    time_data.plot(ax=time_graph)
+
     
-    boxplot_raw = collect_boxplot_data(lines, model, field_name)  # This uses the original lines because the ragged shape is important
-    boxplot_data = pd.DataFrame(pd.Series(boxplot_raw), columns=['Distribution'])
-    boxplot_data.boxplot(ax=axes[1], return_type='axes')
+    boxplot_raw = collect_boxplot_data(lines, explanation)  # This uses the original lines because the ragged shape is important
+    boxplot_data = pd.DataFrame(pd.Series(boxplot_raw), columns=['Last Day'] if field_is_cumulative(explanation) else ['Distribution'])
+    boxplot_data.boxplot(ax=boxplot_graph, return_type='axes')
     #if there are more than 11 iterations, hide or truncate the legend
     if len(columns) > 11:
-        axes[0].legend().set_visible(False)
-    plt.tight_layout()
+        time_graph.legend().set_visible(False)
 
     return HttpFigure(fig)
