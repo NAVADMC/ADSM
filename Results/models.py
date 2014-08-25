@@ -387,7 +387,9 @@ def delete_all_outputs():
     output_models = [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats]
     for model in output_models:
         model.objects.all().delete()
-    try:
-        shutil.rmtree(os.path.join('workspace', scenario_filename()))
-    except:
-        pass  # because the folder doesn't exist (which is fine)
+    scenario_folder = scenario_filename()
+    if scenario_folder != '':
+        try:
+            shutil.rmtree(os.path.join('workspace', scenario_folder))
+        except:
+            pass  # because the folder doesn't exist (which is fine)

@@ -302,7 +302,9 @@ def edit_entry(request, primary_key):
     except ObjectDoesNotExist:
         return redirect('/setup/%s/new/' % model_name)
     if initialized_form.is_valid() and request.method == 'POST':
-        initialized_form.save()  # write instance updates to database
+        model_instance = initialized_form.save()  # write instance updates to database
+        if request.is_ajax():
+            return ajax_success(model_instance, model_name)
 
     context = {'form': initialized_form,
                'title': str(initialized_form.instance)}

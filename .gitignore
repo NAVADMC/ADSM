@@ -6,6 +6,7 @@
 #################
 *.o
 *.in
+CEngine/autom4te.cache/
 
 #################
 ## Django

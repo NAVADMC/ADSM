@@ -9,7 +9,9 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 # Create your tests here.
-from ScenarioCreator.models import Scenario, choice_char_from_value, squish_name, Unit, Population, ProductionType
+from ScenarioCreator.models import Scenario, choice_char_from_value, squish_name, Unit, Population, ProductionType, IndirectSpread, ProbabilityFunction, RelationalFunction
+from ScenarioCreator.parser import PopulationParser
+from ScenarioCreator.forms import IndirectSpreadForm
 
 updatedPost = {'description': 'Updated Description', "naadsm_version": '3.2.19', "language": 'en', "num_runs": '10',
                "num_days": '40', 'scenario_name': 'sample'}
@@ -49,12 +51,53 @@ class ModelUtilsTest(TestCase):
     def test_squish(self):
         self.assertEqual('thefeanciestevar', squish_name('  The FeanCiest Evar  '))
 
+    def test_population_source_file_invalid(self):
+        p = Population(source_file='Population_Grid.xml')
+        with self.assertRaises(OSError):
+            p.save()
+
+    def test_population_source_file_blank(self):
+        unit_count = Unit.objects.all().count()
+        p = Population(source_file='')
+
+        p.save()
+
+        self.assertEqual(unit_count, Unit.objects.all().count())
+
     def test_population_link(self):
         index = Unit.objects.count()
-        p = Population(source_file='Population_Grid.xml')
+        p = Population(source_file='workspace/Population_Grid.xml')
         p.save()
         self.assertGreater( Unit.objects.count(), index, "No new Units were added")
         self.assertEqual( Unit.objects.get(id=index+1)._population, p, "New Unit should link back to newest Population object")
+
+
+class IndirectSpreadFormTestCase(TestCase):
+    def setUp(self):
+        self.p_f = ProbabilityFunction.objects.create(name="Test PF", equation_type="Triangular")
+        self.r_f = RelationalFunction.objects.create(name="Test RF")
+
+        self.form_data = {
+            'name': 'Test',
+            'contact_rate': '0.1',
+            'infection_probability': '0.5',
+            'distance_distribution': self.p_f.pk,
+            'movement_control': self.r_f.pk
+        }
+
+    def test_indirect_spread(self):
+        form = IndirectSpreadForm(data=self.form_data)
+
+        self.assertTrue(form.is_valid())
+
+    def test_indirect_spread_probability_error(self):
+        self.form_data['infection_probability'] = '2'
+        form = IndirectSpreadForm(data=self.form_data)
+
+        self.assertFalse(form.is_valid())
+
+        self.assertIn('infection_probability', form.errors)
+
 
 class CleanTest(unittest.TestCase):
     def test_production_type_names(self):
@@ -68,5 +111,4 @@ class CleanTest(unittest.TestCase):
         self.assertRaises(ValidationError, pt.clean_fields)
         pt = ProductionType(name='table')
         self.assertRaises(ValidationError, pt.clean_fields)
-
 
