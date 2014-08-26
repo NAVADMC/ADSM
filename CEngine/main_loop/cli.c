@@ -50,6 +50,7 @@ main (int argc, char *argv[])
     { NULL }
   };
   int sqlerr;
+  char *sqlerrmsg = NULL;
   sqlite3 *scenario_db;
 
 #if HAVE_MPI && !CANCEL_MPI
@@ -117,6 +118,11 @@ main (int argc, char *argv[])
   if (sqlerr !=  SQLITE_OK)
     {
       g_error ("Error opening scenario database: %s", sqlite3_errmsg (scenario_db));
+    }
+  sqlite3_exec (scenario_db, "PRAGMA journal_mode = WAL", NULL, NULL, &sqlerrmsg);
+  if (sqlerrmsg)
+    {
+      g_error ("%s", sqlerrmsg);
     }
   sqlite3_busy_timeout (scenario_db, 30 * 60 * 1000 /* 30 minutes, given in milliseconds */);
 
