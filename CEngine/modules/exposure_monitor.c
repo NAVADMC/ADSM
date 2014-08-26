@@ -170,39 +170,39 @@ handle_exposure_event (struct adsm_module_t_ *self, EVT_exposure_event_t * event
           adsm_expose_unit (update);
         }
     #endif  
-    }
 
-#if UNDEFINED
-  printf ("unit at index %d exposed by method %s\n", event->exposed_unit->index, cause);
-#endif
+    #if UNDEFINED
+      printf ("unit at index %d exposed by method %s\n", event->exposed_unit->index, cause);
+    #endif
 
-  /* Update the counts of exposures. */
-  RPT_reporting_add_integer  (local_data->num_units_exposed, 1, NULL);
-  RPT_reporting_add_integer1 (local_data->num_units_exposed_by_cause, 1, cause);
-  RPT_reporting_add_integer1 (local_data->num_units_exposed_by_prodtype, 1, exposed_unit->production_type_name);
-  RPT_reporting_add_integer  (local_data->num_animals_exposed, exposed_unit->size, NULL);
-  RPT_reporting_add_integer1 (local_data->num_animals_exposed_by_cause, exposed_unit->size, cause);
-  RPT_reporting_add_integer1 (local_data->num_animals_exposed_by_prodtype, exposed_unit->size, exposed_unit->production_type_name);
-  RPT_reporting_add_integer  (local_data->cumul_num_units_exposed, 1, NULL);
-  RPT_reporting_add_integer1 (local_data->cumul_num_units_exposed_by_cause, 1, cause);
-  RPT_reporting_add_integer1 (local_data->cumul_num_units_exposed_by_prodtype, 1, exposed_unit->production_type_name);
-  RPT_reporting_add_integer  (local_data->cumul_num_animals_exposed, exposed_unit->size, NULL);
-  RPT_reporting_add_integer1 (local_data->cumul_num_animals_exposed_by_cause, exposed_unit->size,
-                              cause);
-  RPT_reporting_add_integer1 (local_data->cumul_num_animals_exposed_by_prodtype, exposed_unit->size,
-                              exposed_unit->production_type_name);
-  drill_down_list[0] = cause;
-  drill_down_list[1] = exposed_unit->production_type_name;
-  RPT_reporting_add_integer (local_data->num_units_exposed_by_cause_and_prodtype, 1, drill_down_list);
-  RPT_reporting_add_integer (local_data->num_animals_exposed_by_cause_and_prodtype, exposed_unit->size,
-                             drill_down_list);
-  RPT_reporting_add_integer (local_data->cumul_num_units_exposed_by_cause_and_prodtype, 1, drill_down_list);
-  RPT_reporting_add_integer (local_data->cumul_num_animals_exposed_by_cause_and_prodtype,
-                             exposed_unit->size, drill_down_list);
-  if (event->adequate)
-    {
-      RPT_reporting_add_integer (local_data->num_adequate_exposures, 1, NULL);
-      RPT_reporting_add_integer (local_data->cumul_num_adequate_exposures, 1, NULL);
+      /* Update the counts of exposures. */
+      RPT_reporting_add_integer  (local_data->num_units_exposed, 1, NULL);
+      RPT_reporting_add_integer1 (local_data->num_units_exposed_by_cause, 1, cause);
+      RPT_reporting_add_integer1 (local_data->num_units_exposed_by_prodtype, 1, exposed_unit->production_type_name);
+      RPT_reporting_add_integer  (local_data->num_animals_exposed, exposed_unit->size, NULL);
+      RPT_reporting_add_integer1 (local_data->num_animals_exposed_by_cause, exposed_unit->size, cause);
+      RPT_reporting_add_integer1 (local_data->num_animals_exposed_by_prodtype, exposed_unit->size, exposed_unit->production_type_name);
+      RPT_reporting_add_integer  (local_data->cumul_num_units_exposed, 1, NULL);
+      RPT_reporting_add_integer1 (local_data->cumul_num_units_exposed_by_cause, 1, cause);
+      RPT_reporting_add_integer1 (local_data->cumul_num_units_exposed_by_prodtype, 1, exposed_unit->production_type_name);
+      RPT_reporting_add_integer  (local_data->cumul_num_animals_exposed, exposed_unit->size, NULL);
+      RPT_reporting_add_integer1 (local_data->cumul_num_animals_exposed_by_cause, exposed_unit->size,
+                                  cause);
+      RPT_reporting_add_integer1 (local_data->cumul_num_animals_exposed_by_prodtype, exposed_unit->size,
+                                  exposed_unit->production_type_name);
+      drill_down_list[0] = cause;
+      drill_down_list[1] = exposed_unit->production_type_name;
+      RPT_reporting_add_integer (local_data->num_units_exposed_by_cause_and_prodtype, 1, drill_down_list);
+      RPT_reporting_add_integer (local_data->num_animals_exposed_by_cause_and_prodtype, exposed_unit->size,
+                                 drill_down_list);
+      RPT_reporting_add_integer (local_data->cumul_num_units_exposed_by_cause_and_prodtype, 1, drill_down_list);
+      RPT_reporting_add_integer (local_data->cumul_num_animals_exposed_by_cause_and_prodtype,
+                                 exposed_unit->size, drill_down_list);
+      if (event->adequate)
+        {
+          RPT_reporting_add_integer (local_data->num_adequate_exposures, 1, NULL);
+          RPT_reporting_add_integer (local_data->cumul_num_adequate_exposures, 1, NULL);
+        }
     }
 
 #if DEBUG
