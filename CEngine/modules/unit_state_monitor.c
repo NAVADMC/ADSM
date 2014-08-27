@@ -23,6 +23,9 @@
 #define events_listened_for unit_state_monitor_events_listened_for
 #define to_string unit_state_monitor_to_string
 #define local_free unit_state_monitor_free
+#define handle_before_any_simulations_event unit_state_monitor_handle_before_any_simulations_event
+#define handle_before_each_simulation_event unit_state_monitor_handle_before_each_simulation_event
+#define handle_unit_state_change_event unit_state_monitor_handle_unit_state_change_event
 #define handle_new_day_event unit_state_monitor_handle_new_day_event
 
 #include "module.h"
@@ -49,10 +52,12 @@
 
 
 
-#define NEVENTS_LISTENED_FOR 2
-EVT_event_type_t events_listened_for[] =
-  { EVT_BeforeAnySimulations,
-    EVT_NewDay
+#define NEVENTS_LISTENED_FOR 4
+EVT_event_type_t events_listened_for[] = {
+  EVT_BeforeAnySimulations,
+  EVT_BeforeEachSimulation,
+  EVT_UnitStateChange,
+  EVT_NewDay
 };
 
 
@@ -61,6 +66,9 @@ EVT_event_type_t events_listened_for[] =
 typedef struct
 {
   GPtrArray *production_types;
+  guint *nunits_of_prodtype;
+  gdouble nanimals;
+  gdouble *nanimals_of_prodtype;
   RPT_reporting_t *num_units_in_state;
   RPT_reporting_t *num_units_in_state_by_prodtype;
   RPT_reporting_t *num_animals_in_state;
@@ -74,13 +82,170 @@ local_data_t;
 
 
 /**
- * On each new day, count the number of units and animals in each state.
- *
+ * Before any simulations, count how many units there are of each production
+ * type. Also declare this module's output variables.
+ * 
  * @param self this module.
- * @param event a new day event.
+ * @param units a list of units.
+ * @param queue for any new events this module creates.
  */
 void
-handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event,
+handle_before_any_simulations_event (struct adsm_module_t_ *self,
+                                     UNT_unit_list_t *units,
+                                     EVT_event_queue_t *queue)
+{
+  local_data_t *local_data;
+  guint nprodtypes;
+  guint nunits, i;
+  UNT_unit_t *unit;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_any_simulations_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+
+  nprodtypes = local_data->production_types->len;
+  local_data->nunits_of_prodtype = g_new0 (guint, nprodtypes);
+  local_data->nanimals_of_prodtype = g_new0 (gdouble, nprodtypes);
+  nunits = UNT_unit_list_length (units);
+  local_data->nanimals = 0;
+  for (i = 0; i < nunits; i++)
+    {
+      unit = UNT_unit_list_get (units, i);
+      local_data->nunits_of_prodtype[unit->production_type] += 1;
+      local_data->nanimals += unit->size;
+      local_data->nanimals_of_prodtype[unit->production_type] += unit->size;
+    }
+
+  adsm_declare_outputs (self, queue);
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_any_simulations_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
+
+
+
+/**
+ * Before each simulation, reset the counts to everyone Susceptible.
+ * 
+ * @param self this module.
+ * @param units a list of units.
+ */
+void
+handle_before_each_simulation_event (struct adsm_module_t_ *self,
+                                     UNT_unit_list_t *units)
+{
+  local_data_t *local_data;
+  guint nunits, nprodtypes;
+  const char *susceptible;
+  UNT_production_type_t prodtype;
+  const char *drill_down_list[3] = { NULL, NULL, NULL };
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+
+  /* First, zero all the counts. */
+  RPT_reporting_zero (local_data->num_units_in_state);
+  RPT_reporting_zero (local_data->num_units_in_state_by_prodtype);
+  RPT_reporting_zero (local_data->num_animals_in_state);
+  RPT_reporting_zero (local_data->num_animals_in_state_by_prodtype);
+
+  /* Set all to Susceptible. */
+  susceptible = UNT_state_name[Susceptible];
+  nunits = UNT_unit_list_length (units);
+  RPT_reporting_set_integer1 (local_data->num_units_in_state, nunits, susceptible);
+  RPT_reporting_set_real1 (local_data->num_animals_in_state, local_data->nanimals, susceptible);
+  nprodtypes = local_data->production_types->len;
+  drill_down_list[0] = susceptible;
+  for (prodtype = 0; prodtype < nprodtypes; prodtype++)
+    {
+      drill_down_list[1] = (char *) g_ptr_array_index (local_data->production_types, prodtype);
+      RPT_reporting_set_integer (local_data->num_units_in_state_by_prodtype,
+                                 local_data->nunits_of_prodtype[prodtype],
+                                 drill_down_list);
+      RPT_reporting_set_real (local_data->num_animals_in_state_by_prodtype,
+                              local_data->nanimals_of_prodtype[prodtype],
+                              drill_down_list);
+    }
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
+
+
+
+/**
+ * Responds to a Unit State Change event by updating the counts of units and
+ * animals in each state.
+ *
+ * @param self this module.
+ * @param event a Unit State Change event.
+ */
+void
+handle_unit_state_change_event (struct adsm_module_t_ *self,
+                                EVT_unit_state_change_event_t * event)
+{
+  local_data_t *local_data;
+  UNT_unit_t *unit;
+  const char *old_state;
+  const char *new_state;
+  const char *drill_down_list[3] = { NULL, NULL, NULL };
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_unit_state_change_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+
+  unit = event->unit;
+  old_state = UNT_state_name[event->old_state];
+  new_state = UNT_state_name[event->new_state];
+  RPT_reporting_sub_integer1 (local_data->num_units_in_state, 1, old_state);
+  RPT_reporting_add_integer1 (local_data->num_units_in_state, 1, new_state);
+  RPT_reporting_sub_real1 (local_data->num_animals_in_state, unit->size, old_state);
+  RPT_reporting_add_real1 (local_data->num_animals_in_state, unit->size, new_state);
+
+  drill_down_list[0] = old_state;
+  drill_down_list[1] = event->unit->production_type_name;
+  RPT_reporting_sub_integer (local_data->num_units_in_state_by_prodtype, 1,
+                             drill_down_list);
+  RPT_reporting_sub_real (local_data->num_animals_in_state_by_prodtype, unit->size,
+                          drill_down_list);
+  drill_down_list[0] = new_state;
+  RPT_reporting_add_integer (local_data->num_units_in_state_by_prodtype, 1,
+                             drill_down_list);
+  RPT_reporting_add_real (local_data->num_animals_in_state_by_prodtype, unit->size,
+                          drill_down_list);
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_unit_state_change_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
+
+
+
+/**
+ * Responds to a New Day event by updating the average prevalence.
+ *
+ * @param self this module.
+ * @param event a New Day event.
+ * @param units a list of units.
+ */
+void
+handle_new_day_event (struct adsm_module_t_ *self,
+                      EVT_new_day_event_t *event,
                       UNT_unit_list_t *units)
 {
   local_data_t *local_data;
@@ -88,7 +253,6 @@ handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event,
   guint nunits, i;
   UNT_unit_t *unit;
   UNT_state_t state;
-  const char *drill_down_list[3] = { NULL, NULL, NULL };
   gboolean active_infections;
 
   #if DEBUG
@@ -97,12 +261,6 @@ handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event,
 
   local_data = (local_data_t *) (self->model_data);
 
-  /* Count the number of units and animals infected, vaccinated, and
-   * destroyed, and the number of units and animals in each state. */
-  RPT_reporting_zero (local_data->num_units_in_state);
-  RPT_reporting_zero (local_data->num_units_in_state_by_prodtype);
-  RPT_reporting_zero (local_data->num_animals_in_state);
-  RPT_reporting_zero (local_data->num_animals_in_state_by_prodtype);
   prevalence_num = prevalence_denom = 0;
 
   active_infections = FALSE;
@@ -112,24 +270,16 @@ handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event,
       unit = UNT_unit_list_get (units, i);
       state = unit->state;
 
-      RPT_reporting_add_integer1 (local_data->num_units_in_state, 1, UNT_state_name[state]);
-      RPT_reporting_add_integer1 (local_data->num_animals_in_state, unit->size,
-                                  UNT_state_name[state]);
-      drill_down_list[0] = UNT_state_name[state];
-      drill_down_list[1] = unit->production_type_name;
-      RPT_reporting_add_integer (local_data->num_units_in_state_by_prodtype, 1, drill_down_list);
-      RPT_reporting_add_integer (local_data->num_animals_in_state_by_prodtype, unit->size,
-                                 drill_down_list);
-
       if (state >= Latent && state <= InfectiousClinical)
         {
           active_infections = TRUE;
           prevalence_num += unit->size * unit->prevalence;
           prevalence_denom += unit->size;
         }
-      RPT_reporting_set_real (local_data->avg_prevalence, (prevalence_denom > 0) ?
-                              prevalence_num / prevalence_denom : 0, NULL);
     }                   /* end loop over units */
+
+  RPT_reporting_set_real (local_data->avg_prevalence, (prevalence_denom > 0) ?
+                          prevalence_num / prevalence_denom : 0, NULL);
 
   if (active_infections)
     {
@@ -147,6 +297,8 @@ handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event,
   #if DEBUG
     g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
   #endif
+
+  return;
 }
 
 
@@ -172,7 +324,13 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
   switch (event->type)
     {
     case EVT_BeforeAnySimulations:
-      adsm_declare_outputs (self, queue);
+      handle_before_any_simulations_event (self, units, queue);
+      break;
+    case EVT_BeforeEachSimulation:
+      handle_before_each_simulation_event (self, units);
+      break;
+    case EVT_UnitStateChange:
+      handle_unit_state_change_event (self, &(event->u.unit_state_change));
       break;
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day), units);
@@ -245,6 +403,8 @@ local_free (struct adsm_module_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
+  g_free (local_data->nunits_of_prodtype);
+  g_free (local_data->nanimals_of_prodtype);
   RPT_free_reporting (local_data->num_units_in_state);
   RPT_free_reporting (local_data->num_units_in_state_by_prodtype);
   RPT_free_reporting (local_data->num_animals_in_state);
@@ -321,13 +481,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   for (i = 0; i < UNT_NSTATES; i++)
     {
       RPT_reporting_set_integer1 (local_data->num_units_in_state, 0, UNT_state_name[i]);
-      RPT_reporting_set_integer1 (local_data->num_animals_in_state, 0, UNT_state_name[i]);
+      RPT_reporting_set_real1 (local_data->num_animals_in_state, 0, UNT_state_name[i]);
       drill_down_list[0] = UNT_state_name[i];
       for (j = 0; j < n; j++)
         {
           drill_down_list[1] = (char *) g_ptr_array_index (units->production_type_names, j);
           RPT_reporting_set_integer (local_data->num_units_in_state_by_prodtype, 0, drill_down_list);
-          RPT_reporting_set_integer (local_data->num_animals_in_state_by_prodtype, 0, drill_down_list);
+          RPT_reporting_set_real (local_data->num_animals_in_state_by_prodtype, 0, drill_down_list);
         }
     }
 
