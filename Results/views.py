@@ -149,12 +149,12 @@ def empty_fields(model_class, excluded_fields):
 
 def class_specific_headers(model_name, prefix):
     # this mapping is also embedded in navigationPanel.html
-    headers = {'DailyByProductionType': [("Exposures", "exp", 'expcU'),
-                                         ("Infections", "inf", 'infcU'),
-                                         ("Destruction", "des", 'descU'),
-                                         ("Exams", "exm", 'exmcUAll'),
+    headers = {'DailyByProductionType': [("Exposures", "exp", 'expnU'),
+                                         ("Infections", "inf", 'infnU'),
+                                         ("Destruction", "des", 'desnUAll'),
+                                         ("Exams", "exm", 'exmnUAll'),
                                          ("Lab Tests", "tst", 'tstcUAll'),
-                                         ("Tracing", "tr", 'trcUAll')],
+                                         ("Tracing", "tr", 'trnUAll')],
                'DailyControls': [("Destruction", 'dest', 'destrSubtotal'),
                                  ("Destruction Wait", 'desw', 'deswATimeAvg'),
                                  ("Vaccination", 'vac', 'vaccVaccination')]}
