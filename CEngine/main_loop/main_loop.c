@@ -647,7 +647,6 @@ run_sim_main (sqlite3 *scenario_db,
 {
   unsigned int ndays, nruns, day, run, iteration_number;
   RPT_reporting_t *last_day_of_outbreak;
-  RPT_reporting_t *clock_time;
   RPT_reporting_t *version;
   GPtrArray *reporting_vars;
   int nmodels = 0;
@@ -664,7 +663,6 @@ run_sim_main (sqlite3 *scenario_db,
   gboolean active_infections_yesterday, active_infections_today,
     pending_actions, pending_infections, disease_end_recorded,
     stop_on_disease_end, early_exit;
-  time_t start_time, finish_time;
   guint exit_conditions = 0;
   double m_total_time, total_processor_time;
   unsigned long total_runs;
@@ -766,12 +764,10 @@ run_sim_main (sqlite3 *scenario_db,
    * easily be sent to a function for initialization. */
   last_day_of_outbreak =
     RPT_new_reporting ("outbreakDuration", RPT_integer);
-  clock_time = RPT_new_reporting ("clock-time", RPT_real);
   version = RPT_new_reporting ("version", RPT_group);
   split_version (PACKAGE_VERSION, version);
   reporting_vars = g_ptr_array_new ();
   g_ptr_array_add (reporting_vars, last_day_of_outbreak);
-  g_ptr_array_add (reporting_vars, clock_time);
   g_ptr_array_add (reporting_vars, version);
 
   zones = ZON_new_zone_list (nunits);
@@ -981,7 +977,6 @@ run_sim_main (sqlite3 *scenario_db,
                          units, zones, rng);
 
       /* Run the iteration. */
-      start_time = time (NULL);
 
       /* Begin the loop over the days in an iteration. */
       for (day = 1; (day <= ndays) && (!early_exit); day++)
@@ -1142,11 +1137,6 @@ run_sim_main (sqlite3 *scenario_db,
             }
 
 
-          if (early_exit || day == ndays)
-            {
-              finish_time = time (NULL);
-              RPT_reporting_set_real (clock_time, (double) (finish_time - start_time), NULL);
-            }
           adsm_create_event (manager, EVT_new_end_of_day2_event (day, early_exit || day == ndays), units, zones, rng);
 
           if (NULL != adsm_show_all_prevalences)
@@ -1236,7 +1226,6 @@ run_sim_main (sqlite3 *scenario_db,
 
   /* Clean up. */
   RPT_free_reporting (last_day_of_outbreak);
-  RPT_free_reporting (clock_time);
   RPT_free_reporting (version);
   adsm_free_event_manager (manager);
   adsm_unload_modules (nmodels, models);
