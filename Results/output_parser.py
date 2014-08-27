@@ -130,7 +130,7 @@ class DailyParser(object):
         for class_name in daily_instances:
             self.populate_tables_with_matching_fields(class_name, daily_instances[class_name], sparse_info)  # there was a lot of preamble to get this line to work
 
-        if len(self.failures):
+        if len(self.failures) and day == 1:
             print('Unable to match columns: ', len(self.failures), sorted(self.failures))
 
     def parse_daily_strings(self, cmd_strings):
