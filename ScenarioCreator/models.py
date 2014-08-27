@@ -137,7 +137,11 @@ class Population(BaseModel):
 
         start_time = time.clock()  # perf_counter() would also work
         session.set_population_upload_status("Parsing")
-        p = ScenarioCreator.parser.PopulationParser(self.source_file)
+        try:
+            p = ScenarioCreator.parser.PopulationParser(self.source_file)
+        except:
+            self.delete()
+            raise
         data = p.parse_to_dictionary()
         session.set_population_upload_status("Creating objects")
         total = len(data)
