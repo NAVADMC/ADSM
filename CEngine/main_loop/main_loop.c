@@ -952,13 +952,6 @@ run_sim_main (sqlite3 *scenario_db,
       /* Reset reporting variables. */
       RPT_reporting_set_null (last_day_of_outbreak, NULL);
 
-      /* Reset all models. */
-      for (i = 0; i < nmodels; i++)
-        models[i]->reset (models[i]);
-
-      /* Reset all zones. */
-      ZON_zone_list_reset (zones);
-
       active_infections_yesterday = TRUE;
       pending_actions = TRUE;
       pending_infections = TRUE;

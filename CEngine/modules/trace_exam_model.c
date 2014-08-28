@@ -24,9 +24,9 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new trace_exam_model_new
 #define run trace_exam_model_run
-#define reset trace_exam_model_reset
 #define to_string trace_exam_model_to_string
 #define local_free trace_exam_model_free
+#define handle_before_each_simulation_event trace_exam_model_handle_before_each_simulation_event
 #define handle_detection_event trace_exam_model_handle_detection_event
 #define handle_trace_result_event trace_exam_model_handle_trace_result_event
 
@@ -88,6 +88,33 @@ typedef struct
     (detection_exam_day_t *). */
 }
 local_data_t;
+
+
+
+/**
+ * Before each simulation, the module deletes any records of detections or
+ * exams left over from a previous iteration.
+ *
+ * @param self this module.
+ */
+void
+handle_before_each_simulation_event (struct adsm_module_t_ *self)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  g_hash_table_remove_all (local_data->detected_or_examined);
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
 
 
 
@@ -248,6 +275,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
   switch (event->type)
     {
+    case EVT_BeforeEachSimulation:
+      handle_before_each_simulation_event (self);
+      break;
     case EVT_Detection:
       handle_detection_event (self, &(event->u.detection));
       break;
@@ -262,30 +292,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
 #if DEBUG
   g_debug ("----- EXIT run (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
- * Resets this model after a simulation run.
- *
- * @param self the model.
- */
-void
-reset (struct adsm_module_t_ *self)
-{
-  local_data_t *local_data;
-
-#if DEBUG
-  g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-  g_hash_table_remove_all (local_data->detected_or_examined);
-
-#if DEBUG
-  g_debug ("----- EXIT reset (%s)", MODEL_NAME);
 #endif
 }
 
@@ -480,6 +486,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   adsm_module_t *self;
   local_data_t *local_data;
   EVT_event_type_t events_listened_for[] = {
+    EVT_BeforeEachSimulation,
     EVT_Detection,
     EVT_TraceResult,
     0
@@ -499,7 +506,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;
-  self->reset = reset;
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = adsm_model_answer_no;
   self->has_pending_infections = adsm_model_answer_no;

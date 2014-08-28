@@ -28,10 +28,10 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new test_model_new
 #define run test_model_run
-#define reset test_model_reset
 #define has_pending_actions test_model_has_pending_actions
 #define to_string test_model_to_string
 #define local_free test_model_free
+#define handle_before_each_simulation_event test_model_handle_before_each_simulation_event
 #define handle_new_day_event test_model_handle_new_day_event
 #define handle_detection_event test_model_handle_detection_event
 #define handle_test_event test_model_handle_test_event
@@ -110,6 +110,45 @@ typedef struct
     so that it will be available to the set_params function. */
 }
 local_data_t;
+
+
+
+/**
+ * Before each simulation, this module deletes any pending test results left
+ * over from a previous iteration.
+ *
+ * @param self the model.
+ */
+void
+handle_before_each_simulation_event (struct adsm_module_t_ *self)
+{
+  local_data_t *local_data;
+  GQueue *q;
+  unsigned int i;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+
+  for (i = 0; i < local_data->pending_results->len; i++)
+    {
+      q = (GQueue *) g_ptr_array_index (local_data->pending_results, i);
+      while (!g_queue_is_empty (q))
+	EVT_free_event (g_queue_pop_head (q));      
+    }
+  local_data->npending_results = 0;
+  local_data->rotating_index = 0;
+
+  g_hash_table_remove_all (local_data->detection_status);
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
 
 
 
@@ -449,6 +488,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t *units, ZON_zone_list_t *zones
 
   switch (event->type)
     {
+    case EVT_BeforeEachSimulation:
+      handle_before_each_simulation_event (self);
+      break;
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day), queue);
       break;
@@ -465,42 +507,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t *units, ZON_zone_list_t *zones
 
 #if DEBUG
   g_debug ("----- EXIT run (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
- * Resets this model after a simulation run.
- *
- * @param self the model.
- */
-void
-reset (struct adsm_module_t_ *self)
-{
-  local_data_t *local_data;
-  GQueue *q;
-  unsigned int i;
-
-#if DEBUG
-  g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-
-  for (i = 0; i < local_data->pending_results->len; i++)
-    {
-      q = (GQueue *) g_ptr_array_index (local_data->pending_results, i);
-      while (!g_queue_is_empty (q))
-	EVT_free_event (g_queue_pop_head (q));      
-    }
-  local_data->npending_results = 0;
-  local_data->rotating_index = 0;
-
-  g_hash_table_remove_all (local_data->detection_status);
-
-#if DEBUG
-  g_debug ("----- EXIT reset (%s)", MODEL_NAME);
 #endif
 }
 
@@ -699,6 +705,7 @@ new (sqlite3 * params, UNT_unit_list_t *units, projPJ projection,
   adsm_module_t *self;
   local_data_t *local_data;
   EVT_event_type_t events_listened_for[] = {
+    EVT_BeforeEachSimulation,
     EVT_NewDay,
     EVT_Detection,
     EVT_Test,
@@ -719,7 +726,6 @@ new (sqlite3 * params, UNT_unit_list_t *units, projPJ projection,
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;
-  self->reset = reset;
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = has_pending_actions;
   self->has_pending_infections = adsm_model_answer_no;

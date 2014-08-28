@@ -24,7 +24,6 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new population_model_new
 #define run population_model_run
-#define reset population_model_reset
 #define local_free population_model_free
 #define handle_before_each_simulation_event population_model_handle_before_each_simulation_event
 #define handle_midnight_event population_model_handle_midnight_event
@@ -530,27 +529,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
 
 /**
- * Resets this model after a simulation run.
- *
- * @param self the model.
- */
-void
-reset (struct adsm_module_t_ *self)
-{
-#if DEBUG
-  g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-#endif
-
-  /* Nothing to do. */
-
-#if DEBUG
-  g_debug ("----- EXIT reset (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
  * Frees this model.  Does not free the production type name.
  *
  * @param self the model.
@@ -616,7 +594,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;
-  self->reset = reset;
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = adsm_model_answer_no;
   self->has_pending_infections = adsm_model_answer_no;

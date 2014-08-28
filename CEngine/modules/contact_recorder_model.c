@@ -51,10 +51,10 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new contact_recorder_model_new
 #define run contact_recorder_model_run
-#define reset contact_recorder_model_reset
 #define has_pending_actions contact_recorder_model_has_pending_actions
 #define to_string contact_recorder_model_to_string
 #define local_free contact_recorder_model_free
+#define handle_before_each_simulation_event contact_recorder_model_handle_before_each_simulation_event
 #define handle_new_day_event contact_recorder_model_handle_new_day_event
 #define handle_exposure_event contact_recorder_model_handle_exposure_event
 #define handle_attempt_to_trace_event contact_recorder_model_handle_attempt_to_trace_event
@@ -124,6 +124,61 @@ typedef struct
     so that it will be available to the set_params function. */
 }
 local_data_t;
+
+
+
+/**
+ * Before each simulation, this module deletes all recorded exposures.
+ *
+ * @param self this module.
+ */
+void
+handle_before_each_simulation_event (struct adsm_module_t_ *self)
+{
+  local_data_t *local_data;
+  unsigned int i;
+  GQueue *q;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+
+  /* Free all nodes in the trace_out lists, and free the exposure events they
+   * point to. */
+  for (i = 0; i < local_data->nunits; i++)
+    {
+      q = local_data->trace_out[i];
+      while (!g_queue_is_empty (q))
+        EVT_free_event ((EVT_event_t *) g_queue_pop_head (q));
+    }
+
+  /* Free all nodes in the trace_in lists, but do not attempt to free the
+   * exposure events they point to.  That has already been done because the
+   * trace_out and trace_in lists share exposure events. */
+  for (i = 0; i < local_data->nunits; i++)
+    {
+      q = local_data->trace_in[i];
+      while (!g_queue_is_empty (q))
+        g_queue_pop_head (q);
+    }
+
+  for (i = 0; i < local_data->pending_results->len; i++)
+    {
+      q = (GQueue *) g_ptr_array_index (local_data->pending_results, i);
+      while (!g_queue_is_empty (q))
+        EVT_free_event (g_queue_pop_head (q));
+    }
+  local_data->npending_results = 0;
+  local_data->rotating_index = 0;
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+  
+  return;
+}
 
 
 
@@ -408,6 +463,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
   switch (event->type)
     {
+    case EVT_BeforeEachSimulation:
+      handle_before_each_simulation_event (self);
+      break;
     case EVT_Exposure:
       handle_exposure_event (self, event);
       break;
@@ -425,59 +483,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
 #if DEBUG
   g_debug ("----- EXIT run (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
- * Resets this model after a simulation run.
- *
- * @param self the model.
- */
-void
-reset (struct adsm_module_t_ *self)
-{
-  local_data_t *local_data;
-  unsigned int i;
-  GQueue *q;
-
-#if DEBUG
-  g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-
-  /* Free all nodes in the trace_out lists, and free the exposure events they
-   * point to. */
-  for (i = 0; i < local_data->nunits; i++)
-    {
-      q = local_data->trace_out[i];
-      while (!g_queue_is_empty (q))
-        EVT_free_event ((EVT_event_t *) g_queue_pop_head (q));
-    }
-
-  /* Free all nodes in the trace_in lists, but do not attempt to free the
-   * exposure events they point to.  That has already been done because the
-   * trace_out and trace_in lists share exposure events. */
-  for (i = 0; i < local_data->nunits; i++)
-    {
-      q = local_data->trace_in[i];
-      while (!g_queue_is_empty (q))
-        g_queue_pop_head (q);
-    }
-
-  for (i = 0; i < local_data->pending_results->len; i++)
-    {
-      q = (GQueue *) g_ptr_array_index (local_data->pending_results, i);
-      while (!g_queue_is_empty (q))
-        EVT_free_event (g_queue_pop_head (q));
-    }
-  local_data->npending_results = 0;
-  local_data->rotating_index = 0;
-
-#if DEBUG
-  g_debug ("----- EXIT reset (%s)", MODEL_NAME);
 #endif
 }
 
@@ -725,6 +730,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   adsm_module_t *self;
   local_data_t *local_data;
   EVT_event_type_t events_listened_for[] = {
+    EVT_BeforeEachSimulation,
     EVT_Exposure,
     EVT_AttemptToTrace,
     EVT_NewDay,
@@ -747,7 +753,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;
-  self->reset = reset;
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = has_pending_actions;
   self->has_pending_infections = adsm_model_answer_no;

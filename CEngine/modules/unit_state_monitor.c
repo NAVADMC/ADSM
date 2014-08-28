@@ -19,7 +19,6 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new unit_state_monitor_new
 #define run unit_state_monitor_run
-#define reset unit_state_monitor_reset
 #define to_string unit_state_monitor_to_string
 #define local_free unit_state_monitor_free
 #define handle_before_any_simulations_event unit_state_monitor_handle_before_any_simulations_event
@@ -119,7 +118,9 @@ handle_before_any_simulations_event (struct adsm_module_t_ *self,
 
 
 /**
- * Before each simulation, reset the counts to everyone Susceptible.
+ * Before each simulation, this module resets the counts to everyone
+ * Susceptible, and deletes any record of the last day of disease left over
+ * from a previous iteration.
  * 
  * @param self this module.
  * @param units a list of units.
@@ -163,6 +164,9 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self,
                               local_data->nanimals_of_prodtype[prodtype],
                               drill_down_list);
     }
+
+  RPT_reporting_set_null (local_data->last_day_of_disease, NULL);
+  local_data->disease_end_recorded = FALSE;
 
   #if DEBUG
     g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -338,31 +342,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
 
 /**
- * Resets this model after a simulation run.
- *
- * @param self the model.
- */
-void
-reset (struct adsm_module_t_ *self)
-{
-  local_data_t *local_data;
-
-  #if DEBUG
-    g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-  #endif
-
-  local_data = (local_data_t *) (self->model_data);
-  RPT_reporting_set_null (local_data->last_day_of_disease, NULL);
-  local_data->disease_end_recorded = FALSE;
-
-  #if DEBUG
-    g_debug ("----- EXIT reset (%s)", MODEL_NAME);
-  #endif
-}
-
-
-
-/**
  * Returns a text representation of this model.
  *
  * @param self the model.
@@ -442,7 +421,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->outputs = g_ptr_array_sized_new (18);
   self->model_data = local_data;
   self->run = run;
-  self->reset = reset;
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = adsm_model_answer_no;
   self->has_pending_infections = adsm_model_answer_no;
