@@ -153,7 +153,7 @@ def class_specific_headers(model_name, prefix):
                                          ("Infections", "inf", 'infnU'),
                                          ("Destruction", "des", 'desnUAll'),
                                          ("Exams", "exm", 'exmnUAll'),
-                                         ("Lab Tests", "tst", 'tstcUAll'),
+                                         ("Lab Tests", "tst", 'tstnUAll'),
                                          ("Tracing", "tr", 'trnUAll')],
                'DailyControls': [("Destruction", 'dest', 'destrSubtotal'),
                                  ("Destruction Wait", 'desw', 'deswATimeAvg'),

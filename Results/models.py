@@ -253,6 +253,7 @@ class DailyByProductionType(OutputBaseModel):
     tstcUFalsePos = models.IntegerField(blank=True, null=True, verbose_name=explain("tstcUFalsePos"))
     tstcUTrueNeg = models.IntegerField(blank=True, null=True, verbose_name=explain("tstcUTrueNeg"))
     tstcUFalseNeg = models.IntegerField(blank=True, null=True, verbose_name=explain("tstcUFalseNeg"))
+    tstnUAll = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUAll"))
     tstnUTruePos = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUTruePos"))
     tstnUFalsePos = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUFalsePos"))
     tstnUTrueNeg = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUTrueNeg"))
