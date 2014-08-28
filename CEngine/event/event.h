@@ -653,4 +653,6 @@ int EVT_fprintf_event_queue (FILE *, EVT_event_queue_t *);
 
 #define EVT_printf_event_queue(Q) EVT_fprintf_event_queue(stdout,Q)
 
+void EVT_free_event_as_GFunc (gpointer data, gpointer user_data);
+
 #endif /* !EVENT_H */

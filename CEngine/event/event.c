@@ -23,11 +23,6 @@
 #  include <math.h>
 #endif
 
-/* To avoid name clashes when dlpreopening multiple modules that have the same
- * global symbols (interface).  See sec. 18.4 of "GNU Autoconf, Automake, and
- * Libtool". */
-#define EVT_free_event_as_GFunc event_LTX_EVT_free_event_as_GFunc
-
 #if STDC_HEADERS
 #  include <stdlib.h>
 #endif

@@ -34,7 +34,6 @@
 #define handle_vaccination_event population_model_handle_vaccination_event
 #define handle_destruction_event population_model_handle_destruction_event
 #define handle_end_of_day_event population_model_handle_end_of_day_event
-#define EVT_free_event_as_GFunc population_model_EVT_free_event_as_GFunc
 
 #include "module.h"
 
@@ -81,20 +80,6 @@ typedef struct
     production type is 0. */
 }
 local_data_t;
-
-
-
-/**
- * Wraps EVT_free_event so that it can be used in GLib calls.
- *
- * @param data a pointer to an EVT_event_t structure, but cast to a gpointer.
- * @param user_data not used, pass NULL.
- */
-void
-EVT_free_event_as_GFunc (gpointer data, gpointer user_data)
-{
-  EVT_free_event ((EVT_event_t *) data);
-}
 
 
 
