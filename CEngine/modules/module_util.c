@@ -391,6 +391,7 @@ read_primary_order_callback (void *data, int ncols, char **value, char **colname
 
 
 
+#if DEBUG
 static void
 build_priority_debug_string (gpointer key,
                              gpointer value,
@@ -416,6 +417,7 @@ build_priority_debug_string (gpointer key,
 
   return;
 }
+#endif
 
 /**
  * Reads the destruction priority order from the parameters database. Returns
