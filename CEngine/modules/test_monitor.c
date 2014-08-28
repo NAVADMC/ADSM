@@ -53,6 +53,10 @@ EVT_NewDay, EVT_Test, EVT_TestResult };
 typedef struct
 {
   GPtrArray *production_types;
+  RPT_reporting_t *nunits_tested;
+  RPT_reporting_t *nunits_tested_by_reason;
+  RPT_reporting_t *nunits_tested_by_prodtype;
+  RPT_reporting_t *nunits_tested_by_reason_and_prodtype;
   RPT_reporting_t *cumul_nunits_tested;
   RPT_reporting_t *cumul_nunits_tested_by_reason;
   RPT_reporting_t *cumul_nunits_tested_by_prodtype;
@@ -83,8 +87,8 @@ local_data_t;
 
 
 /**
- * On each new day, zero the daily counts of true positives, false positives,
- * etc.
+ * On each new day, zero the daily counts of units tested, true positives,
+ * false positives, etc.
  *
  * @param self this module.
  */
@@ -100,6 +104,10 @@ handle_new_day_event (struct adsm_module_t_ *self)
   local_data = (local_data_t *) (self->model_data);
 
   /* Zero the daily counts. */
+  RPT_reporting_zero (local_data->nunits_tested);
+  RPT_reporting_zero (local_data->nunits_tested_by_reason);
+  RPT_reporting_zero (local_data->nunits_tested_by_prodtype);
+  RPT_reporting_zero (local_data->nunits_tested_by_reason_and_prodtype);
   RPT_reporting_zero (local_data->nunits_truepos);
   RPT_reporting_zero (local_data->nunits_truepos_by_prodtype);
   RPT_reporting_zero (local_data->nunits_trueneg);
@@ -140,6 +148,9 @@ handle_test_event (struct adsm_module_t_ *self, EVT_test_event_t * event)
   unit = event->unit;
   reason = ADSM_control_reason_abbrev[event->reason];
 
+  RPT_reporting_add_integer (local_data->nunits_tested, 1, NULL);
+  RPT_reporting_add_integer1 (local_data->nunits_tested_by_reason, 1, reason);
+  RPT_reporting_add_integer1 (local_data->nunits_tested_by_prodtype, 1, unit->production_type_name);
   RPT_reporting_add_integer (local_data->cumul_nunits_tested, 1, NULL);
   RPT_reporting_add_integer1 (local_data->cumul_nunits_tested_by_reason, 1, reason);
   RPT_reporting_add_integer1 (local_data->cumul_nunits_tested_by_prodtype, 1, unit->production_type_name);
@@ -148,6 +159,7 @@ handle_test_event (struct adsm_module_t_ *self, EVT_test_event_t * event)
   RPT_reporting_add_integer1 (local_data->cumul_nanimals_tested_by_prodtype, unit->size, unit->production_type_name);
   drill_down_list[0] = reason;
   drill_down_list[1] = unit->production_type_name;
+  RPT_reporting_add_integer (local_data->nunits_tested_by_reason_and_prodtype, 1, drill_down_list);
   RPT_reporting_add_integer (local_data->cumul_nunits_tested_by_reason_and_prodtype, 1, drill_down_list);
   RPT_reporting_add_integer (local_data->cumul_nanimals_tested_by_reason_and_prodtype, unit->size, drill_down_list);
 
@@ -417,6 +429,14 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
+  local_data->nunits_tested =
+    RPT_new_reporting ("tstnUAll", RPT_integer);
+  local_data->nunits_tested_by_reason =
+    RPT_new_reporting ("tstnU", RPT_group);
+  local_data->nunits_tested_by_prodtype =
+    RPT_new_reporting ("tstnU", RPT_group);
+  local_data->nunits_tested_by_reason_and_prodtype =
+    RPT_new_reporting ("tstnU", RPT_group);
   local_data->cumul_nunits_tested =
     RPT_new_reporting ("tstcUAll", RPT_integer);
   local_data->cumul_nunits_tested_by_reason =
@@ -475,6 +495,10 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     RPT_new_reporting ("tstcA", RPT_group);
   local_data->cumul_nanimals_tested_by_reason_and_prodtype =
     RPT_new_reporting ("tstcA", RPT_group);
+  g_ptr_array_add (self->outputs, local_data->nunits_tested);
+  g_ptr_array_add (self->outputs, local_data->nunits_tested_by_reason);
+  g_ptr_array_add (self->outputs, local_data->nunits_tested_by_prodtype);
+  g_ptr_array_add (self->outputs, local_data->nunits_tested_by_reason_and_prodtype);
   g_ptr_array_add (self->outputs, local_data->cumul_nunits_tested);
   g_ptr_array_add (self->outputs, local_data->cumul_nunits_tested_by_reason);
   g_ptr_array_add (self->outputs, local_data->cumul_nunits_tested_by_prodtype);
@@ -499,6 +523,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   for (i = 0; i < local_data->production_types->len; i++)
     {
       prodtype_name = (char *) g_ptr_array_index (local_data->production_types, i);
+      RPT_reporting_set_integer1 (local_data->nunits_tested_by_prodtype, 0, prodtype_name);
       RPT_reporting_set_integer1 (local_data->cumul_nunits_tested_by_prodtype, 0, prodtype_name);
       RPT_reporting_set_integer1 (local_data->nunits_truepos_by_prodtype, 0, prodtype_name);
       RPT_reporting_set_integer1 (local_data->nunits_trueneg_by_prodtype, 0, prodtype_name);
@@ -520,12 +545,15 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
           || (ADSM_control_reason)i == ADSM_ControlInitialState)
         continue;
       reason = ADSM_control_reason_abbrev[i];
+      RPT_reporting_add_integer1 (local_data->nunits_tested_by_reason, 0, reason);
       RPT_reporting_add_integer1 (local_data->cumul_nunits_tested_by_reason, 0, reason);
       RPT_reporting_add_integer1 (local_data->cumul_nanimals_tested_by_reason, 0, reason);
       drill_down_list[0] = reason;
       for (j = 0; j < local_data->production_types->len; j++)
         {
           drill_down_list[1] = (char *) g_ptr_array_index (local_data->production_types, j);
+          RPT_reporting_add_integer (local_data->nunits_tested_by_reason_and_prodtype, 0,
+                                     drill_down_list);
           RPT_reporting_add_integer (local_data->cumul_nunits_tested_by_reason_and_prodtype, 0,
                                      drill_down_list);
           RPT_reporting_add_integer (local_data->cumul_nanimals_tested_by_reason_and_prodtype, 0,
