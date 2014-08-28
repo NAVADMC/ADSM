@@ -3,6 +3,7 @@ var progressBar = (function(){
     var progressBar = $('<div class="progress-bar" style="width: 0%;"></div>');
     var progressStatus = $('<div class="progress-status">Upload starting...</div>');
     var progressInterval;
+    var progress = $('<div class="progress progress-striped active" style="width:500px"></div>');
 
     var progressChecker =  function() {
         $.get('/setup/UploadPopulation/', function(data){
@@ -29,11 +30,16 @@ var progressBar = (function(){
     };
 
     return {
+       'hide': function(e){
+            $('#load_population_widget').show().before('<div class="alert alert-warning"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error:</strong> ' + e.message + '</div>');
+            progress.remove();
+            progressStatus.hide();
+
+        },
         'show': function(){
-            $('#load_population_widget')
-                .hide()
-                .after($('<div class="progress progress-striped active" style="width:500px"></div>')
-                    .append(progressBar))
+            $('.alert').alert('close');
+            $('#load_population_widget').hide()
+                .after(progress).append(progressBar)
                 .after(progressStatus);
         },
         'startProgressChecker': function() {
@@ -95,7 +101,11 @@ $(function(){
     };
     var completeHandler = function(e) {
         progressBar.stopProgressChecker();
-        window.location = e.redirect;
+        if (e.status == "complete") {
+            window.location = e.redirect;
+        } else {
+            progressBar.hide(e);
+        }
     };
     var errorHandler = function(e) {
         console.log('error', e);

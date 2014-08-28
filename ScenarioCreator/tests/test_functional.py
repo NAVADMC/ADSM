@@ -8,6 +8,8 @@ from selenium.common.exceptions import NoSuchElementException
 from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, ProbabilityFunction, RelationalFunction
 
 class FunctionalTests(LiveServerTestCase):
+    multi_db = True
+
     @classmethod
     def setUpClass(cls):
         cls.selenium = WebDriver()
@@ -55,3 +57,32 @@ class FunctionalTests(LiveServerTestCase):
 
         lp_cattle = ProbabilityFunction.objects.get(pk=lp_cattle.pk)
         self.assertEqual(lp_cattle.name, "Latent period - cattle edited")
+
+    def test_upload_population_file(self):
+        self.selenium.get('%s' % self.live_server_url)
+        time.sleep(1)
+
+        self.selenium.find_element_by_tag_name('nav').find_element_by_link_text('Population').click()
+        time.sleep(1)
+
+        self.selenium.find_element_by_link_text('Population_Grid.xml').click()
+        time.sleep(3) # may need to be adjusted for slow computers or if the file grows
+
+        section = self.selenium.find_element_by_tag_name('section')
+        self.assertIn('Current Units:', section.text)
+
+    def test_upload_blank_population_file(self):
+        self.selenium.get('%s' % self.live_server_url)
+        time.sleep(1)
+
+        self.selenium.find_element_by_tag_name('nav').find_element_by_link_text('Population').click()
+        time.sleep(1)
+
+        self.selenium.find_element_by_link_text('Blank.xml').click()
+        time.sleep(3) # may need to be adjusted for slow computers or if the file grows
+
+        section = self.selenium.find_element_by_tag_name('section')
+        self.assertIn('Load a Population', section.text)
+
+        alert = self.selenium.find_element_by_class_name('alert')
+        self.assertIn('Error: File Read returned a blank string.', alert.text)
