@@ -130,16 +130,16 @@ handle_trace_result_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
   if (event->direction == ADSM_TraceForwardOrOut)
     {
       if (event->contact_type == ADSM_DirectContact)
-        destr_event = EVT_new_request_for_destruction_event (unit, event->day, "DirFwd", priority);
+        destr_event = EVT_new_request_for_destruction_event (unit, event->day, ADSM_ControlTraceForwardDirect, priority);
       else /* indirect */
-        destr_event = EVT_new_request_for_destruction_event (unit, event->day, "IndFwd", priority);
+        destr_event = EVT_new_request_for_destruction_event (unit, event->day, ADSM_ControlTraceForwardIndirect, priority);
     }
   else
     {
       if (event->contact_type == ADSM_DirectContact)
-        destr_event = EVT_new_request_for_destruction_event (unit, event->day, "DirBack", priority);
+        destr_event = EVT_new_request_for_destruction_event (unit, event->day, ADSM_ControlTraceBackDirect, priority);
       else /* indirect */
-        destr_event = EVT_new_request_for_destruction_event (unit, event->day, "IndBack", priority);
+        destr_event = EVT_new_request_for_destruction_event (unit, event->day, ADSM_ControlTraceBackIndirect, priority);
     }
 #if DEBUG
   g_debug ("requesting destruction of unit \"%s\"", unit->official_id);

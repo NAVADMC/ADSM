@@ -1067,7 +1067,7 @@ EVT_vaccination_event_to_string (EVT_vaccination_event_t * event)
 EVT_event_t *
 EVT_new_request_for_destruction_event (UNT_unit_t * unit,
                                        int day,
-                                       char *reason, int priority)
+                                       ADSM_control_reason reason, int priority)
 {
   EVT_event_t *event;
 
@@ -1154,7 +1154,7 @@ EVT_commitment_to_destroy_event_to_string (EVT_commitment_to_destroy_event_t * e
  * @return a pointer to a newly-created EVT_event_t structure.
  */
 EVT_event_t *
-EVT_new_destruction_event (UNT_unit_t * unit, int day, char *reason,
+EVT_new_destruction_event (UNT_unit_t * unit, int day, ADSM_control_reason reason,
                            int day_commitment_made)
 {
   EVT_event_t *event;

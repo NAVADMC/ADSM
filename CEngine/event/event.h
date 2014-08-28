@@ -373,7 +373,7 @@ typedef struct
   UNT_unit_t *unit;
   int day;
   int priority;
-  char *reason; /**< why destruction was requested */
+  ADSM_control_reason reason; /**< why destruction was requested */
   int day_commitment_made; /**< the day on which a commitment to fulfil this
     request was made. */
 }
@@ -396,7 +396,7 @@ typedef struct
 {
   UNT_unit_t *unit;
   int day;
-  char *reason; /**< why destruction was requested */
+  ADSM_control_reason reason; /**< why destruction was requested */
   int day_commitment_made; /**< the day on which a commitment to do this
     destruction was made. */
 }
@@ -605,9 +605,9 @@ EVT_event_t *EVT_new_vaccination_event (UNT_unit_t *, int day, char *reason,
                                         int day_commitment_made);
 EVT_event_t *EVT_new_request_for_destruction_event (UNT_unit_t *,
                                                     int day,
-                                                    char *reason, int priority);
+                                                    ADSM_control_reason, int priority);
 EVT_event_t *EVT_new_commitment_to_destroy_event (UNT_unit_t *, int day);
-EVT_event_t *EVT_new_destruction_event (UNT_unit_t *, int day, char *reason,
+EVT_event_t *EVT_new_destruction_event (UNT_unit_t *, int day, ADSM_control_reason,
                                         int day_commitment_made);
 EVT_event_t *EVT_new_request_for_zone_focus_event (UNT_unit_t *,
                                                    int day, char *reason);

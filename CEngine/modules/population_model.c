@@ -199,7 +199,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ * self,
           break;
         case Destroyed:
           UNT_destroy (unit);
-          event = EVT_new_destruction_event (unit, 0, "Ini", -1);
+          event = EVT_new_destruction_event (unit, 0, ADSM_ControlInitialState, -1);
           EVT_event_enqueue (queue, event);
           break;
         default:

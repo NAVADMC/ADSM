@@ -436,7 +436,7 @@ cancel_vaccination (UNT_unit_t * unit, int day,
 
 void
 destroy (struct adsm_module_t_ *self, UNT_unit_t * unit,
-         int day, char *reason, int day_commitment_made,
+         int day, ADSM_control_reason reason, int day_commitment_made,
          EVT_event_queue_t * queue)
 {
   local_data_t *local_data;

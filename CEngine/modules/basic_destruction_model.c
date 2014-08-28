@@ -116,7 +116,7 @@ handle_detection_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
       EVT_event_enqueue (queue,
                          EVT_new_request_for_destruction_event (event->unit,
                                                                 event->day,
-                                                                "Det",
+                                                                ADSM_ControlDetection,
                                                                 priority));
     }
 
