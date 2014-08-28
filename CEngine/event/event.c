@@ -43,6 +43,7 @@
  * @sa EVT_event_type_t
  */
 const char *EVT_event_type_name[] = {
+  "Unknown",
   "BeforeAnySimulations",
   "OutputDirectory",
   "BeforeEachSimulation",
@@ -1427,6 +1428,7 @@ EVT_free_event (EVT_event_t * event)
 
   switch (event->type)
     {
+    case EVT_UnknownEvent:
     case EVT_BeforeAnySimulations:
     case EVT_BeforeEachSimulation:
     case EVT_DeclarationOfVaccineDelay:

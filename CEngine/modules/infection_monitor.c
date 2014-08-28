@@ -24,7 +24,6 @@
 #define new infection_monitor_new
 #define run infection_monitor_run
 #define reset infection_monitor_reset
-#define events_listened_for infection_monitor_events_listened_for
 #define to_string infection_monitor_to_string
 #define local_free infection_monitor_free
 #define handle_new_day_event infection_monitor_handle_new_day_event
@@ -58,14 +57,6 @@ double round (double x);
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "infection-monitor"
-
-
-
-#define NEVENTS_LISTENED_FOR 4
-EVT_event_type_t events_listened_for[] =
-  { EVT_BeforeAnySimulations,
-    EVT_NewDay, EVT_Infection,
-    EVT_Detection };
 
 
 
@@ -566,6 +557,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
+  EVT_event_type_t events_listened_for[] = {
+    EVT_BeforeAnySimulations,
+    EVT_NewDay,
+    EVT_Infection,
+    EVT_Detection,
+    0
+  };
   guint n, i, j;
   char *prodtype_name;
 
@@ -577,8 +575,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_sized_new (18);
   self->model_data = local_data;
   self->run = run;

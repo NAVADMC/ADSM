@@ -24,7 +24,6 @@
 #define new detection_monitor_new
 #define run detection_monitor_run
 #define reset detection_monitor_reset
-#define events_listened_for detection_monitor_events_listened_for
 #define local_free detection_monitor_free
 #define handle_new_day_event detection_monitor_handle_new_day_event
 #define handle_detection_event detection_monitor_handle_detection_event
@@ -39,12 +38,6 @@
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "detection-monitor"
-
-
-
-#define NEVENTS_LISTENED_FOR 3
-EVT_event_type_t events_listened_for[] =
-  { EVT_BeforeAnySimulations, EVT_NewDay, EVT_Detection };
 
 
 
@@ -518,6 +511,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
+  EVT_event_type_t events_listened_for[] = {
+    EVT_BeforeAnySimulations,
+    EVT_NewDay,
+    EVT_Detection,
+    0
+  };
   unsigned int i, j;         /* loop counters */
   char *prodtype_name;
 
@@ -529,8 +528,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;

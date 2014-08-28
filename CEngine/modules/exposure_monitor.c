@@ -24,7 +24,6 @@
 #define new exposure_monitor_new
 #define run exposure_monitor_run
 #define reset exposure_monitor_reset
-#define events_listened_for exposure_monitor_events_listened_for
 #define local_free exposure_monitor_free
 #define handle_new_day_event exposure_monitor_handle_new_day_event
 #define handle_exposure_event exposure_monitor_handle_exposure_event
@@ -39,11 +38,6 @@
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "exposure-monitor"
-
-
-
-#define NEVENTS_LISTENED_FOR 3
-EVT_event_type_t events_listened_for[] = { EVT_BeforeAnySimulations, EVT_NewDay, EVT_Exposure };
 
 
 
@@ -341,6 +335,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
+  EVT_event_type_t events_listened_for[] = {
+    EVT_BeforeAnySimulations,
+    EVT_NewDay,
+    EVT_Exposure,
+    0
+  };
   guint n, i, j;
   char *prodtype_name;
 
@@ -352,8 +352,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;

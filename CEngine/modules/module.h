@@ -133,8 +133,7 @@ typedef int (*adsm_model_fprintf_t) (FILE *, struct adsm_module_t_ *);
 typedef struct adsm_module_t_
 {
   char *name; /**< A short name for the model. */
-  EVT_event_type_t *events_listened_for; /**< A list of events the model listens for. */
-  unsigned int nevents_listened_for; /**< Length of events_listened_for. */
+  GArray *events_listened_for; /**< A list of events the model listens for. Each item is of type EVT_event_type_t. */
   GPtrArray *outputs; /**< A list of the model's output variables. */
   void *model_data; /**< Specialized information for the particular model. */
   adsm_model_run_t run; /**< A function that runs the model. */
@@ -151,6 +150,7 @@ typedef struct adsm_module_t_
 adsm_module_t;
 
 /* Some methods that tend to be the same for most of the modules. */
+GArray *adsm_setup_events_listened_for (EVT_event_type_t *);
 gboolean adsm_model_is_listening_for (struct adsm_module_t_ *, EVT_event_type_t);
 char *adsm_module_to_string_default (struct adsm_module_t_ *);
 int adsm_model_fprintf (FILE *, struct adsm_module_t_ *);

@@ -59,6 +59,7 @@
 /** Events of interest. */
 typedef enum
 {
+  EVT_UnknownEvent,
   EVT_BeforeAnySimulations,
   EVT_OutputDirectory,
   EVT_BeforeEachSimulation,

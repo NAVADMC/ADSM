@@ -25,7 +25,6 @@
 #define new zone_monitor_new
 #define run zone_monitor_run
 #define reset zone_monitor_reset
-#define events_listened_for zone_monitor_events_listened_for
 #define local_free zone_monitor_free
 #define handle_new_day_event zone_monitor_handle_new_day_event
 #define handle_request_for_zone_focus_event zone_monitor_handle_request_for_zone_focus_event
@@ -49,15 +48,6 @@
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "zone-monitor"
-
-
-
-#define NEVENTS_LISTENED_FOR 3
-EVT_event_type_t events_listened_for[] = {
-  EVT_BeforeAnySimulations,
-  EVT_RequestForZoneFocus,
-  EVT_NewDay
-};
 
 
 
@@ -357,10 +347,15 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self = g_new (adsm_module_t, 1);
   local_data = g_new (local_data_t, 1);
+  EVT_event_type_t events_listened_for[] = {
+    EVT_BeforeAnySimulations,
+    EVT_RequestForZoneFocus,
+    EVT_NewDay,
+    0
+  };
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;

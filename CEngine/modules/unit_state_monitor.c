@@ -20,7 +20,6 @@
 #define new unit_state_monitor_new
 #define run unit_state_monitor_run
 #define reset unit_state_monitor_reset
-#define events_listened_for unit_state_monitor_events_listened_for
 #define to_string unit_state_monitor_to_string
 #define local_free unit_state_monitor_free
 #define handle_before_any_simulations_event unit_state_monitor_handle_before_any_simulations_event
@@ -49,16 +48,6 @@
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "unit-state-monitor"
-
-
-
-#define NEVENTS_LISTENED_FOR 4
-EVT_event_type_t events_listened_for[] = {
-  EVT_BeforeAnySimulations,
-  EVT_BeforeEachSimulation,
-  EVT_UnitStateChange,
-  EVT_NewDay
-};
 
 
 
@@ -431,6 +420,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
+  EVT_event_type_t events_listened_for[] = {
+    EVT_BeforeAnySimulations,
+    EVT_BeforeEachSimulation,
+    EVT_UnitStateChange,
+    EVT_NewDay,
+    0
+  };
   guint n, i, j;
   const char *drill_down_list[3] = { NULL, NULL, NULL };
 
@@ -442,8 +438,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_sized_new (18);
   self->model_data = local_data;
   self->run = run;

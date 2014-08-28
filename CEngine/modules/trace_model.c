@@ -25,7 +25,6 @@
 #define new trace_model_new
 #define run trace_model_run
 #define reset trace_model_reset
-#define events_listened_for trace_model_events_listened_for
 #define to_string trace_model_to_string
 #define local_free trace_model_free
 #define handle_detection_event trace_model_handle_detection_event
@@ -49,11 +48,6 @@
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "trace-model"
-
-
-
-#define NEVENTS_LISTENED_FOR 1
-EVT_event_type_t events_listened_for[] = { EVT_Detection };
 
 
 
@@ -381,6 +375,10 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
+  EVT_event_type_t events_listened_for[] = {
+    EVT_Detection,
+    0
+  };
   guint nprod_types, i, j, k;
   char *sqlerr;
 
@@ -392,8 +390,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;

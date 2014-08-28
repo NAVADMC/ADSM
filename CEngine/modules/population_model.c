@@ -25,7 +25,6 @@
 #define new population_model_new
 #define run population_model_run
 #define reset population_model_reset
-#define events_listened_for population_model_events_listened_for
 #define local_free population_model_free
 #define handle_before_each_simulation_event population_model_handle_before_each_simulation_event
 #define handle_midnight_event population_model_handle_midnight_event
@@ -65,15 +64,6 @@ double trunc (double);
 #endif
 
 #define MODEL_NAME "population-model"
-
-
-
-#define NEVENTS_LISTENED_FOR 7
-EVT_event_type_t events_listened_for[] = { EVT_BeforeEachSimulation, EVT_Midnight,
-  EVT_DeclarationOfVaccineDelay,
-  EVT_Exposure, EVT_Vaccination, EVT_Destruction,
-  EVT_EndOfDay
-};
 
 
 
@@ -618,6 +608,16 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
+  EVT_event_type_t events_listened_for[] = {
+    EVT_BeforeEachSimulation,
+    EVT_Midnight,
+    EVT_DeclarationOfVaccineDelay,
+    EVT_Exposure,
+    EVT_Vaccination,
+    EVT_Destruction,
+    EVT_EndOfDay,
+    0
+  };
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -627,8 +627,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;

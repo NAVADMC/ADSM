@@ -24,7 +24,6 @@
 #define new vaccination_monitor_new
 #define run vaccination_monitor_run
 #define reset vaccination_monitor_reset
-#define events_listened_for vaccination_monitor_events_listened_for
 #define local_free vaccination_monitor_free
 #define handle_new_day_event vaccination_monitor_handle_new_day_event
 #define handle_declaration_of_vaccination_reasons_event vaccination_monitor_handle_declaration_of_vaccination_reasons_event
@@ -40,12 +39,6 @@
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "vaccination-monitor"
-
-
-
-#define NEVENTS_LISTENED_FOR 4
-EVT_event_type_t events_listened_for[] =
-  { EVT_BeforeAnySimulations, EVT_NewDay, EVT_DeclarationOfVaccinationReasons, EVT_Vaccination };
 
 
 
@@ -417,6 +410,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
+  EVT_event_type_t events_listened_for[] = {
+    EVT_BeforeAnySimulations,
+    EVT_NewDay,
+    EVT_DeclarationOfVaccinationReasons,
+    EVT_Vaccination,
+    0
+  };
   unsigned int n;
   unsigned int i;      /* loop counter */
   char *prodtype_name;
@@ -430,8 +430,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;

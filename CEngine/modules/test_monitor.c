@@ -24,7 +24,6 @@
 #define new test_monitor_new
 #define run test_monitor_run
 #define reset test_monitor_reset
-#define events_listened_for test_monitor_events_listened_for
 #define local_free test_monitor_free
 #define handle_new_day_event test_monitor_handle_new_day_event
 #define handle_test_event test_monitor_handle_test_event
@@ -40,12 +39,6 @@
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "test-monitor"
-
-
-
-#define NEVENTS_LISTENED_FOR 4
-EVT_event_type_t events_listened_for[] = { EVT_BeforeAnySimulations,
-EVT_NewDay, EVT_Test, EVT_TestResult };
 
 
 
@@ -404,6 +397,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
+  EVT_event_type_t events_listened_for[] = {
+    EVT_BeforeAnySimulations,
+    EVT_NewDay,
+    EVT_Test,
+    EVT_TestResult,
+    0
+  };
   unsigned int i, j;         /* loop counters */
   char *prodtype_name;
 
@@ -415,8 +415,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
   self->model_data = local_data;
   self->run = run;

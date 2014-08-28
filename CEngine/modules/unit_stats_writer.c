@@ -16,7 +16,6 @@
 #define new unit_stats_writer_new
 #define run unit_stats_writer_run
 #define reset unit_stats_writer_reset
-#define events_listened_for unit_stats_writer_events_listened_for
 #define to_string unit_stats_writer_to_string
 #define local_free unit_stats_writer_free
 #define handle_unit_state_change_event unit_stats_writer_handle_unit_state_change_event
@@ -52,17 +51,6 @@ double round (double x);
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "unit-stats-writer"
-
-
-
-#define NEVENTS_LISTENED_FOR 5
-EVT_event_type_t events_listened_for[] = {
-  EVT_UnitStateChange,
-  EVT_RequestForZoneFocus,
-  EVT_Vaccination,
-  EVT_Destruction,
-  EVT_EndOfDay2
-};
 
 
 
@@ -463,6 +451,14 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
+    EVT_event_type_t events_listened_for[] = {
+    EVT_UnitStateChange,
+    EVT_RequestForZoneFocus,
+    EVT_Vaccination,
+    EVT_Destruction,
+    EVT_EndOfDay2,
+    0
+  };
 
   #if DEBUG
     g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -472,8 +468,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_sized_new (0);
   self->model_data = local_data;
   self->run = run;

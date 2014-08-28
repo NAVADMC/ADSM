@@ -21,6 +21,31 @@
 
 
 /**
+ * Copies a 0-terminated list of event types into a newly-allocated GArray.
+ *
+ * @param event_types a NULL-terminated list of event types.
+ * @return a GArray containing the event types.
+ */
+GArray *
+adsm_setup_events_listened_for (EVT_event_type_t *event_types)
+{
+  GArray *arr;
+  EVT_event_type_t *iter;
+
+  arr = g_array_new (/* zero_terminated = */ FALSE,
+                     /* clear = */ FALSE,
+                     sizeof (EVT_event_type_t));
+  for (iter = event_types; *iter != 0; iter++)
+    {
+      g_array_append_val (arr, *iter);
+    }
+
+  return arr;
+} 
+
+
+
+/**
  * Reports whether a module is listening for a given event type.
  *
  * @param self the module.
@@ -30,10 +55,11 @@
 gboolean
 adsm_model_is_listening_for (struct adsm_module_t_ *self, EVT_event_type_t event_type)
 {
-  int i;
+  guint n, i;
 
-  for (i = 0; i < self->nevents_listened_for; i++)
-    if (self->events_listened_for[i] == event_type)
+  n = self->events_listened_for->len;
+  for (i = 0; i < n; i++)
+    if (g_array_index (self->events_listened_for, EVT_event_type_t, i) == event_type)
       return TRUE;
   return FALSE;
 }

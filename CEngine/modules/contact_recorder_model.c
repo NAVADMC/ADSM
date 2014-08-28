@@ -52,7 +52,6 @@
 #define new contact_recorder_model_new
 #define run contact_recorder_model_run
 #define reset contact_recorder_model_reset
-#define events_listened_for contact_recorder_model_events_listened_for
 #define has_pending_actions contact_recorder_model_has_pending_actions
 #define to_string contact_recorder_model_to_string
 #define local_free contact_recorder_model_free
@@ -85,12 +84,6 @@ double round (double x);
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "contact-recorder-model"
-
-
-
-#define NEVENTS_LISTENED_FOR 3
-EVT_event_type_t events_listened_for[] = { EVT_Exposure, EVT_AttemptToTrace,
-  EVT_NewDay };
 
 
 
@@ -731,6 +724,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
+  EVT_event_type_t events_listened_for[] = {
+    EVT_Exposure,
+    EVT_AttemptToTrace,
+    EVT_NewDay,
+    0
+  };
   unsigned int nprod_types;
   ADSM_contact_type contact_type;
   unsigned int i;
@@ -744,8 +743,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;

@@ -24,7 +24,6 @@
 #define new trace_monitor_new
 #define run trace_monitor_run
 #define reset trace_monitor_reset
-#define events_listened_for trace_monitor_events_listened_for
 #define local_free trace_monitor_free
 #define handle_new_day_event trace_monitor_handle_new_day_event
 #define handle_trace_result_event trace_monitor_handle_trace_result_event
@@ -39,11 +38,6 @@
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "trace-monitor"
-
-
-
-#define NEVENTS_LISTENED_FOR 3
-EVT_event_type_t events_listened_for[] = { EVT_BeforeAnySimulations, EVT_NewDay, EVT_TraceResult };
 
 
 
@@ -427,6 +421,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projections,
 {
   adsm_module_t *self;
   local_data_t *local_data;
+  EVT_event_type_t events_listened_for[] = {
+    EVT_BeforeAnySimulations,
+    EVT_NewDay,
+    EVT_TraceResult,
+    0
+  };
   unsigned int i, j;      /* loop counters */
   const char *contact_type_name;
   char *prodtype_name;
@@ -440,8 +440,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projections,
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;

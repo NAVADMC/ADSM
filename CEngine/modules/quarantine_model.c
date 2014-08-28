@@ -28,7 +28,6 @@
 #define new quarantine_model_new
 #define run quarantine_model_run
 #define reset quarantine_model_reset
-#define events_listened_for quarantine_model_events_listened_for
 #define local_free quarantine_model_free
 #define handle_detection_event quarantine_model_handle_detection_event
 #define handle_request_for_destruction_event quarantine_model_handle_request_for_destruction_event
@@ -43,13 +42,6 @@
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "quarantine-model"
-
-
-
-#define NEVENTS_LISTENED_FOR 2
-EVT_event_type_t events_listened_for[] = { EVT_Detection,
-  EVT_RequestForDestruction
-};
 
 
 
@@ -209,6 +201,11 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
+  EVT_event_type_t events_listened_for[] = {
+    EVT_Detection,
+    EVT_RequestForDestruction,
+    0
+  };
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -218,8 +215,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;

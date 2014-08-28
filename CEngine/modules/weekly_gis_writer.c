@@ -25,7 +25,6 @@
 #define new weekly_gis_writer_new
 #define run weekly_gis_writer_run
 #define reset weekly_gis_writer_reset
-#define events_listened_for weekly_gis_writer_events_listened_for
 #define to_string weekly_gis_writer_to_string
 #define local_free weekly_gis_writer_free
 #define handle_output_dir_event weekly_gis_writer_handle_output_dir_event
@@ -41,15 +40,6 @@
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "weekly-gis-writer"
-
-
-
-#define NEVENTS_LISTENED_FOR 3
-EVT_event_type_t events_listened_for[] = {
-  EVT_OutputDirectory,
-  EVT_BeforeEachSimulation,
-  EVT_NewDay
-};
 
 
 
@@ -687,6 +677,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
+  EVT_event_type_t events_listened_for[] = {
+    EVT_OutputDirectory,
+    EVT_BeforeEachSimulation,
+    EVT_NewDay,
+    0
+  };
 
   #if DEBUG
     g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -696,8 +692,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;

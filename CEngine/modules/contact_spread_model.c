@@ -88,7 +88,6 @@
 #define new contact_spread_model_new
 #define run contact_spread_model_run
 #define reset contact_spread_model_reset
-#define events_listened_for contact_spread_model_events_listened_for
 #define has_pending_actions contact_spread_model_has_pending_actions
 #define has_pending_infections contact_spread_model_has_pending_infections
 #define to_string contact_spread_model_to_string
@@ -129,12 +128,6 @@ double round (double x);
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "contact-spread-model"
-
-
-
-#define NEVENTS_LISTENED_FOR 2
-EVT_event_type_t events_listened_for[] =
-  { EVT_NewDay, EVT_PublicAnnouncement };
 
 
 
@@ -1668,6 +1661,11 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
+  EVT_event_type_t events_listened_for[] = {
+    EVT_NewDay,
+    EVT_PublicAnnouncement,
+    0
+  };
   unsigned int nprod_types, nzones, i;
   char *sqlerr;
 
@@ -1679,8 +1677,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;

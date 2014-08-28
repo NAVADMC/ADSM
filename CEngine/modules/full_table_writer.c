@@ -27,7 +27,6 @@
 #define new full_table_writer_new
 #define run full_table_writer_run
 #define reset full_table_writer_reset
-#define events_listened_for full_table_writer_events_listened_for
 #define to_string full_table_writer_to_string
 #define local_free full_table_writer_free
 #define handle_output_dir_event full_table_writer_handle_output_dir_event
@@ -66,14 +65,6 @@ double round (double x);
 
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "full-table-writer"
-
-
-
-#define NEVENTS_LISTENED_FOR 6
-EVT_event_type_t events_listened_for[] = {
-  EVT_OutputDirectory,
-  EVT_BeforeAnySimulations,
-  EVT_DeclarationOfOutputs, EVT_BeforeEachSimulation, EVT_NewDay, EVT_EndOfDay2 };
 
 
 
@@ -503,6 +494,15 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
+  EVT_event_type_t events_listened_for[] = {
+    EVT_OutputDirectory,
+    EVT_BeforeAnySimulations,
+    EVT_DeclarationOfOutputs,
+    EVT_BeforeEachSimulation,
+    EVT_NewDay,
+    EVT_EndOfDay2,
+    0
+  };
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -512,8 +512,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data = g_new (local_data_t, 1);
 
   self->name = MODEL_NAME;
-  self->events_listened_for = events_listened_for;
-  self->nevents_listened_for = NEVENTS_LISTENED_FOR;
+  self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;
