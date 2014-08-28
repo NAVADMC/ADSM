@@ -62,10 +62,6 @@ double round (double x);
 
 
 
-extern const char *PDF_dist_type_name[];
-
-
-
 /* Specialized information for this model. */
 typedef struct
 {
