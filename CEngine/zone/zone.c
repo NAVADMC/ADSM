@@ -109,15 +109,10 @@ ZON_new_zone_list (unsigned int membership_length)
   ZON_zone_list_t *zones;
   ZON_zone_t *background_zone;
   ZON_zone_fragment_t *fragment;
+  unsigned int i;
 
   zones = g_new (ZON_zone_list_t, 1);
   zones->list = g_ptr_array_new ();
-  zones->membership_length = membership_length;
-  if (membership_length == 0)
-    zones->membership = NULL;
-  else
-    zones->membership = g_new0 (ZON_zone_fragment_t *, membership_length);
-  zones->membership_length = membership_length;
 
   /* Pre-create a "background" zone. */
   background_zone = ZON_new_zone ("Background", 0.0);
@@ -126,6 +121,17 @@ ZON_new_zone_list (unsigned int membership_length)
   fragment = ZON_new_fragment (background_zone, -1);
    g_queue_push_tail (background_zone->fragments, fragment);
   g_ptr_array_add (zones->list, background_zone);
+
+  zones->membership_length = membership_length;
+  if (membership_length == 0)
+    zones->membership = NULL;
+  else
+    {
+      zones->membership = g_new (ZON_zone_fragment_t *, membership_length);
+      for (i = 0; i < membership_length; i++)
+        zones->membership[i] = fragment;
+    }
+  zones->membership_length = membership_length;
 
   return zones;
 }
