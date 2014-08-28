@@ -191,7 +191,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ * self,
           EVT_event_enqueue (queue, event);
           break;
         case VaccineImmune:
-          event = EVT_new_inprogress_immunity_event (unit, 0, "Ini",
+          event = EVT_new_inprogress_immunity_event (unit, 0, ADSM_ControlInitialState,
                                                      unit->initial_state,
                                                      unit->days_in_initial_state,
                                                      unit->days_left_in_initial_state);

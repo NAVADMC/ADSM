@@ -234,7 +234,7 @@ check_and_choose (int id, gpointer arg)
   EVT_event_enqueue (callback_data->queue,
                      EVT_new_request_for_vaccination_event (unit2,
                                                             callback_data->day,
-                                                            "Ring",
+                                                            ADSM_ControlRing,
                                                             param_block->priority,
                                                             !(param_block->vaccinate_detected_units),
                                                             param_block->min_time_between_vaccinations));

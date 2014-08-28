@@ -193,6 +193,7 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
+  const char *reason;
   const char *drill_down_list[3] = { NULL, NULL, NULL };
   UNT_control_t update;
   
@@ -205,16 +206,7 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
 
   update.unit_index = unit->index;
   update.day_commitment_made = event->day_commitment_made;
-  
-  if( 0 == strcmp( "Ring", event->reason ) ) 
-    update.reason = ADSM_ControlRing;
-  else if( 0 == strcmp( "Ini", event->reason ) ) 
-    update.reason = ADSM_ControlInitialState;
-  else
-    {
-      g_error( "Unrecognized reason for vaccination (%s) in handle_vaccination_event", event->reason );
-      update.reason = 0;  
-    }
+  update.reason = event->reason;
   
 #ifdef USE_SC_GUILIB
   sc_vaccinate_unit( event->day, unit, update );
@@ -225,19 +217,20 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
     }
 #endif  
 
-  drill_down_list[0] = event->reason;
+  reason = ADSM_control_reason_abbrev[event->reason];
+  drill_down_list[0] = reason;
   drill_down_list[1] = unit->production_type_name;
   
   /* Initially vaccinated units do not count as the first vaccination. */
-  if (strcmp (event->reason, "Ini") != 0)
+  if (event->reason != ADSM_ControlInitialState)
     {
       if (RPT_reporting_is_null (local_data->first_vaccination, NULL))
         {
           RPT_reporting_set_integer (local_data->first_vaccination, event->day, NULL);
           RPT_reporting_set_integer (local_data->vaccination_occurred, 1, NULL);
         }
-      if (RPT_reporting_is_null1 (local_data->first_vaccination_by_reason, event->reason))
-        RPT_reporting_set_integer1 (local_data->first_vaccination_by_reason, event->day, event->reason);
+      if (RPT_reporting_is_null1 (local_data->first_vaccination_by_reason, reason))
+        RPT_reporting_set_integer1 (local_data->first_vaccination_by_reason, event->day, reason);
       if (RPT_reporting_is_null1 (local_data->first_vaccination_by_prodtype, unit->production_type_name))
         RPT_reporting_set_integer1 (local_data->first_vaccination_by_prodtype, event->day, unit->production_type_name);  
       if (RPT_reporting_is_null (local_data->first_vaccination_by_reason_and_prodtype, drill_down_list))
@@ -256,10 +249,10 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
       RPT_reporting_add_integer  (local_data->cumul_num_animals_vaccinated, unit->size, NULL);
       RPT_reporting_add_integer1 (local_data->cumul_num_animals_vaccinated_by_prodtype, unit->size, unit->production_type_name);
     }
-  RPT_reporting_add_integer1 (local_data->num_units_vaccinated_by_reason, 1, event->reason);
-  RPT_reporting_add_integer1 (local_data->num_animals_vaccinated_by_reason, unit->size, event->reason);
-  RPT_reporting_add_integer1 (local_data->cumul_num_units_vaccinated_by_reason, 1, event->reason);
-  RPT_reporting_add_integer1 (local_data->cumul_num_animals_vaccinated_by_reason, unit->size, event->reason);
+  RPT_reporting_add_integer1 (local_data->num_units_vaccinated_by_reason, 1, reason);
+  RPT_reporting_add_integer1 (local_data->num_animals_vaccinated_by_reason, unit->size, reason);
+  RPT_reporting_add_integer1 (local_data->cumul_num_units_vaccinated_by_reason, 1, reason);
+  RPT_reporting_add_integer1 (local_data->cumul_num_animals_vaccinated_by_reason, unit->size, reason);
   RPT_reporting_add_integer (local_data->num_units_vaccinated_by_reason_and_prodtype, 1, drill_down_list);
   RPT_reporting_add_integer (local_data->num_animals_vaccinated_by_reason_and_prodtype, unit->size,
                              drill_down_list);

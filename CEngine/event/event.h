@@ -311,7 +311,7 @@ typedef struct
   UNT_unit_t *unit;
   int day;
   int priority;
-  char *reason; /**< why vaccination was requested */
+  ADSM_control_reason reason; /**< why vaccination was requested */
   gboolean cancel_on_detection; /**< whether to cancel the vaccination if the
     unit is detected as diseased */
   int min_days_before_next;
@@ -349,7 +349,7 @@ typedef struct
 {
   UNT_unit_t *unit;
   int day;
-  char *reason; /**< why vaccination was requested */
+  ADSM_control_reason reason; /**< why vaccination was requested */
   int day_commitment_made; /**< the day on which a commitment to do this
     vaccination was made. */
   UNT_state_t override_initial_state; /**< when using a vaccination event to
@@ -588,7 +588,7 @@ EVT_event_t *EVT_new_test_result_event (UNT_unit_t *,
                                         ADSM_control_reason);
 EVT_event_t *EVT_new_request_for_vaccination_event (UNT_unit_t *,
                                                     int day,
-                                                    char *reason,
+                                                    ADSM_control_reason,
                                                     int priority,
                                                     gboolean cancel_on_detection,
                                                     int min_days_before_next);
@@ -597,11 +597,12 @@ EVT_event_t *EVT_new_vaccination_canceled_event (UNT_unit_t *, int day,
                                                  int day_commitment_made);
 EVT_event_t *EVT_new_inprogress_immunity_event (UNT_unit_t * unit,
                                                 int day,
-                                                char *cause,
+                                                ADSM_control_reason,
                                                 UNT_state_t start_in_state,
                                                 int days_in_state,
                                                 int days_left_in_state);
-EVT_event_t *EVT_new_vaccination_event (UNT_unit_t *, int day, char *reason,
+EVT_event_t *EVT_new_vaccination_event (UNT_unit_t *, int day,
+                                        ADSM_control_reason,
                                         int day_commitment_made);
 EVT_event_t *EVT_new_request_for_destruction_event (UNT_unit_t *,
                                                     int day,

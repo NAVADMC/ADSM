@@ -837,7 +837,7 @@ EVT_test_result_event_to_string (EVT_test_result_event_t * event)
 EVT_event_t *
 EVT_new_request_for_vaccination_event (UNT_unit_t * unit,
                                        int day,
-                                       char *reason,
+                                       ADSM_control_reason reason,
                                        int priority,
                                        gboolean cancel_on_detection,
                                        int min_days_before_next)
@@ -975,7 +975,7 @@ EVT_vaccination_canceled_event_to_string (EVT_vaccination_canceled_event_t * eve
  */
 EVT_event_t *
 EVT_new_inprogress_immunity_event (UNT_unit_t * unit,
-                                   int day, char *reason,
+                                   int day, ADSM_control_reason reason,
                                    UNT_state_t start_in_state,
                                    int days_in_state, int days_left_in_state)
 {
@@ -1002,7 +1002,7 @@ EVT_new_inprogress_immunity_event (UNT_unit_t * unit,
  * @return a pointer to a newly-created EVT_event_t structure.
  */
 EVT_event_t *
-EVT_new_vaccination_event (UNT_unit_t * unit, int day, char *reason,
+EVT_new_vaccination_event (UNT_unit_t * unit, int day, ADSM_control_reason reason,
                            int day_commitment_made)
 {
   EVT_event_t *event;
