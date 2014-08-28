@@ -7,10 +7,16 @@ import matplotlib
 from ScenarioCreator.views import spaces_for_camel_case
 
 matplotlib.use('Agg')  # Force matplotlib to not use any Xwindows backend.
-import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import pandas as pd
+import matplotlib.pyplot as plt, mpld3
+
+
+def matplotd3(request):
+    fig, ax = plt.subplots()
+    points = ax.plot([3, 1, 4, 1, 5], 'ks-', mec='w', mew=5, ms=20)
+    return HttpResponse(mpld3.fig_to_html(fig))
 
 
 def HttpFigure(fig):
