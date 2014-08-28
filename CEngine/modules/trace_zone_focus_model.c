@@ -94,6 +94,7 @@ handle_trace_result_event (struct adsm_module_t_ *self,
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
+  ADSM_control_reason reason;
 
 #if DEBUG
   g_debug ("----- ENTER trace_result_event (%s)", MODEL_NAME);
@@ -110,7 +111,29 @@ handle_trace_result_event (struct adsm_module_t_ *self,
       #if DEBUG
         g_debug ("ordering a zone focus around unit \"%s\"", unit->official_id);
       #endif
-      EVT_event_enqueue (queue, EVT_new_request_for_zone_focus_event (unit, event->day, "trace out"));
+      if (event->contact_type == ADSM_DirectContact)
+        {
+          if (event->direction == ADSM_TraceForwardOrOut)
+            reason = ADSM_ControlTraceForwardDirect;
+          else if (event->direction == ADSM_TraceBackOrIn)
+            reason = ADSM_ControlTraceBackDirect;
+          else
+            g_assert_not_reached();
+        }
+      else if (event->contact_type == ADSM_IndirectContact)
+        {
+          if (event->direction == ADSM_TraceForwardOrOut)
+            reason = ADSM_ControlTraceForwardIndirect;
+          else if (event->direction == ADSM_TraceBackOrIn)
+            reason = ADSM_ControlTraceBackIndirect;
+          else
+            g_assert_not_reached();
+        }
+      else
+        {
+          g_assert_not_reached();
+        }
+      EVT_event_enqueue (queue, EVT_new_request_for_zone_focus_event (unit, event->day, reason));
     }
 
 #if DEBUG

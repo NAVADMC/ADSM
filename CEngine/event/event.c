@@ -1199,7 +1199,8 @@ EVT_destruction_event_to_string (EVT_destruction_event_t * event)
  * @return a pointer to a newly-created EVT_event_t structure.
  */
 EVT_event_t *
-EVT_new_request_for_zone_focus_event (UNT_unit_t * unit, int day, char *reason)
+EVT_new_request_for_zone_focus_event (UNT_unit_t * unit, int day,
+                                      ADSM_control_reason reason)
 {
   EVT_event_t *event;
 

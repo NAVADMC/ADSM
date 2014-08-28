@@ -409,7 +409,7 @@ typedef struct
 {
   UNT_unit_t *unit;
   int day;
-  char *reason; /**< why a zone focus was requested */
+  ADSM_control_reason reason; /**< why a zone focus was requested */
 }
 EVT_request_for_zone_focus_event_t;
 
@@ -611,7 +611,7 @@ EVT_event_t *EVT_new_commitment_to_destroy_event (UNT_unit_t *, int day);
 EVT_event_t *EVT_new_destruction_event (UNT_unit_t *, int day, ADSM_control_reason,
                                         int day_commitment_made);
 EVT_event_t *EVT_new_request_for_zone_focus_event (UNT_unit_t *,
-                                                   int day, char *reason);
+                                                   int day, ADSM_control_reason);
 EVT_event_t *EVT_new_end_of_day_event (int day, gboolean done);
 EVT_event_t *EVT_new_end_of_day2_event (int day, gboolean done);
 EVT_event_t *EVT_new_midnight_event (int day);

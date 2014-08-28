@@ -106,7 +106,7 @@ handle_detection_event (struct adsm_module_t_ *self,
         g_debug ("ordering a zone focus around unit \"%s\"", unit->official_id);
       #endif
       EVT_event_enqueue (queue,
-                         EVT_new_request_for_zone_focus_event (unit, event->day, "reported diseased"));
+                         EVT_new_request_for_zone_focus_event (unit, event->day, ADSM_ControlDetection));
     }
 
 #if DEBUG
