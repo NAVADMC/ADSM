@@ -126,22 +126,12 @@ main (int argc, char *argv[])
     }
   sqlite3_busy_timeout (scenario_db, 30 * 60 * 1000 /* 30 minutes, given in milliseconds */);
 
-#ifdef USE_SC_GUILIB
-  run_sim_main (scenario_db,
-                (char *)output_dir,
-                fixed_rng_value,
-                verbosity,
-                seed,
-                starting_iteration_number,
-                production_type_file);
-#else
   run_sim_main (scenario_db,
                 (char *)output_dir,
                 fixed_rng_value,
                 verbosity,
                 seed,
                 starting_iteration_number);
-#endif
 
 #if HAVE_MPI && !CANCEL_MPI
   MPI_Finalize ();

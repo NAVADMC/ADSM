@@ -633,17 +633,10 @@ default_projection (UNT_unit_list_t * units)
 
 
 
-#ifdef USE_SC_GUILIB
-DLL_API void
-run_sim_main (sqlite3 *scenario_db,
-              const char *output_dir, double fixed_rng_value, int verbosity, int seed,
-              int starting_iteration_number, char *production_type_file)
-#else
 DLL_API void
 run_sim_main (sqlite3 *scenario_db,
               const char *output_dir, double fixed_rng_value, int verbosity, int seed,
               int starting_iteration_number)
-#endif
 {
   unsigned int ndays, nruns, day, run, iteration_number;
   RPT_reporting_t *last_day_of_outbreak;
