@@ -314,7 +314,7 @@ class ControlMasterPlan(BaseModel):
 class ControlProtocol(BaseModel):
     name = models.CharField(max_length=255,
         help_text='Name your Protocol so you can recognize it later. Ex:"Quarantine"',)
-    use_detection = models.BooleanField(default=False,
+    use_detection = models.BooleanField(default=True,
         help_text='Indicates if disease detection will be modeled for units of this production type.', )
     detection_probability_for_observed_time_in_clinical = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the probability of observing clinical signs in units of this production type.', )

@@ -117,6 +117,14 @@ many_to_many_widget = (function(form_state){
     //jquery events
         //select change
     //render
+    function add_checkboxes_to_headers() {
+        my_table.find('tr:first-child th:nth-child(n+3)').each(function(index, element){
+            $(this).html(           
+                '<input type="checkbox"> ' + $(this).text()
+             );
+        });
+    }
+    
     function insert_select_buttons() {
         var select_buttons = '<td><button class="mtm-button select-all">Select All</button>' +
             '<button class="mtm-button deselect">Deselect All</button></td>'
@@ -187,6 +195,7 @@ many_to_many_widget = (function(form_state){
 
     var render = function(){
         my_table = $('<table>').append($('section form table thead').clone());
+        add_checkboxes_to_headers();
         insert_select_buttons();
         insert_bulk_selectors();
         my_table.append(create_body_rows())
@@ -204,7 +213,6 @@ many_to_many_widget = (function(form_state){
         filter[get_column_name(1)] = sources_selected.length ? sources_selected :
             [$(row).find('th:first-child span').attr('data-pk')];
         filter[get_column_name(2)] = [$(row).find('th:nth-child(2) span').attr('data-pk')];
-        //TODO: assumption may not apply to zones
         return filter
     };
 
