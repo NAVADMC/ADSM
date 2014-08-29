@@ -27,17 +27,17 @@ class PopulationParserTestCase(TestCase):
     def test_parser_load_utf8(self):
         expected_results = {
             'user_notes': '1',
-            'initial_size': '84',
-            'latitude': '52.9672',
-            'longitude': '-8.201',
-            'production_type': 'B',
+            'initial_size': '100',
+            'latitude': '50',
+            'longitude': '-8',
+            'production_type': 'Free Range Cows',
             'initial_state': 'Susceptible',
         }
         p = PopulationParser(POPULATION_FIXTURES + 'Population_Test_UTF8.xml')
 
         results = p.parse_to_dictionary()
 
-        self.assertEqual(len(results), 1)
+        self.assertEqual(len(results), 8)
         self.assertDictEqual(results[0], expected_results)
 
     def test_parser_load_utf16(self):
