@@ -23,8 +23,8 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new destruction_list_monitor_new
 #define run destruction_list_monitor_run
-#define reset destruction_list_monitor_reset
 #define local_free destruction_list_monitor_free
+#define handle_before_each_simulation_event destruction_list_monitor_handle_before_each_simulation_event
 #define handle_new_day_event destruction_list_monitor_handle_new_day_event
 #define handle_commitment_to_destroy_event destruction_list_monitor_handle_commitment_to_destroy_event
 #define handle_destruction_event destruction_list_monitor_handle_destruction_event
@@ -68,6 +68,50 @@ typedef struct
   RPT_reporting_t *animal_days_in_queue;
 }
 local_data_t;
+
+
+
+/**
+ * Before each simulation, reset the recorded statistics to zero.
+ *
+ * @param self this module.
+ */
+void
+handle_before_each_simulation_event (struct adsm_module_t_ *self)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+
+  g_hash_table_remove_all (local_data->status);
+
+  RPT_reporting_zero (local_data->nunits_awaiting_destruction);
+  RPT_reporting_zero (local_data->nunits_awaiting_destruction_by_prodtype);
+  RPT_reporting_zero (local_data->nanimals_awaiting_destruction);
+  RPT_reporting_zero (local_data->nanimals_awaiting_destruction_by_prodtype);
+  RPT_reporting_zero (local_data->peak_nunits_awaiting_destruction);
+  RPT_reporting_set_null (local_data->peak_nunits_awaiting_destruction_day, NULL);
+  RPT_reporting_zero (local_data->peak_nanimals_awaiting_destruction);
+  RPT_reporting_set_null (local_data->peak_nanimals_awaiting_destruction_day, NULL);
+  RPT_reporting_set_null (local_data->peak_wait_time, NULL);
+  RPT_reporting_set_null (local_data->average_wait_time, NULL);
+  RPT_reporting_zero (local_data->unit_days_in_queue);
+  RPT_reporting_zero (local_data->animal_days_in_queue);
+
+  local_data->peak_nunits = local_data->peak_nanimals = 0;
+  local_data->peak_wait = 0;
+  local_data->sum = local_data->count = 0;
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
 
 
 
@@ -251,6 +295,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
     case EVT_BeforeAnySimulations:
       adsm_declare_outputs (self, queue);
       break;
+    case EVT_BeforeEachSimulation:
+      handle_before_each_simulation_event (self);
+      break;
     case EVT_NewDay:
       handle_new_day_event (self);
       break;
@@ -274,48 +321,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
 
 /**
- * Resets this model after a simulation run.
- *
- * @param self the model.
- */
-void
-reset (struct adsm_module_t_ *self)
-{
-  local_data_t *local_data;
-
-#if DEBUG
-  g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-
-  g_hash_table_remove_all (local_data->status);
-
-  RPT_reporting_zero (local_data->nunits_awaiting_destruction);
-  RPT_reporting_zero (local_data->nunits_awaiting_destruction_by_prodtype);
-  RPT_reporting_zero (local_data->nanimals_awaiting_destruction);
-  RPT_reporting_zero (local_data->nanimals_awaiting_destruction_by_prodtype);
-  RPT_reporting_zero (local_data->peak_nunits_awaiting_destruction);
-  RPT_reporting_set_null (local_data->peak_nunits_awaiting_destruction_day, NULL);
-  RPT_reporting_zero (local_data->peak_nanimals_awaiting_destruction);
-  RPT_reporting_set_null (local_data->peak_nanimals_awaiting_destruction_day, NULL);
-  RPT_reporting_set_null (local_data->peak_wait_time, NULL);
-  RPT_reporting_set_null (local_data->average_wait_time, NULL);
-  RPT_reporting_zero (local_data->unit_days_in_queue);
-  RPT_reporting_zero (local_data->animal_days_in_queue);
-
-  local_data->peak_nunits = local_data->peak_nanimals = 0;
-  local_data->peak_wait = 0;
-  local_data->sum = local_data->count = 0;
-
-#if DEBUG
-  g_debug ("----- EXIT reset (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
  * Frees this model.
  *
  * @param self the model.
@@ -332,22 +337,8 @@ local_free (struct adsm_module_t_ *self)
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
   g_hash_table_destroy (local_data->status);
-
-  RPT_free_reporting (local_data->nunits_awaiting_destruction);
-  RPT_free_reporting (local_data->nunits_awaiting_destruction_by_prodtype);
-  RPT_free_reporting (local_data->nanimals_awaiting_destruction);
-  RPT_free_reporting (local_data->nanimals_awaiting_destruction_by_prodtype);
-  RPT_free_reporting (local_data->peak_nunits_awaiting_destruction);
-  RPT_free_reporting (local_data->peak_nunits_awaiting_destruction_day);
-  RPT_free_reporting (local_data->peak_nanimals_awaiting_destruction);
-  RPT_free_reporting (local_data->peak_nanimals_awaiting_destruction_day);
-  RPT_free_reporting (local_data->peak_wait_time);
-  RPT_free_reporting (local_data->average_wait_time);
-  RPT_free_reporting (local_data->unit_days_in_queue);
-  RPT_free_reporting (local_data->animal_days_in_queue);
-
   g_free (local_data);
-  g_ptr_array_free (self->outputs, TRUE);
+  g_ptr_array_free (self->outputs, /* free_seg = */ TRUE); /* also frees all output variables */
   g_free (self);
 
 #if DEBUG
@@ -368,6 +359,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data_t *local_data;
   EVT_event_type_t events_listened_for[] = {
     EVT_BeforeAnySimulations,
+    EVT_BeforeEachSimulation,
     EVT_NewDay,
     EVT_CommitmentToDestroy,
     EVT_Destruction,
@@ -384,10 +376,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_sized_new (10);
+  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
   self->model_data = local_data;
   self->run = run;
-  self->reset = reset;
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = adsm_model_answer_no;
   self->has_pending_infections = adsm_model_answer_no;

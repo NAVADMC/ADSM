@@ -23,8 +23,8 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new detection_monitor_new
 #define run detection_monitor_run
-#define reset detection_monitor_reset
 #define local_free detection_monitor_free
+#define handle_before_each_simulation_event detection_monitor_handle_before_each_simulation_event
 #define handle_new_day_event detection_monitor_handle_new_day_event
 #define handle_detection_event detection_monitor_handle_detection_event
 
@@ -97,6 +97,50 @@ typedef struct
   RPT_reporting_t *last_detection_by_means_and_prodtype_yesterday;
 }
 local_data_t;
+
+
+
+/**
+ * Before each simulation, zero the cumulative counts of detections.
+ *
+ * @param self this module.
+ */
+void
+handle_before_each_simulation_event (struct adsm_module_t_ *self)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  RPT_reporting_zero (local_data->detection_occurred);
+  RPT_reporting_set_null (local_data->first_detection, NULL);
+  RPT_reporting_set_null (local_data->first_detection_by_means, NULL);
+  RPT_reporting_set_null (local_data->first_detection_by_prodtype, NULL);
+  RPT_reporting_set_null (local_data->first_detection_by_means_and_prodtype, NULL);
+  RPT_reporting_set_null (local_data->last_detection, NULL);
+  RPT_reporting_set_null (local_data->last_detection_by_means, NULL);
+  RPT_reporting_set_null (local_data->last_detection_by_prodtype, NULL);
+  RPT_reporting_set_null (local_data->last_detection_by_means_and_prodtype, NULL);
+  RPT_reporting_zero (local_data->cumul_nunits_detected);
+  RPT_reporting_zero (local_data->cumul_nunits_detected_by_means);
+  RPT_reporting_zero (local_data->cumul_nunits_detected_by_prodtype);
+  RPT_reporting_zero (local_data->cumul_nunits_detected_by_means_and_prodtype);
+  RPT_reporting_zero (local_data->cumul_nunits_detected_uniq);
+  RPT_reporting_zero (local_data->cumul_nanimals_detected);
+  RPT_reporting_zero (local_data->cumul_nanimals_detected_by_means);
+  RPT_reporting_zero (local_data->cumul_nanimals_detected_by_prodtype);
+  RPT_reporting_zero (local_data->cumul_nanimals_detected_by_means_and_prodtype);
+  g_hash_table_remove_all (local_data->detected);
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
 
 
 
@@ -380,6 +424,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
     case EVT_BeforeAnySimulations:
       adsm_declare_outputs (self, queue);
       break;
+    case EVT_BeforeEachSimulation:
+      handle_before_each_simulation_event (self);
+      break;
     case EVT_NewDay:
       handle_new_day_event (self);
       break;
@@ -394,48 +441,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
 #if DEBUG
   g_debug ("----- EXIT run (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
- * Resets this model after a simulation run.
- *
- * @param self the model.
- */
-void
-reset (struct adsm_module_t_ *self)
-{
-  local_data_t *local_data;
-
-#if DEBUG
-  g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-  RPT_reporting_zero (local_data->detection_occurred);
-  RPT_reporting_set_null (local_data->first_detection, NULL);
-  RPT_reporting_set_null (local_data->first_detection_by_means, NULL);
-  RPT_reporting_set_null (local_data->first_detection_by_prodtype, NULL);
-  RPT_reporting_set_null (local_data->first_detection_by_means_and_prodtype, NULL);
-  RPT_reporting_set_null (local_data->last_detection, NULL);
-  RPT_reporting_set_null (local_data->last_detection_by_means, NULL);
-  RPT_reporting_set_null (local_data->last_detection_by_prodtype, NULL);
-  RPT_reporting_set_null (local_data->last_detection_by_means_and_prodtype, NULL);
-  RPT_reporting_zero (local_data->cumul_nunits_detected);
-  RPT_reporting_zero (local_data->cumul_nunits_detected_by_means);
-  RPT_reporting_zero (local_data->cumul_nunits_detected_by_prodtype);
-  RPT_reporting_zero (local_data->cumul_nunits_detected_by_means_and_prodtype);
-  RPT_reporting_zero (local_data->cumul_nunits_detected_uniq);
-  RPT_reporting_zero (local_data->cumul_nanimals_detected);
-  RPT_reporting_zero (local_data->cumul_nanimals_detected_by_means);
-  RPT_reporting_zero (local_data->cumul_nanimals_detected_by_prodtype);
-  RPT_reporting_zero (local_data->cumul_nanimals_detected_by_means_and_prodtype);
-  g_hash_table_remove_all (local_data->detected);
-
-#if DEBUG
-  g_debug ("----- EXIT reset (%s)", MODEL_NAME);
 #endif
 }
 
@@ -457,32 +462,6 @@ local_free (struct adsm_module_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  RPT_free_reporting (local_data->detection_occurred);
-  RPT_free_reporting (local_data->first_detection);
-  RPT_free_reporting (local_data->first_detection_by_means);
-  RPT_free_reporting (local_data->first_detection_by_prodtype);
-  RPT_free_reporting (local_data->first_detection_by_means_and_prodtype);
-  RPT_free_reporting (local_data->last_detection);
-  RPT_free_reporting (local_data->last_detection_by_means);
-  RPT_free_reporting (local_data->last_detection_by_prodtype);
-  RPT_free_reporting (local_data->last_detection_by_means_and_prodtype);
-  RPT_free_reporting (local_data->nunits_detected);
-  RPT_free_reporting (local_data->nunits_detected_by_means);
-  RPT_free_reporting (local_data->nunits_detected_by_prodtype);
-  RPT_free_reporting (local_data->nunits_detected_by_means_and_prodtype);
-  RPT_free_reporting (local_data->nanimals_detected);
-  RPT_free_reporting (local_data->nanimals_detected_by_means);
-  RPT_free_reporting (local_data->nanimals_detected_by_prodtype);
-  RPT_free_reporting (local_data->nanimals_detected_by_means_and_prodtype);
-  RPT_free_reporting (local_data->cumul_nunits_detected);
-  RPT_free_reporting (local_data->cumul_nunits_detected_by_means);
-  RPT_free_reporting (local_data->cumul_nunits_detected_by_prodtype);
-  RPT_free_reporting (local_data->cumul_nunits_detected_by_means_and_prodtype);
-  RPT_free_reporting (local_data->cumul_nunits_detected_uniq);
-  RPT_free_reporting (local_data->cumul_nanimals_detected);
-  RPT_free_reporting (local_data->cumul_nanimals_detected_by_means);
-  RPT_free_reporting (local_data->cumul_nanimals_detected_by_prodtype);
-  RPT_free_reporting (local_data->cumul_nanimals_detected_by_means_and_prodtype);
 
   g_hash_table_destroy (local_data->detected);
   g_hash_table_destroy (local_data->detected_today);
@@ -492,7 +471,7 @@ local_free (struct adsm_module_t_ *self)
   RPT_free_reporting (local_data->last_detection_by_means_and_prodtype_yesterday);
 
   g_free (local_data);
-  g_ptr_array_free (self->outputs, TRUE);
+  g_ptr_array_free (self->outputs, /* free_seg = */ TRUE); /* also frees most of the output variables */
   g_free (self);
 
 #if DEBUG
@@ -513,6 +492,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data_t *local_data;
   EVT_event_type_t events_listened_for[] = {
     EVT_BeforeAnySimulations,
+    EVT_BeforeEachSimulation,
     EVT_NewDay,
     EVT_Detection,
     0
@@ -529,10 +509,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_new ();
+  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
   self->model_data = local_data;
   self->run = run;
-  self->reset = reset;
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = adsm_model_answer_no;
   self->has_pending_infections = adsm_model_answer_no;

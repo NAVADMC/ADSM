@@ -23,8 +23,8 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new vaccination_monitor_new
 #define run vaccination_monitor_run
-#define reset vaccination_monitor_reset
 #define local_free vaccination_monitor_free
+#define handle_before_each_simulation_event vaccination_monitor_handle_before_each_simulation_event
 #define handle_new_day_event vaccination_monitor_handle_new_day_event
 #define handle_declaration_of_vaccination_reasons_event vaccination_monitor_handle_declaration_of_vaccination_reasons_event
 #define handle_vaccination_event vaccination_monitor_handle_vaccination_event
@@ -69,6 +69,52 @@ typedef struct
   RPT_reporting_t *cumul_num_animals_vaccinated_by_reason_and_prodtype;
 }
 local_data_t;
+
+
+
+/**
+ * Before each simulation, zero the cumulative counts of vaccinations.
+ *
+ * @param self this module.
+ */
+void
+handle_before_each_simulation_event (struct adsm_module_t_ *self)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  RPT_reporting_zero (local_data->vaccination_occurred);
+  RPT_reporting_set_null (local_data->first_vaccination, NULL);
+  RPT_reporting_set_null (local_data->first_vaccination_by_reason, NULL);
+  RPT_reporting_set_null (local_data->first_vaccination_by_prodtype, NULL);
+  RPT_reporting_set_null (local_data->first_vaccination_by_reason_and_prodtype, NULL);
+  RPT_reporting_zero (local_data->num_units_vaccinated);
+  RPT_reporting_zero (local_data->num_units_vaccinated_by_reason);
+  RPT_reporting_zero (local_data->num_units_vaccinated_by_prodtype);
+  RPT_reporting_zero (local_data->num_units_vaccinated_by_reason_and_prodtype);
+  RPT_reporting_zero (local_data->cumul_num_units_vaccinated);
+  RPT_reporting_zero (local_data->cumul_num_units_vaccinated_by_reason);
+  RPT_reporting_zero (local_data->cumul_num_units_vaccinated_by_prodtype);
+  RPT_reporting_zero (local_data->cumul_num_units_vaccinated_by_reason_and_prodtype);
+  RPT_reporting_zero (local_data->num_animals_vaccinated);
+  RPT_reporting_zero (local_data->num_animals_vaccinated_by_reason);
+  RPT_reporting_zero (local_data->num_animals_vaccinated_by_prodtype);
+  RPT_reporting_zero (local_data->num_animals_vaccinated_by_reason_and_prodtype);
+  RPT_reporting_zero (local_data->cumul_num_animals_vaccinated);
+  RPT_reporting_zero (local_data->cumul_num_animals_vaccinated_by_reason);
+  RPT_reporting_zero (local_data->cumul_num_animals_vaccinated_by_prodtype);
+  RPT_reporting_zero (local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype);
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
 
 
 
@@ -284,6 +330,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
     case EVT_BeforeAnySimulations:
       adsm_declare_outputs (self, queue);
       break;
+    case EVT_BeforeEachSimulation:
+      handle_before_each_simulation_event (self);
+      break;
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day));
       break;
@@ -309,50 +358,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
 
 /**
- * Resets this model after a simulation run.
- *
- * @param self the model.
- */
-void
-reset (struct adsm_module_t_ *self)
-{
-  local_data_t *local_data;
-
-#if DEBUG
-  g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-  RPT_reporting_zero (local_data->vaccination_occurred);
-  RPT_reporting_set_null (local_data->first_vaccination, NULL);
-  RPT_reporting_set_null (local_data->first_vaccination_by_reason, NULL);
-  RPT_reporting_set_null (local_data->first_vaccination_by_prodtype, NULL);
-  RPT_reporting_set_null (local_data->first_vaccination_by_reason_and_prodtype, NULL);
-  RPT_reporting_zero (local_data->num_units_vaccinated);
-  RPT_reporting_zero (local_data->num_units_vaccinated_by_reason);
-  RPT_reporting_zero (local_data->num_units_vaccinated_by_prodtype);
-  RPT_reporting_zero (local_data->num_units_vaccinated_by_reason_and_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_units_vaccinated);
-  RPT_reporting_zero (local_data->cumul_num_units_vaccinated_by_reason);
-  RPT_reporting_zero (local_data->cumul_num_units_vaccinated_by_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_units_vaccinated_by_reason_and_prodtype);
-  RPT_reporting_zero (local_data->num_animals_vaccinated);
-  RPT_reporting_zero (local_data->num_animals_vaccinated_by_reason);
-  RPT_reporting_zero (local_data->num_animals_vaccinated_by_prodtype);
-  RPT_reporting_zero (local_data->num_animals_vaccinated_by_reason_and_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_animals_vaccinated);
-  RPT_reporting_zero (local_data->cumul_num_animals_vaccinated_by_reason);
-  RPT_reporting_zero (local_data->cumul_num_animals_vaccinated_by_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype);
-
-#if DEBUG
-  g_debug ("----- EXIT reset (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
  * Frees this model.
  *
  * @param self the model.
@@ -368,30 +373,8 @@ local_free (struct adsm_module_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  RPT_free_reporting (local_data->vaccination_occurred);
-  RPT_free_reporting (local_data->first_vaccination);
-  RPT_free_reporting (local_data->first_vaccination_by_reason);
-  RPT_free_reporting (local_data->first_vaccination_by_prodtype);
-  RPT_free_reporting (local_data->first_vaccination_by_reason_and_prodtype);
-  RPT_free_reporting (local_data->num_units_vaccinated);
-  RPT_free_reporting (local_data->num_units_vaccinated_by_reason);
-  RPT_free_reporting (local_data->num_units_vaccinated_by_prodtype);
-  RPT_free_reporting (local_data->num_units_vaccinated_by_reason_and_prodtype);
-  RPT_free_reporting (local_data->cumul_num_units_vaccinated);
-  RPT_free_reporting (local_data->cumul_num_units_vaccinated_by_reason);
-  RPT_free_reporting (local_data->cumul_num_units_vaccinated_by_prodtype);
-  RPT_free_reporting (local_data->cumul_num_units_vaccinated_by_reason_and_prodtype);
-  RPT_free_reporting (local_data->num_animals_vaccinated);
-  RPT_free_reporting (local_data->num_animals_vaccinated_by_reason);
-  RPT_free_reporting (local_data->num_animals_vaccinated_by_prodtype);
-  RPT_free_reporting (local_data->num_animals_vaccinated_by_reason_and_prodtype);
-  RPT_free_reporting (local_data->cumul_num_animals_vaccinated);
-  RPT_free_reporting (local_data->cumul_num_animals_vaccinated_by_reason);
-  RPT_free_reporting (local_data->cumul_num_animals_vaccinated_by_prodtype);
-  RPT_free_reporting (local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype);
-
   g_free (local_data);
-  g_ptr_array_free (self->outputs, TRUE);
+  g_ptr_array_free (self->outputs, /* free_seg = */ TRUE); /* also frees all output variables */
   g_free (self);
 
 #if DEBUG
@@ -412,6 +395,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data_t *local_data;
   EVT_event_type_t events_listened_for[] = {
     EVT_BeforeAnySimulations,
+    EVT_BeforeEachSimulation,
     EVT_NewDay,
     EVT_DeclarationOfVaccinationReasons,
     EVT_Vaccination,
@@ -431,10 +415,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_new ();
+  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
   self->model_data = local_data;
   self->run = run;
-  self->reset = reset;
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = adsm_model_answer_no;
   self->has_pending_infections = adsm_model_answer_no;
