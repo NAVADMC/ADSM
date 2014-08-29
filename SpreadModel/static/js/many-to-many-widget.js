@@ -6,7 +6,6 @@
  */
 var form_state;
 var many_to_many_widget;
-var form_prefix = /form-(\d+)-/g;
 
 (function($){
     $.fn.disableSelection = function() {
@@ -36,9 +35,10 @@ form_state = (function(form){
     var format_form_array = function(serialized_array){
         var row = {};
         $.each(serialized_array, function(index, container){
-            var name = container.name.replace(form_prefix, "")
+            var form_prefix = /form-(\d+)-/g;
+            var name = container.name.replace(form_prefix, "");
             row[name] = container.value;
-            row['form_number'] = form_prefix.exec(container.name)[1]
+            row['form_number'] = form_prefix.exec(container.name)[1];
         });
         return row;
     };
@@ -126,8 +126,10 @@ many_to_many_widget = (function(form_state){
     function insert_bulk_selectors() {
         $('section form table tbody tr:last-child td').each(function (index) {
             //headers source and destination are skipped because they are not <td>
+            var form_prefix = /form-(\d+)-/g;
             var bulk_select = $(this).find('select').clone()
             bulk_select.attr('id', bulk_select.attr('id').replace(form_prefix, 'bulk-')).val("");
+            bulk_select.find('option[value="data-add-new"]').remove()
             var button = $('<button>Apply</button>').addClass('bulk-apply')
             my_table.find('thead tr:nth-child(2)').append($('<td>').append(bulk_select).append(button)); //sensitive selector
         });

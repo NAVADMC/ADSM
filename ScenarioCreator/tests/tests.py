@@ -56,6 +56,13 @@ class ModelUtilsTest(TestCase):
         with self.assertRaises(OSError):
             p.save()
 
+    def test_population_removes_itself_when_errors_occur(self):
+        population_count = Population.objects.all().count()
+        p = Population(source_file='Population_Grid.xml')
+        with self.assertRaises(OSError):
+            p.save()
+        self.assertEqual(population_count, Population.objects.all().count())
+
     def test_population_source_file_blank(self):
         unit_count = Unit.objects.all().count()
         p = Population(source_file='')
