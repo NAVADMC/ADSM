@@ -462,32 +462,6 @@ local_free (struct adsm_module_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  RPT_free_reporting (local_data->detection_occurred);
-  RPT_free_reporting (local_data->first_detection);
-  RPT_free_reporting (local_data->first_detection_by_means);
-  RPT_free_reporting (local_data->first_detection_by_prodtype);
-  RPT_free_reporting (local_data->first_detection_by_means_and_prodtype);
-  RPT_free_reporting (local_data->last_detection);
-  RPT_free_reporting (local_data->last_detection_by_means);
-  RPT_free_reporting (local_data->last_detection_by_prodtype);
-  RPT_free_reporting (local_data->last_detection_by_means_and_prodtype);
-  RPT_free_reporting (local_data->nunits_detected);
-  RPT_free_reporting (local_data->nunits_detected_by_means);
-  RPT_free_reporting (local_data->nunits_detected_by_prodtype);
-  RPT_free_reporting (local_data->nunits_detected_by_means_and_prodtype);
-  RPT_free_reporting (local_data->nanimals_detected);
-  RPT_free_reporting (local_data->nanimals_detected_by_means);
-  RPT_free_reporting (local_data->nanimals_detected_by_prodtype);
-  RPT_free_reporting (local_data->nanimals_detected_by_means_and_prodtype);
-  RPT_free_reporting (local_data->cumul_nunits_detected);
-  RPT_free_reporting (local_data->cumul_nunits_detected_by_means);
-  RPT_free_reporting (local_data->cumul_nunits_detected_by_prodtype);
-  RPT_free_reporting (local_data->cumul_nunits_detected_by_means_and_prodtype);
-  RPT_free_reporting (local_data->cumul_nunits_detected_uniq);
-  RPT_free_reporting (local_data->cumul_nanimals_detected);
-  RPT_free_reporting (local_data->cumul_nanimals_detected_by_means);
-  RPT_free_reporting (local_data->cumul_nanimals_detected_by_prodtype);
-  RPT_free_reporting (local_data->cumul_nanimals_detected_by_means_and_prodtype);
 
   g_hash_table_destroy (local_data->detected);
   g_hash_table_destroy (local_data->detected_today);
@@ -497,7 +471,7 @@ local_free (struct adsm_module_t_ *self)
   RPT_free_reporting (local_data->last_detection_by_means_and_prodtype_yesterday);
 
   g_free (local_data);
-  g_ptr_array_free (self->outputs, TRUE);
+  g_ptr_array_free (self->outputs, /* free_seg = */ TRUE); /* also frees most of the output variables */
   g_free (self);
 
 #if DEBUG
@@ -535,7 +509,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_new ();
+  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
   self->model_data = local_data;
   self->run = run;
   self->is_listening_for = adsm_model_is_listening_for;

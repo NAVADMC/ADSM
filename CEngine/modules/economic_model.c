@@ -582,20 +582,9 @@ local_free (struct adsm_module_t_ *self)
   RPT_free_reporting (local_data->vaccination_cost);
   RPT_free_reporting (local_data->surveillance_cost);
   */
-  RPT_free_reporting (local_data->cumul_total_cost);
-  RPT_free_reporting (local_data->cumul_appraisal_cost);
-  RPT_free_reporting (local_data->cumul_euthanasia_cost);
-  RPT_free_reporting (local_data->cumul_indemnification_cost);
-  RPT_free_reporting (local_data->cumul_carcass_disposal_cost);
-  RPT_free_reporting (local_data->cumul_cleaning_disinfecting_cost);
-  RPT_free_reporting (local_data->cumul_destruction_subtotal);
-  RPT_free_reporting (local_data->cumul_vaccination_setup_cost);
-  RPT_free_reporting (local_data->cumul_vaccination_cost);
-  RPT_free_reporting (local_data->cumul_vaccination_subtotal);
-  RPT_free_reporting (local_data->cumul_surveillance_cost);
 
   g_free (local_data);
-  g_ptr_array_free (self->outputs, TRUE);
+  g_ptr_array_free (self->outputs, /* free_seg = */ TRUE); /* also frees all output variables */
   g_free (self);
 
 #if DEBUG
@@ -797,7 +786,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_new ();
+  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
   self->model_data = local_data;
   self->run = run;
   self->is_listening_for = adsm_model_is_listening_for;

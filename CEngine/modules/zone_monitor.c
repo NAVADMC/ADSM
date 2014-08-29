@@ -312,17 +312,8 @@ local_free (struct adsm_module_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  RPT_free_reporting (local_data->area);
-  RPT_free_reporting (local_data->perimeter);
-  RPT_free_reporting (local_data->num_separate_areas);
-  RPT_free_reporting (local_data->num_units);
-  RPT_free_reporting (local_data->num_units_by_prodtype);
-  RPT_free_reporting (local_data->num_unit_days);
-  RPT_free_reporting (local_data->num_unit_days_by_prodtype);
-  RPT_free_reporting (local_data->num_animal_days);
-  RPT_free_reporting (local_data->num_animal_days_by_prodtype);
   g_free (local_data);
-  g_ptr_array_free (self->outputs, TRUE);
+  g_ptr_array_free (self->outputs, /* free_seg = */ TRUE); /* also frees all output variables */
   g_free (self);
 
 #if DEBUG
@@ -362,7 +353,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_new ();
+  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
   self->model_data = local_data;
   self->run = run;
   self->is_listening_for = adsm_model_is_listening_for;
