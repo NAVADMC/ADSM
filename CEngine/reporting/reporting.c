@@ -1486,6 +1486,21 @@ RPT_reporting_zero_as_GDataForeachFunc (GQuark key_id, gpointer data, gpointer u
 
 
 /**
+ * Wraps RPT_reporting_zero so that it can be used with the foreach function of
+ * a GLib Pointer Array.
+ *
+ * @param data an output variable, cast to a gpointer.
+ * @param user_data not used, pass NULL.
+ */
+void
+RPT_reporting_zero_as_GFunc (gpointer data, gpointer user_data)
+{
+  RPT_reporting_zero ((RPT_reporting_t *) data);
+}
+
+
+
+/**
  * Zeroes an output variable.  Integer and real output variables are set to 0.
  * Group output variables have all sub-variables (and sub-sub-variables, etc.)
  * set to 0.  Contrast this with RPT_reporting_reset(), which removes

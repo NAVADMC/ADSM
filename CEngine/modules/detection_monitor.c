@@ -84,6 +84,10 @@ typedef struct
   RPT_reporting_t *cumul_nanimals_detected_by_means;
   RPT_reporting_t *cumul_nanimals_detected_by_prodtype;
   RPT_reporting_t *cumul_nanimals_detected_by_means_and_prodtype;
+  GPtrArray *daily_outputs; /**< Daily outputs, in a list to make it easy to
+    zero them all at once. */
+  GPtrArray *cumul_outputs; /**< Cumulative outputs, is a list to make it easy
+    to zero them all at once. */
   GHashTable *detected; /**< A table for tracking detections of unique units.
     If a unit has been detected, it will be in the.  The key is the unit
     (UNT_unit_t *), and the associated value is irrelevant. */
@@ -115,7 +119,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   #endif
 
   local_data = (local_data_t *) (self->model_data);
-  RPT_reporting_zero (local_data->detection_occurred);
+  g_ptr_array_foreach (local_data->cumul_outputs, RPT_reporting_zero_as_GFunc, NULL);
   RPT_reporting_set_null (local_data->first_detection, NULL);
   RPT_reporting_set_null (local_data->first_detection_by_means, NULL);
   RPT_reporting_set_null (local_data->first_detection_by_prodtype, NULL);
@@ -124,15 +128,6 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   RPT_reporting_set_null (local_data->last_detection_by_means, NULL);
   RPT_reporting_set_null (local_data->last_detection_by_prodtype, NULL);
   RPT_reporting_set_null (local_data->last_detection_by_means_and_prodtype, NULL);
-  RPT_reporting_zero (local_data->cumul_nunits_detected);
-  RPT_reporting_zero (local_data->cumul_nunits_detected_by_means);
-  RPT_reporting_zero (local_data->cumul_nunits_detected_by_prodtype);
-  RPT_reporting_zero (local_data->cumul_nunits_detected_by_means_and_prodtype);
-  RPT_reporting_zero (local_data->cumul_nunits_detected_uniq);
-  RPT_reporting_zero (local_data->cumul_nanimals_detected);
-  RPT_reporting_zero (local_data->cumul_nanimals_detected_by_means);
-  RPT_reporting_zero (local_data->cumul_nanimals_detected_by_prodtype);
-  RPT_reporting_zero (local_data->cumul_nanimals_detected_by_means_and_prodtype);
   g_hash_table_remove_all (local_data->detected);
 
   #if DEBUG
@@ -161,14 +156,7 @@ handle_new_day_event (struct adsm_module_t_ *self)
   local_data = (local_data_t *) (self->model_data);
 
   /* Zero the daily counts. */
-  RPT_reporting_zero (local_data->nunits_detected);
-  RPT_reporting_zero (local_data->nunits_detected_by_means);
-  RPT_reporting_zero (local_data->nunits_detected_by_prodtype);
-  RPT_reporting_zero (local_data->nunits_detected_by_means_and_prodtype);
-  RPT_reporting_zero (local_data->nanimals_detected);
-  RPT_reporting_zero (local_data->nanimals_detected_by_means);
-  RPT_reporting_zero (local_data->nanimals_detected_by_prodtype);
-  RPT_reporting_zero (local_data->nanimals_detected_by_means_and_prodtype);
+  g_ptr_array_foreach (local_data->daily_outputs, RPT_reporting_zero_as_GFunc, NULL);
 
   /* Empty the table that tracks multiple detections of a unit on one day. */
   g_hash_table_remove_all (local_data->detected_today);
@@ -463,6 +451,8 @@ local_free (struct adsm_module_t_ *self)
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
 
+  g_ptr_array_free (local_data->daily_outputs, /* free_seg = */ TRUE);
+  g_ptr_array_free (local_data->cumul_outputs, /* free_seg = */ TRUE);
   g_hash_table_destroy (local_data->detected);
   g_hash_table_destroy (local_data->detected_today);
   RPT_free_reporting (local_data->first_detection_by_means_yesterday);
@@ -519,6 +509,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->printf = adsm_model_printf;
   self->fprintf = adsm_model_fprintf;
   self->free = local_free;
+
+  local_data->daily_outputs = g_ptr_array_new();
+  local_data->cumul_outputs = g_ptr_array_new();
 
   local_data->detection_occurred =
     RPT_new_reporting ("detOccurred", RPT_integer);
@@ -599,7 +592,25 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_ptr_array_add (self->outputs, local_data->cumul_nanimals_detected_by_prodtype);
   g_ptr_array_add (self->outputs, local_data->cumul_nanimals_detected_by_means_and_prodtype);
 
-  /* Set the reporting frequency for the output variables. */
+  g_ptr_array_add (local_data->daily_outputs, local_data->nunits_detected);
+  g_ptr_array_add (local_data->daily_outputs, local_data->nunits_detected_by_means);
+  g_ptr_array_add (local_data->daily_outputs, local_data->nunits_detected_by_prodtype);
+  g_ptr_array_add (local_data->daily_outputs, local_data->nunits_detected_by_means_and_prodtype);
+  g_ptr_array_add (local_data->daily_outputs, local_data->nanimals_detected);
+  g_ptr_array_add (local_data->daily_outputs, local_data->nanimals_detected_by_means);
+  g_ptr_array_add (local_data->daily_outputs, local_data->nanimals_detected_by_prodtype);
+  g_ptr_array_add (local_data->daily_outputs, local_data->nanimals_detected_by_means_and_prodtype);
+
+  g_ptr_array_add (local_data->cumul_outputs, local_data->detection_occurred);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nunits_detected);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nunits_detected_by_means);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nunits_detected_by_prodtype);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nunits_detected_by_means_and_prodtype);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nunits_detected_uniq);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nanimals_detected);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nanimals_detected_by_means);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nanimals_detected_by_prodtype);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nanimals_detected_by_means_and_prodtype);
 
   /* Initialize the categories in the output variables. */
   local_data->production_types = units->production_type_names;

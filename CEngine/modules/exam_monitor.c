@@ -61,6 +61,10 @@ typedef struct
   RPT_reporting_t *cumul_nanimals_examined_by_reason;
   RPT_reporting_t *cumul_nanimals_examined_by_prodtype;
   RPT_reporting_t *cumul_nanimals_examined_by_reason_and_prodtype;
+  GPtrArray *daily_outputs; /**< Daily outputs, in a list to make it easy to
+    zero them all at once. */
+  GPtrArray *cumul_outputs; /**< Cumulative outputs, is a list to make it easy
+    to zero them all at once. */
 }
 local_data_t;
 
@@ -81,14 +85,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   #endif
 
   local_data = (local_data_t *) (self->model_data);
-  RPT_reporting_zero (local_data->cumul_nunits_examined);
-  RPT_reporting_zero (local_data->cumul_nunits_examined_by_reason);
-  RPT_reporting_zero (local_data->cumul_nunits_examined_by_prodtype);
-  RPT_reporting_zero (local_data->cumul_nunits_examined_by_reason_and_prodtype);
-  RPT_reporting_zero (local_data->cumul_nanimals_examined);
-  RPT_reporting_zero (local_data->cumul_nanimals_examined_by_reason);
-  RPT_reporting_zero (local_data->cumul_nanimals_examined_by_prodtype);
-  RPT_reporting_zero (local_data->cumul_nanimals_examined_by_reason_and_prodtype);
+  g_ptr_array_foreach (local_data->cumul_outputs, RPT_reporting_zero_as_GFunc, NULL);
 
   #if DEBUG
     g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -116,14 +113,7 @@ handle_new_day_event (struct adsm_module_t_ *self)
   local_data = (local_data_t *) (self->model_data);
 
   /* Zero the daily counts. */
-  RPT_reporting_zero (local_data->nunits_examined);
-  RPT_reporting_zero (local_data->nunits_examined_by_reason);
-  RPT_reporting_zero (local_data->nunits_examined_by_prodtype);
-  RPT_reporting_zero (local_data->nunits_examined_by_reason_and_prodtype);
-  RPT_reporting_zero (local_data->nanimals_examined);
-  RPT_reporting_zero (local_data->nanimals_examined_by_reason);
-  RPT_reporting_zero (local_data->nanimals_examined_by_prodtype);
-  RPT_reporting_zero (local_data->nanimals_examined_by_reason_and_prodtype);
+  g_ptr_array_foreach (local_data->daily_outputs, RPT_reporting_zero_as_GFunc, NULL);
 
 #if DEBUG
   g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
@@ -282,6 +272,8 @@ local_free (struct adsm_module_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
+  g_ptr_array_free (local_data->daily_outputs, /* free_seg = */ TRUE);
+  g_ptr_array_free (local_data->cumul_outputs, /* free_seg = */ TRUE);
   g_free (local_data);
   g_ptr_array_free (self->outputs, /* free_seg = */ TRUE); /* also frees all output variables */
   g_free (self);
@@ -332,6 +324,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
+  local_data->daily_outputs = g_ptr_array_new();
+  local_data->cumul_outputs = g_ptr_array_new();
+
   local_data->nunits_examined =
     RPT_new_reporting ("exmnUAll", RPT_integer);
   local_data->nunits_examined_by_reason =
@@ -381,7 +376,23 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_ptr_array_add (self->outputs, local_data->cumul_nanimals_examined_by_prodtype);
   g_ptr_array_add (self->outputs, local_data->cumul_nanimals_examined_by_reason_and_prodtype);
 
-  /* Set the reporting frequency for the output variables. */
+  g_ptr_array_add (local_data->daily_outputs, local_data->nunits_examined);
+  g_ptr_array_add (local_data->daily_outputs, local_data->nunits_examined_by_reason);
+  g_ptr_array_add (local_data->daily_outputs, local_data->nunits_examined_by_prodtype);
+  g_ptr_array_add (local_data->daily_outputs, local_data->nunits_examined_by_reason_and_prodtype);
+  g_ptr_array_add (local_data->daily_outputs, local_data->nanimals_examined);
+  g_ptr_array_add (local_data->daily_outputs, local_data->nanimals_examined_by_reason);
+  g_ptr_array_add (local_data->daily_outputs, local_data->nanimals_examined_by_prodtype);
+  g_ptr_array_add (local_data->daily_outputs, local_data->nanimals_examined_by_reason_and_prodtype);
+
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nunits_examined);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nunits_examined_by_reason);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nunits_examined_by_prodtype);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nunits_examined_by_reason_and_prodtype);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nanimals_examined);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nanimals_examined_by_reason);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nanimals_examined_by_prodtype);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nanimals_examined_by_reason_and_prodtype);
 
   /* Initialize the categories in the output variables. */
   local_data->production_types = units->production_type_names;

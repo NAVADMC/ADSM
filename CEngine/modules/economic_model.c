@@ -136,27 +136,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
     g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
   #endif
 
-  /*
-  RPT_reporting_zero (local_data->total_cost);
-  RPT_reporting_zero (local_data->appraisal_cost);
-  RPT_reporting_zero (local_data->euthanasia_cost);
-  RPT_reporting_zero (local_data->indemnification_cost);
-  RPT_reporting_zero (local_data->carcass_disposal_cost);
-  RPT_reporting_zero (local_data->cleaning_disinfecting_cost);
-  RPT_reporting_zero (local_data->vaccination_cost);
-  RPT_reporting_zero (local_data->surveillance_cost);
-  */
-  RPT_reporting_zero (local_data->cumul_total_cost);
-  RPT_reporting_zero (local_data->cumul_appraisal_cost);
-  RPT_reporting_zero (local_data->cumul_euthanasia_cost);
-  RPT_reporting_zero (local_data->cumul_indemnification_cost);
-  RPT_reporting_zero (local_data->cumul_carcass_disposal_cost);
-  RPT_reporting_zero (local_data->cumul_cleaning_disinfecting_cost);
-  RPT_reporting_zero (local_data->cumul_destruction_subtotal);
-  RPT_reporting_zero (local_data->cumul_vaccination_setup_cost);
-  RPT_reporting_zero (local_data->cumul_vaccination_cost);
-  RPT_reporting_zero (local_data->cumul_vaccination_subtotal);
-  RPT_reporting_zero (local_data->cumul_surveillance_cost);
+  g_ptr_array_foreach (self->outputs, RPT_reporting_zero_as_GFunc, NULL);
 
   if (local_data->vaccination_cost_params)
     {

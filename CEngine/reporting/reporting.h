@@ -86,6 +86,7 @@ void RPT_reporting_add_real1 (RPT_reporting_t *, double, const char *);
 void RPT_reporting_splice (RPT_reporting_t *, RPT_reporting_t *);
 void RPT_reporting_reset (RPT_reporting_t *);
 void RPT_reporting_zero (RPT_reporting_t *);
+void RPT_reporting_zero_as_GFunc (gpointer data, gpointer user_data);
 gboolean RPT_reporting_is_null (RPT_reporting_t *, const char**);
 gboolean RPT_reporting_is_null1 (RPT_reporting_t *, const char*);
 long RPT_reporting_get_integer (RPT_reporting_t *, const char **);

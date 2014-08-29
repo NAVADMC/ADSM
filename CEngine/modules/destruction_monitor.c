@@ -66,6 +66,10 @@ typedef struct
   RPT_reporting_t *cumul_num_animals_destroyed_by_reason;
   RPT_reporting_t *cumul_num_animals_destroyed_by_prodtype;
   RPT_reporting_t *cumul_num_animals_destroyed_by_reason_and_prodtype;
+  GPtrArray *daily_outputs; /**< Daily outputs, in a list to make it easy to
+    zero them all at once. */
+  GPtrArray *cumul_outputs; /**< Cumulative outputs, is a list to make it easy
+    to zero them all at once. */
 }
 local_data_t;
 
@@ -86,27 +90,11 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   #endif
 
   local_data = (local_data_t *) (self->model_data);
-  RPT_reporting_zero (local_data->destruction_occurred);
+  g_ptr_array_foreach (local_data->cumul_outputs, RPT_reporting_zero_as_GFunc, NULL);
   RPT_reporting_set_null (local_data->first_destruction, NULL);
   RPT_reporting_set_null (local_data->first_destruction_by_reason, NULL);
   RPT_reporting_set_null (local_data->first_destruction_by_prodtype, NULL);
   RPT_reporting_set_null (local_data->first_destruction_by_reason_and_prodtype, NULL);
-  RPT_reporting_zero (local_data->num_units_destroyed);
-  RPT_reporting_zero (local_data->num_units_destroyed_by_reason);
-  RPT_reporting_zero (local_data->num_units_destroyed_by_prodtype);
-  RPT_reporting_zero (local_data->num_units_destroyed_by_reason_and_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_units_destroyed);
-  RPT_reporting_zero (local_data->cumul_num_units_destroyed_by_reason);
-  RPT_reporting_zero (local_data->cumul_num_units_destroyed_by_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_units_destroyed_by_reason_and_prodtype);
-  RPT_reporting_zero (local_data->num_animals_destroyed);
-  RPT_reporting_zero (local_data->num_animals_destroyed_by_reason);
-  RPT_reporting_zero (local_data->num_animals_destroyed_by_prodtype);
-  RPT_reporting_zero (local_data->num_animals_destroyed_by_reason_and_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_animals_destroyed);
-  RPT_reporting_zero (local_data->cumul_num_animals_destroyed_by_reason);
-  RPT_reporting_zero (local_data->cumul_num_animals_destroyed_by_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_animals_destroyed_by_reason_and_prodtype);
 
   #if DEBUG
     g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -137,14 +125,7 @@ handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event)
   /* Zero the daily counts. */
   if (event->day > 1)
     {
-      RPT_reporting_zero (local_data->num_units_destroyed);
-      RPT_reporting_zero (local_data->num_units_destroyed_by_reason);
-      RPT_reporting_zero (local_data->num_units_destroyed_by_prodtype);
-      RPT_reporting_zero (local_data->num_units_destroyed_by_reason_and_prodtype);
-      RPT_reporting_zero (local_data->num_animals_destroyed);
-      RPT_reporting_zero (local_data->num_animals_destroyed_by_reason);
-      RPT_reporting_zero (local_data->num_animals_destroyed_by_prodtype);
-      RPT_reporting_zero (local_data->num_animals_destroyed_by_reason_and_prodtype);
+      g_ptr_array_foreach (local_data->daily_outputs, RPT_reporting_zero_as_GFunc, NULL);
     }
 
 #if DEBUG
@@ -300,6 +281,8 @@ local_free (struct adsm_module_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
+  g_ptr_array_free (local_data->daily_outputs, /* free_seg = */ TRUE);
+  g_ptr_array_free (local_data->cumul_outputs, /* free_seg = */ TRUE);
   g_free (local_data);
   g_ptr_array_free (self->outputs, /* free_seg = */ TRUE); /* also frees all output variables */
   g_free (self);
@@ -351,6 +334,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->printf = adsm_model_printf;
   self->fprintf = adsm_model_fprintf;
   self->free = local_free;
+
+  local_data->daily_outputs = g_ptr_array_new();
+  local_data->cumul_outputs = g_ptr_array_new();
 
   local_data->destruction_occurred =
     RPT_new_reporting ("destrOccurred", RPT_integer);
@@ -416,7 +402,24 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_ptr_array_add (self->outputs, local_data->cumul_num_animals_destroyed_by_prodtype);
   g_ptr_array_add (self->outputs, local_data->cumul_num_animals_destroyed_by_reason_and_prodtype);
 
-  /* Set the reporting frequency for the output variables. */
+  g_ptr_array_add (local_data->daily_outputs, local_data->num_units_destroyed);
+  g_ptr_array_add (local_data->daily_outputs, local_data->num_units_destroyed_by_reason);
+  g_ptr_array_add (local_data->daily_outputs, local_data->num_units_destroyed_by_prodtype);
+  g_ptr_array_add (local_data->daily_outputs, local_data->num_units_destroyed_by_reason_and_prodtype);
+  g_ptr_array_add (local_data->daily_outputs, local_data->num_animals_destroyed);
+  g_ptr_array_add (local_data->daily_outputs, local_data->num_animals_destroyed_by_reason);
+  g_ptr_array_add (local_data->daily_outputs, local_data->num_animals_destroyed_by_prodtype);
+  g_ptr_array_add (local_data->daily_outputs, local_data->num_animals_destroyed_by_reason_and_prodtype);
+
+  g_ptr_array_add (local_data->cumul_outputs, local_data->destruction_occurred);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_num_units_destroyed);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_num_units_destroyed_by_reason);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_num_units_destroyed_by_prodtype);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_num_units_destroyed_by_reason_and_prodtype);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_num_animals_destroyed);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_num_animals_destroyed_by_reason);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_num_animals_destroyed_by_prodtype);
+  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_num_animals_destroyed_by_reason_and_prodtype);
 
   /* Initialize the output variables. */
   local_data->production_types = units->production_type_names;
