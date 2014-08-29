@@ -470,7 +470,7 @@ class Disease(BaseModel):
 class DiseaseProgression(BaseModel):
     name = models.CharField(max_length=255,
         help_text="Examples: Severe Progression, FMD Long Incubation")
-    _disease = models.ForeignKey('Disease', )#default=lambda: Disease.objects.get_or_create(id=1)[0], )  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
+    _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0], )  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
     disease_latent_period = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the latent period for units of this production type.', )
     disease_subclinical_period = models.ForeignKey(ProbabilityFunction, related_name='+',
@@ -498,7 +498,7 @@ class DiseaseProgressionAssignment(BaseModel):
 
 class DiseaseSpread(BaseModel):
     name = models.CharField(max_length=255,)
-    _disease = models.ForeignKey('Disease', #default=lambda: Disease.objects.get_or_create(id=1)[0],
+    _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0],
                                  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
                                  help_text='Parent disease whose spreading characteristics this describes.')
         # This is in Disease because of simulation restrictions

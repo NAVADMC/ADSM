@@ -42,7 +42,7 @@ def basic_context(request):
                'ProtocolAssignments': ProtocolAssignment.objects.count(),
                'Zones': Zone.objects.count(),
                'ZoneEffects': ZoneEffect.objects.count(),
-               'ZoneEffectAssignments': ZoneEffectAssignment.objects.count() >= Zone.objects.count(),
+               'ZoneEffectAssignments': ZoneEffectAssignment.objects.count() >= Zone.objects.count() and Zone.objects.count(),
                'ProbabilityFunctions': ProbabilityFunction.objects.count(),
                'RelationalFunctions': RelationalFunction.objects.count(),
                'url': request.path,
