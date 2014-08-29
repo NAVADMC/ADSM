@@ -383,7 +383,7 @@ class ControlProtocol(BaseModel):
         help_text='The number of animals of this type that can be vaccinated before the cost of vaccination increases.', )
     cost_of_vaccination_additional_per_animal = MoneyField(default=0.0,
         help_text='The additional cost of vaccination for each vaccinated animal of this type after the threshold is exceeded.', )
-    use_testing = models.BooleanField(default=False, )
+    use_exams = models.BooleanField(default=False, )
     examine_direct_forward_traces = models.BooleanField(default=False,
         help_text='Indicator if units identified by the trace-forward of direct contact will be examined for clinical signs of disease.', )
     exam_direct_forward_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
@@ -400,6 +400,7 @@ class ControlProtocol(BaseModel):
         help_text='Indicator if units identified by the trace-back of indirect contact will be examined for clinical signs of disease.', )
     examine_indirect_back_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Multiplier for the probability of observing clinical signs in units identified by the trace-back of indirect contact.', )
+    use_testing = models.BooleanField(default=False, )
     test_direct_forward_traces = models.BooleanField(default=False,
         help_text='Indicator that diagnostic testing should be performed on units identified by trace-forward of direct contacts.', )
     test_indirect_forward_traces = models.BooleanField(default=False,
