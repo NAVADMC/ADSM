@@ -317,6 +317,10 @@ select {
     display: inline;
 }
 
+#div_id_name div input {
+    min-width: 400px;
+}
+
 /**************************/
 
 #farm_list {
