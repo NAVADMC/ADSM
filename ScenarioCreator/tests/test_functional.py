@@ -7,7 +7,8 @@ from selenium.common.exceptions import NoSuchElementException
 
 from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
     ProbabilityFunction, RelationalFunction, RelationalPoint, Population, \
-    DirectSpread, IndirectSpread, AirborneSpread
+    DirectSpread, IndirectSpread, AirborneSpread, ProductionType, \
+    DiseaseProgressionAssignment
 
 
 class M2mDSL(object):
@@ -150,6 +151,9 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
             disease_clinical_period=cp_cattle,
             disease_immune_period=ip_cattle,
             disease_prevalence=prevalence)
+        production_type = ProductionType.objects.get(name="Free Range Cows")
+        assigned_type = DiseaseProgressionAssignment.objects.create(production_type=production_type,
+            progression=disease_progression)
         dc_ds1 = DirectSpread.objects.create(name="Dairy Cattle Large",
             latent_animals_can_infect_others=True,
             contact_rate=5,
@@ -432,3 +436,26 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
         modal = self.selenium.find_element_by_css_selector('div[id$="-direct_contact_spread_modal"]')
 
         self.assertIn("Create a new Direct Spread", modal.text)
+
+    def test_modal_hide_unneeded_probability_fields(self):
+        """
+            issue 146: unneeded probability fields are not hidden in modals
+        """
+        self.setup_scenario()
+        self.click_navbar_element("Assign Progression")
+
+        target = self.selenium.find_elements_by_class_name('glyphicon-pencil')[0].click()
+        time.sleep(2)
+
+        modal = self.selenium.find_element_by_css_selector('div[id$="-progression_modal"]')
+
+        modal.find_elements_by_class_name('glyphicon-pencil')[0].click()
+        time.sleep(2)
+
+        modal_2 = self.selenium.find_element_by_css_selector('div[id$="disease_latent_period_modal"]')
+
+        mean_field = modal_2.find_element_by_id("div_id_mean")
+
+        self.assertIn("display: none;", mean_field.value_of_css_property("style"))
+
+        time.sleep(10)
