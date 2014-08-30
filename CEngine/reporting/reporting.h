@@ -56,6 +56,38 @@ RPT_reporting_t;
 
 
 
+/**
+ * Types of arrays of subcategories (for bulk creation of output variables).
+ */
+typedef enum
+{
+  RPT_NoSubcategory, RPT_CharArray, RPT_GPtrArray
+}
+RPT_subcategory_type_t;
+
+
+
+/**
+ * A structure used in bulk creation of output variables.
+ */
+typedef struct
+{
+  gpointer loc;
+  const char *format;
+  RPT_type_t type;
+  RPT_subcategory_type_t subcategory1_type;
+  gpointer subcategory1_name;
+  guint subcategory1_count;
+  RPT_subcategory_type_t subcategory2_type;
+  gpointer subcategory2_name;
+  guint subcategory2_count;
+  GPtrArray *membership1;
+  GPtrArray *membership2;  
+}
+RPT_bulk_create_t;
+
+
+
 /* Prototypes. */
 
 RPT_reporting_t *RPT_new_reporting (const char *name, RPT_type_t);
@@ -97,6 +129,7 @@ double RPT_reporting_get_real1 (RPT_reporting_t *, const char *);
 gboolean RPT_reporting_due (RPT_reporting_t *, unsigned int day);
 RPT_type_t RPT_reporting_get_type (RPT_reporting_t *);
 RPT_reporting_t *RPT_clone_reporting (RPT_reporting_t *);
+void RPT_bulk_create (RPT_bulk_create_t *);
 
 /**
  * A struct used to deliver a "flattened" version of an output variable.

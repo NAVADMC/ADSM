@@ -1867,6 +1867,113 @@ RPT_free_flattened_reporting (GArray *flattened)
 
 
 
+void
+RPT_bulk_create (RPT_bulk_create_t *output_specs)
+{
+  RPT_bulk_create_t *output_spec;
+  
+  for (output_spec = output_specs; output_spec->loc != NULL; output_spec++)
+    {
+      if (output_spec->subcategory1_type == RPT_NoSubcategory
+          && output_spec->subcategory2_type == RPT_NoSubcategory)
+        {
+          /* This is a single output variable. */
+          RPT_reporting_t *reporting;
+          
+          reporting = RPT_new_reporting (output_spec->format, output_spec->type);
+          if (output_spec->membership1)
+            g_ptr_array_add (output_spec->membership1, reporting);
+          if (output_spec->membership2)
+            g_ptr_array_add (output_spec->membership2, reporting);
+          
+          *((RPT_reporting_t **)(output_spec->loc)) = reporting;
+        } /* end of creating a single output variable */
+
+      else if (output_spec->subcategory1_type != RPT_NoSubcategory
+               && output_spec->subcategory2_type == RPT_NoSubcategory)
+        {
+          /* Create an array of output variables. */
+          RPT_reporting_t **reporting;
+          char **subcategory_names_c;
+          GPtrArray *subcategory_names_g;
+          guint n, i;
+          gchar *output_name;
+
+          subcategory_names_c = (char **)(output_spec->subcategory1_name);
+          subcategory_names_g = (GPtrArray *)(output_spec->subcategory1_name);
+          n = output_spec->subcategory1_count;
+          reporting = g_new0 (RPT_reporting_t *, n);
+          for (i = 0; i < output_spec->subcategory1_count; i++)
+            {
+              output_name = g_strdup_printf (output_spec->format,
+                output_spec->subcategory1_type == RPT_CharArray
+                ? subcategory_names_c[i]
+                : (char *) g_ptr_array_index (subcategory_names_g, i)
+              );
+              reporting[i] = RPT_new_reporting (output_name, output_spec->type);
+              g_free (output_name);
+              if (output_spec->membership1)
+                g_ptr_array_add (output_spec->membership1, reporting[i]);
+              if (output_spec->membership2)
+                g_ptr_array_add (output_spec->membership2, reporting[i]);
+            } /* end of loop over array */
+
+          *((RPT_reporting_t ***)(output_spec->loc)) = reporting;
+        } /* end of creating an array of output variables */
+
+      else if (output_spec->subcategory1_type != RPT_NoSubcategory
+               && output_spec->subcategory2_type != RPT_NoSubcategory)
+        {
+          /* This is a 2D array of output variables. */
+          RPT_reporting_t ***reporting = NULL;
+          char **subcategory1_names_c, **subcategory2_names_c;
+          GPtrArray *subcategory1_names_g, *subcategory2_names_g;
+          guint nrows, ncols, row, col;
+          gchar *output_name;
+
+          subcategory1_names_c = (char **)(output_spec->subcategory1_name);
+          subcategory1_names_g = (GPtrArray *)(output_spec->subcategory1_name);
+          subcategory2_names_c = (char **)(output_spec->subcategory2_name);
+          subcategory2_names_g = (GPtrArray *)(output_spec->subcategory2_name);
+          nrows = output_spec->subcategory1_count;
+          ncols = output_spec->subcategory2_count;
+          reporting = g_new0 (RPT_reporting_t **, nrows);
+          for (row = 0; row < output_spec->subcategory1_count; row++)
+            {
+              reporting[row] = g_new0 (RPT_reporting_t *, ncols);
+              for (col = 0; col < output_spec->subcategory2_count; col++)
+                {
+                  output_name = g_strdup_printf (output_spec->format,
+                    output_spec->subcategory1_type == RPT_CharArray
+                    ? subcategory1_names_c[row]
+                    : (char *) g_ptr_array_index (subcategory1_names_g, row),
+                    output_spec->subcategory2_type == RPT_CharArray
+                    ? subcategory2_names_c[col]
+                    : (char *) g_ptr_array_index (subcategory2_names_g, col)
+                  );
+                  reporting[row][col] = RPT_new_reporting (output_name, output_spec->type);
+                  g_free (output_name);
+                  if (output_spec->membership1)
+                    g_ptr_array_add (output_spec->membership1, reporting[row][col]);
+                  if (output_spec->membership2)
+                    g_ptr_array_add (output_spec->membership2, reporting[row][col]);
+                } /* end of loop over cols */              
+            } /* end of loop over rows */
+
+          *((RPT_reporting_t ****)(output_spec->loc)) = reporting;
+        } /* end of creating a 2D array of output variables */
+
+      else
+        {
+          g_assert_not_reached();
+        }
+    } /* end of loop over reporting variables to bulk create */
+
+  return;
+}
+
+
+
 /**
  * Returns a copy of the given text, transformed into CamelCase.
  *
