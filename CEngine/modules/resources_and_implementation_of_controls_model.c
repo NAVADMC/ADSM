@@ -232,7 +232,6 @@
 #define local_free resources_and_implementation_of_controls_model_free
 #define handle_before_each_simulation_event resources_and_implementation_of_controls_model_handle_before_each_simulation_event
 #define handle_new_day_event resources_and_implementation_of_controls_model_handle_new_day_event
-#define handle_declaration_of_vaccination_reasons_event resources_and_implementation_of_controls_model_handle_declaration_of_vaccination_reasons_event
 #define handle_detection_event resources_and_implementation_of_controls_model_handle_detection_event
 #define handle_request_for_destruction_event resources_and_implementation_of_controls_model_handle_request_for_destruction_event
 #define handle_request_for_vaccination_event resources_and_implementation_of_controls_model_handle_request_for_vaccination_event
@@ -320,11 +319,6 @@ typedef struct
     or absence of a key is all we ever test). */
 
   /* Parameters concerning vaccination. */
-  unsigned int nvaccination_reasons; /**< Number of distinct reasons for
-    vaccination. */
-  GPtrArray *vaccination_reasons; /**< A temporary array used when counting the
-    number of distinct reasons for vaccination.  It stores the reasons declared
-    so far, so that they will not be double-counted. */
   unsigned int vaccination_program_threshold; /**< The number of diseased units
     that must be detected before vaccination will begin. */
   GHashTable *detected_units; /**< The diseased units detected so far.  Keys
@@ -781,7 +775,7 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
 
       npriorities = local_data->pending_vaccinations->len;
       if (local_data->vaccination_prod_type_priority == 1)
-        step = local_data->nvaccination_reasons;
+        step = ADSM_NCONTROL_REASONS;
       else
         step = local_data->nprod_types;
       start = 0;
@@ -1004,75 +998,6 @@ handle_new_day_event (struct adsm_module_t_ *self,
 
 #if DEBUG
   g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
- * Responds to a declaration of vaccination reasons by recording the potential
- * reasons for vaccination.
- *
- * @param self the model.
- * @param event a declaration of vaccination reasons event.
- */
-void
-handle_declaration_of_vaccination_reasons_event (struct adsm_module_t_ *self,
-                                                 EVT_declaration_of_vaccination_reasons_event_t *
-                                                 event)
-{
-  local_data_t *local_data;
-  unsigned int n, m, i, j;
-  char *reason;
-#if DEBUG
-  GString *s;
-#endif
-
-#if DEBUG
-  g_debug ("----- ENTER handle_declaration_of_vaccination_reasons_event (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-
-  /* Copy the list of potential reasons for vaccination.  (Note that we just
-   * copy the pointers to the C strings, assuming that they are static strings.)
-   * If any potential reason is not already present in our list, add to our
-   * count of distinct reasons. */
-  n = event->reasons->len;
-  for (i = 0; i < n; i++)
-    {
-      reason = (char *) g_ptr_array_index (event->reasons, i);
-
-      m = local_data->vaccination_reasons->len;
-      for (j = 0; j < m; j++)
-        {
-          if (strcasecmp (reason, g_ptr_array_index (local_data->vaccination_reasons, j)) == 0)
-            break;
-        }
-      if (j == m)
-        {
-          /* We haven't encountered this reason before; add its name to the
-           * list. */
-          g_ptr_array_add (local_data->vaccination_reasons, reason);
-          local_data->nvaccination_reasons++;
-#if DEBUG
-          g_debug ("  adding new reason \"%s\"", reason);
-#endif
-        }
-    }
-#if DEBUG
-  s = g_string_new ("  list of reasons now={");
-  n = local_data->vaccination_reasons->len;
-  for (i = 0; i < n; i++)
-    g_string_append_printf (s, i == 0 ? "\"%s\"" : ",\"%s\"",
-                            (char *) g_ptr_array_index (local_data->vaccination_reasons, i));
-  g_string_append_c (s, '}');
-  g_debug ("%s", s->str);
-  g_string_free (s, TRUE);
-#endif
-
-#if DEBUG
-  g_debug ("----- EXIT handle_declaration_of_vaccination_reasons_event (%s)", MODEL_NAME);
 #endif
 }
 
@@ -1455,11 +1380,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day), units, queue);
       break;
-    case EVT_DeclarationOfVaccinationReasons:
-      handle_declaration_of_vaccination_reasons_event (self,
-                                                       &(event->u.
-                                                         declaration_of_vaccination_reasons));
-      break;
     case EVT_Detection:
       handle_detection_event (self, &(event->u.detection), queue);
       break;
@@ -1605,10 +1525,6 @@ local_free (struct adsm_module_t_ *self)
     }
   g_ptr_array_free (local_data->pending_destructions, TRUE);
   g_hash_table_destroy (local_data->destroyed_today);
-
-  /* We destroy the array of pointers but not the C strings they were pointing
-   * to; those we assume are static strings. */
-  g_ptr_array_free (local_data->vaccination_reasons, TRUE);
 
   REL_free_chart (local_data->vaccination_capacity);
   clear_all_pending_vaccinations (local_data);
@@ -1848,7 +1764,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_NewDay,
     EVT_Detection,
     EVT_RequestForDestruction,
-    EVT_DeclarationOfVaccinationReasons,
     EVT_RequestForVaccination,
     EVT_Vaccination,
     0
@@ -1899,11 +1814,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->no_more_vaccinations = FALSE;
   local_data->detected_units = g_hash_table_new (g_direct_hash, g_direct_equal);
   local_data->detected_today = g_hash_table_new (g_direct_hash, g_direct_equal);
-
-  /* We don't yet know how many distinct reasons for destruction or vaccination
-   * requests there may be.  We will rely on other sub-models to tell us. */
-  local_data->nvaccination_reasons = 0;
-  local_data->vaccination_reasons = g_ptr_array_new ();
 
   /* Call the set_params function to read the parameters. */
   local_data->db = params,
