@@ -28,7 +28,6 @@
 #define run ring_vaccination_model_run
 #define to_string ring_vaccination_model_to_string
 #define local_free ring_vaccination_model_free
-#define handle_before_any_simulations_event ring_vaccination_model_handle_before_any_simulations_event
 #define handle_before_each_simulation_event ring_vaccination_model_handle_before_each_simulation_event
 #define handle_new_day_event ring_vaccination_model_handle_new_day_event
 #define handle_detection_event ring_vaccination_model_handle_detection_event
@@ -101,38 +100,6 @@ typedef struct
     redundant. */      
 }
 local_data_t;
-
-
-
-/**
- * Before any simulations, this module declares all the reasons for which it
- * may request a vaccination.
- *
- * @param queue for any new events the model creates.
- */
-void
-handle_before_any_simulations_event (EVT_event_queue_t * queue)
-{
-  GPtrArray *reasons;
-  
-#if DEBUG
-  g_debug ("----- ENTER handle_before_any_simulations_event (%s)", MODEL_NAME);
-#endif
-
-  reasons = g_ptr_array_sized_new (1);
-  g_ptr_array_add (reasons, "Ring");
-  EVT_event_enqueue (queue, EVT_new_declaration_of_vaccination_reasons_event (reasons));
-
-  /* Note that we don't clean up the GPtrArray.  It will be freed along with
-   * the declaration event after all interested sub-models have processed the
-   * event. */
-
-#if DEBUG
-  g_debug ("----- EXIT handle_before_any_simulations_event (%s)", MODEL_NAME);
-#endif
-
-  return;
-}
 
 
 
@@ -358,9 +325,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
   switch (event->type)
     {
-    case EVT_BeforeAnySimulations:
-      handle_before_any_simulations_event (queue);
-      break;
     case EVT_BeforeEachSimulation:
       handle_before_each_simulation_event (self);
       break;
@@ -588,7 +552,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   adsm_module_t *self;
   local_data_t *local_data;
   EVT_event_type_t events_listened_for[] = {
-    EVT_BeforeAnySimulations,
     EVT_BeforeEachSimulation,
     EVT_NewDay,
     EVT_Detection,
