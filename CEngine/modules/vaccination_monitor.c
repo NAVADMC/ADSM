@@ -26,7 +26,6 @@
 #define local_free vaccination_monitor_free
 #define handle_before_each_simulation_event vaccination_monitor_handle_before_each_simulation_event
 #define handle_new_day_event vaccination_monitor_handle_new_day_event
-#define handle_declaration_of_vaccination_reasons_event vaccination_monitor_handle_declaration_of_vaccination_reasons_event
 #define handle_vaccination_event vaccination_monitor_handle_vaccination_event
 
 #include "module.h"
@@ -131,72 +130,6 @@ handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event)
 
 #if DEBUG
   g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
- * Responds to a declaration of vaccination reasons by recording the potential
- * reasons for vaccination.
- *
- * @param self the model.
- * @param event a declaration of vaccination reasons event.
- */
-void
-handle_declaration_of_vaccination_reasons_event (struct adsm_module_t_ *self,
-                                                 EVT_declaration_of_vaccination_reasons_event_t *
-                                                 event)
-{
-  local_data_t *local_data;
-  unsigned int n, i, j;
-  const char *reason;
-  const char *drill_down_list[3] = { NULL, NULL, NULL };
-  
-#if DEBUG
-  g_debug ("----- ENTER handle_declaration_of_vaccination_reasons_event (%s)", MODEL_NAME);
-#endif
-    
-  local_data = (local_data_t *) (self->model_data);
-
-  /* If any potential reason is not already present in our reporting variables,
-   * add it, with an initial count of 0 vaccinations. */
-  n = event->reasons->len;
-  for (i = 0; i < n; i++)
-    {
-      reason = (char *) g_ptr_array_index (event->reasons, i);
-      /* Two function calls for the first_vaccination variable: one to
-       * establish the type of the sub-variable (it's an integer), and one to
-       * clear it to "null" (it has no meaningful value until a vaccination
-       * occurs). */
-      RPT_reporting_add_integer1 (local_data->first_vaccination_by_reason, 0, reason);
-      RPT_reporting_set_null1 (local_data->first_vaccination_by_reason, reason);
-      RPT_reporting_add_integer1 (local_data->num_units_vaccinated_by_reason, 0, reason);
-      RPT_reporting_add_integer1 (local_data->cumul_num_units_vaccinated_by_reason, 0, reason);
-      RPT_reporting_add_integer1 (local_data->num_animals_vaccinated_by_reason, 0, reason);
-      RPT_reporting_add_integer1 (local_data->cumul_num_animals_vaccinated_by_reason, 0, reason);
-
-      drill_down_list[0] = reason;
-      for (j = 0; j < local_data->production_types->len; j++)
-        {
-          drill_down_list[1] = (char *) g_ptr_array_index (local_data->production_types, j);
-          RPT_reporting_add_integer (local_data->first_vaccination_by_reason_and_prodtype, 0,
-                                     drill_down_list);
-          RPT_reporting_set_null (local_data->first_vaccination_by_reason_and_prodtype,
-                                  drill_down_list);
-          RPT_reporting_add_integer (local_data->num_units_vaccinated_by_reason_and_prodtype, 0,
-                                     drill_down_list);
-          RPT_reporting_add_integer (local_data->cumul_num_units_vaccinated_by_reason_and_prodtype, 0,
-                                     drill_down_list);
-          RPT_reporting_add_integer (local_data->num_animals_vaccinated_by_reason_and_prodtype, 0,
-                                     drill_down_list);
-          RPT_reporting_add_integer (local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype, 0,
-                                     drill_down_list);
-        }
-    }
-
-#if DEBUG
-  g_debug ("----- EXIT handle_declaration_of_vaccination_reasons_event (%s)", MODEL_NAME);
 #endif
 }
 
@@ -317,11 +250,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day));
       break;
-    case EVT_DeclarationOfVaccinationReasons:
-      handle_declaration_of_vaccination_reasons_event (self,
-                                                       &(event->u.
-                                                         declaration_of_vaccination_reasons));
-      break;
     case EVT_Vaccination:
       handle_vaccination_event (self, &(event->u.vaccination));
       break;
@@ -380,12 +308,11 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_BeforeAnySimulations,
     EVT_BeforeEachSimulation,
     EVT_NewDay,
-    EVT_DeclarationOfVaccinationReasons,
     EVT_Vaccination,
     0
   };
   unsigned int n;
-  unsigned int i;      /* loop counter */
+  unsigned int i, j;      /* loop counters */
   char *prodtype_name;
   const char *drill_down_list[3] = { NULL, NULL, NULL };
 
@@ -495,7 +422,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_num_animals_vaccinated_by_prodtype);
   g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype);
 
-  /* Initialize the output variables we already know about. */
+  /* Initialize the output variables. */
   local_data->production_types = units->production_type_names;
   n = local_data->production_types->len;
   drill_down_list[0] = "Ini";
@@ -516,6 +443,51 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       RPT_reporting_add_integer (local_data->cumul_num_units_vaccinated_by_reason_and_prodtype, 0, drill_down_list);
       RPT_reporting_add_integer (local_data->num_animals_vaccinated_by_reason_and_prodtype, 0, drill_down_list);
       RPT_reporting_add_integer (local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype, 0, drill_down_list);
+    }
+  for (i = 0; i < ADSM_NCONTROL_REASONS; i++)
+    {
+      const char *reason;
+      reason = ADSM_control_reason_abbrev[i];
+      /* Two function calls for the first_vaccination variable: one to
+       * establish the type of the sub-variable (it's an integer), and one to
+       * clear it to "null" (it has no meaningful value until a vaccination
+       * occurs). */
+      if (i == ADSM_ControlRing)
+        {
+          RPT_reporting_add_integer1 (local_data->first_vaccination_by_reason, 0, reason);
+          RPT_reporting_set_null1 (local_data->first_vaccination_by_reason, reason);
+        }
+      if (i == ADSM_ControlRing || i == ADSM_ControlInitialState)
+        {
+          RPT_reporting_add_integer1 (local_data->num_units_vaccinated_by_reason, 0, reason);
+          RPT_reporting_add_integer1 (local_data->cumul_num_units_vaccinated_by_reason, 0, reason);
+          RPT_reporting_add_integer1 (local_data->num_animals_vaccinated_by_reason, 0, reason);
+          RPT_reporting_add_integer1 (local_data->cumul_num_animals_vaccinated_by_reason, 0, reason);
+        }
+
+      drill_down_list[0] = reason;
+      for (j = 0; j < n; j++)
+        {
+          drill_down_list[1] = (char *) g_ptr_array_index (local_data->production_types, j);
+          if (i == ADSM_ControlRing)
+            {
+              RPT_reporting_add_integer (local_data->first_vaccination_by_reason_and_prodtype, 0,
+                                         drill_down_list);
+              RPT_reporting_set_null (local_data->first_vaccination_by_reason_and_prodtype,
+                                      drill_down_list);
+            }
+          if (i == ADSM_ControlRing || i == ADSM_ControlInitialState)
+            {
+              RPT_reporting_add_integer (local_data->num_units_vaccinated_by_reason_and_prodtype, 0,
+                                         drill_down_list);
+              RPT_reporting_add_integer (local_data->cumul_num_units_vaccinated_by_reason_and_prodtype, 0,
+                                         drill_down_list);
+              RPT_reporting_add_integer (local_data->num_animals_vaccinated_by_reason_and_prodtype, 0,
+                                         drill_down_list);
+              RPT_reporting_add_integer (local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype, 0,
+                                         drill_down_list);
+            }
+        }
     }
 
 #if DEBUG

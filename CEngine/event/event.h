@@ -63,7 +63,6 @@ typedef enum
   EVT_BeforeAnySimulations,
   EVT_OutputDirectory,
   EVT_BeforeEachSimulation,
-  EVT_DeclarationOfVaccinationReasons,
   EVT_DeclarationOfVaccineDelay,
   EVT_DeclarationOfOutputs,
   EVT_NewDay, EVT_Exposure, EVT_Infection,
@@ -116,19 +115,6 @@ typedef struct
   int iteration_number;
 }
 EVT_before_each_simulation_event_t;
-
-
-
-/**
- * A "declaration of vaccination reasons" event.  Models that can request
- * vaccinations use this event to communicate the reason(s) they will supply
- * for the requests, so that other models may initialize counters, etc.
- */
-typedef struct
-{
-  GPtrArray *reasons; /**< array of pointers to ordinary C strings */
-}
-EVT_declaration_of_vaccination_reasons_event_t;
 
 
 
@@ -496,7 +482,6 @@ typedef struct
     EVT_before_any_simulations_event_t before_any_simulations;
     EVT_output_dir_event_t output_dir;
     EVT_before_each_simulation_event_t before_each_simulation;
-    EVT_declaration_of_vaccination_reasons_event_t declaration_of_vaccination_reasons;
     EVT_declaration_of_vaccine_delay_event_t declaration_of_vaccine_delay;
     EVT_declaration_of_outputs_event_t declaration_of_outputs;
     EVT_new_day_event_t new_day;
