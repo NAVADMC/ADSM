@@ -633,6 +633,7 @@ def readParameters( parameterFileName ):
 				protocol = assignment.control_protocol
 			except ProtocolAssignment.DoesNotExist:
 				protocol = ControlProtocol(
+				  use_detection = False,
 				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 				)
 				protocol.save()
@@ -672,6 +673,7 @@ def readParameters( parameterFileName ):
 				protocol = assignment.control_protocol
 			except ProtocolAssignment.DoesNotExist:
 				protocol = ControlProtocol(
+				  use_detection = False,
 				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 				)
 				protocol.save()
@@ -723,6 +725,7 @@ def readParameters( parameterFileName ):
 				protocol = assignment.control_protocol
 			except ProtocolAssignment.DoesNotExist:
 				protocol = ControlProtocol(
+				  use_detection = False,
 				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 				)
 				protocol.save()
@@ -766,6 +769,7 @@ def readParameters( parameterFileName ):
 				protocol = assignment.control_protocol
 			except ProtocolAssignment.DoesNotExist:
 				protocol = ControlProtocol(
+				  use_detection = False,
 				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 				)
 				protocol.save()
@@ -792,6 +796,7 @@ def readParameters( parameterFileName ):
 				protocol = assignment.control_protocol
 			except ProtocolAssignment.DoesNotExist:
 				protocol = ControlProtocol(
+				  use_detection = False,
 				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 				)
 				protocol.save()
@@ -825,6 +830,7 @@ def readParameters( parameterFileName ):
 				protocol = assignment.control_protocol
 			except ProtocolAssignment.DoesNotExist:
 				protocol = ControlProtocol(
+				  use_detection = False,
 				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 				)
 				protocol.save()
@@ -860,6 +866,7 @@ def readParameters( parameterFileName ):
 				protocol = assignment.control_protocol
 			except ProtocolAssignment.DoesNotExist:
 				protocol = ControlProtocol(
+				  use_detection = False,
 				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 				)
 				protocol.save()
@@ -895,6 +902,7 @@ def readParameters( parameterFileName ):
 				protocol = assignment.control_protocol
 			except ProtocolAssignment.DoesNotExist:
 				protocol = ControlProtocol(
+				  use_detection = False,
 				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 				)
 				protocol.save()
@@ -922,6 +930,7 @@ def readParameters( parameterFileName ):
 				protocol = assignment.control_protocol
 			except ProtocolAssignment.DoesNotExist:
 				protocol = ControlProtocol(
+				  use_detection = False,
 				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 				)
 				protocol.save()
@@ -966,6 +975,7 @@ def readParameters( parameterFileName ):
 				protocol = assignment.control_protocol
 			except ProtocolAssignment.DoesNotExist:
 				protocol = ControlProtocol(
+				  use_detection = False,
 				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 				)
 				protocol.save()
@@ -1004,6 +1014,7 @@ def readParameters( parameterFileName ):
 					protocol = assignment.control_protocol
 				except ProtocolAssignment.DoesNotExist:
 					protocol = ControlProtocol(
+					  use_detection = False,
 					  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 					)
 					protocol.save()
@@ -1037,6 +1048,7 @@ def readParameters( parameterFileName ):
 				protocol = assignment.control_protocol
 			except ProtocolAssignment.DoesNotExist:
 				protocol = ControlProtocol(
+				  use_detection = False,
 				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 				)
 				protocol.save()
@@ -1074,6 +1086,7 @@ def readParameters( parameterFileName ):
 				protocol = assignment.control_protocol
 			except ProtocolAssignment.DoesNotExist:
 				protocol = ControlProtocol(
+				  use_detection = False,
 				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 				)
 				protocol.save()
@@ -1120,6 +1133,7 @@ def readParameters( parameterFileName ):
 				protocol = assignment.control_protocol
 			except ProtocolAssignment.DoesNotExist:
 				protocol = ControlProtocol(
+				  use_detection = False,
 				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 				)
 				protocol.save()
@@ -1142,6 +1156,7 @@ def readParameters( parameterFileName ):
 				protocol = assignment.control_protocol
 			except ProtocolAssignment.DoesNotExist:
 				protocol = ControlProtocol(
+				  use_detection = False,
 				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 				)
 				protocol.save()
@@ -1284,6 +1299,7 @@ def readParameters( parameterFileName ):
 				protocol = assignment.control_protocol
 			except ProtocolAssignment.DoesNotExist:
 				protocol = ControlProtocol(
+				  use_detection = False,
 				  test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
 				)
 				protocol.save()
