@@ -190,7 +190,7 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
                        zone_model_new (scenario_db, units, projection, zones));
     }
 
-  if (PAR_get_boolean (scenario_db, "SELECT include_contact_spread FROM ScenarioCreator_disease"))
+  if (PAR_get_boolean (scenario_db, "SELECT (include_direct_contact_spread=1 OR include_indirect_contact_spread=1) FROM ScenarioCreator_disease"))
     {
       g_ptr_array_add (tmp_models,
                        contact_spread_model_new (scenario_db, units, projection, zones));
