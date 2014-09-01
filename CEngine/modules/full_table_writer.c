@@ -1,8 +1,6 @@
 /** @file full_table_writer.c
  * Writes out a table of values covering many aspects of the simulation, in
- * comma-separated values (csv) format.  On systems where the simulation runs
- * without a GUI, this table is meant to imitate the outputs the user will be
- * familiar with from the Windows version.
+ * comma-separated values (csv) format.
  *
  * @author Neil Harvey <nharve01@uoguelph.ca><br>
  *   School of Computer Science, University of Guelph<br>
@@ -15,8 +13,6 @@
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 2 of the License, or (at your option)
  * any later version.
- *
- * @todo check errno after opening the file for writing.
  */
 
 #if HAVE_CONFIG_H
@@ -26,9 +22,7 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new full_table_writer_new
 #define run full_table_writer_run
-#define to_string full_table_writer_to_string
 #define local_free full_table_writer_free
-#define handle_output_dir_event full_table_writer_handle_output_dir_event
 #define handle_before_any_simulations_event full_table_writer_handle_before_any_simulations_event
 #define handle_declaration_of_outputs_event full_table_writer_handle_declaration_of_outputs_event
 #define handle_before_each_simulation_event full_table_writer_handle_before_each_simulation_event
@@ -70,51 +64,12 @@ double round (double x);
 /* Specialized information for this model. */
 typedef struct
 {
-  char *filename; /* with the .csv extension */
-  GIOChannel *channel; /* The open file. */
-  gboolean channel_is_stdout;
+  GIOChannel *channel; /* The output channel. */
   int run_number;
   gboolean printed_header;
   GString *buf;
 }
 local_data_t;
-
-
-
-/**
- * Responds to an "output directory" event by prepending the directory to the
- * its output filename.
- *
- * @param self this module.
- * @param event an output directory event.
- */
-void
-handle_output_dir_event (struct adsm_module_t_ * self,
-                         EVT_output_dir_event_t *event)
-{
-  local_data_t *local_data;
-  char *tmp;
-
-#if DEBUG
-  g_debug ("----- ENTER handle_output_dir_event (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-  if (local_data->channel_is_stdout == FALSE)
-    {
-      tmp = local_data->filename;
-      local_data->filename = g_build_filename (event->output_dir, tmp, NULL);
-      g_free (tmp);
-      #if DEBUG
-        g_debug ("filename is now %s", local_data->filename);
-      #endif
-    }
-
-#if DEBUG
-  g_debug ("----- EXIT handle_output_dir_event (%s)", MODEL_NAME);
-#endif
-  return;
-}
 
 
 
@@ -132,7 +87,6 @@ handle_before_any_simulations_event (struct adsm_module_t_ * self,
                                      EVT_event_queue_t * queue)
 {
   local_data_t *local_data;
-  GError *error = NULL;
 
 #if DEBUG
   g_debug ("----- ENTER handle_before_any_simulations_event (%s)", MODEL_NAME);
@@ -142,24 +96,12 @@ handle_before_any_simulations_event (struct adsm_module_t_ * self,
 
   local_data->printed_header = FALSE;
 
-  if (local_data->channel_is_stdout)
-    {
-      #ifdef G_OS_UNIX
-        local_data->channel = g_io_channel_unix_new (STDOUT_FILENO);
-      #endif
-      #ifdef G_OS_WIN32
-        local_data->channel = g_io_channel_win32_new_fd (STDOUT_FILENO);
-      #endif
-    }
-  else
-    {
-      local_data->channel = g_io_channel_new_file (local_data->filename, "w", &error);
-      if (local_data->channel == NULL)
-        {
-          g_error ("%s: %s error when attempting to open file \"%s\"",
-                   MODEL_NAME, error->message, local_data->filename);
-        }
-    }
+  #ifdef G_OS_UNIX
+    local_data->channel = g_io_channel_unix_new (STDOUT_FILENO);
+  #endif
+  #ifdef G_OS_WIN32
+    local_data->channel = g_io_channel_win32_new_fd (STDOUT_FILENO);
+  #endif
 
 #if DEBUG
   g_debug ("----- EXIT handle_before_any_simulations_event (%s)", MODEL_NAME);
@@ -369,9 +311,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 
   switch (event->type)
     {
-    case EVT_OutputDirectory:
-      handle_output_dir_event (self, &(event->u.output_dir));
-      break;
     case EVT_BeforeAnySimulations:
       handle_before_any_simulations_event (self, queue);
       break;
@@ -401,31 +340,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 
 
 /**
- * Returns a text representation of this model.
- *
- * @param self the model.
- * @return a string.
- */
-char *
-to_string (struct adsm_module_t_ *self)
-{
-  local_data_t *local_data;
-  GString *s;
-  char *chararray;
-
-  local_data = (local_data_t *) (self->model_data);
-  s = g_string_new (NULL);
-  g_string_sprintf (s, "<%s filename=\"%s\">", MODEL_NAME, local_data->filename);
-
-  /* don't return the wrapper object */
-  chararray = s->str;
-  g_string_free (s, FALSE);
-  return chararray;
-}
-
-
-
-/**
  * Frees this model.
  *
  * @param self the model.
@@ -442,15 +356,11 @@ local_free (struct adsm_module_t_ *self)
 
   local_data = (local_data_t *) (self->model_data);
 
-  /* Flush and close the file. */
-  if (local_data->channel_is_stdout)
-    g_io_channel_flush (local_data->channel, &error);
-  else
-    g_io_channel_shutdown (local_data->channel, /* flush = */ TRUE, &error);
+  /* Flush any remaining output. */
+  g_io_channel_flush (local_data->channel, &error);
 
   /* Free the dynamically-allocated parts. */
   g_string_free (local_data->buf, TRUE);
-  g_free (local_data->filename);
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
   g_free (self);
@@ -472,7 +382,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   adsm_module_t *self;
   local_data_t *local_data;
   EVT_event_type_t events_listened_for[] = {
-    EVT_OutputDirectory,
     EVT_BeforeAnySimulations,
     EVT_DeclarationOfOutputs,
     EVT_BeforeEachSimulation,
@@ -496,45 +405,10 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = adsm_model_answer_no;
   self->has_pending_infections = adsm_model_answer_no;
-  self->to_string = to_string;
+  self->to_string = adsm_module_to_string_default;
   self->printf = adsm_model_printf;
   self->fprintf = adsm_model_fprintf;
   self->free = local_free;
-
-  /* Get the filename for the table.  If the filename is omitted, blank, '-',
-   * or 'stdout' (case insensitive), then the table is written to standard
-   * output. */
-  if (TRUE)
-    {
-      local_data->filename = g_strdup ("stdout"); /* just so we have something
-        to display, and to free later */
-      local_data->channel_is_stdout = TRUE;    
-    }
-  else
-    {
-      local_data->filename = NULL; /* PAR_get_text (e); */
-      if (local_data->filename == NULL
-          || g_ascii_strcasecmp (local_data->filename, "") == 0
-          || g_ascii_strcasecmp (local_data->filename, "-") == 0
-          || g_ascii_strcasecmp (local_data->filename, "stdout") == 0)
-        {
-          local_data->channel_is_stdout = TRUE;
-        }
-      else
-        {
-          char *tmp;
-          if (!g_str_has_suffix(local_data->filename, ".csv"))
-            {
-              tmp = local_data->filename;
-              local_data->filename = g_strdup_printf("%s.csv", tmp);
-              g_free(tmp);
-            }
-          tmp = local_data->filename;
-          local_data->filename = adsm_insert_node_number_into_filename (local_data->filename);
-          g_free(tmp);
-          local_data->channel_is_stdout = FALSE;
-        }
-    }
 
   /* This module maintains no output variables of its own.  Before any
    * simulations begin, we will gather all the output variables available from
