@@ -456,6 +456,4 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
 
         mean_field = modal_2.find_element_by_id("div_id_mean")
 
-        self.assertIn("display: none;", mean_field.value_of_css_property("style"))
-
-        time.sleep(10)
+        self.assertIn("none", mean_field.value_of_css_property("display"))
