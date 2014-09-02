@@ -57,13 +57,15 @@ typedef struct
   guint *nunits_of_prodtype;
   gdouble nanimals;
   gdouble *nanimals_of_prodtype;
-  RPT_reporting_t *num_units_in_state;
-  RPT_reporting_t *num_units_in_state_by_prodtype;
-  RPT_reporting_t *num_animals_in_state;
-  RPT_reporting_t *num_animals_in_state_by_prodtype;
-  RPT_reporting_t *avg_prevalence;
-  RPT_reporting_t *last_day_of_disease;
+  RPT_reporting_t  **num_units_in_state;
+  RPT_reporting_t ***num_units_in_state_by_prodtype;
+  RPT_reporting_t  **num_animals_in_state;
+  RPT_reporting_t ***num_animals_in_state_by_prodtype;
+  RPT_reporting_t   *avg_prevalence;
+  RPT_reporting_t   *last_day_of_disease;
   gboolean disease_end_recorded;
+  GPtrArray *daily_outputs; /**< Daily outputs, in a list to make it easy to
+    zero them all at once. */
 }
 local_data_t;
 
@@ -131,9 +133,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self,
 {
   local_data_t *local_data;
   guint nunits, nprodtypes;
-  const char *susceptible;
   UNT_production_type_t prodtype;
-  const char *drill_down_list[3] = { NULL, NULL, NULL };
 
   #if DEBUG
     g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -142,27 +142,21 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self,
   local_data = (local_data_t *) (self->model_data);
 
   /* First, zero all the counts. */
-  RPT_reporting_zero (local_data->num_units_in_state);
-  RPT_reporting_zero (local_data->num_units_in_state_by_prodtype);
-  RPT_reporting_zero (local_data->num_animals_in_state);
-  RPT_reporting_zero (local_data->num_animals_in_state_by_prodtype);
+  g_ptr_array_foreach (local_data->daily_outputs, RPT_reporting_zero_as_GFunc, NULL);
 
   /* Set all to Susceptible. */
-  susceptible = UNT_state_name[Susceptible];
   nunits = UNT_unit_list_length (units);
-  RPT_reporting_set_integer1 (local_data->num_units_in_state, nunits, susceptible);
-  RPT_reporting_set_real1 (local_data->num_animals_in_state, local_data->nanimals, susceptible);
+  RPT_reporting_set_integer (local_data->num_units_in_state[Susceptible], nunits, NULL);
+  RPT_reporting_set_real (local_data->num_animals_in_state[Susceptible], local_data->nanimals, NULL);
   nprodtypes = local_data->production_types->len;
-  drill_down_list[0] = susceptible;
   for (prodtype = 0; prodtype < nprodtypes; prodtype++)
     {
-      drill_down_list[1] = (char *) g_ptr_array_index (local_data->production_types, prodtype);
-      RPT_reporting_set_integer (local_data->num_units_in_state_by_prodtype,
+      RPT_reporting_set_integer (local_data->num_units_in_state_by_prodtype[Susceptible][prodtype],
                                  local_data->nunits_of_prodtype[prodtype],
-                                 drill_down_list);
-      RPT_reporting_set_real (local_data->num_animals_in_state_by_prodtype,
+                                 NULL);
+      RPT_reporting_set_real (local_data->num_animals_in_state_by_prodtype[Susceptible][prodtype],
                               local_data->nanimals_of_prodtype[prodtype],
-                              drill_down_list);
+                              NULL);
     }
 
   RPT_reporting_set_null (local_data->last_day_of_disease, NULL);
@@ -190,9 +184,9 @@ handle_unit_state_change_event (struct adsm_module_t_ *self,
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
-  const char *old_state;
-  const char *new_state;
-  const char *drill_down_list[3] = { NULL, NULL, NULL };
+  UNT_state_t old_state;
+  UNT_state_t new_state;
+  UNT_production_type_t prodtype;
 
   #if DEBUG
     g_debug ("----- ENTER handle_unit_state_change_event (%s)", MODEL_NAME);
@@ -201,24 +195,18 @@ handle_unit_state_change_event (struct adsm_module_t_ *self,
   local_data = (local_data_t *) (self->model_data);
 
   unit = event->unit;
-  old_state = UNT_state_name[event->old_state];
-  new_state = UNT_state_name[event->new_state];
-  RPT_reporting_sub_integer1 (local_data->num_units_in_state, 1, old_state);
-  RPT_reporting_add_integer1 (local_data->num_units_in_state, 1, new_state);
-  RPT_reporting_sub_real1 (local_data->num_animals_in_state, unit->size, old_state);
-  RPT_reporting_add_real1 (local_data->num_animals_in_state, unit->size, new_state);
+  old_state = event->old_state;
+  new_state = event->new_state;
+  RPT_reporting_sub_integer (local_data->num_units_in_state[old_state], 1, NULL);
+  RPT_reporting_add_integer (local_data->num_units_in_state[new_state], 1, NULL);
+  RPT_reporting_sub_real (local_data->num_animals_in_state[old_state], unit->size, NULL);
+  RPT_reporting_add_real (local_data->num_animals_in_state[new_state], unit->size, NULL);
 
-  drill_down_list[0] = old_state;
-  drill_down_list[1] = event->unit->production_type_name;
-  RPT_reporting_sub_integer (local_data->num_units_in_state_by_prodtype, 1,
-                             drill_down_list);
-  RPT_reporting_sub_real (local_data->num_animals_in_state_by_prodtype, unit->size,
-                          drill_down_list);
-  drill_down_list[0] = new_state;
-  RPT_reporting_add_integer (local_data->num_units_in_state_by_prodtype, 1,
-                             drill_down_list);
-  RPT_reporting_add_real (local_data->num_animals_in_state_by_prodtype, unit->size,
-                          drill_down_list);
+  prodtype = event->unit->production_type;
+  RPT_reporting_sub_integer (local_data->num_units_in_state_by_prodtype[old_state][prodtype], 1, NULL);
+  RPT_reporting_sub_real (local_data->num_animals_in_state_by_prodtype[old_state][prodtype], unit->size, NULL);
+  RPT_reporting_add_integer (local_data->num_units_in_state_by_prodtype[new_state][prodtype], 1, NULL);
+  RPT_reporting_add_real (local_data->num_animals_in_state_by_prodtype[new_state][prodtype], unit->size, NULL);
 
   #if DEBUG
     g_debug ("----- EXIT handle_unit_state_change_event (%s)", MODEL_NAME);
@@ -400,8 +388,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_NewDay,
     0
   };
-  guint n, i, j;
-  const char *drill_down_list[3] = { NULL, NULL, NULL };
+  guint nprodtypes;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -423,40 +410,44 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
-  local_data->num_units_in_state =
-    RPT_new_reporting ("tsdU", RPT_group);
-  local_data->num_units_in_state_by_prodtype =
-    RPT_new_reporting ("tsdU", RPT_group);
-  local_data->num_animals_in_state =
-    RPT_new_reporting ("tsdA", RPT_group);
-  local_data->num_animals_in_state_by_prodtype =
-    RPT_new_reporting ("tsdA", RPT_group);
-  local_data->avg_prevalence =
-    RPT_new_reporting ("averagePrevalence", RPT_real);
-  local_data->last_day_of_disease =
-    RPT_new_reporting ("diseaseDuration", RPT_integer);
-  g_ptr_array_add (self->outputs, local_data->num_units_in_state);
-  g_ptr_array_add (self->outputs, local_data->num_units_in_state_by_prodtype);
-  g_ptr_array_add (self->outputs, local_data->num_animals_in_state);
-  g_ptr_array_add (self->outputs, local_data->num_animals_in_state_by_prodtype);
-  g_ptr_array_add (self->outputs, local_data->avg_prevalence);
-  g_ptr_array_add (self->outputs, local_data->last_day_of_disease);
-
-  /* Initialize the output variables. */
+  local_data->daily_outputs = g_ptr_array_new();
   local_data->production_types = units->production_type_names;
-  n = local_data->production_types->len;
-  for (i = 0; i < UNT_NSTATES; i++)
-    {
-      RPT_reporting_set_integer1 (local_data->num_units_in_state, 0, UNT_state_name[i]);
-      RPT_reporting_set_real1 (local_data->num_animals_in_state, 0, UNT_state_name[i]);
-      drill_down_list[0] = UNT_state_name[i];
-      for (j = 0; j < n; j++)
-        {
-          drill_down_list[1] = (char *) g_ptr_array_index (units->production_type_names, j);
-          RPT_reporting_set_integer (local_data->num_units_in_state_by_prodtype, 0, drill_down_list);
-          RPT_reporting_set_real (local_data->num_animals_in_state_by_prodtype, 0, drill_down_list);
-        }
-    }
+  nprodtypes = local_data->production_types->len;
+  {
+    RPT_bulk_create_t outputs[] = {
+      { &local_data->num_units_in_state, "tsdU%s", RPT_integer,
+        RPT_CharArray, UNT_state_name, UNT_NSTATES,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->num_animals_in_state, "tsdA%s", RPT_real,
+        RPT_CharArray, UNT_state_name, UNT_NSTATES,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->num_units_in_state_by_prodtype, "tsdU%s%s", RPT_integer,
+        RPT_CharArray, UNT_state_name, UNT_NSTATES,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->num_animals_in_state_by_prodtype, "tsdA%s%s", RPT_real,
+        RPT_CharArray, UNT_state_name, UNT_NSTATES,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->avg_prevalence, "averagePrevalence", RPT_real,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, NULL },
+
+      { &local_data->last_day_of_disease, "diseaseDuration", RPT_integer,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, NULL },
+      { NULL }
+    };  
+    RPT_bulk_create (outputs);
+  }
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

@@ -45,22 +45,22 @@
 typedef struct
 {
   GPtrArray *production_types;
-  RPT_reporting_t *nunits_examined;
-  RPT_reporting_t *nunits_examined_by_reason;
-  RPT_reporting_t *nunits_examined_by_prodtype;
-  RPT_reporting_t *nunits_examined_by_reason_and_prodtype;
-  RPT_reporting_t *nanimals_examined;
-  RPT_reporting_t *nanimals_examined_by_reason;
-  RPT_reporting_t *nanimals_examined_by_prodtype;
-  RPT_reporting_t *nanimals_examined_by_reason_and_prodtype;
-  RPT_reporting_t *cumul_nunits_examined;
-  RPT_reporting_t *cumul_nunits_examined_by_reason;
-  RPT_reporting_t *cumul_nunits_examined_by_prodtype;
-  RPT_reporting_t *cumul_nunits_examined_by_reason_and_prodtype;
-  RPT_reporting_t *cumul_nanimals_examined;
-  RPT_reporting_t *cumul_nanimals_examined_by_reason;
-  RPT_reporting_t *cumul_nanimals_examined_by_prodtype;
-  RPT_reporting_t *cumul_nanimals_examined_by_reason_and_prodtype;
+  RPT_reporting_t   *nunits_examined;
+  RPT_reporting_t  **nunits_examined_by_reason;
+  RPT_reporting_t  **nunits_examined_by_prodtype;
+  RPT_reporting_t ***nunits_examined_by_reason_and_prodtype;
+  RPT_reporting_t   *nanimals_examined;
+  RPT_reporting_t  **nanimals_examined_by_reason;
+  RPT_reporting_t  **nanimals_examined_by_prodtype;
+  RPT_reporting_t ***nanimals_examined_by_reason_and_prodtype;
+  RPT_reporting_t   *cumul_nunits_examined;
+  RPT_reporting_t  **cumul_nunits_examined_by_reason;
+  RPT_reporting_t  **cumul_nunits_examined_by_prodtype;
+  RPT_reporting_t ***cumul_nunits_examined_by_reason_and_prodtype;
+  RPT_reporting_t   *cumul_nanimals_examined;
+  RPT_reporting_t  **cumul_nanimals_examined_by_reason;
+  RPT_reporting_t  **cumul_nanimals_examined_by_prodtype;
+  RPT_reporting_t ***cumul_nanimals_examined_by_reason_and_prodtype;
   GPtrArray *daily_outputs; /**< Daily outputs, in a list to make it easy to
     zero them all at once. */
   GPtrArray *cumul_outputs; /**< Cumulative outputs, is a list to make it easy
@@ -133,17 +133,21 @@ handle_exam_event (struct adsm_module_t_ *self, EVT_exam_event_t *event)
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
-  const char *reason;
-  const char *drill_down_list[3] = { NULL, NULL, NULL };
   UNT_exam_t exam;
+  ADSM_control_reason reason;
+  UNT_production_type_t prodtype;
+  double nanimals;
 
   #if DEBUG
     g_debug ("----- ENTER handle_exam_event (%s)", MODEL_NAME);
   #endif
 
+  local_data = (local_data_t *) (self->model_data);
+  unit = event->unit;
+
   /* Record the exam in the GUI */
   /* -------------------------- */
-  exam.unit_index = event->unit->index;
+  exam.unit_index = unit->index;
   
   if ( event->reason == ADSM_ControlTraceForwardDirect )
     {
@@ -172,7 +176,7 @@ handle_exam_event (struct adsm_module_t_ *self, EVT_exam_event_t *event)
     }
 
   #ifdef USE_SC_GUILIB
-    sc_examine_unit( event->unit, exam );
+    sc_examine_unit( unit, exam );
   #else
     if (NULL != adsm_examine_unit)
       adsm_examine_unit (exam);
@@ -181,28 +185,25 @@ handle_exam_event (struct adsm_module_t_ *self, EVT_exam_event_t *event)
 
   /* Record the exam in the SC version */
   /* --------------------------------- */
-  local_data = (local_data_t *) (self->model_data);
-  unit = event->unit;
-  reason = ADSM_control_reason_abbrev[event->reason];
-
+  reason = event->reason;
+  prodtype = unit->production_type;
+  nanimals = (double)(unit->size);
   RPT_reporting_add_integer (local_data->nunits_examined, 1, NULL);
-  RPT_reporting_add_integer1 (local_data->nunits_examined_by_reason, 1, reason);
-  RPT_reporting_add_integer1 (local_data->nunits_examined_by_prodtype, 1, unit->production_type_name);
-  RPT_reporting_add_integer (local_data->nanimals_examined, unit->size, NULL);
-  RPT_reporting_add_integer1 (local_data->nanimals_examined_by_reason, unit->size, reason);
-  RPT_reporting_add_integer1 (local_data->nanimals_examined_by_prodtype, unit->size, unit->production_type_name);
+  RPT_reporting_add_integer (local_data->nunits_examined_by_reason[reason], 1, NULL);
+  RPT_reporting_add_integer (local_data->nunits_examined_by_prodtype[prodtype], 1, NULL);
+  RPT_reporting_add_integer (local_data->nunits_examined_by_reason_and_prodtype[reason][prodtype], 1, NULL);
+  RPT_reporting_add_real (local_data->nanimals_examined, nanimals, NULL);
+  RPT_reporting_add_real (local_data->nanimals_examined_by_reason[reason], nanimals, NULL);
+  RPT_reporting_add_real (local_data->nanimals_examined_by_prodtype[prodtype], nanimals, NULL);
+  RPT_reporting_add_real (local_data->nanimals_examined_by_reason_and_prodtype[reason][prodtype], nanimals, NULL);
   RPT_reporting_add_integer (local_data->cumul_nunits_examined, 1, NULL);
-  RPT_reporting_add_integer1 (local_data->cumul_nunits_examined_by_reason, 1, reason);
-  RPT_reporting_add_integer1 (local_data->cumul_nunits_examined_by_prodtype, 1, unit->production_type_name);
-  RPT_reporting_add_integer (local_data->cumul_nanimals_examined, unit->size, NULL);
-  RPT_reporting_add_integer1 (local_data->cumul_nanimals_examined_by_reason, unit->size, reason);
-  RPT_reporting_add_integer1 (local_data->cumul_nanimals_examined_by_prodtype, unit->size, unit->production_type_name);
-  drill_down_list[0] = reason;
-  drill_down_list[1] = unit->production_type_name;
-  RPT_reporting_add_integer (local_data->nunits_examined_by_reason_and_prodtype, 1, drill_down_list);
-  RPT_reporting_add_integer (local_data->nanimals_examined_by_reason_and_prodtype, unit->size, drill_down_list);
-  RPT_reporting_add_integer (local_data->cumul_nunits_examined_by_reason_and_prodtype, 1, drill_down_list);
-  RPT_reporting_add_integer (local_data->cumul_nanimals_examined_by_reason_and_prodtype, unit->size, drill_down_list);
+  RPT_reporting_add_integer (local_data->cumul_nunits_examined_by_reason[reason], 1, NULL);
+  RPT_reporting_add_integer (local_data->cumul_nunits_examined_by_prodtype[prodtype], 1, NULL);
+  RPT_reporting_add_integer (local_data->cumul_nunits_examined_by_reason_and_prodtype[reason][prodtype], 1, NULL);
+  RPT_reporting_add_real (local_data->cumul_nanimals_examined, nanimals, NULL);
+  RPT_reporting_add_real (local_data->cumul_nanimals_examined_by_reason[reason], nanimals, NULL);
+  RPT_reporting_add_real (local_data->cumul_nanimals_examined_by_prodtype[prodtype], nanimals, NULL);
+  RPT_reporting_add_real (local_data->cumul_nanimals_examined_by_reason_and_prodtype[reason][prodtype], nanimals,NULL );
 
 #if DEBUG
   g_debug ("----- EXIT handle_exam_event (%s)", MODEL_NAME);
@@ -301,8 +302,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_Exam,
     0
   };
-  unsigned int i, j;         /* loop counters */
-  char *prodtype_name;
+  guint nprodtypes;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -326,110 +326,94 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   local_data->daily_outputs = g_ptr_array_new();
   local_data->cumul_outputs = g_ptr_array_new();
-
-  local_data->nunits_examined =
-    RPT_new_reporting ("exmnUAll", RPT_integer);
-  local_data->nunits_examined_by_reason =
-    RPT_new_reporting ("exmnU", RPT_group);
-  local_data->nunits_examined_by_prodtype =
-    RPT_new_reporting ("exmnU", RPT_group);
-  local_data->nunits_examined_by_reason_and_prodtype =
-    RPT_new_reporting ("exmnU", RPT_group);
-  local_data->nanimals_examined =
-    RPT_new_reporting ("exmnAAll", RPT_integer);
-  local_data->nanimals_examined_by_reason =
-    RPT_new_reporting ("exmnA", RPT_group);
-  local_data->nanimals_examined_by_prodtype =
-    RPT_new_reporting ("exmnA", RPT_group);
-  local_data->nanimals_examined_by_reason_and_prodtype =
-    RPT_new_reporting ("exmnA", RPT_group);
-  local_data->cumul_nunits_examined =
-    RPT_new_reporting ("exmcUAll", RPT_integer);
-  local_data->cumul_nunits_examined_by_reason =
-    RPT_new_reporting ("exmcU", RPT_group);
-  local_data->cumul_nunits_examined_by_prodtype =
-    RPT_new_reporting ("exmcU", RPT_group);
-  local_data->cumul_nunits_examined_by_reason_and_prodtype =
-    RPT_new_reporting ("exmcU", RPT_group);
-  local_data->cumul_nanimals_examined =
-    RPT_new_reporting ("exmcAAll", RPT_integer);
-  local_data->cumul_nanimals_examined_by_reason =
-    RPT_new_reporting ("exmcA", RPT_group);
-  local_data->cumul_nanimals_examined_by_prodtype =
-    RPT_new_reporting ("exmcA", RPT_group);
-  local_data->cumul_nanimals_examined_by_reason_and_prodtype =
-    RPT_new_reporting ("exmcA", RPT_group);
-  g_ptr_array_add (self->outputs, local_data->nunits_examined);
-  g_ptr_array_add (self->outputs, local_data->nunits_examined_by_reason);
-  g_ptr_array_add (self->outputs, local_data->nunits_examined_by_prodtype);
-  g_ptr_array_add (self->outputs, local_data->nunits_examined_by_reason_and_prodtype);
-  g_ptr_array_add (self->outputs, local_data->nanimals_examined);
-  g_ptr_array_add (self->outputs, local_data->nanimals_examined_by_reason);
-  g_ptr_array_add (self->outputs, local_data->nanimals_examined_by_prodtype);
-  g_ptr_array_add (self->outputs, local_data->nanimals_examined_by_reason_and_prodtype);
-  g_ptr_array_add (self->outputs, local_data->cumul_nunits_examined);
-  g_ptr_array_add (self->outputs, local_data->cumul_nunits_examined_by_reason);
-  g_ptr_array_add (self->outputs, local_data->cumul_nunits_examined_by_prodtype);
-  g_ptr_array_add (self->outputs, local_data->cumul_nunits_examined_by_reason_and_prodtype);
-  g_ptr_array_add (self->outputs, local_data->cumul_nanimals_examined);
-  g_ptr_array_add (self->outputs, local_data->cumul_nanimals_examined_by_reason);
-  g_ptr_array_add (self->outputs, local_data->cumul_nanimals_examined_by_prodtype);
-  g_ptr_array_add (self->outputs, local_data->cumul_nanimals_examined_by_reason_and_prodtype);
-
-  g_ptr_array_add (local_data->daily_outputs, local_data->nunits_examined);
-  g_ptr_array_add (local_data->daily_outputs, local_data->nunits_examined_by_reason);
-  g_ptr_array_add (local_data->daily_outputs, local_data->nunits_examined_by_prodtype);
-  g_ptr_array_add (local_data->daily_outputs, local_data->nunits_examined_by_reason_and_prodtype);
-  g_ptr_array_add (local_data->daily_outputs, local_data->nanimals_examined);
-  g_ptr_array_add (local_data->daily_outputs, local_data->nanimals_examined_by_reason);
-  g_ptr_array_add (local_data->daily_outputs, local_data->nanimals_examined_by_prodtype);
-  g_ptr_array_add (local_data->daily_outputs, local_data->nanimals_examined_by_reason_and_prodtype);
-
-  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nunits_examined);
-  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nunits_examined_by_reason);
-  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nunits_examined_by_prodtype);
-  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nunits_examined_by_reason_and_prodtype);
-  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nanimals_examined);
-  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nanimals_examined_by_reason);
-  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nanimals_examined_by_prodtype);
-  g_ptr_array_add (local_data->cumul_outputs, local_data->cumul_nanimals_examined_by_reason_and_prodtype);
-
-  /* Initialize the categories in the output variables. */
   local_data->production_types = units->production_type_names;
-  for (i = 0; i < local_data->production_types->len; i++)
-    {
-      prodtype_name = (char *) g_ptr_array_index (local_data->production_types, i);
-      RPT_reporting_set_integer1 (local_data->nunits_examined_by_prodtype, 0, prodtype_name);
-      RPT_reporting_set_integer1 (local_data->nanimals_examined_by_prodtype, 0, prodtype_name);
-      RPT_reporting_set_integer1 (local_data->cumul_nunits_examined_by_prodtype, 0, prodtype_name);
-      RPT_reporting_set_integer1 (local_data->cumul_nanimals_examined_by_prodtype, 0, prodtype_name);
-    }
-  for (i = 0; i < ADSM_NCONTROL_REASONS; i++)
-    {
-      const char *reason;
-      const char *drill_down_list[3] = { NULL, NULL, NULL };
-      if ((ADSM_control_reason)i == ADSM_ControlReasonUnspecified
-          || (ADSM_control_reason)i == ADSM_ControlInitialState)
-        continue;
-      reason = ADSM_control_reason_abbrev[i]; 
-      RPT_reporting_add_integer1 (local_data->nunits_examined_by_reason, 0, reason);
-      RPT_reporting_add_integer1 (local_data->nanimals_examined_by_reason, 0, reason);
-      RPT_reporting_add_integer1 (local_data->cumul_nunits_examined_by_reason, 0, reason);
-      RPT_reporting_add_integer1 (local_data->cumul_nanimals_examined_by_reason, 0, reason);
-      drill_down_list[0] = reason;
-      for (j = 0; j < local_data->production_types->len; j++)
-        {
-          drill_down_list[1] = (char *) g_ptr_array_index (local_data->production_types, j);
-          RPT_reporting_add_integer (local_data->nunits_examined_by_reason_and_prodtype, 0,
-                                     drill_down_list);
-          RPT_reporting_add_integer (local_data->nanimals_examined_by_reason_and_prodtype, 0,
-                                     drill_down_list);
-          RPT_reporting_add_integer (local_data->cumul_nunits_examined_by_reason_and_prodtype, 0,
-                                     drill_down_list);
-          RPT_reporting_add_integer (local_data->cumul_nanimals_examined_by_reason_and_prodtype, 0,
-                                     drill_down_list);
-        }
-    }
+  nprodtypes = local_data->production_types->len;
+  {
+    RPT_bulk_create_t outputs[] = {
+      { &local_data->nunits_examined, "exmnUAll", RPT_integer,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->nunits_examined_by_reason, "exmnU%s", RPT_integer,
+        RPT_CharArray, ADSM_control_reason_abbrev, ADSM_NCONTROL_REASONS,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->nunits_examined_by_prodtype, "exmnU%s", RPT_integer,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->nunits_examined_by_reason_and_prodtype, "exmnU%s%s", RPT_integer,
+        RPT_CharArray, ADSM_control_reason_abbrev, ADSM_NCONTROL_REASONS,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->cumul_nunits_examined, "exmcUAll", RPT_integer,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->cumul_nunits_examined_by_reason, "exmcU%s", RPT_integer,
+        RPT_CharArray, ADSM_control_reason_abbrev, ADSM_NCONTROL_REASONS,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->cumul_nunits_examined_by_prodtype, "exmcU%s", RPT_integer,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->cumul_nunits_examined_by_reason_and_prodtype, "exmcU%s%s", RPT_integer,
+        RPT_CharArray, ADSM_control_reason_abbrev, ADSM_NCONTROL_REASONS,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->nanimals_examined, "exmnAAll", RPT_real,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->nanimals_examined_by_reason, "exmnA%s", RPT_real,
+        RPT_CharArray, ADSM_control_reason_abbrev, ADSM_NCONTROL_REASONS,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->nanimals_examined_by_prodtype, "exmnA%s", RPT_real,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->nanimals_examined_by_reason_and_prodtype, "exmnA%s%s", RPT_real,
+        RPT_CharArray, ADSM_control_reason_abbrev, ADSM_NCONTROL_REASONS,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->cumul_nanimals_examined, "exmcAAll", RPT_real,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->cumul_nanimals_examined_by_reason, "exmcA%s", RPT_real,
+        RPT_CharArray, ADSM_control_reason_abbrev, ADSM_NCONTROL_REASONS,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->cumul_nanimals_examined_by_prodtype, "exmcA%s", RPT_real,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->cumul_nanimals_examined_by_reason_and_prodtype, "exmcA%s%s", RPT_real,
+        RPT_CharArray, ADSM_control_reason_abbrev, ADSM_NCONTROL_REASONS,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        self->outputs, local_data->cumul_outputs },
+
+      { NULL }
+    };  
+    RPT_bulk_create (outputs);
+  }
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

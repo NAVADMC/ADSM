@@ -57,15 +57,19 @@ typedef struct
   int nzones;
   projPJ projection; /* The map projection used to convert the units' latitudes
     and longitudes to x-y coordinates */
-  RPT_reporting_t *area;
-  RPT_reporting_t *perimeter;
-  RPT_reporting_t *num_separate_areas;
-  RPT_reporting_t *num_units;
-  RPT_reporting_t *num_units_by_prodtype;
-  RPT_reporting_t *num_unit_days;
-  RPT_reporting_t *num_unit_days_by_prodtype;
-  RPT_reporting_t *num_animal_days;
-  RPT_reporting_t *num_animal_days_by_prodtype;
+  RPT_reporting_t  **area;
+  RPT_reporting_t  **perimeter;
+  RPT_reporting_t  **num_separate_areas;
+  RPT_reporting_t  **num_units;
+  RPT_reporting_t ***num_units_by_prodtype;
+  RPT_reporting_t  **num_unit_days;
+  RPT_reporting_t ***num_unit_days_by_prodtype;
+  RPT_reporting_t  **num_animal_days;
+  RPT_reporting_t ***num_animal_days_by_prodtype;
+  GPtrArray *daily_outputs; /**< Daily outputs, in a list to make it easy to
+    zero them all at once. */
+  GPtrArray *cumul_outputs; /**< Cumulative outputs, is a list to make it easy
+    to zero them all at once. */
   gboolean seen_request_for_zone_focus;
 }
 local_data_t;
@@ -87,17 +91,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   #endif
 
   local_data = (local_data_t *) (self->model_data);
-  /* RPT_reporting_zero preserves sub-cateogories but sets all numbers to 0. */
-  RPT_reporting_zero (local_data->area);
-  RPT_reporting_zero (local_data->perimeter);
-  RPT_reporting_zero (local_data->num_separate_areas);
-  RPT_reporting_zero (local_data->num_units);
-  RPT_reporting_zero (local_data->num_units_by_prodtype);
-  RPT_reporting_zero (local_data->num_unit_days);
-  RPT_reporting_zero (local_data->num_unit_days_by_prodtype);
-  RPT_reporting_zero (local_data->num_animal_days);
-  RPT_reporting_zero (local_data->num_animal_days_by_prodtype);
-
+  g_ptr_array_foreach (local_data->cumul_outputs, RPT_reporting_zero_as_GFunc, NULL);
   local_data->seen_request_for_zone_focus = FALSE;
 
   #if DEBUG
@@ -155,14 +149,14 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
   double perimeter;
   unsigned int nunits;
   UNT_unit_t *unit;
-  const char *drill_down_list[3] = { NULL, NULL, NULL };
+  ZON_zone_fragment_t *background_zone;
 
 #if DEBUG
   g_debug ("----- ENTER handle_new_day_event (%s)", MODEL_NAME);
 #endif
 
   local_data = (local_data_t *) (self->model_data);
-
+  
   /* Recalculate the area and perimeter only if the seen_request_for_zone_focus
    * flag is set. */
   if (local_data->seen_request_for_zone_focus)
@@ -172,15 +166,15 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
           zone = ZON_zone_list_get (zones, i);
 
           area = ZON_update_area (zone);
-          RPT_reporting_set_real1 (local_data->area, area, zone->name);
+          RPT_reporting_set_real (local_data->area[i], area, NULL);
 
           perimeter = ZON_update_perimeter (zone);
-          RPT_reporting_set_real1 (local_data->perimeter, perimeter, zone->name);
+          RPT_reporting_set_real (local_data->perimeter[i], perimeter, NULL);
           if (NULL != adsm_record_zone_perimeter)
             adsm_record_zone_perimeter (zone->level, perimeter);           
 
-          RPT_reporting_set_integer1 (local_data->num_separate_areas,
-                                      zone->poly->num_contours, zone->name);
+          RPT_reporting_set_integer (local_data->num_separate_areas[i],
+                                     zone->poly->num_contours, NULL);
         }
 
       /* In the loop above, the area of each zone polygon was computed.  But since
@@ -198,7 +192,7 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
             {
               next_smaller_zone = ZON_zone_list_get (zones, i - 1);
               zone->area -= next_smaller_zone->area;
-              RPT_reporting_set_real1 (local_data->area, zone->area, zone->name);
+              RPT_reporting_set_real (local_data->area[i], zone->area, NULL);
             }
           #ifdef USE_SC_GUILIB
             sc_record_zone_area( event->day, zone );
@@ -222,25 +216,31 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
       local_data->seen_request_for_zone_focus = FALSE;
     } /* end of if seen_request_for_zone_focus flag is set */
 
+  g_ptr_array_foreach (local_data->daily_outputs, RPT_reporting_zero_as_GFunc, NULL);
   nunits = zones->membership_length;
-  RPT_reporting_zero (local_data->num_units);
-  RPT_reporting_zero (local_data->num_units_by_prodtype);
+
+  background_zone = ZON_zone_list_get_background (zones);
   for (i = 0; i < nunits; i++)
     {
+      guint zone_index;
+      UNT_production_type_t prodtype;
+      double nanimals;
+
       zone = zones->membership[i]->parent;
-      RPT_reporting_add_integer1 (local_data->num_units, 1, zone->name);
+      zone_index = zone->level - 1;
       unit = UNT_unit_list_get (units, i);
-      drill_down_list[0] = zone->name;
-      drill_down_list[1] = unit->production_type_name;
-      RPT_reporting_add_integer (local_data->num_units_by_prodtype, 1, drill_down_list);
-      if (unit->state != Destroyed)
+      prodtype = unit->production_type;
+      nanimals = (double)(unit->size);
+      
+      RPT_reporting_add_integer (local_data->num_units[zone_index], 1, NULL);
+      RPT_reporting_add_integer (local_data->num_units_by_prodtype[zone_index][prodtype], 1, NULL);
+      if (unit->state != Destroyed &&
+          !ZON_same_zone (zones->membership[i], background_zone))
         {
-          RPT_reporting_add_integer1 (local_data->num_unit_days, 1, zone->name);
-          RPT_reporting_add_integer1 (local_data->num_animal_days, unit->size, zone->name);
-          RPT_reporting_add_integer (local_data->num_unit_days_by_prodtype, 1,
-                                     drill_down_list);
-          RPT_reporting_add_integer (local_data->num_animal_days_by_prodtype, unit->size,
-                                     drill_down_list);
+          RPT_reporting_add_integer (local_data->num_unit_days[zone_index], 1, NULL);
+          RPT_reporting_add_integer (local_data->num_unit_days_by_prodtype[zone_index][prodtype], 1, NULL);
+          RPT_reporting_add_real (local_data->num_animal_days[zone_index], nanimals, NULL);
+          RPT_reporting_add_real (local_data->num_animal_days_by_prodtype[zone_index][prodtype], nanimals, NULL);
         }
     }
 
@@ -332,10 +332,10 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
-  unsigned int nprod_types;
-  int i, j;
+  GPtrArray *zone_names;
+  guint i;
+  guint nprodtypes;
   ZON_zone_t *zone;
-  const char *drill_down_list[3] = { NULL, NULL, NULL };
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -364,54 +364,80 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
-  local_data->area = RPT_new_reporting ("zoneArea", RPT_group);
-  local_data->perimeter = RPT_new_reporting ("zonePerimeter", RPT_group);
-  local_data->num_separate_areas =
-    RPT_new_reporting ("numSeparateAreas", RPT_group);
-  local_data->num_units = RPT_new_reporting ("unitsInZone", RPT_group);
-  local_data->num_units_by_prodtype = RPT_new_reporting ("unitsInZone", RPT_group);
-  local_data->num_unit_days = RPT_new_reporting ("unitDaysInZone", RPT_group);
-  local_data->num_unit_days_by_prodtype = RPT_new_reporting ("unitDaysInZone", RPT_group);
-  local_data->num_animal_days = RPT_new_reporting ("animalDaysInZone", RPT_group);
-  local_data->num_animal_days_by_prodtype = RPT_new_reporting ("animalDaysInZone", RPT_group);
-  g_ptr_array_add (self->outputs, local_data->area);
-  g_ptr_array_add (self->outputs, local_data->perimeter);
-  g_ptr_array_add (self->outputs, local_data->num_separate_areas);
-  g_ptr_array_add (self->outputs, local_data->num_units);
-  g_ptr_array_add (self->outputs, local_data->num_units_by_prodtype);
-  g_ptr_array_add (self->outputs, local_data->num_unit_days);
-  g_ptr_array_add (self->outputs, local_data->num_unit_days_by_prodtype);
-  g_ptr_array_add (self->outputs, local_data->num_animal_days);
-  g_ptr_array_add (self->outputs, local_data->num_animal_days_by_prodtype);
-
-  local_data->nzones = ZON_zone_list_length (zones);
   local_data->projection = projection;
+  local_data->daily_outputs = g_ptr_array_new();
+  local_data->cumul_outputs = g_ptr_array_new();
+  nprodtypes = units->production_type_names->len;
 
-  /* Initialize the categories in the output variables. */
-  nprod_types = units->production_type_names->len;
+  /* Make a list of the zone names, including the background zone.  This
+   * temporary list will be used below to initialize sub-categories in the
+   * output variables. */
+  local_data->nzones = ZON_zone_list_length (zones);
+  zone_names = g_ptr_array_sized_new (local_data->nzones);
   for (i = 0; i < local_data->nzones; i++)
     {
       zone = ZON_zone_list_get (zones, i);
-
-      if (i < local_data->nzones - 1)
-        {
-          RPT_reporting_set_real1 (local_data->area, 0, zone->name);
-          RPT_reporting_set_real1 (local_data->perimeter, 0, zone->name);
-          RPT_reporting_set_integer1 (local_data->num_separate_areas, 0, zone->name);
-        }
-      RPT_reporting_set_integer1 (local_data->num_units, 0, zone->name);
-      RPT_reporting_set_integer1 (local_data->num_unit_days, 0, zone->name);
-      RPT_reporting_set_integer1 (local_data->num_animal_days, 0, zone->name);
-
-      drill_down_list[0] = zone->name;
-      for (j = 0; j < nprod_types; j++)
-        {
-          drill_down_list[1] = (char *) g_ptr_array_index (units->production_type_names, j);
-          RPT_reporting_set_integer (local_data->num_units_by_prodtype, 0, drill_down_list);
-          RPT_reporting_set_integer (local_data->num_unit_days_by_prodtype, 0, drill_down_list);
-          RPT_reporting_set_integer (local_data->num_animal_days_by_prodtype, 0, drill_down_list);
-        }
+      g_ptr_array_add (zone_names, zone->name);
     }
+  {
+    RPT_bulk_create_t outputs[] = {
+      /* zoneArea, zonePerimeter, and numSeparateAreas do not include the
+       * background zone, hence the "nzones - 1" for the number of
+       * subcategories. */
+      { &local_data->area, "zoneArea%s", RPT_real,
+        RPT_GPtrArray, zone_names, local_data->nzones - 1,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->perimeter, "zonePerimeter%s", RPT_real,
+        RPT_GPtrArray, zone_names, local_data->nzones - 1,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->num_separate_areas, "numSeparateAreas%s", RPT_integer,
+        RPT_GPtrArray, zone_names, local_data->nzones - 1,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      /* unitsInZone does include the background zone. */
+      { &local_data->num_units, "unitsInZone%s", RPT_integer,
+        RPT_GPtrArray, zone_names, local_data->nzones,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->num_units_by_prodtype, "unitsInZone%s%s", RPT_integer,
+        RPT_GPtrArray, zone_names, local_data->nzones,
+        RPT_GPtrArray, units->production_type_names, nprodtypes,
+        self->outputs, local_data->daily_outputs },
+
+      /* unitsDaysInZone and animalDaysInZone do not include the background
+       * zone. */
+      { &local_data->num_unit_days, "unitDaysInZone%s", RPT_integer,
+        RPT_GPtrArray, zone_names, local_data->nzones - 1,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->num_unit_days_by_prodtype, "unitDaysInZone%s%s", RPT_integer,
+        RPT_GPtrArray, zone_names, local_data->nzones - 1,
+        RPT_GPtrArray, units->production_type_names, nprodtypes,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->num_animal_days, "animalDaysInZone%s", RPT_real,
+        RPT_GPtrArray, zone_names, local_data->nzones - 1,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->num_animal_days_by_prodtype, "animalDaysInZone%s%s", RPT_real,
+        RPT_GPtrArray, zone_names, local_data->nzones - 1,
+        RPT_GPtrArray, units->production_type_names, nprodtypes,
+        self->outputs, local_data->cumul_outputs },
+
+      { NULL }
+    };  
+    RPT_bulk_create (outputs);
+  }
+
+  g_ptr_array_free (zone_names, /* free_seg = */ TRUE);
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

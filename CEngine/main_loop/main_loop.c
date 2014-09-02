@@ -508,7 +508,10 @@ silent_log_handler (const gchar * log_domain, GLogLevelFlags log_level,
  * PACKAGE_VERSION, into major, minor, and release numbers.
  */
 static void
-split_version (const char *version, RPT_reporting_t *split)
+split_version (const char *version,
+               RPT_reporting_t *major_version,
+               RPT_reporting_t *minor_version,
+               RPT_reporting_t *release)
 {
   gchar **tokens;
   gchar **iter;
@@ -520,11 +523,11 @@ split_version (const char *version, RPT_reporting_t *split)
     {
       num = strtol (*iter, NULL, 10);
       if (i == 0)
-        RPT_reporting_set_integer1 (split, num, "major");
+        RPT_reporting_set_integer (major_version, num, NULL);
       else if (i == 1)
-        RPT_reporting_set_integer1 (split, num, "minor");
+        RPT_reporting_set_integer (minor_version, num, NULL);
       else
-        RPT_reporting_set_integer1 (split, num, "release");
+        RPT_reporting_set_integer (release, num, NULL);
     }
   g_strfreev (tokens);
 
@@ -640,7 +643,7 @@ run_sim_main (sqlite3 *scenario_db,
 {
   unsigned int ndays, nruns, day, run, iteration_number;
   RPT_reporting_t *last_day_of_outbreak;
-  RPT_reporting_t *version;
+  RPT_reporting_t *major_version, *minor_version, *release;
   GPtrArray *reporting_vars;
   int nmodels = 0;
   adsm_module_t **models = NULL;
@@ -755,13 +758,16 @@ run_sim_main (sqlite3 *scenario_db,
 
   /* Initialize the reporting variables, and bundle them together so they can
    * easily be sent to a function for initialization. */
-  last_day_of_outbreak =
-    RPT_new_reporting ("outbreakDuration", RPT_integer);
-  version = RPT_new_reporting ("version", RPT_group);
-  split_version (PACKAGE_VERSION, version);
   reporting_vars = g_ptr_array_new ();
-  g_ptr_array_add (reporting_vars, last_day_of_outbreak);
-  g_ptr_array_add (reporting_vars, version);
+  g_ptr_array_add (reporting_vars,
+    last_day_of_outbreak = RPT_new_reporting ("outbreakDuration", RPT_integer));
+  g_ptr_array_add (reporting_vars,
+    major_version = RPT_new_reporting ("versionMajor", RPT_integer));
+  g_ptr_array_add (reporting_vars,
+    minor_version = RPT_new_reporting ("versionMinor", RPT_integer));
+  g_ptr_array_add (reporting_vars,
+    release = RPT_new_reporting ("versionRelease", RPT_integer));
+  split_version (PACKAGE_VERSION, major_version, minor_version, release);
 
   zones = ZON_new_zone_list (nunits);
 #ifdef USE_SC_GUILIB
@@ -1212,7 +1218,9 @@ run_sim_main (sqlite3 *scenario_db,
 
   /* Clean up. */
   RPT_free_reporting (last_day_of_outbreak);
-  RPT_free_reporting (version);
+  RPT_free_reporting (major_version);
+  RPT_free_reporting (minor_version);
+  RPT_free_reporting (release);
   adsm_free_event_manager (manager);
   adsm_unload_modules (nmodels, models);
   RAN_free_generator (rng);

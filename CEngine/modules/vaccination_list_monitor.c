@@ -68,10 +68,10 @@ typedef struct
   double sum; /**< The numerator for calculating the average wait time. */
   unsigned int count; /**< The denominator for calculating the average wait time. */
   RPT_reporting_t *nunits_awaiting_vaccination;
-  RPT_reporting_t *nunits_awaiting_vaccination_by_prodtype;
+  RPT_reporting_t **nunits_awaiting_vaccination_by_prodtype;
   unsigned int unique_units_awaiting_vaccination;
   RPT_reporting_t *nanimals_awaiting_vaccination;
-  RPT_reporting_t *nanimals_awaiting_vaccination_by_prodtype;
+  RPT_reporting_t **nanimals_awaiting_vaccination_by_prodtype;
   double unique_animals_awaiting_vaccination;
   RPT_reporting_t *peak_nunits_awaiting_vaccination;
   RPT_reporting_t *peak_nunits_awaiting_vaccination_day;
@@ -81,6 +81,10 @@ typedef struct
   RPT_reporting_t *average_wait_time;
   RPT_reporting_t *unit_days_in_queue;
   RPT_reporting_t *animal_days_in_queue;
+  GPtrArray *zero_outputs; /**< Outputs that get zeroed at the start of each
+    iteration, in a list to make it easy to zero them all at once. */
+  GPtrArray *null_outputs; /**< Outputs that start out null, in a list to make
+    it easy set them null all at once. */
 }
 local_data_t;
 
@@ -105,20 +109,11 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   g_hash_table_remove_all (local_data->status);
   local_data->num_negative = 0;
 
-  RPT_reporting_zero (local_data->nunits_awaiting_vaccination);
-  RPT_reporting_zero (local_data->nunits_awaiting_vaccination_by_prodtype);
+  g_ptr_array_foreach (local_data->zero_outputs, RPT_reporting_zero_as_GFunc, NULL);
+  g_ptr_array_foreach (local_data->null_outputs, RPT_reporting_set_null_as_GFunc, NULL);
+
   local_data->unique_units_awaiting_vaccination = 0;
-  RPT_reporting_zero (local_data->nanimals_awaiting_vaccination);
-  RPT_reporting_zero (local_data->nunits_awaiting_vaccination_by_prodtype);
   local_data->unique_animals_awaiting_vaccination = 0;
-  RPT_reporting_zero (local_data->peak_nunits_awaiting_vaccination);
-  RPT_reporting_set_null (local_data->peak_nunits_awaiting_vaccination_day, NULL);
-  RPT_reporting_zero (local_data->peak_nanimals_awaiting_vaccination);
-  RPT_reporting_set_null (local_data->peak_nanimals_awaiting_vaccination_day, NULL);
-  RPT_reporting_set_null (local_data->peak_wait_time, NULL);
-  RPT_reporting_set_null (local_data->average_wait_time, NULL);
-  RPT_reporting_zero (local_data->unit_days_in_queue);
-  RPT_reporting_zero (local_data->animal_days_in_queue);
 
   local_data->peak_nunits = local_data->peak_nanimals = 0;
   local_data->peak_wait = 0;
@@ -184,6 +179,7 @@ handle_commitment_to_vaccinate_event (struct adsm_module_t_ *self,
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
+  UNT_production_type_t prodtype;
   gpointer p;
   int old_count, new_count;
   unsigned int nunits;
@@ -195,6 +191,7 @@ handle_commitment_to_vaccinate_event (struct adsm_module_t_ *self,
 
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
+  prodtype = unit->production_type;
 
   /* For each unit, we maintain a count of how many times the unit is in
    * queue. */
@@ -246,8 +243,7 @@ handle_commitment_to_vaccinate_event (struct adsm_module_t_ *self,
 
       /* Increment the counts of vaccinations still to do. */
       RPT_reporting_add_integer (local_data->nunits_awaiting_vaccination, 1, NULL);
-      RPT_reporting_add_integer1 (local_data->nunits_awaiting_vaccination_by_prodtype, 1,
-                                  unit->production_type_name);
+      RPT_reporting_add_integer (local_data->nunits_awaiting_vaccination_by_prodtype[prodtype], 1, NULL);
       nunits = RPT_reporting_get_integer (local_data->nunits_awaiting_vaccination, NULL);
       if (nunits > local_data->peak_nunits)
         {
@@ -257,8 +253,8 @@ handle_commitment_to_vaccinate_event (struct adsm_module_t_ *self,
         }
 
       RPT_reporting_add_real (local_data->nanimals_awaiting_vaccination, (double)(unit->size), NULL);
-      RPT_reporting_add_real1 (local_data->nanimals_awaiting_vaccination_by_prodtype,
-                               (double)(unit->size), unit->production_type_name);
+      RPT_reporting_add_real (local_data->nanimals_awaiting_vaccination_by_prodtype[prodtype],
+                              (double)(unit->size), NULL);
       nanimals = RPT_reporting_get_real (local_data->nanimals_awaiting_vaccination, NULL);
       if (nanimals > local_data->peak_nanimals)
         {
@@ -289,6 +285,7 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
+  UNT_production_type_t prodtype;
   gpointer p;
   int count;
   unsigned int wait;
@@ -299,6 +296,7 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
 
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
+  prodtype = unit->production_type;
 
   /* Special case: if a unit's starting state is Vaccine Immune, it won't be on
    * a waiting list and it won't affect the various counts maintained by this
@@ -334,12 +332,11 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
 
       /* Decrement the counts of vaccinations still to do. */
       RPT_reporting_sub_integer (local_data->nunits_awaiting_vaccination, 1, NULL);
-      RPT_reporting_sub_integer1 (local_data->nunits_awaiting_vaccination_by_prodtype, 1,
-                                  unit->production_type_name);
+      RPT_reporting_sub_integer (local_data->nunits_awaiting_vaccination_by_prodtype[prodtype], 1, NULL);
 
       RPT_reporting_sub_real (local_data->nanimals_awaiting_vaccination, (double)(unit->size), NULL);
-      RPT_reporting_sub_real1 (local_data->nanimals_awaiting_vaccination_by_prodtype,
-                               (double)(unit->size), unit->production_type_name);
+      RPT_reporting_sub_real (local_data->nanimals_awaiting_vaccination_by_prodtype[prodtype],
+                              (double)(unit->size), NULL);
     }
 
 #if DEBUG
@@ -362,6 +359,7 @@ handle_vaccination_canceled_event (struct adsm_module_t_ *self,
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
+  UNT_production_type_t prodtype;
   gpointer p;
   int old_count, new_count;
   UNT_control_t update;
@@ -371,6 +369,7 @@ handle_vaccination_canceled_event (struct adsm_module_t_ *self,
 
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
+  prodtype = unit->production_type;
 
   p = g_hash_table_lookup (local_data->status, unit);
   if (p == NULL)
@@ -431,12 +430,11 @@ handle_vaccination_canceled_event (struct adsm_module_t_ *self,
 
       /* Decrement the counts of vaccinations still to do. */
       RPT_reporting_sub_integer (local_data->nunits_awaiting_vaccination, 1, NULL);
-      RPT_reporting_sub_integer1 (local_data->nunits_awaiting_vaccination_by_prodtype, 1,
-                                  unit->production_type_name);
+      RPT_reporting_sub_integer (local_data->nunits_awaiting_vaccination_by_prodtype[prodtype], 1, NULL);
 
       RPT_reporting_sub_real (local_data->nanimals_awaiting_vaccination, (double)(unit->size), NULL);
-      RPT_reporting_sub_real1 (local_data->nanimals_awaiting_vaccination_by_prodtype,
-                               (double)(unit->size), unit->production_type_name);
+      RPT_reporting_sub_real (local_data->nanimals_awaiting_vaccination_by_prodtype[prodtype],
+                              (double)(unit->size), NULL);
     }
 
 #if DEBUG
@@ -513,6 +511,8 @@ local_free (struct adsm_module_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
+  g_ptr_array_free (local_data->zero_outputs, /* free_seg = */ TRUE);
+  g_ptr_array_free (local_data->null_outputs, /* free_seg = */ TRUE);
   g_hash_table_destroy (local_data->status);
   g_free (local_data);
   g_ptr_array_free (self->outputs, /* free_seg = */ TRUE); /* also frees all output variables */
@@ -543,7 +543,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_Vaccination,
     0
   };
-  unsigned int i;      /* loop counter */
+  guint nprodtypes;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -565,54 +565,76 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
-  local_data->nunits_awaiting_vaccination =
-    RPT_new_reporting ("vacwUAll", RPT_integer);
-  local_data->nunits_awaiting_vaccination_by_prodtype =
-    RPT_new_reporting ("vacwU", RPT_group);
-  local_data->nanimals_awaiting_vaccination =
-    RPT_new_reporting ("vacwAAll", RPT_real);
-  local_data->nanimals_awaiting_vaccination_by_prodtype =
-    RPT_new_reporting ("vacwA", RPT_group);
-  local_data->peak_nunits_awaiting_vaccination =
-    RPT_new_reporting ("vacwUMax", RPT_integer);
-  local_data->peak_nunits_awaiting_vaccination_day =
-    RPT_new_reporting ("vacwUMaxDay", RPT_integer);
-  local_data->peak_nanimals_awaiting_vaccination =
-    RPT_new_reporting ("vacwAMax", RPT_real);
-  local_data->peak_nanimals_awaiting_vaccination_day =
-    RPT_new_reporting ("vacwAMaxDay", RPT_integer);
-  local_data->peak_wait_time =
-    RPT_new_reporting ("vacwUTimeMax", RPT_integer);
-  local_data->average_wait_time =
-    RPT_new_reporting ("vacwUTimeAvg", RPT_real);
-  local_data->unit_days_in_queue =
-    RPT_new_reporting ("vacwUDaysInQueue", RPT_integer);
-  local_data->animal_days_in_queue =
-    RPT_new_reporting ("vacwADaysInQueue", RPT_real);
-  g_ptr_array_add (self->outputs, local_data->nunits_awaiting_vaccination);
-  g_ptr_array_add (self->outputs, local_data->nunits_awaiting_vaccination_by_prodtype);
-  g_ptr_array_add (self->outputs, local_data->nanimals_awaiting_vaccination);
-  g_ptr_array_add (self->outputs, local_data->nanimals_awaiting_vaccination_by_prodtype);
-  g_ptr_array_add (self->outputs, local_data->peak_nunits_awaiting_vaccination);
-  g_ptr_array_add (self->outputs, local_data->peak_nunits_awaiting_vaccination_day);
-  g_ptr_array_add (self->outputs, local_data->peak_nanimals_awaiting_vaccination);
-  g_ptr_array_add (self->outputs, local_data->peak_nanimals_awaiting_vaccination_day);
-  g_ptr_array_add (self->outputs, local_data->peak_wait_time);
-  g_ptr_array_add (self->outputs, local_data->average_wait_time);
-  g_ptr_array_add (self->outputs, local_data->unit_days_in_queue);
-  g_ptr_array_add (self->outputs, local_data->animal_days_in_queue);
-
-  /* Set the reporting frequency for the output variables. */
-
-  local_data->nunits = UNT_unit_list_length (units);
+  local_data->zero_outputs = g_ptr_array_new();
+  local_data->null_outputs = g_ptr_array_new();
   local_data->production_types = units->production_type_names;
-  for (i = 0; i < local_data->production_types->len; i++)
-    {
-      RPT_reporting_set_integer1 (local_data->nunits_awaiting_vaccination_by_prodtype, 0,
-                                  (char *) g_ptr_array_index (local_data->production_types, i));
-      RPT_reporting_set_real1 (local_data->nanimals_awaiting_vaccination_by_prodtype, 0,
-                               (char *) g_ptr_array_index (local_data->production_types, i));
-    }
+  nprodtypes = local_data->production_types->len;
+  {
+    RPT_bulk_create_t outputs[] = {
+      { &local_data->nunits_awaiting_vaccination, "vacwUAll", RPT_integer,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->zero_outputs },
+
+      { &local_data->nunits_awaiting_vaccination_by_prodtype, "vacwU%s", RPT_integer,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->zero_outputs },
+
+      { &local_data->nanimals_awaiting_vaccination, "vacwAAll", RPT_real,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->zero_outputs },
+
+      { &local_data->nanimals_awaiting_vaccination_by_prodtype, "vacwA%s", RPT_real,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->zero_outputs },
+
+      { &local_data->peak_nunits_awaiting_vaccination, "vacwUMax", RPT_integer,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->zero_outputs },
+
+      { &local_data->peak_nunits_awaiting_vaccination_day, "vacwUMaxDay", RPT_integer,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->null_outputs },
+
+      { &local_data->peak_nanimals_awaiting_vaccination, "vacwAMax", RPT_real,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->zero_outputs },
+
+      { &local_data->peak_nanimals_awaiting_vaccination_day, "vacwAMaxDay", RPT_integer,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->null_outputs },
+
+      { &local_data->peak_wait_time, "vacwUTimeMax", RPT_integer,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->null_outputs },
+
+      { &local_data->average_wait_time, "vacwUTimeAvg", RPT_real,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->null_outputs },
+
+      { &local_data->unit_days_in_queue, "vacwUDaysInQueue", RPT_integer,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->zero_outputs },
+
+      { &local_data->animal_days_in_queue, "vacwADaysInQueue", RPT_real,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->zero_outputs },
+
+      { NULL }
+    };
+    RPT_bulk_create (outputs);
+  }
 
   /* Initialize the unit status table. */
   local_data->status = g_hash_table_new (g_direct_hash, g_direct_equal);

@@ -1220,6 +1220,21 @@ RPT_reporting_set_null_as_GDataForeachFunc (GQuark key_id, gpointer data, gpoint
 
 
 /**
+ * Wraps RPT_reporting_set_null so that it can be used with the foreach
+ * function of a GLib Pointer Array.
+ *
+ * @param data an output variable, cast to a gpointer.
+ * @param user_data not used, pass NULL.
+ */
+void
+RPT_reporting_set_null_as_GFunc (gpointer data, gpointer user_data)
+{
+  RPT_reporting_set_null ((RPT_reporting_t *) data, NULL);
+}
+
+
+
+/**
  * Sets the value of an output variable to "null".
  *
  * @param reporting an output variable.
@@ -1871,9 +1886,43 @@ void
 RPT_bulk_create (RPT_bulk_create_t *output_specs)
 {
   RPT_bulk_create_t *output_spec;
-  
+  GPtrArray *camelcased1 = NULL;
+  GPtrArray *camelcased2 = NULL;
+
   for (output_spec = output_specs; output_spec->loc != NULL; output_spec++)
     {
+      guint i;
+
+      /* Make CamelCased versions of the subcategory names. */
+      if (output_spec->subcategory1_type != RPT_NoSubcategory)
+        {
+          gchar *original_name;
+
+          camelcased1 = g_ptr_array_new_with_free_func (g_free);
+          for (i = 0; i < output_spec->subcategory1_count; i++)
+            {
+              if (output_spec->subcategory1_type == RPT_CharArray)
+                original_name = ((char **)(output_spec->subcategory1_name))[i];
+              else
+                original_name = g_ptr_array_index ((GPtrArray *)(output_spec->subcategory1_name), i);
+              g_ptr_array_add (camelcased1,
+                               camelcase (original_name, /* capitalize_first = */ TRUE));
+            } /* end of loop to created CamelCased versions of subcategory 1 names */
+          if (output_spec->subcategory2_type != RPT_NoSubcategory)
+            {
+              camelcased2 = g_ptr_array_new_with_free_func (g_free);
+              for (i = 0; i < output_spec->subcategory2_count; i++)
+                {
+                  if (output_spec->subcategory2_type == RPT_CharArray)
+                    original_name = ((char **)(output_spec->subcategory2_name))[i];
+                  else
+                    original_name = g_ptr_array_index ((GPtrArray *)(output_spec->subcategory2_name), i);
+                  g_ptr_array_add (camelcased2,
+                                   camelcase (original_name, /* capitalize_first = */ TRUE));
+                } /* end of loop to created capitalized versions of subcategory 2 names */
+            } /* end of if there is a subcategory 2 */
+        } /* end of if there is a subcategory 1 */
+
       if (output_spec->subcategory1_type == RPT_NoSubcategory
           && output_spec->subcategory2_type == RPT_NoSubcategory)
         {
@@ -1894,22 +1943,15 @@ RPT_bulk_create (RPT_bulk_create_t *output_specs)
         {
           /* Create an array of output variables. */
           RPT_reporting_t **reporting;
-          char **subcategory_names_c;
-          GPtrArray *subcategory_names_g;
-          guint n, i;
+          guint n;
           gchar *output_name;
 
-          subcategory_names_c = (char **)(output_spec->subcategory1_name);
-          subcategory_names_g = (GPtrArray *)(output_spec->subcategory1_name);
           n = output_spec->subcategory1_count;
           reporting = g_new0 (RPT_reporting_t *, n);
           for (i = 0; i < output_spec->subcategory1_count; i++)
             {
               output_name = g_strdup_printf (output_spec->format,
-                output_spec->subcategory1_type == RPT_CharArray
-                ? subcategory_names_c[i]
-                : (char *) g_ptr_array_index (subcategory_names_g, i)
-              );
+                                             g_ptr_array_index (camelcased1, i));
               reporting[i] = RPT_new_reporting (output_name, output_spec->type);
               g_free (output_name);
               if (output_spec->membership1)
@@ -1926,15 +1968,9 @@ RPT_bulk_create (RPT_bulk_create_t *output_specs)
         {
           /* This is a 2D array of output variables. */
           RPT_reporting_t ***reporting = NULL;
-          char **subcategory1_names_c, **subcategory2_names_c;
-          GPtrArray *subcategory1_names_g, *subcategory2_names_g;
           guint nrows, ncols, row, col;
           gchar *output_name;
 
-          subcategory1_names_c = (char **)(output_spec->subcategory1_name);
-          subcategory1_names_g = (GPtrArray *)(output_spec->subcategory1_name);
-          subcategory2_names_c = (char **)(output_spec->subcategory2_name);
-          subcategory2_names_g = (GPtrArray *)(output_spec->subcategory2_name);
           nrows = output_spec->subcategory1_count;
           ncols = output_spec->subcategory2_count;
           reporting = g_new0 (RPT_reporting_t **, nrows);
@@ -1944,13 +1980,8 @@ RPT_bulk_create (RPT_bulk_create_t *output_specs)
               for (col = 0; col < output_spec->subcategory2_count; col++)
                 {
                   output_name = g_strdup_printf (output_spec->format,
-                    output_spec->subcategory1_type == RPT_CharArray
-                    ? subcategory1_names_c[row]
-                    : (char *) g_ptr_array_index (subcategory1_names_g, row),
-                    output_spec->subcategory2_type == RPT_CharArray
-                    ? subcategory2_names_c[col]
-                    : (char *) g_ptr_array_index (subcategory2_names_g, col)
-                  );
+                                                 g_ptr_array_index (camelcased1, row),
+                                                 g_ptr_array_index (camelcased2, col)); 
                   reporting[row][col] = RPT_new_reporting (output_name, output_spec->type);
                   g_free (output_name);
                   if (output_spec->membership1)
@@ -1967,6 +1998,18 @@ RPT_bulk_create (RPT_bulk_create_t *output_specs)
         {
           g_assert_not_reached();
         }
+
+      if (camelcased1 != NULL)
+        {
+          g_ptr_array_free (camelcased1, /* free_seg = */ TRUE);
+          camelcased1 = NULL;
+          if (camelcased2 != NULL)
+            {
+              g_ptr_array_free (camelcased2, /* free_seg = */ TRUE);
+              camelcased2 = NULL;
+            }
+        }
+
     } /* end of loop over reporting variables to bulk create */
 
   return;
