@@ -707,51 +707,6 @@ RPT_reporting_set_integer (RPT_reporting_t * reporting, long value, const char *
 
 
 /**
- * Sets the value of an integer output variable (alternate version for group
- * variables only 1 level deep).
- *
- * @param reporting an output variable.
- * @param value the new value. 
- * @param subelement_name a string used to choose one element from a group
- *   output variable.  If NULL, <i>reporting</i> is assumed to be an integer
- *   output variable.
- */
-void
-RPT_reporting_set_integer1 (RPT_reporting_t * reporting, long value, const char *subelement_name)
-{
-  GData **group;
-  RPT_reporting_t *subelement;
-
-  if (subelement_name == NULL)
-    {
-      g_assert (reporting->type == RPT_integer);
-      *((long *) reporting->data) = value;
-    }
-  else
-    {
-      if (reporting->type != RPT_group)
-        g_error ("Attempting to drill down to subelement \"%s\" of variable \"%s\", but \"%s\" is type %s, not group",
-                 subelement_name[0], reporting->name, reporting->name,
-                 RPT_type_name[reporting->type]);
-      group = (GData **) (&reporting->data);
-      subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name));
-      /* If there isn't already a subelement by this name, create one. */
-      if (subelement == NULL)
-        {
-          subelement = RPT_new_reporting (subelement_name, RPT_integer);
-          g_datalist_set_data_full (group, subelement_name, subelement,
-                                    RPT_free_reporting_as_GDestroyNotify);
-        }
-      RPT_reporting_set_integer (subelement, value, NULL);
-    }
-
-  reporting->is_null = FALSE;
-  return;
-}
-
-
-
-/**
  * Adds to the value of an integer output variable.
  *
  * @param reporting an output variable.
@@ -803,51 +758,6 @@ RPT_reporting_add_integer (RPT_reporting_t * reporting, long value, const char *
 
 
 /**
- * Adds to the value of an integer output variable (alternate version for group
- * variables only 1 level deep).
- *
- * @param reporting an output variable.
- * @param value the amount to add. 
- * @param subelement_name a string used to choose one element from a group
- *   output variable.  If NULL, <i>reporting</i> is assumed to be an integer
- *   output variable.
- */
-void
-RPT_reporting_add_integer1 (RPT_reporting_t * reporting, long value, const char *subelement_name)
-{
-  GData **group;
-  RPT_reporting_t *subelement;
-
-  if (subelement_name == NULL)
-    {
-      g_assert (reporting->type == RPT_integer);
-      *((long *) reporting->data) += value;
-    }
-  else
-    {
-      if (reporting->type != RPT_group)
-        g_error ("Attempting to drill down to subelement \"%s\" of variable \"%s\", but \"%s\" is type %s, not group",
-                 subelement_name[0], reporting->name, reporting->name,
-                 RPT_type_name[reporting->type]);
-      group = (GData **) (&reporting->data);
-      subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name));
-      /* If there isn't already a subelement by this name, create one. */
-      if (subelement == NULL)
-        {
-          subelement = RPT_new_reporting (subelement_name, RPT_integer);
-          g_datalist_set_data_full (group, subelement_name, subelement,
-                                    RPT_free_reporting_as_GDestroyNotify);
-        }
-      RPT_reporting_add_integer (subelement, value, NULL);
-    }
-
-  reporting->is_null = FALSE;
-  return;
-}
-
-
-
-/**
  * Retrieves the value of an integer output variable.
  *
  * @param reporting an output variable.
@@ -878,45 +788,6 @@ RPT_reporting_get_integer (RPT_reporting_t * reporting, const char **subelement_
       subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name[0]));
       if (subelement != NULL)
         value = RPT_reporting_get_integer (subelement, &(subelement_name[1]));
-    }
-
-  return value;
-}
-
-
-
-/**
- * Retrieves the value of an integer output variable (alternate version for
- * group variables only 1 level deep).
- *
- * @param reporting an output variable.
- * @param subelement_name a string used to choose one element from a group
- *   output variable.  If NULL, <i>reporting</i> is assumed to be an integer
- *   output variable.
- * @returns the value, or 0 if a non-existent subelement was specified.
- */
-long
-RPT_reporting_get_integer1 (RPT_reporting_t * reporting, const char *subelement_name)
-{
-  GData **group;
-  RPT_reporting_t *subelement;
-  long value = 0;
-
-  if (subelement_name == NULL)
-    {
-      g_assert (reporting->type == RPT_integer);
-      value = *((long *) reporting->data);
-    }
-  else
-    {
-      if (reporting->type != RPT_group)
-        g_error ("Attempting to drill down to subelement \"%s\" of variable \"%s\", but \"%s\" is type %s, not group",
-                 subelement_name[0], reporting->name, reporting->name,
-                 RPT_type_name[reporting->type]);
-      group = (GData **) (&reporting->data);
-      subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name));
-      if (subelement != NULL)
-        value = RPT_reporting_get_integer (subelement, NULL);
     }
 
   return value;
@@ -967,51 +838,6 @@ RPT_reporting_set_real (RPT_reporting_t * reporting, double value, const char **
                                     RPT_free_reporting_as_GDestroyNotify);
         }
       RPT_reporting_set_real (subelement, value, &(subelement_name[1]));
-    }
-
-  reporting->is_null = FALSE;
-  return;
-}
-
-
-
-/**
- * Sets the value of a real output variable (alternate version for group
- * variables only 1 level deep).
- *
- * @param reporting an output variable.
- * @param value the new value. 
- * @param subelement_name a string used to choose one element from a group
- *   output variable.  If NULL, <i>reporting</i> is assumed to be a real output
- *   variable.
- */
-void
-RPT_reporting_set_real1 (RPT_reporting_t * reporting, double value, const char *subelement_name)
-{
-  GData **group;
-  RPT_reporting_t *subelement;
-
-  if (subelement_name == NULL)
-    {
-      g_assert (reporting->type == RPT_real);
-      *((double *) reporting->data) = value;
-    }
-  else
-    {
-      if (reporting->type != RPT_group)
-        g_error ("Attempting to drill down to subelement \"%s\" of variable \"%s\", but \"%s\" is type %s, not group",
-                 subelement_name[0], reporting->name, reporting->name,
-                 RPT_type_name[reporting->type]);
-      group = (GData **) (&reporting->data);
-      subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name));
-      /* If there isn't already a subelement by this name, create one. */
-      if (subelement == NULL)
-        {
-          subelement = RPT_new_reporting (subelement_name, RPT_real);
-          g_datalist_set_data_full (group, subelement_name, subelement,
-                                    RPT_free_reporting_as_GDestroyNotify);
-        }
-      RPT_reporting_set_real (subelement, value, NULL);
     }
 
   reporting->is_null = FALSE;
@@ -1072,51 +898,6 @@ RPT_reporting_add_real (RPT_reporting_t * reporting, double value, const char **
 
 
 /**
- * Adds to the value of a real output variable (alternate version for group
- * variables only 1 level deep).
- *
- * @param reporting an output variable.
- * @param value the amount to add. 
- * @param subelement_name a string used to choose one element from a group
- *   output variable.  If NULL, <i>reporting</i> is assumed to be a real output
- *   variable.
- */
-void
-RPT_reporting_add_real1 (RPT_reporting_t * reporting, double value, const char *subelement_name)
-{
-  GData **group;
-  RPT_reporting_t *subelement;
-
-  if (subelement_name == NULL)
-    {
-      g_assert (reporting->type == RPT_real);
-      *((double *) reporting->data) += value;
-    }
-  else
-    {
-      if (reporting->type != RPT_group)
-        g_error ("Attempting to drill down to subelement \"%s\" of variable \"%s\", but \"%s\" is type %s, not group",
-                 subelement_name[0], reporting->name, reporting->name,
-                 RPT_type_name[reporting->type]);
-      group = (GData **) (&reporting->data);
-      subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name));
-      /* If there isn't already a subelement by this name, create one. */
-      if (subelement == NULL)
-        {
-          subelement = RPT_new_reporting (subelement_name, RPT_real);
-          g_datalist_set_data_full (group, subelement_name, subelement,
-                                    RPT_free_reporting_as_GDestroyNotify);
-        }
-      RPT_reporting_add_real (subelement, value, NULL);
-    }
-
-  reporting->is_null = FALSE;
-  return;
-}
-
-
-
-/**
  * Retrieves the value of a real output variable.
  *
  * @param reporting an output variable.
@@ -1147,45 +928,6 @@ RPT_reporting_get_real (RPT_reporting_t * reporting, const char **subelement_nam
       subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name[0]));
       if (subelement != NULL)
         value = RPT_reporting_get_real (subelement, &(subelement_name[1]));
-    }
-
-  return value;
-}
-
-
-
-/**
- * Retrieves the value of a real output variable (alternate version for group
- * variables only 1 level deep).
- *
- * @param reporting an output variable.
- * @param subelement_name a string used to choose one element from a group
- *   output variable.  If NULL, <i>reporting</i> is assumed to be a real
- *   output variable.
- * @returns the value, or 0 if a non-existent subelement was specified.
- */
-double
-RPT_reporting_get_real1 (RPT_reporting_t * reporting, const char *subelement_name)
-{
-  GData **group;
-  RPT_reporting_t *subelement;
-  double value = 0;
-
-  if (subelement_name == NULL)
-    {
-      g_assert (reporting->type == RPT_real);
-      value = *((double *) reporting->data);
-    }
-  else
-    {
-      if (reporting->type != RPT_group)
-        g_error ("Attempting to drill down to subelement \"%s\" of variable \"%s\", but \"%s\" is type %s, not group",
-                 subelement_name[0], reporting->name, reporting->name,
-                 RPT_type_name[reporting->type]);
-      group = (GData **) (&reporting->data);
-      subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name));
-      if (subelement != NULL)
-        value = RPT_reporting_get_real (subelement, NULL);
     }
 
   return value;
@@ -1286,51 +1028,6 @@ RPT_reporting_set_null (RPT_reporting_t * reporting, const char **subelement_nam
 
 
 /**
- * Sets the value of an output variable to "null" (alternate version for group
- * variables only 1 level deep).
- *
- * @param reporting an output variable.
- * @param subelement_name a string used to choose one element from a group
- *   output variable.  Use NULL if the output variable is not a group variable,
- *   or if you want all sub-categories set to NULL.
- */
-void
-RPT_reporting_set_null1 (RPT_reporting_t * reporting, const char *subelement_name)
-{
-  GData **group;
-  RPT_reporting_t *subelement;
-
-  if (subelement_name == NULL)
-    {
-      if (reporting->type == RPT_group)
-        g_datalist_foreach ((GData **) (&reporting->data),
-                            RPT_reporting_set_null_as_GDataForeachFunc, NULL);
-      else
-        RPT_reporting_reset (reporting);
-      reporting->is_null = TRUE;
-    }
-  else
-    {
-      if (reporting->type != RPT_group)
-        g_error ("Attempting to drill down to subelement \"%s\" of variable \"%s\", but \"%s\" is type %s, not group",
-                 subelement_name[0], reporting->name, reporting->name,
-                 RPT_type_name[reporting->type]);
-      group = (GData **) (&reporting->data);
-      subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name));
-      /* If there isn't already a subelement by this name, create one. */
-      if (subelement == NULL)
-        {
-          subelement = RPT_new_reporting (subelement_name, RPT_integer);
-          g_datalist_set_data_full (group, subelement_name, subelement,
-                                    RPT_free_reporting_as_GDestroyNotify);
-        }
-      RPT_reporting_set_null (subelement, NULL);
-    }
-}
-
-
-
-/**
  * Checks whether an output variable is null.
  *
  * @param reporting an output variable.
@@ -1361,44 +1058,6 @@ RPT_reporting_is_null (RPT_reporting_t * reporting, const char **subelement_name
       subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name[0]));
       if (subelement != NULL)
         answer = RPT_reporting_is_null (subelement, &(subelement_name[1]));
-    }
-
-  return answer;
-}
-
-
-
-/**
- * Checks whether an output variable is null (alternate version for group
- * variables only 1 level deep).
- *
- * @param reporting an output variable.
- * @param subelement_name a string used to choose one element from a group
- *   output variable.  Use NULL if you want to know if all sub-categories are
- *   null.
- * @returns TRUE if the variable is null, FALSE otherwise.
- */
-gboolean
-RPT_reporting_is_null1 (RPT_reporting_t * reporting, const char *subelement_name)
-{
-  GData **group;
-  RPT_reporting_t *subelement;
-  gboolean answer = TRUE;
-
-  if (subelement_name == NULL)
-    {
-      answer = (reporting->is_null);
-    }
-  else
-    {
-      if (reporting->type != RPT_group)
-        g_error ("Attempting to drill down to subelement \"%s\" of variable \"%s\", but \"%s\" is type %s, not group",
-                 subelement_name[0], reporting->name, reporting->name,
-                 RPT_type_name[reporting->type]);
-      group = (GData **) (&reporting->data);
-      subelement = (RPT_reporting_t *) (g_datalist_get_data (group, subelement_name));
-      if (subelement != NULL)
-        answer = RPT_reporting_is_null (subelement, NULL);
     }
 
   return answer;

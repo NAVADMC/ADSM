@@ -102,30 +102,20 @@ int RPT_fprintf_reporting (FILE *, RPT_reporting_t *);
 #define RPT_printf_reporting(R) RPT_fprintf_reporting(stdout,R)
 
 void RPT_reporting_set_integer (RPT_reporting_t *, long, const char **);
-void RPT_reporting_set_integer1 (RPT_reporting_t *, long, const char *);
 void RPT_reporting_set_real (RPT_reporting_t *, double, const char **);
-void RPT_reporting_set_real1 (RPT_reporting_t *, double, const char *);
 void RPT_reporting_set_null (RPT_reporting_t *, const char **);
 void RPT_reporting_set_null_as_GFunc (gpointer data, gpointer user_data);
-void RPT_reporting_set_null1 (RPT_reporting_t *, const char *);
 void RPT_reporting_add_integer (RPT_reporting_t *, long, const char **);
-void RPT_reporting_add_integer1 (RPT_reporting_t *, long, const char *);
 void RPT_reporting_add_real (RPT_reporting_t *, double, const char **);
-void RPT_reporting_add_real1 (RPT_reporting_t *, double, const char *);
 #define RPT_reporting_sub_integer(R,I,C) RPT_reporting_add_integer(R,-(I),C)
-#define RPT_reporting_sub_integer1(R,I,C) RPT_reporting_add_integer1(R,-(I),C)
 #define RPT_reporting_sub_real(R,I,C) RPT_reporting_add_real(R,-(I),C)
-#define RPT_reporting_sub_real1(R,I,C) RPT_reporting_add_real1(R,-(I),C)
 void RPT_reporting_splice (RPT_reporting_t *, RPT_reporting_t *);
 void RPT_reporting_reset (RPT_reporting_t *);
 void RPT_reporting_zero (RPT_reporting_t *);
 void RPT_reporting_zero_as_GFunc (gpointer data, gpointer user_data);
 gboolean RPT_reporting_is_null (RPT_reporting_t *, const char**);
-gboolean RPT_reporting_is_null1 (RPT_reporting_t *, const char*);
 long RPT_reporting_get_integer (RPT_reporting_t *, const char **);
-long RPT_reporting_get_integer1 (RPT_reporting_t *, const char *);
 double RPT_reporting_get_real (RPT_reporting_t *, const char **);
-double RPT_reporting_get_real1 (RPT_reporting_t *, const char *);
 
 gboolean RPT_reporting_due (RPT_reporting_t *, unsigned int day);
 RPT_type_t RPT_reporting_get_type (RPT_reporting_t *);
