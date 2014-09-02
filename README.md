@@ -106,6 +106,21 @@ Never merge from OS specific branches back into master.  Changes made in these b
         wget http://python-distribute.org/distribute_setup.py -O - | python
         easy_insatll pip
 
+##Updating the ADSM Executable:
+The production server already has the code checked out (Linux branch) and all
+of the libraries required by ADSM are installed.
+
+To update the executable:
+
+    cd SpreadModel
+    git pull
+    cd CEngine
+    sh bootstrap
+    ./configure --disable-debug
+    make
+
+`make` will will fail on a `dia: command not found` error when it gets to the SpreadModel/CEngine/doc/diagrams directory.  That’s OK: at this point, the executable is built, and you are done.
+
 ###CX_Freeze
 only necessary for creating executables https://pypi.python.org/pypi/cx_Freeze
 Needed to edit C:\Python33\Scripts\cxfreeze and csfreeze-quickstart to point to correct interpreter!
