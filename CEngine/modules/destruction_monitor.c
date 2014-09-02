@@ -177,16 +177,16 @@ handle_destruction_event (struct adsm_module_t_ *self, EVT_destruction_event_t *
   /* Initially destroyed units do not count as the first destruction. */
   if (reason != ADSM_ControlInitialState)
     {
-      if (RPT_reporting_is_null (local_data->first_destruction, NULL))
+      if (local_data->first_destruction->is_null)
         {
           RPT_reporting_set_integer (local_data->first_destruction, event->day, NULL);
           RPT_reporting_set_integer (local_data->destruction_occurred, 1, NULL);
         }
-      if (RPT_reporting_is_null (local_data->first_destruction_by_reason[reason], NULL))
+      if (local_data->first_destruction_by_reason[reason]->is_null)
         RPT_reporting_set_integer (local_data->first_destruction_by_reason[reason], event->day, NULL);
-      if (RPT_reporting_is_null (local_data->first_destruction_by_prodtype[prodtype], NULL))
+      if (local_data->first_destruction_by_prodtype[prodtype]->is_null)
         RPT_reporting_set_integer (local_data->first_destruction_by_prodtype[prodtype], event->day, NULL);  
-      if (RPT_reporting_is_null (local_data->first_destruction_by_reason_and_prodtype[reason][prodtype], NULL))
+      if (local_data->first_destruction_by_reason_and_prodtype[reason][prodtype]->is_null)
         RPT_reporting_set_integer (local_data->first_destruction_by_reason_and_prodtype[reason][prodtype], event->day, NULL);
 
       /* Initially destroyed units also are not included in many of the counts.

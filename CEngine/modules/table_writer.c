@@ -241,7 +241,7 @@ handle_end_of_day2_event (struct adsm_module_t_ * self,
         {
           output_value = g_ptr_array_index (local_data->output_values, i);
           output = output_value->output;
-          if (RPT_reporting_is_null (output, NULL))
+          if (output->is_null)
             continue;
           if (RPT_reporting_get_type (output) == RPT_integer)
             value = (double) RPT_reporting_get_integer (output, NULL);

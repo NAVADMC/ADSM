@@ -177,16 +177,16 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
   /* Initially vaccinated units do not count as the first vaccination. */
   if (event->reason != ADSM_ControlInitialState)
     {
-      if (RPT_reporting_is_null (local_data->first_vaccination, NULL))
+      if (local_data->first_vaccination->is_null)
         {
           RPT_reporting_set_integer (local_data->first_vaccination, event->day, NULL);
           RPT_reporting_set_integer (local_data->vaccination_occurred, 1, NULL);
         }
-      if (RPT_reporting_is_null (local_data->first_vaccination_by_reason[reason], NULL))
+      if (local_data->first_vaccination_by_reason[reason]->is_null)
         RPT_reporting_set_integer (local_data->first_vaccination_by_reason[reason], event->day, NULL);
-      if (RPT_reporting_is_null (local_data->first_vaccination_by_prodtype[prodtype], NULL))
+      if (local_data->first_vaccination_by_prodtype[prodtype]->is_null)
         RPT_reporting_set_integer (local_data->first_vaccination_by_prodtype[prodtype], event->day, NULL);  
-      if (RPT_reporting_is_null (local_data->first_vaccination_by_reason_and_prodtype[reason][prodtype], NULL))
+      if (local_data->first_vaccination_by_reason_and_prodtype[reason][prodtype]->is_null)
         RPT_reporting_set_integer (local_data->first_vaccination_by_reason_and_prodtype[reason][prodtype], event->day, NULL);
 
       /* Initially vaccinated units also are not included in many of the

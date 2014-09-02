@@ -112,7 +112,7 @@ RPT_reporting_value_to_string (RPT_reporting_t * reporting, char *format)
   /* Represent an output variable that is null (has no meaningful value yet)
    * by an empty string, except in the case of a group variable that has sub-
    * categories.  We'll handle that case below. */
-  if (RPT_reporting_is_null (reporting, NULL))
+  if (reporting->is_null)
     {
       g_string_printf (s, "");
     }
@@ -373,24 +373,6 @@ void
 RPT_reporting_set_null (RPT_reporting_t * reporting, const char **subelement_name)
 {
   reporting->is_null = TRUE;
-}
-
-
-
-/**
- * Checks whether an output variable is null.
- *
- * @param reporting an output variable.
- * @param subelement_name a null-terminated array of strings used to "drill
- *   down" through group output variables.  Use NULL if the output variable is
- *   not a group variable, or if you want to know if all sub-categories are
- *   null.
- * @returns TRUE if the variable is null, FALSE otherwise.
- */
-gboolean
-RPT_reporting_is_null (RPT_reporting_t * reporting, const char **subelement_name)
-{
-  return (reporting->is_null);
 }
 
 

@@ -236,12 +236,12 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
   /* A unit can be detected multiple times on one day, by different means of
    * detection.  Handle the outputs that are not broken down by means of
    * detection first. */
-  if (RPT_reporting_is_null (local_data->first_detection, NULL))
+  if (local_data->first_detection->is_null)
     {
       RPT_reporting_set_integer (local_data->first_detection, event->day, NULL);
       RPT_reporting_set_integer (local_data->detection_occurred, 1, NULL);
     } 
-  if (RPT_reporting_is_null (local_data->first_detection_by_prodtype[prodtype], NULL))
+  if (local_data->first_detection_by_prodtype[prodtype]->is_null)
     RPT_reporting_set_integer (local_data->first_detection_by_prodtype[prodtype], event->day, NULL);
   RPT_reporting_set_integer (local_data->last_detection, event->day, NULL);
   RPT_reporting_set_integer (local_data->last_detection_by_prodtype[prodtype], event->day, NULL);  
@@ -250,9 +250,9 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
   if (p == NULL)
     {
       /* This unit has not been detected already today. */
-      if (RPT_reporting_is_null (local_data->first_detection_by_means[means], NULL))
+      if (local_data->first_detection_by_means[means]->is_null)
         RPT_reporting_set_integer (local_data->first_detection_by_means[means], event->day, NULL);
-      if (RPT_reporting_is_null (local_data->first_detection_by_means_and_prodtype[means][prodtype], NULL))
+      if (local_data->first_detection_by_means_and_prodtype[means][prodtype]->is_null)
         RPT_reporting_set_integer (local_data->first_detection_by_means_and_prodtype[means][prodtype], event->day, NULL);
       RPT_reporting_set_integer (local_data->last_detection_by_means[means], event->day, NULL);
       RPT_reporting_set_integer (local_data->last_detection_by_means_and_prodtype[means][prodtype], event->day, NULL);
@@ -311,13 +311,13 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
                   /* We counted detections by a particular means today, but then
                    * we changed our mind and un-counted them all.  Restore
                    * yesterday's values for first & last detection by that means. */
-                  if (RPT_reporting_is_null (local_data->first_detection_by_means_yesterday[previous_detection->means], NULL))
+                  if (local_data->first_detection_by_means_yesterday[previous_detection->means]->is_null)
                     RPT_reporting_set_null (local_data->first_detection_by_means[previous_detection->means], NULL);
                   else
                     RPT_reporting_set_integer (local_data->first_detection_by_means[previous_detection->means],
                                                 RPT_reporting_get_integer (local_data->first_detection_by_means_yesterday[previous_detection->means], NULL),
                                                 NULL);
-                  if (RPT_reporting_is_null (local_data->last_detection_by_means_yesterday[previous_detection->means], NULL))
+                  if (local_data->last_detection_by_means_yesterday[previous_detection->means]->is_null)
                     RPT_reporting_set_null (local_data->last_detection_by_means[previous_detection->means], NULL);
                   else
                     RPT_reporting_set_integer (local_data->last_detection_by_means[previous_detection->means],
@@ -335,13 +335,13 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
                    * and un-counted them all.  Restore yesterday's values for
                    * first & last detection by that combination of means and
                    * production type. */
-                  if (RPT_reporting_is_null (local_data->first_detection_by_means_and_prodtype_yesterday[previous_detection->means][prodtype], NULL))
+                  if (local_data->first_detection_by_means_and_prodtype_yesterday[previous_detection->means][prodtype]->is_null)
                     RPT_reporting_set_null (local_data->first_detection_by_means_and_prodtype[previous_detection->means][prodtype], NULL);
                   else
                     RPT_reporting_set_integer (local_data->first_detection_by_means_and_prodtype[previous_detection->means][prodtype],
                                                RPT_reporting_get_integer (local_data->first_detection_by_means_and_prodtype_yesterday[previous_detection->means][prodtype], NULL),
                                                NULL);
-                  if (RPT_reporting_is_null (local_data->last_detection_by_means_and_prodtype_yesterday[previous_detection->means][prodtype], NULL))
+                  if (local_data->last_detection_by_means_and_prodtype_yesterday[previous_detection->means][prodtype]->is_null)
                     RPT_reporting_set_null (local_data->last_detection_by_means_and_prodtype[previous_detection->means][prodtype], NULL);
                   else
                     RPT_reporting_set_integer (local_data->last_detection_by_means_and_prodtype[previous_detection->means][prodtype],
@@ -350,9 +350,9 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
                 }
 
               /* Increment the count of detections by the new means. */
-              if (RPT_reporting_is_null (local_data->first_detection_by_means[means], NULL))
+              if (local_data->first_detection_by_means[means]->is_null)
                 RPT_reporting_set_integer (local_data->first_detection_by_means[means], event->day, NULL);
-              if (RPT_reporting_is_null (local_data->first_detection_by_means_and_prodtype[means][prodtype], NULL))
+              if (local_data->first_detection_by_means_and_prodtype[means][prodtype]->is_null)
                 RPT_reporting_set_integer (local_data->first_detection_by_means_and_prodtype[means][prodtype], event->day, NULL);
               RPT_reporting_set_integer (local_data->last_detection_by_means[means], event->day, NULL);
               RPT_reporting_set_integer (local_data->last_detection_by_means_and_prodtype[means][prodtype], event->day, NULL);

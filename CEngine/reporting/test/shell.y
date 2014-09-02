@@ -102,7 +102,6 @@ void g_free_as_GFunc (gpointer data, gpointer user_data);
 %token <sval> STRING
 %token <bval> BOOL
 %type <fval> real
-%type <lval> string_list
 
 %%
 
@@ -148,53 +147,6 @@ set_command:
       free (s);
       fflush (stdout);
     }
-  | SET LPAREN INT COMMA string_list RPAREN
-    {
-      /* Integer, with subcategories. */
-      int ncategories;
-      char **drill_down_list, **p, *s;
-      GSList *iter;
-#if DEBUG
-      int i;
-#endif
-
-      if (current_variable == NULL
-	  || current_variable->type != RPT_group
-	  || RPT_reporting_get_type (current_variable) != RPT_integer )
-	{
-	  printf ("creating new group var\n");
-	  fflush (stdout);
-	  current_variable = RPT_new_reporting (tentative_name, RPT_group);
-	}
-
-      /* Copy the subcategories into an array. */
-      ncategories = g_slist_length ($5);
-      drill_down_list = g_new (char *, ncategories + 1);
-      for (iter = $5, p = drill_down_list; iter != NULL; iter = g_slist_next (iter))
-	{
-	  *p++ = (char *)(iter->data);
-	}
-      /* Terminate the array with a null pointer. */
-      *p = NULL;
-#if DEBUG
-      printf ("drill down list = [");
-      for (i = 0; i <= ncategories; i++)
-        printf (i == 0 ? "%s" : ",%s", drill_down_list[i]);
-      printf ("]\n");
-      fflush (stdout);
-#endif
-
-      /* Set the variable, then free the argument list. */
-      RPT_reporting_set_integer (current_variable, $3, (const char **) drill_down_list);
-      g_slist_foreach ($5, g_free_as_GFunc, NULL);
-      g_slist_free ($5);
-      g_free (drill_down_list);
-
-      s = RPT_reporting_value_to_string (current_variable, NULL);
-      printf ("%s\n%s", s, PROMPT);
-      free (s);
-      fflush (stdout);
-    }
   ;
 
 add_command:
@@ -206,35 +158,6 @@ add_command:
       if (current_variable == NULL)
         current_variable = RPT_new_reporting (tentative_name, RPT_integer);
       RPT_reporting_add_integer (current_variable, $3, NULL);
-      s = RPT_reporting_value_to_string (current_variable, NULL);
-      printf ("%s\n%s", s, PROMPT);
-      free (s);
-      fflush (stdout);
-    }
-  | ADD LPAREN INT COMMA string_list RPAREN
-    {
-      /* Integer, with subcategories. */
-      char **drill_down_list, **p, *s;
-      GSList *iter;
-
-      if (current_variable == NULL)
-        current_variable = RPT_new_reporting (tentative_name, RPT_group);
-
-      /* Copy the subcategories into an array. */
-      drill_down_list = g_new (char *, g_slist_length ($5) + 1);
-      for (iter = $5, p = drill_down_list; iter != NULL; iter = g_slist_next (iter))
-	{
-	  *p++ = (char *)(iter->data);
-	}
-      /* Terminate the array with a null pointer. */
-      *p = NULL;
-
-      /* Add the value to the variable, then free the argument list. */
-      RPT_reporting_add_integer (current_variable, $3, (const char **) drill_down_list);
-      g_slist_foreach ($5, g_free_as_GFunc, NULL);
-      g_slist_free ($5);
-      g_free (drill_down_list);
-
       s = RPT_reporting_value_to_string (current_variable, NULL);
       printf ("%s\n%s", s, PROMPT);
       free (s);
@@ -256,35 +179,6 @@ subtract_command:
       free (s);
       fflush (stdout);
     }
-  | SUBTRACT LPAREN INT COMMA string_list RPAREN
-    {
-      /* Integer, with subcategories. */
-      char **drill_down_list, **p, *s;
-      GSList *iter;
-
-      if (current_variable == NULL)
-        current_variable = RPT_new_reporting (tentative_name, RPT_group);
-
-      /* Copy the subcategories into an array. */
-      drill_down_list = g_new (char *, g_slist_length ($5) + 1);
-      for (iter = $5, p = drill_down_list; iter != NULL; iter = g_slist_next (iter))
-	{
-	  *p++ = (char *)(iter->data);
-	}
-      /* Terminate the array with a null pointer. */
-      *p = NULL;
-
-      /* Subtract the value from the variable, then free the argument list. */
-      RPT_reporting_sub_integer (current_variable, $3, (const char **) drill_down_list);
-      g_slist_foreach ($5, g_free_as_GFunc, NULL);
-      g_slist_free ($5);
-      g_free (drill_down_list);
-
-      s = RPT_reporting_value_to_string (current_variable, NULL);
-      printf ("%s\n%s", s, PROMPT);
-      free (s);
-      fflush (stdout);
-    }
   ;
 
 get_command :
@@ -297,35 +191,6 @@ get_command :
       free (s);
       fflush (stdout);
     }
-  | GET LPAREN string_list RPAREN
-    {
-      char **drill_down_list, **p;
-      GSList *iter;
-
-      /* Copy the subcategories into an array, then free the linked list
-       * structure. */
-      drill_down_list = g_new (char *, g_slist_length ($3) + 1);
-      for (iter = $3, p = drill_down_list; iter != NULL; iter = g_slist_next (iter))
-	{
-	  *p++ = (char *)(iter->data);
-	}
-      /* Terminate the list with a null pointer. */
-      *p = NULL;
-
-      switch (RPT_reporting_get_type (current_variable))
-	{
-	case RPT_integer:
-	  printf ("%li", RPT_reporting_get_integer (current_variable, (const char **) drill_down_list));
-	  break;
-	case RPT_real:
-	  printf ("%g", RPT_reporting_get_real (current_variable, (const char **) drill_down_list));
-	  break;
-    default:
-      g_assert_not_reached();
-	}
-      printf ("\n%s", PROMPT);
-      fflush (stdout);
-    }
   ;
 
 real:
@@ -336,19 +201,6 @@ real:
   | REAL
     {
       $$ = $1;
-    }
-  ;
-
-string_list:
-    string_list COMMA STRING
-    {
-      /* Append to a linked list of doubles. */
-      $$ = g_slist_append ($1, $3);
-    }
-  | STRING
-    {
-      /* Initialize a linked list of doubles. */
-      $$ = g_slist_append (NULL, $1);
     }
   ;
 
