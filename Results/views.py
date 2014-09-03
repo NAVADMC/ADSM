@@ -48,22 +48,28 @@ def non_empty_lines(line):
     return output_lines
 
 
-def simulation_process(iteration_number):
+def simulation_process(iteration_number, lock):
     start = time.time()
+
     output_args = prepare_supplemental_output_directory()
     executables = {"Windows": 'adsm.exe', "Linux": 'adsm'}
     system_executable = os.path.join(settings.BASE_DIR, executables[platform.system()])  #TODO: KeyError
     simulation = subprocess.Popen([system_executable, '-i', str(iteration_number), 'activeSession.sqlite3'] + output_args,
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
     headers = simulation.stdout.readline().decode("utf-8")  # first line should be the column headers
-    # print(headers)
     parser = Results.output_parser.DailyParser(headers)
 
-    for line in iter(simulation.stdout.readline, b''):  #
-        parser.parse_daily_strings(non_empty_lines(line))
+    lines = []
+    for line in iter(simulation.stdout.readline, b''):
+        lines.append(non_empty_lines(line))
     outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
     if errors:  # this will only print out error messages after the simulation has halted
         print(errors)
+
+    with lock:
+        for line in lines:
+            parser.parse_daily_strings(line)
+
     # TODO: When the subprocess terminates there might be unconsumed output that still needs to be processed.
     # (I haven't seen evidence of uncaught output since 10 days after writing it)
     end = time.time()
@@ -79,9 +85,16 @@ class Simulation(threading.Thread):
 
     def run(self):
         statuses = []
-        with ProcessPoolExecutor() as executor:
-            for exit_status in executor.map(simulation_process, range(1, self.max_iteration + 1)):
-                statuses.append(exit_status)
+        import multiprocessing
+        manager = multiprocessing.Manager()
+        pool = multiprocessing.Pool()
+        lock = manager.Lock()
+        for iteration in range(1, self.max_iteration + 1):
+            res = pool.apply_async(func=simulation_process, args=(iteration, lock))
+            statuses.append(res)
+        pool.close()
+        pool.join()
+        statuses = [status.get() for status in statuses]
         print(statuses)
 
 
