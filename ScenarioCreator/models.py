@@ -181,7 +181,7 @@ class Unit(BaseModel):
         help_text='The number of days that the unit will remain in its initial state unless preempted by other events.', )
     days_left_in_initial_state = models.IntegerField(blank=True, null=True,
         help_text='Used for setting up scripted scenarios.', )
-    initial_size = models.PositiveIntegerField(
+    initial_size = models.PositiveIntegerField(validators=[MinValueValidator(1)],
         help_text='The number of animals in the unit.', )
     user_notes = models.TextField(blank=True)
 
