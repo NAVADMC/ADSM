@@ -63,6 +63,7 @@ typedef struct
   RPT_reporting_t ***cumul_num_animals_exposed_by_cause_and_prodtype;
   RPT_reporting_t   *num_adequate_exposures;
   RPT_reporting_t   *cumul_num_adequate_exposures;
+  RPT_reporting_t  **cumul_num_adequate_exposures_by_cause;
   GPtrArray *daily_outputs; /**< Daily outputs, in a list to make it easy to
     zero them all at once. */
   GPtrArray *cumul_outputs; /**< Cumulative outputs, is a list to make it easy
@@ -215,6 +216,7 @@ handle_exposure_event (struct adsm_module_t_ *self, EVT_exposure_event_t * event
         {
           RPT_reporting_add_integer (local_data->num_adequate_exposures, 1, NULL);
           RPT_reporting_add_integer (local_data->cumul_num_adequate_exposures, 1, NULL);
+          RPT_reporting_add_integer (local_data->cumul_num_adequate_exposures_by_cause[cause], 1, NULL);
         }
     }
 
@@ -430,6 +432,11 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
       { &local_data->cumul_num_adequate_exposures, "adqcUAll", RPT_integer,
         RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->cumul_num_adequate_exposures_by_cause, "adqcU%s", RPT_integer,
+        RPT_CharArray, ADSM_contact_type_abbrev, ADSM_NCONTACT_TYPES,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->cumul_outputs },
 
