@@ -181,10 +181,9 @@ void
 handle_new_day_event (struct adsm_module_t_ * self, EVT_new_day_event_t * event)
 {
   local_data_t *local_data;
-  unsigned int i,j;
+  unsigned int i;
   RPT_reporting_t *reporting;
-  GPtrArray *names;
-  char *name, *camel;
+  char *camel;
   GError *error = NULL;
 
 #if DEBUG
@@ -204,16 +203,9 @@ handle_new_day_event (struct adsm_module_t_ * self, EVT_new_day_event_t * event)
       for (i = 0; i < self->outputs->len; i++)
         {
           reporting = (RPT_reporting_t *) g_ptr_array_index (self->outputs, i);
-          names = RPT_reporting_names (reporting);
-          for (j = 0; j < names->len; j++)
-            {
-              name = (char *) g_ptr_array_index (names, j);
-              camel = camelcase (name, /* capitalize first = */ FALSE); 
-              g_string_append_printf (local_data->buf, ",%s", camel);
-              g_free (camel);
-              g_free (name);
-            }
-          g_ptr_array_free (names, TRUE);
+          camel = camelcase (reporting->name, /* capitalize first = */ FALSE); 
+          g_string_append_printf (local_data->buf, ",%s", camel);
+          g_free (camel);
         }
       g_string_append_c (local_data->buf, '\n');
       g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
@@ -243,9 +235,8 @@ handle_end_of_day2_event (struct adsm_module_t_ * self,
                           EVT_end_of_day2_event_t * event)
 {
   local_data_t *local_data;
-  unsigned int i,j;
+  unsigned int i;
   RPT_reporting_t *reporting;
-  GPtrArray *values;
   char *value;
   GError *error = NULL;
 
@@ -268,14 +259,9 @@ handle_end_of_day2_event (struct adsm_module_t_ * self,
       for (i = 0; i < self->outputs->len; i++)
         {
           reporting = (RPT_reporting_t *) g_ptr_array_index (self->outputs, i);
-          values = RPT_reporting_values_as_strings (reporting);
-          for (j = 0; j < values->len; j++)
-            {
-              value = (char *) g_ptr_array_index (values, j);
-              g_string_append_printf (local_data->buf, ",%s", value);
-              g_free (value);
-            }
-          g_ptr_array_free (values, TRUE);
+          value = RPT_reporting_value_to_string (reporting, NULL);
+          g_string_append_printf (local_data->buf, ",%s", value);
+          g_free (value);
         } /* end of loop over output variables */
       g_string_append_c (local_data->buf, '\n');
       g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
