@@ -201,7 +201,7 @@ many_to_many_widget = (function(form_state){
         my_table.append(create_body_rows())
         update_display_inputs() //called from events normally, but we want to initialize
 
-        $('section form').before(my_table); //finally, insert everything into the DOM
+        $('.panel').before(my_table); //finally, insert everything into the DOM
         my_table.find('tbody select').on('change', update_state_inputs)//register event listener
     };
 
