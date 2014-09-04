@@ -1,8 +1,6 @@
 /** @file full_table_writer.c
  * Writes out a table of values covering many aspects of the simulation, in
- * comma-separated values (csv) format.  On systems where the simulation runs
- * without a GUI, this table is meant to imitate the outputs the user will be
- * familiar with from the Windows version.
+ * comma-separated values (csv) format.
  *
  * @author Neil Harvey <nharve01@uoguelph.ca><br>
  *   School of Computer Science, University of Guelph<br>
@@ -15,8 +13,6 @@
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 2 of the License, or (at your option)
  * any later version.
- *
- * @todo check errno after opening the file for writing.
  */
 
 #if HAVE_CONFIG_H
@@ -26,7 +22,6 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new full_table_writer_new
 #define run full_table_writer_run
-#define to_string full_table_writer_to_string
 #define local_free full_table_writer_free
 #define handle_before_any_simulations_event full_table_writer_handle_before_any_simulations_event
 #define handle_declaration_of_outputs_event full_table_writer_handle_declaration_of_outputs_event
@@ -69,7 +64,7 @@ double round (double x);
 /* Specialized information for this model. */
 typedef struct
 {
-  GIOChannel *channel; /* The open file. */
+  GIOChannel *channel; /* The output channel. */
   int run_number;
   gboolean printed_header;
   GString *buf;
@@ -186,8 +181,9 @@ void
 handle_new_day_event (struct adsm_module_t_ * self, EVT_new_day_event_t * event)
 {
   local_data_t *local_data;
-  unsigned int i;
+  unsigned int i,j;
   RPT_reporting_t *reporting;
+  GPtrArray *names;
   char *name, *camel;
   GError *error = NULL;
 
@@ -208,10 +204,16 @@ handle_new_day_event (struct adsm_module_t_ * self, EVT_new_day_event_t * event)
       for (i = 0; i < self->outputs->len; i++)
         {
           reporting = (RPT_reporting_t *) g_ptr_array_index (self->outputs, i);
-          name = reporting->name;
-          camel = camelcase (name, /* capitalize first = */ FALSE); 
-          g_string_append_printf (local_data->buf, ",%s", camel);
-          g_free (camel);
+          names = RPT_reporting_names (reporting);
+          for (j = 0; j < names->len; j++)
+            {
+              name = (char *) g_ptr_array_index (names, j);
+              camel = camelcase (name, /* capitalize first = */ FALSE); 
+              g_string_append_printf (local_data->buf, ",%s", camel);
+              g_free (camel);
+              g_free (name);
+            }
+          g_ptr_array_free (names, TRUE);
         }
       g_string_append_c (local_data->buf, '\n');
       g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
@@ -241,8 +243,9 @@ handle_end_of_day2_event (struct adsm_module_t_ * self,
                           EVT_end_of_day2_event_t * event)
 {
   local_data_t *local_data;
-  unsigned int i;
+  unsigned int i,j;
   RPT_reporting_t *reporting;
+  GPtrArray *values;
   char *value;
   GError *error = NULL;
 
@@ -265,9 +268,14 @@ handle_end_of_day2_event (struct adsm_module_t_ * self,
       for (i = 0; i < self->outputs->len; i++)
         {
           reporting = (RPT_reporting_t *) g_ptr_array_index (self->outputs, i);
-          value = RPT_reporting_value_to_string (reporting, NULL);
-          g_string_append_printf (local_data->buf, ",%s", value);
-          g_free (value);
+          values = RPT_reporting_values_as_strings (reporting);
+          for (j = 0; j < values->len; j++)
+            {
+              value = (char *) g_ptr_array_index (values, j);
+              g_string_append_printf (local_data->buf, ",%s", value);
+              g_free (value);
+            }
+          g_ptr_array_free (values, TRUE);
         } /* end of loop over output variables */
       g_string_append_c (local_data->buf, '\n');
       g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
@@ -348,7 +356,7 @@ local_free (struct adsm_module_t_ *self)
 
   local_data = (local_data_t *) (self->model_data);
 
-  /* Flush the output stream. */
+  /* Flush any remaining output. */
   g_io_channel_flush (local_data->channel, &error);
 
   /* Free the dynamically-allocated parts. */
