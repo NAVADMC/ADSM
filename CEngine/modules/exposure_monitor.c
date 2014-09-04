@@ -328,7 +328,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
+  self->outputs = g_ptr_array_new();
   self->model_data = local_data;
   self->run = run;
   self->is_listening_for = adsm_model_is_listening_for;
@@ -444,6 +444,27 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     };  
     RPT_bulk_create (outputs);
   }
+
+  /* Dispose of a few output variables we aren't interested in, to keep the
+   * output neater. */
+  for (ADSM_contact_type cause = 0; cause < ADSM_NCONTACT_TYPES; cause++)
+    {
+      if (cause == ADSM_UnspecifiedInfectionType || cause == ADSM_InitiallyInfected)
+        {
+          g_ptr_array_remove_fast (self->outputs, local_data->num_units_exposed_by_cause[cause] );
+          g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_exposed_by_cause[cause] );
+          g_ptr_array_remove_fast (self->outputs, local_data->num_animals_exposed_by_cause[cause] );
+          g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_exposed_by_cause[cause] );
+          g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_adequate_exposures_by_cause[cause] );
+          for (UNT_production_type_t prodtype = 0; prodtype < nprodtypes; prodtype++)
+            {
+              g_ptr_array_remove_fast (self->outputs, local_data->num_units_exposed_by_cause_and_prodtype[cause][prodtype] );
+              g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_exposed_by_cause_and_prodtype[cause][prodtype] );
+              g_ptr_array_remove_fast (self->outputs, local_data->num_animals_exposed_by_cause_and_prodtype[cause][prodtype] );
+              g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_exposed_by_cause_and_prodtype[cause][prodtype] );
+            }
+        }
+    }
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

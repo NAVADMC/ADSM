@@ -313,7 +313,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
+  self->outputs = g_ptr_array_new();
   self->model_data = local_data;
   self->run = run;
   self->is_listening_for = adsm_model_is_listening_for;
@@ -414,6 +414,27 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     };  
     RPT_bulk_create (outputs);
   }
+
+  /* The reasons for exams, zones, vaccination, destruction, etc. are all in
+   * the enum ADSM_control_reasons.  Dispose of some output variables for
+   * reasons that don't apply to exams, to keep the output neater. */
+  for (ADSM_control_reason reason = 0; reason < ADSM_NCONTROL_REASONS; reason++)
+    {
+      if (reason == ADSM_ControlReasonUnspecified || reason == ADSM_ControlInitialState)
+        {
+          g_ptr_array_remove_fast (self->outputs, local_data->nunits_examined_by_reason[reason] );
+          g_ptr_array_remove_fast (self->outputs, local_data->cumul_nunits_examined_by_reason[reason] );
+          g_ptr_array_remove_fast (self->outputs, local_data->nanimals_examined_by_reason[reason] );
+          g_ptr_array_remove_fast (self->outputs, local_data->cumul_nanimals_examined_by_reason[reason] );
+          for (UNT_production_type_t prodtype = 0; prodtype < nprodtypes; prodtype++)
+            {
+              g_ptr_array_remove_fast (self->outputs, local_data->nunits_examined_by_reason_and_prodtype[reason][prodtype] );
+              g_ptr_array_remove_fast (self->outputs, local_data->cumul_nunits_examined_by_reason_and_prodtype[reason][prodtype] );
+              g_ptr_array_remove_fast (self->outputs, local_data->nanimals_examined_by_reason_and_prodtype[reason][prodtype] );
+              g_ptr_array_remove_fast (self->outputs, local_data->cumul_nanimals_examined_by_reason_and_prodtype[reason][prodtype] );
+            }
+        }
+    }
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

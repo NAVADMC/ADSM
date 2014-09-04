@@ -455,16 +455,22 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * dispose of the other output variables to keep the output neater. */
   for (reason = 0; reason < ADSM_NCONTROL_REASONS; reason++)
     {
-      if (!(reason == ADSM_ControlInitialState || reason == ADSM_ControlRing))
+      if (reason != ADSM_ControlRing)
         {
           g_ptr_array_remove_fast (self->outputs, local_data->first_vaccination_by_reason[reason] );
+          for (prodtype = 0; prodtype < nprodtypes; prodtype++)
+            {
+              g_ptr_array_remove_fast (self->outputs, local_data->first_vaccination_by_reason_and_prodtype[reason][prodtype] );
+            }
+        }
+      if (reason != ADSM_ControlRing && reason != ADSM_ControlInitialState)
+        {
           g_ptr_array_remove_fast (self->outputs, local_data->num_units_vaccinated_by_reason[reason] );
           g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_vaccinated_by_reason[reason] );
           g_ptr_array_remove_fast (self->outputs, local_data->num_animals_vaccinated_by_reason[reason] );
           g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_vaccinated_by_reason[reason] );
           for (prodtype = 0; prodtype < nprodtypes; prodtype++)
             {
-              g_ptr_array_remove_fast (self->outputs, local_data->first_vaccination_by_reason_and_prodtype[reason][prodtype] );
               g_ptr_array_remove_fast (self->outputs, local_data->num_units_vaccinated_by_reason_and_prodtype[reason][prodtype] );
               g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_vaccinated_by_reason_and_prodtype[reason][prodtype] );
               g_ptr_array_remove_fast (self->outputs, local_data->num_animals_vaccinated_by_reason_and_prodtype[reason][prodtype] );

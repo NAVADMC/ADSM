@@ -352,7 +352,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projections,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
+  self->outputs = g_ptr_array_new();
   self->model_data = local_data;
   self->run = run;
   self->is_listening_for = adsm_model_is_listening_for;
@@ -533,6 +533,34 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projections,
     };  
     RPT_bulk_create (outputs);
   }
+
+  /* Only two of the contact types apply to tracing, so dispose of the other
+   * output variables to keep the output neater. */
+  for (ADSM_contact_type contact_type = 0; contact_type < ADSM_NCONTACT_TYPES; contact_type++)
+    {
+      if (contact_type != ADSM_DirectContact && contact_type != ADSM_IndirectContact)
+        {
+          g_ptr_array_remove_fast (self->outputs, local_data->nunits_potentially_traced_by_contacttype[contact_type] );
+          g_ptr_array_remove_fast (self->outputs, local_data->cumul_nunits_potentially_traced_by_contacttype[contact_type] );
+          g_ptr_array_remove_fast (self->outputs, local_data->nanimals_potentially_traced_by_contacttype[contact_type] );
+          g_ptr_array_remove_fast (self->outputs, local_data->cumul_nanimals_potentially_traced_by_contacttype[contact_type] );
+          g_ptr_array_remove_fast (self->outputs, local_data->nunits_traced_by_contacttype[contact_type] );
+          g_ptr_array_remove_fast (self->outputs, local_data->cumul_nunits_traced_by_contacttype[contact_type] );
+          g_ptr_array_remove_fast (self->outputs, local_data->nanimals_traced_by_contacttype[contact_type] );
+          g_ptr_array_remove_fast (self->outputs, local_data->cumul_nanimals_traced_by_contacttype[contact_type] );
+          for (UNT_production_type_t prodtype = 0; prodtype < nprodtypes; prodtype++)
+            {
+              g_ptr_array_remove_fast (self->outputs, local_data->nunits_potentially_traced_by_contacttype_and_prodtype[contact_type][prodtype] );
+              g_ptr_array_remove_fast (self->outputs, local_data->cumul_nunits_potentially_traced_by_contacttype_and_prodtype[contact_type][prodtype] );
+              g_ptr_array_remove_fast (self->outputs, local_data->nanimals_potentially_traced_by_contacttype_and_prodtype[contact_type][prodtype] );
+              g_ptr_array_remove_fast (self->outputs, local_data->cumul_nanimals_potentially_traced_by_contacttype_and_prodtype[contact_type][prodtype] );
+              g_ptr_array_remove_fast (self->outputs, local_data->nunits_traced_by_contacttype_and_prodtype[contact_type][prodtype] );
+              g_ptr_array_remove_fast (self->outputs, local_data->cumul_nunits_traced_by_contacttype_and_prodtype[contact_type][prodtype] );
+              g_ptr_array_remove_fast (self->outputs, local_data->nanimals_traced_by_contacttype_and_prodtype[contact_type][prodtype] );
+              g_ptr_array_remove_fast (self->outputs, local_data->cumul_nanimals_traced_by_contacttype_and_prodtype[contact_type][prodtype] );
+            }
+        }
+    }
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);
