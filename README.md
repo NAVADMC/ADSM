@@ -82,6 +82,7 @@ to be in the py33 virtual env.  That only needs to be done once.
     cd ..
     python manage.py collectstatic
     python manage.py runproductionserver --serve_static=collect --pid_file=server.pid --port=8080 
+    #sudo  iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080  # use this if the server crashes
 
 ##OS - specific Branches
 _Branches: Windows, Linux, Mac-OSX_  
