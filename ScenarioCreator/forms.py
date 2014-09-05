@@ -323,8 +323,8 @@ class AirborneSpreadForm(BaseForm):
             'name',
             AppendedText('spread_1km_probability', 'example: 0.37 = 37%'),
             'max_distance',
-            'wind_direction_start',
-            'wind_direction_end',
+            'exposure_direction_start',
+            'exposure_direction_end',
             'transport_delay',
             submit_button()
         )

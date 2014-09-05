@@ -556,11 +556,11 @@ class AirborneSpread(DiseaseSpread):
         help_text='The probability that disease will be spread to unit 1 km away from the source unit.', )
     max_distance = models.FloatField(validators=[MinValueValidator(1.1)], blank=True, null=True,
         help_text='The maximum distance in KM of airborne spread.  Only used in Linear Airborne Decay.', )
-    wind_direction_start = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=0,
-        help_text='The start angle in degrees of the predominate wind direction for airborne spread.', )
-    #TODO: This doesn't keep start and end from crossing each other.
-    wind_direction_end = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=360,
-        help_text='The end angle in degrees of the predominate wind direction for airborne spread.', )
+    exposure_direction_start = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=0,
+        help_text='The start angle in degrees of the area at risk of airborne spread.  0 is North.', )
+    #TODO: This doesn't keep start and end from crossing each other.  I think Neil said his code can swap them.
+    exposure_direction_end = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=360,
+        help_text='The end angle in degrees of the area at risk of airborne spread.  0 is North.', )
     def __str__(self):
         return "%s %i" % (self.name, self.id)
 
