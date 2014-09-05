@@ -4,6 +4,7 @@
 
 {% block content %}
     <script src="{{ STATIC_URL }}js/many-to-many-widget.js"></script>
+    <script>$(document).ready(check_disable_spread_checboxes)</script>
 
     <h1 id="title">{{ title }}</h1>
     <div class="row">
@@ -16,6 +17,8 @@
         <p class="col-lg-6">Since the number of possible contact pairs is exponential, you can use this page to select groups of production types that all 
         have the same parameters.  Select multiple production types in source and/or destination then use "Apply" to set them all to the same value.
         Or check your work by hand under "All Possible Interactions".</p>
+    </div>
+    <div class="row">
     </div>
     <div class="row col-md-9">
        <div class="panel panel-default">
