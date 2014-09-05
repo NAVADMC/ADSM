@@ -151,11 +151,9 @@ handle_new_day_event (struct adsm_module_t_ *self)
     }
 
   RPT_reporting_add_integer (local_data->unit_days_in_queue,
-                             local_data->unique_units_awaiting_vaccination,
-                             NULL);
+                             local_data->unique_units_awaiting_vaccination);
   RPT_reporting_add_real (local_data->animal_days_in_queue,
-                          local_data->unique_animals_awaiting_vaccination,
-                          NULL);
+                          local_data->unique_animals_awaiting_vaccination);
 
 #if DEBUG
   g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
@@ -242,27 +240,25 @@ handle_commitment_to_vaccinate_event (struct adsm_module_t_ *self,
         }
 
       /* Increment the counts of vaccinations still to do. */
-      RPT_reporting_add_integer (local_data->nunits_awaiting_vaccination, 1, NULL);
-      RPT_reporting_add_integer (local_data->nunits_awaiting_vaccination_by_prodtype[prodtype], 1, NULL);
-      nunits = RPT_reporting_get_integer (local_data->nunits_awaiting_vaccination, NULL);
+      RPT_reporting_add_integer (local_data->nunits_awaiting_vaccination, 1);
+      RPT_reporting_add_integer (local_data->nunits_awaiting_vaccination_by_prodtype[prodtype], 1);
+      nunits = RPT_reporting_get_integer (local_data->nunits_awaiting_vaccination);
       if (nunits > local_data->peak_nunits)
         {
           local_data->peak_nunits = nunits;
-          RPT_reporting_set_integer (local_data->peak_nunits_awaiting_vaccination, nunits, NULL);
-          RPT_reporting_set_integer (local_data->peak_nunits_awaiting_vaccination_day, event->day, NULL);
+          RPT_reporting_set_integer (local_data->peak_nunits_awaiting_vaccination, nunits);
+          RPT_reporting_set_integer (local_data->peak_nunits_awaiting_vaccination_day, event->day);
         }
 
-      RPT_reporting_add_real (local_data->nanimals_awaiting_vaccination, (double)(unit->size), NULL);
+      RPT_reporting_add_real (local_data->nanimals_awaiting_vaccination, (double)(unit->size));
       RPT_reporting_add_real (local_data->nanimals_awaiting_vaccination_by_prodtype[prodtype],
-                              (double)(unit->size), NULL);
-      nanimals = RPT_reporting_get_real (local_data->nanimals_awaiting_vaccination, NULL);
+                              (double)(unit->size));
+      nanimals = RPT_reporting_get_real (local_data->nanimals_awaiting_vaccination);
       if (nanimals > local_data->peak_nanimals)
         {
           local_data->peak_nanimals = nanimals;
-          RPT_reporting_set_real (local_data->peak_nanimals_awaiting_vaccination, nanimals,
-                                     NULL);
-          RPT_reporting_set_integer (local_data->peak_nanimals_awaiting_vaccination_day, event->day,
-                                     NULL);
+          RPT_reporting_set_real (local_data->peak_nanimals_awaiting_vaccination, nanimals);
+          RPT_reporting_set_integer (local_data->peak_nanimals_awaiting_vaccination_day, event->day);
         }
     }
 
@@ -310,13 +306,13 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
 
       /* Update the peak wait time. */
       local_data->peak_wait = MAX (local_data->peak_wait, wait);
-      RPT_reporting_set_integer (local_data->peak_wait_time, local_data->peak_wait, NULL);
+      RPT_reporting_set_integer (local_data->peak_wait_time, local_data->peak_wait);
 
       /* Update the average wait time. */
       local_data->sum += wait;
       local_data->count += 1;
       RPT_reporting_set_real (local_data->average_wait_time,
-                              local_data->sum / local_data->count, NULL);
+                              local_data->sum / local_data->count);
 
       /* Mark the unit as no longer on a waiting list. */
       count = GPOINTER_TO_INT(p);
@@ -331,12 +327,12 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
         g_hash_table_insert (local_data->status, unit, GINT_TO_POINTER(count-1));
 
       /* Decrement the counts of vaccinations still to do. */
-      RPT_reporting_sub_integer (local_data->nunits_awaiting_vaccination, 1, NULL);
-      RPT_reporting_sub_integer (local_data->nunits_awaiting_vaccination_by_prodtype[prodtype], 1, NULL);
+      RPT_reporting_sub_integer (local_data->nunits_awaiting_vaccination, 1);
+      RPT_reporting_sub_integer (local_data->nunits_awaiting_vaccination_by_prodtype[prodtype], 1);
 
-      RPT_reporting_sub_real (local_data->nanimals_awaiting_vaccination, (double)(unit->size), NULL);
+      RPT_reporting_sub_real (local_data->nanimals_awaiting_vaccination, (double)(unit->size));
       RPT_reporting_sub_real (local_data->nanimals_awaiting_vaccination_by_prodtype[prodtype],
-                              (double)(unit->size), NULL);
+                              (double)(unit->size));
     }
 
 #if DEBUG
@@ -429,12 +425,12 @@ handle_vaccination_canceled_event (struct adsm_module_t_ *self,
       #endif
 
       /* Decrement the counts of vaccinations still to do. */
-      RPT_reporting_sub_integer (local_data->nunits_awaiting_vaccination, 1, NULL);
-      RPT_reporting_sub_integer (local_data->nunits_awaiting_vaccination_by_prodtype[prodtype], 1, NULL);
+      RPT_reporting_sub_integer (local_data->nunits_awaiting_vaccination, 1);
+      RPT_reporting_sub_integer (local_data->nunits_awaiting_vaccination_by_prodtype[prodtype], 1);
 
-      RPT_reporting_sub_real (local_data->nanimals_awaiting_vaccination, (double)(unit->size), NULL);
+      RPT_reporting_sub_real (local_data->nanimals_awaiting_vaccination, (double)(unit->size));
       RPT_reporting_sub_real (local_data->nanimals_awaiting_vaccination_by_prodtype[prodtype],
-                              (double)(unit->size), NULL);
+                              (double)(unit->size));
     }
 
 #if DEBUG

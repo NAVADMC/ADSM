@@ -166,15 +166,15 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
           zone = ZON_zone_list_get (zones, i);
 
           area = ZON_update_area (zone);
-          RPT_reporting_set_real (local_data->area[i], area, NULL);
+          RPT_reporting_set_real (local_data->area[i], area);
 
           perimeter = ZON_update_perimeter (zone);
-          RPT_reporting_set_real (local_data->perimeter[i], perimeter, NULL);
+          RPT_reporting_set_real (local_data->perimeter[i], perimeter);
           if (NULL != adsm_record_zone_perimeter)
             adsm_record_zone_perimeter (zone->level, perimeter);           
 
           RPT_reporting_set_integer (local_data->num_separate_areas[i],
-                                     zone->poly->num_contours, NULL);
+                                     zone->poly->num_contours);
         }
 
       /* In the loop above, the area of each zone polygon was computed.  But since
@@ -192,7 +192,7 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
             {
               next_smaller_zone = ZON_zone_list_get (zones, i - 1);
               zone->area -= next_smaller_zone->area;
-              RPT_reporting_set_real (local_data->area[i], zone->area, NULL);
+              RPT_reporting_set_real (local_data->area[i], zone->area);
             }
           #ifdef USE_SC_GUILIB
             sc_record_zone_area( event->day, zone );
@@ -232,15 +232,15 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
       prodtype = unit->production_type;
       nanimals = (double)(unit->size);
       
-      RPT_reporting_add_integer (local_data->num_units[zone_index], 1, NULL);
-      RPT_reporting_add_integer (local_data->num_units_by_prodtype[zone_index][prodtype], 1, NULL);
+      RPT_reporting_add_integer (local_data->num_units[zone_index], 1);
+      RPT_reporting_add_integer (local_data->num_units_by_prodtype[zone_index][prodtype], 1);
       if (unit->state != Destroyed &&
           !ZON_same_zone (zones->membership[i], background_zone))
         {
-          RPT_reporting_add_integer (local_data->num_unit_days[zone_index], 1, NULL);
-          RPT_reporting_add_integer (local_data->num_unit_days_by_prodtype[zone_index][prodtype], 1, NULL);
-          RPT_reporting_add_real (local_data->num_animal_days[zone_index], nanimals, NULL);
-          RPT_reporting_add_real (local_data->num_animal_days_by_prodtype[zone_index][prodtype], nanimals, NULL);
+          RPT_reporting_add_integer (local_data->num_unit_days[zone_index], 1);
+          RPT_reporting_add_integer (local_data->num_unit_days_by_prodtype[zone_index][prodtype], 1);
+          RPT_reporting_add_real (local_data->num_animal_days[zone_index], nanimals);
+          RPT_reporting_add_real (local_data->num_animal_days_by_prodtype[zone_index][prodtype], nanimals);
         }
     }
 

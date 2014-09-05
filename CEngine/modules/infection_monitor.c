@@ -125,9 +125,9 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   local_data->detection_occurred = FALSE;
   /* The output variables for units and animals infected at first detection
    * have no value until there is a detection. */
-  RPT_reporting_set_null (local_data->first_det_u_inf, NULL);
-  RPT_reporting_set_null (local_data->first_det_a_inf, NULL);
-  RPT_reporting_set_null (local_data->ratio, NULL);
+  RPT_reporting_set_null (local_data->first_det_u_inf);
+  RPT_reporting_set_null (local_data->first_det_a_inf);
+  RPT_reporting_set_null (local_data->ratio);
   for (i = 0; i < local_data->nrecent_days * 2; i++)
     local_data->nrecent_infections[i] = 0;
 
@@ -220,7 +220,7 @@ handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event)
    * 2 weeks have passed. */
   if (event->day >= (local_data->nrecent_days * 2) && local_data->denominator > 0)
     RPT_reporting_set_real (local_data->ratio,
-                            1.0 * local_data->numerator / local_data->denominator, NULL);
+                            1.0 * local_data->numerator / local_data->denominator);
 
 #if DEBUG
   g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
@@ -261,13 +261,11 @@ handle_detection_event (struct adsm_module_t_ *self,
        * variables. */
       RPT_reporting_set_integer (
         local_data->first_det_u_inf,
-        RPT_reporting_get_integer(local_data->cumul_num_units_infected, NULL),
-        NULL
+        RPT_reporting_get_integer(local_data->cumul_num_units_infected)
       );
       RPT_reporting_set_real (
         local_data->first_det_a_inf,
-        RPT_reporting_get_real(local_data->cumul_num_animals_infected, NULL),
-        NULL
+        RPT_reporting_get_real(local_data->cumul_num_animals_infected)
       );
     }
 
@@ -332,31 +330,31 @@ handle_infection_event (struct adsm_module_t_ *self, EVT_infection_event_t * eve
    * infnUIni broken down by production type. */
   if (event->contact_type != ADSM_InitiallyInfected)
     {
-      RPT_reporting_add_integer (local_data->num_units_infected, 1, NULL);
-      RPT_reporting_add_integer (local_data->num_units_infected_by_prodtype[prodtype], 1, NULL);
-      RPT_reporting_add_real (local_data->num_animals_infected, nanimals, NULL);
-      RPT_reporting_add_real (local_data->num_animals_infected_by_prodtype[prodtype], nanimals, NULL);
-      RPT_reporting_add_integer (local_data->cumul_num_units_infected, 1, NULL);
-      RPT_reporting_add_integer (local_data->cumul_num_units_infected_by_prodtype[prodtype], 1, NULL);
-      RPT_reporting_add_real (local_data->cumul_num_animals_infected, nanimals, NULL);
-      RPT_reporting_add_real (local_data->cumul_num_animals_infected_by_prodtype[prodtype], nanimals, NULL);
+      RPT_reporting_add_integer (local_data->num_units_infected, 1);
+      RPT_reporting_add_integer (local_data->num_units_infected_by_prodtype[prodtype], 1);
+      RPT_reporting_add_real (local_data->num_animals_infected, nanimals);
+      RPT_reporting_add_real (local_data->num_animals_infected_by_prodtype[prodtype], nanimals);
+      RPT_reporting_add_integer (local_data->cumul_num_units_infected, 1);
+      RPT_reporting_add_integer (local_data->cumul_num_units_infected_by_prodtype[prodtype], 1);
+      RPT_reporting_add_real (local_data->cumul_num_animals_infected, nanimals);
+      RPT_reporting_add_real (local_data->cumul_num_animals_infected_by_prodtype[prodtype], nanimals);
     }
-  RPT_reporting_add_integer (local_data->num_units_infected_by_cause[cause], 1, NULL);
-  RPT_reporting_add_real (local_data->num_animals_infected_by_cause[cause], nanimals, NULL);
-  RPT_reporting_add_integer (local_data->cumul_num_units_infected_by_cause[cause], 1, NULL);
-  RPT_reporting_add_real (local_data->cumul_num_animals_infected_by_cause[cause], nanimals, NULL);
-  RPT_reporting_add_integer (local_data->num_units_infected_by_cause_and_prodtype[cause][prodtype], 1, NULL);
-  RPT_reporting_add_real (local_data->num_animals_infected_by_cause_and_prodtype[cause][prodtype], nanimals, NULL);
-  RPT_reporting_add_integer (local_data->cumul_num_units_infected_by_cause_and_prodtype[cause][prodtype], 1, NULL);
-  RPT_reporting_add_real (local_data->cumul_num_animals_infected_by_cause_and_prodtype[cause][prodtype], nanimals, NULL);
+  RPT_reporting_add_integer (local_data->num_units_infected_by_cause[cause], 1);
+  RPT_reporting_add_real (local_data->num_animals_infected_by_cause[cause], nanimals);
+  RPT_reporting_add_integer (local_data->cumul_num_units_infected_by_cause[cause], 1);
+  RPT_reporting_add_real (local_data->cumul_num_animals_infected_by_cause[cause], nanimals);
+  RPT_reporting_add_integer (local_data->num_units_infected_by_cause_and_prodtype[cause][prodtype], 1);
+  RPT_reporting_add_real (local_data->num_animals_infected_by_cause_and_prodtype[cause][prodtype], nanimals);
+  RPT_reporting_add_integer (local_data->cumul_num_units_infected_by_cause_and_prodtype[cause][prodtype], 1);
+  RPT_reporting_add_real (local_data->cumul_num_animals_infected_by_cause_and_prodtype[cause][prodtype], nanimals);
 
   /* Infections that occur on the same day as the first detection are included
    * in the value of the firstDet output variables. */
   if (local_data->detection_occurred
       && (local_data->detection_day == event->day))
     {
-      RPT_reporting_add_integer (local_data->first_det_u_inf, 1, NULL);
-      RPT_reporting_add_real (local_data->first_det_a_inf, nanimals, NULL);
+      RPT_reporting_add_integer (local_data->first_det_u_inf, 1);
+      RPT_reporting_add_real (local_data->first_det_a_inf, nanimals);
     }
 
   /* Update the ratio of recent infections to infections before that.  Note
@@ -374,20 +372,19 @@ handle_infection_event (struct adsm_module_t_ *self, EVT_infection_event_t * eve
       if (local_data->denominator > 0)
         {
           RPT_reporting_set_real (local_data->ratio,
-                                  1.0 * (local_data->numerator + count) / local_data->denominator,
-                                  NULL);
+                                  1.0 * (local_data->numerator + count) / local_data->denominator);
 #if DEBUG
           g_string_append_printf (s, ", ratio %u/%u = %g",
                                   local_data->numerator + count,
                                   local_data->denominator,
-                                  RPT_reporting_get_real (local_data->ratio, NULL));
+                                  RPT_reporting_get_real (local_data->ratio));
 #endif
         }
       else
         {
 #if DEBUG
           g_string_append_printf (s, ", denominator=0, ratio remains at old value of %g",
-                                  RPT_reporting_get_real (local_data->ratio, NULL));
+                                  RPT_reporting_get_real (local_data->ratio));
 #endif
           ;
         }

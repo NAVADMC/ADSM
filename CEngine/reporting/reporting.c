@@ -229,13 +229,10 @@ RPT_free_reporting (RPT_reporting_t * reporting)
  * Sets the value of an integer output variable.
  *
  * @param reporting an output variable.
- * @param value the new value. 
- * @param subelement_name a null-terminated array of strings used to "drill
- *   down" through group output variables.  If NULL, <i>reporting</i> is
- *   assumed to be an integer output variable.
+ * @param value the new value.
  */
 void
-RPT_reporting_set_integer (RPT_reporting_t * reporting, long value, const char **subelement_name)
+RPT_reporting_set_integer (RPT_reporting_t * reporting, long value)
 {
   g_assert (reporting->type == RPT_integer);
   *((long *) reporting->data) = value;
@@ -250,12 +247,9 @@ RPT_reporting_set_integer (RPT_reporting_t * reporting, long value, const char *
  *
  * @param reporting an output variable.
  * @param value the amount to add. 
- * @param subelement_name a null-terminated array of strings used to "drill
- *   down" through group output variables.  If NULL, <i>reporting</i> is
- *   assumed to be an integer output variable.
  */
 void
-RPT_reporting_add_integer (RPT_reporting_t * reporting, long value, const char **subelement_name)
+RPT_reporting_add_integer (RPT_reporting_t * reporting, long value)
 {
   g_assert (reporting->type == RPT_integer);
   *((long *) reporting->data) += value;
@@ -269,13 +263,10 @@ RPT_reporting_add_integer (RPT_reporting_t * reporting, long value, const char *
  * Retrieves the value of an integer output variable.
  *
  * @param reporting an output variable.
- * @param subelement_name a null-terminated array of strings used to "drill
- *   down" through group output variables.  If NULL, <i>reporting</i> is
- *   assumed to be an integer output variable.
- * @returns the value, or 0 if a non-existent subelement was specified.
+ * @returns the value.
  */
 long
-RPT_reporting_get_integer (RPT_reporting_t * reporting, const char **subelement_name)
+RPT_reporting_get_integer (RPT_reporting_t * reporting)
 {
   long value;
   g_assert (reporting->type == RPT_integer);
@@ -290,12 +281,9 @@ RPT_reporting_get_integer (RPT_reporting_t * reporting, const char **subelement_
  *
  * @param reporting an output variable.
  * @param value the new value. 
- * @param subelement_name a null-terminated array of strings used to "drill
- *   down" through group output variables.  If NULL, <i>reporting</i> is
- *   assumed to be a real output variable.
  */
 void
-RPT_reporting_set_real (RPT_reporting_t * reporting, double value, const char **subelement_name)
+RPT_reporting_set_real (RPT_reporting_t * reporting, double value)
 {
   g_assert (reporting->type == RPT_real);
   *((double *) reporting->data) = value;
@@ -310,12 +298,9 @@ RPT_reporting_set_real (RPT_reporting_t * reporting, double value, const char **
  *
  * @param reporting an output variable.
  * @param value the amount to add. 
- * @param subelement_name a null-terminated array of strings used to "drill
- *   down" through group output variables.  If NULL, <i>reporting</i> is
- *   assumed to be a real output variable.
  */
 void
-RPT_reporting_add_real (RPT_reporting_t * reporting, double value, const char **subelement_name)
+RPT_reporting_add_real (RPT_reporting_t * reporting, double value)
 {
   g_assert (reporting->type == RPT_real);
   *((double *) reporting->data) += value;
@@ -329,13 +314,10 @@ RPT_reporting_add_real (RPT_reporting_t * reporting, double value, const char **
  * Retrieves the value of a real output variable.
  *
  * @param reporting an output variable.
- * @param subelement_name a null-terminated array of strings used to "drill
- *   down" through group output variables.  If NULL, <i>reporting</i> is
- *   assumed to be an real output variable.
- * @returns the value, or 0 if a non-existent subelement was specified.
+ * @returns the value.
  */
 double
-RPT_reporting_get_real (RPT_reporting_t * reporting, const char **subelement_name)
+RPT_reporting_get_real (RPT_reporting_t * reporting)
 {
   double value;
 
@@ -356,7 +338,7 @@ RPT_reporting_get_real (RPT_reporting_t * reporting, const char **subelement_nam
 void
 RPT_reporting_set_null_as_GFunc (gpointer data, gpointer user_data)
 {
-  RPT_reporting_set_null ((RPT_reporting_t *) data, NULL);
+  RPT_reporting_set_null ((RPT_reporting_t *) data);
 }
 
 
@@ -365,12 +347,9 @@ RPT_reporting_set_null_as_GFunc (gpointer data, gpointer user_data)
  * Sets the value of an output variable to "null".
  *
  * @param reporting an output variable.
- * @param subelement_name a null-terminated array of strings used to "drill
- *   down" through group output variables.  Use NULL if the output variable is
- *   not a group variable, or if you want all sub-categories set to NULL.
  */
 void
-RPT_reporting_set_null (RPT_reporting_t * reporting, const char **subelement_name)
+RPT_reporting_set_null (RPT_reporting_t * reporting)
 {
   reporting->is_null = TRUE;
 }
@@ -474,10 +453,10 @@ RPT_clone_reporting (RPT_reporting_t * original)
       switch (original->type)
         {
         case RPT_integer:
-          RPT_reporting_set_integer (copy, RPT_reporting_get_integer (original, NULL), NULL);
+          RPT_reporting_set_integer (copy, RPT_reporting_get_integer (original));
           break;
         case RPT_real:
-          RPT_reporting_set_real (copy, RPT_reporting_get_real (original, NULL), NULL);
+          RPT_reporting_set_real (copy, RPT_reporting_get_real (original));
           break;
         default:
           g_assert_not_reached ();

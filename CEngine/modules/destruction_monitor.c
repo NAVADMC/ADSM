@@ -179,40 +179,37 @@ handle_destruction_event (struct adsm_module_t_ *self, EVT_destruction_event_t *
     {
       if (local_data->first_destruction->is_null)
         {
-          RPT_reporting_set_integer (local_data->first_destruction, event->day, NULL);
-          RPT_reporting_set_integer (local_data->destruction_occurred, 1, NULL);
+          RPT_reporting_set_integer (local_data->first_destruction, event->day);
+          RPT_reporting_set_integer (local_data->destruction_occurred, 1);
         }
       if (local_data->first_destruction_by_reason[reason]->is_null)
-        RPT_reporting_set_integer (local_data->first_destruction_by_reason[reason], event->day, NULL);
+        RPT_reporting_set_integer (local_data->first_destruction_by_reason[reason], event->day);
       if (local_data->first_destruction_by_prodtype[prodtype]->is_null)
-        RPT_reporting_set_integer (local_data->first_destruction_by_prodtype[prodtype], event->day, NULL);  
+        RPT_reporting_set_integer (local_data->first_destruction_by_prodtype[prodtype], event->day);  
       if (local_data->first_destruction_by_reason_and_prodtype[reason][prodtype]->is_null)
-        RPT_reporting_set_integer (local_data->first_destruction_by_reason_and_prodtype[reason][prodtype], event->day, NULL);
+        RPT_reporting_set_integer (local_data->first_destruction_by_reason_and_prodtype[reason][prodtype], event->day);
 
       /* Initially destroyed units also are not included in many of the counts.
        * They will not be part of desnUAll or desnU broken down by production
        * type.  They will be part of desnUIni and desnUIni broken down by
        * production type. */
-      RPT_reporting_add_integer  (local_data->num_units_destroyed, 1, NULL);
-      RPT_reporting_add_integer (local_data->num_units_destroyed_by_prodtype[prodtype], 1, NULL);
-      RPT_reporting_add_real  (local_data->num_animals_destroyed, nanimals, NULL);
-      RPT_reporting_add_real (local_data->num_animals_destroyed_by_prodtype[prodtype], nanimals, NULL);
-      RPT_reporting_add_integer  (local_data->cumul_num_units_destroyed, 1, NULL);
-      RPT_reporting_add_integer (local_data->cumul_num_units_destroyed_by_prodtype[prodtype], 1, NULL);
-      RPT_reporting_add_real  (local_data->cumul_num_animals_destroyed, nanimals, NULL);
-      RPT_reporting_add_real (local_data->cumul_num_animals_destroyed_by_prodtype[prodtype], nanimals, NULL);
+      RPT_reporting_add_integer  (local_data->num_units_destroyed, 1);
+      RPT_reporting_add_integer (local_data->num_units_destroyed_by_prodtype[prodtype], 1);
+      RPT_reporting_add_real  (local_data->num_animals_destroyed, nanimals);
+      RPT_reporting_add_real (local_data->num_animals_destroyed_by_prodtype[prodtype], nanimals);
+      RPT_reporting_add_integer  (local_data->cumul_num_units_destroyed, 1);
+      RPT_reporting_add_integer (local_data->cumul_num_units_destroyed_by_prodtype[prodtype], 1);
+      RPT_reporting_add_real  (local_data->cumul_num_animals_destroyed, nanimals);
+      RPT_reporting_add_real (local_data->cumul_num_animals_destroyed_by_prodtype[prodtype], nanimals);
     }
-  RPT_reporting_add_integer (local_data->num_units_destroyed_by_reason[reason], 1, NULL);
-  RPT_reporting_add_real (local_data->num_animals_destroyed_by_reason[reason], nanimals, NULL);
-  RPT_reporting_add_integer (local_data->cumul_num_units_destroyed_by_reason[reason], 1, NULL);
-  RPT_reporting_add_real (local_data->cumul_num_animals_destroyed_by_reason[reason], nanimals, NULL);
-  RPT_reporting_add_integer (local_data->num_units_destroyed_by_reason_and_prodtype[reason][prodtype], 1, NULL);
-  RPT_reporting_add_real (local_data->num_animals_destroyed_by_reason_and_prodtype[reason][prodtype], nanimals,
-                          NULL);
-  RPT_reporting_add_integer (local_data->cumul_num_units_destroyed_by_reason_and_prodtype[reason][prodtype], 1,
-                             NULL);
-  RPT_reporting_add_real (local_data->cumul_num_animals_destroyed_by_reason_and_prodtype[reason][prodtype], nanimals,
-                          NULL);
+  RPT_reporting_add_integer (local_data->num_units_destroyed_by_reason[reason], 1);
+  RPT_reporting_add_real (local_data->num_animals_destroyed_by_reason[reason], nanimals);
+  RPT_reporting_add_integer (local_data->cumul_num_units_destroyed_by_reason[reason], 1);
+  RPT_reporting_add_real (local_data->cumul_num_animals_destroyed_by_reason[reason], nanimals);
+  RPT_reporting_add_integer (local_data->num_units_destroyed_by_reason_and_prodtype[reason][prodtype], 1);
+  RPT_reporting_add_real (local_data->num_animals_destroyed_by_reason_and_prodtype[reason][prodtype], nanimals);
+  RPT_reporting_add_integer (local_data->cumul_num_units_destroyed_by_reason_and_prodtype[reason][prodtype], 1);
+  RPT_reporting_add_real (local_data->cumul_num_animals_destroyed_by_reason_and_prodtype[reason][prodtype], nanimals);
 
 #if DEBUG
   g_debug ("----- EXIT handle_destruction_event (%s)", MODEL_NAME);

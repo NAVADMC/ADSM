@@ -238,40 +238,40 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
    * detection first. */
   if (local_data->first_detection->is_null)
     {
-      RPT_reporting_set_integer (local_data->first_detection, event->day, NULL);
-      RPT_reporting_set_integer (local_data->detection_occurred, 1, NULL);
+      RPT_reporting_set_integer (local_data->first_detection, event->day);
+      RPT_reporting_set_integer (local_data->detection_occurred, 1);
     } 
   if (local_data->first_detection_by_prodtype[prodtype]->is_null)
-    RPT_reporting_set_integer (local_data->first_detection_by_prodtype[prodtype], event->day, NULL);
-  RPT_reporting_set_integer (local_data->last_detection, event->day, NULL);
-  RPT_reporting_set_integer (local_data->last_detection_by_prodtype[prodtype], event->day, NULL);  
+    RPT_reporting_set_integer (local_data->first_detection_by_prodtype[prodtype], event->day);
+  RPT_reporting_set_integer (local_data->last_detection, event->day);
+  RPT_reporting_set_integer (local_data->last_detection_by_prodtype[prodtype], event->day);  
 
   p = g_hash_table_lookup (local_data->detected_today, unit);
   if (p == NULL)
     {
       /* This unit has not been detected already today. */
       if (local_data->first_detection_by_means[means]->is_null)
-        RPT_reporting_set_integer (local_data->first_detection_by_means[means], event->day, NULL);
+        RPT_reporting_set_integer (local_data->first_detection_by_means[means], event->day);
       if (local_data->first_detection_by_means_and_prodtype[means][prodtype]->is_null)
-        RPT_reporting_set_integer (local_data->first_detection_by_means_and_prodtype[means][prodtype], event->day, NULL);
-      RPT_reporting_set_integer (local_data->last_detection_by_means[means], event->day, NULL);
-      RPT_reporting_set_integer (local_data->last_detection_by_means_and_prodtype[means][prodtype], event->day, NULL);
-      RPT_reporting_add_integer (local_data->nunits_detected, 1, NULL);
-      RPT_reporting_add_integer (local_data->nunits_detected_by_means[means], 1, NULL);
-      RPT_reporting_add_integer (local_data->nunits_detected_by_prodtype[prodtype], 1, NULL);
-      RPT_reporting_add_integer (local_data->nunits_detected_by_means_and_prodtype[means][prodtype], 1, NULL);
-      RPT_reporting_add_real (local_data->nanimals_detected, nanimals, NULL);
-      RPT_reporting_add_real (local_data->nanimals_detected_by_means[means], nanimals, NULL);
-      RPT_reporting_add_real (local_data->nanimals_detected_by_prodtype[prodtype], nanimals, NULL);
-      RPT_reporting_add_real (local_data->nanimals_detected_by_means_and_prodtype[means][prodtype], nanimals, NULL);
-      RPT_reporting_add_integer (local_data->cumul_nunits_detected, 1, NULL);
-      RPT_reporting_add_integer (local_data->cumul_nunits_detected_by_means[means], 1, NULL);
-      RPT_reporting_add_integer (local_data->cumul_nunits_detected_by_prodtype[prodtype], 1, NULL);
-      RPT_reporting_add_integer (local_data->cumul_nunits_detected_by_means_and_prodtype[means][prodtype], 1, NULL);
-      RPT_reporting_add_real (local_data->cumul_nanimals_detected, nanimals, NULL);
-      RPT_reporting_add_real (local_data->cumul_nanimals_detected_by_means[means], nanimals, NULL);
-      RPT_reporting_add_real (local_data->cumul_nanimals_detected_by_prodtype[prodtype], nanimals, NULL);
-      RPT_reporting_add_real (local_data->cumul_nanimals_detected_by_means_and_prodtype[means][prodtype], nanimals, NULL);
+        RPT_reporting_set_integer (local_data->first_detection_by_means_and_prodtype[means][prodtype], event->day);
+      RPT_reporting_set_integer (local_data->last_detection_by_means[means], event->day);
+      RPT_reporting_set_integer (local_data->last_detection_by_means_and_prodtype[means][prodtype], event->day);
+      RPT_reporting_add_integer (local_data->nunits_detected, 1);
+      RPT_reporting_add_integer (local_data->nunits_detected_by_means[means], 1);
+      RPT_reporting_add_integer (local_data->nunits_detected_by_prodtype[prodtype], 1);
+      RPT_reporting_add_integer (local_data->nunits_detected_by_means_and_prodtype[means][prodtype], 1);
+      RPT_reporting_add_real (local_data->nanimals_detected, nanimals);
+      RPT_reporting_add_real (local_data->nanimals_detected_by_means[means], nanimals);
+      RPT_reporting_add_real (local_data->nanimals_detected_by_prodtype[prodtype], nanimals);
+      RPT_reporting_add_real (local_data->nanimals_detected_by_means_and_prodtype[means][prodtype], nanimals);
+      RPT_reporting_add_integer (local_data->cumul_nunits_detected, 1);
+      RPT_reporting_add_integer (local_data->cumul_nunits_detected_by_means[means], 1);
+      RPT_reporting_add_integer (local_data->cumul_nunits_detected_by_prodtype[prodtype], 1);
+      RPT_reporting_add_integer (local_data->cumul_nunits_detected_by_means_and_prodtype[means][prodtype], 1);
+      RPT_reporting_add_real (local_data->cumul_nanimals_detected, nanimals);
+      RPT_reporting_add_real (local_data->cumul_nanimals_detected_by_means[means], nanimals);
+      RPT_reporting_add_real (local_data->cumul_nanimals_detected_by_prodtype[prodtype], nanimals);
+      RPT_reporting_add_real (local_data->cumul_nanimals_detected_by_means_and_prodtype[means][prodtype], nanimals);
 
       previous_detection = g_new (count_and_means_t, 1);
       previous_detection->count = 1;
@@ -302,33 +302,31 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
               /* We have changed our mind about what means of detection to
                * report for this unit.  Decrement the count of detections by
                * the old means. */
-              RPT_reporting_sub_integer (local_data->nunits_detected_by_means[previous_detection->means], 1, NULL);
-              RPT_reporting_sub_real (local_data->nanimals_detected_by_means[previous_detection->means], nanimals, NULL);
-              RPT_reporting_sub_integer (local_data->cumul_nunits_detected_by_means[previous_detection->means], 1, NULL);
-              RPT_reporting_sub_real (local_data->cumul_nanimals_detected_by_means[previous_detection->means], nanimals, NULL);
-              if (RPT_reporting_get_integer (local_data->nunits_detected_by_means[previous_detection->means], NULL) == 0)
+              RPT_reporting_sub_integer (local_data->nunits_detected_by_means[previous_detection->means], 1);
+              RPT_reporting_sub_real (local_data->nanimals_detected_by_means[previous_detection->means], nanimals);
+              RPT_reporting_sub_integer (local_data->cumul_nunits_detected_by_means[previous_detection->means], 1);
+              RPT_reporting_sub_real (local_data->cumul_nanimals_detected_by_means[previous_detection->means], nanimals);
+              if (RPT_reporting_get_integer (local_data->nunits_detected_by_means[previous_detection->means]) == 0)
                 {
                   /* We counted detections by a particular means today, but then
                    * we changed our mind and un-counted them all.  Restore
                    * yesterday's values for first & last detection by that means. */
                   if (local_data->first_detection_by_means_yesterday[previous_detection->means]->is_null)
-                    RPT_reporting_set_null (local_data->first_detection_by_means[previous_detection->means], NULL);
+                    RPT_reporting_set_null (local_data->first_detection_by_means[previous_detection->means]);
                   else
                     RPT_reporting_set_integer (local_data->first_detection_by_means[previous_detection->means],
-                                                RPT_reporting_get_integer (local_data->first_detection_by_means_yesterday[previous_detection->means], NULL),
-                                                NULL);
+                                                RPT_reporting_get_integer (local_data->first_detection_by_means_yesterday[previous_detection->means]));
                   if (local_data->last_detection_by_means_yesterday[previous_detection->means]->is_null)
-                    RPT_reporting_set_null (local_data->last_detection_by_means[previous_detection->means], NULL);
+                    RPT_reporting_set_null (local_data->last_detection_by_means[previous_detection->means]);
                   else
                     RPT_reporting_set_integer (local_data->last_detection_by_means[previous_detection->means],
-                                                RPT_reporting_get_integer (local_data->last_detection_by_means_yesterday[previous_detection->means], NULL),
-                                                NULL);
+                                                RPT_reporting_get_integer (local_data->last_detection_by_means_yesterday[previous_detection->means]));
                 }
-              RPT_reporting_sub_integer (local_data->nunits_detected_by_means_and_prodtype[previous_detection->means][prodtype], 1, NULL);
-              RPT_reporting_sub_real (local_data->nanimals_detected_by_means_and_prodtype[previous_detection->means][prodtype], nanimals, NULL);
-              RPT_reporting_sub_integer (local_data->cumul_nunits_detected_by_means_and_prodtype[previous_detection->means][prodtype], 1, NULL);
-              RPT_reporting_sub_real (local_data->cumul_nanimals_detected_by_means_and_prodtype[previous_detection->means][prodtype], nanimals, NULL);
-              if (RPT_reporting_get_integer (local_data->nunits_detected_by_means_and_prodtype[previous_detection->means][prodtype], NULL) == 0)
+              RPT_reporting_sub_integer (local_data->nunits_detected_by_means_and_prodtype[previous_detection->means][prodtype], 1);
+              RPT_reporting_sub_real (local_data->nanimals_detected_by_means_and_prodtype[previous_detection->means][prodtype], nanimals);
+              RPT_reporting_sub_integer (local_data->cumul_nunits_detected_by_means_and_prodtype[previous_detection->means][prodtype], 1);
+              RPT_reporting_sub_real (local_data->cumul_nanimals_detected_by_means_and_prodtype[previous_detection->means][prodtype], nanimals);
+              if (RPT_reporting_get_integer (local_data->nunits_detected_by_means_and_prodtype[previous_detection->means][prodtype]) == 0)
                 {
                   /* We counted detections by a particular combination of means
                    * and production type today, but then we changed our mind
@@ -336,34 +334,32 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
                    * first & last detection by that combination of means and
                    * production type. */
                   if (local_data->first_detection_by_means_and_prodtype_yesterday[previous_detection->means][prodtype]->is_null)
-                    RPT_reporting_set_null (local_data->first_detection_by_means_and_prodtype[previous_detection->means][prodtype], NULL);
+                    RPT_reporting_set_null (local_data->first_detection_by_means_and_prodtype[previous_detection->means][prodtype]);
                   else
                     RPT_reporting_set_integer (local_data->first_detection_by_means_and_prodtype[previous_detection->means][prodtype],
-                                               RPT_reporting_get_integer (local_data->first_detection_by_means_and_prodtype_yesterday[previous_detection->means][prodtype], NULL),
-                                               NULL);
+                                               RPT_reporting_get_integer (local_data->first_detection_by_means_and_prodtype_yesterday[previous_detection->means][prodtype]));
                   if (local_data->last_detection_by_means_and_prodtype_yesterday[previous_detection->means][prodtype]->is_null)
-                    RPT_reporting_set_null (local_data->last_detection_by_means_and_prodtype[previous_detection->means][prodtype], NULL);
+                    RPT_reporting_set_null (local_data->last_detection_by_means_and_prodtype[previous_detection->means][prodtype]);
                   else
                     RPT_reporting_set_integer (local_data->last_detection_by_means_and_prodtype[previous_detection->means][prodtype],
-                                               RPT_reporting_get_integer (local_data->last_detection_by_means_and_prodtype_yesterday[previous_detection->means][prodtype], NULL),
-                                               NULL);
+                                               RPT_reporting_get_integer (local_data->last_detection_by_means_and_prodtype_yesterday[previous_detection->means][prodtype]));
                 }
 
               /* Increment the count of detections by the new means. */
               if (local_data->first_detection_by_means[means]->is_null)
-                RPT_reporting_set_integer (local_data->first_detection_by_means[means], event->day, NULL);
+                RPT_reporting_set_integer (local_data->first_detection_by_means[means], event->day);
               if (local_data->first_detection_by_means_and_prodtype[means][prodtype]->is_null)
-                RPT_reporting_set_integer (local_data->first_detection_by_means_and_prodtype[means][prodtype], event->day, NULL);
-              RPT_reporting_set_integer (local_data->last_detection_by_means[means], event->day, NULL);
-              RPT_reporting_set_integer (local_data->last_detection_by_means_and_prodtype[means][prodtype], event->day, NULL);
-              RPT_reporting_add_integer (local_data->nunits_detected_by_means[means], 1, NULL);
-              RPT_reporting_add_integer (local_data->cumul_nunits_detected_by_means[means], 1, NULL);
-              RPT_reporting_add_integer (local_data->nunits_detected_by_means_and_prodtype[means][prodtype], 1, NULL);
-              RPT_reporting_add_integer (local_data->cumul_nunits_detected_by_means_and_prodtype[means][prodtype], 1, NULL);
-              RPT_reporting_add_real (local_data->nanimals_detected_by_means[means], nanimals, NULL);
-              RPT_reporting_add_real (local_data->cumul_nanimals_detected_by_means[means], nanimals, NULL);
-              RPT_reporting_add_real (local_data->nanimals_detected_by_means_and_prodtype[means][prodtype], nanimals, NULL);
-              RPT_reporting_add_real (local_data->cumul_nanimals_detected_by_means_and_prodtype[means][prodtype], nanimals, NULL);
+                RPT_reporting_set_integer (local_data->first_detection_by_means_and_prodtype[means][prodtype], event->day);
+              RPT_reporting_set_integer (local_data->last_detection_by_means[means], event->day);
+              RPT_reporting_set_integer (local_data->last_detection_by_means_and_prodtype[means][prodtype], event->day);
+              RPT_reporting_add_integer (local_data->nunits_detected_by_means[means], 1);
+              RPT_reporting_add_integer (local_data->cumul_nunits_detected_by_means[means], 1);
+              RPT_reporting_add_integer (local_data->nunits_detected_by_means_and_prodtype[means][prodtype], 1);
+              RPT_reporting_add_integer (local_data->cumul_nunits_detected_by_means_and_prodtype[means][prodtype], 1);
+              RPT_reporting_add_real (local_data->nanimals_detected_by_means[means], nanimals);
+              RPT_reporting_add_real (local_data->cumul_nanimals_detected_by_means[means], nanimals);
+              RPT_reporting_add_real (local_data->nanimals_detected_by_means_and_prodtype[means][prodtype], nanimals);
+              RPT_reporting_add_real (local_data->cumul_nanimals_detected_by_means_and_prodtype[means][prodtype], nanimals);
             } /* end of case where previously recorded means of detection is replaced */
           else
             {
@@ -385,7 +381,7 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
     {
       /* This unit has not been detected before in this simulation. */
       g_hash_table_insert (local_data->detected, unit, GINT_TO_POINTER(1));
-      RPT_reporting_add_integer (local_data->cumul_nunits_detected_uniq, 1, NULL);
+      RPT_reporting_add_integer (local_data->cumul_nunits_detected_uniq, 1);
     }
 
 #if DEBUG

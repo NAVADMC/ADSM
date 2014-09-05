@@ -244,9 +244,9 @@ handle_end_of_day2_event (struct adsm_module_t_ * self,
           if (output->is_null)
             continue;
           if (RPT_reporting_get_type (output) == RPT_integer)
-            value = (double) RPT_reporting_get_integer (output, NULL);
+            value = (double) RPT_reporting_get_integer (output);
           else if (RPT_reporting_get_type (output) == RPT_real)
-            value = RPT_reporting_get_real (output, NULL);
+            value = RPT_reporting_get_real (output);
           g_array_append_val (output_value->values, value);
         } /* end of loop over tracked output variables */
     } /* end of if last day */

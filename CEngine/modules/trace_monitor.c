@@ -205,43 +205,43 @@ handle_trace_result_event (struct adsm_module_t_ *self, EVT_trace_result_event_t
   prodtype = identified_unit->production_type;
   nanimals = (double)(identified_unit->size);
 
-  RPT_reporting_add_integer (local_data->nunits_potentially_traced, 1, NULL);
-  RPT_reporting_add_integer (local_data->nunits_potentially_traced_by_contacttype[contact_type], 1, NULL);
-  RPT_reporting_add_integer (local_data->nunits_potentially_traced_by_prodtype[prodtype], 1, NULL);
-  RPT_reporting_add_integer (local_data->nunits_potentially_traced_by_contacttype_and_prodtype[contact_type][prodtype], 1, NULL);
-  RPT_reporting_add_integer (local_data->cumul_nunits_potentially_traced, 1, NULL);
-  RPT_reporting_add_integer (local_data->cumul_nunits_potentially_traced_by_contacttype[contact_type], 1, NULL);
-  RPT_reporting_add_integer (local_data->cumul_nunits_potentially_traced_by_prodtype[prodtype], 1, NULL);
-  RPT_reporting_add_integer (local_data->cumul_nunits_potentially_traced_by_contacttype_and_prodtype[contact_type][prodtype], 1, NULL);
-  RPT_reporting_add_real (local_data->nanimals_potentially_traced, nanimals, NULL);
-  RPT_reporting_add_real (local_data->nanimals_potentially_traced_by_contacttype[contact_type], nanimals, NULL);
-  RPT_reporting_add_real (local_data->nanimals_potentially_traced_by_prodtype[prodtype], nanimals, NULL);
-  RPT_reporting_add_real (local_data->nanimals_potentially_traced_by_contacttype_and_prodtype[contact_type][prodtype], nanimals, NULL);
-  RPT_reporting_add_real (local_data->cumul_nanimals_potentially_traced, nanimals, NULL);
-  RPT_reporting_add_real (local_data->cumul_nanimals_potentially_traced_by_contacttype[contact_type], nanimals, NULL);
-  RPT_reporting_add_real (local_data->cumul_nanimals_potentially_traced_by_prodtype[prodtype], nanimals, NULL);
-  RPT_reporting_add_real (local_data->cumul_nanimals_potentially_traced_by_contacttype_and_prodtype[contact_type][prodtype], nanimals, NULL);
+  RPT_reporting_add_integer (local_data->nunits_potentially_traced, 1);
+  RPT_reporting_add_integer (local_data->nunits_potentially_traced_by_contacttype[contact_type], 1);
+  RPT_reporting_add_integer (local_data->nunits_potentially_traced_by_prodtype[prodtype], 1);
+  RPT_reporting_add_integer (local_data->nunits_potentially_traced_by_contacttype_and_prodtype[contact_type][prodtype], 1);
+  RPT_reporting_add_integer (local_data->cumul_nunits_potentially_traced, 1);
+  RPT_reporting_add_integer (local_data->cumul_nunits_potentially_traced_by_contacttype[contact_type], 1);
+  RPT_reporting_add_integer (local_data->cumul_nunits_potentially_traced_by_prodtype[prodtype], 1);
+  RPT_reporting_add_integer (local_data->cumul_nunits_potentially_traced_by_contacttype_and_prodtype[contact_type][prodtype], 1);
+  RPT_reporting_add_real (local_data->nanimals_potentially_traced, nanimals);
+  RPT_reporting_add_real (local_data->nanimals_potentially_traced_by_contacttype[contact_type], nanimals);
+  RPT_reporting_add_real (local_data->nanimals_potentially_traced_by_prodtype[prodtype], nanimals);
+  RPT_reporting_add_real (local_data->nanimals_potentially_traced_by_contacttype_and_prodtype[contact_type][prodtype], nanimals);
+  RPT_reporting_add_real (local_data->cumul_nanimals_potentially_traced, nanimals);
+  RPT_reporting_add_real (local_data->cumul_nanimals_potentially_traced_by_contacttype[contact_type], nanimals);
+  RPT_reporting_add_real (local_data->cumul_nanimals_potentially_traced_by_prodtype[prodtype], nanimals);
+  RPT_reporting_add_real (local_data->cumul_nanimals_potentially_traced_by_contacttype_and_prodtype[contact_type][prodtype], nanimals);
 
   if (event->traced == TRUE)
     {
       /* Record a successfully traced contact. */
 
-      RPT_reporting_add_integer (local_data->nunits_traced, 1, NULL);
-      RPT_reporting_add_integer (local_data->nunits_traced_by_contacttype[contact_type], 1, NULL);
-      RPT_reporting_add_integer (local_data->nunits_traced_by_prodtype[prodtype], 1, NULL);
-      RPT_reporting_add_integer (local_data->nunits_traced_by_contacttype_and_prodtype[contact_type][prodtype], 1, NULL);
-      RPT_reporting_add_integer (local_data->cumul_nunits_traced, 1, NULL);
-      RPT_reporting_add_integer (local_data->cumul_nunits_traced_by_contacttype[contact_type], 1, NULL);
-      RPT_reporting_add_integer (local_data->cumul_nunits_traced_by_prodtype[prodtype], 1, NULL);
-      RPT_reporting_add_integer (local_data->cumul_nunits_traced_by_contacttype_and_prodtype[contact_type][prodtype], 1, NULL);
-      RPT_reporting_add_real (local_data->nanimals_traced, nanimals, NULL);
-      RPT_reporting_add_real (local_data->nanimals_traced_by_contacttype[contact_type], nanimals, NULL);
-      RPT_reporting_add_real (local_data->nanimals_traced_by_prodtype[prodtype], nanimals, NULL);
-      RPT_reporting_add_real (local_data->nanimals_traced_by_contacttype_and_prodtype[contact_type][prodtype], nanimals, NULL);
-      RPT_reporting_add_real (local_data->cumul_nanimals_traced, nanimals, NULL);
-      RPT_reporting_add_real (local_data->cumul_nanimals_traced_by_contacttype[contact_type], nanimals, NULL);
-      RPT_reporting_add_real (local_data->cumul_nanimals_traced_by_prodtype[prodtype], nanimals, NULL);
-      RPT_reporting_add_real (local_data->cumul_nanimals_traced_by_contacttype_and_prodtype[contact_type][prodtype], nanimals, NULL);
+      RPT_reporting_add_integer (local_data->nunits_traced, 1);
+      RPT_reporting_add_integer (local_data->nunits_traced_by_contacttype[contact_type], 1);
+      RPT_reporting_add_integer (local_data->nunits_traced_by_prodtype[prodtype], 1);
+      RPT_reporting_add_integer (local_data->nunits_traced_by_contacttype_and_prodtype[contact_type][prodtype], 1);
+      RPT_reporting_add_integer (local_data->cumul_nunits_traced, 1);
+      RPT_reporting_add_integer (local_data->cumul_nunits_traced_by_contacttype[contact_type], 1);
+      RPT_reporting_add_integer (local_data->cumul_nunits_traced_by_prodtype[prodtype], 1);
+      RPT_reporting_add_integer (local_data->cumul_nunits_traced_by_contacttype_and_prodtype[contact_type][prodtype], 1);
+      RPT_reporting_add_real (local_data->nanimals_traced, nanimals);
+      RPT_reporting_add_real (local_data->nanimals_traced_by_contacttype[contact_type], nanimals);
+      RPT_reporting_add_real (local_data->nanimals_traced_by_prodtype[prodtype], nanimals);
+      RPT_reporting_add_real (local_data->nanimals_traced_by_contacttype_and_prodtype[contact_type][prodtype], nanimals);
+      RPT_reporting_add_real (local_data->cumul_nanimals_traced, nanimals);
+      RPT_reporting_add_real (local_data->cumul_nanimals_traced_by_contacttype[contact_type], nanimals);
+      RPT_reporting_add_real (local_data->cumul_nanimals_traced_by_prodtype[prodtype], nanimals);
+      RPT_reporting_add_real (local_data->cumul_nanimals_traced_by_contacttype_and_prodtype[contact_type][prodtype], nanimals);
     }
 
   #if DEBUG

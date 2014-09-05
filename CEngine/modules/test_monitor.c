@@ -162,18 +162,18 @@ handle_test_event (struct adsm_module_t_ *self, EVT_test_event_t * event)
   reason = event->reason;
   prodtype = unit->production_type;
   nanimals = (double)(unit->size);
-  RPT_reporting_add_integer (local_data->nunits_tested, 1, NULL);
-  RPT_reporting_add_integer (local_data->nunits_tested_by_reason[reason], 1, NULL);
-  RPT_reporting_add_integer (local_data->nunits_tested_by_prodtype[prodtype], 1, NULL);
-  RPT_reporting_add_integer (local_data->nunits_tested_by_reason_and_prodtype[reason][prodtype], 1, NULL);
-  RPT_reporting_add_integer (local_data->cumul_nunits_tested, 1, NULL);
-  RPT_reporting_add_integer (local_data->cumul_nunits_tested_by_reason[reason], 1, NULL);
-  RPT_reporting_add_integer (local_data->cumul_nunits_tested_by_prodtype[prodtype], 1, NULL);
-  RPT_reporting_add_integer (local_data->cumul_nunits_tested_by_reason_and_prodtype[reason][prodtype], 1, NULL);
-  RPT_reporting_add_real (local_data->cumul_nanimals_tested, nanimals, NULL);
-  RPT_reporting_add_real (local_data->cumul_nanimals_tested_by_reason[reason], nanimals, NULL);
-  RPT_reporting_add_real (local_data->cumul_nanimals_tested_by_prodtype[prodtype], nanimals, NULL);
-  RPT_reporting_add_real (local_data->cumul_nanimals_tested_by_reason_and_prodtype[reason][prodtype], nanimals, NULL);
+  RPT_reporting_add_integer (local_data->nunits_tested, 1);
+  RPT_reporting_add_integer (local_data->nunits_tested_by_reason[reason], 1);
+  RPT_reporting_add_integer (local_data->nunits_tested_by_prodtype[prodtype], 1);
+  RPT_reporting_add_integer (local_data->nunits_tested_by_reason_and_prodtype[reason][prodtype], 1);
+  RPT_reporting_add_integer (local_data->cumul_nunits_tested, 1);
+  RPT_reporting_add_integer (local_data->cumul_nunits_tested_by_reason[reason], 1);
+  RPT_reporting_add_integer (local_data->cumul_nunits_tested_by_prodtype[prodtype], 1);
+  RPT_reporting_add_integer (local_data->cumul_nunits_tested_by_reason_and_prodtype[reason][prodtype], 1);
+  RPT_reporting_add_real (local_data->cumul_nanimals_tested, nanimals);
+  RPT_reporting_add_real (local_data->cumul_nanimals_tested_by_reason[reason], nanimals);
+  RPT_reporting_add_real (local_data->cumul_nanimals_tested_by_prodtype[prodtype], nanimals);
+  RPT_reporting_add_real (local_data->cumul_nanimals_tested_by_reason_and_prodtype[reason][prodtype], nanimals);
 
 #if DEBUG
   g_debug ("----- EXIT handle_test_event (%s)", MODEL_NAME);
@@ -257,34 +257,34 @@ handle_test_result_event (struct adsm_module_t_ * self,
     {
       if (event->correct)
         {
-          RPT_reporting_add_integer (local_data->nunits_truepos, 1, NULL);
-          RPT_reporting_add_integer (local_data->nunits_truepos_by_prodtype[prodtype], 1, NULL);
-          RPT_reporting_add_integer (local_data->cumul_nunits_truepos, 1, NULL);
-          RPT_reporting_add_integer (local_data->cumul_nunits_truepos_by_prodtype[prodtype], 1, NULL);
+          RPT_reporting_add_integer (local_data->nunits_truepos, 1);
+          RPT_reporting_add_integer (local_data->nunits_truepos_by_prodtype[prodtype], 1);
+          RPT_reporting_add_integer (local_data->cumul_nunits_truepos, 1);
+          RPT_reporting_add_integer (local_data->cumul_nunits_truepos_by_prodtype[prodtype], 1);
         }
       else
         {
-          RPT_reporting_add_integer (local_data->nunits_falsepos, 1, NULL);
-          RPT_reporting_add_integer (local_data->nunits_falsepos_by_prodtype[prodtype], 1, NULL);
-          RPT_reporting_add_integer (local_data->cumul_nunits_falsepos, 1, NULL);
-          RPT_reporting_add_integer (local_data->cumul_nunits_falsepos_by_prodtype[prodtype], 1, NULL);
+          RPT_reporting_add_integer (local_data->nunits_falsepos, 1);
+          RPT_reporting_add_integer (local_data->nunits_falsepos_by_prodtype[prodtype], 1);
+          RPT_reporting_add_integer (local_data->cumul_nunits_falsepos, 1);
+          RPT_reporting_add_integer (local_data->cumul_nunits_falsepos_by_prodtype[prodtype], 1);
         }
     }
   else /* test result was negative */
     {
       if (event->correct)
         {
-          RPT_reporting_add_integer (local_data->nunits_trueneg, 1, NULL);
-          RPT_reporting_add_integer (local_data->nunits_trueneg_by_prodtype[prodtype], 1, NULL);
-          RPT_reporting_add_integer (local_data->cumul_nunits_trueneg, 1, NULL);
-          RPT_reporting_add_integer (local_data->cumul_nunits_trueneg_by_prodtype[prodtype], 1, NULL);
+          RPT_reporting_add_integer (local_data->nunits_trueneg, 1);
+          RPT_reporting_add_integer (local_data->nunits_trueneg_by_prodtype[prodtype], 1);
+          RPT_reporting_add_integer (local_data->cumul_nunits_trueneg, 1);
+          RPT_reporting_add_integer (local_data->cumul_nunits_trueneg_by_prodtype[prodtype], 1);
         }
       else
         {
-          RPT_reporting_add_integer (local_data->nunits_falseneg, 1, NULL);
-          RPT_reporting_add_integer (local_data->nunits_falseneg_by_prodtype[prodtype], 1, NULL);
-          RPT_reporting_add_integer (local_data->cumul_nunits_falseneg, 1, NULL);
-          RPT_reporting_add_integer (local_data->cumul_nunits_falseneg_by_prodtype[prodtype], 1, NULL);
+          RPT_reporting_add_integer (local_data->nunits_falseneg, 1);
+          RPT_reporting_add_integer (local_data->nunits_falseneg_by_prodtype[prodtype], 1);
+          RPT_reporting_add_integer (local_data->cumul_nunits_falseneg, 1);
+          RPT_reporting_add_integer (local_data->cumul_nunits_falseneg_by_prodtype[prodtype], 1);
         }
     }
 

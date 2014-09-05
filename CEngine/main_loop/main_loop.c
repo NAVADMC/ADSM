@@ -523,11 +523,11 @@ split_version (const char *version,
     {
       num = strtol (*iter, NULL, 10);
       if (i == 0)
-        RPT_reporting_set_integer (major_version, num, NULL);
+        RPT_reporting_set_integer (major_version, num);
       else if (i == 1)
-        RPT_reporting_set_integer (minor_version, num, NULL);
+        RPT_reporting_set_integer (minor_version, num);
       else
-        RPT_reporting_set_integer (release, num, NULL);
+        RPT_reporting_set_integer (release, num);
     }
   g_strfreev (tokens);
 
@@ -949,7 +949,7 @@ run_sim_main (sqlite3 *scenario_db,
       _iteration.infectious_units = g_hash_table_new( g_direct_hash, g_direct_equal );
 
       /* Reset reporting variables. */
-      RPT_reporting_set_null (last_day_of_outbreak, NULL);
+      RPT_reporting_set_null (last_day_of_outbreak);
 
       active_infections_yesterday = TRUE;
       pending_actions = TRUE;
@@ -1091,7 +1091,7 @@ run_sim_main (sqlite3 *scenario_db,
                   if (NULL != adsm_outbreak_end)
                     adsm_outbreak_end (day);
 #endif
-                  RPT_reporting_set_integer (last_day_of_outbreak, day - 1, NULL);
+                  RPT_reporting_set_integer (last_day_of_outbreak, day - 1);
                   early_exit = TRUE;
                 }
             }

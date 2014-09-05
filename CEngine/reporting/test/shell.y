@@ -141,7 +141,7 @@ set_command:
 
       RPT_free_reporting (current_variable);
       current_variable = RPT_new_reporting (tentative_name, RPT_integer);
-      RPT_reporting_set_integer (current_variable, $3, NULL);
+      RPT_reporting_set_integer (current_variable, $3);
       s = RPT_reporting_value_to_string (current_variable, NULL);
       printf ("%s\n%s", s, PROMPT);
       free (s);
@@ -157,7 +157,7 @@ add_command:
 
       if (current_variable == NULL)
         current_variable = RPT_new_reporting (tentative_name, RPT_integer);
-      RPT_reporting_add_integer (current_variable, $3, NULL);
+      RPT_reporting_add_integer (current_variable, $3);
       s = RPT_reporting_value_to_string (current_variable, NULL);
       printf ("%s\n%s", s, PROMPT);
       free (s);
@@ -173,7 +173,7 @@ subtract_command:
       /* Integer, no subcategories. */
       if (current_variable == NULL)
 	current_variable = RPT_new_reporting (tentative_name, RPT_integer);
-      RPT_reporting_sub_integer (current_variable, $3, NULL);
+      RPT_reporting_sub_integer (current_variable, $3);
       s = RPT_reporting_value_to_string (current_variable, NULL);
       printf ("%s\n%s", s, PROMPT);
       free (s);

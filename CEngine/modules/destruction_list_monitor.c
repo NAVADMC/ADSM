@@ -127,11 +127,9 @@ handle_new_day_event (struct adsm_module_t_ *self)
   local_data = (local_data_t *) (self->model_data);
 
   RPT_reporting_add_integer (local_data->unit_days_in_queue,
-                             RPT_reporting_get_integer (local_data->nunits_awaiting_destruction, NULL),
-                             NULL);
+                             RPT_reporting_get_integer (local_data->nunits_awaiting_destruction));
   RPT_reporting_add_real (local_data->animal_days_in_queue,
-                          RPT_reporting_get_real (local_data->nanimals_awaiting_destruction, NULL),
-                          NULL);
+                          RPT_reporting_get_real (local_data->nanimals_awaiting_destruction));
 
 #if DEBUG
   g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
@@ -177,25 +175,25 @@ handle_commitment_to_destroy_event (struct adsm_module_t_ *self,
         }
 
       /* Increment the count of units awaiting destruction. */
-      RPT_reporting_add_integer (local_data->nunits_awaiting_destruction, 1, NULL);
-      RPT_reporting_add_integer (local_data->nunits_awaiting_destruction_by_prodtype[prodtype], 1, NULL);
-      nunits = RPT_reporting_get_integer (local_data->nunits_awaiting_destruction, NULL);
+      RPT_reporting_add_integer (local_data->nunits_awaiting_destruction, 1);
+      RPT_reporting_add_integer (local_data->nunits_awaiting_destruction_by_prodtype[prodtype], 1);
+      nunits = RPT_reporting_get_integer (local_data->nunits_awaiting_destruction);
       if (nunits > local_data->peak_nunits)
         {
           local_data->peak_nunits = nunits;
-          RPT_reporting_set_integer (local_data->peak_nunits_awaiting_destruction, nunits, NULL);
-          RPT_reporting_set_integer (local_data->peak_nunits_awaiting_destruction_day, event->day, NULL);
+          RPT_reporting_set_integer (local_data->peak_nunits_awaiting_destruction, nunits);
+          RPT_reporting_set_integer (local_data->peak_nunits_awaiting_destruction_day, event->day);
         }
 
       /* Increment the count of animals awaiting destruction. */
-      RPT_reporting_add_real (local_data->nanimals_awaiting_destruction, (double)(unit->size), NULL);
-      RPT_reporting_add_real (local_data->nanimals_awaiting_destruction_by_prodtype[prodtype], (double)(unit->size), NULL);
-      nanimals = RPT_reporting_get_real (local_data->nanimals_awaiting_destruction, NULL);
+      RPT_reporting_add_real (local_data->nanimals_awaiting_destruction, (double)(unit->size));
+      RPT_reporting_add_real (local_data->nanimals_awaiting_destruction_by_prodtype[prodtype], (double)(unit->size));
+      nanimals = RPT_reporting_get_real (local_data->nanimals_awaiting_destruction);
       if (nanimals > local_data->peak_nanimals)
         {
           local_data->peak_nanimals = nanimals;
-          RPT_reporting_set_real (local_data->peak_nanimals_awaiting_destruction, nanimals, NULL);
-          RPT_reporting_set_integer (local_data->peak_nanimals_awaiting_destruction_day, event->day, NULL);
+          RPT_reporting_set_real (local_data->peak_nanimals_awaiting_destruction, nanimals);
+          RPT_reporting_set_integer (local_data->peak_nanimals_awaiting_destruction_day, event->day);
         }
     }
 
@@ -240,22 +238,22 @@ handle_destruction_event (struct adsm_module_t_ *self, EVT_destruction_event_t *
 
       /* Update the peak wait time. */
       local_data->peak_wait = MAX (local_data->peak_wait, wait);
-      RPT_reporting_set_integer (local_data->peak_wait_time, local_data->peak_wait, NULL);
+      RPT_reporting_set_integer (local_data->peak_wait_time, local_data->peak_wait);
 
       /* Update the average wait time. */
       local_data->sum += wait;
       local_data->count += 1;
       RPT_reporting_set_real (local_data->average_wait_time,
-                              local_data->sum / local_data->count, NULL);
+                              local_data->sum / local_data->count);
 
       /* Mark the unit as no longer on a waiting list. */
       g_hash_table_remove (local_data->status, unit);
 
       /* Decrement the counts of units and animals awaiting destruction. */
-      RPT_reporting_sub_integer (local_data->nunits_awaiting_destruction, 1, NULL);
-      RPT_reporting_sub_integer (local_data->nunits_awaiting_destruction_by_prodtype[prodtype], 1, NULL);
-      RPT_reporting_sub_real (local_data->nanimals_awaiting_destruction, (double)(unit->size), NULL);
-      RPT_reporting_sub_real (local_data->nanimals_awaiting_destruction_by_prodtype[prodtype], (double)(unit->size), NULL);
+      RPT_reporting_sub_integer (local_data->nunits_awaiting_destruction, 1);
+      RPT_reporting_sub_integer (local_data->nunits_awaiting_destruction_by_prodtype[prodtype], 1);
+      RPT_reporting_sub_real (local_data->nanimals_awaiting_destruction, (double)(unit->size));
+      RPT_reporting_sub_real (local_data->nanimals_awaiting_destruction_by_prodtype[prodtype], (double)(unit->size));
     }
 
 #if DEBUG

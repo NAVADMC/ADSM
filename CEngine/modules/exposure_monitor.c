@@ -196,27 +196,27 @@ handle_exposure_event (struct adsm_module_t_ *self, EVT_exposure_event_t * event
       /* Update the counts of exposures. */
       prodtype = exposed_unit->production_type;
       nanimals = (double)(exposed_unit->size);
-      RPT_reporting_add_integer (local_data->num_units_exposed, 1, NULL);
-      RPT_reporting_add_integer (local_data->num_units_exposed_by_cause[cause], 1, NULL);
-      RPT_reporting_add_integer (local_data->num_units_exposed_by_prodtype[prodtype], 1, NULL);
-      RPT_reporting_add_integer (local_data->num_units_exposed_by_cause_and_prodtype[cause][prodtype], 1, NULL);
-      RPT_reporting_add_real (local_data->num_animals_exposed, nanimals, NULL);
-      RPT_reporting_add_real (local_data->num_animals_exposed_by_cause[cause], nanimals, NULL);
-      RPT_reporting_add_real (local_data->num_animals_exposed_by_prodtype[prodtype], nanimals, NULL);
-      RPT_reporting_add_real (local_data->num_animals_exposed_by_cause_and_prodtype[cause][prodtype], nanimals, NULL);
-      RPT_reporting_add_integer (local_data->cumul_num_units_exposed, 1, NULL);
-      RPT_reporting_add_integer (local_data->cumul_num_units_exposed_by_cause[cause], 1, NULL);
-      RPT_reporting_add_integer (local_data->cumul_num_units_exposed_by_prodtype[prodtype], 1, NULL);
-      RPT_reporting_add_integer (local_data->cumul_num_units_exposed_by_cause_and_prodtype[cause][prodtype], 1, NULL);
-      RPT_reporting_add_real (local_data->cumul_num_animals_exposed, nanimals, NULL);
-      RPT_reporting_add_real (local_data->cumul_num_animals_exposed_by_cause[cause], nanimals, NULL);
-      RPT_reporting_add_real (local_data->cumul_num_animals_exposed_by_prodtype[prodtype], nanimals, NULL);
-      RPT_reporting_add_real (local_data->cumul_num_animals_exposed_by_cause_and_prodtype[cause][prodtype], nanimals, NULL);
+      RPT_reporting_add_integer (local_data->num_units_exposed, 1);
+      RPT_reporting_add_integer (local_data->num_units_exposed_by_cause[cause], 1);
+      RPT_reporting_add_integer (local_data->num_units_exposed_by_prodtype[prodtype], 1);
+      RPT_reporting_add_integer (local_data->num_units_exposed_by_cause_and_prodtype[cause][prodtype], 1);
+      RPT_reporting_add_real (local_data->num_animals_exposed, nanimals);
+      RPT_reporting_add_real (local_data->num_animals_exposed_by_cause[cause], nanimals);
+      RPT_reporting_add_real (local_data->num_animals_exposed_by_prodtype[prodtype], nanimals);
+      RPT_reporting_add_real (local_data->num_animals_exposed_by_cause_and_prodtype[cause][prodtype], nanimals);
+      RPT_reporting_add_integer (local_data->cumul_num_units_exposed, 1);
+      RPT_reporting_add_integer (local_data->cumul_num_units_exposed_by_cause[cause], 1);
+      RPT_reporting_add_integer (local_data->cumul_num_units_exposed_by_prodtype[prodtype], 1);
+      RPT_reporting_add_integer (local_data->cumul_num_units_exposed_by_cause_and_prodtype[cause][prodtype], 1);
+      RPT_reporting_add_real (local_data->cumul_num_animals_exposed, nanimals);
+      RPT_reporting_add_real (local_data->cumul_num_animals_exposed_by_cause[cause], nanimals);
+      RPT_reporting_add_real (local_data->cumul_num_animals_exposed_by_prodtype[prodtype], nanimals);
+      RPT_reporting_add_real (local_data->cumul_num_animals_exposed_by_cause_and_prodtype[cause][prodtype], nanimals);
       if (event->adequate)
         {
-          RPT_reporting_add_integer (local_data->num_adequate_exposures, 1, NULL);
-          RPT_reporting_add_integer (local_data->cumul_num_adequate_exposures, 1, NULL);
-          RPT_reporting_add_integer (local_data->cumul_num_adequate_exposures_by_cause[cause], 1, NULL);
+          RPT_reporting_add_integer (local_data->num_adequate_exposures, 1);
+          RPT_reporting_add_integer (local_data->cumul_num_adequate_exposures, 1);
+          RPT_reporting_add_integer (local_data->cumul_num_adequate_exposures_by_cause[cause], 1);
         }
     }
 

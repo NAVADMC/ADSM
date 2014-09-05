@@ -188,22 +188,22 @@ handle_exam_event (struct adsm_module_t_ *self, EVT_exam_event_t *event)
   reason = event->reason;
   prodtype = unit->production_type;
   nanimals = (double)(unit->size);
-  RPT_reporting_add_integer (local_data->nunits_examined, 1, NULL);
-  RPT_reporting_add_integer (local_data->nunits_examined_by_reason[reason], 1, NULL);
-  RPT_reporting_add_integer (local_data->nunits_examined_by_prodtype[prodtype], 1, NULL);
-  RPT_reporting_add_integer (local_data->nunits_examined_by_reason_and_prodtype[reason][prodtype], 1, NULL);
-  RPT_reporting_add_real (local_data->nanimals_examined, nanimals, NULL);
-  RPT_reporting_add_real (local_data->nanimals_examined_by_reason[reason], nanimals, NULL);
-  RPT_reporting_add_real (local_data->nanimals_examined_by_prodtype[prodtype], nanimals, NULL);
-  RPT_reporting_add_real (local_data->nanimals_examined_by_reason_and_prodtype[reason][prodtype], nanimals, NULL);
-  RPT_reporting_add_integer (local_data->cumul_nunits_examined, 1, NULL);
-  RPT_reporting_add_integer (local_data->cumul_nunits_examined_by_reason[reason], 1, NULL);
-  RPT_reporting_add_integer (local_data->cumul_nunits_examined_by_prodtype[prodtype], 1, NULL);
-  RPT_reporting_add_integer (local_data->cumul_nunits_examined_by_reason_and_prodtype[reason][prodtype], 1, NULL);
-  RPT_reporting_add_real (local_data->cumul_nanimals_examined, nanimals, NULL);
-  RPT_reporting_add_real (local_data->cumul_nanimals_examined_by_reason[reason], nanimals, NULL);
-  RPT_reporting_add_real (local_data->cumul_nanimals_examined_by_prodtype[prodtype], nanimals, NULL);
-  RPT_reporting_add_real (local_data->cumul_nanimals_examined_by_reason_and_prodtype[reason][prodtype], nanimals,NULL );
+  RPT_reporting_add_integer (local_data->nunits_examined, 1);
+  RPT_reporting_add_integer (local_data->nunits_examined_by_reason[reason], 1);
+  RPT_reporting_add_integer (local_data->nunits_examined_by_prodtype[prodtype], 1);
+  RPT_reporting_add_integer (local_data->nunits_examined_by_reason_and_prodtype[reason][prodtype], 1);
+  RPT_reporting_add_real (local_data->nanimals_examined, nanimals);
+  RPT_reporting_add_real (local_data->nanimals_examined_by_reason[reason], nanimals);
+  RPT_reporting_add_real (local_data->nanimals_examined_by_prodtype[prodtype], nanimals);
+  RPT_reporting_add_real (local_data->nanimals_examined_by_reason_and_prodtype[reason][prodtype], nanimals);
+  RPT_reporting_add_integer (local_data->cumul_nunits_examined, 1);
+  RPT_reporting_add_integer (local_data->cumul_nunits_examined_by_reason[reason], 1);
+  RPT_reporting_add_integer (local_data->cumul_nunits_examined_by_prodtype[prodtype], 1);
+  RPT_reporting_add_integer (local_data->cumul_nunits_examined_by_reason_and_prodtype[reason][prodtype], 1);
+  RPT_reporting_add_real (local_data->cumul_nanimals_examined, nanimals);
+  RPT_reporting_add_real (local_data->cumul_nanimals_examined_by_reason[reason], nanimals);
+  RPT_reporting_add_real (local_data->cumul_nanimals_examined_by_prodtype[prodtype], nanimals);
+  RPT_reporting_add_real (local_data->cumul_nanimals_examined_by_reason_and_prodtype[reason][prodtype], nanimals);
 
 #if DEBUG
   g_debug ("----- EXIT handle_exam_event (%s)", MODEL_NAME);

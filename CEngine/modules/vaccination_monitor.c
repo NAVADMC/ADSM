@@ -179,37 +179,37 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
     {
       if (local_data->first_vaccination->is_null)
         {
-          RPT_reporting_set_integer (local_data->first_vaccination, event->day, NULL);
-          RPT_reporting_set_integer (local_data->vaccination_occurred, 1, NULL);
+          RPT_reporting_set_integer (local_data->first_vaccination, event->day);
+          RPT_reporting_set_integer (local_data->vaccination_occurred, 1);
         }
       if (local_data->first_vaccination_by_reason[reason]->is_null)
-        RPT_reporting_set_integer (local_data->first_vaccination_by_reason[reason], event->day, NULL);
+        RPT_reporting_set_integer (local_data->first_vaccination_by_reason[reason], event->day);
       if (local_data->first_vaccination_by_prodtype[prodtype]->is_null)
-        RPT_reporting_set_integer (local_data->first_vaccination_by_prodtype[prodtype], event->day, NULL);  
+        RPT_reporting_set_integer (local_data->first_vaccination_by_prodtype[prodtype], event->day);  
       if (local_data->first_vaccination_by_reason_and_prodtype[reason][prodtype]->is_null)
-        RPT_reporting_set_integer (local_data->first_vaccination_by_reason_and_prodtype[reason][prodtype], event->day, NULL);
+        RPT_reporting_set_integer (local_data->first_vaccination_by_reason_and_prodtype[reason][prodtype], event->day);
 
       /* Initially vaccinated units also are not included in many of the
        * counts.  They will not be part of vacnUAll or vacnU broken down by
        * production type.  They will be part of vacnUIni and vacnUIni broken
        * down by production type. */
-      RPT_reporting_add_integer (local_data->num_units_vaccinated, 1, NULL);
-      RPT_reporting_add_integer (local_data->num_units_vaccinated_by_prodtype[prodtype], 1, NULL);
-      RPT_reporting_add_real (local_data->num_animals_vaccinated, nanimals, NULL);
-      RPT_reporting_add_real (local_data->num_animals_vaccinated_by_prodtype[prodtype], nanimals, NULL);
-      RPT_reporting_add_integer (local_data->cumul_num_units_vaccinated, 1, NULL);
-      RPT_reporting_add_integer (local_data->cumul_num_units_vaccinated_by_prodtype[prodtype], 1, NULL);
-      RPT_reporting_add_real (local_data->cumul_num_animals_vaccinated, nanimals, NULL);
-      RPT_reporting_add_real (local_data->cumul_num_animals_vaccinated_by_prodtype[prodtype], nanimals, NULL);
+      RPT_reporting_add_integer (local_data->num_units_vaccinated, 1);
+      RPT_reporting_add_integer (local_data->num_units_vaccinated_by_prodtype[prodtype], 1);
+      RPT_reporting_add_real (local_data->num_animals_vaccinated, nanimals);
+      RPT_reporting_add_real (local_data->num_animals_vaccinated_by_prodtype[prodtype], nanimals);
+      RPT_reporting_add_integer (local_data->cumul_num_units_vaccinated, 1);
+      RPT_reporting_add_integer (local_data->cumul_num_units_vaccinated_by_prodtype[prodtype], 1);
+      RPT_reporting_add_real (local_data->cumul_num_animals_vaccinated, nanimals);
+      RPT_reporting_add_real (local_data->cumul_num_animals_vaccinated_by_prodtype[prodtype], nanimals);
     }
-  RPT_reporting_add_integer (local_data->num_units_vaccinated_by_reason[reason], 1, NULL);
-  RPT_reporting_add_real (local_data->num_animals_vaccinated_by_reason[reason], nanimals, NULL);
-  RPT_reporting_add_integer (local_data->cumul_num_units_vaccinated_by_reason[reason], 1, NULL);
-  RPT_reporting_add_real (local_data->cumul_num_animals_vaccinated_by_reason[reason], nanimals, NULL);
-  RPT_reporting_add_integer (local_data->num_units_vaccinated_by_reason_and_prodtype[reason][prodtype], 1, NULL);
-  RPT_reporting_add_real (local_data->num_animals_vaccinated_by_reason_and_prodtype[reason][prodtype], nanimals, NULL);
-  RPT_reporting_add_integer (local_data->cumul_num_units_vaccinated_by_reason_and_prodtype[reason][prodtype], 1, NULL);
-  RPT_reporting_add_real (local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype[reason][prodtype], nanimals, NULL);
+  RPT_reporting_add_integer (local_data->num_units_vaccinated_by_reason[reason], 1);
+  RPT_reporting_add_real (local_data->num_animals_vaccinated_by_reason[reason], nanimals);
+  RPT_reporting_add_integer (local_data->cumul_num_units_vaccinated_by_reason[reason], 1);
+  RPT_reporting_add_real (local_data->cumul_num_animals_vaccinated_by_reason[reason], nanimals);
+  RPT_reporting_add_integer (local_data->num_units_vaccinated_by_reason_and_prodtype[reason][prodtype], 1);
+  RPT_reporting_add_real (local_data->num_animals_vaccinated_by_reason_and_prodtype[reason][prodtype], nanimals);
+  RPT_reporting_add_integer (local_data->cumul_num_units_vaccinated_by_reason_and_prodtype[reason][prodtype], 1);
+  RPT_reporting_add_real (local_data->cumul_num_animals_vaccinated_by_reason_and_prodtype[reason][prodtype], nanimals);
 
 #if DEBUG
   g_debug ("----- EXIT handle_vaccination_event (%s)", MODEL_NAME);

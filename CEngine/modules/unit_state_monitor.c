@@ -146,20 +146,18 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self,
 
   /* Set all to Susceptible. */
   nunits = UNT_unit_list_length (units);
-  RPT_reporting_set_integer (local_data->num_units_in_state[Susceptible], nunits, NULL);
-  RPT_reporting_set_real (local_data->num_animals_in_state[Susceptible], local_data->nanimals, NULL);
+  RPT_reporting_set_integer (local_data->num_units_in_state[Susceptible], nunits);
+  RPT_reporting_set_real (local_data->num_animals_in_state[Susceptible], local_data->nanimals);
   nprodtypes = local_data->production_types->len;
   for (prodtype = 0; prodtype < nprodtypes; prodtype++)
     {
       RPT_reporting_set_integer (local_data->num_units_in_state_by_prodtype[Susceptible][prodtype],
-                                 local_data->nunits_of_prodtype[prodtype],
-                                 NULL);
+                                 local_data->nunits_of_prodtype[prodtype]);
       RPT_reporting_set_real (local_data->num_animals_in_state_by_prodtype[Susceptible][prodtype],
-                              local_data->nanimals_of_prodtype[prodtype],
-                              NULL);
+                              local_data->nanimals_of_prodtype[prodtype]);
     }
 
-  RPT_reporting_set_null (local_data->last_day_of_disease, NULL);
+  RPT_reporting_set_null (local_data->last_day_of_disease);
   local_data->disease_end_recorded = FALSE;
 
   #if DEBUG
@@ -186,6 +184,7 @@ handle_unit_state_change_event (struct adsm_module_t_ *self,
   UNT_unit_t *unit;
   UNT_state_t old_state;
   UNT_state_t new_state;
+  double nanimals;
   UNT_production_type_t prodtype;
 
   #if DEBUG
@@ -197,16 +196,17 @@ handle_unit_state_change_event (struct adsm_module_t_ *self,
   unit = event->unit;
   old_state = event->old_state;
   new_state = event->new_state;
-  RPT_reporting_sub_integer (local_data->num_units_in_state[old_state], 1, NULL);
-  RPT_reporting_add_integer (local_data->num_units_in_state[new_state], 1, NULL);
-  RPT_reporting_sub_real (local_data->num_animals_in_state[old_state], unit->size, NULL);
-  RPT_reporting_add_real (local_data->num_animals_in_state[new_state], unit->size, NULL);
+  nanimals = (double)(unit->size);
+  RPT_reporting_sub_integer (local_data->num_units_in_state[old_state], 1);
+  RPT_reporting_add_integer (local_data->num_units_in_state[new_state], 1);
+  RPT_reporting_sub_real (local_data->num_animals_in_state[old_state], nanimals);
+  RPT_reporting_add_real (local_data->num_animals_in_state[new_state], nanimals);
 
   prodtype = event->unit->production_type;
-  RPT_reporting_sub_integer (local_data->num_units_in_state_by_prodtype[old_state][prodtype], 1, NULL);
-  RPT_reporting_sub_real (local_data->num_animals_in_state_by_prodtype[old_state][prodtype], unit->size, NULL);
-  RPT_reporting_add_integer (local_data->num_units_in_state_by_prodtype[new_state][prodtype], 1, NULL);
-  RPT_reporting_add_real (local_data->num_animals_in_state_by_prodtype[new_state][prodtype], unit->size, NULL);
+  RPT_reporting_sub_integer (local_data->num_units_in_state_by_prodtype[old_state][prodtype], 1);
+  RPT_reporting_add_integer (local_data->num_units_in_state_by_prodtype[new_state][prodtype], 1);
+  RPT_reporting_sub_real (local_data->num_animals_in_state_by_prodtype[old_state][prodtype], nanimals);
+  RPT_reporting_add_real (local_data->num_animals_in_state_by_prodtype[new_state][prodtype], nanimals);
 
   #if DEBUG
     g_debug ("----- EXIT handle_unit_state_change_event (%s)", MODEL_NAME);
@@ -260,7 +260,7 @@ handle_new_day_event (struct adsm_module_t_ *self,
     }                   /* end loop over units */
 
   RPT_reporting_set_real (local_data->avg_prevalence, (prevalence_denom > 0) ?
-                          prevalence_num / prevalence_denom : 0, NULL);
+                          prevalence_num / prevalence_denom : 0);
 
   if (active_infections)
     {
@@ -270,7 +270,7 @@ handle_new_day_event (struct adsm_module_t_ *self,
     {
       if (local_data->disease_end_recorded == FALSE)
         {
-          RPT_reporting_set_integer (local_data->last_day_of_disease, event->day - 1, NULL);
+          RPT_reporting_set_integer (local_data->last_day_of_disease, event->day - 1);
           local_data->disease_end_recorded = TRUE;
         }
     }
