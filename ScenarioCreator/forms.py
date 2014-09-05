@@ -238,6 +238,7 @@ class ControlProtocolForm(BaseForm):
 class DiseaseForm(BaseForm):
     class Meta(object):
         model = Disease
+        exclude = ['include_direct_contact_spread', 'include_indirect_contact_spread', 'include_airborne_spread']
 
 
 class DiseaseProgressionForm(BaseForm):

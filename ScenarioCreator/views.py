@@ -81,7 +81,7 @@ def include_spread(request):
     else:  # POST means change
         fields = ['include_direct_contact_spread', 'include_indirect_contact_spread', 'include_airborne_spread']
         for field in fields:
-            setattr(master, field, request.POST.get(field))
+            setattr(master, field, request.POST.get(field) == 'true')
         master.save()
         # We don't need to return anything
         
