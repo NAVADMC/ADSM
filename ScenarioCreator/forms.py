@@ -256,7 +256,7 @@ class DiseaseProgressionForm(BaseForm):
                    'disease_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_prevalence': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/',
                                                             'data-visibility-context': 'use_within_unit_prevalence'
-                                                            })} #'data-required-value': 'true'
+                                                            })}
 
 
 class IndirectSpreadForm(BaseForm):
@@ -305,7 +305,9 @@ class DirectSpreadForm(BaseForm):
     class Meta(object):
         model = DirectSpread
         exclude = ['_spread_method_code', '_disease']
-        widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+        widgets = {'infection_probability': NumberInput(attrs={'data-visibility-context': 'use_within_unit_prevalence',
+                                                               'data-visibility-flipped': 'true'}),
+                   'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',

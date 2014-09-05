@@ -517,8 +517,6 @@ class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indire
         help_text='The average contact rate (in recipient units per source unit per day) for direct or indirect contact models.', )
     use_fixed_contact_rate = models.BooleanField(default=False,
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
-    infection_probability = PercentField(
-        help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
     distance_distribution = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the shipment distances for direct and indirect contact models.', )
     movement_control = models.ForeignKey(RelationalFunction, related_name='+',
@@ -530,6 +528,9 @@ class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indire
 class IndirectSpread(AbstractSpread):
     """This has to inherit from AbstractSpread or else Django treats DirectSpread and IndirectSpread as
     interchangable, which they are not."""
+    infection_probability = PercentField(
+        help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
+
     def __str__(self):
         return "%s %i" % (self.name, self.id)
 
@@ -537,6 +538,8 @@ class IndirectSpread(AbstractSpread):
 class DirectSpread(AbstractSpread):
     """This has to inherit from AbstractSpread or else Django treats DirectSpread and IndirectSpread as
     interchangable, which they are not."""
+    infection_probability = PercentField(blank=True, null=True,
+        help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
     latent_animals_can_infect_others = models.BooleanField(default=False,
         help_text='Indicates if latent units of the source type can spread disease by direct contact. Not applicable to airborne spread or indirect spread.', )
     def __init__(self, *args, **kwargs):

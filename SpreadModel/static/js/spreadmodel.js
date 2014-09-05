@@ -98,6 +98,9 @@ $(function(){
     
     $('[data-visibility-context]').each(function(){
         var context_var = window[$(this).attr('data-visibility-context')]
+        if($(this).attr('data-visibility-flipped') != undefined) {
+            context_var = !context_var;
+        }
         var hide_target = $(this).parents('.control-group')
         if (hide_target.length == 0){  //Sometimes it's not in a form group
             hide_target = $(this)
