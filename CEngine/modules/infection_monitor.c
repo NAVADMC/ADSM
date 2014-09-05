@@ -529,6 +529,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     0
   };
   guint nprodtypes;
+  UNT_production_type_t prodtype;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -662,7 +663,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_infected_by_cause[ADSM_UnspecifiedInfectionType] );
   g_ptr_array_remove_fast (self->outputs, local_data->num_animals_infected_by_cause[ADSM_UnspecifiedInfectionType] );
   g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_infected_by_cause[ADSM_UnspecifiedInfectionType] );
-  for (UNT_production_type_t prodtype = 0; prodtype < nprodtypes; prodtype++)
+  for (prodtype = 0; prodtype < nprodtypes; prodtype++)
     {
       g_ptr_array_remove_fast (self->outputs, local_data->num_units_infected_by_cause_and_prodtype[ADSM_UnspecifiedInfectionType][prodtype] );
       g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_infected_by_cause_and_prodtype[ADSM_UnspecifiedInfectionType][prodtype] );

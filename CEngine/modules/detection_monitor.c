@@ -502,6 +502,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   };
   guint nprodtypes;
   ADSM_detection_reason means;
+  UNT_production_type_t prodtype;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -673,7 +674,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_ptr_array_remove_fast (self->outputs, local_data->cumul_nunits_detected_by_means[ADSM_DetectionReasonUnspecified] );
   g_ptr_array_remove_fast (self->outputs, local_data->nanimals_detected_by_means[ADSM_DetectionReasonUnspecified] );
   g_ptr_array_remove_fast (self->outputs, local_data->cumul_nanimals_detected_by_means[ADSM_DetectionReasonUnspecified] );
-  for (UNT_production_type_t prodtype = 0; prodtype < nprodtypes; prodtype++)
+  for (prodtype = 0; prodtype < nprodtypes; prodtype++)
     {
       g_ptr_array_remove_fast (self->outputs, local_data->first_detection_by_means_and_prodtype[ADSM_DetectionReasonUnspecified][prodtype] );
       g_ptr_array_remove_fast (self->outputs, local_data->last_detection_by_means_and_prodtype[ADSM_DetectionReasonUnspecified][prodtype] );

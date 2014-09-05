@@ -303,6 +303,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     0
   };
   guint nprodtypes;
+  ADSM_control_reason reason;
+  UNT_production_type_t prodtype;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -418,7 +420,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* The reasons for exams, zones, vaccination, destruction, etc. are all in
    * the enum ADSM_control_reasons.  Dispose of some output variables for
    * reasons that don't apply to exams, to keep the output neater. */
-  for (ADSM_control_reason reason = 0; reason < ADSM_NCONTROL_REASONS; reason++)
+  for (reason = 0; reason < ADSM_NCONTROL_REASONS; reason++)
     {
       if (reason == ADSM_ControlReasonUnspecified || reason == ADSM_ControlInitialState)
         {
@@ -426,7 +428,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
           g_ptr_array_remove_fast (self->outputs, local_data->cumul_nunits_examined_by_reason[reason] );
           g_ptr_array_remove_fast (self->outputs, local_data->nanimals_examined_by_reason[reason] );
           g_ptr_array_remove_fast (self->outputs, local_data->cumul_nanimals_examined_by_reason[reason] );
-          for (UNT_production_type_t prodtype = 0; prodtype < nprodtypes; prodtype++)
+          for (prodtype = 0; prodtype < nprodtypes; prodtype++)
             {
               g_ptr_array_remove_fast (self->outputs, local_data->nunits_examined_by_reason_and_prodtype[reason][prodtype] );
               g_ptr_array_remove_fast (self->outputs, local_data->cumul_nunits_examined_by_reason_and_prodtype[reason][prodtype] );
