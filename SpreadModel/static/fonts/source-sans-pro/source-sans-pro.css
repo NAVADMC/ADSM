@@ -1,4 +1,4 @@
-@font-face{
+/*@font-face{
     font-family: 'Source Sans Pro';
     font-weight: 200;
     font-style: normal;
@@ -22,7 +22,7 @@
          url('WOFF/OTF/SourceSansPro-ExtraLightIt.otf.woff') format('woff'),
          url('OTF/SourceSansPro-ExtraLightIt.otf') format('opentype'),
          url('TTF/SourceSansPro-ExtraLightIt.ttf') format('truetype');
-}
+}*/
 
 @font-face{
     font-family: 'Source Sans Pro';
@@ -102,7 +102,7 @@
          url('TTF/SourceSansPro-SemiboldIt.ttf') format('truetype');
 }
 
-@font-face{
+/*@font-face{
     font-family: 'Source Sans Pro';
     font-weight: 700;
     font-style: normal;
@@ -152,4 +152,4 @@
          url('WOFF/OTF/SourceSansPro-BlackIt.otf.woff') format('woff'),
          url('OTF/SourceSansPro-BlackIt.otf') format('opentype'),
          url('TTF/SourceSansPro-BlackIt.ttf') format('truetype');
-}
+}*/
