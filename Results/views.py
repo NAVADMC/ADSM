@@ -14,8 +14,10 @@ import threading
 from django.forms.models import modelformset_factory
 from django.shortcuts import render, redirect
 from django.conf import settings
+from django.db import connections
 import subprocess
 import time
+import multiprocessing
 from ScenarioCreator.models import OutputSettings
 from django.db.models import Max
 from Results.models import *  # necessary
@@ -31,12 +33,17 @@ def back_to_inputs(request):
 def prepare_supplemental_output_directory():
     """Creates a directory with the same name as the Scenario and directs the Simulation to store supplemental files in the new directory"""
     output_args = []
-    if any(OutputSettings.objects.values('save_daily_unit_states', 'save_daily_events', 'save_daily_exposures', 'save_iteration_outputs_for_units',
-                                         'save_map_output')[0].values()):  # any of these settings would justify an output directory
-        output_dir = os.path.join('workspace', scenario_filename())  # this does not have the .sqlite3 suffix
-        output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm.exe
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+    output_settings = OutputSettings.objects.values('save_daily_unit_states',
+                                                    'save_daily_events',
+                                                    'save_daily_exposures',
+                                                    'save_iteration_outputs_for_units',
+                                                    'save_map_output')
+    if len(output_settings) > 0:
+        if any(output_settings[0].values()):  # any of these settings would justify an output directory
+            output_dir = os.path.join('workspace', scenario_filename())  # this does not have the .sqlite3 suffix
+            output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm.exe
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
     return output_args
 
 
@@ -48,16 +55,19 @@ def non_empty_lines(line):
     return output_lines
 
 
-def simulation_process(iteration_number, lock):
+def simulation_process(iteration_number, lock, event, counter, output_args):
     start = time.time()
 
-    output_args = prepare_supplemental_output_directory()
+    cursor = connections['scenario_db'].cursor()
+
     executables = {"Windows": 'adsm.exe', "Linux": 'adsm'}
     system_executable = os.path.join(settings.BASE_DIR, executables[platform.system()])  #TODO: KeyError
+    with lock:
+        counter.value = counter.value + 1
+        event.clear()
     simulation = subprocess.Popen([system_executable, '-i', str(iteration_number), 'activeSession.sqlite3'] + output_args,
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
     headers = simulation.stdout.readline().decode("utf-8")  # first line should be the column headers
-    parser = Results.output_parser.DailyParser(headers)
 
     lines = []
     for line in iter(simulation.stdout.readline, b''):
@@ -65,14 +75,23 @@ def simulation_process(iteration_number, lock):
     outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
     if errors:  # this will only print out error messages after the simulation has halted
         print(errors)
-
     with lock:
+        counter.value = counter.value - 1
+        if counter.value == 0:
+            event.set()
+
+    event.wait()
+    with lock:
+        parser = Results.output_parser.DailyParser(headers)
         for line in lines:
             parser.parse_daily_strings(line)
 
     # TODO: When the subprocess terminates there might be unconsumed output that still needs to be processed.
     # (I haven't seen evidence of uncaught output since 10 days after writing it)
     end = time.time()
+
+    cursor.close()
+
     return '%i: Success in %i seconds' % (iteration_number, end-start)
 
 
@@ -84,13 +103,20 @@ class Simulation(threading.Thread):
         super(Simulation, self).__init__(**kwargs)
 
     def run(self):
+        output_args = prepare_supplemental_output_directory()
+
+        # close db connection so each process will get its own
+        connections['default'].close()
+        connections['scenario_db'].close()
+
         statuses = []
-        import multiprocessing
         manager = multiprocessing.Manager()
         pool = multiprocessing.Pool()
+        event = manager.Event()
         lock = manager.Lock()
+        counter = manager.Value('i', 0)
         for iteration in range(1, self.max_iteration + 1):
-            res = pool.apply_async(func=simulation_process, args=(iteration, lock))
+            res = pool.apply_async(func=simulation_process, args=(iteration, lock, event, counter, output_args))
             statuses.append(res)
         pool.close()
         pool.join()
@@ -124,6 +150,7 @@ def run_simulation(request):
     create_blank_unit_stats()  # create UnitStats before we risk the simulation writing to them
     sim = Simulation(OutputSettings.objects.all().first().iterations)
     sim.start()  # starts a new thread
+    time.sleep(5) # give initial threads time to initialize their db connection
     return redirect('/results/')
 
 
