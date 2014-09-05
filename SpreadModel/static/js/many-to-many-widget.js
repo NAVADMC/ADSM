@@ -114,14 +114,19 @@ form_state = (function(form){
 
 many_to_many_widget = (function(form_state){
     var my_table;
-    //jquery events
-        //select change
     //render
+    //this queries the current state of the Disease object through JSON and sets the checkbox stats to match
     function add_checkboxes_to_headers() {
-        my_table.find('tr:first-child th:nth-child(n+3)').each(function(index, element){
-            $(this).html(           
-                '<input type="checkbox"> ' + $(this).text()
-             );
+        $.get('/setup/IncludeSpreads/', function(data){
+            my_table.find('tr:first-child th:nth-child(n+3)').each(function(index, element){
+                console.log($(this).find('input').first(), data.include_direct_contact_spread);
+                var field_name = 'include_'+ $(this).text().replace(/ /g, '_').toLowerCase() 
+                var myInput = $('<input type="checkbox" name="' + field_name + '">');
+                myInput.prop('checked', data[field_name]);
+                $(this).html(
+                    $('<label class="checkbox">' + $(this).text() + '</label>').prepend(myInput)
+                );
+            });
         });
     }
     
@@ -201,7 +206,7 @@ many_to_many_widget = (function(form_state){
         my_table.append(create_body_rows())
         update_display_inputs() //called from events normally, but we want to initialize
 
-        $('section form').before(my_table); //finally, insert everything into the DOM
+        $('.panel').before(my_table); //finally, insert everything into the DOM
         my_table.find('tbody select').on('change', update_state_inputs)//register event listener
     };
 

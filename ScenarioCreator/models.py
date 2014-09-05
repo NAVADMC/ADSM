@@ -549,7 +549,7 @@ class DirectSpread(AbstractSpread):
 class AirborneSpread(DiseaseSpread):
     _spread_method_code = models.CharField(max_length=255, default='other',
         help_text='Code indicating the mechanism of the disease spread.', )
-    spread_1km_probability = PercentField(
+    spread_1km_probability = PercentField(validators=[MinValueValidator(0.0), MaxValueValidator(.999)],
         help_text='The probability that disease will be spread to unit 1 km away from the source unit.', )
     max_distance = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='The maximum distance in KM of airborne spread.  Only used in Exponential Airborne Decay.', )

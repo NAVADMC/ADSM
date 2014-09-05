@@ -186,6 +186,18 @@ function update_population_filter_and_sort(sort_by) {
     $('#farm_list').parent().load(new_url + ' #farm_list');
 }
 
+//Validation checking for minimums in the filter
+$(document).on('change', '#farm_filter input', function(event){ //this needs to come before update_population_filter_and_sort()
+    var name = $(this).closest('td').prev().text().toLowerCase();
+    if( name.indexOf('max') != -1 ) {
+        var min_val = $(this).closest('td').prev().prev().find('input').val();
+        $(this).val( Math.max(min_val, $(this).val()) ); //bump up to "Min:" if that is higher
+    }
+    if( $(this).attr('min') && $(this).val() < $(this).attr('min')) {
+        $(this).val( $(this).attr('min') );
+    }
+});
+
 $(document).on('change', '#farm_filter select, #farm_filter input', function(){
     update_population_filter_and_sort();
 });
