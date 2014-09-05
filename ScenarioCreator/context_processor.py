@@ -19,6 +19,12 @@ def simulation_ready_to_run(context):
     return all(status_lights)  # All green status_lights  (It's a metaphor)
 
 
+def js(var):
+    if var:
+        return 'true'
+    else:
+        return 'false'
+
 def basic_context(request):
     pt_count = ProductionType.objects.count()
     context = {'filename': scenario_filename(),
@@ -56,4 +62,11 @@ def basic_context(request):
                          'ZoneEffectAssignments']
     context['relevant_keys'] = {name: context[name] for name in validation_models}
     context['Simulation_ready'] = simulation_ready_to_run(context)
+    disease = Disease.objects.get_or_create(pk=1)[0]
+    context['javascript_variables'] = {'use_within_unit_prevalence':      js(disease.use_within_unit_prevalence),
+                                       'use_airborne_exponential_decay':  js(disease.use_airborne_exponential_decay),
+                                       'include_direct_contact_spread':   js(disease.include_direct_contact_spread),
+                                       'include_indirect_contact_spread': js(disease.include_indirect_contact_spread),
+                                       'include_airborne_spread':         js(disease.include_airborne_spread),
+                                       }
     return context

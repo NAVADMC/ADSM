@@ -254,7 +254,9 @@ class DiseaseProgressionForm(BaseForm):
                    'disease_subclinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_clinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'disease_prevalence': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
+                   'disease_prevalence': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/',
+                                                            'data-visibility-context': 'use_within_unit_prevalence'
+                                                            })} #'data-required-value': 'true'
 
 
 class IndirectSpreadForm(BaseForm):

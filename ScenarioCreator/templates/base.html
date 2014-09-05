@@ -32,6 +32,13 @@
     <h2>Animal Disease Spread Model</h2>
     <a href="/admin/" id="admin_link">Advanced Panel</a>
 </header>
+
+{#Javascript context variables#}
+<script type="text/javascript">
+    {% for var_name, value in javascript_variables.items %}
+        var {{var_name}} = {{value}};
+    {% endfor %}
+</script>
 {% block main %}
 
 {% endblock %}

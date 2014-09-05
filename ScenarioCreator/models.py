@@ -600,7 +600,7 @@ class OutputSettings(BaseModel):
         help_text='Save all daily events in a supplemental file.', )
     save_daily_exposures = models.BooleanField(default=False,
         help_text='Save all exposures in a supplemental file.', )
-    save_iteration_outputs_for_units = models.BooleanField(default=False,
+    save_iteration_outputs_for_units = models.BooleanField(default=True,
         help_text='Save all iteration outputs for units in a supplemental file.', )
     save_map_output = models.BooleanField(default=False,
         help_text='Create map outputs for units in supplemental directory.', )
