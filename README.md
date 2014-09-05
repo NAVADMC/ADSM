@@ -122,6 +122,22 @@ To update the executable:
 
 `make` will will fail on a `dia: command not found` error when it gets to the SpreadModel/CEngine/doc/diagrams directory.  That’s OK: at this point, the executable is built, and you are done.
 
-###CX_Freeze
-only necessary for creating executables https://pypi.python.org/pypi/cx_Freeze
-Needed to edit C:\Python33\Scripts\cxfreeze and csfreeze-quickstart to point to correct interpreter!
+##Building Distributable
+    Required Items for PyInstaller:
+        http://sourceforge.net/projects/pywin32/  # For Windows only. MAKE SURE these go into your virtualenv!
+        ldd, objdump  # For Linux only
+        Xcode  # For OS X only
+
+    pip install pyinstaller
+
+    For the Chromium window, we are using the Chromium Embedded Framework. Compiling it is a massive pain,
+    but thankfully Adobe hosts and maintains a site, cefbuilds.com, which has the compile chain setup in as a project per OS platform.
+
+    I pulled the 64bit projects for each OS from the 2062 Branch on that site.
+        Note, the Windows version requires VS2013
+
+    From here, I modified the 'cefsimple' application to launch http://localhost:8000, changed the window names, and disabled right clicking.
+    Compile that project as x64 Release and put the output in the Chromium folder for the OS Branch.
+
+    The CEF Source was not added to the repo as it won't accept merges from the Google CEF Repo in the Project format made by Adobe.
+    Also because this should really only be a one time thing to ever happen. However, the notes are here in case there is a major security hole that needs to be recompiled for.
