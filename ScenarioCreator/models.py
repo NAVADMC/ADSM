@@ -554,8 +554,8 @@ class AirborneSpread(DiseaseSpread):
         help_text='Code indicating the mechanism of the disease spread.', )
     spread_1km_probability = PercentField(validators=[MinValueValidator(0.0), MaxValueValidator(.999)],
         help_text='The probability that disease will be spread to unit 1 km away from the source unit.', )
-    max_distance = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='The maximum distance in KM of airborne spread.  Only used in Exponential Airborne Decay.', )
+    max_distance = models.FloatField(validators=[MinValueValidator(1.1)], blank=True, null=True,
+        help_text='The maximum distance in KM of airborne spread.  Only used in Linear Airborne Decay.', )
     wind_direction_start = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=0,
         help_text='The start angle in degrees of the predominate wind direction for airborne spread.', )
     #TODO: This doesn't keep start and end from crossing each other.

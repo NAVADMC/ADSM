@@ -338,6 +338,8 @@ class AirborneSpreadForm(BaseForm):
         except (ObjectDoesNotExist, OperationalError):
             pass
         widgets = {'_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
+                   'max_distance': NumberInput(attrs={'data-visibility-context': 'use_airborne_exponential_decay',
+                                                      'data-visibility-flipped': 'true'}),  # only visible when exponential is false
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
                                                          'data-visibility-controller': 'transport_delay',
