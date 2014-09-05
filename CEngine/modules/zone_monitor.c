@@ -234,8 +234,7 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
       
       RPT_reporting_add_integer (local_data->num_units[zone_index], 1);
       RPT_reporting_add_integer (local_data->num_units_by_prodtype[zone_index][prodtype], 1);
-      if (unit->state != Destroyed &&
-          !ZON_same_zone (zones->membership[i], background_zone))
+      if (unit->state != Destroyed)
         {
           RPT_reporting_add_integer (local_data->num_unit_days[zone_index], 1);
           RPT_reporting_add_integer (local_data->num_unit_days_by_prodtype[zone_index][prodtype], 1);
@@ -410,25 +409,23 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, units->production_type_names, nprodtypes,
         self->outputs, local_data->daily_outputs },
 
-      /* unitsDaysInZone and animalDaysInZone do not include the background
-       * zone. */
       { &local_data->num_unit_days, "unitDaysInZone%s", RPT_integer,
-        RPT_GPtrArray, zone_names, local_data->nzones - 1,
+        RPT_GPtrArray, zone_names, local_data->nzones,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->cumul_outputs },
 
       { &local_data->num_unit_days_by_prodtype, "unitDaysInZone%s%s", RPT_integer,
-        RPT_GPtrArray, zone_names, local_data->nzones - 1,
+        RPT_GPtrArray, zone_names, local_data->nzones,
         RPT_GPtrArray, units->production_type_names, nprodtypes,
         self->outputs, local_data->cumul_outputs },
 
       { &local_data->num_animal_days, "animalDaysInZone%s", RPT_real,
-        RPT_GPtrArray, zone_names, local_data->nzones - 1,
+        RPT_GPtrArray, zone_names, local_data->nzones,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->cumul_outputs },
 
       { &local_data->num_animal_days_by_prodtype, "animalDaysInZone%s%s", RPT_real,
-        RPT_GPtrArray, zone_names, local_data->nzones - 1,
+        RPT_GPtrArray, zone_names, local_data->nzones,
         RPT_GPtrArray, units->production_type_names, nprodtypes,
         self->outputs, local_data->cumul_outputs },
 

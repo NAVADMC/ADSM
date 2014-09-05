@@ -3120,13 +3120,14 @@
     <tr>
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneHighRisk</td>
+      <td>animalDaysInZoneBackground</td>
       <td>animalDaysInZoneHighRisk</td>
     </tr>
-    <tr><td>16</td>  <td>0</td>    <td>0</td></tr>
-    <tr><td>16</td>  <td>0</td>    <td>0</td></tr>
-    <tr> <td>7</td>  <td>9</td>  <td>225</td></tr>
-    <tr> <td>7</td>  <td>9</td>  <td>450</td></tr>
-    <tr> <td>7</td>  <td>9</td>  <td>675</td></tr>
+    <tr><td>16</td>  <td>0</td>   <td>400</td>    <td>0</td></tr>
+    <tr><td>16</td>  <td>0</td>   <td>800</td>    <td>0</td></tr>
+    <tr> <td>7</td>  <td>9</td>   <td>975</td>  <td>225</td></tr>
+    <tr> <td>7</td>  <td>9</td>  <td>1150</td>  <td>450</td></tr>
+    <tr> <td>7</td>  <td>9</td>  <td>1325</td>  <td>675</td></tr>
   </output>
 </variable-test>
 
@@ -3195,14 +3196,15 @@
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneLowRisk</td>
       <td>unitsInZoneHighRisk</td>
+      <td>animalDaysInZoneBackground</td>
       <td>animalDaysInZoneLowRisk</td>
       <td>animalDaysInZoneHighRisk</td>
     </tr>
-    <tr><td>16</td>  <td>0</td>  <td>0</td>    <td>0</td>    <td>0</td></tr>
-    <tr><td>16</td>  <td>0</td>  <td>0</td>    <td>0</td>    <td>0</td></tr>
-    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>100</td>  <td>125</td></tr>
-    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>200</td>  <td>250</td></tr>
-    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>300</td>  <td>375</td></tr>
+    <tr><td>16</td>  <td>0</td>  <td>0</td>   <td>400</td>    <td>0</td>    <td>0</td></tr>
+    <tr><td>16</td>  <td>0</td>  <td>0</td>   <td>800</td>    <td>0</td>    <td>0</td></tr>
+    <tr> <td>7</td>  <td>4</td>  <td>5</td>   <td>975</td>  <td>100</td>  <td>125</td></tr>
+    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>1150</td>  <td>200</td>  <td>250</td></tr>
+    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>1325</td>  <td>300</td>  <td>375</td></tr>
   </output>
 </variable-test>
 
@@ -3265,12 +3267,13 @@
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneHighRisk</td>
       <td>desnUAll</td>
+      <td>animalDaysInZoneBackground</td>
       <td>animalDaysInZoneHighRisk</td>
     </tr>
-    <tr><td>16</td>  <td>0</td>  <td>0</td>    <td>0</td></tr>
-    <tr><td>16</td>  <td>0</td>  <td>0</td>    <td>0</td></tr>
-    <tr> <td>7</td>  <td>9</td>  <td>9</td>  <td>225</td></tr>
-    <tr> <td>7</td>  <td>9</td>  <td>0</td>  <td>225</td></tr>
+    <tr><td>16</td>  <td>0</td>  <td>0</td>   <td>400</td>    <td>0</td></tr>
+    <tr><td>16</td>  <td>0</td>  <td>0</td>   <td>800</td>    <td>0</td></tr>
+    <tr> <td>7</td>  <td>9</td>  <td>9</td>   <td>975</td>  <td>225</td></tr>
+    <tr> <td>7</td>  <td>9</td>  <td>0</td>  <td>1150</td>  <td>225</td></tr>
   </output>
 </variable-test>
 
@@ -3337,13 +3340,14 @@
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneHighRisk</td>
       <td>desnUAll</td>
+      <td>animalDaysInZoneBackground</td>
       <td>animalDaysInZoneHighRisk</td>
     </tr>
-    <tr><td>16</td>  <td>0</td>  <td>0</td>    <td>0</td></tr>
-    <tr><td>16</td>  <td>0</td>  <td>0</td>    <td>0</td></tr>
-    <tr> <td>7</td>  <td>9</td>  <td>5</td>  <td>225</td></tr>
-    <tr> <td>7</td>  <td>9</td>  <td>4</td>  <td>325</td></tr>
-    <tr> <td>7</td>  <td>9</td>  <td>0</td>  <td>325</td></tr>
+    <tr><td>16</td>  <td>0</td>  <td>0</td>   <td>400</td>    <td>0</td></tr>
+    <tr><td>16</td>  <td>0</td>  <td>0</td>   <td>800</td>    <td>0</td></tr>
+    <tr> <td>7</td>  <td>9</td>  <td>5</td>   <td>975</td>  <td>225</td></tr>
+    <tr> <td>7</td>  <td>9</td>  <td>4</td>  <td>1150</td>  <td>325</td></tr>
+    <tr> <td>7</td>  <td>9</td>  <td>0</td>  <td>1325</td>  <td>325</td></tr>
   </output>
 </variable-test>
 
@@ -3414,13 +3418,14 @@
       <td>unitsInZoneLowRisk</td>
       <td>unitsInZoneHighRisk</td>
       <td>desnUAll</td>
+      <td>animalDaysInZoneBackground</td>
       <td>animalDaysInZoneLowRisk</td>
       <td>animalDaysInZoneHighRisk</td>
     </tr>
-    <tr><td>16</td>  <td>0</td>  <td>0</td>  <td>0</td>    <td>0</td>    <td>0</td></tr>
-    <tr><td>16</td>  <td>0</td>  <td>0</td>  <td>0</td>    <td>0</td>    <td>0</td></tr>
-    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>5</td>  <td>100</td>  <td>125</td></tr>
-    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>0</td>  <td>200</td>  <td>125</td></tr>
+    <tr><td>16</td>  <td>0</td>  <td>0</td>  <td>0</td>   <td>400</td>    <td>0</td>    <td>0</td></tr>
+    <tr><td>16</td>  <td>0</td>  <td>0</td>  <td>0</td>   <td>800</td>    <td>0</td>    <td>0</td></tr>
+    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>5</td>   <td>975</td>  <td>100</td>  <td>125</td></tr>
+    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>0</td>  <td>1150</td>  <td>200</td>  <td>125</td></tr>
   </output>
 </variable-test>
 
@@ -4105,13 +4110,14 @@
       <td>unitsInZoneLöwRïsk</td>
       <td>unitsInZoneHïghRïsk</td>
       <td>desnUAll</td>
+      <td>animalDaysInZoneBackground</td>
       <td>animalDaysInZoneLöwRïsk</td>
       <td>animalDaysInZoneHïghRïsk</td>
     </tr>
-    <tr><td>16</td>  <td>0</td>  <td>0</td>  <td>0</td>    <td>0</td>    <td>0</td></tr>
-    <tr><td>16</td>  <td>0</td>  <td>0</td>  <td>0</td>    <td>0</td>    <td>0</td></tr>
-    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>5</td>  <td>100</td>  <td>125</td></tr>
-    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>0</td>  <td>200</td>  <td>125</td></tr>
+    <tr><td>16</td>  <td>0</td>  <td>0</td>  <td>0</td>   <td>400</td>    <td>0</td>    <td>0</td></tr>
+    <tr><td>16</td>  <td>0</td>  <td>0</td>  <td>0</td>   <td>800</td>    <td>0</td>    <td>0</td></tr>
+    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>5</td>   <td>975</td>  <td>100</td>  <td>125</td></tr>
+    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>0</td>  <td>1150</td>  <td>200</td>  <td>125</td></tr>
   </output>
 </variable-test>
 

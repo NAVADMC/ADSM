@@ -549,6 +549,7 @@
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneLowRisk</td>
       <td>unitsInZoneHighRisk</td>
+      <td>animalDaysInZoneBackground</td>
       <td>animalDaysInZoneLowRisk</td>
       <td>animalDaysInZoneHighRisk</td>
       <!--
@@ -558,10 +559,10 @@
       <td>costSurveillance</td>
       <td>costsTotal</td>
     </tr>
-    <tr><td>16</td>  <td>0</td>  <td>0</td>    <td>0</td>    <td>0</td> <!--    <td>0.00</td>    <td>0.00</td> -->     <td>0.00</td>     <td>0.00</td></tr>
-    <tr><td>16</td>  <td>0</td>  <td>0</td>    <td>0</td>    <td>0</td> <!--    <td>0.00</td>    <td>0.00</td> -->     <td>0.00</td>     <td>0.00</td></tr>
-    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>100</td>  <td>125</td> <!-- <td>8075.00</td> <td>8075.00</td> -->  <td>8075.00</td>  <td>8075.00</td></tr>
-    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>200</td>  <td>250</td> <!-- <td>8075.00</td> <td>8075.00</td> --> <td>16150.00</td> <td>16150.00</td></tr>
-    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>300</td>  <td>375</td> <!-- <td>8075.00</td> <td>8075.00</td> --> <td>24225.00</td> <td>24225.00</td></tr>
+    <tr><td>16</td>  <td>0</td>  <td>0</td>   <td>400</td>    <td>0</td>    <td>0</td> <!--    <td>0.00</td>    <td>0.00</td> -->     <td>0.00</td>     <td>0.00</td></tr>
+    <tr><td>16</td>  <td>0</td>  <td>0</td>   <td>800</td>    <td>0</td>    <td>0</td> <!--    <td>0.00</td>    <td>0.00</td> -->     <td>0.00</td>     <td>0.00</td></tr>
+    <tr> <td>7</td>  <td>4</td>  <td>5</td>   <td>975</td>  <td>100</td>  <td>125</td> <!-- <td>8075.00</td> <td>8075.00</td> -->  <td>8075.00</td>  <td>8075.00</td></tr>
+    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>1150</td>  <td>200</td>  <td>250</td> <!-- <td>8075.00</td> <td>8075.00</td> --> <td>16150.00</td> <td>16150.00</td></tr>
+    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>1325</td>  <td>300</td>  <td>375</td> <!-- <td>8075.00</td> <td>8075.00</td> --> <td>24225.00</td> <td>24225.00</td></tr>
   </output>
 </variable-test>
