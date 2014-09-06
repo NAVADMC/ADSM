@@ -54,6 +54,7 @@ const char *EVT_event_type_name[] = {
   "EndOfDay2",
   "Midnight",
   "UnitStateChange",
+  "UnitZoneChange",
   NULL
 };
 
@@ -1360,6 +1361,52 @@ EVT_unit_state_change_event_to_string (EVT_unit_state_change_event_t * event)
 
 
 /**
+ * Creates a new "unit zone change" event.
+ *
+ * @return a pointer to a newly-created EVT_event_t structure.
+ */
+EVT_event_t *
+EVT_new_unit_zone_change_event (UNT_unit_t * unit,
+                                ZON_zone_t *old_zone,
+                                ZON_zone_t *new_zone,
+                                int day)
+{
+  EVT_event_t *event;
+
+  event = g_new (EVT_event_t, 1);
+  event->type = EVT_UnitZoneChange;
+  event->u.unit_zone_change.unit = unit;
+  event->u.unit_zone_change.old_zone = old_zone;
+  event->u.unit_zone_change.new_zone = new_zone;
+  event->u.unit_zone_change.day = day;
+
+  return event;
+}
+
+
+
+/**
+ * Returns a text representation of a unit zone change event.
+ *
+ * @param event a unit zone change event.
+ * @return a string.
+ */
+char *
+EVT_unit_zone_change_event_to_string (EVT_unit_zone_change_event_t * event)
+{
+  gchar *s;
+
+  s = g_strdup_printf ("<Unit zone change event unit=\"%s\" \"%s\"->\"%s\" day=%i>",
+                       event->unit->official_id,
+                       event->old_zone->name,
+                       event->new_zone->name,
+                       event->day);
+  return s;
+}
+
+
+
+/**
  * Deletes an event from memory.
  *
  * @param event an event.
@@ -1398,6 +1445,7 @@ EVT_free_event (EVT_event_t * event)
     case EVT_EndOfDay2:
     case EVT_Midnight:
     case EVT_UnitStateChange:
+    case EVT_UnitZoneChange:
       /* No dynamically-allocated parts to free. */
       break;
     case EVT_OutputDirectory:
@@ -1596,6 +1644,9 @@ EVT_event_to_string (EVT_event_t * event)
       break;
     case EVT_UnitStateChange:
       s = EVT_unit_state_change_event_to_string (&(event->u.unit_state_change));
+      break;
+    case EVT_UnitZoneChange:
+      s = EVT_unit_zone_change_event_to_string (&(event->u.unit_zone_change));
       break;
     default:
       g_assert_not_reached ();
