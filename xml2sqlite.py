@@ -393,8 +393,8 @@ def readParameters( parameterFileName ):
 		  _disease = disease,
 		  max_distance = maxDistance,
 		  spread_1km_probability = float( el.find( './prob-spread-1km' ).text ),
-		  wind_direction_start = float( el.find( './wind-direction-start/value' ).text ),
-		  wind_direction_end = float( el.find( './wind-direction-end/value' ).text ),
+		  exposure_direction_start = float( el.find( './wind-direction-start/value' ).text ),
+		  exposure_direction_end = float( el.find( './wind-direction-end/value' ).text ),
 		  transport_delay = delay
 		)
 		airborneSpread.save()
