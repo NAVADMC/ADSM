@@ -26,6 +26,7 @@
 #define run zone_monitor_run
 #define local_free zone_monitor_free
 #define handle_before_each_simulation_event zone_monitor_handle_before_each_simulation_event
+#define handle_unit_zone_change_event zone_monitor_handle_unit_zone_change_event
 #define handle_new_day_event zone_monitor_handle_new_day_event
 #define handle_request_for_zone_focus_event zone_monitor_handle_request_for_zone_focus_event
 
@@ -55,6 +56,7 @@
 typedef struct
 {
   int nzones;
+  guint nprodtypes;
   projPJ projection; /* The map projection used to convert the units' latitudes
     and longitudes to x-y coordinates */
   RPT_reporting_t  **area;
@@ -66,13 +68,59 @@ typedef struct
   RPT_reporting_t ***num_unit_days_by_prodtype;
   RPT_reporting_t  **num_animal_days;
   RPT_reporting_t ***num_animal_days_by_prodtype;
-  GPtrArray *daily_outputs; /**< Daily outputs, in a list to make it easy to
-    zero them all at once. */
   GPtrArray *cumul_outputs; /**< Cumulative outputs, is a list to make it easy
     to zero them all at once. */
   gboolean seen_request_for_zone_focus;
+  guint num_units_at_start;
+  guint *num_units_at_start_by_prodtype;
 }
 local_data_t;
+
+
+
+/**
+ * Before any simulations, record the total number of units and number of units
+ * of each production type.  Also report the output variables this module is
+ * tracking.
+ *
+ * @param self this module.
+ * @param units a list of units.
+ * @param queue for any new events this module generates.
+ */
+void
+handle_before_any_simulations_event (struct adsm_module_t_ *self,
+                                     UNT_unit_list_t *units,
+                                     EVT_event_queue_t *queue)
+{
+  local_data_t *local_data;
+  guint nunits, nprodtypes, i;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_any_simulations_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  
+  nunits = UNT_unit_list_length (units);
+  local_data->num_units_at_start = nunits;
+
+  nprodtypes = units->production_type_names->len;
+  local_data->num_units_at_start_by_prodtype = g_new0 (guint, nprodtypes);
+  for (i = 0; i < nunits; i++)
+    {
+      UNT_unit_t *unit;
+      unit = UNT_unit_list_get (units, i);
+      local_data->num_units_at_start_by_prodtype[unit->production_type] += 1;
+    }
+
+  adsm_declare_outputs (self, queue);
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_any_simulations_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
 
 
 
@@ -85,17 +133,67 @@ void
 handle_before_each_simulation_event (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
+  guint background_zone_index;
+  UNT_production_type_t prodtype;
 
   #if DEBUG
     g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
   #endif
 
   local_data = (local_data_t *) (self->model_data);
+
+  /* Reset the counts to all units in the background zone. */
   g_ptr_array_foreach (local_data->cumul_outputs, RPT_reporting_zero_as_GFunc, NULL);
+  background_zone_index = local_data->nzones - 1;
+  RPT_reporting_set_integer (local_data->num_units[background_zone_index],
+                             local_data->num_units_at_start);
+  for (prodtype = 0; prodtype < local_data->nprodtypes; prodtype++)
+    {
+      RPT_reporting_set_integer (local_data->num_units_by_prodtype[background_zone_index][prodtype],
+                                 local_data->num_units_at_start_by_prodtype[prodtype]);
+    }
+
   local_data->seen_request_for_zone_focus = FALSE;
 
   #if DEBUG
     g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
+
+
+
+/**
+ * Responds to a unit zone change event by updating the counts of units in each
+ * zone.
+ *
+ * @param self this module.
+ * @param event a unit zone change event.
+ */
+void
+handle_unit_zone_change_event (struct adsm_module_t_ *self,
+                               EVT_unit_zone_change_event_t *event)
+{
+  local_data_t *local_data;
+  guint old_zone_index, new_zone_index;
+  UNT_production_type_t prodtype;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_unit_zone_change_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  prodtype = event->unit->production_type;
+  old_zone_index =  event->old_zone->level - 1;
+  new_zone_index =  event->new_zone->level - 1;
+  RPT_reporting_sub_integer (local_data->num_units[old_zone_index], 1);
+  RPT_reporting_add_integer (local_data->num_units[new_zone_index], 1);
+  RPT_reporting_sub_integer (local_data->num_units_by_prodtype[old_zone_index][prodtype], 1);
+  RPT_reporting_add_integer (local_data->num_units_by_prodtype[new_zone_index][prodtype], 1);
+  
+  #if DEBUG
+    g_debug ("----- EXIT handle_unit_zone_change_event (%s)", MODEL_NAME);
   #endif
 
   return;
@@ -216,7 +314,6 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
       local_data->seen_request_for_zone_focus = FALSE;
     } /* end of if seen_request_for_zone_focus flag is set */
 
-  g_ptr_array_foreach (local_data->daily_outputs, RPT_reporting_zero_as_GFunc, NULL);
   nunits = zones->membership_length;
 
   background_zone = ZON_zone_list_get_background (zones);
@@ -232,8 +329,6 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
       prodtype = unit->production_type;
       nanimals = (double)(unit->size);
       
-      RPT_reporting_add_integer (local_data->num_units[zone_index], 1);
-      RPT_reporting_add_integer (local_data->num_units_by_prodtype[zone_index][prodtype], 1);
       if (unit->state != Destroyed)
         {
           RPT_reporting_add_integer (local_data->num_unit_days[zone_index], 1);
@@ -271,10 +366,13 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
   switch (event->type)
     {
     case EVT_BeforeAnySimulations:
-      adsm_declare_outputs (self, queue);
+      handle_before_any_simulations_event (self, units, queue);
       break;
     case EVT_BeforeEachSimulation:
       handle_before_each_simulation_event (self);
+      break;
+    case EVT_UnitZoneChange:
+      handle_unit_zone_change_event (self, &(event->u.unit_zone_change));
       break;
     case EVT_RequestForZoneFocus:
       handle_request_for_zone_focus_event (self);
@@ -333,7 +431,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data_t *local_data;
   GPtrArray *zone_names;
   guint i;
-  guint nprodtypes;
   ZON_zone_t *zone;
 
 #if DEBUG
@@ -345,6 +442,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   EVT_event_type_t events_listened_for[] = {
     EVT_BeforeAnySimulations,
     EVT_BeforeEachSimulation,
+    EVT_UnitZoneChange,
     EVT_RequestForZoneFocus,
     EVT_NewDay,
     0
@@ -364,9 +462,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->projection = projection;
-  local_data->daily_outputs = g_ptr_array_new();
   local_data->cumul_outputs = g_ptr_array_new();
-  nprodtypes = units->production_type_names->len;
+  local_data->nprodtypes = units->production_type_names->len;
 
   /* Make a list of the zone names, including the background zone.  This
    * temporary list will be used below to initialize sub-categories in the
@@ -402,12 +499,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       { &local_data->num_units, "unitsInZone%s", RPT_integer,
         RPT_GPtrArray, zone_names, local_data->nzones,
         RPT_NoSubcategory, NULL, 0,
-        self->outputs, local_data->daily_outputs },
+        self->outputs, local_data->cumul_outputs },
 
       { &local_data->num_units_by_prodtype, "unitsInZone%s%s", RPT_integer,
         RPT_GPtrArray, zone_names, local_data->nzones,
-        RPT_GPtrArray, units->production_type_names, nprodtypes,
-        self->outputs, local_data->daily_outputs },
+        RPT_GPtrArray, units->production_type_names, local_data->nprodtypes,
+        self->outputs, local_data->cumul_outputs },
 
       { &local_data->num_unit_days, "unitDaysInZone%s", RPT_integer,
         RPT_GPtrArray, zone_names, local_data->nzones,
@@ -416,7 +513,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
       { &local_data->num_unit_days_by_prodtype, "unitDaysInZone%s%s", RPT_integer,
         RPT_GPtrArray, zone_names, local_data->nzones,
-        RPT_GPtrArray, units->production_type_names, nprodtypes,
+        RPT_GPtrArray, units->production_type_names, local_data->nprodtypes,
         self->outputs, local_data->cumul_outputs },
 
       { &local_data->num_animal_days, "animalDaysInZone%s", RPT_real,
@@ -426,7 +523,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
       { &local_data->num_animal_days_by_prodtype, "animalDaysInZone%s%s", RPT_real,
         RPT_GPtrArray, zone_names, local_data->nzones,
-        RPT_GPtrArray, units->production_type_names, nprodtypes,
+        RPT_GPtrArray, units->production_type_names, local_data->nprodtypes,
         self->outputs, local_data->cumul_outputs },
 
       { NULL }
