@@ -464,6 +464,7 @@ def delete_file(request, target):
 
 def open_scenario(request, target):
     print("Copying ", workspace_path(target), "to", activeSession())
+    connections['scenario_db'].close()
     shutil.copy(workspace_path(target), activeSession())
     scenario_filename(target)
     print('Sessions overwritten with ', target)

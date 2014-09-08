@@ -89,10 +89,12 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'USER': 'josiah',
         'PASSWORD': '1',
+        'TEST_NAME': os.path.join(BASE_DIR, 'test_settings.sqlite3'),
     },
     'scenario_db': {
         'NAME': os.path.join(BASE_DIR, 'activeSession.sqlite3'),
         'ENGINE': 'django.db.backends.sqlite3',
+        'TEST_NAME': os.path.join(BASE_DIR, 'test_activeSession.sqlite3'),
     }
 }
 

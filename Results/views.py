@@ -38,7 +38,7 @@ def prepare_supplemental_output_directory():
                                                     'save_daily_exposures',
                                                     'save_iteration_outputs_for_units',
                                                     'save_map_output')
-    if len(output_settings) > 0:
+    if output_settings.exists():
         if any(output_settings[0].values()):  # any of these settings would justify an output directory
             output_dir = os.path.join('workspace', scenario_filename())  # this does not have the .sqlite3 suffix
             output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm.exe
@@ -62,10 +62,11 @@ def simulation_process(iteration_number, lock, event, counter, output_args):
 
     executables = {"Windows": 'adsm.exe', "Linux": 'adsm'}
     system_executable = os.path.join(settings.BASE_DIR, executables[platform.system()])  #TODO: KeyError
+    database_file = os.path.basename(settings.DATABASES['scenario_db']['NAME'])
     with lock:
         counter.value = counter.value + 1
         event.clear()
-    simulation = subprocess.Popen([system_executable, '-i', str(iteration_number), 'activeSession.sqlite3'] + output_args,
+    simulation = subprocess.Popen([system_executable, '-i', str(iteration_number), database_file] + output_args,
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
     headers = simulation.stdout.readline().decode("utf-8")  # first line should be the column headers
 
