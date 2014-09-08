@@ -75,8 +75,10 @@ class ModelUtilsTest(TestCase):
         index = Unit.objects.count()
         p = Population(source_file='workspace/Population_Grid.xml')
         p.save()
+
+        new_unit = p.unit_set.first()
         self.assertGreater( Unit.objects.count(), index, "No new Units were added")
-        self.assertEqual( Unit.objects.get(id=index+1)._population, p, "New Unit should link back to newest Population object")
+        self.assertEqual( Unit.objects.get(id=new_unit.id)._population, p, "New Unit should link back to newest Population object")
 
 
 class IndirectSpreadFormTestCase(TestCase):
