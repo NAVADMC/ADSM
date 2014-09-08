@@ -119,12 +119,12 @@ main (int argc, char *argv[])
     {
       g_error ("Error opening scenario database: %s", sqlite3_errmsg (scenario_db));
     }
+  sqlite3_busy_timeout (scenario_db, 30 * 60 * 1000 /* 30 minutes, given in milliseconds */);
   sqlite3_exec (scenario_db, "PRAGMA journal_mode = WAL", NULL, NULL, &sqlerrmsg);
   if (sqlerrmsg)
     {
-      g_error ("%s", sqlerrmsg);
+      g_error ("Error switching to WAL mode: %s", sqlerrmsg);
     }
-  sqlite3_busy_timeout (scenario_db, 30 * 60 * 1000 /* 30 minutes, given in milliseconds */);
 
   run_sim_main (scenario_db,
                 (char *)output_dir,
