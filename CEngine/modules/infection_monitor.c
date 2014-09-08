@@ -23,9 +23,9 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new infection_monitor_new
 #define run infection_monitor_run
-#define reset infection_monitor_reset
 #define to_string infection_monitor_to_string
 #define local_free infection_monitor_free
+#define handle_before_each_simulation_event infection_monitor_handle_before_each_simulation_event
 #define handle_new_day_event infection_monitor_handle_new_day_event
 #define handle_infection_event infection_monitor_handle_infection_event
 #define handle_detection_event infection_monitor_handle_detection_event
@@ -98,6 +98,56 @@ typedef struct
   unsigned int numerator, denominator;
 }
 local_data_t;
+
+
+
+/**
+ * Before each simulation, zero the cumulative counts of infections.
+ *
+ * @param self this module.
+ */
+void
+handle_before_each_simulation_event (struct adsm_module_t_ *self)
+{
+  local_data_t *local_data;
+  unsigned int i;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  RPT_reporting_zero (local_data->num_units_infected);
+  RPT_reporting_zero (local_data->num_units_infected_by_cause);
+  RPT_reporting_zero (local_data->num_units_infected_by_prodtype);
+  RPT_reporting_zero (local_data->num_units_infected_by_cause_and_prodtype);
+  RPT_reporting_zero (local_data->cumul_num_units_infected);
+  RPT_reporting_zero (local_data->cumul_num_units_infected_by_cause);
+  RPT_reporting_zero (local_data->cumul_num_units_infected_by_prodtype);
+  RPT_reporting_zero (local_data->cumul_num_units_infected_by_cause_and_prodtype);
+  RPT_reporting_zero (local_data->num_animals_infected);
+  RPT_reporting_zero (local_data->num_animals_infected_by_cause);
+  RPT_reporting_zero (local_data->num_animals_infected_by_prodtype);
+  RPT_reporting_zero (local_data->num_animals_infected_by_cause_and_prodtype);
+  RPT_reporting_zero (local_data->cumul_num_animals_infected);
+  RPT_reporting_zero (local_data->cumul_num_animals_infected_by_cause);
+  RPT_reporting_zero (local_data->cumul_num_animals_infected_by_prodtype);
+  RPT_reporting_zero (local_data->cumul_num_animals_infected_by_cause_and_prodtype);
+  local_data->detection_occurred = FALSE;
+  /* The output variables for units and animals infected at first detection
+   * have no value until there is a detection. */
+  RPT_reporting_set_null (local_data->first_det_u_inf, NULL);
+  RPT_reporting_set_null (local_data->first_det_a_inf, NULL);
+  RPT_reporting_set_null (local_data->ratio, NULL);
+  for (i = 0; i < local_data->nrecent_days * 2; i++)
+    local_data->nrecent_infections[i] = 0;
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
 
 
 
@@ -404,6 +454,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
     case EVT_BeforeAnySimulations:
       adsm_declare_outputs (self, queue);
       break;
+    case EVT_BeforeEachSimulation:
+      handle_before_each_simulation_event (self);
+      break;
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day));
       break;
@@ -421,54 +474,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
 #if DEBUG
   g_debug ("----- EXIT run (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
- * Resets this model after a simulation run.
- *
- * @param self the model.
- */
-void
-reset (struct adsm_module_t_ *self)
-{
-  local_data_t *local_data;
-  unsigned int i;
-
-#if DEBUG
-  g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-  RPT_reporting_zero (local_data->num_units_infected);
-  RPT_reporting_zero (local_data->num_units_infected_by_cause);
-  RPT_reporting_zero (local_data->num_units_infected_by_prodtype);
-  RPT_reporting_zero (local_data->num_units_infected_by_cause_and_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_units_infected);
-  RPT_reporting_zero (local_data->cumul_num_units_infected_by_cause);
-  RPT_reporting_zero (local_data->cumul_num_units_infected_by_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_units_infected_by_cause_and_prodtype);
-  RPT_reporting_zero (local_data->num_animals_infected);
-  RPT_reporting_zero (local_data->num_animals_infected_by_cause);
-  RPT_reporting_zero (local_data->num_animals_infected_by_prodtype);
-  RPT_reporting_zero (local_data->num_animals_infected_by_cause_and_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_animals_infected);
-  RPT_reporting_zero (local_data->cumul_num_animals_infected_by_cause);
-  RPT_reporting_zero (local_data->cumul_num_animals_infected_by_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_animals_infected_by_cause_and_prodtype);
-  local_data->detection_occurred = FALSE;
-  /* The output variables for units and animals infected at first detection
-   * have no value until there is a detection. */
-  RPT_reporting_set_null (local_data->first_det_u_inf, NULL);
-  RPT_reporting_set_null (local_data->first_det_a_inf, NULL);
-  RPT_reporting_set_null (local_data->ratio, NULL);
-  for (i = 0; i < local_data->nrecent_days * 2; i++)
-    local_data->nrecent_infections[i] = 0;
-
-#if DEBUG
-  g_debug ("----- EXIT reset (%s)", MODEL_NAME);
 #endif
 }
 
@@ -515,30 +520,9 @@ local_free (struct adsm_module_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  RPT_free_reporting (local_data->num_units_infected);
-  RPT_free_reporting (local_data->num_units_infected_by_cause);
-  RPT_free_reporting (local_data->num_units_infected_by_prodtype);
-  RPT_free_reporting (local_data->num_units_infected_by_cause_and_prodtype);
-  RPT_free_reporting (local_data->cumul_num_units_infected);
-  RPT_free_reporting (local_data->cumul_num_units_infected_by_cause);
-  RPT_free_reporting (local_data->cumul_num_units_infected_by_prodtype);
-  RPT_free_reporting (local_data->cumul_num_units_infected_by_cause_and_prodtype);
-  RPT_free_reporting (local_data->num_animals_infected);
-  RPT_free_reporting (local_data->num_animals_infected_by_cause);
-  RPT_free_reporting (local_data->num_animals_infected_by_prodtype);
-  RPT_free_reporting (local_data->num_animals_infected_by_cause_and_prodtype);
-  RPT_free_reporting (local_data->cumul_num_animals_infected);
-  RPT_free_reporting (local_data->cumul_num_animals_infected_by_cause);
-  RPT_free_reporting (local_data->cumul_num_animals_infected_by_prodtype);
-  RPT_free_reporting (local_data->cumul_num_animals_infected_by_cause_and_prodtype);
-  RPT_free_reporting (local_data->first_det_u_inf);
-  RPT_free_reporting (local_data->first_det_a_inf);
-  RPT_free_reporting (local_data->ratio);
-
   g_free (local_data->nrecent_infections);
-
   g_free (local_data);
-  g_ptr_array_free (self->outputs, TRUE);
+  g_ptr_array_free (self->outputs, /* free_seg = */ TRUE); /* also frees all output variables */
   g_free (self);
 
 #if DEBUG
@@ -559,6 +543,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data_t *local_data;
   EVT_event_type_t events_listened_for[] = {
     EVT_BeforeAnySimulations,
+    EVT_BeforeEachSimulation,
     EVT_NewDay,
     EVT_Infection,
     EVT_Detection,
@@ -576,10 +561,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_sized_new (18);
+  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
   self->model_data = local_data;
   self->run = run;
-  self->reset = reset;
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = adsm_model_answer_no;
   self->has_pending_infections = adsm_model_answer_no;

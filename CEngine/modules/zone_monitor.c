@@ -24,8 +24,8 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new zone_monitor_new
 #define run zone_monitor_run
-#define reset zone_monitor_reset
 #define local_free zone_monitor_free
+#define handle_before_each_simulation_event zone_monitor_handle_before_each_simulation_event
 #define handle_new_day_event zone_monitor_handle_new_day_event
 #define handle_request_for_zone_focus_event zone_monitor_handle_request_for_zone_focus_event
 
@@ -69,6 +69,43 @@ typedef struct
   gboolean seen_request_for_zone_focus;
 }
 local_data_t;
+
+
+
+/**
+ * Before each simulation, reset the recorded statistics to zero.
+ *
+ * @param self this module.
+ */
+void
+handle_before_each_simulation_event (struct adsm_module_t_ *self)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  /* RPT_reporting_zero preserves sub-cateogories but sets all numbers to 0. */
+  RPT_reporting_zero (local_data->area);
+  RPT_reporting_zero (local_data->perimeter);
+  RPT_reporting_zero (local_data->num_separate_areas);
+  RPT_reporting_zero (local_data->num_units);
+  RPT_reporting_zero (local_data->num_units_by_prodtype);
+  RPT_reporting_zero (local_data->num_unit_days);
+  RPT_reporting_zero (local_data->num_unit_days_by_prodtype);
+  RPT_reporting_zero (local_data->num_animal_days);
+  RPT_reporting_zero (local_data->num_animal_days_by_prodtype);
+
+  local_data->seen_request_for_zone_focus = FALSE;
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
 
 
 
@@ -237,6 +274,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
     case EVT_BeforeAnySimulations:
       adsm_declare_outputs (self, queue);
       break;
+    case EVT_BeforeEachSimulation:
+      handle_before_each_simulation_event (self);
+      break;
     case EVT_RequestForZoneFocus:
       handle_request_for_zone_focus_event (self);
       break;
@@ -251,41 +291,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 
 #if DEBUG
   g_debug ("----- EXIT run (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
- * Resets this model after a simulation run.
- *
- * @param self the model.
- */
-void
-reset (struct adsm_module_t_ *self)
-{
-  local_data_t *local_data;
-
-#if DEBUG
-  g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-  /* RPT_reporting_zero preserves sub-cateogories but sets all numbers to 0. */
-  RPT_reporting_zero (local_data->area);
-  RPT_reporting_zero (local_data->perimeter);
-  RPT_reporting_zero (local_data->num_separate_areas);
-  RPT_reporting_zero (local_data->num_units);
-  RPT_reporting_zero (local_data->num_units_by_prodtype);
-  RPT_reporting_zero (local_data->num_unit_days);
-  RPT_reporting_zero (local_data->num_unit_days_by_prodtype);
-  RPT_reporting_zero (local_data->num_animal_days);
-  RPT_reporting_zero (local_data->num_animal_days_by_prodtype);
-
-  local_data->seen_request_for_zone_focus = FALSE;
-
-#if DEBUG
-  g_debug ("----- EXIT reset (%s)", MODEL_NAME);
 #endif
 }
 
@@ -307,17 +312,8 @@ local_free (struct adsm_module_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  RPT_free_reporting (local_data->area);
-  RPT_free_reporting (local_data->perimeter);
-  RPT_free_reporting (local_data->num_separate_areas);
-  RPT_free_reporting (local_data->num_units);
-  RPT_free_reporting (local_data->num_units_by_prodtype);
-  RPT_free_reporting (local_data->num_unit_days);
-  RPT_free_reporting (local_data->num_unit_days_by_prodtype);
-  RPT_free_reporting (local_data->num_animal_days);
-  RPT_free_reporting (local_data->num_animal_days_by_prodtype);
   g_free (local_data);
-  g_ptr_array_free (self->outputs, TRUE);
+  g_ptr_array_free (self->outputs, /* free_seg = */ TRUE); /* also frees all output variables */
   g_free (self);
 
 #if DEBUG
@@ -349,6 +345,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data = g_new (local_data_t, 1);
   EVT_event_type_t events_listened_for[] = {
     EVT_BeforeAnySimulations,
+    EVT_BeforeEachSimulation,
     EVT_RequestForZoneFocus,
     EVT_NewDay,
     0
@@ -356,10 +353,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_new ();
+  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
   self->model_data = local_data;
   self->run = run;
-  self->reset = reset;
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = adsm_model_answer_no;
   self->has_pending_infections = adsm_model_answer_no;

@@ -15,9 +15,9 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new unit_stats_writer_new
 #define run unit_stats_writer_run
-#define reset unit_stats_writer_reset
 #define to_string unit_stats_writer_to_string
 #define local_free unit_stats_writer_free
+#define handle_before_each_simulation_change_event unit_stats_writer_handle_before_each_simulation_event
 #define handle_unit_state_change_event unit_stats_writer_handle_unit_state_change_event
 #define handle_request_for_zone_focus_event unit_stats_writer_handle_request_for_zone_focus_event
 #define handle_vaccination_event unit_stats_writer_handle_vaccination_event
@@ -73,6 +73,33 @@ typedef struct
     the iteration. */
 }
 local_data_t;
+
+
+
+/**
+ * Before each simulation, this module deletes any records left over from a
+ * previous iteration.
+ *
+ * @param self this module.
+ */
+void
+handle_before_each_simulation_event (struct adsm_module_t_ *self)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  g_hash_table_remove_all (local_data->what_happened);
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
 
 
 
@@ -340,6 +367,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 
   switch (event->type)
     {
+    case EVT_BeforeEachSimulation:
+      handle_before_each_simulation_event (self);
+      break;
     case EVT_UnitStateChange:
       handle_unit_state_change_event (self, &(event->u.unit_state_change));
       break;
@@ -364,32 +394,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
   #if DEBUG
     g_debug ("----- EXIT run (%s)", MODEL_NAME);
   #endif
-}
-
-
-
-/**
- * Resets this module after a simulation run.
- *
- * @param self this module.
- */
-void
-reset (struct adsm_module_t_ *self)
-{
-  local_data_t *local_data;
-
-  #if DEBUG
-    g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-  #endif
-
-  local_data = (local_data_t *) (self->model_data);
-  g_hash_table_remove_all (local_data->what_happened);
-
-  #if DEBUG
-    g_debug ("----- EXIT reset (%s)", MODEL_NAME);
-  #endif
-
-  return;
 }
 
 
@@ -451,7 +455,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 {
   adsm_module_t *self;
   local_data_t *local_data;
-    EVT_event_type_t events_listened_for[] = {
+  EVT_event_type_t events_listened_for[] = {
+    EVT_BeforeEachSimulation,
     EVT_UnitStateChange,
     EVT_RequestForZoneFocus,
     EVT_Vaccination,
@@ -472,7 +477,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->outputs = g_ptr_array_sized_new (0);
   self->model_data = local_data;
   self->run = run;
-  self->reset = reset;
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = adsm_model_answer_no;
   self->has_pending_infections = adsm_model_answer_no;

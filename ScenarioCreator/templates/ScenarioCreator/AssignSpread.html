@@ -7,28 +7,41 @@
     <script src="{{ STATIC_URL }}js/probability-functions.js"></script>
 
     <h1 id="title">{{ title }}</h1>
+    <div class="row">
+        <p class="col-lg-6">Here you define how disease spreads from each production type to every other production type.  There are three
+        types of spread: 1) Direct contact where two animals coming in physical contact with one another, 2) Indirect contact
+        where animals share objects, vehicles, or people in common 3) Airborne Spread where the disease itself can be carried in the air.
+        Airborne spread can also be used for local area spread.</p>
+    </div>
+    <div class="row">
+        <p class="col-lg-6">Since the number of possible contact pairs is exponential, you can use this page to select groups of production types that all 
+        have the same parameters.  Select multiple production types in source and/or destination then use "Apply" to set them all to the same value.
+        Or check your work by hand under "All Possible Interactions".</p>
+    </div>
+    <div class="row">
 
-<form method="post" action="">
-    <h1>All Possible Interactions</h1>
-    {{ formset.management_form }}
-    <table>
-        <thead>
-            <tr>
-                {% for key, value in formset.0.fields.items %}
-                    {% if value.label %}
-                        <th>{{value.label}}</th>
-                    {% endif %}
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for form in formset %}
-                {{form.id}}
-                {% form form using 'ScenarioCreator/FormRow.html' %}
-            {% endfor %}
-     </tbody>
-    </table>
-    <input type="submit" name="submit" value="Submit" class="btn btn-primary button white" id="submit-id-submit">
-</form>
-
+        <form method="post" action="">
+            <h1>All Possible Interactions</h1>
+            {{ formset.management_form }}
+            <table>
+                <thead>
+                    <tr>
+                        {% for key, value in formset.0.fields.items %}
+                            {% if value.label %}
+                                <th>{{value.label}}</th>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for form in formset %}
+                        {{form.id}}
+                        {% form form using 'ScenarioCreator/FormRow.html' %}
+                    {% endfor %}
+             </tbody>
+            </table>
+            <input type="submit" name="submit" value="Submit" class="btn btn-primary button white" id="submit-id-submit">
+        </form>
+    </div>
+    
 {% endblock %}

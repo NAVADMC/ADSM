@@ -227,10 +227,10 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new resources_and_implementation_of_controls_model_new
 #define run resources_and_implementation_of_controls_model_run
-#define reset resources_and_implementation_of_controls_model_reset
 #define has_pending_actions resources_and_implementation_of_controls_model_has_pending_actions
 #define to_string resources_and_implementation_of_controls_model_to_string
 #define local_free resources_and_implementation_of_controls_model_free
+#define handle_before_each_simulation_event resources_and_implementation_of_controls_model_handle_before_each_simulation_event
 #define handle_new_day_event resources_and_implementation_of_controls_model_handle_new_day_event
 #define handle_declaration_of_vaccination_reasons_event resources_and_implementation_of_controls_model_handle_declaration_of_vaccination_reasons_event
 #define handle_detection_event resources_and_implementation_of_controls_model_handle_detection_event
@@ -892,6 +892,66 @@ clear_all_pending_vaccinations (local_data_t *local_data)
 
 
 /**
+ * Before each simulation, this module sets "outbreak known" to no and deletes
+ * any queued vaccinations or destructions left over from a previous iteration.
+ *
+ * @param self this module.
+ */
+void
+handle_before_each_simulation_event (struct adsm_module_t_ *self)
+{
+  local_data_t *local_data;
+  unsigned int npriorities;
+  GQueue *q;
+  int i;
+
+  local_data = (local_data_t *) (self->model_data);
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  local_data->outbreak_known = FALSE;
+  g_hash_table_remove_all (local_data->detected_units);
+  local_data->ndetected_units = 0;
+  local_data->destruction_program_begin_day = 0;
+
+  npriorities = local_data->pending_destructions->len;
+  for (i = 0; i < local_data->nunits; i++)
+    local_data->destruction_status[i] = NULL;
+  local_data->ndestroyed_today = 0;
+  for (i = 0; i < npriorities; i++)
+    {
+      q = (GQueue *) g_ptr_array_index (local_data->pending_destructions, i);
+      while (!g_queue_is_empty (q))
+        EVT_free_event (g_queue_pop_head (q));
+    }
+  local_data->no_more_destructions = FALSE;
+  g_hash_table_remove_all (local_data->destroyed_today);
+
+  /* Empty the prioritized pending vaccinations lists. */
+  clear_all_pending_vaccinations (local_data);
+  local_data->nvaccinated_today = 0;
+
+  for (i = 0; i < local_data->nunits; i++)
+    {
+      local_data->day_last_vaccinated[i] = 0;
+      local_data->min_next_vaccination_day[i] = 0;
+    }
+  local_data->no_more_vaccinations = FALSE;
+  g_hash_table_remove_all (local_data->detected_today);
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
+
+
+
+/**
  * Responds to a new day event by carrying out any queued destructions or
  * vaccinations.
  *
@@ -1389,6 +1449,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
   switch (event->type)
     {
+    case EVT_BeforeEachSimulation:
+      handle_before_each_simulation_event (self);
+      break;
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day), units, queue);
       break;
@@ -1417,62 +1480,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
 #if DEBUG
   g_debug ("----- EXIT run (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
- * Resets this model after a simulation run.
- *
- * @param self the model.
- */
-void
-reset (struct adsm_module_t_ *self)
-{
-  local_data_t *local_data;
-  unsigned int npriorities;
-  GQueue *q;
-  int i;
-
-  local_data = (local_data_t *) (self->model_data);
-#if DEBUG
-  g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-  local_data->outbreak_known = FALSE;
-  g_hash_table_remove_all (local_data->detected_units);
-  local_data->ndetected_units = 0;
-  local_data->destruction_program_begin_day = 0;
-
-  npriorities = local_data->pending_destructions->len;
-  for (i = 0; i < local_data->nunits; i++)
-    local_data->destruction_status[i] = NULL;
-  local_data->ndestroyed_today = 0;
-  for (i = 0; i < npriorities; i++)
-    {
-      q = (GQueue *) g_ptr_array_index (local_data->pending_destructions, i);
-      while (!g_queue_is_empty (q))
-        EVT_free_event (g_queue_pop_head (q));
-    }
-  local_data->no_more_destructions = FALSE;
-  g_hash_table_remove_all (local_data->destroyed_today);
-
-  /* Empty the prioritized pending vaccinations lists. */
-  clear_all_pending_vaccinations (local_data);
-  local_data->nvaccinated_today = 0;
-
-  for (i = 0; i < local_data->nunits; i++)
-    {
-      local_data->day_last_vaccinated[i] = 0;
-      local_data->min_next_vaccination_day[i] = 0;
-    }
-  local_data->no_more_vaccinations = FALSE;
-  g_hash_table_remove_all (local_data->detected_today);
-
-#if DEBUG
-  g_debug ("----- EXIT reset (%s)", MODEL_NAME);
 #endif
 }
 
@@ -1837,6 +1844,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   adsm_module_t *self;
   local_data_t *local_data;
   EVT_event_type_t events_listened_for[] = {
+    EVT_BeforeEachSimulation,
     EVT_NewDay,
     EVT_Detection,
     EVT_RequestForDestruction,
@@ -1859,7 +1867,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;
-  self->reset = reset;
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = has_pending_actions;
   self->has_pending_infections = adsm_model_answer_no;

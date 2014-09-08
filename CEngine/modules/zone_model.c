@@ -31,9 +31,9 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new zone_model_new
 #define run zone_model_run
-#define reset zone_model_reset
 #define to_string zone_model_to_string
 #define local_free zone_model_free
+#define handle_before_each_simulation_event zone_model_handle_before_each_simulation_event
 #define handle_request_for_zone_focus_event zone_model_handle_request_for_zone_focus_event
 #define handle_midnight_event zone_model_handle_midnight_event
 
@@ -112,6 +112,41 @@ gpc_contour_get_boundary (gpc_vertex_list * contour, double *coord)
   coord[1] = miny;
   coord[2] = maxx;
   coord[3] = maxy;
+}
+
+
+
+/**
+ * Before each simulation, this module resets the zones and deletes any
+ * pending zone foci left over from a previous iteration.
+ *
+ * @param self this module
+ * @param zones a zone list.
+ */
+void
+handle_before_each_simulation_event (struct adsm_module_t_ *self,
+                                     ZON_zone_list_t * zones)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+
+  ZON_zone_list_reset (zones);
+
+  /* Empty the list of pending zone foci.  We just need to free the queue nodes
+   * themselves, not the UNT_unit_t structures that they point to. */
+  while (!g_queue_is_empty (local_data->pending_foci))
+    g_queue_pop_head (local_data->pending_foci);
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
 }
 
 
@@ -580,6 +615,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 
   switch (event->type)
     {
+    case EVT_BeforeEachSimulation:
+      handle_before_each_simulation_event (self, zones);
+      break;
     case EVT_RequestForZoneFocus:
       handle_request_for_zone_focus_event (self, &(event->u.request_for_zone_focus), zones);
       break;
@@ -594,34 +632,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 
   #if DEBUG
     g_debug ("----- EXIT run (%s)", MODEL_NAME);
-  #endif
-}
-
-
-
-/**
- * Resets this model after a simulation run.
- *
- * @param self the model.
- */
-void
-reset (struct adsm_module_t_ *self)
-{
-  local_data_t *local_data;
-
-  #if DEBUG
-    g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-  #endif
-
-  local_data = (local_data_t *) (self->model_data);
-
-  /* Empty the list of pending zone foci.  We just need to free the queue nodes
-   * themselves, not the UNT_unit_t structures that they point to. */
-  while (!g_queue_is_empty (local_data->pending_foci))
-    g_queue_pop_head (local_data->pending_foci);
-
-  #if DEBUG
-    g_debug ("----- EXIT reset (%s)", MODEL_NAME);
   #endif
 }
 
@@ -675,18 +685,13 @@ local_free (struct adsm_module_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
-  #if 0
-    RPT_free_reporting (local_data->num_fragments);
-    RPT_free_reporting (local_data->num_holes_filled);
-    RPT_free_reporting (local_data->cumul_num_holes_filled);
-  #endif
 
   /* When freeing pending_foci, we just need to free the queue structure
    * itself, not the UNT_unit_t structures that each queue node points to. */
   g_queue_free (local_data->pending_foci);
 
   g_free (local_data);
-  g_ptr_array_free (self->outputs, TRUE);
+  g_ptr_array_free (self->outputs, /* free_seg = */ TRUE); /* also frees all output variables */
   g_free (self);
 
   #if DEBUG
@@ -766,6 +771,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   adsm_module_t *self;
   local_data_t *local_data;
   EVT_event_type_t events_listened_for[] = {
+    EVT_BeforeEachSimulation,
     EVT_RequestForZoneFocus,
     EVT_Midnight,
     0
@@ -781,10 +787,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_sized_new (3);
+  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
   self->model_data = local_data;
   self->run = run;
-  self->reset = reset;
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = adsm_model_answer_no;
   self->has_pending_infections = adsm_model_answer_no;

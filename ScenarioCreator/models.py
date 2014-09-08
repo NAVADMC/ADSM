@@ -314,7 +314,7 @@ class ControlMasterPlan(BaseModel):
 class ControlProtocol(BaseModel):
     name = models.CharField(max_length=255,
         help_text='Name your Protocol so you can recognize it later. Ex:"Quarantine"',)
-    use_detection = models.BooleanField(default=False,
+    use_detection = models.BooleanField(default=True,
         help_text='Indicates if disease detection will be modeled for units of this production type.', )
     detection_probability_for_observed_time_in_clinical = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the probability of observing clinical signs in units of this production type.', )
@@ -383,7 +383,7 @@ class ControlProtocol(BaseModel):
         help_text='The number of animals of this type that can be vaccinated before the cost of vaccination increases.', )
     cost_of_vaccination_additional_per_animal = MoneyField(default=0.0,
         help_text='The additional cost of vaccination for each vaccinated animal of this type after the threshold is exceeded.', )
-    use_testing = models.BooleanField(default=False, )
+    use_exams = models.BooleanField(default=False, )
     examine_direct_forward_traces = models.BooleanField(default=False,
         help_text='Indicator if units identified by the trace-forward of direct contact will be examined for clinical signs of disease.', )
     exam_direct_forward_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
@@ -400,6 +400,7 @@ class ControlProtocol(BaseModel):
         help_text='Indicator if units identified by the trace-back of indirect contact will be examined for clinical signs of disease.', )
     examine_indirect_back_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Multiplier for the probability of observing clinical signs in units identified by the trace-back of indirect contact.', )
+    use_testing = models.BooleanField(default=False, )
     test_direct_forward_traces = models.BooleanField(default=False,
         help_text='Indicator that diagnostic testing should be performed on units identified by trace-forward of direct contacts.', )
     test_indirect_forward_traces = models.BooleanField(default=False,
@@ -452,8 +453,10 @@ class Disease(BaseModel):
     name = models.CharField(max_length=255,
         help_text='Name of the Disease')
     disease_description = models.TextField(blank=True)
-    include_contact_spread = models.BooleanField(default=True,
-        help_text='Indicates if disease spread by direct or indirect contact is used in the scenario.', )
+    include_direct_contact_spread = models.BooleanField(default=True,
+        help_text='Indicates if disease spread by direct contact is used in the scenario.', )
+    include_indirect_contact_spread = models.BooleanField(default=True,
+        help_text='Indicates if disease spread by indirect contact is used in the scenario.', )
     include_airborne_spread = models.BooleanField(default=True,
         help_text='Indicates if airborne spread is used in the model', )
     use_airborne_exponential_decay = models.BooleanField(default=False,

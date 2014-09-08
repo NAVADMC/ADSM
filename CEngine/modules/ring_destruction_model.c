@@ -26,7 +26,6 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new ring_destruction_model_new
 #define run ring_destruction_model_run
-#define reset ring_destruction_model_reset
 #define to_string ring_destruction_model_to_string
 #define local_free ring_destruction_model_free
 #define handle_detection_event ring_destruction_model_handle_detection_event
@@ -260,27 +259,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
 
 /**
- * Resets this model after a simulation run.
- *
- * @param self the model.
- */
-void
-reset (struct adsm_module_t_ *self)
-{
-#if DEBUG
-  g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-#endif
-
-  /* Nothing to do. */
-
-#if DEBUG
-  g_debug ("----- EXIT reset (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
  * Returns a text representation of this model.
  *
  * @param self the model.
@@ -487,7 +465,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->outputs = g_ptr_array_new ();
   self->model_data = local_data;
   self->run = run;
-  self->reset = reset;
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = adsm_model_answer_no;
   self->has_pending_infections = adsm_model_answer_no;

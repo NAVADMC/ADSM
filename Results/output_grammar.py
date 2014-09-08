@@ -67,7 +67,7 @@ grammars = {'exp': [('c', 'n'), ('U', 'A'), ('', 'Dir', 'Ind', 'Air'), ('All', '
             'det': [('c', 'n'), ('U', 'A'), ('All', 'Clin', 'Test'), ('', 'Cattle', 'Swine')],
             'tr': [('n', 'c'), ('U', 'A'), ('All', 'Dir', 'Ind'), ('', 'p'), ('', 'Cattle', 'Swine')],
             'exm': [('n', 'c'), ('U', 'A'), ('All', 'Ring', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack', 'Det'), ('', 'Cattle', 'Swine')],
-            'tstnU': [('TruePos', 'FalsePos', 'TrueNeg', 'FalseNeg'), ('', 'Cattle', 'Swine')],
+            'tstnU': [('All', 'TruePos', 'FalsePos', 'TrueNeg', 'FalseNeg'), ('', 'Cattle', 'Swine')],
             'tstcU': [('All', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack', 'TruePos', 'FalsePos', 'TrueNeg', 'FalseNeg'), ('', 'Cattle', 'Swine')],
             'tstcA': [('All', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack'), ('', 'Cattle', 'Swine')],
             'firstVaccination': [('', 'Ring'), ('', 'Cattle', 'Swine')],

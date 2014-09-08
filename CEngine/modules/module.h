@@ -85,11 +85,6 @@ typedef void (*adsm_model_run_t) (struct adsm_module_t_ *,
 
 
 
-/** Type of a function that resets a model after one simulation run. */
-typedef void (*adsm_model_reset_t) (struct adsm_module_t_ *);
-
-
-
 /**
  * Type of a function that reports whether a model is listening for a given
  * event type.
@@ -137,7 +132,6 @@ typedef struct adsm_module_t_
   GPtrArray *outputs; /**< A list of the model's output variables. */
   void *model_data; /**< Specialized information for the particular model. */
   adsm_model_run_t run; /**< A function that runs the model. */
-  adsm_model_reset_t reset; /**< A function that resets the model after one simulation run. */
   adsm_model_is_listening_for_t is_listening_for; /**< A function that reports whether the model is listening for a given event type.*/
   adsm_model_has_pending_actions_t has_pending_actions; /**< A function that reports whether the model has any pending actions to carry out.*/
   adsm_model_has_pending_infections_t has_pending_infections; /**< A function

@@ -25,9 +25,9 @@
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new economic_model_new
 #define run economic_model_run
-#define reset economic_model_reset
 #define to_string economic_model_to_string
 #define local_free economic_model_free
+#define handle_before_each_simulation_event economic_model_handle_before_each_simulation_event
 #define handle_new_day_event economic_model_handle_new_day_event
 #define handle_vaccination_event economic_model_handle_vaccination_event
 #define handle_destruction_event economic_model_handle_destruction_event
@@ -117,6 +117,64 @@ typedef struct
   RPT_reporting_t *cumul_surveillance_cost;
 }
 local_data_t;
+
+
+
+/**
+ * Before each simulation, this module resets its recorded costs to zero.
+ *
+ * @param self the model.
+ */
+void
+handle_before_each_simulation_event (struct adsm_module_t_ *self)
+{
+  local_data_t *local_data = (local_data_t *) (self->model_data);
+  unsigned int nprod_types = local_data->production_types->len;
+  unsigned int i;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  /*
+  RPT_reporting_zero (local_data->total_cost);
+  RPT_reporting_zero (local_data->appraisal_cost);
+  RPT_reporting_zero (local_data->euthanasia_cost);
+  RPT_reporting_zero (local_data->indemnification_cost);
+  RPT_reporting_zero (local_data->carcass_disposal_cost);
+  RPT_reporting_zero (local_data->cleaning_disinfecting_cost);
+  RPT_reporting_zero (local_data->vaccination_cost);
+  RPT_reporting_zero (local_data->surveillance_cost);
+  */
+  RPT_reporting_zero (local_data->cumul_total_cost);
+  RPT_reporting_zero (local_data->cumul_appraisal_cost);
+  RPT_reporting_zero (local_data->cumul_euthanasia_cost);
+  RPT_reporting_zero (local_data->cumul_indemnification_cost);
+  RPT_reporting_zero (local_data->cumul_carcass_disposal_cost);
+  RPT_reporting_zero (local_data->cumul_cleaning_disinfecting_cost);
+  RPT_reporting_zero (local_data->cumul_destruction_subtotal);
+  RPT_reporting_zero (local_data->cumul_vaccination_setup_cost);
+  RPT_reporting_zero (local_data->cumul_vaccination_cost);
+  RPT_reporting_zero (local_data->cumul_vaccination_subtotal);
+  RPT_reporting_zero (local_data->cumul_surveillance_cost);
+
+  if (local_data->vaccination_cost_params)
+    {
+      for (i = 0; i < nprod_types; i++)
+        {
+          if (local_data->vaccination_cost_params[i])
+            {
+              local_data->vaccination_cost_params[i]->capacity_used = 0;
+            }
+        }
+    }
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
 
 
 
@@ -343,6 +401,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
     case EVT_BeforeAnySimulations:
       adsm_declare_outputs (self, queue);
       break;
+    case EVT_BeforeEachSimulation:
+      handle_before_each_simulation_event (self);
+      break;
     case EVT_NewDay:
       handle_new_day_event (self, units, zones, &(event->u.new_day));
       break;
@@ -360,62 +421,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
 #if DEBUG
   g_debug ("----- EXIT run (%s)", MODEL_NAME);
-#endif
-}
-
-
-
-/**
- * Resets this model after a simulation run.
- *
- * @param self the model.
- */
-void
-reset (struct adsm_module_t_ *self)
-{
-  local_data_t *local_data = (local_data_t *) (self->model_data);
-  unsigned int nprod_types = local_data->production_types->len;
-  unsigned int i;
-
-#if DEBUG
-  g_debug ("----- ENTER reset (%s)", MODEL_NAME);
-#endif
-
-  /*
-  RPT_reporting_zero (local_data->total_cost);
-  RPT_reporting_zero (local_data->appraisal_cost);
-  RPT_reporting_zero (local_data->euthanasia_cost);
-  RPT_reporting_zero (local_data->indemnification_cost);
-  RPT_reporting_zero (local_data->carcass_disposal_cost);
-  RPT_reporting_zero (local_data->cleaning_disinfecting_cost);
-  RPT_reporting_zero (local_data->vaccination_cost);
-  RPT_reporting_zero (local_data->surveillance_cost);
-  */
-  RPT_reporting_zero (local_data->cumul_total_cost);
-  RPT_reporting_zero (local_data->cumul_appraisal_cost);
-  RPT_reporting_zero (local_data->cumul_euthanasia_cost);
-  RPT_reporting_zero (local_data->cumul_indemnification_cost);
-  RPT_reporting_zero (local_data->cumul_carcass_disposal_cost);
-  RPT_reporting_zero (local_data->cumul_cleaning_disinfecting_cost);
-  RPT_reporting_zero (local_data->cumul_destruction_subtotal);
-  RPT_reporting_zero (local_data->cumul_vaccination_setup_cost);
-  RPT_reporting_zero (local_data->cumul_vaccination_cost);
-  RPT_reporting_zero (local_data->cumul_vaccination_subtotal);
-  RPT_reporting_zero (local_data->cumul_surveillance_cost);
-
-  if (local_data->vaccination_cost_params)
-    {
-      for (i = 0; i < nprod_types; i++)
-        {
-          if (local_data->vaccination_cost_params[i])
-            {
-              local_data->vaccination_cost_params[i]->capacity_used = 0;
-            }
-        }
-    }
-
-#if DEBUG
-  g_debug ("----- EXIT reset (%s)", MODEL_NAME);
 #endif
 }
 
@@ -577,20 +582,9 @@ local_free (struct adsm_module_t_ *self)
   RPT_free_reporting (local_data->vaccination_cost);
   RPT_free_reporting (local_data->surveillance_cost);
   */
-  RPT_free_reporting (local_data->cumul_total_cost);
-  RPT_free_reporting (local_data->cumul_appraisal_cost);
-  RPT_free_reporting (local_data->cumul_euthanasia_cost);
-  RPT_free_reporting (local_data->cumul_indemnification_cost);
-  RPT_free_reporting (local_data->cumul_carcass_disposal_cost);
-  RPT_free_reporting (local_data->cumul_cleaning_disinfecting_cost);
-  RPT_free_reporting (local_data->cumul_destruction_subtotal);
-  RPT_free_reporting (local_data->cumul_vaccination_setup_cost);
-  RPT_free_reporting (local_data->cumul_vaccination_cost);
-  RPT_free_reporting (local_data->cumul_vaccination_subtotal);
-  RPT_free_reporting (local_data->cumul_surveillance_cost);
 
   g_free (local_data);
-  g_ptr_array_free (self->outputs, TRUE);
+  g_ptr_array_free (self->outputs, /* free_seg = */ TRUE); /* also frees all output variables */
   g_free (self);
 
 #if DEBUG
@@ -775,6 +769,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data_t *local_data;
   EVT_event_type_t events_listened_for[] = {
     EVT_BeforeAnySimulations,
+    EVT_BeforeEachSimulation,
     EVT_NewDay,
     EVT_Vaccination,
     EVT_Destruction,
@@ -791,10 +786,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_new ();
+  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
   self->model_data = local_data;
   self->run = run;
-  self->reset = reset;
   self->is_listening_for = adsm_model_is_listening_for;
   self->has_pending_actions = adsm_model_answer_no;
   self->has_pending_infections = adsm_model_answer_no;
