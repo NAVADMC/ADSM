@@ -245,6 +245,30 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
         alert = self.selenium.find_element_by_class_name('alert')
         self.assertIn('Error: File Read returned a blank string.', alert.text)
 
+    def test_delete_population(self):
+        population = Population.objects.create(source_file="ScenarioCreator/tests/population_fixtures/Population_Test_UTF8.xml")
+
+        self.click_navbar_element('Population')
+
+        # javascript is attaching to this event
+        self.selenium.find_element_by_css_selector('[data-delete-link]').click()
+        time.sleep(2)
+
+        modal = self.selenium.find_element_by_class_name('bootstrap-dialog')
+
+        self.assertIn("Delete Confirmation", modal.text)
+        self.assertIn("Are you sure you want to delete Population?", modal.text)
+
+        for button in modal.find_elements_by_tag_name('button'):
+            if button.text == "Delete":
+                button.click()
+                break
+
+        time.sleep(2)
+
+        section = self.selenium.find_element_by_tag_name('section')
+        self.assertIn('Load a Population', section.text)
+
     def test_assign_disease_spread_layout(self):
         self.setup_scenario()
 

@@ -121,3 +121,35 @@ class CleanTest(unittest.TestCase):
         pt = ProductionType(name='table')
         self.assertRaises(ValidationError, pt.clean_fields)
 
+
+class ViewTests(TestCase):
+    def test_delete_links_exist(self):
+        self.client.get('/setup/OpenScenario/Roundtrip.sqlite3/')
+
+        r = self.client.get('/setup/Populations/')
+        self.assertIn('data-delete-link', r.content)
+
+        r = self.client.get('/setup/DiseaseProgression/')
+        self.assertIn('data-delete-link', r.content)
+
+        r = self.client.get('/setup/DiseaseSpread/')
+        self.assertIn('data-delete-link', r.content)
+
+        r = self.client.get('/setup/ControlProtocol/')
+        self.assertIn('data-delete-link', r.content)
+
+        r = self.client.get('/setup/Zone/')
+        self.assertIn('data-delete-link', r.content)
+
+        r = self.client.get('/setup/ZoneEffect/')
+        self.assertIn('data-delete-link', r.content)
+
+        # has a related model, not deleteable
+        function = RelationalFunction.objects.get(name="Prevalence")
+        r = self.client.get('/setup/RelationalFunction/%s/' % function.id)
+        self.assertNotIn('data-delete-link', r.content)
+
+        # has no related models, deleteable
+        function = RelationalFunction.objects.get(name="Unsaved_test")
+        r = self.client.get('/setup/RelationalFunction/%s/' % function.id)
+        self.assertIn('data-delete-link', r.content)
