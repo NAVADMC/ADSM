@@ -257,7 +257,7 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
         modal = self.selenium.find_element_by_class_name('bootstrap-dialog')
 
         self.assertIn("Delete Confirmation", modal.text)
-        self.assertIn("Are you sure you want to delete Population?", modal.text)
+        self.assertIn("Are you sure you want to delete the selected Population?", modal.text)
 
         for button in modal.find_elements_by_tag_name('button'):
             if button.text == "Delete":

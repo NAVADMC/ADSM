@@ -102,11 +102,11 @@ $(function(){
 
     $('[data-delete-link]').click(function(){
         var link = $(this).attr('data-delete-link')
-        var object_name = link.split('/').slice(-1)[0]
+        var object_type = link.split('/')[2]
         var dialog = new BootstrapDialog.show({
             title: 'Delete Confirmation',
             type: BootstrapDialog.TYPE_WARNING,
-            message: 'Are you sure you want to delete <strong>' + object_name + '</strong>?',
+            message: 'Are you sure you want to delete the selected ' + object_type + '?',
             buttons: [
                 {
                     label: 'Cancel',
