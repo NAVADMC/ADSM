@@ -8,7 +8,7 @@ from selenium.common.exceptions import NoSuchElementException
 from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
     ProbabilityFunction, RelationalFunction, RelationalPoint, Population, \
     DirectSpread, IndirectSpread, AirborneSpread, ProductionType, \
-    DiseaseProgressionAssignment, Unit
+    DiseaseProgressionAssignment, Unit, ControlMasterPlan
 
 
 class M2mDSL(object):
@@ -493,3 +493,81 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
         mean_field = modal_2.find_element_by_id("div_id_mean")
 
         self.assertIn("none", mean_field.value_of_css_property("display"))
+
+    def test_disable_control_master_plan(self):
+        self.client.get('/setup/OpenScenario/Roundtrip.sqlite3/')
+
+        self.click_navbar_element("Controls")
+
+        self.selenium.find_element_by_id("id_disable_all_controls").click()
+        time.sleep(2)
+
+        elements = self.selenium.find_elements_by_css_selector("section > form > div")
+
+        for element in elements:
+            el_id = element.get_attribute("id")
+            if el_id == "div_id_name" or el_id == "div_id_disable_all_controls":
+                self.assertEqual(element.get_attribute("disabled"), None)
+            else:
+                self.assertEqual(element.get_attribute("disabled"), "true")
+
+        setup_menu = self.selenium.find_element_by_id("setupMenu")
+
+        hidden_menu_items = [
+            "Control Protocol",
+            "Protocol Assignments",
+            "Zones",
+            "Zone Effects",
+            "Assign Effects"
+        ]
+
+        for element in setup_menu.find_elements_by_tag_name("a"):
+            self.assertNotIn(element.text, hidden_menu_items)
+
+    def test_enable_control_master_plan(self):
+        """
+            Check that re-enabling the disable all controls option
+            in control master plan re-enables the elements and menu
+            items
+        """
+        self.client.get('/setup/OpenScenario/Roundtrip.sqlite3/')
+
+        control_master_plan = ControlMasterPlan.objects.first()
+        control_master_plan.disable_all_controls = True
+        control_master_plan.save()
+        time.sleep(1)
+
+        self.click_navbar_element("Controls")
+
+        self.selenium.find_element_by_id("id_disable_all_controls").click()
+        time.sleep(2)
+
+        elements = self.selenium.find_elements_by_css_selector("section > form > div")
+
+        for element in elements:
+            el_id = element.get_attribute("id")
+            self.assertEqual(element.get_attribute("disabled"), None)
+
+        setup_menu = self.selenium.find_element_by_id("setupMenu")
+
+        menu_items = [
+            "Scenario Description",
+            "Population",
+            "Disease",
+            "Disease Progression",
+            "Assign Progression",
+            "Add Disease Spread",
+            "Assign Disease Spread",
+            "Controls",
+            "Control Protocol",
+            "Protocol Assignments",
+            "Zones",
+            "Zone Effects",
+            "Assign Effects",
+            "Functions",
+            "Output Settings",
+            "Run Simulation"
+        ]
+
+        for element in setup_menu.find_elements_by_tag_name("a"):
+            self.assertIn(element.text, menu_items)
