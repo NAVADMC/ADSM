@@ -116,18 +116,6 @@ AC_CHECK_LIB(gd,gdImageCreate,,AC_MSG_ERROR(cannot continue without GD graphics 
 
 AC_CHECK_LIB(proj,pj_init,,AC_MSG_ERROR(cannot continue without PROJ.4 Cartographic Projections library))
 
-AM_PATH_MPI()
-AC_SUBST(MPI_CFLAGS)
-AC_SUBST(MPI_LIBS)
-AM_CONDITIONAL(HAVE_MPI, test "X${ac_cv_with_mpi}" != Xno)
-
-case "X${ac_cv_with_mpi}" in
-  Xyes|X )
-    AC_DEFINE(USE_MPI,1,[Define to 1 to enable MPI properly in header files included from the operating system.]) ;;
-  * )
-    ;;
-  esac
-
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(errno.h math.h unistd.h limits.h regex.h ctype.h)

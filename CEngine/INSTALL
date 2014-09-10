@@ -27,9 +27,6 @@ Windows XP as a DLL joined with a Windows user interface, [ DLL compiled using
 Windows 7 as a DLL joined with a Windows user interface, [ DLL compiled using
   MinGW ]
 
-Known and tested parallel, i.e. MPI, compatibility on MS-Windows:
-MPICH2
-
 
 Linux [single CPU, SMP, and HPC systems]
 -----------------------------------------
@@ -37,11 +34,6 @@ Fedora 6, 7, 8, 9, 10, 11
 Ubuntu 9.04
 SUSE 10, 11
 HP Linux XC 3.1 [See SHARCNET below]
-
-Known and tested parallel, i.e MPI, compatibility on Linux:
-mpich
-LAM/MPI
-open-MPI
 
 NOTE:  Linux may also be used as the OS on high performance computing, (HPC),
        systems, such as Grids, and Clusters.
@@ -55,7 +47,7 @@ SHARCNET Grid [Canada] ( Various operating systems, and grid sizes )
 
 Parallel, High Performance Machines
 ------------------------------------
-Sun: Sun-Fire 6000 parallel machine running SunOS 5.9, and mpich, with
+Sun: Sun-Fire 6000 parallel machine running SunOS 5.9 with
      48 sparc processors,96Gb RAM, and 1Tb storage.
      [CoGrid at Colorado State University]
 
@@ -157,9 +149,6 @@ http://trac.osgeo.org/proj/
 Optional software
 ------------------
 
-MPI:  In order to use MPI you must have some version/implementation of MPI also
-installed on your machine, such as mpich, lam/mpi, or open-MPI.
-
 DIA:  dia version 0.94 is needed to compile some portions of the documentation.
 Doxygen:  Doxygen is needed to compile some portions of the documentation.
 Gnuplot:  Gnuplot is needed to create some portions of the documentation.
@@ -209,23 +198,6 @@ Note:  Not all users, especially on UNIX systems, will have write access to the
        /usr/local path.  In these cases it is advisable to specify a path, which
        the user has write access to, such as their "home" path.
 
-
-
-MPI
-----
---with-mpi=PATH
-
-     Specifies the location of the system's MPI library and header file.  The
-library is assumed to be named PATH/lib/libmpi.xxx and the header file is
-assumed to be named PATH/include/mpi.h.
-
-You can use the `--with-mpi-cflags' and `--with-mpi-libs' options instead for
-finer control, e.g.,
-
---with-mpi-cflags=-I/usr/lib/mpi/include
---with-mpi-libs="-L/usr/lib/mpi/lib -lmpi"
-
-The default is to compile without MPI support.
 
 
 CFLAGS and LDFLAGS
@@ -532,35 +504,6 @@ specify them on the command line:
 
 [Example]
 %adsm -p /home/me/myherds.xml -m /home/me/models -V0 -o /home/me/results.txt  /home/me/scenario.xml
-
-
-
-MPI enabled system  
--------------------
-[Includes parallel machines, Grid systems, and other HPC systems, as well as,
- MPI enabled MS-Windows machines, and MPI enabled UNIX desktops.]
-------------------------------------------------------------------------------
-
-       
-     MPI enabled systems are very much the same as the standalone systems.  The
-exception is that you must use some form of mpirun to start the program, and you 
-may then specify how many processors to use for the simulation.  
-
-     Some systems have a specific method of submitting jobs to a queued run
-system such as SharcNet below, while others, which you may have shell access to, 
-simply allow you to use mpirun directly.  Especially for the MPI enabled 
-standalone systems, the mpirun method is the most common.
-
-To use mpirun:
-
-[Example]
-
-%mpirun -n 20 /home/me/bin/adsm -h /home/me/myherds.xml -V0 -o /home/me/results.txt  /home/me/scenario.xml
-
-(The final result files will have a numerical suffix added signifying the number
-of the processor on which this run happened.)
-
-
 
 
 

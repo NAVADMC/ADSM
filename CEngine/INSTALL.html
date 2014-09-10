@@ -168,16 +168,6 @@ div.optionText {
 									style="color: rgb(32, 74, 135);" href="#mingw">MinGW</a> ]</li>
 							</ul>
 
-							<ul>
-								<li dir="ltr">Known and tested parallel, i.e. <a
-									style="color: rgb(32, 74, 135);" href="#mpi">MPI</a>,
-								compatibility on MS-Windows:
-								<ul>
-									<li dir="ltr"><a style="color: rgb(32, 74, 135);"
-										href="#mpich2">MPICH2</a></li>
-								</ul>
-								</li>
-							</ul>
 							<br />
 							<li><u><a style="color: rgb(32, 74, 135);" href="#linux">Linux</a>
 							[single CPU, SMP, and HPC systems]</u></li>
@@ -187,20 +177,6 @@ div.optionText {
 								<li dir="ltr">SUSE 10, 11</li>
 								<li dir="ltr">HP <a style="color: rgb(32, 74, 135);"
 									href="#linux">Linux</a> XC 3.1 [See SHARCNET below]</li>
-
-								<br />
-								<li>Known and tested parallel, i.e <a
-									style="color: rgb(32, 74, 135);" href="#mpi">MPI</a> ,
-								compatibility on <a style="color: rgb(32, 74, 135);"
-									href="#linux">Linux</a> :</li>
-								<ul>
-									<li dir="ltr"><a style="color: rgb(32, 74, 135);"
-										href="#mpich">MPICH</a></li>
-									<li dir="ltr"><a style="color: rgb(32, 74, 135);"
-										href="#lam/mpi">LAM/MPI</a></li>
-									<li dir="ltr"><a style="color: rgb(32, 74, 135);"
-										href="#open-mpi">open-MPI</a></li>
-								</ul>
 							</ul>
 							<table>
 								<tr>
@@ -224,8 +200,7 @@ div.optionText {
 							<br />
 							<li><u>Parallel, High Performance Machines</u></li>
 							<ul>
-								<li>Sun: Sun-Fire 6000 parallel machine running SunOS 5.9,
-								and <a style="color: rgb(32, 74, 135);" href="#mpich">mpich</a>,
+								<li>Sun: Sun-Fire 6000 parallel machine running SunOS 5.9
 								with 48 sparc processors,96Gb RAM, and 1Tb storage. [<span
 									style="color: rgb(85, 87, 83); text-decoration: underline;">CoGrid</span>
 								at Colorado State University]</li>
@@ -408,15 +383,6 @@ div.optionText {
 
 						<b>Optional software</b><br />
 						<ul>
-							<li><a style="color: rgb(32, 74, 135);" href="#mpi">MPI</a>
-							: In order to use <a style="color: rgb(32, 74, 135);" href="#mpi">MPI</a>
-							you must have some version/implementation of <a
-								style="color: rgb(32, 74, 135);" href="#mpi">MPI</a> also
-							installed on your machine, such as <a
-								style="color: rgb(32, 74, 135);" href="#mpich">mpich</a> , <a
-								style="color: rgb(32, 74, 135);" href="#lam/mpi">lam/mpi</a> ,
-							or <a style="color: rgb(32, 74, 135);" href="#open-mpi">open-MPI</a></li>
-							<br />
 							<li><a style="color: rgb(32, 74, 135);" href="#dia">Dia</a>
 							:&nbsp; Version 0.94 is needed to compile some portions of the
 							documentation.</li>
@@ -517,41 +483,6 @@ div.optionText {
 										style="color: rgb(52, 101, 164);" href="/usr/local">/usr/local</a>
 									path. In these cases it is advisable to specify a path, which
 									the user has write access to, such as their "home" path.</div>
-									</td>
-								</tr>
-							</table>
-							</li>
-							<br />
-							<li><a style="color: rgb(32, 74, 135);" href="#mpi">MPI</a>:<br />
-							<table>
-								<tr>
-									<td valign="top" align="left" width="130pt">
-									<div class="configOption">--with-mpi=PATH&nbsp;</div>
-									</td>
-									<td>
-									<div class="optionText">Specifies the location of the
-									system's MPI library and header file. The library is assumed to
-									be named PATH/lib/libmpi.xxx and the header file is assumed to
-									be named PATH/include/mpi.h. You can use the
-									`--with-mpi-cflags' and `--with-mpi-libs' options instead for
-									finer control, e.g., --with-mpi-cflags=-I/usr/lib/mpi/include
-									--with-mpi-libs="-L/usr/lib/mpi/lib -lmpi" The default is to
-									compile without MPI support.
-									<table>
-										<tr>
-											<td valign="top" align="left">
-											<div class="cautionNote">Note:&nbsp;</div>
-											</td>
-											<td>
-											<div class="cautionText">If your system contains MPI
-											support, but you do not wish to use it, also be sure to not
-											compile the SPRNG libraries with MPI support, and if you do
-											intend to use MPI, also be sure that SPRNG has been compiled
-											with MPI support.</div>
-											</td>
-										</tr>
-									</table>
-									</div>
 									</td>
 								</tr>
 							</table>
@@ -1078,30 +1009,6 @@ div.optionText {
 						<br />
 
 
-						<p />
-						<div class="configOption">MPI enabled system</div>
-						<br />
-						<div class="optionText">[Includes parallel machines, Grid
-						systems, and other HPC systems, as well as, MPI enabled MS-Windows
-						machines, and MPI enabled UNIX desktops.]</div>
-						<p />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MPI enabled systems are very
-						much the same as the standalone systems. The exception is that you
-						must use some form of mpirun to start the program, and you may
-						then specify how many processors to use for the simulation. Some
-						systems have a specific method of submitting jobs to a queued run
-						system such as SharcNet, described below, while others, which you
-						may have shell access to, simply allow you to use mpirun directly.
-						Especially for the MPI enabled standalone systems, the mpirun
-						method is the most common. To use mpirun:<br />
-						<div class="optionText">[Example]<br />
-						%mpirun -n 20 /home/me/bin/adsm -p /home/me/population.xml -V0 -o
-						/home/me/results.txt /home/me/scenario.xml</div>
-						<r />
-
-						<div class="cautionText">The final result files will have a
-						numerical suffix added signifying the number of the processor on
-						which this run happened.</div>
-						<br />
 						<p />
 						<div class="configOption">SHARCNet specific</div>
 						<br />

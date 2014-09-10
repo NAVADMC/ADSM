@@ -56,9 +56,6 @@
  * A few general notes on the implementation:
  * <ol>
  *   <li>
- *     The MPI implementation simply divides the desired number of
- *     (independent) Monte Carlo runs across the available processors.
- *   <li>
  *     The various <a href="annotated.html">data structures</a> should be
  *     treated as opaque and manipulated \em only through the functions
  *     defined in their header files.
@@ -443,10 +440,6 @@
 #include "sc_adsm_outputs.h"
 #endif
 
-#if HAVE_MPI && !CANCEL_MPI
-#  include "mpix.h"
-#endif
-
 #if STDC_HEADERS
 #  include <string.h>
 #endif
@@ -781,15 +774,6 @@ run_sim_main (sqlite3 *scenario_db,
                        &ndays, &nruns, &models, reporting_vars, &exit_conditions );
   nzones = ZON_zone_list_length (zones);
 
-#if HAVE_MPI && !CANCEL_MPI
-  /* Increase the number of runs to divide evenly by the number of processors,
-   * if necessary. */
-  if (nruns % me.np != 0)
-    nruns += (me.np - nruns % me.np);
-  nruns /= me.np;               /* because it's parallel, wheee! */
-  _scenario.nruns = nruns;
-#endif
-
 #if DEBUG
   g_debug ("simulation %u days x %u runs", ndays, nruns);
 #endif
@@ -800,8 +784,7 @@ run_sim_main (sqlite3 *scenario_db,
    * database if specified there, and finally from the system time.
    *
    * In parallel setups, we want to avoid more than one process starting with
-   * the same seed. In an MPI setup, we add the rank to the starting seed. In a
-   * non-MPI setup, if the "starting_iteration_number" argument to
+   * the same seed. If the "starting_iteration_number" argument to
    * run_sim_main() is specified, then we add that *minus one* to the starting
    * seed. */
   gsl_rng_env_setup();
@@ -811,24 +794,7 @@ run_sim_main (sqlite3 *scenario_db,
     gsl_rng_set (gsl_format_rng, time(NULL));
   else
     gsl_rng_set (gsl_format_rng, _scenario.random_seed );
-#elsif HAVE_MPI && !CANCEL_MPI
-  /* MPI setup */
-  if (seed >= 0)
-    gsl_rng_set (gsl_format_rng, seed + me.rank);
-  else
-    {
-      seed = PAR_get_int (scenario_db, "SELECT (CASE WHEN random_seed IS NULL THEN -1 ELSE random_seed END) FROM ScenarioCreator_Scenario");
-      if (seed >= 0)
-        {
-          gsl_rng_set (gsl_format_rng, seed + me.rank);
-        }
-      else
-        {
-          gsl_rng_set (gsl_format_rng, time(NULL) + me.rank);
-        }
-    }
 #else
-  /* Non-MPI setup */
   {
     int offset;
     /* The starting iteration number is -1 by default, indicating that the caller
@@ -909,12 +875,6 @@ run_sim_main (sqlite3 *scenario_db,
   for (run = 0; run < nruns; run++, iteration_number++)
     {
 
-#if defined( USE_MPI ) && !CANCEL_MPI
-      double m_start_time, m_end_time;
-      m_start_time = m_end_time = 0.0;
-      m_start_time = MPI_Wtime();
-#endif
-
     _iteration.zoneFociCreated = FALSE;
     _iteration.diseaseEndDay = -1;
     _iteration.outbreakEndDay = -1;
@@ -973,10 +933,6 @@ run_sim_main (sqlite3 *scenario_db,
       /* Begin the loop over the days in an iteration. */
       for (day = 1; (day <= ndays) && (!early_exit); day++)
         {
-#if defined( USE_MPI ) && !CANCEL_MPI
-          double m_day_start_time = MPI_Wtime();
-          double m_day_end_time = m_day_start_time;
-#endif
           /* Does the GUI user want to stop a simulation in progress? */
           if (NULL != adsm_simulation_stop)
             {
@@ -999,9 +955,6 @@ run_sim_main (sqlite3 *scenario_db,
             adsm_day_start (day);
 #endif
 
-#if DEBUG && defined( USE_MPI )
-          double m_start_day_time = MPI_Wtime();
-#endif
           /* Process changes made to the units and zones on the previous day. */
           adsm_create_event (manager, EVT_new_midnight_event (day), units, zones, rng);
 
@@ -1155,10 +1108,6 @@ run_sim_main (sqlite3 *scenario_db,
             adsm_day_complete (day);
 #endif
 
-#if defined( USE_MPI ) && !CANCEL_MPI
-  m_day_end_time = MPI_Wtime();
-  g_debug( "%i: Iteration: %i, Day: %i, Day_Time: %g\n", me.rank, run, day, (double)(m_day_end_time - m_day_start_time ) );
-#endif
         } /* end loop over days of one Monte Carlo trial */
 
 #ifdef USE_SC_GUILIB
@@ -1168,32 +1117,14 @@ run_sim_main (sqlite3 *scenario_db,
         adsm_iteration_complete (run);
 #endif
 
-#if defined( USE_MPI ) && !CANCEL_MPI
-  m_end_time = MPI_Wtime();
-  m_total_time = (double)((((double)m_end_time - (double)m_start_time)) + (double)m_total_time);
-  #ifdef DEBUG
-      g_debug("%i - Run: %d timing: startCount %g, endCount %g, totalCount %g MPI Timer Seconds\n", me.rank, me.rank * _scenario.nruns + run + 1, m_start_time, m_end_time, (double)((double)m_end_time - (double)m_start_time));
-  #endif
-#endif
     }                           /* loop over all Monte Carlo trials */
 
 #ifdef USE_SC_GUILIB
 
-#if defined( USE_MPI ) && !CANCEL_MPI
-    if ( me.np > 1 )
-    {
-      MPI_Reduce( &m_total_time, &total_processor_time, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD );
-      MPI_Reduce( &run, &total_runs, 1, MPI_UNSIGNED_LONG, MPI_SUM, 0, MPI_COMM_WORLD );
-    }
-    else
-#endif
     {
       total_processor_time = m_total_time;
       total_runs = run;
     };
-#if defined( USE_MPI ) && !CANCEL_MPI
-    if ( me.rank == 0 )
-#endif
     {
       _scenario.total_processor_time = total_processor_time;
       _scenario.iterations_completed = total_runs;
