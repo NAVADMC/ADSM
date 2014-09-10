@@ -438,6 +438,7 @@
 #include "reporting.h"
 #include "rng.h"
 #include "spatial_search_rtree.h"
+#include "spatial_search_memo.h"
 
 #ifdef USE_SC_GUILIB
 #include "sc_adsm_outputs.h"
@@ -748,7 +749,7 @@ run_sim_main (sqlite3 *scenario_db,
       UNT_unit_list_project (units, units->projection);
     }
   /* Build a spatial index around the unit locations. */
-  units->spatial_index = new_rtree_spatial_search ();
+  units->spatial_index = new_spatial_search_with_memoization (new_rtree_spatial_search ());
   for (i = 0; i < nunits; i++)
     {
       unit = UNT_unit_list_get (units, i);
