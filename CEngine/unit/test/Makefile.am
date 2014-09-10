@@ -24,9 +24,6 @@ if USE_SC_GUILIB
     $(top_srcdir)/sc_guilib/sc_database.c
 endif
 shell_LDADD = @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@
-if HAVE_MPI
-  shell_LDADD += @MPI_LIBS@
-endif
 
 # Include the DejaGnu test files in the distribution file.
 
