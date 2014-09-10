@@ -47,14 +47,4 @@ def scenario_filename(new_value=None):
     return session.scenario_filename
 
 
-def update_status(do_update=False):
-    try:
-        session = SmSession.objects.get_or_create(id=1)[0]
-    except OperationalError:
-        ScenarioCreator.views.reset_db('default')  # I'm doing this instead of graceful_startup() to avoid long migrations on startup
-        return update_status(do_update)  # possible infinite loop
-    if do_update:
-        session.update_needed = update_is_needed()
-        session.save()
-    return session.update_needed
 

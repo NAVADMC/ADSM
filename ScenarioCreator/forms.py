@@ -51,11 +51,6 @@ class BaseForm(ModelForm):
         return super(BaseForm, self).__init__(*args, **kwargs)
 
 
-class DynamicBlobForm(BaseForm):
-    class Meta(object):
-        model = DynamicBlob
-
-
 class PopulationForm(BaseForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()

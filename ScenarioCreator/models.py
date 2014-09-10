@@ -119,10 +119,6 @@ class BaseModel(models.Model):
         abstract = True
 
 
-class DynamicBlob(models.Model):
-    zone_perimeters = models.CharField(max_length=255, blank=True, help_text='', )  # polygons?
-
-
 class Population(BaseModel):
     source_file = models.CharField(max_length=255, blank=True)  # source_file made generic CharField so Django doesn't try to copy and save the raw file
 
