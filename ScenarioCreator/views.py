@@ -50,8 +50,8 @@ def add_breadcrumb_context(context, model_name, primary_key=None):
         context['title'] = 'Edit the ' + spaces_for_camel_case(model_name)
 
 
-def activeSession():
-    full_path = settings.DATABASES['scenario_db']['NAME']
+def activeSession(name='scenario_db'):
+    full_path = settings.DATABASES[name]['NAME']
     return os.path.basename(full_path)
 
 
@@ -307,29 +307,36 @@ def new_entry(request):
     return new_form(request, initialized_form, context)
 
 
-def edit_entry(request, primary_key):
+def edit_entry(request, primary_key, second_try=False):
     model_name, form = get_model_name_and_form(request)
     if model_name == 'RelationalFunction':
         return relational_function(request, primary_key)
 
     try:
-        initialized_form, model_name = initialize_from_existing_model(primary_key, request)
-    except ObjectDoesNotExist:
+        try:
+            initialized_form, model_name = initialize_from_existing_model(primary_key, request)
+        except ObjectDoesNotExist:
+            return redirect('/setup/%s/new/' % model_name)
+
+        if initialized_form.is_valid() and request.method == 'POST':
+            model_instance = initialized_form.save()  # write instance updates to database
+            if request.is_ajax():
+                return ajax_success(model_instance, model_name)
+    
+        context = {'form': initialized_form,
+                   'title': str(initialized_form.instance)}
+        add_breadcrumb_context(context, model_name, primary_key)
+    
+        if model_name == 'ProbabilityFunction':
+            context['backlinks'] = collect_backlinks(initialized_form.instance)
+            context['deletable'] = 'delete/'
+    
+        return render(request, 'ScenarioCreator/crispy-model-form.html', context)
+    except OperationalError:
+        graceful_startup()
+        if not second_try:
+            return edit_entry(request, primary_key, True)  # try again with a fresh file set        
         return redirect('/setup/%s/new/' % model_name)
-    if initialized_form.is_valid() and request.method == 'POST':
-        model_instance = initialized_form.save()  # write instance updates to database
-        if request.is_ajax():
-            return ajax_success(model_instance, model_name)
-
-    context = {'form': initialized_form,
-               'title': str(initialized_form.instance)}
-    add_breadcrumb_context(context, model_name, primary_key)
-
-    if model_name == 'ProbabilityFunction':
-        context['backlinks'] = collect_backlinks(initialized_form.instance)
-        context['deletable'] = 'delete/'
-
-    return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
 def copy_entry(request, primary_key):
@@ -456,8 +463,6 @@ def save_scenario(request):
 
 def update_db_version():
     print("Checking Scenario version")
-
-    print('Building DB structure...')
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
     try:
         call_command('migrate',
@@ -489,20 +494,37 @@ def open_scenario(request, target):
     return redirect('/setup/Scenario/1/')
 
 
-def new_scenario(request):
-    print("Deleting", activeSession())
+def reset_db(name):
+    print("Deleting", activeSession(name))
     try:
-        os.remove(activeSession())
+        os.remove(activeSession(name))
     except BaseException as ex:
         print(ex)  # the file may not exist anyways
     #creates a new blank file by migrate / syncdb
     call_command('syncdb',
                  # verbosity=0,
                  interactive=False,
-                 database=connections['scenario_db'].alias,
+                 database=connections[name].alias,
                  load_initial_data=False)
+    if name == 'default':  # create super user
+        from django.contrib.auth.models import User
+        u = User(username='ADSM', is_superuser=True, is_staff=True)
+        u.set_password('ADSM')
+        u.save()
+
+
+def graceful_startup():
+    if not os.path.isfile(activeSession('default')):
+        reset_db('default')
+    if not os.path.isfile(activeSession('scenario_db')):
+        reset_db('scenario_db')
+        update_db_version()
+
+
+def new_scenario(request):
+    reset_db('default')
+    reset_db('scenario_db')
     update_db_version()
-    scenario_filename("Untitled Scenario")
     return redirect('/setup/Scenario/1/')
 
 
