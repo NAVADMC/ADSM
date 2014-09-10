@@ -2,7 +2,7 @@
 #ifndef _MEMOIZATION_H_
 #define _MEMOIZATION_H_
 
-#include "herd.h"
+#include "unit.h"
 
 #define _IN_
 #define _IN_OUT_
@@ -46,8 +46,9 @@ struct HerdLocation {
                   or "serchWithCirclesAndSquare, 
                   typically after herd list is created in main function "run_sim_main"  
 */
-void initCirclesAndSquaresList(HRD_herd_list_t* herds);
+void initCirclesAndSquaresList(UNT_unit_list_t* herds);
 
+typedef int (*SearchHitCallback)(int id, void* arg);
 /*
    Description  : search in circles and squares with memoization
    Parameters  : pointer to the herd for which "herds in proximity is calculated", 
@@ -55,7 +56,7 @@ void initCirclesAndSquaresList(HRD_herd_list_t* herds);
 		   callback function to be called for a herd in given proximity (same as RTree argument)
 		   arguments for callback function
  */
-boolean searchWithMemoization (HRD_herd_t* pHerd, double dRadius,
+boolean searchWithMemoization (UNT_unit_t* pHerd, double dRadius,
 			      SearchHitCallback pfCallback, void* pCallbackArgs);
 
 /*
@@ -65,8 +66,7 @@ boolean searchWithMemoization (HRD_herd_t* pHerd, double dRadius,
 		   callback function to be called for a herd in given proximity (same as RTree argument)
 		   arguments for callback function (same as RTree argument)
  */
-/
-boolean searchWithCirclesAndSquares (HRD_herd_t* pHerd, double dRadius,
+boolean searchWithCirclesAndSquares (UNT_unit_t* pHerd, double dRadius,
 				     SearchHitCallback pfCallback, void* pCallbackArgs);
 
 #endif /* _MEMOIZATION_H_ */

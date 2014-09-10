@@ -9,8 +9,6 @@
 
 
 #define EPSILON			(0.001)
-#define DEG_TO_RAD(x) 		((x)*DEG2RAD)
-#define RAD_TO_DEG(x) 		((x)/DEG2RAD)
 
 
 typedef struct GeoSquare GeoSquare;
@@ -36,7 +34,7 @@ struct InProximity {
 
 
 typedef float (*GetLatLong) (HerdLocation* psList);
-HerdLocation getHerdLocation(HRD_herd_t* pHerd);
+HerdLocation getHerdLocation(UNT_unit_t* pHerd);
 boolean getLatLong (_IN_ char *sString, _OUT_ float *pfLatitude, _OUT_ float *pfLongitude);
 float getLatitude(HerdLocation* psList);
 float getLongitude(HerdLocation* psList);
@@ -71,7 +69,6 @@ static HerdLocation* g_pUnsortedList = NULL;
 
 static uint g_uiSize = 0;
 static InProximity** g_pAllHerds = NULL;
-static HRD_herd_t hrd_herd;
 
 static double cos0;
 static double cos180;
@@ -86,11 +83,6 @@ static double deg_to_rad315;
 static double deg_to_rad225;
 static double deg_to_rad45;
 static double deg_to_rad135;
-
-
-static uint count_callback = 0;
-static uint count_herds = 0;
-static uint count_rtree_calls = 0;
 
 /************************** quick sort functions *************************/
 
@@ -153,19 +145,19 @@ void quickSort(_IN_OUT_ HerdLocation* psList, _IN_ int iFirst, _IN_ int iLast, _
 
 void Math_functions() {
 
-  cos0 = cos(DEG_TO_RAD(0));
-  cos180 = cos(DEG_TO_RAD(180));
-  cos270 = cos(DEG_TO_RAD(270));
-  cos90 = cos(DEG_TO_RAD(90));
-  cos315 = cos(DEG_TO_RAD(315));
-  cos225 = cos(DEG_TO_RAD(225));
+  cos0 = cos(DEG_TO_RAD*0);
+  cos180 = cos(DEG_TO_RAD*180);
+  cos270 = cos(DEG_TO_RAD*270);
+  cos90 = cos(DEG_TO_RAD*90);
+  cos315 = cos(DEG_TO_RAD*315);
+  cos225 = cos(DEG_TO_RAD*225);
 
-  deg_to_rad270 = DEG_TO_RAD(270);
-  deg_to_rad90 = DEG_TO_RAD(90);
-  deg_to_rad315 = DEG_TO_RAD(315);
-  deg_to_rad225 = DEG_TO_RAD(225);
-  deg_to_rad45 = DEG_TO_RAD(45);
-  deg_to_rad135 = DEG_TO_RAD(135);
+  deg_to_rad270 = DEG_TO_RAD*270;
+  deg_to_rad90 = DEG_TO_RAD*90;
+  deg_to_rad315 = DEG_TO_RAD*315;
+  deg_to_rad225 = DEG_TO_RAD*225;
+  deg_to_rad45 = DEG_TO_RAD*45;
+  deg_to_rad135 = DEG_TO_RAD*135;
 }
 
 
@@ -197,12 +189,12 @@ void printList (_IN_ HerdLocation* psList, _IN_ uint uiSize){
   }
 }
 
-HerdLocation getHerdLocation(HRD_herd_t* pHerd) {
+HerdLocation getHerdLocation(UNT_unit_t* pHerd) {
    HerdLocation herd;
 
    herd.uiID = atoi(pHerd->official_id);
-   herd.fLat = pHerd->lat;
-   herd.fLon = pHerd->lon;
+   herd.fLat = pHerd->latitude;
+   herd.fLon = pHerd->longitude;
 
    return herd;
 }
@@ -273,12 +265,12 @@ boolean initMemoization(uint uiNumHerds) {
   return ret_val;
 }
 
-void initCirclesAndSquaresList(HRD_herd_list_t* herds) {
+void initCirclesAndSquaresList(UNT_unit_list_t* herds) {
 
-  int nherds = HRD_herd_list_length(herds);
+  int nherds = UNT_unit_list_length(herds);
   HerdLocation herd;
   int i;
-  HRD_herd_t* herd_t;
+  UNT_unit_t* herd_t;
   uint herd_id;
 
   /* for id 0, coz official id's start from 1 */ 
@@ -292,7 +284,7 @@ void initCirclesAndSquaresList(HRD_herd_list_t* herds) {
   g_uiSize = nherds+1;
 
   for (i = 0; i < nherds; i++) {
-    herd_t = (HRD_herd_t*)HRD_herd_list_get(herds, i);       
+    herd_t = (UNT_unit_t*)UNT_unit_list_get(herds, i);       
     herd = getHerdLocation(herd_t);
 
     herd_id = atoi(herd_t->official_id);
@@ -377,7 +369,7 @@ boolean withInRadius(HerdLocation* pX_Herd, HerdLocation* pY_Herd, double dRadiu
   double distance;
 
   /* calculate weather the herd is within radius */
-  distance = GIS_local_distance(pX_Herd->fLat, pX_Herd->fLon, pY_Herd->fLat, pY_Herd->fLon);
+  distance = GIS_distance(pX_Herd->fLat, pX_Herd->fLon, pY_Herd->fLat, pY_Herd->fLon);
 
   if ((distance - dRadius) <= EPSILON) {
     ret_val = TRUE;
@@ -397,8 +389,8 @@ boolean getGeoSquareBig(_IN_ HerdLocation sHerd, float uiRadius, GeoSquare* pSqu
     float which_lat;
 
     /* degrees to radians */
-    sHerd.fLat *= DEG2RAD;
-    sHerd.fLon *= DEG2RAD;
+    sHerd.fLat *= DEG_TO_RAD;
+    sHerd.fLon *= DEG_TO_RAD;
 
     /* north side */
     pSquare->fTopLatitude =  asin(sin(sHerd.fLat)*cos(uiRadius/GIS_EARTH_RADIUS)
@@ -452,12 +444,12 @@ boolean getGeoSquareBig(_IN_ HerdLocation sHerd, float uiRadius, GeoSquare* pSqu
 
 
     /* convert back to degrees */
-    pSquare->fTopLatitude = RAD_TO_DEG(pSquare->fTopLatitude);
-    pSquare->fBottomLatitude = RAD_TO_DEG(pSquare->fBottomLatitude);
+    pSquare->fTopLatitude = RAD_TO_DEG * (pSquare->fTopLatitude);
+    pSquare->fBottomLatitude = RAD_TO_DEG * (pSquare->fBottomLatitude);
 
     /* convert back to degrees */
-    pSquare->fLeftLongitude = RAD_TO_DEG(pSquare->fLeftLongitude);
-    pSquare->fRightLongitude = RAD_TO_DEG(pSquare->fRightLongitude);;
+    pSquare->fLeftLongitude = RAD_TO_DEG * (pSquare->fLeftLongitude);
+    pSquare->fRightLongitude = RAD_TO_DEG * (pSquare->fRightLongitude);;
 
 #ifdef DEBUG
     printf ("Top, Left is %f, %f\n", pSquare->fTopLatitude, pSquare->fLeftLongitude);
@@ -472,8 +464,8 @@ boolean getGeoSquareSmall(_IN_ HerdLocation sHerd, float uiRadius, GeoSquare* pS
   float lon_bottom;
 
   /* degrees to radians */
-  sHerd.fLat *= DEG2RAD;
-  sHerd.fLon *= DEG2RAD;
+  sHerd.fLat *= DEG_TO_RAD;
+  sHerd.fLon *= DEG_TO_RAD;
 
   /* left, north side */
   pSquare->fTopLatitude =  asin(sin(sHerd.fLat)*cos(uiRadius/GIS_EARTH_RADIUS)
@@ -507,12 +499,12 @@ boolean getGeoSquareSmall(_IN_ HerdLocation sHerd, float uiRadius, GeoSquare* pS
   }
 
   /* convert back to degrees */
-  pSquare->fTopLatitude = RAD_TO_DEG(pSquare->fTopLatitude);
-  pSquare->fBottomLatitude = RAD_TO_DEG(pSquare->fBottomLatitude);
+  pSquare->fTopLatitude = RAD_TO_DEG * (pSquare->fTopLatitude);
+  pSquare->fBottomLatitude = RAD_TO_DEG * (pSquare->fBottomLatitude);
 
   /* convert back to degrees */
-  pSquare->fLeftLongitude = RAD_TO_DEG(pSquare->fLeftLongitude);
-  pSquare->fRightLongitude = RAD_TO_DEG(pSquare->fRightLongitude);
+  pSquare->fLeftLongitude = RAD_TO_DEG * (pSquare->fLeftLongitude);
+  pSquare->fRightLongitude = RAD_TO_DEG * (pSquare->fRightLongitude);
 
 #ifdef DEBUG
   printf ("Top, Left is %f, %f\n", pSquare->fTopLatitude, pSquare->fLeftLongitude);
@@ -522,7 +514,7 @@ boolean getGeoSquareSmall(_IN_ HerdLocation sHerd, float uiRadius, GeoSquare* pS
 }
 
 /***************** functions of 01, only squares and circles *************/
-boolean searchWithCirclesAndSquares (HRD_herd_t* pHerd, double dRadius,
+boolean searchWithCirclesAndSquares (UNT_unit_t* pHerd, double dRadius,
 			     SearchHitCallback pfCallback, void* pCallbackArgs) {
   boolean ret_val = FALSE;
   HerdLocation herd = getHerdLocation(pHerd);
@@ -546,8 +538,6 @@ void processHerd (HerdLocation* pS_Herd, HerdLocation* pT_Herd,
   }
 }
 
-
-static uint count_circles_and_squares_calls = 0;
 
 void searchInProximity (HerdLocation* psLatList, HerdLocation* psLonList,
 			uint uiSize, HerdLocation* psHerd, double dRadius, 
@@ -719,7 +709,7 @@ boolean inMemoization2(HerdLocation* pHerd, InProximity** pSrcHerds,
 }
 
 /* search in circles and squares with memoization */
-boolean searchWithMemoization (HRD_herd_t* pHerd, double dRadius,
+boolean searchWithMemoization (UNT_unit_t* pHerd, double dRadius,
 			             SearchHitCallback pfCallback, void* pCallbackArgs) {
 
   boolean ret_val = FALSE;
@@ -812,7 +802,7 @@ boolean addToMemoization2 (HerdLocation* pS_Herd, HerdLocation* pT_Herd,
   double distance;
 
   /* calculate weather the herd is within radius */
-  distance = GIS_local_distance(pS_Herd->fLat, pS_Herd->fLon, 
+  distance = GIS_distance(pS_Herd->fLat, pS_Herd->fLon, 
 				pT_Herd->fLat, pT_Herd->fLon);
   
   if ((distance - dRadius) <= EPSILON) {
