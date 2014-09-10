@@ -11,8 +11,14 @@ from django.shortcuts import redirect
 
 
 def update_adsm_from_git(request):
-    print("you Found me!")
     git = os.path.join(settings.BASE_DIR, 'git', 'bin', 'git.exe')
     subprocess.call(git + ' reset --hard', shell=True)
     subprocess.call(git + ' pull', shell=True)
     return redirect('/setup/')
+
+
+def update_is_needed():
+    git = os.path.join(settings.BASE_DIR, 'git', 'bin', 'git.exe')
+    subprocess.call(git + ' remote update', shell=True)
+    status = subprocess.call(git + ' status -uno', shell=True)
+    return 'behind' in status

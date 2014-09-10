@@ -3,6 +3,8 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
+from Settings.views import update_is_needed
+
 standard_library.install_hooks()
 from django.db import models
 from django.contrib.sessions.models import Session
@@ -11,6 +13,7 @@ from django.contrib.sessions.models import Session
 class SmSession(models.Model):
     scenario_filename = models.CharField(max_length=255, default="Untitled Scenario", blank=True)
     unsaved_changes = models.BooleanField(default=False)
+    update_needed = models.BooleanField(default=False, help_text='Is there are new version of ADSM available?')
     population_upload_status = models.CharField(null=True, blank=True, max_length=255)
     population_upload_percent = models.FloatField(default=0)
 
@@ -41,3 +44,12 @@ def scenario_filename(new_value=None):
         session.scenario_filename = new_value.replace('.sqlite3', '')
         session.save()
     return session.scenario_filename
+
+
+def update_status(do_update=False):
+    session = SmSession.objects.get_or_create(id=1)[0]
+    if do_update:
+        session.update_needed = update_is_needed()
+        session.save()
+    return session.update_needed
+
