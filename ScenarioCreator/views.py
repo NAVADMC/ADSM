@@ -17,7 +17,7 @@ from django.db.models import Q
 from Results.models import *  # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from Settings.models import unsaved_changes
-from Settings.views import graceful_startup, file_list
+from Settings.views import graceful_startup, file_list, handle_file_upload, workspace_path
 
 
 
@@ -420,20 +420,6 @@ def model_list(request):
 #     return 'Scenario Saved'
 
 
-def handle_file_upload(request):
-    uploaded_file = request.FILES['file']
-    filename = uploaded_file._name
-    with open(workspace(filename), 'wb+') as destination:
-        for chunk in uploaded_file.chunks():
-            destination.write(chunk)
-    return filename
-
-
-def upload_scenario(request):
-    handle_file_upload(request)
-    return redirect('/setup/Workspace/')
-
-
 def upload_population(request):
     from Settings.models import SmSession
     session = SmSession.objects.get(pk=1)
@@ -443,7 +429,7 @@ def upload_population(request):
 
     session.set_population_upload_status("Processing file")
     filename = request.POST.get('filename') if 'filename' in request.POST else handle_file_upload(request)
-    model = Population(source_file=workspace(filename))
+    model = Population(source_file=workspace_path(filename))
     try:
         model.save()
     except EOFError as e:

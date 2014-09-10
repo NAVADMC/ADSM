@@ -116,6 +116,20 @@ def file_dialog(request):
     return render(request, 'ScenarioCreator/workspace.html', context)
 
 
+def handle_file_upload(request):
+    uploaded_file = request.FILES['file']
+    filename = uploaded_file._name
+    with open(workspace_path(filename), 'wb+') as destination:
+        for chunk in uploaded_file.chunks():
+            destination.write(chunk)
+    return filename
+
+
+def upload_scenario(request):
+    handle_file_upload(request)
+    return redirect('/app/Workspace/')
+
+
 def open_scenario(request, target):
     print("Copying ", workspace_path(target), "to", activeSession())
     shutil.copy(workspace_path(target), activeSession())
@@ -151,7 +165,7 @@ def copy_file(request, target):
     copy_name = re.sub(r'(?P<name>.*)\.(?P<ext>.*)', r'\g<name> - Copy.\g<ext>', target)
     print("Copying ", target, "to", copy_name)
     shutil.copy(workspace_path(target), workspace_path(copy_name))
-    return redirect('/setup/Workspace/')
+    return redirect('/app/Workspace/')
 
 
 def download_file(request, target):

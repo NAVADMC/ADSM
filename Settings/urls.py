@@ -12,13 +12,13 @@ admin.autodiscover()
 urlpatterns = patterns('',
 
     url(r'^update/$', 'Settings.views.update_adsm_from_git'),
-    url('^SaveScenario/$', 'ScenarioCreator.views.save_scenario'),
-    url('^NewScenario/$', 'ScenarioCreator.views.new_scenario'),
-    url('^Workspace/$', 'ScenarioCreator.views.file_dialog'),
+    url('^SaveScenario/$', 'Settings.views.save_scenario'),
+    url('^NewScenario/$', 'Settings.views.new_scenario'),
+    url('^Workspace/$', 'Settings.views.file_dialog'),
     
-    url(r'^OpenScenario/(?P<target>[\w\s\-\.]+)/$', 'ScenarioCreator.views.open_scenario'),  # includes .extension
-    url(r'^DeleteFile/(?P<target>.*)/$', 'ScenarioCreator.views.delete_file'),
-    url(r'^Download/(?P<target>[\w\s\-\./]+)/$', 'ScenarioCreator.views.download_file'),
-    url(r'^Copy/(?P<target>[\w\s\-\.]+)/$', 'ScenarioCreator.views.copy_file'),
-    url(r'^Upload/$', 'ScenarioCreator.views.upload_scenario'),
+    url(r'^OpenScenario/(?P<target>[\w\s\-\.]+)/$', 'Settings.views.open_scenario'),  # includes .extension
+    url(r'^DeleteFile/(?P<target>.*)/$', 'Settings.views.delete_file'),
+    url(r'^Download/(?P<target>[\w\s\-\./]+)/$', 'Settings.views.download_file'),
+    url(r'^Copy/(?P<target>[\w\s\-\.]+)/$', 'Settings.views.copy_file'),
+    url(r'^Upload/$', 'Settings.views.upload_scenario'),
 )

@@ -4,13 +4,14 @@ from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
 standard_library.install_hooks()
+
 import re
 from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Population, Unit, Disease, DiseaseProgression, \
     DiseaseProgressionAssignment, DirectSpread, ProductionTypePairTransmission, ControlMasterPlan, ControlProtocol, \
     ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
 from Results.models import DailyControls
-from ScenarioCreator.views import unsaved_changes
-from Settings.models import scenario_filename, update_status
+from Settings.models import scenario_filename
+from Settings.views import update_status, unsaved_changes
 from django.db.models import F
 
 
