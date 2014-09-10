@@ -1,0 +1,16 @@
+{% extends "admin/base.html" %}{% load admin_static %}
+{% load i18n %}
+
+{% block title %}{{ title }} | {% trans 'Animal Disease Spread Model Backend' %}{% endblock %}
+
+{% block extrastyle %}
+	<link rel="stylesheet" type="text/css" href="{% static "css/spreadmodel.css" %}">
+	<link rel="stylesheet" type="text/css" href="{% static "css/ADSM-admin.css" %}">
+{% endblock extrastyle %}
+
+{% block branding %}
+<a href="/setup/Scenario/1/" style="float:right">Standard View</a>
+<h1 id="site-name">Animal Disease Spread Model Backend</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
