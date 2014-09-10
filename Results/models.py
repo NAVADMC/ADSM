@@ -372,7 +372,7 @@ class DailyControls(OutputBaseModel):
 class UnitStats(OutputBaseModel):
     """Model for holding Unit related output primarily for the Results map Issue # 211.
     If we run into database contention issues, try switching the database mode to http://www.sqlite.org/draft/wal.html"""
-    unit = models.OneToOneField(Unit,
+    unit = models.ForeignKey(Unit,
         help_text='Pointer back to the input Unit (lat/long) these stats are for.')
     cumulative_infected = models.PositiveIntegerField(default=0,
         help_text='The total number of iterations in which this unit became infected.', )

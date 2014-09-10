@@ -181,7 +181,7 @@ class Unit(BaseModel):
         help_text='The number of days that the unit will remain in its initial state unless preempted by other events.', )
     days_left_in_initial_state = models.IntegerField(blank=True, null=True,
         help_text='Used for setting up scripted scenarios.', )
-    initial_size = models.PositiveIntegerField(
+    initial_size = models.PositiveIntegerField(validators=[MinValueValidator(1)],
         help_text='The number of animals in the unit.', )
     user_notes = models.TextField(blank=True)
 
@@ -517,8 +517,6 @@ class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indire
         help_text='The average contact rate (in recipient units per source unit per day) for direct or indirect contact models.', )
     use_fixed_contact_rate = models.BooleanField(default=False,
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
-    infection_probability = PercentField(
-        help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
     distance_distribution = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the shipment distances for direct and indirect contact models.', )
     movement_control = models.ForeignKey(RelationalFunction, related_name='+',
@@ -530,6 +528,9 @@ class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indire
 class IndirectSpread(AbstractSpread):
     """This has to inherit from AbstractSpread or else Django treats DirectSpread and IndirectSpread as
     interchangable, which they are not."""
+    infection_probability = PercentField(
+        help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
+
     def __str__(self):
         return "%s %i" % (self.name, self.id)
 
@@ -537,6 +538,8 @@ class IndirectSpread(AbstractSpread):
 class DirectSpread(AbstractSpread):
     """This has to inherit from AbstractSpread or else Django treats DirectSpread and IndirectSpread as
     interchangable, which they are not."""
+    infection_probability = PercentField(blank=True, null=True,
+        help_text='The probability that a contact will result in disease transmission. Specified for direct and indirect contact models.', )
     latent_animals_can_infect_others = models.BooleanField(default=False,
         help_text='Indicates if latent units of the source type can spread disease by direct contact. Not applicable to airborne spread or indirect spread.', )
     def __init__(self, *args, **kwargs):
@@ -549,15 +552,15 @@ class DirectSpread(AbstractSpread):
 class AirborneSpread(DiseaseSpread):
     _spread_method_code = models.CharField(max_length=255, default='other',
         help_text='Code indicating the mechanism of the disease spread.', )
-    spread_1km_probability = PercentField(
+    spread_1km_probability = PercentField(validators=[MinValueValidator(0.0), MaxValueValidator(.999)],
         help_text='The probability that disease will be spread to unit 1 km away from the source unit.', )
-    max_distance = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='The maximum distance in KM of airborne spread.  Only used in Exponential Airborne Decay.', )
-    wind_direction_start = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=0,
-        help_text='The start angle in degrees of the predominate wind direction for airborne spread.', )
-    #TODO: This doesn't keep start and end from crossing each other.
-    wind_direction_end = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=360,
-        help_text='The end angle in degrees of the predominate wind direction for airborne spread.', )
+    max_distance = models.FloatField(validators=[MinValueValidator(1.1)], blank=True, null=True,
+        help_text='The maximum distance in KM of airborne spread.  Only used in Linear Airborne Decay.', )
+    exposure_direction_start = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=0,
+        help_text='The start angle in degrees of the area at risk of airborne spread.  0 is North.', )
+    #TODO: This doesn't keep start and end from crossing each other.  I think Neil said his code can swap them.
+    exposure_direction_end = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=360,
+        help_text='The end angle in degrees of the area at risk of airborne spread.  0 is North.', )
     def __str__(self):
         return "%s %i" % (self.name, self.id)
 
@@ -600,7 +603,7 @@ class OutputSettings(BaseModel):
         help_text='Save all daily events in a supplemental file.', )
     save_daily_exposures = models.BooleanField(default=False,
         help_text='Save all exposures in a supplemental file.', )
-    save_iteration_outputs_for_units = models.BooleanField(default=False,
+    save_iteration_outputs_for_units = models.BooleanField(default=True,
         help_text='Save all iteration outputs for units in a supplemental file.', )
     save_map_output = models.BooleanField(default=False,
         help_text='Create map outputs for units in supplemental directory.', )

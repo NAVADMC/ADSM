@@ -71,6 +71,21 @@ def extra_forms_needed():
     return extra_count, missing
 
 
+def include_spread(request):
+    master = Disease.objects.get_or_create(pk=1)[0]
+    if 'GET' in request.method:
+        info = {'include_direct_contact_spread': master.include_direct_contact_spread,
+                'include_indirect_contact_spread': master.include_indirect_contact_spread,
+                'include_airborne_spread': master.include_airborne_spread}
+        return HttpResponse(json.dumps(info), content_type="application/json")
+    else:  # POST means change
+        fields = ['include_direct_contact_spread', 'include_indirect_contact_spread', 'include_airborne_spread']
+        for field in fields:
+            setattr(master, field, request.POST.get(field) == 'true')
+        master.save()
+        # We don't need to return anything
+        
+
 def production_type_permutations():
     spread_assignments = []
     pts = list(ProductionType.objects.all())
@@ -81,7 +96,7 @@ def production_type_permutations():
     return spread_assignments
 
 
-def disease_spread(request):
+def assign_disease_spread(request):
     assignment_set = production_type_permutations()
     SpreadSet = modelformset_factory(ProductionTypePairTransmission, extra=0, form=ProductionTypePairTransmissionForm)
     try:

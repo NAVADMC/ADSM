@@ -53,12 +53,11 @@
 
 
 /**
- * An output variable, its fully-expanded name, and a list of its values.
+ * An output variable and a list of its values.
  */
 typedef struct
 {
   RPT_reporting_t *output;
-  char *name;
   GArray *values;
 }
 output_values_t;
@@ -69,18 +68,15 @@ output_values_t;
  * Creates an output_values_t object.
  *
  * @param output an output variable. The pointer will be copied.
- * @param name the output variable's name. The string will be duplicated so
- *   the original can be freed after the call to this function.
  * @return an output_values_t object. Free it with free_output_values().
  */
 static output_values_t *
-new_output_values (RPT_reporting_t *output, char *name)
+new_output_values (RPT_reporting_t *output)
 {
   output_values_t *output_values;
 
   output_values = g_new (output_values_t, 1);  
   output_values->output = output;
-  output_values->name = g_strdup (name);
   switch (RPT_reporting_get_type (output))
   {
     case RPT_integer:
@@ -113,7 +109,6 @@ free_output_values (gpointer data)
   output_values = (output_values_t *) data;
   if (output_values != NULL)
     {
-      g_free (output_values->name);
       g_array_free (output_values->values, /* free_segment = */ TRUE);
       g_free (output_values);
     }
@@ -185,10 +180,8 @@ handle_declaration_of_outputs_event (struct adsm_module_t_ * self,
                                      EVT_declaration_of_outputs_event_t *event)
 {
   local_data_t *local_data;
-  unsigned int i, j;
+  unsigned int i;
   RPT_reporting_t *output;
-  GArray *subvars;
-  RPT_reporting_flattened_t *subvar;
 
   #if DEBUG
     g_debug ("----- ENTER handle_declaration_of_outputs_event (%s)", MODEL_NAME);
@@ -199,17 +192,8 @@ handle_declaration_of_outputs_event (struct adsm_module_t_ * self,
     {
       output = (RPT_reporting_t *) g_ptr_array_index (event->outputs, i);
 
-      /* Get the output in "flattened" form. */
-      subvars = RPT_reporting_flatten (output);
-            
-      for (j = 0; j < subvars->len; j++)
-        {
-          subvar = &g_array_index (subvars, RPT_reporting_flattened_t, j);
-          /* Add this sub-variable to this module's tracking list. */
-          g_ptr_array_add (local_data->output_values,
-                           new_output_values (subvar->reporting, subvar->name));
-        } /* end of loop over sub-variables within one output variable */
-      RPT_free_flattened_reporting (subvars);
+      /* Add this output variable to this module's tracking list. */
+      g_ptr_array_add (local_data->output_values, new_output_values (output));
 
     } /* end of loop over output variables in declaration event */
 
@@ -257,12 +241,12 @@ handle_end_of_day2_event (struct adsm_module_t_ * self,
         {
           output_value = g_ptr_array_index (local_data->output_values, i);
           output = output_value->output;
-          if (RPT_reporting_is_null (output, NULL))
+          if (output->is_null)
             continue;
           if (RPT_reporting_get_type (output) == RPT_integer)
-            value = (double) RPT_reporting_get_integer (output, NULL);
+            value = (double) RPT_reporting_get_integer (output);
           else if (RPT_reporting_get_type (output) == RPT_real)
-            value = RPT_reporting_get_real (output, NULL);
+            value = RPT_reporting_get_real (output);
           g_array_append_val (output_value->values, value);
         } /* end of loop over tracked output variables */
     } /* end of if last day */
@@ -418,7 +402,7 @@ print_table (local_data_t *local_data)
         }
 
       g_string_printf (buf, "%s,%d,%g,%g,%g,%g,%g,%g,%g,%g,%g,%g,%g\n",
-                       output_value->name, nvalues,
+                       output_value->output->name, nvalues,
                        mean, stddev, lo, hi,
                        p05, p10, p25, median, p75, p90, p95);
       g_io_channel_write_chars (local_data->channel, buf->str, 

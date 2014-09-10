@@ -64,22 +64,26 @@ double round (double x);
 typedef struct
 {
   GPtrArray *production_types;
-  RPT_reporting_t *num_units_infected;
-  RPT_reporting_t *num_units_infected_by_cause;
-  RPT_reporting_t *num_units_infected_by_prodtype;
-  RPT_reporting_t *num_units_infected_by_cause_and_prodtype;
-  RPT_reporting_t *cumul_num_units_infected;
-  RPT_reporting_t *cumul_num_units_infected_by_cause;
-  RPT_reporting_t *cumul_num_units_infected_by_prodtype;
-  RPT_reporting_t *cumul_num_units_infected_by_cause_and_prodtype;
-  RPT_reporting_t *num_animals_infected;
-  RPT_reporting_t *num_animals_infected_by_cause;
-  RPT_reporting_t *num_animals_infected_by_prodtype;
-  RPT_reporting_t *num_animals_infected_by_cause_and_prodtype;
-  RPT_reporting_t *cumul_num_animals_infected;
-  RPT_reporting_t *cumul_num_animals_infected_by_cause;
-  RPT_reporting_t *cumul_num_animals_infected_by_prodtype;
-  RPT_reporting_t *cumul_num_animals_infected_by_cause_and_prodtype;
+  RPT_reporting_t   *num_units_infected;
+  RPT_reporting_t  **num_units_infected_by_cause;
+  RPT_reporting_t  **num_units_infected_by_prodtype;
+  RPT_reporting_t ***num_units_infected_by_cause_and_prodtype;
+  RPT_reporting_t   *cumul_num_units_infected;
+  RPT_reporting_t  **cumul_num_units_infected_by_cause;
+  RPT_reporting_t  **cumul_num_units_infected_by_prodtype;
+  RPT_reporting_t ***cumul_num_units_infected_by_cause_and_prodtype;
+  RPT_reporting_t   *num_animals_infected;
+  RPT_reporting_t  **num_animals_infected_by_cause;
+  RPT_reporting_t  **num_animals_infected_by_prodtype;
+  RPT_reporting_t ***num_animals_infected_by_cause_and_prodtype;
+  RPT_reporting_t   *cumul_num_animals_infected;
+  RPT_reporting_t  **cumul_num_animals_infected_by_cause;
+  RPT_reporting_t  **cumul_num_animals_infected_by_prodtype;
+  RPT_reporting_t ***cumul_num_animals_infected_by_cause_and_prodtype;
+  GPtrArray *daily_outputs; /**< Daily outputs, in a list to make it easy to
+    zero them all at once. */
+  GPtrArray *cumul_outputs; /**< Cumulative outputs, is a list to make it easy
+    to zero them all at once. */
   gboolean detection_occurred;
   int detection_day;
   RPT_reporting_t *first_det_u_inf;
@@ -117,28 +121,13 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   #endif
 
   local_data = (local_data_t *) (self->model_data);
-  RPT_reporting_zero (local_data->num_units_infected);
-  RPT_reporting_zero (local_data->num_units_infected_by_cause);
-  RPT_reporting_zero (local_data->num_units_infected_by_prodtype);
-  RPT_reporting_zero (local_data->num_units_infected_by_cause_and_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_units_infected);
-  RPT_reporting_zero (local_data->cumul_num_units_infected_by_cause);
-  RPT_reporting_zero (local_data->cumul_num_units_infected_by_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_units_infected_by_cause_and_prodtype);
-  RPT_reporting_zero (local_data->num_animals_infected);
-  RPT_reporting_zero (local_data->num_animals_infected_by_cause);
-  RPT_reporting_zero (local_data->num_animals_infected_by_prodtype);
-  RPT_reporting_zero (local_data->num_animals_infected_by_cause_and_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_animals_infected);
-  RPT_reporting_zero (local_data->cumul_num_animals_infected_by_cause);
-  RPT_reporting_zero (local_data->cumul_num_animals_infected_by_prodtype);
-  RPT_reporting_zero (local_data->cumul_num_animals_infected_by_cause_and_prodtype);
+  g_ptr_array_foreach (local_data->cumul_outputs, RPT_reporting_zero_as_GFunc, NULL);
   local_data->detection_occurred = FALSE;
   /* The output variables for units and animals infected at first detection
    * have no value until there is a detection. */
-  RPT_reporting_set_null (local_data->first_det_u_inf, NULL);
-  RPT_reporting_set_null (local_data->first_det_a_inf, NULL);
-  RPT_reporting_set_null (local_data->ratio, NULL);
+  RPT_reporting_set_null (local_data->first_det_u_inf);
+  RPT_reporting_set_null (local_data->first_det_a_inf);
+  RPT_reporting_set_null (local_data->ratio);
   for (i = 0; i < local_data->nrecent_days * 2; i++)
     local_data->nrecent_infections[i] = 0;
 
@@ -176,14 +165,7 @@ handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event)
   /* Zero the daily counts. */
   if (event->day > 1)
     {
-      RPT_reporting_zero (local_data->num_units_infected);
-      RPT_reporting_zero (local_data->num_units_infected_by_cause);
-      RPT_reporting_zero (local_data->num_units_infected_by_prodtype);
-      RPT_reporting_zero (local_data->num_units_infected_by_cause_and_prodtype);
-      RPT_reporting_zero (local_data->num_animals_infected);
-      RPT_reporting_zero (local_data->num_animals_infected_by_cause);
-      RPT_reporting_zero (local_data->num_animals_infected_by_prodtype);
-      RPT_reporting_zero (local_data->num_animals_infected_by_cause_and_prodtype);
+      g_ptr_array_foreach (local_data->daily_outputs, RPT_reporting_zero_as_GFunc, NULL);
     }
 
   /* Move the pointer for the current day's infection count ahead. */
@@ -238,7 +220,7 @@ handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event)
    * 2 weeks have passed. */
   if (event->day >= (local_data->nrecent_days * 2) && local_data->denominator > 0)
     RPT_reporting_set_real (local_data->ratio,
-                            1.0 * local_data->numerator / local_data->denominator, NULL);
+                            1.0 * local_data->numerator / local_data->denominator);
 
 #if DEBUG
   g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
@@ -279,13 +261,11 @@ handle_detection_event (struct adsm_module_t_ *self,
        * variables. */
       RPT_reporting_set_integer (
         local_data->first_det_u_inf,
-        RPT_reporting_get_integer(local_data->cumul_num_units_infected, NULL),
-        NULL
+        RPT_reporting_get_integer(local_data->cumul_num_units_infected)
       );
-      RPT_reporting_set_integer (
+      RPT_reporting_set_real (
         local_data->first_det_a_inf,
-        RPT_reporting_get_integer(local_data->cumul_num_animals_infected, NULL),
-        NULL
+        RPT_reporting_get_real(local_data->cumul_num_animals_infected)
       );
     }
 
@@ -308,10 +288,11 @@ handle_infection_event (struct adsm_module_t_ *self, EVT_infection_event_t * eve
 {
   local_data_t *local_data;
   UNT_unit_t *infecting_unit, *infected_unit;
-  const char *cause;
-  const char *drill_down_list[3] = { NULL, NULL, NULL };
-  unsigned int count;
   UNT_infect_t update;
+  ADSM_contact_type cause;
+  UNT_production_type_t prodtype;
+  double nanimals;
+  unsigned int count;
 #if DEBUG
   GString *s;
 #endif
@@ -324,7 +305,9 @@ handle_infection_event (struct adsm_module_t_ *self, EVT_infection_event_t * eve
   infecting_unit = event->infecting_unit;
   infected_unit = event->infected_unit;
 
-  cause = ADSM_contact_type_abbrev[event->contact_type];
+  cause = event->contact_type;
+  prodtype = infected_unit->production_type;
+  nanimals = (double)(infected_unit->size);
 
   update.unit_index = infected_unit->index;
   update.infection_source_type = event->contact_type;
@@ -347,36 +330,31 @@ handle_infection_event (struct adsm_module_t_ *self, EVT_infection_event_t * eve
    * infnUIni broken down by production type. */
   if (event->contact_type != ADSM_InitiallyInfected)
     {
-      RPT_reporting_add_integer  (local_data->num_units_infected, 1, NULL);
-      RPT_reporting_add_integer1 (local_data->num_units_infected_by_prodtype, 1, infected_unit->production_type_name);
-      RPT_reporting_add_integer  (local_data->num_animals_infected, infected_unit->size, NULL);
-      RPT_reporting_add_integer1 (local_data->num_animals_infected_by_prodtype, infected_unit->size, infected_unit->production_type_name);
-      RPT_reporting_add_integer  (local_data->cumul_num_units_infected, 1, NULL);
-      RPT_reporting_add_integer1 (local_data->cumul_num_units_infected_by_prodtype, 1, infected_unit->production_type_name);
-      RPT_reporting_add_integer  (local_data->cumul_num_animals_infected, infected_unit->size, NULL);
-      RPT_reporting_add_integer1 (local_data->cumul_num_animals_infected_by_prodtype, infected_unit->size, infected_unit->production_type_name);
+      RPT_reporting_add_integer (local_data->num_units_infected, 1);
+      RPT_reporting_add_integer (local_data->num_units_infected_by_prodtype[prodtype], 1);
+      RPT_reporting_add_real (local_data->num_animals_infected, nanimals);
+      RPT_reporting_add_real (local_data->num_animals_infected_by_prodtype[prodtype], nanimals);
+      RPT_reporting_add_integer (local_data->cumul_num_units_infected, 1);
+      RPT_reporting_add_integer (local_data->cumul_num_units_infected_by_prodtype[prodtype], 1);
+      RPT_reporting_add_real (local_data->cumul_num_animals_infected, nanimals);
+      RPT_reporting_add_real (local_data->cumul_num_animals_infected_by_prodtype[prodtype], nanimals);
     }
-  RPT_reporting_add_integer1 (local_data->num_units_infected_by_cause, 1, cause);
-  RPT_reporting_add_integer1 (local_data->num_animals_infected_by_cause, infected_unit->size, cause);
-  RPT_reporting_add_integer1 (local_data->cumul_num_units_infected_by_cause, 1, cause);
-  RPT_reporting_add_integer1 (local_data->cumul_num_animals_infected_by_cause, infected_unit->size, cause);
-  drill_down_list[0] = cause;
-  drill_down_list[1] = infected_unit->production_type_name;
-  RPT_reporting_add_integer (local_data->num_units_infected_by_cause_and_prodtype, 1, drill_down_list);
-  RPT_reporting_add_integer (local_data->num_animals_infected_by_cause_and_prodtype, infected_unit->size,
-                             drill_down_list);
-  RPT_reporting_add_integer (local_data->cumul_num_units_infected_by_cause_and_prodtype, 1,
-                             drill_down_list);
-  RPT_reporting_add_integer (local_data->cumul_num_animals_infected_by_cause_and_prodtype,
-                             infected_unit->size, drill_down_list);
+  RPT_reporting_add_integer (local_data->num_units_infected_by_cause[cause], 1);
+  RPT_reporting_add_real (local_data->num_animals_infected_by_cause[cause], nanimals);
+  RPT_reporting_add_integer (local_data->cumul_num_units_infected_by_cause[cause], 1);
+  RPT_reporting_add_real (local_data->cumul_num_animals_infected_by_cause[cause], nanimals);
+  RPT_reporting_add_integer (local_data->num_units_infected_by_cause_and_prodtype[cause][prodtype], 1);
+  RPT_reporting_add_real (local_data->num_animals_infected_by_cause_and_prodtype[cause][prodtype], nanimals);
+  RPT_reporting_add_integer (local_data->cumul_num_units_infected_by_cause_and_prodtype[cause][prodtype], 1);
+  RPT_reporting_add_real (local_data->cumul_num_animals_infected_by_cause_and_prodtype[cause][prodtype], nanimals);
 
   /* Infections that occur on the same day as the first detection are included
    * in the value of the firstDet output variables. */
   if (local_data->detection_occurred
       && (local_data->detection_day == event->day))
     {
-      RPT_reporting_add_integer (local_data->first_det_u_inf, 1, NULL);
-      RPT_reporting_add_integer (local_data->first_det_a_inf, infected_unit->size, NULL);
+      RPT_reporting_add_integer (local_data->first_det_u_inf, 1);
+      RPT_reporting_add_real (local_data->first_det_a_inf, nanimals);
     }
 
   /* Update the ratio of recent infections to infections before that.  Note
@@ -394,20 +372,19 @@ handle_infection_event (struct adsm_module_t_ *self, EVT_infection_event_t * eve
       if (local_data->denominator > 0)
         {
           RPT_reporting_set_real (local_data->ratio,
-                                  1.0 * (local_data->numerator + count) / local_data->denominator,
-                                  NULL);
+                                  1.0 * (local_data->numerator + count) / local_data->denominator);
 #if DEBUG
           g_string_append_printf (s, ", ratio %u/%u = %g",
                                   local_data->numerator + count,
                                   local_data->denominator,
-                                  RPT_reporting_get_real (local_data->ratio, NULL));
+                                  RPT_reporting_get_real (local_data->ratio));
 #endif
         }
       else
         {
 #if DEBUG
           g_string_append_printf (s, ", denominator=0, ratio remains at old value of %g",
-                                  RPT_reporting_get_real (local_data->ratio, NULL));
+                                  RPT_reporting_get_real (local_data->ratio));
 #endif
           ;
         }
@@ -520,6 +497,8 @@ local_free (struct adsm_module_t_ *self)
 
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
+  g_ptr_array_free (local_data->daily_outputs, /* free_seg = */ TRUE);
+  g_ptr_array_free (local_data->cumul_outputs, /* free_seg = */ TRUE);
   g_free (local_data->nrecent_infections);
   g_free (local_data);
   g_ptr_array_free (self->outputs, /* free_seg = */ TRUE); /* also frees all output variables */
@@ -549,8 +528,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_Detection,
     0
   };
-  guint n, i, j;
-  char *prodtype_name;
+  guint nprodtypes;
+  UNT_production_type_t prodtype;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -561,7 +540,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
+  self->outputs = g_ptr_array_new();
   self->model_data = local_data;
   self->run = run;
   self->is_listening_for = adsm_model_is_listening_for;
@@ -572,96 +551,124 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
-  local_data->num_units_infected =
-    RPT_new_reporting ("infnUAll", RPT_integer);
-  local_data->num_units_infected_by_cause =
-    RPT_new_reporting ("infnU", RPT_group);
-  local_data->num_units_infected_by_prodtype =
-    RPT_new_reporting ("infnU", RPT_group);
-  local_data->num_units_infected_by_cause_and_prodtype =
-    RPT_new_reporting ("infnU", RPT_group);
-  local_data->cumul_num_units_infected =
-    RPT_new_reporting ("infcUAll", RPT_integer);
-  local_data->cumul_num_units_infected_by_cause =
-    RPT_new_reporting ("infcU", RPT_group);
-  local_data->cumul_num_units_infected_by_prodtype =
-    RPT_new_reporting ("infcU", RPT_group);
-  local_data->cumul_num_units_infected_by_cause_and_prodtype =
-    RPT_new_reporting ("infcU", RPT_group);
-  local_data->num_animals_infected =
-    RPT_new_reporting ("infnAAll", RPT_integer);
-  local_data->num_animals_infected_by_cause =
-    RPT_new_reporting ("infnA", RPT_group);
-  local_data->num_animals_infected_by_prodtype =
-    RPT_new_reporting ("infnA", RPT_group);
-  local_data->num_animals_infected_by_cause_and_prodtype =
-    RPT_new_reporting ("infnA", RPT_group);
-  local_data->cumul_num_animals_infected =
-    RPT_new_reporting ("infcAAll", RPT_integer);
-  local_data->cumul_num_animals_infected_by_cause =
-    RPT_new_reporting ("infcA", RPT_group);
-  local_data->cumul_num_animals_infected_by_prodtype =
-    RPT_new_reporting ("infcA", RPT_group);
-  local_data->cumul_num_animals_infected_by_cause_and_prodtype =
-    RPT_new_reporting ("infcA", RPT_group);
-  local_data->first_det_u_inf =
-    RPT_new_reporting ("firstDetUInfAll", RPT_integer);
-  local_data->first_det_a_inf =
-    RPT_new_reporting ("firstDetAInfAll", RPT_integer);
-  local_data->ratio = RPT_new_reporting ("ratio", RPT_real);
-  g_ptr_array_add (self->outputs, local_data->num_units_infected);
-  g_ptr_array_add (self->outputs, local_data->num_units_infected_by_cause);
-  g_ptr_array_add (self->outputs, local_data->num_units_infected_by_prodtype);
-  g_ptr_array_add (self->outputs, local_data->num_units_infected_by_cause_and_prodtype);
-  g_ptr_array_add (self->outputs, local_data->cumul_num_units_infected);
-  g_ptr_array_add (self->outputs, local_data->cumul_num_units_infected_by_cause);
-  g_ptr_array_add (self->outputs, local_data->cumul_num_units_infected_by_prodtype);
-  g_ptr_array_add (self->outputs, local_data->cumul_num_units_infected_by_cause_and_prodtype);
-  g_ptr_array_add (self->outputs, local_data->num_animals_infected);
-  g_ptr_array_add (self->outputs, local_data->num_animals_infected_by_cause);
-  g_ptr_array_add (self->outputs, local_data->num_animals_infected_by_prodtype);
-  g_ptr_array_add (self->outputs, local_data->num_animals_infected_by_cause_and_prodtype);
-  g_ptr_array_add (self->outputs, local_data->cumul_num_animals_infected);
-  g_ptr_array_add (self->outputs, local_data->cumul_num_animals_infected_by_cause);
-  g_ptr_array_add (self->outputs, local_data->cumul_num_animals_infected_by_prodtype);
-  g_ptr_array_add (self->outputs, local_data->cumul_num_animals_infected_by_cause_and_prodtype);
-  g_ptr_array_add (self->outputs, local_data->first_det_u_inf);
-  g_ptr_array_add (self->outputs, local_data->first_det_a_inf);
-  g_ptr_array_add (self->outputs, local_data->ratio);
-
-  /* Set the reporting frequency for the output variables. */
-
-  /* Initialize the output variables. */
+  local_data->daily_outputs = g_ptr_array_new();
+  local_data->cumul_outputs = g_ptr_array_new();
   local_data->production_types = units->production_type_names;
-  n = local_data->production_types->len;
-  for (i = 0; i < n; i++)
+  nprodtypes = local_data->production_types->len;
+  {
+    RPT_bulk_create_t outputs[] = {
+      { &local_data->num_units_infected, "infnUAll", RPT_integer,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->num_units_infected_by_cause, "infnU%s", RPT_integer,
+        RPT_CharArray, ADSM_contact_type_abbrev, ADSM_NCONTACT_TYPES,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->num_units_infected_by_prodtype, "infnU%s", RPT_integer,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->num_units_infected_by_cause_and_prodtype, "infnU%s%s", RPT_integer,
+        RPT_CharArray, ADSM_contact_type_abbrev, ADSM_NCONTACT_TYPES,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->cumul_num_units_infected, "infcUAll", RPT_integer,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->cumul_num_units_infected_by_cause, "infcU%s", RPT_integer,
+        RPT_CharArray, ADSM_contact_type_abbrev, ADSM_NCONTACT_TYPES,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->cumul_num_units_infected_by_prodtype, "infcU%s", RPT_integer,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->cumul_num_units_infected_by_cause_and_prodtype, "infcU%s%s", RPT_integer,
+        RPT_CharArray, ADSM_contact_type_abbrev, ADSM_NCONTACT_TYPES,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->num_animals_infected, "infnAAll", RPT_real,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->num_animals_infected_by_cause, "infnA%s", RPT_real,
+        RPT_CharArray, ADSM_contact_type_abbrev, ADSM_NCONTACT_TYPES,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->num_animals_infected_by_prodtype, "infnA%s", RPT_real,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->num_animals_infected_by_cause_and_prodtype, "infnA%s%s", RPT_real,
+        RPT_CharArray, ADSM_contact_type_abbrev, ADSM_NCONTACT_TYPES,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        self->outputs, local_data->daily_outputs },
+
+      { &local_data->cumul_num_animals_infected, "infcAAll", RPT_real,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->cumul_num_animals_infected_by_cause, "infcA%s", RPT_real,
+        RPT_CharArray, ADSM_contact_type_abbrev, ADSM_NCONTACT_TYPES,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->cumul_num_animals_infected_by_prodtype, "infcA%s", RPT_real,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->cumul_num_animals_infected_by_cause_and_prodtype, "infcA%s%s", RPT_real,
+        RPT_CharArray, ADSM_contact_type_abbrev, ADSM_NCONTACT_TYPES,
+        RPT_GPtrArray, local_data->production_types, nprodtypes,
+        self->outputs, local_data->cumul_outputs },
+
+      { &local_data->first_det_u_inf, "firstDetUInfAll", RPT_integer,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, NULL },
+
+      { &local_data->first_det_a_inf, "firstDetAInfAll", RPT_real,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, NULL },
+
+      { &local_data->ratio, "ratio", RPT_real,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, NULL },
+
+      { NULL }
+    };  
+    RPT_bulk_create (outputs);
+  }
+
+  /* Dispose of a few output variables we aren't interested in, to keep the
+   * output neater. */
+  g_ptr_array_remove_fast (self->outputs, local_data->num_units_infected_by_cause[ADSM_UnspecifiedInfectionType] );
+  g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_infected_by_cause[ADSM_UnspecifiedInfectionType] );
+  g_ptr_array_remove_fast (self->outputs, local_data->num_animals_infected_by_cause[ADSM_UnspecifiedInfectionType] );
+  g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_infected_by_cause[ADSM_UnspecifiedInfectionType] );
+  for (prodtype = 0; prodtype < nprodtypes; prodtype++)
     {
-      prodtype_name = (char *) g_ptr_array_index (local_data->production_types, i);
-      RPT_reporting_add_integer1 (local_data->num_units_infected_by_prodtype, 0, prodtype_name);
-      RPT_reporting_add_integer1 (local_data->cumul_num_units_infected_by_prodtype, 0, prodtype_name);
-      RPT_reporting_add_integer1 (local_data->num_animals_infected_by_prodtype, 0, prodtype_name);
-      RPT_reporting_add_integer1 (local_data->cumul_num_animals_infected_by_prodtype, 0, prodtype_name);
-    }
-  for (i = 0; i < ADSM_NCONTACT_TYPES; i++)
-    {
-      const char *cause;
-      const char *drill_down_list[3] = { NULL, NULL, NULL };
-      if ((ADSM_contact_type)i == ADSM_UnspecifiedInfectionType)
-        continue;
-      cause = ADSM_contact_type_abbrev[i]; 
-      RPT_reporting_add_integer1 (local_data->num_units_infected_by_cause, 0, cause);
-      RPT_reporting_add_integer1 (local_data->cumul_num_units_infected_by_cause, 0, cause);
-      RPT_reporting_add_integer1 (local_data->num_animals_infected_by_cause, 0, cause);
-      RPT_reporting_add_integer1 (local_data->cumul_num_animals_infected_by_cause, 0, cause);
-      drill_down_list[0] = cause;
-      for (j = 0; j < n; j++)
-        {
-          drill_down_list[1] = (char *) g_ptr_array_index (local_data->production_types, j);
-          RPT_reporting_add_integer (local_data->num_units_infected_by_cause_and_prodtype, 0, drill_down_list);
-          RPT_reporting_add_integer (local_data->cumul_num_units_infected_by_cause_and_prodtype, 0, drill_down_list);
-          RPT_reporting_add_integer (local_data->num_animals_infected_by_cause_and_prodtype, 0, drill_down_list);
-          RPT_reporting_add_integer (local_data->cumul_num_animals_infected_by_cause_and_prodtype, 0, drill_down_list);
-        }
+      g_ptr_array_remove_fast (self->outputs, local_data->num_units_infected_by_cause_and_prodtype[ADSM_UnspecifiedInfectionType][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_infected_by_cause_and_prodtype[ADSM_UnspecifiedInfectionType][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->num_animals_infected_by_cause_and_prodtype[ADSM_UnspecifiedInfectionType][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_infected_by_cause_and_prodtype[ADSM_UnspecifiedInfectionType][prodtype] );
     }
 
   /* A list to store the number of new infections on each day for the recent

@@ -82,6 +82,7 @@ to be in the py33 virtual env.  That only needs to be done once.
     cd ..
     python manage.py collectstatic
     python manage.py runproductionserver --serve_static=collect --pid_file=server.pid --port=8080 
+    #sudo  iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080  # use this if the server crashes
 
 ##OS - specific Branches
 _Branches: Windows, Linux, Mac-OSX_  
@@ -106,6 +107,37 @@ Never merge from OS specific branches back into master.  Changes made in these b
         wget http://python-distribute.org/distribute_setup.py -O - | python
         easy_insatll pip
 
-###CX_Freeze
-only necessary for creating executables https://pypi.python.org/pypi/cx_Freeze
-Needed to edit C:\Python33\Scripts\cxfreeze and csfreeze-quickstart to point to correct interpreter!
+##Updating the ADSM Executable:
+The production server already has the code checked out (Linux branch) and all
+of the libraries required by ADSM are installed.
+
+To update the executable:
+
+    cd SpreadModel
+    git pull
+    cd CEngine
+    sh bootstrap
+    ./configure --disable-debug
+    make
+
+`make` will will fail on a `dia: command not found` error when it gets to the SpreadModel/CEngine/doc/diagrams directory.  That’s OK: at this point, the executable is built, and you are done.
+
+##Building Distributable
+    Required Items for PyInstaller:
+        http://sourceforge.net/projects/pywin32/  # For Windows only. MAKE SURE these go into your virtualenv!
+        ldd, objdump  # For Linux only
+        Xcode  # For OS X only
+
+    pip install pyinstaller
+
+    For the Chromium window, we are using the Chromium Embedded Framework. Compiling it is a massive pain,
+    but thankfully Adobe hosts and maintains a site, cefbuilds.com, which has the compile chain setup in as a project per OS platform.
+
+    I pulled the 64bit projects for each OS from the 2062 Branch on that site.
+        Note, the Windows version requires VS2013
+
+    From here, I modified the 'cefsimple' application to launch http://localhost:8000, changed the window names, and disabled right clicking.
+    Compile that project as x64 Release and put the output in the Chromium folder for the OS Branch.
+
+    The CEF Source was not added to the repo as it won't accept merges from the Google CEF Repo in the Project format made by Adobe.
+    Also because this should really only be a one time thing to ever happen. However, the notes are here in case there is a major security hole that needs to be recompiled for.

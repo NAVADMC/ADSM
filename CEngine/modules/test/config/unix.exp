@@ -14,7 +14,7 @@ if ![info exists epsilon] then {
 	set epsilon 0.0005
 }
 
-match_max -d 20480
+match_max -d 32768
 
 
 

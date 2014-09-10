@@ -17,6 +17,32 @@ var many_to_many_widget;
     };
 })(jQuery);
 
+
+    
+check_disable_spread_checboxes = function(){
+    var elements = $('table').first().find('tr:first-child th:nth-child(n+3)')
+    $(elements).each(function(index){
+        var active = $(this).find('input').prop('checked');
+        var children = $('table tbody tr:nth-child(n) >*:nth-child('+(index+3)+') *, thead tr:nth-child(2) td:nth-child('+(index+3)+') *');
+        $(children).each(function(){
+            if(active){
+                $(this).removeAttr('disabled')
+            } else {
+                $(this).attr('disabled', 'disabled')
+            }
+        })
+    });
+    var data = {}; 
+    $(elements).each(function(index){
+        var field_name = 'include_'+ $(this).text().replace(/ /g, '_').toLowerCase()
+        var active = $(this).find('input').prop('checked');
+        data[field_name] = active;
+    });
+    $.post('/setup/IncludeSpreads/', data);
+                
+}
+
+
 function headerify_columns1_2() {
     $('tbody tr td:nth-child(-n+2)').replaceWith(function (i, html) {
         return '<th>' + html + '</th>';
@@ -110,18 +136,23 @@ form_state = (function(form){
     };
 })($('section form'));
 
-
-
+    
 many_to_many_widget = (function(form_state){
     var my_table;
-    //jquery events
-        //select change
     //render
+    //this queries the current state of the Disease object through JSON and sets the checkbox stats to match
     function add_checkboxes_to_headers() {
-        my_table.find('tr:first-child th:nth-child(n+3)').each(function(index, element){
-            $(this).html(           
-                '<input type="checkbox"> ' + $(this).text()
-             );
+        $.get('/setup/IncludeSpreads/', function(data){
+            my_table.find('tr:first-child th:nth-child(n+3)').each(function(index){
+                var field_name = 'include_'+ $(this).text().replace(/ /g, '_').toLowerCase() 
+                var myInput = $('<input type="checkbox" name="' + field_name + '">');
+                $(this).html(
+                    $('<label class="checkbox">' + $(this).text() + '</label>').prepend(myInput)
+                );
+                myInput.prop('checked', data[field_name]);
+                myInput.on('change', check_disable_spread_checboxes);
+            });
+            check_disable_spread_checboxes();
         });
     }
     
@@ -195,14 +226,14 @@ many_to_many_widget = (function(form_state){
 
     var render = function(){
         my_table = $('<table>').append($('section form table thead').clone());
-        add_checkboxes_to_headers();
         insert_select_buttons();
         insert_bulk_selectors();
         my_table.append(create_body_rows())
         update_display_inputs() //called from events normally, but we want to initialize
 
-        $('section form').before(my_table); //finally, insert everything into the DOM
+        $('.panel').before(my_table); //finally, insert everything into the DOM
         my_table.find('tbody select').on('change', update_state_inputs)//register event listener
+        add_checkboxes_to_headers();
     };
 
     /*Creates a filter using any selected items from the first column and the matching row header

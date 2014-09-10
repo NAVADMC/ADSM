@@ -1,3 +1,5 @@
+@import "../fonts/source-sans-pro/source-sans-pro.css";
+
 body {
     font-family: 'Source Sans Pro', sans-serif;
     font-size: 10pt;
@@ -7,6 +9,10 @@ body {
 h1, h2, h3, h4 {
     font-size: 14pt;
     font-weight: 600;
+}
+
+.panel-heading h1, .panel-heading h2, .panel-heading h3{
+    margin: 0 0 5px 0;
 }
 
 section h1 {

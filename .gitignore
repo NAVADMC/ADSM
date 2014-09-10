@@ -1,6 +1,22 @@
 *.user
 *.autosave
 *.todo
+
+#################
+# SpreadModel Build
+#################
+build/
+dist/
+include/
+Lib/
+Scripts/
+*.manifest
+msvc*
+python27.dll
+pywintypes27.dll
+SpreadModel.exe
+sqlite3.dll
+
 #################
 ## C files
 #################
@@ -154,6 +170,7 @@ Desktop.ini
 #############
 
 *.py[co]
+*.pyd
 
 # Packages
 *.egg

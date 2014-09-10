@@ -238,6 +238,7 @@ class ControlProtocolForm(BaseForm):
 class DiseaseForm(BaseForm):
     class Meta(object):
         model = Disease
+        exclude = ['include_direct_contact_spread', 'include_indirect_contact_spread', 'include_airborne_spread']
 
 
 class DiseaseProgressionForm(BaseForm):
@@ -254,7 +255,9 @@ class DiseaseProgressionForm(BaseForm):
                    'disease_subclinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_clinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'disease_prevalence': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
+                   'disease_prevalence': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/',
+                                                            'data-visibility-context': 'use_within_unit_prevalence'
+                                                            })}
 
 
 class IndirectSpreadForm(BaseForm):
@@ -303,7 +306,9 @@ class DirectSpreadForm(BaseForm):
     class Meta(object):
         model = DirectSpread
         exclude = ['_spread_method_code', '_disease']
-        widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+        widgets = {'infection_probability': NumberInput(attrs={'data-visibility-context': 'use_within_unit_prevalence',
+                                                               'data-visibility-flipped': 'true'}),
+                   'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
@@ -318,8 +323,8 @@ class AirborneSpreadForm(BaseForm):
             'name',
             AppendedText('spread_1km_probability', 'example: 0.37 = 37%'),
             'max_distance',
-            'wind_direction_start',
-            'wind_direction_end',
+            'exposure_direction_start',
+            'exposure_direction_end',
             'transport_delay',
             submit_button()
         )
@@ -333,6 +338,8 @@ class AirborneSpreadForm(BaseForm):
         except (ObjectDoesNotExist, OperationalError):
             pass
         widgets = {'_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
+                   'max_distance': NumberInput(attrs={'data-visibility-context': 'use_airborne_exponential_decay',
+                                                      'data-visibility-flipped': 'true'}),  # only visible when exponential is false
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
                                                          'data-visibility-controller': 'transport_delay',

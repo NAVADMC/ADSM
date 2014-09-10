@@ -160,6 +160,8 @@ typedef struct
   UNT_unit_list_t *units;
   UNT_unit_t *unit;
   ZON_zone_list_t *zones;
+  EVT_event_queue_t *queue;
+  int day;
   ZON_zone_fragment_t **fragment_containing_focus;
   gpc_vertex_list *hole;
   ZON_zone_fragment_t *hole_fragment;
@@ -241,6 +243,11 @@ check_circle_and_rezone (int id, gpointer arg)
                                        unit->official_id, current_fragment->parent->name, current_level);
                     #endif
                     zones->membership[unit->index] = callback_data->fragment_containing_focus[i];
+                    EVT_event_enqueue (callback_data->queue,
+                                       EVT_new_unit_zone_change_event (unit,
+                                                                       current_fragment->parent,
+                                                                       zone,
+                                                                       callback_data->day));
 
                     zone_update.unit_index = unit->index;
                     zone_update.zone_level = zone->level;
@@ -346,6 +353,11 @@ check_poly_and_rezone (int id, gpointer arg)
                                    unit->official_id, current_fragment->parent->name, current_level);
                 #endif
                 zones->membership[unit->index] = callback_data->hole_fragment;
+                EVT_event_enqueue (callback_data->queue,
+                                   EVT_new_unit_zone_change_event (unit,
+                                                                   current_fragment->parent,
+                                                                   zone,
+                                                                   callback_data->day));
 
                 zone_update.unit_index = unit->index;
                 zone_update.zone_level = zone->level;
@@ -428,12 +440,14 @@ handle_request_for_zone_focus_event (struct adsm_module_t_ *self,
  * @param units a unit list.
  * @param zones a zone list.
  * @param event a midnight event.
+ * @param queue for any new events the module generates.
  */
 void
 handle_midnight_event (struct adsm_module_t_ *self,
                        UNT_unit_list_t * units,
                        ZON_zone_list_t * zones,
-                       EVT_midnight_event_t * event)
+                       EVT_midnight_event_t * event,
+                       EVT_event_queue_t *queue)
 {
   local_data_t *local_data;
   unsigned int nzones;
@@ -479,6 +493,11 @@ handle_midnight_event (struct adsm_module_t_ *self,
 
   local_data = (local_data_t *) (self->model_data);
 
+  callback_data.units = units;
+  callback_data.zones = zones;
+  callback_data.queue = queue;
+  callback_data.day = event->day;
+
   while (!g_queue_is_empty (local_data->pending_foci))
     {
       pending_focus = (UNT_unit_t *) g_queue_pop_head (local_data->pending_foci);
@@ -511,8 +530,6 @@ handle_midnight_event (struct adsm_module_t_ *self,
       /* First, draw the circles around the focus. */
       callback_data.x = x;
       callback_data.y = y;
-      callback_data.units = units;
-      callback_data.zones = zones;
       
       /* Find the distances to other units. */
       /* The search area should be the radius of the largest zone.  Remember
@@ -622,7 +639,7 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
       handle_request_for_zone_focus_event (self, &(event->u.request_for_zone_focus), zones);
       break;
     case EVT_Midnight:
-      handle_midnight_event(self, units, zones, &(event->u.midnight));
+      handle_midnight_event(self, units, zones, &(event->u.midnight), queue);
       break;
     default:
       g_error

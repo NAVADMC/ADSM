@@ -508,7 +508,10 @@ silent_log_handler (const gchar * log_domain, GLogLevelFlags log_level,
  * PACKAGE_VERSION, into major, minor, and release numbers.
  */
 static void
-split_version (const char *version, RPT_reporting_t *split)
+split_version (const char *version,
+               RPT_reporting_t *major_version,
+               RPT_reporting_t *minor_version,
+               RPT_reporting_t *release)
 {
   gchar **tokens;
   gchar **iter;
@@ -520,11 +523,11 @@ split_version (const char *version, RPT_reporting_t *split)
     {
       num = strtol (*iter, NULL, 10);
       if (i == 0)
-        RPT_reporting_set_integer1 (split, num, "major");
+        RPT_reporting_set_integer (major_version, num);
       else if (i == 1)
-        RPT_reporting_set_integer1 (split, num, "minor");
+        RPT_reporting_set_integer (minor_version, num);
       else
-        RPT_reporting_set_integer1 (split, num, "release");
+        RPT_reporting_set_integer (release, num);
     }
   g_strfreev (tokens);
 
@@ -633,21 +636,14 @@ default_projection (UNT_unit_list_t * units)
 
 
 
-#ifdef USE_SC_GUILIB
-DLL_API void
-run_sim_main (sqlite3 *scenario_db,
-              const char *output_dir, double fixed_rng_value, int verbosity, int seed,
-              int starting_iteration_number, char *production_type_file)
-#else
 DLL_API void
 run_sim_main (sqlite3 *scenario_db,
               const char *output_dir, double fixed_rng_value, int verbosity, int seed,
               int starting_iteration_number)
-#endif
 {
   unsigned int ndays, nruns, day, run, iteration_number;
   RPT_reporting_t *last_day_of_outbreak;
-  RPT_reporting_t *version;
+  RPT_reporting_t *major_version, *minor_version, *release;
   GPtrArray *reporting_vars;
   int nmodels = 0;
   adsm_module_t **models = NULL;
@@ -762,13 +758,16 @@ run_sim_main (sqlite3 *scenario_db,
 
   /* Initialize the reporting variables, and bundle them together so they can
    * easily be sent to a function for initialization. */
-  last_day_of_outbreak =
-    RPT_new_reporting ("outbreakDuration", RPT_integer);
-  version = RPT_new_reporting ("version", RPT_group);
-  split_version (PACKAGE_VERSION, version);
   reporting_vars = g_ptr_array_new ();
-  g_ptr_array_add (reporting_vars, last_day_of_outbreak);
-  g_ptr_array_add (reporting_vars, version);
+  g_ptr_array_add (reporting_vars,
+    last_day_of_outbreak = RPT_new_reporting ("outbreakDuration", RPT_integer));
+  g_ptr_array_add (reporting_vars,
+    major_version = RPT_new_reporting ("versionMajor", RPT_integer));
+  g_ptr_array_add (reporting_vars,
+    minor_version = RPT_new_reporting ("versionMinor", RPT_integer));
+  g_ptr_array_add (reporting_vars,
+    release = RPT_new_reporting ("versionRelease", RPT_integer));
+  split_version (PACKAGE_VERSION, major_version, minor_version, release);
 
   zones = ZON_new_zone_list (nunits);
 #ifdef USE_SC_GUILIB
@@ -950,7 +949,7 @@ run_sim_main (sqlite3 *scenario_db,
       _iteration.infectious_units = g_hash_table_new( g_direct_hash, g_direct_equal );
 
       /* Reset reporting variables. */
-      RPT_reporting_set_null (last_day_of_outbreak, NULL);
+      RPT_reporting_set_null (last_day_of_outbreak);
 
       active_infections_yesterday = TRUE;
       pending_actions = TRUE;
@@ -1092,7 +1091,7 @@ run_sim_main (sqlite3 *scenario_db,
                   if (NULL != adsm_outbreak_end)
                     adsm_outbreak_end (day);
 #endif
-                  RPT_reporting_set_integer (last_day_of_outbreak, day - 1, NULL);
+                  RPT_reporting_set_integer (last_day_of_outbreak, day - 1);
                   early_exit = TRUE;
                 }
             }
@@ -1219,7 +1218,9 @@ run_sim_main (sqlite3 *scenario_db,
 
   /* Clean up. */
   RPT_free_reporting (last_day_of_outbreak);
-  RPT_free_reporting (version);
+  RPT_free_reporting (major_version);
+  RPT_free_reporting (minor_version);
+  RPT_free_reporting (release);
   adsm_free_event_manager (manager);
   adsm_unload_modules (nmodels, models);
   RAN_free_generator (rng);

@@ -42,7 +42,6 @@ const char *EVT_event_type_name[] = {
   "BeforeAnySimulations",
   "OutputDirectory",
   "BeforeEachSimulation",
-  "DeclarationOfVaccinationReasons",
   "DeclarationOfVaccineDelay",
   "DeclarationOfOutputs",
   "NewDay", "Exposure", "Infection", "Detection",
@@ -55,6 +54,7 @@ const char *EVT_event_type_name[] = {
   "EndOfDay2",
   "Midnight",
   "UnitStateChange",
+  "UnitZoneChange",
   NULL
 };
 
@@ -161,56 +161,6 @@ EVT_before_each_simulation_event_to_string (EVT_before_each_simulation_event_t *
 {
   return g_strdup_printf ("<Before each simulation event iteration_number=%d>",
                           event->iteration_number);
-}
-
-
-
-/**
- * Creates a new "declaration of vaccination reasons" event.
- *
- * @param reasons an array of ordinary C strings giving the reasons for which
- *   a model may request vaccinations.  The pointer to the array is copied so
- *   the strings and the array structure itself should not be freed after
- *   calling this function.
- * @return a pointer to a newly-created EVT_event_t structure.
- */
-EVT_event_t *
-EVT_new_declaration_of_vaccination_reasons_event (GPtrArray * reasons)
-{
-  EVT_event_t *event;
-
-  event = g_new (EVT_event_t, 1);
-  event->type = EVT_DeclarationOfVaccinationReasons;
-  event->u.declaration_of_vaccination_reasons.reasons = reasons;
-  return event;
-}
-
-
-
-/**
- * Returns a text representation of a declaration of vaccination reasons event.
- *
- * @param event a declaration of vaccination reasons event.
- * @return a string.
- */
-char *
-EVT_declaration_of_vaccination_reasons_event_to_string
-  (EVT_declaration_of_vaccination_reasons_event_t * event)
-{
-  GString *s;
-  char *chararray;
-  int i;
-
-  s = g_string_new ("<Declaration of vaccination reasons event\n  reasons=");
-  for (i = 0; i < event->reasons->len; i++)
-    g_string_append_printf (s, i == 0 ? "\"%s\"" : ",\"%s\"",
-                            (char *) g_ptr_array_index (event->reasons, i));
-  g_string_append_c (s, '>');
-
-  /* don't return the wrapper object */
-  chararray = s->str;
-  g_string_free (s, FALSE);
-  return chararray;
 }
 
 
@@ -1411,6 +1361,52 @@ EVT_unit_state_change_event_to_string (EVT_unit_state_change_event_t * event)
 
 
 /**
+ * Creates a new "unit zone change" event.
+ *
+ * @return a pointer to a newly-created EVT_event_t structure.
+ */
+EVT_event_t *
+EVT_new_unit_zone_change_event (UNT_unit_t * unit,
+                                ZON_zone_t *old_zone,
+                                ZON_zone_t *new_zone,
+                                int day)
+{
+  EVT_event_t *event;
+
+  event = g_new (EVT_event_t, 1);
+  event->type = EVT_UnitZoneChange;
+  event->u.unit_zone_change.unit = unit;
+  event->u.unit_zone_change.old_zone = old_zone;
+  event->u.unit_zone_change.new_zone = new_zone;
+  event->u.unit_zone_change.day = day;
+
+  return event;
+}
+
+
+
+/**
+ * Returns a text representation of a unit zone change event.
+ *
+ * @param event a unit zone change event.
+ * @return a string.
+ */
+char *
+EVT_unit_zone_change_event_to_string (EVT_unit_zone_change_event_t * event)
+{
+  gchar *s;
+
+  s = g_strdup_printf ("<Unit zone change event unit=\"%s\" \"%s\"->\"%s\" day=%i>",
+                       event->unit->official_id,
+                       event->old_zone->name,
+                       event->new_zone->name,
+                       event->day);
+  return s;
+}
+
+
+
+/**
  * Deletes an event from memory.
  *
  * @param event an event.
@@ -1449,15 +1445,11 @@ EVT_free_event (EVT_event_t * event)
     case EVT_EndOfDay2:
     case EVT_Midnight:
     case EVT_UnitStateChange:
+    case EVT_UnitZoneChange:
       /* No dynamically-allocated parts to free. */
       break;
     case EVT_OutputDirectory:
       g_free (event->u.output_dir.output_dir);
-      break;
-    case EVT_DeclarationOfVaccinationReasons:
-      /* Note that we do not free the C strings in the array of vaccination
-       * reasons, because we assume they are static strings. */
-      g_ptr_array_free (event->u.declaration_of_vaccination_reasons.reasons, TRUE);
       break;
     case EVT_DeclarationOfOutputs:
       /* Note that we free the GPtrArray structure that holds the list of
@@ -1580,12 +1572,6 @@ EVT_event_to_string (EVT_event_t * event)
     case EVT_BeforeEachSimulation:
       s = EVT_before_each_simulation_event_to_string (&(event->u.before_each_simulation));
       break;
-    case EVT_DeclarationOfVaccinationReasons:
-      s =
-        EVT_declaration_of_vaccination_reasons_event_to_string (&
-                                                                (event->u.
-                                                                 declaration_of_vaccination_reasons));
-      break;
     case EVT_DeclarationOfVaccineDelay:
       s =
         EVT_declaration_of_vaccine_delay_event_to_string (&(event->u.declaration_of_vaccine_delay));
@@ -1658,6 +1644,9 @@ EVT_event_to_string (EVT_event_t * event)
       break;
     case EVT_UnitStateChange:
       s = EVT_unit_state_change_event_to_string (&(event->u.unit_state_change));
+      break;
+    case EVT_UnitZoneChange:
+      s = EVT_unit_zone_change_event_to_string (&(event->u.unit_zone_change));
       break;
     default:
       g_assert_not_reached ();

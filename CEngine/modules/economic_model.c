@@ -136,27 +136,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
     g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
   #endif
 
-  /*
-  RPT_reporting_zero (local_data->total_cost);
-  RPT_reporting_zero (local_data->appraisal_cost);
-  RPT_reporting_zero (local_data->euthanasia_cost);
-  RPT_reporting_zero (local_data->indemnification_cost);
-  RPT_reporting_zero (local_data->carcass_disposal_cost);
-  RPT_reporting_zero (local_data->cleaning_disinfecting_cost);
-  RPT_reporting_zero (local_data->vaccination_cost);
-  RPT_reporting_zero (local_data->surveillance_cost);
-  */
-  RPT_reporting_zero (local_data->cumul_total_cost);
-  RPT_reporting_zero (local_data->cumul_appraisal_cost);
-  RPT_reporting_zero (local_data->cumul_euthanasia_cost);
-  RPT_reporting_zero (local_data->cumul_indemnification_cost);
-  RPT_reporting_zero (local_data->cumul_carcass_disposal_cost);
-  RPT_reporting_zero (local_data->cumul_cleaning_disinfecting_cost);
-  RPT_reporting_zero (local_data->cumul_destruction_subtotal);
-  RPT_reporting_zero (local_data->cumul_vaccination_setup_cost);
-  RPT_reporting_zero (local_data->cumul_vaccination_cost);
-  RPT_reporting_zero (local_data->cumul_vaccination_subtotal);
-  RPT_reporting_zero (local_data->cumul_surveillance_cost);
+  g_ptr_array_foreach (self->outputs, RPT_reporting_zero_as_GFunc, NULL);
 
   if (local_data->vaccination_cost_params)
     {
@@ -232,11 +212,11 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
                 surveillance_cost_param[zone_index][unit->production_type] *
                 (double) (unit->size);
               /*
-              RPT_reporting_add_real (local_data->surveillance_cost, cost, NULL);
-              RPT_reporting_add_real (local_data->total_cost, cost, NULL);
+              RPT_reporting_add_real (local_data->surveillance_cost, cost);
+              RPT_reporting_add_real (local_data->total_cost, cost);
               */
-              RPT_reporting_add_real (local_data->cumul_surveillance_cost, cost, NULL);
-              RPT_reporting_add_real (local_data->cumul_total_cost, cost, NULL);
+              RPT_reporting_add_real (local_data->cumul_surveillance_cost, cost);
+              RPT_reporting_add_real (local_data->cumul_total_cost, cost);
             }
         }
     }
@@ -276,7 +256,7 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
 
       /* Fixed cost for the unit. */
       cost = params->vaccination_fixed;
-      RPT_reporting_add_real (local_data->cumul_vaccination_setup_cost, cost, NULL);
+      RPT_reporting_add_real (local_data->cumul_vaccination_setup_cost, cost);
       sum += cost;
 
       /* Per-animal cost. */
@@ -294,16 +274,16 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
               (params->capacity_used - params->baseline_capacity);
         }
       /*
-      RPT_reporting_add_real (local_data->vaccination_cost, cost, NULL);
+      RPT_reporting_add_real (local_data->vaccination_cost, cost);
       */
-      RPT_reporting_add_real (local_data->cumul_vaccination_cost, cost, NULL);
+      RPT_reporting_add_real (local_data->cumul_vaccination_cost, cost);
       sum += cost;
 
       /*
-      RPT_reporting_add_real (local_data->total_cost, cost, NULL);
+      RPT_reporting_add_real (local_data->total_cost, cost);
       */
-      RPT_reporting_add_real (local_data->cumul_vaccination_subtotal, sum, NULL);
-      RPT_reporting_add_real (local_data->cumul_total_cost, sum, NULL);
+      RPT_reporting_add_real (local_data->cumul_vaccination_subtotal, sum);
+      RPT_reporting_add_real (local_data->cumul_total_cost, sum);
     }
 
 #if DEBUG
@@ -342,33 +322,33 @@ handle_destruction_event (struct adsm_module_t_ *self, EVT_destruction_event_t *
       destruction_cost_data_t *params = local_data->destruction_cost_params[unit->production_type];
 
       cost = params->appraisal;
-      /* RPT_reporting_add_real (local_data->appraisal_cost, cost, NULL); */
-      RPT_reporting_add_real (local_data->cumul_appraisal_cost, cost, NULL);
+      /* RPT_reporting_add_real (local_data->appraisal_cost, cost); */
+      RPT_reporting_add_real (local_data->cumul_appraisal_cost, cost);
       sum += cost;
 
       cost = size * params->euthanasia;
-      /* RPT_reporting_add_real (local_data->euthanasia_cost, cost, NULL); */
-      RPT_reporting_add_real (local_data->cumul_euthanasia_cost, cost, NULL);
+      /* RPT_reporting_add_real (local_data->euthanasia_cost, cost); */
+      RPT_reporting_add_real (local_data->cumul_euthanasia_cost, cost);
       sum += cost;
 
       cost = size * params->indemnification;
-      /* RPT_reporting_add_real (local_data->indemnification_cost, cost, NULL); */
-      RPT_reporting_add_real (local_data->cumul_indemnification_cost, cost, NULL);
+      /* RPT_reporting_add_real (local_data->indemnification_cost, cost); */
+      RPT_reporting_add_real (local_data->cumul_indemnification_cost, cost);
       sum += cost;
 
       cost = size * params->carcass_disposal;
-      /* RPT_reporting_add_real (local_data->carcass_disposal_cost, cost, NULL); */
-      RPT_reporting_add_real (local_data->cumul_carcass_disposal_cost, cost, NULL);
+      /* RPT_reporting_add_real (local_data->carcass_disposal_cost, cost); */
+      RPT_reporting_add_real (local_data->cumul_carcass_disposal_cost, cost);
       sum += cost;
 
       cost = params->cleaning_disinfecting;
-      /* RPT_reporting_add_real (local_data->cleaning_disinfecting_cost, cost, NULL); */
-      RPT_reporting_add_real (local_data->cumul_cleaning_disinfecting_cost, cost, NULL);
+      /* RPT_reporting_add_real (local_data->cleaning_disinfecting_cost, cost); */
+      RPT_reporting_add_real (local_data->cumul_cleaning_disinfecting_cost, cost);
       sum += cost;
 
-      /* RPT_reporting_add_real (local_data->total_cost, sum, NULL); */
-      RPT_reporting_add_real (local_data->cumul_destruction_subtotal, sum, NULL);
-      RPT_reporting_add_real (local_data->cumul_total_cost, sum, NULL);
+      /* RPT_reporting_add_real (local_data->total_cost, sum); */
+      RPT_reporting_add_real (local_data->cumul_destruction_subtotal, sum);
+      RPT_reporting_add_real (local_data->cumul_total_cost, sum);
     }
 
 #if DEBUG

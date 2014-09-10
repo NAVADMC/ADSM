@@ -29,7 +29,7 @@
  */
 typedef enum
 {
-  RPT_integer, RPT_real, RPT_group, RPT_unknown_type, RPT_NTYPES
+  RPT_unknown_type, RPT_integer, RPT_real, RPT_NTYPES
 }
 RPT_type_t;
 extern const char *RPT_type_name[];
@@ -56,59 +56,65 @@ RPT_reporting_t;
 
 
 
+/**
+ * Types of arrays of subcategories (for bulk creation of output variables).
+ */
+typedef enum
+{
+  RPT_NoSubcategory, RPT_CharArray, RPT_GPtrArray
+}
+RPT_subcategory_type_t;
+
+
+
+/**
+ * A structure used in bulk creation of output variables.
+ */
+typedef struct
+{
+  gpointer loc;
+  const char *format;
+  RPT_type_t type;
+  RPT_subcategory_type_t subcategory1_type;
+  gpointer subcategory1_name;
+  guint subcategory1_count;
+  RPT_subcategory_type_t subcategory2_type;
+  gpointer subcategory2_name;
+  guint subcategory2_count;
+  GPtrArray *membership1;
+  GPtrArray *membership2;  
+}
+RPT_bulk_create_t;
+
+
+
 /* Prototypes. */
 
 RPT_reporting_t *RPT_new_reporting (const char *name, RPT_type_t);
 void RPT_free_reporting (RPT_reporting_t *);
 char *RPT_reporting_to_string (RPT_reporting_t *);
 char *RPT_reporting_value_to_string (RPT_reporting_t *, char *format);
-unsigned int RPT_reporting_var_count (RPT_reporting_t *);
-GPtrArray *RPT_reporting_names (RPT_reporting_t *);
-GPtrArray *RPT_reporting_values_as_strings (RPT_reporting_t *);
 int RPT_fprintf_reporting (FILE *, RPT_reporting_t *);
 
 #define RPT_printf_reporting(R) RPT_fprintf_reporting(stdout,R)
 
-void RPT_reporting_set_integer (RPT_reporting_t *, long, const char **);
-void RPT_reporting_set_integer1 (RPT_reporting_t *, long, const char *);
-void RPT_reporting_set_real (RPT_reporting_t *, double, const char **);
-void RPT_reporting_set_real1 (RPT_reporting_t *, double, const char *);
-void RPT_reporting_set_null (RPT_reporting_t *, const char **);
-void RPT_reporting_set_null1 (RPT_reporting_t *, const char *);
-void RPT_reporting_add_integer (RPT_reporting_t *, long, const char **);
-void RPT_reporting_add_integer1 (RPT_reporting_t *, long, const char *);
-void RPT_reporting_add_real (RPT_reporting_t *, double, const char **);
-void RPT_reporting_add_real1 (RPT_reporting_t *, double, const char *);
-#define RPT_reporting_sub_integer(R,I,C) RPT_reporting_add_integer(R,-(I),C)
-#define RPT_reporting_sub_integer1(R,I,C) RPT_reporting_add_integer1(R,-(I),C)
-#define RPT_reporting_sub_real(R,I,C) RPT_reporting_add_real(R,-(I),C)
-#define RPT_reporting_sub_real1(R,I,C) RPT_reporting_add_real1(R,-(I),C)
-void RPT_reporting_splice (RPT_reporting_t *, RPT_reporting_t *);
-void RPT_reporting_reset (RPT_reporting_t *);
+void RPT_reporting_set_integer (RPT_reporting_t *, long);
+void RPT_reporting_set_real (RPT_reporting_t *, double);
+void RPT_reporting_set_null (RPT_reporting_t *);
+void RPT_reporting_set_null_as_GFunc (gpointer data, gpointer user_data);
+void RPT_reporting_add_integer (RPT_reporting_t *, long);
+void RPT_reporting_add_real (RPT_reporting_t *, double);
+#define RPT_reporting_sub_integer(R,I) RPT_reporting_add_integer(R,-(I))
+#define RPT_reporting_sub_real(R,I) RPT_reporting_add_real(R,-(I))
 void RPT_reporting_zero (RPT_reporting_t *);
-gboolean RPT_reporting_is_null (RPT_reporting_t *, const char**);
-gboolean RPT_reporting_is_null1 (RPT_reporting_t *, const char*);
-long RPT_reporting_get_integer (RPT_reporting_t *, const char **);
-long RPT_reporting_get_integer1 (RPT_reporting_t *, const char *);
-double RPT_reporting_get_real (RPT_reporting_t *, const char **);
-double RPT_reporting_get_real1 (RPT_reporting_t *, const char *);
+void RPT_reporting_zero_as_GFunc (gpointer data, gpointer user_data);
+long RPT_reporting_get_integer (RPT_reporting_t *);
+double RPT_reporting_get_real (RPT_reporting_t *);
 
 gboolean RPT_reporting_due (RPT_reporting_t *, unsigned int day);
 RPT_type_t RPT_reporting_get_type (RPT_reporting_t *);
 RPT_reporting_t *RPT_clone_reporting (RPT_reporting_t *);
-
-/**
- * A struct used to deliver a "flattened" version of an output variable.
- */
-typedef struct
-{
-  char *name;
-  RPT_reporting_t *reporting;
-}
-RPT_reporting_flattened_t;
-
-GArray *RPT_reporting_flatten (RPT_reporting_t *);
-void RPT_free_flattened_reporting (GArray *);
+void RPT_bulk_create (RPT_bulk_create_t *);
 
 char *camelcase (char *, gboolean capitalize_first);
 

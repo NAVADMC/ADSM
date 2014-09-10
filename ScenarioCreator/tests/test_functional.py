@@ -141,7 +141,7 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
         um = RelationalFunction.objects.create(name="Unrestricted movement", x_axis_units="Days", y_axis_units="Percentage")
         RelationalPoint.objects.create(relational_function=um, x=0, y=1)
         RelationalPoint.objects.create(relational_function=um, x=100000, y=1)
-        fmd = Disease.objects.create(name='FMD', disease_description=u'Foot and Mouth Disease')
+        fmd = Disease.objects.create(name='FMD', disease_description=u'Foot and Mouth Disease', include_direct_contact_spread=True)
         prevalence = RelationalFunction.objects.create(name="Prevalence", x_axis_units="Days", y_axis_units="Percentage")
         RelationalPoint.objects.create(relational_function=prevalence, x=0, y=1)
         disease_progression = DiseaseProgression.objects.create(_disease=fmd,
@@ -178,13 +178,13 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
             movement_control=um)
         as1 = AirborneSpread.objects.create(name="Dairy Cattle Large",
             spread_1km_probability=0.1,
-            wind_direction_start=0,
-            wind_direction_end=360,
+            exposure_direction_start=0,
+            exposure_direction_end=360,
             max_distance=3)
         as2 = AirborneSpread.objects.create(name="Dairy Cattle Small",
             spread_1km_probability=0.05,
-            wind_direction_start=0,
-            wind_direction_end=360,
+            exposure_direction_start=0,
+            exposure_direction_end=360,
             max_distance=3)
 
     def test_edit_probability_via_modal(self):

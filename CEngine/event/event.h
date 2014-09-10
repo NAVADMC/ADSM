@@ -63,7 +63,6 @@ typedef enum
   EVT_BeforeAnySimulations,
   EVT_OutputDirectory,
   EVT_BeforeEachSimulation,
-  EVT_DeclarationOfVaccinationReasons,
   EVT_DeclarationOfVaccineDelay,
   EVT_DeclarationOfOutputs,
   EVT_NewDay, EVT_Exposure, EVT_Infection,
@@ -75,6 +74,7 @@ typedef enum
   EVT_EndOfDay2,
   EVT_Midnight,
   EVT_UnitStateChange,
+  EVT_UnitZoneChange,
   EVT_NEVENT_TYPES
 }
 EVT_event_type_t;
@@ -116,19 +116,6 @@ typedef struct
   int iteration_number;
 }
 EVT_before_each_simulation_event_t;
-
-
-
-/**
- * A "declaration of vaccination reasons" event.  Models that can request
- * vaccinations use this event to communicate the reason(s) they will supply
- * for the requests, so that other models may initialize counters, etc.
- */
-typedef struct
-{
-  GPtrArray *reasons; /**< array of pointers to ordinary C strings */
-}
-EVT_declaration_of_vaccination_reasons_event_t;
 
 
 
@@ -487,6 +474,18 @@ EVT_unit_state_change_event_t;
 
 
 
+/** A "unit zone change" event. */
+typedef struct
+{
+  UNT_unit_t *unit;
+  ZON_zone_t *old_zone;
+  ZON_zone_t *new_zone;
+  int day; /**< simulation day on which the new zone membership applies */
+}
+EVT_unit_zone_change_event_t;
+
+
+
 /** A supertype for all events. */
 typedef struct
 {
@@ -496,7 +495,6 @@ typedef struct
     EVT_before_any_simulations_event_t before_any_simulations;
     EVT_output_dir_event_t output_dir;
     EVT_before_each_simulation_event_t before_each_simulation;
-    EVT_declaration_of_vaccination_reasons_event_t declaration_of_vaccination_reasons;
     EVT_declaration_of_vaccine_delay_event_t declaration_of_vaccine_delay;
     EVT_declaration_of_outputs_event_t declaration_of_outputs;
     EVT_new_day_event_t new_day;
@@ -521,6 +519,7 @@ typedef struct
     EVT_end_of_day2_event_t end_of_day2;
     EVT_midnight_event_t midnight;
     EVT_unit_state_change_event_t unit_state_change;
+    EVT_unit_zone_change_event_t unit_zone_change;
   }
   u;
 }
@@ -620,6 +619,10 @@ EVT_event_t *EVT_new_unit_state_change_event (UNT_unit_t *,
                                               UNT_state_t old_state,
                                               UNT_state_t new_state,
                                               int day);
+EVT_event_t *EVT_new_unit_zone_change_event (UNT_unit_t *,
+                                             ZON_zone_t *old_zone,
+                                             ZON_zone_t *new_zone,
+                                             int day);
 
 void EVT_free_event (EVT_event_t *);
 EVT_event_t *EVT_clone_event (EVT_event_t *);
