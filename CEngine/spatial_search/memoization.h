@@ -34,6 +34,28 @@ struct HerdLocation {
 	float fLon;	/* can be longitude or latitude */
 };
 
+typedef struct HerdNode HerdNode;
+struct HerdNode {
+	HerdLocation* psHerd;
+	HerdNode* psNext;
+};
+
+typedef struct InProximity InProximity;
+struct InProximity {
+	double dRadius;
+	HerdNode* psHerdList;
+	InProximity* psNext;
+};
+
+typedef struct {
+  uint uiNumHerds;
+  uint uiSize;
+  HerdLocation *pLatitudeList;
+  HerdLocation *pLongitudeList;
+  HerdLocation *pUnsortedList;
+  InProximity  **pAllHerds;
+} MemoizationTable;
+
 /************************** memoization functions ***********************************/
 
 
@@ -46,7 +68,7 @@ struct HerdLocation {
                   or "serchWithCirclesAndSquare, 
                   typically after herd list is created in main function "run_sim_main"  
 */
-void initCirclesAndSquaresList(UNT_unit_list_t* herds);
+MemoizationTable *initMemoization(UNT_unit_list_t* herds);
 
 typedef int (*SearchHitCallback)(int id, void* arg);
 /*
@@ -56,7 +78,8 @@ typedef int (*SearchHitCallback)(int id, void* arg);
 		   callback function to be called for a herd in given proximity (same as RTree argument)
 		   arguments for callback function
  */
-boolean searchWithMemoization (UNT_unit_t* pHerd, double dRadius,
+boolean searchWithMemoization (MemoizationTable *,
+			      UNT_unit_t* pHerd, double dRadius,
 			      SearchHitCallback pfCallback, void* pCallbackArgs);
 
 /*
@@ -66,7 +89,10 @@ boolean searchWithMemoization (UNT_unit_t* pHerd, double dRadius,
 		   callback function to be called for a herd in given proximity (same as RTree argument)
 		   arguments for callback function (same as RTree argument)
  */
-boolean searchWithCirclesAndSquares (UNT_unit_t* pHerd, double dRadius,
+boolean searchWithCirclesAndSquares (MemoizationTable *,
+				     UNT_unit_t* pHerd, double dRadius,
 				     SearchHitCallback pfCallback, void* pCallbackArgs);
+
+void deleteMemoization (MemoizationTable *);
 
 #endif /* _MEMOIZATION_H_ */

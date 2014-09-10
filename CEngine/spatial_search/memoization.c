@@ -1,3 +1,8 @@
+/**
+ * Changes to files provided by V. Basupalli on Mar 22 2010:
+ *
+ * - Wrapped formerly global variables in a struct named MemoizationTable.
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,20 +23,6 @@ struct GeoSquare {
 	float fTopLatitude;
 	float fBottomLatitude;
 };
-
-typedef struct HerdNode HerdNode;
-struct HerdNode {
-	HerdLocation* psHerd;
-	HerdNode* psNext;
-};
-
-typedef struct InProximity InProximity;
-struct InProximity {
-	double dRadius;
-	HerdNode* psHerdList;
-	InProximity* psNext;
-};
-
 
 typedef float (*GetLatLong) (HerdLocation* psList);
 HerdLocation getHerdLocation(UNT_unit_t* pHerd);
@@ -62,13 +53,6 @@ void quickSort(_IN_OUT_ HerdLocation* psList, _IN_ int iFirst,
 					_IN_ int iLast, _IN_ CompareLatLon fpCompare);
 
 /*************************** global variables ***************************************/
-
-static HerdLocation* g_pLatitudeList = NULL;
-static HerdLocation* g_pLongitudeList = NULL;
-static HerdLocation* g_pUnsortedList = NULL;
-
-static uint g_uiSize = 0;
-static InProximity** g_pAllHerds = NULL;
 
 static double cos0;
 static double cos180;
@@ -253,50 +237,40 @@ int findPosition(HerdLocation* psList, int uiStart, int uiEnd,
 }
 
 
-boolean initMemoization(uint uiNumHerds) {
+MemoizationTable *initMemoization (UNT_unit_list_t* herds) {
 
-  boolean ret_val = FALSE;
-
-  if (NULL == g_pAllHerds) {
-    g_pAllHerds = (InProximity**)malloc(uiNumHerds * sizeof(InProximity*));
-    memset(g_pAllHerds, 0, uiNumHerds * sizeof(InProximity*));
-  }
-
-  return ret_val;
-}
-
-void initCirclesAndSquaresList(UNT_unit_list_t* herds) {
-
+  MemoizationTable *memo;
   int nherds = UNT_unit_list_length(herds);
   HerdLocation herd;
   int i;
   UNT_unit_t* herd_t;
   uint herd_id;
 
+  memo = g_new (MemoizationTable, 1);
+  memo->uiNumHerds = nherds;
+
   /* for id 0, coz official id's start from 1 */ 
-
-  initMemoization(nherds+1);
-
-  g_pLatitudeList = (HerdLocation *)malloc(sizeof(HerdLocation) * (nherds+1));
-  g_pLongitudeList = (HerdLocation *)malloc(sizeof(HerdLocation) * (nherds+1));
-  g_pUnsortedList = (HerdLocation *)malloc(sizeof(HerdLocation) * (nherds+1));
-
-  g_uiSize = nherds+1;
+  memo->uiSize = nherds+1;
+  memo->pAllHerds = g_new0 (InProximity *, nherds+1);
+  memo->pLatitudeList = g_new0 (HerdLocation, nherds+1);
+  memo->pLongitudeList = g_new0 (HerdLocation, nherds+1);
+  memo->pUnsortedList = g_new0 (HerdLocation, nherds+1);
 
   for (i = 0; i < nherds; i++) {
     herd_t = (UNT_unit_t*)UNT_unit_list_get(herds, i);       
     herd = getHerdLocation(herd_t);
 
     herd_id = atoi(herd_t->official_id);
-    insertHerd(g_pLatitudeList, herd.fLat, herd.fLon, herd_id);
-    insertHerd(g_pLongitudeList, herd.fLat, herd.fLon, herd_id);
-    insertHerd(g_pUnsortedList, herd.fLat, herd.fLon, herd_id);
+    insertHerd(memo->pLatitudeList, herd.fLat, herd.fLon, herd_id);
+    insertHerd(memo->pLongitudeList, herd.fLat, herd.fLon, herd_id);
+    insertHerd(memo->pUnsortedList, herd.fLat, herd.fLon, herd_id);
   }
 
   /* start with index 1, because herd ids start with 1 */
-  quickSort(g_pLatitudeList + 1, 0, nherds-1, compareLat);
-  quickSort(g_pLongitudeList + 1, 0, nherds-1, compareLon);
+  quickSort(memo->pLatitudeList + 1, 0, nherds-1, compareLat);
+  quickSort(memo->pLongitudeList + 1, 0, nherds-1, compareLon);
 
+  return memo;
 }
 
 
@@ -344,23 +318,19 @@ void deleteProximityList(InProximity* pDistances) {
   }
 }
 
-boolean deleteMemoization(uint uiNumHerds) {
-  boolean ret_val = FALSE;
-
-  if (NULL != g_pAllHerds) {
-    uint i;
-
-    for (i = 0; i < uiNumHerds; i++) {
-      if (NULL != g_pAllHerds[i]) {
-	deleteProximityList(g_pAllHerds[i]);
-	g_pAllHerds[i] = NULL;
+void deleteMemoization(MemoizationTable *memo) {
+  if (memo != NULL)
+    {
+      uint i;
+      for (i = 0; i < memo->uiNumHerds; i++) {
+        if (NULL != memo->pAllHerds[i]) {
+          deleteProximityList(memo->pAllHerds[i]);
+        }
       }
+      g_free (memo->pAllHerds);
+      g_free (memo);
     }
-
-    free(g_pAllHerds);
-    g_pAllHerds = NULL;
-  }
-  return ret_val;
+  return;
 }
 
 
@@ -514,12 +484,13 @@ boolean getGeoSquareSmall(_IN_ HerdLocation sHerd, float uiRadius, GeoSquare* pS
 }
 
 /***************** functions of 01, only squares and circles *************/
-boolean searchWithCirclesAndSquares (UNT_unit_t* pHerd, double dRadius,
+boolean searchWithCirclesAndSquares (MemoizationTable *memo,
+			     UNT_unit_t* pHerd, double dRadius,
 			     SearchHitCallback pfCallback, void* pCallbackArgs) {
   boolean ret_val = FALSE;
   HerdLocation herd = getHerdLocation(pHerd);
 
-  searchInProximity (g_pLatitudeList, g_pLongitudeList, g_uiSize, 
+  searchInProximity (memo->pLatitudeList, memo->pLongitudeList, memo->uiSize, 
 		     &herd, dRadius, pfCallback, pCallbackArgs);
 
   return ret_val;
@@ -657,7 +628,8 @@ void splitHerdList2(HerdLocation* pHerd, InProximity* pDistList, double dRadius)
 }
 
 
-boolean inMemoization2(HerdLocation* pHerd, InProximity** pSrcHerds,
+boolean inMemoization2(MemoizationTable *memo,
+		      HerdLocation* pHerd, InProximity** pSrcHerds,
 		      double dRadius, SearchHitCallback pfCallback,
 		      void* pCallbackArgs)  {
   InProximity* src_list = *pSrcHerds;
@@ -698,8 +670,8 @@ boolean inMemoization2(HerdLocation* pHerd, InProximity** pSrcHerds,
 
   if (FALSE == ret_val) {		/* create new distance list */
     temp_list = createNewProxmityList(dRadius);
-    searchInProximity2 (g_pLatitudeList, g_pLongitudeList, 
-			g_uiSize, pHerd, dRadius, temp_list, 
+    searchInProximity2 (memo->pLatitudeList, memo->pLongitudeList, 
+			memo->uiSize, pHerd, dRadius, temp_list, 
 			prev_list->dRadius);
     processHerdList2(temp_list->psHerdList, pfCallback, pCallbackArgs);
     prev_list->psNext = temp_list;
@@ -709,22 +681,23 @@ boolean inMemoization2(HerdLocation* pHerd, InProximity** pSrcHerds,
 }
 
 /* search in circles and squares with memoization */
-boolean searchWithMemoization (UNT_unit_t* pHerd, double dRadius,
+boolean searchWithMemoization (MemoizationTable *memo,
+			             UNT_unit_t* pHerd, double dRadius,
 			             SearchHitCallback pfCallback, void* pCallbackArgs) {
 
   boolean ret_val = FALSE;
   HerdLocation herd = getHerdLocation(pHerd);
 
-  if (NULL == g_pAllHerds[herd.uiID]) {
-    g_pAllHerds[herd.uiID] = createNewProxmityList(dRadius);
+  if (NULL == memo->pAllHerds[herd.uiID]) {
+    memo->pAllHerds[herd.uiID] = createNewProxmityList(dRadius);
 
-    searchInProximity2 (g_pLatitudeList, g_pLongitudeList, g_uiSize,
-			&herd, dRadius, g_pAllHerds[herd.uiID], (double)0.0);
+    searchInProximity2 (memo->pLatitudeList, memo->pLongitudeList, memo->uiSize,
+			&herd, dRadius, memo->pAllHerds[herd.uiID], (double)0.0);
 
-    processHerdList2(g_pAllHerds[herd.uiID]->psHerdList, 
+    processHerdList2(memo->pAllHerds[herd.uiID]->psHerdList, 
 		     pfCallback, pCallbackArgs);
   }else {
-    inMemoization2(&herd, &g_pAllHerds[herd.uiID], dRadius,  
+    inMemoization2(memo, &herd, &(memo->pAllHerds[herd.uiID]), dRadius,  
 		   pfCallback, pCallbackArgs);
   }
 

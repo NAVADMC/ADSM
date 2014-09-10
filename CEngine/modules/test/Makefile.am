@@ -56,6 +56,7 @@ miniadsm_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/main_lo
   $(top_srcdir)/spatial_search/spatial_search.h \
   $(top_srcdir)/spatial_search/rTreeIndex.c $(top_srcdir)/spatial_search/rTreeIndex.h \
   $(top_srcdir)/spatial_search/ch2d.c $(top_srcdir)/spatial_search/ch2d.h \
+  $(top_srcdir)/spatial_search/memoization.c $(top_srcdir)/spatial_search/memoization.h \
   $(top_srcdir)/zone/zone.c $(top_srcdir)/zone/zone.h \
   $(top_srcdir)/wml/wml.c $(top_srcdir)/wml/wml.h \
   $(top_srcdir)/modules/module.h $(top_srcdir)/modules/module.c \
