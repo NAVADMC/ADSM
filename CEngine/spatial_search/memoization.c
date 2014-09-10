@@ -1,6 +1,8 @@
 /**
  * Changes to files provided by V. Basupalli on Mar 22 2010:
  *
+ * - Removed dependency on ADSM unit.h. Now just stores location associated
+ *   with an integer ID.
  * - Wrapped formerly global variables in a struct named MemoizationTable.
  */
 #include <stdio.h>
@@ -25,7 +27,6 @@ struct GeoSquare {
 };
 
 typedef float (*GetLatLong) (HerdLocation* psList);
-HerdLocation getHerdLocation(UNT_unit_t* pHerd);
 boolean getLatLong (_IN_ char *sString, _OUT_ float *pfLatitude, _OUT_ float *pfLongitude);
 float getLatitude(HerdLocation* psList);
 float getLongitude(HerdLocation* psList);
@@ -173,16 +174,6 @@ void printList (_IN_ HerdLocation* psList, _IN_ uint uiSize){
   }
 }
 
-HerdLocation getHerdLocation(UNT_unit_t* pHerd) {
-   HerdLocation herd;
-
-   herd.uiID = atoi(pHerd->official_id);
-   herd.fLat = pHerd->latitude;
-   herd.fLon = pHerd->longitude;
-
-   return herd;
-}
-
 boolean insertHerd (_IN_OUT_ HerdLocation* psHerdList,
 		    _IN_ float fLat,
 		    _IN_ float fLon,
@@ -237,38 +228,28 @@ int findPosition(HerdLocation* psList, int uiStart, int uiEnd,
 }
 
 
-MemoizationTable *initMemoization (UNT_unit_list_t* herds) {
+MemoizationTable *initMemoization (float *fLat, float *fLon, uint nherds) {
 
   MemoizationTable *memo;
-  int nherds = UNT_unit_list_length(herds);
-  HerdLocation herd;
-  int i;
-  UNT_unit_t* herd_t;
-  uint herd_id;
+  uint i;
 
   memo = g_new (MemoizationTable, 1);
   memo->uiNumHerds = nherds;
 
-  /* for id 0, coz official id's start from 1 */ 
-  memo->uiSize = nherds+1;
-  memo->pAllHerds = g_new0 (InProximity *, nherds+1);
-  memo->pLatitudeList = g_new0 (HerdLocation, nherds+1);
-  memo->pLongitudeList = g_new0 (HerdLocation, nherds+1);
-  memo->pUnsortedList = g_new0 (HerdLocation, nherds+1);
+  memo->uiSize = nherds;
+  memo->pAllHerds = g_new0 (InProximity *, nherds);
+  memo->pLatitudeList = g_new0 (HerdLocation, nherds);
+  memo->pLongitudeList = g_new0 (HerdLocation, nherds);
+  memo->pUnsortedList = g_new0 (HerdLocation, nherds);
 
   for (i = 0; i < nherds; i++) {
-    herd_t = (UNT_unit_t*)UNT_unit_list_get(herds, i);       
-    herd = getHerdLocation(herd_t);
-
-    herd_id = atoi(herd_t->official_id);
-    insertHerd(memo->pLatitudeList, herd.fLat, herd.fLon, herd_id);
-    insertHerd(memo->pLongitudeList, herd.fLat, herd.fLon, herd_id);
-    insertHerd(memo->pUnsortedList, herd.fLat, herd.fLon, herd_id);
+    insertHerd(memo->pLatitudeList, fLat[i], fLon[i], i);
+    insertHerd(memo->pLongitudeList, fLat[i], fLon[i], i);
+    insertHerd(memo->pUnsortedList, fLat[i], fLon[i], i);
   }
 
-  /* start with index 1, because herd ids start with 1 */
-  quickSort(memo->pLatitudeList + 1, 0, nherds-1, compareLat);
-  quickSort(memo->pLongitudeList + 1, 0, nherds-1, compareLon);
+  quickSort(memo->pLatitudeList, 0, nherds, compareLat);
+  quickSort(memo->pLongitudeList, 0, nherds, compareLon);
 
   return memo;
 }
@@ -485,10 +466,10 @@ boolean getGeoSquareSmall(_IN_ HerdLocation sHerd, float uiRadius, GeoSquare* pS
 
 /***************** functions of 01, only squares and circles *************/
 boolean searchWithCirclesAndSquares (MemoizationTable *memo,
-			     UNT_unit_t* pHerd, double dRadius,
+			     uint uiID, double dRadius,
 			     SearchHitCallback pfCallback, void* pCallbackArgs) {
   boolean ret_val = FALSE;
-  HerdLocation herd = getHerdLocation(pHerd);
+  HerdLocation herd = memo->pUnsortedList[uiID];
 
   searchInProximity (memo->pLatitudeList, memo->pLongitudeList, memo->uiSize, 
 		     &herd, dRadius, pfCallback, pCallbackArgs);
@@ -682,11 +663,11 @@ boolean inMemoization2(MemoizationTable *memo,
 
 /* search in circles and squares with memoization */
 boolean searchWithMemoization (MemoizationTable *memo,
-			             UNT_unit_t* pHerd, double dRadius,
+			             uint uiID, double dRadius,
 			             SearchHitCallback pfCallback, void* pCallbackArgs) {
 
   boolean ret_val = FALSE;
-  HerdLocation herd = getHerdLocation(pHerd);
+  HerdLocation herd = memo->pUnsortedList[uiID];
 
   if (NULL == memo->pAllHerds[herd.uiID]) {
     memo->pAllHerds[herd.uiID] = createNewProxmityList(dRadius);

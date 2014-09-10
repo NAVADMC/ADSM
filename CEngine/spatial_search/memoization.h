@@ -2,8 +2,6 @@
 #ifndef _MEMOIZATION_H_
 #define _MEMOIZATION_H_
 
-#include "unit.h"
-
 #define _IN_
 #define _IN_OUT_
 #define _OUT_
@@ -61,36 +59,36 @@ typedef struct {
 
 /*
    Description : This function initializes the memoization table and also 
-                  creates sorted herd lists for circles and squares algorithm.
-   Parameters  :  pointer to the herd list
+                  creates sorted lists for circles and squares algorithm.
+   Parameters  : Locations
 
    Usage :     : should be called before any calls are made to "searchWithMemoization" 
                   or "serchWithCirclesAndSquare, 
                   typically after herd list is created in main function "run_sim_main"  
 */
-MemoizationTable *initMemoization(UNT_unit_list_t* herds);
+MemoizationTable *initMemoization(float *fLat, float *fLon, uint n);
 
 typedef int (*SearchHitCallback)(int id, void* arg);
 /*
    Description  : search in circles and squares with memoization
-   Parameters  : pointer to the herd for which "herds in proximity is calculated", 
+   Parameters  : id of the herd for which "herds in proximity is calculated", 
                    "Radius" with which herds are to be found.
 		   callback function to be called for a herd in given proximity (same as RTree argument)
 		   arguments for callback function
  */
 boolean searchWithMemoization (MemoizationTable *,
-			      UNT_unit_t* pHerd, double dRadius,
+			      uint uiID, double dRadius,
 			      SearchHitCallback pfCallback, void* pCallbackArgs);
 
 /*
    Description  : search in circles and squares without memoization
-   Parameters  : pointer to the herd for which "herds in proximity is calculated", 
+   Parameters  : id of the herd for which "herds in proximity is calculated", 
                    "Radius" with which herds are to be found.
 		   callback function to be called for a herd in given proximity (same as RTree argument)
 		   arguments for callback function (same as RTree argument)
  */
 boolean searchWithCirclesAndSquares (MemoizationTable *,
-				     UNT_unit_t* pHerd, double dRadius,
+				     uint uiID, double dRadius,
 				     SearchHitCallback pfCallback, void* pCallbackArgs);
 
 void deleteMemoization (MemoizationTable *);
