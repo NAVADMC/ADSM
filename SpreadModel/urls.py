@@ -17,4 +17,5 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', 'ScenarioCreator.views.home'),
     url(r'^setup/$', 'ScenarioCreator.views.home'),
+    url(r'^update/$', 'Settings.views.update_adsm_from_git'),
 )
