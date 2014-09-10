@@ -48,7 +48,7 @@ proc hull_test { points answer {test "hull"} } {
 	global rowpat
 
 	set true_npoints [llength $answer]
-	send "pointset ([join $points ,])\n"
+	send "pointset ([join $points ",\n"])\n"
 	expect {
 		-re "$prompt$" { }
 	}
