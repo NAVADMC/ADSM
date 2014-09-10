@@ -29,7 +29,7 @@ send "reset\n"
 expect {
 	-re "$prompt$" { }
 }
-send "herd (\"beef\",1,0,0)\n"
+send "unit (\"beef\",1,0,0)\n"
 expect {
 	-re "$prompt$" { }
 }
@@ -37,7 +37,7 @@ send "vaccinate (0,1,2)\n"
 expect {
 	-re "$prompt$" { }
 }
-set error [progression_test [list "Susceptible" "Vaccine Immune" "Vaccine Immune" "Susceptible" "Susceptible" "Susceptible"]]
+set error [progression_test [list "Susc" "VImm" "VImm" "Susc" "Susc" "Susc"]]
 if { [string compare $error ""] == 0 } {
 	pass "$test"
 } else {
@@ -52,7 +52,7 @@ send "reset\n"
 expect {
 	-re "$prompt$" { }
 }
-send "herd (\"beef\",1,0,0)\n"
+send "unit (\"beef\",1,0,0)\n"
 expect {
 	-re "$prompt$" { }
 }
@@ -60,7 +60,7 @@ send "vaccinate (0,0,2)\n"
 expect {
 	-re "$prompt$" { }
 }
-set error [progression_test [list "Vaccine Immune" "Vaccine Immune" "Susceptible" "Susceptible" "Susceptible"]]
+set error [progression_test [list "VImm" "VImm" "Susc" "Susc" "Susc"]]
 if { [string compare $error ""] == 0 } {
 	pass "$test"
 } else {
@@ -68,14 +68,14 @@ if { [string compare $error ""] == 0 } {
 }
 
 #
-# Test that you cannot vaccinate a dead herd.
+# Test that you cannot vaccinate a dead unit.
 #
-set test "vaccinate_dead_herd"
+set test "vaccinate_dead_unit"
 send "reset\n"
 expect {
 	-re "$prompt$" { }
 }
-send "herd (\"beef\",1,0,0)\n"
+send "unit (\"beef\",1,0,0)\n"
 expect {
 	-re "$prompt$" { }
 }
@@ -83,13 +83,13 @@ send "destroy (0)\n"
 expect {
 	-re "$prompt$" { }
 }
-set error [progression_test [list "Destroyed"]]
+set error [progression_test [list "Dest"]]
 if { [string compare $error ""] == 0 } {
 	send "vaccinate (0,1,2)\n"
 	expect {
 		-re "$prompt$" { }
 	}
-	set error [progression_test [list "Destroyed" "Destroyed" "Destroyed" "Destroyed" "Destroyed"]]
+	set error [progression_test [list "Dest" "Dest" "Dest" "Dest" "Dest"]]
 }
 if { [string compare $error ""] == 0 } {
 	pass "$test"
@@ -98,14 +98,14 @@ if { [string compare $error ""] == 0 } {
 }
 
 #
-# Test that you cannot vaccinate an infected herd.
+# Test that you cannot vaccinate an infected unit.
 #
-set test "vaccinate_diseased_herd_1"
+set test "vaccinate_diseased_unit_1"
 send "reset\n"
 expect {
 	-re "$prompt$" { }
 }
-send "herd (\"beef\",1,0,0)\n"
+send "unit (\"beef\",1,0,0)\n"
 expect {
 	-re "$prompt$" { }
 }
@@ -113,13 +113,13 @@ send "infect (0,2,0,1,1)\n"
 expect {
 	-re "$prompt$" { }
 }
-set error [progression_test [list "Latent"]]
+set error [progression_test [list "Lat"]]
 if { [string compare $error ""] == 0 } {
 	send "vaccinate (0,4,1)\n"
 	expect {
 		-re "$prompt$" { }
 	}
-	set error [progression_test [list "Latent" "Infectious Clinical" "Naturally Immune" "Susceptible" "Susceptible" "Susceptible" "Susceptible" "Susceptible"]]
+	set error [progression_test [list "Lat" "Clin" "NImm" "Susc" "Susc" "Susc" "Susc" "Susc"]]
 }
 if { [string compare $error ""] == 0 } {
 	pass "$test"
@@ -127,12 +127,12 @@ if { [string compare $error ""] == 0 } {
 	fail "$test $error"
 }
 
-set test "vaccinate_diseased_herd_2"
+set test "vaccinate_diseased_unit_2"
 send "reset\n"
 expect {
 	-re "$prompt$" { }
 }
-send "herd (\"beef\",1,0,0)\n"
+send "unit (\"beef\",1,0,0)\n"
 expect {
 	-re "$prompt$" { }
 }
@@ -140,13 +140,13 @@ send "infect (0,1,0,2,1)\n"
 expect {
 	-re "$prompt$" { }
 }
-set error [progression_test [list "Latent" "Infectious Clinical"]]
+set error [progression_test [list "Lat" "Clin"]]
 if { [string compare $error ""] == 0 } {
 	send "vaccinate (0,3,1)\n"
 	expect {
 		-re "$prompt$" { }
 	}
-	set error [progression_test [list "Infectious Clinical" "Naturally Immune" "Susceptible" "Susceptible" "Susceptible" "Susceptible" "Susceptible"]]
+	set error [progression_test [list "Clin" "NImm" "Susc" "Susc" "Susc" "Susc" "Susc"]]
 }
 if { [string compare $error ""] == 0 } {
 	pass "$test"
@@ -155,14 +155,14 @@ if { [string compare $error ""] == 0 } {
 }
 
 #
-# Test that you cannot double-vaccinate a herd.
+# Test that you cannot double-vaccinate a unit.
 #
 set test "no_double_vaccinate"
 send "reset\n"
 expect {
 	-re "$prompt$" { }
 }
-send "herd (\"beef\",1,0,0)\n"
+send "unit (\"beef\",1,0,0)\n"
 expect {
 	-re "$prompt$" { }
 }
@@ -170,13 +170,13 @@ send "vaccinate (0,3,2)\n"
 expect {
 	-re "$prompt$" { }
 }
-set error [progression_test [list "Susceptible"]]
+set error [progression_test [list "Susc"]]
 if { [string compare $error ""] == 0 } {
 	send "vaccinate (0,1,2)\n"
 	expect {
 		-re "$prompt$" { }
 	}
-	set error [progression_test [list "Susceptible" "Susceptible" "Vaccine Immune" "Vaccine Immune" "Susceptible" "Susceptible" "Susceptible" "Susceptible" "Susceptible"]]
+	set error [progression_test [list "Susc" "Susc" "VImm" "VImm" "Susc" "Susc" "Susc" "Susc" "Susc"]]
 }
 if { [string compare $error ""] == 0 } {
 	pass "$test"
@@ -192,7 +192,7 @@ send "reset\n"
 expect {
 	-re "$prompt$" { }
 }
-send "herd (\"beef\",1,0,0)\n"
+send "unit (\"beef\",1,0,0)\n"
 expect {
 	-re "$prompt$" { }
 }
@@ -200,13 +200,13 @@ send "vaccinate (0,5,2)\n"
 expect {
 	-re "$prompt$" { }
 }
-set error [progression_test [list "Susceptible"]]
+set error [progression_test [list "Susc"]]
 if { [string compare $error ""] == 0 } {
 	send "infect (0,1,0,1,1)\n"
 	expect {
 		-re "$prompt$" { }
 	}
-	set error [progression_test [list "Latent" "Infectious Clinical" "Naturally Immune" "Susceptible" "Susceptible" "Susceptible" "Susceptible" "Susceptible"]]
+	set error [progression_test [list "Lat" "Clin" "NImm" "Susc" "Susc" "Susc" "Susc" "Susc"]]
 }
 if { [string compare $error ""] == 0 } {
 	pass "$test"

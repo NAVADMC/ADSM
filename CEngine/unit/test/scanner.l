@@ -13,8 +13,8 @@
 #  include <strings.h>
 #endif
 
-/** @file herd/test/scanner.c
- * A scanner for a simple shell to exercise libherd.
+/** @file unit/test/scanner.c
+ * A scanner for a simple shell to exercise libunit.
  *
  * @author Neil Harvey <neilharvey@gmail.com><br>
  *   Grid Computing Research Group<br>
