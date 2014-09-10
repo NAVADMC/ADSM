@@ -296,47 +296,45 @@ def initialize_from_existing_model(primary_key, request):
 
 
 '''New / Edit / Copy / Delete / List that are called from model generated URLs'''
-def new_entry(request):
+def new_entry(request, second_try=False):
     model_name, form = get_model_name_and_form(request)
     if model_name == 'RelationalFunction':
         return relational_function(request)
     initialized_form = form(request.POST or None)
     context = {'form': initialized_form, 'title': "Create a new " + spaces_for_camel_case(model_name)}
     add_breadcrumb_context(context, model_name)
+    try:
+        return new_form(request, initialized_form, context)
+    except OperationalError:
+        if not second_try:
+            graceful_startup()
+            return new_entry(request, True)
+        return new_form(request, initialized_form, context)
 
-    return new_form(request, initialized_form, context)
 
-
-def edit_entry(request, primary_key, second_try=False):
+def edit_entry(request, primary_key):
     model_name, form = get_model_name_and_form(request)
     if model_name == 'RelationalFunction':
         return relational_function(request, primary_key)
 
     try:
-        try:
-            initialized_form, model_name = initialize_from_existing_model(primary_key, request)
-        except ObjectDoesNotExist:
-            return redirect('/setup/%s/new/' % model_name)
-
-        if initialized_form.is_valid() and request.method == 'POST':
-            model_instance = initialized_form.save()  # write instance updates to database
-            if request.is_ajax():
-                return ajax_success(model_instance, model_name)
-    
-        context = {'form': initialized_form,
-                   'title': str(initialized_form.instance)}
-        add_breadcrumb_context(context, model_name, primary_key)
-    
-        if model_name == 'ProbabilityFunction':
-            context['backlinks'] = collect_backlinks(initialized_form.instance)
-            context['deletable'] = 'delete/'
-    
-        return render(request, 'ScenarioCreator/crispy-model-form.html', context)
-    except OperationalError:
-        graceful_startup()
-        if not second_try:
-            return edit_entry(request, primary_key, True)  # try again with a fresh file set        
+        initialized_form, model_name = initialize_from_existing_model(primary_key, request)
+    except (ObjectDoesNotExist, OperationalError):
         return redirect('/setup/%s/new/' % model_name)
+    if initialized_form.is_valid() and request.method == 'POST':
+        model_instance = initialized_form.save()  # write instance updates to database
+        if request.is_ajax():
+            return ajax_success(model_instance, model_name)
+
+    context = {'form': initialized_form,
+               'title': str(initialized_form.instance)}
+    add_breadcrumb_context(context, model_name, primary_key)
+
+    if model_name == 'ProbabilityFunction':
+        context['backlinks'] = collect_backlinks(initialized_form.instance)
+        context['deletable'] = 'delete/'
+
+    return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
 def copy_entry(request, primary_key):
@@ -514,9 +512,14 @@ def reset_db(name):
 
 
 def graceful_startup():
-    if not os.path.isfile(activeSession('default')):
+    """Checks something inside of each of the database files to see if it's valid.  If not, rebuild the database."""
+    try:
+        scenario_filename()
+    except OperationalError:
         reset_db('default')
-    if not os.path.isfile(activeSession('scenario_db')):
+    try:
+        ZoneEffect.objects.count()
+    except OperationalError:
         reset_db('scenario_db')
         update_db_version()
 

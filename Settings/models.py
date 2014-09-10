@@ -9,7 +9,7 @@ from django.contrib.sessions.models import Session
 
 
 class SmSession(models.Model):
-    scenario_filename = models.CharField(max_length=255, default='', blank=True)
+    scenario_filename = models.CharField(max_length=255, default="Untitled Scenario", blank=True)
     unsaved_changes = models.BooleanField(default=False)
     population_upload_status = models.CharField(null=True, blank=True, max_length=255)
     population_upload_percent = models.FloatField(default=0)
