@@ -3,10 +3,11 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
+import ScenarioCreator.views
 from Settings.views import update_is_needed
 
 standard_library.install_hooks()
-from django.db import models
+from django.db import models, OperationalError
 from django.contrib.sessions.models import Session
 
 
@@ -47,7 +48,11 @@ def scenario_filename(new_value=None):
 
 
 def update_status(do_update=False):
-    session = SmSession.objects.get_or_create(id=1)[0]
+    try:
+        session = SmSession.objects.get_or_create(id=1)[0]
+    except OperationalError:
+        ScenarioCreator.views.reset_db('default')  # I'm doing this instead of graceful_startup() to avoid long migrations on startup
+        return update_status(do_update)  # possible infinite loop
     if do_update:
         session.update_needed = update_is_needed()
         session.save()
