@@ -32,8 +32,7 @@ if USE_SC_GUILIB
 endif
 AM_CPPFLAGS += @GLIB_CFLAGS@ @GSL_CFLAGS@
 
-# Create a program just like the real simulator, but without MPI, for running
-# small tests.
+# Create a program just like the real simulator for running small tests.
 
 noinst_PROGRAMS = miniadsm shell shell2 fcmp
 
@@ -107,11 +106,8 @@ if USE_SC_GUILIB
     $(top_srcdir)/sc_guilib/sc_guilib_outputs.c \
     $(top_srcdir)/sc_guilib/sc_database.c
 endif
-miniadsm_CPPFLAGS = -DCANCEL_MPI=1 $(AM_CPPFLAGS)
+miniadsm_CPPFLAGS = $(AM_CPPFLAGS)
 miniadsm_LDADD = @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@
-if HAVE_MPI
-  miniadsm_LDADD += @MPI_LIBS@
-endif
 
 shell_SOURCES = shell.c $(top_builddir)/replace/replace.c
 shell_LDADD = @GLIB_LIBS@

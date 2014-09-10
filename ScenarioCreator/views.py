@@ -50,8 +50,8 @@ def add_breadcrumb_context(context, model_name, primary_key=None):
         context['title'] = 'Edit the ' + spaces_for_camel_case(model_name)
 
 
-def activeSession():
-    full_path = settings.DATABASES['scenario_db']['NAME']
+def activeSession(name='scenario_db'):
+    full_path = settings.DATABASES[name]['NAME']
     return os.path.basename(full_path)
 
 
@@ -296,15 +296,20 @@ def initialize_from_existing_model(primary_key, request):
 
 
 '''New / Edit / Copy / Delete / List that are called from model generated URLs'''
-def new_entry(request):
+def new_entry(request, second_try=False):
     model_name, form = get_model_name_and_form(request)
     if model_name == 'RelationalFunction':
         return relational_function(request)
     initialized_form = form(request.POST or None)
     context = {'form': initialized_form, 'title': "Create a new " + spaces_for_camel_case(model_name)}
     add_breadcrumb_context(context, model_name)
-
-    return new_form(request, initialized_form, context)
+    try:
+        return new_form(request, initialized_form, context)
+    except OperationalError:
+        if not second_try:
+            graceful_startup()
+            return new_entry(request, True)
+        return new_form(request, initialized_form, context)
 
 
 def edit_entry(request, primary_key):
@@ -314,7 +319,7 @@ def edit_entry(request, primary_key):
 
     try:
         initialized_form, model_name = initialize_from_existing_model(primary_key, request)
-    except ObjectDoesNotExist:
+    except (ObjectDoesNotExist, OperationalError):
         return redirect('/setup/%s/new/' % model_name)
     if initialized_form.is_valid() and request.method == 'POST':
         model_instance = initialized_form.save()  # write instance updates to database
@@ -456,8 +461,6 @@ def save_scenario(request):
 
 def update_db_version():
     print("Checking Scenario version")
-
-    print('Building DB structure...')
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
     try:
         call_command('migrate',
@@ -489,20 +492,42 @@ def open_scenario(request, target):
     return redirect('/setup/Scenario/1/')
 
 
-def new_scenario(request):
-    print("Deleting", activeSession())
+def reset_db(name):
+    print("Deleting", activeSession(name))
     try:
-        os.remove(activeSession())
+        os.remove(activeSession(name))
     except BaseException as ex:
         print(ex)  # the file may not exist anyways
     #creates a new blank file by migrate / syncdb
     call_command('syncdb',
                  # verbosity=0,
                  interactive=False,
-                 database=connections['scenario_db'].alias,
+                 database=connections[name].alias,
                  load_initial_data=False)
+    if name == 'default':  # create super user
+        from django.contrib.auth.models import User
+        u = User(username='ADSM', is_superuser=True, is_staff=True)
+        u.set_password('ADSM')
+        u.save()
+
+
+def graceful_startup():
+    """Checks something inside of each of the database files to see if it's valid.  If not, rebuild the database."""
+    try:
+        scenario_filename()
+    except OperationalError:
+        reset_db('default')
+    try:
+        ZoneEffect.objects.count()
+    except OperationalError:
+        reset_db('scenario_db')
+        update_db_version()
+
+
+def new_scenario(request):
+    reset_db('default')
+    reset_db('scenario_db')
     update_db_version()
-    scenario_filename("Untitled Scenario")
     return redirect('/setup/Scenario/1/')
 
 

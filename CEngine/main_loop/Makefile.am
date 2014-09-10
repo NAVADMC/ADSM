@@ -18,9 +18,6 @@ if USE_SC_GUILIB
   AM_CPPFLAGS +=  -I$(top_srcdir)/sc_guilib 
 endif
 AM_CPPFLAGS += @GLIB_CFLAGS@ @GSL_CFLAGS@ 
-if HAVE_MPI
-  AM_CPPFLAGS += @MPI_CFLAGS@
-endif
 
 include_HEADERS = adsm.h
 lib_LIBRARIES = libadsm.a
@@ -99,10 +96,4 @@ endif
 
 bin_PROGRAMS = adsm
 adsm_SOURCES = cli.c
-if HAVE_MPI
-  adsm_SOURCES += mpix.c mpix.h
-endif
 adsm_LDADD = libadsm.a @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@
-if HAVE_MPI
-  adsm_LDADD += @MPI_LIBS@
-endif

@@ -4,6 +4,15 @@ from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
 standard_library.install_hooks()
-from django.shortcuts import render
+import os
+import subprocess
+from django.conf import settings
+from django.shortcuts import redirect
 
-# Create your views here.
+
+def update_adsm_from_git(request):
+    print("you Found me!")
+    git = os.path.join(settings.BASE_DIR, 'git', 'bin', 'git.exe')
+    subprocess.call(git + ' reset --hard', shell=True)
+    subprocess.call(git + ' pull', shell=True)
+    return redirect('/setup/')

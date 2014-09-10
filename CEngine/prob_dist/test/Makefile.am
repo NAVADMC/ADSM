@@ -15,9 +15,6 @@ noinst_PROGRAMS = shell fcmp
 shell_SOURCES = shell.y scanner.l ../prob_dist.c ../prob_dist.h \
   $(top_srcdir)/rng/rng.c $(top_srcdir)/rng/rng.h
 shell_LDADD = @GLIB_LIBS@ @GSL_LIBS@
-if HAVE_MPI
-shell_LDADD += @MPI_LIBS@
-endif
 
 fcmp_SOURCES = fcmp.c
 fcmp_LDADD = @GLIB_LIBS@ @GSL_LIBS@
