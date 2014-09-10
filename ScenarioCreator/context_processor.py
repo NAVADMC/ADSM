@@ -10,7 +10,7 @@ from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Pop
     ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
 from Results.models import DailyControls
 from ScenarioCreator.views import unsaved_changes
-from Settings.models import scenario_filename
+from Settings.models import scenario_filename, update_status
 from django.db.models import F
 
 
@@ -29,6 +29,7 @@ def basic_context(request):
     pt_count = ProductionType.objects.count()
     context = {'filename': scenario_filename(),
                'unsaved_changes': unsaved_changes(),
+               'update_needed': update_status(),
                'Scenario': Scenario.objects.count(),
                'OutputSetting': OutputSettings.objects.count(),
                'Population': Population.objects.count(),
@@ -41,8 +42,8 @@ def basic_context(request):
                'AssignSpreads': pt_count and
                                 ProductionTypePairTransmission.objects.filter(
                                     source_production_type=F('destination_production_type'),
-                                    direct_contact_spread__isnull=False)
-                                    .count() >= pt_count,
+                                    direct_contact_spread__isnull=False
+                                ).count() >= pt_count,
                'ControlMasterPlan': ControlMasterPlan.objects.count(),
                'Protocols': ControlProtocol.objects.count(),
                'ProtocolAssignments': ProtocolAssignment.objects.count(),

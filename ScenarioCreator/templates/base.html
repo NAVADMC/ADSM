@@ -30,7 +30,9 @@
     </form>
     <h2>Animal Disease Spread Model</h2>
     <div id="admin_link">
-        <a href="/update/" >Update ADSM. </a>
+        {% if update_needed %}
+            <a href="/update/" >Update ADSM. </a>
+        {% endif %}
         <a href="/admin/" >Advanced Panel</a>
     </div>
 </header>
