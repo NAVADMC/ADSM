@@ -69,10 +69,6 @@ header h1 {
     float: left;
 }
 
-header h2 {
-    margin-top: 3px;
-}
-
 header div {
     width: 220px;
     overflow:auto;
@@ -93,24 +89,11 @@ header div {
     color: #666;
 }
 
-header form {
-    float: left;
-    width: 940px;
-}
-
-/*header .alert {*/
-    /*float: left;*/
-    /*margin-top: 5px;*/
-    /*width: 25%;*/
-    /*height: 40px;*/
-    /*display: none;*/
-/*}*/
-
 header #admin_link {
     position: absolute;
-    bottom: 0;
+    top: 0;
     right: 0;
-    margin-right: 5px;
+    margin-right: 0px;
 }
 
 body>nav {
@@ -224,6 +207,10 @@ ul {
     color: #007700;
     vertical-align: middle;
     margin: 8px 0;
+}
+
+.btn-default {
+    background-color: #b1b1b1;
 }
 
 .btn-primary {
