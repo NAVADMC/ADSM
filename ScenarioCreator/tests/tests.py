@@ -153,3 +153,5 @@ class ViewTests(TestCase):
         function = RelationalFunction.objects.get(name="Unsaved_test")
         r = self.client.get('/setup/RelationalFunction/%s/' % function.id)
         self.assertIn('data-delete-link', r.content)
+
+
