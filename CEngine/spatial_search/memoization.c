@@ -318,31 +318,6 @@ searchWithMemoization (MemoizationTable *memo,
 }
 
 
-boolean searchInHerdList2 (InProximity* pSearchList, Location* pHerd) {
-  boolean ret_val = FALSE;
-  HerdNode* herd;
-
-  while (NULL != pSearchList) {
-    herd = pSearchList->psHerdList;
-
-    while(NULL != herd){
-      if (herd->psHerd->uiID == pHerd->uiID) {
-	ret_val = TRUE;
-	break;
-      }
-      herd = herd->psNext;
-    }
-
-    if (TRUE == ret_val) {
-      break;
-    }else {
-      pSearchList = pSearchList->psNext;
-    }
-  }
-
-  return ret_val;
-}
-
 void addToList2 (InProximity* pTargetList, Location* pHerd) {
   HerdNode* new_node = createNewHerdNode(pHerd);
 
