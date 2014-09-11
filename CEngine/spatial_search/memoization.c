@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include "gis.h"
 
 #include "memoization.h"
@@ -22,25 +21,7 @@
 #define EPSILON			(0.001)
 
 
-void searchInProximity(HerdLocation* psLatList, HerdLocation* psLonList,
-		       uint uiSize, HerdLocation* psHerd, double dRadius, 
-		       spatial_search_hit_callback pfCallback, void* pCallbackArgs);
-
-void searchInProximity2 (HerdLocation* psLatList, HerdLocation* psLonList,
-			uint uiSize, HerdLocation* psHerd, double dRadius,
-			 InProximity* pTargetList, double dLastRadius);
 void addToMemoization2 (int id, gpointer user_data);
-
-int callbackNew(int id, void* args);
-
-void printList (_IN_ HerdLocation* psList, _IN_ uint uiSize){
-  if (NULL != psList) {
-    uint i;
-    for (i = 1; i <= uiSize; i++) {
-      printf("%f,%f,%u\n", psList[i].x, psList[i].y, psList[i].uiID);
-    }
-  }
-}
 
 boolean insertHerd (_IN_OUT_ HerdLocation* psHerdList,
 		    _IN_ double x,
