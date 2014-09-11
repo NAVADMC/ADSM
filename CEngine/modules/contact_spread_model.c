@@ -235,6 +235,7 @@ typedef struct
   unsigned int recipient_production_type;
   double movement_distance;
   UNT_unit_t *best_unit; /**< The current pick for best recipient. */
+  ZON_zone_fragment_t *best_unit_zone; /**< The zone fragment best_unit is in. */
   double best_unit_distance; /**< The distance from the source unit to
     best_unit. */
   double best_unit_difference; /**< The difference between the desired contact
@@ -366,6 +367,7 @@ check_and_choose (int id, gpointer arg)
                     else
                     {                        
                       contact->best_unit = unit2;
+                      contact->best_unit_zone = callback_data->zones->membership[unit2->index];
                       contact->best_unit_distance = distance;
                       contact->best_unit_difference = difference;
                       contact->min_difference = difference;
@@ -381,7 +383,9 @@ check_and_choose (int id, gpointer arg)
                     /* When we find a second potential recipient unit the same distance from
                      * the source as the current closest potential recipient, we first check
                      * if contact with the new find is forbidden by quarantine or zone rules.
-                     * If so, we can ignore it.  Otherwise, the new find has a 1 in 2 chance
+                     * If so, we can ignore it.  Otherwise, check if contact with the old find
+                     * is forbidden by zone rules; if so, we can take the new find.
+                     * Otherwise, the new find has a 1 in 2 chance
                      * of replacing the older find, if they are the same size.  (If the new
                      * find is half the size of the old one, it has a 1 in 3 chance; if it is
                      * twice the size of the old one, it has a 2 in 3 chance.)  If we find a
@@ -404,30 +408,66 @@ check_and_choose (int id, gpointer arg)
     
                     if ( !contact_forbidden )
                     {
-                      contact->cumul_size += unit2->size;
-    
-                      if ( RAN_num ( callback_data->rng ) < unit2->size / contact->cumul_size )
-                      {                        
-                        contact->best_unit = unit2;
-                        contact->best_unit_distance = distance;
-                        contact->best_unit_difference = difference;
-                        if ( difference < contact->min_difference )
-                          contact->min_difference = difference;
-                      }
+                      /* Contact with this new find (unit 2) is not forbidden.
+                       * Is contact with the old find forbidden? If so, take
+                       * the new find. */
+                      contact_forbidden = ( ( contact->best_unit->quarantined && contact->contact_type == ADSM_DirectContact )
+                                          || ( ZON_level ( contact->best_unit_zone ) > ZON_level ( unit1_fragment ) )
+                                          || ( ZON_level ( unit1_fragment ) - ZON_level ( contact->best_unit_zone ) > 1 )
+                                          || ( ( ZON_level ( unit1_fragment ) - ZON_level ( contact->best_unit_zone ) == 1 )
+                                               && !ZON_nests_in ( contact->best_unit_zone, unit1_fragment ) )
+                                          || ( ( ZON_level ( contact->best_unit_zone ) == ZON_level ( unit1_fragment ) )
+                                               && !ZON_same_fragment ( contact->best_unit_zone, unit1_fragment ) ) );
+                      if (contact_forbidden)
+                        {
+                          /* Contact with the old find is forbidden: take the
+                           * new find. */
+                          #if DEBUG
+                            g_debug ( "----- check_and_choose - Optimized Version: Replacing best_unit with this unit because contact with best_unit was forbidden" );
+                          #endif
+                          contact->cumul_size -= contact->best_unit->size;
+                          contact->cumul_size += unit2->size;
+
+                          contact->best_unit = unit2;
+                          contact->best_unit_zone = unit2_fragment;
+                          contact->best_unit_distance = distance;
+                          contact->best_unit_difference = difference;
+                          if ( difference < contact->min_difference )
+                            contact->min_difference = difference;
+                        }
                       else
-                      {
-                        #if DEBUG
-                          g_debug ( "----- check_and_choose - Optimized Version:  Unit size rules do allow replacing best_unit with this contacted unit" );
-                        #endif                           
-                      };
-                    }
+                        {
+                          /* Neither contact with the old find nor contact
+                           * with the new find is forbidden; choose between
+                           * the two at random. */
+                          contact->cumul_size += unit2->size;
+    
+                          if ( RAN_num ( callback_data->rng ) < unit2->size / contact->cumul_size )
+                          {                        
+                            #if DEBUG
+                              g_debug ( "----- check_and_choose - Optimized Version: Replacing best_unit with this unit because of a random number draw" );
+                            #endif                           
+                            contact->best_unit = unit2;
+                            contact->best_unit_distance = distance;
+                            contact->best_unit_difference = difference;
+                            if ( difference < contact->min_difference )
+                              contact->min_difference = difference;
+                          }
+                          else
+                          {
+                            #if DEBUG
+                              g_debug ( "----- check_and_choose - Optimized Version: NOT replacing best_unit with this unit" );
+                            #endif                           
+                          };
+                        }
+                    } /* end of case where contact with the new find (unit2) is not forbidden. */
                     else
                     {
                       #if DEBUG
                         g_debug ( "----- check_and_choose - Optimized Version:  Contact forbidden by zone rules or quarantine rules" );
                       #endif                        
                     }
-                  }
+                  } /* end of case where the new find is the same distance from the source as the current best find */
                   else if ( difference < contact->min_difference )
                   {
                        

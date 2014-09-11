@@ -90,6 +90,7 @@ dist_noinst_DATA = state-transition.png \
   4units_line_3.png \
   4units_line_4.png \
   4units_2.png \
+  4units_2_reversed.png \
   5units.png \
   5units_2.png \
   5units_very_close.png \
