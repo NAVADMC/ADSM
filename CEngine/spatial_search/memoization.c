@@ -4,6 +4,8 @@
  * - Removed dependency on ADSM unit.h. Now just stores location associated
  *   with an integer ID.
  * - Wrapped formerly global variables in a struct named MemoizationTable.
+ * - Removed code for converting between lat-long and x-y.  Now works entirely 
+ *   in x-y.
  * - Removed Circles-&-Squares code.  The code now calls on an underlying
  *   spatial_search_t object, which may use the Circles-&-Squares algorithm or
  *   something else.
@@ -11,7 +13,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <time.h>
 #include "gis.h"
 
@@ -21,12 +22,6 @@
 #define EPSILON			(0.001)
 
 
-typedef float (*GetLatLong) (HerdLocation* psList);
-boolean getLatLong (_IN_ char *sString, _OUT_ float *pfLatitude, _OUT_ float *pfLongitude);
-float getLatitude(HerdLocation* psList);
-float getLongitude(HerdLocation* psList);
-int findPosition(HerdLocation* psList, int uiStart, int uiEnd, float fLocation,
-		 boolean bIsUpperBound, GetLatLong fpGetPoint);
 void searchInProximity(HerdLocation* psLatList, HerdLocation* psLonList,
 		       uint uiSize, HerdLocation* psHerd, double dRadius, 
 		       spatial_search_hit_callback pfCallback, void* pCallbackArgs);
@@ -38,78 +33,25 @@ void addToMemoization2 (int id, gpointer user_data);
 
 int callbackNew(int id, void* args);
 
-/*************************** global variables ***************************************/
-
-static double cos0;
-static double cos180;
-static double cos270;
-static double cos90;
-static double cos315;
-static double cos225;
-
-static double deg_to_rad270;
-static double deg_to_rad90;
-static double deg_to_rad315;
-static double deg_to_rad225;
-static double deg_to_rad45;
-static double deg_to_rad135;
-
-void Math_functions() {
-
-  cos0 = cos(DEG_TO_RAD*0);
-  cos180 = cos(DEG_TO_RAD*180);
-  cos270 = cos(DEG_TO_RAD*270);
-  cos90 = cos(DEG_TO_RAD*90);
-  cos315 = cos(DEG_TO_RAD*315);
-  cos225 = cos(DEG_TO_RAD*225);
-
-  deg_to_rad270 = DEG_TO_RAD*270;
-  deg_to_rad90 = DEG_TO_RAD*90;
-  deg_to_rad315 = DEG_TO_RAD*315;
-  deg_to_rad225 = DEG_TO_RAD*225;
-  deg_to_rad45 = DEG_TO_RAD*45;
-  deg_to_rad135 = DEG_TO_RAD*135;
-}
-
-
-float getLatitude(HerdLocation* psList) {
-  return psList->fLat;
-}
-
-float getLongitude(HerdLocation* psList) {
-  return psList->fLon;
-}
-
-boolean getLatLong (_IN_ char *pcString, _OUT_ float *pfLatitude, _OUT_ float *pfLongitude) {
-  boolean ret_val = FALSE;
-
-  if ((NULL != pcString) && (NULL != pfLatitude) && (NULL != pfLongitude)) {
-    sscanf(pcString, "%f,%f", pfLatitude, pfLongitude);
-    ret_val = TRUE;
-  }
-
-  return ret_val;
-}
-
 void printList (_IN_ HerdLocation* psList, _IN_ uint uiSize){
   if (NULL != psList) {
     uint i;
     for (i = 1; i <= uiSize; i++) {
-      printf("%f,%f,%u\n", psList[i].fLat, psList[i].fLon, psList[i].uiID);
+      printf("%f,%f,%u\n", psList[i].x, psList[i].y, psList[i].uiID);
     }
   }
 }
 
 boolean insertHerd (_IN_OUT_ HerdLocation* psHerdList,
-		    _IN_ float fLat,
-		    _IN_ float fLon,
+		    _IN_ double x,
+		    _IN_ double y,
 		    _IN_ uint uiID) {
 
   boolean ret_val = FALSE;
 
   if (NULL != psHerdList) {
-    psHerdList[uiID].fLat = fLat;
-    psHerdList[uiID].fLon = fLon;
+    psHerdList[uiID].x = x;
+    psHerdList[uiID].y = y;
     psHerdList[uiID].uiID = uiID;
 
     ret_val = TRUE;
@@ -121,40 +63,7 @@ boolean insertHerd (_IN_OUT_ HerdLocation* psHerdList,
 
 
 
-int findPosition(HerdLocation* psList, int uiStart, int uiEnd,
-		 float fLocation, boolean bIsUpperBound, GetLatLong fpGetPoint) {
-  int position;
-  float temp;
-
-  if (uiEnd - uiStart > 0) {
-
-    int i = (uiEnd + uiStart) / 2;
-
-    temp = fpGetPoint(&psList[i]);
-    if (fLocation < temp) {
-      position = findPosition(psList, uiStart, i -1, fLocation, bIsUpperBound, fpGetPoint);
-    }else {
-      position = findPosition(psList, i + 1, uiEnd, fLocation, bIsUpperBound, fpGetPoint);
-    }
-  }else
-    {
-      position = uiEnd;
-      if(TRUE == bIsUpperBound) {
-	if((fpGetPoint(&psList[position]) - fLocation) > EPSILON){
-	  position--;
-	}
-      }else {
-	if((fpGetPoint(&psList[position]) - fLocation) < EPSILON) {
-	  position++;
-	}
-      }
-    }
-
-  return position;
-}
-
-
-MemoizationTable *initMemoization (float *fLat, float *fLon, uint nherds) {
+MemoizationTable *initMemoization (double *x, double *y, uint nherds) {
 
   MemoizationTable *memo;
   uint i;
@@ -166,7 +75,7 @@ MemoizationTable *initMemoization (float *fLat, float *fLon, uint nherds) {
   memo->pUnsortedList = g_new0 (HerdLocation, nherds);
 
   for (i = 0; i < nherds; i++) {
-    insertHerd(memo->pUnsortedList, fLat[i], fLon[i], i);
+    insertHerd(memo->pUnsortedList, x[i], y[i], i);
   }
 
   return memo;
@@ -238,7 +147,7 @@ boolean withInRadius(HerdLocation* pX_Herd, HerdLocation* pY_Herd, double dRadiu
   double distance;
 
   /* calculate weather the herd is within radius */
-  distance = GIS_distance(pX_Herd->fLat, pX_Herd->fLon, pY_Herd->fLat, pY_Herd->fLon);
+  distance = GIS_distance(pX_Herd->x, pX_Herd->y, pY_Herd->x, pY_Herd->y);
 
   if ((distance - dRadius) <= EPSILON) {
     ret_val = TRUE;
@@ -373,7 +282,7 @@ boolean inMemoization2(MemoizationTable *memo,
     args.pTargetList = temp_list;
     args.dLastRadius = prev_list->dRadius;
     spatial_search_circle_by_xy (searcher,
-                                 pHerd->fLon, pHerd->fLat, dRadius,
+                                 pHerd->x, pHerd->y, dRadius,
                                  addToMemoization2, &args);
     processHerdList2(temp_list->psHerdList, pfCallback, pCallbackArgs);
     prev_list->psNext = temp_list;
@@ -414,7 +323,7 @@ searchWithMemoization (MemoizationTable *memo,
     args.pTargetList = memo->pAllHerds[uiID];
     args.dLastRadius = 0,0;
     spatial_search_circle_by_xy (searcher,
-                                 herd->fLon, herd->fLat, dRadius,
+                                 herd->x, herd->y, dRadius,
                                  addToMemoization2, &args);
 
     processHerdList2(memo->pAllHerds[uiID]->psHerdList, 
@@ -501,8 +410,8 @@ void addToMemoization2 (int id, gpointer user_data) {
   pT_Herd = &(args->pUnsortedList[id]);
 
   /* calculate weather the herd is within radius */
-  distance = GIS_distance(pS_Herd->fLat, pS_Herd->fLon, 
-				pT_Herd->fLat, pT_Herd->fLon);
+  distance = GIS_distance(pS_Herd->x, pS_Herd->y, 
+				pT_Herd->x, pT_Herd->y);
   
   if ((distance - args->dRadius) <= EPSILON) {
     if ((distance - args->dLastRadius) > EPSILON) {

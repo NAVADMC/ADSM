@@ -30,8 +30,8 @@ typedef struct HerdLocation HerdLocation;
 
 struct HerdLocation {
 	uint uiID;    /* this is the id of this herd in the main herd list */
-	float fLat;	/* can be latitude or longitude */
-	float fLon;	/* can be longitude or latitude */
+	double x;
+	double y;
 };
 
 typedef struct HerdNode HerdNode;
@@ -65,7 +65,7 @@ typedef struct {
                   or "serchWithCirclesAndSquare, 
                   typically after herd list is created in main function "run_sim_main"  
 */
-MemoizationTable *initMemoization(float *fLat, float *fLon, uint n);
+MemoizationTable *initMemoization(double *x, double *y, uint n);
 
 /*
    Description  : search in circles and squares with memoization
