@@ -43,6 +43,7 @@ def reset_db(name):
     print("Deleting", activeSession(name))
     try:
         os.remove(activeSession(name))
+        connections[name].close()
     except BaseException as ex:
         print(ex)  # the file may not exist anyways
     #creates a new blank file by migrate / syncdb
