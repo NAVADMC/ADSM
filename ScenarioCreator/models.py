@@ -63,10 +63,6 @@ def priority_choices():
                'production type, time waiting, reason')
 
 
-def workspace(file_name):
-    return 'workspace/' + file_name
-
-
 def squish_name(name):
     return name.lower().strip().replace(' ', '').replace('_', '')
 
@@ -78,19 +74,6 @@ def choice_char_from_value(value, map_tuple):
             return key
     return None
 
-
-def clean_filename(filename):
-    #TODO: this appears to be dead code, but it's very well written...
-    filename = filename.strip()  # whitespace
-    if filename:
-        fname = workspace(filename)
-        if os.path.isfile(fname):  # Already exists?
-            raise ValidationError("File already exists: " + fname)
-        try:  # valid filename?  permissions?
-            os.access(fname, os.W_OK)  # I'm not opening a file because that creates a blank one
-        except:
-            raise ValidationError("Cannot write to " + fname)
-    return filename
 
 sqlite_keywords = ['abort', 'action', 'add', 'after', 'all', 'alter', 'analyze', 'and', 'as', 'asc', 'attach', 'autoincrement', 'before', 'begin', 'between', 'by', 'cascade', 'case', 'cast', 'check', 'collate', 'column', 'commit', 'conflict', 'constraint', 'create', 'cross', 'current_date', 'current_time', 'current_timestamp', 'database', 'default', 'deferrable', 'deferred', 'delete', 'desc', 'detach', 'distinct', 'drop', 'each', 'else', 'end', 'escape', 'except', 'exclusive', 'exists', 'explain', 'fail', 'for', 'foreign', 'from', 'full', 'glob', 'group', 'having', 'if', 'ignore', 'immediate', 'in', 'index', 'indexed', 'initially', 'inner', 'insert', 'instead', 'intersect', 'into', 'is', 'isnull', 'join', 'key', 'left', 'like', 'limit', 'match', 'natural', 'no', 'not', 'notnull', 'null', 'of', 'offset', 'on', 'or', 'order', 'outer', 'plan', 'pragma', 'primary', 'query', 'raise', 'recursive', 'references', 'regexp', 'reindex', 'release', 'rename', 'replace', 'restrict', 'right', 'rollback', 'row', 'savepoint', 'select', 'set', 'table', 'temp', 'temporary', 'then', 'to', 'transaction', 'trigger', 'union', 'unique', 'update', 'using', 'vacuum', 'values', 'view', 'virtual', 'when', 'where', 'with', 'without']
 
@@ -117,10 +100,6 @@ class BaseModel(models.Model):
 
     class Meta(object):
         abstract = True
-
-
-class DynamicBlob(models.Model):
-    zone_perimeters = models.CharField(max_length=255, blank=True, help_text='', )  # polygons?
 
 
 class Population(BaseModel):

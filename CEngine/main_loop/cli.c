@@ -18,10 +18,6 @@
 #  include <config.h>
 #endif
 
-#if HAVE_MPI && !CANCEL_MPI
-#  include "mpix.h"
-#endif
-
 #include "adsm.h"
 #include "general.h"
 #include <sys/stat.h>
@@ -52,12 +48,6 @@ main (int argc, char *argv[])
   int sqlerr;
   char *sqlerrmsg = NULL;
   sqlite3 *scenario_db;
-
-#if HAVE_MPI && !CANCEL_MPI
-  /* Initialize MPI. */
-  if (MPIx_Init (&argc, &argv) != MPI_SUCCESS)
-    g_error ("Couldn't initialize MPI.");
-#endif
 
   clear_adsm_fns ();
 
@@ -132,10 +122,6 @@ main (int argc, char *argv[])
                 verbosity,
                 seed,
                 starting_iteration_number);
-
-#if HAVE_MPI && !CANCEL_MPI
-  MPI_Finalize ();
-#endif
 
   sqlite3_close (scenario_db);
 

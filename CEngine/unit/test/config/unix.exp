@@ -11,7 +11,7 @@ if ![info exists prompt] then {
 #
 # Regular expression for matching the output.
 #
-set statepat "(?:Susceptible|Latent|Infectious Subclinical|Infectious Clinical|Naturally Immune|Vaccine Immune|Destroyed)"
+set statepat "(?:Susc|Lat|Subc|Clin|NImm|VImm|Dest)"
 
 
 

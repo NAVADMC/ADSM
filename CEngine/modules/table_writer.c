@@ -501,11 +501,6 @@ set_params (struct adsm_module_t_ *self, sqlite3 * params)
               local_data->filename = g_strdup_printf("%s.csv", tmp);
               g_free(tmp);
             }
-          #if HAVE_MPI && !CANCEL_MPI
-            tmp = local_data->filename;
-            local_data->filename = adsm_insert_number_into_filename (local_data->filename, me.rank);
-            g_free(tmp);
-          #endif
           local_data->channel_is_stdout = FALSE;
         }
     }

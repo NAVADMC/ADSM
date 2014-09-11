@@ -80,10 +80,6 @@
 #  include <config.h>
 #endif
 
-#if HAVE_MPI && !CANCEL_MPI
-  #include <mpi.h>
-#endif
-
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new contact_spread_model_new
 #define run contact_spread_model_run
@@ -524,9 +520,6 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
   PDF_dist_t *poisson;
   new_day_event_hash_table_data *foreach_callback_data;
   GQueue *q;
-#ifdef USE_MPI
-  double start_time, end_time;
-#endif
 
 #if DEBUG
   g_debug ("----- ENTER handle_new_day_event (%s) - Optimized Version", MODEL_NAME);
@@ -575,22 +568,9 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
   foreach_callback_data->new_infections = 0;
   foreach_callback_data->exposure_attempts = 0;
 
-#ifdef USE_MPI
-    start_time = MPI_Wtime();
-#endif
-  
-#if defined( USE_MPI ) && defined( USE_OMP )
-#error TODO:  Add OMP code here to process the infectious unit list!
-#else  
   /*  Iterate over the infectious units.  This is a shortened list compared to the entire unit list */
   g_hash_table_foreach( _iteration.infectious_units, new_day_event_handler, foreach_callback_data );  
-#endif
     
-#ifdef USE_MPI  
-    end_time = MPI_Wtime();
-    g_debug( "handle_new_day_event: Day: %i  Processed %i infectious units, %i exposure attempts, and %i new infections in %g seconds.\n", event->day, g_hash_table_size( _iteration.infectious_units ), foreach_callback_data->exposure_attempts, foreach_callback_data->new_infections, (double)( end_time - start_time) );
-#endif
-  
   /*  Free memory used by the user_data structure */
   g_free( foreach_callback_data );
 
