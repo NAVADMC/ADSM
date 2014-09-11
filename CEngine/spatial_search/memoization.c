@@ -373,14 +373,6 @@ void addToList2 (InProximity* pTargetList, Location* pHerd) {
 
 }
 
-void addToHerdList2 (InProximity* pTargetList, InProximity* pSearchList, 
-		     Location* pHerd) {
-  if (FALSE == searchInHerdList2 (pSearchList, pHerd)){
-    addToList2(pTargetList, pHerd);
-  }
-}
-
-
 void addToMemoization2 (int id, gpointer user_data) {
   addToMemoization2_args_t *args;
   Location *pS_Herd, *pT_Herd;
