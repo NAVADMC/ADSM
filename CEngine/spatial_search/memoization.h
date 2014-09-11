@@ -2,6 +2,8 @@
 #ifndef _MEMOIZATION_H_
 #define _MEMOIZATION_H_
 
+#include "spatial_search.h"
+
 #define _IN_
 #define _IN_OUT_
 #define _OUT_
@@ -47,9 +49,6 @@ struct InProximity {
 
 typedef struct {
   uint uiNumHerds;
-  uint uiSize;
-  HerdLocation *pLatitudeList;
-  HerdLocation *pLongitudeList;
   HerdLocation *pUnsortedList;
   InProximity  **pAllHerds;
 } MemoizationTable;
@@ -68,7 +67,6 @@ typedef struct {
 */
 MemoizationTable *initMemoization(float *fLat, float *fLon, uint n);
 
-typedef int (*SearchHitCallback)(int id, void* arg);
 /*
    Description  : search in circles and squares with memoization
    Parameters  : id of the herd for which "herds in proximity is calculated", 
@@ -76,20 +74,9 @@ typedef int (*SearchHitCallback)(int id, void* arg);
 		   callback function to be called for a herd in given proximity (same as RTree argument)
 		   arguments for callback function
  */
-boolean searchWithMemoization (MemoizationTable *,
-			      uint uiID, double dRadius,
-			      SearchHitCallback pfCallback, void* pCallbackArgs);
-
-/*
-   Description  : search in circles and squares without memoization
-   Parameters  : id of the herd for which "herds in proximity is calculated", 
-                   "Radius" with which herds are to be found.
-		   callback function to be called for a herd in given proximity (same as RTree argument)
-		   arguments for callback function (same as RTree argument)
- */
-boolean searchWithCirclesAndSquares (MemoizationTable *,
-				     uint uiID, double dRadius,
-				     SearchHitCallback pfCallback, void* pCallbackArgs);
+boolean searchWithMemoization (MemoizationTable *, spatial_search_t *,
+                               uint uiID, double dRadius,
+                               spatial_search_hit_callback pfCallback, void* pCallbackArgs);
 
 void deleteMemoization (MemoizationTable *);
 

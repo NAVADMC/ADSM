@@ -4,6 +4,9 @@
  * - Removed dependency on ADSM unit.h. Now just stores location associated
  *   with an integer ID.
  * - Wrapped formerly global variables in a struct named MemoizationTable.
+ * - Removed Circles-&-Squares code.  The code now calls on an underlying
+ *   spatial_search_t object, which may use the Circles-&-Squares algorithm or
+ *   something else.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,40 +21,22 @@
 #define EPSILON			(0.001)
 
 
-typedef struct GeoSquare GeoSquare;
-struct GeoSquare {
-	float fLeftLongitude;
-	float fRightLongitude;
-	float fTopLatitude;
-	float fBottomLatitude;
-};
-
 typedef float (*GetLatLong) (HerdLocation* psList);
 boolean getLatLong (_IN_ char *sString, _OUT_ float *pfLatitude, _OUT_ float *pfLongitude);
 float getLatitude(HerdLocation* psList);
 float getLongitude(HerdLocation* psList);
 int findPosition(HerdLocation* psList, int uiStart, int uiEnd, float fLocation,
 		 boolean bIsUpperBound, GetLatLong fpGetPoint);
-boolean getGeoSquare(_IN_ HerdLocation sHerd, double dRadius, GeoSquare* pSquare);
 void searchInProximity(HerdLocation* psLatList, HerdLocation* psLonList,
 		       uint uiSize, HerdLocation* psHerd, double dRadius, 
-		       SearchHitCallback pfCallback, void* pCallbackArgs);
+		       spatial_search_hit_callback pfCallback, void* pCallbackArgs);
 
 void searchInProximity2 (HerdLocation* psLatList, HerdLocation* psLonList,
 			uint uiSize, HerdLocation* psHerd, double dRadius,
 			 InProximity* pTargetList, double dLastRadius);
+void addToMemoization2 (int id, gpointer user_data);
 
 int callbackNew(int id, void* args);
-
-/************************** quick sort functions *************************************/
-typedef boolean (*CompareLatLon) (_IN_ HerdLocation*, _IN_ HerdLocation*);
-void swap(_IN_OUT_ HerdLocation* psHerd1, _IN_OUT_ HerdLocation* psHerd2);
-boolean compareLat (_IN_ HerdLocation* psHerd1, _IN_ HerdLocation* psHerd2);
-boolean compareLon(_IN_ HerdLocation* psHerd1, _IN_ HerdLocation* psHerd2);
-int partition(_IN_OUT_ HerdLocation* psList, _IN_ int iFirst,
-					_IN_ int iLast, _IN_ CompareLatLon fpCompare);
-void quickSort(_IN_OUT_ HerdLocation* psList, _IN_ int iFirst,
-					_IN_ int iLast, _IN_ CompareLatLon fpCompare);
 
 /*************************** global variables ***************************************/
 
@@ -68,65 +53,6 @@ static double deg_to_rad315;
 static double deg_to_rad225;
 static double deg_to_rad45;
 static double deg_to_rad135;
-
-/************************** quick sort functions *************************/
-
-void swap(_IN_OUT_ HerdLocation* psHerd1, _IN_OUT_ HerdLocation* psHerd2) {
-  HerdLocation temp;
-
-  temp = *psHerd1;
-  *psHerd1 = *psHerd2;
-  *psHerd2 = temp;
-}
-
-
-boolean compareLat (_IN_ HerdLocation* psHerd1, _IN_ HerdLocation* psHerd2) {
-  boolean ret_val = FALSE;
-  if (NULL != psHerd1) {
-    ret_val = ((psHerd1->fLat <= psHerd2->fLat) ? TRUE : FALSE);
-  }
-
-  return ret_val;
-}
-
-boolean compareLon(_IN_ HerdLocation* psHerd1, _IN_ HerdLocation* psHerd2) {
-  boolean ret_val = FALSE;
-  if (NULL != psHerd1) {
-    ret_val = ((psHerd1->fLon <= psHerd2->fLon) ? TRUE : FALSE);
-  }
-
-  return ret_val;
-}
-
-int partition(_IN_OUT_ HerdLocation* psList, _IN_ int iFirst, _IN_ int iLast, _IN_ CompareLatLon fpCompare) {
-  int i, j;
-
-  i = iFirst-1;
-
-  for (j = iFirst; j<= iLast-1; j++) {
-    if (TRUE == fpCompare(&psList[j], &psList[iLast])) {
-      i++;
-      swap(&psList[i], &psList[j]);
-    }
-  }
-  swap(&psList[i+1], &psList[iLast]);
-
-  return i+1;
-}
-
-
-void quickSort(_IN_OUT_ HerdLocation* psList, _IN_ int iFirst, _IN_ int iLast, _IN_ CompareLatLon fpCompare) {
-
-  if (iFirst < iLast) {
-    int pivot;
-
-    pivot = partition(psList, iFirst, iLast, fpCompare);
-    quickSort(psList, iFirst, pivot-1, fpCompare);
-    quickSort(psList, pivot+1, iLast, fpCompare);
-  }
-}
-
-
 
 void Math_functions() {
 
@@ -236,20 +162,12 @@ MemoizationTable *initMemoization (float *fLat, float *fLon, uint nherds) {
   memo = g_new (MemoizationTable, 1);
   memo->uiNumHerds = nherds;
 
-  memo->uiSize = nherds;
   memo->pAllHerds = g_new0 (InProximity *, nherds);
-  memo->pLatitudeList = g_new0 (HerdLocation, nherds);
-  memo->pLongitudeList = g_new0 (HerdLocation, nherds);
   memo->pUnsortedList = g_new0 (HerdLocation, nherds);
 
   for (i = 0; i < nherds; i++) {
-    insertHerd(memo->pLatitudeList, fLat[i], fLon[i], i);
-    insertHerd(memo->pLongitudeList, fLat[i], fLon[i], i);
     insertHerd(memo->pUnsortedList, fLat[i], fLon[i], i);
   }
-
-  quickSort(memo->pLatitudeList, 0, nherds, compareLat);
-  quickSort(memo->pLongitudeList, 0, nherds, compareLon);
 
   return memo;
 }
@@ -329,157 +247,9 @@ boolean withInRadius(HerdLocation* pX_Herd, HerdLocation* pY_Herd, double dRadiu
   return ret_val;
 }
 
-/**************************** square calculations **********************************/
-boolean getGeoSquareBig(_IN_ HerdLocation sHerd, float uiRadius, GeoSquare* pSquare) {
-
-    float temp_lat;
-    float temp1, temp2;
-    float lon_top;
-    float lon_bottom;
-    float lon_0;
-    float which_lat;
-
-    /* degrees to radians */
-    sHerd.fLat *= DEG_TO_RAD;
-    sHerd.fLon *= DEG_TO_RAD;
-
-    /* north side */
-    pSquare->fTopLatitude =  asin(sin(sHerd.fLat)*cos(uiRadius/GIS_EARTH_RADIUS)
-				  + cos(sHerd.fLat)*sin(uiRadius/GIS_EARTH_RADIUS)*cos0);
-    /* south-side */
-    pSquare->fBottomLatitude = asin(sin(sHerd.fLat)*cos(uiRadius/GIS_EARTH_RADIUS)
-				    + cos(sHerd.fLat)*sin(uiRadius/GIS_EARTH_RADIUS)*cos180);
-    /* left side, 270 degree */
-    temp_lat =  asin(sin(sHerd.fLat)*cos(uiRadius/GIS_EARTH_RADIUS)
-		     + cos(sHerd.fLat)*sin(uiRadius/GIS_EARTH_RADIUS)*cos270);
-
-    temp1 = sin(deg_to_rad270)*sin(uiRadius/GIS_EARTH_RADIUS)*cos(sHerd.fLat);
-    temp2 = cos(uiRadius/GIS_EARTH_RADIUS) - (sin(sHerd.fLat) * sin(temp_lat));
-    lon_0 = (sHerd.fLon + atan2(temp1, temp2));
-
-    pSquare->fLeftLongitude = lon_0;
-    which_lat = sHerd.fLat;
-
-    /*  left side at 270, at top */
-    temp_lat =  asin(sin(pSquare->fTopLatitude)*cos(uiRadius/GIS_EARTH_RADIUS)
-		     + cos(pSquare->fTopLatitude)*sin(uiRadius/GIS_EARTH_RADIUS)*cos270);
-
-    temp1 = sin(deg_to_rad270)*sin(uiRadius/GIS_EARTH_RADIUS)*cos(sHerd.fLat);
-    temp2 = cos(uiRadius/GIS_EARTH_RADIUS) - (sin(pSquare->fTopLatitude) * sin(temp_lat));
-    lon_top = (sHerd.fLon + atan2(temp1, temp2));
-
-    if (lon_top < pSquare->fLeftLongitude) {
-      pSquare->fLeftLongitude = lon_top;
-      which_lat = pSquare->fTopLatitude;
-    }
-
-    /*  left side at 270, at bottom */
-    temp_lat =  asin(sin(pSquare->fBottomLatitude)*cos(uiRadius/GIS_EARTH_RADIUS)
-		     + cos(pSquare->fBottomLatitude)*sin(uiRadius/GIS_EARTH_RADIUS)*cos270);
-
-    temp1 = sin(deg_to_rad270)*sin(uiRadius/GIS_EARTH_RADIUS)*cos(sHerd.fLat);
-    temp2 = cos(uiRadius/GIS_EARTH_RADIUS) - (sin(pSquare->fBottomLatitude) * sin(temp_lat));
-    lon_bottom = (sHerd.fLon + atan2(temp1, temp2));
-
-    if (lon_bottom < pSquare->fLeftLongitude) {
-      pSquare->fLeftLongitude = lon_bottom;
-      which_lat = pSquare->fBottomLatitude;
-    }
-
-    temp_lat =  asin(sin(which_lat)*cos(uiRadius/GIS_EARTH_RADIUS)
-		     + cos(which_lat)*sin(uiRadius/GIS_EARTH_RADIUS)*cos90);
-
-    temp1 = sin(deg_to_rad90)*sin(uiRadius/GIS_EARTH_RADIUS)*cos(which_lat);
-    temp2 = cos(uiRadius/GIS_EARTH_RADIUS) - (sin(which_lat) * sin(temp_lat));
-    pSquare->fRightLongitude = (sHerd.fLon + atan2(temp1, temp2));
-
-
-    /* convert back to degrees */
-    pSquare->fTopLatitude = RAD_TO_DEG * (pSquare->fTopLatitude);
-    pSquare->fBottomLatitude = RAD_TO_DEG * (pSquare->fBottomLatitude);
-
-    /* convert back to degrees */
-    pSquare->fLeftLongitude = RAD_TO_DEG * (pSquare->fLeftLongitude);
-    pSquare->fRightLongitude = RAD_TO_DEG * (pSquare->fRightLongitude);;
-
-#ifdef DEBUG
-    printf ("Top, Left is %f, %f\n", pSquare->fTopLatitude, pSquare->fLeftLongitude);
-    printf ("Bottom, Right is %f, %f\n", pSquare->fBottomLatitude, pSquare->fRightLongitude);
-#endif
-    return TRUE;
-}
-
-boolean getGeoSquareSmall(_IN_ HerdLocation sHerd, float uiRadius, GeoSquare* pSquare) {
-
-  float temp1, temp2;
-  float lon_bottom;
-
-  /* degrees to radians */
-  sHerd.fLat *= DEG_TO_RAD;
-  sHerd.fLon *= DEG_TO_RAD;
-
-  /* left, north side */
-  pSquare->fTopLatitude =  asin(sin(sHerd.fLat)*cos(uiRadius/GIS_EARTH_RADIUS)
-				+ cos(sHerd.fLat)*sin(uiRadius/GIS_EARTH_RADIUS)*cos315);
-
-  temp1 = sin(deg_to_rad315)*sin(uiRadius/GIS_EARTH_RADIUS)*cos(sHerd.fLat);
-  temp2 = cos(uiRadius/GIS_EARTH_RADIUS) - (sin(sHerd.fLat) * sin(pSquare->fTopLatitude));
-  pSquare->fLeftLongitude = (sHerd.fLon + atan2(temp1, temp2));
-
-  /* left, south-side */
-  pSquare->fBottomLatitude = asin(sin(sHerd.fLat)*cos(uiRadius/GIS_EARTH_RADIUS)
-				  + cos(sHerd.fLat)*sin(uiRadius/GIS_EARTH_RADIUS)*cos225);
-  temp1 = sin(deg_to_rad225)*sin(uiRadius/GIS_EARTH_RADIUS)*cos(sHerd.fLat);
-  temp2 = cos(uiRadius/GIS_EARTH_RADIUS) - (sin(sHerd.fLat) * sin(pSquare->fBottomLatitude));
-  lon_bottom = (sHerd.fLon + atan2(temp1, temp2));
-
-  if (pSquare->fLeftLongitude > lon_bottom) {
-    pSquare->fLeftLongitude = lon_bottom;
-  }
-
-  temp1 = sin(deg_to_rad45)*sin(uiRadius/GIS_EARTH_RADIUS)*cos(sHerd.fLat);
-  temp2 = cos(uiRadius/GIS_EARTH_RADIUS) - (sin(sHerd.fLat) * sin(pSquare->fTopLatitude));
-  pSquare->fRightLongitude = (sHerd.fLon + atan2(temp1, temp2));
-
-  temp1 = sin(deg_to_rad135)*sin(uiRadius/GIS_EARTH_RADIUS)*cos(sHerd.fLat);
-  temp2 = cos(uiRadius/GIS_EARTH_RADIUS) - (sin(sHerd.fLat) * sin(pSquare->fBottomLatitude));
-  lon_bottom = (sHerd.fLon + atan2(temp1, temp2));
-
-  if (pSquare->fRightLongitude > lon_bottom) {
-    pSquare->fRightLongitude = lon_bottom;
-  }
-
-  /* convert back to degrees */
-  pSquare->fTopLatitude = RAD_TO_DEG * (pSquare->fTopLatitude);
-  pSquare->fBottomLatitude = RAD_TO_DEG * (pSquare->fBottomLatitude);
-
-  /* convert back to degrees */
-  pSquare->fLeftLongitude = RAD_TO_DEG * (pSquare->fLeftLongitude);
-  pSquare->fRightLongitude = RAD_TO_DEG * (pSquare->fRightLongitude);
-
-#ifdef DEBUG
-  printf ("Top, Left is %f, %f\n", pSquare->fTopLatitude, pSquare->fLeftLongitude);
-  printf ("Bottom, Right is %f, %f\n", pSquare->fBottomLatitude, pSquare->fRightLongitude);
-#endif
-  return TRUE;
-}
-
-/***************** functions of 01, only squares and circles *************/
-boolean searchWithCirclesAndSquares (MemoizationTable *memo,
-			     uint uiID, double dRadius,
-			     SearchHitCallback pfCallback, void* pCallbackArgs) {
-  boolean ret_val = FALSE;
-  HerdLocation herd = memo->pUnsortedList[uiID];
-
-  searchInProximity (memo->pLatitudeList, memo->pLongitudeList, memo->uiSize, 
-		     &herd, dRadius, pfCallback, pCallbackArgs);
-
-  return ret_val;
-}
-
 void processHerd (HerdLocation* pS_Herd, HerdLocation* pT_Herd, 
 		     double dRadius, boolean bSureIn, 
-		     SearchHitCallback pfCallback, void* pCallbackArgs) {
+		     spatial_search_hit_callback pfCallback, void* pCallbackArgs) {
 
   if (!bSureIn) {
     if(withInRadius(pS_Herd, pT_Herd, dRadius)) {
@@ -491,81 +261,9 @@ void processHerd (HerdLocation* pS_Herd, HerdLocation* pT_Herd,
 }
 
 
-void searchInProximity (HerdLocation* psLatList, HerdLocation* psLonList,
-			uint uiSize, HerdLocation* psHerd, double dRadius, 
-			SearchHitCallback pfCallback, void* pCallbackArgs) {
-
-  GeoSquare big_square;
-  GeoSquare small_square;
-  HerdLocation* list;
-  int bottom_most;
-  int top_most;
-  int left_most;
-  int right_most;
-  int start_pos;
-  int end_pos;
-  int i;
-
-
-  getGeoSquareBig(*psHerd, dRadius * 1.1, &big_square);
-  getGeoSquareSmall(*psHerd, dRadius*0.99, &small_square);
-
-  /* find latitude and longitudes at the end of the given radius */
-  bottom_most = findPosition(psLatList, 1, uiSize, big_square.fBottomLatitude, FALSE, getLatitude);
-  top_most = findPosition(psLatList, bottom_most, uiSize, big_square.fTopLatitude, TRUE, getLatitude);
-  left_most = findPosition(psLonList, 1, uiSize, big_square.fLeftLongitude, FALSE, getLongitude);
-  right_most = findPosition(psLonList, left_most, uiSize, big_square.fRightLongitude, TRUE, getLongitude);
-
-  if ((top_most - bottom_most) > (right_most - left_most)) {
-    list = psLonList;
-    start_pos = left_most;
-    end_pos = right_most;
-
-    for (i = start_pos; i <= end_pos; i++) {
-  
-      if ((list[i].fLat >= big_square.fBottomLatitude) && (list[i].fLat <= big_square.fTopLatitude)) {
-
-	if ((list[i].fLon > small_square.fLeftLongitude) && (list[i].fLon < small_square.fRightLongitude)
-	    && (list[i].fLat > small_square.fBottomLatitude) && (list[i].fLat < small_square.fTopLatitude)){
-
-	  if (list[i].uiID != psHerd->uiID) {
-	    processHerd(psHerd, &list[i], dRadius, TRUE, pfCallback, pCallbackArgs);
-	  }
-	}else{   
-	  processHerd(psHerd, &list[i], dRadius, FALSE, pfCallback, pCallbackArgs);
-	}
-      }
-    
-    }/* for (i = start_pos; i <= end_pos; i++) */
-
-  }else {
-    list = psLatList;
-    start_pos = bottom_most;
-    end_pos = top_most;
-
-    for (i = start_pos; i <= end_pos; i++) {
-	
-      if ((list[i].fLon >= big_square.fLeftLongitude) && (list[i].fLon <= big_square.fRightLongitude)){
-
-	if ((list[i].fLon > small_square.fLeftLongitude) && (list[i].fLon < small_square.fRightLongitude)
-	    && (list[i].fLat > small_square.fBottomLatitude) && (list[i].fLat < small_square.fTopLatitude)){
-
-	  if (list[i].uiID != psHerd->uiID) {
-	    processHerd(psHerd, &list[i], dRadius, TRUE, pfCallback, pCallbackArgs);
-	  }
-	}else{
-	  processHerd(psHerd, &list[i], dRadius, FALSE, pfCallback, pCallbackArgs);
-	}
-      }    
-    }/* for (i = start_pos; i <= end_pos; i++) */
-  }
-
-}
-
-
 /************************** 10 search with memoization  **************************/
 
-void processHerdList2(HerdNode* pHerdList, SearchHitCallback pfCallback,
+void processHerdList2(HerdNode* pHerdList, spatial_search_hit_callback pfCallback,
 		     void* pCallbackArgs) {
   while (NULL != pHerdList) {
     /* call the function which processes the list */
@@ -609,9 +307,23 @@ void splitHerdList2(HerdLocation* pHerd, InProximity* pDistList, double dRadius)
 }
 
 
+/**
+ * A structure used to hold callback arguments in inMemoization2 below.
+ */
+typedef struct {
+  HerdLocation *pUnsortedList;
+  HerdLocation *pS_Herd;
+  double dRadius;
+  InProximity *pTargetList;
+  double dLastRadius;
+} addToMemoization2_args_t;
+
+
+
 boolean inMemoization2(MemoizationTable *memo,
+              spatial_search_t *searcher,
 		      HerdLocation* pHerd, InProximity** pSrcHerds,
-		      double dRadius, SearchHitCallback pfCallback,
+		      double dRadius, spatial_search_hit_callback pfCallback,
 		      void* pCallbackArgs)  {
   InProximity* src_list = *pSrcHerds;
   InProximity* prev_list = NULL;
@@ -650,10 +362,19 @@ boolean inMemoization2(MemoizationTable *memo,
   }
 
   if (FALSE == ret_val) {		/* create new distance list */
+    addToMemoization2_args_t args;
+
     temp_list = createNewProxmityList(dRadius);
-    searchInProximity2 (memo->pLatitudeList, memo->pLongitudeList, 
-			memo->uiSize, pHerd, dRadius, temp_list, 
-			prev_list->dRadius);
+    /* These callback arguments correspond to the arguments to the old function
+     * searchInProximity2. */
+    args.pUnsortedList = memo->pUnsortedList;
+	args.pS_Herd = pHerd;
+    args.dRadius = dRadius;
+    args.pTargetList = temp_list;
+    args.dLastRadius = prev_list->dRadius;
+    spatial_search_circle_by_xy (searcher,
+                                 pHerd->fLon, pHerd->fLat, dRadius,
+                                 addToMemoization2, &args);
     processHerdList2(temp_list->psHerdList, pfCallback, pCallbackArgs);
     prev_list->psNext = temp_list;
   }
@@ -662,23 +383,44 @@ boolean inMemoization2(MemoizationTable *memo,
 }
 
 /* search in circles and squares with memoization */
-boolean searchWithMemoization (MemoizationTable *memo,
-			             uint uiID, double dRadius,
-			             SearchHitCallback pfCallback, void* pCallbackArgs) {
-
+boolean
+searchWithMemoization (MemoizationTable *memo,
+                       spatial_search_t *searcher,
+                       uint uiID, double dRadius,
+                       spatial_search_hit_callback pfCallback, void* pCallbackArgs)
+{
   boolean ret_val = FALSE;
-  HerdLocation herd = memo->pUnsortedList[uiID];
+  HerdLocation *herd;
 
-  if (NULL == memo->pAllHerds[herd.uiID]) {
-    memo->pAllHerds[herd.uiID] = createNewProxmityList(dRadius);
+  herd = &(memo->pUnsortedList[uiID]);
+  pfCallback(uiID, pCallbackArgs);
 
-    searchInProximity2 (memo->pLatitudeList, memo->pLongitudeList, memo->uiSize,
-			&herd, dRadius, memo->pAllHerds[herd.uiID], (double)0.0);
+  if (NULL == memo->pAllHerds[uiID])
+  {
+    /* In the original implementation, this function called searchInProximity2,
+     * which in turn called addToMemoization2 for all herds that it found. Here
+     * we are replacing searchInProximity2 by an arbitrary spatial_search_t
+     * object, which must also call addToMemoization2 for all herds that it
+     * finds. */
+    addToMemoization2_args_t args;
 
-    processHerdList2(memo->pAllHerds[herd.uiID]->psHerdList, 
+    memo->pAllHerds[uiID] = createNewProxmityList(dRadius);
+
+    /* These callback arguments correspond to the arguments to the old function
+     * searchInProximity2. */
+    args.pUnsortedList = memo->pUnsortedList;
+	args.pS_Herd = herd;
+    args.dRadius = dRadius;
+    args.pTargetList = memo->pAllHerds[uiID];
+    args.dLastRadius = 0,0;
+    spatial_search_circle_by_xy (searcher,
+                                 herd->fLon, herd->fLat, dRadius,
+                                 addToMemoization2, &args);
+
+    processHerdList2(memo->pAllHerds[uiID]->psHerdList, 
 		     pfCallback, pCallbackArgs);
   }else {
-    inMemoization2(memo, &herd, &(memo->pAllHerds[herd.uiID]), dRadius,  
+    inMemoization2(memo, searcher, herd, &(memo->pAllHerds[uiID]), dRadius,  
 		   pfCallback, pCallbackArgs);
   }
 
@@ -749,96 +491,26 @@ void addToHerdList2 (InProximity* pTargetList, InProximity* pSearchList,
 }
 
 
-boolean addToMemoization2 (HerdLocation* pS_Herd, HerdLocation* pT_Herd, 
-			   double dRadius, InProximity* pTargetList, 
-			   double dLastRadius) {
-  boolean ret_val = FALSE;
+void addToMemoization2 (int id, gpointer user_data) {
+  addToMemoization2_args_t *args;
+  HerdLocation *pS_Herd, *pT_Herd;
   double distance;
+
+  args = (addToMemoization2_args_t *) user_data;
+  pS_Herd = args->pS_Herd;
+  pT_Herd = &(args->pUnsortedList[id]);
 
   /* calculate weather the herd is within radius */
   distance = GIS_distance(pS_Herd->fLat, pS_Herd->fLon, 
 				pT_Herd->fLat, pT_Herd->fLon);
   
-  if ((distance - dRadius) <= EPSILON) {
-    if ((distance - dLastRadius) > EPSILON) {
-          addToList2(pTargetList, pT_Herd);
+  if ((distance - args->dRadius) <= EPSILON) {
+    if ((distance - args->dLastRadius) > EPSILON) {
+          addToList2(args->pTargetList, pT_Herd);
     }
   }
 
-  return ret_val;
-}
-
-
-void searchInProximity2 (HerdLocation* psLatList, HerdLocation* psLonList,
-			uint uiSize, HerdLocation* psHerd, double dRadius,
-			InProximity* pTargetList, double dLastRadius) {
-
-
-  GeoSquare big_square;
-  GeoSquare small_square;
-  HerdLocation* list;
-  int bottom_most;
-  int top_most;
-  int left_most;
-  int right_most;
-  int start_pos;
-  int end_pos;
-  int i;
-
-
-  getGeoSquareBig(*psHerd, (dRadius * 1.1), &big_square);
-  getGeoSquareSmall(*psHerd, (dRadius * 0.99), &small_square);
-
-  /* find latitude and longitudes at the end of the given radius */
-  bottom_most = findPosition(psLatList, 1, uiSize, big_square.fBottomLatitude, FALSE, getLatitude);
-  top_most = findPosition(psLatList, bottom_most, uiSize, big_square.fTopLatitude, TRUE, getLatitude);
-  left_most = findPosition(psLonList, 1, uiSize, big_square.fLeftLongitude, FALSE, getLongitude);
-  right_most = findPosition(psLonList, left_most, uiSize, big_square.fRightLongitude, TRUE, getLongitude);
-
-  if ((top_most - bottom_most) > (right_most - left_most)) {
-    list = psLonList;
-    start_pos = left_most;
-    end_pos = right_most;
-
-    for (i = start_pos; i <= end_pos; i++) {
-  
-      if ((list[i].fLat >= big_square.fBottomLatitude) && (list[i].fLat <= big_square.fTopLatitude)) {
-
-	if ((list[i].fLon > small_square.fLeftLongitude) && (list[i].fLon < small_square.fRightLongitude)
-	    && (list[i].fLat > small_square.fBottomLatitude) && (list[i].fLat < small_square.fTopLatitude)){
-
-	  if (list[i].uiID != psHerd->uiID) {
-	    addToMemoization2(psHerd, &list[i], dRadius, pTargetList, dLastRadius);
-	  }
-	}else{   
-	  addToMemoization2(psHerd, &list[i], dRadius, pTargetList, dLastRadius);	  
-	}
-      }
-    
-    }/* for (i = start_pos; i <= end_pos; i++) */
-
-  }else {
-    list = psLatList;
-    start_pos = bottom_most;
-    end_pos = top_most;
-
-    for (i = start_pos; i <= end_pos; i++) {
-	
-      if ((list[i].fLon >= big_square.fLeftLongitude) && (list[i].fLon <= big_square.fRightLongitude)){
-
-	if ((list[i].fLon > small_square.fLeftLongitude) && (list[i].fLon < small_square.fRightLongitude)
-	    && (list[i].fLat > small_square.fBottomLatitude) && (list[i].fLat < small_square.fTopLatitude)){
-
-	  if (list[i].uiID != psHerd->uiID) {
-	    addToMemoization2(psHerd, &list[i], dRadius, pTargetList, dLastRadius);	  
-	  }
-	}else{
-	  addToMemoization2(psHerd, &list[i], dRadius, pTargetList, dLastRadius);	  
-	}
-      }    
-    }/* for (i = start_pos; i <= end_pos; i++) */
-  }
-
+  return;
 }
 
 
