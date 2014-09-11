@@ -23,7 +23,7 @@
 
 void addToMemoization2 (int id, gpointer user_data);
 
-boolean insertHerd (_IN_OUT_ HerdLocation* psHerdList,
+boolean insertHerd (_IN_OUT_ Location* psHerdList,
 		    _IN_ double x,
 		    _IN_ double y,
 		    _IN_ uint uiID) {
@@ -53,7 +53,7 @@ MemoizationTable *initMemoization (double *x, double *y, uint nherds) {
   memo->uiNumHerds = nherds;
 
   memo->pAllHerds = g_new0 (InProximity *, nherds);
-  memo->pUnsortedList = g_new0 (HerdLocation, nherds);
+  memo->pUnsortedList = g_new0 (Location, nherds);
 
   for (i = 0; i < nherds; i++) {
     insertHerd(memo->pUnsortedList, x[i], y[i], i);
@@ -77,7 +77,7 @@ InProximity* createNewProxmityList(double dRadius) {
   return new_dist;
 }
 
-HerdNode* createNewHerdNode(HerdLocation* pHerd) {
+HerdNode* createNewHerdNode(Location* pHerd) {
   HerdNode* new_node = (HerdNode*)malloc(sizeof(HerdNode));
   new_node->psHerd = pHerd;
   new_node->psNext = NULL;
@@ -123,7 +123,7 @@ void deleteMemoization(MemoizationTable *memo) {
 }
 
 
-boolean withInRadius(HerdLocation* pX_Herd, HerdLocation* pY_Herd, double dRadius) {
+boolean withInRadius(Location* pX_Herd, Location* pY_Herd, double dRadius) {
   boolean ret_val = FALSE;
   double distance;
 
@@ -137,7 +137,7 @@ boolean withInRadius(HerdLocation* pX_Herd, HerdLocation* pY_Herd, double dRadiu
   return ret_val;
 }
 
-void processHerd (HerdLocation* pS_Herd, HerdLocation* pT_Herd, 
+void processHerd (Location* pS_Herd, Location* pT_Herd, 
 		     double dRadius, boolean bSureIn, 
 		     spatial_search_hit_callback pfCallback, void* pCallbackArgs) {
 
@@ -162,7 +162,7 @@ void processHerdList2(HerdNode* pHerdList, spatial_search_hit_callback pfCallbac
   }
 }
 
-void splitHerdList2(HerdLocation* pHerd, InProximity* pDistList, double dRadius) {
+void splitHerdList2(Location* pHerd, InProximity* pDistList, double dRadius) {
   HerdNode* src_list = pDistList->psNext->psHerdList;
   HerdNode* next_list = NULL;
   HerdNode* prev_list = NULL;
@@ -201,8 +201,8 @@ void splitHerdList2(HerdLocation* pHerd, InProximity* pDistList, double dRadius)
  * A structure used to hold callback arguments in inMemoization2 below.
  */
 typedef struct {
-  HerdLocation *pUnsortedList;
-  HerdLocation *pS_Herd;
+  Location *pUnsortedList;
+  Location *pS_Herd;
   double dRadius;
   InProximity *pTargetList;
   double dLastRadius;
@@ -212,7 +212,7 @@ typedef struct {
 
 boolean inMemoization2(MemoizationTable *memo,
               spatial_search_t *searcher,
-		      HerdLocation* pHerd, InProximity** pSrcHerds,
+		      Location* pHerd, InProximity** pSrcHerds,
 		      double dRadius, spatial_search_hit_callback pfCallback,
 		      void* pCallbackArgs)  {
   InProximity* src_list = *pSrcHerds;
@@ -280,7 +280,7 @@ searchWithMemoization (MemoizationTable *memo,
                        spatial_search_hit_callback pfCallback, void* pCallbackArgs)
 {
   boolean ret_val = FALSE;
-  HerdLocation *herd;
+  Location *herd;
 
   herd = &(memo->pUnsortedList[uiID]);
   pfCallback(uiID, pCallbackArgs);
@@ -318,7 +318,7 @@ searchWithMemoization (MemoizationTable *memo,
 }
 
 
-boolean searchInHerdList2 (InProximity* pSearchList, HerdLocation* pHerd) {
+boolean searchInHerdList2 (InProximity* pSearchList, Location* pHerd) {
   boolean ret_val = FALSE;
   HerdNode* herd;
 
@@ -343,7 +343,7 @@ boolean searchInHerdList2 (InProximity* pSearchList, HerdLocation* pHerd) {
   return ret_val;
 }
 
-void addToList2 (InProximity* pTargetList, HerdLocation* pHerd) {
+void addToList2 (InProximity* pTargetList, Location* pHerd) {
   HerdNode* new_node = createNewHerdNode(pHerd);
 
   if (NULL != pTargetList->psHerdList) {
@@ -374,7 +374,7 @@ void addToList2 (InProximity* pTargetList, HerdLocation* pHerd) {
 }
 
 void addToHerdList2 (InProximity* pTargetList, InProximity* pSearchList, 
-		     HerdLocation* pHerd) {
+		     Location* pHerd) {
   if (FALSE == searchInHerdList2 (pSearchList, pHerd)){
     addToList2(pTargetList, pHerd);
   }
@@ -383,7 +383,7 @@ void addToHerdList2 (InProximity* pTargetList, InProximity* pSearchList,
 
 void addToMemoization2 (int id, gpointer user_data) {
   addToMemoization2_args_t *args;
-  HerdLocation *pS_Herd, *pT_Herd;
+  Location *pS_Herd, *pT_Herd;
   double distance;
 
   args = (addToMemoization2_args_t *) user_data;

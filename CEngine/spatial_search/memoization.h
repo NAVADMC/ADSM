@@ -24,19 +24,19 @@ typedef unsigned long 	ulong;
 typedef uint 	boolean;
 
 
-typedef struct HerdLocation HerdLocation;
+typedef struct Location Location;
 
-/* location information of the a herd */
+/* location information */
 
-struct HerdLocation {
-	uint uiID;    /* this is the id of this herd in the main herd list */
+struct Location {
+	uint uiID;
 	double x;
 	double y;
 };
 
 typedef struct HerdNode HerdNode;
 struct HerdNode {
-	HerdLocation* psHerd;
+	Location* psHerd;
 	HerdNode* psNext;
 };
 
@@ -49,7 +49,7 @@ struct InProximity {
 
 typedef struct {
   uint uiNumHerds;
-  HerdLocation *pUnsortedList;
+  Location *pUnsortedList;
   InProximity  **pAllHerds;
 } MemoizationTable;
 
