@@ -374,7 +374,7 @@ prepare (spatial_search_t *self)
   private_data_t *private_data;
 
 #if DEBUG
-  g_debug ("----- ENTER prepare");
+  g_debug ("----- ENTER prepare (R-tree)");
 #endif
 
   private_data = (private_data_t *)(self->private_data);
@@ -392,7 +392,7 @@ prepare (spatial_search_t *self)
   private_data->rtree_threshold = 0.25 * private_data->short_axis_length;
 
 #if DEBUG
-  g_debug ("----- EXIT prepare");
+  g_debug ("----- EXIT prepare (R-tree)");
 #endif
 
   return;
@@ -467,7 +467,7 @@ search_circle_by_xy (spatial_search_t * self,
   spatial_search_callback_args_t args;
 
 #if DEBUG
-  g_debug ("----- ENTER search_circle_by_xy (x=%g, y=%g, radius=%g)", x, y, radius);
+  g_debug ("----- ENTER search_circle_by_xy (R-tree, x=%g, y=%g, radius=%g)", x, y, radius);
 #endif
 
   private_data = (private_data_t *)(self->private_data);
@@ -503,7 +503,7 @@ search_circle_by_xy (spatial_search_t * self,
     }
 
 #if DEBUG
-  g_debug ("----- EXIT search_circle_by_xy");
+  g_debug ("----- EXIT search_circle_by_xy (R-tree)");
 #endif
 
   return;
@@ -534,7 +534,7 @@ search_circle_by_id (spatial_search_t * self,
   double x, y;
 
 #if DEBUG
-  g_debug ("----- ENTER search_circle_by_id (id=%i, radius=%g)", id, radius);
+  g_debug ("----- ENTER search_circle_by_id (R-tree, id=%i, radius=%g)", id, radius);
 #endif
 
   private_data = (private_data_t *)(self->private_data);
@@ -544,7 +544,7 @@ search_circle_by_id (spatial_search_t * self,
   search_circle_by_xy (self, x, y, radius, user_function, user_data);
 
 #if DEBUG
-  g_debug ("----- EXIT search_circle_by_id");
+  g_debug ("----- EXIT search_circle_by_id (R-tree)");
 #endif
 
   return;
@@ -599,7 +599,7 @@ search_rectangle (spatial_search_t * self,
   double long_axis;
 
 #if DEBUG
-  g_debug ("----- ENTER search_rectangle");
+  g_debug ("----- ENTER search_rectangle (R-tree)");
 #endif
 
   private_data = (private_data_t *)(self->private_data);
@@ -632,7 +632,7 @@ search_rectangle (spatial_search_t * self,
     }
 
 #if DEBUG
-  g_debug ("----- EXIT search_rectangle");
+  g_debug ("----- EXIT search_rectangle (R-tree)");
 #endif
 
   return;
@@ -651,7 +651,7 @@ free_searcher (spatial_search_t *self)
   private_data_t *private_data;
 
 #if DEBUG
-  g_debug ("----- ENTER free_spatial_search");
+  g_debug ("----- ENTER free_spatial_search (R-tree)");
 #endif
 
   if (self != NULL)
@@ -664,7 +664,7 @@ free_searcher (spatial_search_t *self)
   }
 
 #if DEBUG
-  g_debug ("----- EXIT free_spatial_search");
+  g_debug ("----- EXIT free_spatial_search (R-tree)");
 #endif
 
   return;

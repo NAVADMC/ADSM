@@ -78,7 +78,7 @@ prepare (spatial_search_t *searcher)
   spatial_search_t *underlying_search;
 
   #if DEBUG
-    g_debug ("----- ENTER prepare");
+    g_debug ("----- ENTER prepare (memoization table)");
   #endif
 
   private_data = (private_data_t *)(searcher->private_data);
@@ -105,7 +105,7 @@ prepare (spatial_search_t *searcher)
   private_data->y = NULL;
 
   #if DEBUG
-    g_debug ("----- EXIT prepare");
+    g_debug ("----- EXIT prepare (memoization table)");
   #endif
 
   return;
@@ -134,7 +134,7 @@ search_circle_by_xy (spatial_search_t * searcher,
   private_data_t *private_data;
 
   #if DEBUG
-    g_debug ("----- ENTER search_circle_by_xy (x=%g, y=%g, radius=%g)", x, y, radius);
+    g_debug ("----- ENTER search_circle_by_xy (memoization table, x=%g, y=%g, radius=%g)", x, y, radius);
   #endif
 
   private_data = (private_data_t *)(searcher->private_data);
@@ -145,7 +145,7 @@ search_circle_by_xy (spatial_search_t * searcher,
                                user_function, user_data);
 
   #if DEBUG
-    g_debug ("----- EXIT search_circle_by_xy");
+    g_debug ("----- EXIT search_circle_by_xy (memoization table)");
   #endif
 
   return;
@@ -174,7 +174,7 @@ search_circle_by_id (spatial_search_t * searcher,
   private_data_t *private_data;
 
   #if DEBUG
-    g_debug ("----- ENTER search_circle_by_id (id=%i, radius=%g)", id, radius);
+    g_debug ("----- ENTER search_circle_by_id (memoization table, id=%i, radius=%g)", id, radius);
   #endif
 
   private_data = (private_data_t *)(searcher->private_data);
@@ -186,7 +186,7 @@ search_circle_by_id (spatial_search_t * searcher,
 			             user_function, user_data);
 
   #if DEBUG
-    g_debug ("----- EXIT search_circle_by_id");
+    g_debug ("----- EXIT search_circle_by_id (memoization table)");
   #endif
 
   return;
@@ -216,7 +216,7 @@ search_rectangle (spatial_search_t * searcher,
   private_data_t *private_data;
 
   #if DEBUG
-    g_debug ("----- ENTER search_rectangle");
+    g_debug ("----- ENTER search_rectangle (memoization table)");
   #endif
 
   private_data = (private_data_t *)(searcher->private_data);
@@ -227,7 +227,7 @@ search_rectangle (spatial_search_t * searcher,
                             user_function, user_data);
 
   #if DEBUG
-    g_debug ("----- EXIT search_rectangle");
+    g_debug ("----- EXIT search_rectangle (memoization table)");
   #endif
 
   return;
@@ -248,7 +248,7 @@ free_searcher (spatial_search_t *searcher)
   private_data_t *private_data;
 
   #if DEBUG
-    g_debug ("----- ENTER free_searcher");
+    g_debug ("----- ENTER free_searcher (memoization table)");
   #endif
 
   if (searcher != NULL)
@@ -261,7 +261,7 @@ free_searcher (spatial_search_t *searcher)
   }
 
   #if DEBUG
-    g_debug ("----- EXIT free_searcher");
+    g_debug ("----- EXIT free_searcher (memoization table)");
   #endif
 
   return;
