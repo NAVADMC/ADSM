@@ -538,7 +538,7 @@ handle_midnight_event (struct adsm_module_t_ *self,
       #if DEBUG
         callback_data.n_search_hits = nHitsCircle;
       #endif
-      spatial_search_circle_by_xy (units->spatial_index, x, y, distance,
+      spatial_search_circle_by_id (units->spatial_index, pending_focus->index, distance,
                                    check_circle_and_rezone, &callback_data);
 
       /* Next, fill in any "holes", starting with the zone with the highest

@@ -17,6 +17,7 @@
 #endif
 
 #include "spatial_search.h"
+#include "memoization.h"
 
 
 
@@ -26,6 +27,9 @@
  */
 typedef struct
 {
+  GArray *x; /* For gathering up locations prior to prepare() */
+  GArray *y; /* For gathering up locations priot to prepare() */
+  MemoizationTable *memo;
   spatial_search_t *underlying_search;
 }
 private_data_t;
@@ -48,6 +52,10 @@ add_point (spatial_search_t *searcher, double x, double y)
   private_data_t *private_data;
 
   private_data = (private_data_t *)(searcher->private_data);
+
+  /* Add to the lists that will be used to initialize the memoization table. */
+  g_array_append_val (private_data->x, x);
+  g_array_append_val (private_data->y, y);
 
   /* Also pass along to the underlying search method. */
   spatial_search_add_point (private_data->underlying_search, x, y);
@@ -85,6 +93,16 @@ prepare (spatial_search_t *searcher)
   searcher->min_y = underlying_search->min_y;
   searcher->max_x = underlying_search->max_x;
   searcher->max_y = underlying_search->max_y;
+
+  /* Initialize the memoization table. */
+  private_data->memo =
+    initMemoization ((double *)(private_data->x->data),
+                     (double *)(private_data->y->data),
+                     searcher->npoints);
+  g_array_free (private_data->x, /* free_segment = */ TRUE);
+  private_data->x = NULL;
+  g_array_free (private_data->y, /* free_segment = */ TRUE);
+  private_data->y = NULL;
 
   #if DEBUG
     g_debug ("----- EXIT prepare");
@@ -161,10 +179,11 @@ search_circle_by_id (spatial_search_t * searcher,
 
   private_data = (private_data_t *)(searcher->private_data);
 
-  /* Pass request to underlying search method. */
-  spatial_search_circle_by_id (private_data->underlying_search,
-                               id, radius,
-                               user_function, user_data);
+  /* This is the case the memoization table handles. */
+  searchWithMemoization (private_data->memo,
+                         private_data->underlying_search,
+                         id, radius,
+			             user_function, user_data);
 
   #if DEBUG
     g_debug ("----- EXIT search_circle_by_id");
@@ -235,6 +254,7 @@ free_searcher (spatial_search_t *searcher)
   if (searcher != NULL)
   {
     private_data = (private_data_t *)(searcher->private_data);
+    deleteMemoization (private_data->memo);
     free_spatial_search (private_data->underlying_search);
     g_free (private_data);
     g_free (searcher);
@@ -270,6 +290,10 @@ new_spatial_search_with_memoization (spatial_search_t *underlying_search)
   /* min_x, max_x, min_y, and max_y are undefined until the first point is
    * added. */
   private_data = g_new (private_data_t, 1);
+  private_data->x = g_array_new (FALSE, FALSE, sizeof(double));
+  private_data->y = g_array_new (FALSE, FALSE, sizeof(double));
+  /* The memoization table is null until the call to prepare(). */
+  private_data->memo = NULL;
   private_data->underlying_search = underlying_search;
   searcher->private_data = (gpointer) private_data;
   
