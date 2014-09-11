@@ -20,6 +20,8 @@ standardPost = {'description': 'words', "naadsm_version": '3.2.19', "language": 
 
 
 class CreatorTest(TestCase):
+    multi_db = True
+
     def test_index_page(self):
         r = self.client.get('')
         self.assertEqual(r.status_code, 302)
@@ -42,6 +44,8 @@ class CreatorTest(TestCase):
 
 
 class ModelUtilsTest(TestCase):
+    multi_db = True
+
     def test_choice_char_from_value(self):
         choices = Unit._meta.get_field_by_name('initial_state')[0]._choices
         tests = ['Vaccine immune', 'destroyed', '  Latent', 'Infectious SubClinical', 'kittens']
@@ -82,6 +86,8 @@ class ModelUtilsTest(TestCase):
 
 
 class IndirectSpreadFormTestCase(TestCase):
+    multi_db = True
+
     def setUp(self):
         self.p_f = ProbabilityFunction.objects.create(name="Test PF", equation_type="Triangular")
         self.r_f = RelationalFunction.objects.create(name="Test RF")
@@ -108,7 +114,9 @@ class IndirectSpreadFormTestCase(TestCase):
         self.assertIn('infection_probability', form.errors)
 
 
-class CleanTest(unittest.TestCase):
+class CleanTest(TestCase):
+    multi_db = True
+
     def test_production_type_names(self):
         pt = ProductionType(name='Bob')
         pt.clean_fields()
@@ -123,8 +131,10 @@ class CleanTest(unittest.TestCase):
 
 
 class ViewTests(TestCase):
+    multi_db = True
+
     def test_delete_links_exist(self):
-        self.client.get('/setup/OpenScenario/Roundtrip.sqlite3/')
+        self.client.get('/app/OpenScenario/Roundtrip.sqlite3/')
 
         r = self.client.get('/setup/Populations/')
         self.assertIn('data-delete-link', r.content)

@@ -5,5 +5,44 @@ from __future__ import absolute_import
 from future import standard_library
 standard_library.install_hooks()
 from django.test import TestCase
+import os
 
-# Create your tests here.
+from ScenarioCreator.views import workspace_path
+
+
+class ScenarioTestCase(TestCase):
+    multi_db = True
+
+    def remove_test_file(self, file_path):
+        try:
+            os.remove(file_path)
+        except:
+            pass
+
+    def test_post_success(self):
+        file_name = 'Test Scenario 123 AZ'
+        file_path = workspace_path(file_name) + '.sqlite3'
+
+        self.remove_test_file(file_path)
+
+        r = self.client.post('/app/SaveScenario/', {'filename': file_name})
+
+        try:
+            self.assertEqual(r.status_code, 302)
+            self.assertTrue(os.path.isfile(file_path))
+        finally:
+            self.remove_test_file(file_path)
+
+    def test_post_failure(self):
+        file_name = 'Test \/ Scenario 123 AZ' # this should break Windows and Linux
+        file_path = workspace_path(file_name) + '.sqlite3'
+
+        self.remove_test_file(file_path)
+
+        r = self.client.post('/app/SaveScenario/', {'filename': file_name})
+
+        try:
+            self.assertContains(r, 'Failed to save file.', count=1, status_code=200)
+            self.assertFalse(os.path.isfile(file_path))
+        finally:
+            self.remove_test_file(file_path)

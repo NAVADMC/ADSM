@@ -40,6 +40,7 @@ def prepare_supplemental_output_directory():
                                                     'save_map_output')
     if output_settings.exists():
         if any(output_settings[0].values()):  # any of these settings would justify an output directory
+            from Settings.models import scenario_filename
             output_dir = os.path.join('workspace', scenario_filename())  # this does not have the .sqlite3 suffix
             output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm.exe
             if not os.path.exists(output_dir):

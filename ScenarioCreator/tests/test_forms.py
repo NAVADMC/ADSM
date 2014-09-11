@@ -11,6 +11,7 @@ from django.test import TestCase
 from ScenarioCreator.forms import AirborneSpreadForm
 
 class AirborneSpreadTestCase(TestCase):
+    multi_db = True
 
     def setUp(self):
         self.form_data = {
@@ -98,7 +99,7 @@ class AirborneSpreadTestCase(TestCase):
         self.assertIn('exposure_direction_end', form.errors)
         self.assertIn(error_text, form.errors['exposure_direction_end'])
 
-    def test_invalid_exposure_end_end(self):
+    def test_invalid_exposure_end_high(self):
         error_text = "Ensure this value is less than or equal to 360."
         self.form_data['exposure_direction_end'] = '361'
 

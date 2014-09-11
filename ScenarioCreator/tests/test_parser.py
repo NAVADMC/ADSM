@@ -14,6 +14,8 @@ POPULATION_FIXTURES = 'ScenarioCreator/tests/population_fixtures/'
 
 
 class PopulationParserTestCase(TestCase):
+    multi_db = True
+
     def test_parser_load_invalid_file(self):
         with self.assertRaises(OSError):
             PopulationParser('Invalid_File.xml')
