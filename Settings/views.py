@@ -43,6 +43,7 @@ def reset_db(name):
     print("Deleting", activeSession(name))
     try:
         os.remove(activeSession(name))
+        connections[name].close()
     except BaseException as ex:
         print(ex)  # the file may not exist anyways
     #creates a new blank file by migrate / syncdb
@@ -132,6 +133,7 @@ def upload_scenario(request):
 
 def open_scenario(request, target):
     print("Copying ", workspace_path(target), "to", activeSession())
+    connections['scenario_db'].close()
     shutil.copy(workspace_path(target), activeSession())
     scenario_filename(target)
     print('Sessions overwritten with ', target)
