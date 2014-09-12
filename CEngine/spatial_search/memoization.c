@@ -9,6 +9,7 @@
  * - Removed Circles-&-Squares code.  The code now calls on an underlying
  *   spatial_search_t object, which may use the Circles-&-Squares algorithm or
  *   something else.
+ * - addToList2 no longer keeps the list in sorted order.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -321,31 +322,9 @@ searchWithMemoization (MemoizationTable *memo,
 void addToList2 (InProximity* pTargetList, Location* pHerd) {
   HerdNode* new_node = createNewHerdNode(pHerd);
 
-  if (NULL != pTargetList->psHerdList) {
-    HerdNode* curr_node = pTargetList->psHerdList;
-    HerdNode* prev_node = NULL;
-
-    while ((NULL != curr_node->psNext)
-	   && (curr_node->psHerd->uiID < pHerd->uiID)) {
-      prev_node = curr_node;
-      curr_node = curr_node->psNext;
-    }
-
-    if (curr_node->psHerd->uiID > pHerd->uiID) {
-      if (NULL == prev_node) {
-	pTargetList->psHerdList = new_node;
-      }else {
-	prev_node->psNext = new_node;
-      }
-      new_node->psNext = curr_node;
-    }else {
-      curr_node->psNext = new_node;
-    }
-
-  }else {
-    pTargetList->psHerdList = new_node;
-  }
-
+  /* Insert at the beginning of the list. */
+  new_node->psNext = pTargetList->psHerdList;
+  pTargetList->psHerdList = new_node;
 }
 
 void addToMemoization2 (int id, gpointer user_data) {
