@@ -151,9 +151,20 @@ def save_scenario(request):
     scenario_filename(target)
     print('Copying database to', target)
     full_path = workspace_path(target) + ('.sqlite3' if target[-8:] != '.sqlite3' else '')
-    shutil.copy(activeSession(), full_path)
-    unsaved_changes(False)  # File is now in sync
-    return redirect('/setup/Scenario/1/')
+    save_error = None
+    try:
+        shutil.copy(activeSession(), full_path)
+        unsaved_changes(False)  # File is now in sync
+    except IOError:
+        save_error = 'Failed to save file.'
+    if request.is_ajax():
+        if save_error:
+            json_response = '{"status": "failed", "message": "%s"}' % save_error
+        else:
+            json_response = '{"status": "success"}'
+        return HttpResponse(json_response, content_type="application/json")
+    else:
+        return redirect('/setup/Scenario/1/')
 
 
 def delete_file(request, target):

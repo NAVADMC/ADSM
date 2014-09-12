@@ -6,6 +6,7 @@ from future import standard_library
 standard_library.install_hooks()
 from django.test import TestCase
 import os
+import json
 
 from ScenarioCreator.views import workspace_path
 
@@ -42,7 +43,27 @@ class ScenarioTestCase(TestCase):
         r = self.client.post('/app/SaveScenario/', {'filename': file_name})
 
         try:
-            self.assertContains(r, 'Failed to save file.', count=1, status_code=200)
+            self.assertEqual(r.status_code, 302)
+            self.assertFalse(os.path.isfile(file_path))
+        finally:
+            self.remove_test_file(file_path)
+
+    def test_post_failure_ajax(self):
+        file_name = 'Test \/ Scenario 123 AZ' # this should break Windows and Linux
+        file_path = workspace_path(file_name) + '.sqlite3'
+
+        self.remove_test_file(file_path)
+
+        r = self.client.post('/app/SaveScenario/',
+                             {'filename': file_name},
+                             HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
+        try:
+            data = json.loads(r.content)
+            self.assertIn('status', data)
+            self.assertEqual(data['status'], 'failed')
+            self.assertIn('message', data)
+            self.assertEqual(data['message'], 'Failed to save file.')
             self.assertFalse(os.path.isfile(file_path))
         finally:
             self.remove_test_file(file_path)

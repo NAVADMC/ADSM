@@ -1,4 +1,6 @@
 import time
+import os
+
 
 from django.test import LiveServerTestCase
 from selenium import webdriver
@@ -9,6 +11,7 @@ from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
     ProbabilityFunction, RelationalFunction, RelationalPoint, Population, \
     DirectSpread, IndirectSpread, AirborneSpread, ProductionType, \
     DiseaseProgressionAssignment, Unit, ControlMasterPlan
+from Settings.views import workspace_path
 
 
 class M2mDSL(object):
@@ -571,3 +574,41 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
 
         for element in setup_menu.find_elements_by_tag_name("a"):
             self.assertIn(element.text, menu_items)
+
+    def test_save_scenario_failure(self):
+        filename_field = self.selenium.find_element_by_css_selector('header form .filename input')
+        try:
+            filename_field.send_keys('/\\ 123 AZ')
+            filename_field.submit()
+            time.sleep(1)
+
+            alert = self.selenium.find_element_by_css_selector('.alert.alert-danger')
+            self.assertIn("Failed to save file.", alert.text)
+        finally:
+            try:
+                os.remove(workspace_path('Untitled Scenario/\\ 123 AZ.sqlite3'))
+            except:
+                pass
+
+    def test_save_scenario_success(self):
+        scenario_desc = self.selenium.find_element_by_id('id_description')
+        scenario_desc.send_keys('Test Description')
+        self.selenium.find_element_by_id('submit-id-submit').click()
+        time.sleep(1)
+
+        save_button = self.selenium.find_element_by_css_selector('header form button[type="submit"]')
+        self.assertIn('unsaved', save_button.get_attribute('class'))
+
+        filename_field = self.selenium.find_element_by_css_selector('header form .filename input')
+        try:
+            filename_field.send_keys('123 AZ')
+            filename_field.submit()
+            time.sleep(1)
+
+            save_button = self.selenium.find_element_by_css_selector('header form button[type="submit"]')
+            self.assertNotIn('unsaved', save_button.get_attribute('class'))
+        finally:
+            try:
+                os.remove(workspace_path('Untitled Scenario123 AZ.sqlite3'))
+            except:
+                pass

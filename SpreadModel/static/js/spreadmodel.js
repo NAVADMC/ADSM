@@ -8,9 +8,20 @@ $(function(){
 
     $(document).on('submit', '.ajax', function(evt){
         evt.preventDefault();
-        $.post($(this).attr('action'), $(this).serialize());
-        //TODO: handle success / failure messages
-        $(this).trigger('saved');
+        var posting = $.post($(this).attr('action'), $(this).serialize());
+        posting.done(function( data ) {
+            if (data.status == "success") {
+                $('.ajax').trigger('saved');
+            } else if (data.status == "failed") {
+                alert_template = '<div class="alert alert-danger">' +
+                                    '<a href="#" class="close" data-dismiss="alert">' +
+                                        '&times;' +
+                                    '</a>' +
+                                    '<strong>Error:</strong> ' + data.message +
+                                 '</div>';
+                $('#title').before(alert_template);
+            }
+        });
     })
 
     $(document).on('saved', 'form:has(.unsaved)', function(){ //fixes 'Save' button with wrong color state
