@@ -24,12 +24,12 @@
 
 void addToMemoization2 (int id, gpointer user_data);
 
-boolean insertHerd (_IN_OUT_ Location* psHerdList,
+gboolean insertHerd (_IN_OUT_ Location* psHerdList,
 		    _IN_ double x,
 		    _IN_ double y,
-		    _IN_ uint uiID) {
+		    _IN_ guint uiID) {
 
-  boolean ret_val = FALSE;
+  gboolean ret_val = FALSE;
 
   if (NULL != psHerdList) {
     psHerdList[uiID].x = x;
@@ -45,10 +45,10 @@ boolean insertHerd (_IN_OUT_ Location* psHerdList,
 
 
 
-MemoizationTable *initMemoization (double *x, double *y, uint nherds) {
+MemoizationTable *initMemoization (double *x, double *y, guint nherds) {
 
   MemoizationTable *memo;
-  uint i;
+  guint i;
 
   memo = g_new (MemoizationTable, 1);
   memo->uiNumHerds = nherds;
@@ -78,7 +78,7 @@ InProximity* createNewProxmityList(double dRadius) {
   return new_dist;
 }
 
-HerdNode* createNewHerdNode(uint uiID, double distance) {
+HerdNode* createNewHerdNode(guint uiID, double distance) {
   HerdNode* new_node = (HerdNode*)malloc(sizeof(HerdNode));
   new_node->uiID = uiID;
   new_node->distance = distance;
@@ -112,7 +112,7 @@ void deleteProximityList(InProximity* pDistances) {
 void deleteMemoization(MemoizationTable *memo) {
   if (memo != NULL)
     {
-      uint i;
+      guint i;
       for (i = 0; i < memo->uiNumHerds; i++) {
         if (NULL != memo->pAllHerds[i]) {
           deleteProximityList(memo->pAllHerds[i]);
@@ -184,7 +184,7 @@ typedef struct {
 
 
 
-boolean inMemoization2(MemoizationTable *memo,
+gboolean inMemoization2(MemoizationTable *memo,
               spatial_search_t *searcher,
 		      Location* pHerd, InProximity** pSrcHerds,
 		      double dRadius, spatial_search_hit_callback pfCallback,
@@ -192,7 +192,7 @@ boolean inMemoization2(MemoizationTable *memo,
   InProximity* src_list = *pSrcHerds;
   InProximity* prev_list = NULL;
   InProximity* temp_list = NULL;
-  boolean ret_val = FALSE;
+  gboolean ret_val = FALSE;
 
   while (NULL != src_list) {
     
@@ -247,13 +247,12 @@ boolean inMemoization2(MemoizationTable *memo,
 }
 
 /* search in circles and squares with memoization */
-boolean
+void
 searchWithMemoization (MemoizationTable *memo,
                        spatial_search_t *searcher,
-                       uint uiID, double dRadius,
+                       guint uiID, double dRadius,
                        spatial_search_hit_callback pfCallback, void* pCallbackArgs)
 {
-  boolean ret_val = FALSE;
   Location *herd;
 
   herd = &(memo->pUnsortedList[uiID]);
@@ -288,7 +287,7 @@ searchWithMemoization (MemoizationTable *memo,
 		   pfCallback, pCallbackArgs);
   }
 
-  return ret_val;
+  return;
 }
 
 
