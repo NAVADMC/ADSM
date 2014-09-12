@@ -78,9 +78,10 @@ InProximity* createNewProxmityList(double dRadius) {
   return new_dist;
 }
 
-HerdNode* createNewHerdNode(Location* pHerd) {
+HerdNode* createNewHerdNode(uint uiID, double distance) {
   HerdNode* new_node = (HerdNode*)malloc(sizeof(HerdNode));
-  new_node->psHerd = pHerd;
+  new_node->uiID = uiID;
+  new_node->distance = distance;
   new_node->psNext = NULL;
 
   return new_node;
@@ -124,41 +125,13 @@ void deleteMemoization(MemoizationTable *memo) {
 }
 
 
-boolean withInRadius(Location* pX_Herd, Location* pY_Herd, double dRadius) {
-  boolean ret_val = FALSE;
-  double distance;
-
-  /* calculate weather the herd is within radius */
-  distance = GIS_distance(pX_Herd->x, pX_Herd->y, pY_Herd->x, pY_Herd->y);
-
-  if ((distance - dRadius) <= EPSILON) {
-    ret_val = TRUE;
-  }
-
-  return ret_val;
-}
-
-void processHerd (Location* pS_Herd, Location* pT_Herd, 
-		     double dRadius, boolean bSureIn, 
-		     spatial_search_hit_callback pfCallback, void* pCallbackArgs) {
-
-  if (!bSureIn) {
-    if(withInRadius(pS_Herd, pT_Herd, dRadius)) {
-      pfCallback(pT_Herd->uiID, pCallbackArgs);      
-    }
-  }else {
-      pfCallback(pT_Herd->uiID, pCallbackArgs);
-  }
-}
-
-
 /************************** 10 search with memoization  **************************/
 
 void processHerdList2(HerdNode* pHerdList, spatial_search_hit_callback pfCallback,
 		     void* pCallbackArgs) {
   while (NULL != pHerdList) {
     /* call the function which processes the list */
-    pfCallback(pHerdList->psHerd->uiID, pCallbackArgs);
+    pfCallback(pHerdList->uiID, pCallbackArgs);
     pHerdList = pHerdList->psNext;
   }
 }
@@ -172,7 +145,7 @@ void splitHerdList2(Location* pHerd, InProximity* pDistList, double dRadius) {
   pDistList->psNext->psHerdList =  NULL;     
 
   while (NULL != src_list) {
-    if (TRUE == withInRadius(pHerd, src_list->psHerd, dRadius)) {
+    if (src_list->distance <= dRadius) {
       if (NULL == pDistList->psHerdList) {
 	prev_list = src_list;
 	pDistList->psHerdList = prev_list;
@@ -319,14 +292,6 @@ searchWithMemoization (MemoizationTable *memo,
 }
 
 
-void addToList2 (InProximity* pTargetList, Location* pHerd) {
-  HerdNode* new_node = createNewHerdNode(pHerd);
-
-  /* Insert at the beginning of the list. */
-  new_node->psNext = pTargetList->psHerdList;
-  pTargetList->psHerdList = new_node;
-}
-
 void addToMemoization2 (int id, gpointer user_data) {
   addToMemoization2_args_t *args;
   Location *pS_Herd, *pT_Herd;
@@ -342,7 +307,10 @@ void addToMemoization2 (int id, gpointer user_data) {
   
   if ((distance - args->dRadius) <= EPSILON) {
     if ((distance - args->dLastRadius) > EPSILON) {
-          addToList2(args->pTargetList, pT_Herd);
+          /* Insert at the beginning of the list. */
+          HerdNode* new_node = createNewHerdNode(pT_Herd->uiID, distance);
+          new_node->psNext = args->pTargetList->psHerdList;
+          args->pTargetList->psHerdList = new_node;
     }
   }
 

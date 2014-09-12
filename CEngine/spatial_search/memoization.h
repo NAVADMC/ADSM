@@ -36,7 +36,8 @@ struct Location {
 
 typedef struct HerdNode HerdNode;
 struct HerdNode {
-	Location* psHerd;
+	uint uiID;
+	double distance;
 	HerdNode* psNext;
 };
 
