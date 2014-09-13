@@ -852,6 +852,9 @@ UNT_free_unit_list (UNT_unit_list_t * units)
   if (units->projection != NULL)
     pj_free (units->projection);
 
+  /* Free the spatial index. */
+  free_spatial_search (units->spatial_index);
+
   /* Finally, free the unit list structure. */
   g_free (units);
 

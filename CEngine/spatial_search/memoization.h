@@ -19,19 +19,16 @@ struct Location {
 	double y;
 };
 
-typedef struct HerdNode HerdNode;
-struct HerdNode {
+typedef struct {
 	guint uiID;
 	double distance;
-	HerdNode* psNext;
-};
+} HerdNode;
 
-typedef struct InProximity InProximity;
-struct InProximity {
+typedef struct {
 	double dRadius;
-	HerdNode* psHerdList;
-	InProximity* psNext;
-};
+	GArray *locations; /**< Each item in the GArray is of type HerdNode */
+	gboolean is_sorted;
+} InProximity;
 
 typedef struct {
   guint uiNumHerds;

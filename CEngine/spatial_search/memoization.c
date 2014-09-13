@@ -17,9 +17,7 @@
 #include "gis.h"
 
 #include "memoization.h"
-
-
-#define EPSILON			(0.001)
+#include "timsort.h"
 
 
 void addToMemoization2 (int id, gpointer user_data);
@@ -67,45 +65,21 @@ MemoizationTable *initMemoization (double *x, double *y, guint nherds) {
 InProximity* createNewProxmityList(double dRadius) {
   InProximity* new_dist = NULL;
 
-  new_dist = (InProximity*)malloc(sizeof(InProximity));
-
-  if (NULL != new_dist) {
-    new_dist->dRadius = dRadius;
-    new_dist->psHerdList = NULL;
-    new_dist->psNext = NULL;
-  }
+  new_dist = g_new (InProximity, 1);
+  new_dist->dRadius = dRadius;
+  new_dist->locations =
+    g_array_new (/* zero_terminated = */ FALSE,
+                 /* clear = */ FALSE,
+                 sizeof(HerdNode));
+  new_dist->is_sorted = FALSE;
 
   return new_dist;
 }
 
-HerdNode* createNewHerdNode(guint uiID, double distance) {
-  HerdNode* new_node = (HerdNode*)malloc(sizeof(HerdNode));
-  new_node->uiID = uiID;
-  new_node->distance = distance;
-  new_node->psNext = NULL;
-
-  return new_node;
-}
-
-
-void deleteHerdList (HerdNode* pHerd) {
-  HerdNode* temp_herd;
-
-  while (NULL != pHerd) {
-    temp_herd = pHerd;
-    pHerd = pHerd->psNext;
-    free(temp_herd);
-  }
-}
-
 void deleteProximityList(InProximity* pDistances) {
-  InProximity* temp_dist;
-
-  while (NULL != pDistances) {
-    deleteHerdList(pDistances->psHerdList);
-    temp_dist = pDistances;
-    pDistances = pDistances->psNext;
-    free(temp_dist);
+  if (pDistances != NULL) {
+    g_array_free (pDistances->locations, /* free_segment = */ TRUE);
+    g_free(pDistances);
   }
 }
 
@@ -127,48 +101,68 @@ void deleteMemoization(MemoizationTable *memo) {
 
 /************************** 10 search with memoization  **************************/
 
-void processHerdList2(HerdNode* pHerdList, spatial_search_hit_callback pfCallback,
-		     void* pCallbackArgs) {
-  while (NULL != pHerdList) {
-    /* call the function which processes the list */
-    pfCallback(pHerdList->uiID, pCallbackArgs);
-    pHerdList = pHerdList->psNext;
-  }
-}
+/**
+ * Call the given callback function for each location in the list. Optionally,
+ * stop past a given distance.
+ *
+ * @param locations a GArray of HerdNode structs.
+ * @param upToDistance call the callback function for locations up to and
+ *   including this distance. Use -1 to indicate no maximum distance.
+ */
+void
+processHerdList2 (GArray *locations, double upToDistance,
+                  spatial_search_hit_callback pfCallback,
+		          void* pCallbackArgs)
+{
+  guint n, i;
+  HerdNode *location;
 
-void splitHerdList2(Location* pHerd, InProximity* pDistList, double dRadius) {
-  HerdNode* src_list = pDistList->psNext->psHerdList;
-  HerdNode* next_list = NULL;
-  HerdNode* prev_list = NULL;
-
-  pDistList->psHerdList = NULL;
-  pDistList->psNext->psHerdList =  NULL;     
-
-  while (NULL != src_list) {
-    if (src_list->distance <= dRadius) {
-      if (NULL == pDistList->psHerdList) {
-	prev_list = src_list;
-	pDistList->psHerdList = prev_list;
-      }else {
-	prev_list->psNext = src_list;
-	prev_list = prev_list->psNext;
-      }
-      src_list = src_list->psNext;
-      prev_list->psNext = NULL;
-
-    }else {
-      if (NULL == pDistList->psNext->psHerdList) {
-	next_list = src_list;
-	pDistList->psNext->psHerdList =  src_list;     	
-      }else {
-	next_list->psNext = src_list;
-	next_list = next_list->psNext;	
-      }
-      src_list = src_list->psNext;
-      next_list->psNext = NULL;
+  n = locations->len;
+  if (upToDistance < 0)
+    {
+      /* Process the whole list. */
+      for (i = 0; i < n; i++)
+        {
+          location = &g_array_index (locations, HerdNode, i);
+          pfCallback(location->uiID, pCallbackArgs);
+        }
     }
-  }
+  else
+    {
+      /* Process the list just up to and including upToDistance. */
+      for (i = 0; i < n; i++)
+        {
+          location = &g_array_index (locations, HerdNode, i);
+          if (location->distance <= upToDistance)
+            pfCallback(location->uiID, pCallbackArgs);
+          else
+            break;
+        }      
+    }
+  return;
 }
+
+
+
+/**
+ * Comparison function for sorting the list of HerdNode objects in an
+ * inProximity object.
+ */
+static
+int compare_node (const void *a, const void *b)
+{
+  double distance_a, distance_b;
+  
+  distance_a = ((HerdNode *)a)->distance;
+  distance_b = ((HerdNode *)b)->distance;
+  if (distance_a > distance_b)
+    return 1;
+  else if (distance_b > distance_a)
+    return -1;
+  else
+    return 0;  
+}
+
 
 
 /**
@@ -186,62 +180,63 @@ typedef struct {
 
 gboolean inMemoization2(MemoizationTable *memo,
               spatial_search_t *searcher,
-		      Location* pHerd, InProximity** pSrcHerds,
+		      Location* pHerd, InProximity* pSrcHerds,
 		      double dRadius, spatial_search_hit_callback pfCallback,
 		      void* pCallbackArgs)  {
-  InProximity* src_list = *pSrcHerds;
-  InProximity* prev_list = NULL;
-  InProximity* temp_list = NULL;
   gboolean ret_val = FALSE;
 
-  while (NULL != src_list) {
-    
-    if (fabs(src_list->dRadius - dRadius) <= EPSILON){
-      /* process the herds */
-      processHerdList2(src_list->psHerdList, pfCallback, pCallbackArgs);
-      ret_val = TRUE;
-      break;
-    }else if (src_list->dRadius > dRadius) {
-      /* split list */
-      if (NULL == prev_list) {
-	temp_list = createNewProxmityList(dRadius);
-	temp_list->psNext = src_list;
-	*pSrcHerds = temp_list;
-      }else{
-	temp_list = prev_list;
-	temp_list->psNext = createNewProxmityList(dRadius);
-	temp_list = temp_list->psNext;
-	temp_list->psNext = src_list;
-      }
-      splitHerdList2(pHerd, temp_list, dRadius);
-      processHerdList2(temp_list->psHerdList, pfCallback, pCallbackArgs);
-      ret_val = TRUE;
-      break;
-    }else if (src_list->dRadius < dRadius) {
-      /* process the herds */
-      processHerdList2(src_list->psHerdList, pfCallback, pCallbackArgs);
+  /* If the requested radius is smaller than the cached search circle, make
+   * sure the cached list is sorted, then return all the locations up to and
+   * including the requested radius. */
+  if (dRadius < pSrcHerds->dRadius)
+    {
+      if (pSrcHerds->is_sorted == FALSE)
+        {
+          timsort (pSrcHerds->locations->data, pSrcHerds->locations->len,
+                   sizeof(HerdNode), compare_node);
+          pSrcHerds->is_sorted = TRUE;
+        }
+      processHerdList2(pSrcHerds->locations, dRadius, pfCallback, pCallbackArgs);      
     }
-    prev_list = src_list;
-    src_list = src_list->psNext;
-  }
+  else if (dRadius > pSrcHerds->dRadius)
+    {
+      /* The requested radius is greater than the cached search circle. Do a
+       * search to get the additional locations outside the cached search
+       * circle, add those to the cache, then return all locations from the
+       * cache. */
+      addToMemoization2_args_t args;
+      guint old_len;
+      guint new_len;
 
-  if (FALSE == ret_val) {		/* create new distance list */
-    addToMemoization2_args_t args;
-
-    temp_list = createNewProxmityList(dRadius);
-    /* These callback arguments correspond to the arguments to the old function
-     * searchInProximity2. */
-    args.pUnsortedList = memo->pUnsortedList;
-	args.pS_Herd = pHerd;
-    args.dRadius = dRadius;
-    args.pTargetList = temp_list;
-    args.dLastRadius = prev_list->dRadius;
-    spatial_search_circle_by_xy (searcher,
-                                 pHerd->x, pHerd->y, dRadius,
-                                 addToMemoization2, &args);
-    processHerdList2(temp_list->psHerdList, pfCallback, pCallbackArgs);
-    prev_list->psNext = temp_list;
-  }
+      args.pUnsortedList = memo->pUnsortedList;
+      args.pS_Herd = pHerd;
+      args.dRadius = dRadius;
+      args.pTargetList = pSrcHerds;
+      args.dLastRadius = pSrcHerds->dRadius;
+      old_len = pSrcHerds->locations->len;
+      spatial_search_circle_by_xy (searcher,
+                                   pHerd->x, pHerd->y, dRadius,
+                                   addToMemoization2, &args);
+      /* If the previous cached locations were sorted, we should sort the new
+       * ones we just added to the end, so that the is_sorted property remains
+       * TRUE. */
+      new_len = pSrcHerds->locations->len;
+      if (pSrcHerds->is_sorted && new_len > old_len)
+        {
+          timsort (pSrcHerds->locations->data + old_len * sizeof(HerdNode),
+                   new_len - old_len,
+                   sizeof(HerdNode), compare_node);
+        }      
+      pSrcHerds->dRadius = dRadius;
+      processHerdList2(pSrcHerds->locations, -1, pfCallback, pCallbackArgs);
+    }
+  else
+    {
+      /* The requested radius is exactly the same as the cached search circle.
+       * Return all locations from the cache. It doesn't matter whether the
+       * cache is sorted or not. */
+      processHerdList2(pSrcHerds->locations, -1, pfCallback, pCallbackArgs);      
+    }
 
   return ret_val;
 }
@@ -275,15 +270,15 @@ searchWithMemoization (MemoizationTable *memo,
 	args.pS_Herd = herd;
     args.dRadius = dRadius;
     args.pTargetList = memo->pAllHerds[uiID];
-    args.dLastRadius = 0,0;
+    args.dLastRadius = -1;
     spatial_search_circle_by_xy (searcher,
                                  herd->x, herd->y, dRadius,
                                  addToMemoization2, &args);
 
-    processHerdList2(memo->pAllHerds[uiID]->psHerdList, 
+    processHerdList2(memo->pAllHerds[uiID]->locations, -1, 
 		     pfCallback, pCallbackArgs);
   }else {
-    inMemoization2(memo, searcher, herd, &(memo->pAllHerds[uiID]), dRadius,  
+    inMemoization2(memo, searcher, herd, memo->pAllHerds[uiID], dRadius,  
 		   pfCallback, pCallbackArgs);
   }
 
@@ -304,14 +299,15 @@ void addToMemoization2 (int id, gpointer user_data) {
   distance = GIS_distance(pS_Herd->x, pS_Herd->y, 
 				pT_Herd->x, pT_Herd->y);
   
-  if ((distance - args->dRadius) <= EPSILON) {
-    if ((distance - args->dLastRadius) > EPSILON) {
-          /* Insert at the beginning of the list. */
-          HerdNode* new_node = createNewHerdNode(pT_Herd->uiID, distance);
-          new_node->psNext = args->pTargetList->psHerdList;
-          args->pTargetList->psHerdList = new_node;
+  if (distance <= args->dRadius
+      && distance > args->dLastRadius)
+    {
+      /* Append to the list. */
+      HerdNode new_node;
+      new_node.uiID = pT_Herd->uiID;
+      new_node.distance = distance;
+      g_array_append_val (args->pTargetList->locations, new_node);
     }
-  }
 
   return;
 }
