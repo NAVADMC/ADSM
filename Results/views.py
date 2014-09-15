@@ -3,8 +3,11 @@ from __future__ import unicode_literals
 from __future__ import division
 from __future__ import absolute_import
 from collections import defaultdict
+import zipfile
 from future.builtins import *
 from future import standard_library
+from Settings.views import workspace_path
+
 standard_library.install_hooks()
 
 from concurrent.futures import ProcessPoolExecutor
@@ -70,6 +73,26 @@ def simulation_process(iteration_number):
     return '%i: Success in %i seconds' % (iteration_number, end-start)
 
 
+def map_zip_file():
+    """This is a file named after the scenario in the folder that's also named after the scenario."""
+    return workspace_path(scenario_filename() + '/' + scenario_filename() + " Map Output.zip")
+
+
+def zip_map_directory_if_it_exists():
+    dir_to_zip = workspace_path(scenario_filename() + "/Map")
+    if os.path.exists(dir_to_zip):
+        zipname = map_zip_file()
+        dir_to_zip_len = len(dir_to_zip.rstrip(os.sep)) + 1
+        with zipfile.ZipFile(zipname, mode='w', compression=zipfile.ZIP_DEFLATED) as zf:
+            for dirname, subdirs, files in os.walk(dir_to_zip):
+                for filename in files:
+                    path = os.path.join(dirname, filename)
+                    entry = path[dir_to_zip_len:]
+                    zf.write(path, entry)
+    else:
+        print("No folder detected: ", dir_to_zip)
+        
+
 class Simulation(threading.Thread):
     """Execute system commands in a separate thread so as not to interrupt the webpage.
     Saturate the computer's processors with parallel simulation iterations"""
@@ -83,11 +106,14 @@ class Simulation(threading.Thread):
             for exit_status in executor.map(simulation_process, range(1, self.max_iteration + 1)):
                 statuses.append(exit_status)
         print(statuses)
+        zip_map_directory_if_it_exists()
 
 
 def results_home(request):
-    path_ex = os.path.join("workspace", scenario_filename(), "*.txt")
-    context = {'supplemental_files': [re.sub(r'workspace/?', '', re.sub(r'\\', '/', path)) for path in glob(path_ex)]}
+    path_ex = os.path.join("workspace", scenario_filename(), "*.csv")
+    context = {'supplemental_files': [os.path.relpath(file_path, start="workspace") for file_path in glob(path_ex)]}
+    if os.path.exists(map_zip_file()):
+        context['supplemental_files'].append(os.path.relpath(map_zip_file(), start="workspace"))
     # TODO: value dict file sizes
     if DailyControls.objects.all().count() > 0:
         context['summary'] = Results.summary.summarize_results()
