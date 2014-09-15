@@ -678,494 +678,484 @@ void create_contacts_from_unit( gpointer key, gpointer value, gpointer user_data
   new_infections = 0;
   sum_exposures = 0;
 
-  /*  Does our user_data actually point to something? */
-  if ( user_data != NULL )
-  {
-    new_day_event_hash_table_data *foreach_callback_data = (new_day_event_hash_table_data *) user_data;
-    
-    self = foreach_callback_data->self;
-    units = foreach_callback_data->units;
-    zones = foreach_callback_data->zones;
-    event = foreach_callback_data->event;
-    rng = foreach_callback_data->rng;
-    queue = foreach_callback_data->queue;  
-
-    /*  Do we actually have a valid model_data pointer? */
-    if ( self->model_data != NULL )
-    {
-      local_data = (local_data_t *) (self->model_data);
-
-      /*  Set the usual items for this function from the check_and_choose callback structure*/
-      callback_data.self = self;
-      callback_data.units = units;
-      callback_data.zones = zones;
-      callback_data.rng = rng;
-
-      poisson = foreach_callback_data->_poisson;
-      background_zone = ZON_zone_list_get_background ( zones );
-      nprod_types = local_data->production_types->len;
-      nunits = UNT_unit_list_length ( units );
-        
-      unit1 = (UNT_unit_t *) value;
-      unit1_fragment = zones->membership[unit1->index];
-      callback_data.unit1_fragment = unit1_fragment;      
-      callback_data.unit1 = unit1;
-
-      #if DEBUG
-        g_debug ("new_day_event_handler:  unit \"%s\" is %s (%i), state is %s",
-                 unit1->official_id, unit1->production_type_name,
-                 unit1->production_type, UNT_state_name[unit1->state]);
-      #endif
-
-      /*  How many contact types do we have?  */
-      j = 0;
-      for ( contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++ )
-        j++;
-
-      /*  Begin building 1-dimension of the attempted exposure matrix */
-      _contacts = g_new( GPtrArray **, j );
-      
-      /*  Set some more callback data for check_and_choose to use */
-      callback_data.contact_count = j;
-      callback_data.production_type_count = nprod_types;
-      callback_data._contacts = _contacts; 
-
-      /*  Iterate over all contact/production-type pairs and build the remaining dimensions of the matrix of desired matches for exposure attempts */
-      if ( callback_data.contact_count > 0 )
-      {        
-        j = 0;
-        for ( contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++ )
-        {
-          _contacts[j] = g_new( GPtrArray *, nprod_types );
+  new_day_event_hash_table_data *foreach_callback_data = (new_day_event_hash_table_data *) user_data;
   
-          contact_type_block = local_data->param_block[contact_type][unit1->production_type];
+  self = foreach_callback_data->self;
+  units = foreach_callback_data->units;
+  zones = foreach_callback_data->zones;
+  event = foreach_callback_data->event;
+  rng = foreach_callback_data->rng;
+  queue = foreach_callback_data->queue;  
+
+  local_data = (local_data_t *) (self->model_data);
+
+  /*  Set the usual items for this function from the check_and_choose callback structure*/
+  callback_data.self = self;
+  callback_data.units = units;
+  callback_data.zones = zones;
+  callback_data.rng = rng;
+
+  poisson = foreach_callback_data->_poisson;
+  background_zone = ZON_zone_list_get_background ( zones );
+  nprod_types = local_data->production_types->len;
+  nunits = UNT_unit_list_length ( units );
+    
+  unit1 = (UNT_unit_t *) value;
+  unit1_fragment = zones->membership[unit1->index];
+  callback_data.unit1_fragment = unit1_fragment;      
+  callback_data.unit1 = unit1;
+
+  #if DEBUG
+    g_debug ("new_day_event_handler:  unit \"%s\" is %s (%i), state is %s",
+             unit1->official_id, unit1->production_type_name,
+             unit1->production_type, UNT_state_name[unit1->state]);
+  #endif
+
+  /*  How many contact types do we have?  */
+  j = 0;
+  for ( contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++ )
+    j++;
+
+  /*  Begin building 1-dimension of the attempted exposure matrix */
+  _contacts = g_new( GPtrArray **, j );
+  
+  /*  Set some more callback data for check_and_choose to use */
+  callback_data.contact_count = j;
+  callback_data.production_type_count = nprod_types;
+  callback_data._contacts = _contacts; 
+
+  /*  Iterate over all contact/production-type pairs and build the remaining dimensions of the matrix of desired matches for exposure attempts */
+  if ( callback_data.contact_count > 0 )
+  {        
+    j = 0;
+    for ( contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++ )
+    {
+      _contacts[j] = g_new( GPtrArray *, nprod_types );
+
+      contact_type_block = local_data->param_block[contact_type][unit1->production_type];
 
 #if DEBUG
-      g_debug ("new_day_event_handler:  Trying %i production types for this contact type %s",
-               nprod_types, (( contact_type == ADSM_DirectContact)? "Direct":"Indirect"));
+  g_debug ("new_day_event_handler:  Trying %i production types for this contact type %s",
+           nprod_types, (( contact_type == ADSM_DirectContact)? "Direct":"Indirect"));
 #endif  
-          for (i = 0; i < nprod_types; i++)
+      for (i = 0; i < nprod_types; i++)
+      {
+        /*  Reset maximum distance desired to zero for each contact/production-type pair.  
+            This is used only by the RTree search function.  */
+        distance = 0.0;
+        
+        /*  Create this element of the 2nd Dimension of the exposure attempt matrix */
+        _contacts[j][i] = g_ptr_array_new();
+
+        if (contact_type_block != NULL)
+        {
+          /*  Get this combination, contact_type/production_type, param_block from memory */              
+          param_block = contact_type_block[i];
+
+          if ( param_block != NULL )
           {
-            /*  Reset maximum distance desired to zero for each contact/production-type pair.  
-                This is used only by the RTree search function.  */
-            distance = 0.0;
-            
-            /*  Create this element of the 2nd Dimension of the exposure attempt matrix */
-            _contacts[j][i] = g_ptr_array_new();
-  
-            if (contact_type_block != NULL)
+
+            /*  Can this exposure attempt happen? */
+            if ( !((unit1->quarantined) && (contact_type == ADSM_DirectContact)) )
             {
-              /*  Get this combination, contact_type/production_type, param_block from memory */              
-              param_block = contact_type_block[i];
-  
-              if ( param_block != NULL )
-              {
-  
-                /*  Can this exposure attempt happen? */
-                if ( !((unit1->quarantined) && (contact_type == ADSM_DirectContact)) )
+              /*  Check spread parameters to see if this unit's state can spread for this contact type */ 
+              if ( (unit1->state == Latent && param_block->latent_units_can_infect == TRUE) || 
+                   (unit1->state == InfectiousSubclinical && param_block->subclinical_units_can_infect == TRUE)
+                   || ( (unit1->state != Latent) && (unit1->state != InfectiousSubclinical) )
+                 )
+              { 
+                /*  Okay, this unit CAN spread disease for this contact/production_type pair 
+                    Establish the parameters of this exposure attempt.  */
+                
+                
+                /* Compute a multiplier to reduce the rate of movement once the
+                 * community is aware of an outbreak. */
+                if ( !local_data->outbreak_known )
+                  disease_control_factors = REL_chart_lookup (0, param_block->movement_control);
+                else if (ZON_same_zone (background_zone, unit1_fragment))
+                  disease_control_factors =
+                    REL_chart_lookup (event->day - local_data->public_announcement_day,
+                                      param_block->movement_control);
+                else
                 {
-                  /*  Check spread parameters to see if this unit's state can spread for this contact type */ 
-                  if ( (unit1->state == Latent && param_block->latent_units_can_infect == TRUE) || 
-                       (unit1->state == InfectiousSubclinical && param_block->subclinical_units_can_infect == TRUE)
-                       || ( (unit1->state != Latent) && (unit1->state != InfectiousSubclinical) )
-                     )
-                  { 
-                    /*  Okay, this unit CAN spread disease for this contact/production_type pair 
-                        Establish the parameters of this exposure attempt.  */
-                    
-                    
-                    /* Compute a multiplier to reduce the rate of movement once the
-                     * community is aware of an outbreak. */
-                    if ( !local_data->outbreak_known )
-                      disease_control_factors = REL_chart_lookup (0, param_block->movement_control);
-                    else if (ZON_same_zone (background_zone, unit1_fragment))
-                      disease_control_factors =
-                        REL_chart_lookup (event->day - local_data->public_announcement_day,
-                                          param_block->movement_control);
-                    else
-                    {
-                      zone_index = ZON_level (unit1_fragment) - 1;
-                      #if DEBUG
-                        g_debug ("zone index = %u", zone_index);
-                      #endif
-                      control_chart =
-                        local_data->movement_control[contact_type][zone_index][unit1->production_type];
-                      if (control_chart == NULL)
-                      {
-                        #if DEBUG
-                          g_debug ("new_day_event_handler:  unit is in \"%s\" zone, no special control chart for %s units in this zone",
-                                   unit1_fragment->parent->name, unit1->production_type_name);
-                        #endif
-                        control_chart = param_block->movement_control;
-                      }
-                      else
-                      {
-                        #if DEBUG
-                          g_debug ("new_day_event_handler:  unit is in \"%s\" zone, using special control chart for %s units in this zone",
-                                   unit1_fragment->parent->name, unit1->production_type_name);
-                        #endif
-                        ;
-                      }
-                      disease_control_factors =
-                        REL_chart_lookup (event->day - local_data->public_announcement_day,
-                                          control_chart);
-                    }; /*  END Compute a multiplier */
-  
-  
-                    /* Pick the number of exposures from this source.
-                     * If a fixed number of movements is specified, use it.
-                     * Otherwise, pick a number from the Poisson distribution. */
-                    if (param_block->fixed_movement_rate > 0)
-                    {
-                      rate = param_block->fixed_movement_rate * disease_control_factors;
-                      #if DEBUG
-                        g_debug ("new_day_event_handler:  contact rate = %g (fixed) * %g = %g",
-                                 param_block->fixed_movement_rate, disease_control_factors, rate);
-                      #endif
-                      nexposures = (int) ((event->day + 1) * rate) - (int) (event->day * rate);
-                      sum_exposures = sum_exposures + nexposures;
-                    }
-                    else
-                    {
-                      rate = param_block->movement_rate * disease_control_factors;
-                      #if DEBUG
-                        g_debug ("new_day_event_handler:  contact rate = %g * %g = %g",
-                                 param_block->movement_rate, disease_control_factors, rate);
-                      #endif
-                      poisson->u.poisson.mu = rate;
-                      nexposures = (int) (PDF_random (poisson, rng));
-                      sum_exposures = sum_exposures + nexposures;                          
-                    }
+                  zone_index = ZON_level (unit1_fragment) - 1;
+                  #if DEBUG
+                    g_debug ("zone index = %u", zone_index);
+                  #endif
+                  control_chart =
+                    local_data->movement_control[contact_type][zone_index][unit1->production_type];
+                  if (control_chart == NULL)
+                  {
                     #if DEBUG
-                      g_debug ("new_day_event_handler:  Day %i, Needing %i exposures from unit \"%s\", for production_type %i and contact_type %i",
-                               event->day, nexposures, unit1->official_id, i + 1, j + 1 );
+                      g_debug ("new_day_event_handler:  unit is in \"%s\" zone, no special control chart for %s units in this zone",
+                               unit1_fragment->parent->name, unit1->production_type_name);
                     #endif
-  
-                    /*  Now create and fillin the 3rd and final dimension of the 
-                        exposure attempt matrix, to be used by check_and_choose  */
-                    for ( k = 0; k < nexposures; k++ )
-                    {
-                      /*  Allocate some memory for this data */  
-                      sub_callback_t *sub_callback = g_new(sub_callback_t, 1);
-  
-                      if ( sub_callback != NULL )
-                      {
-                        /*  Add the pointer to this data to the matrix */ 
-                        g_ptr_array_add( _contacts[j][i], sub_callback );
-  
-                        sub_callback->try_again = TRUE;
-                        sub_callback->contact_type = contact_type;
-                        sub_callback->recipient_production_type = i;
-                        sub_callback->best_unit = NULL;
-                        sub_callback->movement_distance = PDF_random (param_block->distance_dist, rng);
-                        if (sub_callback->movement_distance < 0)
-                          sub_callback->movement_distance = 0;
-  
-                        /*  Use maximum distance desired for the bounding box in RTree */
-                        if ( sub_callback->movement_distance > distance )
-                          distance = sub_callback->movement_distance;
-                        #if DEBUG
-                          g_debug ( "new_day_event_handler:  contact of %g km",sub_callback->movement_distance );
-                        #endif  
-                      };  
-                    };  /*  END nexposures for loop */                
+                    control_chart = param_block->movement_control;
                   }
                   else
                   {
-                    if ( ( unit1->state != Latent ) && ( unit1->state != InfectiousSubclinical ) )
-                      g_error ( "new_day_event_handler:  !! ERROR !!  Unit1 is okay to infect, but was not allowed to...something is wrong with the if statement logic...." );
-                     
+                    #if DEBUG
+                      g_debug ("new_day_event_handler:  unit is in \"%s\" zone, using special control chart for %s units in this zone",
+                               unit1_fragment->parent->name, unit1->production_type_name);
+                    #endif
+                    ;
                   }
+                  disease_control_factors =
+                    REL_chart_lookup (event->day - local_data->public_announcement_day,
+                                      control_chart);
+                }; /*  END Compute a multiplier */
+
+
+                /* Pick the number of exposures from this source.
+                 * If a fixed number of movements is specified, use it.
+                 * Otherwise, pick a number from the Poisson distribution. */
+                if (param_block->fixed_movement_rate > 0)
+                {
+                  rate = param_block->fixed_movement_rate * disease_control_factors;
+                  #if DEBUG
+                    g_debug ("new_day_event_handler:  contact rate = %g (fixed) * %g = %g",
+                             param_block->fixed_movement_rate, disease_control_factors, rate);
+                  #endif
+                  nexposures = (int) ((event->day + 1) * rate) - (int) (event->day * rate);
+                  sum_exposures = sum_exposures + nexposures;
                 }
                 else
                 {
-#if DEBUG
-                  g_debug ( "new_day_event_handler:  Unit1 is quarantined and this is direct contact" );
-#endif                    
-                };
+                  rate = param_block->movement_rate * disease_control_factors;
+                  #if DEBUG
+                    g_debug ("new_day_event_handler:  contact rate = %g * %g = %g",
+                             param_block->movement_rate, disease_control_factors, rate);
+                  #endif
+                  poisson->u.poisson.mu = rate;
+                  nexposures = (int) (PDF_random (poisson, rng));
+                  sum_exposures = sum_exposures + nexposures;                          
+                }
+                #if DEBUG
+                  g_debug ("new_day_event_handler:  Day %i, Needing %i exposures from unit \"%s\", for production_type %i and contact_type %i",
+                           event->day, nexposures, unit1->official_id, i + 1, j + 1 );
+                #endif
+
+                /*  Now create and fillin the 3rd and final dimension of the 
+                    exposure attempt matrix, to be used by check_and_choose  */
+                for ( k = 0; k < nexposures; k++ )
+                {
+                  /*  Allocate some memory for this data */  
+                  sub_callback_t *sub_callback = g_new(sub_callback_t, 1);
+
+                  if ( sub_callback != NULL )
+                  {
+                    /*  Add the pointer to this data to the matrix */ 
+                    g_ptr_array_add( _contacts[j][i], sub_callback );
+
+                    sub_callback->try_again = TRUE;
+                    sub_callback->contact_type = contact_type;
+                    sub_callback->recipient_production_type = i;
+                    sub_callback->best_unit = NULL;
+                    sub_callback->movement_distance = PDF_random (param_block->distance_dist, rng);
+                    if (sub_callback->movement_distance < 0)
+                      sub_callback->movement_distance = 0;
+
+                    /*  Use maximum distance desired for the bounding box in RTree */
+                    if ( sub_callback->movement_distance > distance )
+                      distance = sub_callback->movement_distance;
+                    #if DEBUG
+                      g_debug ( "new_day_event_handler:  contact of %g km",sub_callback->movement_distance );
+                    #endif  
+                  };  
+                };  /*  END nexposures for loop */                
               }
               else
               {
-#if DEBUG
-                g_debug ( "new_day_event_handler:  parameter_block empty for this production_type/contact_type pair, %i/%s", i + 1, ((contact_type == ADSM_DirectContact)? "Direct":"Indirect") );
-#endif                    
-              };
+                if ( ( unit1->state != Latent ) && ( unit1->state != InfectiousSubclinical ) )
+                  g_error ( "new_day_event_handler:  !! ERROR !!  Unit1 is okay to infect, but was not allowed to...something is wrong with the if statement logic...." );
+                 
+              }
             }
             else
             {
 #if DEBUG
-              g_debug ( "new_day_event_handler:  contact_type_block empty for this production_type/contact_type pair" );
-#endif                
-            };    
-            
-            /*  Calculate the overall maximum distance for the RTree search */
-            if ( max_distance < distance )
-              max_distance = distance;     
+              g_debug ( "new_day_event_handler:  Unit1 is quarantined and this is direct contact" );
+#endif                    
+            };
+          }
+          else
+          {
 #if DEBUG
-            g_debug ( "new_day_event_handler:  using a max distance of %g km for this contact/production-type pair", distance );
-#endif            
+            g_debug ( "new_day_event_handler:  parameter_block empty for this production_type/contact_type pair, %i/%s", i + 1, ((contact_type == ADSM_DirectContact)? "Direct":"Indirect") );
+#endif                    
           };
-          j = j +1;
-        };  /*  END build matrix of desired matches */
-      }; /*  END if contact_type count > 0 */
-
-      if ( sum_exposures > 0 )
-      {
+        }
+        else
+        {
 #if DEBUG
-        g_debug ( "new_day_event_handler:  Total exposures sought for this unit: %lu", sum_exposures );
+          g_debug ( "new_day_event_handler:  contact_type_block empty for this production_type/contact_type pair" );
+#endif                
+        };    
+        
+        /*  Calculate the overall maximum distance for the RTree search */
+        if ( max_distance < distance )
+          max_distance = distance;     
+#if DEBUG
+        g_debug ( "new_day_event_handler:  using a max distance of %g km for this contact/production-type pair", distance );
+#endif            
+      };
+      j = j +1;
+    };  /*  END build matrix of desired matches */
+  }; /*  END if contact_type count > 0 */
+
+  if ( sum_exposures > 0 )
+  {
+#if DEBUG
+    g_debug ( "new_day_event_handler:  Total exposures sought for this unit: %lu", sum_exposures );
 #endif          
 
-        callback_data.num_unmatched_exposures = sum_exposures;
-        spatial_search_circle_by_id (units->spatial_index, unit1->index, max_distance*2.0 + EPSILON,
-                                     check_and_choose, &callback_data);
+    callback_data.num_unmatched_exposures = sum_exposures;
+    spatial_search_circle_by_id (units->spatial_index, unit1->index, max_distance*2.0 + EPSILON,
+                                 check_and_choose, &callback_data);
 
-        /* A re-search using the exhaustive method is necessary if some
-         * exposures remain unmatched. */
-        if (callback_data.num_unmatched_exposures > 0)
-        {
-          /*  Iterate over the results and reset "try_again" status based on each 
-              match's status.  A re-search using the exhaustive method may be necessary... */
-          j = 0;
-          for( contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++ )
-          {
-            for( i = 0; i < nprod_types; i++ )
-            {
-              GPtrArray *t_array = NULL;
-              t_array = _contacts[j][i];
-                    
-              for( k = 0; k < t_array->len; k++ )
-              {                       
-                sub_callback_t *tsub = g_ptr_array_index( t_array, k );
-                if ( tsub != NULL )
-                {
-                  /*  Did we not find a match?? */ 
-                  tsub->try_again = ( tsub->best_unit == NULL );
-                };
-              }
-            };
-            j = j + 1;
-          }
-#if DEBUG
-          g_debug ( "new_day_event_handler:  Using exhaustive search" );
-#endif
-          /*  Iterate over the entire list of units and find matches for each 
-              needed exposure, using the check_and_choose function */
-          for (unit2_index = 0; unit2_index < nunits; unit2_index++)
-          {
-            check_and_choose (unit2_index, &callback_data);
-          };
-        };
-  
-  
-        /*  Okay, now we "should" have all the "best" fit's for each desired 
-            contact/production-type pair, items.  */
-        /*  Iterate over the results and post exposure and infection events 
-            when applicable, and simultaneously delete dynamic memory used */
-        j = 0;
-        for( contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++ )
-        {
-          contact_type_block = local_data->param_block[contact_type][unit1->production_type];
-  
-          if ( contact_type_block != NULL )
-          {
-            for( i = 0; i < nprod_types; i++ )
-            {
-              GPtrArray *t_array = NULL;
-              t_array = _contacts[j][i];
-  
-              param_block = contact_type_block[i];
-  
-              if ( param_block != NULL )
-              {
-                /*  Iterate over each exposure attempt for this contact/production_type pair */ 
-                for( k = 0; k < t_array->len; k++ )
-                {
-                  sub_callback_t *tsub = g_ptr_array_index( t_array, k );
-                  if ( tsub != NULL )
-                  {
-                    if (tsub->best_unit != NULL)
-                    {
-                      /*  Create exposure and infection events here  */
-  
-                      /* An eligible recipient unit (correct production type, not
-                       * Destroyed, in range, etc... ) was found. */
-                      unit2 = tsub->best_unit;
-#if DEBUG
-                      g_debug ("new_day_event_handler:  unit \"%s\" within %g km of %g",
-                               unit2->official_id,
-                               tsub->best_unit_difference, tsub->movement_distance);
-#endif
-                      /* Check whether contact with this unit is forbidden by the
-                       * zone rules. */
-                      unit2_fragment = zones->membership[unit2->index];
-                      contact_forbidden = FALSE;
-                      if ( ZON_level ( unit2_fragment ) > ZON_level ( unit1_fragment ) )
-                      {
-                        contact_forbidden = TRUE;
-#if DEBUG
-                        g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" in \"%s\" zone, level %i to unit \"%s\" in \"%s\" zone, level %i would violate higher-to-lower rule",
-                                 unit1->official_id,
-                                 unit1_fragment->parent->name,
-                                 unit1_fragment->parent->level,
-                                 unit2->official_id,
-                                 unit2_fragment->parent->name,
-                                 unit2_fragment->parent->level);
-#endif
-                      }
-                      else if ( ZON_level ( unit2_fragment ) == ZON_level ( unit1_fragment ) )
-                      {
-                        if ( !ZON_same_fragment ( unit2_fragment, unit1_fragment ) )
-                        {
-                          contact_forbidden = TRUE;
-#if DEBUG
-                          g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" to unit \"%s\" in separate foci of \"%s\" zone would violate separate foci rule",
-                                   unit1->official_id, unit2->official_id, unit1_fragment->parent->name);
-#endif
-                        }
-                      }
-                      else /* ZON_level ( unit2_fragment ) < ZON_level ( unit1_fragment ) */
-                      {
-                        if ( ZON_level ( unit1_fragment ) - ZON_level ( unit2_fragment ) > 1 )
-                        {
-                          contact_forbidden = TRUE;
-#if DEBUG
-                          g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" in \"%s\" zone, level %i to unit \"%s\" in non-adjacent \"%s\" zone, level %i",
-                                   unit1->official_id,
-                                   unit1_fragment->parent->name,
-                                   unit1_fragment->parent->level,
-                                   unit2->official_id,
-                                   unit2_fragment->parent->name,
-                                   unit2_fragment->parent->level);
-#endif
-                        }
-                        else if ( !ZON_nests_in ( unit2_fragment, unit1_fragment ) )
-                        {
-                          contact_forbidden = TRUE;
-#if DEBUG
-                          g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" in \"%s\" zone, level %i to unit \"%s\" in non-nested focus of \"%s\" zone, level %i",
-                                   unit1->official_id,
-                                   unit1_fragment->parent->name,
-                                   unit1_fragment->parent->level,
-                                   unit2->official_id,
-                                   unit2_fragment->parent->name,
-                                   unit2_fragment->parent->level);
-#endif
-                        }
-                      }
-
-                      /* If none of the zone rules forbade contact, create the exposure. */
-                      if ( !contact_forbidden )
-                      {
-                        /* Announce the exposure. */
-#if DEBUG
-                        g_debug ("new_day_event_handler:  unit \"%s\" unit exposed", unit2->official_id);
-#endif
-  
-                        /* Is the exposure adequate (i.e., will it cause infection in a susceptible unit)? */
-                        if (contact_type == ADSM_DirectContact && unit1->prevalence_curve != NULL)
-                          P = unit1->prevalence;
-                        else
-                          P = param_block->prob_infect;
-                        r = RAN_num (rng);
-                        contact_is_adequate = (r < P);
-  
-                        shipping_delay = (int) round (PDF_random (param_block->shipping_delay, rng));  
-                        exposure = EVT_new_exposure_event (unit1, unit2, event->day,
-                                                           contact_type, TRUE, 
-                                                           contact_is_adequate, shipping_delay);
-                        exposure->u.exposure.contact_type = contact_type; /* This seems redundant (exposure.cause does the same thing), but there's probably a reason.... */
-                              
-                        if (shipping_delay <= 0)
-                        {
-                          EVT_event_enqueue (queue, exposure);
-                        }
-                        else
-                        {
-                          exposure->u.exposure.day += shipping_delay;
-                          if (shipping_delay > local_data->pending_infections->len)
-                          {
-                            adsm_extend_rotating_array (local_data->pending_infections,
-                                                               shipping_delay, local_data->rotating_index);
-                          }
-  
-                          delay_index = (local_data->rotating_index + shipping_delay) % local_data->pending_infections->len;
-                          q = (GQueue *) g_ptr_array_index (local_data->pending_infections, delay_index);
-                          g_queue_push_tail (q, exposure);
-                          local_data->npending_infections++;
-                        };
-
-                        /* If contact was adequate, queue an attempt to infect. */
-                        if( contact_is_adequate )
-                        {
-#if DEBUG
-                          g_debug ("new_day_event_handler:  r (%g) < P (%g), unit \"%s\" infected", r, P,
-                                   unit2->official_id);
-#endif
-                          new_infections = new_infections + 1;
-                        }
-                        else
-                        {
-#if DEBUG
-                          g_debug ("new_day_event_handler:  r (%g) >= P (%g), unit \"%s\" not infected", r,
-                                   P, unit2->official_id);
-#endif
-                        };
-                      } /* contact was not forbidden */
-                    } 
-                    else  /*  hmmm no match was found... */
-                    {
-#if DEBUG
-                      g_debug ("new_day_event_handler:  no recipient can be found at ~%g km from unit \"%s\" for this instance of this contact_type / production_type pair" ,
-                               tsub->movement_distance, unit1->official_id);
-#endif
-                      ;
-                    };  /*  END if a unit match was found */
-                        
-                    /*  Free the structure memory stored at this location in this GPtrArray  */
-                    g_free( tsub );
-                        
-                  };  /* END if tsub != NULL  */
-                };  /*  END for loop iteration over this GPtrArray  */
-              };
-
-              /* Free memory for GPtrArray */
-              g_ptr_array_free( t_array, TRUE );
-              _contacts[j][i] = NULL; /* just in case */
-
-            }; /*  END iteration over production_types  */
-          };
-
-          /* Free memory for this row */
-          g_free( _contacts[j] );
-          j = j + 1;
-        }; /*  END iteration over contact_types  */
-      } /*  END if contact count > 0 */
-      else
+    /* A re-search using the exhaustive method is necessary if some
+     * exposures remain unmatched. */
+    if (callback_data.num_unmatched_exposures > 0)
+    {
+      /*  Iterate over the results and reset "try_again" status based on each 
+          match's status.  A re-search using the exhaustive method may be necessary... */
+      j = 0;
+      for( contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++ )
       {
-        /* Free memory */
-        for( j = 0, contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++, j++ )
+        for( i = 0; i < nprod_types; i++ )
         {
-          for (i = 0; i < nprod_types; i++)
-            g_ptr_array_free (_contacts[j][i], TRUE);
-          g_free( _contacts[j] );
-        }
+          GPtrArray *t_array = NULL;
+          t_array = _contacts[j][i];
+                
+          for( k = 0; k < t_array->len; k++ )
+          {                       
+            sub_callback_t *tsub = g_ptr_array_index( t_array, k );
+            if ( tsub != NULL )
+            {
+              /*  Did we not find a match?? */ 
+              tsub->try_again = ( tsub->best_unit == NULL );
+            };
+          }
+        };
+        j = j + 1;
       }
-      g_free( _contacts );
-      _contacts = NULL;  /*  just in case */
+#if DEBUG
+      g_debug ( "new_day_event_handler:  Using exhaustive search" );
+#endif
+      /*  Iterate over the entire list of units and find matches for each 
+          needed exposure, using the check_and_choose function */
+      for (unit2_index = 0; unit2_index < nunits; unit2_index++)
+      {
+        check_and_choose (unit2_index, &callback_data);
+      };
+    };
 
-    }; /*  END test model_data Not NULL */
-    
-    /*  Set some debugging or informative counts for use by who, 
-       (i.e. some function or procedure), ever might want/need them after this */
-    foreach_callback_data->new_infections = foreach_callback_data->new_infections + new_infections;
-    foreach_callback_data->exposure_attempts = foreach_callback_data->exposure_attempts + sum_exposures;  
-      
-  }; /*  END test user_data not NULL */
+
+    /*  Okay, now we "should" have all the "best" fit's for each desired 
+        contact/production-type pair, items.  */
+    /*  Iterate over the results and post exposure and infection events 
+        when applicable, and simultaneously delete dynamic memory used */
+    j = 0;
+    for( contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++ )
+    {
+      contact_type_block = local_data->param_block[contact_type][unit1->production_type];
+
+      if ( contact_type_block != NULL )
+      {
+        for( i = 0; i < nprod_types; i++ )
+        {
+          GPtrArray *t_array = NULL;
+          t_array = _contacts[j][i];
+
+          param_block = contact_type_block[i];
+
+          if ( param_block != NULL )
+          {
+            /*  Iterate over each exposure attempt for this contact/production_type pair */ 
+            for( k = 0; k < t_array->len; k++ )
+            {
+              sub_callback_t *tsub = g_ptr_array_index( t_array, k );
+              if ( tsub != NULL )
+              {
+                if (tsub->best_unit != NULL)
+                {
+                  /*  Create exposure and infection events here  */
+
+                  /* An eligible recipient unit (correct production type, not
+                   * Destroyed, in range, etc... ) was found. */
+                  unit2 = tsub->best_unit;
+#if DEBUG
+                  g_debug ("new_day_event_handler:  unit \"%s\" within %g km of %g",
+                           unit2->official_id,
+                           tsub->best_unit_difference, tsub->movement_distance);
+#endif
+                  /* Check whether contact with this unit is forbidden by the
+                   * zone rules. */
+                  unit2_fragment = zones->membership[unit2->index];
+                  contact_forbidden = FALSE;
+                  if ( ZON_level ( unit2_fragment ) > ZON_level ( unit1_fragment ) )
+                  {
+                    contact_forbidden = TRUE;
+#if DEBUG
+                    g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" in \"%s\" zone, level %i to unit \"%s\" in \"%s\" zone, level %i would violate higher-to-lower rule",
+                             unit1->official_id,
+                             unit1_fragment->parent->name,
+                             unit1_fragment->parent->level,
+                             unit2->official_id,
+                             unit2_fragment->parent->name,
+                             unit2_fragment->parent->level);
+#endif
+                  }
+                  else if ( ZON_level ( unit2_fragment ) == ZON_level ( unit1_fragment ) )
+                  {
+                    if ( !ZON_same_fragment ( unit2_fragment, unit1_fragment ) )
+                    {
+                      contact_forbidden = TRUE;
+#if DEBUG
+                      g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" to unit \"%s\" in separate foci of \"%s\" zone would violate separate foci rule",
+                               unit1->official_id, unit2->official_id, unit1_fragment->parent->name);
+#endif
+                    }
+                  }
+                  else /* ZON_level ( unit2_fragment ) < ZON_level ( unit1_fragment ) */
+                  {
+                    if ( ZON_level ( unit1_fragment ) - ZON_level ( unit2_fragment ) > 1 )
+                    {
+                      contact_forbidden = TRUE;
+#if DEBUG
+                      g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" in \"%s\" zone, level %i to unit \"%s\" in non-adjacent \"%s\" zone, level %i",
+                               unit1->official_id,
+                               unit1_fragment->parent->name,
+                               unit1_fragment->parent->level,
+                               unit2->official_id,
+                               unit2_fragment->parent->name,
+                               unit2_fragment->parent->level);
+#endif
+                    }
+                    else if ( !ZON_nests_in ( unit2_fragment, unit1_fragment ) )
+                    {
+                      contact_forbidden = TRUE;
+#if DEBUG
+                      g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" in \"%s\" zone, level %i to unit \"%s\" in non-nested focus of \"%s\" zone, level %i",
+                               unit1->official_id,
+                               unit1_fragment->parent->name,
+                               unit1_fragment->parent->level,
+                               unit2->official_id,
+                               unit2_fragment->parent->name,
+                               unit2_fragment->parent->level);
+#endif
+                    }
+                  }
+
+                  /* If none of the zone rules forbade contact, create the exposure. */
+                  if ( !contact_forbidden )
+                  {
+                    /* Announce the exposure. */
+#if DEBUG
+                    g_debug ("new_day_event_handler:  unit \"%s\" unit exposed", unit2->official_id);
+#endif
+
+                    /* Is the exposure adequate (i.e., will it cause infection in a susceptible unit)? */
+                    if (contact_type == ADSM_DirectContact && unit1->prevalence_curve != NULL)
+                      P = unit1->prevalence;
+                    else
+                      P = param_block->prob_infect;
+                    r = RAN_num (rng);
+                    contact_is_adequate = (r < P);
+
+                    shipping_delay = (int) round (PDF_random (param_block->shipping_delay, rng));  
+                    exposure = EVT_new_exposure_event (unit1, unit2, event->day,
+                                                       contact_type, TRUE, 
+                                                       contact_is_adequate, shipping_delay);
+                    exposure->u.exposure.contact_type = contact_type; /* This seems redundant (exposure.cause does the same thing), but there's probably a reason.... */
+                          
+                    if (shipping_delay <= 0)
+                    {
+                      EVT_event_enqueue (queue, exposure);
+                    }
+                    else
+                    {
+                      exposure->u.exposure.day += shipping_delay;
+                      if (shipping_delay > local_data->pending_infections->len)
+                      {
+                        adsm_extend_rotating_array (local_data->pending_infections,
+                                                           shipping_delay, local_data->rotating_index);
+                      }
+
+                      delay_index = (local_data->rotating_index + shipping_delay) % local_data->pending_infections->len;
+                      q = (GQueue *) g_ptr_array_index (local_data->pending_infections, delay_index);
+                      g_queue_push_tail (q, exposure);
+                      local_data->npending_infections++;
+                    };
+
+                    /* If contact was adequate, queue an attempt to infect. */
+                    if( contact_is_adequate )
+                    {
+#if DEBUG
+                      g_debug ("new_day_event_handler:  r (%g) < P (%g), unit \"%s\" infected", r, P,
+                               unit2->official_id);
+#endif
+                      new_infections = new_infections + 1;
+                    }
+                    else
+                    {
+#if DEBUG
+                      g_debug ("new_day_event_handler:  r (%g) >= P (%g), unit \"%s\" not infected", r,
+                               P, unit2->official_id);
+#endif
+                    };
+                  } /* contact was not forbidden */
+                } 
+                else  /*  hmmm no match was found... */
+                {
+#if DEBUG
+                  g_debug ("new_day_event_handler:  no recipient can be found at ~%g km from unit \"%s\" for this instance of this contact_type / production_type pair" ,
+                           tsub->movement_distance, unit1->official_id);
+#endif
+                  ;
+                };  /*  END if a unit match was found */
+                    
+                /*  Free the structure memory stored at this location in this GPtrArray  */
+                g_free( tsub );
+                    
+              };  /* END if tsub != NULL  */
+            };  /*  END for loop iteration over this GPtrArray  */
+          };
+
+          /* Free memory for GPtrArray */
+          g_ptr_array_free( t_array, TRUE );
+          _contacts[j][i] = NULL; /* just in case */
+
+        }; /*  END iteration over production_types  */
+      };
+
+      /* Free memory for this row */
+      g_free( _contacts[j] );
+      j = j + 1;
+    }; /*  END iteration over contact_types  */
+  } /*  END if contact count > 0 */
+  else
+  {
+    /* Free memory */
+    for( j = 0, contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++, j++ )
+    {
+      for (i = 0; i < nprod_types; i++)
+        g_ptr_array_free (_contacts[j][i], TRUE);
+      g_free( _contacts[j] );
+    }
+  }
+  g_free( _contacts );
+  _contacts = NULL;  /*  just in case */
+  
+  /*  Set some debugging or informative counts for use by who, 
+     (i.e. some function or procedure), ever might want/need them after this */
+  foreach_callback_data->new_infections = foreach_callback_data->new_infections + new_infections;
+  foreach_callback_data->exposure_attempts = foreach_callback_data->exposure_attempts + sum_exposures;  
   
 #if DEBUG
   g_debug ("----- EXIT new_day_event_handler - Optimized Version" );
 #endif  
- }
+}
 
 
 
