@@ -532,7 +532,7 @@ typedef struct
 } new_day_event_hash_table_data;
 
 
-void new_day_event_handler( gpointer key, gpointer value, gpointer user_data );
+void create_contacts_from_unit( gpointer key, gpointer value, gpointer user_data );
 
 /**
  * Optimized Version:
@@ -609,7 +609,7 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
   foreach_callback_data->exposure_attempts = 0;
 
   /*  Iterate over the infectious units.  This is a shortened list compared to the entire unit list */
-  g_hash_table_foreach( _iteration.infectious_units, new_day_event_handler, foreach_callback_data );  
+  g_hash_table_foreach( _iteration.infectious_units, create_contacts_from_unit, foreach_callback_data );  
     
   /*  Free memory used by the user_data structure */
   g_free( foreach_callback_data );
@@ -623,16 +623,15 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 }
 
 /**
- * Responds to a new day event by releasing any pending contacts and
- * stochastically generating exposures and infections.
- * This is the optimized version, which builds matrices of exposure attempt/production_type/contact_type
- * combinations, and sends them to the optimized version of check_and_choose.
+ * Creates the outgoing contacts (exposures) from one unit. This function is
+ * typed as a GHFunc so that it can be the function called by
+ * g_hash_table_foreach.
  *
  * @param key       Unused, but required by g_hash_table_foreach()
  * @param value     A Pointer to the infectious unit, (source unit).
  * @param user_data A Pointer to the foreach_callback_data structure, as passed by the optimized handle_new_day_event() function.
  */
-void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
+void create_contacts_from_unit( gpointer key, gpointer value, gpointer user_data )
 {
   local_data_t *local_data;
   double disease_control_factors;
