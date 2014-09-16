@@ -10,6 +10,7 @@ from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Pop
     DiseaseProgressionAssignment, DirectSpread, ProductionTypePairTransmission, ControlMasterPlan, ControlProtocol, \
     ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
 from Results.models import DailyControls
+from Results.summary import iteration_progress
 from Settings.models import scenario_filename
 from Settings.views import update_status, unsaved_changes
 from django.db.models import F
@@ -57,6 +58,7 @@ def basic_context(request):
                'active_link': '/'.join(re.split('\W+', request.path)[2:]),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
                'outputs_computed': DailyControls.objects.all().count() > 0,
+               'results_progress': iteration_progress() * 100,
                }
 
     validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment',
