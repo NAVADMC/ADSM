@@ -36,6 +36,7 @@ def update_adsm_from_git(request):
         session.save()
         close_old_connections()
         thread.interrupt_main()  # equivalent to Ctrl+C in terminal
+        return render(request, 'Settings/Shutdown.html', {})
     except:
         print ("Failed to restart and update!")
 
@@ -55,6 +56,7 @@ def update_is_needed():
 def reset_db(name):
     print("Deleting", activeSession(name))
     try:
+        close_old_connections()
         os.remove(activeSession(name))
         connections[name].close()
     except BaseException as ex:
@@ -89,7 +91,7 @@ def update_db_version():
 def graceful_startup():
     """Checks something inside of each of the database files to see if it's valid.  If not, rebuild the database."""
     try:
-        scenario_filename()
+        SmSession.objects.get_or_create()[0].update_available
     except OperationalError:
         reset_db('default')
     try:
