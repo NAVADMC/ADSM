@@ -4,7 +4,8 @@ from django.db import close_old_connections
 from django.conf import settings
 from django.core.management.base import BaseCommand
 import subprocess
-from Settings.views import git, graceful_startup
+from Settings.views import graceful_startup
+from git.git import git
 from Settings.models import SmSession
 
 

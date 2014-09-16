@@ -20,7 +20,7 @@ from django.db import OperationalError
 from ScenarioCreator.models import ZoneEffect
 from Settings.models import scenario_filename, SmSession, unsaved_changes
 
-git = os.path.join(settings.BASE_DIR, 'git', 'bin', 'git.exe')
+from git.git import git
 
 
 def activeSession(name='scenario_db'):
