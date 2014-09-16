@@ -29,16 +29,16 @@ def activeSession(name='scenario_db'):
 
 
 def update_adsm_from_git(request):
-    """This method closes the program after setting the update_on_startup flag"""
-    try:
-        session = SmSession.objects.get_or_create(id=1)[0]
-        session.update_on_startup = True
-        session.save()
-        close_old_connections()
-        thread.interrupt_main()  # equivalent to Ctrl+C in terminal
-        return render(request, 'Settings/Shutdown.html', {})
-    except:
-        print ("Failed to restart and update!")
+    """This sets the update_on_startup flag for the next program start."""
+    if 'GET' in request.method:
+        try:
+            session = SmSession.objects.get_or_create(id=1)[0]
+            session.update_on_startup = True
+            session.save()
+            return HttpResponse("success")
+        except:
+            print ("Failed to set DB to update!")
+            return HttpResponse("failure")
 
 
 def update_is_needed():
