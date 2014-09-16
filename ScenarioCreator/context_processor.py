@@ -11,8 +11,8 @@ from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Pop
     ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
 from Results.models import DailyControls
 from Results.summary import iteration_progress
-from Settings.models import scenario_filename
-from Settings.views import update_status, unsaved_changes
+from Settings.models import scenario_filename, SmSession
+from Settings.views import unsaved_changes
 from django.db.models import F
 
 
@@ -31,7 +31,7 @@ def basic_context(request):
     pt_count = ProductionType.objects.count()
     context = {'filename': scenario_filename(),
                'unsaved_changes': unsaved_changes(),
-               'update_needed': update_status(),
+               'update_needed': SmSession.objects.get_or_create()[0].update_needed,
                'Scenario': Scenario.objects.count(),
                'OutputSetting': OutputSettings.objects.count(),
                'Population': Population.objects.count(),
