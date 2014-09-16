@@ -2921,6 +2921,54 @@
   </output>
 </stochastic-test>
 
+<stochastic-test>
+  <category>zones</category>
+  <short-name>2 possible recipients, 1 forbidden, units in reverse order</short-name>
+
+  <description>
+    This scenario is identical to “2 possible recipients, 1 forbidden” above,
+    except the units are in the opposite order in the population file.
+  </description>
+
+  <author>&lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>11 September 2014</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>4units_2_reversed</population-file>
+
+  <parameter-file>2targets_same_dist_1</parameter-file>
+  
+  <parameter-description>
+    The parameters are the same as for “2 possible recipients, 1 forbidden” 
+    above.
+
+    What should happen:
+     - On day 1 the pig unit (3) and the infected cattle unit (1) will be
+       Latent.
+     - On day 2 the pig unit will be Infectious Subclinical.
+     - On day 3 the pig unit will be Infectious Clinical; it will be detected
+       and slated for destruction.
+     - On day 4 a 1.5 km "High risk" zone will be in effect around unit 3.
+       Units 0 and 1 will be inside the circle; unit 2 will not.  The infected
+       cattle unit (1) will be Infectious Clinical.  Unit 1 will consider
+       shipment to either unit 0 or unit 2 (both are 1 km away), but contact
+       with unit 2 will be forbidden by the zone rules, so the contact will
+       always go to unit 0.
+     - On day 5 the newly-infected cattle unit (0) will be Latent.
+  </parameter-description>
+
+  <diagram>2targets_1_in_zone</diagram>
+
+  <!-- Cattle unit 0 becomes infected (100% of the time) -->
+  <output probability="1">
+    <tr><td>L S L S</td></tr>
+    <tr><td>B S L S</td></tr>
+    <tr><td>C S L S</td></tr>
+    <tr><td>C S C S</td></tr>
+    <tr><td>D S C L</td></tr>
+  </output>
+</stochastic-test>
+
 <variable-test>
   <category>zones</category>
   <short-name>movement control not changed inside zone</short-name>

@@ -150,7 +150,7 @@ EXTRA_DIST = config/unix.exp 1unit.xml 2units.xml \
   3units_pigs_cattle_sheep_pigs_sheep_infected.xml \
   3units_pigs_cattle_sheep_all_infected.xml \
   4units_line.xml 4units_all_infected.xml 4units_line_2.xml 4units_line_3.xml \
-  4units_line_4.xml 4units_line_5_xy.xml 4units_2.xml \
+  4units_line_4.xml 4units_line_5_xy.xml 4units_2.xml 4units_2_reversed.xml \
   5units.xml 5units_2.xml 5units_very_close.xml 6units.xml 6units_2.xml 7units.xml \
   8units_all_infected.xml 8units_2rows.xml 8units_2rows_2.xml 8units_2rows_3.xml \
   9units.xml \

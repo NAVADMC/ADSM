@@ -142,6 +142,7 @@ class ControlProtocolForm(BaseForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.layout = Layout(
             'name',
+            HTML('<script src="{{ STATIC_URL }}js/control-protocol.js"></script>'),
             TabHolder(
                 Tab('Detection',
                     'use_detection',
