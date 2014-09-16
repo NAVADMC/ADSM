@@ -29,10 +29,10 @@ def activeSession(name='scenario_db'):
 
 
 def update_adsm_from_git(request):
-    """This method closes the program after setting the update_requested flag"""
+    """This method closes the program after setting the update_on_startup flag"""
     try:
         session = SmSession.objects.get_or_create(id=1)[0]
-        session.update_requested = True
+        session.update_on_startup = True
         session.save()
         close_old_connections()
         thread.interrupt_main()  # equivalent to Ctrl+C in terminal
@@ -103,7 +103,7 @@ def check_update(request):
     graceful_startup()
 
     session = SmSession.objects.get_or_create(id=1)[0]
-    session.update_needed = update_is_needed()
+    session.update_available = update_is_needed()
     session.save()
 
     return redirect('/setup/')

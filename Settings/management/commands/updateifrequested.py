@@ -16,8 +16,8 @@ class Command(BaseCommand):
             os.chdir(settings.BASE_DIR)
             graceful_startup()
             session = SmSession.objects.get_or_create()[0]
-            if session.update_requested:
-                session.update_requested = False
+            if session.update_on_startup:
+                session.update_available = False
                 session.save()
                 close_old_connections()
 
@@ -34,3 +34,7 @@ class Command(BaseCommand):
             except:
                 print "Failed to gracefully reset!"
                 return False
+        finally:
+            session = SmSession.objects.get_or_create()[0]
+            session.update_on_startup = False
+            session.save()
