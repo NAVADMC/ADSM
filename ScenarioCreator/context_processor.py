@@ -39,7 +39,7 @@ def basic_context(request):
                'Population': Population.objects.count(),
                'ProductionTypes': pt_count,
                'Farms': Unit.objects.count(),
-               'Disease': Disease.objects.count(),
+               'Disease': Disease.objects.all().exclude(name='').count(),
                'Progressions': DiseaseProgression.objects.count(),
                'ProgressionAssignment': DiseaseProgressionAssignment.objects.count() == pt_count and pt_count,
                'DirectSpreads': DirectSpread.objects.count(),
