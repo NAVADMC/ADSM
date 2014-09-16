@@ -34,8 +34,11 @@ typedef void (*spatial_search_add_point_t) (struct spatial_search_t_ *, double x
  */
 typedef void (*spatial_search_prepare_t) (struct spatial_search_t_ *);
 
-/** Type of a callback function sent to the search routines. */
-typedef void (*spatial_search_hit_callback) (int id, gpointer user_data);
+/**
+ * Type of a callback function sent to the search routines. The callback
+ * function should return TRUE to mean "keep going", or FALSE to mean "stop
+ * searching". */
+typedef gboolean (*spatial_search_hit_callback) (int id, gpointer user_data);
 
 /**
  * Type of a function that searches a circle with its center specified by
@@ -54,6 +57,15 @@ typedef void (*spatial_search_circle_by_id_t) (struct spatial_search_t_ *,
                                                int id, double radius,
                                                spatial_search_hit_callback,
                                                gpointer user_data);
+
+/**
+ * Type of a function that searches for points closest to a given distance from
+ * a center specified by a point ID.
+ */
+typedef void (*spatial_search_closest_to_distance_by_id_t) (struct spatial_search_t_ *,
+                                                            int id, double desired_distance,
+                                                            spatial_search_hit_callback,
+                                                            gpointer user_data);
 
 /** Type of a function that searches a rectangle. */
 typedef void (*spatial_search_rectangle_t) (struct spatial_search_t_ *,
@@ -77,6 +89,7 @@ typedef struct spatial_search_t_
   spatial_search_prepare_t prepare;
   spatial_search_circle_by_xy_t search_circle_by_xy;
   spatial_search_circle_by_id_t search_circle_by_id;
+  spatial_search_closest_to_distance_by_id_t search_closest_to_distance_by_id;
   spatial_search_rectangle_t search_rectangle;
   spatial_search_free_t free;
   /* Private object data - data fields specific to each subclass */
@@ -91,6 +104,7 @@ spatial_search_t;
 #define spatial_search_prepare(S) (S->prepare(S))
 #define spatial_search_circle_by_xy(S,X,Y,R,CB,UD) (S->search_circle_by_xy(S,X,Y,R,CB,UD))
 #define spatial_search_circle_by_id(S,I,R,CB,UD) (S->search_circle_by_id(S,I,R,CB,UD))
+#define spatial_search_closest_to_distance_by_id(S,I,DD,CB,UD) (S->search_closest_to_distance_by_id(S,I,DD,CB,UD))
 #define spatial_search_rectangle(S,X1,Y1,X2,Y2,CB,UD) (S->search_rectangle(S,X1,Y1,X2,Y2,CB,UD))
 #define free_spatial_search(S) (S->free(S))
 

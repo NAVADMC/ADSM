@@ -61,6 +61,11 @@ void searchWithMemoization (MemoizationTable *, spatial_search_t *,
                             guint uiID, double dRadius,
                             spatial_search_hit_callback pfCallback, void* pCallbackArgs);
 
+void searchClosestToDistanceWithMemoization (MemoizationTable *, spatial_search_t *,
+                                             guint uiID, double desired_distance,
+                                             spatial_search_hit_callback pfCallback,
+                                             void* pCallbackArgs);
+
 void deleteMemoization (MemoizationTable *);
 
 #endif /* _MEMOIZATION_H_ */

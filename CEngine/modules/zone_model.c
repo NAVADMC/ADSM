@@ -177,7 +177,7 @@ typedef struct
  * Check whether the unit's distance to the focus is within the radius
  * assigned to each zone.  If so, update the unit-to-zone assignment.
  */
-static void
+static gboolean
 check_circle_and_rezone (int id, gpointer arg)
 {
   callback_t *callback_data;
@@ -285,7 +285,8 @@ check_circle_and_rezone (int id, gpointer arg)
     g_debug ("----- EXIT check_circle_and_rezone");
   #endif
 
-  return;
+  return TRUE; /* A return value of FALSE would stop the spatial search early,
+    which we don't want to do. */
 }
 
 
@@ -294,7 +295,7 @@ check_circle_and_rezone (int id, gpointer arg)
  * Check whether the unit's location is inside the given polygon.  If so,
  * update the unit-to-zone assignment.
  */
-static void
+static gboolean
 check_poly_and_rezone (int id, gpointer arg)
 {
   callback_t *callback_data;
@@ -386,7 +387,8 @@ check_poly_and_rezone (int id, gpointer arg)
     g_debug ("----- EXIT check_poly_and_rezone");
   #endif
 
-  return;
+  return TRUE; /* A return value of FALSE would stop the spatial search early,
+    which we don't want to do. */
 }
 
 

@@ -314,7 +314,7 @@ typedef struct
 /**
  * Check whether unit 1 can infect unit 2 and if so, attempt to infect unit 2.
  */
-void
+gboolean
 check_and_infect (int id, gpointer arg)
 {
   callback_t *callback_data;
@@ -449,7 +449,8 @@ end:
 #if DEBUG
   g_debug ("----- EXIT check_and_infect (%s)", MODEL_NAME);
 #endif
-  return;
+  return TRUE; /* A return value of FALSE would stop the spatial search early,
+    which we don't want to do. */
 }
 
 

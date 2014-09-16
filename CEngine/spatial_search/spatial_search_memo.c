@@ -179,7 +179,7 @@ search_circle_by_id (spatial_search_t * searcher,
 
   private_data = (private_data_t *)(searcher->private_data);
 
-  /* This is the case the memoization table handles. */
+  /* This is a case the memoization table handles. */
   searchWithMemoization (private_data->memo,
                          private_data->underlying_search,
                          id, radius,
@@ -187,6 +187,47 @@ search_circle_by_id (spatial_search_t * searcher,
 
   #if DEBUG
     g_debug ("----- EXIT search_circle_by_id (memoization table)");
+  #endif
+
+  return;
+}
+
+
+
+/**
+ * Searches for points closest to a give distance from a particular point.  The
+ * callback function provided as an argument will be called with the id's of
+ * points found.
+ *
+ * @param searcher the spatial search object.
+ * @param id the id of the point.
+ * @param desired_distance the desired distance from the point.
+ * @param user_function the function to be called with the id's of points found.
+ * @param user_data any data to be passed to user_function.  Can be NULL.
+ */
+static void
+search_closest_to_distance_by_id (spatial_search_t * searcher,
+                                  int id, double desired_distance,
+                                  spatial_search_hit_callback user_function,
+                                  gpointer user_data)
+{
+  private_data_t *private_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER search_closest_to_distance_by_id (memoization table, id=%i, desired_distance=%g)",
+             id, desired_distance);
+  #endif
+
+  private_data = (private_data_t *)(searcher->private_data);
+
+  /* This is a case the memoization table handles. */
+  searchClosestToDistanceWithMemoization (private_data->memo,
+                                          private_data->underlying_search,
+                                          id, desired_distance,
+                                          user_function, user_data);
+
+  #if DEBUG
+    g_debug ("----- EXIT search_closest_to_distance_by_id (memoization table)");
   #endif
 
   return;
@@ -302,6 +343,7 @@ new_spatial_search_with_memoization (spatial_search_t *underlying_search)
   searcher->prepare = prepare;
   searcher->search_circle_by_xy = search_circle_by_xy;
   searcher->search_circle_by_id = search_circle_by_id;
+  searcher->search_closest_to_distance_by_id = search_closest_to_distance_by_id;
   searcher->search_rectangle = search_rectangle;
   searcher->free = free_searcher;
   

@@ -11,16 +11,20 @@
  *   something else.
  * - addToList2 no longer keeps the list in sorted order.
  */
+
+#if HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "gis.h"
 
 #include "memoization.h"
-#include "timsort.h"
 
 
-void addToMemoization2 (int id, gpointer user_data);
+gboolean addToMemoization2 (int id, gpointer user_data);
 
 gboolean insertHerd (_IN_OUT_ Location* psHerdList,
 		    _IN_ double x,
@@ -84,16 +88,47 @@ void deleteProximityList(InProximity* pDistances) {
 }
 
 void deleteMemoization(MemoizationTable *memo) {
+  #if DEBUG
+    GString *s;
+  #endif
+
   if (memo != NULL)
     {
       guint i;
+      
+      #if DEBUG
+        g_debug ("Memoization table final state:");
+        s = g_string_new (NULL);
+      #endif
       for (i = 0; i < memo->uiNumHerds; i++) {
         if (NULL != memo->pAllHerds[i]) {
+          #if DEBUG
+            guint n, j;
+            g_string_printf (s, "unit with index %u", i);
+            if (memo->pAllHerds[i]->is_sorted == FALSE)
+              {
+                g_string_append_printf (s, " (unsorted)");
+              }
+            g_string_append_printf (s, ": ");
+            n = memo->pAllHerds[i]->locations->len;
+            for (j = 0; j < n; j++)
+              {
+                HerdNode *node;
+                node = &g_array_index (memo->pAllHerds[i]->locations, HerdNode, j);
+                if (j > 0)
+                  g_string_append_c (s, ',');
+                g_string_append_printf (s, "u%u=%gkm", node->uiID, node->distance);
+              }
+            g_debug ("%s", s->str);
+          #endif
           deleteProximityList(memo->pAllHerds[i]);
         }
       }
       g_free (memo->pAllHerds);
       g_free (memo);
+      #if DEBUG
+        g_string_free (s, TRUE);
+      #endif
     }
   return;
 }
@@ -149,7 +184,7 @@ processHerdList2 (GArray *locations, double upToDistance,
  * inProximity object.
  */
 static
-int compare_node (const void *a, const void *b)
+int compare_distance (const void *a, const void *b)
 {
   double distance_a, distance_b;
   
@@ -192,8 +227,8 @@ gboolean inMemoization2(MemoizationTable *memo,
     {
       if (pSrcHerds->is_sorted == FALSE)
         {
-          timsort (pSrcHerds->locations->data, pSrcHerds->locations->len,
-                   sizeof(HerdNode), compare_node);
+          qsort (pSrcHerds->locations->data, pSrcHerds->locations->len,
+                 sizeof(HerdNode), compare_distance);
           pSrcHerds->is_sorted = TRUE;
         }
       processHerdList2(pSrcHerds->locations, dRadius, pfCallback, pCallbackArgs);      
@@ -223,9 +258,9 @@ gboolean inMemoization2(MemoizationTable *memo,
       new_len = pSrcHerds->locations->len;
       if (pSrcHerds->is_sorted && new_len > old_len)
         {
-          timsort (pSrcHerds->locations->data + old_len * sizeof(HerdNode),
-                   new_len - old_len,
-                   sizeof(HerdNode), compare_node);
+          qsort (pSrcHerds->locations->data + old_len * sizeof(HerdNode),
+                 new_len - old_len,
+                 sizeof(HerdNode), compare_distance);
         }      
       pSrcHerds->dRadius = dRadius;
       processHerdList2(pSrcHerds->locations, -1, pfCallback, pCallbackArgs);
@@ -241,7 +276,7 @@ gboolean inMemoization2(MemoizationTable *memo,
   return ret_val;
 }
 
-/* search in circles and squares with memoization */
+/* search with memoization */
 void
 searchWithMemoization (MemoizationTable *memo,
                        spatial_search_t *searcher,
@@ -286,7 +321,226 @@ searchWithMemoization (MemoizationTable *memo,
 }
 
 
-void addToMemoization2 (int id, gpointer user_data) {
+
+/**
+ * Binary search a sorted GArray. Based on the glibc bsearch code, but returns
+ * the index of the location where the search stopped. The caller must check
+ * whether the element at that index contains the exact value searched for. */
+size_t
+g_array_bsearch (const void *key, GArray *arr, size_t width,
+                 int (*compar) (const void *, const void *))
+{
+  size_t l, u, mid;
+  gchar *base;
+  const void *p;
+  int comparison;
+
+  l = 0;
+  u = arr->len;
+  base = arr->data;
+  while (l < u)
+    {
+      mid = l + (u - l) / 2; /* integer division */
+      p = base + mid * width;
+      comparison = (*compar) (key, p);
+      if (comparison < 0)
+        u = mid;
+      else if (comparison > 0)
+        l = mid + 1;
+      else
+        return mid;
+    }
+  return l;
+}
+
+
+
+/* search with memoization */
+void
+searchClosestToDistanceWithMemoization (MemoizationTable *memo,
+                                        spatial_search_t *searcher,
+                                        guint uiID, double desired_distance,
+                                        spatial_search_hit_callback pfCallback,
+                                        void* pCallbackArgs)
+{
+  Location *herd;
+  double desired_distance_x2;
+  InProximity *proximity_list;
+  guint low, high;
+  gboolean keep_going, no_more_low, no_more_high;
+  HerdNode key;
+
+  #if DEBUG
+    g_debug ("----- ENTER searchClosestToDistanceWithMemoization");
+  #endif
+
+  herd = &(memo->pUnsortedList[uiID]);
+  desired_distance_x2 = 2.0 * desired_distance;
+
+  proximity_list = memo->pAllHerds[uiID];
+  if (proximity_list == NULL)
+    {
+      /* Create a new proximity list around the point. */
+      addToMemoization2_args_t args;
+
+      #if DEBUG
+        g_debug ("creating a new proximity list around location ID %u", uiID);
+      #endif
+      memo->pAllHerds[uiID] = proximity_list = createNewProxmityList(desired_distance_x2);
+
+      args.pUnsortedList = memo->pUnsortedList;
+      args.pS_Herd = herd;
+      args.dRadius = desired_distance_x2;
+      args.pTargetList = proximity_list;
+      args.dLastRadius = -1;
+      spatial_search_circle_by_xy (searcher,
+                                   herd->x, herd->y, desired_distance_x2,
+                                   addToMemoization2, &args);
+      #if DEBUG
+        g_debug ("new proximity list contains %u locations",
+                 proximity_list->locations->len);
+      #endif
+    }
+  else if (proximity_list->dRadius < desired_distance_x2)
+    {
+      /* Expand the existing proximity list around the point. */
+      addToMemoization2_args_t args;
+      guint old_len;
+      guint new_len;
+
+      args.pUnsortedList = memo->pUnsortedList;
+      args.pS_Herd = herd;
+      args.dRadius = desired_distance_x2;
+      args.pTargetList = proximity_list;
+      args.dLastRadius = proximity_list->dRadius;
+      old_len = proximity_list->locations->len;
+      spatial_search_circle_by_xy (searcher,
+                                   herd->x, herd->y, desired_distance_x2,
+                                   addToMemoization2, &args);
+      /* If the previous cached locations were sorted, we should sort the new
+       * ones we just added to the end, so that the is_sorted property remains
+       * TRUE. */
+      new_len = proximity_list->locations->len;
+      if (proximity_list->is_sorted && new_len > old_len)
+        {
+          qsort (proximity_list->locations->data + old_len * sizeof(HerdNode),
+                 new_len - old_len,
+                 sizeof(HerdNode), compare_distance);
+        }      
+      proximity_list->dRadius = desired_distance_x2;
+    }
+
+  /* Make sure the list is sorted. */
+  if (proximity_list->is_sorted == FALSE)
+    {
+      qsort (proximity_list->locations->data, proximity_list->locations->len,
+             sizeof(HerdNode), compare_distance);
+      proximity_list->is_sorted = TRUE;
+    }
+
+  #if DEBUG
+  {
+    /* Verify that the list is sorted. */
+    HerdNode *curr, *prev;
+    guint i;
+    if (proximity_list->locations->len > 1)
+      {
+        for (i = 1; i < proximity_list->locations->len; i++)
+          {
+            curr = &g_array_index (proximity_list->locations, HerdNode, i);
+            prev = &g_array_index (proximity_list->locations, HerdNode, i-1);
+            g_assert (prev->distance <= curr->distance);
+          }
+      }
+  } 
+  #endif
+
+  if (proximity_list->locations->len >= 1)
+    {
+      /* Search for the place in the list where a point exactly the given distance
+       * from the starting point would be. */
+      key.uiID = 0;
+      key.distance = desired_distance;
+      high = g_array_bsearch (&key, proximity_list->locations,
+                             sizeof(HerdNode), compare_distance);
+      #if DEBUG
+        g_debug ("binary search returns index %u (distance %g)",
+                 high,
+                 g_array_index (proximity_list->locations, HerdNode, high).distance); 
+      #endif
+      /* Now "high" is the index at which there is a point exactly the given
+       * distance from the starting point, or a greater distance from the starting
+       * point. Or, high may be one higher than the highest index of any point in
+       * the list. */
+      no_more_high = (high == proximity_list->locations->len);
+      if (high > 0)
+        {
+          low = high - 1;
+          no_more_low = FALSE;
+        }
+      else
+        no_more_low = TRUE;
+
+      keep_going = TRUE;    
+      while (keep_going && !(no_more_low && no_more_high))
+        {
+          if (no_more_high)
+            {
+              HerdNode *location = &g_array_index (proximity_list->locations, HerdNode, low);
+              keep_going = pfCallback(location->uiID, pCallbackArgs);
+              if (low == 0)
+                no_more_low = TRUE;
+              else
+                low--;
+            }
+          else if (no_more_low)
+            {
+              HerdNode *location = &g_array_index (proximity_list->locations, HerdNode, high);
+              keep_going = pfCallback(location->uiID, pCallbackArgs);
+              high++;
+              if (high == proximity_list->locations->len)
+                no_more_high = TRUE;
+            }      
+          else
+            {
+              HerdNode *location_low, *location_high;
+              double dlow, dhigh;
+              location_low = &g_array_index (proximity_list->locations, HerdNode, low);
+              location_high = &g_array_index (proximity_list->locations, HerdNode, high);
+              dlow = fabs(desired_distance - location_low->distance);
+              dhigh = fabs(desired_distance - location_high->distance);
+              if (dlow < dhigh)
+                {
+                  keep_going = pfCallback(location_low->uiID, pCallbackArgs);
+                  if (low == 0)
+                    no_more_low = TRUE;
+                  else
+                    low--;
+                }
+              else
+                {
+                  keep_going = pfCallback(location_high->uiID, pCallbackArgs);
+                  high++;
+                  if (high == proximity_list->locations->len)
+                    no_more_high = TRUE;
+                }
+            }
+          #if DEBUG
+            g_debug ("return value from callback indicates %s",
+                     keep_going ? "keep going" : "stop"); 
+          #endif
+        }
+    } /* end of if proximity list not empty */
+    
+  #if DEBUG
+    g_debug ("----- EXIT searchClosestToDistanceWithMemoization");
+  #endif
+
+  return;
+}
+
+
+gboolean addToMemoization2 (int id, gpointer user_data) {
   addToMemoization2_args_t *args;
   Location *pS_Herd, *pT_Herd;
   double distance;
@@ -295,21 +549,25 @@ void addToMemoization2 (int id, gpointer user_data) {
   pS_Herd = args->pS_Herd;
   pT_Herd = &(args->pUnsortedList[id]);
 
-  /* calculate weather the herd is within radius */
-  distance = GIS_distance(pS_Herd->x, pS_Herd->y, 
-				pT_Herd->x, pT_Herd->y);
-  
-  if (distance <= args->dRadius
-      && distance > args->dLastRadius)
+  if (pS_Herd != pT_Herd)
     {
-      /* Append to the list. */
-      HerdNode new_node;
-      new_node.uiID = pT_Herd->uiID;
-      new_node.distance = distance;
-      g_array_append_val (args->pTargetList->locations, new_node);
+      /* calculate weather the herd is within radius */
+      distance = GIS_distance(pS_Herd->x, pS_Herd->y, 
+	    			pT_Herd->x, pT_Herd->y);
+  
+      if (distance <= args->dRadius
+          && distance > args->dLastRadius)
+        {
+          /* Append to the list. */
+          HerdNode new_node;
+          new_node.uiID = pT_Herd->uiID;
+          new_node.distance = distance;
+          g_array_append_val (args->pTargetList->locations, new_node);
+        }
     }
 
-  return;
+  return TRUE; /* A return value of FALSE would stop the spatial search early,
+    which we don't want to do. */
 }
 
 

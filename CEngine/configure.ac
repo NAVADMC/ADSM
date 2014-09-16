@@ -116,8 +116,6 @@ AC_CHECK_LIB(gd,gdImageCreate,,AC_MSG_ERROR(cannot continue without GD graphics 
 
 AC_CHECK_LIB(proj,pj_init,,AC_MSG_ERROR(cannot continue without PROJ.4 Cartographic Projections library))
 
-AC_CHECK_LIB(timsort,timsort,,AC_MSG_ERROR(cannot continue without timsort))
-
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(errno.h math.h unistd.h limits.h regex.h ctype.h)

@@ -107,7 +107,7 @@ typedef struct
 /**
  * Check whether unit 2 should be part of the destruction ring.
  */
-void
+gboolean
 check_and_choose (int id, gpointer arg)
 {
   callback_t *callback_data;
@@ -151,7 +151,8 @@ end:
 #if DEBUG
   g_debug ("----- EXIT check_and_choose (%s)", MODEL_NAME);
 #endif
-  return;
+  return TRUE; /* A return value of FALSE would stop the spatial search early,
+    which we don't want to do. */
 }
 
 
