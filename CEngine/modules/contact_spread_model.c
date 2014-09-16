@@ -843,26 +843,24 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
                   /*  Allocate some memory for this data */  
                   sub_callback_t *sub_callback = g_new(sub_callback_t, 1);
 
-                  if ( sub_callback != NULL )
-                  {
-                    /*  Add the pointer to this data to the matrix */ 
-                    g_ptr_array_add( _contacts[j][i], sub_callback );
+                  /*  Add the pointer to this data to the matrix */ 
+                  g_ptr_array_add( _contacts[j][i], sub_callback );
 
-                    sub_callback->try_again = TRUE;
-                    sub_callback->contact_type = contact_type;
-                    sub_callback->recipient_production_type = i;
-                    sub_callback->best_unit = NULL;
-                    sub_callback->movement_distance = PDF_random (param_block->distance_dist, rng);
-                    if (sub_callback->movement_distance < 0)
-                      sub_callback->movement_distance = 0;
+                  sub_callback->try_again = TRUE;
+                  sub_callback->contact_type = contact_type;
+                  sub_callback->recipient_production_type = i;
+                  sub_callback->best_unit = NULL;
+                  sub_callback->movement_distance = PDF_random (param_block->distance_dist, rng);
+                  if (sub_callback->movement_distance < 0)
+                    sub_callback->movement_distance = 0;
 
-                    /*  Use maximum distance desired for the bounding box in RTree */
-                    if ( sub_callback->movement_distance > distance )
-                      distance = sub_callback->movement_distance;
-                    #if DEBUG
-                      g_debug ( "new_day_event_handler:  contact of %g km",sub_callback->movement_distance );
-                    #endif  
-                  };  
+                  /*  Use maximum distance desired for the bounding box in RTree */
+                  if ( sub_callback->movement_distance > distance )
+                    distance = sub_callback->movement_distance;
+                  #if DEBUG
+                    g_debug ( "new_day_event_handler:  contact of %g km",sub_callback->movement_distance );
+                  #endif  
+
                 };  /*  END nexposures for loop */                
               }
               else
