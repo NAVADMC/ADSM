@@ -277,6 +277,20 @@ select {
     margin: 8px 4px;
 }
 
+.progress-bar-mini {
+    display:block;
+    margin-top: -4px;
+    margin-right: 8px;
+    padding-bottom: 4px;
+}
+.progress-bar-mini .bar {
+    height: 3px;
+    background-color: #00477f;
+}
+.progress-bar-mini .bar.success {
+    background-color: #B6F3A7;
+}
+
 /**********************/
 
 #file_list li {

@@ -8,7 +8,7 @@ standard_library.install_hooks()
 from future.builtins import object
 
 from Results.models import DailyControls, DailyByProductionType, DailyByZone
-from ScenarioCreator.models import Zone
+from ScenarioCreator.models import Zone, OutputSettings
 from django.db.models import Q, F
 
 
@@ -21,10 +21,10 @@ def median_value(queryset, term):
     return queryset.values_list(term, flat=True).order_by(term)[int(round(count/2))]
 
 
-def last_day_query():
+def last_day_query(model=DailyControls):
     last_days = {}  # dictionary with iteration int keys
     for iteration in list_of_iterations():
-        last_days[iteration] = DailyControls.objects.filter(iteration=iteration).order_by('day').last().day
+        last_days[iteration] = model.objects.filter(iteration=iteration).order_by('day').last().day
     last_day_query1 = [Q(iteration=key, day=value) for key, value in last_days.items()]
     return reduce(Q.__or__, last_day_query1, Q(day=-1))
 
@@ -70,3 +70,25 @@ def summarize_results():
         name_and_value("maxZoneArea", DailyByZone)]
 
     return summary
+
+def iteration_progress():
+    iterations_started = len(list_of_iterations())
+    try:
+        stop_criteria = OutputSettings.objects.get().stop_criteria
+    except OutputSettings.DoesNotExist:
+        stop_criteria = None
+    
+    criteria = {
+        "disease-end": lambda: DailyControls.objects.filter(last_day_query(), diseaseDuration__gt=0).count(),
+        "first-detection": lambda: DailyByProductionType.objects
+                                    .filter(last_day_query(model=DailyByProductionType), firstDetection__gt=0)
+                                    .values_list('iteration', flat=True).distinct().count(),
+        "outbreak-end": lambda: DailyControls.objects.filter(last_day_query(), outbreakDuration__gt=0).count(),
+        "stop-days": lambda: DailyControls.objects.filter(last_day_query(), day=OutputSettings.objects.get().days).count(),
+    }
+
+    try:
+        iterations_completed = criteria[stop_criteria]() or 0.5
+    except KeyError:
+        iterations_completed = 0
+    return iterations_completed / iterations_started if iterations_started else 0
