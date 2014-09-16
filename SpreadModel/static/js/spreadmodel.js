@@ -12,6 +12,28 @@ $(function(){
         //TODO: handle success / failure messages
         $(this).trigger('saved');
     })
+    
+    $(document).on('click', '#update_adsm', function(event){
+        event.preventDefault();
+        $.get('/app/Update/', function(result){
+            if( result == "success"){
+                var dialog = new BootstrapDialog.show({
+                    title: 'Update ADSM on Restart',
+                    type: BootstrapDialog.TYPE_INFO,
+                    message: 'ADSM is now set to update next time you start the application.',
+                    buttons: [
+                        {
+                            label: 'Ok',
+                            cssClass: 'btn-info',
+                            action: function(dialog){
+                                dialog.close();
+                            }
+                        }
+                    ]
+                });
+            }
+        });
+    })
 
     $(document).on('saved', 'form:has(.unsaved)', function(){ //fixes 'Save' button with wrong color state
         $(this).find('.unsaved').removeClass('unsaved');

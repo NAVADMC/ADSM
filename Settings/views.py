@@ -8,16 +8,19 @@ standard_library.install_hooks()
 import re
 import os
 import shutil
+import thread
 from glob import glob
 import subprocess
 from django.shortcuts import redirect, render, HttpResponse
 from django.core.management import call_command
-from django.db import connections
+from django.db import connections, close_old_connections
 from django.conf import settings
 from django.db import OperationalError
 
 from ScenarioCreator.models import ZoneEffect
 from Settings.models import scenario_filename, SmSession, unsaved_changes
+
+from git.git import git
 
 
 def activeSession(name='scenario_db'):
@@ -26,22 +29,34 @@ def activeSession(name='scenario_db'):
 
 
 def update_adsm_from_git(request):
-    git = os.path.join(settings.BASE_DIR, 'git', 'bin', 'git.exe')
-    subprocess.call(git + ' reset --hard', shell=True)
-    subprocess.call(git + ' pull', shell=True)
-    return redirect('/setup/')
+    """This sets the update_on_startup flag for the next program start."""
+    if 'GET' in request.method:
+        try:
+            session = SmSession.objects.get_or_create(id=1)[0]
+            session.update_on_startup = True
+            session.save()
+            return HttpResponse("success")
+        except:
+            print ("Failed to set DB to update!")
+            return HttpResponse("failure")
 
 
 def update_is_needed():
-    git = os.path.join(settings.BASE_DIR, 'git', 'bin', 'git.exe')
-    subprocess.call(git + ' remote update', shell=True)
-    status = subprocess.call(git + ' status -uno', shell=True)
-    return 'behind' in status
+    try:
+        os.chdir(settings.BASE_DIR)
+        subprocess.call([git, 'remote', 'update'], shell=True)
+        status = subprocess.check_output([git, 'status', '-uno'], shell=True)
+        print(status)
+        return 'is behind' in status
+    except:
+        print ("Failed in checking if an update is required!")
+        return False
 
 
 def reset_db(name):
     print("Deleting", activeSession(name))
     try:
+        close_old_connections()
         os.remove(activeSession(name))
         connections[name].close()
     except BaseException as ex:
@@ -76,7 +91,7 @@ def update_db_version():
 def graceful_startup():
     """Checks something inside of each of the database files to see if it's valid.  If not, rebuild the database."""
     try:
-        scenario_filename()
+        SmSession.objects.get_or_create()[0].update_available
     except OperationalError:
         reset_db('default')
     try:
@@ -86,16 +101,14 @@ def graceful_startup():
         update_db_version()
 
 
-def update_status(do_update=False):
-    try:
-        session = SmSession.objects.get_or_create(id=1)[0]
-    except OperationalError:
-        reset_db('default')  # I'm doing this instead of graceful_startup() to avoid long migrations on startup
-        return update_status(do_update)  # possible infinite loop
-    if do_update:
-        session.update_needed = update_is_needed()
-        session.save()
-    return session.update_needed
+def check_update(request):
+    graceful_startup()
+
+    session = SmSession.objects.get_or_create(id=1)[0]
+    session.update_available = update_is_needed()
+    session.save()
+
+    return redirect('/setup/')
 
 
 def workspace_path(target):

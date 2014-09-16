@@ -10,7 +10,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-
+    url('^CheckUpdate/$', 'Settings.views.check_update'),
     url('^Update/$', 'Settings.views.update_adsm_from_git'),
     url('^SaveScenario/$', 'Settings.views.save_scenario'),
     url('^NewScenario/$', 'Settings.views.new_scenario'),

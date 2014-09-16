@@ -29,8 +29,10 @@
             {#        </div>#}
     </form>
     <div id="admin_link">
-        {% if update_needed %}
-            <a href="app/Update/" class="btn btn-default">update ADSM</a>
+        {% if update_available %}
+            <a href="#" class="btn btn-default" id="update_adsm">update ADSM</a>
+        {%  else %}
+            <a href="/app/CheckUpdate/" class="btn btn-default">check updates</a>
         {% endif %}
         <form action="/admin/" method="post" style="display:inline;">
             <input type="hidden" name="username" value="ADSM">

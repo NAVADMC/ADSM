@@ -86,7 +86,11 @@ to be in the py33 virtual env.  That only needs to be done once.
 
 ##OS - specific Branches
 _Branches: Windows, Linux, Mac-OSX_  
-Never merge from OS specific branches back into master.  Changes made in these branches should be OS-specific and stay isolated.  Any general changes should be made in master and applied to the other branches by merging.
+Never merge from OS specific branches back into master.  Changes made in these branches should be OS-specific and stay isolated.  Any general changes should be made in master and applied to the other branches by merging.  
+If you do accidentally merge an OS branch into master use this command to reset the repo before you push:  
+`git reset --merge <SHA>`  
+
+Where <SHA> is the SHA from the latest commit on GitHub, before the erroneous merge happened.  This will reset the state back to the SHA.
 
 
 ##Bryan's Notes on Installing Python3.3 in Linux:
