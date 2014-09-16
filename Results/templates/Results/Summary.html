@@ -1,5 +1,7 @@
 <table>
-    <tr><th>Iterations Started:</th> <td>{{ iterations }}</td></tr>
+    <tr><th>Iterations Started:</th> <td>{{ iterations }} {% if results_progress < 100 %}
+    	({{ results_progress|floatformat:"0" }}% complete)
+    {% endif %}</td></tr>
 </table>
 <table>
     <tbody>
