@@ -33,7 +33,7 @@ def basic_context(request):
     pt_count = ProductionType.objects.count()
     context = {'filename': scenario_filename(),
                'unsaved_changes': unsaved_changes(),
-               'update_needed': SmSession.objects.get_or_create()[0].update_needed,
+               'update_available': SmSession.objects.get_or_create()[0].update_available,
                'Scenario': Scenario.objects.count(),
                'OutputSetting': OutputSettings.objects.count(),
                'Population': Population.objects.count(),
