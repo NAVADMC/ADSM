@@ -12,7 +12,8 @@ class SmSession(models.Model):
     scenario_filename = models.CharField(max_length=255, default="Untitled Scenario", blank=True)
     unsaved_changes = models.BooleanField(default=False)
     update_needed = models.BooleanField(default=False, help_text='Is there are new version of ADSM available?')
-    population_upload_status = models.CharField(null=True, blank=True, max_length=255)
+    update_requested = models.BooleanField(default=False, help_text='The user has requested to install the update.')
+    population_upload_status = models.CharField(default='', null=True, blank=True, max_length=255)
     population_upload_percent = models.FloatField(default=0)
 
     def set_population_upload_status(self, status=None, percent=None):
