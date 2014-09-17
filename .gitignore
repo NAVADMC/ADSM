@@ -11,6 +11,7 @@ include/
 Lib/
 lib/
 Scripts/
+cef/out/
 *.manifest
 msvc*
 python27.dll
