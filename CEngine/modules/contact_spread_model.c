@@ -585,8 +585,6 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
   foreach_callback_data->rng = rng;
   foreach_callback_data->queue = queue; 
   foreach_callback_data->_poisson = poisson; 
-  foreach_callback_data->new_infections = 0;
-  foreach_callback_data->exposure_attempts = 0;
 
   /*  Iterate over the infectious units.  This is a shortened list compared to the entire unit list */
   g_hash_table_foreach( _iteration.infectious_units, new_day_event_handler, foreach_callback_data );  
@@ -648,7 +646,6 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
   EVT_event_queue_t *queue;  
   unsigned long sum_exposures;
   double max_distance;
-  unsigned long new_infections;
   
   
 #if DEBUG
@@ -656,7 +653,6 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
 #endif
   
   max_distance = 0.0;  
-  new_infections = 0;
   sum_exposures = 0;
 
   new_day_event_hash_table_data *foreach_callback_data = (new_day_event_hash_table_data *) user_data;
@@ -1069,7 +1065,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
                     g_debug ("new_day_event_handler:  r (%g) < P (%g), unit \"%s\" infected", r, P,
                              unit2->official_id);
 #endif
-                    new_infections = new_infections + 1;
+                    ;
                   }
                   else
                   {
@@ -1119,11 +1115,6 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
   }
   g_free( _contacts );
   _contacts = NULL;  /*  just in case */
-  
-  /*  Set some debugging or informative counts for use by who, 
-     (i.e. some function or procedure), ever might want/need them after this */
-  foreach_callback_data->new_infections = foreach_callback_data->new_infections + new_infections;
-  foreach_callback_data->exposure_attempts = foreach_callback_data->exposure_attempts + sum_exposures;  
   
 #if DEBUG
   g_debug ("----- EXIT new_day_event_handler - Optimized Version" );
