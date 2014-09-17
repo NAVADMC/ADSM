@@ -909,11 +909,8 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
           for( k = 0; k < t_array->len; k++ )
           {                       
             sub_callback_t *tsub = g_ptr_array_index( t_array, k );
-            if ( tsub != NULL )
-            {
-              /*  Did we not find a match?? */ 
-              tsub->try_again = ( tsub->best_unit == NULL );
-            };
+            /*  Did we not find a match?? */ 
+            tsub->try_again = ( tsub->best_unit == NULL );
           }
         };
         j = j + 1;
@@ -954,29 +951,53 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
             for( k = 0; k < t_array->len; k++ )
             {
               sub_callback_t *tsub = g_ptr_array_index( t_array, k );
-              if ( tsub != NULL )
+              if (tsub->best_unit != NULL)
               {
-                if (tsub->best_unit != NULL)
-                {
-                  /*  Create exposure and infection events here  */
+                /*  Create exposure and infection events here  */
 
-                  /* An eligible recipient unit (correct production type, not
-                   * Destroyed, in range, etc... ) was found. */
-                  unit2 = tsub->best_unit;
+                /* An eligible recipient unit (correct production type, not
+                 * Destroyed, in range, etc... ) was found. */
+                unit2 = tsub->best_unit;
 #if DEBUG
-                  g_debug ("new_day_event_handler:  unit \"%s\" within %g km of %g",
-                           unit2->official_id,
-                           tsub->best_unit_difference, tsub->movement_distance);
+                g_debug ("new_day_event_handler:  unit \"%s\" within %g km of %g",
+                         unit2->official_id,
+                         tsub->best_unit_difference, tsub->movement_distance);
 #endif
-                  /* Check whether contact with this unit is forbidden by the
-                   * zone rules. */
-                  unit2_fragment = zones->membership[unit2->index];
-                  contact_forbidden = FALSE;
-                  if ( ZON_level ( unit2_fragment ) > ZON_level ( unit1_fragment ) )
+                /* Check whether contact with this unit is forbidden by the
+                 * zone rules. */
+                unit2_fragment = zones->membership[unit2->index];
+                contact_forbidden = FALSE;
+                if ( ZON_level ( unit2_fragment ) > ZON_level ( unit1_fragment ) )
+                {
+                  contact_forbidden = TRUE;
+#if DEBUG
+                  g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" in \"%s\" zone, level %i to unit \"%s\" in \"%s\" zone, level %i would violate higher-to-lower rule",
+                           unit1->official_id,
+                           unit1_fragment->parent->name,
+                           unit1_fragment->parent->level,
+                           unit2->official_id,
+                           unit2_fragment->parent->name,
+                           unit2_fragment->parent->level);
+#endif
+                }
+                else if ( ZON_level ( unit2_fragment ) == ZON_level ( unit1_fragment ) )
+                {
+                  if ( !ZON_same_fragment ( unit2_fragment, unit1_fragment ) )
                   {
                     contact_forbidden = TRUE;
 #if DEBUG
-                    g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" in \"%s\" zone, level %i to unit \"%s\" in \"%s\" zone, level %i would violate higher-to-lower rule",
+                    g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" to unit \"%s\" in separate foci of \"%s\" zone would violate separate foci rule",
+                             unit1->official_id, unit2->official_id, unit1_fragment->parent->name);
+#endif
+                  }
+                }
+                else /* ZON_level ( unit2_fragment ) < ZON_level ( unit1_fragment ) */
+                {
+                  if ( ZON_level ( unit1_fragment ) - ZON_level ( unit2_fragment ) > 1 )
+                  {
+                    contact_forbidden = TRUE;
+#if DEBUG
+                    g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" in \"%s\" zone, level %i to unit \"%s\" in non-adjacent \"%s\" zone, level %i",
                              unit1->official_id,
                              unit1_fragment->parent->name,
                              unit1_fragment->parent->level,
@@ -985,119 +1006,92 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
                              unit2_fragment->parent->level);
 #endif
                   }
-                  else if ( ZON_level ( unit2_fragment ) == ZON_level ( unit1_fragment ) )
+                  else if ( !ZON_nests_in ( unit2_fragment, unit1_fragment ) )
                   {
-                    if ( !ZON_same_fragment ( unit2_fragment, unit1_fragment ) )
-                    {
-                      contact_forbidden = TRUE;
+                    contact_forbidden = TRUE;
 #if DEBUG
-                      g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" to unit \"%s\" in separate foci of \"%s\" zone would violate separate foci rule",
-                               unit1->official_id, unit2->official_id, unit1_fragment->parent->name);
+                    g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" in \"%s\" zone, level %i to unit \"%s\" in non-nested focus of \"%s\" zone, level %i",
+                             unit1->official_id,
+                             unit1_fragment->parent->name,
+                             unit1_fragment->parent->level,
+                             unit2->official_id,
+                             unit2_fragment->parent->name,
+                             unit2_fragment->parent->level);
 #endif
-                    }
                   }
-                  else /* ZON_level ( unit2_fragment ) < ZON_level ( unit1_fragment ) */
-                  {
-                    if ( ZON_level ( unit1_fragment ) - ZON_level ( unit2_fragment ) > 1 )
-                    {
-                      contact_forbidden = TRUE;
-#if DEBUG
-                      g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" in \"%s\" zone, level %i to unit \"%s\" in non-adjacent \"%s\" zone, level %i",
-                               unit1->official_id,
-                               unit1_fragment->parent->name,
-                               unit1_fragment->parent->level,
-                               unit2->official_id,
-                               unit2_fragment->parent->name,
-                               unit2_fragment->parent->level);
-#endif
-                    }
-                    else if ( !ZON_nests_in ( unit2_fragment, unit1_fragment ) )
-                    {
-                      contact_forbidden = TRUE;
-#if DEBUG
-                      g_debug ("new_day_event_handler: contact forbidden: contact from unit \"%s\" in \"%s\" zone, level %i to unit \"%s\" in non-nested focus of \"%s\" zone, level %i",
-                               unit1->official_id,
-                               unit1_fragment->parent->name,
-                               unit1_fragment->parent->level,
-                               unit2->official_id,
-                               unit2_fragment->parent->name,
-                               unit2_fragment->parent->level);
-#endif
-                    }
-                  }
+                }
 
-                  /* If none of the zone rules forbade contact, create the exposure. */
-                  if ( !contact_forbidden )
-                  {
-                    /* Announce the exposure. */
-#if DEBUG
-                    g_debug ("new_day_event_handler:  unit \"%s\" unit exposed", unit2->official_id);
-#endif
-
-                    /* Is the exposure adequate (i.e., will it cause infection in a susceptible unit)? */
-                    if (contact_type == ADSM_DirectContact && unit1->prevalence_curve != NULL)
-                      P = unit1->prevalence;
-                    else
-                      P = param_block->prob_infect;
-                    r = RAN_num (rng);
-                    contact_is_adequate = (r < P);
-
-                    shipping_delay = (int) round (PDF_random (param_block->shipping_delay, rng));  
-                    exposure = EVT_new_exposure_event (unit1, unit2, event->day,
-                                                       contact_type, TRUE, 
-                                                       contact_is_adequate, shipping_delay);
-                    exposure->u.exposure.contact_type = contact_type; /* This seems redundant (exposure.cause does the same thing), but there's probably a reason.... */
-                          
-                    if (shipping_delay <= 0)
-                    {
-                      EVT_event_enqueue (queue, exposure);
-                    }
-                    else
-                    {
-                      exposure->u.exposure.day += shipping_delay;
-                      if (shipping_delay > local_data->pending_infections->len)
-                      {
-                        adsm_extend_rotating_array (local_data->pending_infections,
-                                                           shipping_delay, local_data->rotating_index);
-                      }
-
-                      delay_index = (local_data->rotating_index + shipping_delay) % local_data->pending_infections->len;
-                      q = (GQueue *) g_ptr_array_index (local_data->pending_infections, delay_index);
-                      g_queue_push_tail (q, exposure);
-                      local_data->npending_infections++;
-                    };
-
-                    /* If contact was adequate, queue an attempt to infect. */
-                    if( contact_is_adequate )
-                    {
-#if DEBUG
-                      g_debug ("new_day_event_handler:  r (%g) < P (%g), unit \"%s\" infected", r, P,
-                               unit2->official_id);
-#endif
-                      new_infections = new_infections + 1;
-                    }
-                    else
-                    {
-#if DEBUG
-                      g_debug ("new_day_event_handler:  r (%g) >= P (%g), unit \"%s\" not infected", r,
-                               P, unit2->official_id);
-#endif
-                    };
-                  } /* contact was not forbidden */
-                } 
-                else  /*  hmmm no match was found... */
+                /* If none of the zone rules forbade contact, create the exposure. */
+                if ( !contact_forbidden )
                 {
+                  /* Announce the exposure. */
 #if DEBUG
-                  g_debug ("new_day_event_handler:  no recipient can be found at ~%g km from unit \"%s\" for this instance of this contact_type / production_type pair" ,
-                           tsub->movement_distance, unit1->official_id);
+                  g_debug ("new_day_event_handler:  unit \"%s\" unit exposed", unit2->official_id);
 #endif
-                  ;
-                };  /*  END if a unit match was found */
+
+                  /* Is the exposure adequate (i.e., will it cause infection in a susceptible unit)? */
+                  if (contact_type == ADSM_DirectContact && unit1->prevalence_curve != NULL)
+                    P = unit1->prevalence;
+                  else
+                    P = param_block->prob_infect;
+                  r = RAN_num (rng);
+                  contact_is_adequate = (r < P);
+
+                  shipping_delay = (int) round (PDF_random (param_block->shipping_delay, rng));  
+                  exposure = EVT_new_exposure_event (unit1, unit2, event->day,
+                                                     contact_type, TRUE, 
+                                                     contact_is_adequate, shipping_delay);
+                  exposure->u.exposure.contact_type = contact_type; /* This seems redundant (exposure.cause does the same thing), but there's probably a reason.... */
+                        
+                  if (shipping_delay <= 0)
+                  {
+                    EVT_event_enqueue (queue, exposure);
+                  }
+                  else
+                  {
+                    exposure->u.exposure.day += shipping_delay;
+                    if (shipping_delay > local_data->pending_infections->len)
+                    {
+                      adsm_extend_rotating_array (local_data->pending_infections,
+                                                         shipping_delay, local_data->rotating_index);
+                    }
+
+                    delay_index = (local_data->rotating_index + shipping_delay) % local_data->pending_infections->len;
+                    q = (GQueue *) g_ptr_array_index (local_data->pending_infections, delay_index);
+                    g_queue_push_tail (q, exposure);
+                    local_data->npending_infections++;
+                  };
+
+                  /* If contact was adequate, queue an attempt to infect. */
+                  if( contact_is_adequate )
+                  {
+#if DEBUG
+                    g_debug ("new_day_event_handler:  r (%g) < P (%g), unit \"%s\" infected", r, P,
+                             unit2->official_id);
+#endif
+                    new_infections = new_infections + 1;
+                  }
+                  else
+                  {
+#if DEBUG
+                    g_debug ("new_day_event_handler:  r (%g) >= P (%g), unit \"%s\" not infected", r,
+                             P, unit2->official_id);
+#endif
+                  };
+                } /* contact was not forbidden */
+              } 
+              else  /*  hmmm no match was found... */
+              {
+#if DEBUG
+                g_debug ("new_day_event_handler:  no recipient can be found at ~%g km from unit \"%s\" for this instance of this contact_type / production_type pair" ,
+                         tsub->movement_distance, unit1->official_id);
+#endif
+                ;
+              };  /*  END if a unit match was found */
+                  
+              /*  Free the structure memory stored at this location in this GPtrArray  */
+              g_free( tsub );
                     
-                /*  Free the structure memory stored at this location in this GPtrArray  */
-                g_free( tsub );
-                    
-              };  /* END if tsub != NULL  */
             };  /*  END for loop iteration over this GPtrArray  */
           };
 
