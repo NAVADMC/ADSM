@@ -328,6 +328,11 @@ check_and_choose (int id, gpointer arg)
   
       for ( contact_type = 0; contact_type < callback_data->contact_count; contact_type++ )
       {         
+        /* If unit 2 is quarantined, it cannot be the recipient of a direct
+         * contact. */
+        if (contact_type == 0 && unit2->quarantined)
+          continue;
+
         for ( production_type = 0; production_type < callback_data->production_type_count; production_type++ )
         {
           GPtrArray *_contacts = (GPtrArray *)callback_data->_contacts[contact_type][production_type];
@@ -356,27 +361,16 @@ check_and_choose (int id, gpointer arg)
                   difference = fabs ( contact->movement_distance - distance );
                   if ( contact->best_unit == NULL )
                   {                     
-                    /* If unit 2 is quarantined, it cannot be the recipient of a direct
-                     * contact. */
-                    if ( ( unit2->quarantined ) && ( contact->contact_type == ADSM_DirectContact ) )
-                    {
-                      #if DEBUG
-                        g_debug ( "----- check_and_choose - Optimized Version:  Fit found, but not allowed; quarantined direct-contact" );
-                      #endif                         
-                    }
-                    else
-                    {                        
-                      contact->best_unit = unit2;
-                      contact->best_unit_zone = callback_data->zones->membership[unit2->index];
-                      contact->best_unit_distance = distance;
-                      contact->best_unit_difference = difference;
-                      contact->min_difference = difference;
-                      contact->cumul_size = unit2->size;
-                      /* A best_unit has been filled in where there previously
-                       * was NULL.  This means that we can decrement the count
-                       * of unmatched exposures. */
-                      callback_data->num_unmatched_exposures--;
-                    };
+                    contact->best_unit = unit2;
+                    contact->best_unit_zone = callback_data->zones->membership[unit2->index];
+                    contact->best_unit_distance = distance;
+                    contact->best_unit_difference = difference;
+                    contact->min_difference = difference;
+                    contact->cumul_size = unit2->size;
+                    /* A best_unit has been filled in where there previously
+                     * was NULL.  This means that we can decrement the count
+                     * of unmatched exposures. */
+                    callback_data->num_unmatched_exposures--;
                   }
                   else if ( fabs ( difference - contact->min_difference ) <= EPSILON )
                   {                        
@@ -398,8 +392,7 @@ check_and_choose (int id, gpointer arg)
                     unit2_fragment = callback_data->zones->membership[unit2->index];
     
     
-                    contact_forbidden = ( ( unit2->quarantined && contact->contact_type == ADSM_DirectContact )
-                                          || ( ZON_level ( unit2_fragment ) > ZON_level ( unit1_fragment ) )
+                    contact_forbidden = ( ( ZON_level ( unit2_fragment ) > ZON_level ( unit1_fragment ) )
                                           || ( ZON_level ( unit1_fragment ) - ZON_level ( unit2_fragment ) > 1 )
                                           || ( ( ZON_level ( unit1_fragment ) - ZON_level ( unit2_fragment ) == 1 )
                                                && !ZON_nests_in ( unit2_fragment, unit1_fragment ) )
@@ -411,8 +404,7 @@ check_and_choose (int id, gpointer arg)
                       /* Contact with this new find (unit 2) is not forbidden.
                        * Is contact with the old find forbidden? If so, take
                        * the new find. */
-                      contact_forbidden = ( ( contact->best_unit->quarantined && contact->contact_type == ADSM_DirectContact )
-                                          || ( ZON_level ( contact->best_unit_zone ) > ZON_level ( unit1_fragment ) )
+                      contact_forbidden = ( ( ZON_level ( contact->best_unit_zone ) > ZON_level ( unit1_fragment ) )
                                           || ( ZON_level ( unit1_fragment ) - ZON_level ( contact->best_unit_zone ) > 1 )
                                           || ( ( ZON_level ( unit1_fragment ) - ZON_level ( contact->best_unit_zone ) == 1 )
                                                && !ZON_nests_in ( contact->best_unit_zone, unit1_fragment ) )
@@ -470,23 +462,11 @@ check_and_choose (int id, gpointer arg)
                   } /* end of case where the new find is the same distance from the source as the current best find */
                   else if ( difference < contact->min_difference )
                   {
-                       
-                    contact_forbidden = ( unit2->quarantined && contact->contact_type == ADSM_DirectContact );
-    
-                    if ( !contact_forbidden )
-                    {                       
-                      contact->best_unit = unit2;
-                      contact->best_unit_distance = distance;
-                      contact->best_unit_difference = difference;
-                      contact->min_difference = difference;
-                      contact->cumul_size = unit2->size;
-                    }
-                    else
-                    {
-                      #if DEBUG
-                        g_debug ( "----- check_and_choose - Optimized Version:  Better fit found, but contact forbidden:  quarantined unit for direct-contact" );
-                      #endif           
-                    };
+                    contact->best_unit = unit2;
+                    contact->best_unit_distance = distance;
+                    contact->best_unit_difference = difference;
+                    contact->min_difference = difference;
+                    contact->cumul_size = unit2->size;
                   }
                   else
                   {
