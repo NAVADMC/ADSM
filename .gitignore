@@ -9,15 +9,20 @@ build/
 dist/
 include/
 Lib/
+lib/
 Scripts/
+cef/out/
 *.manifest
 msvc*
 python27.dll
 pywintypes27.dll
 SpreadModel.exe
+AnimalDiseaseSpreadModel
 sqlite3.dll
 debug.log
 SpreadModel.zip
+*.so
+*.so.*
 
 #################
 ## C files
