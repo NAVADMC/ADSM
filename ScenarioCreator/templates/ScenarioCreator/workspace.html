@@ -7,7 +7,7 @@
 
     <h4>Upload a Scenario File (sqlite3)</h4>
     <form id="file-upload" method="post" action="/app/Upload/" enctype="multipart/form-data">
-        <input type="file" name="file" accept="application/x-sqlite3" file-upload="">
+        <input type="file" id="file-input" name="file" accept="application/x-sqlite3">
         <button type="submit" class="btn btn-primary">Upload Scenario &nbsp<img src="{{ STATIC_URL }}icons/upload.png" class="icon"></button>
         <p class="help-block">You can upload a file from anywhere on your computer and it will be imported to the ADSM workspace.</p>
     </form>

@@ -140,8 +140,11 @@ def handle_file_upload(request):
 
 
 def upload_scenario(request):
-    handle_file_upload(request)
-    return redirect('/app/Workspace/')
+    if '.sqlite' in request.FILES['file']._name:
+        handle_file_upload(request)
+        return redirect('/app/Workspace/')
+    else:
+        raise ValueError("You can only submit files with '.sqlite' in the file name.")  # ugly error should be caught by Javascript first
 
 
 def open_scenario(request, target):

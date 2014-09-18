@@ -182,6 +182,16 @@ $(function(){
         });
         $(this).closest('form').submit();//will cause page reload
     });
+    
+    $(document).on('submit','#file-upload',function(event){
+        var filename = $(this).find('input[type=file]').val()
+        var file_extension = /application\/(x-|)(.*)/g.exec($(this).find('input[type=file]').attr('accept'))[2]
+        if( filename.indexOf(file_extension) == -1) {
+            alert("Uploaded files must have "+file_extension+" in the name: " + filename)
+            console.log(file_extension)
+            event.preventDefault()
+        }
+    });
 
 })
 
