@@ -139,9 +139,15 @@ To update the executable:
 
     I pulled the 64bit projects for each OS from the 2062 Branch on that site.
         Note, the Windows version requires VS2013
+        Note, the Linux version require mesa-common-dev, libglew-dev, libgtkglext1-dev
+            sudo ln -s /lib/x86_64-linux-gnu/libudev.so.1.3.5 /usr/lib/libudev.so.0
 
     From here, I modified the 'cefsimple' application to launch http://localhost:8000, changed the window names, and disabled right clicking.
     Compile that project as x64 Release and put the output in the Chromium folder for the OS Branch.
 
     The CEF Source was not added to the repo as it won't accept merges from the Google CEF Repo in the Project format made by Adobe.
     Also because this should really only be a one time thing to ever happen. However, the notes are here in case there is a major security hole that needs to be recompiled for.
+
+    Git for windows, just downloaded portable from msysgit git repo.
+    Linux, downloaded git source from github/git/git and compiled in new directory.
+        requires build-essential, libssl-dev, libcurl4-openssl-dev
