@@ -73,18 +73,21 @@ class DailyParser(object):
         """
         field_map = self.build_composite_field_map(getattr(Results.models, model_class_name)() )  # creates a table instance
         for suffix_key, instance in instance_dict.items():  # For each combination: DailyByZoneAndProductionType with (Bull_HighRisk), (Swine_MediumRisk), etc.
+            instance_needed = False
             for column_name, model_field in field_map.items():
                 if suffix_key == '' and model_class_name == 'DailyByProductionType' \
                         and column_name in 'deswU deswA expnU expcU expnA expcA infnU infcU infnA infcA'.split():
                     column_name = column_name + "All"  # sometimes columns use "All" instead of ''
                 if column_name + suffix_key in sparse_info:
                     setattr(instance, model_field, sparse_info[column_name + suffix_key])
+                    instance_needed = True
                     try:
                         self.failures.remove(column_name + suffix_key)
                     except KeyError:
                         print('Error: Column was assigned twice.  Second copy in %s.%s for output column %s.' % (model_class_name, model_field, column_name + suffix_key))
-            instance_dict[suffix_key].save()
-
+            if not instance_needed:
+                del instance_dict[suffix_key]
+        return [instance for key, instance in instance_dict.items()]
 
     def construct_combinatorial_instances(self, day, iteration):
         daily_instances = {table_name:{} for table_name in ["DailyByProductionType", "DailyByZone", "DailyByZoneAndProductionType", "DailyControls"]}
@@ -126,17 +129,22 @@ class DailyParser(object):
         #construct the set of tables we're going to use for this day
         daily_instances = self.construct_combinatorial_instances(day, iteration)
 
+        results = []
         for class_name in daily_instances:
-            self.populate_tables_with_matching_fields(class_name, daily_instances[class_name], sparse_info)  # there was a lot of preamble to get this line to work
+            result = self.populate_tables_with_matching_fields(class_name, daily_instances[class_name], sparse_info)  # there was a lot of preamble to get this line to work
+            results.extend(result)
 
         if len(self.failures) and day == 1:
             print('Unable to match columns: ', len(self.failures), sorted(self.failures))
+        return results
 
     def parse_daily_strings(self, cmd_strings):
+        results = []
         for cmd_string in cmd_strings:
             values = cmd_string.split(',')
             if len(values):
                 pairs = zip(self.headers, values)
                 sparse_values = {a: number(b) for a, b in pairs}
                 Results.models.DailyReport(sparse_dict=str(sparse_values), full_line=cmd_string).save()
-                self.populate_db_from_daily_report(sparse_values)
+                results.extend(self.populate_db_from_daily_report(sparse_values))
+        return results

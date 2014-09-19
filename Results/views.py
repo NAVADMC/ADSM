@@ -17,7 +17,7 @@ import threading
 from django.forms.models import modelformset_factory
 from django.shortcuts import render, redirect
 from django.conf import settings
-from django.db import connections
+from django.db import connections, transaction
 import subprocess
 import time
 import multiprocessing
@@ -59,43 +59,25 @@ def non_empty_lines(line):
     return output_lines
 
 
-def simulation_process(iteration_number, lock, event, counter, output_args):
+def simulation_process(iteration_number, adsm_cmd, queue):
     start = time.time()
+    adsm_result = {}
 
-    cursor = connections['scenario_db'].cursor()
-
-    executables = {"Windows": 'adsm.exe', "Linux": 'adsm'}
-    system_executable = os.path.join(settings.BASE_DIR, executables[platform.system()])  #TODO: KeyError
-    database_file = os.path.basename(settings.DATABASES['scenario_db']['NAME'])
-    with lock:
-        counter.value = counter.value + 1
-        event.clear()
-    simulation = subprocess.Popen([system_executable, '-i', str(iteration_number), database_file] + output_args,
-                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
-    headers = simulation.stdout.readline().decode("utf-8")  # first line should be the column headers
-
-    lines = []
+    simulation = subprocess.Popen(adsm_cmd,
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE,
+                                  bufsize=1)
+    adsm_result['headers'] = simulation.stdout.readline().decode("utf-8")
+    adsm_result['lines'] = []
     for line in iter(simulation.stdout.readline, b''):
-        lines.append(non_empty_lines(line))
+        adsm_result['lines'].append(non_empty_lines(line))
     outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
     if errors:  # this will only print out error messages after the simulation has halted
         print(errors)
-    with lock:
-        counter.value = counter.value - 1
-        if counter.value == 0:
-            event.set()
 
-    event.wait()
-    with lock:
-        parser = Results.output_parser.DailyParser(headers)
-        for line in lines:
-            parser.parse_daily_strings(line)
+    queue.put(adsm_result)
 
-    # TODO: When the subprocess terminates there might be unconsumed output that still needs to be processed.
-    # (I haven't seen evidence of uncaught output since 10 days after writing it)
     end = time.time()
-
-    cursor.close()
 
     return '%i: Success in %i seconds' % (iteration_number, end-start)
 
@@ -118,6 +100,18 @@ def zip_map_directory_if_it_exists():
                     zf.write(path, entry)
     else:
         print("No folder detected: ", dir_to_zip)
+
+def process_result(queue):
+    from Results.output_parser import DailyParser
+    adsm_result = queue.get()
+    p = DailyParser(adsm_result['headers'])
+    results = []
+    for line in adsm_result['lines']:
+        results.extend(p.parse_daily_strings(line))
+
+    with transaction.atomic(using='scenario_db'):
+        for result in results:
+            result.save()
         
 
 class Simulation(threading.Thread):
@@ -128,23 +122,25 @@ class Simulation(threading.Thread):
         super(Simulation, self).__init__(**kwargs)
 
     def run(self):
+        executables = {"Windows": 'adsm.exe', "Linux": 'adsm'}
+        system_executable = os.path.join(settings.BASE_DIR, executables[platform.system()])  #TODO: KeyError
+        database_file = os.path.basename(settings.DATABASES['scenario_db']['NAME'])
         output_args = prepare_supplemental_output_directory()
-
-        # close db connection so each process will get its own
-        connections['default'].close()
-        connections['scenario_db'].close()
 
         statuses = []
         manager = multiprocessing.Manager()
         pool = multiprocessing.Pool()
-        event = manager.Event()
-        lock = manager.Lock()
-        counter = manager.Value('i', 0)
+        queue = manager.Queue()
         for iteration in range(1, self.max_iteration + 1):
-            res = pool.apply_async(func=simulation_process, args=(iteration, lock, event, counter, output_args))
+            adsm_cmd = [system_executable, '-i', str(iteration), database_file] + output_args
+            res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, queue))
             statuses.append(res)
         pool.close()
+
+        [process_result(queue) for iteration in range(self.max_iteration)]
+
         pool.join()
+
         statuses = [status.get() for status in statuses]
         print(statuses)
         zip_map_directory_if_it_exists()
