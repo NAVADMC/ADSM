@@ -72,13 +72,15 @@ def summarize_results():
     return summary
 
 def iteration_progress():
-    iterations_started = len(list_of_iterations())
     try:
-        stop_criteria = OutputSettings.objects.get().stop_criteria
-    except OutputSettings.DoesNotExist:
-        stop_criteria = None
-    
-    criteria = {
+        outputSettings = OutputSettings.objects.get()
+    except (OutputSettings.DoesNotExist, OutputSettings.MultipleObjectsReturned):
+        return 0
+
+    iterations_started = outputSettings.iterations
+    stop_criteria = outputSettings.stop_criteria
+
+    calculation_function = {
         "disease-end": lambda: DailyControls.objects.filter(last_day_query(), diseaseDuration__gt=0).count(),
         "first-detection": lambda: DailyByProductionType.objects
                                     .filter(last_day_query(model=DailyByProductionType), firstDetection__gt=0)
@@ -87,8 +89,9 @@ def iteration_progress():
         "stop-days": lambda: DailyControls.objects.filter(last_day_query(), day=OutputSettings.objects.get().days).count(),
     }
 
+    first_iteration_half_done = 0.5
     try:
-        iterations_completed = criteria[stop_criteria]() or 0.5
+        iterations_completed = calculation_function[stop_criteria]() or first_iteration_half_done
     except KeyError:
-        iterations_completed = 0
+        raise NotImplementedError("'%s' does not have an implemented progress calculation function." % stop_criteria)
     return iterations_completed / iterations_started if iterations_started else 0
