@@ -21,6 +21,7 @@ AnimalDiseaseSpreadModel
 sqlite3.dll
 debug.log
 SpreadModel.zip
+SpreadModel.tar.bz2
 *.so
 *.so.*
 

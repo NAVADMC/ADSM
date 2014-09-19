@@ -140,6 +140,7 @@ To update the executable:
     I pulled the 64bit projects for each OS from the 2062 Branch on that site.
         Note, the Windows version requires VS2013
         Note, the Linux version require mesa-common-dev, libglew-dev, libgtkglext1-dev
+            # NOTE: This file needs to be linked on normal user machines too!
             sudo ln -s /lib/x86_64-linux-gnu/libudev.so.1.3.5 /usr/lib/libudev.so.0
 
     From here, I modified the 'cefsimple' application to launch http://localhost:8000, changed the window names, and disabled right clicking.
