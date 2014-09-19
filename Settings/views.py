@@ -44,8 +44,10 @@ def update_adsm_from_git(request):
 def update_is_needed():
     try:
         os.chdir(settings.BASE_DIR)
-        subprocess.call([git, 'remote', 'update'], shell=True)
-        status = subprocess.check_output([git, 'status', '-uno'], shell=True)
+        command = git + ' remote update'
+        subprocess.call(command, shell=True)
+        command = git + ' status -uno'
+        status = subprocess.check_output(command, shell=True)
         print(status)
         return 'is behind' in status
     except:
