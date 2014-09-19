@@ -120,6 +120,7 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
     @classmethod
     def setUpClass(cls):
         cls.selenium = webdriver.Chrome()
+        cls.selenium.set_window_size(1280, 800)
         super(FunctionalTests, cls).setUpClass()
 
     @classmethod
