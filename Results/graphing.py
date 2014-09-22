@@ -13,16 +13,16 @@ import pandas as pd
 import matplotlib.pyplot as plt, mpld3
 
 
-def matplotd3(request):
-    fig, ax = plt.subplots()
-    points = ax.plot([3, 1, 4, 1, 5], 'ks-', mec='w', mew=5, ms=20)
-    return HttpResponse(mpld3.fig_to_html(fig))
-
-
 def HttpFigure(fig):
     response = HttpResponse(content_type='image/png')
     FigureCanvas(fig).print_png(response)
     return response
+
+
+def matplotd3(request):
+    fig, ax = plt.subplots()
+    points = ax.plot([3, 1, 4, 1, 5], 'ks-', mec='w', mew=5, ms=20)
+    return HttpResponse(mpld3.fig_to_html(fig))
 
 
 def rstyle(axis):
