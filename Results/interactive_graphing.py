@@ -10,24 +10,31 @@ and panning, and to reset the view.
 """
 from django.http import HttpResponse
 
+from matplotlib.colors import ListedColormap
 import matplotlib.pyplot as plt
 import numpy as np
 import mpld3
 from Results.models import Unit
+from Results.summary import list_of_iterations
 
-def scatterplot_demo(request):
-    fig, ax = plt.subplots(subplot_kw=dict(axisbg='#EEEEEE'))
+
+def population_d3_map(request):
+    fig, ax = plt.subplots(subplot_kw=dict(axisbg='#EEEEEE'), figsize=(9,9))
     pop_size = Unit.objects.count()
 
-    latlong = [(u.latitude, u.longitude, u.user_notes, u.production_type.id) for u in Unit.objects.all()]
-    latitude, longitude, names, production_types = zip(*latlong)
+    latlong = [(u.latitude, u.longitude, "%s %s %i"%(u.production_type.name, u.user_notes, u.unitstats.cumulative_infected), u.unitstats.cumulative_infected) for u in Unit.objects.all()]
+    latitude, longitude, names, number_infected = zip(*latlong)
+    total_iterations = float(len(list_of_iterations()))  # This is slower but more accurate than OutputSettings[0].iterations
     
+    red_spectrum = ListedColormap([(1.0, 1.0, 0.8), (1.0, 0.929, 0.627), (0.996, 0.851, 0.463), (0.996, 0.698, 0.298), (0.992, 0.553, 0.235), 
+                                   (0.988, 0.306, 0.165), (0.89, 0.102, 0.11), (0.741, 0.0, 0.149), (0.502, 0.0, 0.149)], 
+                                  name=u'from_list', N=None)
     scatter = ax.scatter(latitude,
                          longitude,
-                         c=production_types,
+                         c=[x / total_iterations for x in number_infected],
                          s=[30] * pop_size,  # Size in square pixels
-                         alpha=0.3,
-                         cmap=plt.cm.jet,
+                         alpha=0.5,
+                         cmap=red_spectrum,
                          linewidths=0)
     ax.grid(color='white', linestyle='solid')
     
