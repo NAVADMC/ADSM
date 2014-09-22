@@ -13,23 +13,27 @@ from django.http import HttpResponse
 import matplotlib.pyplot as plt
 import numpy as np
 import mpld3
+from Results.models import Unit
 
 def scatterplot_demo(request):
     fig, ax = plt.subplots(subplot_kw=dict(axisbg='#EEEEEE'))
-    N = 100000
+    pop_size = Unit.objects.count()
+
+    latlong = [(u.latitude, u.longitude, u.user_notes, u.production_type.id) for u in Unit.objects.all()]
+    latitude, longitude, names, production_types = zip(*latlong)
     
-    scatter = ax.scatter(np.random.normal(size=N),
-                         np.random.normal(size=N),
-                         c=np.random.random(size=N),
-                         s=1000 * np.random.random(size=N),
+    scatter = ax.scatter(latitude,
+                         longitude,
+                         c=production_types,
+                         s=[30] * pop_size,  # Size in square pixels
                          alpha=0.3,
-                         cmap=plt.cm.jet)
+                         cmap=plt.cm.jet,
+                         linewidths=0)
     ax.grid(color='white', linestyle='solid')
     
-    ax.set_title("Scatter Plot (with tooltips!)", size=20)
+    ax.set_title("Population Locations and IDs", size=20)
     
-    labels = ['point {0}'.format(i + 1) for i in range(N)]
-    tooltip = mpld3.plugins.PointLabelTooltip(scatter, labels=labels)
+    tooltip = mpld3.plugins.PointLabelTooltip(scatter, labels=names)
     mpld3.plugins.connect(fig, tooltip)
     
     html = mpld3.fig_to_html(fig, d3_url=None, mpld3_url=None, no_extras=False,
