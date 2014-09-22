@@ -342,6 +342,8 @@ def readParameters( parameterFileName ):
 	disease = Disease(
 	  name='',
 	  include_airborne_spread = (xml.find( './/airborne-spread-model' ) != None or xml.find( './/airborne-spread-exponential-model' ) != None),
+	  include_direct_contact_spread = False,
+	  include_indirect_contact_spread = False,
 	  use_airborne_exponential_decay = useAirborneExponentialDecay
 	)
 	disease.save()
@@ -458,6 +460,7 @@ def readParameters( parameterFileName ):
 			  latent_animals_can_infect_others = latentCanInfect,
 			  subclinical_animals_can_infect_others = subclinicalCanInfect
 			)
+			disease.include_direct_contact_spread = True
 		elif el.attrib['contact-type'] == 'indirect':
 			contactSpreadModel = IndirectSpread(
 			  _disease = disease,
@@ -469,9 +472,11 @@ def readParameters( parameterFileName ):
 			  infection_probability = probInfect,
 			  subclinical_animals_can_infect_others = subclinicalCanInfect
 			)
+			disease.include_indirect_contact_spread = True
 		else:
 			assert False
 		contactSpreadModel.save()
+		disease.save()
 
 		for fromTypeName in getProductionTypes( el, 'from-production-type', productionTypeNames ):
 			for toTypeName in getProductionTypes( el, 'to-production-type', productionTypeNames ):

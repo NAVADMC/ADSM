@@ -73,7 +73,7 @@ def breakdown_dictionary(iterate_pt, iterate_zone):
     production_types, zones = {}, {}
     if iterate_pt:
         production_types = dict(ProductionType.objects.all().values_list('name', 'id'))  # Tuples need to be turned into dict
-        production_types['All'] = None
+        production_types['All'] = None  # this has been vetted for Issue #223 as a user label
     if iterate_zone:
         zones = dict(Zone.objects.all().values_list('name', 'id'))  # Tuples need to be turned into dict
         if iterate_pt:  # Background is only included in DailyByZoneAndProductionType.  See Issue #198
