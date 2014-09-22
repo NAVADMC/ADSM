@@ -94,10 +94,10 @@
     <tr>
       <td>detOccurred</td>
       <td>firstDetection</td>
-      <td>detnUAll</td>
-      <td>detcUAll</td>
+      <td>detnU</td>
+      <td>detcU</td>
       <td>destrOccurred</td>
-      <td>desnUAll</td>
+      <td>desnU</td>
     </tr>
     <tr><td>0</td>  <td></td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>1</td> <td>2</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td></tr>
@@ -196,10 +196,10 @@
     <tr>
       <td>detOccurred</td>
       <td>firstDetection</td>
-      <td>detnUAll</td>
-      <td>detcUAll</td>
+      <td>detnU</td>
+      <td>detcU</td>
       <td>destrOccurred</td>
-      <td>desnUAll</td>
+      <td>desnU</td>
     </tr>
     <tr><td>0</td> <td></td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>0</td> <td></td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -991,8 +991,8 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
-      <td>detcUAll</td>
+      <td>detnU</td>
+      <td>detcU</td>
       <td>detnUClin</td>
       <td>detnUTest</td>
       <td>detnUBeefCattle</td>
@@ -1087,8 +1087,8 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
-      <td>detcUAll</td>
+      <td>detnU</td>
+      <td>detcU</td>
       <td>detnUClin</td>
       <td>detnUTest</td>
       <td>detnUBeefCattle</td>
@@ -1288,7 +1288,7 @@
 
   <output>
     <tr>
-      <td>exmcUAll</td>
+      <td>exmcU</td>
       <td>exmcUDirFwd</td>
       <td>exmcUDirBack</td>
       <td>exmcUIndFwd</td>
@@ -1303,7 +1303,7 @@
       <td>exmcUIndFwdPigs</td>
       <td>exmcUIndBackBeefCattle</td>
       <td>exmcUIndBackPigs</td>
-      <td>exmcAAll</td>
+      <td>exmcA</td>
       <td>exmcADirFwd</td>
       <td>exmcADirBack</td>
       <td>exmcAIndFwd</td>
@@ -1376,7 +1376,7 @@
 
   <output>
     <tr>
-      <td>exmcUAll</td>
+      <td>exmcU</td>
       <td>exmcUDirFwd</td>
       <td>exmcUDirBack</td>
       <td>exmcUIndFwd</td>
@@ -1391,7 +1391,7 @@
       <td>exmcUIndFwdPigs</td>
       <td>exmcUIndBackBeefCattle</td>
       <td>exmcUIndBackPigs</td>
-      <td>exmcAAll</td>
+      <td>exmcA</td>
       <td>exmcADirFwd</td>
       <td>exmcADirBack</td>
       <td>exmcAIndFwd</td>
@@ -1497,8 +1497,8 @@
 
   <output>
     <tr>
-      <td>exmcUAll</td>
-      <td>exmcAAll</td>
+      <td>exmcU</td>
+      <td>exmcA</td>
       <td>exmcUDirFwd</td>
       <td>exmcUDirBack</td>
       <td>exmcUIndFwd</td>
@@ -1573,7 +1573,7 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUDirFwd</td>
       <td>tstcUDirBack</td>
       <td>tstcUIndFwd</td>
@@ -1588,7 +1588,7 @@
       <td>tstcUIndFwdPigs</td>
       <td>tstcUIndBackBeefCattle</td>
       <td>tstcUIndBackPigs</td>
-      <td>tstcAAll</td>
+      <td>tstcA</td>
       <td>tstcADirFwd</td>
       <td>tstcADirBack</td>
       <td>tstcAIndFwd</td>
@@ -1659,7 +1659,7 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUDirFwd</td>
       <td>tstcUDirBack</td>
       <td>tstcUIndFwd</td>
@@ -1674,7 +1674,7 @@
       <td>tstcUIndFwdPigs</td>
       <td>tstcUIndBackBeefCattle</td>
       <td>tstcUIndBackPigs</td>
-      <td>tstcAAll</td>
+      <td>tstcA</td>
       <td>tstcADirFwd</td>
       <td>tstcADirBack</td>
       <td>tstcAIndFwd</td>
@@ -2729,12 +2729,12 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUTruePos</td>
       <td>tstcUTrueNeg</td>
       <td>tstcUFalsePos</td>
       <td>tstcUFalseNeg</td>
-      <td>detcUAll</td>
+      <td>detcU</td>
     </tr>
     <!--  Tests       TP         TN         FP         FN      Detections  -->
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -2779,12 +2779,12 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUTruePos</td>
       <td>tstcUTrueNeg</td>
       <td>tstcUFalsePos</td>
       <td>tstcUFalseNeg</td>
-      <td>detcUAll</td>
+      <td>detcU</td>
     </tr>
     <!--  Tests       TP         TN         FP         FN      Detections  -->
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -2832,12 +2832,12 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUTruePos</td>
       <td>tstcUTrueNeg</td>
       <td>tstcUFalsePos</td>
       <td>tstcUFalseNeg</td>
-      <td>detcUAll</td>
+      <td>detcU</td>
     </tr>
     <!--  Tests       TP         TN         FP         FN      Detections  -->
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -2886,12 +2886,12 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUTruePos</td>
       <td>tstcUTrueNeg</td>
       <td>tstcUFalsePos</td>
       <td>tstcUFalseNeg</td>
-      <td>detcUAll</td>
+      <td>detcU</td>
     </tr>
     <!--  Tests       TP         TN         FP         FN      Detections  -->
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -2941,12 +2941,12 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUTruePos</td>
       <td>tstcUTrueNeg</td>
       <td>tstcUFalsePos</td>
       <td>tstcUFalseNeg</td>
-      <td>detcUAll</td>
+      <td>detcU</td>
     </tr>
     <!--  Tests       TP         TN         FP         FN      Detections  -->
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -2997,12 +2997,12 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUTruePos</td>
       <td>tstcUTrueNeg</td>
       <td>tstcUFalsePos</td>
       <td>tstcUFalseNeg</td>
-      <td>detcUAll</td>
+      <td>detcU</td>
     </tr>
     <!--  Tests       TP         TN         FP         FN      Detections  -->
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -3053,12 +3053,12 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUTruePos</td>
       <td>tstcUTrueNeg</td>
       <td>tstcUFalsePos</td>
       <td>tstcUFalseNeg</td>
-      <td>detcUAll</td>
+      <td>detcU</td>
     </tr>
     <!--  Tests       TP         TN         FP         FN      Detections  -->
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -3110,12 +3110,12 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUTruePos</td>
       <td>tstcUTrueNeg</td>
       <td>tstcUFalsePos</td>
       <td>tstcUFalseNeg</td>
-      <td>detcUAll</td>
+      <td>detcU</td>
     </tr>
     <!--  Tests       TP         TN         FP         FN      Detections  -->
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -3163,12 +3163,12 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUTruePos</td>
       <td>tstcUTrueNeg</td>
       <td>tstcUFalsePos</td>
       <td>tstcUFalseNeg</td>
-      <td>detcUAll</td>
+      <td>detcU</td>
     </tr>
     <!--  Tests       TP         TN         FP         FN      Detections  -->
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -3213,12 +3213,12 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUTruePos</td>
       <td>tstcUTrueNeg</td>
       <td>tstcUFalsePos</td>
       <td>tstcUFalseNeg</td>
-      <td>detcUAll</td>
+      <td>detcU</td>
     </tr>
     <!--  Tests       TP         TN         FP         FN      Detections  -->
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -3267,12 +3267,12 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUTruePos</td>
       <td>tstcUTrueNeg</td>
       <td>tstcUFalsePos</td>
       <td>tstcUFalseNeg</td>
-      <td>detcUAll</td>
+      <td>detcU</td>
     </tr>
     <!--  Tests       TP         TN         FP         FN      Detections  -->
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -3323,12 +3323,12 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUTruePos</td>
       <td>tstcUTrueNeg</td>
       <td>tstcUFalsePos</td>
       <td>tstcUFalseNeg</td>
-      <td>detcUAll</td>
+      <td>detcU</td>
     </tr>
     <!--  Tests       TP         TN         FP         FN      Detections  -->
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -3387,12 +3387,12 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUTruePos</td>
       <td>tstcUTrueNeg</td>
       <td>tstcUFalsePos</td>
       <td>tstcUFalseNeg</td>
-      <td>detcUAll</td>
+      <td>detcU</td>
     </tr>
     <!--  Tests       TP         TN         FP         FN      Detections  -->
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -3451,12 +3451,12 @@
 
   <output>
     <tr>
-      <td>tstcUAll</td>
+      <td>tstcU</td>
       <td>tstcUTruePos</td>
       <td>tstcUTrueNeg</td>
       <td>tstcUFalsePos</td>
       <td>tstcUFalseNeg</td>
-      <td>detcUAll</td>
+      <td>detcU</td>
     </tr>
     <!--  Tests       TP         TN         FP         FN      Detections  -->
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -3527,11 +3527,11 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
-      <td>detnUAll</td>
-      <td>trnUAllp</td>
-      <td>trnUAll</td>
-      <td>exmnUAll</td>
+      <td>expnU</td>
+      <td>detnU</td>
+      <td>trnUp</td>
+      <td>trnU</td>
+      <td>exmnU</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>2</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -3596,11 +3596,11 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
-      <td>detnUAll</td>
-      <td>trnUAllp</td>
-      <td>trnUAll</td>
-      <td>exmnUAll</td>
+      <td>expnU</td>
+      <td>detnU</td>
+      <td>trnUp</td>
+      <td>trnU</td>
+      <td>exmnU</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>2</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td></tr>
@@ -3676,11 +3676,11 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
-      <td>detnUAll</td>
-      <td>trnUAllp</td>
-      <td>trnUAll</td>
-      <td>exmnUAll</td>
+      <td>expnU</td>
+      <td>detnU</td>
+      <td>trnUp</td>
+      <td>trnU</td>
+      <td>exmnU</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>2</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -3748,7 +3748,7 @@
 
   <output probability="0.5">
     <tr>
-      <td>detnUAll</td>
+      <td>detnU</td>
       <td>detnUClin</td>
       <td>detnUTest</td>
       <td>detnUSheep</td>
@@ -3770,7 +3770,7 @@
 
   <output probability="0.5">
     <tr>
-      <td>detnUAll</td>
+      <td>detnU</td>
       <td>detnUClin</td>
       <td>detnUTest</td>
       <td>detnUSheep</td>
@@ -3940,7 +3940,7 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
+      <td>detnU</td>
       <td>tstcUTruePos</td>
       <td>tstcUTrueNeg</td>
       <td>tstcUFalsePos</td>
@@ -4016,7 +4016,7 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
+      <td>detnU</td>
       <td>detnUClinPigs</td>
       <td>detnUTestSheep</td>
       <td>detnUClinSheep</td>
@@ -4091,7 +4091,7 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
+      <td>detnU</td>
       <td>detnUClinPigs</td>
       <td>detnUTestSheep</td>
       <td>detnUClinSheep</td>
@@ -4154,9 +4154,9 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
-      <td>exmnUAll</td>
-      <td>desnUAll</td>
+      <td>detnU</td>
+      <td>exmnU</td>
+      <td>desnU</td>
     </tr>
     <!--   Det        Exam       Dest     -->
     <tr><td>0</td> <td>0</td> <td>0</td></tr>
@@ -4200,9 +4200,9 @@
  
     What should happen:
      - Day 4 will be the day of first detection.
-     - Up until day 4, the outputs “firstDetUInfAll” and “firstDetAInfAll”
+     - Up until day 4, the outputs “firstDetUInf” and “firstDetAInf”
        should have no numeric value.
-     - On day 4, firstDetUInfAll should be 1 and firstDetAInfAll should be 25.
+     - On day 4, firstDetUInf should be 1 and firstDetAInf should be 25.
        (By the end of the day of first detection, 1 infection has occurred and
        the infected unit contains 25 animals.)
      - The test is deliberately stopped at 7 days.
@@ -4211,9 +4211,9 @@
   <output>
     <tr>
       <td>firstDetection</td>
-      <td>infcUAll</td>
-      <td>firstDetUInfAll</td>
-      <td>firstDetAInfAll</td>
+      <td>infcU</td>
+      <td>firstDetUInf</td>
+      <td>firstDetAInf</td>
     </tr>
     <tr> <td></td> <td>0</td>  <td></td>   <td></td></tr>
     <tr> <td></td> <td>0</td>  <td></td>   <td></td></tr>
@@ -4250,9 +4250,9 @@
  
     What should happen:
      - Day 5 will be the day of first detection.
-     - Up until day 5, the outputs “firstDetUInfAll” and “firstDetAInfAll”
+     - Up until day 5, the outputs “firstDetUInf” and “firstDetAInf”
        should have no numeric value.
-     - On day 5, firstDetUInfAll should be 2 and firstDetAInfAll should be 50.
+     - On day 5, firstDetUInf should be 2 and firstDetAInf should be 50.
        (By the end of the day of first detection, 2 infections have occurred
        and the infected units contains 50 animals in total.)
      - The test is deliberately stopped at 7 days.
@@ -4261,9 +4261,9 @@
   <output>
     <tr>
       <td>firstDetection</td>
-      <td>infcUAll</td>
-      <td>firstDetUInfAll</td>
-      <td>firstDetAInfAll</td>
+      <td>infcU</td>
+      <td>firstDetUInf</td>
+      <td>firstDetAInf</td>
     </tr>
     <tr> <td></td> <td>0</td>  <td></td>   <td></td></tr>
     <tr> <td></td> <td>0</td>  <td></td>   <td></td></tr>
@@ -4299,17 +4299,17 @@
     never happens, because the clinical period is only 3 days).
  
     What should happen:
-     - There will be no first detection, so the outputs “firstDetUInfAll” and
-       “firstDetAInfAll” should never have a numeric value.
+     - There will be no first detection, so the outputs “firstDetUInf” and
+       “firstDetAInf” should never have a numeric value.
      - The test is deliberately stopped at 7 days.
   </parameter-description>
 
   <output>
     <tr>
       <td>firstDetection</td>
-      <td>infcUAll</td>
-      <td>firstDetUInfAll</td>
-      <td>firstDetAInfAll</td>
+      <td>infcU</td>
+      <td>firstDetUInf</td>
+      <td>firstDetAInf</td>
     </tr>
     <tr><td></td> <td>0</td> <td></td> <td></td></tr>
     <tr><td></td> <td>0</td> <td></td> <td></td></tr>

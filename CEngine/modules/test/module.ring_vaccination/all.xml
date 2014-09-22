@@ -69,8 +69,8 @@
   <output>
     <tr>
       <td>vaccOccurred</td>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
+      <td>vacwU</td>
+      <td>vacnU</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
@@ -106,8 +106,8 @@
   <output>
     <tr>
       <td>vaccOccurred</td>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
+      <td>vacwU</td>
+      <td>vacnU</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
     <tr><td>0</td>  <td>1</td>  <td>0</td></tr>
@@ -459,9 +459,9 @@
     vaccination happens "before" the infection (0.5). -->
   <output probability="0.5">
     <tr>
-      <td>vacnUAll</td>
-      <td>expnUAll</td>
-      <td>infnUAll</td>
+      <td>vacnU</td>
+      <td>expnU</td>
+      <td>infnU</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
@@ -472,9 +472,9 @@
     happens "before" the vaccination (0.5). -->
   <output probability="0.5">
     <tr>
-      <td>vacnUAll</td>
-      <td>expnUAll</td>
-      <td>infnUAll</td>
+      <td>vacnU</td>
+      <td>expnU</td>
+      <td>infnU</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
@@ -1031,8 +1031,8 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
+      <td>vacwU</td>
+      <td>vacnU</td>
     </tr>
     <tr><td>0</td> <td>0</td></tr>
     <tr><td>5</td> <td>0</td></tr>
@@ -2135,10 +2135,10 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacwAAll</td>
-      <td>vacnUAll</td>
-      <td>vacnAAll</td>
+      <td>vacwU</td>
+      <td>vacwA</td>
+      <td>vacnU</td>
+      <td>vacnA</td>
       <td>vacwUMax</td>
       <td>vacwAMax</td>
       <td>vacwUTimeMax</td>
@@ -2285,10 +2285,10 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacwAAll</td>
-      <td>vacnUAll</td>
-      <td>vacnAAll</td>
+      <td>vacwU</td>
+      <td>vacwA</td>
+      <td>vacnU</td>
+      <td>vacnA</td>
       <td>vacwUMax</td>
       <td>vacwAMax</td>
       <td>vacwUTimeMax</td>
@@ -2420,10 +2420,10 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacwAAll</td>
-      <td>vacnUAll</td>
-      <td>vacnAAll</td>
+      <td>vacwU</td>
+      <td>vacwA</td>
+      <td>vacnU</td>
+      <td>vacnA</td>
       <td>vacwUMax</td>
       <td>vacwAMax</td>
       <td>vacwUTimeMax</td>
@@ -2570,10 +2570,10 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacwAAll</td>
-      <td>vacnUAll</td>
-      <td>vacnAAll</td>
+      <td>vacwU</td>
+      <td>vacwA</td>
+      <td>vacnU</td>
+      <td>vacnA</td>
       <td>vacwUMax</td>
       <td>vacwAMax</td>
       <td>vacwUTimeMax</td>
@@ -2647,11 +2647,11 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
+      <td>vacwU</td>
       <td>vacwUSheep</td>
       <td>vacwUBeefCattle</td>
       <td>vacwUPigs</td>
-      <td>vacwAAll</td>
+      <td>vacwA</td>
       <td>vacwASheep</td>
       <td>vacwABeefCattle</td>
       <td>vacwAPigs</td>
@@ -2666,7 +2666,7 @@
       <td>vacnURingPigs</td>
       <td>vacnUIni</td>
       <td>vacnURing</td>
-      <td>vacnUAll</td>
+      <td>vacnU</td>
       <td>vacnASheep</td>
       <td>vacnABeefCattle</td>
       <td>vacnAPigs</td>
@@ -2678,7 +2678,7 @@
       <td>vacnARingPigs</td>
       <td>vacnAIni</td>
       <td>vacnARing</td>
-      <td>vacnAAll</td>
+      <td>vacnA</td>
     </tr>
     <!--  # units waiting                              |   # animals waiting                               |   # units vaccinated                Initially/  Initially/  Initially/                                                                         |   # animals vaccinated                Initially/  Initially/  Initially/                                                                              -->
     <!--  Total       Sheep       Cattle      Pigs     |   Total        Sheep        Cattle       Pigs     |   Sheep       Cattle      Pigs        Sheep       Cattle       Pigs     Ring/Sheep  Ring/Cattle Ring/Pigs   Initially     Ring        Total    |   Sheep        Cattle       Pigs        Sheep       Cattle       Pigs     Ring/Sheep  Ring/Cattle   Ring/Pigs   Initially       Ring        Total     -->
@@ -2846,10 +2846,10 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacwAAll</td>
-      <td>vacnUAll</td>
-      <td>vacnAAll</td>
+      <td>vacwU</td>
+      <td>vacwA</td>
+      <td>vacnU</td>
+      <td>vacnA</td>
       <td>vacwUMax</td>
       <td>vacwAMax</td>
       <td>vacwUTimeMax</td>
@@ -2932,15 +2932,15 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
+      <td>vacwU</td>
       <td>vacwUSheep</td>
       <td>vacwUBeefCattle</td>
       <td>vacwUPigs</td>
-      <td>vacwAAll</td>
+      <td>vacwA</td>
       <td>vacwASheep</td>
       <td>vacwABeefCattle</td>
       <td>vacwAPigs</td>
-      <td>vacnUAll</td>
+      <td>vacnU</td>
       <td>vacnUSheep</td>
       <td>vacnUBeefCattle</td>
       <td>vacnUPigs</td>
@@ -2952,7 +2952,7 @@
       <td>vacnURingSheep</td>
       <td>vacnURingBeefCattle</td>
       <td>vacnURingPigs</td>
-      <td>vacnAAll</td>
+      <td>vacnA</td>
       <td>vacnASheep</td>
       <td>vacnABeefCattle</td>
       <td>vacnAPigs</td>
@@ -3121,10 +3121,10 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacwAAll</td>
-      <td>vacnUAll</td>
-      <td>vacnAAll</td>
+      <td>vacwU</td>
+      <td>vacwA</td>
+      <td>vacnU</td>
+      <td>vacnA</td>
       <td>vacwUMax</td>
       <td>vacwAMax</td>
       <td>vacwUTimeMax</td>
@@ -3200,15 +3200,15 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
+      <td>vacwU</td>
       <td>vacwUSheep</td>
       <td>vacwUBeefCattle</td>
       <td>vacwUPigs</td>
-      <td>vacwAAll</td>
+      <td>vacwA</td>
       <td>vacwASheep</td>
       <td>vacwABeefCattle</td>
       <td>vacwAPigs</td>
-      <td>vacnUAll</td>
+      <td>vacnU</td>
       <td>vacnUSheep</td>
       <td>vacnUBeefCattle</td>
       <td>vacnUPigs</td>
@@ -3220,7 +3220,7 @@
       <td>vacnURingSheep</td>
       <td>vacnURingBeefCattle</td>
       <td>vacnURingPigs</td>
-      <td>vacnAAll</td>
+      <td>vacnA</td>
       <td>vacnASheep</td>
       <td>vacnABeefCattle</td>
       <td>vacnAPigs</td>
@@ -3403,12 +3403,12 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
+      <td>vacwU</td>
+      <td>vacnU</td>
       <td>vacwUMax</td>
       <td>vacwUTimeMax</td>
-      <td>deswUAll</td>
-      <td>desnUAll</td>
+      <td>deswU</td>
+      <td>desnU</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td>   <td></td>  <td>0</td>  <td>0</td></tr>
     <tr><td>1</td>  <td>0</td>  <td>1</td>   <td></td>  <td>1</td>  <td>0</td></tr>
@@ -3572,12 +3572,12 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
+      <td>vacwU</td>
+      <td>vacnU</td>
       <td>vacwUMax</td>
       <td>vacwUTimeMax</td>
-      <td>deswUAll</td>
-      <td>desnUAll</td>
+      <td>deswU</td>
+      <td>desnU</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td>  <td></td>  <td>0</td>  <td>0</td></tr>
     <tr><td>1</td>  <td>0</td>  <td>1</td>  <td></td>  <td>1</td>  <td>0</td></tr>
@@ -3740,12 +3740,12 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
+      <td>vacwU</td>
+      <td>vacnU</td>
       <td>vacwUMax</td>
       <td>vacwUTimeMax</td>
-      <td>deswUAll</td>
-      <td>desnUAll</td>
+      <td>deswU</td>
+      <td>desnU</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td>  <td></td>  <td>0</td>  <td>0</td></tr>
     <tr><td>1</td>  <td>0</td>  <td>1</td>  <td></td>  <td>1</td>  <td>0</td></tr>
@@ -3800,7 +3800,7 @@
 
   <output>
     <tr>
-      <td>vacnUAll</td>
+      <td>vacnU</td>
     </tr>
     <tr> <td>0</td></tr>
     <tr> <td>0</td></tr>
@@ -3850,7 +3850,7 @@
 
   <output>
     <tr>
-      <td>vacnUAll</td>
+      <td>vacnU</td>
     </tr>
     <tr> <td>0</td></tr>
     <tr> <td>0</td></tr>
@@ -3901,7 +3901,7 @@
 
   <output>
     <tr>
-      <td>vacnUAll</td>
+      <td>vacnU</td>
     </tr>
     <tr> <td>0</td></tr>
     <tr> <td>0</td></tr>
@@ -3951,7 +3951,7 @@
 
   <output>
     <tr>
-      <td>vacnUAll</td>
+      <td>vacnU</td>
     </tr>
     <tr> <td>0</td></tr>
     <tr> <td>0</td></tr>
@@ -4001,7 +4001,7 @@
 
   <output>
     <tr>
-      <td>vacnUAll</td>
+      <td>vacnU</td>
     </tr>
     <tr> <td>0</td></tr>
     <tr> <td>0</td></tr>
@@ -4052,7 +4052,7 @@
 
   <output>
     <tr>
-      <td>vacnUAll</td>
+      <td>vacnU</td>
     </tr>
     <tr> <td>0</td></tr>
     <tr> <td>0</td></tr>
@@ -4111,10 +4111,10 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
-      <td>desnUAll</td>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
+      <td>detnU</td>
+      <td>desnU</td>
+      <td>vacwU</td>
+      <td>vacnU</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>1</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -4176,10 +4176,10 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
-      <td>desnUAll</td>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
+      <td>detnU</td>
+      <td>desnU</td>
+      <td>vacwU</td>
+      <td>vacnU</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>1</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -4238,8 +4238,8 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
+      <td>vacwU</td>
+      <td>vacnU</td>
     </tr>
     <tr><td>0</td> <td>0</td></tr>
     <tr><td>0</td> <td>0</td></tr>
@@ -4298,8 +4298,8 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
+      <td>vacwU</td>
+      <td>vacnU</td>
     </tr>
     <tr><td>0</td> <td>0</td></tr>
     <tr><td>0</td> <td>0</td></tr>
@@ -4355,8 +4355,8 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
+      <td>vacwU</td>
+      <td>vacnU</td>
     </tr>
     <tr><td>0</td> <td>0</td></tr>
     <tr><td>4</td> <td>0</td></tr>
@@ -4412,8 +4412,8 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
+      <td>vacwU</td>
+      <td>vacnU</td>
     </tr>
     <tr><td>0</td> <td>0</td></tr>
     <tr><td>2</td> <td>0</td></tr>
@@ -4475,8 +4475,8 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
+      <td>vacwU</td>
+      <td>vacnU</td>
     </tr>
     <tr><td>0</td> <td>0</td></tr>
     <tr><td>2</td> <td>0</td></tr>
@@ -4532,8 +4532,8 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
-      <td>vacnUAll</td>
+      <td>vacwU</td>
+      <td>vacnU</td>
     </tr>
     <tr><td>0</td> <td>0</td></tr>
     <tr><td>4</td> <td>0</td></tr>
@@ -4590,11 +4590,11 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
-      <td>vacwUAll</td>
+      <td>desnU</td>
+      <td>vacwU</td>
       <td>vacwUMax</td>
       <td>vacwUMaxDay</td>
-      <td>vaccUAll</td>
+      <td>vaccU</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td>  <td></td> <td>0</td></tr>
     <tr><td>0</td> <td>5</td> <td>5</td> <td>2</td> <td>0</td></tr>
@@ -4663,11 +4663,11 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
-      <td>vacwUAll</td>
+      <td>detnU</td>
+      <td>vacwU</td>
       <td>vacwUMax</td>
       <td>vacwUMaxDay</td>
-      <td>vaccUAll</td>
+      <td>vaccU</td>
       <td>firstDetection</td>
       <td>lastDetection</td>
     </tr>
@@ -4720,9 +4720,9 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
-      <td>vacwUAll</td>
-      <td>vaccUAll</td>
+      <td>desnU</td>
+      <td>vacwU</td>
+      <td>vaccU</td>
       <td>vacwUTimeAvg</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td></td></tr>
@@ -4785,12 +4785,12 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
-      <td>deswUAll</td>
+      <td>desnU</td>
+      <td>deswU</td>
       <td>deswUDaysInQueue</td>
       <td>deswADaysInQueue</td>
-      <td>vacnUAll</td>
-      <td>vacwUAll</td>
+      <td>vacnU</td>
+      <td>vacwU</td>
       <td>vacwUDaysInQueue</td>
       <td>vacwADaysInQueue</td>
     </tr>
@@ -4848,9 +4848,9 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
-      <td>vacwUAll</td>
-      <td>vaccUAll</td>
+      <td>detnU</td>
+      <td>vacwU</td>
+      <td>vaccU</td>
       <td>vacwUTimeAvg</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td> <td></td></tr>
@@ -4916,8 +4916,8 @@
 
   <output>
     <tr>
-      <td>vacnUAll</td>
-      <td>vacwUAll</td>
+      <td>vacnU</td>
+      <td>vacwU</td>
       <td>vacwUTimeAvg</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td></td></tr>
@@ -4975,7 +4975,7 @@
 
   <output>
     <tr>
-      <td>vacnUAll</td>
+      <td>vacnU</td>
       <td>firstVaccination</td>
     </tr>
     <tr><td>0</td>   <td></td></tr>
@@ -5085,13 +5085,13 @@
      - On day 1 the infected units (0 and 2) will be Latent.
      - On day 2 unit 0 will be Infectious Clinical.  It will infect unit 1.  It
        will be detected and will trigger a vaccination ring.  Unit 1 will be
-       marked for vaccination. The output vacwUAll will show 1 vaccination to
+       marked for vaccination. The output vacwU will show 1 vaccination to
        do.
      - On day 3 the output vacwUDaysInQueue will show 1 (1 unit has spent 1 day
        in queue).
      - On day 4 unit 2 will be Infectious Clinical.  It will be detected and
        will trigger a vaccination ring.  Unit 1 will again be marked for
-       vaccination.  The output vacwUAll will show 2 vaccinations to do (of the
+       vaccination.  The output vacwU will show 2 vaccinations to do (of the
        same unit, but 2 vaccinations nonetheless).  The output vacwUDaysInQueue
        will show 2 (1 unit has spent 2 days in queue).
      - On day 5 the output vacwUDaysInQueue will show 3 (1 unit has spent 3
@@ -5109,10 +5109,10 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
-      <td>vacnUAll</td>
-      <td>vaccUAll</td>
-      <td>vacwUAll</td>
+      <td>detnU</td>
+      <td>vacnU</td>
+      <td>vaccU</td>
+      <td>vacwU</td>
       <td>vacwUDaysInQueue</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>0</td></tr>
@@ -5171,13 +5171,13 @@
      - On day 1 the infected units (0 and 2) will be Latent.
      - On day 2 unit 0 will be Infectious Clinical.  It will infect unit 1.  It
        will be detected and will trigger a vaccination ring.  Unit 1 will be
-       marked for vaccination. The output vacwUAll will show 1 vaccination to
+       marked for vaccination. The output vacwU will show 1 vaccination to
        do.
      - On day 3 the output vacwUDaysInQueue will show 1 (1 unit has spent 1 day
        in queue).
      - On day 4 unit 2 will be Infectious Clinical.  It will be detected and
        will trigger a vaccination ring.  Unit 1 will again be marked for
-       vaccination.  The output vacwUAll will show 2 vaccinations to do (of the
+       vaccination.  The output vacwU will show 2 vaccinations to do (of the
        same unit, but 2 vaccinations nonetheless).  The output vacwUDaysInQueue
        will show 2 (1 unit has spent 2 days in queue).
      - On day 5 the output vacwUDaysInQueue will show 3 (1 unit has spent 3
@@ -5195,10 +5195,10 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
-      <td>vacnUAll</td>
-      <td>vaccUAll</td>
-      <td>vacwUAll</td>
+      <td>detnU</td>
+      <td>vacnU</td>
+      <td>vaccU</td>
+      <td>vacwU</td>
       <td>vacwUDaysInQueue</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>0</td></tr>
@@ -5256,13 +5256,13 @@
      - On day 1 the infected units (0 and 2) will be Latent.
      - On day 2 unit 0 will be Infectious Clinical.  It will infect unit 1.  It
        will be detected and will trigger a vaccination ring.  Unit 1 will be
-       marked for vaccination. The output vacwUAll will show 1 vaccination to
+       marked for vaccination. The output vacwU will show 1 vaccination to
        do.
      - On day 3 the output vacwUDaysInQueue will show 1 (1 unit has spent 1 day
        in queue).
      - On day 4 unit 2 will be Infectious Clinical.  It will be detected and
        will trigger a vaccination ring.  Unit 1 will again be marked for
-       vaccination.  The output vacwUAll will show 2 vaccinations to do (of the
+       vaccination.  The output vacwU will show 2 vaccinations to do (of the
        same unit, but 2 vaccinations nonetheless).  The output vacwUDaysInQueue
        will show 2 (1 unit has spent 2 days in queue).
      - On day 5 the output vacwUDaysInQueue will show 3 (1 unit has spent 3
@@ -5274,10 +5274,10 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
-      <td>vacnUAll</td>
-      <td>vaccUAll</td>
-      <td>vacwUAll</td>
+      <td>detnU</td>
+      <td>vacnU</td>
+      <td>vaccU</td>
+      <td>vacwU</td>
       <td>vacwUDaysInQueue</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>0</td></tr>
@@ -5342,9 +5342,9 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
-      <td>vacnUAll</td>
-      <td>desnUAll</td>
+      <td>detnU</td>
+      <td>vacnU</td>
+      <td>desnU</td>
       <td>vacwUTimeMax</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td>   <td></td></tr>
@@ -5413,9 +5413,9 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
-      <td>vacnUAll</td>
-      <td>desnUAll</td>
+      <td>detnU</td>
+      <td>vacnU</td>
+      <td>desnU</td>
       <td>vacwUTimeMax</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td>   <td></td></tr>
@@ -5572,14 +5572,14 @@
 
   <output>
     <tr>
-      <td>adqnUAll</td>
+      <td>adqnU</td>
       <td>detnUSheep</td>
-      <td>trnUAll</td>
+      <td>trnU</td>
       <td>detnUClin</td>
       <td>detnUTest</td>
-      <td>vacwUAll</td>
+      <td>vacwU</td>
     </tr>
-    <!-- adqnUAll  detnUSheep  trnUAll   detnUClin  detnUTest   vacwUAll   -->
+    <!--  adqnU    detnUSheep    trnU    detnUClin  detnUTest    vacwU     -->
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>2</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>2</td> <td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td></tr>

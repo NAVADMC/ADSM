@@ -190,7 +190,7 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
         RPT_reporting_set_integer (local_data->first_vaccination_by_reason_and_prodtype[reason][prodtype], event->day);
 
       /* Initially vaccinated units also are not included in many of the
-       * counts.  They will not be part of vacnUAll or vacnU broken down by
+       * counts.  They will not be part of vacnU or vacnU broken down by
        * production type.  They will be part of vacnUIni and vacnUIni broken
        * down by production type. */
       RPT_reporting_add_integer (local_data->num_units_vaccinated, 1);
@@ -365,7 +365,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->null_outputs },
 
-      { &local_data->num_units_vaccinated, "vacnUAll", RPT_integer,
+      { &local_data->num_units_vaccinated, "vacnU", RPT_integer,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->daily_outputs },
@@ -385,7 +385,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->daily_outputs },
 
-      { &local_data->cumul_num_units_vaccinated, "vaccUAll", RPT_integer,
+      { &local_data->cumul_num_units_vaccinated, "vaccU", RPT_integer,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->cumul_outputs },
@@ -405,7 +405,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->cumul_outputs },
 
-      { &local_data->num_animals_vaccinated, "vacnAAll", RPT_real,
+      { &local_data->num_animals_vaccinated, "vacnA", RPT_real,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->daily_outputs },
@@ -425,7 +425,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->daily_outputs },
 
-      { &local_data->cumul_num_animals_vaccinated, "vaccAAll", RPT_real,
+      { &local_data->cumul_num_animals_vaccinated, "vaccA", RPT_real,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->cumul_outputs },

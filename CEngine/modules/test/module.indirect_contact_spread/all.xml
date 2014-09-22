@@ -899,7 +899,7 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
     </tr>
     <tr><td>0</td></tr>
     <tr><td>1</td></tr>
@@ -945,7 +945,7 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
     </tr>
     <tr><td>0</td></tr>
     <tr><td>2</td></tr>
@@ -990,7 +990,7 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
     </tr>
     <tr><td>0</td></tr>
     <tr><td>0</td></tr>
@@ -1036,7 +1036,7 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
     </tr>
     <tr><td>0</td></tr>
     <tr><td>0</td></tr>
@@ -1084,7 +1084,7 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
     </tr>
     <tr><td>0</td></tr>
     <tr><td>1</td></tr>

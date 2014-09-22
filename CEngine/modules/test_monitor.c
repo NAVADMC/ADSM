@@ -420,7 +420,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   nprodtypes = local_data->production_types->len;
   {
     RPT_bulk_create_t outputs[] = {
-      { &local_data->nunits_tested, "tstnUAll", RPT_integer,
+      { &local_data->nunits_tested, "tstnU", RPT_integer,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->daily_outputs },
@@ -440,7 +440,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->daily_outputs },
 
-      { &local_data->cumul_nunits_tested, "tstcUAll", RPT_integer,
+      { &local_data->cumul_nunits_tested, "tstcU", RPT_integer,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->cumul_outputs },
@@ -460,7 +460,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->cumul_outputs },
 
-      { &local_data->cumul_nanimals_tested, "tstcAAll", RPT_real,
+      { &local_data->cumul_nanimals_tested, "tstcA", RPT_real,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->cumul_outputs },

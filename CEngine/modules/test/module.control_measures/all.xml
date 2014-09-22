@@ -93,11 +93,11 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
-      <td>desnAAll</td>
-      <td>descUAll</td>
-      <td>descAAll</td>
-      <td>deswUAll</td>
+      <td>desnU</td>
+      <td>desnA</td>
+      <td>descU</td>
+      <td>descA</td>
+      <td>deswU</td>
     </tr>
     <tr><td>0</td>   <td>0</td> <td>0</td>   <td>0</td> <td>0</td></tr>
     <tr><td>0</td>   <td>0</td> <td>0</td>   <td>0</td> <td>4</td></tr>
@@ -206,11 +206,11 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
-      <td>desnAAll</td>
-      <td>descUAll</td>
-      <td>descAAll</td>
-      <td>deswUAll</td>
+      <td>desnU</td>
+      <td>desnA</td>
+      <td>descU</td>
+      <td>descA</td>
+      <td>deswU</td>
     </tr>
     <tr><td>0</td>   <td>0</td> <td>0</td>   <td>0</td> <td>0</td></tr>
     <tr><td>0</td>   <td>0</td> <td>0</td>   <td>0</td> <td>4</td></tr>
@@ -322,11 +322,11 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
-      <td>desnAAll</td>
-      <td>descUAll</td>
-      <td>descAAll</td>
-      <td>deswUAll</td>
+      <td>desnU</td>
+      <td>desnA</td>
+      <td>descU</td>
+      <td>descA</td>
+      <td>deswU</td>
     </tr>
     <tr><td>0</td>   <td>0</td> <td>0</td>   <td>0</td> <td>0</td></tr>
     <tr><td>0</td>   <td>0</td> <td>0</td>   <td>0</td> <td>4</td></tr>
@@ -369,7 +369,7 @@
   </parameter-description>
 
   <output>
-    <tr><td>desnUAll</td></tr>
+    <tr><td>desnU</td></tr>
     <tr><td>0</td></tr>
     <tr><td>0</td></tr>
     <tr><td>1</td></tr>
@@ -412,7 +412,7 @@
   </parameter-description>
 
   <output>
-    <tr><td>desnUAll</td></tr>
+    <tr><td>desnU</td></tr>
     <tr><td>0</td></tr>
     <tr><td>0</td></tr>
     <tr><td>2</td></tr>
@@ -455,7 +455,7 @@
   </parameter-description>
 
   <output>
-    <tr><td>desnUAll</td></tr>
+    <tr><td>desnU</td></tr>
     <tr><td>0</td></tr>
     <tr><td>0</td></tr>
     <tr><td>1</td></tr>
@@ -503,7 +503,7 @@
   </parameter-description>
 
   <output>
-    <tr><td>desnUAll</td></tr>
+    <tr><td>desnU</td></tr>
     <tr><td>0</td></tr>
     <tr><td>0</td></tr>
     <tr><td>0</td></tr>
@@ -560,8 +560,8 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
-      <td>deswUAll</td>
+      <td>desnU</td>
+      <td>deswU</td>
       <td>deswUTimeMax</td>
       <td>deswUTimeAvg</td>
       <td>deswUMax</td>
@@ -612,8 +612,8 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
-      <td>deswUAll</td>
+      <td>desnU</td>
+      <td>deswU</td>
       <td>deswUTimeMax</td>
       <td>deswUTimeAvg</td>
       <td>deswUMax</td>
@@ -915,8 +915,8 @@
 
   <output>
     <tr>
-      <td>trnUAllp</td>
-      <td>trnUAll</td>
+      <td>trnUp</td>
+      <td>trnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnUDirFwd</td>
@@ -928,7 +928,7 @@
       <td>desnUDetPigs</td>
       <td>desnUDirFwdBeefCattle</td>
       <td>desnUDirFwdPigs</td>
-      <td>desnUAll</td>
+      <td>desnU</td>
     </tr>
     <!-- Traced                | Destroyed                                                  Initially/  Initially/   Reported/   Reported/    Traced/     Traced/               -->
     <!-- Potential    Actual   | Initially    Reported     Traced      Cattle       Pigs       Cattle       Pigs       Cattle       Pigs       Cattle       Pigs       Total     -->
@@ -1065,8 +1065,8 @@
 
   <output>
     <tr>
-      <td>trnUAllp</td>
-      <td>trnUAll</td>
+      <td>trnUp</td>
+      <td>trnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnUDirFwd</td>
@@ -1078,7 +1078,7 @@
       <td>desnUDetPigs</td>
       <td>desnUDirFwdBeefCattle</td>
       <td>desnUDirFwdPigs</td>
-      <td>desnUAll</td>
+      <td>desnU</td>
     </tr>
     <!-- Traced                | Destroyed                                                   Initially/  Initially/   Reported/   Reported/    Traced/     Traced/               -->
     <!-- Potential    Actual   | Initially    Reported     Traced      Cattle       Pigs       Cattle       Pigs       Cattle       Pigs       Cattle       Pigs       Total     -->
@@ -1174,8 +1174,8 @@
 
   <output>
     <tr>
-      <td>trnUAllp</td>
-      <td>trnUAll</td>
+      <td>trnUp</td>
+      <td>trnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnUDirFwd</td>
@@ -1187,7 +1187,7 @@
       <td>desnUDetPigs</td>
       <td>desnUDirFwdBeefCattle</td>
       <td>desnUDirFwdPigs</td>
-      <td>desnUAll</td>
+      <td>desnU</td>
     </tr>
     <!-- Traced                | Destroyed                                                   Initially/  Initially/   Reported/   Reported/    Traced/     Traced/               -->
     <!-- Potential    Actual   | Initially    Reported     Traced      Cattle       Pigs       Cattle       Pigs       Cattle       Pigs       Cattle       Pigs       Total     -->
@@ -1253,8 +1253,8 @@
 
   <output>
     <tr>
-      <td>trnUAllp</td>
-      <td>trnUAll</td>
+      <td>trnUp</td>
+      <td>trnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnUDirFwd</td>
@@ -1266,7 +1266,7 @@
       <td>desnUDetPigs</td>
       <td>desnUDirFwdBeefCattle</td>
       <td>desnUDirFwdPigs</td>
-      <td>desnUAll</td>
+      <td>desnU</td>
     </tr>
     <!-- Traced                | Destroyed                                                   Initially/  Initially/   Reported/   Reported/    Traced/     Traced/               -->
     <!-- Potential    Actual   | Initially    Reported     Traced      Cattle       Pigs       Cattle       Pigs       Cattle       Pigs       Cattle       Pigs       Total     -->
@@ -1314,8 +1314,8 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
-      <td>trnUAllp</td>
+      <td>desnU</td>
+      <td>trnUp</td>
       <td>trnUDirp</td>
       <td>trnUIndp</td>
       <td>trnUpBeefCattle</td>
@@ -1324,7 +1324,7 @@
       <td>trnUDirpPigs</td>
       <td>trnUIndpBeefCattle</td>
       <td>trnUIndpPigs</td>
-      <td>trnUAll</td>
+      <td>trnU</td>
       <td>trnUDir</td>
       <td>trnUInd</td>
       <td>trnUBeefCattle</td>
@@ -1380,8 +1380,8 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
-      <td>trnAAllp</td>
+      <td>desnU</td>
+      <td>trnAp</td>
       <td>trnADirp</td>
       <td>trnAIndp</td>
       <td>trnApBeefCattle</td>
@@ -1390,7 +1390,7 @@
       <td>trnADirpPigs</td>
       <td>trnAIndpBeefCattle</td>
       <td>trnAIndpPigs</td>
-      <td>trnAAll</td>
+      <td>trnA</td>
       <td>trnADir</td>
       <td>trnAInd</td>
       <td>trnABeefCattle</td>
@@ -3012,7 +3012,7 @@
 
   <output>
     <tr>
-      <td>deswUAll</td>
+      <td>deswU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnURing</td>
@@ -3027,7 +3027,7 @@
       <td>desnURingPigs</td>
       <td>desnUDirFwdBeefCattle</td>
       <td>desnUDirFwdPigs</td>
-      <td>desnUAll</td>
+      <td>desnU</td>
     </tr>
     <!--                                                                             Initially  Initially   Detected   Detected     Ring       Ring      Traced     Traced               -->
     <!-- Waiting   Initially   Detected     Ring      Traced     Cattle      Pigs      Cattle      Pigs      Cattle      Pigs      Cattle      Pigs      Cattle      Pigs      Total     -->
@@ -3064,7 +3064,7 @@
 
   <output>
     <tr>
-      <td>deswUAll</td>
+      <td>deswU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnURing</td>
@@ -3079,7 +3079,7 @@
       <td>desnURingPigs</td>
       <td>desnUDirFwdBeefCattle</td>
       <td>desnUDirFwdPigs</td>
-      <td>desnUAll</td>
+      <td>desnU</td>
     </tr>
     <!--                                                                             Initially  Initially   Detected   Detected     Ring       Ring      Traced     Traced               -->
     <!-- Waiting   Initially   Detected     Ring      Traced     Cattle      Pigs      Cattle      Pigs      Cattle      Pigs      Cattle      Pigs      Cattle      Pigs      Total     -->
@@ -4181,8 +4181,8 @@
 
   <output probability="1.0">
     <tr>
-      <td>desnUAll</td>
-      <td>vacnUAll</td>
+      <td>desnU</td>
+      <td>vacnU</td>
     </tr>
     <tr><td>0</td>  <td>0</td></tr>
     <tr><td>0</td>  <td>0</td></tr>
@@ -4984,7 +4984,7 @@
   <output>
     <tr>
       <!-- Large table because of the 7 production types. -->
-      <td>trnUAllp</td> <!-- Potential traces -->
+      <td>trnUp</td> <!-- Potential traces -->
       <td>trnUDirp</td> <!-- broken down by contact type -->
       <td>trnUIndp</td>
       <td>trnUpA</td> <!-- broken down by production type -->
@@ -5008,7 +5008,7 @@
       <td>trnUIndpE</td>
       <td>trnUIndpF</td>
       <td>trnUIndpG</td>
-      <td>trnUAll</td> <!-- Actual traces -->
+      <td>trnU</td> <!-- Actual traces -->
       <td>trnUDir</td> <!-- broken down by contact type -->
       <td>trnUInd</td>
       <td>trnUA</td> <!-- broken down by production type -->
@@ -5151,7 +5151,7 @@
   <output>
     <tr>
       <!-- Large table because of the 7 production types. -->
-      <td>trnUAllp</td> <!-- Potential traces -->
+      <td>trnUp</td> <!-- Potential traces -->
       <td>trnUDirp</td> <!-- broken down by contact type -->
       <td>trnUIndp</td>
       <td>trnUpA</td> <!-- broken down by production type -->
@@ -5175,7 +5175,7 @@
       <td>trnUIndpE</td>
       <td>trnUIndpF</td>
       <td>trnUIndpG</td>
-      <td>trnUAll</td> <!-- Actual traces -->
+      <td>trnU</td> <!-- Actual traces -->
       <td>trnUDir</td> <!-- broken down by contact type -->
       <td>trnUInd</td>
       <td>trnUA</td> <!-- broken down by production type -->
@@ -5314,7 +5314,7 @@
   <output>
     <tr>
       <!-- Large table because of the 7 production types. -->
-      <td>trnUAllp</td> <!-- Potential traces -->
+      <td>trnUp</td> <!-- Potential traces -->
       <td>trnUDirp</td> <!-- broken down by contact type -->
       <td>trnUIndp</td>
       <td>trnUpA</td> <!-- broken down by production type -->
@@ -5338,7 +5338,7 @@
       <td>trnUIndpE</td>
       <td>trnUIndpF</td>
       <td>trnUIndpG</td>
-      <td>trnUAll</td> <!-- Actual traces -->
+      <td>trnU</td> <!-- Actual traces -->
       <td>trnUDir</td> <!-- broken down by contact type -->
       <td>trnUInd</td>
       <td>trnUA</td> <!-- broken down by production type -->
@@ -6661,9 +6661,9 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
-      <td>trnUAllp</td>
-      <td>trnUAll</td>
+      <td>detnU</td>
+      <td>trnUp</td>
+      <td>trnU</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
@@ -6791,9 +6791,9 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
-      <td>trnUAllp</td>
-      <td>trnUAll</td>
+      <td>detnU</td>
+      <td>trnUp</td>
+      <td>trnU</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
@@ -7711,7 +7711,7 @@
 
   <output probability="0.5">
     <tr>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>desnUBeefCattle</td> <!-- by production type -->
       <td>desnUPigs</td>
       <td>desnUIni</td> <!-- by reason -->
@@ -7736,7 +7736,7 @@
 
   <output probability="0.5">
     <tr>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>desnUBeefCattle</td> <!-- by production type -->
       <td>desnUPigs</td>
       <td>desnUIni</td> <!-- by reason -->
