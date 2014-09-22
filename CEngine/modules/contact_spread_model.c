@@ -236,10 +236,8 @@ typedef struct
   double movement_distance;
   UNT_unit_t *best_unit; /**< The current pick for best recipient. */
   ZON_zone_fragment_t *best_unit_zone; /**< The zone fragment best_unit is in. */
-  double best_unit_distance; /**< The distance from the source unit to
-    best_unit. */
   double best_unit_difference; /**< The difference between the desired contact
-    distance and best_unit_distance. */
+    distance and the best distance found so far. */
   double min_difference; /**< The smallest value of best_unit_difference so
     far.  See the file drift.xml in the direct contact tests for an explanation
     of why this is needed. */
@@ -363,7 +361,6 @@ check_and_choose (int id, gpointer arg)
                   {                     
                     contact->best_unit = unit2;
                     contact->best_unit_zone = callback_data->zones->membership[unit2->index];
-                    contact->best_unit_distance = distance;
                     contact->best_unit_difference = difference;
                     contact->min_difference = difference;
                     contact->cumul_size = unit2->size;
@@ -422,7 +419,6 @@ check_and_choose (int id, gpointer arg)
 
                           contact->best_unit = unit2;
                           contact->best_unit_zone = unit2_fragment;
-                          contact->best_unit_distance = distance;
                           contact->best_unit_difference = difference;
                           if ( difference < contact->min_difference )
                             contact->min_difference = difference;
@@ -440,7 +436,6 @@ check_and_choose (int id, gpointer arg)
                               g_debug ( "----- check_and_choose - Optimized Version: Replacing best_unit with this unit because of a random number draw" );
                             #endif                           
                             contact->best_unit = unit2;
-                            contact->best_unit_distance = distance;
                             contact->best_unit_difference = difference;
                             if ( difference < contact->min_difference )
                               contact->min_difference = difference;
@@ -463,7 +458,6 @@ check_and_choose (int id, gpointer arg)
                   else if ( difference < contact->min_difference )
                   {
                     contact->best_unit = unit2;
-                    contact->best_unit_distance = distance;
                     contact->best_unit_difference = difference;
                     contact->min_difference = difference;
                     contact->cumul_size = unit2->size;
@@ -628,7 +622,6 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
   int nexposures;
   EVT_event_t *exposure;
   callback_t callback_data;
-  double distance;              /* between two units being considered */
   gboolean contact_forbidden;
   double r, P;
   gboolean contact_is_adequate;
@@ -717,10 +710,6 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
 #endif  
       for (i = 0; i < nprod_types; i++)
       {
-        /*  Reset maximum distance desired to zero for each contact/production-type pair.  
-            This is used only by the RTree search function.  */
-        distance = 0.0;
-        
         /*  Create this element of the 2nd Dimension of the exposure attempt matrix */
         _contacts[j][i] = g_ptr_array_new();
 
@@ -831,8 +820,8 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
                     sub_callback->movement_distance = 0;
 
                   /*  Use maximum distance desired for the bounding box in RTree */
-                  if ( sub_callback->movement_distance > distance )
-                    distance = sub_callback->movement_distance;
+                  if ( sub_callback->movement_distance > max_distance )
+                    max_distance = sub_callback->movement_distance;
                   #if DEBUG
                     g_debug ( "new_day_event_handler:  contact of %g km",sub_callback->movement_distance );
                   #endif  
@@ -867,12 +856,6 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
 #endif                
         };    
         
-        /*  Calculate the overall maximum distance for the RTree search */
-        if ( max_distance < distance )
-          max_distance = distance;     
-#if DEBUG
-        g_debug ( "new_day_event_handler:  using a max distance of %g km for this contact/production-type pair", distance );
-#endif            
       };
       j = j +1;
     };  /*  END build matrix of desired matches */
