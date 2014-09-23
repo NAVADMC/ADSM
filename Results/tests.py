@@ -193,45 +193,6 @@ class ParserTests(TestCase):
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0].animalDaysInZone, 2)
 
-    def test_parse_single_field_special_case_all_2(self):
-        """
-            from output_parser, sometimes columns use 'All' instead of ''
-            this assigns them to the Results DailyByProductionType table
-            but without a ProductionType foreign key
-        """
-        header_line = "Run,Day,deswUAll,deswAAll,expnUAll,expcUAll,expnAAll,expcAAll,infnUAll,infcUAll,infnAAll,infcAAll\r\n"
-        p = DailyParser(header_line)
-
-        adsm_iteration_output = ["1,1,1,2,3,4,5,6,7,8,9,10"]
-
-        results = p.parse_daily_strings(adsm_iteration_output)
-
-        self.assertEqual(len(results), 1)
-        self.assertIsInstance(results[0], DailyByProductionType)
-        self.assertEqual(results[0].deswU, 1)
-        self.assertEqual(results[0].deswA, 2)
-        self.assertEqual(results[0].expnU, 3)
-        self.assertEqual(results[0].expcU, 4)
-        self.assertEqual(results[0].expnA, 5)
-        self.assertEqual(results[0].expcA, 6)
-        self.assertEqual(results[0].infnU, 7)
-        self.assertEqual(results[0].infcU, 8)
-        self.assertEqual(results[0].infnA, 9)
-        self.assertEqual(results[0].infcA, 10)
-
-    def test_parse_single_field_special_case_all(self):
-        cattle = ProductionType.objects.create(name="Cattle")
-        header_line = "Run,Day,desnUCattle\r\n"
-        p = DailyParser(header_line)
-
-        adsm_iteration_output = ["1,1,1"]
-
-        results = p.parse_daily_strings(adsm_iteration_output)
-
-        self.assertEqual(len(results), 1)
-        self.assertIsInstance(results[0], DailyByProductionType)
-        self.assertEqual(results[0].desnUAll, 1)
-
     def test_parse_single_field_background_zone(self):
         """
             the background zone is used if no other zone is specified
@@ -267,7 +228,7 @@ class ParserTests(TestCase):
             the results parser should not output an object if all
             fields of that object are None
         """
-        cattle = ProductionType.objects.create(name="Cattle")
+        # cattle = ProductionType.objects.create(name="Cattle")
 
         header_line = "Run,Day,outbreakDuration\r\n"
         p = DailyParser(header_line)
