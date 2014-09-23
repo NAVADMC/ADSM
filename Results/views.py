@@ -144,6 +144,8 @@ class Simulation(threading.Thread):
         statuses = [status.get() for status in statuses]
         print(statuses)
         zip_map_directory_if_it_exists()
+        connections['default'].close()
+        connections['scenario_db'].close()
 
 
 def results_home(request):
