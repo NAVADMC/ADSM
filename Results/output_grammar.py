@@ -32,7 +32,7 @@ tmp_dict = {'A': 'Animals',
             'vacn': 'Vaccination New',
             'vacw': 'Vaccination Wait Time',
             'inf': 'Infection',
-            'All': 'For Any Reason',
+            # 'All': 'For Any Reason',  # TODO: Not sure about how to handle this since `'' in 'app'` == True 
             'Max': 'Max',
             'MaxDay': 'Day with Max',
             'TimeMax': 'Max Time',
@@ -61,31 +61,30 @@ tmp_dict = {'A': 'Animals',
 explanations = defaultdict(lambda: '', tmp_dict)
 
 #For DailyByProductionType model only
-grammars = {'exp': [('c', 'n'), ('U', 'A'), ('', 'Dir', 'Ind', 'Air'), ('All', 'Cattle', 'Swine')],
+grammars = {'exp': [('c', 'n'), ('U', 'A'), ('', 'Dir', 'Ind', 'Air'), ('', 'Cattle', 'Swine')],
             'firstDetection': [('', 'Clin', 'Test'), ('', 'Cattle', 'Swine')],
             'lastDetection': [('', 'Clin', 'Test'), ('', 'Cattle', 'Swine')],
-            'det': [('c', 'n'), ('U', 'A'), ('All', 'Clin', 'Test'), ('', 'Cattle', 'Swine')],
-            'tr': [('n', 'c'), ('U', 'A'), ('All', 'Dir', 'Ind'), ('', 'p'), ('', 'Cattle', 'Swine')],
-            'exm': [('n', 'c'), ('U', 'A'), ('All', 'Ring', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack', 'Det'), ('', 'Cattle', 'Swine')],
-            'tstnU': [('All', 'TruePos', 'FalsePos', 'TrueNeg', 'FalseNeg'), ('', 'Cattle', 'Swine')],
-            'tstcU': [('All', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack', 'TruePos', 'FalsePos', 'TrueNeg', 'FalseNeg'), ('', 'Cattle', 'Swine')],
-            'tstcA': [('All', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack'), ('', 'Cattle', 'Swine')],
+            'det': [('c', 'n'), ('U', 'A'), ('', 'Clin', 'Test'), ('', 'Cattle', 'Swine')],
+            'tr': [('n', 'c'), ('U', 'A'), ('', 'Dir', 'Ind'), ('', 'p'), ('', 'Cattle', 'Swine')],
+            'exm': [('n', 'c'), ('U', 'A'), ('', 'Ring', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack', 'Det'), ('', 'Cattle', 'Swine')],
+            'tstnU': [('', 'TruePos', 'FalsePos', 'TrueNeg', 'FalseNeg'), ('', 'Cattle', 'Swine')],
+            'tstcU': [('', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack', 'TruePos', 'FalsePos', 'TrueNeg', 'FalseNeg'), ('', 'Cattle', 'Swine')],
+            'tstcA': [('', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack'), ('', 'Cattle', 'Swine')],
             'firstVaccination': [('', 'Ring'), ('', 'Cattle', 'Swine')],
-            'vacw': [('U', 'A'), ('All', 'Max', 'MaxDay', 'TimeMax', 'TimeAvg', 'DaysInQueue'), ('', 'Cattle', 'Swine')],
-            'vacn': [('U', 'A'), ('All', 'Ini', 'Ring'), ('', 'Cattle', 'Swine')],
-            'vacc': [('U', 'A'), ('All', 'Ini', 'Ring'), ('', 'Cattle', 'Swine')],
+            'vacw': [('U', 'A'), ('', 'Max', 'MaxDay', 'TimeMax', 'TimeAvg', 'DaysInQueue'), ('', 'Cattle', 'Swine')],
+            'vacn': [('U', 'A'), ('', 'Ini', 'Ring'), ('', 'Cattle', 'Swine')],
+            'vacc': [('U', 'A'), ('', 'Ini', 'Ring'), ('', 'Cattle', 'Swine')],
             'firstDestruction': [('', 'Unsp', 'Ring', 'Det', 'Ini', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack'), ('', 'Cattle', 'Swine')],
-            'des': [('n', 'c'), ('U', 'A'), ('All', 'Unsp', 'Ring', 'Det', 'Ini', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack'), ('', 'Cattle', 'Swine')],
+            'des': [('n', 'c'), ('U', 'A'), ('', 'Unsp', 'Ring', 'Det', 'Ini', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack'), ('', 'Cattle', 'Swine')],
             'tsd': [('U', 'A'), ('Susc', 'Lat', 'Subc', 'Clin', 'NImm', 'VImm', 'Dest'), ('', 'Cattle', 'Swine')],
-            'inf': [('c', 'n'), ('U', 'A'), ('', 'Ini', 'Dir', 'Ind', 'Air'), ('All', 'Cattle', 'Swine')],
-            'desw': [('U', 'A'), ('All', 'Cattle', 'Swine')],
+            'inf': [('c', 'n'), ('U', 'A'), ('', 'Ini', 'Dir', 'Ind', 'Air'), ('', 'Cattle', 'Swine')],
+            'desw': [('U', 'A'), ('', 'Cattle', 'Swine')],
 }
 
 DailyControls = {'desw': [('U', 'A'), ('Max', 'MaxDay', 'TimeMax', 'TimeAvg', 'DaysInQueue'), ]}
 
 ZONES = ('Background', 'HighRisk', 'MediumRisk')
 PT = ('', 'Cattle', 'Swine')
-PT_All = ('All', 'Cattle', 'Swine')
 DailyByZoneAndProductionType = {'animalDaysInZone': [ZONES, PT],
                                 'unitDaysInZone': [ZONES, PT],
                                 'unitsInZone': [ZONES, PT]}

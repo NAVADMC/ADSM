@@ -23,6 +23,28 @@ $(function(){
             }
         });
     })
+    
+    $(document).on('click', '#update_adsm', function(event){
+        event.preventDefault();
+        $.get('/app/Update/', function(result){
+            if( result == "success"){
+                var dialog = new BootstrapDialog.show({
+                    title: 'Update ADSM on Restart',
+                    type: BootstrapDialog.TYPE_INFO,
+                    message: 'ADSM is now set to update next time you start the application.',
+                    buttons: [
+                        {
+                            label: 'Ok',
+                            cssClass: 'btn-info',
+                            action: function(dialog){
+                                dialog.close();
+                            }
+                        }
+                    ]
+                });
+            }
+        });
+    })
 
     $(document).on('saved', 'form:has(.unsaved)', function(){ //fixes 'Save' button with wrong color state
         $(this).find('.unsaved').removeClass('unsaved');
@@ -170,6 +192,16 @@ $(function(){
             $(value).find(':input').removeAttr('disabled');//remove disabled
         });
         $(this).closest('form').submit();//will cause page reload
+    });
+    
+    $(document).on('submit','#file-upload',function(event){
+        var filename = $(this).find('input[type=file]').val()
+        var file_extension = /application\/(x-|)(.*)/g.exec($(this).find('input[type=file]').attr('accept'))[2]
+        if( filename.indexOf(file_extension) == -1) {
+            alert("Uploaded files must have "+file_extension+" in the name: " + filename)
+            console.log(file_extension)
+            event.preventDefault()
+        }
     });
 
 })

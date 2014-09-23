@@ -51,9 +51,6 @@ class DailyParser(object):
         for prefix, field in table:
             if prefix not in ('iteration', 'day', 'production_type', 'zone'):  # skip the selector fields
                 road_map[prefix] = prefix
-                pref_all = prefix.replace('All', '')
-                if pref_all not in road_map:
-                    road_map[pref_all] = prefix  # special case where C removes All when suffixed by a Production Type
 
         return road_map
 
@@ -75,9 +72,6 @@ class DailyParser(object):
         for suffix_key, instance in instance_dict.items():  # For each combination: DailyByZoneAndProductionType with (Bull_HighRisk), (Swine_MediumRisk), etc.
             instance_needed = False
             for column_name, model_field in field_map.items():
-                if suffix_key == '' and model_class_name == 'DailyByProductionType' \
-                        and column_name in 'deswU deswA expnU expcU expnA expcA infnU infcU infnA infcA'.split():
-                    column_name = column_name + "All"  # sometimes columns use "All" instead of ''
                 if column_name + suffix_key in sparse_info:
                     setattr(instance, model_field, sparse_info[column_name + suffix_key])
                     instance_needed = True
@@ -90,11 +84,22 @@ class DailyParser(object):
         return [instance for key, instance in instance_dict.items()]
 
     def construct_combinatorial_instances(self, day, iteration):
+        """This constructs a mapping between the name of the column 'suffix' for example: 'BackgroundCattle' and maps it
+        to the appropriate Django query settings to grab the matching model instance.  For 'BackgroundCattle' the query
+        should be `DailyByZoneAndProductionType(production_type__name=Cattle, zone=None, ...`.
+        This handles the special blank case for both "All ProductionType" = '' and "Background Zone" = None.
+        
+        It returns a dict which is the collection of all the model instances which will need to be populated each day:
+        1 DailyControls
+        1*pt DailyByProductionType
+        zones*pt DailyByZoneAndProductionType
+        zones*1 DailyByZone
+        """
         daily_instances = {table_name:{} for table_name in ["DailyByProductionType", "DailyByZone", "DailyByZoneAndProductionType", "DailyControls"]}
 
         daily_by_pt = daily_instances["DailyByProductionType"]
         for pt_name in self.possible_pts:
-            pt = ProductionType.objects.filter(name=pt_name).first()  # obj or None
+            pt = ProductionType.objects.filter(name=pt_name).first()  # obj or None for "All Animals" case
             daily_by_pt[camel_case_spaces(pt_name)] = \
                 Results.models.DailyByProductionType(production_type=pt, iteration=iteration, day=day)
 
@@ -103,9 +108,9 @@ class DailyParser(object):
 
         daily_by_pt_zone = daily_instances["DailyByZoneAndProductionType"]
         for pt_name in self.possible_pts:
-            pt = ProductionType.objects.filter(name=pt_name).first()
+            pt = ProductionType.objects.filter(name=pt_name).first()  # obj or None for "All Animals" case
             for zone_name in self.possible_zones:
-                zone = Zone.objects.filter(name=zone_name).first()
+                zone = Zone.objects.filter(name=zone_name).first()  # obj or None for "Background" case
                 daily_by_pt_zone[camel_case_spaces(zone_name + pt_name)] = \
                     Results.models.DailyByZoneAndProductionType(production_type=pt, zone=zone, iteration=iteration, day=day)
 
@@ -137,6 +142,7 @@ class DailyParser(object):
         if len(self.failures) and day == 1:
             print('Unable to match columns: ', len(self.failures), sorted(self.failures))
         return results
+
 
     def parse_daily_strings(self, cmd_strings):
         results = []
