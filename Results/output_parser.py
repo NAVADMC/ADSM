@@ -29,6 +29,15 @@ def number(string):
             return -1
 
 
+def build_composite_field_map( table):
+    road_map = {}
+    for prefix, field in table:
+        if prefix not in ('iteration', 'day', 'production_type', 'zone'):  # skip the selector fields
+            road_map[prefix] = prefix
+
+    return road_map
+
+
 class DailyParser(object):
     def __init__(self, header_line):
         self.headers = header_line.strip().split(',')  # there was a trailing /r/n to remove
@@ -36,28 +45,6 @@ class DailyParser(object):
         self.possible_pts = {x.name for x in ProductionType.objects.all()}.union({''})
         self.failures = set()
 
-
-    def extract_name(self, c_header_name, possibilities):
-        """Returns the header with the name clipped out and the matching name if it is in the list of possibilities.
-         Use for extracting zone and production type names from CEngine output."""
-        for name in possibilities:
-            if self.camel_case_spaces(name) in c_header_name:  # It's important to camelCase this to match C output
-                shortened = re.sub(self.camel_case_spaces(name), '', c_header_name)
-                return shortened, name
-        return c_header_name, None
-
-    def build_composite_field_map(self, table):
-        road_map = {}
-        for prefix, field in table:
-            if prefix not in ('iteration', 'day', 'production_type', 'zone'):  # skip the selector fields
-                road_map[prefix] = prefix
-
-        return road_map
-
-    def stripped_field(self, c_header_name):
-        c_header_name, zone = self.extract_name(c_header_name, self.possible_zones)
-        c_header_name, pt = self.extract_name(c_header_name, self.possible_pts)
-        return c_header_name
 
     def populate_tables_with_matching_fields(self, model_class_name, instance_dict, sparse_info):
         """Populates all combinations of a particular table in one go.  This method must be called once for each
@@ -68,7 +55,7 @@ class DailyParser(object):
         field_map: Keys are all column names to match to (prefix only), values are exact field name in that model.  The distinction allows
             the program to map multiple columns onto the same field.  There are some special cases where column name is not exactly field + suffix.
         """
-        field_map = self.build_composite_field_map(getattr(Results.models, model_class_name)() )  # creates a table instance
+        field_map = build_composite_field_map(getattr(Results.models, model_class_name)() )  # creates a table instance
         for suffix_key, instance in instance_dict.items():  # For each combination: DailyByZoneAndProductionType with (Bull_HighRisk), (Swine_MediumRisk), etc.
             instance_needed = False
             for column_name, model_field in field_map.items():
@@ -82,6 +69,7 @@ class DailyParser(object):
             if not instance_needed:
                 del instance_dict[suffix_key]
         return [instance for key, instance in instance_dict.items()]
+
 
     def construct_combinatorial_instances(self, day, iteration):
         """This constructs a mapping between the name of the column 'suffix' for example: 'BackgroundCattle' and maps it
