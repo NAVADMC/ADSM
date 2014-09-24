@@ -422,7 +422,8 @@ def model_list(request):
 
 def upload_population(request):
     from Settings.models import SmSession
-    session = SmSession.objects.get(pk=1)
+    from xml.etree.ElementTree import ParseError
+    session = SmSession.objects.get_or_create(pk=1)[0]
     if 'GET' in request.method:
         json = '{"status": "%s", "percent": "%s"}' % (session.population_upload_status, session.population_upload_percent*100)
         return HttpResponse(json, content_type="application/json")
@@ -432,7 +433,7 @@ def upload_population(request):
     model = Population(source_file=workspace_path(filename))
     try:
         model.save()
-    except EOFError as e:
+    except (EOFError, ParseError) as e:
         return HttpResponse('{"status": "failed", "message": "%s"}' % e, content_type="application/json")
     # wait for Population parsing (up to 5 minutes)
     session.reset_population_upload_status()

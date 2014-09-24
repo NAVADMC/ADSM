@@ -4,6 +4,8 @@ from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
 
+from xml.etree.ElementTree import ParseError
+
 from django.test import TestCase
 
 # Create your tests here.
@@ -85,3 +87,7 @@ class PopulationParserTestCase(TestCase):
         self.assertEqual(len(results), 2)
         self.assertDictEqual(results[0], expected_results[0])
         self.assertDictEqual(results[1], expected_results[1])
+
+    def test_parser_load_invalid_xml(self):
+        with self.assertRaises(ParseError):
+            PopulationParser(POPULATION_FIXTURES + 'Population_Test_Invalid.xml')

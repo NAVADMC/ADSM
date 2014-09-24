@@ -13,16 +13,16 @@ import pandas as pd
 import matplotlib.pyplot as plt, mpld3
 
 
-def matplotd3(request):
-    fig, ax = plt.subplots()
-    points = ax.plot([3, 1, 4, 1, 5], 'ks-', mec='w', mew=5, ms=20)
-    return HttpResponse(mpld3.fig_to_html(fig))
-
-
 def HttpFigure(fig):
     response = HttpResponse(content_type='image/png')
     FigureCanvas(fig).print_png(response)
     return response
+
+
+def matplotd3(request):
+    fig, ax = plt.subplots()
+    points = ax.plot([3, 1, 4, 1, 5], 'ks-', mec='w', mew=5, ms=20)
+    return HttpResponse(mpld3.fig_to_html(fig))
 
 
 def rstyle(axis):
@@ -73,7 +73,7 @@ def breakdown_dictionary(iterate_pt, iterate_zone):
     production_types, zones = {}, {}
     if iterate_pt:
         production_types = dict(ProductionType.objects.all().values_list('name', 'id'))  # Tuples need to be turned into dict
-        production_types['All'] = None
+        production_types['All'] = None  # this has been vetted for Issue #223 as a user label
     if iterate_zone:
         zones = dict(Zone.objects.all().values_list('name', 'id'))  # Tuples need to be turned into dict
         if iterate_pt:  # Background is only included in DailyByZoneAndProductionType.  See Issue #198

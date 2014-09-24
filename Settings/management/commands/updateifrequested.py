@@ -21,16 +21,21 @@ class Command(BaseCommand):
                 session.save()
                 close_old_connections()
 
-                subprocess.call([git, 'stash'], shell=True)  # trying to get rid of settings.sqlite3 change
-                subprocess.call([git, 'reset', '--hard'], shell=True)
+                command = git + ' stash'
+                subprocess.call(command, shell=True)  # trying to get rid of settings.sqlite3 change
+                command = git + ' reset --hard'
+                subprocess.call(command, shell=True)
 
-                git_status = subprocess.check_output([git, 'pull'], shell=True)
+                command = git + ' pull'
+                git_status = subprocess.check_output(command, shell=True)
                 # TODO: Make sure the pull actually worked
         except:
             print "Failed to update!"
             try:
-                subprocess.call([git, 'reset'], shell=True)
-                subprocess.call([git, 'stash', 'apply'], shell=True)
+                command = git + ' reset'
+                subprocess.call(command, shell=True)
+                command = git + ' stash apply'
+                subprocess.call(command, shell=True)
             except:
                 print "Failed to gracefully reset!"
                 return False

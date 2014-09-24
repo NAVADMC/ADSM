@@ -6,10 +6,13 @@ from future import standard_library
 standard_library.install_hooks()
 import unittest
 import os
+import json
 
 from django.test import TestCase
 
 from ScenarioCreator.models import AirborneSpread
+
+POPULATION_FIXTURES = 'ScenarioCreator/tests/population_fixtures/'
 
 
 class AirborneSpreadTestCase(TestCase):
@@ -43,3 +46,17 @@ class AirborneSpreadTestCase(TestCase):
         r = self.client.post('/setup/AirborneSpread/new/', self.form_data)
 
         self.assertContains(r, 'This field is required.', count=1, status_code=200)
+
+class PopulationTestCase(TestCase):
+    multi_db = True
+
+    def test_post_failure_bad_xml(self):
+        expected_results = {
+            'status': 'failed',
+            'message': 'mismatched tag: line 17, column 2'
+        }
+        with open(POPULATION_FIXTURES + 'Population_Test_Invalid.xml') as fp:
+            r = self.client.post('/setup/UploadPopulation/', {'file': fp})
+
+        data = json.loads(r.content)
+        self.assertEqual(data, expected_results)

@@ -14,11 +14,11 @@ def main(*args):
     execute_from_command_line(*args)
 
 if __name__ == "__main__":
-	key = "DJANGO_SETTINGS_MODULE"
-	value = "SpreadModel.settings"
-	if os.name == 'nt':
-		key = key.encode('ascii', 'ignore')
-		value = value.encode('ascii', 'ignore')
+    key = "DJANGO_SETTINGS_MODULE"
+    value = "SpreadModel.settings"
+    if os.name == 'nt':
+        key = key.encode('ascii', 'ignore')
+        value = value.encode('ascii', 'ignore')
     os.environ.setdefault(key, value)
 
     main(sys.argv)

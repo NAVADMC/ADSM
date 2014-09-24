@@ -29,22 +29,25 @@ def activeSession(name='scenario_db'):
 
 
 def update_adsm_from_git(request):
-    """This method closes the program after setting the update_on_startup flag"""
-    try:
-        session = SmSession.objects.get_or_create(id=1)[0]
-        session.update_on_startup = True
-        session.save()
-        close_old_connections()
-        thread.interrupt_main()  # equivalent to Ctrl+C in terminal
-    except:
-        print ("Failed to restart and update!")
+    """This sets the update_on_startup flag for the next program start."""
+    if 'GET' in request.method:
+        try:
+            session = SmSession.objects.get_or_create(id=1)[0]
+            session.update_on_startup = True
+            session.save()
+            return HttpResponse("success")
+        except:
+            print ("Failed to set DB to update!")
+            return HttpResponse("failure")
 
 
 def update_is_needed():
     try:
         os.chdir(settings.BASE_DIR)
-        subprocess.call([git, 'remote', 'update'], shell=True)
-        status = subprocess.check_output([git, 'status', '-uno'], shell=True)
+        command = git + ' remote update'
+        subprocess.call(command, shell=True)
+        command = git + ' status -uno'
+        status = subprocess.check_output(command, shell=True)
         print(status)
         return 'is behind' in status
     except:
@@ -55,6 +58,7 @@ def update_is_needed():
 def reset_db(name):
     print("Deleting", activeSession(name))
     try:
+        close_old_connections()
         os.remove(activeSession(name))
         connections[name].close()
     except BaseException as ex:
@@ -89,7 +93,7 @@ def update_db_version():
 def graceful_startup():
     """Checks something inside of each of the database files to see if it's valid.  If not, rebuild the database."""
     try:
-        scenario_filename()
+        SmSession.objects.get_or_create()[0].update_available
     except OperationalError:
         reset_db('default')
     try:
@@ -138,8 +142,11 @@ def handle_file_upload(request):
 
 
 def upload_scenario(request):
-    handle_file_upload(request)
-    return redirect('/app/Workspace/')
+    if '.sqlite' in request.FILES['file']._name:
+        handle_file_upload(request)
+        return redirect('/app/Workspace/')
+    else:
+        raise ValueError("You can only submit files with '.sqlite' in the file name.")  # ugly error should be caught by Javascript first
 
 
 def open_scenario(request, target):
