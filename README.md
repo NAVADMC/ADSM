@@ -19,11 +19,12 @@ Please note that ADSM is built against Python 3.3 which is incompatible with Pyt
     pip install python-dateutil  
     pip install pyparsing  
     pip install pytz  
+    #http://chromedriver.storage.googleapis.com/index.html?path=2.10/  places exe in your virtual_env/scripts folder
 
     git clone https://github.com/NAVADMC/SpreadModel.git
     git submodule init   # this fills out the 'production_server'
     git submodule update
-    cp workspace/blank.sqlite3 activeSession.sqlite3
+    
 
 ### Matplotlib and Numpy Dependencies
 For non-Windows machines:
