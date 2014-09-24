@@ -153,3 +153,10 @@ To update the executable:
     Git for windows, just downloaded portable from msysgit git repo.
     Linux, downloaded git source from github/git/git and compiled in new directory.
         requires build-essential, libssl-dev, libcurl4-openssl-dev
+
+    GDAL. Required by Django. Usually Django uses a stubbed out library in its source.
+    However, if the user has and GIS software installed, it messes up the path. So we need to specify a path to a library.
+    Figured I would go ahead and use a real one instead of a stubbed one for possible future needs.
+    www.gdal.org pointed to www.gisinternals.com where I downloaded the GDAL and MapServer Latest Release for Win64 (1600 GDAL).
+    Got the binary only zip. From this pulled the gdal111.dll from the bin folder.
+    This one file is enough to make django not complain. But I don't know if it is enough to actually do geo stuff later...
