@@ -17,7 +17,7 @@ import threading
 from django.forms.models import modelformset_factory
 from django.shortcuts import render, redirect
 from django.conf import settings
-from django.db import connections, transaction
+from django.db import transaction, close_old_connections
 import subprocess
 import time
 import multiprocessing
@@ -144,8 +144,7 @@ class Simulation(threading.Thread):
         statuses = [status.get() for status in statuses]
         print(statuses)
         zip_map_directory_if_it_exists()
-        connections['default'].close()
-        connections['scenario_db'].close()
+        close_old_connections()
 
 
 def results_home(request):
