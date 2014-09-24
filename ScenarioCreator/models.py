@@ -118,9 +118,9 @@ class Population(BaseModel):
         session.set_population_upload_status("Parsing")
         try:
             p = ScenarioCreator.parser.PopulationParser(self.source_file)
-        except:
+        except BaseException as error:
             self.delete()
-            raise
+            raise error
         data = p.parse_to_dictionary()
         session.set_population_upload_status("Creating objects")
         total = len(data)

@@ -31,9 +31,15 @@ def js(var):
 def basic_context(request):
     graceful_startup()
     pt_count = ProductionType.objects.count()
-    context = {'filename': scenario_filename(),
+    context = {'filename': scenario_filename(),  # context in either mode
                'unsaved_changes': unsaved_changes(),
                'update_available': SmSession.objects.get_or_create()[0].update_available,
+               'url': request.path,
+               'active_link': '/'.join(re.split('\W+', request.path)[2:]),
+               }
+    
+    if 'setup/' in request.path:  # inputs specific context
+        context.update({
                'Scenario': Scenario.objects.count(),
                'OutputSetting': OutputSettings.objects.count(),
                'Population': Population.objects.count(),
@@ -56,23 +62,24 @@ def basic_context(request):
                'ZoneEffectAssignments': ZoneEffectAssignment.objects.count() >= Zone.objects.count() and Zone.objects.count(),
                'ProbabilityFunctions': ProbabilityFunction.objects.count(),
                'RelationalFunctions': RelationalFunction.objects.count(),
-               'url': request.path,
-               'active_link': '/'.join(re.split('\W+', request.path)[2:]),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
                'outputs_computed': DailyControls.objects.all().count() > 0,
-               'results_progress': iteration_progress() * 100,
-               }
+               })
 
-    validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment',
-                         'DirectSpreads', 'AssignSpreads', 'ControlMasterPlan', 'Protocols', 'ProtocolAssignments', 'Zones', 'ZoneEffects',
-                         'ZoneEffectAssignments']
-    context['relevant_keys'] = {name: context[name] for name in validation_models}
-    context['Simulation_ready'] = simulation_ready_to_run(context)
-    disease = Disease.objects.get_or_create(pk=1)[0]
-    context['javascript_variables'] = {'use_within_unit_prevalence':      js(disease.use_within_unit_prevalence),
-                                       'use_airborne_exponential_decay':  js(disease.use_airborne_exponential_decay),
-                                       'include_direct_contact_spread':   js(disease.include_direct_contact_spread),
-                                       'include_indirect_contact_spread': js(disease.include_indirect_contact_spread),
-                                       'include_airborne_spread':         js(disease.include_airborne_spread),
-                                       }
+        validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment',
+                             'DirectSpreads', 'AssignSpreads', 'ControlMasterPlan', 'Protocols', 'ProtocolAssignments', 'Zones', 'ZoneEffects',
+                             'ZoneEffectAssignments']
+        context['relevant_keys'] = {name: context[name] for name in validation_models}
+        context['Simulation_ready'] = simulation_ready_to_run(context)
+        disease = Disease.objects.get_or_create()[0]
+        context['javascript_variables'] = {'use_within_unit_prevalence':      js(disease.use_within_unit_prevalence),
+                                           'use_airborne_exponential_decay':  js(disease.use_airborne_exponential_decay),
+                                           'include_direct_contact_spread':   js(disease.include_direct_contact_spread),
+                                           'include_indirect_contact_spread': js(disease.include_indirect_contact_spread),
+                                           'include_airborne_spread':         js(disease.include_airborne_spread),
+                                           }
+        
+    elif 'results/' in request.path:  # results specific context
+        context.update({'results_progress': iteration_progress() * 100,})
+        
     return context

@@ -72,13 +72,9 @@ def summarize_results():
     return summary
 
 def iteration_progress():
-    try:
-        outputSettings = OutputSettings.objects.get()
-    except (OutputSettings.DoesNotExist, OutputSettings.MultipleObjectsReturned):
-        return 0
-
-    iterations_started = outputSettings.iterations
-    stop_criteria = outputSettings.stop_criteria
+    output_settings = OutputSettings.objects.get_or_create()[0]
+    iterations_started = output_settings.iterations
+    stop_criteria = output_settings.stop_criteria
 
     calculation_function = {
         "disease-end": lambda: DailyControls.objects.filter(last_day_query(), diseaseDuration__gt=0).count(),

@@ -53,9 +53,6 @@ class OutputBaseModel(models.Model):
 class DailyReport(OutputBaseModel):
     sparse_dict = models.TextField()
     full_line = models.TextField()
-    # to get the dictionary object back:
-    # import ast
-    # ast.literal_eval("{'muffin' : 'lolz', 'foo' : 'kitty'}")
 
     def __str__(self):
         sparse_dict = literal_eval(self.sparse_dict)
