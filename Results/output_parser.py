@@ -66,6 +66,8 @@ class DailyParser(object):
                         self.failures.remove(column_name + suffix_key)
                     except KeyError:
                         print('Error: Column was assigned twice.  Second copy in %s.%s for output column %s.' % (model_class_name, model_field, column_name + suffix_key))
+                else:
+                    pass  # It's okay for the model to specify a field that the C Engine doesn't output.  No harm done
             if not instance_needed:
                 del instance_dict[suffix_key]
         return [instance for key, instance in instance_dict.items()]
