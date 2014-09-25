@@ -567,7 +567,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   nprodtypes = local_data->production_types->len;
   {
     RPT_bulk_create_t outputs[] = {
-      { &local_data->nunits_awaiting_vaccination, "vacwUAll", RPT_integer,
+      { &local_data->nunits_awaiting_vaccination, "vacwU", RPT_integer,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->zero_outputs },
@@ -577,7 +577,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->zero_outputs },
 
-      { &local_data->nanimals_awaiting_vaccination, "vacwAAll", RPT_real,
+      { &local_data->nanimals_awaiting_vaccination, "vacwA", RPT_real,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->zero_outputs },

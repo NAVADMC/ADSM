@@ -1787,7 +1787,7 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnURing</td>
@@ -1845,7 +1845,7 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnURing</td>
@@ -1904,7 +1904,7 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnURing</td>
@@ -1962,7 +1962,7 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnURing</td>
@@ -2020,7 +2020,7 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnURing</td>
@@ -2079,7 +2079,7 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnURing</td>
@@ -2140,7 +2140,7 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnURing</td>
@@ -2201,7 +2201,7 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnURing</td>
@@ -2262,7 +2262,7 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>firstDestruction</td>
     </tr>
     <tr><td>0</td>   <td></td></tr>

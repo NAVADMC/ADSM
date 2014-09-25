@@ -190,7 +190,7 @@ handle_destruction_event (struct adsm_module_t_ *self, EVT_destruction_event_t *
         RPT_reporting_set_integer (local_data->first_destruction_by_reason_and_prodtype[reason][prodtype], event->day);
 
       /* Initially destroyed units also are not included in many of the counts.
-       * They will not be part of desnUAll or desnU broken down by production
+       * They will not be part of desnU or desnU broken down by production
        * type.  They will be part of desnUIni and desnUIni broken down by
        * production type. */
       RPT_reporting_add_integer  (local_data->num_units_destroyed, 1);
@@ -363,7 +363,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->null_outputs },
 
-      { &local_data->num_units_destroyed, "desnUAll", RPT_integer,
+      { &local_data->num_units_destroyed, "desnU", RPT_integer,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->daily_outputs },
@@ -383,7 +383,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->daily_outputs },
 
-      { &local_data->cumul_num_units_destroyed, "descUAll", RPT_integer,
+      { &local_data->cumul_num_units_destroyed, "descU", RPT_integer,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->cumul_outputs },
@@ -403,7 +403,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->cumul_outputs },
 
-      { &local_data->num_animals_destroyed, "desnAAll", RPT_real,
+      { &local_data->num_animals_destroyed, "desnA", RPT_real,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->daily_outputs },
@@ -423,7 +423,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->daily_outputs },
 
-      { &local_data->cumul_num_animals_destroyed, "descAAll", RPT_real,
+      { &local_data->cumul_num_animals_destroyed, "descA", RPT_real,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->cumul_outputs },

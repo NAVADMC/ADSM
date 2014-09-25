@@ -94,7 +94,7 @@
 
   <output>
     <tr>
-      <td>detnUAll</td>
+      <td>detnU</td>
       <td>unitsInZoneBackground</td>
     </tr>
     <tr><td>0</td>  <td>1</td></tr>
@@ -153,7 +153,7 @@
   <output>
     <tr>
       <td>numSeparateAreasHighRisk</td>
-      <td>detnUAll</td>
+      <td>detnU</td>
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneHighRisk</td>
     </tr>
@@ -214,7 +214,7 @@
     <tr>
       <td>numSeparateAreasLowRisk</td>
       <td>numSeparateAreasHighRisk</td>
-      <td>detnUAll</td>
+      <td>detnU</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>0</td> <td>0</td> <td>1</td></tr>
@@ -331,7 +331,7 @@
   <output>
     <tr>
       <td>numSeparateAreasHighRisk</td>
-      <td>detnUAll</td>
+      <td>detnU</td>
     </tr>
     <tr><td>0</td> <td>0</td></tr>
     <tr><td>0</td> <td>2</td></tr>
@@ -390,7 +390,7 @@
   <output>
     <tr>
       <td>numSeparateAreasHighRisk</td>
-      <td>detnUAll</td>
+      <td>detnU</td>
     </tr>
     <tr><td>0</td> <td>0</td></tr>
     <tr><td>0</td> <td>2</td></tr>
@@ -452,7 +452,7 @@
     <tr>
       <td>numSeparateAreasLowRisk</td>
       <td>numSeparateAreasHighRisk</td>
-      <td>detnUAll</td>
+      <td>detnU</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>0</td> <td>0</td> <td>2</td></tr>
@@ -518,7 +518,7 @@
     <tr>
       <td>numSeparateAreasLowRisk</td>
       <td>numSeparateAreasHighRisk</td>
-      <td>detnUAll</td>
+      <td>detnU</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>0</td> <td>0</td> <td>2</td></tr>
@@ -583,7 +583,7 @@
     <tr>
       <td>numSeparateAreasLowRisk</td>
       <td>numSeparateAreasHighRisk</td>
-      <td>detnUAll</td>
+      <td>detnU</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>0</td> <td>0</td> <td>2</td></tr>
@@ -719,8 +719,8 @@
   <output>
     <tr>
       <td>numSeparateAreasHighRisk</td>
-      <td>detnUAll</td>
-      <td>desnUAll</td>
+      <td>detnU</td>
+      <td>desnU</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>0</td> <td>2</td> <td>0</td></tr>
@@ -856,8 +856,8 @@
   <output>
     <tr>
       <td>numSeparateAreasHighRisk</td>
-      <td>detnUAll</td>
-      <td>desnUAll</td>
+      <td>detnU</td>
+      <td>desnU</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>0</td> <td>1</td> <td>0</td></tr>
@@ -928,8 +928,8 @@
   <output>
     <tr>
       <td>numSeparateAreasHighRisk</td>
-      <td>detnUAll</td>
-      <td>desnUAll</td>
+      <td>detnU</td>
+      <td>desnU</td>
     </tr>
     <tr><td>0</td> <td>0</td> <td>0</td></tr>
     <tr><td>0</td> <td>1</td> <td>0</td></tr>
@@ -1151,10 +1151,10 @@
       <td>numSeparateAreasHighRisk</td>
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneHighRisk</td>
-      <td>expnUAll</td>
-      <td>infnUAll</td>
-      <td>detnUAll</td>
-      <td>desnUAll</td>
+      <td>expnU</td>
+      <td>infnU</td>
+      <td>detnU</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnUDirFwd</td>
@@ -1251,10 +1251,10 @@
       <td>numSeparateAreasHighRisk</td>
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneHighRisk</td>
-      <td>expnUAll</td>
-      <td>infnUAll</td>
-      <td>detnUAll</td>
-      <td>desnUAll</td>
+      <td>expnU</td>
+      <td>infnU</td>
+      <td>detnU</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnUDirFwd</td>
@@ -1351,10 +1351,10 @@
       <td>numSeparateAreasHighRisk</td>
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneHighRisk</td>
-      <td>expnUAll</td>
-      <td>infnUAll</td>
-      <td>detnUAll</td>
-      <td>desnUAll</td>
+      <td>expnU</td>
+      <td>infnU</td>
+      <td>detnU</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnUDirFwd</td>
@@ -1452,10 +1452,10 @@
       <td>numSeparateAreasHighRisk</td>
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneHighRisk</td>
-      <td>expnUAll</td>
-      <td>infnUAll</td>
-      <td>detnUAll</td>
-      <td>desnUAll</td>
+      <td>expnU</td>
+      <td>infnU</td>
+      <td>detnU</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnUDirFwd</td>
@@ -1565,10 +1565,10 @@
       <td>numSeparateAreasHighRisk</td>
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneHighRisk</td>
-      <td>expnUAll</td>
-      <td>infnUAll</td>
-      <td>detnUAll</td>
-      <td>desnUAll</td>
+      <td>expnU</td>
+      <td>infnU</td>
+      <td>detnU</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnUDirFwd</td>
@@ -1621,10 +1621,10 @@
       <td>numSeparateAreasHighRisk</td>
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneHighRisk</td>
-      <td>expnUAll</td>
-      <td>infnUAll</td>
-      <td>detnUAll</td>
-      <td>desnUAll</td>
+      <td>expnU</td>
+      <td>infnU</td>
+      <td>detnU</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnUDirFwd</td>
@@ -1677,10 +1677,10 @@
       <td>numSeparateAreasHighRisk</td>
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneHighRisk</td>
-      <td>expnUAll</td>
-      <td>infnUAll</td>
-      <td>detnUAll</td>
-      <td>desnUAll</td>
+      <td>expnU</td>
+      <td>infnU</td>
+      <td>detnU</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnUDirFwd</td>
@@ -1733,10 +1733,10 @@
       <td>numSeparateAreasHighRisk</td>
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneHighRisk</td>
-      <td>expnUAll</td>
-      <td>infnUAll</td>
-      <td>detnUAll</td>
-      <td>desnUAll</td>
+      <td>expnU</td>
+      <td>infnU</td>
+      <td>detnU</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUDet</td>
       <td>desnUDirFwd</td>
@@ -3025,7 +3025,7 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
       <td>numSeparateAreasHighRisk</td>
     </tr>
     <tr><td>0</td> <td>0</td></tr>
@@ -3095,7 +3095,7 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
       <td>numSeparateAreasHighRisk</td>
     </tr>
     <tr><td>0</td> <td>0</td></tr>
@@ -3314,7 +3314,7 @@
     <tr>
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneHighRisk</td>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>animalDaysInZoneBackground</td>
       <td>animalDaysInZoneHighRisk</td>
     </tr>
@@ -3387,7 +3387,7 @@
     <tr>
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneHighRisk</td>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>animalDaysInZoneBackground</td>
       <td>animalDaysInZoneHighRisk</td>
     </tr>
@@ -3465,7 +3465,7 @@
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneLowRisk</td>
       <td>unitsInZoneHighRisk</td>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>animalDaysInZoneBackground</td>
       <td>animalDaysInZoneLowRisk</td>
       <td>animalDaysInZoneHighRisk</td>
@@ -4157,7 +4157,7 @@
       <td>unitsInZoneBackground</td>
       <td>unitsInZoneLöwRïsk</td>
       <td>unitsInZoneHïghRïsk</td>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>animalDaysInZoneBackground</td>
       <td>animalDaysInZoneLöwRïsk</td>
       <td>animalDaysInZoneHïghRïsk</td>
@@ -4222,8 +4222,8 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
-      <td>detnUAll</td>
+      <td>expnU</td>
+      <td>detnU</td>
       <td>numSeparateAreasHighRisk</td>
     </tr>
     <tr><td>1</td> <td>0</td>  <td>0</td></tr>
@@ -4290,7 +4290,7 @@
     <tr>
       <td>numSeparateAreasLowRisk</td>
       <td>numSeparateAreasHighRisk</td>
-      <td>expnUAll</td>
+      <td>expnU</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>1</td></tr>
     <tr><td>0</td>  <td>0</td>  <td>1</td></tr>
@@ -4356,7 +4356,7 @@
     <tr>
       <td>numSeparateAreasLowRisk</td>
       <td>numSeparateAreasHighRisk</td>
-      <td>expnUAll</td>
+      <td>expnU</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>1</td></tr>
     <tr><td>0</td>  <td>0</td>  <td>1</td></tr>
@@ -4424,7 +4424,7 @@
       <td>numSeparateAreasLowRisk</td>
       <td>numSeparateAreasMediumRisk</td>
       <td>numSeparateAreasHighRisk</td>
-      <td>expnUAll</td>
+      <td>expnU</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>1</td></tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>1</td></tr>
@@ -4493,7 +4493,7 @@
       <td>numSeparateAreasLowRisk</td>
       <td>numSeparateAreasMediumRisk</td>
       <td>numSeparateAreasHighRisk</td>
-      <td>expnUAll</td>
+      <td>expnU</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>1</td></tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>1</td></tr>
@@ -4562,7 +4562,7 @@
       <td>numSeparateAreasLowRisk</td>
       <td>numSeparateAreasMediumRisk</td>
       <td>numSeparateAreasHighRisk</td>
-      <td>expnUAll</td>
+      <td>expnU</td>
     </tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>1</td></tr>
     <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>1</td></tr>

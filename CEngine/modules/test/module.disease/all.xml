@@ -317,19 +317,19 @@
 
   <output>
     <tr>
-      <td>desnUAll</td>
+      <td>desnU</td>
       <td>desnUIni</td>
       <td>desnUBeefCattle</td>
       <td>desnUPigs</td>
       <td>desnUIniBeefCattle</td>
       <td>desnUIniPigs</td>
-      <td>descUAll</td>
+      <td>descU</td>
       <td>descUIni</td>
       <td>descUBeefCattle</td>
       <td>descUPigs</td>
       <td>descUIniBeefCattle</td>
       <td>descUIniPigs</td>
-      <td>deswUAll</td>
+      <td>deswU</td>
     </tr>
     <!-- Day-by-day                                     Initially/  Initially/ | Cumulative                                      Initially/  Initially/ |             -->
     <!--  Total     Initially     Cattle       Pigs       Cattle       Pigs    |   Total     Initially     Cattle       Pigs       Cattle       Pigs    |  Waiting    -->
@@ -405,19 +405,19 @@
 
   <output>
     <tr>
-      <td>vacnUAll</td>
+      <td>vacnU</td>
       <td>vacnUIni</td>
       <td>vacnUBeefCattle</td>
       <td>vacnUPigs</td>
       <td>vacnUIniBeefCattle</td>
       <td>vacnUIniPigs</td>
-      <td>vaccUAll</td>
+      <td>vaccU</td>
       <td>vaccUIni</td>
       <td>vaccUBeefCattle</td>
       <td>vaccUPigs</td>
       <td>vaccUIniBeefCattle</td>
       <td>vaccUIniPigs</td>
-      <td>vacwUAll</td>
+      <td>vacwU</td>
     </tr>
     <!-- Day-by-day                                     Initially/  Initially/ | Cumulative                                      Initially/  Initially/ |             -->
     <!--  Total     Initially     Cattle       Pigs       Cattle       Pigs    |   Total     Initially     Cattle       Pigs       Cattle       Pigs    |  Waiting    -->
@@ -493,19 +493,19 @@
 
   <output>
     <tr>
-      <td>vacnUAll</td>
+      <td>vacnU</td>
       <td>vacnUIni</td>
       <td>vacnUBeefCattle</td>
       <td>vacnUPigs</td>
       <td>vacnUIniBeefCattle</td>
       <td>vacnUIniPigs</td>
-      <td>vaccUAll</td>
+      <td>vaccU</td>
       <td>vaccUIni</td>
       <td>vaccUBeefCattle</td>
       <td>vaccUPigs</td>
       <td>vaccUIniBeefCattle</td>
       <td>vaccUIniPigs</td>
-      <td>vacwUAll</td>
+      <td>vacwU</td>
     </tr>
     <!-- Day-by-day                                     Initially/  Initially/ | Cumulative                                      Initially/  Initially/ |             -->
     <!--  Total     Initially     Cattle       Pigs       Cattle       Pigs    |   Total     Initially     Cattle       Pigs       Cattle       Pigs    |  Waiting    -->
@@ -1348,7 +1348,7 @@
 
   <output>
     <tr>
-      <td>vacwUAll</td>
+      <td>vacwU</td>
     </tr>
     <tr><td>0</td></tr>
     <tr><td>4</td></tr>

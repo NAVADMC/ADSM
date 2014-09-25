@@ -1021,8 +1021,8 @@
       <td>infnUBeefCattle</td>
       <td>infnUIniBeefCattle</td>
       <td>infnUAirBeefCattle</td>
-      <td>infnUAll</td>
-      <td>infcUAll</td>
+      <td>infnU</td>
+      <td>infcU</td>
     </tr>
     <!--   Ini        Air       Cattle   Ini/Cattle Air/Cattle   Total      Cumul  -->
     <tr><td>1</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -1312,8 +1312,8 @@
       <td>infnUIniPigs</td>
       <td>infnUAirBeefCattle</td>
       <td>infnUAirPigs</td>
-      <td>infnUAll</td>
-      <td>infcUAll</td>
+      <td>infnU</td>
+      <td>infcU</td>
     </tr>
     <!--   Ini        Air       Cattle      Pigs    Ini/Cattle  Ini/Pigs  Air/Cattle  Air/Pigs    Total      Cumul     -->
     <tr><td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
@@ -1540,7 +1540,7 @@
 
   <output>
     <tr>
-      <td>infnUAll</td>
+      <td>infnU</td>
     </tr>
     <tr><td>0</td></tr>
     <tr><td>1</td></tr>
@@ -1636,7 +1636,7 @@
 
   <output>
     <tr>
-      <td>infnUAll</td>
+      <td>infnU</td>
     </tr>
     <tr><td>0</td></tr>
     <tr><td>1</td></tr>
@@ -1729,7 +1729,7 @@
 
   <output>
     <tr>
-      <td>infnUAll</td>
+      <td>infnU</td>
     </tr>
     <tr><td>0</td></tr>
     <tr><td>1</td></tr>

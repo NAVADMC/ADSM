@@ -75,13 +75,13 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUBeefCattle</td>
       <td>infnUIniBeefCattle</td>
       <td>infnUDirBeefCattle</td>
-      <td>infnUAll</td>
+      <td>infnU</td>
     </tr>
     <!--              Ini        Dir       Cattle   Ini/Cattle Dir/Cattle   Total     -->
     <tr><td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td></tr>
@@ -184,13 +184,13 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUBeefCattle</td>
       <td>infnUIniBeefCattle</td>
       <td>infnUDirBeefCattle</td>
-      <td>infnUAll</td>
+      <td>infnU</td>
     </tr>
     <!--              Ini        Dir       Cattle   Ini/Cattle Dir/Cattle   Total     -->
     <tr><td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td></tr>
@@ -288,13 +288,13 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUBeefCattle</td>
       <td>infnUIniBeefCattle</td>
       <td>infnUDirBeefCattle</td>
-      <td>infnUAll</td>
+      <td>infnU</td>
     </tr>
     <!--              Ini        Dir       Cattle   Ini/Cattle Dir/Cattle   Total     -->
     <tr><td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td></tr>
@@ -398,13 +398,13 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUBeefCattle</td>
       <td>infnUIniBeefCattle</td>
       <td>infnUDirBeefCattle</td>
-      <td>infnUAll</td>
+      <td>infnU</td>
     </tr>
     <!--              Ini        Dir       Cattle   Ini/Cattle Dir/Cattle   Total     -->
     <tr><td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td></tr>
@@ -1506,13 +1506,13 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUBeefCattle</td>
       <td>infnUIniBeefCattle</td>
       <td>infnUDirBeefCattle</td>
-      <td>infnUAll</td>
+      <td>infnU</td>
     </tr>
     <tr><td>2</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td></tr>
     <!-- Note that the "Ini" counts are separate, and most of the output
@@ -1556,7 +1556,7 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUBeefCattle</td>
@@ -1568,7 +1568,7 @@
       <td>infnUDirBeefCattle</td>
       <td>infnUDirSheep</td>
       <td>infnUDirPigs</td>
-      <td>infnUAll</td>
+      <td>infnU</td>
     </tr>
     <!--              Ini        Dir       Cattle     Sheep       Pigs    Ini/Cattle Ini/Sheep   Ini/Pigs  Dir/Cattle Dir/Sheep   Dir/Pigs    Total     -->
     <tr><td>2</td> <td>2</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>1</td></tr>
@@ -1614,7 +1614,7 @@
 
   <output probability="0.5">
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
       <td>expnUDir</td>
       <td>expnUInd</td>
       <td>expnUBeefCattle</td>
@@ -1626,7 +1626,7 @@
       <td>expnUIndBeefCattle</td>
       <td>expnUIndSheep</td>
       <td>expnUIndPigs</td>
-      <td>infnUAll</td>
+      <td>infnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUInd</td>
@@ -1653,7 +1653,7 @@
 
   <output probability="0.5">
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
       <td>expnUDir</td>
       <td>expnUInd</td>
       <td>expnUBeefCattle</td>
@@ -1665,7 +1665,7 @@
       <td>expnUIndBeefCattle</td>
       <td>expnUIndSheep</td>
       <td>expnUIndPigs</td>
-      <td>infnUAll</td>
+      <td>infnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUInd</td>
@@ -1724,7 +1724,7 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
     </tr>
     <tr><td>0</td></tr>
     <tr><td>1</td></tr>
@@ -1772,7 +1772,7 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
     </tr>
     <tr><td>0</td></tr>
     <tr><td>2</td></tr>
@@ -1819,7 +1819,7 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
     </tr>
     <tr><td>0</td></tr>
     <tr><td>0</td></tr>
@@ -1867,7 +1867,7 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
     </tr>
     <tr><td>0</td></tr>
     <tr><td>0</td></tr>
@@ -1917,7 +1917,7 @@
 
   <output>
     <tr>
-      <td>expnUAll</td>
+      <td>expnU</td>
     </tr>
     <tr><td>0</td></tr>
     <tr><td>1</td></tr>
@@ -2296,7 +2296,7 @@
 
   <output>
     <tr>
-      <td>infnUAll</td>
+      <td>infnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUAeiou</td> <!-- note the conversion to CamelCase -->
@@ -2354,7 +2354,7 @@
 
   <output>
     <tr>
-      <td>infnUAll</td>
+      <td>infnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUãêïòú</td>
@@ -2416,7 +2416,7 @@
 
   <output>
     <tr>
-      <td>infnUAll</td>
+      <td>infnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUãêïòú</td>
@@ -2477,7 +2477,7 @@
 
   <output>
     <tr>
-      <td>infnUAll</td>
+      <td>infnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUãêïòú</td>
@@ -2540,7 +2540,7 @@
 
   <output>
     <tr>
-      <td>infnUAll</td>
+      <td>infnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUãêïòú</td>
@@ -2602,7 +2602,7 @@
 
   <output>
     <tr>
-      <td>infnUAll</td>
+      <td>infnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUãêïòú</td>
@@ -2665,7 +2665,7 @@
 
   <output>
     <tr>
-      <td>infnUAll</td>
+      <td>infnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUãêïòú</td>
@@ -2727,7 +2727,7 @@
 
   <output>
     <tr>
-      <td>infnUAll</td>
+      <td>infnU</td>
       <td>infnUIni</td>
       <td>infnUDir</td>
       <td>infnUãêïòú</td>

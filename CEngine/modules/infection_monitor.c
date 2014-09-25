@@ -255,8 +255,8 @@ handle_detection_event (struct adsm_module_t_ *self,
       #endif
       local_data->detection_occurred = TRUE;
       local_data->detection_day = event->day;
-      /* Copy the current value from infcUAll to firstDetUInfAll and from
-       * from infcAAll to firstDetAInfAll.  Any subsequent infections on the
+      /* Copy the current value from infcU to firstDetUInf and from
+       * from infcA to firstDetAInf.  Any subsequent infections on the
        * day of first detection will also be included in the firstDet output
        * variables. */
       RPT_reporting_set_integer (
@@ -325,7 +325,7 @@ handle_infection_event (struct adsm_module_t_ *self, EVT_infection_event_t * eve
 #endif
 
   /* Update the counts of infections.  Note that initially infected units are
-   * not included in many of the counts.  They will not be part of infnUAll or
+   * not included in many of the counts.  They will not be part of infnU or
    * infnU broken down by production type.  They will be part of infnUIni and
    * infnUIni broken down by production type. */
   if (event->contact_type != ADSM_InitiallyInfected)
@@ -557,7 +557,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   nprodtypes = local_data->production_types->len;
   {
     RPT_bulk_create_t outputs[] = {
-      { &local_data->num_units_infected, "infnUAll", RPT_integer,
+      { &local_data->num_units_infected, "infnU", RPT_integer,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->daily_outputs },
@@ -577,7 +577,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->daily_outputs },
 
-      { &local_data->cumul_num_units_infected, "infcUAll", RPT_integer,
+      { &local_data->cumul_num_units_infected, "infcU", RPT_integer,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->cumul_outputs },
@@ -597,7 +597,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->cumul_outputs },
 
-      { &local_data->num_animals_infected, "infnAAll", RPT_real,
+      { &local_data->num_animals_infected, "infnA", RPT_real,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->daily_outputs },
@@ -617,7 +617,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->daily_outputs },
 
-      { &local_data->cumul_num_animals_infected, "infcAAll", RPT_real,
+      { &local_data->cumul_num_animals_infected, "infcA", RPT_real,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, local_data->cumul_outputs },
@@ -637,12 +637,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->cumul_outputs },
 
-      { &local_data->first_det_u_inf, "firstDetUInfAll", RPT_integer,
+      { &local_data->first_det_u_inf, "firstDetUInf", RPT_integer,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, NULL },
 
-      { &local_data->first_det_a_inf, "firstDetAInfAll", RPT_real,
+      { &local_data->first_det_a_inf, "firstDetAInf", RPT_real,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, NULL },
