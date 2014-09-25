@@ -263,10 +263,15 @@ class DailyByProductionType(OutputBaseModel):
     tstcUTrueNeg = models.IntegerField(blank=True, null=True, verbose_name=explain("tstcUTrueNeg"))
     tstcUFalseNeg = models.IntegerField(blank=True, null=True, verbose_name=explain("tstcUFalseNeg"))
     tstnU = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnU"))
+    tstnUDirFwd = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUDirFwd"))
+    tstnUIndFwd = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUIndFwd"))
+    tstnUDirBack = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUDirBack"))
+    tstnUIndBack = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUIndBack"))
     tstnUTruePos = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUTruePos"))
     tstnUFalsePos = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUFalsePos"))
     tstnUTrueNeg = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUTrueNeg"))
     tstnUFalseNeg = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUFalseNeg"))
+    
     
     vaccU = models.IntegerField(blank=True, null=True, verbose_name=explain("vaccU"))
     vaccUIni = models.IntegerField(blank=True, null=True, verbose_name=explain("vaccUIni"))
