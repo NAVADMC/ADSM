@@ -5,7 +5,7 @@ https://pypi.python.org/pypi/pip#downloads
 Please note that ADSM is built against Python 3.3 which is incompatible with Python 2.x.  
 
     pip install django==1.6
-    pip install django-floppyforms==1.1
+    pip install django-floppyforms==1.2.0
     pip install django-crispy-forms
     pip install django-extras
     pip install south==0.8.4

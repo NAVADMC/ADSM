@@ -121,6 +121,8 @@ STATIC_ROOT = BASE_DIR + '/static/'
 STATICFILES_DIRS = (BASE_DIR + '/SpreadModel/static/', )
 STATIC_URL = '/static/'
 
+GDAL_LIBRARY_PATH = 'NULLPATH'
+
 # Skip migrations for tests
 # must be done due to --database=scenario_db flag for migrations
 SOUTH_TESTS_MIGRATE = False
