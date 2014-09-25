@@ -17,7 +17,8 @@ from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Field, Hidde
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import OperationalError  # OperationalError is for initial manage.py syncdb
 from ScenarioCreator.models import *
-from floppyforms import ModelForm, Select, NumberInput, RadioSelect, HiddenInput, TextInput
+from floppyforms import Select, NumberInput, RadioSelect, HiddenInput, TextInput
+from floppyforms.__future__ import ModelForm
 from crispy_forms.helper import FormHelper
 
 
