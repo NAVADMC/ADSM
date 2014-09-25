@@ -101,6 +101,7 @@ class DailyByProductionType(OutputBaseModel):
     descAIndBack = models.IntegerField(blank=True, null=True, verbose_name=explain("descAIndBack"))
     deswU = models.IntegerField(blank=True, null=True, verbose_name=explain("deswU"))
     deswA = models.IntegerField(blank=True, null=True, verbose_name=explain("deswA"))
+    
     detcU = models.IntegerField(blank=True, null=True, verbose_name=explain("detcU"))
     detcUClin = models.IntegerField(blank=True, null=True, verbose_name=explain("detcUClin"))
     detcUTest = models.IntegerField(blank=True, null=True, verbose_name=explain("detcUTest"))
@@ -113,6 +114,7 @@ class DailyByProductionType(OutputBaseModel):
     detnA = models.IntegerField(blank=True, null=True, verbose_name=explain("detnA"))
     detnAClin = models.IntegerField(blank=True, null=True, verbose_name=explain("detnAClin"))
     detnATest = models.IntegerField(blank=True, null=True, verbose_name=explain("detnATest"))
+    
     exmnU = models.IntegerField(blank=True, null=True, verbose_name=explain("exmnU"))
     exmnURing = models.IntegerField(blank=True, null=True, verbose_name=explain("exmnURing"))
     exmnUDirFwd = models.IntegerField(blank=True, null=True, verbose_name=explain("exmnUDirFwd"))
@@ -141,6 +143,7 @@ class DailyByProductionType(OutputBaseModel):
     exmcADirBack = models.IntegerField(blank=True, null=True, verbose_name=explain("exmcADirBack"))
     exmcAIndBack = models.IntegerField(blank=True, null=True, verbose_name=explain("exmcAIndBack"))
     exmcADet = models.IntegerField(blank=True, null=True, verbose_name=explain("exmcADet"))
+    
     expcU = models.IntegerField(blank=True, null=True, verbose_name=explain("expcU"))
     expcUDir = models.IntegerField(blank=True, null=True, verbose_name=explain("expcUDir"))
     expcUInd = models.IntegerField(blank=True, null=True, verbose_name=explain("expcUInd"))
@@ -157,9 +160,15 @@ class DailyByProductionType(OutputBaseModel):
     expnADir = models.IntegerField(blank=True, null=True, verbose_name=explain("expnADir"))
     expnAInd = models.IntegerField(blank=True, null=True, verbose_name=explain("expnAInd"))
     expnAAir = models.IntegerField(blank=True, null=True, verbose_name=explain("expnAAir"))
-    
-    adqnU = models.IntegerField(blank=True, null=True, verbose_name=printable_name('Adequate Exposures New Units'))
-    adqcU = models.IntegerField(blank=True, null=True, verbose_name=printable_name('Adequate Exposures Cumulative Units'))
+
+    adqcU = models.IntegerField(blank=True, null=True, verbose_name=explain("adqcU"))
+    adqcUDir = models.IntegerField(blank=True, null=True, verbose_name=explain("adqcUDir"))
+    adqcUInd = models.IntegerField(blank=True, null=True, verbose_name=explain("adqcUInd"))
+    adqcUAir = models.IntegerField(blank=True, null=True, verbose_name=explain("adqcUAir"))
+    adqnU = models.IntegerField(blank=True, null=True, verbose_name=explain("adqnU"))
+    adqnUDir = models.IntegerField(blank=True, null=True, verbose_name=explain("adqnUDir"))
+    adqnUInd = models.IntegerField(blank=True, null=True, verbose_name=explain("adqnUInd"))
+    adqnUAir = models.IntegerField(blank=True, null=True, verbose_name=explain("adqnUAir"))
 
     firstDestruction = models.IntegerField(blank=True, null=True, verbose_name=explain("firstDestruction"))
     firstDestructionRing = models.IntegerField(blank=True, null=True, verbose_name=explain("firstDestructionRing"))
@@ -173,6 +182,7 @@ class DailyByProductionType(OutputBaseModel):
     firstDetectionTest = models.IntegerField(blank=True, null=True, verbose_name=explain("firstDetectionTest"))
     firstVaccination = models.IntegerField(blank=True, null=True, verbose_name=explain("firstVaccination"))
     firstVaccinationRing = models.IntegerField(blank=True, null=True, verbose_name=explain("firstVaccinationRing"))
+    
     infcU = models.IntegerField(blank=True, null=True, verbose_name=explain("infcU"))
     infcUIni = models.IntegerField(blank=True, null=True, verbose_name=explain("infcUIni"))
     infcUDir = models.IntegerField(blank=True, null=True, verbose_name=explain("infcUDir"))
@@ -193,9 +203,11 @@ class DailyByProductionType(OutputBaseModel):
     infnADir = models.IntegerField(blank=True, null=True, verbose_name=explain("infnADir"))
     infnAInd = models.IntegerField(blank=True, null=True, verbose_name=explain("infnAInd"))
     infnAAir = models.IntegerField(blank=True, null=True, verbose_name=explain("infnAAir"))
+    
     lastDetection = models.IntegerField(blank=True, null=True, verbose_name=explain("lastDetection"))
     lastDetectionClin = models.IntegerField(blank=True, null=True, verbose_name=explain("lastDetectionClin"))
     lastDetectionTest = models.IntegerField(blank=True, null=True, verbose_name=explain("lastDetectionTest"))
+    
     trnU = models.IntegerField(blank=True, null=True, verbose_name=explain("trnU"))
     trnUp = models.IntegerField(blank=True, null=True, verbose_name=explain("trnUp"))
     trnUDir = models.IntegerField(blank=True, null=True, verbose_name=explain("trnUDir"))
@@ -220,6 +232,7 @@ class DailyByProductionType(OutputBaseModel):
     trcADirp = models.IntegerField(blank=True, null=True, verbose_name=explain("trcADirp"))
     trcAInd = models.IntegerField(blank=True, null=True, verbose_name=explain("trcAInd"))
     trcAIndp = models.IntegerField(blank=True, null=True, verbose_name=explain("trcAIndp"))
+    
     tsdUSusc = models.IntegerField(blank=True, null=True, verbose_name=explain("tsdUSusc"))
     tsdULat = models.IntegerField(blank=True, null=True, verbose_name=explain("tsdULat"))
     tsdUSubc = models.IntegerField(blank=True, null=True, verbose_name=explain("tsdUSubc"))
@@ -234,6 +247,7 @@ class DailyByProductionType(OutputBaseModel):
     tsdANImm = models.IntegerField(blank=True, null=True, verbose_name=explain("tsdANImm"))
     tsdAVImm = models.IntegerField(blank=True, null=True, verbose_name=explain("tsdAVImm"))
     tsdADest = models.IntegerField(blank=True, null=True, verbose_name=explain("tsdADest"))
+    
     tstcA = models.IntegerField(blank=True, null=True, verbose_name=explain("tstcA"))
     tstcADirFwd = models.IntegerField(blank=True, null=True, verbose_name=explain("tstcADirFwd"))
     tstcAIndFwd = models.IntegerField(blank=True, null=True, verbose_name=explain("tstcAIndFwd"))
@@ -253,6 +267,7 @@ class DailyByProductionType(OutputBaseModel):
     tstnUFalsePos = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUFalsePos"))
     tstnUTrueNeg = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUTrueNeg"))
     tstnUFalseNeg = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUFalseNeg"))
+    
     vaccU = models.IntegerField(blank=True, null=True, verbose_name=explain("vaccU"))
     vaccUIni = models.IntegerField(blank=True, null=True, verbose_name=explain("vaccUIni"))
     vaccURing = models.IntegerField(blank=True, null=True, verbose_name=explain("vaccURing"))
@@ -280,8 +295,6 @@ class DailyByProductionType(OutputBaseModel):
 
 
 #####END DailyByProductionType######
-
-#####BEGIN DailyByZoneAndProductionType######
 
 
 class DailyByZoneAndProductionType(OutputBaseModel):
