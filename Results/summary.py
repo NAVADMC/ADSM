@@ -18,7 +18,10 @@ def list_of_iterations():
 
 def median_value(queryset, term):
     count = queryset.count()
-    return queryset.values_list(term, flat=True).order_by(term)[int(round(count/2))]
+    if count:
+        return queryset.values_list(term, flat=True).order_by(term)[int(round(count/2))]
+    else:
+        return 0
 
 
 def last_day_query(model=DailyControls):
