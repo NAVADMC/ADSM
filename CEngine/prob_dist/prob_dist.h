@@ -60,7 +60,7 @@
 #include <stdio.h>
 #include <glib.h>
 #include <gsl/gsl_histogram.h>
-#include <rng.h>
+#include "rng.h"
 
 
 /**

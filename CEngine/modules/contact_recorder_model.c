@@ -45,7 +45,7 @@
  */
 
 #if HAVE_CONFIG_H
-#  include <config.h>
+#  include "config.h"
 #endif
 
 /* To avoid name clashes when multiple modules have the same interface. */

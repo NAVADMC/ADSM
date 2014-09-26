@@ -1,5 +1,5 @@
 #if HAVE_CONFIG_H
-#  include <config.h>
+#  include "config.h"
 #endif
 
 #if STDC_HEADERS
@@ -7,7 +7,7 @@
 #  include <string.h>
 #endif
 
-#include <general.h>
+#include "general.h"
 
 /*  New Scenario and Iteration storage areas  */
   MAIN_scenario _scenario;

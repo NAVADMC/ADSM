@@ -16,10 +16,10 @@
  */
 
 #if HAVE_CONFIG_H
-#  include <config.h>
+#  include "config.h"
 #endif
 
-#include <gis.h>
+#include "gis.h"
 
 #if HAVE_MATH_H
 #  include <math.h>
