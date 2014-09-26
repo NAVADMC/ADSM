@@ -3,7 +3,7 @@ import copy
 from itertools import product
 
 
-tmp_dict = {'A': 'Animals',
+explanations = {'A': 'Animals',
             'U': 'Units',
             'n': 'New',
             'c': 'Cumulative',
@@ -26,14 +26,12 @@ tmp_dict = {'A': 'Animals',
             'lastDetection': "Last Detection",
             'tr': 'Trace',
             'tsd': 'Transition State Daily',
-            'tstcA': 'Lab Test Cumulative Animals',
-            'tstcU': 'Lab Test Cumulative Units',
-            'tstnU': 'Lab Test New Units',
-            'vacc': 'Vaccination Cumulative',
-            'vacn': 'Vaccination New',
+            'tst': 'Lab Test',
+            'tstcA': 'Lab Tests Cumulative Animals',
+            'vac': 'Vaccinations',
             'vacw': 'Vaccination Wait Time',
             'inf': 'Infection',
-            # 'All': 'For Any Reason',  # TODO: Not sure about how to handle this since `'' in 'app'` == True 
+            '': 'For Any Reason',  # TODO: Not sure about how to handle this since `'' in 'app'` == True 
             'Max': 'Max',
             'MaxDay': 'Day with Max',
             'TimeMax': 'Max Time',
@@ -59,7 +57,7 @@ tmp_dict = {'A': 'Animals',
             'VImm': 'Vaccine Immune',
             'Dest': 'Destroyed',
 }
-explanations = defaultdict(lambda: '', tmp_dict)
+# explanations = defaultdict(lambda: '', tmp_dict)
 
 #For DailyByProductionType model only
 grammars = {'exp': [('c', 'n'), ('U', 'A'), ('', 'Dir', 'Ind', 'Air')],
@@ -73,8 +71,7 @@ grammars = {'exp': [('c', 'n'), ('U', 'A'), ('', 'Dir', 'Ind', 'Air')],
             'tstcA': [('', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack')],
             'firstVaccination': [('', 'Ring')],
             'vacw': [('U', 'A'), ('', 'Max', 'MaxDay', 'TimeMax', 'TimeAvg', 'DaysInQueue')],
-            'vacn': [('U', 'A'), ('', 'Ini', 'Ring')],
-            'vacc': [('U', 'A'), ('', 'Ini', 'Ring')],
+            'vac': [('n', 'c'), ('U', 'A'), ('', 'Ini', 'Ring')],
             'firstDestruction': [('', 'Ring', 'Det', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack')],
             'des': [('n', 'c'), ('U', 'A'), ('', 'Ring', 'Det', 'Ini', 'DirFwd', 'IndFwd', 'DirBack', 'IndBack')],
             'tsd': [('U', 'A'), ('Susc', 'Lat', 'Subc', 'Clin', 'NImm', 'VImm', 'Dest')],
@@ -104,7 +101,7 @@ def explain(field_name):
     start = start[-1]  # last one is the longest
     grammar = grammars[start]
     field_name, explanation = push_explanation(field_name, start)
-    for piece in grammar[:-1]:  # skip production type tuple at the end
+    for piece in grammar:
         for option in sorted(piece, key=len, reverse=True):  # this puts the empty string as the last possibility
             if field_name.startswith(option):
                 field_name, explanation = push_explanation(field_name, option, explanation)

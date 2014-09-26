@@ -272,7 +272,6 @@ class DailyByProductionType(OutputBaseModel):
     tstnUTrueNeg = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUTrueNeg"))
     tstnUFalseNeg = models.IntegerField(blank=True, null=True, verbose_name=explain("tstnUFalseNeg"))
     
-    
     vaccU = models.IntegerField(blank=True, null=True, verbose_name=explain("vaccU"))
     vaccUIni = models.IntegerField(blank=True, null=True, verbose_name=explain("vaccUIni"))
     vaccURing = models.IntegerField(blank=True, null=True, verbose_name=explain("vaccURing"))

@@ -217,6 +217,7 @@ def class_specific_headers(model_name, prefix):
     # this mapping is also embedded in navigationPanel.html
     headers = {'DailyByProductionType': [("Exposures", "exp", 'expnU'),
                                          ("Infections", "inf", 'infnU'),
+                                         ("Vaccinations", "vac", 'vacnU'),
                                          ("Destruction", "des", 'desnU'),
                                          ("Exams", "exm", 'exmnU'),
                                          ("Lab Tests", "tst", 'tstnU'),
