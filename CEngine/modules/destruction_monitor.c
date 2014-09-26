@@ -310,6 +310,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     0
   };
   guint nprodtypes;
+  UNT_production_type_t prodtype;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -320,7 +321,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
+  self->outputs = g_ptr_array_new();
   self->model_data = local_data;
   self->run = run;
   self->is_listening_for = adsm_model_is_listening_for;
@@ -447,6 +448,25 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     };  
     RPT_bulk_create (outputs);
   }
+
+  /* The reasons for zones, vaccination, and destruction are all in the enum
+   * ADSM_control_reasons.  Dispose of the reasons that don't apply to
+   * destruction, to keep the output neater. */
+  g_ptr_array_remove_fast (self->outputs, local_data->first_destruction_by_reason[ADSM_ControlReasonUnspecified] );
+  g_ptr_array_remove_fast (self->outputs, local_data->first_destruction_by_reason[ADSM_ControlInitialState] );
+  g_ptr_array_remove_fast (self->outputs, local_data->num_units_destroyed_by_reason[ADSM_ControlReasonUnspecified] );
+  g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_destroyed_by_reason[ADSM_ControlReasonUnspecified] );
+  g_ptr_array_remove_fast (self->outputs, local_data->num_animals_destroyed_by_reason[ADSM_ControlReasonUnspecified] );
+  g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_destroyed_by_reason[ADSM_ControlReasonUnspecified] );
+  for (prodtype = 0; prodtype < nprodtypes; prodtype++)
+    {
+      g_ptr_array_remove_fast (self->outputs, local_data->first_destruction_by_reason_and_prodtype[ADSM_ControlReasonUnspecified][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->first_destruction_by_reason_and_prodtype[ADSM_ControlInitialState][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->num_units_destroyed_by_reason_and_prodtype[ADSM_ControlReasonUnspecified][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_units_destroyed_by_reason_and_prodtype[ADSM_ControlReasonUnspecified][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->num_animals_destroyed_by_reason_and_prodtype[ADSM_ControlReasonUnspecified][prodtype] );
+      g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_destroyed_by_reason_and_prodtype[ADSM_ControlReasonUnspecified][prodtype] );
+    }
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

@@ -393,6 +393,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     0
   };
   guint nprodtypes;
+  ADSM_control_reason reason;
+  UNT_production_type_t prodtype;
 
 #if DEBUG
   g_debug ("----- ENTER new (%s)", MODEL_NAME);
@@ -403,7 +405,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   self->name = MODEL_NAME;
   self->events_listened_for = adsm_setup_events_listened_for (events_listened_for);
-  self->outputs = g_ptr_array_new_with_free_func ((GDestroyNotify)RPT_free_reporting);
+  self->outputs = g_ptr_array_new();
   self->model_data = local_data;
   self->run = run;
   self->is_listening_for = adsm_model_is_listening_for;
@@ -564,6 +566,28 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     };  
     RPT_bulk_create (outputs);
   }
+
+  /* The reasons for zones, vaccination, and destruction are all in the enum
+   * ADSM_control_reasons.  Dispose of the reasons that don't apply to tests,
+   * to keep the output neater. */
+  for (reason = 0; reason < ADSM_NCONTROL_REASONS; reason++)
+    {
+      if (!(reason == ADSM_ControlTraceForwardDirect
+            || reason == ADSM_ControlTraceForwardIndirect
+            || reason == ADSM_ControlTraceBackDirect
+            || reason ==  ADSM_ControlTraceBackIndirect))
+        {
+          g_ptr_array_remove_fast (self->outputs, local_data->nunits_tested_by_reason[reason] );
+          g_ptr_array_remove_fast (self->outputs, local_data->cumul_nunits_tested_by_reason[reason] );
+          g_ptr_array_remove_fast (self->outputs, local_data->cumul_nanimals_tested_by_reason[reason] );
+          for (prodtype = 0; prodtype < nprodtypes; prodtype++)
+            {
+              g_ptr_array_remove_fast (self->outputs, local_data->nunits_tested_by_reason_and_prodtype[reason][prodtype] );
+              g_ptr_array_remove_fast (self->outputs, local_data->cumul_nunits_tested_by_reason_and_prodtype[reason][prodtype] );
+              g_ptr_array_remove_fast (self->outputs, local_data->cumul_nanimals_tested_by_reason_and_prodtype[reason][prodtype] );
+            }
+        }
+    }
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);
