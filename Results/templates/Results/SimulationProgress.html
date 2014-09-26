@@ -3,9 +3,12 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-
-    <h1 id="title">Simulation Status</h1>
-    <object type="image/svg+xml"  data="/results/population_d3_map" alt="Unit Locations" width="516px" height="516px">Not Loading</object>
+    
+    {% if large_population %}
+        <img src="/results/Population.png" alt="Unit Locations"/>
+    {% else %}
+        <object type="image/svg+xml"  data="/results/population_d3_map" alt="Unit Locations" width="516px" height="516px">Not Loading</object>
+    {% endif %}
     <p>Locations of all Units in the simulation</p>
 
     {% include "Results/Summary.html" %}
