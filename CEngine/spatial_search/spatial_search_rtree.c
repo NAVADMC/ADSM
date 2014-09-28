@@ -90,7 +90,7 @@ distance (double x1, double y1, double x2, double y2)
  * @param y2 the y-coordinate of point 2.
  * @return the square of the distance between point 1 and point 2.
  */
-static double
+inline static double
 distance_sq (double x1, double y1, double x2, double y2)
 {
   double dx, dy;
@@ -464,7 +464,6 @@ search_circle_by_xy (spatial_search_t * self,
                      gpointer user_data)
 {
   private_data_t *private_data;
-  spatial_search_callback_args_t args;
 
 #if DEBUG
   g_debug ("----- ENTER search_circle_by_xy (x=%g, y=%g, radius=%g)", x, y, radius);
@@ -472,19 +471,20 @@ search_circle_by_xy (spatial_search_t * self,
 
   private_data = (private_data_t *)(self->private_data);
 
-  args.user_function = user_function;
-  args.user_data = user_data;
-  args.xy = private_data->xy;
-  args.center_x = x;
-  args.center_y = y;
-  args.radius_sq = gsl_pow_2 (radius);
-
   if (radius * 2 <= private_data->rtree_threshold)
     {
+      spatial_search_callback_args_t args;
       struct Rect search_rect;
 #if DEBUG
       g_debug ("use R-tree");
 #endif
+      args.user_function = user_function;
+      args.user_data = user_data;
+      args.xy = private_data->xy;
+      args.center_x = x;
+      args.center_y = y;
+      args.radius_sq = gsl_pow_2 (radius);
+
       search_rect.boundary[0] = x - radius;
       search_rect.boundary[1] = y - radius;
       search_rect.boundary[2] = x + radius;
@@ -494,12 +494,22 @@ search_circle_by_xy (spatial_search_t * self,
   else
     {
       unsigned int npoints, id;
+      double radius_sq;
+      double *p;
 #if DEBUG
       g_debug ("use exhaustive search");
 #endif
+      radius_sq = gsl_pow_2 (radius);
+      p = (double *)(private_data->xy->data);
       npoints = self->npoints;
-      for (id = 1; id <= npoints; id++)
-        spatial_search_circle_callback (id, &args);
+      for (id = 0; id < npoints; id++)
+        {
+          double px, py;
+          px = *p++;
+          py = *p++;
+          if (distance_sq (x, y, px, py) <= radius_sq)
+            user_function (id, user_data);
+        }
     }
 
 #if DEBUG
