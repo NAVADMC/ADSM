@@ -129,6 +129,7 @@
 
 #include "spatial_search.h"
 
+#include "general.h"
 #include "airborne_spread_model.h"
 
 #if !HAVE_ROUND && HAVE_RINT
@@ -455,6 +456,59 @@ end:
 
 
 /**
+ *
+ * 
+ * @param key index of a unit in the unit list.
+ * @param value not used.
+ * @param user_data a callback_t structure.
+ */   
+static void
+do_spread_around_unit (gpointer key, gpointer value, gpointer user_data)
+{
+  callback_t *args;
+  local_data_t *local_data;
+  unsigned int unit1_index;
+  UNT_unit_t *unit1;
+  gboolean unit1_can_be_source;
+  #if DEBUG
+    GString *s;
+  #endif
+
+  args = (callback_t *) user_data;
+  local_data = args->local_data;
+  unit1_index = GPOINTER_TO_UINT(key);
+  unit1 = UNT_unit_list_get (args->units, unit1_index);
+
+  /* Can this unit be the source of an exposure? */
+  #if DEBUG
+    s = g_string_new (NULL);
+    g_string_sprintf (s, "unit \"%s\" is %s, state is %s: ",
+                      unit1->official_id, unit1->production_type_name,
+                      UNT_state_name[unit1->state]);
+  #endif
+  unit1_can_be_source =
+    (local_data->param_block[unit1->production_type] != NULL)
+    && (unit1->state != Latent);
+  #if DEBUG
+    g_string_sprintfa (s, "%s be source", unit1_can_be_source ? "can" : "cannot");
+    if (unit1_can_be_source)
+      g_debug ("%s", s->str);
+    g_string_free (s, TRUE);
+  #endif
+  if (unit1_can_be_source)
+    {
+      args->unit1 = unit1;
+      spatial_search_circle_by_id (args->units->spatial_index, unit1_index,
+                                   local_data->max_spread[unit1->production_type] + EPSILON,
+                                   check_and_infect, args);
+    }
+
+  return;
+}
+
+
+
+/**
  * Responds to a new day event by releasing any pending infections and
  * stochastically generating infections.
  *
@@ -469,16 +523,9 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
                       EVT_new_day_event_t * event, RAN_gen_t * rng, EVT_event_queue_t * queue)
 {
   local_data_t *local_data;
-  UNT_unit_t *unit1;
-  unsigned int nunits;          /* number of units */
-  unsigned int unit1_index;
-  gboolean unit1_can_be_source;
   GQueue *q;
   EVT_event_t *pending_event;
   callback_t callback_data;
-#if DEBUG
-  GString *s;
-#endif
 
 #if DEBUG
   g_debug ("----- ENTER handle_new_day_event (%s)", MODEL_NAME);
@@ -515,35 +562,13 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
   callback_data.rng = rng;
   callback_data.queue = queue;
 
-  nunits = UNT_unit_list_length (units);
-  for (unit1_index = 0; unit1_index < nunits; unit1_index++)
-    {
-      unit1 = UNT_unit_list_get (units, unit1_index);
-
-      /* Can this unit be the source of an exposure? */
-#if DEBUG
-      s = g_string_new (NULL);
-      g_string_sprintf (s, "unit \"%s\" is %s, state is %s: ",
-                        unit1->official_id, unit1->production_type_name,
-                        UNT_state_name[unit1->state]);
-#endif
-      unit1_can_be_source =
-        local_data->param_block[unit1->production_type] != NULL
-        && (unit1->state == InfectiousSubclinical || unit1->state == InfectiousClinical);
-#if DEBUG
-      g_string_sprintfa (s, "%s be source", unit1_can_be_source ? "can" : "cannot");
-      if (unit1_can_be_source)
-        g_debug ("%s", s->str);
-      g_string_free (s, TRUE);
-#endif
-      if (!unit1_can_be_source)
-        continue;
-
-      callback_data.unit1 = unit1;
-      spatial_search_circle_by_id (units->spatial_index, unit1_index,
-                                   local_data->max_spread[unit1->production_type] + EPSILON,
-                                   check_and_infect, &callback_data);
-    }
+  /* The _iteration.infectious_units table contains all units that are Latent,
+   * Infectious Subclinical, or Infectious Clinical.  This module doesn't do
+   * spread from the Latent units, but it's easier to use this table for now
+   * rather than create a new table just for tracking the Infectious states. */
+  g_hash_table_foreach (_iteration.infectious_units,
+                        do_spread_around_unit,
+                        &callback_data);
 
 #if DEBUG
   g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
