@@ -69,6 +69,7 @@
 #define to_string detection_model_to_string
 #define local_free detection_model_free
 #define handle_before_each_simulation_event detection_model_handle_before_each_simulation_event
+#define handle_unit_state_change_event detection_model_handle_unit_state_change_event
 #define handle_new_day_event detection_model_handle_new_day_event
 #define handle_exam_event detection_model_handle_exam_event
 #define handle_public_announcement_event detection_model_handle_public_announcement_event
@@ -114,7 +115,14 @@ typedef struct
     particular multiplier. */
   gboolean outbreak_known;
   int public_announcement_day;
-  GHashTable *detected;
+  GHashTable *detectable; /**< A table containing potentially detectable units.
+    When a unit transitions to Infectious Clinical, it is added to this table
+    with associated value TRUE. If the unit transitions to a different state,
+    it is immediately removed from the table. If a unit is detected, its
+    associated value is changed to FALSE, and it is removed from the table the
+    next day. A detected unit is not removed from the table *immediately*
+    because we want to allow a unit to be detected by self-reporting and by
+    exam on the same day. */
   double *prob_report_from_awareness; /**< An array with the probability of
     reporting due to one value per production type.  The array is initialized
     in the reset function, and the values are re-calculated each day once an
@@ -143,7 +151,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   #endif
 
   local_data = (local_data_t *) (self->model_data);
-  g_hash_table_remove_all (local_data->detected);
+  g_hash_table_remove_all (local_data->detectable);
   local_data->outbreak_known = FALSE;
   local_data->public_announcement_day = 0;
 
@@ -168,6 +176,181 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
 
 
 /**
+ * Responds to a unit state change event by updating the list of detectable
+ * units.
+ *
+ * @param self this module.
+ * @param event a unit state change event.
+ */
+void
+handle_unit_state_change_event (struct adsm_module_t_ *self,
+                                EVT_unit_state_change_event_t * event)
+{
+  local_data_t *local_data;
+  UNT_unit_t *unit;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_unit_state_change_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  unit = event->unit;
+
+  /* Check if the unit is a production type we handle. */
+  if (NULL != local_data->param_block[unit->production_type])
+    {
+      if (event->new_state == InfectiousClinical)
+        {
+          #if DEBUG
+            g_debug ("unit \"%s\" now in a detectable state", unit->official_id);
+          #endif
+          g_hash_table_insert (local_data->detectable, GUINT_TO_POINTER(unit->index), GINT_TO_POINTER(TRUE));
+        }
+      else if (event->old_state == InfectiousClinical)
+        {
+          #if DEBUG
+            g_debug ("unit \"%s\" no longer in a detectable state", unit->official_id);
+          #endif
+          g_hash_table_remove (local_data->detectable, GUINT_TO_POINTER(unit->index));
+        }
+    }
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_unit_state_change_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
+
+
+
+typedef struct
+{
+  local_data_t *local_data;
+  UNT_unit_list_t *units;
+  ZON_zone_list_t *zones;
+  ZON_zone_fragment_t *background_zone;
+  EVT_new_day_event_t *event;
+  RAN_gen_t *rng;
+  EVT_event_queue_t *queue;
+  GSList *units_to_remove;
+}
+check_and_detect_args_t;
+
+
+
+/**
+ * @param key index of a unit in the unit list.
+ * @param value TRUE (not detected yet) or FALSE (detected already).
+ * @param user_data a check_and_detect_args_t structure.
+ */   
+void
+check_and_detect (gpointer key, gpointer value, gpointer user_data)
+{
+  UNT_unit_t *unit;
+  gboolean detectable;
+  check_and_detect_args_t *args;
+  local_data_t *local_data;
+  
+  detectable = (gboolean) GPOINTER_TO_INT(value);
+  args = (check_and_detect_args_t *) user_data; 
+
+  /* Unpack args to get the same parameters as handle_new_day_event. */
+  local_data = args->local_data;
+  unit = UNT_unit_list_get (args->units, GPOINTER_TO_UINT(key));
+
+  if (detectable == FALSE)
+    {
+      /* This unit was detected yesterday so it is no longer detectable. */
+      #if DEBUG
+        g_debug ("unit \"%s\" detected yesterday, no longer detectable", unit->official_id);
+      #endif
+      args->units_to_remove = g_slist_prepend (args->units_to_remove, key);
+    }   
+  else  
+    {
+      ZON_zone_list_t *zones;
+      ZON_zone_fragment_t *background_zone, *fragment;
+      ZON_zone_t *zone;
+      unsigned int prod_type;
+      param_block_t *param_block;
+      RAN_gen_t *rng;
+      double prob_detect, P, r;
+      EVT_new_day_event_t *event;
+      EVT_event_queue_t *queue;
+
+      /* Unpack args to get the same parameters as handle_new_day_event. */
+      zones = args->zones;
+      background_zone = args->background_zone;
+      event = args->event;
+      rng = args->rng;
+      queue = args->queue;
+      
+      /* Find which zone the unit is in. */
+      fragment = zones->membership[unit->index];
+      zone = fragment->parent;
+      #if DEBUG
+        g_debug ("unit \"%s\" is %s, in zone \"%s\", state is %s",
+                 unit->official_id,
+                 unit->production_type_name,
+                 zone->name,
+                 UNT_state_name[unit->state]);
+      #endif
+
+      /* Compute the probability that the disease would be noticed, based
+       * on clinical signs or mortality.  This is multiplied with the probability
+       * of reporting from awareness. */
+      #if DEBUG
+        g_debug ("using chart value for day %hu in current state", unit->days_in_state);
+      #endif
+      prod_type = unit->production_type;
+      param_block = local_data->param_block[prod_type];
+      prob_detect =
+        REL_chart_lookup (unit->days_in_state, param_block->prob_report_vs_days_clinical);
+
+      if (ZON_same_zone (background_zone, fragment))
+        {
+          P = prob_detect * local_data->prob_report_from_awareness[prod_type];
+          #if DEBUG
+            g_debug ("P = %g * %g", prob_detect, local_data->prob_report_from_awareness[prod_type]);
+          #endif
+        }
+      else
+        {
+          P = prob_detect * local_data->zone_multiplier[zone->level - 1][prod_type];
+#if DEBUG
+          g_debug ("P = %g * %g", prob_detect, local_data->zone_multiplier[zone->level - 1][prod_type]);
+#endif
+        }
+      r = RAN_num (rng);
+      if (r < P)
+        {
+#if DEBUG
+          g_debug ("r (%g) < P (%g)", r, P);
+          g_debug ("unit \"%s\" detected and reported", unit->official_id);
+#endif
+          g_hash_table_insert (local_data->detectable, GUINT_TO_POINTER(unit->index), GINT_TO_POINTER(FALSE));
+          /* There was no diagnostic test, so NAADSM_TestUnspecified is a legitimate value here. */
+          EVT_event_enqueue (queue,
+                             EVT_new_detection_event (unit, event->day,
+                                                      ADSM_DetectionClinicalSigns,
+                                                      ADSM_TestUnspecified));
+        }
+      else
+        {
+#if DEBUG
+          g_debug ("r (%g) >= P (%g), not detected", r, P);
+#endif
+          ;
+        }
+    }
+	
+  return;
+}
+
+
+
+/**
  * Responds to a new day event by stochastically generating detections.
  *
  * @param self the model.
@@ -186,14 +369,10 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
   unsigned int lookup_day;
   unsigned int nprod_types;
   param_block_t *param_block;
-  UNT_unit_t *unit;
-  unsigned int nunits;
-  unsigned int prod_type;
-  ZON_zone_fragment_t *background_zone, *fragment;
-  ZON_zone_t *zone;
-  double prob_report_from_signs, *prob_report_from_awareness;
-  double P, r;
+  double *prob_report_from_awareness;
   unsigned int i;
+  check_and_detect_args_t check_and_detect_args;
+  GSList *iter;
 
 #if DEBUG
   g_debug ("----- ENTER handle_new_day_event (%s)", MODEL_NAME);
@@ -220,83 +399,23 @@ handle_new_day_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
         }
     }
 
-  background_zone = ZON_zone_list_get_background (zones);
-
-  nunits = UNT_unit_list_length (units);
-  for (i = 0; i < nunits; i++)
+  /* Iterate over all the detectable units. */
+  check_and_detect_args.local_data = local_data;
+  check_and_detect_args.units = units;
+  check_and_detect_args.zones = zones;
+  check_and_detect_args.background_zone = ZON_zone_list_get_background (zones);
+  check_and_detect_args.event = event;
+  check_and_detect_args.rng = rng;
+  check_and_detect_args.queue = queue;
+  check_and_detect_args.units_to_remove = NULL; /* empty GSList */
+  g_hash_table_foreach (local_data->detectable, check_and_detect, (gpointer) (&check_and_detect_args));
+  /* You can't remove items from a hash table while iterating over it, so the
+   * operation above returns a list of units to remove. */
+  for (iter = check_and_detect_args.units_to_remove; iter != NULL; iter = g_slist_next(iter))
     {
-      unit = UNT_unit_list_get (units, i);
-
-      /* Check whether the unit is showing clinical signs of disease and is a
-       * production type we're interested in.  If not, go on to the next
-       * unit. */
-      prod_type = unit->production_type;
-      param_block = local_data->param_block[prod_type];
-      if (unit->state != InfectiousClinical || param_block == NULL)
-        continue;
-
-      /* Find which zone the unit is in. */
-      fragment = zones->membership[unit->index];
-      zone = fragment->parent;
-
-      #if DEBUG
-        g_debug ("unit \"%s\" is %s, in zone \"%s\", state is %s, %s detected",
-                 unit->official_id,
-                 unit->production_type_name,
-                 zone->name,
-                 UNT_state_name[unit->state], g_hash_table_lookup(local_data->detected, unit) ? "already" : "not");
-      #endif
-      /* Check whether the unit has already been detected.  If so, go on to the
-       * next unit. */
-      if (g_hash_table_lookup(local_data->detected, unit))
-        continue;
-
-      /* Compute the probability that the disease would be noticed, based
-       * on clinical signs.  This is multiplied with the probability
-       * computed above. */
-      #if DEBUG
-        g_debug ("using chart value for day %i in clinical state", unit->days_in_state);
-      #endif
-      prob_report_from_signs =
-        REL_chart_lookup (unit->days_in_state, param_block->prob_report_vs_days_clinical);
-
-      if (ZON_same_zone (background_zone, fragment))
-        {
-          P = prob_report_from_signs * prob_report_from_awareness[prod_type];
-          #if DEBUG
-            g_debug ("P = %g * %g", prob_report_from_signs, prob_report_from_awareness[prod_type]);
-          #endif
-        }
-      else
-        {
-          P = prob_report_from_signs * local_data->zone_multiplier[zone->level - 1][prod_type];
-          #if DEBUG
-            g_debug ("P = %g * %g",
-                     prob_report_from_signs, local_data->zone_multiplier[zone->level - 1][prod_type]);
-          #endif
-        }
-      r = RAN_num (rng);
-      if (r < P)
-        {
-          #if DEBUG
-            g_debug ("r (%g) < P (%g)", r, P);
-            g_debug ("unit \"%s\" detected and reported", unit->official_id);
-          #endif
-          /* There was no diagnostic test, so ADSM_TestUnspecified is a legitimate value here. */
-          EVT_event_enqueue (queue,
-                             EVT_new_detection_event (unit, event->day,
-                                                      ADSM_DetectionClinicalSigns,
-                                                      ADSM_TestUnspecified));
-          g_hash_table_insert (local_data->detected, unit, GINT_TO_POINTER(1));
-        }
-      else
-        {
-          #if DEBUG
-            g_debug ("r (%g) >= P (%g), not detected", r, P);
-          #endif
-          ;
-        }
-    }                           /* end of loop over units */
+      g_hash_table_remove (local_data->detectable, iter->data);
+    }
+  g_slist_free (check_and_detect_args.units_to_remove);
 
 #if DEBUG
   g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
@@ -341,19 +460,15 @@ handle_exam_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
     goto end;
 
   #if DEBUG
-    g_debug ("unit \"%s\" is %s, state is %s, %s detected",
+    g_debug ("unit \"%s\" is %s, state is %s",
              unit->official_id,
              unit->production_type_name,
-             UNT_state_name[unit->state],
-             g_hash_table_lookup (local_data->detected, unit) ? "already" : "not");
+             UNT_state_name[unit->state]);
   #endif
 
-  /* Check whether the unit has already been detected.  If so, abort. */
-  if (g_hash_table_lookup (local_data->detected, unit))
-    goto end;
-
-  /* Check whether the unit is showing clinical signs of disease. */
-  if (unit->state == InfectiousClinical)
+  /* Check whether the unit is showing clinical signs of disease and has not
+   * already been detected. */
+  if (g_hash_table_lookup (local_data->detectable, GUINT_TO_POINTER(unit->index)) != NULL)
     {
       /* Compute the probability that the disease would be noticed, based on
        * clinical signs and the request multiplier. */
@@ -376,7 +491,7 @@ handle_exam_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
                              EVT_new_detection_event (unit, event->day,
                                                       ADSM_DetectionClinicalSigns,
                                                       ADSM_TestUnspecified));
-          g_hash_table_insert (local_data->detected, unit, GINT_TO_POINTER(1));
+          g_hash_table_insert (local_data->detectable, GUINT_TO_POINTER(unit->index), GINT_TO_POINTER(FALSE));
         }
       else
         {
@@ -456,7 +571,7 @@ handle_detection_event (struct adsm_module_t_ *self,
   #endif
 
   local_data = (local_data_t *) (self->model_data);
-  g_hash_table_insert (local_data->detected, event->unit, GINT_TO_POINTER(1));
+  g_hash_table_insert (local_data->detectable, GUINT_TO_POINTER(event->unit->index), GINT_TO_POINTER(FALSE));
 
   #if DEBUG
     g_debug ("----- EXIT handle_detection_event (%s)", MODEL_NAME);
@@ -491,6 +606,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
     {
     case EVT_BeforeEachSimulation:
       handle_before_each_simulation_event (self);
+      break;
+    case EVT_UnitStateChange:
+      handle_unit_state_change_event (self, &(event->u.unit_state_change));
       break;
     case EVT_NewDay:
       handle_new_day_event (self, units, zones, &(event->u.new_day), rng, queue);
@@ -612,7 +730,7 @@ local_free (struct adsm_module_t_ *self)
     g_free (local_data->zone_multiplier[i]);
   g_free (local_data->zone_multiplier);
 
-  g_hash_table_destroy (local_data->detected);
+  g_hash_table_destroy (local_data->detectable);
   g_free (local_data->prob_report_from_awareness);
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
@@ -757,6 +875,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data_t *local_data;
   EVT_event_type_t events_listened_for[] = {
     EVT_BeforeEachSimulation,
+    EVT_UnitStateChange,
     EVT_NewDay,
     EVT_PublicAnnouncement,
     EVT_Exam,
@@ -808,8 +927,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         local_data->zone_multiplier[i][j] = 1.0;
     }
 
-  /* Initialize the set of detected units. */
-  local_data->detected = g_hash_table_new (NULL, NULL);
+  /* Initialize the table of detectable units. */
+  local_data->detectable = g_hash_table_new (g_direct_hash, g_direct_equal);
+
   /* No outbreak has been announced yet. */
   local_data->outbreak_known = FALSE;
   local_data->public_announcement_day = 0;
