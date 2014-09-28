@@ -60,7 +60,8 @@ local_data_t;
  * @param event a detection event.
  */
 void
-handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * event)
+handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * event,
+                        EVT_event_queue_t * queue)
 {
 #if DEBUG
   g_debug ("----- ENTER handle_detection_event (%s)", MODEL_NAME);
@@ -70,6 +71,7 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
   g_debug ("quarantining unit %s", event->unit->official_id);
 #endif
   UNT_quarantine (event->unit);
+  EVT_event_enqueue (queue, EVT_new_quarantine_event (event->unit, event->day));
 
 #if DEBUG
   g_debug ("----- EXIT handle_detection_event (%s)", MODEL_NAME);
@@ -86,7 +88,8 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
  */
 void
 handle_request_for_destruction_event (struct adsm_module_t_ *self,
-                                      EVT_request_for_destruction_event_t * event)
+                                      EVT_request_for_destruction_event_t * event,
+                                      EVT_event_queue_t * queue)
 {
 #if DEBUG
   g_debug ("----- ENTER handle_request_for_destruction_event (%s)", MODEL_NAME);
@@ -96,6 +99,7 @@ handle_request_for_destruction_event (struct adsm_module_t_ *self,
   g_debug ("quarantining unit %s", event->unit->official_id);
 #endif
   UNT_quarantine (event->unit);
+  EVT_event_enqueue (queue, EVT_new_quarantine_event (event->unit, event->day));
 
 #if DEBUG
   g_debug ("----- EXIT handle_request_for_destruction_event (%s)", MODEL_NAME);
@@ -125,10 +129,10 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
   switch (event->type)
     {
     case EVT_Detection:
-      handle_detection_event (self, &(event->u.detection));
+      handle_detection_event (self, &(event->u.detection), queue);
       break;
     case EVT_RequestForDestruction:
-      handle_request_for_destruction_event (self, &(event->u.request_for_destruction));
+      handle_request_for_destruction_event (self, &(event->u.request_for_destruction), queue);
       break;
     default:
       g_error

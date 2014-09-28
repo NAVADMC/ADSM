@@ -66,7 +66,9 @@ typedef enum
   EVT_DeclarationOfVaccineDelay,
   EVT_DeclarationOfOutputs,
   EVT_NewDay, EVT_Exposure, EVT_Infection,
-  EVT_Detection, EVT_PublicAnnouncement, EVT_Exam, EVT_AttemptToTrace,
+  EVT_Detection,
+  EVT_Quarantine,
+  EVT_PublicAnnouncement, EVT_Exam, EVT_AttemptToTrace,
   EVT_TraceResult, EVT_Test, EVT_TestResult, EVT_RequestForVaccination,
   EVT_CommitmentToVaccinate, EVT_VaccinationCanceled,
   EVT_Vaccination, EVT_RequestForDestruction, EVT_CommitmentToDestroy,
@@ -217,6 +219,16 @@ typedef struct
   ADSM_test_result test_result; /**< If detection was by diagnostic testing, what was the test result? **/
 }
 EVT_detection_event_t;
+
+
+
+/** A "quarantine" event. */
+typedef struct
+{
+  UNT_unit_t *unit;
+  int day; /**< day of the simulation */
+}
+EVT_quarantine_event_t;
 
 
 
@@ -501,6 +513,7 @@ typedef struct
     EVT_exposure_event_t exposure;
     EVT_infection_event_t infection;
     EVT_detection_event_t detection;
+    EVT_quarantine_event_t quarantine;
     EVT_public_announcement_event_t public_announcement;
     EVT_exam_event_t exam;
     EVT_attempt_to_trace_event_t attempt_to_trace;
@@ -562,6 +575,7 @@ EVT_event_t *EVT_new_infection_event (UNT_unit_t * infecting_unit,
 EVT_event_t *EVT_new_detection_event (UNT_unit_t *, int day,
                                       ADSM_detection_reason,
                                       ADSM_test_result);
+EVT_event_t *EVT_new_quarantine_event (UNT_unit_t *, int day);
 EVT_event_t *EVT_new_public_announcement_event (int day);
 EVT_event_t *EVT_new_exam_event (UNT_unit_t *,
                                  int day,

@@ -45,6 +45,7 @@ const char *EVT_event_type_name[] = {
   "DeclarationOfVaccineDelay",
   "DeclarationOfOutputs",
   "NewDay", "Exposure", "Infection", "Detection",
+  "Quarantine",
   "PublicAnnouncement", "Exam", "AttemptToTrace", "TraceResult", "Test",
   "TestResult",
   "RequestForVaccination", "CommitmentToVaccinate", "VaccinationCanceled",
@@ -480,6 +481,40 @@ EVT_detection_event_to_string (EVT_detection_event_t * event)
   chararray = s->str;
   g_string_free (s, FALSE);
   return chararray;
+}
+
+
+
+/**
+ * Creates a new "quarantine" event.
+ *
+ * @return a pointer to a newly-created EVT_event_t structure.
+ */
+EVT_event_t *
+EVT_new_quarantine_event (UNT_unit_t * unit, int day)
+{
+  EVT_event_t *event;
+
+  event = g_new (EVT_event_t, 1);
+  event->type = EVT_Quarantine;
+  event->u.quarantine.unit = unit;
+  event->u.quarantine.day = day;
+  return event;
+}
+
+
+
+/**
+ * Returns a text representation of a quarantine event.
+ *
+ * @param event a quarantine event.
+ * @return a string.
+ */
+char *
+EVT_quarantine_event_to_string (EVT_quarantine_event_t * event)
+{
+  return g_strdup_printf ("<Quarantine event unit=\"%s\" day=%i>",
+                          event->unit->official_id, event->day);
 }
 
 
@@ -1427,6 +1462,7 @@ EVT_free_event (EVT_event_t * event)
     case EVT_Exposure:
     case EVT_Infection:
     case EVT_Detection:
+    case EVT_Quarantine:
     case EVT_PublicAnnouncement:
     case EVT_Exam:
     case EVT_AttemptToTrace:
@@ -1590,6 +1626,9 @@ EVT_event_to_string (EVT_event_t * event)
       break;
     case EVT_Detection:
       s = EVT_detection_event_to_string (&(event->u.detection));
+      break;
+    case EVT_Quarantine:
+      s = EVT_quarantine_event_to_string (&(event->u.quarantine));
       break;
     case EVT_PublicAnnouncement:
       s = EVT_public_announcement_event_to_string (&(event->u.public_announcement));
