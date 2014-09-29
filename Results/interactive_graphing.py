@@ -11,20 +11,32 @@ and panning, and to reset the view.
 from django.http import HttpResponse
 
 from matplotlib.colors import ListedColormap
+from matplotlib.patches import Rectangle, Circle
 from matplotlib import pyplot, colors
 import numpy as np
 import mpld3
-from Results.models import Unit, UnitStats
+from Results.models import Unit
 from Results.summary import list_of_iterations
 
 
 def population_d3_map(request):
-    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#CCCCCC'), figsize=(6,6))
+    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#CCCCCC'), figsize=(6,9))
     pop_size = Unit.objects.count()
     queryset = Unit.objects.all().order_by('unitstats__cumulative_infected')  # sort by N infected
     # It might be faster to request a flat value list and then construct new tuples based on that
     latlong = [(u.latitude, u.longitude, "%s %s %i" % (u.production_type.name, u.user_notes, u.unitstats.cumulative_infected), u.unitstats.cumulative_infected) for u in queryset]
     latitude, longitude, names, number_infected = zip(*latlong)
+
+    kilometers_in_one_latitude_degree = 111.13
+    for i in [index for index, val in enumerate(number_infected) if val > 3]:
+        ax.add_patch(Circle(xy=(latitude[i], longitude[i]),
+                               color='r',
+                               alpha=0.2,
+                               radius=5.0 / kilometers_in_one_latitude_degree,
+                               linewidth=0,
+                               zorder=0,
+        ))
+    
     
     total_iterations = float(len(list_of_iterations()))  # This is slower but more accurate than OutputSettings[0].iterations
     red_spectrum = ListedColormap([(1.0, 0.929, 0.627), (0.996, 0.851, 0.463), (0.996, 0.698, 0.298), (0.992, 0.553, 0.235), 
@@ -46,8 +58,8 @@ def population_d3_map(request):
     ax.set_title("Population Locations and IDs", size=20)
     
     # Begin mpld3 specific code
-    tooltip = mpld3.plugins.PointLabelTooltip(scatter, labels=names)
-    mpld3.plugins.connect(fig, tooltip)
+    # tooltip = mpld3.plugins.PointLabelTooltip(scatter, labels=names)
+    # mpld3.plugins.connect(fig, tooltip)
     
     html = mpld3.fig_to_html(fig, d3_url=None, mpld3_url=None, no_extras=False,
                 template_type="general", figid=None, use_http=False)
