@@ -11,7 +11,7 @@ and panning, and to reset the view.
 from django.http import HttpResponse
 
 from matplotlib.colors import ListedColormap
-from matplotlib.patches import Rectangle, Circle
+from matplotlib.patches import Circle
 from matplotlib import pyplot, colors
 import numpy as np
 import mpld3
@@ -20,26 +20,28 @@ from Results.summary import list_of_iterations
 
 
 def population_d3_map(request):
-    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#CCCCCC'), figsize=(6,9))
+    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#CCCCCC'), figsize=(12,12))
     pop_size = Unit.objects.count()
+    total_iterations = float(len(list_of_iterations()))  # This is slower but more accurate than OutputSettings[0].iterations
     queryset = Unit.objects.all().order_by('unitstats__cumulative_infected')  # sort by N infected
     # It might be faster to request a flat value list and then construct new tuples based on that
-    latlong = [(u.latitude, u.longitude, "%s %s %i" % (u.production_type.name, u.user_notes, u.unitstats.cumulative_infected), u.unitstats.cumulative_infected) for u in queryset]
-    latitude, longitude, names, number_infected = zip(*latlong)
+    latlong = [(u.latitude, u.longitude, u.unitstats.cumulative_infected, u.unitstats.cumulative_zone_focus,
+                "%s %s %i" % (u.production_type.name, u.user_notes, u.unitstats.cumulative_infected) 
+                ) for u in queryset]
+    latitude, longitude, number_infected, zone_focus, names = zip(*latlong)
 
-    kilometers_in_one_latitude_degree = 111.13
-    for i in [index for index, val in enumerate(number_infected) if val > 3]:
+    kilometers_in_one_latitude_degree = 111.13  # https://au.answers.yahoo.com/question/index?qid=20100815170802AAZe1AZ
+    grey_scale = pyplot.get_cmap('gist_heat')
+    for i, freq in [(index, n_times) for index, n_times in enumerate(zone_focus) if n_times > 0]:
         ax.add_patch(Circle(xy=(latitude[i], longitude[i]),
-                               color='r',
-                               alpha=0.2,
-                               radius=5.0 / kilometers_in_one_latitude_degree,
+                               color=grey_scale((total_iterations - freq) / total_iterations),
+                               radius=15.0 / kilometers_in_one_latitude_degree,
                                linewidth=0,
-                               zorder=0,
+                               zorder=freq,
         ))
     
     
-    total_iterations = float(len(list_of_iterations()))  # This is slower but more accurate than OutputSettings[0].iterations
-    red_spectrum = ListedColormap([(1.0, 0.929, 0.627), (0.996, 0.851, 0.463), (0.996, 0.698, 0.298), (0.992, 0.553, 0.235), 
+    red_spectrum = ListedColormap([(0.996, 0.851, 0.463), (0.996, 0.698, 0.298), (0.992, 0.553, 0.235),  # (1.0, 0.929, 0.627),  
                                    (0.988, 0.306, 0.165), (0.89, 0.102, 0.11), (0.741, 0.0, 0.149), (0.502, 0.0, 0.149)], 
                                   name=u'from_list', N=None)
     # to ensure zero occurrences has a different color
@@ -52,7 +54,8 @@ def population_d3_map(request):
                          alpha=1.0,
                          cmap=red_spectrum,
                          norm=non_zero_values,
-                         linewidths=0)
+                         linewidths=0,
+                         zorder=1000)
     ax.grid(color='white', linestyle='solid')
     
     ax.set_title("Population Locations and IDs", size=20)
