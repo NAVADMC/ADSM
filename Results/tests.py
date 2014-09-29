@@ -8,6 +8,7 @@ from django.test import TestCase
 from django.db import connections
 import unittest
 import time
+import os, shutil
 
 from Results.views import Simulation, simulation_process
 from Results.models import DailyReport
@@ -15,26 +16,32 @@ from ScenarioCreator.models import OutputSettings, ProductionType, Zone
 from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType
 from Results.summary import iteration_progress, summarize_results
 from Results.output_parser import DailyParser
+from Settings.models import scenario_filename
+from Settings.utils import close_all_connections
 
 
 class SimulationTest(TestCase):
     multi_db = True
 
+    @classmethod
+    def setUpClass(cls):
+        shutil.copy('workspace/Roundtrip.sqlite3', 'workspace/Roundtrip_test.sqlite3')
+
+    @classmethod
+    def tearDownClass(cls):
+        os.remove('workspace/Roundtrip_test.sqlite3')
+
     def setUp(self):
-        self.client.get('/app/OpenScenario/Roundtrip.sqlite3/')
+        self.client.get('/app/OpenScenario/Roundtrip_test.sqlite3/')
 
         settings = OutputSettings.objects.first()
         settings.stop_criteria = 'stop-days'
         settings.days = 4
-        settings.save_daily_unit_states = False
-        settings.save_daily_events = False
-        settings.save_daily_exposures = False
-        settings.save_iteration_outputs_for_units = False
-        settings.save_map_output = False
         settings.save()
+        close_all_connections()
 
-        connections['default'].close()
-        connections['scenario_db'].close()
+    def tearDown(self):
+        shutil.rmtree('workspace/Roundtrip_test', ignore_errors=True)
 
     def test_multiple_threads(self):
         sim = Simulation(5)
@@ -50,6 +57,35 @@ class SimulationTest(TestCase):
         sim.join()
 
         self.assertEqual(DailyReport.objects.count(), 4)
+
+    def test_supplemental_output_created(self):
+        """
+            Ensures that prepare_supplemental_output_directory
+            is being called, and that the directory created is
+            being passed to adsm properly
+        """
+        settings = OutputSettings.objects.first()
+        settings.save_daily_unit_states = True
+        settings.save()
+        close_all_connections()
+
+        sim = Simulation(1)
+        sim.start()
+        sim.join()
+
+        self.assertTrue(os.access('workspace/Roundtrip_test/states_1.csv', os.F_OK))
+
+    def test_map_output(self):
+        settings = OutputSettings.objects.first()
+        settings.save_map_output = True
+        settings.save()
+        close_all_connections()
+
+        sim = Simulation(1)
+        sim.start()
+        sim.join()
+
+        self.assertTrue(os.access('workspace/Roundtrip_test/Roundtrip_test Map Output.zip', os.F_OK))
 
 
 class IterationProgressTestClass(TestCase):
