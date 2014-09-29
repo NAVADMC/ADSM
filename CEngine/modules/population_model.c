@@ -30,6 +30,7 @@
 #define handle_new_day_event population_model_handle_new_day_event
 #define handle_declaration_of_vaccine_delay_event population_model_handle_declaration_of_vaccine_delay_event
 #define handle_exposure_event population_model_handle_exposure_event
+#define handle_quarantine_event population_model_handle_quarantine_event
 #define handle_vaccination_event population_model_handle_vaccination_event
 #define handle_destruction_event population_model_handle_destruction_event
 #define handle_end_of_day_event population_model_handle_end_of_day_event
@@ -68,6 +69,8 @@ double trunc (double);
 /* Specialized information for this model. */
 typedef struct
 {
+  gboolean first; /**< TRUE on the first iteration */
+  GHashTable *stepping;
   GHashTable *adequate_exposures; /**< Gathers adequate exposures.  Keys are
     indices into the unit list (unsigned int), values are GSLists. */
   GHashTable *vacc_or_dest; /**< Gathers vaccinations and/or destructions that
@@ -132,6 +135,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ * self,
                                      UNT_unit_list_t * units,
                                      EVT_event_queue_t * queue)
 {
+  local_data_t *local_data;
   unsigned int nunits, i;
   UNT_unit_t *unit;
   EVT_event_t *event;
@@ -140,13 +144,29 @@ handle_before_each_simulation_event (struct adsm_module_t_ * self,
   g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
 #endif
 
+  local_data = (local_data_t *) (self->model_data);
+  nunits = UNT_unit_list_length (units);
+
+  if (local_data->first)
+    {
+      local_data->first = FALSE;
+    }
+  else
+    {
+      for (i = 0; i < nunits; i++)
+        {
+          unit = UNT_unit_list_get (units, i);
+          UNT_reset (unit);
+        }
+      g_hash_table_remove_all (local_data->stepping);
+    }
+
   /* Set each unit's initial state.  We don't need to go through the usual
    * conflict resolution steps here. */
-  nunits = UNT_unit_list_length (units);
+  
   for (i = 0; i < nunits; i++)
     {
       unit = UNT_unit_list_get (units, i);
-      UNT_reset (unit);
       switch (unit->initial_state)
         {
         case Susceptible:
@@ -163,6 +183,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ * self,
           event->u.exposure.override_days_in_state = unit->days_in_initial_state;
           event->u.exposure.override_days_left_in_state = unit->days_left_in_initial_state;
           EVT_event_enqueue (queue, event);
+          g_hash_table_insert (local_data->stepping, unit, unit);
           break;
         case VaccineImmune:
           event = EVT_new_inprogress_immunity_event (unit, 0, ADSM_ControlInitialState,
@@ -170,11 +191,13 @@ handle_before_each_simulation_event (struct adsm_module_t_ * self,
                                                      unit->days_in_initial_state,
                                                      unit->days_left_in_initial_state);
           EVT_event_enqueue (queue, event);
+          g_hash_table_insert (local_data->stepping, unit, unit);
           break;
         case Destroyed:
           UNT_destroy (unit);
           event = EVT_new_destruction_event (unit, 0, ADSM_ControlInitialState, -1);
           EVT_event_enqueue (queue, event);
+          g_hash_table_insert (local_data->stepping, unit, unit);
           break;
         default:
           g_assert_not_reached ();
@@ -189,6 +212,48 @@ handle_before_each_simulation_event (struct adsm_module_t_ * self,
 } 
 
 
+
+typedef struct
+{
+  int day;
+  GHashTable *infectious_units;
+  EVT_event_queue_t *queue;
+  GPtrArray *to_remove;
+}
+step_args_t;
+
+
+
+static void
+step (gpointer key, gpointer value, gpointer user_data)
+{
+  step_args_t *args;
+  UNT_unit_t *unit;
+  UNT_state_t old_state, new_state;
+  
+  unit = (UNT_unit_t *) key;
+  args = (step_args_t *) user_data;
+ 
+  #if DEBUG
+    g_debug ("----- ENTER step (\"%s\")", unit->official_id);
+  #endif
+  old_state = unit->state;
+  new_state = UNT_step (unit, args->infectious_units);
+  if (old_state != new_state)
+    {
+      EVT_event_enqueue (args->queue,
+                         EVT_new_unit_state_change_event (unit,
+                                                          old_state,
+                                                          new_state,
+                                                          args->day));
+    }
+  if (new_state == Destroyed
+      || (new_state == Susceptible && !unit->in_vaccine_cycle))
+    {
+      g_ptr_array_add (args->to_remove, unit);
+    }
+  return;
+}
 
 /**
  * Responds to a "midnight" event by making the units change state.
@@ -207,31 +272,28 @@ handle_midnight_event (struct adsm_module_t_ *self,
                        EVT_event_queue_t * queue)
 {
   local_data_t *local_data;
-  unsigned int nunits, i;
-  UNT_unit_t *unit;
-  UNT_state_t old_state, new_state;
+  step_args_t args;
+  guint i;
 
 #if DEBUG
   g_debug ("----- ENTER handle_midnight_event (%s)", MODEL_NAME);
 #endif
 
   local_data = (local_data_t *) (self->model_data);
-  nunits = UNT_unit_list_length (units);
-  for (i = 0; i < nunits; i++)
-    {
-      unit = UNT_unit_list_get (units, i);
-      old_state = unit->state;
-      /* _iteration is a global variable defined in general.c */
-      new_state = UNT_step (unit, _iteration.infectious_units);
-      if (old_state != new_state)
-        {
-          EVT_event_enqueue (queue,
-                             EVT_new_unit_state_change_event (unit,
-                                                              old_state,
-                                                              new_state,
-                                                              event->day));
-        }
-    }
+
+  /* _iteration is a global variable defined in general.c */
+  args.day = event->day;
+  args.infectious_units = _iteration.infectious_units;
+  args.queue = queue;
+  args.to_remove = g_ptr_array_sized_new (g_hash_table_size (local_data->stepping));
+  g_hash_table_foreach (local_data->stepping, step, &args);
+
+  /* We can't remove items from a GHashTable while iterating over it. Remove
+   * items that were flagged for removal now. */
+  for (i = 0; i < args.to_remove->len; i++)
+    g_hash_table_remove (local_data->stepping,
+                         g_ptr_array_index (args.to_remove, i));
+  g_ptr_array_free (args.to_remove, TRUE);
 
 #if DEBUG
   g_debug ("----- EXIT handle_midnight_event (%s)", MODEL_NAME);
@@ -268,10 +330,37 @@ handle_exposure_event (struct adsm_module_t_ *self, EVT_event_t * event)
         g_debug ("now %u adequate exposures to unit \"%s\"",
                  g_slist_length (g_hash_table_lookup (local_data->adequate_exposures, GUINT_TO_POINTER(unit->index))), unit->official_id);
       #endif
+      g_hash_table_insert (local_data->stepping, unit, unit);
     }
 
 #if DEBUG
   g_debug ("----- EXIT handle_exposure_event (%s)", MODEL_NAME);
+#endif
+
+}
+
+
+
+/**
+ * Responds to a quarantine event
+ *
+ * @param self the model.
+ * @param event a quarantine event.
+ */
+void
+handle_quarantine_event (struct adsm_module_t_ *self, EVT_quarantine_event_t * event)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_quarantine_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  g_hash_table_insert (local_data->stepping, event->unit, event->unit);
+
+#if DEBUG
+  g_debug ("----- EXIT handle_quarantine_event (%s)", MODEL_NAME);
 #endif
 
 }
@@ -307,6 +396,7 @@ handle_vaccination_event (struct adsm_module_t_ * self,
 #endif
       g_hash_table_insert (local_data->vacc_or_dest, unit, unit);
     }
+  g_hash_table_insert (local_data->stepping, unit, unit);
 
 #if DEBUG
   g_debug ("----- EXIT handle_vaccination_event (%s)", MODEL_NAME);
@@ -340,6 +430,7 @@ handle_destruction_event (struct adsm_module_t_ * self,
   g_assert (g_hash_table_lookup (local_data->vacc_or_dest, unit) == NULL);
 #endif
   g_hash_table_insert (local_data->vacc_or_dest, unit, unit);
+  g_hash_table_insert (local_data->stepping, unit, unit);
 
 #if DEBUG
   g_debug ("----- EXIT handle_destruction_event (%s)", MODEL_NAME);
@@ -397,7 +488,6 @@ resolve_conflicts (gpointer key, gpointer value, gpointer user_data)
 #if DEBUG
       g_debug ("vaccination or destruction cancels infection for unit \"%s\"", unit->official_id);
 #endif
-      ;
     }
   else if (!unit->in_disease_cycle)
     {
@@ -506,6 +596,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
     case EVT_Exposure:
       handle_exposure_event (self, event);
       break;
+    case EVT_Quarantine:
+      handle_quarantine_event (self, &(event->u.quarantine));
+      break;
     case EVT_Vaccination:
       handle_vaccination_event (self, &(event->u.vaccination));
       break;
@@ -545,6 +638,7 @@ local_free (struct adsm_module_t_ *self)
   /* Free the dynamically-allocated parts. */
   local_data = (local_data_t *) (self->model_data);
 
+  g_hash_table_destroy (local_data->stepping);
   g_hash_table_destroy (local_data->adequate_exposures);
   g_hash_table_destroy (local_data->vacc_or_dest);
 
@@ -575,6 +669,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_BeforeEachSimulation,
     EVT_Midnight,
     EVT_DeclarationOfVaccineDelay,
+    EVT_Quarantine,
     EVT_Exposure,
     EVT_Vaccination,
     EVT_Destruction,
@@ -602,6 +697,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
+  local_data->first = TRUE;
+  local_data->stepping = g_hash_table_new (g_direct_hash, g_direct_equal);
   local_data->adequate_exposures = g_hash_table_new (g_direct_hash, g_direct_equal);
   local_data->vacc_or_dest = g_hash_table_new (g_direct_hash, g_direct_equal);
   local_data->production_types = units->production_type_names;

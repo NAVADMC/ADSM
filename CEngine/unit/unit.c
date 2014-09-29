@@ -995,7 +995,8 @@ UNT_load_unit_callback (void *data, GHashTable *dict)
         state = Susceptible;
       }
 
-    unit->state = unit->initial_state = state;
+    unit->initial_state = state;
+    unit->state = Susceptible;
     #ifdef USE_SC_GUILIB
 	  if ( state == Destroyed )
 		unit->apparent_status = asDestroyed;

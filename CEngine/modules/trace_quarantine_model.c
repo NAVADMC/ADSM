@@ -68,7 +68,8 @@ local_data_t;
  */
 void
 handle_trace_result_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
-                           EVT_trace_result_event_t * event)
+                           EVT_trace_result_event_t * event,
+                           EVT_event_queue_t * queue)
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
@@ -91,6 +92,7 @@ handle_trace_result_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
       #endif
 
       UNT_quarantine (unit);
+      EVT_event_enqueue (queue, EVT_new_quarantine_event (unit, event->day));
     }
 
 #if DEBUG
@@ -122,7 +124,7 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
   switch (event->type)
     {
     case EVT_TraceResult:
-      handle_trace_result_event (self, units, &(event->u.trace_result));
+      handle_trace_result_event (self, units, &(event->u.trace_result), queue);
       break;
     default:
       g_error
