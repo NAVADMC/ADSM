@@ -20,10 +20,23 @@ from Results.output_parser import DailyParser
 class SimulationTest(TestCase):
     multi_db = True
 
-    def test_multiple_threads(self):
+    def setUp(self):
         self.client.get('/app/OpenScenario/Roundtrip.sqlite3/')
-        connections['default'].close()
 
+        settings = OutputSettings.objects.first()
+        settings.stop_criteria = 'stop-days'
+        settings.days = 4
+        settings.save_daily_unit_states = False
+        settings.save_daily_events = False
+        settings.save_daily_exposures = False
+        settings.save_iteration_outputs_for_units = False
+        settings.save_map_output = False
+        settings.save()
+
+        connections['default'].close()
+        connections['scenario_db'].close()
+
+    def test_multiple_threads(self):
         sim = Simulation(5)
         sim.start()
         sim.join()
@@ -32,9 +45,6 @@ class SimulationTest(TestCase):
         self.assertEqual(DailyReport.objects.count(), 20)
 
     def test_single_thread(self):
-        self.client.get('/app/OpenScenario/Roundtrip.sqlite3/')
-        connections['default'].close()
-
         sim = Simulation(1)
         sim.start()
         sim.join()

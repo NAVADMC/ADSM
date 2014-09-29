@@ -160,7 +160,7 @@ class ViewTests(TestCase):
         self.assertNotIn('data-delete-link', r.content)
 
         # has no related models, deleteable
-        function = RelationalFunction.objects.get(name="Unsaved_test")
+        function = RelationalFunction.objects.create(name="Test RelationalFunction")
         r = self.client.get('/setup/RelationalFunction/%s/' % function.id)
         self.assertIn('data-delete-link', r.content)
 
