@@ -19,6 +19,7 @@ from django.db import OperationalError
 
 from ScenarioCreator.models import ZoneEffect
 from Settings.models import scenario_filename, SmSession, unsaved_changes
+from Settings.utils import close_all_connections
 
 from git.git import git
 
@@ -151,7 +152,7 @@ def upload_scenario(request):
 
 def open_scenario(request, target):
     print("Copying ", workspace_path(target), "to", activeSession())
-    connections['scenario_db'].close()
+    close_all_connections()
     shutil.copy(workspace_path(target), activeSession())
     scenario_filename(target)
     print('Sessions overwritten with ', target)
