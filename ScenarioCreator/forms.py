@@ -304,7 +304,8 @@ class DirectSpreadForm(BaseForm):
         model = DirectSpread
         exclude = ['_spread_method_code', '_disease']
         widgets = {'infection_probability': NumberInput(attrs={'data-visibility-context': 'use_within_unit_prevalence',
-                                                               'data-visibility-flipped': 'true'}),
+                                                               'data-visibility-flipped': 'true',
+                                                               'step': 'any'}),
                    'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
@@ -336,7 +337,8 @@ class AirborneSpreadForm(BaseForm):
             pass
         widgets = {'_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'max_distance': NumberInput(attrs={'data-visibility-context': 'use_airborne_exponential_decay',
-                                                      'data-visibility-flipped': 'true'}),  # only visible when exponential is false
+                                                      'data-visibility-flipped': 'true',
+                                                      'step': 'any'}),  # only visible when exponential is false
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
                                                          'data-visibility-controller': 'transport_delay',
@@ -376,7 +378,8 @@ class OutputSettingsForm(BaseForm):
         widgets = {
             'days': NumberInput(
                 attrs={'data-visibility-controller': 'stop_criteria',
-                       'data-required-value': 'stop-days'})
+                       'data-required-value': 'stop-days',
+                       'step': '1'})
         }
 
 
