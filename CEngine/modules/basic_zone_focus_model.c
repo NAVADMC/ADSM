@@ -32,6 +32,7 @@
 
 #include "module.h"
 #include "module_util.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -221,13 +222,12 @@ local_free (struct adsm_module_t_ *self)
  * Adds a set of parameters to a basic zone focus model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format. * @param colname names of columns in the SQL query result.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
@@ -242,10 +242,10 @@ set_params (void *data, int ncols, char **value, char **colname)
   self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
-  g_assert (ncols == 2);
+  g_assert (g_hash_table_size (dict) == 2);
 
   errno = 0;
-  tmp = strtol (value[1], NULL, /* base */ 10);
+  tmp = strtol (g_hash_table_lookup (dict, "detection_is_a_zone_trigger"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);  
   g_assert (tmp == 0 || tmp == 1);
   detection_triggers_zone = (tmp == 1);
@@ -253,7 +253,8 @@ set_params (void *data, int ncols, char **value, char **colname)
   if (detection_triggers_zone)
     {
       /* Find out which production type these parameters apply to. */
-      production_type = adsm_read_prodtype (value[0], local_data->production_types);
+      production_type = adsm_read_prodtype (g_hash_table_lookup (dict, "prodtype"),
+                                            local_data->production_types);
       local_data->production_type[production_type] = TRUE;
     }
 
@@ -306,9 +307,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* Call the set_params function to read the production type specific
    * parameters. */
-  sqlite3_exec (params,
-                "SELECT prodtype.name,detection_is_a_zone_trigger FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT prodtype.name AS prodtype,detection_is_a_zone_trigger "
+                     "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref "
+                     "WHERE prodtype.id=xref.production_type_id "
+                     "AND xref.control_protocol_id=protocol.id",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

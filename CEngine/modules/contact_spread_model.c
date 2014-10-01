@@ -96,6 +96,7 @@
 #include "module_util.h"
 #include "gis.h"
 #include "spatial_search.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -767,8 +768,14 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
                 sum_exposures = sum_exposures + nexposures;                          
               }
               #if DEBUG
-                g_debug ("new_day_event_handler:  Day %i, Needing %i exposures from unit \"%s\", for production_type %i and contact_type %i",
-                         event->day, nexposures, unit1->official_id, i + 1, j + 1 );
+                if (nexposures > 0)
+                {
+                  g_debug ("new_day_event_handler: Day %i, want %i %ss from unit \"%s\" to production_type \"%s\"",
+                           event->day, nexposures, 
+                           ADSM_contact_type_name[contact_type],
+                           unit1->official_id,
+                           (char *) g_ptr_array_index (local_data->production_types, i));
+                }
               #endif
 
               /*  Now create and fillin the 3rd and final dimension of the 
@@ -1359,18 +1366,18 @@ local_free (struct adsm_module_t_ *self)
  * parameters to a contact spread model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
   sqlite3 *params;
   guint from_production_type, to_production_type;
+  char *tmp_text;
   ADSM_contact_type contact_type;
   param_block_t ***contact_type_block;
   param_block_t *p;
@@ -1386,19 +1393,22 @@ set_params (void *data, int ncols, char **value, char **colname)
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
-  g_assert (ncols == 11);
+  g_assert (g_hash_table_size (dict) == 11);
 
   /* Find out which to-from production type combination these parameters apply
    * to. */
   from_production_type =
-    adsm_read_prodtype (value[0], local_data->production_types);
+    adsm_read_prodtype (g_hash_table_lookup (dict, "src_prodtype"),
+                        local_data->production_types);
   to_production_type =
-    adsm_read_prodtype (value[1], local_data->production_types);
+    adsm_read_prodtype (g_hash_table_lookup (dict, "dest_prodtype"),
+                        local_data->production_types);
 
   /* Find out whether these parameters are for direct or indirect contact. */
-  if (strcmp (value[2], "direct") == 0)
+  tmp_text = g_hash_table_lookup (dict, "contact_type");
+  if (strcmp (tmp_text, "direct") == 0)
     contact_type = ADSM_DirectContact;
-  else if (strcmp (value[2], "indirect") == 0)
+  else if (strcmp (tmp_text, "indirect") == 0)
     contact_type = ADSM_IndirectContact;
   else
     g_assert_not_reached ();
@@ -1420,12 +1430,12 @@ set_params (void *data, int ncols, char **value, char **colname)
 
   /* Read the parameters. */
   errno = 0;
-  tmp = strtol (value[3], NULL, /* base */ 10);
+  tmp = strtol (g_hash_table_lookup (dict, "use_fixed_contact_rate"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
   g_assert (tmp == 0 || tmp == 1);
   use_fixed_contact_rate = (tmp == 1);
   errno = 0;
-  p->movement_rate = strtod (value[4], NULL);
+  p->movement_rate = strtod (g_hash_table_lookup (dict, "contact_rate"), NULL);
   g_assert (errno != ERANGE);
   if (use_fixed_contact_rate)
     {
@@ -1444,7 +1454,7 @@ set_params (void *data, int ncols, char **value, char **colname)
     }
 
   errno = 0;
-  pdf_id = strtol (value[5], NULL, /* base */ 10);
+  pdf_id = strtol (g_hash_table_lookup (dict, "distance_distribution_id"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
   p->distance_dist = PAR_get_PDF (params, pdf_id);
   /* No part of the distance distribution can be negative. */
@@ -1453,10 +1463,11 @@ set_params (void *data, int ncols, char **value, char **colname)
       g_assert (PDF_cdf (-EPSILON, p->distance_dist) == 0);
     }
 
-  if (value[6] != NULL)
+  tmp_text = g_hash_table_lookup (dict, "transport_delay_id");
+  if (tmp_text != NULL)
     {
       errno = 0;
-      pdf_id = strtol (value[6], NULL, /* base */ 10);
+      pdf_id = strtol (tmp_text, NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);
       p->shipping_delay = PAR_get_PDF (params, pdf_id);
     }
@@ -1464,25 +1475,25 @@ set_params (void *data, int ncols, char **value, char **colname)
     p->shipping_delay = PDF_new_point_dist (0);
 
   errno = 0;
-  p->prob_infect = strtod (value[7], NULL);
+  p->prob_infect = strtod (g_hash_table_lookup (dict, "infection_probability"), NULL);
   g_assert (errno != ERANGE);
   g_assert (p->prob_infect >= 0 && p->prob_infect <= 1);
 
   errno = 0;
-  rel_id = strtol (value[8], NULL, /* base */ 10);
+  rel_id = strtol (g_hash_table_lookup (dict, "movement_control_id"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);  
   p->movement_control = PAR_get_relchart (params, rel_id);
   /* The movement rate multiplier cannot go negative. */
   g_assert (REL_chart_min (p->movement_control) >= 0);
 
   errno = 0;
-  tmp = strtol (value[9], NULL, /* base */ 10);
+  tmp = strtol (g_hash_table_lookup (dict, "latent_animals_can_infect_others"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
   g_assert (tmp == 0 || tmp == 1);
   p->latent_units_can_infect = (tmp == 1);
 
   errno = 0;
-  tmp = strtol (value[10], NULL, /* base */ 10);
+  tmp = strtol (g_hash_table_lookup (dict, "subclinical_animals_can_infect_others"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
   g_assert (tmp == 0 || tmp == 1);
   p->subclinical_units_can_infect = (tmp == 1);
@@ -1501,18 +1512,18 @@ set_params (void *data, int ncols, char **value, char **colname)
  * contact spread model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_zone_params (void *data, int ncols, char **value, char **colname)
+set_zone_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
   sqlite3 *params;
   guint zone, production_type;
+  char *tmp_text;
   ADSM_contact_type contact_type;
   REL_chart_t ***contact_type_chart;
   guint rel_id;
@@ -1526,17 +1537,19 @@ set_zone_params (void *data, int ncols, char **value, char **colname)
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
-  g_assert (ncols == 4);
+  g_assert (g_hash_table_size (dict) == 4);
 
   /* Find out which zone/production type combination these parameters apply
    * to. */
-  zone = adsm_read_zone (value[0], local_data->zones);
-  production_type = adsm_read_prodtype (value[1], local_data->production_types);
+  zone = adsm_read_zone (g_hash_table_lookup (dict, "zone"), local_data->zones);
+  production_type = adsm_read_prodtype (g_hash_table_lookup (dict, "prodtype"),
+                                       local_data->production_types);
 
   /* Find out whether these parameters are for direct or indirect contact. */
-  if (strcmp (value[2], "direct") == 0)
+  tmp_text = g_hash_table_lookup (dict, "contact_type");
+  if (strcmp (tmp_text, "direct") == 0)
     contact_type = ADSM_DirectContact;
-  else if (strcmp (value[2], "indirect") == 0)
+  else if (strcmp (tmp_text, "indirect") == 0)
     contact_type = ADSM_IndirectContact;
   else
     g_assert_not_reached ();
@@ -1548,7 +1561,7 @@ set_zone_params (void *data, int ncols, char **value, char **colname)
 
   /* Read the parameter. */
   errno = 0;
-  rel_id = strtol (value[3], NULL, /* base */ 10);
+  rel_id = strtol (g_hash_table_lookup (dict, "zone_direct_movement_id"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);  
   movement_control = PAR_get_relchart (params, rel_id);
   /* The movement rate multiplier cannot go negative. */
@@ -1644,9 +1657,18 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read the from-production-type/
    * to-production-type combination specific parameters. */
   local_data->db = params;
-  sqlite3_exec (params,
-                "SELECT src_prodtype.name,dest_prodtype.name,\"direct\",use_fixed_contact_rate,contact_rate,distance_distribution_id,transport_delay_id,infection_probability,movement_control_id,latent_animals_can_infect_others,subclinical_animals_can_infect_others FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_directspread direct WHERE src_prodtype.id=pairing.source_production_type_id AND dest_prodtype.id=pairing.destination_production_type_id AND pairing.direct_contact_spread_id = direct.id UNION SELECT src_prodtype.name,dest_prodtype.name,\"indirect\",use_fixed_contact_rate,contact_rate,distance_distribution_id,transport_delay_id,infection_probability,movement_control_id,0,subclinical_animals_can_infect_others FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_indirectspread indirect WHERE src_prodtype.id=pairing.source_production_type_id AND dest_prodtype.id=pairing.destination_production_type_id AND pairing.indirect_contact_spread_id = indirect.id",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT src_prodtype.name AS src_prodtype,dest_prodtype.name AS dest_prodtype,\"direct\" AS contact_type,use_fixed_contact_rate,contact_rate,distance_distribution_id,transport_delay_id,infection_probability,movement_control_id,latent_animals_can_infect_others,subclinical_animals_can_infect_others "
+                     "FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_directspread direct "
+                     "WHERE src_prodtype.id=pairing.source_production_type_id "
+                     "AND dest_prodtype.id=pairing.destination_production_type_id "
+                     "AND pairing.direct_contact_spread_id = direct.id "
+                     "UNION SELECT src_prodtype.name AS src_prodtype,dest_prodtype.name AS dest_prodtype,\"indirect\" AS contact_type,use_fixed_contact_rate,contact_rate,distance_distribution_id,transport_delay_id,infection_probability,movement_control_id,0 AS latent_animals_can_infect_others,subclinical_animals_can_infect_others "
+                     "FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_indirectspread indirect "
+                     "WHERE src_prodtype.id=pairing.source_production_type_id "
+                     "AND dest_prodtype.id=pairing.destination_production_type_id "
+                     "AND pairing.indirect_contact_spread_id = indirect.id",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
@@ -1654,20 +1676,20 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* Call the set_zone_params function to read the zone/production type
    * combination specific parameters. */
-  sqlite3_exec (params,
-                "SELECT zone.name,prodtype.name,\"direct\",zone_direct_movement_id "
-                "FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectassignment pairing,ScenarioCreator_zoneeffect effect "
-                "WHERE zone.id=pairing.zone_id "
-                "AND prodtype.id=pairing.production_type_id "
-                "AND effect.id=pairing.effect_id "
-                "AND zone_direct_movement_id IS NOT NULL "
-                "UNION SELECT zone.name,prodtype.name,\"indirect\",zone_indirect_movement_id "
-                "FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectassignment pairing,ScenarioCreator_zoneeffect effect "
-                "WHERE zone.id=pairing.zone_id "
-                "AND prodtype.id=pairing.production_type_id "
-                "AND effect.id=pairing.effect_id "
-                "AND zone_indirect_movement_id IS NOT NULL",
-                set_zone_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                    "SELECT zone.name AS zone,prodtype.name AS prodtype,\"direct\" AS contact_type,zone_direct_movement_id "
+                    "FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectassignment pairing,ScenarioCreator_zoneeffect effect "
+                    "WHERE zone.id=pairing.zone_id "
+                    "AND prodtype.id=pairing.production_type_id "
+                    "AND effect.id=pairing.effect_id "
+                    "AND zone_direct_movement_id IS NOT NULL "
+                    "UNION SELECT zone.name AS zone,prodtype.name AS prodtype,\"indirect\" AS contact_type,zone_indirect_movement_id "
+                    "FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectassignment pairing,ScenarioCreator_zoneeffect effect "
+                    "WHERE zone.id=pairing.zone_id "
+                    "AND prodtype.id=pairing.production_type_id "
+                    "AND effect.id=pairing.effect_id "
+                    "AND zone_indirect_movement_id IS NOT NULL",
+                    set_zone_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

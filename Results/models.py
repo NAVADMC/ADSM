@@ -384,14 +384,14 @@ class UnitStats(OutputBaseModel):
     If we run into database contention issues, try switching the database mode to http://www.sqlite.org/draft/wal.html"""
     unit = models.OneToOneField(Unit,
         help_text='Pointer back to the input Unit (lat/long) these stats are for.')
-    cumulative_infected = models.PositiveIntegerField(default=0,
+    cumulative_infected = models.PositiveIntegerField(default=0,  # red
         help_text='The total number of iterations in which this unit became infected.', )
-    cumulative_zone_focus = models.PositiveIntegerField(default=0,
-        help_text='The total number of iterations in which this unit was a zone focus.', )
-    cumulative_destroyed = models.PositiveIntegerField(default=0,
+    cumulative_destroyed = models.PositiveIntegerField(default=0,  # black, larger circle laid behind up to 3x area
         help_text='The total number of iterations in which this unit was destroyed.', )
-    cumulative_vaccinated = models.PositiveIntegerField(default=0,
+    cumulative_vaccinated = models.PositiveIntegerField(default=0,  # green
         help_text='The total number of iterations in which this unit was vaccinated.', )
+    cumulative_zone_focus = models.PositiveIntegerField(default=0,  # blue, detection is the only zone trigger so this is "infected" related
+        help_text='The total number of iterations in which this unit was a zone focus.', )
 
 
 def delete_all_outputs():

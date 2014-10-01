@@ -32,6 +32,7 @@
 
 #include "module.h"
 #include "module_util.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -430,13 +431,12 @@ make_param_block (char *examine, char *success_multiplier, char *test)
  * Adds a set of production type specific parameters to a trace exam model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
@@ -449,23 +449,33 @@ set_params (void *data, int ncols, char **value, char **colname)
   self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
-  g_assert (ncols == 13);
+  g_assert (g_hash_table_size (dict) == 13);
 
   /* Find out which production type these parameters apply to. */
-  production_type = adsm_read_prodtype (value[0], local_data->production_types);
+  production_type =
+    adsm_read_prodtype (g_hash_table_lookup (dict, "prodtype"),
+                        local_data->production_types);
 
   /* Read the parameters. */
   local_data->param_block[ADSM_DirectContact][ADSM_TraceForwardOrOut][production_type]
-    = make_param_block (value[1], value[2], value[3]);
+    = make_param_block (g_hash_table_lookup (dict, "examine_direct_forward_traces"),
+                        g_hash_table_lookup (dict, "exam_direct_forward_success_multiplier"),
+                        g_hash_table_lookup (dict, "test_direct_forward_traces"));
 
   local_data->param_block[ADSM_DirectContact][ADSM_TraceBackOrIn][production_type]
-    = make_param_block (value[4], value[5], value[6]);
+    = make_param_block (g_hash_table_lookup (dict, "examine_direct_back_traces"),
+                        g_hash_table_lookup (dict, "exam_direct_back_success_multiplier"),
+                        g_hash_table_lookup (dict, "test_direct_back_traces"));
 
   local_data->param_block[ADSM_IndirectContact][ADSM_TraceForwardOrOut][production_type]
-    = make_param_block (value[7], value[8], value[9]);
+    = make_param_block (g_hash_table_lookup (dict, "examine_indirect_forward_traces"),
+                        g_hash_table_lookup (dict, "exam_indirect_forward_success_multiplier"),
+                        g_hash_table_lookup (dict, "test_indirect_forward_traces"));
 
   local_data->param_block[ADSM_IndirectContact][ADSM_TraceBackOrIn][production_type]
-    = make_param_block (value[10], value[11], value[12]);
+    = make_param_block (g_hash_table_lookup (dict, "examine_indirect_back_traces"),
+                        g_hash_table_lookup (dict, "examine_indirect_back_success_multiplier"),
+                        g_hash_table_lookup (dict, "test_indirect_back_traces"));
   
   #if DEBUG
     g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
@@ -530,9 +540,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* Call the set_params function to read the production type specific
    * parameters. */
-  sqlite3_exec (params,
-                "SELECT prodtype.name,examine_direct_forward_traces,exam_direct_forward_success_multiplier,test_direct_forward_traces,examine_direct_back_traces,exam_direct_back_success_multiplier,test_direct_back_traces,examine_indirect_forward_traces,exam_indirect_forward_success_multiplier,test_indirect_forward_traces,examine_indirect_back_traces,examine_indirect_back_success_multiplier,test_indirect_back_traces FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol, ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT prodtype.name AS prodtype,examine_direct_forward_traces,exam_direct_forward_success_multiplier,test_direct_forward_traces,examine_direct_back_traces,exam_direct_back_success_multiplier,test_direct_back_traces,examine_indirect_forward_traces,exam_indirect_forward_success_multiplier,test_indirect_forward_traces,examine_indirect_back_traces,examine_indirect_back_success_multiplier,test_indirect_back_traces "
+                     "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref "
+                     "WHERE prodtype.id=xref.production_type_id "
+                     "AND xref.control_protocol_id=protocol.id",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

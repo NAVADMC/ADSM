@@ -21,6 +21,7 @@
 
 #include "module_util.h"
 #include "gis.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -307,19 +308,19 @@ adsm_insert_number_into_filename (const char *filename, int number)
  * @param data a GPtrArray in which to store the production type names. The
  *   production type names are copied from the query result and should be freed
  *   using g_free().
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-read_prodtype_order_callback (void *data, int ncols, char **value, char **colname)
+read_prodtype_order_callback (void *data, GHashTable *dict)
 {
   GPtrArray *prodtype_order;
   
-  g_assert (ncols == 1);
+  g_assert (g_hash_table_size (dict) == 1);
   prodtype_order = (GPtrArray *)data;
-  g_ptr_array_add (prodtype_order, g_strdup(value[0]));
+  g_ptr_array_add (prodtype_order,
+                   g_strdup (g_hash_table_lookup (dict, "prodtype")));
   
   return 0;
 }
@@ -330,22 +331,22 @@ read_prodtype_order_callback (void *data, int ncols, char **value, char **colnam
  * Fills in an array with the reasons in priority order.
  *
  * @param data location of an array in which to store the reasons.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-read_reason_order_callback (void *data, int ncols, char **value, char **colname)
+read_reason_order_callback (void *data, GHashTable *dict)
 {
   ADSM_control_reason *reason_order;
   guint priority;
   gchar **tokens, **iter;
 
-  g_assert (ncols == 1);
+  g_assert (g_hash_table_size (dict) == 1);
   reason_order = (ADSM_control_reason *)data;
-  /* The reason order is given in a comma-separated string in value[0]. */
-  tokens = g_strsplit (value[0], ",", 0);
+  /* The reason order is given in a comma-separated string in the column
+   * "destruction_reason_order". */
+  tokens = g_strsplit (g_hash_table_lookup (dict, "destruction_reason_order"), ",", 0);
   for (iter = tokens, priority = 0; *iter != NULL; iter++)
     {
       ADSM_control_reason reason;
@@ -369,21 +370,22 @@ read_reason_order_callback (void *data, int ncols, char **value, char **colname)
  * Finds out whether reason has priority over production type.
  *
  * @param data pointer to a boolean in which to store the answer.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-read_primary_order_callback (void *data, int ncols, char **value, char **colname)
+read_primary_order_callback (void *data, GHashTable *dict)
 {
   gboolean *reason_has_priority_over_prodtype;
+  char *tmp_text;
   gchar *reason_loc, *prodtype_loc;
  
-  g_assert (ncols == 1);
+  g_assert (g_hash_table_size (dict) == 1);
   reason_has_priority_over_prodtype = (gboolean *)data;
-  reason_loc = strstr (value[0], "reason");
-  prodtype_loc = strstr (value[0], "production type");
+  tmp_text = g_hash_table_lookup (dict, "destruction_priority_order");
+  reason_loc = strstr (tmp_text, "reason");
+  prodtype_loc = strstr (tmp_text, "production type");
   *reason_has_priority_over_prodtype = (reason_loc < prodtype_loc);
 
   return 0;
@@ -446,9 +448,9 @@ adsm_read_priority_order (sqlite3 *params)
   char *sqlerr;
 
   /* First find out if reason has priority over production type. */
-  sqlite3_exec (params,
-                "SELECT destruction_priority_order FROM ScenarioCreator_controlmasterplan",
-                read_primary_order_callback, &reason_has_priority_over_prodtype, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT destruction_priority_order FROM ScenarioCreator_controlmasterplan",
+                     read_primary_order_callback, &reason_has_priority_over_prodtype, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
@@ -462,9 +464,9 @@ adsm_read_priority_order (sqlite3 *params)
 
   /* Next get the relative ordering of reasons. */
   reason_order = g_new0 (ADSM_control_reason, ADSM_NCONTROL_REASONS);
-  sqlite3_exec (params,
-                "SELECT destruction_reason_order FROM ScenarioCreator_controlmasterplan",
-                read_reason_order_callback, reason_order, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT destruction_reason_order FROM ScenarioCreator_controlmasterplan",
+                     read_reason_order_callback, reason_order, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
@@ -487,9 +489,9 @@ adsm_read_priority_order (sqlite3 *params)
 
   /* Next get the relative ordering of production types. */
   prodtype_order = g_ptr_array_new_with_free_func (g_free);
-  sqlite3_exec (params,
-                "SELECT prodtype.name FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id ORDER BY destruction_priority ASC",
-                read_prodtype_order_callback, prodtype_order, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT prodtype.name AS prodtype FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id ORDER BY destruction_priority ASC",
+                     read_prodtype_order_callback, prodtype_order, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

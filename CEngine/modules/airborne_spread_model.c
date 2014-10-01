@@ -114,6 +114,7 @@
 #include "module.h"
 #include "module_util.h"
 #include "gis.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -776,17 +777,17 @@ local_free (struct adsm_module_t_ *self)
  * Adds a set of parameters to an airborne spread model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
   sqlite3 *params;
+  char *tmp_text;
   UNT_production_type_t from_production_type, to_production_type;
   param_block_t *p;
   char *endptr;
@@ -800,14 +801,16 @@ set_params (void *data, int ncols, char **value, char **colname)
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
-  g_assert (ncols == 7);
+  g_assert (g_hash_table_size (dict) == 7);
 
   /* Find out which to-from production type combination these parameters apply
    * to. */
   from_production_type =
-    adsm_read_prodtype (value[0], local_data->production_types);
+    adsm_read_prodtype (g_hash_table_lookup (dict, "src_prodtype"),
+                        local_data->production_types);
   to_production_type =
-    adsm_read_prodtype (value[1], local_data->production_types);
+    adsm_read_prodtype (g_hash_table_lookup (dict, "dest_prodtype"),
+                        local_data->production_types);
 
   /* If necessary, create a row in the 2D array for this from-production-type. */
   if (local_data->param_block[from_production_type] == NULL)
@@ -824,16 +827,18 @@ set_params (void *data, int ncols, char **value, char **colname)
   local_data->param_block[from_production_type][to_production_type] = p;  
 
   /* Read the parameters. */
-  p->prob_spread_1km = strtod (value[2], &endptr);
-  if (errno == ERANGE || endptr == value[2] || p->prob_spread_1km < 0)
+  tmp_text = g_hash_table_lookup (dict, "spread_1km_probability");
+  p->prob_spread_1km = strtod (tmp_text, &endptr);
+  if (errno == ERANGE || endptr == tmp_text || p->prob_spread_1km < 0)
     {
       g_warning ("setting probability of spread at 1 km to 0");
       p->prob_spread_1km = 0;
     }
   p->prob_spread_1km = CLAMP (p->prob_spread_1km, 0, 1);
 
-  p->wind_dir_start = strtod (value[3], &endptr);
-  if (errno == ERANGE || endptr == value[3])
+  tmp_text = g_hash_table_lookup (dict, "exposure_direction_start");
+  p->wind_dir_start = strtod (tmp_text, &endptr);
+  if (errno == ERANGE || endptr == tmp_text)
     {
       g_warning ("setting start of area at risk of exposure to 0");
       p->wind_dir_start = 0;
@@ -844,8 +849,9 @@ set_params (void *data, int ncols, char **value, char **colname)
   while (p->wind_dir_start >= 360)
     p->wind_dir_start -= 360;
 
-  p->wind_dir_end = strtod (value[4], &endptr);
-  if (errno == ERANGE || endptr == value[4])
+  tmp_text = g_hash_table_lookup (dict, "exposure_direction_end");
+  p->wind_dir_end = strtod (tmp_text, &endptr);
+  if (errno == ERANGE || endptr == tmp_text)
     {
       g_warning ("setting end of area at risk of exposure to 360");
       p->wind_dir_end = 360;
@@ -880,8 +886,9 @@ set_params (void *data, int ncols, char **value, char **colname)
     }
   else
     {
-      p->max_spread = strtod (value[5], &endptr);
-      if (errno == ERANGE || endptr == value[5])
+      tmp_text = g_hash_table_lookup (dict, "max_distance");
+      p->max_spread = strtod (tmp_text, &endptr);
+      if (errno == ERANGE || endptr == tmp_text)
         {
           g_warning ("setting maximum distance of spread to 0");
           p->max_spread = 0;
@@ -909,10 +916,11 @@ set_params (void *data, int ncols, char **value, char **colname)
   if (p->max_spread > local_data->max_spread[from_production_type])
     local_data->max_spread[from_production_type] = p->max_spread;
 
-  if (value[6] != NULL)
+  tmp_text = g_hash_table_lookup (dict, "transport_delay_id");
+  if (tmp_text != NULL)
     {
       errno = 0;
-      pdf_id = strtol (value[6], NULL, /* base */ 10);
+      pdf_id = strtol (tmp_text, NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);
       p->delay = PAR_get_PDF (params, pdf_id);
     }
@@ -995,13 +1003,13 @@ new (sqlite3 *params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read the production type combination
    * specific parameters. */
   local_data->db = params;
-  sqlite3_exec (params,
-                "SELECT src_prodtype.name,dest_prodtype.name,spread_1km_probability,exposure_direction_start,exposure_direction_end,max_distance,transport_delay_id "
-                "FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_airbornespread airborne "
-                "WHERE src_prodtype.id=pairing.source_production_type_id "
-                "AND dest_prodtype.id=pairing.destination_production_type_id "
-                "AND pairing.airborne_spread_id = airborne.id",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT src_prodtype.name AS src_prodtype,dest_prodtype.name AS dest_prodtype,spread_1km_probability,exposure_direction_start,exposure_direction_end,max_distance,transport_delay_id "
+                     "FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_airbornespread airborne "
+                     "WHERE src_prodtype.id=pairing.source_production_type_id "
+                     "AND dest_prodtype.id=pairing.destination_production_type_id "
+                     "AND pairing.airborne_spread_id = airborne.id",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

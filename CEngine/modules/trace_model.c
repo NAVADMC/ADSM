@@ -30,6 +30,7 @@
 
 #include "module.h"
 #include "module_util.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -244,17 +245,17 @@ local_free (struct adsm_module_t_ *self)
  * Adds a set of production type specific parameters to a trace model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
   guint production_type;
+  char *tmp_text;
   long int trace_period;
   long int tmp;
 
@@ -265,23 +266,27 @@ set_params (void *data, int ncols, char **value, char **colname)
   self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
-  g_assert (ncols == 7);
+  g_assert (g_hash_table_size (dict) == 7);
 
   /* Find out which production type these parameters apply to. */
-  production_type = adsm_read_prodtype (value[0], local_data->production_types);
+  production_type =
+    adsm_read_prodtype (g_hash_table_lookup (dict, "prodtype"),
+                        local_data->production_types);
 
   /* Read the parameters. */
-  if (value[1] != NULL)
+  tmp_text = g_hash_table_lookup (dict, "direct_trace_period");
+  if (tmp_text != NULL)
     {
       errno = 0;
-      trace_period = strtol (value[1], NULL, /* base */ 10);
+      trace_period = strtol (tmp_text, NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);
       if (trace_period >= 0)
         {
-          if (value[2] != NULL)
+          tmp_text = g_hash_table_lookup (dict, "trace_direct_forward");
+          if (tmp_text != NULL)
             {
               errno = 0;
-              tmp = strtol (value[2], NULL, /* base */ 10);
+              tmp = strtol (tmp_text, NULL, /* base */ 10);
               g_assert (errno != ERANGE && errno != EINVAL);
               g_assert (tmp == 0 || tmp == 1);
               if (tmp == 1)
@@ -289,10 +294,11 @@ set_params (void *data, int ncols, char **value, char **colname)
                   local_data->trace_period[ADSM_DirectContact][ADSM_TraceForwardOrOut][production_type] = trace_period;
                 }
             }
-          if (value[3] != NULL)
+          tmp_text = g_hash_table_lookup (dict, "trace_direct_back");
+          if (tmp_text != NULL)
             {
               errno = 0;
-              tmp = strtol (value[3], NULL, /* base */ 10);
+              tmp = strtol (tmp_text, NULL, /* base */ 10);
               g_assert (errno != ERANGE && errno != EINVAL);
               g_assert (tmp == 0 || tmp == 1);
               if (tmp == 1)
@@ -303,17 +309,19 @@ set_params (void *data, int ncols, char **value, char **colname)
         }
     }
 
-  if (value[4] != NULL)
+  tmp_text = g_hash_table_lookup (dict, "indirect_trace_period");
+  if (tmp_text != NULL)
     {
       errno = 0;
-      trace_period = strtol (value[4], NULL, /* base */ 10);
+      trace_period = strtol (tmp_text, NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);
       if (trace_period >= 0)
         {
-          if (value[5] != NULL)
+          tmp_text = g_hash_table_lookup (dict, "trace_indirect_forward");
+          if (tmp_text != NULL)
             {
               errno = 0;
-              tmp = strtol (value[5], NULL, /* base */ 10);
+              tmp = strtol (tmp_text, NULL, /* base */ 10);
               g_assert (errno != ERANGE && errno != EINVAL);
               g_assert (tmp == 0 || tmp == 1);
               if (tmp == 1)
@@ -321,10 +329,11 @@ set_params (void *data, int ncols, char **value, char **colname)
                   local_data->trace_period[ADSM_IndirectContact][ADSM_TraceForwardOrOut][production_type] = trace_period;
                 }
             }
-          if (value[6] != NULL)
+          tmp_text = g_hash_table_lookup (dict, "trace_indirect_back");
+          if (tmp_text != NULL)
             {
               errno = 0;
-              tmp = strtol (value[6], NULL, /* base */ 10);
+              tmp = strtol (tmp_text, NULL, /* base */ 10);
               g_assert (errno != ERANGE && errno != EINVAL);
               g_assert (tmp == 0 || tmp == 1);
               if (tmp == 1)
@@ -397,9 +406,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* Call the set_params function to read the production type specific
    * parameters. */
-  sqlite3_exec (params,
-                "SELECT prodtype.name,direct_trace_period,trace_direct_forward,trace_direct_back,indirect_trace_period,trace_indirect_forward,trace_indirect_back FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol, ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND (trace_direct_forward=1 OR trace_direct_back=1 OR trace_indirect_forward=1 OR trace_indirect_back=1)",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT prodtype.name AS prodtype,direct_trace_period,trace_direct_forward,trace_direct_back,indirect_trace_period,trace_indirect_forward,trace_indirect_back "
+                     "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref "
+                     "WHERE prodtype.id=xref.production_type_id "
+                     "AND xref.control_protocol_id=protocol.id "
+                     "AND (trace_direct_forward=1 OR trace_direct_back=1 OR trace_indirect_forward=1 OR trace_indirect_back=1)",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
