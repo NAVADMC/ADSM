@@ -61,6 +61,7 @@
 
 #include "module.h"
 #include "module_util.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -643,18 +644,18 @@ local_free (struct adsm_module_t_ *self)
  * Adds a set of parameters to a contact recorder.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format. * @param colname names of columns in the SQL query result.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
   sqlite3 *params;
   guint production_type;
+  char *tmp_text;
   double trace_success;
   guint pdf_id;
 
@@ -666,16 +667,18 @@ set_params (void *data, int ncols, char **value, char **colname)
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
-  g_assert (ncols == 4);
+  g_assert (g_hash_table_size (dict) == 4);
 
   /* Find out which source production type these parameters apply to. */
   production_type =
-    adsm_read_prodtype (value[0], local_data->production_types);
+    adsm_read_prodtype (g_hash_table_lookup (dict, "prodtype"),
+                        local_data->production_types);
 
-  if (value[1] != NULL)
+  tmp_text = g_hash_table_lookup (dict, "direct_trace_success_rate");
+  if (tmp_text != NULL)
     {
       errno = 0;
-      trace_success = strtod (value[1], NULL);
+      trace_success = strtod (tmp_text, NULL);
       g_assert (errno != ERANGE);
       g_assert (trace_success >= 0 && trace_success <= 1);
     }
@@ -685,10 +688,11 @@ set_params (void *data, int ncols, char **value, char **colname)
     }
   local_data->trace_success[ADSM_DirectContact][production_type] = trace_success;
 
-  if (value[2] != NULL)
+  tmp_text = g_hash_table_lookup (dict, "indirect_trace_success");
+  if (tmp_text != NULL)
     {
       errno = 0;
-      trace_success = strtod (value[2], NULL);
+      trace_success = strtod (tmp_text, NULL);
       g_assert (errno != ERANGE);
       g_assert (trace_success >= 0 && trace_success <= 1);
     }
@@ -698,10 +702,11 @@ set_params (void *data, int ncols, char **value, char **colname)
     }
   local_data->trace_success[ADSM_IndirectContact][production_type] = trace_success;
 
-  if (value[3] != NULL)
+  tmp_text = g_hash_table_lookup (dict, "trace_result_delay_id");
+  if (tmp_text != NULL)
     {
       errno = 0;
-      pdf_id = strtol (value[3], NULL, /* base */ 10);
+      pdf_id = strtol (tmp_text, NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);
       g_assert (local_data->trace_delay[production_type] == NULL);
       local_data->trace_delay[production_type] = PAR_get_PDF (params, pdf_id);
@@ -802,9 +807,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read the production type specific
    * parameters. */
   local_data->db = params;
-  sqlite3_exec (params,
-                "SELECT prodtype.name,direct_trace_success_rate,indirect_trace_success,trace_result_delay_id FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol, ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND (trace_direct_forward=1 OR trace_direct_back=1 OR trace_indirect_forward=1 OR trace_indirect_back=1)",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT prodtype.name AS prodtype,direct_trace_success_rate,indirect_trace_success,trace_result_delay_id "
+                     "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref "
+                     "WHERE prodtype.id=xref.production_type_id "
+                     "AND xref.control_protocol_id=protocol.id "
+                     "AND (trace_direct_forward=1 OR trace_direct_back=1 OR trace_indirect_forward=1 OR trace_indirect_back=1)",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

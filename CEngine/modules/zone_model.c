@@ -39,6 +39,7 @@
 
 #include "module.h"
 #include "gis.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -722,13 +723,12 @@ local_free (struct adsm_module_t_ *self)
  * Adds a set of parameters to a zone model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data = NULL;
@@ -743,9 +743,10 @@ set_params (void *data, int ncols, char **value, char **colname)
   self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
-  if (value[0] != NULL)
+  name = g_hash_table_lookup (dict, "name");
+  if (name != NULL)
     {
-      name = g_utf8_normalize (value[0], -1, G_NORMALIZE_DEFAULT);
+      name = g_utf8_normalize (name, -1, G_NORMALIZE_DEFAULT);
       g_assert (name != NULL);
     }
   else
@@ -754,7 +755,7 @@ set_params (void *data, int ncols, char **value, char **colname)
     }
 
   errno = 0;
-  radius = strtod (value[1], NULL);
+  radius = strtod (g_hash_table_lookup (dict, "radius"), NULL);
   g_assert (errno != ERANGE);
   /* Radius must be positive. */
   if (radius < 0)
@@ -821,9 +822,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* Call the set_params function to read the production type combination
    * specific parameters. */
-  sqlite3_exec (params,
-                "SELECT name,radius FROM ScenarioCreator_zone ORDER BY radius",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT name,radius FROM ScenarioCreator_zone ORDER BY radius",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

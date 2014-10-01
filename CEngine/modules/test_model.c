@@ -38,6 +38,7 @@
 
 #include "module.h"
 #include "module_util.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -633,13 +634,12 @@ local_free (struct adsm_module_t_ *self)
  * Adds a set of production type specific parameters to a test model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
@@ -656,11 +656,12 @@ set_params (void *data, int ncols, char **value, char **colname)
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
-  g_assert (ncols == 4);
+  g_assert (g_hash_table_size (dict) == 4);
 
   /* Find out which production type these parameters apply to. */
   production_type =
-    adsm_read_prodtype (value[0], local_data->production_types);
+    adsm_read_prodtype (g_hash_table_lookup (dict, "prodtype"),
+                        local_data->production_types);
 
   /* Check that we are not overwriting an existing parameter block (that would
    * indicate a bug). */
@@ -672,17 +673,17 @@ set_params (void *data, int ncols, char **value, char **colname)
 
   /* Read the parameters. */
   errno = 0;
-  pdf_id = strtol (value[1], NULL, /* base */ 10);
+  pdf_id = strtol (g_hash_table_lookup (dict, "test_delay_id"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);  
   p->delay = PAR_get_PDF (params, pdf_id);
 
   errno = 0;
-  p->sensitivity = strtod (value[2], NULL);
+  p->sensitivity = strtod (g_hash_table_lookup (dict, "test_sensitivity"), NULL);
   g_assert (errno != ERANGE);
   g_assert (p->sensitivity >= 0 && p->sensitivity <= 1);
 
   errno = 0;
-  p->specificity = strtod (value[3], NULL);
+  p->specificity = strtod (g_hash_table_lookup (dict, "test_specificity"), NULL);
   g_assert (errno != ERANGE);
   g_assert (p->specificity >= 0 && p->specificity <= 1);
 
@@ -752,9 +753,12 @@ new (sqlite3 * params, UNT_unit_list_t *units, projPJ projection,
   /* Call the set_params function to read the production type specific
    * parameters. */
   local_data->db = params;
-  sqlite3_exec (params,
-                "SELECT prodtype.name,test_delay_id,test_sensitivity,test_specificity FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol, ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT prodtype.name AS prodtype,test_delay_id,test_sensitivity,test_specificity "
+                     "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref "
+                     "WHERE prodtype.id=xref.production_type_id "
+                     "AND xref.control_protocol_id=protocol.id",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

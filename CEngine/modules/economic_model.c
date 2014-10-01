@@ -34,6 +34,7 @@
 
 #include "module.h"
 #include "module_util.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -578,17 +579,17 @@ local_free (struct adsm_module_t_ *self)
  * Adds a set of parameters to an economic model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
   guint production_type_id;
+  char *tmp_text;
   destruction_cost_data_t *d;
   vaccination_cost_data_t *v;
 
@@ -596,17 +597,19 @@ set_params (void *data, int ncols, char **value, char **colname)
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
-  g_assert (ncols == 10);
+  g_assert (g_hash_table_size (dict) == 10);
 
   self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
   /* Find out which production type these parameters apply to. */
   production_type_id =
-    adsm_read_prodtype (value[0], local_data->production_types);
+    adsm_read_prodtype (g_hash_table_lookup (dict, "prodtype"),
+                        local_data->production_types);
 
   /* Destruction Cost Parameters */
-  if (value[1] != NULL)
+  tmp_text = g_hash_table_lookup (dict, "cost_of_destruction_appraisal_per_unit");
+  if (tmp_text != NULL)
     {
       if (local_data->destruction_cost_params == NULL)
         {
@@ -623,25 +626,26 @@ set_params (void *data, int ncols, char **value, char **colname)
       local_data->destruction_cost_params[production_type_id] = d;
 
       errno = 0;
-      d->appraisal = strtod (value[1], NULL);
+      d->appraisal = strtod (tmp_text, NULL);
       g_assert (errno != ERANGE);
       errno = 0;
-      d->euthanasia = strtod (value[2], NULL);
+      d->euthanasia = strtod (g_hash_table_lookup (dict, "cost_of_euthanasia_per_animal"), NULL);
       g_assert (errno != ERANGE);
       errno = 0;
-      d->indemnification = strtod (value[3], NULL);
+      d->indemnification = strtod (g_hash_table_lookup (dict, "cost_of_indemnification_per_animal"), NULL);
       g_assert (errno != ERANGE);
       errno = 0;
-      d->carcass_disposal = strtod (value[4], NULL);
+      d->carcass_disposal = strtod (g_hash_table_lookup (dict, "cost_of_carcass_disposal_per_animal"), NULL);
       g_assert (errno != ERANGE);
       errno = 0;
-      d->cleaning_disinfecting = strtod (value[5], NULL);
+      d->cleaning_disinfecting = strtod (g_hash_table_lookup (dict, "cost_of_destruction_cleaning_per_unit"), NULL);
       g_assert (errno != ERANGE);
     }
 
   /* Vaccination Cost Parameters */
 
-  if (value[6] != NULL)
+  tmp_text = g_hash_table_lookup (dict, "vaccination_demand_threshold");
+  if (tmp_text != NULL)
     {
       if (local_data->vaccination_cost_params == NULL)
         {
@@ -658,16 +662,16 @@ set_params (void *data, int ncols, char **value, char **colname)
       local_data->vaccination_cost_params[production_type_id] = v;
 
       errno = 0;
-      v->baseline_capacity = strtol (value[6], NULL, /* base */ 10);
+      v->baseline_capacity = strtol (tmp_text, NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);  
       errno = 0;
-      v->vaccination = strtod (value[7], NULL);
+      v->vaccination = strtod (g_hash_table_lookup (dict, "cost_of_vaccination_baseline_per_animal"), NULL);
       g_assert (errno != ERANGE);
       errno = 0;
-      v->extra_vaccination = strtod (value[8], NULL);
+      v->extra_vaccination = strtod (g_hash_table_lookup (dict, "cost_of_vaccination_additional_per_animal"), NULL);
       g_assert (errno != ERANGE);
       errno = 0;
-      v->vaccination_fixed = strtod (value[9], NULL);
+      v->vaccination_fixed = strtod (g_hash_table_lookup (dict, "cost_of_vaccination_setup_per_unit"), NULL);
       g_assert (errno != ERANGE);
 
       /* No vaccinations have been performed yet. */
@@ -684,13 +688,12 @@ set_params (void *data, int ncols, char **value, char **colname)
  * economic model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_zone_params (void *data, int ncols, char **value, char **colname)
+set_zone_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
@@ -700,15 +703,16 @@ set_zone_params (void *data, int ncols, char **value, char **colname)
     g_debug ("----- ENTER set_zone_params (%s)", MODEL_NAME);
   #endif
 
-  g_assert (ncols == 3);
+  g_assert (g_hash_table_size (dict) == 3);
 
   self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
   /* Find out which zone/production type combination these parameters apply
    * to. */
-  zone_id = adsm_read_zone (value[0], local_data->zones);
-  production_type_id = adsm_read_prodtype (value[1], local_data->production_types);
+  zone_id = adsm_read_zone (g_hash_table_lookup (dict, "zone"), local_data->zones);
+  production_type_id = adsm_read_prodtype (g_hash_table_lookup (dict, "prodtype"),
+                                           local_data->production_types);
 
   /* Create a paramater block if needed. */
   if (local_data->surveillance_cost_param == NULL)
@@ -726,7 +730,8 @@ set_zone_params (void *data, int ncols, char **value, char **colname)
 
   /* Read the parameter. */
   errno = 0;
-  local_data->surveillance_cost_param[zone_id][production_type_id] = strtod (value[2], NULL);
+  local_data->surveillance_cost_param[zone_id][production_type_id] =
+    strtod (g_hash_table_lookup (dict, "cost_of_surveillance_per_animal_day"), NULL);
   g_assert (errno != ERANGE);
 
   #if DEBUG
@@ -853,9 +858,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* Call the set_params function to read the production type specific
    * parameters. */
-  sqlite3_exec (params,
-                "SELECT prodtype.name,cost_of_destruction_appraisal_per_unit,cost_of_euthanasia_per_animal,cost_of_indemnification_per_animal,cost_of_carcass_disposal_per_animal,cost_of_destruction_cleaning_per_unit,vaccination_demand_threshold,cost_of_vaccination_baseline_per_animal,cost_of_vaccination_additional_per_animal,cost_of_vaccination_setup_per_unit FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND use_cost_accounting=1",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT prodtype.name AS prodtype,cost_of_destruction_appraisal_per_unit,cost_of_euthanasia_per_animal,cost_of_indemnification_per_animal,cost_of_carcass_disposal_per_animal,cost_of_destruction_cleaning_per_unit,vaccination_demand_threshold,cost_of_vaccination_baseline_per_animal,cost_of_vaccination_additional_per_animal,cost_of_vaccination_setup_per_unit "
+                     "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref "
+                     "WHERE prodtype.id=xref.production_type_id "
+                     "AND xref.control_protocol_id=protocol.id "
+                     "AND use_cost_accounting=1",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
@@ -863,13 +872,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* Call the set_zone_params function to read the zone/production type
    * combination specific parameters. */
-  sqlite3_exec (params,
-                "SELECT zone.name,prodtype.name,cost_of_surveillance_per_animal_day "
-                "FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectassignment pairing,ScenarioCreator_zoneeffect effect "
-                "WHERE zone.id=pairing.zone_id "
-                "AND prodtype.id=pairing.production_type_id "
-                "AND effect.id=pairing.effect_id",
-                set_zone_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT zone.name AS zone,prodtype.name AS prodtype,cost_of_surveillance_per_animal_day "
+                     "FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectassignment pairing,ScenarioCreator_zoneeffect effect "
+                     "WHERE zone.id=pairing.zone_id "
+                     "AND prodtype.id=pairing.production_type_id "
+                     "AND effect.id=pairing.effect_id",
+                     set_zone_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

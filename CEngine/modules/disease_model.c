@@ -33,6 +33,7 @@
 
 #include "module.h"
 #include "module_util.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -494,13 +495,12 @@ local_free (struct adsm_module_t_ *self)
  * Adds a set of parameters to a disease model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
@@ -508,6 +508,7 @@ set_params (void *data, int ncols, char **value, char **colname)
   guint production_type;
   param_block_t *p;
   guint pdf_id, rel_id;
+  char *tmp_text;
 
 #if DEBUG
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
@@ -518,7 +519,9 @@ set_params (void *data, int ncols, char **value, char **colname)
   params = local_data->db;
 
   /* Find out which production type these parameters apply to. */
-  production_type = adsm_read_prodtype (value[0], local_data->production_types);
+  production_type =
+    adsm_read_prodtype (g_hash_table_lookup (dict, "prodtype"),
+                        local_data->production_types);
 
   /* Check that we are not overwriting an existing parameter block (that would
    * indicate a bug). */
@@ -529,18 +532,19 @@ set_params (void *data, int ncols, char **value, char **colname)
   local_data->param_block[production_type] = p;  
 
   /* Read the parameters. */
-  g_assert (ncols == 6);
-  pdf_id = strtol(value[1], NULL, /* base */ 10);
+  g_assert (g_hash_table_size (dict) == 6);
+  pdf_id = strtol (g_hash_table_lookup (dict, "disease_latent_period_id"), NULL, /* base */ 10);
   p->latent_period = PAR_get_PDF (params, pdf_id);
-  pdf_id = strtol(value[2], NULL, /* base */ 10);
+  pdf_id = strtol (g_hash_table_lookup (dict, "disease_subclinical_period_id"), NULL, /* base */ 10);
   p->infectious_subclinical_period = PAR_get_PDF (params, pdf_id);
-  pdf_id = strtol(value[3], NULL, /* base */ 10);
+  pdf_id = strtol (g_hash_table_lookup (dict, "disease_clinical_period_id"), NULL, /* base */ 10);
   p->infectious_clinical_period = PAR_get_PDF (params, pdf_id);
-  pdf_id = strtol(value[4], NULL, /* base */ 10);
+  pdf_id = strtol (g_hash_table_lookup (dict, "disease_immune_period_id"), NULL, /* base */ 10);
   p->immunity_period = PAR_get_PDF (params, pdf_id);
-  if (value[5] != NULL)
+  tmp_text = g_hash_table_lookup (dict, "disease_prevalence_id");
+  if (tmp_text != NULL)
     {
-      rel_id = strtol(value[5], NULL, /* base */ 10);
+      rel_id = strtol(tmp_text, NULL, /* base */ 10);
       p->prevalence = PAR_get_relchart (params, rel_id);
       if (REL_chart_min (p->prevalence) < 0)
         {
@@ -611,9 +615,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read the production type combination
    * specific parameters. */
   local_data->db = params;
-  sqlite3_exec (params,
-                "SELECT prodtype.name,disease_latent_period_id,disease_subclinical_period_id,disease_clinical_period_id,disease_immune_period_id,disease_prevalence_id FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_diseaseprogressionassignment xref,ScenarioCreator_diseaseprogression disease WHERE prodtype.id=xref.production_type_id AND xref.progression_id = disease.id",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT prodtype.name AS prodtype,disease_latent_period_id,disease_subclinical_period_id,disease_clinical_period_id,disease_immune_period_id,disease_prevalence_id "
+                     "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_diseaseprogressionassignment xref,ScenarioCreator_diseaseprogression disease "
+                     "WHERE prodtype.id=xref.production_type_id "
+                     "AND xref.progression_id = disease.id",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

@@ -37,6 +37,7 @@
 #include "module_util.h"
 #include "gis.h"
 #include "spatial_search.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -438,13 +439,12 @@ local_free (struct adsm_module_t_ *self)
  * Adds a set of parameters to a ring vaccination model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
@@ -456,14 +456,15 @@ set_params (void *data, int ncols, char **value, char **colname)
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
-  g_assert (ncols == 7);
+  g_assert (g_hash_table_size (dict) == 7);
 
   self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
   /* Find out which production types these parameters apply to. */
   production_type_id =
-    adsm_read_prodtype (value[0], local_data->production_types);
+    adsm_read_prodtype (g_hash_table_lookup (dict, "prodtype"),
+                        local_data->production_types);
 
   /* Check that we are not overwriting an existing parameter block (that would
    * indicate a bug). */
@@ -475,13 +476,13 @@ set_params (void *data, int ncols, char **value, char **colname)
 
   /* Read the parameters. */
   errno = 0;
-  tmp = strtol (value[1], NULL, /* base */ 10);
+  tmp = strtol (g_hash_table_lookup (dict, "trigger_vaccination_ring"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);  
   g_assert (tmp == 0 || tmp == 1);
   if (tmp == 1)
     {
       errno = 0;
-      p->radius = strtod (value[2], NULL);
+      p->radius = strtod (g_hash_table_lookup (dict, "vaccination_ring_radius"), NULL);
       g_assert (errno != ERANGE);
       /* Radius must be positive. */
       if (p->radius < 0)
@@ -497,12 +498,12 @@ set_params (void *data, int ncols, char **value, char **colname)
     }
 
   errno = 0;
-  tmp = strtol (value[3], NULL, /* base */ 10);
+  tmp = strtol (g_hash_table_lookup (dict, "use_vaccination"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
   g_assert (tmp == 0 || tmp == 1);
   if (tmp == 1)
     {
-      tmp = strtol (value[4], NULL, /* base */ 10);
+      tmp = strtol (g_hash_table_lookup (dict, "vaccination_priority"), NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);
       p->priority = tmp;
       if (p->priority < 1)
@@ -511,12 +512,12 @@ set_params (void *data, int ncols, char **value, char **colname)
           p->priority = 1;
         }
 
-      tmp = strtol (value[5], NULL, /* base */ 10);
+      tmp = strtol (g_hash_table_lookup (dict, "vaccinate_detected_units"), NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);
       g_assert (tmp == 0 || tmp == 1);
       p->vaccinate_detected_units = (tmp == 1);
 
-      tmp = strtol (value[6], NULL, /* base */ 10);
+      tmp = strtol (g_hash_table_lookup (dict, "minimum_time_between_vaccinations"), NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);
       if (tmp < 1)
         {
@@ -597,9 +598,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* Call the set_params function to read the production type combination
    * specific parameters. */
-  sqlite3_exec (params,
-                "SELECT prodtype.name,trigger_vaccination_ring,vaccination_ring_radius,use_vaccination,vaccination_priority,vaccinate_detected_units,minimum_time_between_vaccinations FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol vaccine,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=vaccine.id AND (trigger_vaccination_ring=1 OR use_vaccination=1)",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT prodtype.name AS prodtype,trigger_vaccination_ring,vaccination_ring_radius,use_vaccination,vaccination_priority,vaccinate_detected_units,minimum_time_between_vaccinations "
+                     "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol vaccine,ScenarioCreator_protocolassignment xref "
+                     "WHERE prodtype.id=xref.production_type_id "
+                     "AND xref.control_protocol_id=vaccine.id "
+                     "AND (trigger_vaccination_ring=1 OR use_vaccination=1)",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

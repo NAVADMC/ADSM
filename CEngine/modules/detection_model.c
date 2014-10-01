@@ -77,6 +77,7 @@
 
 #include "module.h"
 #include "module_util.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -747,13 +748,12 @@ local_free (struct adsm_module_t_ *self)
  * Adds a set of parameters to a detection model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
@@ -770,11 +770,12 @@ set_params (void *data, int ncols, char **value, char **colname)
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
-  g_assert (ncols == 3);
+  g_assert (g_hash_table_size (dict) == 3);
 
   /* Find out which production type these parameters apply to. */
   production_type =
-    adsm_read_prodtype (value[0], local_data->production_types);
+    adsm_read_prodtype (g_hash_table_lookup (dict, "prodtype"),
+                        local_data->production_types);
 
   /* Check that we are not overwriting an existing parameter block (that would
    * indicate a bug). */
@@ -786,12 +787,12 @@ set_params (void *data, int ncols, char **value, char **colname)
 
   /* Read the parameters. */
   errno = 0;
-  rel_id = strtol (value[1], NULL, /* base */ 10);
+  rel_id = strtol (g_hash_table_lookup (dict, "detection_probability_for_observed_time_in_clinical_id"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);  
   p->prob_report_vs_days_clinical = PAR_get_relchart (params, rel_id);
 
   errno = 0;
-  rel_id = strtol (value[2], NULL, /* base */ 10);
+  rel_id = strtol (g_hash_table_lookup (dict, "detection_probability_report_vs_first_detection_id"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);  
   p->prob_report_vs_days_since_outbreak = PAR_get_relchart (params, rel_id);
 
@@ -809,13 +810,12 @@ set_params (void *data, int ncols, char **value, char **colname)
  * detection model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_zone_params (void *data, int ncols, char **value, char **colname)
+set_zone_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
@@ -829,16 +829,17 @@ set_zone_params (void *data, int ncols, char **value, char **colname)
   self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
-  g_assert (ncols == 3);
+  g_assert (g_hash_table_size (dict) == 3);
 
   /* Find out which zone/production type combination these parameters apply
    * to. */
-  zone = adsm_read_zone (value[0], local_data->zones);
-  production_type = adsm_read_prodtype (value[1], local_data->production_types);
+  zone = adsm_read_zone (g_hash_table_lookup (dict, "zone"), local_data->zones);
+  production_type = adsm_read_prodtype (g_hash_table_lookup (dict, "prodtype"),
+                                        local_data->production_types);
 
   /* Read the parameter. */
   errno = 0;
-  multiplier = strtod (value[2], NULL);
+  multiplier = strtod (g_hash_table_lookup (dict, "zone_detection_multiplier"), NULL);
   g_assert (errno != ERANGE);
   /* The zone multiplier cannot be negative. */
   if (multiplier < 0)
@@ -942,9 +943,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read the production type specific
    * parameters. */
   local_data->db = params;
-  sqlite3_exec (params,
-                "SELECT prodtype.name,detection_probability_for_observed_time_in_clinical_id,detection_probability_report_vs_first_detection_id FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND use_detection=1",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT prodtype.name AS prodtype,detection_probability_for_observed_time_in_clinical_id,detection_probability_report_vs_first_detection_id "
+                     "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref "
+                     "WHERE prodtype.id=xref.production_type_id "
+                     "AND xref.control_protocol_id=protocol.id "
+                     "AND use_detection=1",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
@@ -953,14 +958,14 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* Call the set_zone_params function to read the zone/production type
    * combination specific parameters. */
-  sqlite3_exec (params,
-                "SELECT zone.name,prodtype.name,zone_detection_multiplier "
-                "FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectassignment pairing,ScenarioCreator_zoneeffect effect "
-                "WHERE zone.id=pairing.zone_id "
-                "AND prodtype.id=pairing.production_type_id "
-                "AND effect.id=pairing.effect_id "
-                "AND zone_detection_multiplier IS NOT NULL",
-                set_zone_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT zone.name AS zone,prodtype.name AS prodtype,zone_detection_multiplier "
+                     "FROM ScenarioCreator_zone zone,ScenarioCreator_productiontype prodtype,ScenarioCreator_zoneeffectassignment pairing,ScenarioCreator_zoneeffect effect "
+                     "WHERE zone.id=pairing.zone_id "
+                     "AND prodtype.id=pairing.production_type_id "
+                     "AND effect.id=pairing.effect_id "
+                     "AND zone_detection_multiplier IS NOT NULL",
+                     set_zone_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

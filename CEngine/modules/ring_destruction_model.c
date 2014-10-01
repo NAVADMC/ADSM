@@ -35,6 +35,7 @@
 #include "module_util.h"
 #include "gis.h"
 #include "spatial_search.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -357,13 +358,12 @@ local_free (struct adsm_module_t_ *self)
  * Adds a set of parameters to a ring destruction model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
@@ -376,13 +376,13 @@ set_params (void *data, int ncols, char **value, char **colname)
     g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
   #endif
 
-  g_assert (ncols == 4);
+  g_assert (g_hash_table_size (dict) == 4);
 
   self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
   /* Find out which production type these parameters apply to. */
-  production_type_name = value[0];
+  production_type_name = g_hash_table_lookup (dict, "prodtype");
   production_type_id = adsm_read_prodtype (production_type_name, local_data->production_types);
 
   /* Check that we are not overwriting an existing parameter block (that would
@@ -395,7 +395,7 @@ set_params (void *data, int ncols, char **value, char **colname)
 
   /* Read the parameters. */
   errno = 0;
-  tmp = strtol (value[1], NULL, /* base */ 10);
+  tmp = strtol (g_hash_table_lookup (dict, "destruction_is_a_ring_trigger"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
   g_assert (tmp == 0 || tmp == 1);
   p->triggers_ring = (tmp == 1);
@@ -403,7 +403,7 @@ set_params (void *data, int ncols, char **value, char **colname)
   if (p->triggers_ring)
     {
       errno = 0;
-      p->radius = strtod (value[2], NULL);
+      p->radius = strtod (g_hash_table_lookup (dict, "destruction_ring_radius"), NULL);
       g_assert (errno != ERANGE);
       /* Radius must be positive. */
       if (p->radius < 0)
@@ -414,7 +414,7 @@ set_params (void *data, int ncols, char **value, char **colname)
     }
 
   errno = 0;
-  tmp = strtol (value[3], NULL, /* base */ 10);
+  tmp = strtol (g_hash_table_lookup (dict, "destruction_is_a_ring_target"), NULL, /* base */ 10);
   g_assert (errno != ERANGE && errno != EINVAL);
   g_assert (tmp == 0 || tmp == 1);
   p->include_in_ring = (tmp == 1);
@@ -481,9 +481,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Get a table that shows the priority order for combinations of production
    * type and reason for destruction. */
   local_data->priority_order_table = adsm_read_priority_order (params);
-  sqlite3_exec (params,
-                "SELECT prodtype.name,destruction_is_a_ring_trigger,destruction_ring_radius,destruction_is_a_ring_target FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND (destruction_is_a_ring_trigger=1 OR destruction_is_a_ring_target=1)",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT prodtype.name AS prodtype,destruction_is_a_ring_trigger,destruction_ring_radius,destruction_is_a_ring_target "
+                     "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref "
+                     "WHERE prodtype.id=xref.production_type_id "
+                     "AND xref.control_protocol_id=protocol.id "
+                     "AND (destruction_is_a_ring_trigger=1 OR destruction_is_a_ring_target=1)",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
