@@ -767,8 +767,14 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
                 sum_exposures = sum_exposures + nexposures;                          
               }
               #if DEBUG
-                g_debug ("new_day_event_handler:  Day %i, Needing %i exposures from unit \"%s\", for production_type %i and contact_type %i",
-                         event->day, nexposures, unit1->official_id, i + 1, j + 1 );
+                if (nexposures > 0)
+                {
+                  g_debug ("new_day_event_handler: Day %i, want %i %ss from unit \"%s\" to production_type \"%s\"",
+                           event->day, nexposures, 
+                           ADSM_contact_type_name[contact_type],
+                           unit1->official_id,
+                           (char *) g_ptr_array_index (local_data->production_types, i));
+                }
               #endif
 
               /*  Now create and fillin the 3rd and final dimension of the 
