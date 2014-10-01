@@ -330,11 +330,6 @@ class AirborneSpreadForm(BaseForm):
     class Meta(object):
         model = AirborneSpread
         exclude = ['_spread_method_code', '_disease']
-        try:
-            if Disease.objects.get(id=1).use_airborne_exponential_decay:
-                exclude.append('max_distance')
-        except (ObjectDoesNotExist, OperationalError):
-            pass
         widgets = {'_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'max_distance': NumberInput(attrs={'data-visibility-context': 'use_airborne_exponential_decay',
                                                       'data-visibility-flipped': 'true',
