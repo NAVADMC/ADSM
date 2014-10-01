@@ -30,6 +30,7 @@
 
 #include "module.h"
 #include "module_util.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -296,13 +297,12 @@ get_priority (GHashTable *priority_order_table,
  * Adds a set of parameters to a trace destruction model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
@@ -313,30 +313,34 @@ set_params (void *data, int ncols, char **value, char **colname)
     g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
   #endif
 
-  g_assert (ncols == 5);
+  g_assert (g_hash_table_size (dict) == 5);
 
   self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
   /* Find out which production type these parameters apply to. */
-  production_type_name = value[0];
+  production_type_name = g_hash_table_lookup (dict, "prodtype");
   production_type_id = adsm_read_prodtype (production_type_name, local_data->production_types);
 
   local_data->priority[ADSM_DirectContact][ADSM_TraceBackOrIn][production_type_id]
     = get_priority (local_data->priority_order_table, production_type_name,
-                    ADSM_ControlTraceBackDirect, value[1]);
+                    ADSM_ControlTraceBackDirect,
+                    g_hash_table_lookup (dict, "destroy_direct_back_traces"));
 
   local_data->priority[ADSM_DirectContact][ADSM_TraceForwardOrOut][production_type_id]
     = get_priority (local_data->priority_order_table, production_type_name,
-                    ADSM_ControlTraceForwardDirect, value[2]);
+                    ADSM_ControlTraceForwardDirect,
+                    g_hash_table_lookup (dict, "destroy_direct_forward_traces"));
 
   local_data->priority[ADSM_IndirectContact][ADSM_TraceBackOrIn][production_type_id]
     = get_priority (local_data->priority_order_table, production_type_name,
-                    ADSM_ControlTraceBackIndirect, value[3]);
+                    ADSM_ControlTraceBackIndirect,
+                    g_hash_table_lookup (dict, "destroy_indirect_back_traces"));
 
   local_data->priority[ADSM_IndirectContact][ADSM_TraceForwardOrOut][production_type_id]
     = get_priority (local_data->priority_order_table, production_type_name,
-                    ADSM_ControlTraceForwardIndirect, value[4]);
+                    ADSM_ControlTraceForwardIndirect,
+                    g_hash_table_lookup (dict, "destroy_indirect_forward_traces"));
 
   return 0;
 }
@@ -393,9 +397,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Get a table that shows the priority order for combinations of production
    * type and reason for destruction. */
   local_data->priority_order_table = adsm_read_priority_order (params);
-  sqlite3_exec (params,
-                "SELECT prodtype.name,destroy_direct_back_traces,destroy_direct_forward_traces,destroy_indirect_back_traces,destroy_indirect_forward_traces FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND (destroy_direct_back_traces=1 OR destroy_direct_forward_traces=1 OR destroy_indirect_back_traces=1 OR destroy_indirect_forward_traces=1)",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT prodtype.name AS prodtype,destroy_direct_back_traces,destroy_direct_forward_traces,destroy_indirect_back_traces,destroy_indirect_forward_traces "
+                     "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref "
+                     "WHERE prodtype.id=xref.production_type_id "
+                     "AND xref.control_protocol_id=protocol.id "
+                     "AND (destroy_direct_back_traces=1 OR destroy_direct_forward_traces=1 OR destroy_indirect_back_traces=1 OR destroy_indirect_forward_traces=1)",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

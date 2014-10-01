@@ -31,6 +31,7 @@
 
 #include "module.h"
 #include "module_util.h"
+#include "sqlite3_exec_dict.h"
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -228,13 +229,12 @@ local_free (struct adsm_module_t_ *self)
  * called once for each production type that has basic destruction enabled.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format. * @param colname names of columns in the SQL query result.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
@@ -251,11 +251,11 @@ set_params (void *data, int ncols, char **value, char **colname)
   self = (adsm_module_t *)data;
   local_data = (local_data_t *) (self->model_data);
 
-  g_assert (ncols == 1);
+  g_assert (g_hash_table_size (dict) == 1);
 
   /* Priority numbers are stored in a hash table keyed by strings of the form
    * "production type,reason". */
-  production_type_name = value[0];
+  production_type_name = g_hash_table_lookup (dict, "prodtype");
   key = g_strdup_printf ("%s,%s", production_type_name,
                          ADSM_control_reason_name[ADSM_ControlDetection]);
   p = g_hash_table_lookup (local_data->priority_order_table, key);
@@ -316,9 +316,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * type and reason for destruction. */
   local_data->priority_order_table = adsm_read_priority_order (params);
 
-  sqlite3_exec (params,
-                "SELECT prodtype.name FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref WHERE prodtype.id=xref.production_type_id AND xref.control_protocol_id=protocol.id AND use_destruction=1",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT prodtype.name AS prodtype "
+                     "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref "
+                     "WHERE prodtype.id=xref.production_type_id "
+                     "AND xref.control_protocol_id=protocol.id "
+                     "AND use_destruction=1",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

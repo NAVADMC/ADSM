@@ -239,6 +239,7 @@
 
 #include "module.h"
 #include "module_util.h"
+#include "sqlite3_exec_dict.h"
 #include <limits.h>
 
 #if STDC_HEADERS
@@ -1555,17 +1556,17 @@ local_free (struct adsm_module_t_ *self)
  * Adds a set of parameters to a resources and implementation of controls model.
  *
  * @param data this module ("self"), but cast to a void *.
- * @param ncols number of columns in the SQL query result.
- * @param values values returned by the SQL query, all in text form.
- * @param colname names of columns in the SQL query result.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
  * @return 0
  */
 static int
-set_params (void *data, int ncols, char **value, char **colname)
+set_params (void *data, GHashTable *dict)
 {
   adsm_module_t *self;
   local_data_t *local_data;
   sqlite3 *params;
+  char *tmp_text;
   guint rel_id;
   double dummy;
 
@@ -1577,12 +1578,13 @@ set_params (void *data, int ncols, char **value, char **colname)
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
-  g_assert (ncols == 6);
+  g_assert (g_hash_table_size (dict) == 6);
 
-  if (value[0] != NULL)
+  tmp_text = g_hash_table_lookup (dict, "destruction_program_delay");
+  if (tmp_text != NULL)
     {
       errno = 0;
-      local_data->destruction_program_delay = (int) strtol (value[0], NULL, /* base */ 10);
+      local_data->destruction_program_delay = (int) strtol (tmp_text, NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);
     }
   else
@@ -1590,10 +1592,11 @@ set_params (void *data, int ncols, char **value, char **colname)
       local_data->destruction_program_delay = 0;
     }
 
-  if (value[1] != NULL)
+  tmp_text = g_hash_table_lookup (dict, "destruction_capacity_id");
+  if (tmp_text != NULL)
     {
       errno = 0;
-      rel_id = strtol (value[1], NULL, /* base */ 10);
+      rel_id = strtol (tmp_text, NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);  
       local_data->destruction_capacity = PAR_get_relchart (params, rel_id);
     }
@@ -1614,37 +1617,38 @@ set_params (void *data, int ncols, char **value, char **colname)
       #endif
     }
 
-  if (strcasecmp (value[2], "production type, reason, time waiting") == 0)
+  tmp_text = g_hash_table_lookup (dict, "destruction_priority_order");
+  if (strcasecmp (tmp_text, "production type, reason, time waiting") == 0)
     {
       local_data->destruction_prod_type_priority = 1;
       local_data->destruction_reason_priority = 2;
       local_data->destruction_time_waiting_priority = 3;
     }
-  else if (strcasecmp (value[2], "production type, time waiting, reason") == 0)
+  else if (strcasecmp (tmp_text, "production type, time waiting, reason") == 0)
     {
       local_data->destruction_prod_type_priority = 1;
       local_data->destruction_reason_priority = 3;
       local_data->destruction_time_waiting_priority = 2;
     }
-  else if (strcasecmp (value[2], "reason, production type, time waiting") == 0)
+  else if (strcasecmp (tmp_text, "reason, production type, time waiting") == 0)
     {
       local_data->destruction_prod_type_priority = 2;
       local_data->destruction_reason_priority = 1;
       local_data->destruction_time_waiting_priority = 3;
     }
-  else if (strcasecmp (value[2], "reason, time waiting, production type") == 0)
+  else if (strcasecmp (tmp_text, "reason, time waiting, production type") == 0)
     {
       local_data->destruction_prod_type_priority = 3;
       local_data->destruction_reason_priority = 1;
       local_data->destruction_time_waiting_priority = 2;
     }
-  else if (strcasecmp (value[2], "time waiting, reason, production type") == 0)
+  else if (strcasecmp (tmp_text, "time waiting, reason, production type") == 0)
     {
       local_data->destruction_prod_type_priority = 3;
       local_data->destruction_reason_priority = 2;
       local_data->destruction_time_waiting_priority = 1;
     }
-  else if (strcasecmp (value[2], "time waiting, production type, reason") == 0)
+  else if (strcasecmp (tmp_text, "time waiting, production type, reason") == 0)
     {
       local_data->destruction_prod_type_priority = 2;
       local_data->destruction_reason_priority = 3;
@@ -1660,10 +1664,11 @@ set_params (void *data, int ncols, char **value, char **colname)
       local_data->destruction_time_waiting_priority = 3;
     }
 
-  if (value[3] != NULL)
+  tmp_text = g_hash_table_lookup (dict, "units_detected_before_triggering_vaccination");
+  if (tmp_text != NULL)
     {
       errno = 0;
-      local_data->vaccination_program_threshold = strtol (value[3], NULL, /* base */ 10);
+      local_data->vaccination_program_threshold = strtol (tmp_text, NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);  
     }
   else
@@ -1671,10 +1676,11 @@ set_params (void *data, int ncols, char **value, char **colname)
       local_data->vaccination_program_threshold = 0;
     }
 
-  if (value[4] != NULL)
+  tmp_text = g_hash_table_lookup (dict, "vaccination_capacity_id");
+  if (tmp_text != NULL)
     {
       errno = 0;
-      rel_id = strtol (value[4], NULL, /* base */ 10);
+      rel_id = strtol (tmp_text, NULL, /* base */ 10);
       g_assert (errno != ERANGE && errno != EINVAL);  
       local_data->vaccination_capacity = PAR_get_relchart (params, rel_id);
     }
@@ -1695,37 +1701,38 @@ set_params (void *data, int ncols, char **value, char **colname)
       #endif
     }
 
-  if (strcasecmp (value[5], "production type, reason, time waiting") == 0)
+  tmp_text = g_hash_table_lookup (dict, "vaccination_priority_order");
+  if (strcasecmp (tmp_text, "production type, reason, time waiting") == 0)
     {
       local_data->vaccination_prod_type_priority = 1;
       local_data->vaccination_reason_priority = 2;
       local_data->vaccination_time_waiting_priority = 3;
     }
-  else if (strcasecmp (value[5], "production type, time waiting, reason") == 0)
+  else if (strcasecmp (tmp_text, "production type, time waiting, reason") == 0)
     {
       local_data->vaccination_prod_type_priority = 1;
       local_data->vaccination_reason_priority = 3;
       local_data->vaccination_time_waiting_priority = 2;
     }
-  else if (strcasecmp (value[5], "reason, production type, time waiting") == 0)
+  else if (strcasecmp (tmp_text, "reason, production type, time waiting") == 0)
     {
       local_data->vaccination_prod_type_priority = 2;
       local_data->vaccination_reason_priority = 1;
       local_data->vaccination_time_waiting_priority = 3;
      }
-  else if (strcasecmp (value[5], "reason, time waiting, production type") == 0)
+  else if (strcasecmp (tmp_text, "reason, time waiting, production type") == 0)
     {
       local_data->vaccination_prod_type_priority = 3;
       local_data->vaccination_reason_priority = 1;
       local_data->vaccination_time_waiting_priority = 2;
     }
-  else if (strcasecmp (value[5], "time waiting, reason, production type") == 0)
+  else if (strcasecmp (tmp_text, "time waiting, reason, production type") == 0)
     {
       local_data->vaccination_prod_type_priority = 3;
       local_data->vaccination_reason_priority = 2;
       local_data->vaccination_time_waiting_priority = 1;
     }
-  else if (strcasecmp (value[5], "time waiting, production type, reason") == 0)
+  else if (strcasecmp (tmp_text, "time waiting, production type, reason") == 0)
     {
       local_data->vaccination_prod_type_priority = 2;
       local_data->vaccination_reason_priority = 3;
@@ -1817,9 +1824,10 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* Call the set_params function to read the parameters. */
   local_data->db = params,
-  sqlite3_exec (params,
-                "SELECT destruction_program_delay,destruction_capacity_id,destruction_priority_order,units_detected_before_triggering_vaccination,vaccination_capacity_id,vaccination_priority_order FROM ScenarioCreator_controlmasterplan",
-                set_params, self, &sqlerr);
+  sqlite3_exec_dict (params,
+                     "SELECT destruction_program_delay,destruction_capacity_id,destruction_priority_order,units_detected_before_triggering_vaccination,vaccination_capacity_id,vaccination_priority_order "
+                     "FROM ScenarioCreator_controlmasterplan",
+                     set_params, self, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
