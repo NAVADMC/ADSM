@@ -19,13 +19,15 @@ from future.builtins import *
 
 from django.http import HttpResponse
 from matplotlib.colors import ListedColormap
-from matplotlib.patches import Circle
+from matplotlib.patches import Circle, Rectangle
 from matplotlib import pyplot, colors
 import numpy as np
 import mpld3
 from Results.models import Unit
 from Results.summary import list_of_iterations
-from math import ceil
+
+
+kilometers_in_one_latitude_degree = 111.13  # https://au.answers.yahoo.com/question/index?qid=20100815170802AAZe1AZ
 
 
 def define_color_mappings():
@@ -60,9 +62,8 @@ def define_color_mappings():
 
 
 def graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus):
-    kilometers_in_one_latitude_degree = 111.13  # https://au.answers.yahoo.com/question/index?qid=20100815170802AAZe1AZ
     for i, freq in [(index, n_times) for index, n_times in enumerate(zone_focus) if n_times > 0]:
-        ax.add_patch(Circle(xy=(latitude[i], longitude[i]),
+        ax.add_patch(Circle(xy=(longitude[i], latitude[i]),
                             color=zone_blues(freq / total_iterations),
                             radius=15.0 / kilometers_in_one_latitude_degree,
                             linewidth=0,
@@ -70,56 +71,69 @@ def graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focu
         ))
 
 
+def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated, destroyed):
+    for i in range(len(infected)):
+        if infected[i] > 0:
+            #infected
+            marker_size = 3.0
+            width = marker_size / kilometers_in_one_latitude_degree / 3
+            ax.add_patch(Rectangle(xy=(longitude[i], latitude[i]),
+                                color = (0.741, 0.0, 0.149),
+                                width = width,
+                                height= marker_size / kilometers_in_one_latitude_degree * infected[i] / total_iterations,
+                                zorder=2000))
+            #vaccinated
+            ax.add_patch(Rectangle(xy=(longitude[i]+width, latitude[i]),
+                                   color=(0.1373, 0.5451, 0.2706),
+                                   width= width,
+                                   height= marker_size / kilometers_in_one_latitude_degree * vaccinated[i] / total_iterations,
+                                   zorder=2000))
+            #destroyed
+            ax.add_patch(Rectangle(xy=(longitude[i] + width*2, latitude[i]),
+                                   color=(0.3, 0.27, 0.27),
+                                   width=width,
+                                   height= marker_size / kilometers_in_one_latitude_degree * destroyed[i] / total_iterations,
+                                   zorder=2000))
+
 
 def population_d3_map(request):
     fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(12,12))
     ax.grid(color='white', linestyle='solid')
     ax.set_title("Population Locations and IDs", size=20)
 
-    pop_size = Unit.objects.count()
     total_iterations = float(len(list_of_iterations()))  # This is slower but more accurate than OutputSettings[0].iterations
     queryset = Unit.objects.all().order_by('unitstats__cumulative_infected')  # sort by N infected
     # It might be faster to request a flat value list and then construct new tuples based on that
-    latlong = [(u.latitude, u.longitude, u.unitstats.cumulative_infected, u.unitstats.cumulative_zone_focus, u.unitstats.cumulative_destroyed,
+    latlong = [(u.latitude, u.longitude, 
+                u.unitstats.cumulative_infected, 
+                u.unitstats.cumulative_vaccinated,
+                u.unitstats.cumulative_destroyed,
+                u.unitstats.cumulative_zone_focus, 
                 "%s %s %i" % (u.production_type.name, u.user_notes, u.unitstats.cumulative_destroyed) 
                 ) for u in queryset]
-    latitude, longitude, number_infected, zone_focus, destroyed, names = zip(*latlong)
+    latitude, longitude, infected, vaccinated, destroyed, zone_focus, names = zip(*latlong)
     zone_blues, red_infected, green_vaccinated = define_color_mappings()
 
     graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus)
-    
-    #the relation between sizes and black_rings was calculated to preserve the size of the inner colored dot,
-    #the ratio compensates for size being squared and half the radius being eaten by the line width,
-    #this ratio would probably be thrown off if you change the starting square pixels from 30.  Don't do that.
-    sizes = [30 + ((d/total_iterations)/.0866)**2 for d in destroyed]  # Size in square pixels
-    black_rings = [ceil((d/total_iterations)/.15) for d in destroyed]
+    graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated, destroyed)  
     
     # to ensure zero occurrences has a different color
     non_zero_values = colors.Normalize(vmin=.001, vmax=1.0, clip=False)
     red_infected.set_under((0.6, 0.6, 0.6, 1.0))  # dark grey
-    infected = ax.scatter(latitude,
-                         longitude,
-                         c=[x / total_iterations for x in number_infected],
-                         s=sizes,
-                         alpha=1.0,
-                         cmap=red_infected,
-                         norm=non_zero_values,
-                         edgecolor='k',
-                         linewidths=black_rings,
-                         zorder=2000)
+    # infected = ax.scatter(longitude,
+    #                      latitude,
+    #                      c=[x / total_iterations for x in infected],
+    #                      s=30,
+    #                      alpha=1.0,
+    #                      cmap=red_infected,
+    #                      norm=non_zero_values,
+    #                      edgecolor='k',
+    #                      linewidths=0,
+    #                      zorder=1000)
     # Begin mpld3 specific code
-    tooltip = mpld3.plugins.PointLabelTooltip(infected, labels=names)
-    mpld3.plugins.connect(fig, tooltip)
+    # tooltip = mpld3.plugins.PointLabelTooltip(infected, labels=names)
+    # mpld3.plugins.connect(fig, tooltip)
 
-
-    # destroyed = ax.scatter(latitude,
-    #                        longitude,
-    #                        c='black',
-    #                        s=[30] * pop_size,  # Size in square pixels
-    #                        alpha=1.0,
-    #                        linewidths=0,
-    #                        zorder=1000)
-   
     
     html = mpld3.fig_to_html(fig, d3_url=None, mpld3_url=None, no_extras=False,
                 template_type="general", figid=None, use_http=False)
