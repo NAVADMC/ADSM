@@ -156,7 +156,7 @@ def results_home(request):
     if DailyControls.objects.all().count() > 0:
         context['summary'] = Results.summary.summarize_results()
         context['iterations'] = len(list_of_iterations())
-        context['large_population'] = Unit.objects.count() > 20000  # determines slower interactive map vs fast matplotlib
+        context['large_population'] = Unit.objects.count() > 2000  # determines slower interactive map vs fast matplotlib
     return render(request, 'Results/SimulationProgress.html', context)
 
 
