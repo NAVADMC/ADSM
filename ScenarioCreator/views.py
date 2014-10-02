@@ -222,7 +222,7 @@ def relational_function(request, primary_key=None, doCopy=False):
     It is possible to integrate this code back into the standard new / edit / copy views by checking for
     context['formset'].  The extra logic for formsets could be kicked in only when one or more formsets are present."""
     context = initialize_relational_form({}, primary_key, request)
-    context['formset'] = PointFormSet(instance=context['model'])
+    context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
     if context['form'].is_valid():
         if doCopy:
             context['form'].instance.pk = None  # This will cause a new instance to be created
@@ -443,22 +443,33 @@ def upload_population(request):
 def upload_points(request):
     import csv  # TODO this SHOULD be the 3.3 version from python-future.org...
     filename = handle_file_upload(request)
-    try:
-        with open(filename) as csvfile:
-            dialect = csv.Sniffer().sniff(csvfile.read(1024))
-            csvfile.seek(0)
-            header = csv.Sniffer().has_header(csvfile.read(1024))
-            csvfile.seek(0)
-            if header:
-                header = None  #DictReader will pull it off the first line
-            else:
-                header = ['x', 'y']
-            reader = csv.DictReader(csvfile, fieldnames=header, dialect=dialect)
-            entries = [line for line in reader]  # ordered list
-        return HttpResponse(json.dumps(entries), content_type="application/json")
-    except BaseException as e:
-        return HttpResponse('{"status": "failed", "message": "%s"}' % e, content_type="application/json")
-
+    with open(filename) as csvfile:
+        dialect = csv.Sniffer().sniff(csvfile.read(1024))
+        csvfile.seek(0)
+        header = csv.Sniffer().has_header(csvfile.read(1024))
+        csvfile.seek(0)
+        if header:
+            header = None  #DictReader will pull it off the first line
+        else:
+            header = ['x', 'y']
+        reader = csv.DictReader(csvfile, fieldnames=header, dialect=dialect)
+        #TODO: lower case the user provided header
+        entries = [line for line in reader]  # ordered list
+        initial_values = {}
+        for index, point in enumerate(entries):
+            initial_values['relationalpoint_set-%i-id' % index] = ''
+            initial_values['relationalpoint_set-%i-relational_function' % index] = ''
+            initial_values['relationalpoint_set-%i-x' % index] = point['x']
+            initial_values['relationalpoint_set-%i-y' % index] = point['y']
+        initial_values['relationalpoint_set-TOTAL_FORMS'] = str(len(entries))
+        initial_values['relationalpoint_set-INITIAL_FORMS'] = '0'
+        initial_values['relationalpoint_set-MAX_NUM_FORMS'] = '1000'
+        request.POST.update(initial_values)
+        try:
+            os.remove(workspace_path(filename))  # we don't want to keep these files around in the workspace
+        except: pass  # possible that file was never created
+    return relational_function(request)
+   
 
 def filtering_params(request):
     """Collects the list of parameters to filter by.  Because of the way this is setup:
