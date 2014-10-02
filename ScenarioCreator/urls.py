@@ -45,6 +45,7 @@ urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
 
                                          "url('^Populations/$', 'ScenarioCreator.views.population')",
                                          "url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population')",
+                                         "url('^UploadFunction/$', 'ScenarioCreator.views.upload_points')",
                                          "url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario')",
                                         ])
 

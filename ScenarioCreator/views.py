@@ -440,6 +440,26 @@ def upload_population(request):
     return HttpResponse('{"status": "complete", "redirect": "/setup/Populations/"}', content_type="application/json")
 
 
+def upload_points(request):
+    import csv  # TODO this SHOULD be the 3.3 version from python-future.org...
+    filename = handle_file_upload(request)
+    try:
+        with open(filename) as csvfile:
+            dialect = csv.Sniffer().sniff(csvfile.read(1024))
+            csvfile.seek(0)
+            header = csv.Sniffer().has_header(csvfile.read(1024))
+            csvfile.seek(0)
+            if header:
+                header = None  #DictReader will pull it off the first line
+            else:
+                header = ['x', 'y']
+            reader = csv.DictReader(csvfile, fieldnames=header, dialect=dialect)
+            entries = [line for line in reader]  # ordered list
+        return HttpResponse(json.dumps(entries), content_type="application/json")
+    except BaseException as e:
+        return HttpResponse('{"status": "failed", "message": "%s"}' % e, content_type="application/json")
+
+
 def filtering_params(request):
     """Collects the list of parameters to filter by.  Because of the way this is setup:
     1) Only keys mentioned in this list will be used (security, functionality).

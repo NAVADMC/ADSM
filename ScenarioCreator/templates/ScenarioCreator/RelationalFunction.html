@@ -10,9 +10,17 @@
     {% endif %}
     {{ title }}</h1>
 
+    
+{#  Import Button  #}
+{#    <button class="btn btn-primary button white" id="import_rel_function">Import Points from File...</button>#}
+<form id="file-upload" method="post" action="/setup/UploadFunction/" enctype="multipart/form-data">
+    <input type="file" name="file" accept="text/csv">
+    <button type="submit" class="btn btn-primary">Import Points from File... &nbsp<img src="{{ STATIC_URL }}icons/upload.png" class="icon"></button>
+</form>
+
 <form method="post">
     {% crispy form %}
-
+    
     {% include "ScenarioCreator/EmbeddedFormset.html" %}
     {% include "ScenarioCreator/EditButtons.html" %}
 </form>
