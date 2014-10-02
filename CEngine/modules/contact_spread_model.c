@@ -183,6 +183,7 @@ typedef struct
   int public_announcement_day;
   sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
     so that it will be available to the set_params function. */
+  GPtrArray ***desired_contacts; /**< A 3D array that is used repeatedly. */
 }
 local_data_t;
 
@@ -660,8 +661,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
   for ( contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++ )
     j++;
 
-  /*  Begin building 1-dimension of the attempted exposure matrix */
-  _contacts = g_new( GPtrArray **, nprod_types );
+  _contacts = local_data->desired_contacts;
   
   /*  Set some more callback data for check_and_choose to use */
   callback_data.contact_count = j;
@@ -671,13 +671,9 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
   /*  Iterate over all contact/production-type pairs and build the remaining dimensions of the matrix of desired matches for exposure attempts */
   for (i = 0; i < nprod_types; i++)
   {        
-    _contacts[i] = g_new( GPtrArray *, callback_data.contact_count );
     for ( j = 0, contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; j++, contact_type++ )
     {
       contact_type_block = local_data->param_block[contact_type][unit1->production_type];
-
-      /*  Create this element of the 2nd Dimension of the exposure attempt matrix */
-      _contacts[i][j] = g_ptr_array_new();
 
       if (contact_type_block != NULL)
       {
@@ -864,7 +860,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
     /*  Okay, now we "should" have all the "best" fit's for each desired 
         contact/production-type pair, items.  */
     /*  Iterate over the results and post exposure and infection events 
-        when applicable, and simultaneously delete dynamic memory used */
+        when applicable. */
     for( i = 0; i < nprod_types; i++ )
     {
       for( j = 0, contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; j++, contact_type++ )
@@ -1022,38 +1018,18 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
 #endif
                 ;
               };  /*  END if a unit match was found */
-                  
-              /*  Free the structure memory stored at this location in this GPtrArray  */
-              g_free( tsub );
-                    
             };  /*  END for loop iteration over this GPtrArray  */
           };
 
-          /* Free memory for GPtrArray */
-          g_ptr_array_free( t_array, TRUE );
-          _contacts[i][j] = NULL; /* just in case */
+          /* Empty the GPtrArray of exposures. This will free the
+           * sub_callback_t objects it points to, because we specified an
+           * element_free_func when we created the GPtrArray. */
+          g_ptr_array_set_size( t_array, 0 );
 
         }; /*  END iteration over production_types  */
       };
-
-      /* Free memory for this row */
-      g_free( _contacts[i] );
     }; /*  END iteration over contact_types  */
   } /*  END if contact count > 0 */
-  else
-  {
-    /* Free memory */
-    for (i = 0; i < nprod_types; i++)
-    {
-      for( j = 0, contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++, j++ )
-      {
-        g_ptr_array_free (_contacts[i][j], TRUE);
-      }
-      g_free( _contacts[i] );
-    }
-  }
-  g_free( _contacts );
-  _contacts = NULL;  /*  just in case */
   
 #if DEBUG
   g_debug ("----- EXIT new_day_event_handler - Optimized Version" );
@@ -1591,7 +1567,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_PublicAnnouncement,
     0
   };
-  unsigned int nprod_types, nzones, i;
+  unsigned int nprod_types, nzones, i, j;
   char *sqlerr;
 
 #if DEBUG
@@ -1653,6 +1629,20 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   g_ptr_array_add (local_data->pending_infections, g_queue_new ());
   local_data->npending_infections = 0;
   local_data->rotating_index = 0;
+
+  /* Initialize a 3D array of desired contacts. This array will be used
+   * repeatedly when searching for recipients of contacts. */
+  local_data->desired_contacts = g_new (GPtrArray **, nprod_types);
+  for (i = 0; i < nprod_types; i++)
+    {
+      local_data->desired_contacts[i] = g_new (GPtrArray *, 2);
+      for (j = 0; j < 2; j++)
+        {
+          local_data->desired_contacts[i][j] =
+            g_ptr_array_new_full (/* reserved_size = */ 8,
+                                  /* element_free_func = */ g_free);
+        }
+    }
 
   /* Call the set_params function to read the from-production-type/
    * to-production-type combination specific parameters. */
