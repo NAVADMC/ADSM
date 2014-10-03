@@ -13,9 +13,8 @@
 
 <form method="post" enctype="multipart/form-data">
     {% crispy form %}
-    
-    <input type="file" name="file" accept="text/csv">
-    <button type="submit" id="point-upload" class="btn btn-primary">Import Points from File... &nbsp<img src="{{ STATIC_URL }}icons/upload.png" class="icon"></button>
+    <label for="file">Or Import Points from File... &nbsp</label>    
+    <input type="file" id="file" name="file" accept="text/csv">
 
     {% include "ScenarioCreator/EmbeddedFormset.html" %}
     {% include "ScenarioCreator/EditButtons.html" %}
