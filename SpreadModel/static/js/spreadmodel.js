@@ -263,7 +263,7 @@ var modelModal = {
     },
 
     populate_modal_body: function($newForm, modal) {
-        var $form = $newForm.find('form:not(.ajax)');
+        var $form = $newForm.find('form:not(.ajax, .admin)');
         $form.find('.buttonHolder').remove();
         modal.find('.modal-body').html($form);
         return $form;
