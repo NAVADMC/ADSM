@@ -76,7 +76,7 @@ class UnitForm(BaseForm):
 class UnitFormAbbreviated(BaseForm):
     class Meta(object):
         model = Unit
-        exclude = ['days_in_initial_state', 'days_left_in_initial_state', 'user_notes']
+        exclude = ['_population', 'days_in_initial_state', 'days_left_in_initial_state', 'user_notes']
 
 
 class ProbabilityFunctionForm(BaseForm):
