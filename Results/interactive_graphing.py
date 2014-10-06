@@ -14,6 +14,8 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
+from Results.graphing import HttpFigure, rstyle
+
 standard_library.install_hooks()
 from future.builtins import *
 
@@ -94,11 +96,23 @@ def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated
                                    width=width,
                                    height= marker_size / kilometers_in_one_latitude_degree * destroyed[i] / total_iterations,
                                    zorder=2000))
+        if infected[i] > 0 or vaccinated[i] > 0 or destroyed[i] > 0:
+            ax.add_patch(Rectangle(xy=(longitude[i] - half, latitude[i] - half),
+                                   fill=None,
+                                   alpha=0.1,
+                                   edgecolor='k',
+                                   linestyle='solid',
+                                   width=width*3,
+                                   height=width*3,
+                                   zorder=1500))
 
 
 def population_d3_map(request):
-    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(15,12))
+    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(60,52), frameon=False)
+    pyplot.tight_layout()
+    ax.autoscale_view('tight')
     ax.grid(color='white', linestyle='solid')
+    rstyle(ax)
     ax.set_title("Population Locations and IDs", size=20)
 
     total_iterations = float(len(list_of_iterations()))  # This is slower but more accurate than OutputSettings[0].iterations
@@ -122,19 +136,20 @@ def population_d3_map(request):
     # to ensure zero occurrences has a different color
     uninvolved = ax.scatter(longitude,
                             latitude,
-                            s=30,
+                            s=70,
                             color=(0.6, 0.6, 0.6, 1.0),
-                            edgecolor='k',
                             linewidths=0,
                             zorder=1000)
+    return HttpFigure(fig)
+    
     # Begin mpld3 specific code
     # tooltip = mpld3.plugins.PointLabelTooltip(infected, labels=names)
     # mpld3.plugins.connect(fig, tooltip)
 
     
-    html = mpld3.fig_to_html(fig, d3_url=None, mpld3_url=None, no_extras=False,
-                template_type="general", figid=None, use_http=False)
-    return HttpResponse(html)
+    # html = mpld3.fig_to_html(fig, d3_url=None, mpld3_url=None, no_extras=False,
+    #             template_type="general", figid=None, use_http=False)
+    # return HttpResponse(html)
 
 
 
