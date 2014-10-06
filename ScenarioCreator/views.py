@@ -251,7 +251,8 @@ def relational_function(request, primary_key=None, doCopy=False):
     foreignkey back to the RelationalFunction which must be created before it can be referenced.
 
     It is possible to integrate this code back into the standard new / edit / copy views by checking for
-    context['formset'].  The extra logic for formsets could be kicked in only when one or more formsets are present."""
+    context['formset'].  The extra logic for formsets could be kicked in only when one or more formsets are present. At
+    the moment integration looks like a bad idea because it would mangle the happy path for the sake of one edge case."""
     context = initialize_relational_form({}, primary_key, request)
     if 'file' in request.FILES:  # data file is present
         request = initialize_points_from_csv(request)

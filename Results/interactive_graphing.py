@@ -72,24 +72,24 @@ def graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focu
 
 
 def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated, destroyed):
+    marker_size = 3.0
+    width = marker_size / kilometers_in_one_latitude_degree / 3
+    half = width * 1.5
     for i in range(len(infected)):
         if infected[i] > 0:
-            #infected
-            marker_size = 3.0
-            width = marker_size / kilometers_in_one_latitude_degree / 3
-            ax.add_patch(Rectangle(xy=(longitude[i], latitude[i]),
-                                color = (0.741, 0.0, 0.149),
-                                width = width,
-                                height= marker_size / kilometers_in_one_latitude_degree * infected[i] / total_iterations,
-                                zorder=2000))
-            #vaccinated
-            ax.add_patch(Rectangle(xy=(longitude[i]+width, latitude[i]),
-                                   color=(0.1373, 0.5451, 0.2706),
+            ax.add_patch(Rectangle(xy=(longitude[i] - half, latitude[i] - half),
+                                   color = (0.89, 0.102, 0.11),
+                                   width = width,
+                                   height= marker_size / kilometers_in_one_latitude_degree * infected[i] / total_iterations,
+                                   zorder=2000))
+        if vaccinated[i] > 0:
+            ax.add_patch(Rectangle(xy=(longitude[i] - width *.5, latitude[i] - half),
+                                   color=(0.2549, 0.6706, 0.3647),
                                    width= width,
                                    height= marker_size / kilometers_in_one_latitude_degree * vaccinated[i] / total_iterations,
                                    zorder=2000))
-            #destroyed
-            ax.add_patch(Rectangle(xy=(longitude[i] + width*2, latitude[i]),
+        if destroyed[i] > 0:
+            ax.add_patch(Rectangle(xy=(longitude[i] + width * .5, latitude[i] - half),
                                    color=(0.3, 0.27, 0.27),
                                    width=width,
                                    height= marker_size / kilometers_in_one_latitude_degree * destroyed[i] / total_iterations,
@@ -97,7 +97,7 @@ def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated
 
 
 def population_d3_map(request):
-    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(12,12))
+    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(15,12))
     ax.grid(color='white', linestyle='solid')
     ax.set_title("Population Locations and IDs", size=20)
 
@@ -113,23 +113,20 @@ def population_d3_map(request):
                 ) for u in queryset]
     latitude, longitude, infected, vaccinated, destroyed, zone_focus, names = zip(*latlong)
     zone_blues, red_infected, green_vaccinated = define_color_mappings()
-
+    
     graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus)
     graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated, destroyed)  
     
+    longitude = [entry[1] for entry in latlong if not any(x > 0 for x in (entry[2], entry[3], entry[4]))]
+    latitude =  [entry[0] for entry in latlong if not any(x > 0 for x in (entry[2], entry[3], entry[4]))]
     # to ensure zero occurrences has a different color
-    non_zero_values = colors.Normalize(vmin=.001, vmax=1.0, clip=False)
-    red_infected.set_under((0.6, 0.6, 0.6, 1.0))  # dark grey
-    # infected = ax.scatter(longitude,
-    #                      latitude,
-    #                      c=[x / total_iterations for x in infected],
-    #                      s=30,
-    #                      alpha=1.0,
-    #                      cmap=red_infected,
-    #                      norm=non_zero_values,
-    #                      edgecolor='k',
-    #                      linewidths=0,
-    #                      zorder=1000)
+    uninvolved = ax.scatter(longitude,
+                            latitude,
+                            s=30,
+                            color=(0.6, 0.6, 0.6, 1.0),
+                            edgecolor='k',
+                            linewidths=0,
+                            zorder=1000)
     # Begin mpld3 specific code
     # tooltip = mpld3.plugins.PointLabelTooltip(infected, labels=names)
     # mpld3.plugins.connect(fig, tooltip)
