@@ -2,6 +2,12 @@
 <html>
 <head>
     <title>ADSM - Animal Disease Spread Model</title>
+    {#Javascript context variables#}
+    <script type="text/javascript">
+        {% for var_name, value in javascript_variables.items %}
+            var {{var_name}} = {{value}};
+        {% endfor %}
+    </script>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/spreadmodel.css" />
     <script src="{{ STATIC_URL }}js/jquery-2.1.0.min.js"></script>
@@ -44,12 +50,6 @@
     </div>
 </header>
 
-{#Javascript context variables#}
-<script type="text/javascript">
-    {% for var_name, value in javascript_variables.items %}
-        var {{var_name}} = {{value}};
-    {% endfor %}
-</script>
 {% block main %}
 
 {% endblock %}
