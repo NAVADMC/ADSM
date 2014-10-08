@@ -196,7 +196,7 @@ $(function(){
     
     $(document).on('submit','#file-upload',function(event){
         var filename = $(this).find('input[type=file]').val()
-        var file_extension = /application\/(x-|)(.*)/g.exec($(this).find('input[type=file]').attr('accept'))[2]
+        var file_extension = /application|text\/(x-|)(.*)/g.exec($(this).find('input[type=file]').attr('accept'))[2]
         if( filename.indexOf(file_extension) == -1) {
             alert("Uploaded files must have "+file_extension+" in the name: " + filename)
             console.log(file_extension)
@@ -237,11 +237,51 @@ var check_file_saved = function(){
     }
 }
 
+function ajax_file(){
+    var file = this.files[0];
+    var formData = new FormData($('*formId*')[0]);
+    $.ajax({
+        url: 'script',  //server script to process data
+        type: 'POST',
+        xhr: function() {  // custom xhr
+            myXhr = $.ajaxSettings.xhr();
+            if(myXhr.upload){ // if upload property exists
+                myXhr.upload.addEventListener('progress', progressHandlingFunction, false); // progressbar
+            }
+            return myXhr;
+        },
+        //Ajax events
+        success: completeHandler = function(data) {
+            /*
+            * workaround for crome browser // delete the fakepath
+            */
+            if(navigator.userAgent.indexOf('Chrome')) {
+                var catchFile = $(":file").val().replace(/C:\\fakepath\\/i, '');
+            }
+            else {
+                var catchFile = $(":file").val();
+            }
+            var writeFile = $(":file");
+            writeFile.html(writer(catchFile));
+            $("*setIdOfImageInHiddenInput*").val(data.logo_id);
+        },
+        error: errorHandler = function() {
+            alert("Något gick fel");
+        },
+        // Form data
+        data: formData,
+        //Options to tell JQuery not to process data or worry about content-type
+        cache: false,
+        contentType: false,
+        processData: false
+    }, 'json');
+}
+
 
 var modelModal = {
 
     ajax_submit: function($form, url, success_callback, fail_callback){
-        return $.post(url, $form.serialize(), function(data, status, xhr){
+        return $.ajax({url: url, type: "POST", data: new FormData($form[0]), success: function(data, status, xhr){
             if(typeof(data) == 'object') {
                 if (data['status']=='success') { //redundant for now
                     success_callback(data)
@@ -249,7 +289,9 @@ var modelModal = {
             } else {//html dataType  == failure probably validation errors
                 fail_callback(data)
             }
-        });
+        },
+        processData: false,
+        contentType: false});
     },
 
     ajax_success: function(modal, selectInput){
@@ -263,7 +305,7 @@ var modelModal = {
     },
 
     populate_modal_body: function($newForm, modal) {
-        var $form = $newForm.find('form:not(.ajax)');
+        var $form = $newForm.find('form:not(.ajax, .admin)').first();
         $form.find('.buttonHolder').remove();
         modal.find('.modal-body').html($form);
         return $form;

@@ -18,8 +18,38 @@ var many_to_many_widget;
 })(jQuery);
 
 
+safe_save = function(fn){
+    if(!outputs_computed) { 
+        fn()
+    } else { //confirmation dialog so we don't clobber outputs
+        var dialog = new BootstrapDialog.show({
+            title: 'Delete Results Confirmation',
+            type: BootstrapDialog.TYPE_WARNING,
+            message: 'You must delete your previously computed <strong><u>Results</u></strong> to change input parameters.  Are you sure you want to delete your Results?',
+            buttons: [
+                {
+                    label: 'Cancel',
+                    cssClass: 'btn',
+                    action: function(dialog){
+                        window.location.reload()
+                    }
+                },
+                {
+                    label: 'Delete Results',
+                    cssClass: 'btn-danger',
+                    action: function(dialog){
+                        outputs_computed = false
+                        fn()
+                        window.location.reload()
+                    }
+                }
+            ]
+        });
+    }
+}
     
-check_disable_spread_checboxes = function(){
+
+check_disable_spread_checboxes = function(post_changes){
     var elements = $('table').first().find('tr:first-child th:nth-child(n+3)')
     $(elements).each(function(index){
         var active = $(this).find('input').prop('checked');
@@ -32,14 +62,15 @@ check_disable_spread_checboxes = function(){
             }
         })
     });
-    var data = {}; 
-    $(elements).each(function(index){
-        var field_name = 'include_'+ $(this).text().replace(/ /g, '_').toLowerCase()
-        var active = $(this).find('input').prop('checked');
-        data[field_name] = active;
-    });
-    $.post('/setup/IncludeSpreads/', data);
-                
+    if(post_changes) {
+        var data = {}; 
+        $(elements).each(function(index){
+            var field_name = 'include_'+ $(this).text().replace(/ /g, '_').toLowerCase()
+            var active = $(this).find('input').prop('checked');
+            data[field_name] = active;
+        });
+        safe_save(function(){$.post('/setup/IncludeSpreads/', data)});
+    }
 }
 
 
@@ -121,7 +152,7 @@ form_state = (function(form){
                 $('#'+input_name).val(variables[key]);
             }
         })
-        save();
+        safe_save(save);
     };
 
     var save = debounce(function() {
@@ -145,14 +176,14 @@ many_to_many_widget = (function(form_state){
         $.get('/setup/IncludeSpreads/', function(data){
             my_table.find('tr:first-child th:nth-child(n+3)').each(function(index){
                 var field_name = 'include_'+ $(this).text().replace(/ /g, '_').toLowerCase() 
-                var myInput = $('<input type="checkbox" name="' + field_name + '">');
+                var $myInput = $('<input type="checkbox" name="' + field_name + '">');
                 $(this).html(
-                    $('<label class="checkbox">' + $(this).text() + '</label>').prepend(myInput)
+                    $('<label class="checkbox">' + $(this).text() + '</label>').prepend($myInput)
                 );
-                myInput.prop('checked', data[field_name]);
-                myInput.on('change', check_disable_spread_checboxes);
+                $myInput.prop('checked', data[field_name]);
+                $myInput.on('change', function(){check_disable_spread_checboxes(true)});
             });
-            check_disable_spread_checboxes();
+            check_disable_spread_checboxes(false);
         });
     }
     

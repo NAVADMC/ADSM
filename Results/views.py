@@ -122,7 +122,7 @@ class Simulation(threading.Thread):
         super(Simulation, self).__init__(**kwargs)
 
     def run(self):
-        executables = {"Windows": 'adsm.exe', "Linux": 'adsm'}
+        executables = {"Windows": 'adsm.exe', "Linux": 'adsm', "Darwin": 'adsm'}
         system_executable = os.path.join(settings.BASE_DIR, executables[platform.system()])  #TODO: KeyError
         database_file = os.path.basename(settings.DATABASES['scenario_db']['NAME'])
         output_args = prepare_supplemental_output_directory()
@@ -156,7 +156,7 @@ def results_home(request):
     if DailyControls.objects.all().count() > 0:
         context['summary'] = Results.summary.summarize_results()
         context['iterations'] = len(list_of_iterations())
-        context['large_population'] = Unit.objects.count() > 20000  # determines slower interactive map vs fast matplotlib
+        context['large_population'] = Unit.objects.count() > 2000  # determines slower interactive map vs fast matplotlib
     return render(request, 'Results/SimulationProgress.html', context)
 
 
