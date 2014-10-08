@@ -731,7 +731,7 @@ run_sim_main (sqlite3 *scenario_db,
 #endif
   if (nunits == 0)
     {
-      g_error ("no units in scenario database");
+      g_warning ("no units in scenario database");
     }
 
   /* Project the unit locations onto a flat map, if they aren't already. */
