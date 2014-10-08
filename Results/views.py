@@ -122,7 +122,7 @@ class Simulation(threading.Thread):
         super(Simulation, self).__init__(**kwargs)
 
     def run(self):
-        executables = {"Windows": 'adsm.exe', "Linux": 'adsm'}
+        executables = {"Windows": 'adsm.exe', "Linux": 'adsm', "Darwin": 'adsm'}
         system_executable = os.path.join(settings.BASE_DIR, executables[platform.system()])  #TODO: KeyError
         database_file = os.path.basename(settings.DATABASES['scenario_db']['NAME'])
         output_args = prepare_supplemental_output_directory()
