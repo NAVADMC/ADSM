@@ -63,7 +63,7 @@ def basic_context(request):
                'ProbabilityFunctions': ProbabilityFunction.objects.count(),
                'RelationalFunctions': RelationalFunction.objects.count(),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
-               'outputs_computed': DailyControls.objects.all().count() > 0,
+               'outputs_computed': DailyControls.objects.count() > 0,
                })
 
         validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment',
@@ -77,7 +77,8 @@ def basic_context(request):
                                            'include_direct_contact_spread':   js(disease.include_direct_contact_spread),
                                            'include_indirect_contact_spread': js(disease.include_indirect_contact_spread),
                                            'include_airborne_spread':         js(disease.include_airborne_spread),
-                                           }
+                                           'outputs_computed':                js(DailyControls.objects.count() > 0),
+        }
         
     elif 'results/' in request.path:  # results specific context
         context.update({'results_progress': iteration_progress() * 100,})

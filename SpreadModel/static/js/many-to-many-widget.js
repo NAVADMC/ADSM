@@ -19,7 +19,7 @@ var many_to_many_widget;
 
 
     
-check_disable_spread_checboxes = function(){
+check_disable_spread_checboxes = function(post_changes){
     var elements = $('table').first().find('tr:first-child th:nth-child(n+3)')
     $(elements).each(function(index){
         var active = $(this).find('input').prop('checked');
@@ -32,14 +32,15 @@ check_disable_spread_checboxes = function(){
             }
         })
     });
-    var data = {}; 
-    $(elements).each(function(index){
-        var field_name = 'include_'+ $(this).text().replace(/ /g, '_').toLowerCase()
-        var active = $(this).find('input').prop('checked');
-        data[field_name] = active;
-    });
-    $.post('/setup/IncludeSpreads/', data);
-                
+    if(post_changes) {
+        var data = {}; 
+        $(elements).each(function(index){
+            var field_name = 'include_'+ $(this).text().replace(/ /g, '_').toLowerCase()
+            var active = $(this).find('input').prop('checked');
+            data[field_name] = active;
+        });
+        $.post('/setup/IncludeSpreads/', data);
+    }
 }
 
 
@@ -145,14 +146,14 @@ many_to_many_widget = (function(form_state){
         $.get('/setup/IncludeSpreads/', function(data){
             my_table.find('tr:first-child th:nth-child(n+3)').each(function(index){
                 var field_name = 'include_'+ $(this).text().replace(/ /g, '_').toLowerCase() 
-                var myInput = $('<input type="checkbox" name="' + field_name + '">');
+                var $myInput = $('<input type="checkbox" name="' + field_name + '">');
                 $(this).html(
-                    $('<label class="checkbox">' + $(this).text() + '</label>').prepend(myInput)
+                    $('<label class="checkbox">' + $(this).text() + '</label>').prepend($myInput)
                 );
-                myInput.prop('checked', data[field_name]);
-                myInput.on('change', check_disable_spread_checboxes);
+                $myInput.prop('checked', data[field_name]);
+                $myInput.on('change', function(){check_disable_spread_checboxes(true)});
             });
-            check_disable_spread_checboxes();
+            check_disable_spread_checboxes(false);
         });
     }
     

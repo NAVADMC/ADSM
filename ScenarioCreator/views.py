@@ -75,7 +75,7 @@ def include_spread(request):
         for field in fields:
             setattr(master, field, request.POST.get(field) == 'true')
         master.save()
-        # We don't need to return anything
+        return HttpResponse('success')  # We don't need to return any data
         
 
 def production_type_permutations():
