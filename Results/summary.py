@@ -18,9 +18,9 @@ def list_of_iterations():
 
 def median_value(queryset, term):
     count = queryset.count()
-    if count:
+    try:
         return queryset.values_list(term, flat=True).order_by(term)[int(round(count/2))]
-    else:
+    except:
         return 0
 
 

@@ -116,7 +116,7 @@ def population_d3_map(request):
     ax.set_title("Population Locations and IDs", size=20)
 
     total_iterations = float(len(list_of_iterations()))  # This is slower but more accurate than OutputSettings[0].iterations
-    queryset = Unit.objects.all().order_by('unitstats__cumulative_infected')  # sort by N infected
+    queryset = Unit.objects.all()
     # It might be faster to request a flat value list and then construct new tuples based on that
     latlong = [(u.latitude, u.longitude, 
                 u.unitstats.cumulative_infected, 
