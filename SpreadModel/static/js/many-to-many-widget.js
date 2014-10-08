@@ -18,7 +18,37 @@ var many_to_many_widget;
 })(jQuery);
 
 
+safe_save = function(fn){
+    if(!outputs_computed) { 
+        fn()
+    } else { //confirmation dialog so we don't clobber outputs
+        var dialog = new BootstrapDialog.show({
+            title: 'Delete Results Confirmation',
+            type: BootstrapDialog.TYPE_WARNING,
+            message: 'You must delete your previously computed <strong><u>Results</u></strong> to change input parameters.  Are you sure you want to delete your Results?',
+            buttons: [
+                {
+                    label: 'Cancel',
+                    cssClass: 'btn',
+                    action: function(dialog){
+                        window.location.reload()
+                    }
+                },
+                {
+                    label: 'Delete Results',
+                    cssClass: 'btn-danger',
+                    action: function(dialog){
+                        outputs_computed = false
+                        fn()
+                        window.location.reload()
+                    }
+                }
+            ]
+        });
+    }
+}
     
+
 check_disable_spread_checboxes = function(post_changes){
     var elements = $('table').first().find('tr:first-child th:nth-child(n+3)')
     $(elements).each(function(index){
@@ -39,7 +69,7 @@ check_disable_spread_checboxes = function(post_changes){
             var active = $(this).find('input').prop('checked');
             data[field_name] = active;
         });
-        $.post('/setup/IncludeSpreads/', data);
+        safe_save(function(){$.post('/setup/IncludeSpreads/', data)});
     }
 }
 
@@ -122,7 +152,7 @@ form_state = (function(form){
                 $('#'+input_name).val(variables[key]);
             }
         })
-        save();
+        safe_save(save);
     };
 
     var save = debounce(function() {
