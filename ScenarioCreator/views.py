@@ -350,15 +350,10 @@ def edit_entry(request, primary_key):
         initialized_form, model_name = initialize_from_existing_model(primary_key, request)
     except (ObjectDoesNotExist, OperationalError):
         return redirect('/setup/%s/new/' % model_name)
-    if initialized_form.is_valid():
+    if initialized_form.is_valid() and request.method == 'POST':
+        model_instance = initialized_form.save()  # write instance updates to database
         if request.is_ajax():
-            if DailyControls.objects.count() == 0 or request.POST.get('force_delete') == 'true':
-                model_instance = initialized_form.save()  # write instance updates to database
-                return ajax_success(model_instance, model_name)
-            else:
-                return HttpResponse('failed', status=409)
-        else:
-            model_instance = initialized_form.save()  # write instance updates to database
+            return ajax_success(model_instance, model_name)
 
     context = {'form': initialized_form,
                'title': str(initialized_form.instance)}
