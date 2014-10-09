@@ -395,6 +395,8 @@ class UnitStats(OutputBaseModel):
 
 
 def delete_all_outputs():
+    if DailyControls.objects.count() > 0:
+        print("DELETING ALL OUTPUTS")
     output_models = [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats]
     for model in output_models:
         model.objects.all().delete()

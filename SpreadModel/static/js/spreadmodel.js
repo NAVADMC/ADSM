@@ -1,7 +1,7 @@
 function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTimeout(d),d=setTimeout(function(){d=null,c||a.apply(e,f)},b),c&&!d&&a.apply(e,f)}};
 
 
-safe_save = function(fn){
+safe_save = function(url, data){
     if(!outputs_computed) { 
         fn()
     } else { //confirmation dialog so we don't clobber outputs
@@ -22,7 +22,8 @@ safe_save = function(fn){
                     cssClass: 'btn-danger',
                     action: function(dialog){
                         outputs_computed = false
-                        fn()
+                        $.post(url, $.extend(data, {force_delete: true}) );  // ajax
+                        dialog.close()
                         window.location.reload()
                     }
                 }
@@ -224,7 +225,9 @@ $(function(){
             $(value).removeAttr('disabled');
             $(value).find(':input').removeAttr('disabled');//remove disabled
         });
-        $(this).closest('form').submit();//will cause page reload
+        console.log($(this).closest('form')[0]);
+        safe_save('', $($(this).closest('form')[0]).serialize());//will cause page reload
+//        window.location.reload();
     });
     
     $(document).on('submit','#file-upload',function(event){
@@ -268,46 +271,6 @@ var check_file_saved = function(){
         });
         return dialog;
     }
-}
-
-function ajax_file(){
-    var file = this.files[0];
-    var formData = new FormData($('*formId*')[0]);
-    $.ajax({
-        url: 'script',  //server script to process data
-        type: 'POST',
-        xhr: function() {  // custom xhr
-            myXhr = $.ajaxSettings.xhr();
-            if(myXhr.upload){ // if upload property exists
-                myXhr.upload.addEventListener('progress', progressHandlingFunction, false); // progressbar
-            }
-            return myXhr;
-        },
-        //Ajax events
-        success: completeHandler = function(data) {
-            /*
-            * workaround for crome browser // delete the fakepath
-            */
-            if(navigator.userAgent.indexOf('Chrome')) {
-                var catchFile = $(":file").val().replace(/C:\\fakepath\\/i, '');
-            }
-            else {
-                var catchFile = $(":file").val();
-            }
-            var writeFile = $(":file");
-            writeFile.html(writer(catchFile));
-            $("*setIdOfImageInHiddenInput*").val(data.logo_id);
-        },
-        error: errorHandler = function() {
-            alert("Något gick fel");
-        },
-        // Form data
-        data: formData,
-        //Options to tell JQuery not to process data or worry about content-type
-        cache: false,
-        contentType: false,
-        processData: false
-    }, 'json');
 }
 
 
