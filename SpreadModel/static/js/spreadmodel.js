@@ -2,7 +2,7 @@ function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTim
 
 
 safe_save = function(url, data){
-    if(!outputs_computed) { 
+    if(typeof outputs_computed == 'undefined' || outputs_computed == false) { 
         fn()
     } else { //confirmation dialog so we don't clobber outputs
         var dialog = new BootstrapDialog.show({
@@ -275,7 +275,7 @@ var check_file_saved = function(){
 
 
 two_state_button = function(){
-    if( !outputs_computed){
+    if(typeof outputs_computed == 'undefined' || outputs_computed == false) {
         return 'class="btn btn-primary">Save changes'
     } else {
         return 'class="btn btn-danger">Delete Results and Save Changes'
