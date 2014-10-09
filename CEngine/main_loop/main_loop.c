@@ -632,7 +632,7 @@ default_projection (UNT_unit_list_t * units)
 DLL_API void
 run_sim_main (sqlite3 *scenario_db,
               const char *output_dir, double fixed_rng_value, int verbosity, int seed,
-              int starting_iteration_number)
+              int starting_iteration_number, gboolean dry_run)
 {
   unsigned int ndays, nruns, day, run, iteration_number;
   RPT_reporting_t *last_day_of_outbreak;
@@ -870,8 +870,11 @@ run_sim_main (sqlite3 *scenario_db,
   else
     iteration_number = 1;
 
-  /* Begin the loop over the specified number of iterations. */
+  /* Begin the loop over the specified number of iterations. If this is a "dry
+   * run", set the number of iterations to zero. */
   adsm_create_event (manager, EVT_new_before_any_simulations_event(), units, zones, rng);
+  if (dry_run)
+    nruns = 0;
   for (run = 0; run < nruns; run++, iteration_number++)
     {
 

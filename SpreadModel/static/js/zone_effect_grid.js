@@ -8,7 +8,7 @@ $(function(){
         var form = $(this).find('form')
         var selector = $(this).find('select')
         $(selector).change(function(event){
-            $.post('/setup/ZoneEffectAssignment/'+ pk +'/', form.serialize() );  // ajax
+            safe_save('/setup/ZoneEffectAssignment/'+ pk +'/', form.serialize() );
         })
     })
 });

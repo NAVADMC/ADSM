@@ -18,37 +18,6 @@ var many_to_many_widget;
 })(jQuery);
 
 
-safe_save = function(fn){
-    if(!outputs_computed) { 
-        fn()
-    } else { //confirmation dialog so we don't clobber outputs
-        var dialog = new BootstrapDialog.show({
-            title: 'Delete Results Confirmation',
-            type: BootstrapDialog.TYPE_WARNING,
-            message: 'You must delete your previously computed <strong><u>Results</u></strong> to change input parameters.  Are you sure you want to delete your Results?',
-            buttons: [
-                {
-                    label: 'Cancel',
-                    cssClass: 'btn',
-                    action: function(dialog){
-                        window.location.reload()
-                    }
-                },
-                {
-                    label: 'Delete Results',
-                    cssClass: 'btn-danger',
-                    action: function(dialog){
-                        outputs_computed = false
-                        fn()
-                        window.location.reload()
-                    }
-                }
-            ]
-        });
-    }
-}
-    
-
 check_disable_spread_checboxes = function(post_changes){
     var elements = $('table').first().find('tr:first-child th:nth-child(n+3)')
     $(elements).each(function(index){
@@ -69,7 +38,7 @@ check_disable_spread_checboxes = function(post_changes){
             var active = $(this).find('input').prop('checked');
             data[field_name] = active;
         });
-        safe_save(function(){$.post('/setup/IncludeSpreads/', data)});
+        safe_save('/setup/IncludeSpreads/', data);
     }
 }
 
@@ -152,15 +121,12 @@ form_state = (function(form){
                 $('#'+input_name).val(variables[key]);
             }
         })
-        safe_save(save);
+        debounce(
+            safe_save('', form.serialize())
+        , 500);  //interval = 500 milliseconds
     };
 
-    var save = debounce(function() {
-        $.post('', form.serialize())
-    }, 500); //interval = 500 milliseconds
-
     return {
-        'save': save,
         'get':  get,
         'set':  set,
         'get_consensus': get_consensus

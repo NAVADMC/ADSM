@@ -1,14 +1,47 @@
 function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTimeout(d),d=setTimeout(function(){d=null,c||a.apply(e,f)},b),c&&!d&&a.apply(e,f)}};
 
 
+safe_save = function(url, data){
+    if(typeof outputs_computed == 'undefined' || outputs_computed == false) { 
+        fn()
+    } else { //confirmation dialog so we don't clobber outputs
+        var dialog = new BootstrapDialog.show({
+            title: 'Delete Results Confirmation',
+            type: BootstrapDialog.TYPE_WARNING,
+            message: 'You must delete your previously computed <strong><u>Results</u></strong> to change input parameters.  Are you sure you want to delete your Results?',
+            buttons: [
+                {
+                    label: 'Cancel',
+                    cssClass: 'btn',
+                    action: function(dialog){
+                        window.location.reload()
+                    }
+                },
+                {
+                    label: 'Delete Results',
+                    cssClass: 'btn-danger',
+                    action: function(dialog){
+                        outputs_computed = false
+                        $.post(url, $.extend(data, {force_delete: true}) );  // ajax
+                        dialog.close()
+                        window.location.reload()
+                    }
+                }
+            ]
+        });
+    }
+}
+    
+
 $(function(){
     $(document).on('click', '[data-click-toggle]', function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });
 
-    $(document).on('submit', '.ajax', function(evt){
+    $(document).on('submit', '.ajax', function(evt){ 
         evt.preventDefault();
-        var posting = $.post($(this).attr('action'), $(this).serialize());
+        var posting = $.post($(this).attr('action'), $(this).serialize()); //this post method is currently not accessible anywhere that accidentally 
+        // deleting Results could happen, otherwise wrap this in safe_save()
         posting.done(function( data ) {
             if (data.status == "success") {
                 $('.ajax').trigger('saved');
@@ -70,7 +103,7 @@ $(function(){
     });
     $(document).on('change', '[data-new-item-url]', function(e){
         if ($(this).val() == "data-add-new") {
-            modelModal.show($(this));
+            modelModal.show($(this))
         }
     });
 
@@ -153,10 +186,11 @@ $(function(){
     $('[data-delete-link]').click(function(){
         var link = $(this).attr('data-delete-link')
         var object_type = link.split('/')[2]
+        var additional_msg = outputs_computed ? ' and <strong><u>All Results</u></strong>' : ''
         var dialog = new BootstrapDialog.show({
             title: 'Delete Confirmation',
             type: BootstrapDialog.TYPE_WARNING,
-            message: 'Are you sure you want to delete the selected ' + object_type + '?',
+            message: 'Are you sure you want to delete the selected ' + object_type + additional_msg + '?',
             buttons: [
                 {
                     label: 'Cancel',
@@ -191,7 +225,9 @@ $(function(){
             $(value).removeAttr('disabled');
             $(value).find(':input').removeAttr('disabled');//remove disabled
         });
-        $(this).closest('form').submit();//will cause page reload
+        console.log($(this).closest('form')[0]);
+        safe_save('', $($(this).closest('form')[0]).serialize());//will cause page reload
+//        window.location.reload();
     });
     
     $(document).on('submit','#file-upload',function(event){
@@ -237,44 +273,13 @@ var check_file_saved = function(){
     }
 }
 
-function ajax_file(){
-    var file = this.files[0];
-    var formData = new FormData($('*formId*')[0]);
-    $.ajax({
-        url: 'script',  //server script to process data
-        type: 'POST',
-        xhr: function() {  // custom xhr
-            myXhr = $.ajaxSettings.xhr();
-            if(myXhr.upload){ // if upload property exists
-                myXhr.upload.addEventListener('progress', progressHandlingFunction, false); // progressbar
-            }
-            return myXhr;
-        },
-        //Ajax events
-        success: completeHandler = function(data) {
-            /*
-            * workaround for crome browser // delete the fakepath
-            */
-            if(navigator.userAgent.indexOf('Chrome')) {
-                var catchFile = $(":file").val().replace(/C:\\fakepath\\/i, '');
-            }
-            else {
-                var catchFile = $(":file").val();
-            }
-            var writeFile = $(":file");
-            writeFile.html(writer(catchFile));
-            $("*setIdOfImageInHiddenInput*").val(data.logo_id);
-        },
-        error: errorHandler = function() {
-            alert("Något gick fel");
-        },
-        // Form data
-        data: formData,
-        //Options to tell JQuery not to process data or worry about content-type
-        cache: false,
-        contentType: false,
-        processData: false
-    }, 'json');
+
+two_state_button = function(){
+    if(typeof outputs_computed == 'undefined' || outputs_computed == false) {
+        return 'class="btn btn-primary">Save changes'
+    } else {
+        return 'class="btn btn-danger">Delete Results and Save Changes'
+    }
 }
 
 
@@ -344,6 +349,7 @@ var modelModal = {
         });
 
         },
+    
     template: $('<div class="modal fade">\
                   <div class="modal-dialog">\
                     <div class="modal-content">\
@@ -355,7 +361,7 @@ var modelModal = {
                       </div>\
                       <div class="modal-footer">\
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>\
-                        <button type="button" class="btn btn-primary">Save changes</button>\
+                        <button type="button"' + two_state_button() + '</button>\
                       </div>\
                     </div>\
                   </div>\

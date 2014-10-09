@@ -107,7 +107,7 @@ def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated
                                    zorder=1500))
 
 
-def population_d3_map(request):
+def population_results_map(request):
     fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(60,52), frameon=False)
     pyplot.tight_layout()
     ax.autoscale_view('tight')
@@ -140,17 +140,24 @@ def population_d3_map(request):
                             color=(0.6, 0.6, 0.6, 1.0),
                             linewidths=0,
                             zorder=1000)
-    return HttpFigure(fig)
-    
+    return fig
+
+
+def population_d3_map(request):
+    fig = population_results_map(request)
     # Begin mpld3 specific code
     # tooltip = mpld3.plugins.PointLabelTooltip(infected, labels=names)
     # mpld3.plugins.connect(fig, tooltip)
 
     
-    # html = mpld3.fig_to_html(fig, d3_url=None, mpld3_url=None, no_extras=False,
-    #             template_type="general", figid=None, use_http=False)
-    # return HttpResponse(html)
+    html = mpld3.fig_to_html(fig, d3_url=None, mpld3_url=None, no_extras=False,
+                template_type="general", figid=None, use_http=False)
+    return HttpResponse(html)
 
+
+def population_zoom_png(request):
+    fig = population_results_map(request)
+    return HttpFigure(fig)
 
 
 from mpld3 import plugins, utils

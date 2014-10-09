@@ -39,6 +39,7 @@ urlpatterns = generate_urls_from_models(
      "url('^RunSimulation/$', 'Results.views.run_simulation')",
      "url('^Population.png$', 'Results.graphing.population_png')",
      "url('^population_d3_map/$', 'Results.interactive_graphing.population_d3_map')",
+     "url('^population_zoom\.png$', 'Results.interactive_graphing.population_zoom_png')",
      "url('^random_walk/(?P<n_paths>\d+)/(?P<n_steps>\d+)/$', 'Results.interactive_graphing.random_walk')",
      "url('^(?P<model_name>\w+)/(?P<field_name>\w+)/(?P<iteration>\d*)/?$', 'Results.views.graph_field')",  # optional iteration argument
      "url('^(?P<model_name>\w+)/(?P<field_name>\w+)/(?P<iteration>\d*)/?(?P<zone>[^/]*)/?Graph\.png$', 'Results.graphing.graph_field_png')",
