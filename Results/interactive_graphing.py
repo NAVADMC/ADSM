@@ -13,8 +13,9 @@ from __future__ import unicode_literals
 from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
+import os
 from future import standard_library
-from Results.graphing import HttpFigure, rstyle
+from Settings.models import scenario_filename
 
 standard_library.install_hooks()
 from future.builtins import *
@@ -23,10 +24,15 @@ from django.http import HttpResponse
 from matplotlib.colors import ListedColormap
 from matplotlib.patches import Circle, Rectangle
 from matplotlib import pyplot, colors
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import numpy as np
 import mpld3
+from mpld3 import plugins, utils
+
 from Results.models import Unit
 from Results.summary import list_of_iterations
+from Results.graphing import HttpFigure, rstyle
+from Settings.views import workspace_path
 
 
 kilometers_in_one_latitude_degree = 111.13  # https://au.answers.yahoo.com/question/index?qid=20100815170802AAZe1AZ
@@ -156,11 +162,18 @@ def population_d3_map(request):
 
 
 def population_zoom_png(request):
-    fig = population_results_map(request)
-    return HttpFigure(fig)
-
-
-from mpld3 import plugins, utils
+    path = workspace_path(scenario_filename() + '/population_map.png')
+    try:
+        with open(path, "rb") as img_file:  #TODO: remove "rb"
+            return HttpResponse(img_file.read(), mimetype="image/png")
+    except IOError:
+        fig = population_results_map(request)
+        response = HttpResponse(content_type='image/png')
+        FigureCanvas(fig).print_png(response)
+        if not os.path.exists(workspace_path(scenario_filename())):
+            os.makedirs(workspace_path(scenario_filename()))
+        FigureCanvas(fig).print_png(path)
+        return response
 
 
 class HighlightLines(plugins.PluginBase):
