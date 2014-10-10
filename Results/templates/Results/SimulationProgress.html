@@ -5,9 +5,19 @@
 {% block content %}
     
     {% if large_population %}
+        <p>{{ large_population }}</p>
         <img src="/results/Population.png" alt="Unit Locations"/>
     {% else %}
-        <object type="image/svg+xml"  data="/results/population_d3_map" alt="Unit Locations" width="516px" height="516px">Interactive Graph Failed to Load</object>
+{#        <object type="image/svg+xml"  data="/results/population_d3_map" alt="Unit Locations" width="516px" height="516px">Interactive Graph Failed to Load</object>#}
+        <div id="population_zoom" style="cursor: -webkit-zoom-in; width: 1000px;">
+            <img src="/results/population_zoom.png" alt="" style="width: 1000px; display: inline-block; "/>
+        </div>
+        <script src="{{ STATIC_URL }}zoom-master/jquery.zoom.js"></script>
+        <script>
+            $(document).ready(function(){
+                $('#population_zoom').zoom({on:'click'});
+            });
+        </script>
     {% endif %}
     <p>Locations of all Units in the simulation</p>
 

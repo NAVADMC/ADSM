@@ -170,6 +170,8 @@ typedef struct
     charts for units inside zones.  Use an expression of the form
     movement_control[contact_type][zone->level-1][source_production_type]
     to get a pointer to a particular chart. */
+  double min_radius; /**< A minimum radius in which to look for neighbours when
+    generating short-distance contacts. */
   GPtrArray *pending_infections; /**< An array to store delayed contacts.  Each
     item in the array is a GQueue of Exposure events.  (Actually
     a singly-linked list would suffice, but the GQueue syntax is much more
@@ -821,7 +823,8 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
 #endif          
 
     callback_data.num_unmatched_exposures = sum_exposures;
-    spatial_search_circle_by_id (units->spatial_index, unit1->index, max_distance*2.0 + EPSILON,
+    spatial_search_circle_by_id (units->spatial_index, unit1->index,
+                                 MAX(local_data->min_radius, max_distance*2.0 + EPSILON),
                                  check_and_choose, &callback_data);
 
     /* A re-search using the exhaustive method is necessary if some
@@ -1552,12 +1555,64 @@ set_zone_params (void *data, GHashTable *dict)
 }
 
 
+
+/**
+ * A callback function used with estimate_density() below. It receives a
+ * pointer to a guint and increments that guint.
+ *
+ * @param id not used.
+ * @param data a pointer to a counter (guint *), cast to a gpointer.
+ */
+static void
+estimate_density_count_unit (int id, gpointer data)
+{
+  guint *count;
+  count = (guint *) data;
+  *count += 1;
+  return;
+}
+
+
+
+/**
+ * Estimate the density of the population by counting units in a rectangle in
+ * the center of the study area. Hopefully this will not be wildly off.
+ *
+ * @param units a list of units.
+ */
+static double
+estimate_density (UNT_unit_list_t *units)
+{
+  double side_length = 25; /* km */
+  double center_x, center_y;
+  double x1, y1, x2, y2;
+  guint count = 0;
+  double density;
+  
+  center_x = units->min_x + 0.5 * (units->max_x - units->min_x);
+  center_y = units->min_y + 0.5 * (units->max_y - units->min_y);
+  x1 = center_x - (side_length / 2.0);
+  y1 = center_y - (side_length / 2.0);
+  x2 = center_x + (side_length / 2.0);
+  y2 = center_y + (side_length / 2.0);
+  spatial_search_rectangle (units->spatial_index, x1, y1, x2, y2,
+                            estimate_density_count_unit, &count);
+  density = count / (side_length * side_length);
+  #if DEBUG
+    g_debug ("estimated density = %u units/%.0f sq km = %.2f units/sq km",
+             count, side_length * side_length, density);
+  #endif
+  return density;
+}
+
+
+
 /**
  * Returns a new contact spread model.
  */
 adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
-     ZON_zone_list_t * zones)
+     ZON_zone_list_t * zones, GError **error)
 {
   adsm_module_t *self;
   local_data_t *local_data;
@@ -1686,6 +1741,20 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     }
   local_data->db = NULL;
 
+  /* Set a minimum radius in which to look for neighbours when generating
+   * short-distance contacts. Experimentally, a radius in which you expect to
+   * find three dozen units seems to work well. */
+  {
+    double density, area_for_3_doz_units;
+
+    density = estimate_density (units);
+    area_for_3_doz_units = 3 * 12 / density;
+    local_data->min_radius = sqrt (area_for_3_doz_units / M_PI);
+    #if DEBUG
+      g_debug ("minimum radius = %g km", local_data->min_radius);
+    #endif
+  }
+  
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);
 #endif

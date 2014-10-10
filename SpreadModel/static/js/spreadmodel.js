@@ -1,14 +1,47 @@
 function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTimeout(d),d=setTimeout(function(){d=null,c||a.apply(e,f)},b),c&&!d&&a.apply(e,f)}};
 
 
+safe_save = function(url, data){
+    if(typeof outputs_computed == 'undefined' || outputs_computed == false) { 
+        $.post(url, data);
+    } else { //confirmation dialog so we don't clobber outputs
+        var dialog = new BootstrapDialog.show({
+            title: 'Delete Results Confirmation',
+            type: BootstrapDialog.TYPE_WARNING,
+            message: 'You must delete your previously computed <strong><u>Results</u></strong> to change input parameters.  Are you sure you want to delete your Results?',
+            buttons: [
+                {
+                    label: 'Cancel',
+                    cssClass: 'btn',
+                    action: function(dialog){
+                        window.location.reload()
+                    }
+                },
+                {
+                    label: 'Delete Results',
+                    cssClass: 'btn-danger',
+                    action: function(dialog){
+                        outputs_computed = false
+                        $.post(url, $.extend(data, {force_delete: true}) );  // ajax
+                        dialog.close()
+                        window.location.reload()
+                    }
+                }
+            ]
+        });
+    }
+}
+    
+
 $(function(){
     $(document).on('click', '[data-click-toggle]', function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });
 
-    $(document).on('submit', '.ajax', function(evt){
+    $(document).on('submit', '.ajax', function(evt){ 
         evt.preventDefault();
-        var posting = $.post($(this).attr('action'), $(this).serialize());
+        var posting = $.post($(this).attr('action'), $(this).serialize()); //this post method is currently not accessible anywhere that accidentally 
+        // deleting Results could happen, otherwise wrap this in safe_save()
         posting.done(function( data ) {
             if (data.status == "success") {
                 $('.ajax').trigger('saved');
@@ -70,7 +103,7 @@ $(function(){
     });
     $(document).on('change', '[data-new-item-url]', function(e){
         if ($(this).val() == "data-add-new") {
-            modelModal.show($(this));
+            modelModal.show($(this))
         }
     });
 
@@ -153,10 +186,11 @@ $(function(){
     $('[data-delete-link]').click(function(){
         var link = $(this).attr('data-delete-link')
         var object_type = link.split('/')[2]
+        var additional_msg = outputs_computed ? ' and <strong><u>All Results</u></strong>' : ''
         var dialog = new BootstrapDialog.show({
             title: 'Delete Confirmation',
             type: BootstrapDialog.TYPE_WARNING,
-            message: 'Are you sure you want to delete the selected ' + object_type + '?',
+            message: 'Are you sure you want to delete the selected ' + object_type + additional_msg + '?',
             buttons: [
                 {
                     label: 'Cancel',
@@ -191,12 +225,14 @@ $(function(){
             $(value).removeAttr('disabled');
             $(value).find(':input').removeAttr('disabled');//remove disabled
         });
-        $(this).closest('form').submit();//will cause page reload
+        console.log($(this).closest('form')[0]);
+        safe_save('', $($(this).closest('form')[0]).serialize());//will cause page reload
+        window.location.reload();
     });
     
     $(document).on('submit','#file-upload',function(event){
         var filename = $(this).find('input[type=file]').val()
-        var file_extension = /application\/(x-|)(.*)/g.exec($(this).find('input[type=file]').attr('accept'))[2]
+        var file_extension = /application|text\/(x-|)(.*)/g.exec($(this).find('input[type=file]').attr('accept'))[2]
         if( filename.indexOf(file_extension) == -1) {
             alert("Uploaded files must have "+file_extension+" in the name: " + filename)
             console.log(file_extension)
@@ -238,10 +274,19 @@ var check_file_saved = function(){
 }
 
 
+two_state_button = function(){
+    if(typeof outputs_computed == 'undefined' || outputs_computed == false) {
+        return 'class="btn btn-primary">Save changes'
+    } else {
+        return 'class="btn btn-danger">Delete Results and Save Changes'
+    }
+}
+
+
 var modelModal = {
 
     ajax_submit: function($form, url, success_callback, fail_callback){
-        return $.post(url, $form.serialize(), function(data, status, xhr){
+        return $.ajax({url: url, type: "POST", data: new FormData($form[0]), success: function(data, status, xhr){
             if(typeof(data) == 'object') {
                 if (data['status']=='success') { //redundant for now
                     success_callback(data)
@@ -249,7 +294,9 @@ var modelModal = {
             } else {//html dataType  == failure probably validation errors
                 fail_callback(data)
             }
-        });
+        },
+        processData: false,
+        contentType: false});
     },
 
     ajax_success: function(modal, selectInput){
@@ -263,7 +310,7 @@ var modelModal = {
     },
 
     populate_modal_body: function($newForm, modal) {
-        var $form = $newForm.find('form:not(.ajax)');
+        var $form = $newForm.find('form:not(.ajax, .admin)').first();
         $form.find('.buttonHolder').remove();
         modal.find('.modal-body').html($form);
         return $form;
@@ -302,6 +349,7 @@ var modelModal = {
         });
 
         },
+    
     template: $('<div class="modal fade">\
                   <div class="modal-dialog">\
                     <div class="modal-content">\
@@ -313,7 +361,7 @@ var modelModal = {
                       </div>\
                       <div class="modal-footer">\
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>\
-                        <button type="button" class="btn btn-primary">Save changes</button>\
+                        <button type="button"' + two_state_button() + '</button>\
                       </div>\
                     </div>\
                   </div>\

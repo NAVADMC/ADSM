@@ -5,11 +5,10 @@ from __future__ import absolute_import
 from collections import OrderedDict
 from future import standard_library
 standard_library.install_hooks()
-from future.builtins import object
 
 from Results.models import DailyControls, DailyByProductionType, DailyByZone
 from ScenarioCreator.models import Zone, OutputSettings
-from django.db.models import Q, F
+from django.db.models import Q
 
 
 def list_of_iterations():
@@ -18,9 +17,9 @@ def list_of_iterations():
 
 def median_value(queryset, term):
     count = queryset.count()
-    if count:
+    try:
         return queryset.values_list(term, flat=True).order_by(term)[int(round(count/2))]
-    else:
+    except:
         return 0
 
 

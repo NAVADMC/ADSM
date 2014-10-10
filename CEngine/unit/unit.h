@@ -233,6 +233,11 @@ typedef struct
   projPJ projection; /**< The projection used to convert between the latitude,
     longitude and x,y locations of the units.  Note that the projection object
     works in meters, while the x,y locations are stored in kilometers. */
+
+  double min_x;
+  double max_x;
+  double min_y;
+  double max_y;
 }
 UNT_unit_list_t;
 

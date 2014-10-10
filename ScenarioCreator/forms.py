@@ -49,7 +49,7 @@ class BaseForm(ModelForm):
             self.helper = FormHelper()
             fields_and_submit = list(self.base_fields.keys()) + [submit_button()]
             self.helper.layout = Layout(*fields_and_submit)
-        return super(BaseForm, self).__init__(*args, **kwargs)
+        super(BaseForm, self).__init__(*args, **kwargs)
 
 
 class PopulationForm(BaseForm):
@@ -60,7 +60,7 @@ class PopulationForm(BaseForm):
             'source_file',
             submit_button()
         )
-        return super(PopulationForm, self).__init__(*args, **kwargs)
+        super(PopulationForm, self).__init__(*args, **kwargs)
 
     class Meta(object):
         model = Population
@@ -76,7 +76,7 @@ class UnitForm(BaseForm):
 class UnitFormAbbreviated(BaseForm):
     class Meta(object):
         model = Unit
-        exclude = ['days_in_initial_state', 'days_left_in_initial_state', 'user_notes']
+        exclude = ['_population', 'days_in_initial_state', 'days_left_in_initial_state', 'user_notes']
 
 
 class ProbabilityFunctionForm(BaseForm):
@@ -105,7 +105,7 @@ class RelationalFunctionForm(BaseForm):
             'y_axis_units',
             'notes'
         )
-        return super(RelationalFunctionForm, self).__init__(*args, **kwargs)
+        super(RelationalFunctionForm, self).__init__(*args, **kwargs)
 
     class Meta(object):
         model = RelationalFunction
@@ -222,7 +222,8 @@ class ControlProtocolForm(BaseForm):
             ),
             submit_button()
         )
-        return super(ControlProtocolForm, self).__init__(*args, **kwargs)
+        super(ControlProtocolForm, self).__init__(*args, **kwargs)
+        
     class Meta(object):
         model = ControlProtocol
         widgets = {'detection_probability_for_observed_time_in_clinical': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
@@ -242,11 +243,6 @@ class DiseaseProgressionForm(BaseForm):
     class Meta(object):
         model = DiseaseProgression
         exclude = ['_disease']
-        try:
-            if not Disease.objects.get(id=1).use_within_unit_prevalence:
-                exclude.append('disease_prevalence')
-        except (ObjectDoesNotExist, OperationalError):
-            pass  # If someone hasn't created a Scenario yet, the field will show
         widgets = {'_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'disease_latent_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_subclinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
@@ -272,7 +268,8 @@ class IndirectSpreadForm(BaseForm):
             'movement_control',
             submit_button()
         )
-        return super(IndirectSpreadForm, self).__init__(*args, **kwargs)
+        super(IndirectSpreadForm, self).__init__(*args, **kwargs)
+
     class Meta(object):
         model = IndirectSpread
         exclude = ['_spread_method_code', '_disease']
@@ -299,7 +296,8 @@ class DirectSpreadForm(BaseForm):
             'movement_control',
             submit_button()
         )
-        return super(DirectSpreadForm, self).__init__(*args, **kwargs)
+        super(DirectSpreadForm, self).__init__(*args, **kwargs)
+        
     class Meta(object):
         model = DirectSpread
         exclude = ['_spread_method_code', '_disease']
@@ -326,7 +324,8 @@ class AirborneSpreadForm(BaseForm):
             'transport_delay',
             submit_button()
         )
-        return super(AirborneSpreadForm, self).__init__(*args, **kwargs)
+        super(AirborneSpreadForm, self).__init__(*args, **kwargs)
+        
     class Meta(object):
         model = AirborneSpread
         exclude = ['_spread_method_code', '_disease']
@@ -361,15 +360,14 @@ class OutputSettingsForm(BaseForm):
             'save_daily_unit_states',
             'save_daily_events',
             'save_daily_exposures',
-            'save_iteration_outputs_for_units',
             'save_map_output',
             submit_button()
         )
-        return super(OutputSettingsForm, self).__init__(*args, **kwargs)
+        super(OutputSettingsForm, self).__init__(*args, **kwargs)
 
     class Meta(object):
         model = OutputSettings
-        exclude = ['_scenario']
+        exclude = ['_scenario', 'save_iteration_outputs_for_units']
         widgets = {
             'days': NumberInput(
                 attrs={'data-visibility-controller': 'stop_criteria',

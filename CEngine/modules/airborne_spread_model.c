@@ -190,7 +190,8 @@ local_data_t;
  * Computes the size factor for each unit.
  *
  * @param units a list of units.
- * @return an array containing the size factor for each unit.
+ * @return an array containing the size factor for each unit. Will be NULL if
+ *   there are no units.
  */
 static double *
 build_size_factor_list (UNT_unit_list_t * units)
@@ -200,7 +201,7 @@ build_size_factor_list (UNT_unit_list_t * units)
   unsigned int max_size = 0;    /* size of largest unit */
   gsl_histogram *histogram;
   PDF_dist_t *size_dist;
-  double *size_factor;
+  double *size_factor = NULL;
   unsigned int i;               /* loop counter */
 #if DEBUG
   char *s;
@@ -211,50 +212,53 @@ build_size_factor_list (UNT_unit_list_t * units)
 #endif
 
   nunits = UNT_unit_list_length (units);
-  size_factor = g_new (double, nunits);
-
-  /* Find the largest unit. */
-  for (i = 0; i < nunits; i++)
+  if (nunits >= 1)
     {
-      unit = UNT_unit_list_get (units, i);
-      if (unit->size > max_size)
-        max_size = unit->size;
-    }
-#if DEBUG
-  g_debug ("largest number of animals = %u", max_size);
-#endif
+      size_factor = g_new (double, nunits);
 
-  /* Build a histogram. */
-  histogram = gsl_histogram_alloc (MIN(200,max_size));
-  g_assert (histogram != NULL);
-  gsl_histogram_set_ranges_uniform (histogram, 0.5, (double) max_size + 0.5);
-  for (i = 0; i < nunits; i++)
-    {
-      unit = UNT_unit_list_get (units, i);
-      gsl_histogram_increment (histogram, (double) (unit->size));
-    }
-  size_dist = PDF_new_histogram_dist (histogram);
-  gsl_histogram_free (histogram);
-  g_assert (size_dist != NULL);
+      /* Find the largest unit. */
+      for (i = 0; i < nunits; i++)
+        {
+          unit = UNT_unit_list_get (units, i);
+          if (unit->size > max_size)
+            max_size = unit->size;
+        }
+      #if DEBUG
+        g_debug ("largest number of animals = %u", max_size);
+      #endif
 
-#if DEBUG
-  s = PDF_dist_to_string (size_dist);
-  g_debug ("size distribution =\n%s", s);
-  g_free (s);
-#endif
+      /* Build a histogram. */
+      histogram = gsl_histogram_alloc (MIN(200,max_size));
+      g_assert (histogram != NULL);
+      gsl_histogram_set_ranges_uniform (histogram, 0.5, (double) max_size + 0.5);
+      for (i = 0; i < nunits; i++)
+        {
+          unit = UNT_unit_list_get (units, i);
+          gsl_histogram_increment (histogram, (double) (unit->size));
+        }
+      size_dist = PDF_new_histogram_dist (histogram);
+      gsl_histogram_free (histogram);
+      g_assert (size_dist != NULL);
 
-  /* Compute the size factors. */
-  for (i = 0; i < nunits; i++)
-    {
-      unit = UNT_unit_list_get (units, i);
-      size_factor[i] = PDF_cdf (unit->size, size_dist) * 2;
-    }
+      #if DEBUG
+        s = PDF_dist_to_string (size_dist);
+        g_debug ("size distribution =\n%s", s);
+        g_free (s);
+      #endif
 
-  PDF_free_dist (size_dist);
+      /* Compute the size factors. */
+      for (i = 0; i < nunits; i++)
+        {
+          unit = UNT_unit_list_get (units, i);
+          size_factor[i] = PDF_cdf (unit->size, size_dist) * 2;
+        }
 
-#if DEBUG
-  g_debug ("----- EXIT build_size_factor_list");
-#endif
+      PDF_free_dist (size_dist);
+    } /* end of if number of units >= 1 */
+
+  #if DEBUG
+    g_debug ("----- EXIT build_size_factor_list");
+  #endif
 
   return size_factor;
 }
@@ -941,7 +945,7 @@ set_params (void *data, GHashTable *dict)
  */
 adsm_module_t *
 new (sqlite3 *params, UNT_unit_list_t * units, projPJ projection,
-     ZON_zone_list_t * zones)
+     ZON_zone_list_t * zones, GError **error)
 {
   adsm_module_t *self;
   local_data_t *local_data;

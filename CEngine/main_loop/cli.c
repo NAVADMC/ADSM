@@ -35,6 +35,7 @@ main (int argc, char *argv[])
   double fixed_rng_value = -1;
   int seed = -1;
   int starting_iteration_number = -1;
+  gboolean dry_run = FALSE;
   GError *option_error = NULL;
   GOptionContext *context;
   GOptionEntry options[] = {
@@ -43,10 +44,13 @@ main (int argc, char *argv[])
     { "fixed-random-value", 'r', 0, G_OPTION_ARG_DOUBLE, &fixed_rng_value, "Fixed number to use instead of random numbers", NULL },
     { "rng-seed", 's', 0, G_OPTION_ARG_INT, &seed, "Seed used to initialize the random number generator", NULL },
     { "iteration-number", 'i', 0, G_OPTION_ARG_INT, &starting_iteration_number, "Number of the first iteration", NULL },
+    { "dry-run", 'n', 0, G_OPTION_ARG_NONE, &dry_run, "Check the parameters but do not actually run the simulation", NULL },
     { NULL }
   };
   int sqlerr;
   sqlite3 *scenario_db;
+  GError *error = NULL;
+  int exit_status = EXIT_SUCCESS;
 
   clear_adsm_fns ();
 
@@ -115,11 +119,20 @@ main (int argc, char *argv[])
                 fixed_rng_value,
                 verbosity,
                 seed,
-                starting_iteration_number);
+                starting_iteration_number,
+                dry_run,
+                &error);
 
   sqlite3_close (scenario_db);
+  
+  if (error)
+    {
+      g_warning ("%s", error->message);
+      g_clear_error (&error);
+      exit_status = EXIT_FAILURE;
+    }
 
-  return EXIT_SUCCESS;
+  return exit_status;
 }
 
 /* end of file cli.c */

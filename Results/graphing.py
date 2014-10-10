@@ -7,6 +7,8 @@ import matplotlib
 from ScenarioCreator.views import spaces_for_camel_case
 
 matplotlib.use('Agg')  # Force matplotlib to not use any Xwindows backend.
+from matplotlib import rc
+rc("figure", facecolor="white")
 from matplotlib import gridspec
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import pandas as pd

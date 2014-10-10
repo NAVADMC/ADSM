@@ -4,11 +4,12 @@ from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
 standard_library.install_hooks()
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.db import connections
 import unittest
 import time
 import os, shutil
+import zipfile
 
 from Results.views import Simulation, simulation_process
 from Results.models import DailyReport
@@ -20,16 +21,19 @@ from Settings.models import scenario_filename
 from Settings.utils import close_all_connections
 
 
-class SimulationTest(TestCase):
+class SimulationTest(TransactionTestCase):
     multi_db = True
 
     @classmethod
     def setUpClass(cls):
-        shutil.copy('workspace/Roundtrip.sqlite3', 'workspace/Roundtrip_test.sqlite3')
+        source_db = os.path.join('workspace', 'Roundtrip.sqlite3')
+        cls.destination_db = os.path.join('workspace', 'Roundtrip_test.sqlite3')
+        shutil.copy(source_db, cls.destination_db)
+        cls.scenario_directory = os.path.join('workspace', 'Roundtrip_test')
 
     @classmethod
     def tearDownClass(cls):
-        os.remove('workspace/Roundtrip_test.sqlite3')
+        os.remove(cls.destination_db)
 
     def setUp(self):
         self.client.get('/app/OpenScenario/Roundtrip_test.sqlite3/')
@@ -41,7 +45,7 @@ class SimulationTest(TestCase):
         close_all_connections()
 
     def tearDown(self):
-        shutil.rmtree('workspace/Roundtrip_test', ignore_errors=True)
+        shutil.rmtree(self.scenario_directory, ignore_errors=True)
 
     def test_multiple_threads(self):
         sim = Simulation(5)
@@ -68,24 +72,49 @@ class SimulationTest(TestCase):
         settings.save_daily_unit_states = True
         settings.save()
         close_all_connections()
+        output_file = os.path.join(self.scenario_directory, 'states_1.csv')
 
         sim = Simulation(1)
         sim.start()
         sim.join()
 
-        self.assertTrue(os.access('workspace/Roundtrip_test/states_1.csv', os.F_OK))
+        self.assertTrue(os.access(output_file, os.F_OK))
 
-    def test_map_output(self):
+    def test_map_zip_with_output(self):
         settings = OutputSettings.objects.first()
+        settings.save_daily_unit_states = True
         settings.save_map_output = True
         settings.save()
         close_all_connections()
+        file_name = os.path.join(self.scenario_directory, 'Roundtrip_test Map Output.zip')
+        folder_name = os.path.join(self.scenario_directory, 'Map')
 
         sim = Simulation(1)
         sim.start()
         sim.join()
 
-        self.assertTrue(os.access('workspace/Roundtrip_test/Roundtrip_test Map Output.zip', os.F_OK))
+        self.assertTrue(os.access(file_name, os.F_OK))
+
+        with zipfile.ZipFile(file_name, 'r') as zf:
+            self.assertListEqual(zf.namelist(), os.listdir(folder_name))
+
+    def test_map_zip_no_output(self):
+        settings = OutputSettings.objects.first()
+        settings.save_map_output = False
+        settings.save()
+        close_all_connections()
+        file_name = os.path.join(self.scenario_directory, 'Roundtrip_test Map Output.zip')
+        folder_name = os.path.join(self.scenario_directory, 'Map')
+
+        sim = Simulation(1)
+        sim.start()
+        sim.join()
+
+        self.assertTrue(os.access(file_name, os.F_OK))
+
+        with zipfile.ZipFile(file_name, 'r') as zf:
+            self.assertEqual(len(zf.namelist()), 0)
+            self.assertListEqual(zf.namelist(), os.listdir(folder_name))
 
 
 class IterationProgressTestClass(TestCase):

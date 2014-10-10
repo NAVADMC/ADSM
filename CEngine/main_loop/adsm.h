@@ -241,7 +241,9 @@ DLL_API void
 run_sim_main (sqlite3 *scenario_db,
               const char *output_dir,
               double fixed_rng_value, int verbosity, int seed,
-              int starting_iteration_number);
+              int starting_iteration_number,
+              gboolean dry_run,
+              GError **);
 
 
 /* Functions for version tracking */

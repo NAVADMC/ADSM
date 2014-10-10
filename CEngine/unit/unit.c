@@ -39,6 +39,7 @@
 #include <stdio.h>
 #include "unit.h"
 #include "sqlite3_exec_dict.h"
+#include <gsl/gsl_math.h>
 
 #if STDC_HEADERS
 #  include <stdlib.h>
@@ -806,6 +807,8 @@ UNT_new_unit_list (void)
 #endif
   units->production_type_names = g_ptr_array_new ();
   units->projection = NULL;
+  /* The x and y bounds have no value until projection is done. */
+  units->min_x = units->max_x = units->min_y = units->max_y = GSL_NAN;
 
   return units;
 }
@@ -866,6 +869,8 @@ end:
 
 /**
  * Converts the latitude and longitude values to x and y coordinates on a map.
+ * At the same time, fill in the min_x, max_x, min_y, and max_y fields for the
+ * unit list.
  *
  * @param units a unit list.
  * @param projection a map projection.  If NULL, the longitudes will be copied
@@ -883,7 +888,25 @@ UNT_unit_list_project (UNT_unit_list_t * units, projPJ projection)
   nunits = UNT_unit_list_length (units);
   for (i = 0; i < nunits; i++)
     {
-      UNT_unit_project (UNT_unit_list_get (units, i), projection);
+      UNT_unit_t *unit;
+      unit = UNT_unit_list_get (units, i);
+      UNT_unit_project (unit, projection);
+      if (i == 0)
+        {
+          units->min_x = units->max_x = unit->x;
+          units->min_y = units->max_y = unit->y;
+        }
+      else
+        {
+          if (unit->x < units->min_x)
+            units->min_x = unit->x;
+          else if (unit->x > units->max_x)
+            units->max_x = unit->x;
+          if (unit->y < units->min_y)
+            units->min_y = unit->y;
+          else if (unit->y > units->max_y)
+            units->max_y = unit->y;
+        }
     }
 
 #if DEBUG

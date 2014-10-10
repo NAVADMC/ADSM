@@ -74,8 +74,11 @@ def include_spread(request):
         fields = ['include_direct_contact_spread', 'include_indirect_contact_spread', 'include_airborne_spread']
         for field in fields:
             setattr(master, field, request.POST.get(field) == 'true')
-        master.save()
-        # We don't need to return anything
+        if DailyControls.objects.count() == 0 or request.POST.get('force_delete') == 'true':
+            master.save()
+            return HttpResponse('success')  # We don't need to return any data
+        else:
+            return HttpResponse('failed', status=409)
         
 
 def production_type_permutations():
@@ -213,6 +216,37 @@ def deepcopy_points(request, primary_key, created_instance):
     return formset
 
 
+def initialize_points_from_csv(request):
+    import csv  # TODO this SHOULD be the 3.3 version from python-future.org...
+    filename = handle_file_upload(request)
+    with open(workspace_path(filename)) as csvfile:
+        dialect = csv.Sniffer().sniff(csvfile.read(1024))
+        csvfile.seek(0)
+        header = csv.Sniffer().has_header(csvfile.read(1024))
+        csvfile.seek(0)
+        if header:
+            header = None  #DictReader will pull it off the first line
+        else:
+            header = ['x', 'y']
+        reader = csv.DictReader(csvfile, fieldnames=header, dialect=dialect)
+        #TODO: lower case the user provided header
+        entries = [line for line in reader]  # ordered list
+        initial_values = {}
+        for index, point in enumerate(entries):
+            initial_values['relationalpoint_set-%i-id' % index] = ''
+            initial_values['relationalpoint_set-%i-relational_function' % index] = ''
+            initial_values['relationalpoint_set-%i-x' % index] = point['x']
+            initial_values['relationalpoint_set-%i-y' % index] = point['y']
+        initial_values['relationalpoint_set-TOTAL_FORMS'] = str(len(entries))
+        initial_values['relationalpoint_set-INITIAL_FORMS'] = '0'
+        initial_values['relationalpoint_set-MAX_NUM_FORMS'] = '1000'
+        request.POST.update(initial_values)
+    try:
+        os.remove(workspace_path(filename))  # we don't want to keep these files around in the workspace
+    except: pass  # possible that file was never created
+    return request
+
+
 def relational_function(request, primary_key=None, doCopy=False):
     """This handles the edge case of saving, copying, and creating Relational Functions.  RFs are different from any
     other model in ADSM in that they have a list of RelationalPoints.  These points are listed alongside the normal form.
@@ -220,9 +254,12 @@ def relational_function(request, primary_key=None, doCopy=False):
     foreignkey back to the RelationalFunction which must be created before it can be referenced.
 
     It is possible to integrate this code back into the standard new / edit / copy views by checking for
-    context['formset'].  The extra logic for formsets could be kicked in only when one or more formsets are present."""
+    context['formset'].  The extra logic for formsets could be kicked in only when one or more formsets are present. At
+    the moment integration looks like a bad idea because it would mangle the happy path for the sake of one edge case."""
     context = initialize_relational_form({}, primary_key, request)
-    context['formset'] = PointFormSet(instance=context['model'])
+    if 'file' in request.FILES:  # data file is present
+        request = initialize_points_from_csv(request)
+    context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
     if context['form'].is_valid():
         if doCopy:
             context['form'].instance.pk = None  # This will cause a new instance to be created
@@ -438,7 +475,7 @@ def upload_population(request):
     # wait for Population parsing (up to 5 minutes)
     session.reset_population_upload_status()
     return HttpResponse('{"status": "complete", "redirect": "/setup/Populations/"}', content_type="application/json")
-
+   
 
 def filtering_params(request):
     """Collects the list of parameters to filter by.  Because of the way this is setup:

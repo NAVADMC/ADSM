@@ -67,9 +67,10 @@ struct adsm_module_t_;
 
 /** Type of a function that creates and sets parameters for a model. */
 typedef struct adsm_module_t_ *(*adsm_model_new_t) (sqlite3 *,
-                                                                 UNT_unit_list_t *,
-                                                                 projPJ,
-                                                                 ZON_zone_list_t *);
+                                                    UNT_unit_list_t *,
+                                                    projPJ,
+                                                    ZON_zone_list_t *,
+                                                    GError **);
 
 
 

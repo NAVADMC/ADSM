@@ -21,6 +21,6 @@
 #define TRACE_MONITOR_H
 
 adsm_module_t *trace_monitor_new (sqlite3 *, UNT_unit_list_t *,
-                                  projPJ, ZON_zone_list_t *);
+                                  projPJ, ZON_zone_list_t *, GError **);
 
 #endif

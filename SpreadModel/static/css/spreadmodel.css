@@ -320,7 +320,7 @@ select {
     margin-left: 15px;
 }
 
-#file-upload input, button {
+input[type=file], button {
     display: inline;
 }
 
