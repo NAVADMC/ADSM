@@ -128,6 +128,7 @@ get_exit_condition (char *exit_condition_text)
  * @param _exit_conditions a location in which to store a set of flags
  *   (combined with bitwise-or) specifying when the simulation should end
  *   (e.g., at the first detection, or when all disease is gone).
+ * @param error a location in which an error can be placed.
  * @return the number of models loaded.
  */
 int
@@ -135,9 +136,12 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
                    projPJ projection, ZON_zone_list_t * zones,
                    unsigned int *ndays, unsigned int *nruns,
                    adsm_module_t *** models, GPtrArray * outputs,
-                   guint *_exit_conditions )
+                   guint *_exit_conditions,
+                   GError **error)
 {
-  GPtrArray *tmp_models;
+  GPtrArray *instantiation_fns;
+  gboolean instantiation_failures;
+  GError *instantiation_error = NULL;
   gboolean disable_all_controls;
   gboolean include_zones;
   gboolean include_detection;
@@ -166,19 +170,19 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
       STOP_NORMAL. */
   *_exit_conditions = get_exit_condition (PAR_get_text (scenario_db, "SELECT stop_criteria FROM ScenarioCreator_outputsettings"));
 
-  /* Instantiate modules based on which features are active in the scenario. */
-  tmp_models = g_ptr_array_new();
+  /* Modules will be instantiated based on which features are active in the
+   * scenario. Start by gathering a list of function pointers for the
+   * instantiation functions. */
+  instantiation_fns = g_ptr_array_new();
 
   if (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_diseaseprogressionassignment") >= 1)
     {
-      g_ptr_array_add (tmp_models,
-                       disease_model_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, disease_model_new);
     }
 
   if (PAR_get_boolean (scenario_db, "SELECT include_airborne_spread FROM ScenarioCreator_disease"))
     {
-      g_ptr_array_add (tmp_models,
-                       airborne_spread_model_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, airborne_spread_model_new);
     }
 
   disable_all_controls = PAR_get_boolean (scenario_db, "SELECT disable_all_controls FROM ScenarioCreator_controlmasterplan");
@@ -186,178 +190,166 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
   include_zones = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_zone") >= 1);
   if (include_zones)
     {
-      g_ptr_array_add (tmp_models,
-                       zone_model_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, zone_model_new);
     }
 
   if (PAR_get_boolean (scenario_db, "SELECT (include_direct_contact_spread=1 OR include_indirect_contact_spread=1) FROM ScenarioCreator_disease"))
     {
-      g_ptr_array_add (tmp_models,
-                       contact_spread_model_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, contact_spread_model_new);
     }
 
   include_detection = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND use_detection=1") >= 1);
   if (include_detection)
     {
-      g_ptr_array_add (tmp_models,
-                       detection_model_new (scenario_db, units, projection, zones));
-      g_ptr_array_add (tmp_models,
-                       quarantine_model_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, detection_model_new);
+      g_ptr_array_add (instantiation_fns, quarantine_model_new);
     }
 
   if (include_zones && include_detection)
     {
-      g_ptr_array_add (tmp_models,
-                       basic_zone_focus_model_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, basic_zone_focus_model_new);
     }
 
   include_tracing = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND use_tracing=1") >= 1);
   if (include_tracing)
     {
-      g_ptr_array_add (tmp_models,
-                       contact_recorder_model_new (scenario_db, units, projection, zones));
-      g_ptr_array_add (tmp_models,
-                       trace_model_new (scenario_db, units, projection, zones));
-      g_ptr_array_add (tmp_models,
-                       trace_quarantine_model_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, contact_recorder_model_new);
+      g_ptr_array_add (instantiation_fns, trace_model_new);
+      g_ptr_array_add (instantiation_fns, trace_quarantine_model_new);
     }
 
   if (include_zones && include_tracing)
     {
-      g_ptr_array_add (tmp_models,
-                       trace_zone_focus_model_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, trace_zone_focus_model_new);
     }
 
   include_exams = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND (examine_direct_back_traces=1 OR examine_direct_forward_traces=1 OR examine_indirect_back_traces=1 OR examine_indirect_forward_traces = 1)") >= 1);
   if (include_exams)
     {
-      g_ptr_array_add (tmp_models,
-                       trace_exam_model_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, trace_exam_model_new);
     }
 
   include_testing = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND use_testing=1") >= 1);
   if (include_testing)
     {
-      g_ptr_array_add (tmp_models,
-                       test_model_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, test_model_new);
     }
 
   include_vaccination = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND vaccine_immune_period_id IS NOT NULL") >= 1);
   if (include_vaccination)
     {
-      g_ptr_array_add (tmp_models,
-                       vaccine_model_new (scenario_db, units, projection, zones));
-      g_ptr_array_add (tmp_models,
-                       ring_vaccination_model_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, vaccine_model_new);
+      g_ptr_array_add (instantiation_fns, ring_vaccination_model_new);
     }
 
   include_destruction = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND (use_destruction=1 OR destruction_is_a_ring_target=1 OR destroy_direct_back_traces=1 OR destroy_direct_forward_traces=1 OR destroy_indirect_back_traces=1 OR destroy_indirect_forward_traces=1)") >= 1);
   if (include_destruction)
     {
-      g_ptr_array_add (tmp_models,
-                       basic_destruction_model_new (scenario_db, units, projection, zones));
-      g_ptr_array_add (tmp_models,
-                       ring_destruction_model_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, basic_destruction_model_new);
+      g_ptr_array_add (instantiation_fns, ring_destruction_model_new);
     }
 
   if (include_tracing && include_destruction)
     {
-      g_ptr_array_add (tmp_models,
-                       trace_destruction_model_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, trace_destruction_model_new);
     }
 
   if (include_detection || include_vaccination || include_destruction)
     {
-      g_ptr_array_add (tmp_models,
-                       resources_and_implementation_of_controls_model_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, resources_and_implementation_of_controls_model_new);
     }
 
   /* Main output, the table of output variable values. */
-  g_ptr_array_add (tmp_models,
-                   full_table_writer_new (scenario_db, units, projection, zones));
-  g_ptr_array_add (tmp_models,
-                   unit_state_monitor_new (scenario_db, units, projection, zones));
-  g_ptr_array_add (tmp_models,
-                   exposure_monitor_new (scenario_db, units, projection, zones));
-  g_ptr_array_add (tmp_models,
-                   infection_monitor_new (scenario_db, units, projection, zones));
-  g_ptr_array_add (tmp_models,
-                   destruction_monitor_new (scenario_db, units, projection, zones));
-  g_ptr_array_add (tmp_models,
-                   destruction_list_monitor_new (scenario_db, units, projection, zones));
-  g_ptr_array_add (tmp_models,
-                   zone_monitor_new (scenario_db, units, projection, zones));
+  g_ptr_array_add (instantiation_fns, full_table_writer_new);
+  g_ptr_array_add (instantiation_fns, unit_state_monitor_new);
+  g_ptr_array_add (instantiation_fns, exposure_monitor_new);
+  g_ptr_array_add (instantiation_fns, infection_monitor_new);
+  g_ptr_array_add (instantiation_fns, destruction_monitor_new);
+  g_ptr_array_add (instantiation_fns, destruction_list_monitor_new);
+  g_ptr_array_add (instantiation_fns, zone_monitor_new);
   if (include_detection)
     {
-      g_ptr_array_add (tmp_models,
-                       detection_monitor_new (scenario_db, units, projection, zones));
-      g_ptr_array_add (tmp_models,
-                       trace_monitor_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, detection_monitor_new);
+      g_ptr_array_add (instantiation_fns, trace_monitor_new);
     }
   if (include_exams)
     {
-      g_ptr_array_add (tmp_models,
-                       exam_monitor_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, exam_monitor_new);
     }
   if (include_testing)
     {
-      g_ptr_array_add (tmp_models,
-                       test_monitor_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, test_monitor_new);
     }
   if (include_vaccination)
     {
-      g_ptr_array_add (tmp_models,
-                       vaccination_monitor_new (scenario_db, units, projection, zones));
-      g_ptr_array_add (tmp_models,
-                       vaccination_list_monitor_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, vaccination_monitor_new);
+      g_ptr_array_add (instantiation_fns, vaccination_list_monitor_new);
     }
 
   include_economic = PAR_get_boolean (scenario_db, "SELECT (cost_track_zone_surveillance=1 OR cost_track_vaccination=1 OR cost_track_destruction=1) FROM ScenarioCreator_outputsettings");
   if (include_economic)
     {
-      g_ptr_array_add (tmp_models,
-                       economic_model_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, economic_model_new);
     }
 
   /* Supplemental outputs. */
   if (PAR_get_boolean (scenario_db, "SELECT (save_daily_unit_states=1) FROM ScenarioCreator_outputsettings"))
     {
-      g_ptr_array_add (tmp_models,
-                       state_table_writer_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, state_table_writer_new);
     }
   if (PAR_get_boolean (scenario_db, "SELECT (save_daily_exposures=1) FROM ScenarioCreator_outputsettings"))
     {
-      g_ptr_array_add (tmp_models,
-                       exposures_table_writer_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, exposures_table_writer_new);
     }
   if (PAR_get_boolean (scenario_db, "SELECT (save_daily_events=1) FROM ScenarioCreator_outputsettings"))
     {
-      g_ptr_array_add (tmp_models,
-                       apparent_events_table_writer_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, apparent_events_table_writer_new);
     }
   if (PAR_get_boolean (scenario_db, "SELECT (save_iteration_outputs_for_units=1) FROM ScenarioCreator_outputsettings"))
     {
-      g_ptr_array_add (tmp_models,
-                       unit_stats_writer_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, unit_stats_writer_new);
     }
   if (PAR_get_boolean (scenario_db, "SELECT (save_map_output=1) FROM ScenarioCreator_outputsettings"))
     {
-      g_ptr_array_add (tmp_models,
-                       weekly_gis_writer_new (scenario_db, units, projection, zones));
+      g_ptr_array_add (instantiation_fns, weekly_gis_writer_new);
     }
 
   /* Population model is always added. */
-  g_ptr_array_add (tmp_models, population_model_new (NULL, units, projection, zones));
+  g_ptr_array_add (instantiation_fns, population_model_new);
 
-  #if DEBUG
-    for (i = 0; i < tmp_models->len; i++)
-      {
-        model = g_ptr_array_index (tmp_models, i);
-        s = model->to_string (model);
-        g_debug ("%s", s);
-        g_free (s);
-      }
-  #endif
+  /* Instantiate the modules. If creation of any of them fails, output a
+   * warning. */
+  nmodels = instantiation_fns->len;
+  *models = g_new (adsm_module_t *, nmodels);
+  instantiation_failures = FALSE;
+  for (i = 0; i < nmodels; i++)
+    {
+      adsm_model_new_t instantiation_fn;
+
+      instantiation_fn = g_ptr_array_index (instantiation_fns, i);
+      (*models)[i] = instantiation_fn (scenario_db, units, projection, zones, &instantiation_error);
+      if (instantiation_error)
+        {
+          g_warning ("%s", instantiation_error->message);
+          g_clear_error (&instantiation_error);
+          instantiation_failures = TRUE;
+        }
+      else
+        {
+          #if DEBUG
+            model = (*models)[i];
+            s = model->to_string (model);
+            g_debug ("%s", s);
+            g_free (s);
+          #endif
+        }
+    }
+
+  if (instantiation_failures)
+    {
+      g_set_error (error, g_quark_from_string(G_LOG_DOMAIN), 0,
+                   "One or more modules could not be initialized");
+    }
 
   /* Make sure the zones' surveillance level numbers start at 1 and are
    * consecutive, because we're going to use them as list indices later. */
@@ -376,12 +368,6 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
 #if DEBUG
   g_debug ("----- EXIT adsm_load_models");
 #endif
-
-  /* The caller wants just the array of pointers to models. Discard the
-   * GPtrArray objects that wraps that array. */
-  nmodels = tmp_models->len;
-  *models = (adsm_module_t **) (tmp_models->pdata);
-  g_ptr_array_free (tmp_models, /* free_seg = */ FALSE);
 
   return nmodels;
 }

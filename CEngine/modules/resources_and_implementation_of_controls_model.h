@@ -22,6 +22,7 @@
 adsm_module_t *resources_and_implementation_of_controls_model_new (sqlite3 *,
                                                                    UNT_unit_list_t *,
                                                                    projPJ,
-                                                                   ZON_zone_list_t *);
+                                                                   ZON_zone_list_t *,
+                                                                   GError **);
 
 #endif

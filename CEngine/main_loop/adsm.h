@@ -242,7 +242,8 @@ run_sim_main (sqlite3 *scenario_db,
               const char *output_dir,
               double fixed_rng_value, int verbosity, int seed,
               int starting_iteration_number,
-              gboolean dry_run);
+              gboolean dry_run,
+              GError **);
 
 
 /* Functions for version tracking */

@@ -423,8 +423,6 @@
 #if HAVE_CONFIG_H
 #  include "config.h"
 #endif
-/* #include <sys/times.h> */
-#include <time.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -632,7 +630,7 @@ default_projection (UNT_unit_list_t * units)
 DLL_API void
 run_sim_main (sqlite3 *scenario_db,
               const char *output_dir, double fixed_rng_value, int verbosity, int seed,
-              int starting_iteration_number, gboolean dry_run)
+              int starting_iteration_number, gboolean dry_run, GError **error)
 {
   unsigned int ndays, nruns, day, run, iteration_number;
   RPT_reporting_t *last_day_of_outbreak;
@@ -640,12 +638,12 @@ run_sim_main (sqlite3 *scenario_db,
   GPtrArray *reporting_vars;
   int nmodels = 0;
   adsm_module_t **models = NULL;
-  adsm_event_manager_t *manager;
+  adsm_event_manager_t *manager = NULL;
   unsigned int nunits;
   UNT_unit_list_t *units;
   UNT_unit_t *unit;
   gsl_rng *gsl_format_rng;
-  RAN_gen_t *rng;
+  RAN_gen_t *rng = NULL;
   unsigned int nzones;
   ZON_zone_list_t *zones;
   int i;                     /* loop counter */
@@ -653,9 +651,7 @@ run_sim_main (sqlite3 *scenario_db,
     pending_actions, pending_infections, disease_end_recorded,
     stop_on_disease_end, early_exit;
   guint exit_conditions = 0;
-  double m_total_time, total_processor_time;
-  unsigned long total_runs;
-  m_total_time = total_processor_time = 0.0;
+  GError *module_load_error = NULL;
 
 #ifdef USE_SC_GUILIB
   GPtrArray *production_types;
@@ -771,384 +767,348 @@ run_sim_main (sqlite3 *scenario_db,
   /* Get the simulation parameters. */
   nmodels =
     adsm_load_modules (scenario_db, units, units->projection, zones,
-                       &ndays, &nruns, &models, reporting_vars, &exit_conditions );
-  nzones = ZON_zone_list_length (zones);
-
-#if DEBUG
-  g_debug ("simulation %u days x %u runs", ndays, nruns);
-#endif
-
-
-  /* Initialize the pseudo-random number generator. The seed is taken from the
-   * "seed" argument to run_sim_main() if specified there, then from the
-   * database if specified there, and finally from the system time.
-   *
-   * In parallel setups, we want to avoid more than one process starting with
-   * the same seed. If the "starting_iteration_number" argument to
-   * run_sim_main() is specified, then we add that *minus one* to the starting
-   * seed. */
-  gsl_rng_env_setup();
-  gsl_format_rng = gsl_rng_alloc (gsl_rng_taus2);
-#ifdef USE_SC_GUILIB
-  if ( _scenario.random_seed == 0 )
-    gsl_rng_set (gsl_format_rng, time(NULL));
+                       &ndays, &nruns, &models, reporting_vars, &exit_conditions,
+                       &module_load_error);
+  if (module_load_error)
+    {
+      g_propagate_error (error, module_load_error);
+    }
   else
-    gsl_rng_set (gsl_format_rng, _scenario.random_seed );
-#else
-  {
-    int offset;
-    /* The starting iteration number is -1 by default, indicating that the caller
-     * did not request a specific starting iteration number. */
-    if (starting_iteration_number >= 1)
-      offset = starting_iteration_number - 1;
-    else
-      offset = 0;
+    {
+      nzones = ZON_zone_list_length (zones);
 
-    if (seed >= 0)
+      #if DEBUG
+        g_debug ("simulation %u days x %u runs", ndays, nruns);
+      #endif
+
+      /* Initialize the pseudo-random number generator. The seed is taken from
+       * the "seed" argument to run_sim_main() if specified there, then from
+       * the database if specified there, and finally from the system time.
+       *
+       * In parallel setups, we want to avoid more than one process starting
+       * with the same seed. If the "starting_iteration_number" argument to
+       * run_sim_main() is specified, then we add that *minus one* to the
+       * starting seed. */
+      gsl_rng_env_setup();
+      gsl_format_rng = gsl_rng_alloc (gsl_rng_taus2);
       {
-        gsl_rng_set (gsl_format_rng, seed + offset);
-      }
-    else
-      {
-        seed = PAR_get_int (scenario_db, "SELECT (CASE WHEN random_seed IS NULL THEN -1 ELSE random_seed END) FROM ScenarioCreator_Scenario");
+        int offset;
+        /* The starting iteration number is -1 by default, indicating that the caller
+         * did not request a specific starting iteration number. */
+        if (starting_iteration_number >= 1)
+          offset = starting_iteration_number - 1;
+        else
+          offset = 0;
+
         if (seed >= 0)
           {
             gsl_rng_set (gsl_format_rng, seed + offset);
           }
         else
           {
-            gsl_rng_set (gsl_format_rng, time(NULL) + offset);
+            seed = PAR_get_int (scenario_db, "SELECT (CASE WHEN random_seed IS NULL THEN -1 ELSE random_seed END) FROM ScenarioCreator_Scenario");
+            if (seed >= 0)
+              {
+                gsl_rng_set (gsl_format_rng, seed + offset);
+              }
+            else
+              {
+                gsl_rng_set (gsl_format_rng, time(NULL) + offset);
+              }
           }
       }
-  }
-#endif
-  rng = RAN_new_generator (gsl_format_rng);
-  if (fixed_rng_value >= 0 && fixed_rng_value < 1)
-    {
-      RAN_fix (rng, fixed_rng_value);
-    }
-
-  manager = adsm_new_event_manager (models, nmodels);
-
-  /* Determine whether each iteration should end when the active disease phase ends. */
-  stop_on_disease_end = (0 != get_stop_on_disease_end( exit_conditions ) );
-
-  m_total_time = total_processor_time = 0.0;
-  total_runs = 0;
-
-#ifdef USE_SC_GUILIB
-  sc_sim_start( units, production_types, zones );
-#else
-  if (NULL != adsm_sim_start)
-    adsm_sim_start ();
-#endif
-
-
-/*
-#ifdef USE_SC_GUILIB
-  write_scenario_SQL();
-  write_job_SQL();
-  write_production_types_SQL( production_types );
-  write_zones_SQL( zones );
-  fflush(NULL);
-#endif
-*/
-
-  if (output_dir != NULL)
-    adsm_create_event (manager, EVT_new_output_dir_event((char *)output_dir), units, zones, rng);
-  adsm_create_event (manager, EVT_new_declaration_of_outputs_event(reporting_vars), units, zones, rng);
-
-  /* The starting iteration number is -1 by default, indicating that the caller
-   * did not request a specific starting iteration number. */
-  if (starting_iteration_number >= 1)
-    {
-      iteration_number = starting_iteration_number;
-      /* Also, when a starting iteration number is given, run for only 1
-       * iteration. */
-      nruns = 1;
-    }
-  else
-    iteration_number = 1;
-
-  /* Begin the loop over the specified number of iterations. If this is a "dry
-   * run", set the number of iterations to zero. */
-  adsm_create_event (manager, EVT_new_before_any_simulations_event(), units, zones, rng);
-  if (dry_run)
-    nruns = 0;
-  for (run = 0; run < nruns; run++, iteration_number++)
-    {
-
-    _iteration.zoneFociCreated = FALSE;
-    _iteration.diseaseEndDay = -1;
-    _iteration.outbreakEndDay = -1;
-    _iteration.first_detection = FALSE;
-
-      /* Does the GUI user want to stop a simulation in progress? */
-      if (NULL != adsm_simulation_stop)
+      rng = RAN_new_generator (gsl_format_rng);
+      if (fixed_rng_value >= 0 && fixed_rng_value < 1)
         {
-          if (0 != adsm_simulation_stop ())
-            break;
+          RAN_fix (rng, fixed_rng_value);
         }
 
-      #if DEBUG
-        g_debug ("resetting everything before start of simulation");
+      manager = adsm_new_event_manager (models, nmodels);
+
+      /* Determine whether each iteration should end when the active disease phase ends. */
+      stop_on_disease_end = (0 != get_stop_on_disease_end( exit_conditions ) );
+
+      #ifdef USE_SC_GUILIB
+       sc_sim_start( units, production_types, zones );
+      #else
+       if (NULL != adsm_sim_start)
+         adsm_sim_start ();
       #endif
 
-/*
-#error TODO:  After removing the infectious_unit updates from the sc_adsm functions make sure to call them from near here if the optimizations have been defined
-*/
-#ifdef USE_SC_GUILIB
-      sc_iteration_start ( production_types, units,  run);
-#else
-      if (NULL != adsm_iteration_start)
-        adsm_iteration_start (run);
-#endif
+      if (output_dir != NULL)
+        adsm_create_event (manager, EVT_new_output_dir_event((char *)output_dir), units, zones, rng);
+      adsm_create_event (manager, EVT_new_declaration_of_outputs_event(reporting_vars), units, zones, rng);
 
-      if ( _iteration.infectious_units != NULL )
-      {
-        g_hash_table_destroy( _iteration.infectious_units );
-        _iteration.infectious_units = NULL;
-      };
+      /* The starting iteration number is -1 by default, indicating that the caller
+       * did not request a specific starting iteration number. */
+      if (starting_iteration_number >= 1)
+        {
+          iteration_number = starting_iteration_number;
+          /* Also, when a starting iteration number is given, run for only 1
+           * iteration. */
+          nruns = 1;
+        }
+      else
+        iteration_number = 1;
+
       _iteration.infectious_units = g_hash_table_new( g_direct_hash, g_direct_equal );
 
-      /* Reset reporting variables. */
-      RPT_reporting_set_null (last_day_of_outbreak);
-
-      active_infections_yesterday = TRUE;
-      pending_actions = TRUE;
-      pending_infections = TRUE;
-      disease_end_recorded = FALSE;
-      early_exit = FALSE;
-
-      /* The starting iteration number is -1 by default, indicating that the
-       * caller did not request a specific starting iteration number. */
-      adsm_create_event (manager,
-                         EVT_new_before_each_simulation_event(iteration_number),
-                         units, zones, rng);
-      /* Create an End Of Day event for day "0" to make the population module
-       * process the initially infected/initially vaccine immune units. */
-      adsm_create_event (manager,
-                         EVT_new_end_of_day_event(0, /* done = */ FALSE),
-                         units, zones, rng);
-
-      /* Run the iteration. */
-
-      /* Begin the loop over the days in an iteration. */
-      for (day = 1; (day <= ndays) && (!early_exit); day++)
+      /* Begin the loop over the specified number of iterations. If this is a "dry
+       * run", set the number of iterations to zero. */
+      adsm_create_event (manager, EVT_new_before_any_simulations_event(), units, zones, rng);
+      if (dry_run)
+        nruns = 0;
+      for (run = 0; run < nruns; run++, iteration_number++)
         {
+          _iteration.zoneFociCreated = FALSE;
+          _iteration.diseaseEndDay = -1;
+          _iteration.outbreakEndDay = -1;
+          _iteration.first_detection = FALSE;
+
           /* Does the GUI user want to stop a simulation in progress? */
           if (NULL != adsm_simulation_stop)
             {
-              /* This check may break the day loop.
-               * If necessary, Another check (see above) will break the iteration loop.*/
               if (0 != adsm_simulation_stop ())
                 break;
             }
 
-          /* Should the iteration end due to first detection? */
-      if ( _iteration.first_detection && (0 != get_stop_on_first_detection( exit_conditions )) )
-      break;
+          #if DEBUG
+            g_debug ("resetting everything before start of simulation");
+          #endif
 
+          /*
+          #error TODO:  After removing the infectious_unit updates from the sc_adsm functions make sure to call them from near here if the optimizations have been defined
+          */
+          #ifdef USE_SC_GUILIB
+            sc_iteration_start ( production_types, units,  run);
+          #else
+            if (NULL != adsm_iteration_start)
+              adsm_iteration_start (run);
+          #endif
 
-      _iteration.current_day = day;
-#ifdef USE_SC_GUILIB
-          sc_day_start( production_types );
-#else
-          if (NULL != adsm_day_start)
-            adsm_day_start (day);
-#endif
+          g_hash_table_remove_all( _iteration.infectious_units );
 
-          /* Process changes made to the units and zones on the previous day. */
-          adsm_create_event (manager, EVT_new_midnight_event (day), units, zones, rng);
+          /* Reset reporting variables. */
+          RPT_reporting_set_null (last_day_of_outbreak);
 
-          /* Check if there are active infections. */
-          active_infections_today = FALSE;
-          for (i = 0; i < nunits; i++)
+          active_infections_yesterday = TRUE;
+          pending_actions = TRUE;
+          pending_infections = TRUE;
+          disease_end_recorded = FALSE;
+          early_exit = FALSE;
+
+          adsm_create_event (manager,
+                             EVT_new_before_each_simulation_event(iteration_number),
+                             units, zones, rng);
+          /* Create an End Of Day event for day "0" to make the population module
+           * process the initially infected/initially vaccine immune units. */
+          adsm_create_event (manager,
+                             EVT_new_end_of_day_event(0, /* done = */ FALSE),
+                             units, zones, rng);
+
+          /* Run the iteration. */
+
+          /* Begin the loop over the days in an iteration. */
+          for (day = 1; (day <= ndays) && (!early_exit); day++)
             {
-              unit = UNT_unit_list_get (units, i);
-              if (unit->state == Latent
-                  || unit->state == InfectiousSubclinical
-                  || unit->state == InfectiousClinical)
+              /* Does the GUI user want to stop a simulation in progress? */
+              if (NULL != adsm_simulation_stop)
                 {
-                  active_infections_today = TRUE;
-                  break;
+                  /* This check may break the day loop.
+                   * If necessary, Another check (see above) will break the iteration loop.*/
+                  if (0 != adsm_simulation_stop ())
+                    break;
                 }
-            }
 
-          /* Run the models to get today's changes. */
-          adsm_create_event (manager, EVT_new_new_day_event (day), units, zones, rng);
+              /* Should the iteration end due to first detection? */
+              if ( _iteration.first_detection && (0 != get_stop_on_first_detection( exit_conditions )) )
+                break;
 
-          /* Check if the outbreak is over, and if so, whether we can exit this
-           * Monte Carlo trial early. */
+              _iteration.current_day = day;
+              #ifdef USE_SC_GUILIB
+                sc_day_start( production_types );
+              #else
+                if (NULL != adsm_day_start)
+                  adsm_day_start (day);
+              #endif
 
-          /* Check first for active infections... */
-          if (active_infections_yesterday)
-            {
-              if (!active_infections_today)
+              /* Process changes made to the units and zones on the previous day. */
+              adsm_create_event (manager, EVT_new_midnight_event (day), units, zones, rng);
+
+              /* Check if there are active infections. */
+              active_infections_today = FALSE;
+              for (i = 0; i < nunits; i++)
                 {
-                  ;
-                  #if DEBUG
-                    g_debug ("no more active infections");
+                  unit = UNT_unit_list_get (units, i);
+                  if (unit->state == Latent
+                      || unit->state == InfectiousSubclinical
+                      || unit->state == InfectiousClinical)
+                    {
+                      active_infections_today = TRUE;
+                      break;
+                    }
+                }
+
+              /* Run the models to get today's changes. */
+              adsm_create_event (manager, EVT_new_new_day_event (day), units, zones, rng);
+
+              /* Check if the outbreak is over, and if so, whether we can exit
+               * this iteration early. */
+
+              /* Check first for active infections... */
+              if (active_infections_yesterday)
+                {
+                  if (!active_infections_today)
+                    {
+                      ;
+                      #if DEBUG
+                        g_debug ("no more active infections");
+                      #endif
+                    }
+                }
+              else /* there were no active infections yesterday */
+                {
+                  if (active_infections_today)
+                    {
+                      ;
+                      #if DEBUG
+                        g_debug ("active infections again");
+                      #endif
+                    }
+                }
+
+              /* Should the end of the disease phase be recorded? */
+              if (!disease_end_recorded && !active_infections_today && !pending_infections)
+                {
+                  #ifdef USE_SC_GUILIB
+                    sc_disease_end( day );
+                  #else
+                    if (NULL != adsm_disease_end)
+                      adsm_disease_end (day);
                   #endif
+                  disease_end_recorded = TRUE;
                 }
-            }
-          else /* there were no active infections yesterday */
-            {
-              if (active_infections_today)
+
+              /* Check the early exit conditions.  If the user wants to exit when
+               * the active disease phase ends, then active_infections and pending_infections
+               * must both be false to exit early.
+               *
+               * Otherwise, active_infections and pending_actions must both be false
+               * to exit early.
+               */
+              if (stop_on_disease_end)
                 {
-                  ;
-                  #if DEBUG
-                    g_debug ("active infections again");
-                  #endif
+                  if (!active_infections_today && !pending_infections)
+                    {
+                      #if DEBUG
+                        g_debug ("can exit early on end of disease phase");
+                      #endif
+                      early_exit = TRUE;
+                    }
                 }
-            }
-
-          /* Should the end of the disease phase be recorded? */
-          if (!disease_end_recorded && !active_infections_today && !pending_infections)
-            {
-
-#ifdef USE_SC_GUILIB
-              sc_disease_end( day );
-#else
-              if (NULL != adsm_disease_end)
-                adsm_disease_end (day);
-#endif
-              disease_end_recorded = TRUE;
-            }
-
-
-          /* Check the early exit conditions.  If the user wants to exit when
-           * the active disease phase ends, then active_infections and pending_infections
-           * must both be false to exit early.
-           *
-           * Otherwise, active_infections and pending_actions must both be false
-           * to exit early.
-           */
-          if (stop_on_disease_end)
-            {
-              if (!active_infections_today && !pending_infections)
+              else
                 {
-                  #if DEBUG
-                    g_debug ("can exit early on end of disease phase");
-                  #endif
-                  early_exit = TRUE;
+                  if (!active_infections_today && !pending_actions)
+                    {
+                      #if DEBUG
+                        g_debug ("can exit early on end of outbreak");
+                      #endif
+                      #ifdef USE_SC_GUILIB
+                        sc_outbreak_end( day );
+                      #else
+                        if (NULL != adsm_outbreak_end)
+                          adsm_outbreak_end (day);
+                      #endif
+                      RPT_reporting_set_integer (last_day_of_outbreak, day - 1);
+                      early_exit = TRUE;
+                    }
                 }
-            }
-          else
-            {
-              if (!active_infections_today && !pending_actions)
+              active_infections_yesterday = active_infections_today;
+
+              adsm_create_event (manager, EVT_new_end_of_day_event (day, early_exit), units, zones, rng);
+
+              /* Next, check for pending actions... */
+              pending_actions = FALSE;
+              for (i = 0; i < nmodels; i++)
                 {
-                  #if DEBUG
-                    g_debug ("can exit early on end of outbreak");
-                  #endif
-#ifdef USE_SC_GUILIB
-          sc_outbreak_end( day );
-#else
-                  if (NULL != adsm_outbreak_end)
-                    adsm_outbreak_end (day);
-#endif
-                  RPT_reporting_set_integer (last_day_of_outbreak, day - 1);
-                  early_exit = TRUE;
+                  if (models[i]->has_pending_actions (models[i]))
+                    {
+                      #if DEBUG
+                        g_debug ("%s has pending actions", models[i]->name);
+                      #endif
+                      pending_actions = TRUE;
+                      break;
+                    }
                 }
-            }
-          active_infections_yesterday = active_infections_today;
 
-          adsm_create_event (manager, EVT_new_end_of_day_event (day, early_exit), units, zones, rng);
-
-          /* Next, check for pending actions... */
-          pending_actions = FALSE;
-          for (i = 0; i < nmodels; i++)
-            {
-              if (models[i]->has_pending_actions (models[i]))
+              /* And finally, check for pending infections. */
+              pending_infections = FALSE;
+              for (i = 0; i < nmodels; i++)
                 {
-                  #if DEBUG
-                    g_debug ("%s has pending actions", models[i]->name);
-                  #endif
-                  pending_actions = TRUE;
-                  break;
+                  if (models[i]->has_pending_infections (models[i]))
+                    {
+                      #if DEBUG
+                        g_debug ("%s has pending infections", models[i]->name);
+                      #endif
+                      pending_infections = TRUE;
+                      break;
+                    }
                 }
-            }
 
+              adsm_create_event (manager, EVT_new_end_of_day2_event (day, early_exit || day == ndays), units, zones, rng);
 
-          /* And finally, check for pending infections. */
-          pending_infections = FALSE;
-          for (i = 0; i < nmodels; i++)
-            {
-              if (models[i]->has_pending_infections (models[i]))
+              if (NULL != adsm_show_all_prevalences)
                 {
-                  #if DEBUG
-                    g_debug ("%s has pending infections", models[i]->name);
-                  #endif
-                  pending_infections = TRUE;
-                  break;
+                  char *prev_summary = UNT_unit_list_prevalence_to_string (units, day);
+                  adsm_show_all_prevalences (prev_summary);
+                  free (prev_summary);
                 }
-            }
 
+              if (NULL != adsm_show_all_states)
+                {
+                  char *summary = UNT_unit_list_summary_to_string (units);
+                  adsm_show_all_states (summary);
+                  free (summary);
+                }
 
-          adsm_create_event (manager, EVT_new_end_of_day2_event (day, early_exit || day == ndays), units, zones, rng);
+              if (NULL != adsm_set_zone_perimeters)
+                adsm_set_zone_perimeters (zones);
 
-          if (NULL != adsm_show_all_prevalences)
-            {
-              char *prev_summary = UNT_unit_list_prevalence_to_string (units, day);
-              adsm_show_all_prevalences (prev_summary);
-              free (prev_summary);
-            }
+              #ifdef USE_SC_GUILIB
+                sc_day_complete( day, run, production_types, zones );
+              #else
+                if (NULL != adsm_day_complete)
+                  adsm_day_complete (day);
+              #endif
+            } /* end of loop over days of one iteration */
 
-          if (NULL != adsm_show_all_states)
-            {
-              char *summary = UNT_unit_list_summary_to_string (units);
-              adsm_show_all_states (summary);
-              free (summary);
-            }
+          #ifdef USE_SC_GUILIB
+            sc_iteration_complete( zones, units, production_types, run );
+          #else
+            if (NULL != adsm_iteration_complete)
+              adsm_iteration_complete (run);
+          #endif
+        } /* end of loop over all iterations */
 
-          if (NULL != adsm_set_zone_perimeters)
-            adsm_set_zone_perimeters (zones);
-
-#ifdef USE_SC_GUILIB
-          sc_day_complete( day, run, production_types, zones );
-#else
-          if (NULL != adsm_day_complete)
-            adsm_day_complete (day);
-#endif
-
-        } /* end loop over days of one Monte Carlo trial */
-
-#ifdef USE_SC_GUILIB
-      sc_iteration_complete( zones, units, production_types, run );
-#else
-      if (NULL != adsm_iteration_complete)
-        adsm_iteration_complete (run);
-#endif
-
-    }                           /* loop over all Monte Carlo trials */
-
-#ifdef USE_SC_GUILIB
-
-    {
-      total_processor_time = m_total_time;
-      total_runs = run;
-    };
-    {
-      _scenario.total_processor_time = total_processor_time;
-      _scenario.iterations_completed = total_runs;
-      sc_sim_complete( -1, units, production_types, zones );
-    };
-#else
-  /* Inform the GUI that the simulation has ended */
-  if (NULL != adsm_sim_complete)
-    {
-      if (-1 == adsm_simulation_stop ())
-        {
-          /* simulation was interrupted by the user and did not complete. */
-          adsm_sim_complete (0);
-        }
-      else
-        {
-          /* Simulation ran to completion. */
-          adsm_sim_complete (-1);
-        }
-    }
-#endif
+      #ifdef USE_SC_GUILIB
+        sc_sim_complete( -1, units, production_types, zones );
+      #else
+        /* Inform the GUI that the simulation has ended */
+        if (NULL != adsm_sim_complete)
+          {
+            if (-1 == adsm_simulation_stop ())
+              {
+                /* simulation was interrupted by the user and did not complete. */
+                adsm_sim_complete (0);
+              }
+            else
+              {
+                /* Simulation ran to completion. */
+                adsm_sim_complete (-1);
+              }
+          }
+      #endif
+    } /* end of case where modules were successfully instantiated. */
 
   /* Clean up. */
   RPT_free_reporting (last_day_of_outbreak);

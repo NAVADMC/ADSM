@@ -1636,7 +1636,7 @@ estimate_density (UNT_unit_list_t *units)
  */
 adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
-     ZON_zone_list_t * zones)
+     ZON_zone_list_t * zones, GError **error)
 {
   adsm_module_t *self;
   local_data_t *local_data;

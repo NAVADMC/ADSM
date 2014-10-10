@@ -10,6 +10,6 @@
 #define UNIT_STATS_WRITER_H
 
 adsm_module_t *unit_stats_writer_new (sqlite3 *, UNT_unit_list_t *,
-                                      projPJ, ZON_zone_list_t *);
+                                      projPJ, ZON_zone_list_t *, GError **);
 
 #endif

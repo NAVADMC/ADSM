@@ -16,6 +16,6 @@
 #define SUMMARY_GIS_WRITER_H
 
 adsm_module_t *summary_gis_writer_new (sqlite3 *, UNT_unit_list_t *,
-                                       projPJ, ZON_zone_list_t *);
+                                       projPJ, ZON_zone_list_t *, GError **);
 
 #endif
