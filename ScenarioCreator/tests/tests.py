@@ -6,7 +6,7 @@ from future import standard_library
 standard_library.install_hooks()
 import unittest
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 
 # Create your tests here.
 from ScenarioCreator.models import Scenario, choice_char_from_value, squish_name, Unit, Population, ProductionType, IndirectSpread, ProbabilityFunction, RelationalFunction
@@ -130,7 +130,7 @@ class CleanTest(TestCase):
         self.assertRaises(ValidationError, pt.clean_fields)
 
 
-class ViewTests(TestCase):
+class ViewTests(TransactionTestCase):
     multi_db = True
 
     def test_delete_links_exist(self):
@@ -163,5 +163,4 @@ class ViewTests(TestCase):
         function = RelationalFunction.objects.create(name="Test RelationalFunction")
         r = self.client.get('/setup/RelationalFunction/%s/' % function.id)
         self.assertIn('data-delete-link', r.content)
-
 

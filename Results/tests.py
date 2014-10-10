@@ -4,7 +4,7 @@ from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
 standard_library.install_hooks()
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.db import connections
 import unittest
 import time
@@ -21,7 +21,7 @@ from Settings.models import scenario_filename
 from Settings.utils import close_all_connections
 
 
-class SimulationTest(TestCase):
+class SimulationTest(TransactionTestCase):
     multi_db = True
 
     @classmethod
