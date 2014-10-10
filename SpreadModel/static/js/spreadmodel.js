@@ -3,7 +3,7 @@ function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTim
 
 safe_save = function(url, data){
     if(typeof outputs_computed == 'undefined' || outputs_computed == false) { 
-        fn()
+        $.post(url, data);
     } else { //confirmation dialog so we don't clobber outputs
         var dialog = new BootstrapDialog.show({
             title: 'Delete Results Confirmation',
@@ -227,7 +227,7 @@ $(function(){
         });
         console.log($(this).closest('form')[0]);
         safe_save('', $($(this).closest('form')[0]).serialize());//will cause page reload
-//        window.location.reload();
+        window.location.reload();
     });
     
     $(document).on('submit','#file-upload',function(event){
