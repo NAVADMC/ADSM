@@ -423,8 +423,6 @@
 #if HAVE_CONFIG_H
 #  include "config.h"
 #endif
-/* #include <sys/times.h> */
-#include <time.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -653,9 +651,6 @@ run_sim_main (sqlite3 *scenario_db,
     pending_actions, pending_infections, disease_end_recorded,
     stop_on_disease_end, early_exit;
   guint exit_conditions = 0;
-  double m_total_time, total_processor_time;
-  unsigned long total_runs;
-  m_total_time = total_processor_time = 0.0;
 
 #ifdef USE_SC_GUILIB
   GPtrArray *production_types;
@@ -833,26 +828,12 @@ run_sim_main (sqlite3 *scenario_db,
   /* Determine whether each iteration should end when the active disease phase ends. */
   stop_on_disease_end = (0 != get_stop_on_disease_end( exit_conditions ) );
 
-  m_total_time = total_processor_time = 0.0;
-  total_runs = 0;
-
 #ifdef USE_SC_GUILIB
   sc_sim_start( units, production_types, zones );
 #else
   if (NULL != adsm_sim_start)
     adsm_sim_start ();
 #endif
-
-
-/*
-#ifdef USE_SC_GUILIB
-  write_scenario_SQL();
-  write_job_SQL();
-  write_production_types_SQL( production_types );
-  write_zones_SQL( zones );
-  fflush(NULL);
-#endif
-*/
 
   if (output_dir != NULL)
     adsm_create_event (manager, EVT_new_output_dir_event((char *)output_dir), units, zones, rng);
@@ -1123,14 +1104,7 @@ run_sim_main (sqlite3 *scenario_db,
     }                           /* loop over all Monte Carlo trials */
 
 #ifdef USE_SC_GUILIB
-
     {
-      total_processor_time = m_total_time;
-      total_runs = run;
-    };
-    {
-      _scenario.total_processor_time = total_processor_time;
-      _scenario.iterations_completed = total_runs;
       sc_sim_complete( -1, units, production_types, zones );
     };
 #else
