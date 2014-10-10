@@ -26,7 +26,8 @@
 int adsm_load_modules (sqlite3 *scenario_db,
                        UNT_unit_list_t *, projPJ, ZON_zone_list_t *,
                        unsigned int *ndays, unsigned int *nruns,
-                       adsm_module_t *** models, GPtrArray * outputs, guint *_exit_conditions);
+                       adsm_module_t *** models, GPtrArray * outputs, guint *_exit_conditions,
+                       GError **);
 void adsm_unload_modules (int nmodels, adsm_module_t ** models);
 
 #endif /* !MODULE_LOADER_H */

@@ -21,6 +21,6 @@
 #define RING_VACCINATION_MODEL_H
 
 adsm_module_t *ring_vaccination_model_new (sqlite3 *, UNT_unit_list_t *,
-                                           projPJ, ZON_zone_list_t *);
+                                           projPJ, ZON_zone_list_t *, GError **);
 
 #endif

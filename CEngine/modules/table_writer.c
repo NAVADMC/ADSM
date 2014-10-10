@@ -519,7 +519,7 @@ set_params (struct adsm_module_t_ *self, sqlite3 * params)
  */
 adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
-     ZON_zone_list_t * zones)
+     ZON_zone_list_t * zones, GError **error)
 {
   adsm_module_t *self;
   local_data_t *local_data;

@@ -49,6 +49,8 @@ main (int argc, char *argv[])
   };
   int sqlerr;
   sqlite3 *scenario_db;
+  GError *error = NULL;
+  int exit_status = EXIT_SUCCESS;
 
   clear_adsm_fns ();
 
@@ -118,11 +120,19 @@ main (int argc, char *argv[])
                 verbosity,
                 seed,
                 starting_iteration_number,
-                dry_run);
+                dry_run,
+                &error);
 
   sqlite3_close (scenario_db);
+  
+  if (error)
+    {
+      g_warning ("%s", error->message);
+      g_clear_error (&error);
+      exit_status = EXIT_FAILURE;
+    }
 
-  return EXIT_SUCCESS;
+  return exit_status;
 }
 
 /* end of file cli.c */
