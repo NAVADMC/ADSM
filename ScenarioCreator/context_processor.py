@@ -81,6 +81,7 @@ def basic_context(request):
         }
         
     elif 'results/' in request.path:  # results specific context
-        context.update({'results_progress': iteration_progress() * 100,})
+        context.update({'results_progress': iteration_progress() * 100,
+                        'large_population': Unit.objects.count() > 40000})
         
     return context

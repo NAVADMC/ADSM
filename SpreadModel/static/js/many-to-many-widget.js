@@ -38,7 +38,7 @@ check_disable_spread_checboxes = function(post_changes){
             var active = $(this).find('input').prop('checked');
             data[field_name] = active;
         });
-        safe_save(function(){$.post('/setup/IncludeSpreads/', data)});
+        safe_save('/setup/IncludeSpreads/', data);
     }
 }
 
@@ -121,9 +121,9 @@ form_state = (function(form){
                 $('#'+input_name).val(variables[key]);
             }
         })
-        safe_save(debounce(function() {
-            $.post('', form.serialize())
-        }, 500));  //interval = 500 milliseconds
+        debounce(
+            safe_save('', form.serialize())
+        , 500);  //interval = 500 milliseconds
     };
 
     return {

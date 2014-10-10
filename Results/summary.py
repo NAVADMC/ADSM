@@ -5,11 +5,10 @@ from __future__ import absolute_import
 from collections import OrderedDict
 from future import standard_library
 standard_library.install_hooks()
-from future.builtins import object
 
 from Results.models import DailyControls, DailyByProductionType, DailyByZone
 from ScenarioCreator.models import Zone, OutputSettings
-from django.db.models import Q, F
+from django.db.models import Q
 
 
 def list_of_iterations():
