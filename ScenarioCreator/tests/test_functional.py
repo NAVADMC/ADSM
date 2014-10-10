@@ -513,7 +513,7 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
             if el_id == "div_id_name" or el_id == "div_id_disable_all_controls":
                 self.assertEqual(element.get_attribute("disabled"), None)
             else:
-                self.assertEqual(element.get_attribute("disabled"), "disabled")
+                self.assertEqual(element.get_attribute("disabled"), "true")
 
         setup_menu = self.selenium.find_element_by_id("setupMenu")
 
