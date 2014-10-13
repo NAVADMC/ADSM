@@ -60,7 +60,7 @@ header a, header button {
     line-height: 35px;
 }
 
-header .btn {
+header .btn, #header .btn {
     padding: 8px 10px 8px 10px;
 }
 
