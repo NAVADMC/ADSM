@@ -7,6 +7,7 @@ import zipfile
 from future.builtins import *
 from future import standard_library
 from Results.interactive_graphing import population_zoom_png
+from Settings.views import adsm_executable_command
 
 standard_library.install_hooks()
 
@@ -15,11 +16,9 @@ import thread
 from Settings.views import workspace_path
 
 from glob import glob
-import platform
 import threading
 from django.forms.models import modelformset_factory
 from django.shortcuts import render, redirect
-from django.conf import settings
 from django.db import transaction, close_old_connections
 import subprocess
 import time
@@ -35,15 +34,6 @@ from Settings.models import scenario_filename
 
 def back_to_inputs(request):
     return redirect('/setup/')
-
-
-def prepare_supplemental_output_directory():
-    """Creates a directory with the same name as the Scenario and directs the Simulation to store supplemental files in the new directory"""
-    output_dir = workspace_path(scenario_filename())  # this does not have the .sqlite3 suffix
-    output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm.exe
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    return output_args
 
 
 def non_empty_lines(line):
@@ -107,7 +97,7 @@ def process_result(queue):
     with transaction.atomic(using='scenario_db'):
         for result in results:
             result.save()
-        
+    
 
 class Simulation(threading.Thread):
     """Execute system commands in a separate thread so as not to interrupt the webpage.
@@ -117,17 +107,13 @@ class Simulation(threading.Thread):
         super(Simulation, self).__init__(**kwargs)
 
     def run(self):
-        executables = {"Windows": 'adsm.exe', "Linux": 'adsm', "Darwin": 'adsm'}
-        system_executable = os.path.join(settings.BASE_DIR, executables[platform.system()])  #TODO: KeyError
-        database_file = os.path.basename(settings.DATABASES['scenario_db']['NAME'])
-        output_args = prepare_supplemental_output_directory()
-
+        executable_cmd = adsm_executable_command()  # only want to do this once
         statuses = []
         manager = multiprocessing.Manager()
         pool = multiprocessing.Pool()
         queue = manager.Queue()
         for iteration in range(1, self.max_iteration + 1):
-            adsm_cmd = [system_executable, '-i', str(iteration), database_file] + output_args
+            adsm_cmd = executable_cmd + ['-i', str(iteration)]
             res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, queue))
             statuses.append(res)
         pool.close()
@@ -138,8 +124,8 @@ class Simulation(threading.Thread):
 
         statuses = [status.get() for status in statuses]
         print(statuses)
-        thread.start_new_thread(zip_map_directory_if_it_exists, ())
         thread.start_new_thread(population_zoom_png, ('request',))
+        zip_map_directory_if_it_exists()
         close_old_connections()
 
 

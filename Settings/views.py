@@ -7,8 +7,8 @@ standard_library.install_hooks()
 
 import re
 import os
+import platform
 import shutil
-import thread
 from glob import glob
 import subprocess
 from django.shortcuts import redirect, render, HttpResponse
@@ -16,7 +16,6 @@ from django.core.management import call_command
 from django.db import connections, close_old_connections
 from django.conf import settings
 from django.db import OperationalError
-
 from ScenarioCreator.models import ZoneEffect
 from Settings.models import scenario_filename, SmSession, unsaved_changes
 from Settings.utils import close_all_connections
@@ -213,3 +212,20 @@ def new_scenario(request):
     reset_db('scenario_db')
     update_db_version()
     return redirect('/setup/Scenario/1/')
+
+
+def prepare_supplemental_output_directory():
+    """Creates a directory with the same name as the Scenario and directs the Simulation to store supplemental files in the new directory"""
+    output_dir = workspace_path(scenario_filename())  # this does not have the .sqlite3 suffix
+    output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm.exe
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    return output_args
+
+
+def adsm_executable_command():
+    executables = {"Windows": 'adsm.exe', "Linux": 'adsm', "Darwin": 'adsm'}
+    system_executable = os.path.join(settings.BASE_DIR, executables[platform.system()])  #TODO: KeyError
+    database_file = os.path.basename(settings.DATABASES['scenario_db']['NAME'])
+    output_args = prepare_supplemental_output_directory()
+    return [system_executable, database_file] + output_args
