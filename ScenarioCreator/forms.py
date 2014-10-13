@@ -243,11 +243,6 @@ class DiseaseProgressionForm(BaseForm):
     class Meta(object):
         model = DiseaseProgression
         exclude = ['_disease']
-        try:
-            if not Disease.objects.get(id=1).use_within_unit_prevalence:
-                exclude.append('disease_prevalence')
-        except (ObjectDoesNotExist, OperationalError):
-            pass  # If someone hasn't created a Scenario yet, the field will show
         widgets = {'_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'disease_latent_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_subclinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),

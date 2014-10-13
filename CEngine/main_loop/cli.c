@@ -35,7 +35,7 @@ main (int argc, char *argv[])
   double fixed_rng_value = -1;
   int seed = -1;
   int starting_iteration_number = -1;
-  gboolean dry_run;
+  gboolean dry_run = FALSE;
   GError *option_error = NULL;
   GOptionContext *context;
   GOptionEntry options[] = {
