@@ -49,7 +49,7 @@ def name_and_value(field_name, model=DailyByProductionType):
 
 
 def pair(unit_pair, animal_number):
-    return unit_pair[0], "%i (%i)" % (unit_pair[1], animal_number)
+    return unit_pair[0], "%s (%s)" % (str(unit_pair[1]), str(animal_number))
 
 
 def summarize_results():
@@ -69,6 +69,7 @@ def summarize_results():
 
     return summary
 
+
 def iteration_progress():
     output_settings = OutputSettings.objects.get_or_create()[0]
     iterations_started = output_settings.iterations
@@ -77,10 +78,11 @@ def iteration_progress():
     calculation_function = {
         "disease-end": lambda: DailyControls.objects.filter(last_day_query(), diseaseDuration__gt=0).count(),
         "first-detection": lambda: DailyByProductionType.objects
-                                    .filter(last_day_query(model=DailyByProductionType), firstDetection__gt=0)
+                                    .filter(last_day_query(model=DailyByProductionType), firstDetection__gt=0, production_type=None)
                                     .values_list('iteration', flat=True).distinct().count(),
-        "outbreak-end": lambda: DailyControls.objects.filter(last_day_query(), outbreakDuration__gt=0).count(),
-        "stop-days": lambda: DailyControls.objects.filter(last_day_query(), day=OutputSettings.objects.get().days).count(),
+        # these last two have an implicit last_day_query because outbreakDuration is the last event in a simulation
+        "outbreak-end": lambda: DailyControls.objects.filter(outbreakDuration__gt=0).count(),
+        "stop-days": lambda: DailyControls.objects.filter(Q(day=OutputSettings.objects.get().days) | Q(outbreakDuration__gt=0)).count(),
     }
 
     first_iteration_half_done = 0.5

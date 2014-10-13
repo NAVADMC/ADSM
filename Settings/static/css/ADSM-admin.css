@@ -4,13 +4,17 @@
 	color:#111;
 	font-size: 14pt;
 }
+#header .btn {
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+
+
 #branding h1 {
 	color: #111;
 	font-weight: 600;
 }
-#header a:link, #header a:visited {
-	color: #7cb9ff;
-}
+
 th, td, input, textarea, select, .form-row p {
 	font-family: 'Source Sans Pro', sans-serif;
 }

@@ -6,11 +6,14 @@ from collections import defaultdict
 import zipfile
 from future.builtins import *
 from future import standard_library
-from Settings.views import workspace_path
+from Results.interactive_graphing import population_zoom_png
 
 standard_library.install_hooks()
 
 from concurrent.futures import ProcessPoolExecutor
+import thread
+from Settings.views import workspace_path
+
 from glob import glob
 import platform
 import threading
@@ -27,6 +30,7 @@ from Results.models import *  # necessary
 from Results.forms import *  # necessary
 import Results.output_parser
 from Results.summary import list_of_iterations, summarize_results
+from Settings.models import scenario_filename
 
 
 def back_to_inputs(request):
@@ -35,19 +39,10 @@ def back_to_inputs(request):
 
 def prepare_supplemental_output_directory():
     """Creates a directory with the same name as the Scenario and directs the Simulation to store supplemental files in the new directory"""
-    output_args = []
-    output_settings = OutputSettings.objects.values('save_daily_unit_states',
-                                                    'save_daily_events',
-                                                    'save_daily_exposures',
-                                                    'save_iteration_outputs_for_units',
-                                                    'save_map_output')
-    if output_settings.exists():
-        if any(output_settings[0].values()):  # any of these settings would justify an output directory
-            from Settings.models import scenario_filename
-            output_dir = os.path.join('workspace', scenario_filename())  # this does not have the .sqlite3 suffix
-            output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm.exe
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
+    output_dir = workspace_path(scenario_filename())  # this does not have the .sqlite3 suffix
+    output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm.exe
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     return output_args
 
 
@@ -143,7 +138,8 @@ class Simulation(threading.Thread):
 
         statuses = [status.get() for status in statuses]
         print(statuses)
-        zip_map_directory_if_it_exists()
+        thread.start_new_thread(zip_map_directory_if_it_exists, ())
+        thread.start_new_thread(population_zoom_png, ('request',))
         close_old_connections()
 
 

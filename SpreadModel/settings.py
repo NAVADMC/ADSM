@@ -63,6 +63,12 @@ MIDDLEWARE_CLASSES = (
     'Settings.disable.DisableCSRF',
 )
 
+if DEBUG:
+    MIDDLEWARE_CLASSES += (
+        'Settings.debug.HotshotProfileMiddleware',
+        'Settings.debug.cProfileMiddleware',
+    )
+    
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
     "django.core.context_processors.debug",
