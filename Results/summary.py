@@ -24,11 +24,7 @@ def median_value(queryset, term):
 
 
 def last_day_query(model=DailyControls):
-    last_days = {}  # dictionary with iteration int keys
-    for iteration in list_of_iterations():
-        last_days[iteration] = model.objects.filter(iteration=iteration).order_by('day').last().day
-    last_day_query1 = [Q(iteration=key, day=value) for key, value in last_days.items()]
-    return reduce(Q.__or__, last_day_query1, Q(day=-1))
+    return Q(last_day=True)
 
 
 def field_summary(field_name, model=DailyByProductionType):

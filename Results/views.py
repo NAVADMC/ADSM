@@ -106,8 +106,8 @@ def process_result(queue):
     adsm_result = queue.get()
     p = DailyParser(adsm_result['headers'])
     results = []
-    for line in adsm_result['lines']:
-        results.extend(p.parse_daily_strings(line))
+    for index, line in enumerate(adsm_result['lines']):
+        results.extend(p.parse_daily_strings(line, index + 1 == len(adsm_result['lines'])))
 
     with transaction.atomic(using='scenario_db'):
         for result in results:

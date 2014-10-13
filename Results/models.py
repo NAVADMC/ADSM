@@ -64,6 +64,7 @@ class DailyByProductionType(OutputBaseModel):
         help_text='The iteration during which the outputs in this records where generated.', )
     day = models.IntegerField(blank=True, null=True, verbose_name=printable_name('day'),
         help_text='The day in this iteration during which the outputs in this records where generated.', )
+    last_day = models.BooleanField(default=False, help_text="Flag that is only set on the last day of an iteration.")
     production_type = models.ForeignKey(ProductionType, blank=True, null=True, verbose_name=printable_name('production_type'),
         help_text='The identifier of the production type that these outputs apply to.', )
 
@@ -308,6 +309,7 @@ class DailyByZoneAndProductionType(OutputBaseModel):
         help_text='The day in this iteration during which the outputs in this records where generated.', )
     production_type = models.ForeignKey(ProductionType, blank=True, null=True, verbose_name=printable_name('production_type'),
         help_text='The identifier of the production type that these outputs apply to.', )
+    last_day = models.BooleanField(default=False, help_text="Flag that is only set on the last day of an iteration.")
     zone = models.ForeignKey(Zone, blank=True, null=True, verbose_name=printable_name('zone'),
         help_text='The identifier of the zone that these outputs apply to.', )
 
@@ -324,6 +326,7 @@ class DailyByZone(OutputBaseModel):
         help_text='The iteration during which the outputs in this records where generated.', )
     day = models.IntegerField(blank=True, null=True, verbose_name=printable_name('day'),
         help_text='The day in this iteration during which the outputs in this records where generated.', )
+    last_day = models.BooleanField(default=False, help_text="Flag that is only set on the last day of an iteration.")
     zone = models.ForeignKey(Zone, blank=True, null=True, verbose_name=printable_name('zone'),
         help_text='The identifier of the zone that these outputs apply to.', )
 
@@ -343,6 +346,7 @@ class DailyControls(OutputBaseModel):
         help_text='The iteration during which the outputs in this records where generated.', )
     day = models.IntegerField(blank=True, null=True, verbose_name=printable_name('day'),
         help_text='The day in this iteration during which the outputs in this records where generated.', )
+    last_day = models.BooleanField(default=False, help_text="Flag that is only set on the last day of an iteration.")
 
     diseaseDuration      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('diseaseDuration'))
     detOccurred          = models.IntegerField(blank=True, null=True, verbose_name=printable_name('detOccurred'))
