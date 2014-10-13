@@ -73,6 +73,7 @@ def summarize_results():
 
     return summary
 
+
 def iteration_progress():
     output_settings = OutputSettings.objects.get_or_create()[0]
     iterations_started = output_settings.iterations
@@ -83,8 +84,9 @@ def iteration_progress():
         "first-detection": lambda: DailyByProductionType.objects
                                     .filter(last_day_query(model=DailyByProductionType), firstDetection__gt=0)
                                     .values_list('iteration', flat=True).distinct().count(),
-        "outbreak-end": lambda: DailyControls.objects.filter(last_day_query(), outbreakDuration__gt=0).count(),
-        "stop-days": lambda: DailyControls.objects.filter(last_day_query(), day=OutputSettings.objects.get().days).count(),
+        # these last two have an implicit last_day_query because outbreakDuration is the last event in a simulation
+        "outbreak-end": lambda: DailyControls.objects.filter(outbreakDuration__gt=0).count(),
+        "stop-days": lambda: DailyControls.objects.filter(Q(day=OutputSettings.objects.get().days) | Q(outbreakDuration__gt=0)).count(),
     }
 
     first_iteration_half_done = 0.5

@@ -6,11 +6,14 @@ from collections import defaultdict
 import zipfile
 from future.builtins import *
 from future import standard_library
-from Settings.views import workspace_path
+from Results.interactive_graphing import population_zoom_png
 
 standard_library.install_hooks()
 
 from concurrent.futures import ProcessPoolExecutor
+import thread
+from Settings.views import workspace_path
+
 from glob import glob
 import platform
 import threading
@@ -135,7 +138,8 @@ class Simulation(threading.Thread):
 
         statuses = [status.get() for status in statuses]
         print(statuses)
-        zip_map_directory_if_it_exists()
+        thread.start_new_thread(zip_map_directory_if_it_exists, ())
+        thread.start_new_thread(population_zoom_png, ('request',))
         close_old_connections()
 
 

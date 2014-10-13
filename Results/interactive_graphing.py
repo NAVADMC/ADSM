@@ -30,7 +30,7 @@ import mpld3
 from mpld3 import plugins, utils
 
 from Results.models import Unit
-from Results.summary import list_of_iterations
+from Results.summary import list_of_iterations, iteration_progress
 from Results.graphing import HttpFigure, rstyle
 from Settings.views import workspace_path
 
@@ -114,7 +114,7 @@ def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated
 
 
 def population_results_map(request):
-    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(60,52), frameon=False)
+    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(60,52), frameon=True)
     pyplot.tight_layout()
     ax.autoscale_view('tight')
     ax.grid(color='white', linestyle='solid')
@@ -167,12 +167,14 @@ def population_zoom_png(request):
         with open(path, "rb") as img_file:  #TODO: remove "rb"
             return HttpResponse(img_file.read(), mimetype="image/png")
     except IOError:
+        print("Calculating a new Population Map")
         fig = population_results_map(request)
         response = HttpResponse(content_type='image/png')
         FigureCanvas(fig).print_png(response)
-        if not os.path.exists(workspace_path(scenario_filename())):
-            os.makedirs(workspace_path(scenario_filename()))
-        FigureCanvas(fig).print_png(path)
+        if iteration_progress() == 1.0:
+            if not os.path.exists(workspace_path(scenario_filename())):
+                os.makedirs(workspace_path(scenario_filename()))
+            FigureCanvas(fig).print_png(path)
         return response
 
 
