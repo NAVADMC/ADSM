@@ -168,10 +168,11 @@ def population_zoom_png(request):
             return HttpResponse(img_file.read(), mimetype="image/png")
     except IOError:
         print("Calculating a new Population Map")
+        save_image = iteration_progress() == 1.0  # we want to check this before reading the stats, this is in motion
         fig = population_results_map(request)
         response = HttpResponse(content_type='image/png')
         FigureCanvas(fig).print_png(response)
-        if iteration_progress() == 1.0:
+        if save_image:
             if not os.path.exists(workspace_path(scenario_filename())):
                 os.makedirs(workspace_path(scenario_filename()))
             FigureCanvas(fig).print_png(path)

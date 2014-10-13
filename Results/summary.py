@@ -53,7 +53,7 @@ def name_and_value(field_name, model=DailyByProductionType):
 
 
 def pair(unit_pair, animal_number):
-    return unit_pair[0], "%i (%i)" % (unit_pair[1], animal_number)
+    return unit_pair[0], "%s (%s)" % (str(unit_pair[1]), str(animal_number))
 
 
 def summarize_results():
@@ -82,7 +82,7 @@ def iteration_progress():
     calculation_function = {
         "disease-end": lambda: DailyControls.objects.filter(last_day_query(), diseaseDuration__gt=0).count(),
         "first-detection": lambda: DailyByProductionType.objects
-                                    .filter(last_day_query(model=DailyByProductionType), firstDetection__gt=0)
+                                    .filter(last_day_query(model=DailyByProductionType), firstDetection__gt=0, production_type=None)
                                     .values_list('iteration', flat=True).distinct().count(),
         # these last two have an implicit last_day_query because outbreakDuration is the last event in a simulation
         "outbreak-end": lambda: DailyControls.objects.filter(outbreakDuration__gt=0).count(),
