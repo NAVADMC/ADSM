@@ -1763,8 +1763,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       for (j = 0; j < 2; j++)
         {
           local_data->desired_contacts[i][j] =
-            g_ptr_array_new_full (/* reserved_size = */ 8,
-                                  /* element_free_func = */ g_free);
+            g_ptr_array_sized_new (/* reserved_size = */ 8);
+          g_ptr_array_set_free_func (local_data->desired_contacts[i][j], g_free);
         }
     }
 
@@ -1917,8 +1917,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
             for (j = 0; j < 2; j++)
               {
                 local_data->desired_contacts_rhi[i][j] =
-                  g_ptr_array_new_full (/* reserved_size = */ 8,
-                                        /* element_free_func = */ g_free);
+                  g_ptr_array_sized_new (/* reserved_size = */ 8);
+                g_ptr_array_set_free_func (local_data->desired_contacts_rhi[i][j], g_free);
               }
           }
         /* Get a list of the units of those production types. */
