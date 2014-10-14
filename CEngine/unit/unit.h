@@ -218,7 +218,8 @@ typedef struct
 {
   GArray *list; /**< Each item is a UNT_unit_t structure. */
   GPtrArray *production_type_names; /**< Each item is a (gchar *) pointer and is in UTF-8. */
-  
+  GArray *production_type_counts; /**< Each item is a guint. */
+
 #ifdef USE_SC_GUILIB  
   /*  This field is used on the SC version if the user wants to 
       write out the iteration summaries, as would be found in the Windows

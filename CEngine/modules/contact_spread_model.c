@@ -183,9 +183,17 @@ typedef struct
   unsigned int rotating_index; /**< To go with pending_infections. */
   gboolean outbreak_known;
   int public_announcement_day;
+  gboolean *rare_high_incoming; /**< A set of flags, one per production type,
+    indicating whether the production type is rare and has an unusually high
+    rate of incoming contacts. */
   sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
     so that it will be available to the set_params function. */
   GPtrArray ***desired_contacts; /**< A 3D array that is used repeatedly. */
+  GPtrArray ***desired_contacts_rhi; /**< A separate copy of desired_contacts
+    used only for contacts to rare high incoming production types. Will be NULL
+    if there are no rare high incoming production types. */
+  GPtrArray *rhi_units; /**< A list of pointers to the units that are rare high
+    incoming production types. May be NULL. */
 }
 local_data_t;
 
@@ -591,7 +599,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
   ADSM_contact_type contact_type;
   param_block_t **contact_type_block;
   UNT_unit_t *unit1, *unit2;
-  unsigned int nprod_types, i, j, k;
+  unsigned int nprod_types, i, j, k, m;
   param_block_t *param_block;
   unsigned int unit2_index;
   unsigned int zone_index;
@@ -615,6 +623,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
   RAN_gen_t *rng;
   EVT_event_queue_t *queue;  
   unsigned long sum_exposures;
+  unsigned long sum_exposures_rhi;
   double max_distance;
   
   
@@ -623,7 +632,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
 #endif
   
   max_distance = 0.0;  
-  sum_exposures = 0;
+  sum_exposures = sum_exposures_rhi = 0;
 
   new_day_event_hash_table_data *foreach_callback_data = (new_day_event_hash_table_data *) user_data;
   
@@ -668,11 +677,17 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
   /*  Set some more callback data for check_and_choose to use */
   callback_data.contact_count = j;
   callback_data.production_type_count = nprod_types;
-  callback_data._contacts = _contacts; 
 
   /*  Iterate over all contact/production-type pairs and build the remaining dimensions of the matrix of desired matches for exposure attempts */
   for (i = 0; i < nprod_types; i++)
   {        
+    /* Use a separate desired contacts array if the recipient production type
+     * is a rare high incoming type. */
+    if (local_data->rare_high_incoming[i] == TRUE)
+      _contacts = local_data->desired_contacts_rhi;
+    else
+      _contacts = local_data->desired_contacts;
+
     for ( j = 0, contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; j++, contact_type++ )
     {
       contact_type_block = local_data->param_block[contact_type][unit1->production_type];
@@ -752,7 +767,6 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
                            param_block->fixed_movement_rate, disease_control_factors, rate);
                 #endif
                 nexposures = (int) ((event->day + 1) * rate) - (int) (event->day * rate);
-                sum_exposures = sum_exposures + nexposures;
               }
               else
               {
@@ -763,8 +777,11 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
                 #endif
                 poisson->u.poisson.mu = rate;
                 nexposures = (int) (PDF_random (poisson, rng));
-                sum_exposures = sum_exposures + nexposures;                          
               }
+              if (local_data->rare_high_incoming[i] == TRUE)
+                sum_exposures_rhi += nexposures;
+              else
+                sum_exposures += nexposures;
               #if DEBUG
                 if (nexposures > 0)
                 {
@@ -816,12 +833,44 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
     }; /* end of loop over contact types */
   }; /* end of loop over recipient production types */
 
+  #if DEBUG
+    if ( sum_exposures + sum_exposures_rhi > 0 )
+    {
+      g_debug ( "new_day_event_handler:  Total exposures sought for this unit: %lu",
+                sum_exposures + sum_exposures_rhi );
+    }
+  #endif          
+
+  /* If there are exposures to rare high incoming production types, do those
+   * first. Don't bother with the spatial search; just iterating over the list
+   * of units is OK because their rarity makes them unlikely to be found at
+   * close to the desired distance anyway. */
+  if ( sum_exposures_rhi > 0 )
+  {
+    guint num_rhi_units;
+    UNT_unit_t *unit2;
+    #if DEBUG
+      g_debug ("searching for recipients that are rare high incoming production types");
+    #endif
+    callback_data._contacts = local_data->desired_contacts_rhi; 
+    callback_data.num_unmatched_exposures = sum_exposures_rhi;
+    num_rhi_units = local_data->rhi_units->len;
+    #if DEBUG
+      g_debug ("num_rhi_units = %u", num_rhi_units);
+    #endif
+    for ( i = 0; i < num_rhi_units; i++ )
+    {
+      unit2 = g_ptr_array_index (local_data->rhi_units, i);
+      check_and_choose (unit2->index, &callback_data);
+    }
+  }
+
   if ( sum_exposures > 0 )
   {
-#if DEBUG
-    g_debug ( "new_day_event_handler:  Total exposures sought for this unit: %lu", sum_exposures );
-#endif          
-
+    #if DEBUG
+      g_debug ("searching for recipients that are not rare high incoming production types");
+    #endif
+    callback_data._contacts = local_data->desired_contacts; 
     callback_data.num_unmatched_exposures = sum_exposures;
     spatial_search_circle_by_id (units->spatial_index, unit1->index,
                                  MAX(local_data->min_radius, max_distance*2.0 + EPSILON),
@@ -858,12 +907,31 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
         check_and_choose (unit2_index, &callback_data);
       };
     };
+  }
 
-
+  if ( sum_exposures + sum_exposures_rhi > 0 )
+  {
     /*  Okay, now we "should" have all the "best" fit's for each desired 
         contact/production-type pair, items.  */
     /*  Iterate over the results and post exposure and infection events 
         when applicable. */
+    for (m = 0; m < 2; m++)
+    {
+      /* Choose which desired contacts array will be used, the regular one or
+       * the one for contacts to units of rare high incoming production types. */
+      if (m == 0)
+      {
+        if (sum_exposures_rhi == 0)
+          continue;
+        _contacts = local_data->desired_contacts_rhi;
+      }
+      else
+      {
+        if (sum_exposures == 0)
+          continue;
+        _contacts = local_data->desired_contacts;
+      }
+
     for( i = 0; i < nprod_types; i++ )
     {
       for( j = 0, contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; j++, contact_type++ )
@@ -1032,6 +1100,7 @@ void new_day_event_handler( gpointer key, gpointer value, gpointer user_data )
         }; /*  END iteration over production_types  */
       };
     }; /*  END iteration over contact_types  */
+    }; /* end loop over 2 different contact arrays */
   } /*  END if contact count > 0 */
   
 #if DEBUG
@@ -1699,6 +1768,10 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         }
     }
 
+  /* The second 3D array of desired contacts, used only for contacts to rare
+   * high incoming production types, will be initialized below if needed. */
+  local_data->desired_contacts_rhi = NULL;
+
   /* Call the set_params function to read the from-production-type/
    * to-production-type combination specific parameters. */
   local_data->db = params;
@@ -1753,6 +1826,133 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     #if DEBUG
       g_debug ("minimum radius = %g km", local_data->min_radius);
     #endif
+  }
+
+  /* Look for production types that are rare and have a high number of incoming
+   * contacts. */
+  local_data->rare_high_incoming = g_new0 (gboolean, nprod_types);
+  local_data->rhi_units = NULL;
+  {
+    double *rarity;
+    double *incoming;
+    UNT_production_type_t dest_prodtype;
+    double max_incoming;
+    gboolean any_rare_high_incoming = FALSE;
+    guint num_rhi_units = 0;
+
+    rarity = g_new (double, nprod_types);
+    incoming = g_new (double, nprod_types);
+    
+    for (dest_prodtype = 0; dest_prodtype < nprod_types; dest_prodtype++)
+      {
+        guint ndest_units;
+        double percent_population;
+        UNT_production_type_t src_prodtype;
+
+        ndest_units = g_array_index (units->production_type_counts, guint, dest_prodtype);
+        percent_population = 1.0 * ndest_units / UNT_unit_list_length(units);
+        rarity[dest_prodtype] = (1.0 - percent_population) * 2;
+        incoming[dest_prodtype] = 0.0;
+        for (src_prodtype = 0; src_prodtype < nprod_types; src_prodtype++)
+          {
+            ADSM_contact_type contact_type;
+            param_block_t *param_block;
+            for (contact_type = ADSM_DirectContact; contact_type <= ADSM_IndirectContact; contact_type++)
+              {
+                param_block_t ***contact_type_block = local_data->param_block[contact_type];
+                guint nsrc_units;
+                double rate;
+                if (contact_type_block[src_prodtype] == NULL)
+                  continue;
+                param_block = contact_type_block[src_prodtype][dest_prodtype];
+                if (param_block == NULL)
+                  continue;
+                nsrc_units = g_array_index (units->production_type_counts, guint, src_prodtype);
+				if (param_block->fixed_movement_rate > 0)
+				  rate = param_block->fixed_movement_rate;
+                else
+                  rate = param_block->movement_rate;
+                incoming[dest_prodtype] += rate * nsrc_units;
+              }
+          } /* end of loop over source production types */
+        incoming[dest_prodtype] /= ndest_units;
+        if (dest_prodtype == 0)
+          max_incoming = incoming[dest_prodtype];
+        else
+          max_incoming = MAX (max_incoming, incoming[dest_prodtype]);          
+      } /* end of loop over recipient production types */
+
+    /* Scale the incoming values so that they are in the range 0-2. */
+    for (dest_prodtype = 0; dest_prodtype < nprod_types; dest_prodtype++)
+      {
+        incoming[dest_prodtype] *= (2.0 / max_incoming);
+      }
+    
+    /* Call the production type rare, high incoming if rarity * incoming >= 3.0 */
+    for (dest_prodtype = 0; dest_prodtype < nprod_types; dest_prodtype++)
+      {
+        if (rarity[dest_prodtype] * incoming[dest_prodtype] >= 3.0)
+          {
+            local_data->rare_high_incoming[dest_prodtype] = TRUE;
+            any_rare_high_incoming = TRUE;
+            num_rhi_units += g_array_index (units->production_type_counts, guint, dest_prodtype);
+            #if DEBUG
+              g_debug ("designating \"%s\" as a rare high incoming production type",
+                       (char *) g_ptr_array_index (local_data->production_types, dest_prodtype));
+            #endif
+          }
+      }
+
+    if (any_rare_high_incoming)
+      {
+        guint nunits;
+        UNT_unit_t *unit;
+
+        /* Initialize a 3D array of desired contacts just for contacts to rare
+         * high incoming production types. */
+        local_data->desired_contacts_rhi = g_new (GPtrArray **, nprod_types);
+        for (i = 0; i < nprod_types; i++)
+          {
+            local_data->desired_contacts_rhi[i] = g_new (GPtrArray *, 2);
+            for (j = 0; j < 2; j++)
+              {
+                local_data->desired_contacts_rhi[i][j] =
+                  g_ptr_array_new_full (/* reserved_size = */ 8,
+                                        /* element_free_func = */ g_free);
+              }
+          }
+        /* Get a list of the units of those production types. */
+        #if DEBUG
+          g_debug ("%u units of rare high incoming production types", num_rhi_units);
+        #endif
+        local_data->rhi_units = g_ptr_array_sized_new (num_rhi_units);
+        nunits = UNT_unit_list_length (units);
+        for (i = 0; i < nunits; i++)
+          {
+            unit = UNT_unit_list_get (units, i);
+            if (local_data->rare_high_incoming[unit->production_type])
+              g_ptr_array_add (local_data->rhi_units, unit);
+          }
+        #if DEBUG
+        {
+          GString *s;
+          s = g_string_new ("[");
+          for (i = 0; i < num_rhi_units; i++)
+            {
+              unit = g_ptr_array_index (local_data->rhi_units, i);
+              if (i > 0)
+                g_string_append_c (s, ',');
+              g_string_append_printf (s, "\"%s\"", unit->official_id);
+            }
+          g_string_append_c (s, ']');
+          g_debug ("list of RHI units =%s", s->str);
+          g_string_free (s, TRUE);
+        }
+        #endif
+      }
+
+    g_free (rarity);
+    g_free (incoming);
   }
   
 #if DEBUG

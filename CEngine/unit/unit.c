@@ -806,6 +806,9 @@ UNT_new_unit_list (void)
   units->production_types = NULL;
 #endif
   units->production_type_names = g_ptr_array_new ();
+  units->production_type_counts = g_array_new (/* zero_terminated = */ FALSE,
+                                               /* clear = */ TRUE,
+                                               sizeof (guint));
   units->projection = NULL;
   /* The x and y bounds have no value until projection is done. */
   units->min_x = units->max_x = units->min_y = units->max_y = GSL_NAN;
@@ -846,10 +849,11 @@ UNT_free_unit_list (UNT_unit_list_t * units)
   /* Free the unit structures. */
   g_array_free (units->list, TRUE);
 
-  /* Free the production type names. */
+  /* Free the production type names and counts. */
   for (i = 0; i < units->production_type_names->len; i++)
     g_free (g_ptr_array_index (units->production_type_names, i));
   g_ptr_array_free (units->production_type_names, TRUE);
+  g_array_free (units->production_type_counts, TRUE);
 
   /* Free the projection. */
   if (units->projection != NULL)
@@ -1146,6 +1150,13 @@ UNT_unit_list_append (UNT_unit_list_t * units, UNT_unit_t * unit)
 
   /* Set the list index number for the unit. */
   unit->index = new_length - 1;
+
+  /* Update the count of units by production type */
+  if (units->production_type_counts->len <= unit->production_type)
+    {
+      g_array_set_size (units->production_type_counts, unit->production_type + 1);
+    }
+  g_array_index (units->production_type_counts, guint, unit->production_type) += 1;
 
   return new_length;
 }
