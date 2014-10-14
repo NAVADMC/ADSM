@@ -104,9 +104,6 @@
  *     displayed.  To eliminate this waste, specify "--disable-debug" when
  *     running the configure script.
  *   <li>
- *     It is assumed that text in the input XML may contain accented characters.
- *     The text is converted to ISO-8859-1 inside the simulator.
- *   <li>
  *     Comments are marked up for the auto-documentation tool
  *     <a href="http://www.doxygen.org/">Doxygen</a>, whose lovely output you
  *     are reading right now.
