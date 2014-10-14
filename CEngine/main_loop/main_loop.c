@@ -917,10 +917,6 @@ run_sim_main (sqlite3 *scenario_db,
                     break;
                 }
 
-              /* Should the iteration end due to first detection? */
-              if ( _iteration.first_detection && (0 != get_stop_on_first_detection( exit_conditions )) )
-                break;
-
               _iteration.current_day = day;
               #ifdef USE_SC_GUILIB
                 sc_day_start( production_types );
@@ -1021,6 +1017,10 @@ run_sim_main (sqlite3 *scenario_db,
                     }
                 }
               active_infections_yesterday = active_infections_today;
+
+              /* Should the iteration end due to first detection? */
+              if ( _iteration.first_detection && (0 != get_stop_on_first_detection( exit_conditions )) )
+                early_exit = TRUE;
 
               adsm_create_event (manager, EVT_new_end_of_day_event (day, early_exit), units, zones, rng);
 
