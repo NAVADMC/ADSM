@@ -6,6 +6,9 @@ from future.builtins import open
 from future.builtins import map
 from future.builtins import str
 from future import standard_library
+import subprocess
+from Settings.views import adsm_executable_command
+
 standard_library.install_hooks()
 
 import json
@@ -525,4 +528,11 @@ def population(request):
 
 
 def validate_scenario(request):
-    return render(request, 'ScenarioCreator/Validation.html', {})
+    simulation = subprocess.Popen(adsm_executable_command() + ['--dry-run'],
+                                  shell=True,
+                                  stdout=subprocess.PIPE)
+    sim_output = [line for line in simulation.stdout]
+    simulation.wait()  # simulation will process db then exit
+    context = {'dry_run_passed': simulation.returncode == 0,
+               'sim_output': sim_output}
+    return render(request, 'ScenarioCreator/Validation.html', context)

@@ -73,7 +73,7 @@ class DailyParser(object):
         return [instance for key, instance in instance_dict.items()]
 
 
-    def construct_combinatorial_instances(self, day, iteration):
+    def construct_combinatorial_instances(self, day, iteration, last_line):
         """This constructs a mapping between the name of the column 'suffix' for example: 'BackgroundCattle' and maps it
         to the appropriate Django query settings to grab the matching model instance.  For 'BackgroundCattle' the query
         should be `DailyByZoneAndProductionType(production_type__name=Cattle, zone=None, ...`.
@@ -91,10 +91,10 @@ class DailyParser(object):
         for pt_name in self.possible_pts:
             pt = ProductionType.objects.filter(name=pt_name).first()  # obj or None for "All Animals" case
             daily_by_pt[camel_case_spaces(pt_name)] = \
-                Results.models.DailyByProductionType(production_type=pt, iteration=iteration, day=day)
+                Results.models.DailyByProductionType(production_type=pt, iteration=iteration, day=day, last_day=last_line)
 
         daily_instances["DailyByZone"] = {camel_case_spaces(zone_name):
-            Results.models.DailyByZone(zone=Zone.objects.filter(name=zone_name).first(), iteration=iteration, day=day) for zone_name in self.possible_zones}
+            Results.models.DailyByZone(zone=Zone.objects.filter(name=zone_name).first(), iteration=iteration, day=day, last_day=last_line) for zone_name in self.possible_zones}
 
         daily_by_pt_zone = daily_instances["DailyByZoneAndProductionType"]
         for pt_name in self.possible_pts:
@@ -102,13 +102,13 @@ class DailyParser(object):
             for zone_name in self.possible_zones:
                 zone = Zone.objects.filter(name=zone_name).first()  # obj or None for "Background" case
                 daily_by_pt_zone[camel_case_spaces(zone_name + pt_name)] = \
-                    Results.models.DailyByZoneAndProductionType(production_type=pt, zone=zone, iteration=iteration, day=day)
+                    Results.models.DailyByZoneAndProductionType(production_type=pt, zone=zone, iteration=iteration, day=day, last_day=last_line)
 
-        daily_instances["DailyControls"] = {'': Results.models.DailyControls(iteration=iteration, day=day)}  # there's only one of these
+        daily_instances["DailyControls"] = {'': Results.models.DailyControls(iteration=iteration, day=day, last_day=last_line)}  # there's only one of these
         return daily_instances
 
 
-    def populate_db_from_daily_report(self, sparse_info):
+    def populate_db_from_daily_report(self, sparse_info, last_line):
         """Parses the C Engine stdout and populates the appropriate models with the information.  Takes one line
         at a time, representing one DailyReport."""
         assert isinstance(sparse_info, dict)
@@ -122,7 +122,7 @@ class DailyParser(object):
         self.failures = set(sparse_info.keys())  # whatever is left is a failure
 
         #construct the set of tables we're going to use for this day
-        daily_instances = self.construct_combinatorial_instances(day, iteration)
+        daily_instances = self.construct_combinatorial_instances(day, iteration, last_line)
 
         results = []
         for class_name in daily_instances:
@@ -134,7 +134,7 @@ class DailyParser(object):
         return results
 
 
-    def parse_daily_strings(self, cmd_strings):
+    def parse_daily_strings(self, cmd_strings, last_line=False):
         results = []
         for cmd_string in cmd_strings:
             values = cmd_string.split(',')
@@ -142,5 +142,5 @@ class DailyParser(object):
                 pairs = zip(self.headers, values)
                 sparse_values = {a: number(b) for a, b in pairs}
                 Results.models.DailyReport(sparse_dict=str(sparse_values), full_line=cmd_string).save()
-                results.extend(self.populate_db_from_daily_report(sparse_values))
+                results.extend(self.populate_db_from_daily_report(sparse_values, last_line))
         return results

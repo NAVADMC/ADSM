@@ -5,9 +5,17 @@
 {% block content %}
 
 <h1>Whole Scenario Validation</h1>
-    
+    {%  if dry_run_passed %}
+        <h2>The simulation will successfully load with the current settings.  You may proceed...</h2>
+    {% endif %}
+        <p>Simulation output:</p>
+        <ul>
+            {% for line in sim_output %}
+                <li>{{line}}</li>
+            {% endfor %}
+        </ul>
 <h3>Missing forms</h3>
-    <p>The following either don't exist or have a missing copies (in the case of assignment):</p>
+    <p>The following either don't exist or have missing assignments:</p>
     <ul class="validation-checklist">
         {% for name, ready in relevant_keys.items %}
             {% if not ready %}

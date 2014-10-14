@@ -48,8 +48,8 @@
                         <a href="/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
                         Run Simulation <i class="glyphicon glyphicon-play"></i></a>
                     {% else %}
-                        {% if "ValidateScenario"|active:active_link %}
-                                <a href="/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
+                        {% if dry_run_passed %}
+                                <a href="/results/RunSimulation/" class="completed">
                                 Force Run Simulation <i class="glyphicon glyphicon-play"></i></a>
                             {% else %}
                                 <a href="/setup/ValidateScenario/" class=" {{Simulation_ready|completed}}">
