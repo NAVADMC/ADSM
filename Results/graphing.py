@@ -1,11 +1,7 @@
 from django.http import HttpResponse
 from django.db.models import Max
 from itertools import chain
-from Results.summary import list_of_iterations
-from Results.models import *  # necessary for globals()
 import matplotlib
-from ScenarioCreator.views import spaces_for_camel_case
-
 matplotlib.use('Agg')  # Force matplotlib to not use any Xwindows backend.
 from matplotlib import rc
 rc("figure", facecolor="white")
@@ -13,6 +9,14 @@ from matplotlib import gridspec
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import pandas as pd
 import matplotlib.pyplot as plt, mpld3
+
+from ScenarioCreator.models import Zone, ProductionType, Unit
+from ScenarioCreator.views import spaces_for_camel_case
+from Results.summary import list_of_iterations
+from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType
+
+
+max_displayed_iterations = 100
 
 
 def HttpFigure(fig):
@@ -64,10 +68,10 @@ def rstyle(axis):
     axis.yaxis.set_ticks_position('left')
 
 
-def population_png(request):
+def population_png(request, width_inches=4.5, height_inches=4):
     latlong = [(u.latitude, u.longitude) for u in Unit.objects.all()]
     df = pd.DataFrame.from_records(latlong, columns=['Latitude', 'Longitude'])
-    axis = df.plot('Longitude', 'Latitude', kind='scatter', color='black', figsize=(4.5, 4))
+    axis = df.plot('Longitude', 'Latitude', kind='scatter', color='black', figsize=(width_inches, height_inches))
     return HttpFigure(axis.figure)
 
 
@@ -115,9 +119,9 @@ def construct_iterating_combination_filter_dictionary(iteration, iterate_pt, ite
                 filter_sequence.append({'iteration': iteration},)
             
     else:  # 0__ This is a summary time plot of all iterations.
-        columns += ["Iteration " + str(it) for it in list_of_iterations()]  # columns names are always the same,
+        columns += ["Iteration " + str(it) for it in list_of_iterations()[:max_displayed_iterations]]  # columns names are always the same,
         # Different graph settings still only get to inject one time line graph per iteration
-        for nth_iteration in list_of_iterations():
+        for nth_iteration in list_of_iterations()[:max_displayed_iterations]:
             if production_types:  # 01_ "All Production Type"
                 if iterate_zone:  # 011 "All Production Type" and active_zone
                     filter_sequence.append({'iteration': nth_iteration, 'production_type': None, 'zone': active_zone})
