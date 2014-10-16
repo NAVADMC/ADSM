@@ -33,7 +33,7 @@ For non-Windows machines:
     pip install matplotlib
     pip install pandas
 
-For a new Python3.3 installation on Windows, you will need to download and install these binaries:  
+For a new Python2.7 installation on Windows, you will need to download and install these binaries:  
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy  
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#pandas  
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#matplotlib  
