@@ -1,8 +1,7 @@
 ##Installing Animal Disease Spread Model (ADSM)
-ADSM has several external dependencies.  We recommend using pip to install them.
+ADSM has several external dependencies.  We recommend using pip to install them.  We're currently using Python 2.7.8.
+https://www.python.org/download
 https://pypi.python.org/pypi/pip#downloads
-
-Please note that ADSM is built against Python 3.3 which is incompatible with Python 2.x.  
 
     pip install django==1.6
     pip install django-floppyforms==1.2.0
