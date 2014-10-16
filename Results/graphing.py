@@ -16,8 +16,6 @@ from Results.summary import list_of_iterations
 from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType
 
 
-max_displayed_iterations = 800
-
 
 def HttpFigure(fig):
     response = HttpResponse(content_type='image/png')
@@ -119,40 +117,40 @@ def construct_iterating_combination_filter_dictionary(iteration, iterate_pt, ite
                 filter_sequence.append({'iteration': iteration},)
             
     else:  # 0__ This is a summary time plot of all iterations.
-        columns += ["Iteration " + str(it) for it in list_of_iterations()[:max_displayed_iterations]]  # columns names are always the same,
+        columns += ["Iteration " + str(it) for it in list_of_iterations()]  # columns names are always the same,
         # Different graph settings still only get to inject one time line graph per iteration
-        for nth_iteration in list_of_iterations()[:max_displayed_iterations]:
-            if production_types:  # 01_ "All Production Type"
-                if iterate_zone:  # 011 "All Production Type" and active_zone
-                    filter_sequence.append({'iteration': nth_iteration, 'production_type': None, 'zone': active_zone})
-                else:  # 010
-                    filter_sequence.append({'iteration': nth_iteration, 'production_type': None})
-                
-            else:  # 00_
-                if iterate_zone:  # 001 DailyByZone
-                    filter_sequence.append({'iteration': nth_iteration, 'zone': active_zone})
-                else:  # 000 DailyControls
-                    filter_sequence.append({'iteration': nth_iteration})  
+        if production_types:  # 01_ "All Production Type"
+            if iterate_zone:  # 011 "All Production Type" and active_zone
+                filter_sequence.append({'production_type': None, 'zone': active_zone})
+            else:  # 010
+                filter_sequence.append({'production_type': None})
+            
+        else:  # 00_
+            if iterate_zone:  # 001 DailyByZone
+                filter_sequence.append({'zone': active_zone})
+            else:  # 000 DailyControls
+                filter_sequence.append({})  
 
     return filter_sequence, columns
 
 
-def create_time_series_lines(field_name, model, iteration='', zone=''):  # Django assigns iteration='' when there's nothing
+def create_time_series_lines(field_name, model, iteration=None, zone=''):
     iterate_pt, iterate_zone = {DailyByProductionType: (True, False),
                                 DailyByZoneAndProductionType: (True, True),
                                 DailyByZone: (False, True),
                                 DailyControls: (False, False)}[model]
     filter_sequence, columns = construct_iterating_combination_filter_dictionary(iteration, iterate_pt, iterate_zone, zone=zone)
     lines = [] 
-    max_size = model.objects.filter(production_type=None, iteration__lte=max_displayed_iterations).aggregate(Max('day'))['day__max']
-    print(max_size)
-    for row in range(min(OutputSettings.objects.get().iterations, max_displayed_iterations)):  # iteration = index
-        lines.append([0]* max_size)
-    # for filter_dict in filter_sequence:  # TODO: Group_by as a single query
-    #     lines.append(list(model.objects.filter(**filter_dict).order_by('day').values_list(field_name, flat=True)))
-    objs = model.objects.filter(production_type=None, iteration__lte=max_displayed_iterations).values_list('iteration', 'day', field_name)
-    for entry in objs:
-        lines[int(entry[0])-1][entry[1]-1] = entry[2]  # sorting done in python, iteration and day are both 1 indexed
+    if iteration:  # Manually step through each query for a single iteration
+        for filter_dict in filter_sequence:  # TODO: Group_by as a single query
+            lines.append(list(model.objects.filter(**filter_dict).order_by('day').values_list(field_name, flat=True)))
+    else:  # summary of all iterations is a single query for performance reasons
+        max_size = model.objects.filter(production_type=None).aggregate(Max('day'))['day__max']
+        for row in range(OutputSettings.objects.get().iterations):  # iteration = index
+            lines.append([None] * max_size)
+        objs = model.objects.filter(**filter_sequence[0]).values_list('iteration', 'day', field_name)
+        for entry in objs:
+            lines[int(entry[0])-1][entry[1]-1] = entry[2]  # sorting done in python, iteration and day are both 1 indexed
 
     return lines, columns
 
@@ -192,10 +190,10 @@ def collect_boxplot_data(ragged_lines, explanation):
 
 def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     model = globals()[model_name]
+    iteration = int(iteration) if iteration else None
     lines, columns = create_time_series_lines(field_name, model, iteration=iteration, zone=zone)
     
     time_series = extend_last_day_lines(lines, model, field_name)
-    print(len(time_series))
     time_data = pd.DataFrame.from_records(time_series, columns=columns)  # keys should be same ordering as the for loop above
     time_data = time_data.set_index('Day')
 
