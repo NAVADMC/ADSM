@@ -6,14 +6,8 @@ from collections import defaultdict
 import zipfile
 from future.builtins import *
 from future import standard_library
-from Results.interactive_graphing import population_zoom_png
-from Settings.views import adsm_executable_command
-
 standard_library.install_hooks()
 
-from concurrent.futures import ProcessPoolExecutor
-import thread
-from Settings.views import workspace_path
 
 from glob import glob
 import threading
@@ -30,6 +24,9 @@ from Results.forms import *  # necessary
 import Results.output_parser
 from Results.summary import list_of_iterations, summarize_results
 from Settings.models import scenario_filename
+import Results.graphing  # necessary to select backend Agg first
+from Results.interactive_graphing import population_zoom_png
+from Settings.views import adsm_executable_command, workspace_path
 
 
 def back_to_inputs(request):
@@ -124,7 +121,7 @@ class Simulation(threading.Thread):
 
         statuses = [status.get() for status in statuses]
         print(statuses)
-        thread.start_new_thread(population_zoom_png, ('request',))
+        population_zoom_png('request')
         zip_map_directory_if_it_exists()
         close_old_connections()
 

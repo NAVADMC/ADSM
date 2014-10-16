@@ -6,11 +6,9 @@ from future.builtins import open
 from future.builtins import map
 from future.builtins import str
 from future import standard_library
-import subprocess
-from Settings.views import adsm_executable_command
-
 standard_library.install_hooks()
 
+import subprocess
 import json
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -21,6 +19,8 @@ from Results.models import *  # This is absolutely necessary for dynamic form lo
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from Settings.models import unsaved_changes
 from Settings.views import graceful_startup, file_list, handle_file_upload, workspace_path
+from Settings.views import adsm_executable_command
+
 
 
 

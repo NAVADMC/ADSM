@@ -63,7 +63,9 @@ header a, header button {
 header .btn, #header .btn {
     padding: 8px 10px 8px 10px;
 }
-
+header .buttonHolder {
+    min-width: 256px;
+}
 header h1 {
     margin: 0 0px;
     float: left;

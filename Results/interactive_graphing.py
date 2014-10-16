@@ -13,26 +13,26 @@ from __future__ import unicode_literals
 from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
-import os
 from future import standard_library
-from Settings.models import scenario_filename
-
 standard_library.install_hooks()
 from future.builtins import *
 
 from django.http import HttpResponse
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import ListedColormap
 from matplotlib.patches import Circle, Rectangle
-from matplotlib import pyplot, colors
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-import numpy as np
-import mpld3
-from mpld3 import plugins, utils
+from matplotlib import pyplot
+# import numpy as np
+# import mpld3
+# from mpld3 import plugins, utils
+import os
 
 from Results.models import Unit
 from Results.summary import list_of_iterations, iteration_progress
-from Results.graphing import HttpFigure, rstyle
+from Results.graphing import rstyle, population_png
 from Settings.views import workspace_path
+from Settings.models import scenario_filename
+
 
 
 kilometers_in_one_latitude_degree = 111.13  # https://au.answers.yahoo.com/question/index?qid=20100815170802AAZe1AZ
@@ -88,19 +88,19 @@ def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated
             ax.add_patch(Rectangle(xy=(longitude[i] - half, latitude[i] - half),
                                    color = (0.89, 0.102, 0.11),
                                    width = width,
-                                   height= marker_size / kilometers_in_one_latitude_degree * infected[i] / total_iterations,
+                                   height= marker_size / kilometers_in_one_latitude_degree * (infected[i] / total_iterations),
                                    zorder=2000))
         if vaccinated[i] > 0:
             ax.add_patch(Rectangle(xy=(longitude[i] - width *.5, latitude[i] - half),
                                    color=(0.2549, 0.6706, 0.3647),
                                    width= width,
-                                   height= marker_size / kilometers_in_one_latitude_degree * vaccinated[i] / total_iterations,
+                                   height= marker_size / kilometers_in_one_latitude_degree * (vaccinated[i] / total_iterations),
                                    zorder=2000))
         if destroyed[i] > 0:
             ax.add_patch(Rectangle(xy=(longitude[i] + width * .5, latitude[i] - half),
                                    color=(0.3, 0.27, 0.27),
                                    width=width,
-                                   height= marker_size / kilometers_in_one_latitude_degree * destroyed[i] / total_iterations,
+                                   height= marker_size / kilometers_in_one_latitude_degree * (destroyed[i] / total_iterations),
                                    zorder=2000))
         if infected[i] > 0 or vaccinated[i] > 0 or destroyed[i] > 0:
             ax.add_patch(Rectangle(xy=(longitude[i] - half, latitude[i] - half),
@@ -114,14 +114,13 @@ def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated
 
 
 def population_results_map(request):
-    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(60,52), frameon=True)
+    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(58.5,52), frameon=True)
     pyplot.tight_layout()
     ax.autoscale_view('tight')
     ax.grid(color='white', linestyle='solid')
     rstyle(ax)
     ax.set_title("Population Locations and IDs", size=20)
 
-    total_iterations = float(len(list_of_iterations()))  # This is slower but more accurate than OutputSettings[0].iterations
     queryset = Unit.objects.all()
     # It might be faster to request a flat value list and then construct new tuples based on that
     latlong = [(u.latitude, u.longitude, 
@@ -131,6 +130,7 @@ def population_results_map(request):
                 u.unitstats.cumulative_zone_focus, 
                 "%s %s %i" % (u.production_type.name, u.user_notes, u.unitstats.cumulative_destroyed) 
                 ) for u in queryset]
+    total_iterations = float(len(list_of_iterations()))  # This is slower but more accurate than OutputSettings[0].iterations
     latitude, longitude, infected, vaccinated, destroyed, zone_focus, names = zip(*latlong)
     zone_blues, red_infected, green_vaccinated = define_color_mappings()
     
@@ -156,9 +156,9 @@ def population_d3_map(request):
     # mpld3.plugins.connect(fig, tooltip)
 
     
-    html = mpld3.fig_to_html(fig, d3_url=None, mpld3_url=None, no_extras=False,
-                template_type="general", figid=None, use_http=False)
-    return HttpResponse(html)
+    # html = mpld3.fig_to_html(fig, d3_url=None, mpld3_url=None, no_extras=False,
+    #             template_type="general", figid=None, use_http=False)
+    return HttpResponse()#html)
 
 
 def population_zoom_png(request):
@@ -169,66 +169,15 @@ def population_zoom_png(request):
     except IOError:
         print("Calculating a new Population Map")
         save_image = iteration_progress() == 1.0  # we want to check this before reading the stats, this is in motion
-        fig = population_results_map(request)
-        response = HttpResponse(content_type='image/png')
-        FigureCanvas(fig).print_png(response)
-        if save_image:
-            if not os.path.exists(workspace_path(scenario_filename())):
-                os.makedirs(workspace_path(scenario_filename()))
-            FigureCanvas(fig).print_png(path)
-        return response
-
-
-class HighlightLines(plugins.PluginBase):
-    """A plugin to highlight lines on hover
-    http://mpld3.github.io/examples/random_walk.html"""
-
-    JAVASCRIPT = """
-    mpld3.register_plugin("linehighlight", LineHighlightPlugin);
-    LineHighlightPlugin.prototype = Object.create(mpld3.Plugin.prototype);
-    LineHighlightPlugin.prototype.constructor = LineHighlightPlugin;
-    LineHighlightPlugin.prototype.requiredProps = ["line_ids"];
-    LineHighlightPlugin.prototype.defaultProps = {alpha_bg:0.3, alpha_fg:1.0}
-    function LineHighlightPlugin(fig, props){
-        mpld3.Plugin.call(this, fig, props);
-    };
-
-    LineHighlightPlugin.prototype.draw = function(){
-      for(var i=0; i<this.props.line_ids.length; i++){
-         var obj = mpld3.get_element(this.props.line_ids[i], this.fig),
-             alpha_fg = this.props.alpha_fg;
-             alpha_bg = this.props.alpha_bg;
-         obj.elements()
-             .on("mouseover", function(d, i){
-                            d3.select(this).transition().duration(50)
-                              .style("stroke-opacity", alpha_fg); })
-             .on("mouseout", function(d, i){
-                            d3.select(this).transition().duration(200)
-                              .style("stroke-opacity", alpha_bg); });
-      }
-    };
-    """
-
-    def __init__(self, lines):
-        self.lines = lines
-        self.dict_ = {"type": "linehighlight",
-                      "line_ids": [utils.get_id(line) for line in lines],
-                      "alpha_bg": lines[0].get_alpha(),
-                      "alpha_fg": 1.0}
-
-
-def random_walk(request, n_paths, n_steps):
-    n_paths = int(n_paths)
-    n_steps = int(n_steps)
-    
-    x = np.linspace(0, 50, n_steps)
-    y = 0.1 * (np.random.random((n_paths, n_steps)) - 0.5)
-    y = y.cumsum(1)
-    
-    fig, ax = pyplot.subplots(subplot_kw={'xticks': [], 'yticks': []})
-    lines = ax.plot(x, y.T, color='blue', lw=4, alpha=0.1)
-    plugins.connect(fig, HighlightLines(lines))
-    
-    html = mpld3.fig_to_html(fig, d3_url=None, mpld3_url=None, no_extras=False,
-                             template_type="general", figid=None, use_http=False)
-    return HttpResponse(html)
+        if not save_image:  # in order to avoid database locked Issue #150
+            return population_png(request, 58.5, 52)
+        else:
+            fig = population_results_map(request)
+            response = HttpResponse(content_type='image/png')
+            FigureCanvas(fig).print_png(response)
+            if save_image:
+                if not os.path.exists(workspace_path(scenario_filename())):
+                    os.makedirs(workspace_path(scenario_filename()))
+                FigureCanvas(fig).print_png(path)
+            print("Finished Population Map")
+            return response
