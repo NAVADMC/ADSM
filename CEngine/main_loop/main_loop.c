@@ -638,7 +638,6 @@ run_sim_main (sqlite3 *scenario_db,
   adsm_event_manager_t *manager = NULL;
   unsigned int nunits;
   UNT_unit_list_t *units;
-  UNT_unit_t *unit;
   gsl_rng *gsl_format_rng;
   RAN_gen_t *rng = NULL;
   unsigned int nzones;
@@ -737,6 +736,7 @@ run_sim_main (sqlite3 *scenario_db,
   units->spatial_index = new_rtree_spatial_search ();
   for (i = 0; i < nunits; i++)
     {
+      UNT_unit_t *unit;
       unit = UNT_unit_list_get (units, i);
       spatial_search_add_point (units->spatial_index, unit->x, unit->y);
     }
@@ -929,18 +929,7 @@ run_sim_main (sqlite3 *scenario_db,
               adsm_create_event (manager, EVT_new_midnight_event (day), units, zones, rng);
 
               /* Check if there are active infections. */
-              active_infections_today = FALSE;
-              for (i = 0; i < nunits; i++)
-                {
-                  unit = UNT_unit_list_get (units, i);
-                  if (unit->state == Latent
-                      || unit->state == InfectiousSubclinical
-                      || unit->state == InfectiousClinical)
-                    {
-                      active_infections_today = TRUE;
-                      break;
-                    }
-                }
+              active_infections_today = (g_hash_table_size (_iteration.infectious_units) > 0);
 
               /* Run the models to get today's changes. */
               adsm_create_event (manager, EVT_new_new_day_event (day), units, zones, rng);
