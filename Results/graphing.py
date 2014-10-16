@@ -10,13 +10,13 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import pandas as pd
 import matplotlib.pyplot as plt, mpld3
 
-from ScenarioCreator.models import Zone, ProductionType, Unit
+from ScenarioCreator.models import Zone, ProductionType, Unit, OutputSettings
 from ScenarioCreator.views import spaces_for_camel_case
 from Results.summary import list_of_iterations
 from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType
 
 
-max_displayed_iterations = 100
+max_displayed_iterations = 800
 
 
 def HttpFigure(fig):
@@ -143,9 +143,16 @@ def create_time_series_lines(field_name, model, iteration='', zone=''):  # Djang
                                 DailyByZone: (False, True),
                                 DailyControls: (False, False)}[model]
     filter_sequence, columns = construct_iterating_combination_filter_dictionary(iteration, iterate_pt, iterate_zone, zone=zone)
-    lines = []
-    for filter_dict in filter_sequence:
-        lines.append(list(model.objects.filter(**filter_dict).order_by('day').values_list(field_name, flat=True)))
+    lines = [] 
+    max_size = model.objects.filter(production_type=None, iteration__lte=max_displayed_iterations).aggregate(Max('day'))['day__max']
+    print(max_size)
+    for row in range(min(OutputSettings.objects.get().iterations, max_displayed_iterations)):  # iteration = index
+        lines.append([0]* max_size)
+    # for filter_dict in filter_sequence:  # TODO: Group_by as a single query
+    #     lines.append(list(model.objects.filter(**filter_dict).order_by('day').values_list(field_name, flat=True)))
+    objs = model.objects.filter(production_type=None, iteration__lte=max_displayed_iterations).values_list('iteration', 'day', field_name)
+    for entry in objs:
+        lines[int(entry[0])-1][entry[1]-1] = entry[2]  # sorting done in python, iteration and day are both 1 indexed
 
     return lines, columns
 
@@ -188,6 +195,7 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     lines, columns = create_time_series_lines(field_name, model, iteration=iteration, zone=zone)
     
     time_series = extend_last_day_lines(lines, model, field_name)
+    print(len(time_series))
     time_data = pd.DataFrame.from_records(time_series, columns=columns)  # keys should be same ordering as the for loop above
     time_data = time_data.set_index('Day')
 
