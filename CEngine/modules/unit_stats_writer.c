@@ -291,7 +291,8 @@ update_what_happened (gpointer key, gpointer value, gpointer user_data)
   sqlite3_exec (db, sql, NULL, NULL, &sqlerr);
   if (sqlerr)
     {
-      g_error ("%s", sqlerr);
+      g_error ("Error updating UnitStats for unit \"%s\": %s",
+               unit->official_id, sqlerr);
     }
   g_free (sql);
 
@@ -325,7 +326,7 @@ handle_end_of_day2_event (struct adsm_module_t_ * self,
       sqlite3_exec (local_data->db, "BEGIN TRANSACTION", NULL, NULL, &sqlerr);
       if (sqlerr)
         {
-          g_error ("%s", sqlerr);
+          g_error ("Error beginning transaction to write UnitStats: %s", sqlerr);
         }
 
       g_hash_table_foreach (local_data->what_happened, update_what_happened,
@@ -334,7 +335,7 @@ handle_end_of_day2_event (struct adsm_module_t_ * self,
       sqlite3_exec (local_data->db, "COMMIT TRANSACTION", NULL, NULL, &sqlerr);
       if (sqlerr)
         {
-         g_error ("%s", sqlerr);
+         g_error ("Error committing transaction to write UnitStats: %s", sqlerr);
         }
     }
 
