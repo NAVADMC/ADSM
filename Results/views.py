@@ -41,7 +41,7 @@ def non_empty_lines(line):
     return output_lines
 
 
-def simulation_process(iteration_number, adsm_cmd, queue):
+def simulation_process(iteration_number, adsm_cmd, queue, production_types, zones):
     start = time.time()
     adsm_result = {}
 
@@ -49,10 +49,15 @@ def simulation_process(iteration_number, adsm_cmd, queue):
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
                                   bufsize=1)
-    adsm_result['headers'] = simulation.stdout.readline().decode("utf-8")
-    adsm_result['lines'] = []
+    headers = simulation.stdout.readline().decode("utf-8")
+    from Results.output_parser import DailyParser
+    p = DailyParser(headers, production_types, zones)
+    adsm_result = []
+    prev_line = ''
     for line in iter(simulation.stdout.readline, b''):
-        adsm_result['lines'].append(non_empty_lines(line))
+        adsm_result.extend(p.parse_daily_strings(non_empty_lines(prev_line), False))
+        prev_line = line
+    adsm_result.extend(p.parse_daily_strings(non_empty_lines(prev_line), True))
     outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
     if errors:  # this will only print out error messages after the simulation has halted
         print(errors)
@@ -84,23 +89,24 @@ def zip_map_directory_if_it_exists():
         print("No folder detected: ", dir_to_zip)
 
 def process_result(queue):
-    from Results.output_parser import DailyParser
-    adsm_result = queue.get()
-    p = DailyParser(adsm_result['headers'])
-    results = []
-    for index, line in enumerate(adsm_result['lines']):
-        results.extend(p.parse_daily_strings(line, index + 1 == len(adsm_result['lines'])))
+    results = queue.get()
+    # start = time.time()
+    # middle = time.time()
 
     with transaction.atomic(using='scenario_db'):
         for result in results:
             result.save()
-    
+    # end = time.time()
+    # print("Time Parsing: ", middle-start)
+    # print("Time Writing to DB: ", end-middle)
 
 class Simulation(threading.Thread):
     """Execute system commands in a separate thread so as not to interrupt the webpage.
     Saturate the computer's processors with parallel simulation iterations"""
     def __init__(self, max_iteration, **kwargs):
         self.max_iteration = max_iteration
+        self.production_types = ProductionType.objects.values_list('id', 'name')
+        self.zones = Zone.objects.values_list('id', 'name')
         super(Simulation, self).__init__(**kwargs)
 
     def run(self):
@@ -111,7 +117,7 @@ class Simulation(threading.Thread):
         queue = manager.Queue()
         for iteration in range(1, self.max_iteration + 1):
             adsm_cmd = executable_cmd + ['-i', str(iteration)]
-            res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, queue))
+            res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, queue, self.production_types, self.zones))
             statuses.append(res)
         pool.close()
 
