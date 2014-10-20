@@ -267,9 +267,9 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
         boxplot_graph.set_ylim(0.0, ymax)
         
     days = range(1, len(time_series[0]) + 1)  # Start with day index
-    x = numpy.array(days * len(time_series), dtype=int)  # repeat day series for each set of data (1 per iteration)
-    y = numpy.array(list(chain(*time_series)), dtype=int)
-    time_graph.hist2d(x, y, bins=100, norm=LogNorm(), cmap='hot')
+    x = days * len(time_series)  # repeat day series for each set of data (1 per iteration)
+    y = list(chain(*time_series))
+    time_graph.hist2d(x, y, bins=[len(days), min(max(*y), 300)], norm=LogNorm(), cmap='hot')  # 300 should really be the number of pixels in the draw area (I don't know how to fetch that)
     # time_data.plot(ax=time_graph, color='r', alpha=0.05)
 
     
