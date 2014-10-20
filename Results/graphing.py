@@ -7,8 +7,11 @@ from matplotlib import rc
 rc("figure", facecolor="white")
 from matplotlib import gridspec
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.colors import LogNorm
 import pandas as pd
-import matplotlib.pyplot as plt, mpld3
+import matplotlib.pyplot as plt
+import mpld3
+import numpy
 
 from ScenarioCreator.models import Zone, ProductionType, Unit, OutputSettings
 from ScenarioCreator.views import spaces_for_camel_case
@@ -160,7 +163,6 @@ def extend_last_day_lines(lines, model, field_name):
     a series of flat lines at their ending value.  Implemented for Issue #159"""
     time_series = []
     max_size = max([len(x) for x in lines])
-    time_series.append(range(1, max_size + 1))  # Start with day index
     cumulative_field = 'new' not in model._meta.get_field_by_name(field_name)[0].verbose_name.lower()
     ends = [line.index(None) if None in line else max_size for line in lines]
     
@@ -172,7 +174,7 @@ def extend_last_day_lines(lines, model, field_name):
         time_series.append(line)
         for x in range(end, max_size):
             time_series[-1][x] = last_value  # editing the line we just appended
-    return list(zip(*time_series))
+    return time_series  # list(zip(*time_series))
 
 
 def field_is_cumulative(explanation):
@@ -239,8 +241,8 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     lines, columns = create_time_series_lines(field_name, model, iteration=iteration, zone=zone)
     
     time_series = extend_last_day_lines(lines, model, field_name)
-    time_data = pd.DataFrame.from_records(time_series, columns=columns)  # keys should be same ordering as the for loop above
-    time_data = time_data.set_index('Day')
+    # time_data = pd.DataFrame.from_records(time_series, columns=columns)  # keys should be same ordering as the for loop above
+    # time_data = time_data.set_index('Day')
 
     explanation, title = construct_title(field_name, iteration, model, model_name)
     
@@ -255,7 +257,7 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     plt.setp(boxplot_graph.get_yticklabels(), visible=False)
     for axis in [time_graph, boxplot_graph]:
         rstyle(axis)
-
+    time_graph.grid(False)
 
     # Manually scale zone graphs based on the Max for any zone (universal value)
     if "Zone" in model_name:
@@ -263,7 +265,12 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
             Max(field_name))[field_name + '__max'] * 1.05
         time_graph.set_ylim(0.0, ymax)
         boxplot_graph.set_ylim(0.0, ymax)
-    time_data.plot(ax=time_graph, color='r', alpha=0.05)
+        
+    days = range(1, len(time_series[0]) + 1)  # Start with day index
+    x = numpy.array(days * len(time_series), dtype=int)  # repeat day series for each set of data (1 per iteration)
+    y = numpy.array(list(chain(*time_series)), dtype=int)
+    time_graph.hist2d(x, y, bins=100, norm=LogNorm(), cmap='hot')
+    # time_data.plot(ax=time_graph, color='r', alpha=0.05)
 
     
     # boxplot_raw = collect_boxplot_data(lines, explanation)  # This uses the original lines because the ragged shape is important
@@ -271,7 +278,7 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     boxplot_data = pd.DataFrame(pd.Series(boxplot_raw), columns=['Last Day'] if field_is_cumulative(explanation) else ['Distribution'])
     boxplot_data.boxplot(ax=boxplot_graph, return_type='axes')
     #if there are more than 11 iterations, hide or truncate the legend
-    if len(columns) > 11:
-        time_graph.legend().set_visible(False)
+    # if len(columns) > 11:
+    #     time_graph.legend().set_visible(False)
 
     return HttpFigure(fig)
