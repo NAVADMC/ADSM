@@ -205,7 +205,7 @@ def histogram_density_plot(request, field_name, model_name, model, zone):
     matplotlib.rcParams.update({'font.size': 10})
     gs = gridspec.GridSpec(2, 2, width_ratios=[1, 1], height_ratios=[1,6])
     magnitude_graph = fig.add_subplot(gs[2], title="Magnitude")
-    duration_graph = fig.add_subplot(gs[3], title="Last Day")
+    duration_graph = fig.add_subplot(gs[3], title="Iteration Duration" if not field_is_cumulative(explanation) else "Final Distribution")
     # subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
     plt.locator_params(nbins=4)
     # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
@@ -214,10 +214,11 @@ def histogram_density_plot(request, field_name, model_name, model, zone):
         rstyle(axis)
 
     magnitude_data = model.objects.filter(**filter_sequence[0]).values_list(field_name, flat=True)
-    n, bins, patches = magnitude_graph.hist(magnitude_data, 50, facecolor='blue')
+    n, bins, patches = magnitude_graph.hist(magnitude_data, 50, normed=True, facecolor='blue')
 
-    duration_data = model.objects.filter(last_day=True, **filter_sequence[0]).values_list('day', flat=True)
-    n, bins, patches = duration_graph.hist(duration_data, 50, facecolor='green')
+    relevant_field = 'day' if not field_is_cumulative(explanation) else field_name
+    duration_data = model.objects.filter(last_day=True, **filter_sequence[0]).values_list(relevant_field, flat=True)
+    n, bins, patches = duration_graph.hist(duration_data, 50, normed=True, facecolor='green')
     # plt.axis([40, 160, 0, 0.03])
     plt.grid(True)  
     
