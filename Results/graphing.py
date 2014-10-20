@@ -7,7 +7,6 @@ from matplotlib import rc
 rc("figure", facecolor="white")
 from matplotlib import gridspec
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-import numpy
 import pandas as pd
 import matplotlib.pyplot as plt, mpld3
 
@@ -163,14 +162,16 @@ def extend_last_day_lines(lines, model, field_name):
     max_size = max([len(x) for x in lines])
     time_series.append(range(1, max_size + 1))  # Start with day index
     cumulative_field = 'new' not in model._meta.get_field_by_name(field_name)[0].verbose_name.lower()
-        
-    for line in lines:
+    ends = [line.index(None) if None in line else max_size for line in lines]
+    
+    for line, end in [(lines[i], ends[i]) for i in range(len(lines))]:
         if cumulative_field:
-            last_value = line[-1]
+            last_value = line[end-1]
         else:  # This field is non-cumulative, default to zero
             last_value = 0
-        missing_values = max_size - len(line)
-        time_series.append(line + [last_value] * missing_values)
+        time_series.append(line)
+        for x in range(end, max_size):
+            time_series[-1][x] = last_value  # editing the line we just appended
     return list(zip(*time_series))
 
 
@@ -233,8 +234,8 @@ def histogram_density_plot(request, field_name, model_name, model, zone):
 def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     model = globals()[model_name]
     iteration = int(iteration) if iteration else None
-    if not iteration:
-        return histogram_density_plot(request, field_name, model_name, model, zone)
+    #if not iteration:
+    #    return histogram_density_plot(request, field_name, model_name, model, zone)
     lines, columns = create_time_series_lines(field_name, model, iteration=iteration, zone=zone)
     
     time_series = extend_last_day_lines(lines, model, field_name)
@@ -262,10 +263,11 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
             Max(field_name))[field_name + '__max'] * 1.05
         time_graph.set_ylim(0.0, ymax)
         boxplot_graph.set_ylim(0.0, ymax)
-    time_data.plot(ax=time_graph)
+    time_data.plot(ax=time_graph, color='r', alpha=0.05)
 
     
-    boxplot_raw = collect_boxplot_data(lines, explanation)  # This uses the original lines because the ragged shape is important
+    # boxplot_raw = collect_boxplot_data(lines, explanation)  # This uses the original lines because the ragged shape is important
+    boxplot_raw = [0]
     boxplot_data = pd.DataFrame(pd.Series(boxplot_raw), columns=['Last Day'] if field_is_cumulative(explanation) else ['Distribution'])
     boxplot_data.boxplot(ax=boxplot_graph, return_type='axes')
     #if there are more than 11 iterations, hide or truncate the legend
