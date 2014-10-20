@@ -8,6 +8,7 @@ rc("figure", facecolor="white")
 from matplotlib import gridspec
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import LogNorm
+from matplotlib.colorbar import ColorbarBase
 import pandas as pd
 import matplotlib.pyplot as plt
 import mpld3
@@ -181,14 +182,14 @@ def field_is_cumulative(explanation):
     return 'new' not in explanation.lower()
 
 
-def collect_boxplot_data(ragged_lines, explanation):
-    """Returns a tuple with all the data necessary to make a boxplot distribution.  For 'cumulative' fields,
+def collect_boxplot_data(padded_lines, explanation):
+    """Returns a long tuple with all the data necessary to make a boxplot distribution.  For 'cumulative' fields,
     this is the last day.  For non-cumulative, it is the range of non-blank values.  Issue #159:
     https://github.com/NAVADMC/SpreadModel/issues/159#issuecomment-53058264"""
     if not field_is_cumulative(explanation):  # This field is non-cumulative, default to zero
-        boxplot_data = tuple(chain(*ragged_lines))  # pile together all the data, but don't include trailing zeroes
+        boxplot_data = tuple(chain([x for line in padded_lines for x in line if x != 0]))  # pile together all the data, but don't include trailing zeroes
     else:  # this field is cumulative
-        boxplot_data = (line[-1] for line in ragged_lines)  # only last day is relevant
+        boxplot_data = (line[-1] for line in padded_lines)  # only last day is relevant
     return boxplot_data
 
 
@@ -247,11 +248,12 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     explanation, title = construct_title(field_name, iteration, model, model_name)
     
     # plt.xkcd(scale=.5, randomness=1)
-    fig = plt.figure(figsize=(6, 4), dpi=100, tight_layout=True, facecolor='w')
+    fig = plt.figure(figsize=(7, 4), dpi=100, tight_layout=True, facecolor='w')
     matplotlib.rcParams.update({'font.size': 10})
-    gs = gridspec.GridSpec(1, 2, width_ratios=[6, 1])
-    time_graph = fig.add_subplot(gs[0], title=title)
-    boxplot_graph = fig.add_subplot(gs[1], sharey=time_graph, )
+    gs = gridspec.GridSpec(1, 3, width_ratios=[.2, 6, 1])
+    time_graph = fig.add_subplot(gs[1], title=title)
+    boxplot_graph = fig.add_subplot(gs[2], sharey=time_graph, )
+    color_bar = fig.add_subplot(gs[0], )
     plt.locator_params(nbins=4)
     # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
     plt.setp(boxplot_graph.get_yticklabels(), visible=False)
@@ -269,14 +271,17 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     days = range(1, len(time_series[0]) + 1)  # Start with day index
     x = days * len(time_series)  # repeat day series for each set of data (1 per iteration)
     y = list(chain(*time_series))
-    time_graph.hist2d(x, y, bins=[len(days), min(max(*y), 300)], norm=LogNorm(), cmap='hot')  # 300 should really be the number of pixels in the draw area (I don't know how to fetch that)
-    # time_data.plot(ax=time_graph, color='r', alpha=0.05)
-
+    hot = plt.get_cmap('hot')
+    norm = LogNorm()
+    time_graph.hist2d(x, y, bins=[len(days), min(max(*y), 300)], norm=norm, cmap=hot)  # 300 should really be the number of pixels in the draw area (I don't know how to fetch that)
+    ColorbarBase(cmap=hot, ax=color_bar, norm=norm)
     
-    # boxplot_raw = collect_boxplot_data(lines, explanation)  # This uses the original lines because the ragged shape is important
-    boxplot_raw = [0]
+    # time_data.plot(ax=time_graph)    
+
+    boxplot_raw = collect_boxplot_data(time_series, explanation)  # This has already been padded
     boxplot_data = pd.DataFrame(pd.Series(boxplot_raw), columns=['Last Day'] if field_is_cumulative(explanation) else ['Distribution'])
     boxplot_data.boxplot(ax=boxplot_graph, return_type='axes')
+    
     #if there are more than 11 iterations, hide or truncate the legend
     # if len(columns) > 11:
     #     time_graph.legend().set_visible(False)
