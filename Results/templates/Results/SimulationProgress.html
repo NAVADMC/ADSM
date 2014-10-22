@@ -3,7 +3,6 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    
     {% if large_population %}
         <p>{{ large_population }}</p>
         <img src="/results/Population.png" alt="Unit Locations"/>
@@ -19,7 +18,8 @@
             });
         </script>
     {% endif %}
-    <p>Locations of all Units in the simulation</p>
+    <p>Distribution of Outcomes for all Units in the simulation</p>
+    <p>Version: {{ version_number }}</p>
 
     {% include "Results/Summary.html" %}
     

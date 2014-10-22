@@ -86,7 +86,7 @@ def zip_map_directory_if_it_exists():
 def process_result(queue):
     from Results.output_parser import DailyParser
     adsm_result = queue.get()
-    p = DailyParser(adsm_result['headers'])
+    p = DailyParser(adsm_result['headers'], adsm_result['lines'][0][0])
     results = []
     for index, line in enumerate(adsm_result['lines']):
         results.extend(p.parse_daily_strings(line, index + 1 == len(adsm_result['lines'])))
@@ -136,6 +136,8 @@ def results_home(request):
         context['summary'] = Results.summary.summarize_results()
         context['iterations'] = len(list_of_iterations())
         context['large_population'] = Unit.objects.count() > 10000  # determines slower interactive map vs fast matplotlib
+        v = ResultsVersion.objects.get()
+        context['version_number'] = '.'.join([v.versionMajor, v.versionMinor, v.versionRelease])
     return render(request, 'Results/SimulationProgress.html', context)
 
 
