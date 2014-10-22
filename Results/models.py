@@ -331,13 +331,7 @@ class DailyByZone(OutputBaseModel):
         help_text='The identifier of the zone that these outputs apply to.', )
 
     zoneArea            = models.FloatField(blank=True, null=True, verbose_name=printable_name('zoneArea'))
-    maxZoneArea         = models.FloatField(blank=True, null=True, verbose_name=printable_name('maxZoneArea'))
-    maxZoneAreaDay      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('maxZoneAreaDay'))
     zonePerimeter       = models.FloatField(blank=True, null=True, verbose_name=printable_name('zonePerimeter'))
-    maxZonePerimeter    = models.FloatField(blank=True, null=True, verbose_name=printable_name('maxZonePerimeter'))
-    maxZonePerimeterDay = models.IntegerField(blank=True, null=True, verbose_name=printable_name('maxZonePerimeterDay'))
-    finalZoneArea       = models.FloatField(blank=True, null=True, verbose_name=printable_name('finalZoneArea'))
-    finalZonePerimeter  = models.FloatField(blank=True, null=True, verbose_name=printable_name('finalZonePerimeter'))
     numSeparateAreas  = models.IntegerField(blank=True, null=True, verbose_name=printable_name('number of separate areas'))
 
 
