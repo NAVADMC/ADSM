@@ -26,7 +26,7 @@ from Results.summary import list_of_iterations, summarize_results
 from Settings.models import scenario_filename
 import Results.graphing  # necessary to select backend Agg first
 from Results.interactive_graphing import population_zoom_png
-from Settings.views import adsm_executable_command, workspace_path
+from Settings.views import adsm_executable_command, workspace_path, save_scenario
 
 
 def back_to_inputs(request):
@@ -121,8 +121,9 @@ class Simulation(threading.Thread):
 
         statuses = [status.get() for status in statuses]
         print(statuses)
-        population_zoom_png('request')
+        population_zoom_png()
         zip_map_directory_if_it_exists()
+        save_scenario()
         close_old_connections()
 
 
@@ -154,6 +155,7 @@ def create_blank_unit_stats():
 
 def run_simulation(request):
     delete_all_outputs()
+    delete_supplemental_folder()
     create_blank_unit_stats()  # create UnitStats before we risk the simulation writing to them
     sim = Simulation(OutputSettings.objects.all().first().iterations)
     sim.start()  # starts a new thread

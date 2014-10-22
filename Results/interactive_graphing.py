@@ -112,8 +112,8 @@ def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated
                                    zorder=1500))
 
 
-def population_results_map(request):
-    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(58.5,52), frameon=True)
+def population_results_map():
+    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(58.5,52), frameon=True)  # Issue #168 aspect ratio doesn't adjust currently
     pyplot.tight_layout()
     ax.autoscale_view('tight')
     ax.grid(color='white', linestyle='solid')
@@ -161,7 +161,7 @@ def population_d3_map(request):
     return HttpResponse()#html)
 
 
-def population_zoom_png(request):
+def population_zoom_png(request=None):
     path = workspace_path(scenario_filename() + '/population_map.png')
     try:
         with open(path, "rb") as img_file:  #TODO: remove "rb"
@@ -172,7 +172,7 @@ def population_zoom_png(request):
         if not save_image:  # in order to avoid database locked Issue #150
             return population_png(request, 58.5, 52)
         else:
-            fig = population_results_map(request)
+            fig = population_results_map()
             response = HttpResponse(content_type='image/png')
             FigureCanvas(fig).print_png(response)
             if save_image:

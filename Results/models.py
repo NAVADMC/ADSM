@@ -406,6 +406,9 @@ def delete_all_outputs():
     output_models = [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]
     for model in output_models:
         model.objects.all().delete()
+
+
+def delete_supplemental_folder():
     scenario_folder = scenario_filename()
     if scenario_folder != '':
         try:
