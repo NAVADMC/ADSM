@@ -8,11 +8,11 @@
 <form method="post" action="">
     {{ formset.management_form }}
 
-    {% for label, prefix, image in headers %}
+    {% for label, prefix, image_links in headers %}
         <h1>{{ label }}</h1>
-        {% if image %}
+        {% for image in image_links%}
             <img src="{{ image }}/Graph.png" alt=""/>
-        {% endif %}
+        {% endfor %}
         <table class="result-table">
             <thead>
                 <tr>

@@ -12,10 +12,8 @@ from matplotlib.colorbar import ColorbarBase
 import pandas as pd
 import matplotlib.pyplot as plt
 import mpld3
-import numpy
 
 from ScenarioCreator.models import Zone, ProductionType, Unit, OutputSettings
-from ScenarioCreator.views import spaces_for_camel_case
 from Results.summary import list_of_iterations
 from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType
 
@@ -193,7 +191,7 @@ def collect_boxplot_data(padded_lines, explanation):
     return boxplot_data
 
 
-def construct_title(field_name, iteration, model, model_name, zone):
+def construct_title(field_name, iteration, model, zone=''):
     pt_mention = ' for all Production Types' if model in [DailyByProductionType, DailyByZoneAndProductionType] and not iteration else ''
     explanation = model._meta.get_field_by_name(field_name)[0].verbose_name
     iter_str = " iteration " + str(iteration) if iteration else ' for all iterations'
@@ -229,7 +227,7 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
 
     time_series = extend_last_day_lines(lines, model, field_name)
     
-    explanation, title = construct_title(field_name, iteration, model, model_name, zone)
+    explanation, title = construct_title(field_name, iteration, model, zone)
 
     fig = plt.figure(figsize=(7, 4), dpi=100, tight_layout=True, facecolor='w')
     matplotlib.rcParams.update({'font.size': 10})

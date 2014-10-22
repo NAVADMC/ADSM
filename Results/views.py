@@ -165,8 +165,8 @@ def list_entries(model_name, model, iteration=1):
 
 def graph_field_by_zone(request, model_name, field_name, iteration=None):
     links = [request.path + zone + '/Graph.png' for zone in Zone.objects.all().values_list('name', flat=True)]
-    iter_str = "iteration " + str(iteration) if iteration else 'for all iterations'
-    context = {'title': "Graph of %s in %s %s" % (field_name, model_name, iter_str),
+    explanation, title = Results.graphing.construct_title(field_name, iteration, globals()[model_name])
+    context = {'title': title,
                'image_links': links}
     return render(request, 'Results/Graph.html', context)
 
@@ -194,22 +194,23 @@ def empty_fields(model_class, excluded_fields):
 
 def class_specific_headers(model_name, prefix):
     # this mapping is also embedded in navigationPanel.html
-    headers = {'DailyByProductionType': [("Exposures", "exp", 'expnU'),
-                                         ("Infections", "inf", 'infnU'),
-                                         ("Vaccinations", "vac", 'vacnU'),
-                                         ("Destruction", "des", 'desnU'),
-                                         ("Exams", "exm", 'exmnU'),
-                                         ("Lab Tests", "tst", 'tstnU'),
-                                         ("Tracing", "tr", 'trnU')],
-               'DailyControls': [("Destruction", 'dest', 'destrSubtotal'),
-                                 ("Destruction Wait", 'desw', 'deswUTimeAvg'),
-                                 ("Vaccination", 'vac', 'vaccVaccination')]}
-    headers = defaultdict(lambda: [('', '', '')], headers)
+    headers = {'DailyByProductionType': [("Exposures", "exp", ['expnU', 'expcU']),
+                                         ("Infections", "inf", ['infnU', 'infcU']),
+                                         ("Vaccinations", "vac", ['vacnU', 'vaccU']),
+                                         ("Destruction", "des", ['desnU', 'descU']),
+                                         ("Exams", "exm", ['exmnU', 'exmcU']),
+                                         ("Lab Tests", "tst", ['tstnU', 'tstcU']),
+                                         ("Tracing", "tr", ['trnU', 'trcU'])],
+               'DailyControls': [("Destruction", 'dest', ['destrSubtotal']),
+                                 ("Destruction Wait", 'desw', ['deswUTimeAvg']),
+                                 ("Vaccination", 'vac', ['vaccVaccination'])]}
+    headers = defaultdict(lambda: [('', '', [])], headers)
     headers = headers[model_name]  # select by class
     if prefix:  # filter if there's a prefix
         headers = [item for item in headers if item[1] == prefix]
-        title, pref, link = headers[0]
-        headers[0] = title, pref, '/results/' + model_name + '/' + headers[0][2]  # otherwise links get broken
+        title, pref, links = headers[0]
+        links = ['/results/' + model_name + '/' + item for item in links]  # otherwise links get broken
+        headers[0] = title, pref, links
     return headers
 
 
