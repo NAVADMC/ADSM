@@ -193,10 +193,14 @@ def collect_boxplot_data(padded_lines, explanation):
     return boxplot_data
 
 
-def construct_title(field_name, iteration, model, model_name):
+def construct_title(field_name, iteration, model, model_name, zone):
+    pt_mention = ' for all Production Types' if model in [DailyByProductionType, DailyByZoneAndProductionType] and not iteration else ''
     explanation = model._meta.get_field_by_name(field_name)[0].verbose_name
-    iter_str = ", iteration " + str(iteration) if iteration else 'for all iterations'
-    title = "%s in \n%s %s" % (explanation, spaces_for_camel_case(model_name), iter_str)
+    iter_str = " iteration " + str(iteration) if iteration else ' for all iterations'
+    if zone:
+        title = "%s %s\n%s%s" % (zone, explanation, pt_mention, iter_str)
+    else:
+        title = "%s\n%s%s" % (explanation, pt_mention, iter_str)
     return explanation, title
 
 
@@ -225,7 +229,7 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
 
     time_series = extend_last_day_lines(lines, model, field_name)
     
-    explanation, title = construct_title(field_name, iteration, model, model_name)
+    explanation, title = construct_title(field_name, iteration, model, model_name, zone)
 
     fig = plt.figure(figsize=(7, 4), dpi=100, tight_layout=True, facecolor='w')
     matplotlib.rcParams.update({'font.size': 10})
