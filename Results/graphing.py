@@ -149,7 +149,7 @@ def create_time_series_lines(field_name, model, iteration=None, zone=''):
         for filter_dict in filter_sequence:
             lines.append(list(model.objects.filter(**filter_dict).order_by('day').values_list(field_name, flat=True)))
     else:  # summary of all iterations is a single query for performance reasons
-        max_size = model.objects.filter(production_type=None).aggregate(Max('day'))['day__max']
+        max_size = model.objects.all().aggregate(Max('day'))['day__max']
         for row in range(OutputSettings.objects.get().iterations):  # iteration = index
             lines.append([None] * max_size)
         objs = model.objects.filter(**filter_sequence[0]).values_list('iteration', 'day', field_name)
@@ -231,6 +231,7 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     matplotlib.rcParams.update({'font.size': 10})
     gs = gridspec.GridSpec(1, 3, width_ratios=[.2, 6, 1])
     time_graph = fig.add_subplot(gs[1], title=title)
+    time_graph.set_xlabel('Days')
     boxplot_graph = fig.add_subplot(gs[2], sharey=time_graph, )
     plt.locator_params(nbins=4)
     # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
@@ -250,7 +251,10 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     y = list(chain(*time_series))
     hot = plt.get_cmap('hot')
     norm = LogNorm()
-    time_graph.hist2d(x, y, bins=[len(days), min(max(*y), 300)], norm=norm, cmap=hot)  # 300 should really be the number of pixels in the draw area (I don't know how to fetch that)
+    time_graph.hist2d(x, y, 
+                      bins=[len(days), max(5, min(max(*y), 300))],  # 300 should really be the number of pixels in the draw area (I don't know how to fetch that)
+                      norm=norm, 
+                      cmap=hot)
     color_bar = fig.add_subplot(gs[0], )
     ColorbarBase(cmap=hot, ax=color_bar, norm=norm)
 

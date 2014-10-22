@@ -142,6 +142,7 @@ def population_results_map(request):
     # to ensure zero occurrences has a different color
     uninvolved = ax.scatter(longitude,
                             latitude,
+                            marker='s',
                             s=70,
                             color=(0.6, 0.6, 0.6, 1.0),
                             linewidths=0,

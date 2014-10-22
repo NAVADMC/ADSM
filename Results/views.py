@@ -202,7 +202,7 @@ def class_specific_headers(model_name, prefix):
                                          ("Lab Tests", "tst", 'tstnU'),
                                          ("Tracing", "tr", 'trnU')],
                'DailyControls': [("Destruction", 'dest', 'destrSubtotal'),
-                                 ("Destruction Wait", 'desw', 'deswATimeAvg'),
+                                 ("Destruction Wait", 'desw', 'deswUTimeAvg'),
                                  ("Vaccination", 'vac', 'vaccVaccination')]}
     headers = defaultdict(lambda: [('', '', '')], headers)
     headers = headers[model_name]  # select by class
@@ -227,7 +227,7 @@ def result_table(request, model_name, model_class, model_form, graph_links=False
         context['Zones'] = Zone.objects.all()
         context['iterations'] = iterations[:5]  # It's pointless to display links to more than the first 10 iterations, there can be thousands
         context['model_name'] = model_name
-        context['excluded_fields'] = ['zone', 'production_type', 'day', 'iteration', 'id', 'pk']
+        context['excluded_fields'] = ['zone', 'production_type', 'day', 'iteration', 'id', 'pk', 'last_day']
         context['excluded_fields'] += [field for field in model_class._meta.get_all_field_names() if not field.startswith(prefix)]
         context['empty_fields'] = empty_fields(model_class, context['excluded_fields'])
         context['headers'] = class_specific_headers(model_name, prefix)
