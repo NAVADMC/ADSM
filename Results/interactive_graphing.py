@@ -72,7 +72,7 @@ def graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focu
     for i, freq in [(index, n_times) for index, n_times in enumerate(zone_focus) if n_times > 0]:
         ax.add_patch(Circle(xy=(longitude[i], latitude[i]),
                             color=zone_blues(freq / total_iterations),
-                            radius=15.0 / kilometers_in_one_latitude_degree,
+                            radius= largest_zone_radius / kilometers_in_one_latitude_degree,
                             linewidth=0,
                             zorder=freq,
         ))
