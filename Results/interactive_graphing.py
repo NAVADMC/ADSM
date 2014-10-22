@@ -14,10 +14,13 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
+from ScenarioCreator.models import Zone
+
 standard_library.install_hooks()
 from future.builtins import *
 
 from django.http import HttpResponse
+from django.db.models import Max
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import ListedColormap
 from matplotlib.patches import Circle, Rectangle
@@ -70,10 +73,11 @@ def define_color_mappings():
 
 
 def graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus):
+    largest_zone_radius = Zone.objects.aggregate(Max('radius'))['radius__max']
     for i, freq in [(index, n_times) for index, n_times in enumerate(zone_focus) if n_times > 0]:
         ax.add_patch(Circle(xy=(longitude[i], latitude[i]),
                             color=zone_blues(freq / total_iterations),
-                            radius=15.0 / kilometers_in_one_latitude_degree,
+                            radius=largest_zone_radius / kilometers_in_one_latitude_degree,
                             linewidth=0,
                             zorder=freq,
         ))
