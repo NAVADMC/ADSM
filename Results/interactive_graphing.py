@@ -17,22 +17,20 @@ from future import standard_library
 standard_library.install_hooks()
 from future.builtins import *
 
-from django.http import HttpResponse
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import ListedColormap
 from matplotlib.patches import Circle, Rectangle
 from matplotlib import pyplot
-# import numpy as np
-# import mpld3
-# from mpld3 import plugins, utils
 import os
+from django.http import HttpResponse
+from django.db.models import Max
 
 from Results.models import Unit
 from Results.summary import list_of_iterations, iteration_progress
 from Results.graphing import rstyle, population_png
 from Settings.views import workspace_path
 from Settings.models import scenario_filename
-
+from ScenarioCreator.models import Zone
 
 
 kilometers_in_one_latitude_degree = 111.13  # https://au.answers.yahoo.com/question/index?qid=20100815170802AAZe1AZ
@@ -70,10 +68,11 @@ def define_color_mappings():
 
 
 def graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus):
+    largest_zone_radius = Zone.objects.aggregate(Max('radius'))['radius__max']
     for i, freq in [(index, n_times) for index, n_times in enumerate(zone_focus) if n_times > 0]:
         ax.add_patch(Circle(xy=(longitude[i], latitude[i]),
                             color=zone_blues(freq / total_iterations),
-                            radius=15.0 / kilometers_in_one_latitude_degree,
+                            radius= largest_zone_radius / kilometers_in_one_latitude_degree,
                             linewidth=0,
                             zorder=freq,
         ))
@@ -113,8 +112,8 @@ def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated
                                    zorder=1500))
 
 
-def population_results_map(request):
-    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(58.5,52), frameon=True)
+def population_results_map():
+    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(58.5,52), frameon=True)  # Issue #168 aspect ratio doesn't adjust currently
     pyplot.tight_layout()
     ax.autoscale_view('tight')
     ax.grid(color='white', linestyle='solid')
@@ -142,6 +141,7 @@ def population_results_map(request):
     # to ensure zero occurrences has a different color
     uninvolved = ax.scatter(longitude,
                             latitude,
+                            marker='s',
                             s=70,
                             color=(0.6, 0.6, 0.6, 1.0),
                             linewidths=0,
@@ -161,7 +161,7 @@ def population_d3_map(request):
     return HttpResponse()#html)
 
 
-def population_zoom_png(request):
+def population_zoom_png(request=None):
     path = workspace_path(scenario_filename() + '/population_map.png')
     try:
         with open(path, "rb") as img_file:  #TODO: remove "rb"
@@ -172,7 +172,7 @@ def population_zoom_png(request):
         if not save_image:  # in order to avoid database locked Issue #150
             return population_png(request, 58.5, 52)
         else:
-            fig = population_results_map(request)
+            fig = population_results_map()
             response = HttpResponse(content_type='image/png')
             FigureCanvas(fig).print_png(response)
             if save_image:

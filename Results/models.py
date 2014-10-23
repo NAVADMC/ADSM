@@ -331,13 +331,7 @@ class DailyByZone(OutputBaseModel):
         help_text='The identifier of the zone that these outputs apply to.', )
 
     zoneArea            = models.FloatField(blank=True, null=True, verbose_name=printable_name('zoneArea'))
-    maxZoneArea         = models.FloatField(blank=True, null=True, verbose_name=printable_name('maxZoneArea'))
-    maxZoneAreaDay      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('maxZoneAreaDay'))
     zonePerimeter       = models.FloatField(blank=True, null=True, verbose_name=printable_name('zonePerimeter'))
-    maxZonePerimeter    = models.FloatField(blank=True, null=True, verbose_name=printable_name('maxZonePerimeter'))
-    maxZonePerimeterDay = models.IntegerField(blank=True, null=True, verbose_name=printable_name('maxZonePerimeterDay'))
-    finalZoneArea       = models.FloatField(blank=True, null=True, verbose_name=printable_name('finalZoneArea'))
-    finalZonePerimeter  = models.FloatField(blank=True, null=True, verbose_name=printable_name('finalZonePerimeter'))
     numSeparateAreas  = models.IntegerField(blank=True, null=True, verbose_name=printable_name('number of separate areas'))
 
 
@@ -398,12 +392,23 @@ class UnitStats(OutputBaseModel):
         help_text='The total number of iterations in which this unit was a zone focus.', )
 
 
+class ResultsVersion(OutputBaseModel):
+    """There's a single copy of this model per set of output.  The version is grabbed from the first daily output from
+    the C Engine.  All subsequent versions are discarded."""
+    versionMajor = models.CharField(max_length=255, null=True, blank=True)
+    versionMinor = models.CharField(max_length=255, null=True, blank=True)
+    versionRelease = models.CharField(max_length=255, null=True, blank=True)
+
+
 def delete_all_outputs():
     if DailyControls.objects.count() > 0:
         print("DELETING ALL OUTPUTS")
-    output_models = [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats]
+    output_models = [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]
     for model in output_models:
         model.objects.all().delete()
+
+
+def delete_supplemental_folder():
     scenario_folder = scenario_filename()
     if scenario_folder != '':
         try:

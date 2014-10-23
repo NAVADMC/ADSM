@@ -8,8 +8,6 @@ from future.builtins import str
 from future import standard_library
 standard_library.install_hooks()
 from future.builtins import object
-from ast import literal_eval
-from collections import namedtuple
 import re
 import Results.models
 from ScenarioCreator.models import Zone, ProductionType
@@ -39,11 +37,20 @@ def build_composite_field_map( table):
 
 
 class DailyParser(object):
-    def __init__(self, header_line):
+    def __init__(self, header_line, first_day_line):
         self.headers = header_line.strip().split(',')  # there was a trailing /r/n to remove
         self.possible_zones = {x.name for x in Zone.objects.all()}.union({'Background'})
         self.possible_pts = {x.name for x in ProductionType.objects.all()}.union({''})
         self.failures = set()
+        if not Results.models.ResultsVersion.objects.exists():
+            values = first_day_line.split(',')
+            pairs = zip(self.headers, values)
+            sparse_values = {a: number(b) for a, b in pairs}
+            version = Results.models.ResultsVersion()
+            version.versionMajor = sparse_values['versionMajor']
+            version.versionMinor = sparse_values['versionMinor']
+            version.versionRelease = sparse_values['versionRelease']
+            version.save()
 
 
     def populate_tables_with_matching_fields(self, model_class_name, instance_dict, sparse_info):
@@ -118,6 +125,9 @@ class DailyParser(object):
         del sparse_info['Run']
         day = sparse_info['Day']
         del sparse_info['Day']
+        del sparse_info['versionMajor']
+        del sparse_info['versionMinor']
+        del sparse_info['versionRelease']
 
         self.failures = set(sparse_info.keys())  # whatever is left is a failure
 

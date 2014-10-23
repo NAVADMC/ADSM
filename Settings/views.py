@@ -162,11 +162,14 @@ def open_scenario(request, target):
     return redirect('/setup/Scenario/1/')
 
 
-def save_scenario(request):
+def save_scenario(request=None):
     """Save to the existing session of a new file name if target is provided
     """
-    target = request.POST['filename']
-    scenario_filename(target)
+    if request:
+        target = request.POST['filename']
+        scenario_filename(target)
+    else:
+        target = scenario_filename()
     print('Copying database to', target)
     full_path = workspace_path(target) + ('.sqlite3' if target[-8:] != '.sqlite3' else '')
     save_error = None
@@ -175,7 +178,7 @@ def save_scenario(request):
         unsaved_changes(False)  # File is now in sync
     except IOError:
         save_error = 'Failed to save file.'
-    if request.is_ajax():
+    if request is not None and request.is_ajax():
         if save_error:
             json_response = '{"status": "failed", "message": "%s"}' % save_error
         else:

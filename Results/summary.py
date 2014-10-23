@@ -65,7 +65,7 @@ def summarize_results():
         name_and_value("firstDetection"),
         name_and_value("firstVaccination"),
         name_and_value("firstDestruction"),
-        name_and_value("maxZoneArea", DailyByZone)]
+        name_and_value("zoneArea", DailyByZone)]
 
     return summary
 

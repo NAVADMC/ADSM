@@ -7,12 +7,13 @@ from matplotlib import rc
 rc("figure", facecolor="white")
 from matplotlib import gridspec
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-import numpy
+from matplotlib.colors import LogNorm
+from matplotlib.colorbar import ColorbarBase
 import pandas as pd
-import matplotlib.pyplot as plt, mpld3
+import matplotlib.pyplot as plt
+import mpld3
 
 from ScenarioCreator.models import Zone, ProductionType, Unit, OutputSettings
-from ScenarioCreator.views import spaces_for_camel_case
 from Results.summary import list_of_iterations
 from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType
 
@@ -143,10 +144,10 @@ def create_time_series_lines(field_name, model, iteration=None, zone=''):
     filter_sequence, columns = construct_iterating_combination_filter_dictionary(iteration, model, zone=zone)
     lines = [] 
     if iteration:  # Manually step through each query for a single iteration
-        for filter_dict in filter_sequence:  # TODO: Group_by as a single query
+        for filter_dict in filter_sequence:
             lines.append(list(model.objects.filter(**filter_dict).order_by('day').values_list(field_name, flat=True)))
     else:  # summary of all iterations is a single query for performance reasons
-        max_size = model.objects.filter(production_type=None).aggregate(Max('day'))['day__max']
+        max_size = model.objects.all().aggregate(Max('day'))['day__max']
         for row in range(OutputSettings.objects.get().iterations):  # iteration = index
             lines.append([None] * max_size)
         objs = model.objects.filter(**filter_sequence[0]).values_list('iteration', 'day', field_name)
@@ -156,75 +157,65 @@ def create_time_series_lines(field_name, model, iteration=None, zone=''):
     return lines, columns
 
 
+def field_is_cumulative(explanation):
+    return 'new' not in explanation.lower()
+
+
 def extend_last_day_lines(lines, model, field_name):
     """Turns the ragged edge caused by different iterations ending on different days into
     a series of flat lines at their ending value.  Implemented for Issue #159"""
     time_series = []
     max_size = max([len(x) for x in lines])
-    time_series.append(range(1, max_size + 1))  # Start with day index
-    cumulative_field = 'new' not in model._meta.get_field_by_name(field_name)[0].verbose_name.lower()
-        
-    for line in lines:
+    cumulative_field = field_is_cumulative(model._meta.get_field_by_name(field_name)[0].verbose_name.lower())
+    ends = [line.index(None) if None in line else max_size for line in lines]
+    
+    for line, end in [(lines[i], ends[i]) for i in range(len(lines))]:
         if cumulative_field:
-            last_value = line[-1]
+            last_value = line[end-1]
         else:  # This field is non-cumulative, default to zero
             last_value = 0
-        missing_values = max_size - len(line)
-        time_series.append(line + [last_value] * missing_values)
-    return list(zip(*time_series))
+        time_series.append(line)
+        for x in range(end, max_size):
+            time_series[-1][x] = last_value  # editing the line we just appended
+    return time_series
 
 
-def field_is_cumulative(explanation):
-    return 'new' not in explanation.lower()
-
-
-def collect_boxplot_data(ragged_lines, explanation):
-    """Returns a tuple with all the data necessary to make a boxplot distribution.  For 'cumulative' fields,
+def collect_boxplot_data(padded_lines, explanation):
+    """Returns a long tuple with all the data necessary to make a boxplot distribution.  For 'cumulative' fields,
     this is the last day.  For non-cumulative, it is the range of non-blank values.  Issue #159:
     https://github.com/NAVADMC/SpreadModel/issues/159#issuecomment-53058264"""
     if not field_is_cumulative(explanation):  # This field is non-cumulative, default to zero
-        boxplot_data = tuple(chain(*ragged_lines))  # pile together all the data, but don't include trailing zeroes
+        boxplot_data = tuple(chain([x for line in padded_lines for x in line if x != 0]))  # pile together all the data, but don't include trailing zeroes
     else:  # this field is cumulative
-        boxplot_data = (line[-1] for line in ragged_lines)  # only last day is relevant
+        boxplot_data = (line[-1] for line in padded_lines)  # only last day is relevant
     return boxplot_data
 
 
-def construct_title(field_name, iteration, model, model_name):
+def construct_title(field_name, iteration, model, zone=''):
+    pt_mention = ' for all Production Types' if model in [DailyByProductionType, DailyByZoneAndProductionType] and not iteration else ''
     explanation = model._meta.get_field_by_name(field_name)[0].verbose_name
-    iter_str = ", iteration " + str(iteration) if iteration else 'for all iterations'
-    title = "%s in \n%s %s" % (explanation, spaces_for_camel_case(model_name), iter_str)
+    iter_str = " iteration " + str(iteration) if iteration else ' for all iterations'
+    if zone:
+        title = "%s %s\n%s%s" % (zone, explanation, pt_mention, iter_str)
+    else:
+        title = "%s\n%s%s" % (explanation, pt_mention, iter_str)
     return explanation, title
 
 
-def histogram_density_plot(request, field_name, model_name, model, zone):
-    filter_sequence, columns = construct_iterating_combination_filter_dictionary(None, model, zone=zone)
+def single_iteration_line_graph(iteration, field_name, model_name, model, time_series, columns, time_graph, boxplot_graph, fig):
+    days = list(range(1, len(time_series[0]) + 1))  # Start with day index
+    time_data = pd.DataFrame.from_records( list(zip(days, *time_series)), columns=columns)  # keys should be same ordering as the for loop above
+    time_data = time_data.set_index('Day')
 
-    explanation, title = construct_title(field_name, None, model, model_name)
-    fig = plt.figure(figsize=(9, 4), dpi=100, tight_layout=True, facecolor='w')
-    fig.suptitle(title)
-    matplotlib.rcParams.update({'font.size': 10})
-    gs = gridspec.GridSpec(2, 2, width_ratios=[1, 1], height_ratios=[1,6])
-    magnitude_graph = fig.add_subplot(gs[2], title="Magnitude")
-    duration_graph = fig.add_subplot(gs[3], title="Last Day")
-    # subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
-    plt.locator_params(nbins=4)
-    # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
-    # plt.setp(duration_graph.get_yticklabels(), visible=False)
-    for axis in [magnitude_graph, duration_graph]:
-        rstyle(axis)
-
-    magnitude_data = model.objects.filter(**filter_sequence[0]).values_list(field_name, flat=True)
-    n, bins, patches = magnitude_graph.hist(magnitude_data, 50, facecolor='blue')
-
-    duration_data = model.objects.filter(last_day=True, **filter_sequence[0]).values_list('day', flat=True)
-    n, bins, patches = duration_graph.hist(duration_data, 50, facecolor='green')
-    # plt.axis([40, 160, 0, 0.03])
-    plt.grid(True)  
+    time_graph.legend()
+    time_data.plot(ax=time_graph)
     
-    # magnitude_data.plot(ax=magnitude_graph)
-    # duration_data.plot(ax=duration_graph)
-
-    # magnitude_graph.legend().set_visible(False)
+    # Manually scale zone graphs based on the Max for any zone (universal value)
+    if "Zone" in model_name:
+        # It's important to filter out Background stats from this Max
+        ymax = model.objects.filter(zone__isnull=False, iteration=iteration).aggregate(Max(field_name))[field_name + '__max'] * 1.05
+        time_graph.set_ylim(0.0, ymax)
+        boxplot_graph.set_ylim(0.0, ymax)
 
     return HttpFigure(fig)
 
@@ -232,43 +223,41 @@ def histogram_density_plot(request, field_name, model_name, model, zone):
 def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     model = globals()[model_name]
     iteration = int(iteration) if iteration else None
-    if not iteration:
-        return histogram_density_plot(request, field_name, model_name, model, zone)
     lines, columns = create_time_series_lines(field_name, model, iteration=iteration, zone=zone)
-    
-    time_series = extend_last_day_lines(lines, model, field_name)
-    time_data = pd.DataFrame.from_records(time_series, columns=columns)  # keys should be same ordering as the for loop above
-    time_data = time_data.set_index('Day')
 
-    explanation, title = construct_title(field_name, iteration, model, model_name)
+    time_series = extend_last_day_lines(lines, model, field_name)
     
-    # plt.xkcd(scale=.5, randomness=1)
-    fig = plt.figure(figsize=(6, 4), dpi=100, tight_layout=True, facecolor='w')
+    explanation, title = construct_title(field_name, iteration, model, zone)
+
+    fig = plt.figure(figsize=(7, 4), dpi=100, tight_layout=True, facecolor='w')
     matplotlib.rcParams.update({'font.size': 10})
-    gs = gridspec.GridSpec(1, 2, width_ratios=[6, 1])
-    time_graph = fig.add_subplot(gs[0], title=title)
-    boxplot_graph = fig.add_subplot(gs[1], sharey=time_graph, )
+    gs = gridspec.GridSpec(1, 3, width_ratios=[.2, 6, 1])
+    time_graph = fig.add_subplot(gs[1], title=title)
+    time_graph.set_xlabel('Days')
+    boxplot_graph = fig.add_subplot(gs[2], sharey=time_graph, )
     plt.locator_params(nbins=4)
     # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
     plt.setp(boxplot_graph.get_yticklabels(), visible=False)
     for axis in [time_graph, boxplot_graph]:
         rstyle(axis)
+    time_graph.grid(False)
 
-
-    # Manually scale zone graphs based on the Max for any zone (universal value)
-    if "Zone" in model_name:
-        ymax = model.objects.filter(zone__isnull=False).aggregate(  # It's important to filter out Background stats from this Max
-            Max(field_name))[field_name + '__max'] * 1.05
-        time_graph.set_ylim(0.0, ymax)
-        boxplot_graph.set_ylim(0.0, ymax)
-    time_data.plot(ax=time_graph)
-
-    
-    boxplot_raw = collect_boxplot_data(lines, explanation)  # This uses the original lines because the ragged shape is important
+    boxplot_raw = collect_boxplot_data(time_series, explanation)  # This has already been padded
     boxplot_data = pd.DataFrame(pd.Series(boxplot_raw), columns=['Last Day'] if field_is_cumulative(explanation) else ['Distribution'])
     boxplot_data.boxplot(ax=boxplot_graph, return_type='axes')
-    #if there are more than 11 iterations, hide or truncate the legend
-    if len(columns) > 11:
-        time_graph.legend().set_visible(False)
+
+    if iteration:  # for a single iteration, we don't need all the hist2d prep
+        return single_iteration_line_graph(iteration, field_name, model_name, model, time_series, columns, time_graph, boxplot_graph, fig)
+    days = range(1, len(time_series[0]) + 1)  # Start with day index
+    x = days * len(time_series)  # repeat day series for each set of data (1 per iteration)
+    y = list(chain(*time_series))
+    hot = plt.get_cmap('hot')
+    norm = LogNorm()
+    time_graph.hist2d(x, y, 
+                      bins=[len(days), max(5, min(max(*y), 300))],  # 300 should really be the number of pixels in the draw area (I don't know how to fetch that)
+                      norm=norm, 
+                      cmap=hot)
+    color_bar = fig.add_subplot(gs[0], )
+    ColorbarBase(cmap=hot, ax=color_bar, norm=norm)
 
     return HttpFigure(fig)

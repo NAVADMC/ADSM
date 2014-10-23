@@ -26,7 +26,7 @@ from Results.summary import list_of_iterations, summarize_results
 from Settings.models import scenario_filename
 import Results.graphing  # necessary to select backend Agg first
 from Results.interactive_graphing import population_zoom_png
-from Settings.views import adsm_executable_command, workspace_path
+from Settings.views import adsm_executable_command, workspace_path, save_scenario
 
 
 def back_to_inputs(request):
@@ -86,7 +86,7 @@ def zip_map_directory_if_it_exists():
 def process_result(queue):
     from Results.output_parser import DailyParser
     adsm_result = queue.get()
-    p = DailyParser(adsm_result['headers'])
+    p = DailyParser(adsm_result['headers'], adsm_result['lines'][0][0])
     results = []
     for index, line in enumerate(adsm_result['lines']):
         results.extend(p.parse_daily_strings(line, index + 1 == len(adsm_result['lines'])))
@@ -121,8 +121,9 @@ class Simulation(threading.Thread):
 
         statuses = [status.get() for status in statuses]
         print(statuses)
-        population_zoom_png('request')
+        population_zoom_png()
         zip_map_directory_if_it_exists()
+        save_scenario()
         close_old_connections()
 
 
@@ -136,6 +137,8 @@ def results_home(request):
         context['summary'] = Results.summary.summarize_results()
         context['iterations'] = len(list_of_iterations())
         context['large_population'] = Unit.objects.count() > 10000  # determines slower interactive map vs fast matplotlib
+        v = ResultsVersion.objects.get()
+        context['version_number'] = '.'.join([v.versionMajor, v.versionMinor, v.versionRelease])
     return render(request, 'Results/SimulationProgress.html', context)
 
 
@@ -152,6 +155,7 @@ def create_blank_unit_stats():
 
 def run_simulation(request):
     delete_all_outputs()
+    delete_supplemental_folder()
     create_blank_unit_stats()  # create UnitStats before we risk the simulation writing to them
     sim = Simulation(OutputSettings.objects.all().first().iterations)
     sim.start()  # starts a new thread
@@ -165,8 +169,8 @@ def list_entries(model_name, model, iteration=1):
 
 def graph_field_by_zone(request, model_name, field_name, iteration=None):
     links = [request.path + zone + '/Graph.png' for zone in Zone.objects.all().values_list('name', flat=True)]
-    iter_str = "iteration " + str(iteration) if iteration else 'for all iterations'
-    context = {'title': "Graph of %s in %s %s" % (field_name, model_name, iter_str),
+    explanation, title = Results.graphing.construct_title(field_name, iteration, globals()[model_name])
+    context = {'title': title,
                'image_links': links}
     return render(request, 'Results/Graph.html', context)
 
@@ -194,22 +198,23 @@ def empty_fields(model_class, excluded_fields):
 
 def class_specific_headers(model_name, prefix):
     # this mapping is also embedded in navigationPanel.html
-    headers = {'DailyByProductionType': [("Exposures", "exp", 'expnU'),
-                                         ("Infections", "inf", 'infnU'),
-                                         ("Vaccinations", "vac", 'vacnU'),
-                                         ("Destruction", "des", 'desnU'),
-                                         ("Exams", "exm", 'exmnU'),
-                                         ("Lab Tests", "tst", 'tstnU'),
-                                         ("Tracing", "tr", 'trnU')],
-               'DailyControls': [("Destruction", 'dest', 'destrSubtotal'),
-                                 ("Destruction Wait", 'desw', 'deswATimeAvg'),
-                                 ("Vaccination", 'vac', 'vaccVaccination')]}
-    headers = defaultdict(lambda: [('', '', '')], headers)
+    headers = {'DailyByProductionType': [("Exposures", "exp", ['expnU', 'expcU']),
+                                         ("Infections", "inf", ['infnU', 'infcU']),
+                                         ("Vaccinations", "vac", ['vacnU', 'vaccU']),
+                                         ("Destruction", "des", ['desnU', 'descU']),
+                                         ("Exams", "exm", ['exmnU', 'exmcU']),
+                                         ("Lab Tests", "tst", ['tstnU', 'tstcU']),
+                                         ("Tracing", "tr", ['trnU', 'trcU'])],
+               'DailyControls': [("Destruction", 'dest', ['destrSubtotal']),
+                                 ("Destruction Wait", 'desw', ['deswUTimeAvg']),
+                                 ("Vaccination", 'vac', ['vaccVaccination'])]}
+    headers = defaultdict(lambda: [('', '', [])], headers)
     headers = headers[model_name]  # select by class
     if prefix:  # filter if there's a prefix
         headers = [item for item in headers if item[1] == prefix]
-        title, pref, link = headers[0]
-        headers[0] = title, pref, '/results/' + model_name + '/' + headers[0][2]  # otherwise links get broken
+        title, pref, links = headers[0]
+        links = ['/results/' + model_name + '/' + item for item in links]  # otherwise links get broken
+        headers[0] = title, pref, links
     return headers
 
 
@@ -227,7 +232,7 @@ def result_table(request, model_name, model_class, model_form, graph_links=False
         context['Zones'] = Zone.objects.all()
         context['iterations'] = iterations[:5]  # It's pointless to display links to more than the first 10 iterations, there can be thousands
         context['model_name'] = model_name
-        context['excluded_fields'] = ['zone', 'production_type', 'day', 'iteration', 'id', 'pk']
+        context['excluded_fields'] = ['zone', 'production_type', 'day', 'iteration', 'id', 'pk', 'last_day']
         context['excluded_fields'] += [field for field in model_class._meta.get_all_field_names() if not field.startswith(prefix)]
         context['empty_fields'] = empty_fields(model_class, context['excluded_fields'])
         context['headers'] = class_specific_headers(model_name, prefix)

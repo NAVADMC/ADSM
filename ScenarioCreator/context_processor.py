@@ -5,6 +5,8 @@ from __future__ import absolute_import
 from future import standard_library
 standard_library.install_hooks()
 
+from glob import glob
+from itertools import chain
 import re
 from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Population, Unit, Disease, DiseaseProgression, \
     DiseaseProgressionAssignment, DirectSpread, ProductionTypePairTransmission, ControlMasterPlan, ControlProtocol, \
@@ -12,7 +14,7 @@ from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Pop
 from Results.models import DailyControls
 from Results.summary import iteration_progress
 from Settings.models import scenario_filename, SmSession
-from Settings.views import unsaved_changes, graceful_startup
+from Settings.views import unsaved_changes, graceful_startup, workspace_path
 from django.db.models import F
 
 
@@ -26,6 +28,12 @@ def js(var):
         return 'true'
     else:
         return 'false'
+
+
+def supplemental_folder_exists():
+    """Doesn't currently include Map subdirectory.  Instead it checks for the map zip file.  TODO: This could be a page load slow down given that
+    we're checking the file system every page."""
+    return len(list(chain(*[glob(workspace_path(scenario_filename() + "/*." + ext)) for ext in ['csv', 'shp', 'shx', 'dbf', 'zip']]))) > 0
 
 
 def basic_context(request):
@@ -64,6 +72,7 @@ def basic_context(request):
                'RelationalFunctions': RelationalFunction.objects.count(),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
                'outputs_computed': DailyControls.objects.count() > 0,
+               'supplemental_folder_exists': supplemental_folder_exists()
                })
 
         validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment',
