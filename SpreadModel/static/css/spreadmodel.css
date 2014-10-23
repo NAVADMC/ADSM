@@ -186,6 +186,12 @@ ul {
     text-align: center;
 }
 
+#RunSimulation a.tall {
+    padding-top: 10px;
+    height: 75px;
+    line-height: 20px;
+}
+
 #RunSimulation .glyphicon {
     font-size: 30px;
     display: relative;
