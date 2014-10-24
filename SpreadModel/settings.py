@@ -65,8 +65,8 @@ MIDDLEWARE_CLASSES = (
 
 if DEBUG:
     MIDDLEWARE_CLASSES += (
-        'Settings.debug.HotshotProfileMiddleware',
-        'Settings.debug.cProfileMiddleware',
+        # 'Settings.debug.HotshotProfileMiddleware',
+        # 'Settings.debug.cProfileMiddleware',
     )
     
 TEMPLATE_CONTEXT_PROCESSORS = (
