@@ -127,10 +127,11 @@ def population_results_map():
                 u.unitstats.cumulative_vaccinated,
                 u.unitstats.cumulative_destroyed,
                 u.unitstats.cumulative_zone_focus, 
+                u.initial_size,
                 "%s %s %i" % (u.production_type.name, u.user_notes, u.unitstats.cumulative_destroyed) 
                 ) for u in queryset]
     total_iterations = float(len(list_of_iterations()))  # This is slower but more accurate than OutputSettings[0].iterations
-    latitude, longitude, infected, vaccinated, destroyed, zone_focus, names = zip(*latlong)
+    latitude, longitude, infected, vaccinated, destroyed, zone_focus, herd_size, names = zip(*latlong)
     zone_blues, red_infected, green_vaccinated = define_color_mappings()
     
     graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus)
@@ -142,7 +143,7 @@ def population_results_map():
     uninvolved = ax.scatter(longitude,
                             latitude,
                             marker='s',
-                            s=100,
+                            s=[max(1, size // 10) for size in herd_size],
                             color=(0.6, 0.6, 0.6, 1.0),
                             zorder=1000)
     return fig
