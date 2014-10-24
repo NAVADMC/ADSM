@@ -45,7 +45,7 @@
                     View Results <i class="glyphicon glyphicon-play"></i></a>
                 {% else %}
                     {% if Simulation_ready or dry_run_passed %}
-                        {% if supplemental_folder_exists %}
+                        {% if supplemental_folder_has_contents %}
                             <a href="/results/RunSimulation/" class="incomplete tall">
                             Delete Supplementals and Run Simulation <i class="glyphicon glyphicon-play"></i></a>
                         {% else %}

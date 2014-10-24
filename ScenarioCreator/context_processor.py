@@ -30,10 +30,10 @@ def js(var):
         return 'false'
 
 
-def supplemental_folder_exists():
+def supplemental_folder_has_contents(subfolder=''):
     """Doesn't currently include Map subdirectory.  Instead it checks for the map zip file.  TODO: This could be a page load slow down given that
     we're checking the file system every page."""
-    return len(list(chain(*[glob(workspace_path(scenario_filename() + "/*." + ext)) for ext in ['csv', 'shp', 'shx', 'dbf', 'zip']]))) > 0
+    return len(list(chain(*[glob(workspace_path(scenario_filename() + subfolder + "/*." + ext)) for ext in ['csv', 'shp', 'shx', 'dbf', 'zip']]))) > 0
 
 
 def basic_context(request):
@@ -72,7 +72,7 @@ def basic_context(request):
                'RelationalFunctions': RelationalFunction.objects.count(),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
                'outputs_computed': DailyControls.objects.count() > 0,
-               'supplemental_folder_exists': supplemental_folder_exists()
+               'supplemental_folder_has_contents': supplemental_folder_has_contents()
                })
 
         validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment',
