@@ -63,6 +63,7 @@ class DailyParser(object):
             the program to map multiple columns onto the same field.  There are some special cases where column name is not exactly field + suffix.
         """
         field_map = build_composite_field_map(getattr(Results.models, model_class_name)() )  # creates a table instance
+        keys_to_delete = []
         for suffix_key, instance in instance_dict.items():  # For each combination: DailyByZoneAndProductionType with (Bull_HighRisk), (Swine_MediumRisk), etc.
             instance_needed = False
             for column_name, model_field in field_map.items():
@@ -76,7 +77,9 @@ class DailyParser(object):
                 else:
                     pass  # It's okay for the model to specify a field that the C Engine doesn't output.  No harm done
             if not instance_needed:
-                del instance_dict[suffix_key]
+                keys_to_delete.append(suffix_key)
+        for suffix_key in keys_to_delete:
+            del instance_dict[suffix_key] 
         return [instance for key, instance in instance_dict.items()]
 
 

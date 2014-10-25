@@ -113,7 +113,7 @@ def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated
 
 
 def population_results_map():
-    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(58.5,52), frameon=True)  # Issue #168 aspect ratio doesn't adjust currently
+    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(60,52), frameon=True)  # Issue #168 aspect ratio doesn't adjust currently
     pyplot.tight_layout()
     ax.autoscale_view('tight')
     ax.grid(color='white', linestyle='solid')
@@ -127,14 +127,15 @@ def population_results_map():
                 u.unitstats.cumulative_vaccinated,
                 u.unitstats.cumulative_destroyed,
                 u.unitstats.cumulative_zone_focus, 
+                u.initial_size,
                 "%s %s %i" % (u.production_type.name, u.user_notes, u.unitstats.cumulative_destroyed) 
                 ) for u in queryset]
     total_iterations = float(len(list_of_iterations()))  # This is slower but more accurate than OutputSettings[0].iterations
-    latitude, longitude, infected, vaccinated, destroyed, zone_focus, names = zip(*latlong)
+    latitude, longitude, infected, vaccinated, destroyed, zone_focus, herd_size, names = zip(*latlong)
     zone_blues, red_infected, green_vaccinated = define_color_mappings()
     
     graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus)
-    graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated, destroyed)  
+    graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated, destroyed)
     
     longitude = [entry[1] for entry in latlong if not any(x > 0 for x in (entry[2], entry[3], entry[4]))]
     latitude =  [entry[0] for entry in latlong if not any(x > 0 for x in (entry[2], entry[3], entry[4]))]
@@ -142,9 +143,8 @@ def population_results_map():
     uninvolved = ax.scatter(longitude,
                             latitude,
                             marker='s',
-                            s=70,
+                            s=[max(1, size // 10) for size in herd_size],
                             color=(0.6, 0.6, 0.6, 1.0),
-                            linewidths=0,
                             zorder=1000)
     return fig
 

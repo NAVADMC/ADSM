@@ -6,6 +6,8 @@ from collections import defaultdict
 import zipfile
 from future.builtins import *
 from future import standard_library
+from ScenarioCreator.context_processor import supplemental_folder_has_contents
+
 standard_library.install_hooks()
 
 
@@ -71,7 +73,7 @@ def map_zip_file():
 
 def zip_map_directory_if_it_exists():
     dir_to_zip = workspace_path(scenario_filename() + "/Map")
-    if os.path.exists(dir_to_zip):
+    if os.path.exists(dir_to_zip) and supplemental_folder_has_contents(subfolder='/Map'):
         zipname = map_zip_file()
         dir_to_zip_len = len(dir_to_zip.rstrip(os.sep)) + 1
         with zipfile.ZipFile(zipname, mode='w', compression=zipfile.ZIP_DEFLATED) as zf:
@@ -81,7 +83,7 @@ def zip_map_directory_if_it_exists():
                     entry = path[dir_to_zip_len:]
                     zf.write(path, entry)
     else:
-        print("No folder detected: ", dir_to_zip)
+        print("Folder is empty: ", dir_to_zip)
 
 def process_result(queue):
     from Results.output_parser import DailyParser
