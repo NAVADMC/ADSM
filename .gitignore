@@ -15,7 +15,10 @@ cef/out/
 *.manifest
 msvc*
 python27.dll
+python33.dll
 pywintypes27.dll
+pywintypes33.dll
+base_library.zip
 SpreadModel.exe
 AnimalDiseaseSpreadModel
 sqlite3.dll
