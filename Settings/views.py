@@ -56,13 +56,14 @@ def update_is_needed():
 
 
 def reset_db(name):
+    """ It now checks if the file exists.  This will throw a PermissionError if the user has the DB open in another program."""
     print("Deleting", activeSession(name))
-    try:
-        close_old_connections()
-        os.remove(activeSession(name))
+    close_old_connections()
+    if os.path.exists(activeSession(name)):
         connections[name].close()
-    except BaseException as ex:
-        print(ex)  # the file may not exist anyways
+        os.remove(activeSession(name))
+    else:
+        print(activeSession(name), "does not exist")
     #creates a new blank file by migrate / syncdb
     call_command('syncdb',
                  # verbosity=0,
@@ -211,8 +212,8 @@ def download_file(request, target):
 
 
 def new_scenario(request):
-    reset_db('default')
     reset_db('scenario_db')
+    reset_db('default')
     update_db_version()
     return redirect('/setup/Scenario/1/')
 
