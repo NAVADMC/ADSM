@@ -33,7 +33,7 @@ class AirborneSpreadTestCase(TestCase):
         r = self.client.get('/setup/AirborneSpread/new/')
 
         self.assertEqual(r.status_code, 200)
-        self.assertIn("Create a new Airborne Spread", r.content)
+        self.assertIn('Create a new Airborne Spread', r.content.decode())
 
     def test_post_success(self):
         count = AirborneSpread.objects.count()
@@ -57,10 +57,10 @@ class PopulationTestCase(TestCase):
             'status': 'failed',
             'message': 'mismatched tag: line 17, column 2'
         }
-        with open(POPULATION_FIXTURES + 'Population_Test_Invalid.xml') as fp:
+        with open(POPULATION_FIXTURES + 'Population_Test_Invalid.xml', mode='rb') as fp:
             r = self.client.post('/setup/UploadPopulation/', {'file': fp})
 
-        data = json.loads(r.content)
+        data = json.loads(r.content.decode())
         self.assertEqual(data, expected_results)
 
 class RelationalFunctionTestCase(TestCase):
@@ -70,7 +70,7 @@ class RelationalFunctionTestCase(TestCase):
         r = self.client.get('/setup/Function/')
 
         self.assertEqual(r.status_code, 200)
-        self.assertIn("Create Functions", r.content)
+        self.assertIn('Create Functions', r.content.decode())
 
     def test_get(self):
         function = RelationalFunction.objects.create(name="Test Function")
@@ -80,7 +80,7 @@ class RelationalFunctionTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertIn('title', r.context)
         self.assertEqual('Create a Relational Function', r.context['title'])
-        self.assertIn('Test Function', r.content)
+        self.assertIn('Test Function', r.content.decode())
 
     def test_post_no_points(self):
         form_data = {
@@ -170,7 +170,7 @@ class RelationalFunctionTestCase(TestCase):
 
     def test_post_with_points_from_file(self):
         points_file = tempfile.NamedTemporaryFile(delete=False)
-        points_file.write("x,y\n0.0, 1.0\n")
+        points_file.write(b"x,y\n0.0, 1.0\n")
         points_file.seek(0)
         form_data = {
             'relationalpoint_set-TOTAL_FORMS': '0',

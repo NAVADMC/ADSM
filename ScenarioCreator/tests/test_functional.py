@@ -12,6 +12,7 @@ from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
     DirectSpread, IndirectSpread, AirborneSpread, ProductionType, \
     DiseaseProgressionAssignment, Unit, ControlMasterPlan
 from Settings.views import workspace_path
+from Results.models import delete_all_outputs
 
 
 class M2mDSL(object):
@@ -500,6 +501,7 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
 
     def test_disable_control_master_plan(self):
         self.client.get('/app/OpenScenario/Roundtrip.sqlite3/')
+        delete_all_outputs()
 
         self.click_navbar_element("Controls")
 
@@ -520,13 +522,13 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
         hidden_menu_items = [
             "Control Protocol",
             "Protocol Assignments",
-            "Zones",
             "Zone Effects",
             "Assign Effects"
         ]
 
         for element in setup_menu.find_elements_by_tag_name("a"):
             self.assertNotIn(element.text, hidden_menu_items)
+            "Zones",
 
     def test_enable_control_master_plan(self):
         """
@@ -535,6 +537,7 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
             items
         """
         self.client.get('/app/OpenScenario/Roundtrip.sqlite3/')
+        delete_all_outputs()
 
         control_master_plan = ControlMasterPlan.objects.first()
         control_master_plan.disable_all_controls = True
@@ -570,7 +573,7 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
             "Assign Effects",
             "Functions",
             "Output Settings",
-            "Run Simulation"
+            "Delete Supplementals and Run Simulation"
         ]
 
         for element in setup_menu.find_elements_by_tag_name("a"):

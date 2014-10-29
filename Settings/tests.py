@@ -61,7 +61,7 @@ class ScenarioTestCase(TestCase):
                              HTTP_X_REQUESTED_WITH='XMLHttpRequest')
 
         try:
-            data = json.loads(r.content)
+            data = json.loads(r.content.decode())
             self.assertIn('status', data)
             self.assertEqual(data['status'], 'failed')
             self.assertIn('message', data)

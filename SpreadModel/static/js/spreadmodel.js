@@ -3,7 +3,7 @@ function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTim
 
 safe_save = function(url, data){
     if(typeof outputs_computed == 'undefined' || outputs_computed == false) { 
-        $.post(url, data);
+        $.post(url, data, function() { window.location.reload() });
     } else { //confirmation dialog so we don't clobber outputs
         var dialog = new BootstrapDialog.show({
             title: 'Delete Results Confirmation',
@@ -21,10 +21,11 @@ safe_save = function(url, data){
                     label: 'Delete Results',
                     cssClass: 'btn-danger',
                     action: function(dialog){
-                        outputs_computed = false
-                        $.post(url, $.extend(data, {force_delete: true}) );  // ajax
+                        outputs_computed = false;
+                        $.post(url, data, function(){
+                            window.location.reload()
+                        });
                         dialog.close()
-                        window.location.reload()
                     }
                 }
             ]
@@ -221,13 +222,14 @@ $(function(){
         //toggle global disabled state and submit form.  views.py will update the context and redirect
         //It is important to un-disable fields before submit so that their values go to the DB
         //Josiah: I'm not entirely happy with the jumpiness of this solution, but it does satisfy Issue #79
-        $(this).closest('form').children().each(function (index, value) {
+        var form = $(this).closest('form');
+        form.children().each(function (index, value) {
             $(value).removeAttr('disabled');
             $(value).find(':input').removeAttr('disabled');//remove disabled
         });
-        console.log($(this).closest('form')[0]);
-        safe_save('', $($(this).closest('form')[0]).serialize());//will cause page reload
-        window.location.reload();
+        console.log(form.serialize());
+        safe_save('', form.serialize());//will cause page reload
+        // window.location.reload();
     });
     
     $(document).on('submit','#file-upload',function(event){

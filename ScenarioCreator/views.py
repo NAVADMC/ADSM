@@ -77,11 +77,8 @@ def include_spread(request):
         fields = ['include_direct_contact_spread', 'include_indirect_contact_spread', 'include_airborne_spread']
         for field in fields:
             setattr(master, field, request.POST.get(field) == 'true')
-        if DailyControls.objects.count() == 0 or request.POST.get('force_delete') == 'true':
-            master.save()
-            return HttpResponse('success')  # We don't need to return any data
-        else:
-            return HttpResponse('failed', status=409)
+        master.save()
+        return HttpResponse('success')  # We don't need to return any data
         
 
 def production_type_permutations():
