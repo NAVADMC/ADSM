@@ -132,7 +132,7 @@ To update the executable:
         ldd, objdump  # For Linux only
         Xcode  # For OS X only
 
-    pip install pyinstaller
+    Currently requires a modified pyinstaller from Nyx
 
     For the Chromium window, we are using the Chromium Embedded Framework. Compiling it is a massive pain,
     but thankfully Adobe hosts and maintains a site, cefbuilds.com, which has the compile chain setup in as a project per OS platform.

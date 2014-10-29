@@ -16,10 +16,12 @@ standard_library.install_hooks()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-from django.conf.global_settings import STATICFILES_DIRS
+import sys
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
+if getattr(sys, 'frozen', False):
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
@@ -31,14 +33,11 @@ SECRET_KEY = '(iosdjsujy653@eo2lzs*x2$*OTGh#=y_vpzvbo6n^(7eao0-tbc!rcgd'
 DEBUG = True
 
 TEMPLATE_DEBUG = True
-# TEMPLATE_STRING_IF_INVALID = 'XXXXXX_BAD_{{ %s }}'
 
 ALLOWED_HOSTS = []
 
-
-# Application definition
-
 INSTALLED_APPS = (
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -51,7 +50,6 @@ INSTALLED_APPS = (
     'Results',
     'Settings',
     'django_production_server',
-    'django.contrib.admin',
 )
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -68,18 +66,6 @@ if DEBUG:
         # 'Settings.debug.HotshotProfileMiddleware',
         # 'Settings.debug.cProfileMiddleware',
     )
-    
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.static",
-    "django.core.context_processors.tz",
-    "django.contrib.messages.context_processors.messages",
-    "django.core.context_processors.request",
-    "ScenarioCreator.context_processor.basic_context"
-)
 
 ROOT_URLCONF = 'SpreadModel.urls'
 
@@ -94,8 +80,6 @@ DATABASES = {
     'default': {
         'NAME': os.path.join(BASE_DIR, 'settings.sqlite3'),
         'ENGINE': 'django.db.backends.sqlite3',
-        'USER': 'josiah',
-        'PASSWORD': '1',
         'TEST_NAME': os.path.join(BASE_DIR, 'test_settings.sqlite3'),
     },
     'scenario_db': {
@@ -120,13 +104,44 @@ USE_L10N = True
 
 USE_TZ = True
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
+TEMPLATE_LOADERS = (
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+    # 'django.template.loaders.eggs.Loader',
+)
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.core.context_processors.tz",
+    "django.contrib.messages.context_processors.messages",
+    "django.core.context_processors.request",
+    "ScenarioCreator.context_processor.basic_context"
+)
+TEMPLATE_DIRS = (
+    os.path.join(BASE_DIR, 'templates'),
+)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
-STATIC_ROOT = BASE_DIR + '/static/'
-STATICFILES_DIRS = (BASE_DIR + '/SpreadModel/static/', )
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
+)
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'SpreadModel', 'static'),
+)
 
+# Need to disable GDAL in case there are other libraries installed on the system path
+# TODO: Find a better solution for this when ever we need to incorporate GDAL functionality
 GDAL_LIBRARY_PATH = 'NULLPATH'
 
 # Skip migrations for tests
