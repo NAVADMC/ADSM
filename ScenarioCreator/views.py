@@ -524,12 +524,31 @@ def population(request):
     return render(request, 'ScenarioCreator/Population.html', context)
 
 
+def whole_scenario_validation():
+    fatal_errors = []
+    for pt in ProductionType.objects.all():
+        count = DiseaseProgressionAssignment.objects.filter(production_type=pt, progression__isnull=False).count()
+        if not count:
+            fatal_errors.append(pt.name + " has no Disease Progression assigned and so is a non-participant in the simulation.")
+        count = ProductionTypePairTransmission.objects.filter(source_production_type=pt, 
+                                                              destination_production_type=pt,
+                                                              direct_contact_spread__isnull=False).count()
+        if not count:
+            fatal_errors.append(pt.name + " cannot spread disease from one animal to another, because Direct Spread %s -> %s has not been assigned." % (pt.name, pt.name))
+    return fatal_errors
+
+
 def validate_scenario(request):
     simulation = subprocess.Popen(adsm_executable_command() + ['--dry-run'],
                                   shell=True,
-                                  stdout=subprocess.PIPE)
-    sim_output = [line for line in simulation.stdout]
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+    stdout, stderr = simulation.communicate()  # still running while we work on python validation
+    
+    fatal_errors = whole_scenario_validation()
     simulation.wait()  # simulation will process db then exit
-    context = {'dry_run_passed': simulation.returncode == 0,
-               'sim_output': sim_output}
+    print("Return code", simulation.returncode)
+    context = {'dry_run_passed': simulation.returncode == 0 and not stderr,
+               'sim_output': stdout + stderr,
+               'fatal_errors': fatal_errors}
     return render(request, 'ScenarioCreator/Validation.html', context)

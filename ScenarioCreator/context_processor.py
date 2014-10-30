@@ -55,7 +55,7 @@ def basic_context(request):
                'Farms': Unit.objects.count(),
                'Disease': Disease.objects.all().exclude(name='').count(),
                'Progressions': DiseaseProgression.objects.count(),
-               'ProgressionAssignment': DiseaseProgressionAssignment.objects.count() == pt_count and pt_count,
+               'ProgressionAssignment': pt_count and DiseaseProgressionAssignment.objects.filter(progression__isnull=False).count() == pt_count,
                'DirectSpreads': DirectSpread.objects.count(),
                'AssignSpreads': pt_count and
                                 ProductionTypePairTransmission.objects.filter(
