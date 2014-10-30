@@ -221,14 +221,14 @@ def new_scenario(request):
 def prepare_supplemental_output_directory():
     """Creates a directory with the same name as the Scenario and directs the Simulation to store supplemental files in the new directory"""
     output_dir = workspace_path(scenario_filename())  # this does not have the .sqlite3 suffix
-    output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm.exe
+    output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm_simulation.exe
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     return output_args
 
 
 def adsm_executable_command():
-    executables = {"Windows": 'adsm.exe', "Linux": 'adsm', "Darwin": 'adsm'}
+    executables = {"Windows": 'adsm_simulation.exe', "Linux": 'adsm_simulation', "Darwin": 'adsm_simulation'}
     system_executable = os.path.join(settings.BASE_DIR, executables[platform.system()])  #TODO: KeyError
     database_file = os.path.basename(settings.DATABASES['scenario_db']['NAME'])
     output_args = prepare_supplemental_output_directory()
