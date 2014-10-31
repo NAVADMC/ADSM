@@ -36,16 +36,18 @@ from future.builtins import str
 from future.builtins import super
 from future.builtins import int
 from future import standard_library
+
 standard_library.install_hooks()
 from future.builtins import object
-import os
+
+import re
+import time
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django_extras.db.models import LatitudeField, LongitudeField, MoneyField
 from ScenarioCreator.custom_fields import PercentField
-import re
-import time
+from ScenarioCreator.templatetags.db_status_tags import wiki
 import ScenarioCreator.parser
 import Settings.models
 
@@ -451,13 +453,13 @@ class DiseaseProgression(BaseModel):
         help_text="Examples: Severe Progression, FMD Long Incubation")
     _disease = models.ForeignKey('Disease', default=lambda: Disease.objects.get_or_create(id=1)[0], )  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
     disease_latent_period = models.ForeignKey(ProbabilityFunction, related_name='+',
-        help_text='Defines the latent period for units of this production type.', )
+        help_text='Defines the ' + wiki('latent period',"latent-state") + ' for units of this production type.', )
     disease_subclinical_period = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the subclinical period for units of this production type.', )
     disease_clinical_period = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the clinical period for units of this production type.', )
     disease_immune_period = models.ForeignKey(ProbabilityFunction, related_name='+',
-        help_text='Defines the natural immune period for units of this production type.', )
+        help_text='Defines the natural ' + wiki('immune') + ' period for units of this production type.', )
     disease_prevalence = models.ForeignKey(RelationalFunction, related_name='+',
         blank=True, null=True,
         help_text='Defines the prevalance for units of this production type.', )

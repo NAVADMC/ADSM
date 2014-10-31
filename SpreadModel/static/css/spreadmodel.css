@@ -41,6 +41,10 @@ a:hover {
     /*with underline*/
 }
 
+a.wiki, a.wiki:visited {
+    color: #B95E07;
+}
+
 .icon {
     max-height: 20px;
     max-width: 20px;

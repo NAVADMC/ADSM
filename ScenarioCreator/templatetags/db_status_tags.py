@@ -33,6 +33,16 @@ def parent_link(model_link):
     return re.sub(r"/\d+/", '', model_link).replace(r"/new/", '')
 
 
+@register.filter()
+def wiki(words, url=None):
+    """Generates a Lexicon link from a set of words with optional url help (when the titles don't match).  
+    The call to wiki links is in the help text which is defined in ScenarioCreator.models file."""
+    wiki_base = "https://github.com/NAVADMC/SpreadModel/wiki/Lexicon-of-Disease-Spread-Modelling-terms#"  # pound sign
+    if url is None:
+        url = words.lower().replace(' ', '-')
+        url = re.sub(r'[^\w-]', '', url)  # remove everything that's not a letter of hyphen
+    return '<a href="'+ wiki_base + url + '" class="wiki">' + words + '</a>'
+
 class FormCompleted(Node):
     def __init__(self, variable):
         self.queryset = variable
