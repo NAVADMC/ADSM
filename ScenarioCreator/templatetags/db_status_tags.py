@@ -2,6 +2,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import division
 from __future__ import absolute_import
+from django.utils.safestring import mark_safe
 from future import standard_library
 standard_library.install_hooks()
 __author__ = 'Josiah Seaman'
@@ -35,13 +36,18 @@ def parent_link(model_link):
 
 @register.filter()
 def wiki(words, url=None):
-    """Generates a Lexicon link from a set of words with optional url help (when the titles don't match).  
+    """Wiki Definition: Generates a Lexicon link from a set of words with optional url help (when the titles don't match).  
     The call to wiki links is in the help text which is defined in ScenarioCreator.models file."""
-    wiki_base = "https://github.com/NAVADMC/SpreadModel/wiki/Lexicon-of-Disease-Spread-Modelling-terms#"  # pound sign
+    wiki_base = "https://github.com/NAVADMC/SpreadModel/wiki"
+    lexicon = "/Lexicon-of-Disease-Spread-Modelling-terms#"  # pound sign
     if url is None:
         url = words.lower().replace(' ', '-')
         url = re.sub(r'[^\w-]', '', url)  # remove everything that's not a letter of hyphen
-    return '<a href="'+ wiki_base + url + '" class="wiki">' + words + '</a>'
+        url = wiki_base + lexicon + url
+    elif url[:1] == '/':  # for linking wiki pages besides the Lexicon
+        url = wiki_base + url
+    return mark_safe('<a href="'+ url + '" class="wiki">' + words + '</a>')
+
 
 class FormCompleted(Node):
     def __init__(self, variable):
