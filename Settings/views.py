@@ -44,8 +44,13 @@ def update_adsm_from_git(request):
 def update_is_needed():
     try:
         os.chdir(settings.BASE_DIR)
-        command = git + ' remote update'
+
+        command = git + ' rev-parse --abbrev-ref HEAD'
+        current_branch = subprocess.check_output(command, shell=True).strip()
+
+        command = git + ' fetch origin ' + current_branch + ':' + current_branch
         subprocess.call(command, shell=True)
+
         command = git + ' status -uno'
         status = subprocess.check_output(command, shell=True)
         print(status)
