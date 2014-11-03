@@ -156,7 +156,7 @@ def upload_scenario(request):
 
 
 def open_scenario(request, target):
-    print("Copying ", workspace_path(target), "to", activeSession())
+    print("Copying ", workspace_path(target), "to", activeSession(), ". This could take several minutes...")
     close_all_connections()
     shutil.copy(workspace_path(target), activeSession())
     scenario_filename(target)
@@ -182,8 +182,10 @@ def save_scenario(request=None):
     try:
         shutil.copy(activeSession(), full_path)
         unsaved_changes(False)  # File is now in sync
+        print('Done Copying database to', target)
     except IOError:
         save_error = 'Failed to save file.'
+        print('Encountered an error while copying file', target)
     if request is not None and request.is_ajax():
         if save_error:
             json_response = '{"status": "failed", "message": "%s"}' % save_error
@@ -203,8 +205,9 @@ def delete_file(request, target):
 
 def copy_file(request, target):
     copy_name = re.sub(r'(?P<name>.*)\.(?P<ext>.*)', r'\g<name> - Copy.\g<ext>', target)
-    print("Copying ", target, "to", copy_name)
+    print("Copying", target, "to", copy_name, ". This could take several minutes...")
     shutil.copy(workspace_path(target), workspace_path(copy_name))
+    print("Done copying", target)
     return redirect('/app/Workspace/')
 
 
