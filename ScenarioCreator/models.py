@@ -626,7 +626,7 @@ class ProductionType(BaseModel):
         return self.name
 
 
-class ProductionTypePairTransmission(BaseModel):
+class DiseaseSpreadAssignment(BaseModel):
     source_production_type = models.ForeignKey(ProductionType, related_name='used_as_sources',
         help_text='The ' + wiki("production type") + ' that will be the source type for this ' + wiki("production type") + ' combination.', )
     destination_production_type = models.ForeignKey(ProductionType, related_name='used_as_destinations',

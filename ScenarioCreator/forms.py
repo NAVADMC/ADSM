@@ -381,10 +381,10 @@ class ProductionTypeForm(BaseForm):
         model = ProductionType
 
 
-class ProductionTypePairTransmissionForm(BaseForm):
+class DiseaseSpreadAssignmentForm(BaseForm):
     class Meta(object):
-        model = ProductionTypePairTransmission
-        widgets = {
+        model = DiseaseSpreadAssignment
+        widgets = {  # Production types are not given edit buttons because the user is only allowed to add Production types from a Population XML
                    # 'source_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
                    # 'destination_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
                    'direct_contact_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/DirectSpread/new/'}),
@@ -410,15 +410,3 @@ class ZoneEffectAssignmentForm(BaseForm):
         exclude = ['zone', 'production_type']
         widgets = {'zone': AddOrSelect(attrs={'data-new-item-url': '/setup/Zone/new/'}),
                    'effect': AddOrSelect(attrs={'data-new-item-url': '/setup/ZoneEffect/new/'})}
-
-
-class ReadAllCodesForm(BaseForm):
-    class Meta(object):
-        model = ReadAllCodes
-        exclude = ['_code', '_code_type', '_code_description']
-
-
-class ReadAllCodeTypesForm(BaseForm):
-    class Meta(object):
-        model = ReadAllCodeTypes
-        exclude = ['_code_type', '_code_type_description']
