@@ -597,7 +597,7 @@ class OutputSettings(BaseModel):
     save_daily_exposures = models.BooleanField(default=False,
         help_text='Save all exposures in a supplemental file.', )
     save_iteration_outputs_for_units = models.BooleanField(default=True,
-        help_text='Save all iteration outputs for units in a supplemental file.', )
+        help_text='Required for the Population Map. Save all iteration outputs for units in a supplemental file.', )
     save_map_output = models.BooleanField(default=False,
         help_text='Create map outputs for units in supplemental directory.', )
 
@@ -682,18 +682,3 @@ class ZoneEffectAssignment(BaseModel):
 
     def __str__(self):
         return "%s Zone -> %s = %s" % (self.zone.name, self.production_type, self.effect.name if self.effect else "None")
-
-
-class ReadAllCodes(BaseModel):
-    _code = models.CharField(max_length=255,
-        help_text='Actual code used in the simulation', )
-    _code_type = models.CharField(max_length=255,
-        help_text='Type of code', )
-    _code_description = models.TextField(
-        help_text='Description of the code type.', )
-
-
-class ReadAllCodeTypes(BaseModel):
-    _code_type = models.CharField(max_length=255,
-        help_text='Type of code', )
-    _code_type_description = models.TextField()
