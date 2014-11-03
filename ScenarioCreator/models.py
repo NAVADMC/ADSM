@@ -47,7 +47,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django_extras.db.models import LatitudeField, LongitudeField, MoneyField
 from ScenarioCreator.custom_fields import PercentField
-from ScenarioCreator.templatetags.db_status_tags import wiki
+from ScenarioCreator.templatetags.db_status_tags import wiki, link
 import ScenarioCreator.parser
 import Settings.models
 
@@ -266,7 +266,8 @@ class RelationalPoint(BaseModel):
 class ControlMasterPlan(BaseModel):
     name = models.CharField(default="Control Master Plan", max_length=255)
     disable_all_controls = models.BooleanField(default=False,
-        help_text='Disable all Control activities for this simulation run.  Normally used temporarily to test uncontrolled disease spread.')
+        help_text='Disable all ' + wiki("Control activities", "control-measures") + 
+                  ' for this simulation run.  Normally used temporarily to test uncontrolled disease spread.')
     destruction_program_delay = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
     destruction_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
@@ -284,7 +285,7 @@ class ControlMasterPlan(BaseModel):
     vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the daily vaccination capacity.', )
     vaccination_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
-        help_text='A string that identifies the primary priority order for vaccination.',
+        help_text='The primary priority criteria for order of vaccinations.',
         choices=priority_choices(), )
     # vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True,
     #     help_text='Number of days in retrospect that should be used to determine which herds to vaccinate.', )
@@ -298,28 +299,31 @@ class ControlProtocol(BaseModel):
     use_detection = models.BooleanField(default=True,
         help_text='Indicates if disease detection will be modeled for units of this ' + wiki("production type") + '.', )
     detection_probability_for_observed_time_in_clinical = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
-        help_text='Relational function used to define the probability of observing clinical signs in units of this ' + wiki("production type") + '.', )
+        help_text='Relational function used to define the probability of observing '+wiki("clinical signs", "clinically-infectious")+
+                  ' in units of this ' + wiki("production type") + '.', )
     detection_probability_report_vs_first_detection = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
-        help_text='Relational function used to define the probability of reporting clinical signs in units of this ' + wiki("production type") + '.')
+        help_text='Relational function used to define the probability of reporting '+wiki("clinical signs", "clinically-infectious")+
+                  ' in units of this ' + wiki("production type") + '.')
     detection_is_a_zone_trigger = models.BooleanField(default=False,
         help_text='Indicator if detection of infected units of this ' + wiki("production type") + ' will trigger a '+wiki("Zone")+' focus.', )
     use_tracing = models.BooleanField(default=False, )
     trace_direct_forward = models.BooleanField(default=False,
-        help_text='Indicator that trace forward will be conducted for direct contacts where the reported unit was the source of contact and was of this ' + wiki("production type") + '.', )
+        help_text='Indicator that '+wiki("trace forward")+
+                  ' will be conducted for '+wiki("direct contact")+'s where the reported unit was the source of contact and was of this ' + wiki("production type") + '.', )
     trace_direct_back = models.BooleanField(default=False,
-        help_text='Indicator that trace back will be conducted for direct contacts where the reported unit was the source of contact and was of this ' + wiki("production type") + '.', )
+        help_text='Indicator that '+wiki("trace back")+' will be conducted for '+wiki("direct contact")+'s where the reported unit was the source of contact and was of this ' + wiki("production type") + '.', )
     direct_trace_success_rate = PercentField(blank=True, null=True,
-        help_text='Probability of success of trace for direct contact.', )
+        help_text='Probability of success of trace for '+wiki("direct contact")+'.', )
     direct_trace_period = models.PositiveIntegerField(blank=True, null=True,
-        help_text='Days before detection (critical period) for tracing of direct contacts.', )
+        help_text='Days before detection (critical period) for tracing of '+wiki("direct contact")+'s.', )
     trace_indirect_forward = models.BooleanField(default=False,
-        help_text='Indicator that trace forward will be conducted for indirect contacts where the reported unit was the source of contact and was of this ' + wiki("production type") + '.', )
+        help_text='Indicator that '+wiki("trace forward")+' will be conducted for '+wiki("indirect contact")+'s where the reported unit was the source of contact and was of this ' + wiki("production type") + '.', )
     trace_indirect_back = models.BooleanField(default=False,
-        help_text='Indicator that trace back will be conducted for indirect contacts where the reported unit was the source of contact and was of this ' + wiki("production type") + '.', )
+        help_text='Indicator that '+wiki("trace back")+' will be conducted for '+wiki("indirect contact")+'s where the reported unit was the source of contact and was of this ' + wiki("production type") + '.', )
     indirect_trace_success = PercentField(blank=True, null=True,
-        help_text='Probability of success of trace for indirect contact.', )
+        help_text='Probability of success of trace for '+wiki("indirect contact")+'.', )
     indirect_trace_period = models.PositiveIntegerField(blank=True, null=True,
-        help_text='Days before detection  (critical period) for tracing of indirect contacts.', )
+        help_text='Days before detection  (critical period) for tracing of '+wiki("indirect contact")+'s.', )
     trace_result_delay = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Delay for carrying out trace investigation result (days).', )
     direct_trace_is_a_zone_trigger = models.BooleanField(default=False,
@@ -335,13 +339,13 @@ class ControlProtocol(BaseModel):
     destruction_is_a_ring_target = models.BooleanField(default=False,
         help_text='Indicates if unit of this ' + wiki("production type") + ' will be subject to preemptive ring destruction.', )
     destroy_direct_forward_traces = models.BooleanField(default=False,
-        help_text='Indicates if units of this type identified by trace forward of indirect contacts will be subject to preemptive destruction.', )
+        help_text='Indicates if units of this type identified by '+wiki("trace forward")+' of '+wiki("direct contact")+'s will be subject to preemptive destruction.', )
     destroy_indirect_forward_traces = models.BooleanField(default=False,
-        help_text='Indicates if units of this type identified by trace forward of direct contacts will be subject to preemptive destruction.', )
+        help_text='Indicates if units of this type identified by '+wiki("trace forward")+' of '+wiki("indirect contact")+'s will be subject to preemptive destruction.', )
     destroy_direct_back_traces = models.BooleanField(default=False,
-        help_text='Indicates if units of this type identified by trace back of direct contacts will be subject to preemptive destruction.', )
+        help_text='Indicates if units of this type identified by '+wiki("trace back")+' of '+wiki("direct contact")+'s will be subject to preemptive destruction.', )
     destroy_indirect_back_traces = models.BooleanField(default=False,
-        help_text='Indicates if units of this type identified by trace back of indirect contacts will be subject to preemptive destruction.', )
+        help_text='Indicates if units of this type identified by '+wiki("trace back")+' of '+wiki("indirect contact")+'s will be subject to preemptive destruction.', )
     destruction_priority = models.PositiveIntegerField(default=5, blank=True, null=True,
         help_text='The destruction priority of this ' + wiki("production type") + ' relative to other production types.  A lower number indicates a higher priority.', )
     use_vaccination = models.BooleanField(default=False,
@@ -349,11 +353,11 @@ class ControlProtocol(BaseModel):
     vaccinate_detected_units = models.BooleanField(default=False,  # TODO: Clarify the distinction between use_vaccination and vaccinate_detected_units
         help_text='Indicates if units of this ' + wiki("production type") + ' will be subject to vaccination if infected and detected.', )
     days_to_immunity = models.PositiveIntegerField(blank=True, null=True,
-        help_text='The number of days required for the onset of vaccine immunity in a newly vaccinated unit of this type.', )
+        help_text='The number of days required for the onset of ' + wiki("vaccine immunity", "vaccine-immune") + ' in a newly vaccinated unit of this type.', )
     minimum_time_between_vaccinations = models.PositiveIntegerField(blank=True, null=True,
         help_text='The minimum time in days between vaccination for units of this ' + wiki("production type") + '.', )
     vaccine_immune_period = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
-        help_text='Defines the vaccine immune period for units of this ' + wiki("production type") + '.', )
+        help_text='Defines the '+ wiki("vaccine immune") + ' period for units of this ' + wiki("production type") + '.', )
     trigger_vaccination_ring = models.BooleanField(default=False,
         help_text='Indicates if detection of a clinical unit of this type will trigger a vaccination ring.', )
     vaccination_ring_radius = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
@@ -366,34 +370,42 @@ class ControlProtocol(BaseModel):
         help_text='The additional cost of vaccination for each vaccinated animal of this type after the threshold is exceeded.', )
     use_exams = models.BooleanField(default=False, )
     examine_direct_forward_traces = models.BooleanField(default=False,
-        help_text='Indicator if units identified by the trace-forward of direct contact will be examined for clinical signs of disease.', )
+        help_text='Indicator if units identified by the '+wiki("trace forward")+' of '+wiki("direct contact")+' will be examined for '+
+                  wiki("clinical signs", "clinically-infectious")+' of disease.', )
     exam_direct_forward_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='Multiplier for the probability of observing clinical signs in units identified by the trace-forward of direct contact.', )
+        help_text='Multiplier for the probability of observing '+wiki("clinical signs", "clinically-infectious")+' in units identified by the '+
+                  wiki("trace forward")+' of '+wiki("direct contact")+'.', )
     examine_indirect_forward_traces = models.BooleanField(default=False,
-        help_text='Indicator if units identified by the trace-forward of indirect contact will be examined for clinical signs of disease.', )
+        help_text='Indicator if units identified by the '+wiki("trace forward")+' of '+wiki("indirect contact")+' will be examined for '+
+                  wiki("clinical signs", "clinically-infectious")+ ' of disease.', )
     exam_indirect_forward_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='Multiplier for the probability of observing clinical signs in units identified by the trace-forward of indirect contact .', )
+        help_text='Multiplier for the probability of observing '+wiki("clinical signs", "clinically-infectious")+
+            ' in units identified by the '+wiki("trace forward")+' of '+wiki("indirect contact")+' .', )
     examine_direct_back_traces = models.BooleanField(default=False,
-        help_text='Indicator if units identified by the trace-back of direct contact will be examined for clinical signs of disease.', )
+        help_text='Indicator if units identified by the '+wiki("trace back")+' of '+wiki("direct contact")+' will be examined for '+
+                  wiki("clinical signs", "clinically-infectious")+ ' of disease.', )
     exam_direct_back_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='Multiplier for the probability of observing clinical signs in units identified by the trace-back of direct contact.', )
+        help_text='Multiplier for the probability of observing '+wiki("clinical signs", "clinically-infectious")+
+            ' in units identified by the '+wiki("trace back")+' of '+wiki("direct contact")+'.', )
     examine_indirect_back_traces = models.BooleanField(default=False,
-        help_text='Indicator if units identified by the trace-back of indirect contact will be examined for clinical signs of disease.', )
+        help_text='Indicator if units identified by the '+wiki("trace back")+' of '+wiki("indirect contact")+' will be examined for '+
+                  wiki("clinical signs", "clinically-infectious")+ ' of disease.', )
     examine_indirect_back_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='Multiplier for the probability of observing clinical signs in units identified by the trace-back of indirect contact.', )
+        help_text='Multiplier for the probability of observing '+wiki("clinical signs", "clinically-infectious")+
+                  ' in units identified by the '+wiki("trace back")+' of '+wiki("indirect contact")+'.', )
     use_testing = models.BooleanField(default=False, )
     test_direct_forward_traces = models.BooleanField(default=False,
-        help_text='Indicator that diagnostic testing should be performed on units identified by trace-forward of direct contacts.', )
+        help_text='Indicator that diagnostic testing should be performed on units identified by '+wiki("trace forward")+' of '+wiki("direct contact")+'s.', )
     test_indirect_forward_traces = models.BooleanField(default=False,
-        help_text='Indicator that diagnostic testing should be performed on units identified by trace-forward of indirect contacts.', )
+        help_text='Indicator that diagnostic testing should be performed on units identified by '+wiki("trace forward")+' of '+wiki("indirect contact")+'s.', )
     test_direct_back_traces = models.BooleanField(default=False,
-        help_text='Indicator that diagnostic testing should be performed on units identified by trace-back of direct contacts.', )
+        help_text='Indicator that diagnostic testing should be performed on units identified by '+wiki("trace back")+' of '+wiki("direct contact")+'s.', )
     test_indirect_back_traces = models.BooleanField(default=False,
-        help_text='Indicator that diagnostic testing should be performed on units identified by trace-back of indirect contacts.', )
+        help_text='Indicator that diagnostic testing should be performed on units identified by '+wiki("trace back")+' of '+wiki("indirect contact")+'s.', )
     test_specificity = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='Test Specificity for units of this production type', )
+        help_text=link("Test Specificity", "http://en.wikipedia.org/wiki/Sensitivity_and_specificity") + ' for units of this production type', )
     test_sensitivity = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='Test Sensitivity for units of this production type', )
+        help_text=link("Test Sensitivity", "http://en.wikipedia.org/wiki/Sensitivity_and_specificity") + ' for units of this production type', )
     test_delay = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Function that describes the delay in obtaining test results.', )
     use_cost_accounting = models.BooleanField(default=False, )
@@ -435,9 +447,9 @@ class Disease(BaseModel):
         help_text='Name of the Disease')
     disease_description = models.TextField(blank=True)
     include_direct_contact_spread = models.BooleanField(default=True,
-        help_text='Indicates if disease spread by direct contact is used in the scenario.', )
+        help_text='Indicates if disease spread by '+wiki("direct contact")+' is used in the scenario.', )
     include_indirect_contact_spread = models.BooleanField(default=True,
-        help_text='Indicates if disease spread by indirect contact is used in the scenario.', )
+        help_text='Indicates if disease spread by '+wiki("indirect contact")+' is used in the scenario.', )
     include_airborne_spread = models.BooleanField(default=True,
         help_text='Indicates if airborne spread is used in the model', )
     use_airborne_exponential_decay = models.BooleanField(default=False,
@@ -526,13 +538,13 @@ class DirectSpread(AbstractSpread):
     """This has to inherit from AbstractSpread or else Django treats DirectSpread and IndirectSpread as
     interchangable, which they are not."""
     infection_probability = PercentField(blank=True, null=True,
-        help_text='The probability that a contact will result in disease transmission. Specified for ' + 
+        help_text='The probability that a '+ wiki("contact will result in disease transmission", "effective-contact") + 
+                  '. Specified for ' + 
                   wiki("direct", "direct-contact") + ' or '+ 
                   wiki("indirect contact") + ' models.', )
     latent_animals_can_infect_others = models.BooleanField(default=False,
-        help_text='Indicates if latent units of the source type can spread disease by ' + 
-                  wiki("direct contact") + '. Not applicable to ' + wiki("airborne spread", "airborne-transmission") + 
-                  ' or ' + wiki("indirect spread","indirect-transmission") + '.', )
+        help_text='Indicates if '+wiki("latent", "latent-state")+' units of the source type can spread disease by ' + 
+                  wiki("direct contact") + '.', )
     def __str__(self):
         return "%s %i" % (self.name, self.id)
 
@@ -624,9 +636,9 @@ class DiseaseSpreadAssignment(BaseModel):
     destination_production_type = models.ForeignKey(ProductionType, related_name='used_as_destinations',
         help_text='The ' + wiki("production type") + ' that will be the recipient type for this ' + wiki("production type") + ' combination.', )
     direct_contact_spread = models.ForeignKey(DirectSpread, related_name='direct_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
-        help_text='Disease spread mechanism used to model spread by direct contact between these types.', )
+        help_text='Disease spread mechanism used to model spread by '+wiki("direct contact")+' between these types.', )
     indirect_contact_spread = models.ForeignKey(IndirectSpread, related_name='indirect_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
-        help_text='Disease spread mechanism used to model spread by indirect contact between these types.', )
+        help_text='Disease spread mechanism used to model spread by '+wiki("indirect contact")+' between these types.', )
     airborne_spread = models.ForeignKey(AirborneSpread, related_name='airborne_spread_pair', blank=True, null=True,  # These can be blank, so no check box necessary
         help_text='Disease spread mechanism used to model spread by ' + wiki("airborne spread", "airborne-transmission") + ' between these types.', )
     class Meta(object):
@@ -656,7 +668,8 @@ class ZoneEffect(BaseModel):
     zone_indirect_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Function the describes indirect movement rate.', )
     zone_detection_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], default=1.0,
-        help_text='Multiplier for the probability of observing clinical signs in units of this ' + wiki("production type") + ' in this '+wiki("Zone")+'.', )
+        help_text='Multiplier for the probability of observing '+wiki("clinical signs", "clinically-infectious")+' in units of this ' + 
+                  wiki("production type") + ' in this '+wiki("Zone")+'.', )
     cost_of_surveillance_per_animal_day = MoneyField(default=0.0,
         help_text='Cost of surveillance per animal per day in this '+wiki("Zone")+'.', )
 

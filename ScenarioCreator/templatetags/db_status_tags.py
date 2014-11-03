@@ -46,7 +46,14 @@ def wiki(words, url=None):
         url = wiki_base + lexicon + url
     elif url[:1] == '/':  # for linking wiki pages besides the Lexicon
         url = wiki_base + url
+    elif url is not None:  # specific lexicon link that doesn't start with /
+        url = wiki_base + lexicon + url
     return mark_safe('<a href="'+ url + '" class="wiki">' + words + '</a>')
+
+
+def link(words, url):
+    """Like the wiki filter above, but for external links"""
+    return mark_safe('<a href="' + url + '" class="wiki">' + words + '</a>')
 
 
 class FormCompleted(Node):
