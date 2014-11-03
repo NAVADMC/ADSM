@@ -490,8 +490,6 @@ class DiseaseSpread(BaseModel):
 
 
 class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indirect that were not in Airborne
-    _spread_method_code = models.CharField(max_length=255, default='indirect',
-        help_text='Code indicating the mechanism of the disease spread.', )
     subclinical_animals_can_infect_others = models.BooleanField(default=False,
         help_text='Indicates if ' + wiki("Subclinical", "subclinically-infectious") + 
                   ' units of the source type can spread disease by ' + wiki("direct", "direct-contact") + ' or '+ 
@@ -535,16 +533,11 @@ class DirectSpread(AbstractSpread):
         help_text='Indicates if latent units of the source type can spread disease by ' + 
                   wiki("direct contact") + '. Not applicable to ' + wiki("airborne spread", "airborne-transmission") + 
                   ' or ' + wiki("indirect spread","indirect-transmission") + '.', )
-    def __init__(self, *args, **kwargs):
-        super(AbstractSpread, self).__init__(*args, **kwargs)
-        self._spread_method_code = 'direct'  # overrides 'indirect' value without creating a new field
     def __str__(self):
         return "%s %i" % (self.name, self.id)
 
 
 class AirborneSpread(DiseaseSpread):
-    _spread_method_code = models.CharField(max_length=255, default='other',
-        help_text='Code indicating the mechanism of the disease spread.', )
     spread_1km_probability = PercentField(validators=[MinValueValidator(0.0), MaxValueValidator(.999)],
         help_text='The probability that disease will be spread to unit 1 km away from the source unit.', )
     max_distance = models.FloatField(validators=[MinValueValidator(1.1)], blank=True, null=True,
@@ -570,7 +563,6 @@ class Scenario(BaseModel):
 
 
 class OutputSettings(BaseModel):
-    _scenario = models.ForeignKey('Scenario', default=lambda: Scenario.objects.get_or_create(id=1)[0],)  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
     iterations = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)],
         help_text='The number of iterations of this scenario that should be run', )
     stop_criteria = models.CharField(max_length=255, default='disease-end',
