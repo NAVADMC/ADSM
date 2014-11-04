@@ -58,6 +58,10 @@ form_state = (function(form){
     //list Assignments already in DB  //done by views.py
     //serialize -> POST   //standard formset views.py
 
+    var save = function() {
+        safe_save('', form.serialize());
+    };
+
     var format_form_array = function(serialized_array){
         var row = {};
         $.each(serialized_array, function(index, container){
@@ -120,10 +124,9 @@ form_state = (function(form){
                 var input_name = 'id_form-' + matching_row_number + '-' + key;
                 $('#'+input_name).val(variables[key]);
             }
-        })
-        debounce(
-            safe_save('', form.serialize())
-        , 500);  //interval = 500 milliseconds
+        });
+
+        (debounce(save, 200))();
     };
 
     return {

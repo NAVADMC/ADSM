@@ -403,7 +403,7 @@ def readParameters( parameterFileName ):
 
 		for fromTypeName in getProductionTypes( el, 'from-production-type', productionTypeNames ):
 			for toTypeName in getProductionTypes( el, 'to-production-type', productionTypeNames ):
-				pairing = ProductionTypePairTransmission(
+				pairing = DiseaseSpreadAssignment(
 				  source_production_type = ProductionType.objects.get( name=fromTypeName ),
 				  destination_production_type = ProductionType.objects.get( name=toTypeName ),
 				  airborne_spread = airborneSpread
@@ -480,7 +480,7 @@ def readParameters( parameterFileName ):
 
 		for fromTypeName in getProductionTypes( el, 'from-production-type', productionTypeNames ):
 			for toTypeName in getProductionTypes( el, 'to-production-type', productionTypeNames ):
-				pairing, created = ProductionTypePairTransmission.objects.get_or_create(
+				pairing, created = DiseaseSpreadAssignment.objects.get_or_create(
 				  source_production_type = ProductionType.objects.get( name=fromTypeName ),
 				  destination_production_type = ProductionType.objects.get( name=toTypeName )
 				)

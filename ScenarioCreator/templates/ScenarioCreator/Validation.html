@@ -14,7 +14,16 @@
                 <li>{{line}}</li>
             {% endfor %}
         </ul>
-<h3>Missing forms</h3>
+{% if fatal_errors %}
+<h3>Fatal Errors:</h3>
+    <ul>
+        {% for line in fatal_errors %}
+            <li>{{line}}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+    
+<h3>Warnings: Missing forms</h3>
     <p>The following either don't exist or have missing assignments:</p>
     <ul class="validation-checklist">
         {% for name, ready in relevant_keys.items %}

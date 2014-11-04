@@ -272,7 +272,7 @@ class IndirectSpreadForm(BaseForm):
 
     class Meta(object):
         model = IndirectSpread
-        exclude = ['_spread_method_code', '_disease']
+        exclude = ['_disease']
         widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
@@ -300,7 +300,7 @@ class DirectSpreadForm(BaseForm):
         
     class Meta(object):
         model = DirectSpread
-        exclude = ['_spread_method_code', '_disease']
+        exclude = ['_disease']
         widgets = {'infection_probability': NumberInput(attrs={'data-visibility-context': 'use_within_unit_prevalence',
                                                                'data-visibility-flipped': 'true',
                                                                'step': 'any'}),
@@ -328,7 +328,7 @@ class AirborneSpreadForm(BaseForm):
         
     class Meta(object):
         model = AirborneSpread
-        exclude = ['_spread_method_code', '_disease']
+        exclude = ['_disease']
         widgets = {'_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'max_distance': NumberInput(attrs={'data-visibility-context': 'use_airborne_exponential_decay',
                                                       'data-visibility-flipped': 'true',
@@ -367,7 +367,7 @@ class OutputSettingsForm(BaseForm):
 
     class Meta(object):
         model = OutputSettings
-        exclude = ['_scenario', 'save_iteration_outputs_for_units']
+        exclude = ['save_iteration_outputs_for_units']
         widgets = {
             'days': NumberInput(
                 attrs={'data-visibility-controller': 'stop_criteria',
@@ -381,10 +381,10 @@ class ProductionTypeForm(BaseForm):
         model = ProductionType
 
 
-class ProductionTypePairTransmissionForm(BaseForm):
+class DiseaseSpreadAssignmentForm(BaseForm):
     class Meta(object):
-        model = ProductionTypePairTransmission
-        widgets = {
+        model = DiseaseSpreadAssignment
+        widgets = {  # Production types are not given edit buttons because the user is only allowed to add Production types from a Population XML
                    # 'source_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
                    # 'destination_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
                    'direct_contact_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/DirectSpread/new/'}),
@@ -410,15 +410,3 @@ class ZoneEffectAssignmentForm(BaseForm):
         exclude = ['zone', 'production_type']
         widgets = {'zone': AddOrSelect(attrs={'data-new-item-url': '/setup/Zone/new/'}),
                    'effect': AddOrSelect(attrs={'data-new-item-url': '/setup/ZoneEffect/new/'})}
-
-
-class ReadAllCodesForm(BaseForm):
-    class Meta(object):
-        model = ReadAllCodes
-        exclude = ['_code', '_code_type', '_code_description']
-
-
-class ReadAllCodeTypesForm(BaseForm):
-    class Meta(object):
-        model = ReadAllCodeTypes
-        exclude = ['_code_type', '_code_type_description']

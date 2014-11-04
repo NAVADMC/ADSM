@@ -56,11 +56,11 @@ def home(request):
 
 def extra_forms_needed():
     missing = list(ProductionType.objects.all())
-    for entry in ProductionTypePairTransmission.objects.all():
+    for entry in DiseaseSpreadAssignment.objects.all():
         if entry.destination_production_type_id == entry.source_production_type_id:  #Spread within a species
             missing.remove(entry.source_production_type)
     extra_count = len(missing)
-    if not missing and ProductionTypePairTransmission.objects.count() < ProductionType.objects.count() ** 2:
+    if not missing and DiseaseSpreadAssignment.objects.count() < ProductionType.objects.count() ** 2:
         #all possible interactions are not accounted for
         extra_count = 1  # add one more blank possibility
     return extra_count, missing
@@ -77,11 +77,8 @@ def include_spread(request):
         fields = ['include_direct_contact_spread', 'include_indirect_contact_spread', 'include_airborne_spread']
         for field in fields:
             setattr(master, field, request.POST.get(field) == 'true')
-        if DailyControls.objects.count() == 0 or request.POST.get('force_delete') == 'true':
-            master.save()
-            return HttpResponse('success')  # We don't need to return any data
-        else:
-            return HttpResponse('failed', status=409)
+        master.save()
+        return HttpResponse('success')  # We don't need to return any data
         
 
 def production_type_permutations():
@@ -89,23 +86,23 @@ def production_type_permutations():
     pts = list(ProductionType.objects.all())
     for source in pts:
         for destination in pts:
-            spread_assignments.append(ProductionTypePairTransmission.objects.get_or_create(
+            spread_assignments.append(DiseaseSpreadAssignment.objects.get_or_create(
                 source_production_type=source, destination_production_type=destination)[0])  # first index is object
     return spread_assignments
 
 
 def assign_disease_spread(request):
     assignment_set = production_type_permutations()
-    SpreadSet = modelformset_factory(ProductionTypePairTransmission, extra=0, form=ProductionTypePairTransmissionForm)
+    SpreadSet = modelformset_factory(DiseaseSpreadAssignment, extra=0, form=ProductionTypePairTransmissionForm)
     try:
-        initialized_formset = SpreadSet(request.POST, request.FILES, queryset=ProductionTypePairTransmission.objects.all())
+        initialized_formset = SpreadSet(request.POST, request.FILES, queryset=DiseaseSpreadAssignment.objects.all())
         if initialized_formset.is_valid():
             instances = initialized_formset.save()
             print(instances)
             return redirect(request.path)  # update these numbers after database save because they've changed
 
     except ValidationError:
-        initialized_formset = SpreadSet(queryset=ProductionTypePairTransmission.objects.all())
+        initialized_formset = SpreadSet(queryset=DiseaseSpreadAssignment.objects.all())
     context = {'formset': initialized_formset,
                'title': 'How does Disease spread from one Production Type to another?'}
     return render(request, 'ScenarioCreator/AssignSpread.html', context)
@@ -527,12 +524,33 @@ def population(request):
     return render(request, 'ScenarioCreator/Population.html', context)
 
 
+def whole_scenario_validation():
+    fatal_errors = []
+    for pt in ProductionType.objects.all():
+        count = DiseaseProgressionAssignment.objects.filter(production_type=pt, progression__isnull=False).count()
+        if not count:
+            fatal_errors.append(pt.name + " has no Disease Progression assigned and so is a non-participant in the simulation.")
+        count = DiseaseSpreadAssignment.objects.filter(source_production_type=pt, 
+                                                              destination_production_type=pt,
+                                                              direct_contact_spread__isnull=False).count()
+        if not count:
+            fatal_errors.append(pt.name + " cannot spread disease from one animal to another, because Direct Spread %s -> %s has not been assigned." % (pt.name, pt.name))
+    if not Disease.objects.get_or_create().include_direct_contact_spread:
+        fatal_errors.append("Direct Spread is not enabled in this Simulation.")
+    return fatal_errors
+
+
 def validate_scenario(request):
     simulation = subprocess.Popen(adsm_executable_command() + ['--dry-run'],
                                   shell=True,
-                                  stdout=subprocess.PIPE)
-    sim_output = [line for line in simulation.stdout]
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+    stdout, stderr = simulation.communicate()  # still running while we work on python validation
+    
+    fatal_errors = whole_scenario_validation()
     simulation.wait()  # simulation will process db then exit
-    context = {'dry_run_passed': simulation.returncode == 0,
-               'sim_output': sim_output}
+    print("Return code", simulation.returncode)
+    context = {'dry_run_passed': simulation.returncode == 0 and not stderr,
+               'sim_output': stdout + stderr,
+               'fatal_errors': fatal_errors}
     return render(request, 'ScenarioCreator/Validation.html', context)

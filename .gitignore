@@ -5,28 +5,29 @@
 #################
 # SpreadModel Build
 #################
-build/
-dist/
-include/
+## Only Ignore In Master ##
+msvc*
+python33.dll
+pywintypes33.dll
+library.zip
+ADSM.exe
+sqlite3.dll
 Lib/
 lib/
-Scripts/
+# Don't ignore these in the root folder of production branches but still everywhere else
+*.so
+*.so.*
+*.pyc
+*.pyd
+*.pyo
+
+## Always Ignore ##
+build/
 cef/out/
 *.manifest
-msvc*
-python27.dll
-python33.dll
-pywintypes27.dll
-pywintypes33.dll
-base_library.zip
-SpreadModel.exe
-AnimalDiseaseSpreadModel
-sqlite3.dll
 debug.log
 SpreadModel.zip
 SpreadModel.tar.bz2
-*.so
-*.so.*
 
 #################
 ## C files
@@ -148,7 +149,6 @@ publish
 # Others
 [Bb]in
 [Oo]bj
-sql
 TestResults
 *.Cache
 ClientBin
@@ -180,14 +180,7 @@ Desktop.ini
 ## Python
 #############
 
-*.py[co]
-*.pyd
-
 # Packages
-*.egg
-*.egg-info
-build
-eggs
 parts
 bin
 var

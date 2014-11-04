@@ -44,8 +44,13 @@ def update_adsm_from_git(request):
 def update_is_needed():
     try:
         os.chdir(settings.BASE_DIR)
-        command = git + ' remote update'
+
+        command = git + ' rev-parse --abbrev-ref HEAD'
+        current_branch = subprocess.check_output(command, shell=True).strip()
+
+        command = git + ' fetch origin ' + current_branch + ':' + current_branch
         subprocess.call(command, shell=True)
+
         command = git + ' status -uno'
         status = subprocess.check_output(command, shell=True)
         print(status)
@@ -56,13 +61,14 @@ def update_is_needed():
 
 
 def reset_db(name):
+    """ It now checks if the file exists.  This will throw a PermissionError if the user has the DB open in another program."""
     print("Deleting", activeSession(name))
-    try:
-        close_old_connections()
-        os.remove(activeSession(name))
+    close_old_connections()
+    if os.path.exists(activeSession(name)):
         connections[name].close()
-    except BaseException as ex:
-        print(ex)  # the file may not exist anyways
+        os.remove(activeSession(name))
+    else:
+        print(activeSession(name), "does not exist")
     #creates a new blank file by migrate / syncdb
     call_command('syncdb',
                  # verbosity=0,
@@ -150,7 +156,7 @@ def upload_scenario(request):
 
 
 def open_scenario(request, target):
-    print("Copying ", workspace_path(target), "to", activeSession())
+    print("Copying ", workspace_path(target), "to", activeSession(), ". This could take several minutes...")
     close_all_connections()
     shutil.copy(workspace_path(target), activeSession())
     scenario_filename(target)
@@ -176,8 +182,10 @@ def save_scenario(request=None):
     try:
         shutil.copy(activeSession(), full_path)
         unsaved_changes(False)  # File is now in sync
+        print('Done Copying database to', target)
     except IOError:
         save_error = 'Failed to save file.'
+        print('Encountered an error while copying file', target)
     if request is not None and request.is_ajax():
         if save_error:
             json_response = '{"status": "failed", "message": "%s"}' % save_error
@@ -197,8 +205,9 @@ def delete_file(request, target):
 
 def copy_file(request, target):
     copy_name = re.sub(r'(?P<name>.*)\.(?P<ext>.*)', r'\g<name> - Copy.\g<ext>', target)
-    print("Copying ", target, "to", copy_name)
+    print("Copying", target, "to", copy_name, ". This could take several minutes...")
     shutil.copy(workspace_path(target), workspace_path(copy_name))
+    print("Done copying", target)
     return redirect('/app/Workspace/')
 
 
@@ -211,8 +220,8 @@ def download_file(request, target):
 
 
 def new_scenario(request):
-    reset_db('default')
     reset_db('scenario_db')
+    reset_db('default')
     update_db_version()
     return redirect('/setup/Scenario/1/')
 
@@ -220,14 +229,14 @@ def new_scenario(request):
 def prepare_supplemental_output_directory():
     """Creates a directory with the same name as the Scenario and directs the Simulation to store supplemental files in the new directory"""
     output_dir = workspace_path(scenario_filename())  # this does not have the .sqlite3 suffix
-    output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm.exe
+    output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm_simulation.exe
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     return output_args
 
 
 def adsm_executable_command():
-    executables = {"Windows": 'adsm.exe', "Linux": 'adsm', "Darwin": 'adsm'}
+    executables = {"Windows": 'adsm_simulation.exe', "Linux": 'adsm_simulation', "Darwin": 'adsm_simulation'}
     system_executable = os.path.join(settings.BASE_DIR, executables[platform.system()])  #TODO: KeyError
     database_file = os.path.basename(settings.DATABASES['scenario_db']['NAME'])
     output_args = prepare_supplemental_output_directory()

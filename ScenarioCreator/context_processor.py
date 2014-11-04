@@ -9,7 +9,7 @@ from glob import glob
 from itertools import chain
 import re
 from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Population, Unit, Disease, DiseaseProgression, \
-    DiseaseProgressionAssignment, DirectSpread, ProductionTypePairTransmission, ControlMasterPlan, ControlProtocol, \
+    DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
     ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
 from Results.models import DailyControls
 from Results.summary import iteration_progress
@@ -55,10 +55,10 @@ def basic_context(request):
                'Farms': Unit.objects.count(),
                'Disease': Disease.objects.all().exclude(name='').count(),
                'Progressions': DiseaseProgression.objects.count(),
-               'ProgressionAssignment': DiseaseProgressionAssignment.objects.count() == pt_count and pt_count,
+               'ProgressionAssignment': pt_count and DiseaseProgressionAssignment.objects.filter(progression__isnull=False).count() == pt_count,
                'DirectSpreads': DirectSpread.objects.count(),
                'AssignSpreads': pt_count and
-                                ProductionTypePairTransmission.objects.filter(
+                                DiseaseSpreadAssignment.objects.filter(
                                     source_production_type=F('destination_production_type'),
                                     direct_contact_spread__isnull=False
                                 ).count() >= pt_count,

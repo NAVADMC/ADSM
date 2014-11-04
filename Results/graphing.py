@@ -248,7 +248,7 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
 
     if iteration:  # for a single iteration, we don't need all the hist2d prep
         return single_iteration_line_graph(iteration, field_name, model_name, model, time_series, columns, time_graph, boxplot_graph, fig)
-    days = range(1, len(time_series[0]) + 1)  # Start with day index
+    days = list(range(1, len(time_series[0]) + 1))  # Start with day index
     x = days * len(time_series)  # repeat day series for each set of data (1 per iteration)
     y = list(chain(*time_series))
     hot = plt.get_cmap('hot')

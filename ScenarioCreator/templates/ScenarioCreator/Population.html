@@ -1,6 +1,7 @@
 {% extends 'ScenarioCreator/navigationPane.html' %}
 {% load floppyforms %}
 {% load crispy_forms_tags  %}
+{% load db_status_tags %}
 
 {% block content %}
     <script type="text/javascript" src="{{ STATIC_URL }}js/population.js"></script>
@@ -26,7 +27,7 @@
     </div>
 
 {% else %}
-    <h1>Current Units:</h1>
+    <h1>Current {{"Units"|wiki:"unit"}}:</h1>
     <img src="/results/Population.png" alt="Unit Locations"/>
     <p></p>
 

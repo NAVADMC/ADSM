@@ -137,30 +137,30 @@ class ViewTests(TransactionTestCase):
         self.client.get('/app/OpenScenario/Roundtrip.sqlite3/')
 
         r = self.client.get('/setup/Populations/')
-        self.assertIn('data-delete-link', r.content)
+        self.assertIn('data-delete-link', r.content.decode())
 
         r = self.client.get('/setup/DiseaseProgression/')
-        self.assertIn('data-delete-link', r.content)
+        self.assertIn('data-delete-link', r.content.decode())
 
         r = self.client.get('/setup/DiseaseSpread/')
-        self.assertIn('data-delete-link', r.content)
+        self.assertIn('data-delete-link', r.content.decode())
 
         r = self.client.get('/setup/ControlProtocol/')
-        self.assertIn('data-delete-link', r.content)
+        self.assertIn('data-delete-link', r.content.decode())
 
         r = self.client.get('/setup/Zone/')
-        self.assertIn('data-delete-link', r.content)
+        self.assertIn('data-delete-link', r.content.decode())
 
         r = self.client.get('/setup/ZoneEffect/')
-        self.assertIn('data-delete-link', r.content)
+        self.assertIn('data-delete-link', r.content.decode())
 
         # has a related model, not deleteable
         function = RelationalFunction.objects.get(name="Prevalence")
         r = self.client.get('/setup/RelationalFunction/%s/' % function.id)
-        self.assertNotIn('data-delete-link', r.content)
+        self.assertNotIn('data-delete-link', r.content.decode())
 
         # has no related models, deleteable
         function = RelationalFunction.objects.create(name="Test RelationalFunction")
         r = self.client.get('/setup/RelationalFunction/%s/' % function.id)
-        self.assertIn('data-delete-link', r.content)
+        self.assertIn('data-delete-link', r.content.decode())
 

@@ -127,12 +127,10 @@ To update the executable:
 `make` will will fail on a `dia: command not found` error when it gets to the SpreadModel/CEngine/doc/diagrams directory.  That’s OK: at this point, the executable is built, and you are done.
 
 ##Building Distributable
-    Required Items for PyInstaller:
+    Required Items for cx_freeze:
         http://sourceforge.net/projects/pywin32/  # For Windows only. MAKE SURE these go into your virtualenv!
         ldd, objdump  # For Linux only
         Xcode  # For OS X only
-
-    Currently requires a modified pyinstaller from Nyx
 
     For the Chromium window, we are using the Chromium Embedded Framework. Compiling it is a massive pain,
     but thankfully Adobe hosts and maintains a site, cefbuilds.com, which has the compile chain setup in as a project per OS platform.

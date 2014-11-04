@@ -153,8 +153,8 @@ from django.dispatch import receiver
 
 
 @receiver(connection_created)
-def activate_write_ahead_mode(sender, connection, **kwargs):
-    """Enable integrity constraint with sqlite."""
+def activate_auto_vacuum(sender, connection, **kwargs):
+    """Vacuum mode to keep file sizes reasonable with sqlite."""
     if connection.vendor == 'sqlite' or connection.vendor == 'sqlite3':
         cursor = connection.cursor()
         cursor.execute('PRAGMA auto_vacuum = FULL;')
