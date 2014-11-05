@@ -208,8 +208,9 @@ many_to_many_widget = (function(form_state){
 
         var column_information = [];
         $('section form table tbody tr:last-child td').each(function (index) {//copy the select
-            column_information[index] = $(this).find('select').clone()
-                .val('').removeAttr('id');
+            bulk_select = $(this).find('select').clone().val('').removeAttr('id');
+            bulk_select.find('option[value="data-add-new"]').remove();
+            column_information[index] = bulk_select;
         });
 
         var num_rows = Math.max(header_information[0].length, header_information[1].length);
