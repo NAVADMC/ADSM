@@ -63,26 +63,10 @@ def simulation_process(iteration_number, adsm_cmd, queue, production_types, zone
     if errors:  # this will only print out error messages after the simulation has halted
         print(errors)
     
-    sorted_results = {}
-    sorted_results['DailyReport'] = []
-    sorted_results['DailyControls'] = []
-    sorted_results['DailyByZoneAndProductionType'] = []
-    sorted_results['DailyByProductionType'] = []
-    sorted_results['DailyByZone'] = []
-
-
+    sorted_results = defaultdict(lambda: [] )
     for result in adsm_result:
         result_type = type(result).__name__
-        if result_type == 'DailyReport':
-            sorted_results['DailyReport'].append(result)
-        elif result_type == 'DailyControls':
-            sorted_results['DailyControls'].append(result)
-        elif result_type == 'DailyByZoneAndProductionType':
-            sorted_results['DailyByZoneAndProductionType'].append(result)
-        elif result_type == 'DailyByProductionType':
-            sorted_results['DailyByProductionType'].append(result)
-        elif result_type == 'DailyByZone':
-            sorted_results['DailyByZone'].append(result)
+        sorted_results[result_type].append(result)
 
     queue.put(sorted_results)
 
@@ -110,14 +94,13 @@ def zip_map_directory_if_it_exists():
     else:
         print("Folder is empty: ", dir_to_zip)
 
-def process_result(queue):
-    results = queue.get()
-
+def process_result(results):
     DailyReport.objects.bulk_create(results['DailyReport'])
     DailyControls.objects.bulk_create(results['DailyControls'])
     DailyByZoneAndProductionType.objects.bulk_create(results['DailyByZoneAndProductionType'])
     DailyByProductionType.objects.bulk_create(results['DailyByProductionType'])
     DailyByZone.objects.bulk_create(results['DailyByZone'])
+    ResultsVersion.objects.bulk_create(results['ResultsVersion'])
 
 
 class Simulation(threading.Thread):
@@ -141,7 +124,7 @@ class Simulation(threading.Thread):
             statuses.append(res)
         pool.close()
 
-        [process_result(queue) for iteration in range(self.max_iteration)]
+        [process_result(queue.get()) for iteration in range(self.max_iteration)]  # each .get() gets a new thread result
 
         pool.join()
 
