@@ -191,15 +191,17 @@ class ParserTests(TestCase):
     multi_db = True
 
     def setUp(self):
+        self.production_types = [(1, "Cattle")]
+        self.zones = [(1, "Medium Risk")]
         self.common_headers = "Run,Day,versionMajor,versionMinor,versionRelease"
 
     def test_initialize(self):
+        
         cattle = ProductionType.objects.create(name="Cattle")
         medium_risk = Zone.objects.create(name="Medium Risk", radius=5.0)
         header_line = self.common_headers + "\r\n"
-        first_line = "1,1,3,2,1"
 
-        p = DailyParser(header_line, first_line)
+        p = DailyParser(header_line, self.production_types, self.zones)
 
         self.assertEqual(p.headers, ['Run', 'Day', 'versionMajor', 'versionMinor', 'versionRelease'])
         self.assertEqual(p.possible_zones, {'Medium Risk', 'Background'})
@@ -207,10 +209,9 @@ class ParserTests(TestCase):
 
     def test_parse_single_field_in_controls(self):
         header_line = self.common_headers + ",outbreakDuration\r\n"
+        p = DailyParser(header_line, self.production_types, self.zones)
+
         adsm_iteration_output = ["1,1,3,2,1,1"]
-        p = DailyParser(header_line, adsm_iteration_output[0])
-
-
         results = p.parse_daily_strings(adsm_iteration_output)
 
         self.assertEqual(len(results), 1)
@@ -218,11 +219,10 @@ class ParserTests(TestCase):
         self.assertEqual(results[0].outbreakDuration, 1)
 
     def test_parse_single_field_in_daily_by_production_type(self):
-        cows, created = ProductionType.objects.get_or_create(name="Cattle")
         header_line = self.common_headers + ",firstDetectionCattle\r\n"
-        adsm_iteration_output = ["1,1,3,2,1,1"]
-        p = DailyParser(header_line, adsm_iteration_output[0])
+        p = DailyParser(header_line, self.production_types, self.zones)
 
+        adsm_iteration_output = ["1,1,3,2,1,1"]
         results = p.parse_daily_strings(adsm_iteration_output)
 
         self.assertEqual(len(results), 1)
@@ -230,11 +230,9 @@ class ParserTests(TestCase):
         self.assertEqual(results[0].firstDetection, 1)
 
     def test_parse_single_field_in_daily_by_zone_and_production_type(self):
-        cattle = ProductionType.objects.create(name="Cattle")
-        medium_risk = Zone.objects.create(name="Medium Risk", radius=5.0)
-        header_line = self.common_headers + ",unitsInZoneMediumRiskCattle\r\n"
+        header_line = "Run,Day,unitsInZoneMediumRiskCattle\r\n"
+        p = DailyParser(header_line, self.production_types, self.zones)
         adsm_iteration_output = ["1,1,3,2,1,1"]
-        p = DailyParser(header_line, adsm_iteration_output[0])
 
         results = p.parse_daily_strings(adsm_iteration_output)
 
@@ -243,12 +241,10 @@ class ParserTests(TestCase):
         self.assertEqual(results[0].unitsInZone, 1)
 
     def test_parse_multiple_fields_in_same_table(self):
-        cattle = ProductionType.objects.create(name="Cattle")
-        medium_risk = Zone.objects.create(name="Medium Risk", radius=5.0)
-        header_line = self.common_headers + ",unitsInZoneMediumRiskCattle,animalDaysInZoneMediumRiskCattle\r\n"
-        adsm_iteration_output = ["1,1,3,2,1,1,2"]
-        p = DailyParser(header_line, adsm_iteration_output[0])
+        header_line = "Run,Day,unitsInZoneMediumRiskCattle,animalDaysInZoneMediumRiskCattle\r\n"
+        p = DailyParser(header_line, self.production_types, self.zones)
 
+        adsm_iteration_output = ["1,1,3,2,1,1,2"]
         results = p.parse_daily_strings(adsm_iteration_output)
 
         self.assertEqual(len(results), 1)
@@ -257,12 +253,9 @@ class ParserTests(TestCase):
         self.assertEqual(results[0].animalDaysInZone, 2)
 
     def test_parse_multiple_fields_in_different_tables(self):
-        cattle = ProductionType.objects.create(name="Cattle")
-        medium_risk = Zone.objects.create(name="Medium Risk", radius=5.0)
-        header_line = self.common_headers + ",firstDetectionCattle,animalDaysInZoneMediumRiskCattle\r\n"
+        header_line = "Run,Day,firstDetectionCattle,animalDaysInZoneMediumRiskCattle\r\n"
+        p = DailyParser(header_line, self.production_types, self.zones)
         adsm_iteration_output = ["1,1,3,2,1,1,2"]
-        p = DailyParser(header_line, adsm_iteration_output[0])
-
         results = p.parse_daily_strings(adsm_iteration_output)
 
         self.assertEqual(len(results), 2)
@@ -281,11 +274,9 @@ class ParserTests(TestCase):
             it will not exist in the ScenarioCreator Zone table so it will
             not have a foreign key in the Results DailyByZone table
         """
-        header_line = self.common_headers + ",zoneAreaBackground\r\n"
+        header_line = "Run,Day,zoneAreaBackground\r\n"
+        p = DailyParser(header_line, self.production_types, self.zones)
         adsm_iteration_output = ["1,1,3,2,1,1"]
-        p = DailyParser(header_line, adsm_iteration_output[0])
-
-
         results = p.parse_daily_strings(adsm_iteration_output)
 
         self.assertEqual(len(results), 1)
@@ -294,11 +285,9 @@ class ParserTests(TestCase):
         self.assertEqual(results[0].zoneArea, 1)
 
     def test_parse_unknown_column(self):
-        header_line = self.common_headers + ",aaaaaa\r\n"
+        header_line = "Run,Day,aaaaaa\r\n"
+        p = DailyParser(header_line, self.production_types, self.zones)
         adsm_iteration_output = ["1,1,3,2,1,1"]
-        p = DailyParser(header_line, adsm_iteration_output[0])
-
-
         results = p.parse_daily_strings(adsm_iteration_output)
 
         self.assertEqual(len(results), 0)
@@ -310,12 +299,9 @@ class ParserTests(TestCase):
             the results parser should not output an object if all
             fields of that object are None
         """
-        # cattle = ProductionType.objects.create(name="Cattle")
-
-        header_line = self.common_headers + ",outbreakDuration\r\n"
-        adsm_iteration_output = ["1,1,3,2,1,1"]
-        p = DailyParser(header_line, adsm_iteration_output[0])
-
+        header_line = "Run,Day,outbreakDuration\r\n"
+        p = DailyParser(header_line, self.production_types, self.zones)
+        adsm_iteration_output = ["1,1,1"]
         results = p.parse_daily_strings(adsm_iteration_output)
 
         self.assertEqual(len(results), 1)

@@ -37,10 +37,12 @@ def build_composite_field_map( table):
 
 
 class DailyParser(object):
-    def __init__(self, header_line, first_day_line):
+    def __init__(self, header_line, production_types, zones):
+        self.production_types = production_types
+        self.zones = zones
         self.headers = header_line.strip().split(',')  # there was a trailing /r/n to remove
-        self.possible_zones = {x.name for x in Zone.objects.all()}.union({'Background'})
-        self.possible_pts = {x.name for x in ProductionType.objects.all()}.union({''})
+        self.possible_zones = {x[1] for x in zones}.union({'Background'})
+        self.possible_pts = {x[1] for x in production_types}.union({''})
         self.failures = set()
         if not Results.models.ResultsVersion.objects.exists():
             values = first_day_line.split(',')
@@ -99,20 +101,35 @@ class DailyParser(object):
 
         daily_by_pt = daily_instances["DailyByProductionType"]
         for pt_name in self.possible_pts:
-            pt = ProductionType.objects.filter(name=pt_name).first()  # obj or None for "All Animals" case
+            try:
+                pt = [x[0] for x in self.production_types if x[1] == pt_name][0]
+            except IndexError:
+                pt = None
             daily_by_pt[camel_case_spaces(pt_name)] = \
-                Results.models.DailyByProductionType(production_type=pt, iteration=iteration, day=day, last_day=last_line)
+                Results.models.DailyByProductionType(production_type_id=pt, iteration=iteration, day=day, last_day=last_line)
 
-        daily_instances["DailyByZone"] = {camel_case_spaces(zone_name):
-            Results.models.DailyByZone(zone=Zone.objects.filter(name=zone_name).first(), iteration=iteration, day=day, last_day=last_line) for zone_name in self.possible_zones}
+        daily_instances["DailyByZone"] = {}
+        for zone_name in self.possible_zones:
+            try:
+                zone = [x[0] for x in self.zones if x[1] == zone_name][0]
+            except IndexError:
+                zone = None
+            instance = Results.models.DailyByZone(zone_id=zone, iteration=iteration, day=day, last_day=last_line)
+            daily_instances["DailyByZone"][camel_case_spaces(zone_name)] = instance
 
         daily_by_pt_zone = daily_instances["DailyByZoneAndProductionType"]
         for pt_name in self.possible_pts:
-            pt = ProductionType.objects.filter(name=pt_name).first()  # obj or None for "All Animals" case
+            try:
+                pt = [x[0] for x in self.production_types if x[1] == pt_name][0]
+            except IndexError:
+                pt = None
             for zone_name in self.possible_zones:
-                zone = Zone.objects.filter(name=zone_name).first()  # obj or None for "Background" case
+                try:
+                    zone = [x[0] for x in self.zones if x[1] == zone_name][0]
+                except IndexError:
+                    zone = None
                 daily_by_pt_zone[camel_case_spaces(zone_name + pt_name)] = \
-                    Results.models.DailyByZoneAndProductionType(production_type=pt, zone=zone, iteration=iteration, day=day, last_day=last_line)
+                    Results.models.DailyByZoneAndProductionType(production_type_id=pt, zone_id=zone, iteration=iteration, day=day, last_day=last_line)
 
         daily_instances["DailyControls"] = {'': Results.models.DailyControls(iteration=iteration, day=day, last_day=last_line)}  # there's only one of these
         return daily_instances
@@ -154,6 +171,6 @@ class DailyParser(object):
             if len(values):
                 pairs = zip(self.headers, values)
                 sparse_values = {a: number(b) for a, b in pairs}
-                Results.models.DailyReport(sparse_dict=str(sparse_values), full_line=cmd_string).save()
+                results.extend([Results.models.DailyReport(sparse_dict=str(sparse_values), full_line=cmd_string)])
                 results.extend(self.populate_db_from_daily_report(sparse_values, last_line))
         return results
