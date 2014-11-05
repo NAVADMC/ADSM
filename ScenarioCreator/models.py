@@ -281,7 +281,7 @@ class ControlMasterPlan(BaseModel):
         # old UI: Detected, Trace forward of direct contact, Ring, Trace forward of indirect contact, Trace back of direct contact, Trace back of indirect contact
         help_text='The secondary priority order for destruction.', )
     units_detected_before_triggering_vaccination = models.PositiveIntegerField(blank=True, null=True,
-        help_text='The number of clinical ' + wiki("Units", "unit") + ' which must be detected before the initiation of a vaccination program.', )
+        help_text='The number of ' + wiki("Units", "unit") + ' which must be detected before the initiation of a vaccination program.', )
     vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the daily vaccination capacity.', )
     vaccination_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
@@ -331,7 +331,7 @@ class ControlProtocol(BaseModel):
     indirect_trace_is_a_zone_trigger = models.BooleanField(default=False,
         help_text='Indicator if indirect tracing of infected units of this ' + wiki("production type") + ' will trigger a '+wiki("Zone")+' focus.', )
     use_destruction = models.BooleanField(default=False,
-        help_text='Indicates if detected clinical units of this ' + wiki("production type") + ' will be destroyed.', )
+        help_text='Indicates if detected units of this ' + wiki("production type") + ' will be destroyed.', )
     destruction_is_a_ring_trigger = models.BooleanField(default=False,
         help_text='Indicates if detection of a unit of this ' + wiki("production type") + ' will trigger the formation of a destruction ring.', )
     destruction_ring_radius = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
@@ -359,7 +359,7 @@ class ControlProtocol(BaseModel):
     vaccine_immune_period = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Defines the '+ wiki("vaccine immune") + ' period for units of this ' + wiki("production type") + '.', )
     trigger_vaccination_ring = models.BooleanField(default=False,
-        help_text='Indicates if detection of a clinical unit of this type will trigger a vaccination ring.', )
+        help_text='Indicates if detection of a unit of this type will trigger a vaccination ring.', )
     vaccination_ring_radius = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Radius in kilometers of the vaccination ring.', )
     vaccination_priority = models.PositiveIntegerField(default=5, blank=True, null=True,
