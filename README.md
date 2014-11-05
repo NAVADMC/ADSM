@@ -10,7 +10,6 @@ https://pypi.python.org/pypi/pip#downloads
     pip install south==0.8.4
     pip install future
     pip install futures  # This isn't a mistake, they're seriously two different packages. We're very futuristic here.
-    pip install mpld3
     pip install jinja2
     pip install selenium  # only necessary for testing
     pip install cherrypy==3.5.0 --no-use-wheel # local host server
