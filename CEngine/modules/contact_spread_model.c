@@ -1777,12 +1777,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->db = params;
   sqlite3_exec_dict (params,
                      "SELECT src_prodtype.name AS src_prodtype,dest_prodtype.name AS dest_prodtype,\"direct\" AS contact_type,use_fixed_contact_rate,contact_rate,distance_distribution_id,transport_delay_id,infection_probability,movement_control_id,latent_animals_can_infect_others,subclinical_animals_can_infect_others "
-                     "FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_directspread direct "
+                     "FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_diseasespreadassignment pairing,ScenarioCreator_directspread direct "
                      "WHERE src_prodtype.id=pairing.source_production_type_id "
                      "AND dest_prodtype.id=pairing.destination_production_type_id "
                      "AND pairing.direct_contact_spread_id = direct.id "
                      "UNION SELECT src_prodtype.name AS src_prodtype,dest_prodtype.name AS dest_prodtype,\"indirect\" AS contact_type,use_fixed_contact_rate,contact_rate,distance_distribution_id,transport_delay_id,infection_probability,movement_control_id,0 AS latent_animals_can_infect_others,subclinical_animals_can_infect_others "
-                     "FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_indirectspread indirect "
+                     "FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_diseasespreadassignment pairing,ScenarioCreator_indirectspread indirect "
                      "WHERE src_prodtype.id=pairing.source_production_type_id "
                      "AND dest_prodtype.id=pairing.destination_production_type_id "
                      "AND pairing.indirect_contact_spread_id = indirect.id",

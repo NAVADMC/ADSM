@@ -1009,7 +1009,7 @@ new (sqlite3 *params, UNT_unit_list_t * units, projPJ projection,
   local_data->db = params;
   sqlite3_exec_dict (params,
                      "SELECT src_prodtype.name AS src_prodtype,dest_prodtype.name AS dest_prodtype,spread_1km_probability,exposure_direction_start,exposure_direction_end,max_distance,transport_delay_id "
-                     "FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_productiontypepairtransmission pairing,ScenarioCreator_airbornespread airborne "
+                     "FROM ScenarioCreator_productiontype src_prodtype,ScenarioCreator_productiontype dest_prodtype,ScenarioCreator_diseasespreadassignment pairing,ScenarioCreator_airbornespread airborne "
                      "WHERE src_prodtype.id=pairing.source_production_type_id "
                      "AND dest_prodtype.id=pairing.destination_production_type_id "
                      "AND pairing.airborne_spread_id = airborne.id",
