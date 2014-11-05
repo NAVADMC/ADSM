@@ -44,15 +44,6 @@ class DailyParser(object):
         self.possible_zones = {x[1] for x in zones}.union({'Background'})
         self.possible_pts = {x[1] for x in production_types}.union({''})
         self.failures = set()
-        if not Results.models.ResultsVersion.objects.exists():
-            values = first_day_line.split(',')
-            pairs = zip(self.headers, values)
-            sparse_values = {a: number(b) for a, b in pairs}
-            version = Results.models.ResultsVersion()
-            version.versionMajor = sparse_values['versionMajor']
-            version.versionMinor = sparse_values['versionMinor']
-            version.versionRelease = sparse_values['versionRelease']
-            version.save()
 
 
     def populate_tables_with_matching_fields(self, model_class_name, instance_dict, sparse_info):
@@ -164,7 +155,7 @@ class DailyParser(object):
         return results
 
 
-    def parse_daily_strings(self, cmd_strings, last_line=False):
+    def parse_daily_strings(self, cmd_strings, last_line=False, create_version_entry=False):
         results = []
         for cmd_string in cmd_strings:
             values = cmd_string.split(',')
@@ -172,5 +163,12 @@ class DailyParser(object):
                 pairs = zip(self.headers, values)
                 sparse_values = {a: number(b) for a, b in pairs}
                 results.extend([Results.models.DailyReport(sparse_dict=str(sparse_values), full_line=cmd_string)])
+                if create_version_entry:
+                    version = Results.models.ResultsVersion()
+                    version.versionMajor = sparse_values['versionMajor']
+                    version.versionMinor = sparse_values['versionMinor']
+                    version.versionRelease = sparse_values['versionRelease']
+                    results.extend([version])
+                    create_version_entry = False  # only run once
                 results.extend(self.populate_db_from_daily_report(sparse_values, last_line))
         return results

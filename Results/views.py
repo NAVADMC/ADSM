@@ -45,7 +45,6 @@ def non_empty_lines(line):
 
 def simulation_process(iteration_number, adsm_cmd, queue, production_types, zones):
     start = time.time()
-    adsm_result = {}
 
     simulation = subprocess.Popen(adsm_cmd,
                                   stdout=subprocess.PIPE,
@@ -59,7 +58,7 @@ def simulation_process(iteration_number, adsm_cmd, queue, production_types, zone
     for line in iter(simulation.stdout.readline, b''):
         adsm_result.extend(p.parse_daily_strings(non_empty_lines(prev_line), False))
         prev_line = line
-    adsm_result.extend(p.parse_daily_strings(non_empty_lines(prev_line), True))
+    adsm_result.extend(p.parse_daily_strings(non_empty_lines(prev_line), last_line=True, create_version_entry=iteration_number==1))
     outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
     if errors:  # this will only print out error messages after the simulation has halted
         print(errors)
