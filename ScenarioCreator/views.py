@@ -93,7 +93,7 @@ def production_type_permutations():
 
 def assign_disease_spread(request):
     assignment_set = production_type_permutations()
-    SpreadSet = modelformset_factory(DiseaseSpreadAssignment, extra=0, form=ProductionTypePairTransmissionForm)
+    SpreadSet = modelformset_factory(DiseaseSpreadAssignment, extra=0, form=DiseaseSpreadAssignmentForm)
     try:
         initialized_formset = SpreadSet(request.POST, request.FILES, queryset=DiseaseSpreadAssignment.objects.all())
         if initialized_formset.is_valid():

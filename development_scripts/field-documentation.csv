@@ -235,7 +235,7 @@ class ProductionType
 name, CharField, 
 description, TextField, 
 
-class ProductionTypePairTransmission
+class DiseaseSpreadAssignment
 source_production_type, ForeignKey, The Production type that will be the source type for this production type combination.
 destination_production_type, ForeignKey, The Production type that will be the recipient type for this production type combination.
 direct_contact_spread_model, ForeignKey, Disease spread mechanism used to model spread by direct contact between these types.
