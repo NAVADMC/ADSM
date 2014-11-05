@@ -62,8 +62,29 @@ def simulation_process(iteration_number, adsm_cmd, queue, production_types, zone
     outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
     if errors:  # this will only print out error messages after the simulation has halted
         print(errors)
+    
+    sorted_results = {}
+    sorted_results['DailyReport'] = []
+    sorted_results['DailyControls'] = []
+    sorted_results['DailyByZoneAndProductionType'] = []
+    sorted_results['DailyByProductionType'] = []
+    sorted_results['DailyByZone'] = []
 
-    queue.put(adsm_result)
+
+    for result in adsm_result:
+        result_type = type(result).__name__
+        if result_type == 'DailyReport':
+            sorted_results['DailyReport'].append(result)
+        elif result_type == 'DailyControls':
+            sorted_results['DailyControls'].append(result)
+        elif result_type == 'DailyByZoneAndProductionType':
+            sorted_results['DailyByZoneAndProductionType'].append(result)
+        elif result_type == 'DailyByProductionType':
+            sorted_results['DailyByProductionType'].append(result)
+        elif result_type == 'DailyByZone':
+            sorted_results['DailyByZone'].append(result)
+
+    queue.put(sorted_results)
 
     end = time.time()
 
@@ -91,15 +112,13 @@ def zip_map_directory_if_it_exists():
 
 def process_result(queue):
     results = queue.get()
-    # start = time.time()
-    # middle = time.time()
 
-    with transaction.atomic(using='scenario_db'):
-        for result in results:
-            result.save()
-    # end = time.time()
-    # print("Time Parsing: ", middle-start)
-    # print("Time Writing to DB: ", end-middle)
+    DailyReport.objects.bulk_create(results['DailyReport'])
+    DailyControls.objects.bulk_create(results['DailyControls'])
+    DailyByZoneAndProductionType.objects.bulk_create(results['DailyByZoneAndProductionType'])
+    DailyByProductionType.objects.bulk_create(results['DailyByProductionType'])
+    DailyByZone.objects.bulk_create(results['DailyByZone'])
+
 
 class Simulation(threading.Thread):
     """Execute system commands in a separate thread so as not to interrupt the webpage.
