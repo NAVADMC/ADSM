@@ -1,7 +1,6 @@
 import time
 import os
 
-
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
@@ -54,7 +53,7 @@ class M2mDSL(object):
                 time.sleep(sleep)
                 break
 
-    def select_bulk_contact_disease(self, name, sleep=1):
+    def select_bulk_contact_disease(self, name, sleep=3):
         target = self.selenium.find_element_by_id("id_bulk-direct_contact_spread")
         Select(target).select_by_visible_text(name)
         time.sleep(sleep)
@@ -348,7 +347,10 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
         # verify bulk selector for each destination production type were updated
         types = self.get_bulk_production_types()
         for production_type in types:
-            self.assertEqual(production_type['disease'], "Dairy Cattle Large 1")
+            if (production_type['source'] == "Free Range Cows"):
+                self.assertEqual(production_type['disease'], "Dairy Cattle Large 1")
+            else:
+                self.assertEqual(production_type['disease'], u"---------")
 
         interactions = self.get_interactions()
         for interaction in interactions:
@@ -372,7 +374,11 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
         # verify bulk selector for each destination production type were updated
         types = self.get_bulk_production_types()
         for production_type in types:
-            self.assertEqual(production_type['disease'], "Dairy Cattle Large 1")
+            if (production_type['source'] == 'Free Range Cows' or
+                    production_type['source'] == 'Dairy Cows'):
+                self.assertEqual(production_type['disease'], "Dairy Cattle Large 1")
+            else:
+                self.assertEqual(production_type['disease'], u"---------")
 
         interactions = self.get_interactions()
         for interaction in interactions:
@@ -472,7 +478,9 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
     def test_assign_disease_spread_add_disease_modal(self):
         self.setup_scenario()
         self.click_navbar_element("Assign Disease Spread")
-        self.select_contact_disease("Add...")
+        target = self.selenium.find_element_by_id('id_form-0-direct_contact_spread')
+        Select(target).select_by_visible_text('Add...')
+        time.sleep(1)
 
         modal = self.selenium.find_element_by_css_selector('div[id$="-direct_contact_spread_modal"]')
 
