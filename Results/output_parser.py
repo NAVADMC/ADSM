@@ -139,6 +139,7 @@ class DailyParser(object):
         del sparse_info['versionMajor']
         del sparse_info['versionMinor']
         del sparse_info['versionRelease']
+        print("Parsing Iteration %i Day %i" % (iteration, day))
 
         self.failures = set(sparse_info.keys())  # whatever is left is a failure
 
@@ -155,9 +156,9 @@ class DailyParser(object):
         return results
 
 
-    def parse_daily_strings(self, cmd_strings, last_line=False, create_version_entry=False):
+    def parse_daily_strings(self, cmd_string, last_line=False, create_version_entry=False):
         results = []
-        for cmd_string in cmd_strings:
+        if cmd_string:
             values = cmd_string.split(',')
             if len(values):
                 pairs = zip(self.headers, values)

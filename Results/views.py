@@ -50,15 +50,18 @@ def simulation_process(iteration_number, adsm_cmd, queue, production_types, zone
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
                                   bufsize=1)
-    headers = simulation.stdout.readline().decode("utf-8")
+    headers = simulation.stdout.readline().decode()
     from Results.output_parser import DailyParser
     p = DailyParser(headers, production_types, zones)
     adsm_result = []
     prev_line = ''
-    for line in iter(simulation.stdout.readline, b''):
-        adsm_result.extend(p.parse_daily_strings(non_empty_lines(prev_line), False))
+    for line in simulation.stdout.readlines():
+        line = line.decode()
+        parse_result = p.parse_daily_strings(prev_line, False)
+        adsm_result.extend(parse_result)
         prev_line = line
-    adsm_result.extend(p.parse_daily_strings(non_empty_lines(prev_line), last_line=True, create_version_entry=iteration_number==1))
+        simulation.stdout.flush()  # TODO: may be unnecessary
+    adsm_result.extend(p.parse_daily_strings(prev_line, last_line=True, create_version_entry=iteration_number==1))
     outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
     if errors:  # this will only print out error messages after the simulation has halted
         print(errors)
@@ -67,8 +70,10 @@ def simulation_process(iteration_number, adsm_cmd, queue, production_types, zone
     for result in adsm_result:
         result_type = type(result).__name__
         sorted_results[result_type].append(result)
-
-    queue.put(sorted_results)
+    try:
+        queue.put(dict(sorted_results))
+    except BaseException as e:
+        print(e)
 
     end = time.time()
 
@@ -94,7 +99,9 @@ def zip_map_directory_if_it_exists():
     else:
         print("Folder is empty: ", dir_to_zip)
 
-def process_result(results):
+def process_result(queue):
+    results = queue.get()
+    print("Adding Iteration to the database" )
     DailyReport.objects.bulk_create(results['DailyReport'])
     DailyControls.objects.bulk_create(results['DailyControls'])
     DailyByZoneAndProductionType.objects.bulk_create(results['DailyByZoneAndProductionType'])
@@ -123,8 +130,9 @@ class Simulation(threading.Thread):
             res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, queue, self.production_types, self.zones))
             statuses.append(res)
         pool.close()
-
-        [process_result(queue.get()) for iteration in range(self.max_iteration)]  # each .get() gets a new thread result
+        
+        for iteration in range(self.max_iteration):
+            process_result(queue)  # each .get() gets a new thread result
 
         pool.join()
 
