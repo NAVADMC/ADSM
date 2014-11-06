@@ -143,7 +143,6 @@ class IterationProgressTestClass(TestCase):
     def test_two_iterations_completed_first_detection(self):
         self.settings.stop_criteria = "first-detection"
         self.settings.save()
-        cows, created = ProductionType.objects.get_or_create(name="cow")
         pigs, created = ProductionType.objects.get_or_create(name="pig")
         cats, created = ProductionType.objects.get_or_create(name="cat")
         iteration = 10
@@ -151,13 +150,13 @@ class IterationProgressTestClass(TestCase):
         for i in range(1, iteration + 1):
             for d in range(1, days + 1):
                 DailyControls.objects.create(iteration=i, day=d)
-                DailyByProductionType.objects.create(iteration=i, day=d, production_type=cows)
+                DailyByProductionType.objects.create(iteration=i, day=d, production_type=None)
                 DailyByProductionType.objects.create(iteration=i, day=d, production_type=pigs)
                 DailyByProductionType.objects.create(iteration=i, day=d, production_type=cats)
             if i <= 6:
                 DailyControls.objects.create(iteration=i, day=8, diseaseDuration=8, last_day=True)
-                DailyByProductionType.objects.create(iteration=i, day=d, production_type=cows, firstDetection=1, last_day=True)
-                DailyByProductionType.objects.create(iteration=i, day=d, production_type=pigs, firstDetection=1, last_day=True)
+                DailyByProductionType.objects.create(iteration=i, day=d, production_type=None, firstDetection=1, last_day=True)
+                DailyByProductionType.objects.create(iteration=i, day=d, production_type=pigs, firstDetection=1, last_day=True) # first detection happened in pigs
                 DailyByProductionType.objects.create(iteration=i, day=d, production_type=cats, last_day=True)
         self.assertEqual(iteration_progress(), 0.6)
 
