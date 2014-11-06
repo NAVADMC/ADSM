@@ -43,23 +43,37 @@ def non_empty_lines(line):
     return output_lines
 
 
-def simulation_process(iteration_number, adsm_cmd, queue):
+def simulation_process(iteration_number, adsm_cmd, queue, production_types, zones):
     start = time.time()
-    adsm_result = {}
 
     simulation = subprocess.Popen(adsm_cmd,
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
                                   bufsize=1)
-    adsm_result['headers'] = simulation.stdout.readline().decode("utf-8")
-    adsm_result['lines'] = []
-    for line in iter(simulation.stdout.readline, b''):
-        adsm_result['lines'].append(non_empty_lines(line))
+    headers = simulation.stdout.readline().decode()
+    from Results.output_parser import DailyParser
+    p = DailyParser(headers, production_types, zones)
+    adsm_result = []
+    prev_line = ''
+    for line in simulation.stdout.readlines():
+        line = line.decode()
+        parse_result = p.parse_daily_strings(prev_line, False)
+        adsm_result.extend(parse_result)
+        prev_line = line
+        simulation.stdout.flush()  # TODO: may be unnecessary
+    adsm_result.extend(p.parse_daily_strings(prev_line, last_line=True, create_version_entry=iteration_number==1))
     outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
     if errors:  # this will only print out error messages after the simulation has halted
         print(errors)
-
-    queue.put(adsm_result)
+    
+    sorted_results = defaultdict(lambda: [] )
+    for result in adsm_result:
+        result_type = type(result).__name__
+        sorted_results[result_type].append(result)
+    try:
+        queue.put(dict(sorted_results))
+    except BaseException as e:
+        print(e)
 
     end = time.time()
 
@@ -86,23 +100,23 @@ def zip_map_directory_if_it_exists():
         print("Folder is empty: ", dir_to_zip)
 
 def process_result(queue):
-    from Results.output_parser import DailyParser
-    adsm_result = queue.get()
-    p = DailyParser(adsm_result['headers'], adsm_result['lines'][0][0])
-    results = []
-    for index, line in enumerate(adsm_result['lines']):
-        results.extend(p.parse_daily_strings(line, index + 1 == len(adsm_result['lines'])))
+    results = queue.get()
+    print("Adding Iteration to the database" )
+    DailyReport.objects.bulk_create(results['DailyReport'])
+    DailyControls.objects.bulk_create(results['DailyControls'])
+    DailyByZoneAndProductionType.objects.bulk_create(results['DailyByZoneAndProductionType'])
+    DailyByProductionType.objects.bulk_create(results['DailyByProductionType'])
+    DailyByZone.objects.bulk_create(results['DailyByZone'])
+    ResultsVersion.objects.bulk_create(results['ResultsVersion'])
 
-    with transaction.atomic(using='scenario_db'):
-        for result in results:
-            result.save()
-    
 
 class Simulation(threading.Thread):
     """Execute system commands in a separate thread so as not to interrupt the webpage.
     Saturate the computer's processors with parallel simulation iterations"""
     def __init__(self, max_iteration, **kwargs):
         self.max_iteration = max_iteration
+        self.production_types = ProductionType.objects.values_list('id', 'name')
+        self.zones = Zone.objects.values_list('id', 'name')
         super(Simulation, self).__init__(**kwargs)
 
     def run(self):
@@ -113,11 +127,12 @@ class Simulation(threading.Thread):
         queue = manager.Queue()
         for iteration in range(1, self.max_iteration + 1):
             adsm_cmd = executable_cmd + ['-i', str(iteration)]
-            res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, queue))
+            res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, queue, self.production_types, self.zones))
             statuses.append(res)
         pool.close()
-
-        [process_result(queue) for iteration in range(self.max_iteration)]
+        
+        for iteration in range(self.max_iteration):
+            process_result(queue)  # each .get() gets a new thread result
 
         pool.join()
 
