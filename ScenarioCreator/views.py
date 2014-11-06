@@ -384,7 +384,7 @@ def copy_entry(request, primary_key):
 
 def delete_entry(request, primary_key):
     model_name, model = get_model_name_and_model(request)
-    model.objects.filter(pk=primary_key).delete()
+    model.objects.get(pk=primary_key).delete()
     unsaved_changes(True)
     return redirect('/setup/%s/' % model_name)
 

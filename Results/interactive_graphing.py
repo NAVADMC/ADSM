@@ -8,15 +8,6 @@ the point labels.
 Use the toolbar buttons at the bottom-right of the plot to enable zooming
 and panning, and to reset the view.
 """
-
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from future import standard_library
-standard_library.install_hooks()
-from future.builtins import *
-
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import ListedColormap
 from matplotlib.patches import Circle, Rectangle
