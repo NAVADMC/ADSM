@@ -112,6 +112,11 @@ class Population(BaseModel):
         if self.source_file:
             self.import_population()  # Population must be saved to db so that it can be foreignkeyed
 
+    def delete(self, using=None):
+        for id_start in range(0, Unit.objects.count()+900, 900):  # step size 900
+            Unit.objects.filter(_population=self, id__gte=id_start, id__lt=id_start + 900).delete()  # bulk delete 900 or less at a time
+        super(Population, self).delete()
+
     def import_population(self):
         from Settings.models import SmSession
         session = SmSession.objects.get(pk=1)
