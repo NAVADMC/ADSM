@@ -1,5 +1,5 @@
 ##Installing Animal Disease Spread Model (ADSM)
-ADSM has several external dependencies.  We recommend using pip to install them.  We're currently using Python 2.7.8.
+ADSM has several external dependencies.  We recommend using pip to install them.  We're currently using Python 3.3.
 https://www.python.org/download
 https://pypi.python.org/pypi/pip#downloads
 
@@ -64,7 +64,7 @@ will need to:
 4) `python manage.py migrate Results --database=scenario_db --fake --delete-ghost-migrations`
 5) I've also found creating a "New Scenario" works well:  http://127.0.0.1:8000/setup/NewScenario/
 
-It's important that when you migrate you specify the database= because south does not use Django routers correctly.
+It's important that when you migrate you specify the --database= because south does not use Django routers correctly.
 
 
 
