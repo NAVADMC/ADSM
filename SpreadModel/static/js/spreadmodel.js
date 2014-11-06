@@ -234,8 +234,10 @@ $(function(){
     
     $(document).on('submit','#file-upload',function(event){
         var filename = $(this).find('input[type=file]').val()
-        var file_extension = /application|text\/(x-|)(.*)/g.exec($(this).find('input[type=file]').attr('accept'))[2]
-        if( filename.indexOf(file_extension) == -1) {
+        var valid_extensions = {"application/x-sqlite3": '.sqlite3',
+                                "application/xml": '.xml'}
+        var file_extension = valid_extensions[$(this).find('input[type=file]').attr('accept')]
+        if( file_extension !== undefined && filename.indexOf(file_extension) == -1) {
             alert("Uploaded files must have "+file_extension+" in the name: " + filename)
             console.log(file_extension)
             event.preventDefault()
