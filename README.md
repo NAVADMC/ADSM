@@ -62,7 +62,7 @@ will need to:
 2) Delete migration files (not the directory)
 3) `python manage.py schemamigration Results --initial`
 4) `python manage.py migrate Results --database=scenario_db --fake --delete-ghost-migrations`
-5) I've also found creating a "New Scenario" works well:  http://127.0.0.1:8000/setup/NewScenario/
+5) I've also found creating a "New Scenario" works well:  http://127.0.0.1:8000/app/NewScenario/
 
 It's important that when you migrate you specify the --database= because south does not use Django routers correctly.
 
