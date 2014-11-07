@@ -40,7 +40,7 @@ def supplemental_folder_has_contents(subfolder=''):
 
 def git_adsm_sha():
     try:
-        version = subprocess.check_output('git rev-parse HEAD'.split(), shell=True).strip()[:7]
+        version = subprocess.check_output('git rev-parse HEAD'.split(), shell=True, stderr=subprocess.STDOUT).strip()[:7]
     except:
         version = 'no git'
     return version
