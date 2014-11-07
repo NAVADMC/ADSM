@@ -24,7 +24,7 @@ https://pypi.python.org/pypi/pip#downloads
     git submodule update
     
 
-### C Libraries: Matplotlib and Numpy Dependencies
+### C Libraries: Matplotlib and other Dependencies
 C dependencies can be downloaded as binaries or compiled on non-windows machines.  
 For non-Windows machines:
 
@@ -40,8 +40,13 @@ http://www.lfd.uci.edu/~gohlke/pythonlibs/#pandas
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#matplotlib  
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#pyproj
 
+Download all the above files that match your system (amd64 vs win32).  Place them in your virtualenv /Scripts/ folder.
+Use your virtualenv easy_install.exe on each binary, for example:
 
-##Google Server Production Deploy:
+    easy_install.exe pyproj-1.9.4dev.win-amd64-py3.3.exe
+
+
+## Google Server Production Deploy:
 Ensure that you start server in a screen.  `screen -r` To avoid `sudo` Google server is forwarding port 80 to 8080.  You need
 to be in the py33 virtual env.  That only needs to be done once.
 
@@ -56,7 +61,7 @@ to be in the py33 virtual env.  That only needs to be done once.
     python manage.py runproductionserver --serve_static=collect --pid_file=server.pid --port=8080 
     #sudo  iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080  # use this if the server crashes
 
-##OS - specific Branches
+## OS - specific Branches
 _Branches: Windows, Linux, Mac-OSX_  
 Never merge from OS specific branches back into master.  Changes made in these branches should be OS-specific and stay isolated.  Any general changes should be made in master and applied to the other branches by merging.  
 If you do accidentally merge an OS branch into master use this command to reset the repo before you push:  
@@ -65,7 +70,7 @@ If you do accidentally merge an OS branch into master use this command to reset 
 Where <SHA> is the SHA from the latest commit on GitHub, before the erroneous merge happened.  This will reset the state back to the SHA.
 
 
-##Bryan's Notes on Installing Python3.3 in Linux:
+## Bryan's Notes on Installing Python3.3 in Linux:
     sudo apt-get build-dep python3.2
     sudo apt-get install libreadline-dev libncurses5-dev libssl1.0.0 tk8.5-dev zlib1g-dev liblzma-dev
     wget http://python.org/ftp/python/3.3.3/Python-3.3.3.tgz
@@ -83,7 +88,7 @@ Where <SHA> is the SHA from the latest commit on GitHub, before the erroneous me
         wget http://python-distribute.org/distribute_setup.py -O - | python
         easy_insatll pip
 
-##Updating the ADSM Executable:
+## Updating the ADSM Executable:
 The production server already has the code checked out (Linux branch) and all
 of the libraries required by ADSM are installed.
 
@@ -98,7 +103,7 @@ To update the executable:
 
 `make` will will fail on a `dia: command not found` error when it gets to the SpreadModel/CEngine/doc/diagrams directory.  That’s OK: at this point, the executable is built, and you are done.
 
-##Building Distributable
+## Building Distributable
     Required Items for cx_freeze:
         http://sourceforge.net/projects/pywin32/  # For Windows only. MAKE SURE these go into your virtualenv!
         ldd, objdump  # For Linux only
