@@ -26,7 +26,14 @@ class Command(BaseCommand):
                 command = git + ' reset --hard'
                 subprocess.call(command, shell=True)
 
-                command = git + ' pull'
+                command = git + ' rev-parse --abbrev-ref HEAD'
+                current_branch = subprocess.check_output(command, shell=True).decode().strip()
+
+                # Go ahead and fetch the current branch
+                command = git + ' fetch origin ' + current_branch
+                subprocess.call(command, shell=True)
+
+                command = git + ' rebase FETCH_HEAD'
                 git_status = subprocess.check_output(command, shell=True)
                 # TODO: Make sure the pull actually worked
         except:
@@ -34,12 +41,13 @@ class Command(BaseCommand):
             try:
                 command = git + ' reset'
                 subprocess.call(command, shell=True)
-                command = git + ' stash apply'
-                subprocess.call(command, shell=True)
             except:
                 print("Failed to gracefully reset!")
                 return False
         finally:
+            command = git + ' stash apply'
+            subprocess.call(command, shell=True)
+            
             session = SmSession.objects.get_or_create()[0]
             session.update_on_startup = False
             session.save()
