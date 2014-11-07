@@ -186,7 +186,9 @@ $(function(){
 
     $('[data-delete-link]').click(function(){
         var link = $(this).attr('data-delete-link')
+        var do_async = $(this).hasClass('ajax-post')
         var object_type = link.split('/')[2]
+        object_type = object_type === undefined ? 'object' : object_type
         var additional_msg = outputs_computed ? ' and <strong><u>All Results</u></strong>' : ''
         var dialog = new BootstrapDialog.show({
             title: 'Delete Confirmation',
@@ -204,7 +206,11 @@ $(function(){
                     label: 'Delete',
                     cssClass: 'btn-danger',
                     action: function(dialog){
-                        window.location = link;
+                        if(do_async){
+                            $.post(link).done(function(){window.location.reload()});
+                        } else {
+                            window.location = link;
+                        }
                     }
                 }
             ]
