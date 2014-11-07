@@ -100,6 +100,12 @@ class BaseModel(models.Model):
         delete_all_outputs()
         return super(BaseModel, self).save(force_insert, force_update, using, update_fields)
 
+    def delete(self, using=None):
+        Settings.models.unsaved_changes(True)
+        from Results.models import delete_all_outputs  # I quickly get circular imports if this is higher up
+        delete_all_outputs()
+        return super(BaseModel, self).delete(using)
+
     class Meta(object):
         abstract = True
 
@@ -115,7 +121,7 @@ class Population(BaseModel):
     def delete(self, using=None):
         for id_start in range(0, Unit.objects.count()+900, 900):  # step size 900
             Unit.objects.filter(_population=self, id__gte=id_start, id__lt=id_start + 900).delete()  # bulk delete 900 or less at a time
-        super(Population, self).delete()
+        super(Population, self).delete(using)
 
     def import_population(self):
         from Settings.models import SmSession
