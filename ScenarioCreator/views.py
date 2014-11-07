@@ -386,7 +386,10 @@ def delete_entry(request, primary_key):
     model_name, model = get_model_name_and_model(request)
     model.objects.get(pk=primary_key).delete()
     unsaved_changes(True)
-    return redirect('/setup/%s/' % model_name)
+    if model_name not in singletons:
+        return redirect('/setup/%s/' % model_name)  # model list
+    else:
+        return redirect('/setup/%s/new/' % model_name)  # Population can be deleted, maybe others
 
 
 def list_per_model(model_name, model):

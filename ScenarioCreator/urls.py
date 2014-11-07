@@ -44,6 +44,7 @@ urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
                                          "url('^AssignZoneEffects/$', 'ScenarioCreator.views.zone_effects')",
 
                                          "url('^Populations/$', 'ScenarioCreator.views.population')",
+                                         "url('^Population/new/$', 'ScenarioCreator.views.population')",  # force redirect for special singleton
                                          "url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population')",
                                          "url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario')",
                                         ])
