@@ -3,8 +3,10 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
+
 standard_library.install_hooks()
 
+import subprocess
 from glob import glob
 from itertools import chain
 import re
@@ -36,6 +38,14 @@ def supplemental_folder_has_contents(subfolder=''):
     return len(list(chain(*[glob(workspace_path(scenario_filename() + subfolder + "/*." + ext)) for ext in ['csv', 'shp', 'shx', 'dbf', 'zip']]))) > 0
 
 
+def git_adsm_sha():
+    try:
+        version = subprocess.check_output('git rev-parse HEAD'.split(), shell=True).strip()[:7]
+    except:
+        version = 'no git'
+    return version
+
+
 def basic_context(request):
     graceful_startup()
     pt_count = ProductionType.objects.count()
@@ -44,6 +54,7 @@ def basic_context(request):
                'update_available': SmSession.objects.get_or_create()[0].update_available,
                'url': request.path,
                'active_link': '/'.join(re.split('\W+', request.path)[2:]),
+               'dev_version': git_adsm_sha(),
                }
     
     if 'setup/' in request.path:  # inputs specific context
