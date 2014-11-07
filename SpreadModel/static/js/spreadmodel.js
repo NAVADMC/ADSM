@@ -2,7 +2,7 @@ function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTim
 
 
 safe_save = function(url, data){
-    if(typeof outputs_computed == 'undefined' || outputs_computed == false) { 
+    if(typeof outputs_computed === 'undefined' || outputs_computed == false) { 
         $.post(url, data, function() { window.location.reload() });
     } else { //confirmation dialog so we don't clobber outputs
         var dialog = new BootstrapDialog.show({
