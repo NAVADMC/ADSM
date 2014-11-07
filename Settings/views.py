@@ -46,15 +46,20 @@ def update_is_needed():
         os.chdir(settings.BASE_DIR)
 
         command = git + ' rev-parse --abbrev-ref HEAD'
-        current_branch = subprocess.check_output(command, shell=True).strip()
+        current_branch = subprocess.check_output(command, shell=True).decode().strip()
 
-        command = git + ' fetch origin ' + current_branch + ':' + current_branch
+        # Go ahead and fetch the current branch
+        command = git + ' fetch origin ' + current_branch
         subprocess.call(command, shell=True)
-
-        command = git + ' status -uno'
-        status = subprocess.check_output(command, shell=True)
-        print(status)
-        return 'is behind' in status
+        
+        command = git + ' rev-parse FETCH_HEAD'
+        fetched_sha = subprocess.check_output(command, shell=True).decode().strip()
+        command = git + ' rev-parse HEAD'
+        head_sha = subprocess.check_output(command, shell=True).decode().strip()
+        
+        if fetched_sha != head_sha:
+            return True
+        return False
     except:
         print ("Failed in checking if an update is required!")
         return False
