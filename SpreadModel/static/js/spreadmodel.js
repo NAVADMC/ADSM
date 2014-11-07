@@ -286,7 +286,7 @@ var check_file_saved = function(){
 
 
 two_state_button = function(){
-    if(typeof outputs_computed == 'undefined' || outputs_computed == false) {
+    if(typeof outputs_computed === 'undefined' || outputs_computed == false) {
         return 'class="btn btn-primary">Save changes'
     } else {
         return 'class="btn btn-danger">Delete Results and Save Changes'
