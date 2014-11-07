@@ -204,7 +204,7 @@ $(function(){
                     label: 'Delete',
                     cssClass: 'btn-danger',
                     action: function(dialog){
-                        $.post(link).done(function(){window.location.reload()});
+                        window.location = link;
                     }
                 }
             ]
