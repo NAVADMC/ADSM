@@ -26,6 +26,16 @@
 
 
 
+#define ADSM_CLI_ERROR adsm_cli_error_quark()
+
+GQuark
+adsm_cli_error_quark (void)
+{
+  return g_quark_from_static_string ("ADSM_CLI_ERROR");
+}
+
+
+
 int
 main (int argc, char *argv[])
 {
@@ -78,53 +88,63 @@ main (int argc, char *argv[])
     {
       g_error ("option parsing failed: %s\n", option_error->message);
     }
-  if (argc >= 1)
+  if (argc >= 2)
     scenario_db_name = argv[1];
   else
     {
-      g_error ("Need name of scenario database");
+      g_set_error (&error, ADSM_CLI_ERROR, 0, "Need name of scenario database");
     }
   g_option_context_free (context);
 
-  /* If an output directory was specified, and that directory does not exist,
-   * create the directory. */
-  {
-    /* There will be a "Map" directory inside the output directory too. We can
-     * make the output directory and the subdirectory inside with one call to
-     * g_mkdir_with_parents. */
-    gint errcode;
-    gchar *map_output_dir;
-    if (output_dir == NULL)
-      map_output_dir = g_strdup ("Map");
-    else
-      map_output_dir = g_build_filename (output_dir, "Map", NULL);
-    errcode = g_mkdir_with_parents (map_output_dir, S_IRUSR + S_IWUSR + S_IXUSR);
-    if (errcode != 0)
-      {
-        g_error ("could not create output directory \"%s\": %s",
-                 map_output_dir, strerror(errno));
-      }
-    g_free (map_output_dir);
-  }
-
-  sqlerr = sqlite3_open_v2 (scenario_db_name, &scenario_db, SQLITE_OPEN_READWRITE, NULL);
-  if (sqlerr !=  SQLITE_OK)
+  if (!error)
     {
-      g_error ("Error opening scenario database: %s", sqlite3_errmsg (scenario_db));
+      /* If an output directory was specified, and that directory does not exist,
+       * create the directory. */
+      {
+        /* There will be a "Map" directory inside the output directory too. We can
+         * make the output directory and the subdirectory inside with one call to
+         * g_mkdir_with_parents. */
+        gint errcode;
+        gchar *map_output_dir;
+        if (output_dir == NULL)
+          map_output_dir = g_strdup ("Map");
+        else
+          map_output_dir = g_build_filename (output_dir, "Map", NULL);
+        errcode = g_mkdir_with_parents (map_output_dir, S_IRUSR + S_IWUSR + S_IXUSR);
+        if (errcode != 0)
+          {
+            g_error ("could not create output directory \"%s\": %s",
+                     map_output_dir, strerror(errno));
+          }
+        g_free (map_output_dir);
+      }
     }
-  sqlite3_busy_timeout (scenario_db, 30 * 60 * 1000 /* 30 minutes, given in milliseconds */);
 
-  run_sim_main (scenario_db,
-                (char *)output_dir,
-                fixed_rng_value,
-                verbosity,
-                seed,
-                starting_iteration_number,
-                dry_run,
-                &error);
+  if (!error)
+    {
+      sqlerr = sqlite3_open_v2 (scenario_db_name, &scenario_db, SQLITE_OPEN_READWRITE, NULL);
+      if (sqlerr !=  SQLITE_OK)
+        {
+          g_error ("Error opening scenario database: %s", sqlite3_errmsg (scenario_db));
+        }
+    }
 
-  sqlite3_close (scenario_db);
-  
+  if (!error)
+    {
+      sqlite3_busy_timeout (scenario_db, 30 * 60 * 1000 /* 30 minutes, given in milliseconds */);
+
+      run_sim_main (scenario_db,
+                    (char *)output_dir,
+                    fixed_rng_value,
+                    verbosity,
+                    seed,
+                    starting_iteration_number,
+                    dry_run,
+                    &error);
+
+      sqlite3_close (scenario_db);
+    }
+
   if (error)
     {
       g_warning ("%s", error->message);
