@@ -69,7 +69,7 @@ $(function(){
     });
 
 
-    $('#file-upload').on('submit', function(e){
+    $(document).on('submit', '#file-upload', function(e){
         e.preventDefault();
         var formData = new FormData($(this)[0]);
         $.ajax({
