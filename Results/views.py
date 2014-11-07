@@ -101,13 +101,15 @@ def zip_map_directory_if_it_exists():
 
 def process_result(queue):
     results = queue.get()
-    print("Adding Iteration to the database" )
     DailyReport.objects.bulk_create(results['DailyReport'])
     DailyControls.objects.bulk_create(results['DailyControls'])
     DailyByZoneAndProductionType.objects.bulk_create(results['DailyByZoneAndProductionType'])
     DailyByProductionType.objects.bulk_create(results['DailyByProductionType'])
     DailyByZone.objects.bulk_create(results['DailyByZone'])
-    ResultsVersion.objects.bulk_create(results['ResultsVersion'])
+    try:
+        ResultsVersion.objects.bulk_create(results['ResultsVersion'])
+    except KeyError:
+        pass
 
 
 class Simulation(threading.Thread):
