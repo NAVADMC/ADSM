@@ -30,14 +30,14 @@ class Command(BaseCommand):
                 git_status = subprocess.check_output(command, shell=True)
                 # TODO: Make sure the pull actually worked
         except:
-            print "Failed to update!"
+            print("Failed to update!")
             try:
                 command = git + ' reset'
                 subprocess.call(command, shell=True)
                 command = git + ' stash apply'
                 subprocess.call(command, shell=True)
             except:
-                print "Failed to gracefully reset!"
+                print("Failed to gracefully reset!")
                 return False
         finally:
             session = SmSession.objects.get_or_create()[0]
