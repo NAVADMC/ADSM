@@ -3,6 +3,8 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
+from Settings.forms import ImportForm
+
 standard_library.install_hooks()
 
 import re
@@ -150,6 +152,19 @@ def handle_file_upload(request):
         for chunk in uploaded_file.chunks():
             destination.write(chunk)
     return filename
+
+
+def run_importer(import_form):
+    scenario_name = '' 
+    return open_scenario(scenario_name)
+        
+    
+def import_naadsm_scenario(request):
+    initialized_form = ImportForm(request.POST or None)
+    context = {'form': initialized_form, 'title': "Import Legacy NAADSM Scenario in XML format"}
+    if initialized_form.is_valid():
+        return run_importer(initialized_form)
+    return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages
 
 
 def upload_scenario(request):

@@ -16,6 +16,7 @@ urlpatterns = patterns('',
     url('^NewScenario/$', 'Settings.views.new_scenario'),
     url('^Workspace/$', 'Settings.views.file_dialog'),
     
+    url(r'^ImportScenario/$', 'Settings.views.import_naadsm_scenario'),
     url(r'^OpenScenario/(?P<target>.+)/$', 'Settings.views.open_scenario'),  # includes .extension
     url(r'^DeleteFile/(?P<target>.+)/$', 'Settings.views.delete_file'),
     url(r'^Download/(?P<target>.+)/$', 'Settings.views.download_file'),
