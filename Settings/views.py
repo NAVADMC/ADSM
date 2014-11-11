@@ -145,8 +145,8 @@ def file_dialog(request):
     return render(request, 'ScenarioCreator/workspace.html', context)
 
 
-def handle_file_upload(request):
-    uploaded_file = request.FILES['file']
+def handle_file_upload(request, field_name='file'):
+    uploaded_file = request.FILES[field_name]
     filename = uploaded_file._name
     with open(workspace_path(filename), 'wb+') as destination:
         for chunk in uploaded_file.chunks():
@@ -154,8 +154,14 @@ def handle_file_upload(request):
     return filename
 
 
-def run_importer(import_form):
-    scenario_name = '' 
+def run_importer(request):
+    param_file_path = handle_file_upload(request, 'parameters_xml')
+    popul_file_path = handle_file_upload(request, 'population_xml')
+    scenario_name = '%s_%s.sqlite3' % (os.path.splitext(os.path.basename(x)) for x in [param_file_path, popul_file_path])
+    command = 'python xml2sqlite.py %s %s %s' % (popul_file_path, param_file_path, scenario_name)
+    any_output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True).decode().strip()
+    print(any_output)
+    #this could be displayed as a more detailed status screen
     return open_scenario(scenario_name)
         
     
@@ -163,7 +169,7 @@ def import_naadsm_scenario(request):
     initialized_form = ImportForm(request.POST or None)
     context = {'form': initialized_form, 'title': "Import Legacy NAADSM Scenario in XML format"}
     if initialized_form.is_valid():
-        return run_importer(initialized_form)
+        return run_importer(request)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages
 
 
