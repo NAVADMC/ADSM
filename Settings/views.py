@@ -159,14 +159,14 @@ def run_importer(request):
     param_path = workspace_path(handle_file_upload(request, 'parameters_xml'))
     popul_path = workspace_path(handle_file_upload(request, 'population_xml'))
     names_without_extensions = tuple(os.path.splitext(os.path.basename(x))[0] for x in [param_path, popul_path])  # stupid generators...
-    scenario_name = '%s_%s.sqlite3' % names_without_extensions
+    scenario_name = workspace_path('%s_%s.sqlite3' % names_without_extensions)
     # try:
     import_naadsm_xml(popul_path, param_path, scenario_name)
     # except BaseException as error:
     #     print("Import process crashed\n", error)
     #     return redirect("/app/ImportScenario/")
     #this could be displayed as a more detailed status screen
-    return open_scenario(scenario_name)
+    return open_scenario(request, scenario_name)
         
     
 def import_naadsm_scenario(request):

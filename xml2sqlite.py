@@ -306,7 +306,7 @@ def readParameters( parameterFileName ):
 		assert fileAsString != None
 		# Insert text to define the xdf namespace.
 		fileAsString = fileAsString.replace( 'xmlns:', 'xmlns:xdf="http://xml.gsfc.nasa.gov/XDF" xmlns:', 1 )
-		xml = ET.parse( StringIO( fileAsString ) ).getroot()
+		xml = ET.fromstring( fileAsString )
 	fp.close()
 
 	scenario = Scenario(
