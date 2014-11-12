@@ -155,21 +155,30 @@ def handle_file_upload(request, field_name='file'):
 
 
 def run_importer(request):
-    param_file_path = handle_file_upload(request, 'parameters_xml')
-    popul_file_path = handle_file_upload(request, 'population_xml')
-    scenario_name = '%s_%s.sqlite3' % (os.path.splitext(os.path.basename(x)) for x in [param_file_path, popul_file_path])
-    command = 'python xml2sqlite.py %s %s %s' % (popul_file_path, param_file_path, scenario_name)
-    any_output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True).decode().strip()
-    print(any_output)
+    param_file_name = handle_file_upload(request, 'parameters_xml')
+    popul_file_name = handle_file_upload(request, 'population_xml')
+    names_without_extensions = tuple(os.path.splitext(os.path.basename(x))[0] for x in [param_file_name, popul_file_name])  # stupid generators...
+    scenario_name = '%s_%s.sqlite3' % names_without_extensions
+    command = 'python.exe xml2sqlite.py %s %s %s' % (popul_file_name, param_file_name, scenario_name)
+    try:
+        any_output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True).decode().strip()
+        print(any_output)
+    except subprocess.CalledProcessError as error:
+        any_output = "Import process crashed"
+        print(any_output, error)
+        return redirect("/app/ImportScenario/")
     #this could be displayed as a more detailed status screen
     return open_scenario(scenario_name)
         
     
 def import_naadsm_scenario(request):
-    initialized_form = ImportForm(request.POST or None)
-    context = {'form': initialized_form, 'title': "Import Legacy NAADSM Scenario in XML format"}
+    if request.method == "POST":
+        initialized_form = ImportForm(request.POST, request.FILES)
+    else:  # GET page for the first time
+        initialized_form = ImportForm()
     if initialized_form.is_valid():
         return run_importer(request)
+    context = {'form': initialized_form, 'title': "Import Legacy NAADSM Scenario in XML format"}
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages
 
 
