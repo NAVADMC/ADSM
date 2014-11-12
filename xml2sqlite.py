@@ -24,6 +24,7 @@ from django.core.management import call_command
 import xml.etree.ElementTree as ET
 import warnings
 from pyproj import Proj
+from io import StringIO
 
 CREATE_AT_A_TIME = 500 # for bulk object creation
 
@@ -288,7 +289,33 @@ def readPopulation( populationFileName ):
 
 def readParameters( parameterFileName ):
 	fp = open( parameterFileName, 'rb' )
-	xml = ET.parse( fp ).getroot()
+	try:
+		xml = ET.parse( fp ).getroot()
+	except ET.ParseError as e:
+		# XML parameter files exported from NAADSM contain elements with an
+		# "xdf" prefix, but the files do not define that namespace. This can
+		# result in an "unbound prefix" exception, which we handle here.
+		#
+		# Any exception other than "unbound prefix", we just re-raise.
+		if not 'unbound prefix' in str( e ):
+			raise
+		# Rewind to the start of the file, and read it into memory as binary.
+		fp.seek( 0 )
+		fileAsBinary = bytearray( fp.read() )
+		# Try to guess the encoding.
+		possibleEncodings = ('utf-16', 'utf-8', 'us-ascii')
+		fileAsString = None
+		for encoding in possibleEncodings:
+			try:
+				fileAsString = fileAsBinary.decode( encoding )
+				break
+			except UnicodeDecodeError:
+				pass
+		# end of loop over possible encodings
+		assert fileAsString != None
+		# Insert text to define the xdf namespace.
+		fileAsString = fileAsString.replace( 'xmlns:', 'xmlns:xdf="http://xml.gsfc.nasa.gov/XDF" xmlns:', 1 )
+		xml = ET.parse( StringIO( fileAsString ) ).getroot()
 	fp.close()
 
 	scenario = Scenario(
