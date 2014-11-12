@@ -1,29 +1,20 @@
-#!/usr/bin/env python
-"""This script reads an XML parameters file and creates the equivalent
+"""This module reads an XML parameters file and creates the equivalent
 database.  It was written primarily for migrating the automated test suite,
 but it can also serve as an example for creating a SpreadModel parameter file
 programmatically.
 
 This script avoids direct SQL manipulation and instead uses the models.py file
 defined for the SpreadModel project for all object creation."""
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
-from future.builtins import open
-from future.builtins import int
-from future.builtins import filter
-from future import standard_library
-standard_library.install_hooks()
 
-
-
-import sys
 from django.conf import settings
-from django.core.management import call_command
+# from django.core.management import call_command
 import xml.etree.ElementTree as ET
 import warnings
 from pyproj import Proj
+
+from ScenarioCreator.models import *
+from Results.models import *
+from Settings.connection_handler import create_db_connection
 
 CREATE_AT_A_TIME = 500 # for bulk object creation
 
@@ -1362,53 +1353,7 @@ def readParameters( parameterFileName ):
 	return # from readParameters
 
 
-
-def initResults():
-	bulkUnitStats = []
-	for unit in Unit.objects.all():
-		bulkUnitStats.append( UnitStats( unit=unit ) )
-		if len( bulkUnitStats ) >= CREATE_AT_A_TIME:
-			UnitStats.objects.bulk_create( bulkUnitStats )
-			bulkUnitStats = []
-	if bulkUnitStats:
-		UnitStats.objects.bulk_create( bulkUnitStats )
-
-
-
-def main():
-	# Make sure the database has all the correct tables.
-	call_command('syncdb', verbosity=0)
-
-	populationFileName = sys.argv[1]
-	readPopulation( populationFileName )
-
-	parameterFileName = sys.argv[2]
-	readParameters( parameterFileName )
-
-	# The Results UnitStats objects must be initialized after the parameters,
-	# because saving a change to the Population or Scenario objects will delete
-	# all Results.
-	initResults()
-
-
-
-if __name__ == "__main__":
-	# The reading of the database file name is done here instead of in main()
-	# because "settings" must be filled in before models is imported, and
-	# import statements are allowed only at the top level in Python, not inside
-	# functions.
-	dbName = sys.argv[3]
-	settings.configure(
-	  INSTALLED_APPS = ('ScenarioCreator', 'Settings', 'Results'),
-	  DATABASES = {
-	    'default': {
-	      'NAME': dbName,
-	      'ENGINE': 'django.db.backends.sqlite3',
-	      'USER': 'user',
-	      'PASSWORD': '1',
-	    }
-	  }
-	)
-	from ScenarioCreator.models import *
-	from Results.models import *
-	main()
+def import_naadsm_xml(populationFileName, parameterFileName, db_path):
+	create_db_connection('import_db', db_path)  # Make sure the database has all the correct tables.
+	readPopulation(populationFileName)
+	readParameters(parameterFileName)

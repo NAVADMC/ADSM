@@ -4,6 +4,7 @@ from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
 from Settings.forms import ImportForm
+from xml2sqlite import import_naadsm_xml
 
 standard_library.install_hooks()
 
@@ -155,18 +156,15 @@ def handle_file_upload(request, field_name='file'):
 
 
 def run_importer(request):
-    param_file_name = handle_file_upload(request, 'parameters_xml')
-    popul_file_name = handle_file_upload(request, 'population_xml')
-    names_without_extensions = tuple(os.path.splitext(os.path.basename(x))[0] for x in [param_file_name, popul_file_name])  # stupid generators...
+    param_path = workspace_path(handle_file_upload(request, 'parameters_xml'))
+    popul_path = workspace_path(handle_file_upload(request, 'population_xml'))
+    names_without_extensions = tuple(os.path.splitext(os.path.basename(x))[0] for x in [param_path, popul_path])  # stupid generators...
     scenario_name = '%s_%s.sqlite3' % names_without_extensions
-    command = 'python.exe xml2sqlite.py %s %s %s' % (popul_file_name, param_file_name, scenario_name)
-    try:
-        any_output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True).decode().strip()
-        print(any_output)
-    except subprocess.CalledProcessError as error:
-        any_output = "Import process crashed"
-        print(any_output, error)
-        return redirect("/app/ImportScenario/")
+    # try:
+    import_naadsm_xml(popul_path, param_path, scenario_name)
+    # except BaseException as error:
+    #     print("Import process crashed\n", error)
+    #     return redirect("/app/ImportScenario/")
     #this could be displayed as a more detailed status screen
     return open_scenario(scenario_name)
         

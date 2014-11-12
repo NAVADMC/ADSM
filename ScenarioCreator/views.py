@@ -418,47 +418,7 @@ def model_list(request):
         context['models'].append(list_per_model(model_name, model))
     return render(request, 'ScenarioCreator/ModelList.html', context)
 
-
-'''Utility Views for UI'''
-# Leave this code here until we can use it for importing chunks of a scenario in the Scenario Builder
-# def create_db_connection(db_name, db_path):
-#     needs_sync = not os.path.isfile(db_path)
-#
-#     connections.databases[db_name] = {
-#         'NAME': os.path.join(settings.BASE_DIR, db_path),
-#         'ENGINE': 'django.db.backends.sqlite3'}
-#     # Ensure the remaining default connection information is defined.
-#     # EDIT: this is actually performed for you in the wrapper class __getitem__
-#     # method.. although it may be good to do it when being initially setup to
-#     # prevent runtime errors later.
-#     # connections.databases.ensure_defaults(db_name)
-#     if needs_sync:
-#         # Don't import django.core.management if it isn't needed.
-#         from django.core.management import call_command
-#         print('Building DB structure...')
-#         os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
-#         call_command('migrate',
-#             # verbosity=0,
-#             interactive=False,
-#             database=connections[db_name].alias,  # database=self.connection.alias,
-#             load_initial_data=False)
-#         # call_command('syncdb', )
-#         print('Done creating database')
-#
-#
-# def db_save(file_path):
-#     create_db_connection('save_file', file_path)
-#     top_level_models = [Scenario, Population, Disease, ControlMasterPlan]
-#     for parent_object in top_level_models:
-#         try:
-#             node = parent_object.objects.using('default').get(id=1)
-#             node.save(using='save_file')
-#         except ObjectDoesNotExist:
-#             print("Couldn't find a ", parent_object)
-#
-#     unsaved_changes(False)  # File is now in sync
-#     return 'Scenario Saved'
-
+# Utility Views was moved to the Settings/connection_handler.py 
 
 def upload_population(request):
     from Settings.models import SmSession
