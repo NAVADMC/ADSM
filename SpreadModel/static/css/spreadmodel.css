@@ -258,6 +258,11 @@ textarea {
     height: 70px;
 }
 
+#id_description {
+    width: 602px; 
+    height: 200px;
+}
+
 td, th {
     padding-bottom: 8px;
     padding-right: 10px;
