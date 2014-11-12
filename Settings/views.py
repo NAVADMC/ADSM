@@ -3,9 +3,6 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
-from Settings.forms import ImportForm
-from xml2sqlite import import_naadsm_xml
-
 standard_library.install_hooks()
 
 import re
@@ -22,6 +19,8 @@ from django.db import OperationalError
 from ScenarioCreator.models import ZoneEffect
 from Settings.models import scenario_filename, SmSession, unsaved_changes
 from Settings.utils import close_all_connections
+from Settings.forms import ImportForm
+from Settings.xml2sqlite import import_naadsm_xml
 
 from git.git import git
 
@@ -129,7 +128,7 @@ def check_update(request):
 
 def workspace_path(target):
     if '/' in target or '\\' in target:
-        parts = re.split(r'/+\\+', target)  # the slashes here are coming in from URL so they probably don't match os.path.split()
+        parts = re.split(r'[/\\]+', target)  # the slashes here are coming in from URL so they probably don't match os.path.split()
         return os.path.join("workspace", *parts)
     return os.path.join("workspace", target)
 
@@ -146,10 +145,14 @@ def file_dialog(request):
     return render(request, 'ScenarioCreator/workspace.html', context)
 
 
-def handle_file_upload(request, field_name='file'):
+def handle_file_upload(request, field_name='file', is_temp_file=False):
     """Writes an uploaded file into the project workspace and returns the full path to the file."""
     uploaded_file = request.FILES[field_name]
-    filename = workspace_path(uploaded_file._name)
+    prefix = ''
+    if is_temp_file:
+        prefix = 'temp/'
+        os.mkdir(workspace_path(prefix))
+    filename = workspace_path(prefix + uploaded_file._name)
     with open(filename, 'wb+') as destination:
         for chunk in uploaded_file.chunks():
             destination.write(chunk)
@@ -157,7 +160,7 @@ def handle_file_upload(request, field_name='file'):
 
 
 def run_importer(request):
-    param_path = handle_file_upload(request, 'parameters_xml')
+    param_path = handle_file_upload(request, 'parameters_xml', is_temp_file=True)  # we don't want param XMLs stored next to population XMLs
     popul_path = handle_file_upload(request, 'population_xml')
     names_without_extensions = tuple(os.path.splitext(os.path.basename(x))[0] for x in [param_path, popul_path])  # stupid generators...
     new_scenario(request)  # I realized this was WAY simpler than creating a new database connection
