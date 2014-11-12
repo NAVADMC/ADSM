@@ -6,16 +6,12 @@ programmatically.
 This script avoids direct SQL manipulation and instead uses the models.py file
 defined for the SpreadModel project for all object creation."""
 
-from django.conf import settings
-# from django.core.management import call_command
 import xml.etree.ElementTree as ET
 import warnings
 from pyproj import Proj
-from io import StringIO
 
 from ScenarioCreator.models import *
 from Results.models import *
-from Settings.connection_handler import create_db_connection
 
 CREATE_AT_A_TIME = 500 # for bulk object creation
 
@@ -1380,7 +1376,8 @@ def readParameters( parameterFileName ):
 	return # from readParameters
 
 
-def import_naadsm_xml(populationFileName, parameterFileName, db_path):
-	create_db_connection('import_db', db_path)  # Make sure the database has all the correct tables.
+def import_naadsm_xml(populationFileName, parameterFileName):
+	""" Load activeSession with the contents of 2 XML files.  This can be saved normally after the scenario_db is populated.
+	Database routing is done through the normal ScenarioCreator/router.py"""
 	readPopulation(populationFileName)
 	readParameters(parameterFileName)
