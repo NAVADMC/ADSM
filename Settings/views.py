@@ -147,17 +147,18 @@ def file_dialog(request):
 
 
 def handle_file_upload(request, field_name='file'):
+    """Writes an uploaded file into the project workspace and returns the full path to the file."""
     uploaded_file = request.FILES[field_name]
-    filename = uploaded_file._name
-    with open(workspace_path(filename), 'wb+') as destination:
+    filename = workspace_path(uploaded_file._name)
+    with open(filename, 'wb+') as destination:
         for chunk in uploaded_file.chunks():
             destination.write(chunk)
     return filename
 
 
 def run_importer(request):
-    param_path = workspace_path(handle_file_upload(request, 'parameters_xml'))
-    popul_path = workspace_path(handle_file_upload(request, 'population_xml'))
+    param_path = handle_file_upload(request, 'parameters_xml')
+    popul_path = handle_file_upload(request, 'population_xml')
     names_without_extensions = tuple(os.path.splitext(os.path.basename(x))[0] for x in [param_path, popul_path])  # stupid generators...
     new_scenario(request)  # I realized this was WAY simpler than creating a new database connection
     import_naadsm_xml(popul_path, param_path)  # puts all the data in activeSession
