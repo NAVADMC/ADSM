@@ -538,7 +538,7 @@ def whole_scenario_validation():
                                                               direct_contact_spread__isnull=False).count()
         if not count:
             fatal_errors.append(pt.name + " cannot spread disease from one animal to another, because Direct Spread %s -> %s has not been assigned." % (pt.name, pt.name))
-    if not Disease.objects.get_or_create().include_direct_contact_spread:
+    if not Disease.objects.get_or_create()[0].include_direct_contact_spread:
         fatal_errors.append("Direct Spread is not enabled in this Simulation.")
     return fatal_errors
 
