@@ -257,7 +257,7 @@ def download_file(request, target):
     return response
 
 
-def new_scenario(request):
+def new_scenario(request=None):
     reset_db('scenario_db')
     reset_db('default')
     update_db_version()

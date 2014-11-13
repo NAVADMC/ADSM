@@ -4,7 +4,8 @@ import json
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
-from django.db.models import Q
+from django.db.models import Q, ObjectDoesNotExist
+from django.db import OperationalError
 
 from Results.models import *  # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
