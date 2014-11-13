@@ -151,7 +151,7 @@ def handle_file_upload(request, field_name='file', is_temp_file=False):
     prefix = ''
     if is_temp_file:
         prefix = 'temp/'
-        os.mkdir(workspace_path(prefix))
+        os.makedirs(workspace_path(prefix), exist_ok=True)
     filename = workspace_path(prefix + uploaded_file._name)
     with open(filename, 'wb+') as destination:
         for chunk in uploaded_file.chunks():

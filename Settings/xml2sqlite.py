@@ -16,6 +16,17 @@ from Results.models import *
 CREATE_AT_A_TIME = 500 # for bulk object creation
 
 
+def getProductionType( xml, attributeName, allowedNames ):
+    if attributeName not in xml.attrib:
+        types = allowedNames
+    else:
+        text = xml.attrib[attributeName]
+        if text == '':
+            types = allowedNames
+        else:
+            types = text
+    return types
+
 
 def getProductionTypes( xml, attributeName, allowedNames ):
     if attributeName not in xml.attrib:
@@ -372,8 +383,11 @@ def readParameters( parameterFileName ):
             prevalence = getRelChart( el.find( './prevalence' ), relChartNameSequence )
         else:
             prevalence = None
+
+        typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
         diseaseProgression = DiseaseProgression(
             _disease = disease,
+            name = typeNames[0] + ' Progression',
             disease_latent_period = latentPeriod,
             disease_subclinical_period = subclinicalPeriod,
             disease_clinical_period = clinicalPeriod,
@@ -382,7 +396,6 @@ def readParameters( parameterFileName ):
             )
         diseaseProgression.save()
 
-        typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
         for typeName in typeNames:
             diseaseProgressionAssignment = DiseaseProgressionAssignment(
                 production_type = ProductionType.objects.get( name=typeName ),
@@ -401,8 +414,13 @@ def readParameters( parameterFileName ):
             delay = getPdf( el.find( './delay' ), pdfNameSequence )
         else:
             delay = None
+            
+        fromTypeName = getProductionType( el, 'from-production-type', productionTypeNames )
+        toTypeName = getProductionType( el, 'to-production-type', productionTypeNames )
+        
         airborneSpread = AirborneSpread(
             _disease = disease,
+            name = 'Airborne %s -> %s' % (fromTypeName, toTypeName),
             max_distance = maxDistance,
             spread_1km_probability = float( el.find( './prob-spread-1km' ).text ),
             exposure_direction_start = float( el.find( './wind-direction-start/value' ).text ),
@@ -411,16 +429,14 @@ def readParameters( parameterFileName ):
         )
         airborneSpread.save()
 
-        for fromTypeName in getProductionTypes( el, 'from-production-type', productionTypeNames ):
-            for toTypeName in getProductionTypes( el, 'to-production-type', productionTypeNames ):
-                pairing = DiseaseSpreadAssignment(
-                    source_production_type = ProductionType.objects.get( name=fromTypeName ),
-                    destination_production_type = ProductionType.objects.get( name=toTypeName ),
-                    airborne_spread = airborneSpread
-                )
-                pairing.save()
-            # end of loop over to-production-types covered by this <airborne-spread[-exponential]-model> element
-            # end of loop over from-production-types covered by this <airborne-spread[-exponential]-model> element
+        pairing = DiseaseSpreadAssignment(
+            source_production_type = ProductionType.objects.get( name=fromTypeName ),
+            destination_production_type = ProductionType.objects.get( name=toTypeName ),
+            airborne_spread = airborneSpread
+        )
+        pairing.save()
+        # end of loop over to-production-types covered by this <airborne-spread[-exponential]-model> element
+        # end of loop over from-production-types covered by this <airborne-spread[-exponential]-model> element
     # end of loop over <airborne-spread[-exponential]-model> elements
 
     for el in xml.findall( './/zone-model' ):
@@ -458,9 +474,13 @@ def readParameters( parameterFileName ):
             subclinicalCanInfect = True # default
         movementControl = getRelChart( el.find( './movement-control' ), relChartNameSequence )
 
+        fromTypeName = getProductionType(el, 'from-production-type', productionTypeNames)
+        toTypeName = getProductionType(el, 'to-production-type', productionTypeNames)
+        
         if el.attrib['contact-type'] == 'direct':
             contactSpreadModel = DirectSpread(
                 _disease = disease,
+                name='Direct %s -> %s' % (fromTypeName, toTypeName),
                 use_fixed_contact_rate = fixedRate,
                 contact_rate = contactRate,
                 movement_control = movementControl,
@@ -474,6 +494,7 @@ def readParameters( parameterFileName ):
         elif el.attrib['contact-type'] == 'indirect':
             contactSpreadModel = IndirectSpread(
                 _disease = disease,
+                name='Indirect %s -> %s' % (fromTypeName, toTypeName),
                 use_fixed_contact_rate = fixedRate,
                 contact_rate = contactRate,
                 movement_control = movementControl,
@@ -488,17 +509,15 @@ def readParameters( parameterFileName ):
         contactSpreadModel.save()
         disease.save()
 
-        for fromTypeName in getProductionTypes( el, 'from-production-type', productionTypeNames ):
-            for toTypeName in getProductionTypes( el, 'to-production-type', productionTypeNames ):
-                pairing, created = DiseaseSpreadAssignment.objects.get_or_create(
-                    source_production_type = ProductionType.objects.get( name=fromTypeName ),
-                    destination_production_type = ProductionType.objects.get( name=toTypeName )
-                )
-                if el.attrib['contact-type'] == 'direct':
-                    pairing.direct_contact_spread = contactSpreadModel
-                else:
-                    pairing.indirect_contact_spread = contactSpreadModel
-                pairing.save()
+        pairing, created = DiseaseSpreadAssignment.objects.get_or_create(
+            source_production_type = ProductionType.objects.get( name=fromTypeName ),
+            destination_production_type = ProductionType.objects.get( name=toTypeName )
+        )
+        if el.attrib['contact-type'] == 'direct':
+            pairing.direct_contact_spread = contactSpreadModel
+        else:
+            pairing.indirect_contact_spread = contactSpreadModel
+        pairing.save()
             # end of loop over to-production-types covered by this <contact-spread-model> element
             # end of loop over from-production-types covered by this <contact-spread-model> element		
     # end of loop over <contact-spread-model> elements without a "zone" attribute
@@ -527,7 +546,7 @@ def readParameters( parameterFileName ):
                 )
                 effect = assignment.effect
             except ZoneEffectAssignment.DoesNotExist:
-                effect = ZoneEffect()
+                effect = ZoneEffect(name = zoneName + ' effect on ' + fromTypeName)
                 effect.save()
                 assignment = ZoneEffectAssignment(
                     zone = Zone.objects.get( name=zoneName ),
@@ -596,7 +615,7 @@ def readParameters( parameterFileName ):
                     )
                     effect = assignment.effect
                 except ZoneEffectAssignment.DoesNotExist:
-                    effect = ZoneEffect()
+                    effect = ZoneEffect(name= zoneName + ' effect on ' + typeName)
                     effect.save()
                     assignment = ZoneEffectAssignment(
                         zone = Zone.objects.get( name=zoneName ),
@@ -1356,7 +1375,7 @@ def readParameters( parameterFileName ):
                     )
                     effect = assignment.effect
                 except ZoneEffectAssignment.DoesNotExist:
-                    effect = ZoneEffect()
+                    effect = ZoneEffect(name = zoneName + ' effect on ' + typeName)
                     effect.save()
                     assignment = ZoneEffectAssignment(
                         zone = Zone.objects.get( name=zoneName ),
