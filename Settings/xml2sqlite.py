@@ -9,9 +9,11 @@ defined for the SpreadModel project for all object creation."""
 import xml.etree.ElementTree as ET
 import warnings
 from pyproj import Proj
+import sys
 
 from ScenarioCreator.models import *
 from Results.models import *
+from Settings.views import new_scenario, save_scenario, activeSession
 
 CREATE_AT_A_TIME = 500 # for bulk object creation
 
@@ -1396,3 +1398,17 @@ def import_naadsm_xml(populationFileName, parameterFileName):
     Database routing is done through the normal ScenarioCreator/router.py"""
     readPopulation(populationFileName)
     readParameters(parameterFileName)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) == 4:  # single command line invocation
+        shutil.copy(activeSession(), 'activeSession.bak')
+        shutil.copy('settings.sqlite3', 'settings.bak')
+        
+        new_scenario()
+        import_naadsm_xml(sys.argv[1], sys.argv[2])
+        scenario_filename(sys.argv[3])
+        save_scenario()
+        
+        shutil.copy('activeSession.bak', activeSession())
+        shutil.copy('settings.bak', 'settings.sqlite3')
