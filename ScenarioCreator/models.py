@@ -148,7 +148,7 @@ class Population(BaseModel):
         session.set_population_upload_status("Preparing data", 100)
         Unit.objects.bulk_create(unit_objects)
         execution_time = (time.clock() - start_time)
-        print("Done creating", '{:,}'.format(len(data)), "Units took %i seconds" % (execution_time))
+        print("Done creating", '{:,}'.format(len(data)), "Units took %i seconds" % execution_time)
 
 
 class Unit(BaseModel):
@@ -361,8 +361,8 @@ class ControlProtocol(BaseModel):
         help_text='The destruction priority of this ' + wiki("production type") + ' relative to other production types.  A lower number indicates a higher priority.', )
     use_vaccination = models.BooleanField(default=False,
         help_text='Indicates if units of this ' + wiki("production type") + ' will be subject to vaccination.', )
-    vaccinate_detected_units = models.BooleanField(default=False,  # TODO: Clarify the distinction between use_vaccination and vaccinate_detected_units
-        help_text='Indicates if units of this ' + wiki("production type") + ' will be subject to vaccination if infected and detected.', )
+    vaccinate_detected_units = models.BooleanField(default=False,
+        help_text='Indicates if detection in units of this ' + wiki("production type") + ' will trigger vaccination.', )
     days_to_immunity = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of days required for the onset of ' + wiki("vaccine immunity", "vaccine-immune") + ' in a newly vaccinated unit of this type.', )
     minimum_time_between_vaccinations = models.PositiveIntegerField(blank=True, null=True,
@@ -567,7 +567,6 @@ class AirborneSpread(DiseaseSpread):
         help_text='The maximum distance in KM of ' + wiki("airborne spread", "airborne-transmission") + '.  Only used in Linear Airborne Decay.', )
     exposure_direction_start = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=0,
         help_text='The start angle in degrees of the area at risk of ' + wiki("airborne spread", "airborne-transmission") + '.  0 is North.', )
-    #TODO: This doesn't keep start and end from crossing each other.  I think Neil said his code can swap them.
     exposure_direction_end = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=360,
         help_text='The end angle in degrees of the area at risk of ' + wiki("airborne spread", "airborne-transmission") + '.  0 is North.', )
     def __str__(self):

@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
+from collections import defaultdict
 from future import standard_library
 standard_library.install_hooks()
 
@@ -274,7 +275,8 @@ def prepare_supplemental_output_directory():
 
 def adsm_executable_command():
     executables = {"Windows": 'adsm_simulation.exe', "Linux": 'adsm_simulation', "Darwin": 'adsm_simulation'}
-    system_executable = os.path.join(settings.BASE_DIR, executables[platform.system()])  #TODO: KeyError
+    executables = defaultdict(lambda: 'adsm_simulation', executables)
+    system_executable = os.path.join(settings.BASE_DIR, executables[platform.system()])
     database_file = os.path.basename(settings.DATABASES['scenario_db']['NAME'])
     output_args = prepare_supplemental_output_directory()
     return [system_executable, database_file] + output_args

@@ -1,13 +1,4 @@
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
-from future.builtins import open
-from future.builtins import map
-from future.builtins import str
-from future import standard_library
-standard_library.install_hooks()
-
+import csv
 import subprocess
 import json
 from django.http import HttpResponse
@@ -81,18 +72,7 @@ def include_spread(request):
         return HttpResponse('success')  # We don't need to return any data
         
 
-def production_type_permutations():
-    spread_assignments = []
-    pts = list(ProductionType.objects.all())
-    for source in pts:
-        for destination in pts:
-            spread_assignments.append(DiseaseSpreadAssignment.objects.get_or_create(
-                source_production_type=source, destination_production_type=destination)[0])  # first index is object
-    return spread_assignments
-
-
 def assign_disease_spread(request):
-    assignment_set = production_type_permutations()
     SpreadSet = modelformset_factory(DiseaseSpreadAssignment, extra=0, form=DiseaseSpreadAssignmentForm)
     try:
         initialized_formset = SpreadSet(request.POST, request.FILES, queryset=DiseaseSpreadAssignment.objects.all())
@@ -217,7 +197,6 @@ def deepcopy_points(request, primary_key, created_instance):
 
 
 def initialize_points_from_csv(request):
-    import csv  # TODO this SHOULD be the 3.3 version from python-future.org...
     file_path = handle_file_upload(request)
     with open(file_path) as csvfile:
         dialect = csv.Sniffer().sniff(csvfile.read(1024))
@@ -425,8 +404,8 @@ def upload_population(request):
     from xml.etree.ElementTree import ParseError
     session = SmSession.objects.get_or_create(pk=1)[0]
     if 'GET' in request.method:
-        json = '{"status": "%s", "percent": "%s"}' % (session.population_upload_status, session.population_upload_percent*100)
-        return HttpResponse(json, content_type="application/json")
+        json_response = '{"status": "%s", "percent": "%s"}' % (session.population_upload_status, session.population_upload_percent*100)
+        return HttpResponse(json_response, content_type="application/json")
 
     session.set_population_upload_status("Processing file")
     file_path = workspace_path(request.POST.get('filename')) if 'filename' in request.POST else handle_file_upload(request)
@@ -482,8 +461,7 @@ def population(request):
         context['filter_info'] = filter_info(request, params)
         context['deletable'] = '/setup/Population/1/delete/'
     else:
-        xml_files = file_list(".xml")
-        context['xml_files'] = xml_files
+        context['xml_files'] = file_list(".xml")
     return render(request, 'ScenarioCreator/Population.html', context)
 
 

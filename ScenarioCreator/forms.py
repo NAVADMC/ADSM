@@ -2,23 +2,13 @@
 ModelForm -> models.py.  This basic layout can be overridden by declaring an __init__ with a self.helper Layout.
 See DirectSpread for an example.  More complex widgets and layouts are accessible from there.
 All forms now have their "submit" button restored and you can choose custom layouts.  ControlProtocol has tabs."""
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from future.builtins import super
-from future.builtins import open
-from future import standard_library
-standard_library.install_hooks()
-from future.builtins import object
-from django.forms.models import inlineformset_factory
-from crispy_forms.bootstrap import TabHolder, Tab, AppendedText, Accordion
-from crispy_forms.layout import Layout, ButtonHolder, Submit, HTML, Field, Hidden, MultiField
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.utils import OperationalError  # OperationalError is for initial manage.py syncdb
-from ScenarioCreator.models import *
-from floppyforms import Select, NumberInput, RadioSelect, HiddenInput, TextInput
 from floppyforms.__future__ import ModelForm
+
+from django.forms.models import inlineformset_factory
+from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
+from crispy_forms.layout import Layout, ButtonHolder, HTML
+from ScenarioCreator.models import *
+from floppyforms import Select, NumberInput
 from crispy_forms.helper import FormHelper
 
 
