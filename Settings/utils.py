@@ -80,6 +80,7 @@ def reset_db(name, fail_ok=True):
     """ It now checks if the file exists.  This will throw a PermissionError if the user has the DB open in another program."""
     print("Deleting", db_name(name))
     close_old_connections()
+    delete_failed = False
     if os.path.exists(db_name(name)):
         connections[name].close()
         try:
@@ -87,6 +88,8 @@ def reset_db(name, fail_ok=True):
         except PermissionError as err:
             if not fail_ok:
                 raise err
+            else: 
+                delete_failed = True
     else:
         print(db_name(name), "does not exist")
     #creates a new blank file by migrate 
@@ -95,7 +98,7 @@ def reset_db(name, fail_ok=True):
                  interactive=False,
                  database=connections[name].alias,
                  load_initial_data=False)
-    if name == 'default':  # create super user
+    if name == 'default' and not delete_failed:  # create super user
         from django.contrib.auth.models import User
         u = User(username='ADSM', is_superuser=True, is_staff=True)
         u.set_password('ADSM')

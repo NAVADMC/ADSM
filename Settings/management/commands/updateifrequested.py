@@ -22,5 +22,7 @@ class Command(BaseCommand):
                 session.update_on_startup = False
                 session.save()
             except:
-                pass
-            close_old_connections()
+                print("Failed to gracefully reset!")
+                return False
+            finally:
+                close_old_connections()
