@@ -23,6 +23,10 @@ if getattr(sys, 'frozen', False):
 else:
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# suppress floppyforms gis warning
+import warnings
+warnings.filterwarnings("ignore", "Unable to import floppyforms.gis, geometry widgets not available")
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
