@@ -49,7 +49,7 @@ def main():
 			cmd = 'python3.3 xml2sqlite.py ' \
 			  + os.path.join( dir, populationFileName + '.xml' ) \
 			  + ' ' + os.path.join( subdir, parameterFileName + '.xml' ) \
-			  + ' ' + os.path.join( subdir, parameterFileName + '_' + populationFileName + '.sqlite3' )
+			  + ' ' + os.path.join( os.path.pardir, subdir, parameterFileName + '_' + populationFileName + '.sqlite3' )
 			print( cmd )
 			os.system( cmd )
 		# end of loop over tests in the test description file
