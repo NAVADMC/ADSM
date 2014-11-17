@@ -51,3 +51,4 @@ class Command(BaseCommand):
             session = SmSession.objects.get_or_create()[0]
             session.update_on_startup = False
             session.save()
+            close_old_connections()
