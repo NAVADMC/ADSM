@@ -5,7 +5,7 @@ from __future__ import absolute_import
 from future import standard_library
 standard_library.install_hooks()
 from django.test import TestCase, TransactionTestCase
-from django.db import connections
+from django.db import connections, close_old_connections
 import unittest
 import time
 import os, shutil
@@ -18,7 +18,6 @@ from Results.models import DailyControls, DailyByProductionType, DailyByZone, Da
 from Results.summary import iteration_progress, summarize_results
 from Results.output_parser import DailyParser
 from Settings.models import scenario_filename
-from Settings.utils import close_all_connections
 
 
 class SimulationTest(TransactionTestCase):
@@ -42,7 +41,7 @@ class SimulationTest(TransactionTestCase):
         settings.stop_criteria = 'stop-days'
         settings.days = 4
         settings.save()
-        close_all_connections()
+        close_old_connections()
 
     def tearDown(self):
         shutil.rmtree(self.scenario_directory, ignore_errors=True)
@@ -71,7 +70,7 @@ class SimulationTest(TransactionTestCase):
         settings = OutputSettings.objects.first()
         settings.save_daily_unit_states = True
         settings.save()
-        close_all_connections()
+        close_old_connections()
         output_file = os.path.join(self.scenario_directory, 'states_1.csv')
 
         sim = Simulation(1)
@@ -85,7 +84,7 @@ class SimulationTest(TransactionTestCase):
         settings.save_daily_unit_states = True
         settings.save_map_output = True
         settings.save()
-        close_all_connections()
+        close_old_connections()
         file_name = os.path.join(self.scenario_directory, 'Roundtrip_test Map Output.zip')
         folder_name = os.path.join(self.scenario_directory, 'Map')
 
@@ -102,7 +101,7 @@ class SimulationTest(TransactionTestCase):
         settings = OutputSettings.objects.first()
         settings.save_map_output = False
         settings.save()
-        close_all_connections()
+        close_old_connections()
         file_name = os.path.join(self.scenario_directory, 'Roundtrip_test Map Output.zip')
         folder_name = os.path.join(self.scenario_directory, 'Map')
 

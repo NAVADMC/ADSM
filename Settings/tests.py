@@ -10,7 +10,7 @@ import os
 import json
 
 from ScenarioCreator.views import workspace_path
-from Settings.utils import close_all_connections
+from SpreadModel.utils import close_all_connections
 
 
 class ScenarioTestCase(TestCase):
@@ -69,16 +69,3 @@ class ScenarioTestCase(TestCase):
             self.assertFalse(os.path.isfile(file_path))
         finally:
             self.remove_test_file(file_path)
-
-
-class UtilsTestCase(TestCase):
-    multi_db = True
-
-    def test_close_all_connections(self):
-        for conn in connections:
-            connections[conn].ensure_connection()
-
-        close_all_connections()
-
-        for conn in connections:
-            self.assertEqual(connections[conn].connection, None)

@@ -16,7 +16,8 @@ from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Pop
 from Results.models import DailyControls
 from Results.summary import iteration_progress
 from Settings.models import scenario_filename, SmSession
-from Settings.views import unsaved_changes, graceful_startup, workspace_path
+from Settings.views import unsaved_changes
+from Settings.utils import graceful_startup, workspace_path
 from django.db.models import F
 from git.git import git
 

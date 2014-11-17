@@ -14,7 +14,8 @@ if __name__ == "__main__":
     from django.conf import settings
     from django.core import management
     from Settings.models import scenario_filename
-    from Settings.views import activeSession, new_scenario, save_scenario
+    from Settings.utils import activeSession
+    from Settings.views import new_scenario, save_scenario
     from Settings.xml2sqlite import import_naadsm_xml
 
 

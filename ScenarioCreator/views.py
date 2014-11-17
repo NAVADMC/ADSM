@@ -10,10 +10,7 @@ from django.db import OperationalError
 from Results.models import *  # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from Settings.models import unsaved_changes
-from Settings.views import graceful_startup, file_list, handle_file_upload, workspace_path
-from Settings.views import adsm_executable_command
-
-
+from Settings.utils import graceful_startup, file_list, handle_file_upload, workspace_path, adsm_executable_command
 
 
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
