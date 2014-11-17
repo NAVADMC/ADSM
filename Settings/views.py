@@ -22,6 +22,7 @@ from Settings.models import scenario_filename, SmSession, unsaved_changes
 from Settings.utils import close_all_connections
 from Settings.forms import ImportForm
 from Settings.xml2sqlite import import_naadsm_xml
+from Settings.utils import update_is_needed
 
 from git.git import git
 
@@ -42,30 +43,6 @@ def update_adsm_from_git(request):
         except:
             print ("Failed to set DB to update!")
             return HttpResponse("failure")
-
-
-def update_is_needed():
-    try:
-        os.chdir(settings.BASE_DIR)
-
-        command = git + ' rev-parse --abbrev-ref HEAD'
-        current_branch = subprocess.check_output(command, shell=True).decode().strip()
-
-        # Go ahead and fetch the current branch
-        command = git + ' fetch origin ' + current_branch
-        subprocess.call(command, shell=True)
-        
-        command = git + ' rev-parse FETCH_HEAD'
-        fetched_sha = subprocess.check_output(command, shell=True).decode().strip()
-        command = git + ' rev-parse HEAD'
-        head_sha = subprocess.check_output(command, shell=True).decode().strip()
-        
-        if fetched_sha != head_sha:
-            return True
-        return False
-    except:
-        print ("Failed in checking if an update is required!")
-        return False
 
 
 def reset_db(name):
