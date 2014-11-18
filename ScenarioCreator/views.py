@@ -68,9 +68,21 @@ def include_spread(request):
             setattr(master, field, request.POST.get(field) == 'true')
         master.save()
         return HttpResponse('success')  # We don't need to return any data
+
+
+def initialize_spread_assignments():
+    pts = list(ProductionType.objects.all())
+    for source in pts:
+        for destination in pts:
+            DiseaseSpreadAssignment.objects.get_or_create(
+                source_production_type=source,
+                destination_production_type=destination)
         
 
 def assign_disease_spread(request):
+    if not DiseaseSpreadAssignment.objects.count():
+        initialize_spread_assignments()
+
     SpreadSet = modelformset_factory(DiseaseSpreadAssignment, extra=0, form=DiseaseSpreadAssignmentForm)
     try:
         initialized_formset = SpreadSet(request.POST, request.FILES, queryset=DiseaseSpreadAssignment.objects.all())

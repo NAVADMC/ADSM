@@ -581,6 +581,7 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
             "Assign Effects",
             "Functions",
             "Output Settings",
+            "Run Simulation",
             "Delete Supplementals and Run Simulation"
         ]
 

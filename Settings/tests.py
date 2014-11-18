@@ -10,7 +10,6 @@ import os
 import json
 
 from ScenarioCreator.views import workspace_path
-from SpreadModel.utils import close_all_connections
 
 
 class ScenarioTestCase(TestCase):
