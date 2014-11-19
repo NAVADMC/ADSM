@@ -624,6 +624,7 @@ def readParameters( parameterFileName ):
                 effect.save()
             else:
                 protocol = ControlProtocol(
+                    name = typeName + " Protocol",
                     use_detection = True,
                     detection_probability_for_observed_time_in_clinical = observing,
                     detection_probability_report_vs_first_detection = reporting,

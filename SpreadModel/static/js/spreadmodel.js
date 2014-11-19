@@ -165,7 +165,7 @@ $(function(){
     
     $('[data-visibility-context]').each(function(){
         var context_var = window[$(this).attr('data-visibility-context')]
-        if($(this).attr('data-visibility-flipped') != undefined) {
+        if(typeof $(this).attr('data-visibility-flipped') !== 'undefined') {
             context_var = !context_var;
         }
         var hide_target = $(this).parents('.control-group')
@@ -188,8 +188,11 @@ $(function(){
         var link = $(this).attr('data-delete-link')
         var do_async = $(this).hasClass('ajax-post')
         var object_type = link.split('/')[2]
-        object_type = object_type === undefined ? 'object' : object_type
-        var additional_msg = outputs_computed ? ' and <strong><u>All Results</u></strong>' : ''
+        if (typeof object_type === 'undefined') {object_type = 'object'}
+        var additional_msg = ''
+        if(typeof outputs_computed !== 'undefined' && outputs_computed){
+            additional_msg = ' and <strong><u>All Results</u></strong>' 
+        }
         var dialog = new BootstrapDialog.show({
             title: 'Delete Confirmation',
             type: BootstrapDialog.TYPE_WARNING,
@@ -243,7 +246,7 @@ $(function(){
         var valid_extensions = {"application/x-sqlite3": '.sqlite3',
                                 "application/xml": '.xml'}
         var file_extension = valid_extensions[$(this).find('input[type=file]').attr('accept')]
-        if( file_extension !== undefined && filename.indexOf(file_extension) == -1) {
+        if( typeof file_extension !== 'undefined' && filename.indexOf(file_extension) == -1) {
             alert("Uploaded files must have "+file_extension+" in the name: " + filename)
             console.log(file_extension);
             event.preventDefault();
