@@ -22,10 +22,6 @@ print( simulation.stdout.read().decode("utf-8"))
 
 # <codecell>
 
-if a = True: print('hi')
-
-# <codecell>
-
 import re
 cmd_string = 'Reply from 74.125.225.161: bytes=32 time=24ms TTL=55'
 ip, bytes, time, ignore =  re.sub(r'Reply from |bytes=|ms|time=|:', '', cmd_string).split()
@@ -63,7 +59,7 @@ for x in range(10000):
 proc = subprocess.Popen('sqlite3.exe --help', shell=True, stdout=subprocess.PIPE)
 try:
     outs, errs = proc.communicate(timeout=15)
-except TimeoutExpired:
+except subprocess.TimeoutExpired:
     proc.kill()
     outs, errs = proc.communicate()
 print(outs, errs)
@@ -189,9 +185,6 @@ main()
 
 
 # <codecell>
-
-from IPython.parallel import Client
-rc = Client()
 
 # <markdowncell>
 

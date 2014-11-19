@@ -1,11 +1,3 @@
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from collections import OrderedDict
-from future import standard_library
-standard_library.install_hooks()
-
 from Results.models import DailyControls, DailyByProductionType, DailyByZone
 from ScenarioCreator.models import Zone, OutputSettings
 from django.db.models import Q

@@ -1,16 +1,5 @@
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
 from collections import defaultdict
 import zipfile
-from future.builtins import *
-from future import standard_library
-from ScenarioCreator.context_processor import supplemental_folder_has_contents
-
-standard_library.install_hooks()
-
-
 from glob import glob
 import threading
 from django.forms.models import modelformset_factory
@@ -20,6 +9,7 @@ import subprocess
 import time
 import multiprocessing
 from ScenarioCreator.models import OutputSettings
+from ScenarioCreator.context_processor import supplemental_folder_has_contents
 from django.db.models import Max
 from Results.models import *  # necessary
 from Results.forms import *  # necessary

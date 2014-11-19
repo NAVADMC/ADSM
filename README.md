@@ -3,13 +3,11 @@ ADSM has several external dependencies.  We recommend using pip to install them.
 https://www.python.org/download
 https://pypi.python.org/pypi/pip#downloads
 
-    pip install django==1.6
+    pip install django==1.7
     pip install django-floppyforms==1.2.0
     pip install django-crispy-forms
     pip install django-extras
-    pip install south==0.8.4
-    pip install future
-    pip install futures  # This isn't a mistake, they're seriously two different packages. We're very futuristic here.
+    pip install futures
     pip install jinja2
     pip install selenium  # only necessary for testing
     pip install cherrypy==3.5.0 --no-use-wheel # local host server

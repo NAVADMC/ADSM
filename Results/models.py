@@ -11,14 +11,6 @@ Model Declarations: Each model creates a table in sqlite3 and a 'model' for tabl
  which is significantly more obscure.
  The code in scripts/Output_Table.py (.ipynb) was used to generate these name declarations.  Also, if you're reading this
  doc and you don't know about IPython Notebooks, go get IPython Notebooks."""
-
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from future import standard_library
-standard_library.install_hooks()
-from future.builtins import object
 import os
 from django.db import models
 import shutil

@@ -1,12 +1,4 @@
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
 from django.utils.safestring import mark_safe
-from future import standard_library
-standard_library.install_hooks()
-__author__ = 'Josiah Seaman'
-
 from django import template
 from django.template.base import Node
 import re

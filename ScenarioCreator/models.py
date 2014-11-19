@@ -28,17 +28,6 @@ Changes made in ScenarioCreator/models.py propagate to the script output
 Limit foreignkey choices with a dictionary filter on field values:
                      limit_choices_to={'is_staff': True}
 """
-from __future__ import print_function
-from __future__ import division
-from __future__ import unicode_literals
-from __future__ import absolute_import
-from future.builtins import str
-from future.builtins import super
-from future.builtins import int
-from future import standard_library
-
-standard_library.install_hooks()
-from future.builtins import object
 
 import re
 import time

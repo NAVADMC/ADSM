@@ -1,18 +1,4 @@
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from future.builtins import zip
-from future.builtins import next
-from future.builtins import open
-from future.builtins import dict
-from future import standard_library
 import os
-
-standard_library.install_hooks()
-from future.builtins import object
-
-__author__ = 'Josiah'
 import xml.etree.ElementTree as ET
 
 
