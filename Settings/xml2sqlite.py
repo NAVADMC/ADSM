@@ -16,19 +16,18 @@ from Results.models import *
 CREATE_AT_A_TIME = 500 # for bulk object creation
 
 
-def getProductionType( xml, attributeName, allowedNames ):
-    if attributeName not in xml.attrib:
-        types = allowedNames
-    else:
-        text = xml.attrib[attributeName]
-        if text == '':
-            types = allowedNames
-        else:
-            types = text
-    return types
-
 
 def getProductionTypes( xml, attributeName, allowedNames ):
+    """Returns a list or set of production type names extractedfrom an XML
+    element.  "attributeName" gives the attribute to examine (typically it is
+    "production-type", "from-production-type", or "to-production-type").
+    "allowedNames" is a list of all production type names in the population.
+    
+    The text in the attribute can be a single production type name or a comma-
+    separated list of production type names.  If the XML element does not have
+    an attribute matching "attributeName", all of the allowedNames are
+    returned.  In other words, omitting the production type name implies
+    "all"."""
     if attributeName not in xml.attrib:
         types = allowedNames
     else:
@@ -60,7 +59,7 @@ def getPdf( xml, nameGenerator ):
         except KeyError:
             name = next( nameGenerator )
         firstChild = list( firstChild )[0]
-    # Now "firstChild" is the PDF element
+        # Now "firstChild" is the PDF element
     else:
         name = next( nameGenerator )
     pdfType = firstChild.tag
@@ -385,18 +384,18 @@ def readParameters( parameterFileName ):
             prevalence = None
 
         typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
-        diseaseProgression = DiseaseProgression(
-            _disease = disease,
-            name = typeNames[0] + ' Progression',
-            disease_latent_period = latentPeriod,
-            disease_subclinical_period = subclinicalPeriod,
-            disease_clinical_period = clinicalPeriod,
-            disease_immune_period = immunePeriod,
-            disease_prevalence = prevalence,
-            )
-        diseaseProgression.save()
-
         for typeName in typeNames:
+            diseaseProgression = DiseaseProgression(
+                _disease = disease,
+                name = typeName + ' Progression',
+                disease_latent_period = latentPeriod,
+                disease_subclinical_period = subclinicalPeriod,
+                disease_clinical_period = clinicalPeriod,
+                disease_immune_period = immunePeriod,
+                disease_prevalence = prevalence,
+            )
+            diseaseProgression.save()
+
             diseaseProgressionAssignment = DiseaseProgressionAssignment(
                 production_type = ProductionType.objects.get( name=typeName ),
                 progression = diseaseProgression
@@ -414,28 +413,27 @@ def readParameters( parameterFileName ):
             delay = getPdf( el.find( './delay' ), pdfNameSequence )
         else:
             delay = None
-            
-        fromTypeName = getProductionType( el, 'from-production-type', productionTypeNames )
-        toTypeName = getProductionType( el, 'to-production-type', productionTypeNames )
-        
-        airborneSpread = AirborneSpread(
-            _disease = disease,
-            name = 'Airborne %s -> %s' % (fromTypeName, toTypeName),
-            max_distance = maxDistance,
-            spread_1km_probability = float( el.find( './prob-spread-1km' ).text ),
-            exposure_direction_start = float( el.find( './wind-direction-start/value' ).text ),
-            exposure_direction_end = float( el.find( './wind-direction-end/value' ).text ),
-            transport_delay = delay
-        )
-        airborneSpread.save()
 
-        pairing = DiseaseSpreadAssignment(
-            source_production_type = ProductionType.objects.get( name=fromTypeName ),
-            destination_production_type = ProductionType.objects.get( name=toTypeName ),
-            airborne_spread = airborneSpread
-        )
-        pairing.save()
-        # end of loop over to-production-types covered by this <airborne-spread[-exponential]-model> element
+        for fromTypeName in getProductionTypes( el, 'from-production-type', productionTypeNames ):
+            for toTypeName in getProductionTypes( el, 'to-production-type', productionTypeNames ):
+                airborneSpread = AirborneSpread(
+                  _disease = disease,
+                  name = 'Airborne %s -> %s' % (fromTypeName, toTypeName),
+                  max_distance = maxDistance,
+                  spread_1km_probability = float( el.find( './prob-spread-1km' ).text ),
+                  exposure_direction_start = float( el.find( './wind-direction-start/value' ).text ),
+                  exposure_direction_end = float( el.find( './wind-direction-end/value' ).text ),
+                  transport_delay = delay
+                )
+                airborneSpread.save()
+
+                pairing = DiseaseSpreadAssignment(
+                  source_production_type = ProductionType.objects.get( name=fromTypeName ),
+                  destination_production_type = ProductionType.objects.get( name=toTypeName ),
+                  airborne_spread = airborneSpread
+                )
+                pairing.save()
+            # end of loop over to-production-types covered by this <airborne-spread[-exponential]-model> element
         # end of loop over from-production-types covered by this <airborne-spread[-exponential]-model> element
     # end of loop over <airborne-spread[-exponential]-model> elements
 
@@ -474,52 +472,51 @@ def readParameters( parameterFileName ):
             subclinicalCanInfect = True # default
         movementControl = getRelChart( el.find( './movement-control' ), relChartNameSequence )
 
-        fromTypeName = getProductionType(el, 'from-production-type', productionTypeNames)
-        toTypeName = getProductionType(el, 'to-production-type', productionTypeNames)
-        
-        if el.attrib['contact-type'] == 'direct':
-            contactSpreadModel = DirectSpread(
-                _disease = disease,
-                name='Direct %s -> %s' % (fromTypeName, toTypeName),
-                use_fixed_contact_rate = fixedRate,
-                contact_rate = contactRate,
-                movement_control = movementControl,
-                distance_distribution = distance,
-                transport_delay = delay,
-                infection_probability = probInfect,
-                latent_animals_can_infect_others = latentCanInfect,
-                subclinical_animals_can_infect_others = subclinicalCanInfect
-            )
-            disease.include_direct_contact_spread = True
-        elif el.attrib['contact-type'] == 'indirect':
-            contactSpreadModel = IndirectSpread(
-                _disease = disease,
-                name='Indirect %s -> %s' % (fromTypeName, toTypeName),
-                use_fixed_contact_rate = fixedRate,
-                contact_rate = contactRate,
-                movement_control = movementControl,
-                distance_distribution = distance,
-                transport_delay = delay,
-                infection_probability = probInfect,
-                subclinical_animals_can_infect_others = subclinicalCanInfect
-            )
-            disease.include_indirect_contact_spread = True
-        else:
-            assert False
-        contactSpreadModel.save()
-        disease.save()
+        for fromTypeName in getProductionTypes( el, 'from-production-type', productionTypeNames ):
+            for toTypeName in getProductionTypes( el, 'to-production-type', productionTypeNames ):
+                if el.attrib['contact-type'] == 'direct':
+                    contactSpreadModel = DirectSpread(
+                        _disease = disease,
+                        name='Direct %s -> %s' % (fromTypeName, toTypeName),
+                        use_fixed_contact_rate = fixedRate,
+                        contact_rate = contactRate,
+                        movement_control = movementControl,
+                        distance_distribution = distance,
+                        transport_delay = delay,
+                        infection_probability = probInfect,
+                        latent_animals_can_infect_others = latentCanInfect,
+                        subclinical_animals_can_infect_others = subclinicalCanInfect
+                    )
+                    disease.include_direct_contact_spread = True
+                elif el.attrib['contact-type'] == 'indirect':
+                    contactSpreadModel = IndirectSpread(
+                        _disease = disease,
+                        name='Indirect %s -> %s' % (fromTypeName, toTypeName),
+                        use_fixed_contact_rate = fixedRate,
+                        contact_rate = contactRate,
+                        movement_control = movementControl,
+                        distance_distribution = distance,
+                        transport_delay = delay,
+                        infection_probability = probInfect,
+                        subclinical_animals_can_infect_others = subclinicalCanInfect
+                    )
+                    disease.include_indirect_contact_spread = True
+                else:
+                    assert False
+                contactSpreadModel.save()
+                disease.save()
 
-        pairing, created = DiseaseSpreadAssignment.objects.get_or_create(
-            source_production_type = ProductionType.objects.get( name=fromTypeName ),
-            destination_production_type = ProductionType.objects.get( name=toTypeName )
-        )
-        if el.attrib['contact-type'] == 'direct':
-            pairing.direct_contact_spread = contactSpreadModel
-        else:
-            pairing.indirect_contact_spread = contactSpreadModel
-        pairing.save()
+                pairing, created = DiseaseSpreadAssignment.objects.get_or_create(
+                    source_production_type = ProductionType.objects.get( name=fromTypeName ),
+                    destination_production_type = ProductionType.objects.get( name=toTypeName )
+                )
+                if el.attrib['contact-type'] == 'direct':
+                    pairing.direct_contact_spread = contactSpreadModel
+                else:
+                    pairing.indirect_contact_spread = contactSpreadModel
+                pairing.save()
             # end of loop over to-production-types covered by this <contact-spread-model> element
-            # end of loop over from-production-types covered by this <contact-spread-model> element		
+        # end of loop over from-production-types covered by this <contact-spread-model> element
     # end of loop over <contact-spread-model> elements without a "zone" attribute
 
     for el in xml.findall( './/contact-spread-model' ):
@@ -638,7 +635,7 @@ def readParameters( parameterFileName ):
                     control_protocol = protocol
                 )
                 assignment.save()
-            # end of loop over production-types covered by this <detection-model> element
+        # end of loop over production-types covered by this <detection-model> element
     # end of loop over <detection-model> elements
 
     for el in xml.findall( './/contact-recorder-model' ):
@@ -1067,7 +1064,7 @@ def readParameters( parameterFileName ):
                 destructionReasonOrder.append( (priority, reason) )
                 destructionProductionTypeOrder.append ( (priority, typeName) )
             # end of loop over production-types covered by this <trace-back-destruction-model> element
-            # end of if not quarantineOnly
+        # end of if not quarantineOnly
     # end of loop over <trace-back-destruction-model> elements
 
     for el in xml.findall( './/basic-destruction-model' ):
@@ -1385,7 +1382,7 @@ def readParameters( parameterFileName ):
                     assignment.save()
                 effect.cost_of_surveillance_per_animal_day = surveillance
                 effect.save()
-            # end of loop over production types covered by this <economic-model> element
+        # end of loop over production types covered by this <economic-model> element
     # end of loop over <economic-model> elements
 
     return # from readParameters
