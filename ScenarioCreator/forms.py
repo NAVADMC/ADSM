@@ -39,6 +39,9 @@ class BaseForm(ModelForm):
             self.helper = FormHelper()
             fields_and_submit = list(self.base_fields.keys()) + [submit_button()]
             self.helper.layout = Layout(*fields_and_submit)
+        if not hasattr(self, 'exclude'):
+            self.exclude = []
+
         super(BaseForm, self).__init__(*args, **kwargs)
 
 

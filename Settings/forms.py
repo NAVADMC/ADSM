@@ -27,4 +27,6 @@ class ImportForm(NonModelForm):
             'parameters_xml': ClearableFileInput(attrs={'accept': 'application/xml'}),
             'population_xml': ClearableFileInput(attrs={'accept': 'application/xml'}),
         }
+        exclude = []
+
         
