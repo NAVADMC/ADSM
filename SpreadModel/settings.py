@@ -17,9 +17,6 @@ if getattr(sys, 'frozen', False):
 else:
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# suppress floppyforms gis warning
-import warnings
-warnings.filterwarnings("ignore", "Unable to import floppyforms.gis, geometry widgets not available")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
@@ -136,14 +133,6 @@ STATICFILES_FINDERS = (
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'SpreadModel', 'static'),
 )
-
-# Need to disable GDAL in case there are other libraries installed on the system path
-# TODO: Find a better solution for this when ever we need to incorporate GDAL functionality
-GDAL_LIBRARY_PATH = 'NULLPATH'
-
-# Skip migrations for tests
-# must be done due to --database=scenario_db flag for migrations
-TESTS_MIGRATE = False
 
 from django.db.backends.signals import connection_created
 from django.dispatch import receiver
