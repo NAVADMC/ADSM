@@ -3,11 +3,13 @@ ModelForm -> models.py.  This basic layout can be overridden by declaring an __i
 See DirectSpread for an example.  More complex widgets and layouts are accessible from there.
 All forms now have their "submit" button restored and you can choose custom layouts.  ControlProtocol has tabs."""
 
+
+from floppyforms.__future__ import ModelForm
 from django.forms.models import inlineformset_factory
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
-from floppyforms import Select, NumberInput, ModelForm
+from floppyforms import Select, NumberInput
 from crispy_forms.helper import FormHelper
 
 
