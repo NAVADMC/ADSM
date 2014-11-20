@@ -14,13 +14,13 @@ if __name__ == "__main__":
     from django.conf import settings
     from django.core import management
     from Settings.models import scenario_filename
-    from Settings.utils import activeSession
+    from Settings.utils import db_name
     from Settings.views import new_scenario, save_scenario
     from Settings.xml2sqlite import import_naadsm_xml
 
 
     if len(sys.argv) == 4:  # single command line invocation
-        shutil.copy(activeSession(), 'activeSession.bak')
+        shutil.copy(db_name(), 'activeSession.bak')
         shutil.copy('settings.sqlite3', 'settings.bak')
         
         new_scenario()
@@ -28,5 +28,5 @@ if __name__ == "__main__":
         scenario_filename(sys.argv[3])
         save_scenario()
         
-        shutil.copy('activeSession.bak', activeSession())
+        shutil.copy('activeSession.bak', db_name())
         shutil.copy('settings.bak', 'settings.sqlite3')

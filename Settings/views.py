@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render, HttpResponse
 from Settings.models import scenario_filename, SmSession, unsaved_changes
 from Settings.forms import ImportForm
 from Settings.xml2sqlite import import_naadsm_xml
-from Settings.utils import update_is_needed, graceful_startup, reset_db, update_db_version, activeSession, workspace_path, file_list, handle_file_upload
+from Settings.utils import update_is_needed, graceful_startup, reset_db, update_db_version, db_name, workspace_path, file_list, handle_file_upload
 
 
 def update_adsm_from_git(request):
@@ -73,9 +73,9 @@ def upload_scenario(request):
 
 
 def open_scenario(request, target):
-    print("Copying ", workspace_path(target), "to", activeSession(), ". This could take several minutes...")
+    print("Copying ", workspace_path(target), "to", db_name(), ". This could take several minutes...")
     close_old_connections()
-    shutil.copy(workspace_path(target), activeSession())
+    shutil.copy(workspace_path(target), db_name())
     scenario_filename(target)
     print('Sessions overwritten with ', target)
     update_db_version()
@@ -97,7 +97,7 @@ def save_scenario(request=None):
     full_path = workspace_path(target) + ('.sqlite3' if target[-8:] != '.sqlite3' else '')
     save_error = None
     try:
-        shutil.copy(activeSession(), full_path)
+        shutil.copy(db_name(), full_path)
         unsaved_changes(False)  # File is now in sync
         print('Done Copying database to', target)
     except IOError:

@@ -14,7 +14,7 @@ from django.conf import settings
 from Settings.models import SmSession, scenario_filename
 
 
-def activeSession(name='scenario_db'):
+def db_name(name='scenario_db'):
     full_path = settings.DATABASES[name]['NAME']
     return os.path.basename(full_path)
 
@@ -76,22 +76,29 @@ def graceful_startup():
         update_db_version()
 
 
-def reset_db(name):
+def reset_db(name, fail_ok=True):
     """ It now checks if the file exists.  This will throw a PermissionError if the user has the DB open in another program."""
-    print("Deleting", activeSession(name))
+    print("Deleting", db_name(name))
     close_old_connections()
-    if os.path.exists(activeSession(name)):
+    delete_failed = False
+    if os.path.exists(db_name(name)):
         connections[name].close()
-        os.remove(activeSession(name))
+        try:
+            os.remove(db_name(name))
+        except PermissionError as err:
+            if not fail_ok:
+                raise err
+            else: 
+                delete_failed = True
     else:
-        print(activeSession(name), "does not exist")
-    #creates a new blank file by migrate / syncdb
-    call_command('syncdb',
+        print(db_name(name), "does not exist")
+    #creates a new blank file by migrate 
+    call_command('migrate',
                  # verbosity=0,
                  interactive=False,
                  database=connections[name].alias,
                  load_initial_data=False)
-    if name == 'default':  # create super user
+    if name == 'default' and not delete_failed:  # create super user
         from django.contrib.auth.models import User
         u = User(username='ADSM', is_superuser=True, is_staff=True)
         u.set_password('ADSM')
