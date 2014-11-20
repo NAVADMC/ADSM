@@ -41,7 +41,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'south',
     'floppyforms',
     'crispy_forms',
     'ScenarioCreator',
@@ -144,7 +143,7 @@ GDAL_LIBRARY_PATH = 'NULLPATH'
 
 # Skip migrations for tests
 # must be done due to --database=scenario_db flag for migrations
-SOUTH_TESTS_MIGRATE = False
+TESTS_MIGRATE = False
 
 from django.db.backends.signals import connection_created
 from django.dispatch import receiver

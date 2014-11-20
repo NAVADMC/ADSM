@@ -1,8 +1,8 @@
 """This models file specifies all the tables used to create a settings file for
 a SpreadModel simulation.
-This project uses South migration tool for database structure changes.
-Use manage.py schemamigration APPNAME --auto whenever the models.py changes.
-Then rune manage.py migrate to apply the changes.
+This project uses Django 1.7 migrations for database structure changes.
+Use manage.py makemigrations APPNAME whenever the models.py changes.
+Then run manage.py migrate to apply the changes.
 
 This file in particular and the project in general
 relies heavily on conventions.  Please be careful to follow the existing conventions
@@ -13,7 +13,7 @@ Conventions:
     - forms.py relies on this
 - the names of Models are replicated in the hyperlinks
 - Model names are used in forms.py by appending <ModelName>Form to the end
-- scripts/textscrubber.py relies on the only blank lines being between classes
+- Outdated: Previously scripts/textscrubber.py relies on the only blank lines being between classes
     DO NOT put blank lines in the middle of models or before a class method
 - a Model with 'name' as the first field is assumed to be referenced other places
     forms.py will give this special back-track features
