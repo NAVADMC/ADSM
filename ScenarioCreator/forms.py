@@ -2,13 +2,12 @@
 ModelForm -> models.py.  This basic layout can be overridden by declaring an __init__ with a self.helper Layout.
 See DirectSpread for an example.  More complex widgets and layouts are accessible from there.
 All forms now have their "submit" button restored and you can choose custom layouts.  ControlProtocol has tabs."""
-from floppyforms.__future__ import ModelForm
 
 from django.forms.models import inlineformset_factory
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
-from floppyforms import Select, NumberInput
+from floppyforms import Select, NumberInput, ModelForm
 from crispy_forms.helper import FormHelper
 
 
@@ -39,8 +38,6 @@ class BaseForm(ModelForm):
             self.helper = FormHelper()
             fields_and_submit = list(self.base_fields.keys()) + [submit_button()]
             self.helper.layout = Layout(*fields_and_submit)
-        if not hasattr(self, 'exclude'):
-            self.exclude = []
 
         super(BaseForm, self).__init__(*args, **kwargs)
 
@@ -57,6 +54,7 @@ class PopulationForm(BaseForm):
 
     class Meta(object):
         model = Population
+        exclude = []
 
 
 class UnitForm(BaseForm):
@@ -75,17 +73,18 @@ class UnitFormAbbreviated(BaseForm):
 class ProbabilityFunctionForm(BaseForm):
     class Meta(object):
         model = ProbabilityFunction
+        exclude = []
         widgets = {'graph': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
 class RelationalPointForm(BaseForm):
     class Meta(object):
         model = RelationalPoint
-        exclude = []
+        fields = ['relational_function', 'x', 'y']  # just to make the deprecation warnings happy
         widgets = {'relational_function': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
-PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint)
+PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint, fields=['relational_function', 'x', 'y'])
 
 
 class RelationalFunctionForm(BaseForm):
@@ -102,6 +101,7 @@ class RelationalFunctionForm(BaseForm):
 
     class Meta(object):
         model = RelationalFunction
+        exclude = []
 
 
 class ControlMasterPlanForm(BaseForm):
@@ -124,6 +124,7 @@ class ProtocolAssignmentForm(BaseForm):
 class DiseaseProgressionAssignmentForm(BaseForm):
     class Meta(object):
         model = DiseaseProgressionAssignment
+        exclude = []
         widgets = {'production_type': FixedSelect(),
                    'progression': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseProgression/new/'})}
 
@@ -219,6 +220,7 @@ class ControlProtocolForm(BaseForm):
         
     class Meta(object):
         model = ControlProtocol
+        exclude = []
         widgets = {'detection_probability_for_observed_time_in_clinical': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'detection_probability_report_vs_first_detection': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'trace_result_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
@@ -372,11 +374,13 @@ class OutputSettingsForm(BaseForm):
 class ProductionTypeForm(BaseForm):
     class Meta(object):
         model = ProductionType
+        exclude = []
 
 
 class DiseaseSpreadAssignmentForm(BaseForm):
     class Meta(object):
         model = DiseaseSpreadAssignment
+        exclude = []
         widgets = {  # Production types are not given edit buttons because the user is only allowed to add Production types from a Population XML
                    # 'source_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
                    # 'destination_production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'}),
@@ -388,11 +392,13 @@ class DiseaseSpreadAssignmentForm(BaseForm):
 class ZoneForm(BaseForm):
     class Meta(object):
         model = Zone
+        exclude = []
 
 
 class ZoneEffectForm(BaseForm):
     class Meta(object):
         model = ZoneEffect
+        exclude = []
         widgets = {'zone_indirect_movement': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'zone_direct_movement': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
