@@ -90,6 +90,7 @@ def zip_map_directory_if_it_exists():
     else:
         print("Folder is empty: ", dir_to_zip)
 
+
 def process_result(queue):
     results = queue.get()
     DailyReport.objects.bulk_create(results['DailyReport'])
@@ -107,6 +108,12 @@ class Simulation(threading.Thread):
     """Execute system commands in a separate thread so as not to interrupt the webpage.
     Saturate the computer's processors with parallel simulation iterations"""
     def __init__(self, max_iteration, **kwargs):
+        # Re-setup django since we have dropped into a thread (new environment)
+        from django.conf import settings
+        settings.configure()
+        import django
+        django.setup()
+
         self.max_iteration = max_iteration
         self.production_types = ProductionType.objects.values_list('id', 'name')
         self.zones = Zone.objects.values_list('id', 'name')
@@ -123,7 +130,7 @@ class Simulation(threading.Thread):
             res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, queue, self.production_types, self.zones))
             statuses.append(res)
         pool.close()
-        
+
         for iteration in range(self.max_iteration):
             process_result(queue)  # each .get() gets a new thread result
 

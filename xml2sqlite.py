@@ -12,7 +12,12 @@ if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
 
     from django.conf import settings
+    settings.configure()
+    import django
+    django.setup()
+
     from django.core import management
+
     from Settings.models import scenario_filename
     from Settings.utils import db_name
     from Settings.views import new_scenario, save_scenario
