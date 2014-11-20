@@ -32,7 +32,7 @@ For non-Windows machines:
     pip install pandas
     pip install pyproj  # used in the xml2sqlite.py retro script
 
-For a new Python3.3 installation on Windows, you will need to download and install these binaries:  
+For a new Python3.4 installation on Windows, you will need to download and install these binaries:  
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy  
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#pandas  
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#matplotlib  
@@ -43,21 +43,6 @@ Use your virtualenv easy_install.exe on each binary, for example:
 
     easy_install.exe pyproj-1.9.4dev.win-amd64-py3.3.exe
 
-
-## Google Server Production Deploy:
-Ensure that you start server in a screen.  `screen -r` To avoid `sudo` Google server is forwarding port 80 to 8080.  You need
-to be in the py33 virtual env.  That only needs to be done once.
-
-    screen -r   (Ctrl+C to stop server and reuse the screen) or (Ctrl+A  K   to kill the screen and start from scratch)
-    git pull
-    git submodule update
-    #source /home/josiah/py33/bin/activate 
-    cd CEngine
-    make
-    cd ..
-    python manage.py collectstatic
-    python manage.py runproductionserver --serve_static=collect --pid_file=server.pid --port=8080 
-    #sudo  iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080  # use this if the server crashes
 
 ## OS - specific Branches
 _Branches: Windows, Linux, Mac-OSX_  
