@@ -175,8 +175,7 @@ def collect_backlinks(model_instance):
                 try:  # not everything has a name attr
                     links[str(direct_reference)] = '/setup/%s/%i/' % (name, direct_reference.pk)
                 except:
-                    links['%s:%i' % (name, direct_reference.pk)] = \
-                        '/setup/%s/%i/' % (name, direct_reference.pk)
+                    links['%s:%i' % (name, direct_reference.pk)] = '/setup/%s/%i/' % (name, direct_reference.pk)
     print(links)
     return links
 
@@ -189,9 +188,9 @@ def initialize_relational_form(context, primary_key, request):
         model = RelationalFunction.objects.get(id=primary_key)
         main_form = RelationalFunctionForm(request.POST or None, instance=model)
         context['model_link'] = '/setup/RelationalFunction/' + primary_key + '/'
+        context['backlinks'] = collect_backlinks(model)
     context['form'] = main_form
     context['model'] = model
-    context['backlinks'] = collect_backlinks(model)
     context['deletable'] = 'delete/'
     return context
 
