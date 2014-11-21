@@ -27,7 +27,7 @@ class ScenarioRouter(object):
            return True
         return False
 
-    def allow_syncdb(self, db, model):
+    def allow_migrate(self, db, model):
         """ Ensures Scenario tables are not created in non-scenario databases
         """
         if db == 'scenario_db':

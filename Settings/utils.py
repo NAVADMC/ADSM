@@ -96,8 +96,7 @@ def reset_db(name, fail_ok=True):
     call_command('migrate',
                  # verbosity=0,
                  interactive=False,
-                 database=connections[name].alias,
-                 load_initial_data=False)
+                 database=connections[name].alias)
     if name == 'default' and not delete_failed:  # create super user
         from django.contrib.auth.models import User
         u = User(username='ADSM', is_superuser=True, is_staff=True)
@@ -112,8 +111,7 @@ def update_db_version():
         call_command('migrate',
                      # verbosity=0,
                      interactive=False,
-                     database=connections['scenario_db'].alias,
-                     load_initial_data=False)
+                     database=connections['scenario_db'].alias)
     except:
         print("Error: Migration failed.")
     print('Done creating database')

@@ -32,6 +32,9 @@ TEMPLATE_DEBUG = True
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = (
+    'ScenarioCreator',
+    'Results',
+    'Settings',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,11 +43,9 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'floppyforms',
     'crispy_forms',
-    'ScenarioCreator',
-    'Results',
-    'Settings',
     'django_production_server',
 )
+
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
