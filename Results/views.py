@@ -105,15 +105,15 @@ def process_result(queue):
 
 
 class Simulation(threading.Thread):
+    from django.conf import settings
+    if not settings.configured:
+        settings.configure()
+    import django
+    django.setup()
+
     """Execute system commands in a separate thread so as not to interrupt the webpage.
     Saturate the computer's processors with parallel simulation iterations"""
     def __init__(self, max_iteration, **kwargs):
-        # Re-setup django since we have dropped into a thread (new environment)
-        from django.conf import settings
-        settings.configure()
-        import django
-        django.setup()
-
         self.max_iteration = max_iteration
         self.production_types = ProductionType.objects.values_list('id', 'name')
         self.zones = Zone.objects.values_list('id', 'name')
