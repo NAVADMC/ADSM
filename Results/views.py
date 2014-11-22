@@ -7,7 +7,6 @@ from django.shortcuts import render, redirect
 from django.db import transaction, close_old_connections
 import subprocess
 import time
-import multiprocessing
 from ScenarioCreator.models import OutputSettings
 from ScenarioCreator.context_processor import supplemental_folder_has_contents
 from django.db.models import Max
@@ -20,6 +19,9 @@ import Results.graphing  # necessary to select backend Agg first
 from Results.interactive_graphing import population_zoom_png
 from Settings.utils import adsm_executable_command, workspace_path
 from Settings.views import save_scenario
+
+import multiprocessing
+from Results.django_queue import DjangoSyncManager
 
 
 def back_to_inputs(request):
@@ -68,6 +70,7 @@ def simulation_process(iteration_number, adsm_cmd, queue, production_types, zone
 
     end = time.time()
 
+    print("DONE WITH SIM PROCESS!")
     return '%i: Success in %i seconds' % (iteration_number, end-start)
 
 
@@ -92,7 +95,9 @@ def zip_map_directory_if_it_exists():
 
 
 def process_result(queue):
+    print("BEFORE CRASH")
     results = queue.get()
+    print("AFTER CRASH")
     DailyReport.objects.bulk_create(results['DailyReport'])
     DailyControls.objects.bulk_create(results['DailyControls'])
     DailyByZoneAndProductionType.objects.bulk_create(results['DailyByZoneAndProductionType'])
@@ -122,7 +127,8 @@ class Simulation(threading.Thread):
     def run(self):
         executable_cmd = adsm_executable_command()  # only want to do this once
         statuses = []
-        manager = multiprocessing.Manager()
+        manager = DjangoSyncManager()
+        manager.start()
         pool = multiprocessing.Pool()
         queue = manager.Queue()
         for iteration in range(1, self.max_iteration + 1):
