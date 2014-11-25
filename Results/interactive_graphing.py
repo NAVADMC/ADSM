@@ -156,7 +156,7 @@ def population_zoom_png(request=None):
     path = workspace_path(scenario_filename() + '/population_map.png')
     try:
         with open(path, "rb") as img_file:  #TODO: remove "rb"
-            return HttpResponse(img_file.read(), mimetype="image/png")
+            return HttpResponse(img_file.read(), content_type='image/png')
     except IOError:
         print("Calculating a new Population Map")
         save_image = iteration_progress() == 1.0  # we want to check this before reading the stats, this is in motion
