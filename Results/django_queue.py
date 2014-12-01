@@ -14,7 +14,10 @@ class DjangoQueue(queue.Queue):
         return super(DjangoQueue, self).get(block=block, timeout=timeout)
 
 
-class DjangoSyncManager(SyncManager):
-    pass
+class DjangoManager(SyncManager):
+    def __init__(self):
+        super(DjangoManager, self).__init__()
 
-DjangoSyncManager.register('DjangoQueue', DjangoQueue)
+        self.start()
+
+DjangoManager.register('DjangoQueue', DjangoQueue)
