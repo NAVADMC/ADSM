@@ -21,7 +21,7 @@ from Settings.utils import adsm_executable_command, workspace_path
 from Settings.views import save_scenario
 
 import multiprocessing
-from Results.django_queue import DjangoSyncManager
+from Results.django_queue import DjangoSyncManager, DjangoQueue
 
 
 def back_to_inputs(request):
@@ -130,7 +130,7 @@ class Simulation(threading.Thread):
         manager = DjangoSyncManager()
         manager.start()
         pool = multiprocessing.Pool()
-        queue = manager.Queue()
+        queue = manager.DjangoQueue()
         for iteration in range(1, self.max_iteration + 1):
             adsm_cmd = executable_cmd + ['-i', str(iteration)]
             res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, queue, self.production_types, self.zones))
