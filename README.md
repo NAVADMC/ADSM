@@ -56,6 +56,7 @@ Using the pip in your new Virtual Environment (`/path/to/adsm_venv/Scripts/pip`)
     - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/matplotlib-1.4.2.win-amd64-py3.4.exe
     - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/pyproj-1.9.4dev.win-amd64-py3.4.exe
   - Now, using the easy_install in your new Virtual Environment (`/path/to/adsm_venv/Scripts/easy_install`), install the following packages:
+        
         easy_install numpy-MKL-1.9.1.win-amd64-py3.4.exe  
         easy_install pandas-0.15.1.win-amd64-py3.4.exe  
         easy_install matplotlib-1.4.2.win-amd64-py3.4.exe  
@@ -80,6 +81,7 @@ Windows:
     - http://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/pywin32-219.win-amd64-py3.4.exe/download  
     - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/cx_Freeze-4.3.3.win-amd64-py3.4.exe
   - Now, using the easy_install in your new Virtual Environment (/path/to/adsm_venv/Scripts/easy_install), install the packages:
+        
         easy_install pywin32-219.win-amd64-py3.4.exe
         easy_install cx_Freeze-4.3.3.win-amd64-py3.4.exe
 
