@@ -4,11 +4,11 @@ Setting up ADSM for Development Work
 ---------
 ADSM has several external dependencies. Getting your environment setup with these dependencies for development work will be outlined in this document.
 
- Operating system:
- 
-  - Windows, Debian Linux or Mac OS X.
+Operating system:  
+
+  - Windows, Debian Linux or Mac OS X. 
   
- Python 3.4.2 (x64): 
+Python 3.4.2 (x64): 
  
   - Windows: https://www.python.org/ftp/python/3.4.2/python-3.4.2.amd64.msi
   - Linux: https://www.python.org/ftp/python/3.4.2/Python-3.4.2.tgz (Please find instructions for compiling on your platform)
@@ -48,50 +48,54 @@ Using the pip in your new Virtual Environment (`/path/to/adsm_venv/Scripts/pip`)
     pip install pandas==0.15.1
     pip install pyproj==1.9.4
 
-**If you are on Windows**, these packages need a special installation. Download the following files for Windows into a directory that you can easily navigate to in a command prompt:
+**If you are on Windows**, these packages need a special installation: 
 
- - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/numpy-MKL-1.9.1.win-amd64-py3.4.exe
- - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/pandas-0.15.1.win-amd64-py3.4.exe
- - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/matplotlib-1.4.2.win-amd64-py3.4.exe
- - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/pyproj-1.9.4dev.win-amd64-py3.4.exe
-
-Now, using the easy_install in your new Virtual Environment (`/path/to/adsm_venv/Scripts/easy_install`), install the following packages:
-
-    easy_install numpy-MKL-1.9.1.win-amd64-py3.4.exe
-    easy_install pandas-0.15.1.win-amd64-py3.4.exe
-    easy_install matplotlib-1.4.2.win-amd64-py3.4.exe
-    easy_install pyproj-1.9.4dev.win-amd64-py3.4.exe
+  - Download the following files for Windows into a directory that you can easily navigate to in a command prompt:
+    - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/numpy-MKL-1.9.1.win-amd64-py3.4.exe
+    - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/pandas-0.15.1.win-amd64-py3.4.exe
+    - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/matplotlib-1.4.2.win-amd64-py3.4.exe
+    - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/pyproj-1.9.4dev.win-amd64-py3.4.exe
+  - Now, using the easy_install in your new Virtual Environment (`/path/to/adsm_venv/Scripts/easy_install`), install the following packages:
+        easy_install numpy-MKL-1.9.1.win-amd64-py3.4.exe  
+        easy_install pandas-0.15.1.win-amd64-py3.4.exe  
+        easy_install matplotlib-1.4.2.win-amd64-py3.4.exe  
+        easy_install pyproj-1.9.4dev.win-amd64-py3.4.exe  
 
 ###Compile chain (optional)
 If you plan on compiling a distributable version of the project, then use the following instructions.
 
- Linux:  
+Linux:  
+ 
   - Requires ldd and objdump installed (probably already on your system)  
   - `pip install cx-freeze==4.3.3`
  
- Mac:  
+Mac:  
+ 
   - Install Xcode  
   - `pip install cx-freeze==4.3.3`
  
- Windows:  
- Download the following two files:  
- - http://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/pywin32-219.win-amd64-py3.4.exe/download  
- - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/cx_Freeze-4.3.3.win-amd64-py3.4.exe
- 
- Now, using the easy_install in your new Virtual Environment (/path/to/adsm_venv/Scripts/easy_install), install the packages:  
-    `easy_install pywin32-219.win-amd64-py3.4.exe`  
-    `easy_install cx_Freeze-4.3.3.win-amd64-py3.4.exe`
+Windows:  
+
+  - Download the following two files:
+    - http://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/pywin32-219.win-amd64-py3.4.exe/download  
+    - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/cx_Freeze-4.3.3.win-amd64-py3.4.exe
+  - Now, using the easy_install in your new Virtual Environment (/path/to/adsm_venv/Scripts/easy_install), install the packages:
+        easy_install pywin32-219.win-amd64-py3.4.exe
+        easy_install cx_Freeze-4.3.3.win-amd64-py3.4.exe
 
 ###Selenium Tests
 To run the Selenium Tests, you will need Chrome or Chromium installed on your system plus the ChromeDriver v2.12.
 
 Windows:  
+
   - http://chromedriver.storage.googleapis.com/2.12/chromedriver_win32.zip
   
 Linux:  
+
   - http://chromedriver.storage.googleapis.com/2.12/chromedriver_linux64.zip
   
 Mac:  
+
   - http://chromedriver.storage.googleapis.com/2.12/chromedriver_mac32.zip
 
 Unzip the file and place it in the Scripts folder of your new Virtual Environment (/path/to/adsm_venv/Scripts/)
@@ -136,7 +140,8 @@ If you need a one off compile of the adsm_simulation.exe, setup your own tempora
 Notes on the Distributable
 ----------
 The Chromium Window should never need to be recompiled but instructions are provided here.        
-For the Chromium window, we are using the Chromium Embedded Framework. Adobe hosts and maintains a site, cefbuilds.com, which has the compile chain setup in as a project per OS platform. I pulled the 64bit projects for each OS from the 2062 Branch on that site.  
+For the Chromium window, we are using the Chromium Embedded Framework. Adobe hosts and maintains a site, cefbuilds.com, which has the compile chain setup in as a project per OS platform. I pulled the 64bit projects for each OS from the 2062 Branch on that site. 
+
  - Note, the Windows version requires VS2013  
  - Note, the Linux version require mesa-common-dev, libglew-dev, libgtkglext1-dev  
  - Note, in Linux this file needs to be linked on dev and normal user machines too! The distributable should handle this. `sudo ln -s /lib/x86_64-linux-gnu/libudev.so.1.3.5 /usr/lib/libudev.so.0`  
@@ -144,19 +149,22 @@ For the Chromium window, we are using the Chromium Embedded Framework. Adobe hos
 From here, I modified the 'cefsimple' application to launch http://localhost:8000, changed the window names, and disabled right clicking.  
 Then compiled that project as x64 Release and put the output in the Viewer folder for the OS Branch.
 
-Git needed to be put into the deployable, so we got a portable version for each OS.  
+Git needed to be put into the deployable, so we got a portable version for each OS. 
+
  - Git for windows, just downloaded portable from msysgit git repo.  
  - Linux, downloaded git source from github/git/git and compiled in new directory. Requires build-essential, libssl-dev, libcurl4-openssl-dev  
 
 Building the Distributable
 -----------
-Cx_freeze must be installed.
+Cx_freeze must be installed.  
 Required Items for cx_freeze:  
+
  - http://sourceforge.net/projects/pywin32/  (For Windows only)  
  - ldd, objdump  (For Linux only)  
  - Xcode  (For OS X only)  
 
 Build steps:  
+
  - Merge master into Stable.  
  - Test.  
  - Merge Stable into each OS-staging branch.  
