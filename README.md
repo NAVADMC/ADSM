@@ -169,13 +169,21 @@ Build steps:
 
  - Merge master into Stable.  
  - Test.  
+ - Push.
+ - Make fixes in Master and repeat above until everything works.
  - Merge Stable into each OS-staging branch.  
  - Make OS Specific changes.  
  - Test.  
- - Compile.  
- - Test Compiled (`ADSM.exe --test`)  
- - Merge OS-staging into OS branch. Do not merge in the Staging compiled files (ADSM.exe, adsm_update.exe, and library.zip). Do not merge in CEF or CEngine files.  
- - Compile.  
+ - Run compile.py with your Virtual Env's Python (you can probably kill the process when it starts zipping the output).  
+ - Test Compiled (`ADSM.exe --test`).
+ - `git add -u` Commit as "OS Staging Compile mm/dd/yyyy @ HH:MM".
+ - Push.
+ - Merge OS-staging into OS branch. Do not merge in the Staging compiled files (ADSM.exe, adsm_update.exe, and library.zip). Do not merge in CEF or CEngine files. 
+ - Test.
+ - Run compile.py with your Virtual Env's Python.
+ - Test Compiled (`ADSM.exe --test`).
+ - `git add -u` Commit as "OS Production Compile mm/dd/yyyy @ HH:MM".
+ - Push.
 
 When you push the OS branch, that compiled version is now live and will be pulled down by all clients.
 
