@@ -103,6 +103,7 @@ class Population(BaseModel):
     source_file = models.CharField(max_length=255, blank=True)  # source_file made generic CharField so Django doesn't try to copy and save the raw file
 
     def save(self, *args, **kwargs):
+        self.id = 1
         super(Population, self).save(*args, **kwargs)
         if self.source_file:
             self.import_population()  # Population must be saved to db so that it can be foreignkeyed
@@ -114,7 +115,7 @@ class Population(BaseModel):
 
     def import_population(self):
         from Settings.models import SmSession
-        session = SmSession.objects.get(pk=1)
+        session = SmSession.objects.get_or_create(id=1)[0]
 
         start_time = time.clock()  # perf_counter() would also work
         session.set_population_upload_status("Parsing")
