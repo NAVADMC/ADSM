@@ -66,7 +66,7 @@ def adsm_executable_command():
 def graceful_startup():
     """Checks something inside of each of the database files to see if it's valid.  If not, rebuild the database."""
     try:
-        SmSession.objects.get_or_create()[0].update_available
+        SmSession.objects.get_or_create(id=1)[0].update_available
     except OperationalError:
         reset_db('default')
     try:
@@ -121,7 +121,7 @@ def update_requested():
     try:
         graceful_startup()
 
-        session = SmSession.objects.get_or_create()[0]
+        session = SmSession.objects.get_or_create(id=1)[0]
         if session.update_on_startup:
             return True
     except:

@@ -45,7 +45,7 @@ def basic_context(request):
     pt_count = ProductionType.objects.count()
     context = {'filename': scenario_filename(),  # context in either mode
                'unsaved_changes': unsaved_changes(),
-               'update_available': SmSession.objects.get_or_create()[0].update_available,
+               'update_available': SmSession.objects.get_or_create(id=1)[0].update_available,
                'url': request.path,
                'active_link': '/'.join(re.split('\W+', request.path)[2:]),
                'dev_version': git_adsm_sha(),
