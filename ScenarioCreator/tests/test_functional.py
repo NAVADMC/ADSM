@@ -159,7 +159,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         production_type = ProductionType.objects.get(name="Free Range Cows")
         assigned_type = DiseaseProgressionAssignment.objects.create(production_type=production_type,
             progression=disease_progression)
-        dc_ds1 = DirectSpread.objects.create(name="Dairy Cattle Large",
+        self.dc_ds1 = DirectSpread.objects.create(name="Dairy Cattle Large",
             latent_animals_can_infect_others=True,
             contact_rate=5,
             infection_probability=1,
@@ -319,18 +319,18 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.setup_scenario()
         self.click_navbar_element("Assign Disease Spread")
 
-        self.select_bulk_contact_disease("Dairy Cattle Large 1")
+        self.select_bulk_contact_disease(str(self.dc_ds1))
 
         # verify bulk selector for each destination production type were updated
         types = self.get_bulk_production_types()
         for production_type in types:
-            self.assertEqual(production_type['disease'], "Dairy Cattle Large 1")
+            self.assertEqual(production_type['disease'], str(self.dc_ds1))
 
         # verify interactions are set correctly
         interactions = self.get_interactions()
         for interaction in interactions:
             if interaction['source'] == interaction['destination']:
-                self.assertEqual(interaction['disease'], 'Dairy Cattle Large 1')
+                self.assertEqual(interaction['disease'], str(self.dc_ds1))
             else:
                 self.assertEqual(interaction['disease'], u'---------')
 
@@ -343,20 +343,20 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.click_navbar_element("Assign Disease Spread")
 
         self.click_production_type("Free Range Cows")
-        self.select_bulk_contact_disease("Dairy Cattle Large 1")
+        self.select_bulk_contact_disease(str(self.dc_ds1))
 
         # verify bulk selector for each destination production type were updated
         types = self.get_bulk_production_types()
         for production_type in types:
             if (production_type['source'] == "Free Range Cows"):
-                self.assertEqual(production_type['disease'], "Dairy Cattle Large 1")
+                self.assertEqual(production_type['disease'], str(self.dc_ds1))
             else:
                 self.assertEqual(production_type['disease'], u"---------")
 
         interactions = self.get_interactions()
         for interaction in interactions:
             if interaction['source'] == 'Free Range Cows':
-                self.assertEqual(interaction['disease'], "Dairy Cattle Large 1")
+                self.assertEqual(interaction['disease'], str(self.dc_ds1))
             else:
                 self.assertEqual(interaction['disease'], u"---------")
 
@@ -370,14 +370,14 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         self.click_production_type("Free Range Cows")
         self.click_production_type("Dairy Cows")
-        self.select_bulk_contact_disease("Dairy Cattle Large 1")
+        self.select_bulk_contact_disease(str(self.dc_ds1))
 
         # verify bulk selector for each destination production type were updated
         types = self.get_bulk_production_types()
         for production_type in types:
             if (production_type['source'] == 'Free Range Cows' or
                     production_type['source'] == 'Dairy Cows'):
-                self.assertEqual(production_type['disease'], "Dairy Cattle Large 1")
+                self.assertEqual(production_type['disease'], str(self.dc_ds1))
             else:
                 self.assertEqual(production_type['disease'], u"---------")
 
@@ -385,7 +385,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         for interaction in interactions:
             if (interaction['source'] == 'Free Range Cows' or
                     interaction['source'] == 'Dairy Cows'):
-                self.assertEqual(interaction['disease'], "Dairy Cattle Large 1")
+                self.assertEqual(interaction['disease'], str(self.dc_ds1))
             else:
                 self.assertEqual(interaction['disease'], u"---------")
 
@@ -402,7 +402,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.click_production_type("Dairy Cows")
         self.click_production_type("Free Range Cows", "destination")
         self.click_production_type("Dairy Cows", "destination")
-        self.select_bulk_contact_disease("Dairy Cattle Large 1")
+        self.select_bulk_contact_disease(str(self.dc_ds1))
 
         # verify bulk selector for each destination production type were updated
         types = self.get_bulk_production_types()
@@ -410,7 +410,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             if (production_type['source'] == "Free Range Cows" or
                 production_type['source'] == "Dairy Cows"):
                 # only the sources selected should have updated
-                self.assertEqual(production_type['disease'], "Dairy Cattle Large 1")
+                self.assertEqual(production_type['disease'], str(self.dc_ds1))
             else:
                 self.assertEqual(production_type['disease'], u"---------")
 
@@ -420,7 +420,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             if ((i['source'] == 'Free Range Cows' or i['source'] == 'Dairy Cows') and
                 (i['destination'] == 'Free Range Cows' or i['destination'] == 'Dairy Cows')):
                 # both the source and destination type were selected
-                self.assertEqual(interaction['disease'], "Dairy Cattle Large 1")
+                self.assertEqual(interaction['disease'], str(self.dc_ds1))
             else:
                 self.assertEqual(interaction['disease'], u"---------")
 
