@@ -1,7 +1,7 @@
 import time
 import os
 
-from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
@@ -114,7 +114,7 @@ class M2mDSL(object):
             return rows.find_elements_by_css_selector(destination_selector)
 
 
-class FunctionalTests(LiveServerTestCase, M2mDSL):
+class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
     multi_db = True
 
     @classmethod
@@ -125,6 +125,7 @@ class FunctionalTests(LiveServerTestCase, M2mDSL):
 
     @classmethod
     def tearDownClass(cls):
+        cls.selenium.refresh()
         cls.selenium.quit()
         super(FunctionalTests, cls).tearDownClass()
 
