@@ -187,11 +187,18 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
 
   disable_all_controls = PAR_get_boolean (scenario_db, "SELECT disable_all_controls FROM ScenarioCreator_controlmasterplan");
 
-  include_zones = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_zone") >= 1);
+  /* Instantiate the zone module even if disable_all_controls is true. This
+   * prevents dangling references when there are movement control charts,
+   * detection multipliers, etc. attached to zones. */
+  include_zones = (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_zone") >= 1);
   if (include_zones)
     {
       g_ptr_array_add (instantiation_fns, zone_model_new);
     }
+  /* But now we set include_zones to false if disable_all_controls is true.
+   * In the code below, this will prevent instantiation of any modules that
+   * actually trigger zone creation. */
+  include_zones = include_zones && (!disable_all_controls);
 
   if (PAR_get_boolean (scenario_db, "SELECT (include_direct_contact_spread=1 OR include_indirect_contact_spread=1) FROM ScenarioCreator_disease"))
     {
