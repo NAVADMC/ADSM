@@ -335,15 +335,14 @@ class DailyControls(OutputBaseModel):
     last_day = models.BooleanField(default=False, help_text="Flag that is only set on the last day of an iteration.")
 
     costSurveillance = models.FloatField(blank=True, null=True, verbose_name='Surveillance Cost')
-    vaccOccurred = models.IntegerField(blank=True, null=True, verbose_name='Vaccination Occurred')
     vaccSetup = models.FloatField(blank=True, null=True, verbose_name='Vaccination Site Setup Cost')
     vaccVaccination = models.FloatField(blank=True, null=True, verbose_name='Cost of Vaccine')
     vaccSubtotal = models.FloatField(blank=True, null=True, verbose_name='Vaccination Subtotal')
     destrAppraisal = models.FloatField(blank=True, null=True, verbose_name="Appraisal Cost")
     destrEuthanasia = models.FloatField(blank=True, null=True, verbose_name='Euthanasia Cost')
     destrIndemnification = models.FloatField(blank=True, null=True, verbose_name='Indemnification Cost')
-    destrDisposal = models.FloatField(blank=True, null=True, verbose_name='Disposal Cost')
-    destrCleaning = models.FloatField(blank=True, null=True, verbose_name='Cleaning Cost')
+    destrDisposal = models.FloatField(blank=True, null=True, verbose_name='Carcass Disposal Cost')
+    destrCleaning = models.FloatField(blank=True, null=True, verbose_name='Cleaning and Disinfection Cost')
     destrSubtotal = models.FloatField(blank=True, null=True, verbose_name='Depopulation Subtotal Cost')
     costsTotal = models.FloatField(blank=True, null=True, verbose_name=printable_name('costsTotal'))
 
@@ -357,6 +356,7 @@ class DailyControls(OutputBaseModel):
     deswATimeMax = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Animals Max Time")
     deswATimeAvg = models.FloatField(blank=True, null=True, verbose_name="Destruction Wait Time Animals Average Time")
     deswADaysInQueue = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Animals Days in Queue")
+    vaccOccurred = models.IntegerField(blank=True, null=True, verbose_name='Vaccination Occurred')
 
     diseaseDuration = models.IntegerField(blank=True, null=True, verbose_name=printable_name('diseaseDuration'))
     outbreakDuration     = models.IntegerField(blank=True, null=True, verbose_name=printable_name('outbreakDuration'))
