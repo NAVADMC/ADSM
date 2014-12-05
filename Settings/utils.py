@@ -1,3 +1,4 @@
+from itertools import chain
 import os
 import subprocess
 import re
@@ -189,3 +190,9 @@ def update_adsm():
             subprocess.call(command, shell=True)  # TODO: What if the stash apply has a conflict?
     else:
         return True
+
+
+def supplemental_folder_has_contents(subfolder=''):
+    """Doesn't currently include Map subdirectory.  Instead it checks for the map zip file.  TODO: This could be a page load slow down given that
+    we're checking the file system every page."""
+    return len(list(chain(*[glob(workspace_path(scenario_filename() + subfolder + "/*." + ext)) for ext in ['csv', 'shp', 'shx', 'dbf', 'zip']]))) > 0

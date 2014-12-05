@@ -1,16 +1,15 @@
 import subprocess
-from glob import glob
-from itertools import chain
 import re
+
+from django.db.models import F
+
 from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Population, Unit, Disease, DiseaseProgression, \
     DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
     ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
 from Results.models import DailyControls
-from Results.summary import iteration_progress
 from Settings.models import scenario_filename, SmSession
 from Settings.views import unsaved_changes
-from Settings.utils import graceful_startup, workspace_path
-from django.db.models import F
+from Settings.utils import graceful_startup, supplemental_folder_has_contents
 from git.git import git
 
 
@@ -24,12 +23,6 @@ def js(var):
         return 'true'
     else:
         return 'false'
-
-
-def supplemental_folder_has_contents(subfolder=''):
-    """Doesn't currently include Map subdirectory.  Instead it checks for the map zip file.  TODO: This could be a page load slow down given that
-    we're checking the file system every page."""
-    return len(list(chain(*[glob(workspace_path(scenario_filename() + subfolder + "/*." + ext)) for ext in ['csv', 'shp', 'shx', 'dbf', 'zip']]))) > 0
 
 
 def git_adsm_sha():
@@ -94,7 +87,5 @@ def basic_context(request):
                                            'outputs_computed':                js(DailyControls.objects.count() > 0),
         }
         
-    elif 'results/' in request.path:  # results specific context
-        context.update({'results_progress': iteration_progress() * 100})
         
     return context
