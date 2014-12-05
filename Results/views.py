@@ -2,6 +2,7 @@ from collections import defaultdict
 import zipfile
 from glob import glob
 import threading
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, PermissionDenied
 from django.forms.models import modelformset_factory
 from django.shortcuts import render, redirect
 from django.db import transaction, close_old_connections
@@ -153,8 +154,11 @@ def results_home(request):
         context['summary'] = Results.summary.summarize_results()
         context['iterations'] = len(list_of_iterations())
         context['large_population'] = Unit.objects.count() > 10000  # determines slower interactive map vs fast matplotlib
-        v = ResultsVersion.objects.get()
-        context['version_number'] = '.'.join([v.versionMajor, v.versionMinor, v.versionRelease])
+        try:
+            v = ResultsVersion.objects.get()
+            context['version_number'] = '.'.join([v.versionMajor, v.versionMinor, v.versionRelease])
+        except (MultipleObjectsReturned, ObjectDoesNotExist, PermissionDenied):
+            pass
     return render(request, 'Results/SimulationProgress.html', context)
 
 
