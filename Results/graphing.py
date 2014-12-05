@@ -206,13 +206,18 @@ def single_iteration_line_graph(iteration, field_name, model_name, model, time_s
     time_data = pd.DataFrame.from_records( list(zip(days, *time_series)), columns=columns)  # keys should be same ordering as the for loop above
     time_data = time_data.set_index('Day')
 
-    time_graph.legend()
     time_data.plot(ax=time_graph)
+
+    if iteration is None:
+        time_graph.legend().remove()
     
     # Manually scale zone graphs based on the Max for any zone (universal value)
     if "Zone" in model_name:
         # It's important to filter out Background stats from this Max
-        ymax = model.objects.filter(zone__isnull=False, iteration=iteration).aggregate(Max(field_name))[field_name + '__max'] * 1.05
+        if iteration is not None:
+            ymax = model.objects.filter(zone__isnull=False, iteration=iteration).aggregate(Max(field_name))[field_name + '__max'] * 1.05
+        else:
+            ymax = model.objects.filter(zone__isnull=False).aggregate(Max(field_name))[field_name + '__max'] * 1.05
         time_graph.set_ylim(0.0, ymax)
         boxplot_graph.set_ylim(0.0, ymax)
 
@@ -247,6 +252,10 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
 
     if iteration:  # for a single iteration, we don't need all the hist2d prep
         return single_iteration_line_graph(iteration, field_name, model_name, model, time_series, columns, time_graph, boxplot_graph, fig)
+    if OutputSettings.objects.get_or_create()[0].iterations < 100:
+        # do a stacked line graph instead of a histogram    
+        return single_iteration_line_graph(iteration, field_name, model_name, model, time_series, columns, time_graph, boxplot_graph, fig)
+    
     days = list(range(1, len(time_series[0]) + 1))  # Start with day index
     x = days * len(time_series)  # repeat day series for each set of data (1 per iteration)
     y = list(chain(*time_series))
