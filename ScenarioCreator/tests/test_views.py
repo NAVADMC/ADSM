@@ -7,6 +7,8 @@ from django.test import TestCase
 
 from ScenarioCreator.models import (AirborneSpread, RelationalFunction,
         RelationalPoint, ProbabilityFunction, DiseaseProgression)
+from Settings.utils import workspace_path
+from SpreadModel import settings
 
 POPULATION_FIXTURES = 'ScenarioCreator/tests/population_fixtures/'
 
@@ -175,6 +177,10 @@ class RelationalFunctionTestCase(TestCase):
             'file': points_file
         }
         r = self.client.post('/setup/RelationalFunction/new/', form_data, follow=True)
+
+        temp_file_name = os.path.basename(points_file.name)
+        temp_file_upload_path = os.path.join(settings.BASE_DIR, workspace_path(temp_file_name))
+        self.assertFalse(os.path.exists(temp_file_upload_path))
 
         self.assertEqual(RelationalFunction.objects.count(), 1)
         function = RelationalFunction.objects.first()

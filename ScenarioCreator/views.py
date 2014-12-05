@@ -230,7 +230,7 @@ def initialize_points_from_csv(request):
         initial_values['relationalpoint_set-MAX_NUM_FORMS'] = '1000'
         request.POST.update(initial_values)
     try:
-        os.remove(workspace_path(file_path))  # we don't want to keep these files around in the workspace
+        os.remove(file_path)  # we don't want to keep these files around in the workspace
     except: pass  # possible that file was never created
     return request
 
