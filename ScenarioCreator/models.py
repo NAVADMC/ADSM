@@ -143,7 +143,7 @@ class Population(BaseModel):
 
 class Unit(BaseModel):
     def population_default():
-        return Population.objects.get_or_create(id=1[0])
+        return Population.objects.get_or_create(id=1)[0]
 
     _population = models.ForeignKey(Population, default=population_default, )  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
     production_type = models.ForeignKey('ProductionType',
