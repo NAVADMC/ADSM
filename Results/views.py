@@ -234,19 +234,20 @@ headers = {'DailyByProductionType': [("Exposures", "exp", ['expnU', 'expcU']),
                                      ("Tracing", "tr", ['trnU', 'trcU'])],
            'DailyControls': [("Destruction", 'dest', ['destrSubtotal']),
                              ("Destruction Wait", 'desw', ['deswUTimeAvg']),
-                             ("Vaccination", 'vac', ['vaccVaccination'])]}
+                             ("Vaccination", 'vacc', ['vaccVaccination'])]}
 headers = defaultdict(lambda: [('', '', [])], headers)
 
 
 def class_specific_headers(model_name, prefix):
     sub_headers = headers[model_name]  # select by class
     hidden_categories = excluded_headers()
-    sub_headers = [v for v in sub_headers if v[1] not in hidden_categories.keys()]
     if prefix:  # filter if there's a prefix
-        sub_headers = [item for item in headers if item[1] == prefix]
+        sub_headers = [item for item in sub_headers if item[1] == prefix]
         title, pref, links = sub_headers[0]
         links = ['/results/' + model_name + '/' + item for item in links]  # otherwise links get broken
         sub_headers[0] = title, pref, links
+    else:
+        sub_headers = [item for item in sub_headers if item[1] not in hidden_categories.keys()]
     return sub_headers
 
 
