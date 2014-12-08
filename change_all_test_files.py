@@ -46,7 +46,7 @@ def main():
 		  + doc.findall( './/stochastic-variable-test' ):
 			populationFileName = el.find( './population-file' ).text
 			parameterFileName = el.find( './parameter-file' ).text
-			cmd = 'python3.3 xml2sqlite.py ' \
+			cmd = 'python3.4 xml2sqlite.py ' \
 			  + os.path.join( dir, populationFileName + '.xml' ) \
 			  + ' ' + os.path.join( subdir, parameterFileName + '.xml' ) \
 			  + ' ' + os.path.join( os.path.pardir, subdir, parameterFileName + '_' + populationFileName + '.sqlite3' )
