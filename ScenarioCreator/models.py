@@ -142,10 +142,11 @@ class Population(BaseModel):
 
 
 class Unit(BaseModel):
-    def population_default():
-        return Population.objects.get_or_create(id=1)[0]
+    def save(self, *args, **kwargs):
+        self._population = Population.objects.get_or_create(id=1)[0]
+        super(Unit, self).save(*args, **kwargs)
 
-    _population = models.ForeignKey(Population, default=population_default, )  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
+    _population = models.ForeignKey(Population)
     production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
     latitude = LatitudeField(
@@ -432,12 +433,11 @@ class ControlProtocol(BaseModel):
 
 
 class ProtocolAssignment(BaseModel):
-    def control_master_plan_default():
-        return ControlMasterPlan.objects.get_or_create(id=1)[0]
+    def save(self, *args, **kwargs):
+        self._master_plan = ControlMasterPlan.objects.get_or_create(id=1)[0]
+        super(ProtocolAssignment, self).save(*args, **kwargs)
 
     _master_plan = models.ForeignKey('ControlMasterPlan',
-                                     default=control_master_plan_default,
-                                     # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
                                      help_text='Points back to a master plan for grouping purposes.')
     production_type = models.ForeignKey('ProductionType', unique=True,
         help_text='The production type that these outputs apply to.', )
@@ -468,12 +468,13 @@ class Disease(BaseModel):
 
 
 class DiseaseProgression(BaseModel):
-    def disease_default():
-        return Disease.objects.get_or_create(id=1)[0]
+    def save(self, *args, **kwargs):
+        self._disease = Disease.objects.get_or_create(id=1)[0]
+        super(DiseaseProgression, self).save(*args, **kwargs)
 
     name = models.CharField(max_length=255,
         help_text="Examples: Severe Progression, FMD Long Incubation")
-    _disease = models.ForeignKey('Disease', default=disease_default, )  # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
+    _disease = models.ForeignKey('Disease')
     disease_latent_period = models.ForeignKey(ProbabilityFunction, related_name='+',
         help_text='Defines the ' + wiki('latent period',"latent-state") + ' for units of this ' + wiki("production type") + '.', )
     disease_subclinical_period = models.ForeignKey(ProbabilityFunction, related_name='+',
@@ -500,13 +501,12 @@ class DiseaseProgressionAssignment(BaseModel):
 
 
 class DiseaseSpread(BaseModel):
-    def disease_default():
-        return Disease.objects.get_or_create(id=1)[0]
+    def save(self, *args, **kwargs):
+        self._disease = Disease.objects.get_or_create(id=1)[0]
+        super(DiseaseSpread, self).save(*args, **kwargs)
 
     name = models.CharField(max_length=255,)
-    _disease = models.ForeignKey('Disease', default=disease_default,
-                                 # If you're having an OperationalError creating a migration, remove the default on ForeignKeys duration south --auto process.
-                                 help_text='Parent disease whose spreading characteristics this describes.')
+    _disease = models.ForeignKey('Disease', help_text='Parent disease whose spreading characteristics this describes.')
         # This is in Disease because of simulation restrictions
     transport_delay = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,  # This will be hidden if it's defaulted
         help_text='WARNING: THIS FIELD IS NOT RECOMMENDED BY ADSM and will be removed in later versions. Consider setting this to "-----".', )

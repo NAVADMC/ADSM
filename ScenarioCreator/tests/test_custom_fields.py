@@ -8,6 +8,9 @@ from ScenarioCreator.custom_fields import PercentField
 class FieldHolder(models.Model):
     test_field = PercentField()
 
+    class Meta(object):
+        abstract = True
+
 
 class PercentFieldTestCase(TestCase):
     multi_db = True
