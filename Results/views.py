@@ -1,4 +1,5 @@
 from collections import defaultdict
+from itertools import chain
 import zipfile
 from glob import glob
 import threading
@@ -9,7 +10,6 @@ from django.db import transaction, close_old_connections
 import subprocess
 import time
 from ScenarioCreator.models import OutputSettings
-from ScenarioCreator.context_processor import supplemental_folder_has_contents
 from django.db.models import Max
 from Results.models import *  # necessary
 from Results.forms import *  # necessary
@@ -18,7 +18,7 @@ from Results.summary import list_of_iterations, summarize_results
 from Settings.models import scenario_filename
 import Results.graphing  # necessary to select backend Agg first
 from Results.interactive_graphing import population_zoom_png
-from Settings.utils import adsm_executable_command, workspace_path
+from Settings.utils import adsm_executable_command, workspace_path, supplemental_folder_has_contents
 from Settings.views import save_scenario
 
 import multiprocessing
@@ -206,36 +206,66 @@ def graph_field(request, model_name, field_name, iteration=None):
     return render(request, 'Results/Graph.html', context)
 
 
-def empty_fields(model_class, excluded_fields):
+def empty_fields(target_fields_by_model_class):
+    """Expects a dictionary:  key=model_class, value=target_fields list"""
     rejected_fields = []
-    target_fields = [field for field in model_class._meta.get_all_field_names() if field not in excluded_fields]
-    maximums_dict = model_class.objects.all().aggregate(*[Max(field) for field in target_fields])
-    for key, value in maximums_dict.items():
-        if value is None or value <= 0:
-            rejected_fields.append(key[:-5])  # 5 characters in '__max'
+    for model_class in target_fields_by_model_class.keys():
+        target_fields = target_fields_by_model_class[model_class]
+        maximums_dict = model_class.objects.all().aggregate(*[Max(field) for field in target_fields])
+        for key, value in maximums_dict.items():
+            if value is None or value <= 0:
+                rejected_fields.append(key[:-5])  # 5 characters in '__max'
     return rejected_fields
 
 
+def all_empty_fields(model_class, excluded_fields):
+    """Returns a list of all empty fields for a single model"""
+    target_fields = [field for field in model_class._meta.get_all_field_names() if field not in excluded_fields]
+    return empty_fields({model_class: target_fields})
+
+
+# this mapping is also embedded in navigationPanel.html
+headers = {'DailyByProductionType': [("Exposures", "exp", ['expnU', 'expcU']),
+                                     ("Infections", "inf", ['infnU', 'infcU']),
+                                     ("Vaccinations", "vac", ['vacnU', 'vaccU']),
+                                     ("Destruction", "des", ['desnU', 'descU']),
+                                     ("Exams", "exm", ['exmnU', 'exmcU']),
+                                     ("Lab Tests", "tst", ['tstnU', 'tstcU']),
+                                     ("Tracing", "tr", ['trnU', 'trcU'])],
+           'DailyControls': [("Destruction", 'dest', ['destrSubtotal']),
+                             ("Destruction Wait", 'desw', ['deswUTimeAvg']),
+                             ("Vaccination", 'vacc', ['vaccVaccination'])]}
+headers = defaultdict(lambda: [('', '', [])], headers)
+
+
 def class_specific_headers(model_name, prefix):
-    # this mapping is also embedded in navigationPanel.html
-    headers = {'DailyByProductionType': [("Exposures", "exp", ['expnU', 'expcU']),
-                                         ("Infections", "inf", ['infnU', 'infcU']),
-                                         ("Vaccinations", "vac", ['vacnU', 'vaccU']),
-                                         ("Destruction", "des", ['desnU', 'descU']),
-                                         ("Exams", "exm", ['exmnU', 'exmcU']),
-                                         ("Lab Tests", "tst", ['tstnU', 'tstcU']),
-                                         ("Tracing", "tr", ['trnU', 'trcU'])],
-               'DailyControls': [("Destruction", 'dest', ['destrSubtotal']),
-                                 ("Destruction Wait", 'desw', ['deswUTimeAvg']),
-                                 ("Vaccination", 'vac', ['vaccVaccination'])]}
-    headers = defaultdict(lambda: [('', '', [])], headers)
-    headers = headers[model_name]  # select by class
+    sub_headers = headers[model_name]  # select by class
+    hidden_categories = excluded_headers()
     if prefix:  # filter if there's a prefix
-        headers = [item for item in headers if item[1] == prefix]
-        title, pref, links = headers[0]
+        sub_headers = [item for item in sub_headers if item[1] == prefix]
+        title, pref, links = sub_headers[0]
         links = ['/results/' + model_name + '/' + item for item in links]  # otherwise links get broken
-        headers[0] = title, pref, links
-    return headers
+        sub_headers[0] = title, pref, links
+    else:
+        sub_headers = [item for item in sub_headers if item[1] not in hidden_categories.keys()]
+    return sub_headers
+
+
+def model_class(model_name):
+    return globals()[model_name]  # IMPORTANT: depends on import *
+
+
+def excluded_headers():
+    """Returns a dictionary containing the names of excluded results subcategories for the context processor.
+    The values are CSS classes inserted in the template navigationPane.html"""
+    subcategory_states = {}
+    bad_fields = empty_fields({model_class(key): list(chain(*[v[2] for v in value])) for key, value in headers.items()})
+    for bad_field in bad_fields:
+        for sub_list in headers.values():
+            for entry in sub_list:
+                if bad_field in entry[2]:
+                    subcategory_states[entry[1]] = 'empty_subcategory'  # This is a CSS class
+    return subcategory_states
 
 
 def result_table(request, model_name, model_class, model_form, graph_links=False, prefix=''):
@@ -254,7 +284,7 @@ def result_table(request, model_name, model_class, model_form, graph_links=False
         context['model_name'] = model_name
         context['excluded_fields'] = ['zone', 'production_type', 'day', 'iteration', 'id', 'pk', 'last_day']
         context['excluded_fields'] += [field for field in model_class._meta.get_all_field_names() if not field.startswith(prefix)]
-        context['empty_fields'] = empty_fields(model_class, context['excluded_fields'])
+        context['empty_fields'] = all_empty_fields(model_class, context['excluded_fields'])
         context['headers'] = class_specific_headers(model_name, prefix)
         return render(request, 'Results/GraphLinks.html', context)
 

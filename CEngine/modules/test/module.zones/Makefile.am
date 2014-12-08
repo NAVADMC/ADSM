@@ -30,6 +30,7 @@ EXTRA_DIST = no_zones.xml no_zones_w_vars.xml 1_zone_1_focus_w_vars.xml \
   gingerbread_man_0.xml gingerbread_man_1.xml \
   2targets_same_dist_0.xml 2targets_same_dist_1.xml \
   movement_control_0.xml movement_control_1.xml \
+  movement_control_1_controls_disabled_2units_pigs_cattle_all_infected.sqlite3 \
   animal_days_in_zone_1.xml animal_days_in_zone_1_w_destr.xml \
   animal_days_in_zone_1_w_destr_limit.xml \
   animal_days_in_zone_2.xml animal_days_in_zone_2_w_destr.xml \

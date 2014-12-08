@@ -116,7 +116,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.tz",
     "django.contrib.messages.context_processors.messages",
     "django.core.context_processors.request",
-    "ScenarioCreator.context_processor.basic_context"
+    "ScenarioCreator.context_processor.basic_context",
+    "Results.context_processor.results_context"
+
 )
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, 'templates'),

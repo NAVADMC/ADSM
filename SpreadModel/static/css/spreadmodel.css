@@ -181,6 +181,10 @@ ul {
     background-color: #B6F3A7;
 }
 
+#setupMenu .empty_subcategory {
+    display: none;
+}
+
 #RunSimulation {
     position: fixed;
     bottom: 0;

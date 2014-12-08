@@ -174,15 +174,50 @@ def getRelChart( xml, nameGenerator ):
             name = firstChild.attrib['name']
         except KeyError:
             name = next( nameGenerator )
-        relChart = RelationalFunction( name=name )
-        relChart.save()
-        for xyPair in firstChild.findall( './value' ):
-            point = RelationalPoint(
-                relational_function = relChart,
-                x = float( xyPair.find( './x' ).text ),
+        relChart, created = RelationalFunction.objects.get_or_create( name=name )
+        if created:
+            # This is a new RelationalFunction: no RelationalFunction with this
+            # name has been encountered in the XML so far.
+            for xyPair in firstChild.findall( './value' ):
+                point = RelationalPoint(
+                    relational_function = relChart,
+                    x = float( xyPair.find( './x' ).text ),
+                    y = float( xyPair.find( './y' ).text )
+                )
+                point.save()
+            # end of loop over points
+        else:
+            # One or more RelationalFunctions with this name have already been
+            # encountered in the XML.  Check whether this RelationalFunction
+            # contains exactly the same points as the previously-seen
+            # RelationalFunction(s) with the same name.
+            points = RelationalPoint.objects.filter( relational_function=relChart ).order_by( 'x' )
+            same = True
+            i = 0
+            for xyPair in firstChild.findall( './value' ):
+                x = float( xyPair.find( './x' ).text )
                 y = float( xyPair.find( './y' ).text )
-            )
-            point.save()
+                if x != points[i].x or y != points[i].y:
+                    same = False
+                    break
+                i += 1
+            if not same:
+                # The points in the current XML are *not* the same as the ones
+                # in previously-seen RelationalFunction(s) with the same name.
+                # Give this chart a new, automatically-generated name.
+                relChart = RelationalFunction( name=next( nameGenerator ) )
+                relChart.save()
+                for xyPair in firstChild.findall( './value' ):
+                    point = RelationalPoint(
+                        relational_function = relChart,
+                        x = float( xyPair.find( './x' ).text ),
+                        y = float( xyPair.find( './y' ).text )
+                    )
+                    point.save()
+                # end of loop over points
+            # end of case where we create a new RelationalFunction
+        # end of case where we are handling a "new-style" <relational-function>
+        # element, that has a name attached to it.
     else:
         # Old style
         relChart = RelationalFunction( name=next( nameGenerator ) )

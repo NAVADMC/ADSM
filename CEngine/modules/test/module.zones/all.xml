@@ -3112,6 +3112,56 @@
 
 <variable-test>
   <category>zones</category>
+  <short-name>movement control changed inside zone but controls disabled</short-name>
+
+  <description>
+    Test that zones are turned off by the “disable all controls” setting. This
+    test failed in version 3.2.22 and was fixed in version 3.2.23.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>7 November 2014</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>2units_pigs_cattle_all_infected</population-file>
+
+  <parameter-file>movement_control_1_controls_disabled</parameter-file>
+
+  <parameter-description>
+    The parameters are identical to “movement control changed inside zone”
+    above, except that the “disable all controls” option is set.
+
+    What should happen:
+     - On day 1 both units will be Latent.
+     - Day 2 and day 3 will be the same as day 1.
+     - On day 4 both units will be Infectious Clinical.  There will be 2
+       exposures from unit 0 to unit 1.  The pig unit will be detected.  
+     - Because controls are disabled, the detection on day 4 will not result in
+       a zone being created, and the in-zone movement controls will not apply.
+       On days 5-8 (the remainder of the Infectious Clinical period) there will
+       be 2 exposures from unit 0 to unit 1 each day.
+     - On day 9 both units will be Immune.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>expnU</td>
+      <td>numSeparateAreasHighRisk</td>
+    </tr>
+    <tr><td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td></tr>
+    <tr><td>2</td> <td>0</td></tr>
+    <tr><td>2</td> <td>0</td></tr>
+    <tr><td>2</td> <td>0</td></tr>
+    <tr><td>2</td> <td>0</td></tr>
+    <tr><td>2</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>zones</category>
   <short-name>count animal days, 1 zone</short-name>
 
   <description>
