@@ -3,10 +3,10 @@ import os
 import shutil
 from django.db import close_old_connections
 from django.shortcuts import redirect, render, HttpResponse
-from Settings.models import scenario_filename, SmSession, unsaved_changes
-from Settings.forms import ImportForm
-from Settings.xml2sqlite import import_naadsm_xml
-from Settings.utils import update_is_needed, graceful_startup, reset_db, update_db_version, db_name, workspace_path, file_list, handle_file_upload
+from ADSMSettings.models import scenario_filename, SmSession, unsaved_changes
+from ADSMSettings.forms import ImportForm
+from ADSMSettings.xml2sqlite import import_naadsm_xml
+from ADSMSettings.utils import update_is_needed, graceful_startup, reset_db, update_db_version, db_name, workspace_path, file_list, handle_file_upload
 
 
 def update_adsm_from_git(request):

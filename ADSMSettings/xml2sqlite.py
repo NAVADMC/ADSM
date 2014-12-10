@@ -1,10 +1,10 @@
 """This module reads an XML parameters file and creates the equivalent
 database.  It was written primarily for migrating the automated test suite,
-but it can also serve as an example for creating a SpreadModel parameter file
+but it can also serve as an example for creating a ADSM parameter file
 programmatically.
 
 This script avoids direct SQL manipulation and instead uses the models.py file
-defined for the SpreadModel project for all object creation."""
+defined for the ADSM project for all object creation."""
 
 import xml.etree.ElementTree as ET
 import warnings

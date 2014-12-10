@@ -1,5 +1,5 @@
 """
-Django settings for SpreadModel project.
+Django settings for ADSM project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/1.6/topics/settings/
@@ -34,7 +34,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = (
     'ScenarioCreator',
     'Results',
-    'Settings',
+    'ADSMSettings',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,18 +53,18 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'Settings.disable.DisableCSRF',
+    'ADSMSettings.disable.DisableCSRF',
 )
 
 if DEBUG:
     MIDDLEWARE_CLASSES += (
-        # 'Settings.debug.HotshotProfileMiddleware',
-        # 'Settings.debug.cProfileMiddleware',
+        # 'ADSMSettings.debug.HotshotProfileMiddleware',
+        # 'ADSMSettings.debug.cProfileMiddleware',
     )
 
-ROOT_URLCONF = 'SpreadModel.urls'
+ROOT_URLCONF = 'ADSM.urls'
 
-WSGI_APPLICATION = 'SpreadModel.wsgi.application'
+WSGI_APPLICATION = 'ADSM.wsgi.application'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap'
 
@@ -134,7 +134,7 @@ STATICFILES_FINDERS = (
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'SpreadModel', 'static'),
+    os.path.join(BASE_DIR, 'ADSM', 'static'),
 )
 
 from django.db.backends.signals import connection_created

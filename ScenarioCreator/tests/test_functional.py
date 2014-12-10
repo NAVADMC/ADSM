@@ -10,7 +10,7 @@ from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
     ProbabilityFunction, RelationalFunction, RelationalPoint, Population, \
     DirectSpread, IndirectSpread, AirborneSpread, ProductionType, \
     DiseaseProgressionAssignment, Unit, ControlMasterPlan
-from Settings.utils import workspace_path
+from ADSMSettings.utils import workspace_path
 from Results.models import delete_all_outputs
 
 

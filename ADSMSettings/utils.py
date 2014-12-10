@@ -12,7 +12,7 @@ from django.core.management import call_command
 from django.db import connections, close_old_connections
 from ScenarioCreator.models import ZoneEffect
 from django.conf import settings
-from Settings.models import SmSession, scenario_filename
+from ADSMSettings.models import SmSession, scenario_filename
 
 
 def db_name(name='scenario_db'):
@@ -107,7 +107,7 @@ def reset_db(name, fail_ok=True):
 
 def update_db_version():
     print("Checking Scenario version")
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
     try:
         call_command('migrate',
                      # verbosity=0,

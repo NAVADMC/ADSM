@@ -182,7 +182,7 @@ def extend_last_day_lines(lines, model, field_name):
 def collect_boxplot_data(padded_lines, explanation):
     """Returns a long tuple with all the data necessary to make a boxplot distribution.  For 'cumulative' fields,
     this is the last day.  For non-cumulative, it is the range of non-blank values.  Issue #159:
-    https://github.com/NAVADMC/SpreadModel/issues/159#issuecomment-53058264"""
+    https://github.com/NAVADMC/ADSM/issues/159#issuecomment-53058264"""
     if not field_is_cumulative(explanation):  # This field is non-cumulative, default to zero
         boxplot_data = tuple(chain([x for line in padded_lines for x in line if x != 0]))  # pile together all the data, but don't include trailing zeroes
     else:  # this field is cumulative

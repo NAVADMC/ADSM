@@ -9,8 +9,8 @@ from django.db import OperationalError
 
 from Results.models import *  # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
-from Settings.models import unsaved_changes
-from Settings.utils import graceful_startup, file_list, handle_file_upload, workspace_path, adsm_executable_command
+from ADSMSettings.models import unsaved_changes
+from ADSMSettings.utils import graceful_startup, file_list, handle_file_upload, workspace_path, adsm_executable_command
 
 
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
@@ -406,10 +406,10 @@ def model_list(request):
         context['models'].append(list_per_model(model_name, model))
     return render(request, 'ScenarioCreator/ModelList.html', context)
 
-# Utility Views was moved to the Settings/connection_handler.py 
+# Utility Views was moved to the ADSMSettings/connection_handler.py
 
 def upload_population(request):
-    from Settings.models import SmSession
+    from ADSMSettings.models import SmSession
     from xml.etree.ElementTree import ParseError
     session = SmSession.objects.get_or_create(pk=1)[0]
     if 'GET' in request.method:

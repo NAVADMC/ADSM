@@ -16,7 +16,7 @@ from django.db import models
 import shutil
 from ScenarioCreator.models import ProductionType, Zone, Unit
 import re
-from Settings.models import scenario_filename
+from ADSMSettings.models import scenario_filename
 from Results.output_grammar import explain
 from ast import literal_eval
 

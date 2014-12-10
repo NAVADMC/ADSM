@@ -2,7 +2,7 @@
 Leave this code here until we can use it for importing chunks of a scenario in the Scenario Builder"""
 
 import os
-from SpreadModel import settings
+from ADSM import settings
 
 
 def create_db_connection(db_name, db_path):
@@ -21,7 +21,7 @@ def create_db_connection(db_name, db_path):
         # Don't import django.core.management if it isn't needed.
         from django.core.management import call_command
         print('Building DB structure...')
-        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
         call_command('migrate',
             # verbosity=0,
             interactive=False,
