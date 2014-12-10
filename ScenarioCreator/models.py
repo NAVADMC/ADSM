@@ -112,10 +112,14 @@ class SingletonManager(models.Manager):
             result = super(SingletonManager, self).get()
             for key in kwargs:
                 setattr(result, key, kwargs[key])
-            result.save()
-            return result
+            if len(kwargs):
+                result.save()
+            return result, False
         except:
             return super(SingletonManager, self).get_or_create(id=1, **kwargs)
+
+    def create(self, **kwargs):
+        return self.get_or_create(**kwargs)[0]
 
 
 class InputSingleton(BaseModel):
@@ -299,7 +303,7 @@ class RelationalPoint(BaseModel):
         return '%i Point(%s, %s)' % (self.relational_function.id, self.x, self.y)
 
 
-class ControlMasterPlan(BaseModel):
+class ControlMasterPlan(InputSingleton):
     name = models.CharField(default="Control Master Plan", max_length=255)
     disable_all_controls = models.BooleanField(default=False,
         help_text='Disable all ' + wiki("Control activities", "control-measures") + 
@@ -480,7 +484,7 @@ class ProtocolAssignment(BaseModel):
         return "%s applied to %s" % (self.control_protocol, self.production_type)
 
 
-class Disease(BaseModel):
+class Disease(InputSingleton):
     name = models.CharField(max_length=255,
         help_text='Name of the Disease')
     disease_description = models.TextField(blank=True)
@@ -606,7 +610,7 @@ class AirborneSpread(DiseaseSpread):
         return "%s %i" % (self.name, self.id)
 
 
-class Scenario(BaseModel):
+class Scenario(InputSingleton):
     description = models.TextField(blank=True,
         help_text='The description of the %s.' % wiki('scenario'), )
     language = models.CharField(default='en', choices=(('en', "English"), ('es', "Spanish")), max_length=255, blank=True,
@@ -617,7 +621,7 @@ class Scenario(BaseModel):
         return "Scenario: %s" % (self.description, )
 
 
-class OutputSettings(BaseModel):
+class OutputSettings(InputSingleton):
     iterations = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)],
         help_text='The number of iterations of this scenario that should be run', )
     stop_criteria = models.CharField(max_length=255, default='disease-end',
