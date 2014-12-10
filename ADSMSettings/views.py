@@ -97,12 +97,13 @@ def save_scenario(request=None):
     full_path = workspace_path(target) + ('.sqlite3' if target[-8:] != '.sqlite3' else '')
     save_error = None
     try:
+        assert(r'\\' not in target and '/' not in target)
         shutil.copy(db_name(), full_path)
         unsaved_changes(False)  # File is now in sync
-        print('Done Copying database to', target)
-    except IOError:
-        save_error = 'Failed to save file.'
-        print('Encountered an error while copying file', target)
+        print('Done Copying database to', full_path)
+    except (IOError, AssertionError):
+        save_error = 'Failed to save filename.'
+        print('Encountered an error while copying file', full_path)
     if request is not None and request.is_ajax():
         if save_error:
             json_response = '{"status": "failed", "message": "%s"}' % save_error

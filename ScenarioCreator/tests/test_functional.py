@@ -597,7 +597,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             time.sleep(1)
 
             alert = self.selenium.find_element_by_css_selector('.alert.alert-danger')
-            self.assertIn("Failed to save file.", alert.text)
+            self.assertIn("Failed to save filename.", alert.text)
         finally:
             try:
                 os.remove(workspace_path('Untitled Scenario/\\ 123 AZ.sqlite3'))
