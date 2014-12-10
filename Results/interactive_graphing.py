@@ -19,8 +19,8 @@ from django.db.models import Max
 from Results.models import Unit
 from Results.summary import list_of_iterations, iteration_progress
 from Results.graphing import rstyle, population_png
-from Settings.utils import workspace_path
-from Settings.models import scenario_filename
+from ADSMSettings.utils import workspace_path
+from ADSMSettings.models import scenario_filename
 from ScenarioCreator.models import Zone
 
 

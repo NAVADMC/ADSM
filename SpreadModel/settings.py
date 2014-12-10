@@ -34,7 +34,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = (
     'ScenarioCreator',
     'Results',
-    'Settings',
+    'ADSMSettings',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,13 +53,13 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'Settings.disable.DisableCSRF',
+    'ADSMSettings.disable.DisableCSRF',
 )
 
 if DEBUG:
     MIDDLEWARE_CLASSES += (
-        # 'Settings.debug.HotshotProfileMiddleware',
-        # 'Settings.debug.cProfileMiddleware',
+        # 'ADSMSettings.debug.HotshotProfileMiddleware',
+        # 'ADSMSettings.debug.cProfileMiddleware',
     )
 
 ROOT_URLCONF = 'SpreadModel.urls'

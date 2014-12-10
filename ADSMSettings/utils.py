@@ -12,7 +12,7 @@ from django.core.management import call_command
 from django.db import connections, close_old_connections
 from ScenarioCreator.models import ZoneEffect
 from django.conf import settings
-from Settings.models import SmSession, scenario_filename
+from ADSMSettings.models import SmSession, scenario_filename
 
 
 def db_name(name='scenario_db'):

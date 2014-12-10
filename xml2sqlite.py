@@ -17,10 +17,10 @@ if __name__ == "__main__":
 
     from django.core import management
 
-    from Settings.models import scenario_filename
-    from Settings.utils import db_name
-    from Settings.views import new_scenario, save_scenario
-    from Settings.xml2sqlite import import_naadsm_xml
+    from ADSMSettings.models import scenario_filename
+    from ADSMSettings.utils import db_name
+    from ADSMSettings.views import new_scenario, save_scenario
+    from ADSMSettings.xml2sqlite import import_naadsm_xml
 
 
     if len(sys.argv) == 4:  # single command line invocation

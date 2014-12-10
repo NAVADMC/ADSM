@@ -11,7 +11,7 @@ from ScenarioCreator.models import OutputSettings, ProductionType, Zone
 from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType
 from Results.summary import iteration_progress, summarize_results
 from Results.output_parser import DailyParser
-from Settings.models import scenario_filename
+from ADSMSettings.models import scenario_filename
 
 
 class SimulationTest(TransactionTestCase):

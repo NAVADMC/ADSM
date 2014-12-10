@@ -7,9 +7,9 @@ from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Pop
     DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
     ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
 from Results.models import DailyControls
-from Settings.models import scenario_filename, SmSession
-from Settings.views import unsaved_changes
-from Settings.utils import graceful_startup, supplemental_folder_has_contents
+from ADSMSettings.models import scenario_filename, SmSession
+from ADSMSettings.views import unsaved_changes
+from ADSMSettings.utils import graceful_startup, supplemental_folder_has_contents
 from git.git import git
 
 

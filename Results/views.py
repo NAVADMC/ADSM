@@ -15,11 +15,11 @@ from Results.models import *  # necessary
 from Results.forms import *  # necessary
 import Results.output_parser
 from Results.summary import list_of_iterations, summarize_results
-from Settings.models import scenario_filename
+from ADSMSettings.models import scenario_filename
 import Results.graphing  # necessary to select backend Agg first
 from Results.interactive_graphing import population_zoom_png
-from Settings.utils import adsm_executable_command, workspace_path, supplemental_folder_has_contents
-from Settings.views import save_scenario
+from ADSMSettings.utils import adsm_executable_command, workspace_path, supplemental_folder_has_contents
+from ADSMSettings.views import save_scenario
 
 import multiprocessing
 from Results.django_queue import DjangoManager
