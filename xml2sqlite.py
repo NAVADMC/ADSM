@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     print("Preparing Django environment...")
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
 
     from django.conf import settings
     import django

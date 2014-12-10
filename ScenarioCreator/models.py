@@ -1,5 +1,5 @@
 """This models file specifies all the tables used to create a settings file for
-a SpreadModel simulation.
+a ADSM simulation.
 This project uses Django 1.7 migrations for database structure changes.
 Use manage.py makemigrations APPNAME whenever the models.py changes.
 Then run manage.py migrate to apply the changes.

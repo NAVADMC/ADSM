@@ -1,5 +1,5 @@
 """
-Django settings for SpreadModel project.
+Django settings for ADSM project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/1.6/topics/settings/
@@ -62,9 +62,9 @@ if DEBUG:
         # 'ADSMSettings.debug.cProfileMiddleware',
     )
 
-ROOT_URLCONF = 'SpreadModel.urls'
+ROOT_URLCONF = 'ADSM.urls'
 
-WSGI_APPLICATION = 'SpreadModel.wsgi.application'
+WSGI_APPLICATION = 'ADSM.wsgi.application'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap'
 
@@ -134,7 +134,7 @@ STATICFILES_FINDERS = (
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'SpreadModel', 'static'),
+    os.path.join(BASE_DIR, 'ADSM', 'static'),
 )
 
 from django.db.backends.signals import connection_created

@@ -8,7 +8,7 @@ from django.test import TestCase
 from ScenarioCreator.models import (AirborneSpread, RelationalFunction,
         RelationalPoint, ProbabilityFunction, DiseaseProgression)
 from ADSMSettings.utils import workspace_path
-from SpreadModel import settings
+from ADSM import settings
 
 POPULATION_FIXTURES = 'ScenarioCreator/tests/population_fixtures/'
 

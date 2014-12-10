@@ -5,7 +5,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     # Examples:
-    # url(r'^$', 'SpreadModel.views.home', name='home'),
+    # url(r'^$', 'ADSM.views.home', name='home'),
     url(r'^setup/', include('ScenarioCreator.urls')),
     url(r'^results/', include('Results.urls')),
     url(r'^app/', include('ADSMSettings.urls')),

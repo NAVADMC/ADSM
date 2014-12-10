@@ -107,7 +107,7 @@ def reset_db(name, fail_ok=True):
 
 def update_db_version():
     print("Checking Scenario version")
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpreadModel.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
     try:
         call_command('migrate',
                      # verbosity=0,

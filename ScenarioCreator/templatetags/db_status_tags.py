@@ -30,7 +30,7 @@ def parent_link(model_link):
 def wiki(words, url=None):
     """Wiki Definition: Generates a Lexicon link from a set of words with optional url help (when the titles don't match).  
     The call to wiki links is in the help text which is defined in ScenarioCreator.models file."""
-    wiki_base = "https://github.com/NAVADMC/SpreadModel/wiki"
+    wiki_base = "https://github.com/NAVADMC/ADSM/wiki"
     lexicon = "/Lexicon-of-Disease-Spread-Modelling-terms#"  # pound sign
     if url is None:
         url = words.lower().replace(' ', '-')
