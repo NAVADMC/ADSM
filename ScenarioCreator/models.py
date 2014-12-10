@@ -31,7 +31,7 @@ Limit foreignkey choices with a dictionary filter on field values:
 
 import re
 import time
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, MultipleObjectsReturned, ObjectDoesNotExist
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django_extras.db.models import LatitudeField, LongitudeField, MoneyField
@@ -99,7 +99,38 @@ class BaseModel(models.Model):
         abstract = True
 
 
-class Population(BaseModel):
+class SingletonManager(models.Manager):
+    def get(self, **kwargs):
+        try:
+            return super(SingletonManager, self).first()
+        except (MultipleObjectsReturned, ObjectDoesNotExist):
+            return super(SingletonManager, self).get_or_create(id=1)[0]
+
+    def get_or_create(self, **kwargs):
+        kwargs.pop('id', None)  # make sure there's no id specified  TODO: or just set kwargs['id'] = 1
+        try:  # modify an existing copy by overwriting with additional values
+            result = super(SingletonManager, self).get()
+            for key in kwargs:
+                setattr(result, key, kwargs[key])
+            result.save()
+            return result
+        except:
+            return super(SingletonManager, self).get_or_create(id=1, **kwargs)
+
+
+class InputSingleton(BaseModel):
+    objects = SingletonManager()
+    
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.id=1
+        return super(InputSingleton, self).save(force_insert, force_update, using, update_fields)
+    
+    
+    class Meta(object):
+        abstract = True
+
+
+class Population(InputSingleton):
     source_file = models.CharField(max_length=255, blank=True)  # source_file made generic CharField so Django doesn't try to copy and save the raw file
 
     def save(self, *args, **kwargs):
