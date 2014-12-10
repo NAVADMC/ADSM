@@ -16,7 +16,7 @@ from django.db import models
 import shutil
 from ScenarioCreator.models import ProductionType, Zone, Unit
 import re
-from ADSMSettings.models import scenario_filename
+from ADSMSettings.models import scenario_filename, SingletonManager
 from Results.output_grammar import explain
 from ast import literal_eval
 
@@ -390,6 +390,13 @@ class ResultsVersion(OutputBaseModel):
     versionMajor = models.CharField(max_length=255, null=True, blank=True)
     versionMinor = models.CharField(max_length=255, null=True, blank=True)
     versionRelease = models.CharField(max_length=255, null=True, blank=True)
+    
+    ## Singleton code
+    objects = SingletonManager()
+    
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.id=1
+        return super(ResultsVersion, self).save(force_insert, force_update, using, update_fields)
 
 
 def delete_all_outputs():

@@ -31,10 +31,13 @@ Limit foreignkey choices with a dictionary filter on field values:
 
 import re
 import time
-from django.core.exceptions import ValidationError, MultipleObjectsReturned, ObjectDoesNotExist
+
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django_extras.db.models import LatitudeField, LongitudeField, MoneyField
+
+from ADSMSettings.models import SingletonManager
 from ScenarioCreator.custom_fields import PercentField
 from ScenarioCreator.templatetags.db_status_tags import wiki, link
 import ScenarioCreator.parser
@@ -97,29 +100,6 @@ class BaseModel(models.Model):
 
     class Meta(object):
         abstract = True
-
-
-class SingletonManager(models.Manager):
-    def get(self, **kwargs):
-        try:
-            return super(SingletonManager, self).first()
-        except (MultipleObjectsReturned, ObjectDoesNotExist):
-            return super(SingletonManager, self).get_or_create(id=1)[0]
-
-    def get_or_create(self, **kwargs):
-        kwargs.pop('id', None)  # make sure there's no id specified  TODO: or just set kwargs['id'] = 1
-        try:  # modify an existing copy by overwriting with additional values
-            result = super(SingletonManager, self).get()
-            for key in kwargs:
-                setattr(result, key, kwargs[key])
-            if len(kwargs):
-                result.save()
-            return result, False
-        except:
-            return super(SingletonManager, self).get_or_create(id=1, **kwargs)
-
-    def create(self, **kwargs):
-        return self.get_or_create(**kwargs)[0]
 
 
 class InputSingleton(BaseModel):

@@ -1,5 +1,30 @@
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import models
 
+
+
+class SingletonManager(models.Manager):
+    def get(self, **kwargs):
+        try:
+            return super(SingletonManager, self).first()
+        except (MultipleObjectsReturned, ObjectDoesNotExist):
+            return super(SingletonManager, self).get_or_create(id=1)[0]
+
+    def get_or_create(self, **kwargs):
+        kwargs.pop('id', None)  # make sure there's no id specified  TODO: or just set kwargs['id'] = 1
+        try:  # modify an existing copy by overwriting with additional values
+            result = super(SingletonManager, self).get()
+            for key in kwargs:
+                setattr(result, key, kwargs[key])
+            if len(kwargs):
+                result.save()
+            return result, False
+        except:
+            return super(SingletonManager, self).get_or_create(id=1, **kwargs)
+
+    def create(self, **kwargs):
+        return self.get_or_create(**kwargs)[0]
+    
 
 class SmSession(models.Model):
     scenario_filename = models.CharField(max_length=255, default="Untitled Scenario", blank=True)
@@ -20,6 +45,13 @@ class SmSession(models.Model):
         self.population_upload_status = None
         self.population_upload_percent = 0
         self.save()
+    
+    ## Singleton code
+    objects = SingletonManager()
+    
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.id=1
+        return super(SmSession, self).save(force_insert, force_update, using, update_fields)
 
 
 def unsaved_changes(new_value=None):
@@ -36,6 +68,4 @@ def scenario_filename(new_value=None):
         session.scenario_filename = new_value.replace('.sqlite3', '')
         session.save()
     return session.scenario_filename
-
-
 
