@@ -35,6 +35,7 @@ Using the pip in your new Virtual Environment (`/path/to/adsm_venv/Scripts/pip`)
     pip install pytz==2014.10
     pip install selenium==2.44.0
     pip install six==1.8.0
+    pip install git+git://github.com/BryanHurst/django-productionserver.git@1.0.2  # Note, this does not currently pip install correctly. Please clone it and run the setup.py script
 
 
 **If you are on Linux or Mac**, then you can install the following:
@@ -105,12 +106,14 @@ Unzip the file and place it in the Scripts folder of your new Virtual Environmen
 
 Development and Production Branches
 -----------
-List of Relevant Branches: master, Stable, Windows-staging, Windows, Linux-staging, Linux, Mac-OSX-staging, Mac-OSX
+List of Relevant Branches: master, Stable, Hotfix, Windows-staging, Windows, Linux-staging, Linux, Mac-OSX-staging, Mac-OSX
 
 Development should be done in feature branches and merged into master. Master is the general development branch.
 
 Stable is the branch we merge master into when we are ready to do testing before deploying to the OS Specific branches.  
-**This branch is what will be tagged in the GitHub Releases.**
+**This branch is what will be tagged in the GitHub Releases.**  
+Hotfix is the branch we push fixes to that need to be immediately promoted to the OS Production Branches without merging in current development work in master.  
+Any time you merge from master to Stable, **also merge from master into Hotfix**.
 
 After merging master into Stable and testing, merge Stable into each OS Staging branch.   
 **NEVER merge master into a staging branch.**  
@@ -119,6 +122,9 @@ Make OS specific changes in their staging branches.
 Once you are happy that the compiled version in each OS Staging branch is ready to go, merge each OS Staging into the main OS branch.  
 This is the Production Branch for each OS.   
 Distributables all update off of this branch, so NEVER merge directly to it! Only ever merge from their Staging branch.
+
+If you need to push a patch to the distributions, make the changes in Hotfix. Merge Hotfix into Stable and do the testing as above, then merge Stable into the Production Branches.   
+Once this is done, **make sure to merge Hotfix back into master as well**.
 
 **NEVER merge any OS or OS-staging branch back into master.**  
 If you do accidentally merge an OS branch into master, use this command to reset the repo before you push:
@@ -130,14 +136,14 @@ Updating the adsm_simulation Executable
 Please never merge master into a staging branch just to compile the adsm_simulation executable.
 If you need a one off compile of the adsm_simulation.exe, setup your own temporary branch or other compile directory.
 
-    cd SpreadModel
+    cd ADSM
     git pull
     cd CEngine
     sh bootstrap
     ./configure --disable-debug
     make
 
-`make` will will fail on a `dia: command not found` error when it gets to the SpreadModel/CEngine/doc/diagrams directory.  That’s OK: at this point, the executable is built, and you are done.
+`make` will will fail on a `dia: command not found` error when it gets to the ADSM/CEngine/doc/diagrams directory.  That’s OK: at this point, the executable is built, and you are done.
 
 Notes on the Distributable
 ----------

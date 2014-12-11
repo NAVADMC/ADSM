@@ -39,7 +39,7 @@ def non_empty_lines(line):
     return output_lines
 
 
-def simulation_process(iteration_number, adsm_cmd, queue, production_types, zones):
+def simulation_process(iteration_number, adsm_cmd, queue, event, production_types, zones):
     start = time.time()
 
     simulation = subprocess.Popen(adsm_cmd,
@@ -52,6 +52,9 @@ def simulation_process(iteration_number, adsm_cmd, queue, production_types, zone
     adsm_result = []
     prev_line = ''
     for line in simulation.stdout.readlines():
+        if event.is_set():
+            simulation.terminate()
+            return
         line = line.decode()
         parse_result = p.parse_daily_strings(prev_line, False)
         adsm_result.extend(parse_result)
@@ -127,6 +130,8 @@ class Simulation(threading.Thread):
     """Execute system commands in a separate thread so as not to interrupt the webpage.
     Saturate the computer's processors with parallel simulation iterations"""
     def __init__(self, max_iteration, **kwargs):
+        kwargs['name'] = 'simulation_control_thread'
+        self.stop_event = threading.Event()
         self.max_iteration = max_iteration
         self.production_types = ProductionType.objects.values_list('id', 'name')
         self.zones = Zone.objects.values_list('id', 'name')
@@ -138,13 +143,22 @@ class Simulation(threading.Thread):
         manager = DjangoManager()
         pool = multiprocessing.Pool()
         queue = manager.DjangoQueue()
+        event = manager.Event()
         for iteration in range(1, self.max_iteration + 1):
             adsm_cmd = executable_cmd + ['-i', str(iteration)]
-            res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, queue, self.production_types, self.zones))
+            res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, queue, event, self.production_types, self.zones))
             statuses.append(res)
+
         pool.close()
 
         for iteration in range(self.max_iteration):
+            if self.stop_event.is_set():
+                event.set()
+                pool.terminate()
+                pool.join()
+                close_old_connections()
+                print("Simulation halted")
+                return
             process_result(queue)  # each .get() gets a new thread result
 
         pool.join()
@@ -155,6 +169,9 @@ class Simulation(threading.Thread):
         zip_map_directory_if_it_exists()
         save_scenario()
         close_old_connections()
+
+    def stop(self):
+        self.stop_event.set()
 
 
 def results_home(request):

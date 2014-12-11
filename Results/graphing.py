@@ -21,6 +21,7 @@ from Results.models import DailyControls, DailyByProductionType, DailyByZone, Da
 def HttpFigure(fig):
     response = HttpResponse(content_type='image/png')
     FigureCanvas(fig).print_png(response)
+    plt.close(fig)
     return response
 
 
@@ -224,6 +225,22 @@ def single_iteration_line_graph(iteration, field_name, model_name, model, time_s
     return HttpFigure(fig)
 
 
+def TwoD_histogram(fig, gs, time_graph, time_series):
+    days = list(range(1, len(time_series[0]) + 1))  # Start with day index
+    x = days * len(time_series)  # repeat day series for each set of data (1 per iteration)
+    y = list(chain(*time_series))
+    hot = plt.get_cmap('hot')
+    norm = LogNorm()
+    time_graph.hist2d(x, y,
+                      bins=[len(days), max(5, min(max(*y), 300))],
+                      # 300 should really be the number of pixels in the draw area (I don't know how to fetch that)
+                      norm=norm,
+                      cmap=hot)
+    color_bar = fig.add_subplot(gs[0], )
+    ColorbarBase(cmap=hot, ax=color_bar, norm=norm)
+    return HttpFigure(fig)
+
+
 def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     model = globals()[model_name]
     iteration = int(iteration) if iteration else None
@@ -238,9 +255,8 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     gs = gridspec.GridSpec(1, 3, width_ratios=[.2, 6, 1])
     time_graph = fig.add_subplot(gs[1], title=title)
     time_graph.set_xlabel('Days')
-    boxplot_graph = fig.add_subplot(gs[2], sharey=time_graph, )
-    plt.locator_params(nbins=4)
-    # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
+    boxplot_graph = fig.add_subplot(gs[2], sharey=time_graph, )  # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
+    # boxplot_graph.locator_params(nbins=4)  # limiting the number of y-axis ticks was causing an intermittent crash.  try/except this if you want it
     plt.setp(boxplot_graph.get_yticklabels(), visible=False)
     for axis in [time_graph, boxplot_graph]:
         rstyle(axis)
@@ -252,20 +268,8 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
 
     if iteration:  # for a single iteration, we don't need all the hist2d prep
         return single_iteration_line_graph(iteration, field_name, model_name, model, time_series, columns, time_graph, boxplot_graph, fig)
-    if OutputSettings.objects.get_or_create()[0].iterations < 100:
+    if OutputSettings.objects.get().iterations < 100:
         # do a stacked line graph instead of a histogram    
         return single_iteration_line_graph(iteration, field_name, model_name, model, time_series, columns, time_graph, boxplot_graph, fig)
-    
-    days = list(range(1, len(time_series[0]) + 1))  # Start with day index
-    x = days * len(time_series)  # repeat day series for each set of data (1 per iteration)
-    y = list(chain(*time_series))
-    hot = plt.get_cmap('hot')
-    norm = LogNorm()
-    time_graph.hist2d(x, y, 
-                      bins=[len(days), max(5, min(max(*y), 300))],  # 300 should really be the number of pixels in the draw area (I don't know how to fetch that)
-                      norm=norm, 
-                      cmap=hot)
-    color_bar = fig.add_subplot(gs[0], )
-    ColorbarBase(cmap=hot, ax=color_bar, norm=norm)
 
-    return HttpFigure(fig)
+    return TwoD_histogram(fig, gs, time_graph, time_series)

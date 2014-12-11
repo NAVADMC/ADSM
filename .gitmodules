@@ -1,3 +1,0 @@
-[submodule "django_production_server"]
-	path = django_production_server
-	url = git://github.com/BryanHurst/django_production_server.git

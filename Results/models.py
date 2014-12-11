@@ -12,6 +12,7 @@ Model Declarations: Each model creates a table in sqlite3 and a 'model' for tabl
  The code in scripts/Output_Table.py (.ipynb) was used to generate these name declarations.  Also, if you're reading this
  doc and you don't know about IPython Notebooks, go get IPython Notebooks."""
 import os
+import threading
 from django.db import models
 import shutil
 from ScenarioCreator.models import ProductionType, Zone, Unit
@@ -400,11 +401,14 @@ class ResultsVersion(OutputBaseModel):
 
 
 def delete_all_outputs():
+    for thread in threading.enumerate():
+        if thread.name == 'simulation_control_thread':
+            thread.stop()
+            thread.join()
     if DailyControls.objects.count() > 0:
         print("DELETING ALL OUTPUTS")
-        output_models = [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]
-        for model in output_models:
-            model.objects.all().delete()
+    for model in [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]:
+        model.objects.all().delete()
 
 
 def delete_supplemental_folder():
