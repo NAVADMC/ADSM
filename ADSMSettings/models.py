@@ -5,9 +5,9 @@ from django.db import models
 
 class SingletonManager(models.Manager):
     def get(self, **kwargs):
-        try:
-            return super(SingletonManager, self).first()
-        except (MultipleObjectsReturned, ObjectDoesNotExist):
+        if kwargs:
+            return self.get_or_create(**kwargs)[0]
+        else:
             return super(SingletonManager, self).get_or_create(id=1)[0]
 
     def get_or_create(self, **kwargs):

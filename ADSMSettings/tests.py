@@ -58,7 +58,7 @@ class ScenarioTestCase(TestCase):
             self.assertIn('status', data)
             self.assertEqual(data['status'], 'failed')
             self.assertIn('message', data)
-            self.assertEqual(data['message'], 'Failed to save file.')
+            self.assertEqual(data['message'], 'Failed to save filename.')
             self.assertFalse(os.path.isfile(file_path))
         finally:
             self.remove_test_file(file_path)
