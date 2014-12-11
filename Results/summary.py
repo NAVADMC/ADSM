@@ -74,24 +74,7 @@ def summarize_results():
 
 
 def iterations_complete():
-    output_settings = OutputSettings.objects.get_or_create()[0]
-    stop_criteria = output_settings.stop_criteria
-
-    calculation_function = {
-        "disease-end": lambda: DailyControls.objects.filter(last_day_query(), diseaseDuration__gt=0).count(),
-        "first-detection": lambda: DailyByProductionType.objects
-                                    .filter(last_day_query(model=DailyByProductionType), firstDetection__gt=0, production_type=None)
-                                    .values_list('iteration', flat=True).distinct().count(),
-        # these last two have an implicit last_day_query because outbreakDuration is the last event in a simulation
-        "outbreak-end": lambda: DailyControls.objects.filter(outbreakDuration__gt=0).count(),
-        "stop-days": lambda: DailyControls.objects.filter(Q(day=OutputSettings.objects.get().days) | Q(outbreakDuration__gt=0)).count(),
-    }
-
-    try:
-        iterations_completed = calculation_function[stop_criteria]()
-    except KeyError:
-        raise NotImplementedError("'%s' does not have an implemented progress calculation function." % stop_criteria)
-    return iterations_completed
+    return DailyControls.objects.filter(last_day_query()).count()
 
 
 def iteration_progress():
