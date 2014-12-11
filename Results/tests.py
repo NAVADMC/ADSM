@@ -14,96 +14,96 @@ from Results.output_parser import DailyParser
 from ADSMSettings.models import scenario_filename
 
 
-# class SimulationTest(TransactionTestCase):
-#     multi_db = True
+class SimulationTest(TransactionTestCase):
+    multi_db = True
 
-#     @classmethod
-#     def setUpClass(cls):
-#         source_db = os.path.join('workspace', 'Roundtrip.sqlite3')
-#         cls.destination_db = os.path.join('workspace', 'Roundtrip_test.sqlite3')
-#         shutil.copy(source_db, cls.destination_db)
-#         cls.scenario_directory = os.path.join('workspace', 'Roundtrip_test')
+    @classmethod
+    def setUpClass(cls):
+        source_db = os.path.join('workspace', 'Roundtrip.sqlite3')
+        cls.destination_db = os.path.join('workspace', 'Roundtrip_test.sqlite3')
+        shutil.copy(source_db, cls.destination_db)
+        cls.scenario_directory = os.path.join('workspace', 'Roundtrip_test')
 
-#     @classmethod
-#     def tearDownClass(cls):
-#         os.remove(cls.destination_db)
+    @classmethod
+    def tearDownClass(cls):
+        os.remove(cls.destination_db)
 
-#     def setUp(self):
-#         self.client.get('/app/OpenScenario/Roundtrip_test.sqlite3/')
+    def setUp(self):
+        self.client.get('/app/OpenScenario/Roundtrip_test.sqlite3/')
 
-#         settings = OutputSettings.objects.first()
-#         settings.stop_criteria = 'stop-days'
-#         settings.days = 4
-#         settings.save()
-#         close_old_connections()
+        settings = OutputSettings.objects.first()
+        settings.stop_criteria = 'stop-days'
+        settings.days = 4
+        settings.save()
+        close_old_connections()
 
-#     def tearDown(self):
-#         shutil.rmtree(self.scenario_directory, ignore_errors=True)
+    def tearDown(self):
+        shutil.rmtree(self.scenario_directory, ignore_errors=True)
 
-#     def test_multiple_threads(self):
-#         sim = Simulation(5)
-#         sim.start()
-#         sim.join()
+    def test_multiple_threads(self):
+        sim = Simulation(5)
+        sim.start()
+        sim.join()
 
-#         # 4 days for each iteration, so 20 reports total
-#         self.assertEqual(DailyReport.objects.count(), 20)
+        # 4 days for each iteration, so 20 reports total
+        self.assertEqual(DailyReport.objects.count(), 20)
 
-#     def test_single_thread(self):
-#         sim = Simulation(1)
-#         sim.start()
-#         sim.join()
+    def test_single_thread(self):
+        sim = Simulation(1)
+        sim.start()
+        sim.join()
 
-#         self.assertEqual(DailyReport.objects.count(), 4)
+        self.assertEqual(DailyReport.objects.count(), 4)
 
-#     def test_supplemental_output_created(self):
-#         """
-#             Ensures that prepare_supplemental_output_directory
-#             is being called, and that the directory created is
-#             being passed to adsm properly
-#         """
-#         settings = OutputSettings.objects.first()
-#         settings.save_daily_unit_states = True
-#         settings.save()
-#         close_old_connections()
-#         output_file = os.path.join(self.scenario_directory, 'states_1.csv')
+    def test_supplemental_output_created(self):
+        """
+            Ensures that prepare_supplemental_output_directory
+            is being called, and that the directory created is
+            being passed to adsm properly
+        """
+        settings = OutputSettings.objects.first()
+        settings.save_daily_unit_states = True
+        settings.save()
+        close_old_connections()
+        output_file = os.path.join(self.scenario_directory, 'states_1.csv')
 
-#         sim = Simulation(1)
-#         sim.start()
-#         sim.join()
+        sim = Simulation(1)
+        sim.start()
+        sim.join()
 
-#         self.assertTrue(os.access(output_file, os.F_OK))
+        self.assertTrue(os.access(output_file, os.F_OK))
 
-#     def test_map_zip_with_output(self):
-#         settings = OutputSettings.objects.first()
-#         settings.save_daily_unit_states = True
-#         settings.save_map_output = True
-#         settings.save()
-#         close_old_connections()
-#         file_name = os.path.join(self.scenario_directory, 'Roundtrip_test Map Output.zip')
-#         folder_name = os.path.join(self.scenario_directory, 'Map')
+    def test_map_zip_with_output(self):
+        settings = OutputSettings.objects.first()
+        settings.save_daily_unit_states = True
+        settings.save_map_output = True
+        settings.save()
+        close_old_connections()
+        file_name = os.path.join(self.scenario_directory, 'Roundtrip_test Map Output.zip')
+        folder_name = os.path.join(self.scenario_directory, 'Map')
 
-#         sim = Simulation(1)
-#         sim.start()
-#         sim.join()
+        sim = Simulation(1)
+        sim.start()
+        sim.join()
 
-#         self.assertTrue(os.access(file_name, os.F_OK))
+        self.assertTrue(os.access(file_name, os.F_OK))
 
-#         with zipfile.ZipFile(file_name, 'r') as zf:
-#             self.assertListEqual(zf.namelist(), os.listdir(folder_name))
+        with zipfile.ZipFile(file_name, 'r') as zf:
+            self.assertListEqual(zf.namelist(), os.listdir(folder_name))
 
-#     def test_map_zip_no_output(self):
-#         settings = OutputSettings.objects.first()
-#         settings.save_map_output = False
-#         settings.save()
-#         close_old_connections()
-#         file_name = os.path.join(self.scenario_directory, 'Roundtrip_test Map Output.zip')
-#         folder_name = os.path.join(self.scenario_directory, 'Map')
+    def test_map_zip_no_output(self):
+        settings = OutputSettings.objects.first()
+        settings.save_map_output = False
+        settings.save()
+        close_old_connections()
+        file_name = os.path.join(self.scenario_directory, 'Roundtrip_test Map Output.zip')
+        folder_name = os.path.join(self.scenario_directory, 'Map')
 
-#         sim = Simulation(1)
-#         sim.start()
-#         sim.join()
+        sim = Simulation(1)
+        sim.start()
+        sim.join()
 
-#         self.assertFalse(os.access(file_name, os.F_OK))
+        self.assertFalse(os.access(file_name, os.F_OK))
 
 
 class IterationProgressTestClass(TestCase):
@@ -117,8 +117,7 @@ class IterationProgressTestClass(TestCase):
         days = 7
         for i in range(1, iteration + 1):
             for d in range(1, days + 1):
-                last_day = d == days
-                DailyControls.objects.create(iteration=i, day=d, last_day=last_day)
+                DailyControls.objects.create(iteration=i, day=d, last_day=False)
         self.assertEqual(iterations_complete(), 0)
 
     def test_two_iterations_completed_disease_end(self):
