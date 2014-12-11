@@ -175,20 +175,6 @@ $(function(){
     $('[data-visibility-controller]').each(function(){attach_visibility_controller(this)})
     
     
-    $('#hint_id_contact_rate').each(function(){
-        //attach visibility controller
-        $(this).attr("data-visibility-controller", "use_fixed_contact_rate") 
-        $(this).attr("data-disabled-value", "true")
-        //add sibling element
-        $(this).after($('<p id="hint_id_contact_rate2" data-visibility-controller="use_fixed_contact_rate" data-disabled-value="false" class="help-block">' +
-        'Mean baseline contact rate (in outgoing contacts/unit/day) for <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#direct-contact" class="wiki">direct</a> or <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#indirect-contact" class="wiki">indirect contact</a> models.</p>'))
-        //ensure event hooks are functioning
-        attach_visibility_controller($('#hint_id_contact_rate'))
-        attach_visibility_controller($('#hint_id_contact_rate2'))
-    })
-
-    
-    
     $('[data-visibility-context]').each(function(){
         var context_var = window[$(this).attr('data-visibility-context')]
         if(typeof $(this).attr('data-visibility-flipped') !== 'undefined') {

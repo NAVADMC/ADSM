@@ -35,6 +35,7 @@ import time
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.utils.safestring import mark_safe
 from django_extras.db.models import LatitudeField, LongitudeField, MoneyField
 
 from ADSMSettings.models import SingletonManager
@@ -535,10 +536,11 @@ class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indire
                   ' units of the source type can spread disease by ' + wiki("direct", "direct-contact") + ' or '+ 
                   wiki("indirect contact") + '. ', )
     contact_rate = models.FloatField(validators=[MinValueValidator(0.0)],
-        help_text='Fixed baseline contact rate (in outgoing contacts/unit/day) for ' + 
-                  wiki("direct", "direct-contact") + ' or '+ 
-                  wiki("indirect contact") + ' models.', )
-        # Important: Contact_rate help_text has been given special behavior in the javascript. id = #hint_id_contact_rate
+         # Important: Contact_rate help_text has been given special behavior vial two data-visibility-controller 's.
+        help_text=mark_safe("""<div class="help-block" data-visibility-controller="use_fixed_contact_rate" data-disabled-value="true">
+                                    Fixed baseline contact rate (in outgoing contacts/unit/day) for <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#direct-contact" class="wiki">direct</a> or <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#indirect-contact" class="wiki">indirect contact</a> models.</div>
+                                <div class="help-block" data-visibility-controller="use_fixed_contact_rate" data-disabled-value="false">
+                                    Mean baseline contact rate (in outgoing contacts/unit/day) for <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#direct-contact" class="wiki">direct</a> or <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#indirect-contact" class="wiki">indirect contact</a> models.</div>"""))
     use_fixed_contact_rate = models.BooleanField(default=False,
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
     distance_distribution = models.ForeignKey(ProbabilityFunction, related_name='+',
