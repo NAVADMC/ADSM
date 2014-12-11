@@ -3,18 +3,20 @@ from itertools import chain
 import zipfile
 from glob import glob
 import threading
+from django.http import HttpResponse
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, PermissionDenied
 from django.forms.models import modelformset_factory
 from django.shortcuts import render, redirect
 from django.db import transaction, close_old_connections
 import subprocess
 import time
+import json
 from ScenarioCreator.models import OutputSettings
 from django.db.models import Max
 from Results.models import *  # necessary
 from Results.forms import *  # necessary
 import Results.output_parser
-from Results.summary import list_of_iterations, summarize_results
+from Results.summary import list_of_iterations, summarize_results, iterations_complete
 from ADSMSettings.models import scenario_filename
 import Results.graphing  # necessary to select backend Agg first
 from Results.interactive_graphing import population_zoom_png
@@ -72,6 +74,17 @@ def simulation_process(iteration_number, adsm_cmd, queue, production_types, zone
     end = time.time()
 
     return '%i: Success in %i seconds' % (iteration_number, end-start)
+
+
+def simulation_status(request):
+    output_settings = OutputSettings.objects.get_or_create()[0]
+    status = {
+        'iterations_total': output_settings.iterations,
+        'iterations_started': len(list_of_iterations()),
+        'iterations_completed': iterations_complete(),
+        'status_text': "running?",
+    }
+    return HttpResponse(json.dumps(status), content_type="application/json")
 
 
 def map_zip_file():

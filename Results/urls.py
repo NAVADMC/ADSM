@@ -37,4 +37,4 @@ urlpatterns = generate_urls_from_models(
      "url('^Inputs/$', 'Results.views.back_to_inputs')",
      
      ])
-
+urlpatterns += [url('^simulation_status.json$', 'Results.views.simulation_status')]

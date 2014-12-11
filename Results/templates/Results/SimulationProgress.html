@@ -18,6 +18,12 @@
             });
         </script>
     {% endif %}
+
+    <div class="progress" style="width:92vh; position: relative;">
+        <span class="simulation-status status-text"></span>
+        <div class="simulation-progress progress-bar {% if results_progress == 100 %} done{% endif %}" style="width:{{ results_progress|floatformat:"0" }}%"></div>
+    </div>
+
     <p>Distribution of Outcomes for all Units in the simulation</p>
     <p>Version: {{ version_number }}</p>
 

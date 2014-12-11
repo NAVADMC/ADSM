@@ -56,6 +56,7 @@ a.wiki, a.wiki:visited {
 
 header {
     position: fixed;
+    z-index: 100;
     background-color: white;
     width: 100%;
     height: 44px;
@@ -302,6 +303,14 @@ select {
     margin: 8px 4px;
 }
 
+.progress .status-text {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    text-shadow: 0 -1px 1px #fff;
+    font-size:1.2em
+}
 .progress-bar-mini {
     display:block;
     margin-top: -4px;
@@ -312,7 +321,7 @@ select {
     height: 3px;
     background-color: #00477f;
 }
-.progress-bar-mini .bar.success {
+.progress-bar-mini .bar.done, .progress-bar.done {
     background-color: #B6F3A7;
 }
 
