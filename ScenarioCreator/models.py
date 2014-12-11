@@ -535,9 +535,10 @@ class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indire
                   ' units of the source type can spread disease by ' + wiki("direct", "direct-contact") + ' or '+ 
                   wiki("indirect contact") + '. ', )
     contact_rate = models.FloatField(validators=[MinValueValidator(0.0)],
-        help_text='The average contact rate (in recipient units per source unit per day) for ' + 
+        help_text='Fixed baseline contact rate (in outgoing contacts/unit/day) for ' + 
                   wiki("direct", "direct-contact") + ' or '+ 
                   wiki("indirect contact") + ' models.', )
+        # Important: Contact_rate help_text has been given special behavior in the javascript. id = #hint_id_contact_rate
     use_fixed_contact_rate = models.BooleanField(default=False,
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
     distance_distribution = models.ForeignKey(ProbabilityFunction, related_name='+',

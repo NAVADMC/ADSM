@@ -107,7 +107,7 @@ $(function(){
             modelModal.show($(this))
         }
     });
-
+    
     /*$('[data-visibility-controller]').each(function(){
         var controller = '[name=' + $(this).attr('data-visibility-controller') + ']'
         var hide_target = $(this).parents('.control-group, td')
@@ -129,21 +129,30 @@ $(function(){
     }) */
 
     
-    $('[data-visibility-controller]').each(function(){
-        var controller = '[name=' + $(this).attr('data-visibility-controller') + ']'
-        var hide_target = $(this).parents('.control-group')
-        if (hide_target.length == 0){  //Sometimes it's not in a form group
-            hide_target = $(this)
+    var attach_visibility_controller = function (self){
+        var controller = '[name=' + $(self).attr('data-visibility-controller') + ']'
+        var hide_target = $(self).parents('.control-group')
+        if (hide_target.length == 0 || $(self).attr('class') === 'help-block'){  //Sometimes it's not in a form group
+            hide_target = $(self)
         }
-        var disabled_value = $(this).attr('data-disabled-value')
-        var required_value = $(this).attr('data-required-value')
+        console.log("attached to", self, controller)
+        var disabled_value = $(self).attr('data-disabled-value')
+        var required_value = $(self).attr('data-required-value')
 
         $('body').on('change', controller, function(){
-            if($(this).val() == disabled_value){
+            if($(self).val() == disabled_value){
                 hide_target.hide()
             }else{
-                if (typeof required_value !== 'undefined'){ //required value is specified
-                    if($(this).val() == required_value || $(this).val() == ''){
+                if($(this).attr('type') == 'checkbox') {
+                    if( $(this).is(':checked') == (disabled_value === 'false')){
+                        hide_target.show()
+                    }else {
+                        hide_target.hide()
+                    }
+                }
+                else {
+                    if (typeof required_value !== 'undefined'){ //required value is specified
+                    if($(self).val() == required_value || $(self).val() == ''){
                         hide_target.show()
                     }else{
                         console.log("Hiding", hide_target)
@@ -152,7 +161,7 @@ $(function(){
                 }else{
                     hide_target.show()
                 }
-            }
+            }}
         })
         $(controller).each(function(index, elem){ //each because radio buttons have multiple elem, same name
             if($(elem).attr('type') != 'radio' || elem.hasAttribute('checked')){
@@ -161,7 +170,24 @@ $(function(){
             }
         });
         $(hide_target).css('margin-left', '26px');
+    }
+    
+    $('[data-visibility-controller]').each(function(){attach_visibility_controller(this)})
+    
+    
+    $('#hint_id_contact_rate').each(function(){
+        //attach visibility controller
+        $(this).attr("data-visibility-controller", "use_fixed_contact_rate") 
+        $(this).attr("data-disabled-value", "true")
+        //add sibling element
+        $(this).after($('<p id="hint_id_contact_rate2" data-visibility-controller="use_fixed_contact_rate" data-disabled-value="false" class="help-block">' +
+        'Mean baseline contact rate (in outgoing contacts/unit/day) for <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#direct-contact" class="wiki">direct</a> or <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#indirect-contact" class="wiki">indirect contact</a> models.</p>'))
+        //ensure event hooks are functioning
+        attach_visibility_controller($('#hint_id_contact_rate'))
+        attach_visibility_controller($('#hint_id_contact_rate2'))
     })
+
+    
     
     $('[data-visibility-context]').each(function(){
         var context_var = window[$(this).attr('data-visibility-context')]
