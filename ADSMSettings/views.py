@@ -13,7 +13,7 @@ def update_adsm_from_git(request):
     """This sets the update_on_startup flag for the next program start."""
     if 'GET' in request.method:
         try:
-            session = SmSession.objects.get_or_create(id=1)[0]
+            session = SmSession.objects.get()
             session.update_on_startup = True
             session.save()
             return HttpResponse("success")
@@ -25,7 +25,7 @@ def update_adsm_from_git(request):
 def check_update(request):
     graceful_startup()
 
-    session = SmSession.objects.get_or_create(id=1)[0]
+    session = SmSession.objects.get()
     session.update_available = update_is_needed()
     session.save()
 

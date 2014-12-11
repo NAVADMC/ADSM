@@ -34,7 +34,7 @@ class CreatorTest(TestCase):
         r = self.client.post('/setup/Scenario/new/', standardPost)
         r = self.client.get('/setup/Scenario/1/')
         r = self.client.post('/setup/Scenario/1/', updatedPost)
-        self.assertEqual(Scenario.objects.get(pk=1).description, 'Updated Description')
+        self.assertEqual(Scenario.objects.get().description, 'Updated Description')
 
 
 class ModelUtilsTest(TestCase):

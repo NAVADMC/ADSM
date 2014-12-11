@@ -11,7 +11,8 @@ class SingletonManager(models.Manager):
             return super(SingletonManager, self).get_or_create(id=1)[0]
 
     def get_or_create(self, **kwargs):
-        kwargs.pop('id', None)  # make sure there's no id specified  TODO: or just set kwargs['id'] = 1
+        kwargs.pop('id', None)  # make sure there's no id specified
+        kwargs.pop('pk', None)
         try:  # modify an existing copy by overwriting with additional values
             result = super(SingletonManager, self).get()
             for key in kwargs:
@@ -55,7 +56,7 @@ class SmSession(models.Model):
 
 
 def unsaved_changes(new_value=None):
-    session = SmSession.objects.get_or_create(id=1)[0]  # This keeps track of the state for all views and is used by basic_context
+    session = SmSession.objects.get()  # This keeps track of the state for all views and is used by basic_context
     if new_value is not None:  # you can still set it to False
         session.unsaved_changes = new_value
         session.save()
@@ -63,7 +64,7 @@ def unsaved_changes(new_value=None):
 
 
 def scenario_filename(new_value=None):
-    session = SmSession.objects.get_or_create(id=1)[0]  # This keeps track of the state for all views and is used by basic_context
+    session = SmSession.objects.get()  # This keeps track of the state for all views and is used by basic_context
     if new_value:
         session.scenario_filename = new_value.replace('.sqlite3', '')
         session.save()

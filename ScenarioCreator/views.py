@@ -56,7 +56,7 @@ def extra_forms_needed():
 
 
 def include_spread(request):
-    master = Disease.objects.get_or_create(pk=1)[0]
+    master = Disease.objects.get()
     if 'GET' in request.method:
         info = {'include_direct_contact_spread': master.include_direct_contact_spread,
                 'include_indirect_contact_spread': master.include_indirect_contact_spread,
@@ -411,7 +411,7 @@ def model_list(request):
 def upload_population(request):
     from ADSMSettings.models import SmSession
     from xml.etree.ElementTree import ParseError
-    session = SmSession.objects.get_or_create(pk=1)[0]
+    session = SmSession.objects.get()
     if 'GET' in request.method:
         json_response = '{"status": "%s", "percent": "%s"}' % (session.population_upload_status, session.population_upload_percent*100)
         return HttpResponse(json_response, content_type="application/json")

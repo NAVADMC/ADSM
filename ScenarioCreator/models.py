@@ -131,7 +131,7 @@ class Population(InputSingleton):
 
     def import_population(self):
         from ADSMSettings.models import SmSession
-        session = SmSession.objects.get_or_create(id=1)[0]
+        session = SmSession.objects.get()
 
         start_time = time.clock()  # perf_counter() would also work
         session.set_population_upload_status("Parsing")
@@ -159,7 +159,7 @@ class Population(InputSingleton):
 
 class Unit(BaseModel):
     def save(self, *args, **kwargs):
-        self._population = Population.objects.get_or_create(id=1)[0]
+        self._population = Population.objects.get()
         super(Unit, self).save(*args, **kwargs)
 
     _population = models.ForeignKey(Population)
@@ -450,7 +450,7 @@ class ControlProtocol(BaseModel):
 
 class ProtocolAssignment(BaseModel):
     def save(self, *args, **kwargs):
-        self._master_plan = ControlMasterPlan.objects.get_or_create(id=1)[0]
+        self._master_plan = ControlMasterPlan.objects.get()
         super(ProtocolAssignment, self).save(*args, **kwargs)
 
     _master_plan = models.ForeignKey('ControlMasterPlan',
@@ -485,7 +485,7 @@ class Disease(InputSingleton):
 
 class DiseaseProgression(BaseModel):
     def save(self, *args, **kwargs):
-        self._disease = Disease.objects.get_or_create(id=1)[0]
+        self._disease = Disease.objects.get()
         super(DiseaseProgression, self).save(*args, **kwargs)
 
     name = models.CharField(max_length=255,
@@ -518,7 +518,7 @@ class DiseaseProgressionAssignment(BaseModel):
 
 class DiseaseSpread(BaseModel):
     def save(self, *args, **kwargs):
-        self._disease = Disease.objects.get_or_create(id=1)[0]
+        self._disease = Disease.objects.get()
         super(DiseaseSpread, self).save(*args, **kwargs)
 
     name = models.CharField(max_length=255,)

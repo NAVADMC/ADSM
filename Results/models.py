@@ -402,9 +402,9 @@ class ResultsVersion(OutputBaseModel):
 def delete_all_outputs():
     if DailyControls.objects.count() > 0:
         print("DELETING ALL OUTPUTS")
-    output_models = [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]
-    for model in output_models:
-        model.objects.all().delete()
+        output_models = [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]
+        for model in output_models:
+            model.objects.all().delete()
 
 
 def delete_supplemental_folder():

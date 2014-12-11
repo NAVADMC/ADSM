@@ -38,7 +38,7 @@ def basic_context(request):
     pt_count = ProductionType.objects.count()
     context = {'filename': scenario_filename(),  # context in either mode
                'unsaved_changes': unsaved_changes(),
-               'update_available': SmSession.objects.get_or_create(id=1)[0].update_available,
+               'update_available': SmSession.objects.get().update_available,
                'url': request.path,
                'active_link': '/'.join(re.split('\W+', request.path)[2:]),
                'dev_version': git_adsm_sha(),
@@ -78,7 +78,7 @@ def basic_context(request):
                              'ZoneEffectAssignments']
         context['relevant_keys'] = {name: context[name] for name in validation_models}
         context['Simulation_ready'] = simulation_ready_to_run(context)
-        disease = Disease.objects.get_or_create(pk=1)[0]
+        disease = Disease.objects.get()
         context['javascript_variables'] = {'use_within_unit_prevalence':      js(disease.use_within_unit_prevalence),
                                            'use_airborne_exponential_decay':  js(disease.use_airborne_exponential_decay),
                                            'include_direct_contact_spread':   js(disease.include_direct_contact_spread),

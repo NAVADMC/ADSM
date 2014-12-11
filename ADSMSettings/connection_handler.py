@@ -34,7 +34,7 @@ def create_db_connection(db_name, db_path):
 #     top_level_models = [Scenario, Population, Disease, ControlMasterPlan]
 #     for parent_object in top_level_models:
 #         try:
-#             node = parent_object.objects.using('default').get(id=1)
+#             node = parent_object.objects.using('default').get()
 #             node.save(using='save_file')
 #         except ObjectDoesNotExist:
 #             print("Couldn't find a ", parent_object)
