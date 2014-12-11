@@ -187,7 +187,7 @@ def results_home(request):
         try:
             v = ResultsVersion.objects.get()
             context['version_number'] = '.'.join([v.versionMajor, v.versionMinor, v.versionRelease])
-        except (MultipleObjectsReturned, ObjectDoesNotExist, PermissionDenied):
+        except:  # more specific exceptions kept leaking through
             pass
     return render(request, 'Results/SimulationProgress.html', context)
 
