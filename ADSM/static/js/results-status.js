@@ -1,5 +1,6 @@
 var results_status  = (function(pollTime){
-    var pollInterval;
+    var pollInterval,
+        last_progress = 1;
 
     var update_results_status = function() {
         $.get('/results/simulation_status.json').done(function (status) {
@@ -11,18 +12,22 @@ var results_status  = (function(pollTime){
                                 status.iterations_completed + " of " + status.iterations_total + " iterations completed.";
 
             if (simulation_complete) {
-                $('.simulation-progress').addClass('progress-bar-success');
+                $('.simulation-progress').addClass('done');
                 status_text = "Simulation complete.  " + status.iterations_total + " iterations run.";
                 stop_poll();
+                if (last_progress < 1) {
+                    window.reload();
+                }
             }
             
             $('.simulation-progress').width(simulation_progress * 100 + "%");
             $('.simulation-status').text(status_text);
 
+            last_progress = simulation_progress;
         });
     },
 
-        start_poll = function() { update_results_status(); setInterval(update_results_status, pollTime); },
+        start_poll = function() { pollInterval = setInterval(update_results_status, pollTime); update_results_status(); },
         stop_poll = function() { clearInterval(pollInterval); };
 
 
