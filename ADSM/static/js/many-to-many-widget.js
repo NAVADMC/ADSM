@@ -1,5 +1,5 @@
 /** Javascript widget designed to make many group assignments as quick and painless as possible.
- * Described in https://github.com/NAVADMC/SpreadModel/issues/77.
+ * Described in https://github.com/NAVADMC/ADSM/issues/77.
  * Used in Disease Spread Assignment and Zone assignment.
  * Possibly could be used in Assigning Progression and Protocols as well.
  * Created by Josiah and Marshall on 6/5/14.

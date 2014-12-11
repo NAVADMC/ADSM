@@ -130,14 +130,14 @@ Updating the adsm_simulation Executable
 Please never merge master into a staging branch just to compile the adsm_simulation executable.
 If you need a one off compile of the adsm_simulation.exe, setup your own temporary branch or other compile directory.
 
-    cd SpreadModel
+    cd ADSM
     git pull
     cd CEngine
     sh bootstrap
     ./configure --disable-debug
     make
 
-`make` will will fail on a `dia: command not found` error when it gets to the SpreadModel/CEngine/doc/diagrams directory.  That’s OK: at this point, the executable is built, and you are done.
+`make` will will fail on a `dia: command not found` error when it gets to the ADSM/CEngine/doc/diagrams directory.  That’s OK: at this point, the executable is built, and you are done.
 
 Notes on the Distributable
 ----------
