@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+{#    Just add /?loading_url= to the beginning of any URL#}
 <style>
 	body{
 		background:white;
@@ -20,6 +21,12 @@
 </style>
 </head>
 <body>
-	<div>{{ redirect_url }}</div>
+	<div>{{ loading_url }}</div>
+
+   <script type="text/javascript">
+        (function(){
+            window.location = '{{ loading_url }}';
+        })();
+    </script>
 </body>
 </html>

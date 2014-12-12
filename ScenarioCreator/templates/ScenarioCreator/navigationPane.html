@@ -46,10 +46,10 @@
                 {% else %}
                     {% if Simulation_ready or dry_run_passed %}
                         {% if supplemental_folder_has_contents %}
-                            <a href="/results/RunSimulation/" class="incomplete tall">
+                            <a href="/?loading_url=/results/RunSimulation/" class="incomplete tall">
                             Delete Supplementals and Run Simulation <i class="glyphicon glyphicon-play"></i></a>
                         {% else %}
-                            <a href="/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
+                            <a href="/?loading_url=/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
                             Run Simulation <i class="glyphicon glyphicon-play"></i></a>
                         {% endif %}
                     {% else %}

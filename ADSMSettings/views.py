@@ -10,8 +10,13 @@ from ADSMSettings.utils import update_is_needed, graceful_startup, reset_db, upd
 
 
 def loading_screen(request):
-    # force context processor to not run
-    context = {'redirect_url': '/setup/Scenario/1/'}
+    """Display a loading screen then immediate GET the redirect_url from javascript.
+    Just add /?loading_url= to the beginning of any URL"""
+    # context processor does not run on this url
+    try:
+        context = {'loading_url': request.GET['loading_url']}
+    except:
+        context = {'loading_url': 'setup/Scenario/1/'}
     return render(request, "LoadingScreen.html", context)
 
 
