@@ -409,6 +409,8 @@ def delete_all_outputs():
         print("DELETING ALL OUTPUTS")
     for model in [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]:
         model.objects.all().delete()
+    from django.db import connections
+    connections['scenario_db'].cursor().execute('VACUUM')
 
 
 def delete_supplemental_folder():
