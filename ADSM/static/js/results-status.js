@@ -16,7 +16,7 @@ var results_status  = (function(pollTime){
                 status_text = "Simulation complete.  " + status.iterations_total + " iterations run.";
                 stop_poll();
                 if (last_progress < 1) {
-                    window.reload();
+                    window.location.reload();
                 }
             }
             
