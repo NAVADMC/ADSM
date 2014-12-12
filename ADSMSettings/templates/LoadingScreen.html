@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	body{
+		background:white;
+		box-shadow:inset 0 0 10px #000000;
+		background:url("{{ STATIC_URL }}splash-screen.gif") no-repeat center;
+		margin-top:50%;
+	}
+	div{
+		display:block;
+		width:100%;
+		height:100%;
+		position:absolute;
+		top:0;
+		left:0;
+		-webkit-box-shadow:inset 0 0 2em #ccc;
+	}
+</style>
+</head>
+<body>
+	<div>{{ redirect_url }}</div>
+</body>
+</html>

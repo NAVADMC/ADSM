@@ -10,6 +10,6 @@ urlpatterns = patterns('',
     url(r'^results/', include('Results.urls')),
     url(r'^app/', include('ADSMSettings.urls')),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^$', 'ScenarioCreator.views.home'),
+    url(r'^$', 'ADSMSettings.views.loading_screen'),
     url(r'^setup/$', 'ScenarioCreator.views.home'),
 )

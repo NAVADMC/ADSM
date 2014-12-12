@@ -34,17 +34,11 @@ def git_adsm_sha():
 
 
 def basic_context(request):
-    graceful_startup()
-    pt_count = ProductionType.objects.count()
-    context = {'filename': scenario_filename(),  # context in either mode
-               'unsaved_changes': unsaved_changes(),
-               'update_available': SmSession.objects.get().update_available,
-               'url': request.path,
-               'active_link': '/'.join(re.split('\W+', request.path)[2:]),
-               'dev_version': git_adsm_sha(),
-               }
+    context = {}
     
     if 'setup/' in request.path:  # inputs specific context
+        pt_count = ProductionType.objects.count()
+
         context.update({
                'Scenario': Scenario.objects.count(),
                'OutputSetting': OutputSettings.objects.count(),

@@ -9,6 +9,12 @@ from ADSMSettings.xml2sqlite import import_naadsm_xml
 from ADSMSettings.utils import update_is_needed, graceful_startup, reset_db, update_db_version, db_name, workspace_path, file_list, handle_file_upload
 
 
+def loading_screen(request):
+    # force context processor to not run
+    context = {'redirect_url': '/setup/Scenario/1/'}
+    return render(request, "LoadingScreen.html", context)
+
+
 def update_adsm_from_git(request):
     """This sets the update_on_startup flag for the next program start."""
     if 'GET' in request.method:

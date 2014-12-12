@@ -116,6 +116,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.tz",
     "django.contrib.messages.context_processors.messages",
     "django.core.context_processors.request",
+    "ADSMSettings.context_processor.adsm_context",
     "ScenarioCreator.context_processor.basic_context",
     "Results.context_processor.results_context"
 
