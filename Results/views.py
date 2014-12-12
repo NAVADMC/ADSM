@@ -138,10 +138,13 @@ class Simulation(threading.Thread):
         super(Simulation, self).__init__(**kwargs)
 
     def run(self):
+        num_cores = multiprocessing.cpu_count()
+        if num_cores > 2:
+            num_cores -= 1
         executable_cmd = adsm_executable_command()  # only want to do this once
         statuses = []
         manager = DjangoManager()
-        pool = multiprocessing.Pool()
+        pool = multiprocessing.Pool(num_cores)
         queue = manager.DjangoQueue()
         event = manager.Event()
         for iteration in range(1, self.max_iteration + 1):
