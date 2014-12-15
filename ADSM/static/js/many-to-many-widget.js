@@ -18,7 +18,7 @@ var many_to_many_widget;
 })(jQuery);
 
 
-check_disable_spread_checboxes = function(post_changes){
+check_disable_spread_checboxes = function(){
     var elements = $('table').first().find('tr:first-child th:nth-child(n+3)')
     $(elements).each(function(index){
         var active = $(this).find('input').prop('checked');
@@ -31,15 +31,6 @@ check_disable_spread_checboxes = function(post_changes){
             }
         })
     });
-    if(post_changes) {
-        var data = {}; 
-        $(elements).each(function(index){
-            var field_name = 'include_'+ $(this).text().replace(/ /g, '_').toLowerCase()
-            var active = $(this).find('input').prop('checked');
-            data[field_name] = active;
-        });
-        safe_save('/setup/IncludeSpreads/', data);
-    }
 }
 
 
@@ -59,7 +50,7 @@ form_state = (function(form){
     //serialize -> POST   //standard formset views.py
 
     var save = function() {
-        safe_save('', form.serialize());
+        // noop.  Save manually now.
     };
 
     var format_form_array = function(serialized_array){
@@ -169,8 +160,7 @@ many_to_many_widget = (function(form_state){
             var bulk_select = $(this).find('select').clone()
             bulk_select.attr('id', bulk_select.attr('id').replace(form_prefix, 'bulk-')).val("");
             bulk_select.find('option[value="data-add-new"]').remove()
-            var button = $('<button>Apply</button>').addClass('bulk-apply')
-            my_table.find('thead tr:nth-child(2)').append($('<td>').append(bulk_select).append(button)); //sensitive selector
+            my_table.find('thead tr:nth-child(2)').append($('<td>').append(bulk_select)); //sensitive selector
         });
     }
 
@@ -232,7 +222,7 @@ many_to_many_widget = (function(form_state){
         my_table.append(create_body_rows())
         update_display_inputs() //called from events normally, but we want to initialize
 
-        $('.panel').before(my_table); //finally, insert everything into the DOM
+        $('.m2mtable').append(my_table);
         my_table.find('tbody select').on('change', update_state_inputs)//register event listener
         add_checkboxes_to_headers();
     };

@@ -18,15 +18,18 @@
         have the same parameters.  Select multiple production types in source and/or destination then use "Apply" to set them all to the same value.
         Or check your work by hand under "All Possible Interactions".</p>
     </div>
-    <div class="row">
-    </div>
+                
     <div class="row col-md-9">
-       <div class="panel panel-default">
-            <div class="panel-heading">
-            <h3>All Possible Interactions</h3>
-            Use this area to double check your work or submit individual changes.
-            </div>
-            <form method="post" action="">
+        <div class="m2mtable"></div>
+
+        <form method="post" action="">
+            <p><input type="submit" name="submit" value="Submit" class="btn btn-primary button white" id="submit-id-submit"></p>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3>All Possible Interactions</h3>
+                    Use this area to double check your work or submit individual changes.
+                </div>
                 {{ formset.management_form }}
                 <table>
                     <thead>
@@ -46,10 +49,11 @@
                  </tbody>
                 </table>
                 <input type="submit" name="submit" value="Submit" class="btn btn-primary button white" id="submit-id-submit">
-            </form>
-        
+            
+                </div>
             </div>
-        </div>
+            
+        </form>
     </div>
 
 {% endblock %}

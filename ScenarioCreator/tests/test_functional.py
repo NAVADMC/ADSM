@@ -24,7 +24,7 @@ class M2mDSL(object):
         time.sleep(sleep)
 
     def click_production_type(self, name, type_of_type='source'):
-        row_selector = 'section > div > table > tbody > tr'
+        row_selector = '.m2mtable > table > tbody > tr'
         source_type_selector = 'th:first-of-type span'
         destination_type_selector = 'th:nth-of-type(2) span'
 
@@ -38,7 +38,7 @@ class M2mDSL(object):
                 target.click()
 
     def click_button(self, name, type_of_type='source', sleep=1):
-        row_selector = 'section > div > table > thead > tr:nth-of-type(2)'
+        row_selector = '.m2mtable > table > thead > tr:nth-of-type(2)'
         source_selector = 'td:first-of-type button'
         destination_selector = 'td:nth-of-type(2) button'
 
@@ -59,13 +59,13 @@ class M2mDSL(object):
         time.sleep(sleep)
 
     def select_contact_disease(self, name, sleep=2):
-        select_selector = 'section > div > table > tbody > tr:first-of-type > td:first-of-type select'
+        select_selector = '.m2mtable > table > tbody > tr:first-of-type > td:first-of-type select'
         target = self.selenium.find_element_by_css_selector(select_selector)
         Select(target).select_by_visible_text(name)
         time.sleep(sleep)
 
     def get_bulk_production_types(self):
-        row_selector = 'section > div > table > tbody > tr'
+        row_selector = '.m2mtable > table > tbody > tr'
         source_selector = 'th:first-of-type span'
         select_selector = 'td:first-of-type select'
         rows = self.selenium.find_elements_by_css_selector(row_selector)
@@ -82,7 +82,7 @@ class M2mDSL(object):
         return production_types
 
     def get_interactions(self):
-        row_selector = 'form > table > tbody > tr'
+        row_selector = 'form table > tbody > tr'
         source_selector = 'select[id$="source_production_type"]'
         destination_selector = 'select[id$="destination_production_type"]'
         disease_selector = 'select[id$="-direct_contact_spread"]'
@@ -103,7 +103,7 @@ class M2mDSL(object):
         return interactions
 
     def get_selected_production_types(self, type_of_type='source'):
-        row_selector = 'section > div > table > tbody'
+        row_selector = '.m2mtable > table > tbody'
         source_selector = 'th:first-of-type span.selected'
         destination_selector = 'th:nth-of-type(2) span.selected'
 
@@ -293,13 +293,12 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             .find_element_by_link_text('Assign Disease Spread').click()
         time.sleep(2)
 
-        m2m_widget = self.selenium.find_element_by_css_selector('section > div > table')
+        m2m_widget = self.selenium.find_element_by_css_selector('.m2mtable > table')
 
         # check that the buttons are present
         buttons = m2m_widget.find_elements_by_tag_name('button')
         self.assertEqual(len([b for b in buttons if b.text == "Select All"]), 2)
         self.assertEqual(len([b for b in buttons if b.text == "Deselect All"]), 2)
-        self.assertEqual(len([b for b in buttons if b.text == "Apply"]), 3)
 
         # and production type labels
         self.assertEqual(m2m_widget.text.count("Free Range Cows"), 2)
@@ -348,10 +347,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         # verify bulk selector for each destination production type were updated
         types = self.get_bulk_production_types()
         for production_type in types:
-            if (production_type['source'] == "Free Range Cows"):
-                self.assertEqual(production_type['disease'], str(self.dc_ds1))
-            else:
-                self.assertEqual(production_type['disease'], u"---------")
+            self.assertEqual(production_type['disease'], str(self.dc_ds1))
 
         interactions = self.get_interactions()
         for interaction in interactions:
@@ -375,11 +371,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         # verify bulk selector for each destination production type were updated
         types = self.get_bulk_production_types()
         for production_type in types:
-            if (production_type['source'] == 'Free Range Cows' or
-                    production_type['source'] == 'Dairy Cows'):
-                self.assertEqual(production_type['disease'], str(self.dc_ds1))
-            else:
-                self.assertEqual(production_type['disease'], u"---------")
+            self.assertEqual(production_type['disease'], str(self.dc_ds1))
 
         interactions = self.get_interactions()
         for interaction in interactions:
