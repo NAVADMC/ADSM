@@ -1,6 +1,7 @@
 import csv
 import subprocess
 import json
+import itertools
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
@@ -99,21 +100,23 @@ def assign_disease_spread(request):
 
 
 def zone_effects(request):
-    grid_forms = []
-    for pt in ProductionType.objects.all():
-        row = [pt.name, [] ]  # label and empty list
-        for zone in Zone.objects.all():
-            instance = ZoneEffectAssignment.objects.get_or_create(production_type=pt, zone=zone)[0]
-            form = ZoneEffectAssignmentForm(instance=instance)
-            setattr(form, 'pk', instance.pk)  # adding the pk so the javascript can call back
-            row[1].append(form)
-        grid_forms.append(row)
-        
+    missing = Zone.objects.filter(zoneeffectassignment__isnull=True)
+    zoneSet = modelformset_factory(ZoneEffectAssignment, form=ZoneEffectAssignmentForm, extra=len(missing))
+    context = {'title': 'What Effect does a Zone have on each Production Type?'}
+    if save_formset_succeeded(zoneSet, ZoneEffectAssignment, context, request):
+        return redirect(request.path)
+    else:
+        forms = zoneSet(queryset=ZoneEffectAssignment.objects.all())
+        for index, pt in enumerate(missing):
+            index += ZoneEffectAssignment.objects.count()
+            forms[index].fields['zone'].initial = pt.id
 
-    context = {'grid_forms': grid_forms,
-               'title': 'What Effect does a Zone have on each Production Type?',
-               'zones': Zone.objects.all()}
-    return render(request, 'ScenarioCreator/ZoneEffectGrid.html', context)
+        context['formset'] = zoneSet
+        context['formset_headings'] = Zone.objects.order_by('id')
+        context['formset_grouped'] = {k: sorted(v, key=lambda x: x.instance.zone.id) 
+                                        for k,v in itertools.groupby(forms, lambda x: x.instance.production_type)}
+
+        return render(request, 'ScenarioCreator/FormSet2D.html', context)
 
 
 def save_formset_succeeded(MyFormSet, TargetModel, context, request):
