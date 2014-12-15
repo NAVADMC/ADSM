@@ -33,7 +33,8 @@ var results_status  = (function(pollTime){
 
     return {
         start_poll: start_poll,
-        stop_poll: start_poll
+        stop_poll: start_poll,
+        get_last_progress: function() { return last_progress; }
     };
 })(5000);
 

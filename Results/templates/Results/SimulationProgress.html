@@ -15,6 +15,13 @@
         <script>
             $(document).ready(function(){
                 $('#population_zoom').zoom({on:'click'});
+
+                var refreshInterval = setInterval(function(){
+                    if (results_status.get_last_progress() < 1)
+                        $('#summaryData').load(' #summaryData > table');
+                    else
+                        clearInterval(refreshInterval);
+                }, 1000);
             });
         </script>
     {% endif %}
@@ -27,8 +34,10 @@
     <p>Distribution of Outcomes for all Units in the simulation</p>
     <p>Version: {{ version_number }}</p>
 
+    <div id="summaryData">
     {% include "Results/Summary.html" %}
-    
+    </div>
+
     {% if supplemental_files %}
         <div class="panel panel-default">
             <div class="panel-heading">
