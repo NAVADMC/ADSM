@@ -2,14 +2,19 @@ import unittest
 from django.core.exceptions import ValidationError
 from django.test import TestCase, TransactionTestCase
 
-# Create your tests here.
-from ScenarioCreator.models import Scenario, choice_char_from_value, squish_name, Unit, Population, ProductionType, IndirectSpread, ProbabilityFunction, RelationalFunction
+from ScenarioCreator.models import (Scenario, choice_char_from_value, squish_name,
+                                    Unit, Population, ProductionType, IndirectSpread,
+                                    ProbabilityFunction, RelationalFunction, Disease,
+                                    ControlMasterPlan, OutputSettings)
 from ScenarioCreator.parser import PopulationParser
 from ScenarioCreator.forms import IndirectSpreadForm
+from ADSMSettings.models import SingletonManager
 
-updatedPost = {'description': 'Updated Description', "naadsm_version": '3.2.19', "language": 'en', "num_runs": '10',
+updatedPost = {'description': 'Updated Description',
+               "naadsm_version": '3.2.19', "language": 'en', "num_runs": '10',
                "num_days": '40', 'scenario_name': 'sample'}
-standardPost = {'description': 'words', "naadsm_version": '3.2.19', "language": 'en', "num_runs": '10',
+standardPost = {'description': 'words', "naadsm_version": '3.2.19',
+                "language": 'en', "num_runs": '10',
                 "num_days": '40', 'scenario_name': 'sample'}
 
 
@@ -158,3 +163,82 @@ class ViewTests(TransactionTestCase):
         r = self.client.get('/setup/RelationalFunction/%s/' % function.id)
         self.assertIn('data-delete-link', r.content.decode())
 
+
+class PopulationTestCase(TestCase):
+    multi_db = True
+
+    def test_model_is_singleton(self):
+        self.assertIsInstance(Population.objects, SingletonManager)
+
+    def test_save(self):
+        result = Population()
+        result.id = 2
+        result.save()
+
+        result = Population.objects.get()
+        self.assertEqual(Population.objects.count(), 1)
+        self.assertEqual(result.pk, 1)
+
+
+class ControlMasterPlanTestCase(TestCase):
+    multi_db = True
+
+    def test_model_is_singleton(self):
+        self.assertIsInstance(ControlMasterPlan.objects, SingletonManager)
+
+    def test_save(self):
+        result = ControlMasterPlan()
+        result.id = 2
+        result.save()
+
+        result = ControlMasterPlan.objects.get()
+        self.assertEqual(ControlMasterPlan.objects.count(), 1)
+        self.assertEqual(result.pk, 1)
+
+
+class DiseaseTestCase(TestCase):
+    multi_db = True
+
+    def test_model_is_singleton(self):
+        self.assertIsInstance(Disease.objects, SingletonManager)
+
+    def test_save(self):
+        result = Disease()
+        result.id = 2
+        result.save()
+
+        result = Disease.objects.get()
+        self.assertEqual(Disease.objects.count(), 1)
+        self.assertEqual(result.pk, 1)
+
+
+class ScenarioTestCase(TestCase):
+    multi_db = True
+
+    def test_model_is_singleton(self):
+        self.assertIsInstance(Scenario.objects, SingletonManager)
+
+    def test_save(self):
+        result = Scenario()
+        result.id = 2
+        result.save()
+
+        result = Scenario.objects.get()
+        self.assertEqual(Scenario.objects.count(), 1)
+        self.assertEqual(result.pk, 1)
+
+
+class OutputSettingsTestCase(TestCase):
+    multi_db = True
+
+    def test_model_is_singleton(self):
+        self.assertIsInstance(OutputSettings.objects, SingletonManager)
+
+    def test_save(self):
+        result = OutputSettings()
+        result.id = 2
+        result.save()
+
+        result = OutputSettings.objects.get()
+        self.assertEqual(OutputSettings.objects.count(), 1)
+        self.assertEqual(result.pk, 1)

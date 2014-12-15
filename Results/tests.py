@@ -8,10 +8,11 @@ import zipfile
 from Results.views import Simulation, simulation_process
 from Results.models import DailyReport
 from ScenarioCreator.models import OutputSettings, ProductionType, Zone
-from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType
+from Results.models import (DailyControls, DailyByProductionType, DailyByZone,
+                            DailyByZoneAndProductionType, ResultsVersion)
 from Results.summary import iteration_progress, summarize_results
 from Results.output_parser import DailyParser
-from ADSMSettings.models import scenario_filename
+from ADSMSettings.models import scenario_filename, SingletonManager
 
 
 class SimulationTest(TransactionTestCase):
@@ -295,3 +296,19 @@ class ParserTests(TestCase):
 
         self.assertEqual(len(results), 2)
         self.assertIsInstance(results[1], DailyControls)
+
+
+class ResultsVersionTestCase(TestCase):
+    multi_db = True
+
+    def test_model_is_singleton(self):
+        self.assertIsInstance(ResultsVersion.objects, SingletonManager)
+
+    def test_save(self):
+        result = ResultsVersion()
+        result.id = 2
+        result.save()
+
+        result = ResultsVersion.objects.get()
+        self.assertEqual(ResultsVersion.objects.count(), 1)
+        self.assertEqual(result.pk, 1)
