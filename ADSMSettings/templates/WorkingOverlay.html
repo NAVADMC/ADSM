@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	.mask{
+		display:block;
+		width:100%;
+		height:100%;
+		position:absolute;
+		top:0;
+		left:0;
+		background:rgba(0,0,0,.6);
+		}
+	.container {
+		position:relative;
+		top:50%;
+		-webkit-transform:translatey(-50%);
+		color:#ccc;
+		font-size:18px;
+		font-family:'Source Sans Pro';  {# TODO: add backup fonts #}
+		background:url('{{ STATIC_URL }}working.gif') no-repeat top center;
+		display:table;
+		width:300px;
+		margin:auto;
+		text-align:center;
+	}
+	/*this makes the "working" text breathe*/
+	@-webkit-keyframes breathing {
+		0% {
+			opacity: .7;
+		}
+		50%{
+			opacity: 1;
+		}
+		100%{
+			opacity: .7;
+		}
+	}
+	p#breathing{
+		-webkit-animation:breathing 2.94s infinite;
+		margin-top:60px;
+	}
+	p#message{
+		font-size:13px;
+		margin-top:-10px;
+	}
+</style>
+</head>
+<body>
+<!-- insert this block in a manner that it sits on top of all other page content -->
+	<div class="mask">
+		<div class="container">
+			<p id="breathing">working...</p>
+			<p id="message">(This operation can take up to 3 minutes.)</p>
+		</div>
+	</div>
+
+</body>
+</html>
