@@ -35,7 +35,7 @@ Using the pip in your new Virtual Environment (`/path/to/adsm_venv/Scripts/pip`)
     pip install pytz==2014.10
     pip install selenium==2.44.0
     pip install six==1.8.0
-    pip install git+git://github.com/BryanHurst/django-productionserver.git@1.0.2  # Note, this does not currently pip install correctly. Please clone it and run the setup.py script
+    pip install git+git://github.com/BryanHurst/django-productionserver.git@1.0.0  # Note, this currently throws permission errors but actually works. Fix in Pip dev version.
 
 
 **If you are on Linux or Mac**, then you can install the following:
