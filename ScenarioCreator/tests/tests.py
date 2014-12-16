@@ -18,7 +18,17 @@ class CreatorTest(TestCase):
 
     def test_index_page(self):
         r = self.client.get('')
-        self.assertEqual(r.status_code, 302)
+        self.assertEqual(r.status_code, 200)
+        self.assertIn('loading_url', r.context)
+        self.assertEqual(r.context['loading_url'], 'setup/Scenario/1/')
+        self.assertTemplateUsed('LoadingScreen.html')
+
+    def test_index_page_with_loading_url(self):
+        r = self.client.get('', {'loading_url': 'app/Workspace/'})
+        self.assertEqual(r.status_code, 200)
+        self.assertIn('loading_url', r.context)
+        self.assertEqual(r.context['loading_url'], 'app/Workspace/')
+
 
     def test_create_Scenario(self):
         r = self.client.get('/setup/Scenario/new/')
