@@ -28,6 +28,7 @@ cef/out/
 debug.log
 SpreadModel.zip
 SpreadModel.tar.bz2
+nginx/
 
 #################
 ## C files
