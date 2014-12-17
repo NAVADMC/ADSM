@@ -9,7 +9,7 @@ from django.forms.models import inlineformset_factory
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
-from floppyforms import Select, NumberInput
+from floppyforms import Select, NumberInput, HiddenInput
 from crispy_forms.helper import FormHelper
 
 
@@ -389,6 +389,15 @@ class DiseaseSpreadAssignmentForm(BaseForm):
                    'direct_contact_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/DirectSpread/new/'}),
                    'indirect_contact_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/IndirectSpread/new/'}),
                    'airborne_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/AirborneSpread/new/'})}
+
+
+class DiseaseIncludeSpreadForm(BaseForm):
+    class Meta(object):
+        model = Disease
+        fields = ['include_direct_contact_spread', 'include_indirect_contact_spread', 'include_airborne_spread']
+        widgets = {'include_direct_contact_spread': HiddenInput(),
+                   'include_indirect_contact_spread': HiddenInput(),
+                   'include_airborne_spread': HiddenInput()}
 
 
 class ZoneForm(BaseForm):

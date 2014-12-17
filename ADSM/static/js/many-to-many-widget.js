@@ -18,21 +18,6 @@ var many_to_many_widget;
 })(jQuery);
 
 
-check_disable_spread_checboxes = function(){
-    var elements = $('table').first().find('tr:first-child th:nth-child(n+3)')
-    $(elements).each(function(index){
-        var active = $(this).find('input').prop('checked');
-        var children = $('table tbody tr:nth-child(n) >*:nth-child('+(index+3)+') *, thead tr:nth-child(2) td:nth-child('+(index+3)+') *');
-        $(children).each(function(){
-            if(active){
-                $(this).removeAttr('disabled')
-            } else {
-                $(this).attr('disabled', 'disabled')
-            }
-        })
-    });
-}
-
 
 function headerify_columns1_2() {
     $('tbody tr td:nth-child(-n+2)').replaceWith(function (i, html) {
@@ -130,20 +115,28 @@ form_state = (function(form){
     
 many_to_many_widget = (function(form_state){
     var my_table;
-    //render
-    //this queries the current state of the Disease object through JSON and sets the checkbox stats to match
+
     function add_checkboxes_to_headers() {
-        $.get('/setup/IncludeSpreads/', function(data){
-            my_table.find('tr:first-child th:nth-child(n+3)').each(function(index){
-                var field_name = 'include_'+ $(this).text().replace(/ /g, '_').toLowerCase() 
-                var $myInput = $('<input type="checkbox" name="' + field_name + '">');
-                $(this).html(
-                    $('<label class="checkbox">' + $(this).text() + '</label>').prepend($myInput)
-                );
-                $myInput.prop('checked', data[field_name]);
-                $myInput.on('change', function(){check_disable_spread_checboxes(true)});
-            });
-            check_disable_spread_checboxes(false);
+        $('.m2mtable thead th').each(function(i){
+            var column = i + 1,
+                input_name = 'include_' + $(this).text().replace(/ /g, "_").toLowerCase(),
+                $checkbox = $('#include_spread_form [name='+input_name+']');
+
+            if ($checkbox.length == 1) {
+                is_checked = $checkbox.val() == "True" ? " checked" : "";
+                var $m2m_checkbox = $('<input type="checkbox"' + is_checked + ' />');
+                $(this).html($('<label class="checkbox">' + $(this).text() + '</label>').prepend($m2m_checkbox));
+
+                $m2m_checkbox.on('change', function() {
+                    if ($(this).is(':checked')) {
+                        $checkbox.val("True");
+                        my_table.find('tr :nth-child('+(i+1)+')').children().removeAttr('disabled');
+                    } else {
+                        $checkbox.val("");
+                        my_table.find('tr :nth-child('+(i+1)+')').children().attr('disabled', 'disabled');
+                    }
+                }).trigger('change');
+            }
         });
     }
     
