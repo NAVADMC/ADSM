@@ -1,17 +1,15 @@
 from django.test import TestCase, TransactionTestCase
-from django.db import connections, close_old_connections
-import unittest
-import time
+from django.db import close_old_connections
 import os, shutil
 import zipfile
 
-from Results.views import Simulation, simulation_process
+from Results.views import Simulation
 from Results.models import DailyReport
-from ScenarioCreator.models import OutputSettings, ProductionType, Zone
-from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType
-from Results.summary import iteration_progress, iterations_complete, summarize_results
+from ScenarioCreator.models import OutputSettings, ProductionType
+from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType, ResultsVersion
+from Results.summary import iterations_complete
 from Results.output_parser import DailyParser
-from ADSMSettings.models import scenario_filename, SingletonManager
+from ADSMSettings.models import SingletonManager
 
 
 class SimulationTest(TransactionTestCase):
