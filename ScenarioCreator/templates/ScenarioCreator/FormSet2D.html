@@ -1,0 +1,43 @@
+{% extends 'ScenarioCreator/navigationPane.html' %}
+{% load floppyforms %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <script src="{{ STATIC_URL }}js/probability-functions.js"></script>
+    <h1 id="title">{{ title }}</h1>
+
+<form method="post" action="">
+    {{ formset.management_form }}
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                {% for heading in formset_headings %}
+                        <th>{{ heading }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for heading, group in formset_grouped.items %}
+                <tr>
+                    <th>{{ heading }}</th>
+                    {% for f in group %}
+                        <td>
+                        {{f.id}}
+                        {% form f using %}{# needed to push the context for the formconfig #}
+                            {% for field in f.visible_fields %}
+                                {% block widget %}{% formfield field %}{% endblock %}
+                            {% endfor %}
+                    {#        {% for field in form.hidden_fields %}#}
+                    {#            <td>{% formfield field %}</td>#}
+                    {#        {% endfor %}#}
+                        </td>
+                        {% endform %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include "ScenarioCreator/EditButtons.html" %}
+</form>
+
+{% endblock %}
