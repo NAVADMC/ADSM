@@ -152,16 +152,17 @@ $(function(){
                 }
                 else {
                     if (typeof required_value !== 'undefined'){ //required value is specified
-                    if($(self).val() == required_value || $(self).val() == ''){
-                        hide_target.show()
+                        if($(this).val() == required_value || $(this).val() == ''){
+                            hide_target.show()
+                        }else{
+                            console.log("Hiding", hide_target)
+                            hide_target.hide()
+                        }
                     }else{
-                        console.log("Hiding", hide_target)
-                        hide_target.hide()
+                        hide_target.show()
                     }
-                }else{
-                    hide_target.show()
                 }
-            }}
+            }
         })
         $(controller).each(function(index, elem){ //each because radio buttons have multiple elem, same name
             if($(elem).attr('type') != 'radio' || elem.hasAttribute('checked')){
