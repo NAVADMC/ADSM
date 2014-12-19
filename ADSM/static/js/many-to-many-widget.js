@@ -127,13 +127,18 @@ many_to_many_widget = (function(form_state){
                 var $m2m_checkbox = $('<input type="checkbox"' + is_checked + ' />');
                 $(this).html($('<label class="checkbox">' + $(this).text() + '</label>').prepend($m2m_checkbox));
 
+                var m2m_table_column = my_table.find('tr :nth-child('+column+')').children().not('label'),
+                    full_table_column = $('#full_assign_spread').find('tr :nth-child('+column+')');
+
                 $m2m_checkbox.on('change', function() {
                     if ($(this).is(':checked')) {
                         $checkbox.val("True");
-                        my_table.find('tr :nth-child('+(i+1)+')').children().removeAttr('disabled');
+                        m2m_table_column.removeAttr('disabled');
+                        full_table_column.removeClass('visually-disabled');
                     } else {
                         $checkbox.val("");
-                        my_table.find('tr :nth-child('+(i+1)+')').children().attr('disabled', 'disabled');
+                        m2m_table_column.attr('disabled', 'disabled');
+                        full_table_column.addClass('visually-disabled');
                     }
                 }).trigger('change');
             }

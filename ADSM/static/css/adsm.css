@@ -458,6 +458,11 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 }
 
 /*Disabled control fields: include text labels*/
-*[disabled] {
+[disabled] {
     opacity: .5;
+}
+
+.visually-disabled {
+    opacity: .5;
+    pointer-events: none;
 }
