@@ -356,7 +356,7 @@ var modelModal = {
         var modal = this.template.clone();
         modal.attr('id', selectInput.attr('name') + '_modal');
         var url = selectInput.attr('data-new-item-url');
-        if(selectInput.val() != 'data-add-new')
+        if(selectInput.val() != 'data-add-new' && selectInput.val() != '')
             url = url.replace('new', selectInput.val());//will edit already existing model
 
         $.get(url, function(newForm){

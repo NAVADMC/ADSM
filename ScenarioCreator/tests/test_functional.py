@@ -227,6 +227,22 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         lp_cattle = ProbabilityFunction.objects.get(pk=lp_cattle.pk)
         self.assertEqual(lp_cattle.name, "Latent period - cattle edited")
 
+    def test_launch_add_new_modal_when_nothing_selected(self):
+        self.setup_scenario()
+
+        self.click_navbar_element("Assign Progression")
+
+        target = self.selenium.find_element_by_id('id_form-0-progression')
+        Select(target).select_by_visible_text(u'---------')
+        time.sleep(1)
+
+        target = self.selenium.find_elements_by_class_name('glyphicon-pencil')[0].click()
+        time.sleep(2)
+
+        modal = self.selenium.find_element_by_id('form-0-progression_modal')
+
+        self.assertIn("Create a new Disease Progression", modal.text)
+
     def test_upload_population_file(self):
         self.selenium.find_element_by_tag_name('nav').find_element_by_link_text('Population').click()
         time.sleep(1)
