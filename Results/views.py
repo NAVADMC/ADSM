@@ -69,10 +69,20 @@ def simulation_process(iteration_number, adsm_cmd, queue, event, production_type
     for result in adsm_result:
         result_type = type(result).__name__
         sorted_results[result_type].append(result)
+
+    DailyReport.objects.bulk_create(sorted_results['DailyReport'])
+    DailyControls.objects.bulk_create(sorted_results['DailyControls'])
+    DailyByZoneAndProductionType.objects.bulk_create(sorted_results['DailyByZoneAndProductionType'])
+    DailyByProductionType.objects.bulk_create(sorted_results['DailyByProductionType'])
+    DailyByZone.objects.bulk_create(sorted_results['DailyByZone'])
     try:
-        queue.put(dict(sorted_results))
-    except BaseException as e:
-        print(e)
+        ResultsVersion.objects.bulk_create(sorted_results['ResultsVersion'])
+    except KeyError:
+        pass
+    # try:
+    #     queue.put(dict(sorted_results))
+    # except BaseException as e:
+    #     print(e)
 
     end = time.time()
 
@@ -154,15 +164,15 @@ class Simulation(threading.Thread):
 
         pool.close()
 
-        for iteration in range(self.max_iteration):
-            if self.stop_event.is_set():
-                event.set()
-                pool.terminate()
-                pool.join()
-                close_old_connections()
-                print("Simulation halted")
-                return
-            process_result(queue)  # each .get() gets a new thread result
+        # for iteration in range(self.max_iteration):
+        #     if self.stop_event.is_set():
+        #         event.set()
+        #         pool.terminate()
+        #         pool.join()
+        #         close_old_connections()
+        #         print("Simulation halted")
+        #         return
+        #     process_result(queue)  # each .get() gets a new thread result
 
         pool.join()
 
