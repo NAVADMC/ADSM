@@ -153,7 +153,6 @@ class DailyParser(object):
             if len(values):
                 pairs = zip(self.headers, values)
                 sparse_values = {a: number(b) for a, b in pairs}
-                results.extend([Results.models.DailyReport(sparse_dict=str(sparse_values), full_line=cmd_string)])
                 if create_version_entry:
                     version = Results.models.ResultsVersion()
                     version.versionMajor = sparse_values['versionMajor']

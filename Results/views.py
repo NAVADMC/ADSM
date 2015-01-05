@@ -40,9 +40,9 @@ def non_empty_lines(line):
 
 
 def simulation_process(iteration_number, adsm_cmd, queue, event, production_types, zones):
-    # import cProfile, pstats
-    # profiler = cProfile.Profile()
-    # profiler.enable()
+    import cProfile, pstats
+    profiler = cProfile.Profile()
+    profiler.enable()
 
     start = time.time()
 
@@ -74,7 +74,6 @@ def simulation_process(iteration_number, adsm_cmd, queue, event, production_type
         result_type = type(result).__name__
         sorted_results[result_type].append(result)
 
-    # DailyReport.objects.bulk_create(sorted_results['DailyReport'])
     for cls, cls_name in {DailyControls:'DailyControls', DailyByZoneAndProductionType:'DailyByZoneAndProductionType', 
                           DailyByProductionType:'DailyByProductionType', DailyByZone:'DailyByZone'}.items():
         worked = False
@@ -87,25 +86,18 @@ def simulation_process(iteration_number, adsm_cmd, queue, event, production_type
                     worked = False
             
             
-    # DailyControls.objects.bulk_create(sorted_results['DailyControls'])
-    # DailyByZoneAndProductionType.objects.bulk_create(sorted_results['DailyByZoneAndProductionType'])
-    # DailyByProductionType.objects.bulk_create(sorted_results['DailyByProductionType'])
-    # DailyByZone.objects.bulk_create(sorted_results['DailyByZone'])
     try:
         ResultsVersion.objects.bulk_create(sorted_results['ResultsVersion'])
     except KeyError:
         pass
-    # try:
-    #     queue.put(dict(sorted_results))
-    # except BaseException as e:
-    #     print(e)
+    
     end = time.time()
 
-    # profiler.disable()
-    # profiler.dump_stats("parser.prof")
-    # stats = pstats.Stats("parser.prof")
-    # stats.sort_stats('time')
-    # stats.print_stats(10)
+    profiler.disable()
+    profiler.dump_stats("parser.prof")
+    stats = pstats.Stats("parser.prof")
+    stats.sort_stats('time')
+    stats.print_stats(10)
     
     return '%i: Success in %f seconds' % (iteration_number, end-start)
 
