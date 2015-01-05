@@ -163,17 +163,6 @@ class Simulation(threading.Thread):
             statuses.append(res)
 
         pool.close()
-
-        # for iteration in range(self.max_iteration):
-        #     if self.stop_event.is_set():
-        #         event.set()
-        #         pool.terminate()
-        #         pool.join()
-        #         close_old_connections()
-        #         print("Simulation halted")
-        #         return
-        #     process_result(queue)  # each .get() gets a new thread result
-
         pool.join()
 
         statuses = [status.get() for status in statuses]

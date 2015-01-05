@@ -71,6 +71,10 @@ CRISPY_TEMPLATE_PACK = 'bootstrap'
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
+DATABASE_OPTIONS = {
+    "connect_timeout": 300,  # 5 minutes
+}
+
 DATABASES = {
     'default': {
         'NAME': os.path.join(BASE_DIR, 'settings.sqlite3'),
