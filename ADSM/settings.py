@@ -81,6 +81,9 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'activeSession.sqlite3'),
         'ENGINE': 'django.db.backends.sqlite3',
         'TEST_NAME': os.path.join(BASE_DIR, 'test_activeSession.sqlite3'),
+        'OPTIONS': {
+            'timeout': 300,
+        }
     }
 }
 
