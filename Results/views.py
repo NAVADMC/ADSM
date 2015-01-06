@@ -39,6 +39,15 @@ def non_empty_lines(line):
     return output_lines
 
 
+def set_pragma(setting, value, connection='default'):
+    from django.db import connections
+
+    cursor = connections[connection].cursor()
+    raw_sql = "PRAGMA {0} = {1}".format(setting, value)
+
+    cursor.execute(raw_sql)
+
+
 def simulation_process(iteration_number, adsm_cmd, queue, event, production_types, zones):
     start = time.time()
 
@@ -69,6 +78,9 @@ def simulation_process(iteration_number, adsm_cmd, queue, event, production_type
     for result in adsm_result:
         result_type = type(result).__name__
         sorted_results[result_type].append(result)
+
+    set_pragma("synchronous", "OFF", connection='scenario_db')
+    set_pragma("journal_mode", "MEMORY", connection='scenario_db')
 
     DailyReport.objects.bulk_create(sorted_results['DailyReport'])
     DailyControls.objects.bulk_create(sorted_results['DailyControls'])
