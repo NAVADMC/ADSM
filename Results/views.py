@@ -48,7 +48,7 @@ def set_pragma(setting, value, connection='default'):
     cursor.execute(raw_sql)
 
 
-def simulation_process(iteration_number, adsm_cmd, queue, event, production_types, zones):
+def simulation_process(iteration_number, adsm_cmd, event, production_types, zones):
     start = time.time()
 
     simulation = subprocess.Popen(adsm_cmd,
@@ -91,10 +91,6 @@ def simulation_process(iteration_number, adsm_cmd, queue, event, production_type
         ResultsVersion.objects.bulk_create(sorted_results['ResultsVersion'])
     except KeyError:
         pass
-    # try:
-    #     queue.put(dict(sorted_results))
-    # except BaseException as e:
-    #     print(e)
 
     end = time.time()
 
@@ -132,19 +128,6 @@ def zip_map_directory_if_it_exists():
         print("Folder is empty: ", dir_to_zip)
 
 
-def process_result(queue):
-    results = queue.get()
-    DailyReport.objects.bulk_create(results['DailyReport'])
-    DailyControls.objects.bulk_create(results['DailyControls'])
-    DailyByZoneAndProductionType.objects.bulk_create(results['DailyByZoneAndProductionType'])
-    DailyByProductionType.objects.bulk_create(results['DailyByProductionType'])
-    DailyByZone.objects.bulk_create(results['DailyByZone'])
-    try:
-        ResultsVersion.objects.bulk_create(results['ResultsVersion'])
-    except KeyError:
-        pass
-
-
 class Simulation(threading.Thread):
     import django
     django.setup()
@@ -153,7 +136,8 @@ class Simulation(threading.Thread):
     Saturate the computer's processors with parallel simulation iterations"""
     def __init__(self, max_iteration, **kwargs):
         kwargs['name'] = 'simulation_control_thread'
-        self.stop_event = threading.Event()
+        self.manager = DjangoManager()
+        self.stop_event = self.manager.Event()
         self.max_iteration = max_iteration
         self.production_types = ProductionType.objects.values_list('id', 'name')
         self.zones = Zone.objects.values_list('id', 'name')
@@ -165,31 +149,25 @@ class Simulation(threading.Thread):
             num_cores -= 1
         executable_cmd = adsm_executable_command()  # only want to do this once
         statuses = []
-        manager = DjangoManager()
         pool = multiprocessing.Pool(num_cores)
-        queue = manager.DjangoQueue()
-        event = manager.Event()
         for iteration in range(1, self.max_iteration + 1):
             adsm_cmd = executable_cmd + ['-i', str(iteration)]
-            res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, queue, event, self.production_types, self.zones))
+            res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, self.stop_event, self.production_types, self.zones))
             statuses.append(res)
 
         pool.close()
 
-        # for iteration in range(self.max_iteration):
-        #     if self.stop_event.is_set():
-        #         event.set()
-        #         pool.terminate()
-        #         pool.join()
-        #         close_old_connections()
-        #         print("Simulation halted")
-        #         return
-        #     process_result(queue)  # each .get() gets a new thread result
+        simulation_output = []
+        for status in statuses:
+            simulation_output.append(status.get())
+            if self.stop_event.is_set():
+                pool.terminate()
+                pool.join()
+                close_old_connections()
+                print("Simulation halted")
+                return
 
-        pool.join()
-
-        statuses = [status.get() for status in statuses]
-        print(statuses)
+        print(simulation_output)
         population_zoom_png()
         zip_map_directory_if_it_exists()
         save_scenario()
