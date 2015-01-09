@@ -421,7 +421,5 @@ def delete_supplemental_folder():
 
         from django.db import connections
         connections['scenario_db'].cursor().execute('VACUUM')
-        connections['scenario_db'].cursor().execute('PRAGMA synchronous = OFF')
-        connections['scenario_db'].cursor().execute('PRAGMA journal_mode = MEMORY')
 
 

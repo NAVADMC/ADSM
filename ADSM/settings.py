@@ -71,10 +71,6 @@ CRISPY_TEMPLATE_PACK = 'bootstrap'
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
-DATABASE_OPTIONS = {
-    "connect_timeout": 300,  # 5 minutes
-}
-
 DATABASES = {
     'default': {
         'NAME': os.path.join(BASE_DIR, 'settings.sqlite3'),
@@ -144,15 +140,3 @@ STATICFILES_FINDERS = (
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'ADSM', 'static'),
 )
-
-from django.db.backends.signals import connection_created
-from django.dispatch import receiver
-
-
-@receiver(connection_created)
-def activate_auto_vacuum(sender, connection, **kwargs):
-    """Vacuum mode to keep file sizes reasonable with sqlite."""
-    if connection.vendor == 'sqlite' or connection.vendor == 'sqlite3':
-        cursor = connection.cursor()
-        cursor.execute('PRAGMA auto_vacuum = FULL;')
-#         cursor.execute('PRAGMA journal_mode = WAL;')

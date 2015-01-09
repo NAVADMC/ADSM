@@ -130,7 +130,7 @@ class DailyParser(object):
         del sparse_info['versionMinor']
         del sparse_info['versionRelease']
         if last_line:
-            print("Parsing Iteration %i Day %i" % (iteration, day))
+            print("Finished Iteration %i:  %i Days" % (iteration, day))
 
         self.failures = set(sparse_info.keys())  # whatever is left is a failure
 
