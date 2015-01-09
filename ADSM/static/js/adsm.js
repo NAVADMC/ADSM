@@ -99,6 +99,10 @@ $(function(){
         $(this).closest('form').trigger('submit');
     });
 
+    $('.btn-save').on('click', function() {
+        $('.blocking-overlay').show().find('.message').text('Saving file...');
+    });
+
     $(document).on('mousedown', '[data-new-item-url]', function(e){
             $(this).prop('last-selected', $(this).val()); // cache old selection
     });
