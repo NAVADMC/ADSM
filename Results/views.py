@@ -39,13 +39,22 @@ def non_empty_lines(line):
     return output_lines
 
 
-def simulation_process(iteration_number, adsm_cmd, queue, event, production_types, zones):
-    import cProfile, pstats
-    profiler = cProfile.Profile()
-    profiler.enable()
+def set_pragma(setting, value, connection='default'):
+    from django.db import connections
 
+    cursor = connections[connection].cursor()
+    raw_sql = "PRAGMA {0} = {1}".format(setting, value)
+
+    cursor.execute(raw_sql)
+
+
+def simulation_process(iteration_number, adsm_cmd, event, production_types, zones):
     start = time.time()
 
+    # import cProfile, pstats
+    # profiler = cProfile.Profile()
+    # profiler.enable()
+    
     simulation = subprocess.Popen(adsm_cmd,
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
@@ -74,32 +83,28 @@ def simulation_process(iteration_number, adsm_cmd, queue, event, production_type
         result_type = type(result).__name__
         sorted_results[result_type].append(result)
 
-    for cls, cls_name in {DailyControls:'DailyControls', DailyByZoneAndProductionType:'DailyByZoneAndProductionType', 
-                          DailyByProductionType:'DailyByProductionType', DailyByZone:'DailyByZone'}.items():
-        worked = False
-        for i in range(10):
-            if not worked:
-                try:
-                    cls.objects.bulk_create(sorted_results[cls_name])
-                    worked = True
-                except:
-                    worked = False
-            
-            
+    set_pragma("synchronous", "OFF", connection='scenario_db')
+    set_pragma("journal_mode", "MEMORY", connection='scenario_db')
+
+    DailyReport.objects.bulk_create(sorted_results['DailyReport'])
+    DailyControls.objects.bulk_create(sorted_results['DailyControls'])
+    DailyByZoneAndProductionType.objects.bulk_create(sorted_results['DailyByZoneAndProductionType'])
+    DailyByProductionType.objects.bulk_create(sorted_results['DailyByProductionType'])
+    DailyByZone.objects.bulk_create(sorted_results['DailyByZone'])
     try:
         ResultsVersion.objects.bulk_create(sorted_results['ResultsVersion'])
     except KeyError:
         pass
-    
-    end = time.time()
 
-    profiler.disable()
-    profiler.dump_stats("parser.prof")
-    stats = pstats.Stats("parser.prof")
-    stats.sort_stats('time')
-    stats.print_stats(10)
+    end = time.time()
     
-    return '%i: Success in %f seconds' % (iteration_number, end-start)
+    # profiler.disable()
+    # profiler.dump_stats("parser.prof")
+    # stats = pstats.Stats("parser.prof")
+    # stats.sort_stats('time')
+    # stats.print_stats(10)
+    
+    return end-start
 
 
 def simulation_status(request):
@@ -133,19 +138,6 @@ def zip_map_directory_if_it_exists():
         print("Folder is empty: ", dir_to_zip)
 
 
-def process_result(queue):
-    results = queue.get()
-    DailyReport.objects.bulk_create(results['DailyReport'])
-    DailyControls.objects.bulk_create(results['DailyControls'])
-    DailyByZoneAndProductionType.objects.bulk_create(results['DailyByZoneAndProductionType'])
-    DailyByProductionType.objects.bulk_create(results['DailyByProductionType'])
-    DailyByZone.objects.bulk_create(results['DailyByZone'])
-    try:
-        ResultsVersion.objects.bulk_create(results['ResultsVersion'])
-    except KeyError:
-        pass
-
-
 class Simulation(threading.Thread):
     import django
     django.setup()
@@ -154,7 +146,8 @@ class Simulation(threading.Thread):
     Saturate the computer's processors with parallel simulation iterations"""
     def __init__(self, max_iteration, **kwargs):
         kwargs['name'] = 'simulation_control_thread'
-        self.stop_event = threading.Event()
+        self.manager = DjangoManager()
+        self.stop_event = self.manager.Event()
         self.max_iteration = max_iteration
         self.production_types = ProductionType.objects.values_list('id', 'name')
         self.zones = Zone.objects.values_list('id', 'name')
@@ -166,20 +159,26 @@ class Simulation(threading.Thread):
             num_cores -= 1
         executable_cmd = adsm_executable_command()  # only want to do this once
         statuses = []
-        manager = DjangoManager()
         pool = multiprocessing.Pool(num_cores)
-        queue = manager.DjangoQueue()
-        event = manager.Event()
         for iteration in range(1, self.max_iteration + 1):
             adsm_cmd = executable_cmd + ['-i', str(iteration)]
-            res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, queue, event, self.production_types, self.zones))
+            res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, self.stop_event, self.production_types, self.zones))
             statuses.append(res)
 
         pool.close()
-        pool.join()
 
-        statuses = [status.get() for status in statuses]
-        print(statuses)
+        simulation_times = []
+        for status in statuses:
+            simulation_times.append(status.get())
+            if self.stop_event.is_set():
+                pool.terminate()
+                pool.join()
+                close_old_connections()
+                print("Simulation halted")
+                return
+
+        print(simulation_times)
+        print("Average Time:", sum(simulation_times)/len(simulation_times))
         population_zoom_png()
         zip_map_directory_if_it_exists()
         save_scenario()
