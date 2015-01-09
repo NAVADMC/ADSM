@@ -51,6 +51,10 @@ def set_pragma(setting, value, connection='default'):
 def simulation_process(iteration_number, adsm_cmd, event, production_types, zones):
     start = time.time()
 
+    import cProfile, pstats
+    profiler = cProfile.Profile()
+    profiler.enable()
+    
     simulation = subprocess.Popen(adsm_cmd,
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
@@ -93,8 +97,14 @@ def simulation_process(iteration_number, adsm_cmd, event, production_types, zone
         pass
 
     end = time.time()
-
-    return '%i: Success in %i seconds' % (iteration_number, end-start)
+    
+    profiler.disable()
+    profiler.dump_stats("parser.prof")
+    stats = pstats.Stats("parser.prof")
+    stats.sort_stats('time')
+    stats.print_stats(10)
+    
+    return end-start
 
 
 def simulation_status(request):
@@ -157,9 +167,9 @@ class Simulation(threading.Thread):
 
         pool.close()
 
-        simulation_output = []
+        simulation_times = []
         for status in statuses:
-            simulation_output.append(status.get())
+            simulation_times.append(status.get())
             if self.stop_event.is_set():
                 pool.terminate()
                 pool.join()
@@ -167,7 +177,8 @@ class Simulation(threading.Thread):
                 print("Simulation halted")
                 return
 
-        print(simulation_output)
+        print(simulation_times)
+        print("Average Time:", sum(simulation_times)/len(simulation_times))
         population_zoom_png()
         zip_map_directory_if_it_exists()
         save_scenario()
