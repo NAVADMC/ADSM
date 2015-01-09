@@ -100,7 +100,7 @@ def save_scenario(request=None):
     """Save to the existing session of a new file name if target is provided
     """
     if request:
-        target = request.POST['filename']
+        target = request.GET['filename']
         scenario_filename(target)
     else:
         target = scenario_filename()
