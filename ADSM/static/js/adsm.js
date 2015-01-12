@@ -99,7 +99,7 @@ $(function(){
         $(this).closest('form').trigger('submit');
     });
 
-    $('.btn-save').on('click', function() {
+    $(document).on('click', '.btn-save', function() {
         $('.blocking-overlay').show().find('.message').text('Saving file...');
     });
 
