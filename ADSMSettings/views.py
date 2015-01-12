@@ -99,10 +99,10 @@ def open_scenario(request, target):
 def save_scenario(request=None):
     """Save to the existing session of a new file name if target is provided
     """
-    if request:
+    try:
         target = request.GET['filename']
         scenario_filename(target)
-    else:
+    except:
         target = scenario_filename()
     print('Copying database to', target)
     full_path = workspace_path(target) + ('.sqlite3' if target[-8:] != '.sqlite3' else '')

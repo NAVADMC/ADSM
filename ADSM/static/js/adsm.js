@@ -293,9 +293,9 @@ var check_file_saved = function(){
                 },
                 {
                     label: 'Save',
-                    cssClass: 'btn-primary',
+                    cssClass: 'btn-primary btn-save',
                     action: function(dialog){
-                        $.post($('header form').attr('action'), $('header form').serialize(), function(){dialog.close()});//ajax
+                        $.get($('header form').attr('action'), $('header form').serialize(), function(){dialog.close()});
                     }
                 }
             ]

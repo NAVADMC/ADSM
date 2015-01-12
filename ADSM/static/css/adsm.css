@@ -207,14 +207,13 @@ ul {
 
 #RunSimulation .glyphicon {
     font-size: 30px;
-    display: relative;
     top: 6px;
     /*vertical-align: middle;*/
 }
 
 .blocking-overlay {
     display:none;
-    position: absolute;
+    position: fixed;
     top:0;
     bottom: 0;
     left: 0;
