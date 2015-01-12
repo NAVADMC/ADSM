@@ -100,7 +100,9 @@ $(function(){
     });
 
     $(document).on('click', '.btn-save', function() {
-        $('.blocking-overlay').show().find('.message').text('Saving file...');
+        if ($(':invalid').length == 0) {
+            $('.blocking-overlay').show().find('.message').text('Saving file...');
+        }
     });
 
     $(document).on('mousedown', '[data-new-item-url]', function(e){
