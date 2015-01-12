@@ -1,18 +1,17 @@
 var progressBar = (function(){
-
-    var progressBar = $('<div class="progress-bar" style="width: 0%;"></div>');
-    var progressStatus = $('<div class="progress-status">Upload starting...</div>');
-    var progressInterval;
-    var progress = $('<div class="progress progress-striped active" style="width:500px"></div>');
+    var progress = $('<div class="progress progress-striped active" style="width:500px"></div>'),
+        progressBar = $('<div class="progress-bar" style="width: 0%;"></div>'),
+        progressStatus = $('<div class="progress-status">Upload starting...</div>'),
+        progressInterval;
 
     var progressChecker =  function() {
         $.get('/setup/UploadPopulation/', function(data){
-            console.log(data)
+            var newWidth;
             if (data.percent <= 0) {
-                var newWidth = progressBar.width() < 100 ? progressBar.width()+2 : null;
+                newWidth = progressBar.width() < 100 ? progressBar.width()+2 : null;
                 setStatus(data.status, newWidth);
             } else if (data.percent >= 100) {
-                var newWidth = progressBar.width() < 500 ? progressBar.width()+1 : null;
+                newWidth = progressBar.width() < 500 ? progressBar.width()+1 : null;
                 setStatus(data.status, newWidth);
             } else {
                 setStatus(data.status + " " + Math.round(data.percent*100)/100 + "%", (data.percent*0.7 + 20));
@@ -24,7 +23,6 @@ var progressBar = (function(){
         if (text)
             progressStatus.html(text);
         if (typeof(width) == "number"){
-//            console.log(width)
             progressBar.css('width', width + "%");
         }
     };
@@ -39,7 +37,7 @@ var progressBar = (function(){
         'show': function(){
             $('.alert').alert('close');
             $('#load_population_widget').hide()
-                .after(progress).append(progressBar)
+                .after(progress.append(progressBar))
                 .after(progressStatus);
         },
         'startProgressChecker': function() {
