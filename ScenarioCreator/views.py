@@ -88,6 +88,35 @@ def assign_disease_spread(request):
 
 
 def zone_effects(request):
+    pt_count = ProductionType.objects.count()
+    zone_count = Zone.objects.count()
+    ze_count = ZoneEffectAssignment.objects.count()
+    missing = pt_count * zone_count - ze_count
+    zoneSet = modelformset_factory(ZoneEffectAssignment, form=ZoneEffectAssignmentForm, extra=missing)
+    context = {'title': 'What Effect does a Zone have on each Production Type?'}
+    if save_formset_succeeded(zoneSet, ZoneEffectAssignment, context, request):
+        return redirect(request.path)
+    else:
+        forms = zoneSet(queryset=ZoneEffectAssignment.objects.all())
+        populated_forms_index = ze_count
+        for pt_index, pt in enumerate(ProductionType.objects.all()):
+            for z_index, zone in enumerate(Zone.objects.all()):
+                if not ZoneEffectAssignment.objects.filter(production_type=pt, zone=zone).count():
+                    forms[populated_forms_index].instance = ZoneEffectAssignment(production_type=pt, zone=zone)
+                    forms[populated_forms_index].fields['production_type'].initial = pt
+                    forms[populated_forms_index].fields['zone'].initial = zone
+                    populated_forms_index += 1
+
+        sorted_keys = itertools.groupby(forms, lambda x: x.instance.production_type)
+        context['formset'] = forms
+        context['formset_headings'] = Zone.objects.order_by('id')
+        context['formset_grouped'] = {k: sorted(v, key=lambda x: x.instance.zone.id) 
+                                        for k,v in sorted_keys}
+
+        return render(request, 'ScenarioCreator/FormSet2D.html', context)
+
+
+def zone_effects2(request):
     missing = Zone.objects.filter(zoneeffectassignment__isnull=True)
     zoneSet = modelformset_factory(ZoneEffectAssignment, form=ZoneEffectAssignmentForm, extra=len(missing))
     context = {'title': 'What Effect does a Zone have on each Production Type?'}
