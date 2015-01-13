@@ -269,9 +269,19 @@ class AssignEffectsTestCase(TestCase):
         zone_b = Zone.objects.create(name="B", radius=4)
         effect_1 = ZoneEffect.objects.create(name="1")
         effect_2 = ZoneEffect.objects.create(name="2")
-        ZoneEffectAssignment.objects.create(zone=zone_a, production_type=pt_1, effect=effect_1)
+        updated_zone_effect = ZoneEffectAssignment.objects.create(zone=zone_a, production_type=pt_1, effect=effect_1)
         ZoneEffectAssignment.objects.create(zone=zone_a, production_type=pt_2, effect=effect_2)
 
-        self.client.post('/setup/AssignZoneEffects/', {
-            
-            })
+        form_data = {
+            'form-TOTAL_FORMS': '1',
+            'form-INITIAL_FORMS': '1',
+            'form-MAX_NUM_FORMS': '1',
+            'form-0-id': updated_zone_effect.pk,
+            'form-0-effect': effect_2.pk,
+        }
+
+        r = self.client.post('/setup/AssignZoneEffects/', form_data, follow=True)
+
+        self.assertEqual(r.status_code, 200)
+        updated_zone_effect = ZoneEffectAssignment.objects.get(pk=updated_zone_effect.pk)
+        self.assertEqual(updated_zone_effect.effect, effect_2)
