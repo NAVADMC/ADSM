@@ -58,14 +58,9 @@ def main():
 				if os.path.isfile( dbFilePath ):
 					os.remove( dbFilePath )
 
-				# Note that in the command below we need to prepend the "up
-				# to parent directory" symbol (os.path.pardir) to the database
-				# file path. That's because the Django code tries to place
-				# database files in a directory named "workspace" and we need
-				# to override that to make the files go where we want them to.
 				cmd = 'python3.4 xml2sqlite.py ' \
 				  + populationFilePath + ' ' + parameterFilePath \
-				  + ' ' + os.path.join( os.path.pardir, dbFilePath )
+				  + ' ' + dbFilePath
 				print( cmd )
 				os.system( cmd )
 			# end of case where XML files need to be converted to SQLite

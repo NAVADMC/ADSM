@@ -18,7 +18,7 @@ if __name__ == "__main__":
     from django.core import management
 
     from ADSMSettings.models import scenario_filename
-    from ADSMSettings.utils import db_name
+    from ADSMSettings.utils import db_name, workspace_path
     from ADSMSettings.views import new_scenario, save_scenario
     from ADSMSettings.xml2sqlite import import_naadsm_xml
 
@@ -27,10 +27,15 @@ if __name__ == "__main__":
         shutil.copy(db_name(), 'activeSession.bak')
         shutil.copy('settings.sqlite3', 'settings.bak')
         
+        popul_path = sys.argv[1]
+        param_path = sys.argv[2]
+        scenario_path = sys.argv[3]
+        scenario_name = os.path.basename(scenario_path)
         new_scenario()
-        import_naadsm_xml(sys.argv[1], sys.argv[2])
-        scenario_filename(sys.argv[3])
+        import_naadsm_xml(popul_path, param_path)
+        scenario_filename(scenario_name)
         save_scenario()
+        shutil.move(workspace_path(scenario_name), scenario_path)
         
         shutil.copy('activeSession.bak', db_name())
         shutil.copy('settings.bak', 'settings.sqlite3')
