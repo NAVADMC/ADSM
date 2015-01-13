@@ -87,7 +87,7 @@ def assign_disease_spread(request):
     return render(request, 'ScenarioCreator/AssignSpread.html', context)
 
 
-def zone_effects(request):
+def zone_effects2(request):
     pt_count = ProductionType.objects.count()
     zone_count = Zone.objects.count()
     ze_count = ZoneEffectAssignment.objects.count()
@@ -116,22 +116,29 @@ def zone_effects(request):
         return render(request, 'ScenarioCreator/FormSet2D.html', context)
 
 
-def zone_effects2(request):
-    missing = Zone.objects.filter(zoneeffectassignment__isnull=True)
-    zoneSet = modelformset_factory(ZoneEffectAssignment, form=ZoneEffectAssignmentForm, extra=len(missing))
+def zone_effects(request):
+    zones = Zone.objects.all()
+    production_types = ProductionType.objects.all()
+    zone_effect_assignments = [(z.zone, z.production_type) for z in ZoneEffectAssignment.objects.all()]
+
+    for zone in zones:
+        for production_type in production_types:
+            if not (zone, production_type) in zone_effect_assignments:
+                ZoneEffectAssignment.objects.create(zone=zone, production_type=production_type)
+
+    assignment_form_set = modelformset_factory(ZoneEffectAssignment, form=ZoneEffectAssignmentForm, extra=0)
+
     context = {'title': 'What Effect does a Zone have on each Production Type?'}
-    if save_formset_succeeded(zoneSet, ZoneEffectAssignment, context, request):
+    if save_formset_succeeded(assignment_form_set, ZoneEffectAssignment, context, request):
         return redirect(request.path)
     else:
-        forms = zoneSet(queryset=ZoneEffectAssignment.objects.all())
-        for index, pt in enumerate(missing):
-            index += ZoneEffectAssignment.objects.count()
-            forms[index].fields['zone'].initial = pt.id
+        forms = assignment_form_set(queryset=ZoneEffectAssignment.objects.all())
+        forms_sorted_by_pt = sorted(forms, key=lambda x: x.instance.production_type.name)
 
-        context['formset'] = zoneSet
+        context['formset'] = assignment_form_set
         context['formset_headings'] = Zone.objects.order_by('id')
         context['formset_grouped'] = {k: sorted(v, key=lambda x: x.instance.zone.id) 
-                                        for k,v in itertools.groupby(forms, lambda x: x.instance.production_type)}
+                                        for k,v in itertools.groupby(forms_sorted_by_pt, lambda x: x.instance.production_type)}
 
         return render(request, 'ScenarioCreator/FormSet2D.html', context)
 
