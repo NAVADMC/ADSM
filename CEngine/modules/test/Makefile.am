@@ -97,7 +97,6 @@ miniadsm_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/main_lo
   $(top_srcdir)/modules/state_table_writer.c $(top_srcdir)/modules/state_table_writer.h \
   $(top_srcdir)/modules/exposures_table_writer.c $(top_srcdir)/modules/exposures_table_writer.h \
   $(top_srcdir)/modules/apparent_events_table_writer.c $(top_srcdir)/modules/apparent_events_table_writer.h \
-  $(top_srcdir)/modules/unit_stats_writer.c $(top_srcdir)/modules/unit_stats_writer.h \
   $(top_srcdir)/modules/weekly_gis_writer.c $(top_srcdir)/modules/weekly_gis_writer.h \
   $(top_srcdir)/modules/summary_gis_writer.c $(top_srcdir)/modules/summary_gis_writer.h
 if USE_SC_GUILIB

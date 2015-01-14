@@ -319,7 +319,7 @@ def readPopulation( populationFileName ):
 
 
 
-def readParameters( parameterFileName ):
+def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     fp = open( parameterFileName, 'rb' )
     try:
         xml = ET.parse( fp ).getroot()
@@ -368,7 +368,7 @@ def readParameters( parameterFileName ):
         save_daily_unit_states = (xml.find( './/state-table-writer' ) is not None),
         save_daily_events = (xml.find( './/apparent-events-table-writer' ) is not None),
         save_daily_exposures = (xml.find( './/exposures-table-writer' ) is not None),
-        save_iteration_outputs_for_units = True,
+        save_iteration_outputs_for_units = saveIterationOutputsForUnits,
         save_map_output = (xml.find( './/weekly-gis-writer' ) is not None or xml.find( './/summary-gis-writer' ) is not None),
         cost_track_zone_surveillance = (xml.find( './/economic-model/surveillance' ) is not None),
         cost_track_vaccination = (xml.find( './/economic-model/vaccination' ) is not None),
@@ -1424,8 +1424,8 @@ def readParameters( parameterFileName ):
     return # from readParameters
 
 
-def import_naadsm_xml(populationFileName, parameterFileName):
+def import_naadsm_xml(populationFileName, parameterFileName, saveIterationOutputsForUnits=True):
     """ Load activeSession with the contents of 2 XML files.  This can be saved normally after the scenario_db is populated.
     Database routing is done through the normal ScenarioCreator/router.py"""
     readPopulation(populationFileName)
-    readParameters(parameterFileName)
+    readParameters(parameterFileName, saveIterationOutputsForUnits)

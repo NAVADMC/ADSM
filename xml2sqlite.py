@@ -32,7 +32,7 @@ if __name__ == "__main__":
         scenario_path = sys.argv[3]
         scenario_name = os.path.basename(scenario_path)
         new_scenario()
-        import_naadsm_xml(popul_path, param_path)
+        import_naadsm_xml(popul_path, param_path, saveIterationOutputsForUnits=False)
         scenario_filename(scenario_name)
         save_scenario()
         shutil.move(workspace_path(scenario_name), scenario_path)

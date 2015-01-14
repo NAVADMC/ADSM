@@ -71,7 +71,6 @@
 #include "trace_quarantine_model.h"
 #include "trace_zone_focus_model.h"
 #include "unit_state_monitor.h"
-#include "unit_stats_writer.h"
 #include "vaccination_monitor.h"
 #include "vaccination_list_monitor.h"
 #include "vaccine_model.h"
@@ -311,10 +310,6 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
   if (PAR_get_boolean (scenario_db, "SELECT (save_daily_events=1) FROM ScenarioCreator_outputsettings"))
     {
       g_ptr_array_add (instantiation_fns, apparent_events_table_writer_new);
-    }
-  if (PAR_get_boolean (scenario_db, "SELECT (save_iteration_outputs_for_units=1) FROM ScenarioCreator_outputsettings"))
-    {
-      g_ptr_array_add (instantiation_fns, unit_stats_writer_new);
     }
   if (PAR_get_boolean (scenario_db, "SELECT (save_map_output=1) FROM ScenarioCreator_outputsettings"))
     {

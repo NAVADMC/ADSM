@@ -27,6 +27,10 @@
 #define handle_declaration_of_outputs_event full_table_writer_handle_declaration_of_outputs_event
 #define handle_before_each_simulation_event full_table_writer_handle_before_each_simulation_event
 #define handle_new_day_event full_table_writer_handle_new_day_event
+#define handle_unit_state_change_event full_table_writer_handle_unit_state_change_event
+#define handle_request_for_zone_focus_event full_table_writer_handle_request_for_zone_focus_event
+#define handle_vaccination_event full_table_writer_handle_vaccination_event
+#define handle_destruction_event full_table_writer_handle_destruction_event
 #define handle_end_of_day2_event full_table_writer_handle_end_of_day2_event
 
 #include "module.h"
@@ -61,6 +65,31 @@ double round (double x);
 
 
 
+/* A structure used to store how many times certain events happened to a unit
+ * during the simulation. */
+typedef struct
+{
+  guint was_infected;
+  guint was_zone_focus;
+  guint was_vaccinated;
+  guint was_destroyed;
+}
+unit_stats_t;
+
+/**
+ * Returns a new unit_stats_t structure, initialized to zeroes.
+ */
+unit_stats_t *
+new_unit_stats (void)
+{
+  unit_stats_t *self;
+  self = g_new (unit_stats_t, 1);
+  self->was_infected = self->was_zone_focus = self->was_vaccinated = self->was_destroyed = 0;
+  return self;
+}
+
+
+
 /* Specialized information for this model. */
 typedef struct
 {
@@ -68,6 +97,10 @@ typedef struct
   int run_number;
   gboolean printed_header;
   GString *buf;
+  gboolean write_unit_stats;
+  GHashTable *unit_stats; /* Key = unit (UNT_unit_t *), value = pointer to a
+    a unit_stats_t struct, storing what happened to the unit during the
+    iteration. */
 }
 local_data_t;
 
@@ -142,7 +175,9 @@ handle_declaration_of_outputs_event (struct adsm_module_t_ * self,
 
 
 /**
- * Before each simulation, this module increments its "run number".
+ * Before each simulation, this module increments its "run number" and deletes
+ * any records about units being infected, vaccinated, etc. left over from a
+ * previous iteration.
  *
  * @event a Before Each Simulation event.
  * @param self the model.
@@ -159,6 +194,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ * self,
 
   local_data = (local_data_t *) (self->model_data);
   local_data->run_number = event->iteration_number;
+  g_hash_table_remove_all (local_data->unit_stats);
 
 #if DEBUG
   g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -225,6 +261,157 @@ handle_new_day_event (struct adsm_module_t_ * self, EVT_new_day_event_t * event)
 
 
 /**
+ * Responds to a Unit State Change to an infected state by recording that the
+ * unit was infected during this iteration.
+ *
+ * @param self this module.
+ * @param event a Unit State Change event.
+ */
+void
+handle_unit_state_change_event (struct adsm_module_t_ * self,
+                                EVT_unit_state_change_event_t * event)
+{
+  local_data_t *local_data;
+  unit_stats_t *unit_stats;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_unit_state_change_event (%s)", MODEL_NAME);
+  #endif
+
+  /* We are only interested in state changes to an infected state. */
+  if (event->old_state == Susceptible
+      && (event->new_state == Latent
+          || event->new_state == InfectiousSubclinical
+          || event->new_state == InfectiousClinical))
+    {
+      local_data = (local_data_t *) (self->model_data);
+      unit_stats = g_hash_table_lookup (local_data->unit_stats, event->unit);
+      if (unit_stats == NULL)
+        {
+          unit_stats = new_unit_stats();
+          g_hash_table_insert (local_data->unit_stats, event->unit, unit_stats);
+        }
+      unit_stats->was_infected++;
+    }
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_unit_state_change_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
+
+
+
+/**
+ * Responds to a RequestForZoneFocus event by recording that a zone was created
+ * around the unit during this iteration.
+ *
+ * @param self this module.
+ * @param event a Request For Zone Focus event.
+ */
+void
+handle_request_for_zone_focus_event (struct adsm_module_t_ * self,
+                                     EVT_request_for_zone_focus_event_t * event)
+{
+  local_data_t *local_data;
+  unit_stats_t *unit_stats;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_request_for_zone_focus_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  unit_stats = g_hash_table_lookup (local_data->unit_stats, event->unit);
+  if (unit_stats == NULL)
+    {
+      unit_stats = new_unit_stats();
+      g_hash_table_insert (local_data->unit_stats, event->unit, unit_stats);
+    }
+  unit_stats->was_zone_focus++;
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_request_for_zone_focus_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
+
+
+
+/**
+ * Responds to a Vaccination event by recording that the unit was vaccinated
+ * during this iteration.
+ *
+ * @param self this module.
+ * @param event a Vaccination event.
+ */
+void
+handle_vaccination_event (struct adsm_module_t_ * self,
+                          EVT_vaccination_event_t * event)
+{
+  local_data_t *local_data;
+  unit_stats_t *unit_stats;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_vaccination_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  unit_stats = g_hash_table_lookup (local_data->unit_stats, event->unit);
+  if (unit_stats == NULL)
+    {
+      unit_stats = new_unit_stats();
+      g_hash_table_insert (local_data->unit_stats, event->unit, unit_stats);
+    }
+  unit_stats->was_vaccinated++;
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_vaccination_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
+
+
+
+/**
+ * Responds to a Destruction event by recording that the unit was destroyed
+ * during this iteration.
+ *
+ * @param self this module.
+ * @param event a Destruction event.
+ */
+void
+handle_destruction_event (struct adsm_module_t_ * self,
+                          EVT_destruction_event_t * event)
+{
+  local_data_t *local_data;
+  unit_stats_t *unit_stats;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_destruction_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  unit_stats = g_hash_table_lookup (local_data->unit_stats, event->unit);
+  if (unit_stats == NULL)
+    {
+      unit_stats = new_unit_stats();
+      g_hash_table_insert (local_data->unit_stats, event->unit, unit_stats);
+    }
+  unit_stats->was_destroyed++;
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_destruction_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
+
+
+
+/**
  * Responds to an end of day event by writing a table row.
  *
  * @param self the model.
@@ -278,6 +465,41 @@ handle_end_of_day2_event (struct adsm_module_t_ * self,
 
 
 /**
+ * Outputs a row for one unit in the database, saying how many times the unit
+ * was infected, vaccinated, etc.
+ *
+ * @param key a unit
+ * @param value a pointer to a unit_stats_t struct
+ * @param user_data local_data
+ */
+static void
+write_unit_stats (gpointer key, gpointer value, gpointer user_data)
+{
+  UNT_unit_t *unit;
+  unit_stats_t *unit_stats;
+  local_data_t *local_data;
+  GError *error = NULL;
+
+  unit = (UNT_unit_t *) key;
+  unit_stats = (unit_stats_t *) value;
+  local_data = (local_data_t *) (user_data);
+
+  g_string_printf (local_data->buf, "%u,%u,%u,%u,%u\n",
+                   unit->db_id,
+                   unit_stats->was_infected,
+                   unit_stats->was_zone_focus,
+                   unit_stats->was_vaccinated,
+                   unit_stats->was_destroyed);
+  g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
+                            -1 /* assume null-terminated string */,
+                            NULL, &error);
+
+  return;
+}
+
+
+
+/**
  * Runs this model.
  *
  * @param self the model.
@@ -308,6 +530,18 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
       break;
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day));
+      break;
+    case EVT_UnitStateChange:
+      handle_unit_state_change_event (self, &(event->u.unit_state_change));
+      break;
+    case EVT_RequestForZoneFocus:
+      handle_request_for_zone_focus_event (self, &(event->u.request_for_zone_focus));
+      break;
+    case EVT_Vaccination:
+      handle_vaccination_event (self, &(event->u.vaccination));
+      break;
+    case EVT_Destruction:
+      handle_destruction_event (self, &(event->u.destruction));
       break;
     case EVT_EndOfDay2:
       handle_end_of_day2_event (self, &(event->u.end_of_day2));
@@ -342,11 +576,23 @@ local_free (struct adsm_module_t_ *self)
 
   local_data = (local_data_t *) (self->model_data);
 
+  if (local_data->write_unit_stats)
+    {
+      /* Write the unit stats table. The free function isn't a great place to do
+       * this; maybe an AfterAllSimulations event is needed. */
+      g_string_printf (local_data->buf, "\nunit,infected,zone_focus,vaccinated,destroyed\n");
+      g_io_channel_write_chars (local_data->channel, local_data->buf->str, 
+                                -1 /* assume null-terminated string */,
+                                NULL, &error);
+      g_hash_table_foreach (local_data->unit_stats, write_unit_stats, local_data);
+    }
+
   /* Flush any remaining output. */
   g_io_channel_flush (local_data->channel, &error);
 
   /* Free the dynamically-allocated parts. */
   g_string_free (local_data->buf, TRUE);
+  g_hash_table_destroy (local_data->unit_stats);
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
   g_free (self);
@@ -372,6 +618,10 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_DeclarationOfOutputs,
     EVT_BeforeEachSimulation,
     EVT_NewDay,
+    EVT_UnitStateChange,
+    EVT_RequestForZoneFocus,
+    EVT_Vaccination,
+    EVT_Destruction,
     EVT_EndOfDay2,
     0
   };
@@ -401,6 +651,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * other modules. */
 
   local_data->buf = g_string_new (NULL);
+  local_data->unit_stats =
+    g_hash_table_new_full (g_direct_hash, g_direct_equal,
+                           /* key_destroy_func = */ NULL,
+                           /* value_destroy_func = */ g_free);
+
+  /* Check if the flag to write unit stats is set. */
+  local_data->write_unit_stats = PAR_get_boolean (params, "SELECT (save_iteration_outputs_for_units=1) FROM ScenarioCreator_outputsettings");
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

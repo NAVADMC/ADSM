@@ -819,6 +819,8 @@ run_sim_main (sqlite3 *scenario_db,
         {
           RAN_fix (rng, fixed_rng_value);
         }
+      /* That was the last use of the database; the connection can be closed now. */
+      sqlite3_close (scenario_db);
 
       manager = adsm_new_event_manager (models, nmodels);
 

@@ -81,7 +81,6 @@ libadsm_a_SOURCES = main_loop.c module_loader.c module_loader.h \
   $(top_srcdir)/modules/state_table_writer.c $(top_srcdir)/modules/state_table_writer.h \
   $(top_srcdir)/modules/exposures_table_writer.c $(top_srcdir)/modules/exposures_table_writer.h \
   $(top_srcdir)/modules/apparent_events_table_writer.c $(top_srcdir)/modules/apparent_events_table_writer.h \
-  $(top_srcdir)/modules/unit_stats_writer.c $(top_srcdir)/modules/unit_stats_writer.h \
   $(top_srcdir)/modules/weekly_gis_writer.c $(top_srcdir)/modules/weekly_gis_writer.h \
   $(top_srcdir)/modules/summary_gis_writer.c $(top_srcdir)/modules/summary_gis_writer.h
 if USE_SC_GUILIB

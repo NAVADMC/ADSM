@@ -133,7 +133,7 @@ main (int argc, char *argv[])
         
           if (!error)
             {
-              sqlerr = sqlite3_open_v2 (scenario_db_name, &scenario_db, SQLITE_OPEN_READWRITE, NULL);
+              sqlerr = sqlite3_open_v2 (scenario_db_name, &scenario_db, SQLITE_OPEN_READONLY, NULL);
               if (sqlerr !=  SQLITE_OK)
                 {
                   g_error ("Error opening scenario database: %s", sqlite3_errmsg (scenario_db));
@@ -153,7 +153,8 @@ main (int argc, char *argv[])
                             dry_run,
                             &error);
         
-              sqlite3_close (scenario_db);
+              /* We don't close the database connection here because run_sim_main
+               * closes it as soon as it has finished reading. */
             }
         } /* end of case where we don't just output the version number and exit */
     } /* end of case where command line option parsing succeeded */
