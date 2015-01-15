@@ -343,7 +343,7 @@ var modelModal = {
     },
 
     populate_modal_body: function($newForm, modal) {
-        var $form = $newForm.find('form:not(.ajax, .admin)').first();
+        var $form = $($newForm.find('form')[2]);  // work around because find for HTML5 section, header, nav doesn't work in this context
         $form.find('.buttonHolder').remove();
         modal.find('.modal-body').html($form);
         return $form;
