@@ -6,7 +6,8 @@ import tempfile
 from django.test import TestCase
 
 from ScenarioCreator.models import (AirborneSpread, RelationalFunction,
-        RelationalPoint, ProbabilityFunction, DiseaseProgression)
+        RelationalPoint, ProbabilityFunction, DiseaseProgression,
+        ProductionType, Zone, ZoneEffect, ZoneEffectAssignment)
 from ADSMSettings.utils import workspace_path
 from ADSM import settings
 
@@ -211,3 +212,76 @@ class RelationalFunctionTestCase(TestCase):
         self.assertIn('backlinks', r.context)
         self.assertIn('Test Progression', r.context['backlinks'])
         self.assertEqual(progression_url, r.context['backlinks']['Test Progression'])
+
+class AssignEffectsTestCase(TestCase):
+    multi_db = True
+
+    def setUp(self):
+        self.client.get('/setup/AirborneSpread/new/')
+
+    def test_does_not_error_on_new_scenario(self):
+        r = self.client.get('/setup/AssignZoneEffects/')
+        self.assertEqual(r.status_code, 200)
+
+    def test_does_not_error_with_population_but_no_zones(self):
+        with open(POPULATION_FIXTURES + 'Population_Test_Zone_Assignment.xml', mode='rb') as fp:
+            self.client.post('/setup/UploadPopulation/', {'file': fp})
+
+        r = self.client.get('/setup/AssignZoneEffects/')
+        self.assertEqual(r.status_code, 200)
+
+    def test_does_not_error_with_no_zone_effects(self):
+        with open(POPULATION_FIXTURES + 'Population_Test_Zone_Assignment.xml', mode='rb') as fp:
+            self.client.post('/setup/UploadPopulation/', {'file': fp})
+        pt_1 = ProductionType.objects.get(name="Free Range Cows")
+        Zone.objects.create(name="A", radius=2)
+        Zone.objects.create(name="B", radius=4)
+
+        r = self.client.get('/setup/AssignZoneEffects/')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.context['formset_grouped'][pt_1]), 2)
+
+    def test_correctly_initializes_formsets_with_partial_ZoneEffectAssignments(self):
+        with open(POPULATION_FIXTURES + 'Population_Test_Zone_Assignment.xml', mode='rb') as fp:
+            self.client.post('/setup/UploadPopulation/', {'file': fp})
+        pt_1 = ProductionType.objects.get(name="Free Range Cows")
+        pt_2 = ProductionType.objects.get(name="Dairy Cows")
+        zone_a = Zone.objects.create(name="A", radius=2)
+        zone_b = Zone.objects.create(name="B", radius=4)
+        effect_1 = ZoneEffect.objects.create(name="1")
+        effect_2 = ZoneEffect.objects.create(name="2")
+        ZoneEffectAssignment.objects.create(zone=zone_a, production_type=pt_1, effect=effect_1)
+        ZoneEffectAssignment.objects.create(zone=zone_a, production_type=pt_2, effect=effect_2)
+
+        r = self.client.get('/setup/AssignZoneEffects/')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.context['formset_grouped']), ProductionType.objects.count())
+        self.assertEqual(len(r.context['formset_grouped'][pt_1]), 2)
+        self.assertEqual(r.context['formset_grouped'][pt_1][0].instance.id, 1)
+        self.assertEqual(r.context['formset_grouped'][pt_1][0].instance.effect, effect_1)
+
+    def test_save_ZoneEffectAssignment(self):
+        with open(POPULATION_FIXTURES + 'Population_Test_Zone_Assignment.xml', mode='rb') as fp:
+            self.client.post('/setup/UploadPopulation/', {'file': fp})
+        pt_1 = ProductionType.objects.get(name="Free Range Cows")
+        pt_2 = ProductionType.objects.get(name="Dairy Cows")
+        zone_a = Zone.objects.create(name="A", radius=2)
+        zone_b = Zone.objects.create(name="B", radius=4)
+        effect_1 = ZoneEffect.objects.create(name="1")
+        effect_2 = ZoneEffect.objects.create(name="2")
+        updated_zone_effect = ZoneEffectAssignment.objects.create(zone=zone_a, production_type=pt_1, effect=effect_1)
+        ZoneEffectAssignment.objects.create(zone=zone_a, production_type=pt_2, effect=effect_2)
+
+        form_data = {
+            'form-TOTAL_FORMS': '1',
+            'form-INITIAL_FORMS': '1',
+            'form-MAX_NUM_FORMS': '1',
+            'form-0-id': updated_zone_effect.pk,
+            'form-0-effect': effect_2.pk,
+        }
+
+        r = self.client.post('/setup/AssignZoneEffects/', form_data, follow=True)
+
+        self.assertEqual(r.status_code, 200)
+        updated_zone_effect = ZoneEffectAssignment.objects.get(pk=updated_zone_effect.pk)
+        self.assertEqual(updated_zone_effect.effect, effect_2)

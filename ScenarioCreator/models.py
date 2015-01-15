@@ -706,6 +706,20 @@ class ZoneEffect(BaseModel):
         return self.name
 
 
+class ZoneEffectAssignmentManager(models.Manager):
+    def ensure_all_zones_and_production_types(self):
+        zones = Zone.objects.all()
+        production_types = ProductionType.objects.all()
+        zone_effect_assignments = [(z.zone, z.production_type) for z in self.all()]
+
+        for zone in zones:
+            for production_type in production_types:
+                if not (zone, production_type) in zone_effect_assignments:
+                    self.create(zone=zone, production_type=production_type)
+
+        return self.get_queryset()
+
+
 class ZoneEffectAssignment(BaseModel):
     zone = models.ForeignKey(Zone,
         help_text=''+wiki("Zone")+' for which this event occurred.', )
@@ -713,6 +727,8 @@ class ZoneEffectAssignment(BaseModel):
         help_text='The ' + wiki("production type") + ' that these outputs apply to.', )
     effect = models.ForeignKey(ZoneEffect, blank=True, null=True,
         help_text='Describes what effect this '+wiki("Zone")+' has on this ' + wiki("production type") + '.')
+
+    objects = ZoneEffectAssignmentManager()
 
     def __str__(self):
         return "%s Zone -> %s = %s" % (self.zone.name, self.production_type, self.effect.name if self.effect else "None")
