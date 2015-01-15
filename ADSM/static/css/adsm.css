@@ -49,6 +49,11 @@ a.wiki, a.wiki:visited {
     font-weight: bold; /* check boxes are bold from mixins.less and I think it looks better with definitions*/
 }
 
+.help-inline strong {  /* validation errors from the server */
+    background-color: #D13737;
+    color: white;
+}
+
 .icon {
     max-height: 20px;
     max-width: 20px;
