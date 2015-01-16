@@ -51,12 +51,13 @@ Using the pip in your new Virtual Environment (`/path/to/adsm_venv/Scripts/pip`)
 
 **If you are on Windows**, these packages need a special installation: 
 
-  - Download the following files for Windows into a directory that you can easily navigate to in a command prompt:
+  - Download the following files for Windows from [PythonLibs](http://www.lfd.uci.edu/~gohlke/pythonlibs/).  The exact links vary so you will need to navigate
+  there manually.  Put them into a directory that you can easily navigate to in a command prompt:
     - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/numpy-MKL-1.9.1.win-amd64-py3.4.exe
-    - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/pandas-0.15.1.win-amd64-py3.4.exe
+    - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/pandas-0.15.2.win-amd64-py3.4.exe
     - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/matplotlib-1.4.2.win-amd64-py3.4.exe
     - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/pyproj-1.9.4dev.win-amd64-py3.4.exe
-  - Now, using the easy_install in your new Virtual Environment (`/path/to/adsm_venv/Scripts/easy_install`), install the following packages:
+  - Now, using the easy_install (for exe) or pip (for whl) in your new Virtual Environment (`/path/to/adsm_venv/Scripts/easy_install`), install the following packages:
         
         easy_install numpy-MKL-1.9.1.win-amd64-py3.4.exe  
         easy_install pandas-0.15.1.win-amd64-py3.4.exe  
