@@ -491,7 +491,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         Select(target).select_by_visible_text('Add...')
         time.sleep(1)
 
-        modal = self.selenium.find_element_by_css_selector('div[id$="-direct_contact_spread_modal"]')
+        modal = self.selenium.find_element_by_css_selector('div.modal')
 
         self.assertIn("Create a new Direct Spread", modal.text)
 
