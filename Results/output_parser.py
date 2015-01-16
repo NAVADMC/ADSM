@@ -163,29 +163,23 @@ class DailyParser(object):
                 results.extend(self.populate_db_from_daily_report(sparse_values, last_line))
         return results
 
-    def parse_unit_stats_string(self, cmd_string):
+    @staticmethod
+    def parse_unit_stats_string(cmd_string):
         values = cmd_string.split(',')
         if len(values) == 5 and (values[1] or values[2] or values[3] or values[4]):
+            unit = values[0]
+            was_infected, was_zone_focus, was_vaccinated, was_destroyed = values[1], values[2], values[3], values[4]
+            command = 'UPDATE Results_unitstats ' \
+                      ' SET cumulative_infected=cumulative_infected+%i,' \
+                      ' cumulative_zone_focus=cumulative_zone_focus+%i,' \
+                      ' cumulative_vaccinated=cumulative_vaccinated+%i,' \
+                      ' cumulative_destroyed=cumulative_destroyed+%i' \
+                      ' WHERE unit_id=%s' % (1 if was_infected else 0, 1 if was_zone_focus else 0, 1 if was_vaccinated else 0, 1 if was_destroyed else 0, unit)
             try:
-                unit = values[0]
-                WAS_INFECTED, WAS_ZONE_FOCUS, WAS_VACCINATED, WAS_DESTROYED = values[1], values[2], values[3], values[4] 
-                command = 'UPDATE Results_unitstats ' \
-                          ' SET cumulative_infected=cumulative_infected+%i,' \
-                          ' cumulative_zone_focus=cumulative_zone_focus+%i,' \
-                          ' cumulative_vaccinated=cumulative_vaccinated+%i,' \
-                          ' cumulative_destroyed=cumulative_destroyed+%i' \
-                          ' WHERE unit_id=%s' % (1 if WAS_INFECTED else 0, 1 if WAS_ZONE_FOCUS else 0, 1 if WAS_VACCINATED else 0, 1 if WAS_DESTROYED else 0, unit)
-
                 cursor = connections['scenario_db'].cursor()
                 cursor.execute(command)
 
-                # Results.models.UnitStats.objects.filter(unit__id=values[0]).update(
-                #     cumulative_infected=F("cumulative_infected") + 1 if values[1] else 0,
-                #     cumulative_destroyed=F("cumulative_destroyed") + 1 if values[4] else 0,
-                #     cumulative_vaccinated=F("cumulative_vaccinated") + 1 if values[3] else 0,
-                #     cumulative_zone_focus=F("cumulative_zone_focus") + 1 if values[2] else 0)
                 return True
             except BaseException as e:
                 print("Command Failure", e, command)
-                pass
         return False

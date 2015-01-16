@@ -64,14 +64,12 @@ def simulation_process(iteration_number, adsm_cmd, event, production_types, zone
     p = DailyParser(headers, production_types, zones)
     adsm_result = []
     prev_line = ''
-    # for line in simulation.stdout.readlines():
     while True:
-        line = simulation.stdout.readline()
+        line = simulation.stdout.readline()  # TODO: Has the potential to lock up if CEngine crashes (blocking io)
         if event.is_set():
             simulation.terminate()
             return
         line = line.decode().strip()
-        # print(line)
         parse_result = p.parse_daily_strings(prev_line, False)
         adsm_result.extend(parse_result)
         if not line:
@@ -80,16 +78,14 @@ def simulation_process(iteration_number, adsm_cmd, event, production_types, zone
     adsm_result.extend(p.parse_daily_strings(prev_line, last_line=True, create_version_entry=iteration_number==1))
 
     prev_line = ''
-    unit_stats_headers = simulation.stdout.readline().decode()
+    unit_stats_headers = simulation.stdout.readline().decode()  # TODO: Currently we don't use the headers to find which row to insert into.
     for line in simulation.stdout.readlines():
         if event.is_set():
             simulation.terminate()
             return
         line = line.decode().strip()
-        # print(line)
         p.parse_unit_stats_string(prev_line)
         prev_line = line
-        simulation.stdout.flush()
     p.parse_unit_stats_string(prev_line)
 
     outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
