@@ -71,7 +71,7 @@ def simulation_process(iteration_number, adsm_cmd, event, production_types, zone
             simulation.terminate()
             return
         line = line.decode().strip()
-        print(line)
+        # print(line)
         parse_result = p.parse_daily_strings(prev_line, False)
         adsm_result.extend(parse_result)
         if not line:
@@ -81,13 +81,12 @@ def simulation_process(iteration_number, adsm_cmd, event, production_types, zone
 
     prev_line = ''
     unit_stats_headers = simulation.stdout.readline().decode()
-    print("I'm the new headers:", unit_stats_headers)
     for line in simulation.stdout.readlines():
         if event.is_set():
             simulation.terminate()
             return
         line = line.decode().strip()
-        print(line)
+        # print(line)
         p.parse_unit_stats_string(prev_line)
         prev_line = line
         simulation.stdout.flush()

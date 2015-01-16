@@ -1,7 +1,7 @@
 import re
+from django.db import connections
 import Results.models
 from ScenarioCreator.models import Zone, ProductionType
-from django.db.models import F
 
 
 def camel_case_spaces(name_with_spaces):
@@ -167,12 +167,25 @@ class DailyParser(object):
         values = cmd_string.split(',')
         if len(values) == 5 and (values[1] or values[2] or values[3] or values[4]):
             try:
-                Results.models.UnitStats.objects.filter(unit__id=values[0]).update(
-                    cumulative_infected=F("cumulative_infected") + 1 if values[1] else 0,
-                    cumulative_destroyed=F("cumulative_destroyed") + 1 if values[4] else 0,
-                    cumulative_vaccinated=F("cumulative_vaccinated") + 1 if values[3] else 0,
-                    cumulative_zone_focus=F("cumulative_zone_focus") + 1 if values[2] else 0)
+                unit = values[0]
+                WAS_INFECTED, WAS_ZONE_FOCUS, WAS_VACCINATED, WAS_DESTROYED = values[1], values[2], values[3], values[4] 
+                command = 'UPDATE Results_unitstats ' \
+                          ' SET cumulative_infected=cumulative_infected+%i,' \
+                          ' cumulative_zone_focus=cumulative_zone_focus+%i,' \
+                          ' cumulative_vaccinated=cumulative_vaccinated+%i,' \
+                          ' cumulative_destroyed=cumulative_destroyed+%i' \
+                          ' WHERE unit_id=%s' % (1 if WAS_INFECTED else 0, 1 if WAS_ZONE_FOCUS else 0, 1 if WAS_VACCINATED else 0, 1 if WAS_DESTROYED else 0, unit)
+
+                cursor = connections['scenario_db'].cursor()
+                cursor.execute(command)
+
+                # Results.models.UnitStats.objects.filter(unit__id=values[0]).update(
+                #     cumulative_infected=F("cumulative_infected") + 1 if values[1] else 0,
+                #     cumulative_destroyed=F("cumulative_destroyed") + 1 if values[4] else 0,
+                #     cumulative_vaccinated=F("cumulative_vaccinated") + 1 if values[3] else 0,
+                #     cumulative_zone_focus=F("cumulative_zone_focus") + 1 if values[2] else 0)
                 return True
-            except:
+            except BaseException as e:
+                print("Command Failure", e, command)
                 pass
         return False
