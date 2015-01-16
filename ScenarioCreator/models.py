@@ -124,8 +124,9 @@ class Population(InputSingleton):
             self.import_population()  # Population must be saved to db so that it can be foreignkeyed
 
     def delete(self, using=None):
-        for id_start in range(0, Unit.objects.last().id, 900):  # step size 900
-            Unit.objects.filter(_population=self, id__lt=id_start + 900).delete()  # bulk delete 900 or less at a time
+        if Unit.objects.count():
+            for id_start in range(0, Unit.objects.last().id, 900):  # step size 900
+                Unit.objects.filter(_population=self, id__lt=id_start + 900).delete()  # bulk delete 900 or less at a time
         super(Population, self).delete(using)
 
     def import_population(self):
