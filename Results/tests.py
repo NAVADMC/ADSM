@@ -4,7 +4,6 @@ import os, shutil
 import zipfile
 
 from Results.views import Simulation
-from Results.models import DailyReport
 from ScenarioCreator.models import OutputSettings, ProductionType
 from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType, ResultsVersion
 from Results.summary import iterations_complete
@@ -31,7 +30,7 @@ class SimulationTest(TransactionTestCase):
 
         settings = OutputSettings.objects.first()
         settings.stop_criteria = 'stop-days'
-        settings.days = 4
+        settings.days = 10
         settings.save()
         close_old_connections()
 
@@ -43,15 +42,15 @@ class SimulationTest(TransactionTestCase):
         sim.start()
         sim.join()
 
-        # 4 days for each iteration, so 20 reports total
-        self.assertEqual(DailyControls.objects.count(), 20)
+        # 10 days for each iteration, so 50 reports total
+        self.assertEqual(DailyControls.objects.count(), 50)
 
     def test_single_thread(self):
         sim = Simulation(1)
         sim.start()
         sim.join()
 
-        self.assertEqual(DailyControls.objects.count(), 4)
+        self.assertEqual(DailyControls.objects.count(), 10)
 
     def test_supplemental_output_created(self):
         """
