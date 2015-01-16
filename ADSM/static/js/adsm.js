@@ -39,24 +39,25 @@ $(function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });
 
-    $(document).on('submit', '.ajax', function(evt){ 
+    $(document).on('submit', '.ajax', function(evt) {
         evt.preventDefault();
-        var posting = $.post($(this).attr('action'), $(this).serialize()); //this post method is currently not accessible anywhere that accidentally 
-        // deleting Results could happen, otherwise wrap this in safe_save()
-        posting.done(function( data ) {
-            if (data.status == "success") {
-                $('.ajax').trigger('saved');
-            } else if (data.status == "failed") {
-                alert_template = '<div class="alert alert-danger">' +
-                                    '<a href="#" class="close" data-dismiss="alert">' +
-                                        '&times;' +
-                                    '</a>' +
-                                    '<strong>Error:</strong> ' + data.message +
-                                 '</div>';
-                $('#title').before(alert_template);
+        $.post($(this).attr('action'), $(this).serialize())
+            .done(function( data ) {
+                if (data.status == "success") {
+                    $('.ajax').trigger('saved');
+                } else if (data.status == "failed") {
+                    alert_template = '<div class="alert alert-danger">' +
+                                        '<a href="#" class="close" data-dismiss="alert">' +
+                                            '&times;' +
+                                        '</a>' +
+                                        '<strong>Error:</strong> ' + data.message +
+                                     '</div>';
+                    $('#title').before(alert_template);
             }
+        }).always(function() {
+            $('.blocking-overlay').hide();
         });
-    })
+    });
     
     $(document).on('click', '#update_adsm', function(event){
         event.preventDefault();
@@ -100,7 +101,7 @@ $(function(){
     });
 
     $(document).on('click', '.btn-save', function() {
-        if ($(':invalid').length == 0) {
+        if ($(this).closest('form').find(':invalid').length == 0) {
             $('.blocking-overlay').show().find('.message').text('Saving file...');
         }
     });
