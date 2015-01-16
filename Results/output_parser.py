@@ -1,6 +1,7 @@
 import re
 import Results.models
 from ScenarioCreator.models import Zone, ProductionType
+from django.db.models import F
 
 
 def camel_case_spaces(name_with_spaces):
@@ -35,7 +36,6 @@ class DailyParser(object):
         self.possible_pts = {x[1] for x in production_types}.union({''})
         self.failures = set()
 
-
     def populate_tables_with_matching_fields(self, model_class_name, instance_dict, sparse_info):
         """Populates all combinations of a particular table in one go.  This method must be called once for each
         model class that you want populated.
@@ -64,7 +64,6 @@ class DailyParser(object):
         for suffix_key in keys_to_delete:
             del instance_dict[suffix_key] 
         return [instance for key, instance in instance_dict.items()]
-
 
     def construct_combinatorial_instances(self, day, iteration, last_line):
         """This constructs a mapping between the name of the column 'suffix' for example: 'BackgroundCattle' and maps it
@@ -115,7 +114,6 @@ class DailyParser(object):
         daily_instances["DailyControls"] = {'': Results.models.DailyControls(iteration=iteration, day=day, last_day=last_line)}  # there's only one of these
         return daily_instances
 
-
     def populate_db_from_daily_report(self, sparse_info, last_line):
         """Parses the C Engine stdout and populates the appropriate models with the information.  Takes one line
         at a time, representing one DailyReport."""
@@ -148,7 +146,6 @@ class DailyParser(object):
             print('Unable to match columns: ', len(self.failures), sorted(self.failures))
         return results
 
-
     def parse_daily_strings(self, cmd_string, last_line=False, create_version_entry=False):
         results = []
         if cmd_string:
@@ -165,3 +162,17 @@ class DailyParser(object):
                     create_version_entry = False  # only run once
                 results.extend(self.populate_db_from_daily_report(sparse_values, last_line))
         return results
+
+    def parse_unit_stats_string(self, cmd_string):
+        values = cmd_string.split(',')
+        if len(values) == 5 and (values[1] or values[2] or values[3] or values[4]):
+            try:
+                Results.models.UnitStats.objects.filter(unit__id=values[0]).update(
+                    cumulative_infected=F("cumulative_infected") + 1 if values[1] else 0,
+                    cumulative_destroyed=F("cumulative_destroyed") + 1 if values[4] else 0,
+                    cumulative_vaccinated=F("cumulative_vaccinated") + 1 if values[3] else 0,
+                    cumulative_zone_focus=F("cumulative_zone_focus") + 1 if values[2] else 0)
+                return True
+            except:
+                pass
+        return False
