@@ -44,14 +44,14 @@ class SimulationTest(TransactionTestCase):
         sim.join()
 
         # 4 days for each iteration, so 20 reports total
-        self.assertEqual(DailyReport.objects.count(), 20)
+        self.assertEqual(DailyControls.objects.count(), 20)
 
     def test_single_thread(self):
         sim = Simulation(1)
         sim.start()
         sim.join()
 
-        self.assertEqual(DailyReport.objects.count(), 4)
+        self.assertEqual(DailyControls.objects.count(), 4)
 
     def test_supplemental_output_created(self):
         """
@@ -198,7 +198,7 @@ class ParserTests(TestCase):
         p = DailyParser(header_line, self.production_types, self.zones)
 
         adsm_iteration_output = "1,1,3,2,1,1"
-        results = p.parse_daily_strings(adsm_iteration_output)
+        results = p.parse_daily_strings(adsm_iteration_output, create_version_entry=True)
 
         self.assertEqual(len(results), 2)
         self.assertIsInstance(results[1], DailyControls)
@@ -209,7 +209,7 @@ class ParserTests(TestCase):
         p = DailyParser(header_line, self.production_types, self.zones)
 
         adsm_iteration_output = "1,1,3,2,1,1"
-        results = p.parse_daily_strings(adsm_iteration_output)
+        results = p.parse_daily_strings(adsm_iteration_output, create_version_entry=True)
 
         self.assertEqual(len(results), 2)
         self.assertIsInstance(results[1], DailyByProductionType)
@@ -220,7 +220,7 @@ class ParserTests(TestCase):
         p = DailyParser(header_line, self.production_types, self.zones)
         adsm_iteration_output = "1,1,3,2,1,1"
 
-        results = p.parse_daily_strings(adsm_iteration_output)
+        results = p.parse_daily_strings(adsm_iteration_output, create_version_entry=True)
 
         self.assertEqual(len(results), 2)
         self.assertIsInstance(results[1], DailyByZoneAndProductionType)
@@ -231,7 +231,7 @@ class ParserTests(TestCase):
         p = DailyParser(header_line, self.production_types, self.zones)
 
         adsm_iteration_output = "1,1,3,2,1,1,2"
-        results = p.parse_daily_strings(adsm_iteration_output)
+        results = p.parse_daily_strings(adsm_iteration_output, create_version_entry=True)
 
         self.assertEqual(len(results), 2)
         self.assertIsInstance(results[1], DailyByZoneAndProductionType)
@@ -242,7 +242,7 @@ class ParserTests(TestCase):
         header_line = self.common_headers + ",firstDetectionCattle,animalDaysInZoneMediumRiskCattle\r\n"
         p = DailyParser(header_line, self.production_types, self.zones)
         adsm_iteration_output = "1,1,3,2,1,1,2"
-        results = p.parse_daily_strings(adsm_iteration_output)
+        results = p.parse_daily_strings(adsm_iteration_output, create_version_entry=True)
 
         self.assertEqual(len(results), 3)
 
@@ -263,7 +263,7 @@ class ParserTests(TestCase):
         header_line = self.common_headers + ",zoneAreaBackground\r\n"
         p = DailyParser(header_line, self.production_types, self.zones)
         adsm_iteration_output = "1,1,3,2,1,1"
-        results = p.parse_daily_strings(adsm_iteration_output)
+        results = p.parse_daily_strings(adsm_iteration_output, create_version_entry=True)
 
         self.assertEqual(len(results), 2)
         self.assertIsInstance(results[1], DailyByZone)
@@ -274,7 +274,7 @@ class ParserTests(TestCase):
         header_line = self.common_headers + ",aaaaaa\r\n"
         p = DailyParser(header_line, self.production_types, self.zones)
         adsm_iteration_output = "1,1,3,2,1,1"
-        results = p.parse_daily_strings(adsm_iteration_output)
+        results = p.parse_daily_strings(adsm_iteration_output, create_version_entry=True)
 
         self.assertEqual(len(results), 1)
         self.assertEqual(len(p.failures), 1)
@@ -288,7 +288,7 @@ class ParserTests(TestCase):
         header_line = self.common_headers + ",outbreakDuration\r\n"
         p = DailyParser(header_line, self.production_types, self.zones)
         adsm_iteration_output = "1,1,3,2,19,1"
-        results = p.parse_daily_strings(adsm_iteration_output)
+        results = p.parse_daily_strings(adsm_iteration_output, create_version_entry=True)
 
         self.assertEqual(len(results), 2)
         self.assertIsInstance(results[1], DailyControls)
