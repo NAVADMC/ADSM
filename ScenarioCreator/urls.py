@@ -1,9 +1,10 @@
 """URLs is entirely procedural based on the contents of models.py.
 This has the advantage that urls automatically update as the models change or are renamed."""
-
-import re
-
 __author__ = 'josiahseaman'
+
+import os
+from django.conf import settings
+import re
 
 from django.conf.urls import patterns, url  # do not delete this
 from ScenarioCreator.models import *  # do not delete this
@@ -29,7 +30,7 @@ def generate_urls_from_models(input_file, extra_urls=()):
     return eval(output)
 
 
-urlpatterns = generate_urls_from_models('ScenarioCreator/models.py',
+urlpatterns = generate_urls_from_models(os.path.join(settings.BASE_DIR, 'ScenarioCreator','models.py'),
                                          ["url('^AssignSpreads/$', 'ScenarioCreator.views.assign_disease_spread')",
                                          "url('^AssignProtocols/$', 'ScenarioCreator.views.assign_protocols')",
                                          "url('^AssignProgressions/$', 'ScenarioCreator.views.assign_progressions')",

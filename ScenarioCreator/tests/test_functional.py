@@ -258,7 +258,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         time.sleep(1)
 
         self.selenium.find_element_by_link_text('Blank.xml').click()
-        time.sleep(3) # may need to be adjusted for slow computers or if the file grows
+        time.sleep(5) # may need to be adjusted for slow computers or if the file grows
 
         section = self.selenium.find_element_by_tag_name('section')
         self.assertIn('Load a Population', section.text)

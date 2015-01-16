@@ -1,9 +1,9 @@
 """URLs is entirely procedural based on the contents of models.py.
 This has the advantage that urls automatically update as the models change or are renamed."""
-import re
-
 __author__ = 'josiahseaman'
 
+import re
+from django.conf import settings
 from django.conf.urls import patterns, url  # do not delete this
 from Results.models import *  # do not delete this
 
@@ -26,7 +26,7 @@ def generate_urls_from_models(input_file, extra_urls=()):
 
 
 urlpatterns = generate_urls_from_models(
-    'Results/models.py',
+    os.path.join(settings.BASE_DIR, 'Results','models.py'),
     ["url('^$', 'Results.views.results_home')",
      "url('^RunSimulation/$', 'Results.views.run_simulation')",
      "url('^Population.png$', 'Results.graphing.population_png')",

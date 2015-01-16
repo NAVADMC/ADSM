@@ -122,16 +122,18 @@ class DailyParser(object):
         assert isinstance(sparse_info, dict)
         # sparse_info = literal_eval(report.sparse_dict)
         # print(sparse_info)
-        iteration = sparse_info['Run']
-        del sparse_info['Run']
-        day = sparse_info['Day']
-        del sparse_info['Day']
-        del sparse_info['versionMajor']
-        del sparse_info['versionMinor']
-        del sparse_info['versionRelease']
-        if last_line:
-            print("Finished Iteration %i:  %i Days" % (iteration, day))
-
+        try:
+            iteration = sparse_info['Run']
+            del sparse_info['Run']
+            day = sparse_info['Day']
+            del sparse_info['Day']
+            del sparse_info['versionMajor']
+            del sparse_info['versionMinor']
+            del sparse_info['versionRelease']
+            if last_line:
+                print("Finished Iteration %i:  %i Days" % (iteration, day))
+        except:
+            return []
         self.failures = set(sparse_info.keys())  # whatever is left is a failure
 
         #construct the set of tables we're going to use for this day
