@@ -77,16 +77,17 @@ def simulation_process(iteration_number, adsm_cmd, event, production_types, zone
         prev_line = line
     adsm_result.extend(p.parse_daily_strings(prev_line, last_line=True, create_version_entry=iteration_number==1))
 
-    prev_line = ''
-    unit_stats_headers = simulation.stdout.readline().decode()  # TODO: Currently we don't use the headers to find which row to insert into.
-    for line in simulation.stdout.readlines():
-        if event.is_set():
-            simulation.terminate()
-            return
-        line = line.decode().strip()
+    with transaction.atomic(using='scenario_db'):
+        prev_line = ''
+        unit_stats_headers = simulation.stdout.readline().decode()  # TODO: Currently we don't use the headers to find which row to insert into.
+        for line in simulation.stdout.readlines():
+            if event.is_set():
+                simulation.terminate()
+                return
+            line = line.decode().strip()
+            p.parse_unit_stats_string(prev_line)
+            prev_line = line
         p.parse_unit_stats_string(prev_line)
-        prev_line = line
-    p.parse_unit_stats_string(prev_line)
 
     outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
     if errors:  # this will only print out error messages after the simulation has halted
