@@ -26,8 +26,8 @@ build/
 cef/out/
 *.manifest
 debug.log
-SpreadModel.zip
-SpreadModel.tar.bz2
+ADSM_Distributable.zip
+ADSM_Distributable.tar.bz2
 nginx/
 
 #################

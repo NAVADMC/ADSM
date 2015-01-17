@@ -120,6 +120,14 @@ def update_db_version():
 
 def update_requested():
     try:
+        a_size = os.stat(connections['scenario_db']['NAME']).st_size
+        s_size = os.stat(connections['default']['NAME']).st_size
+        if a_size < 500 or s_size < 500:  # size in bytes
+            return False
+    except:
+        return False
+        
+    try:
         graceful_startup()
 
         session = SmSession.objects.get()
