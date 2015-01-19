@@ -11,6 +11,7 @@ and panning, and to reset the view.
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import ListedColormap
 from matplotlib.patches import Circle, Rectangle
+from matplotlib.image import thumbnail
 from matplotlib import pyplot
 import os
 from django.http import HttpResponse
@@ -153,6 +154,7 @@ def population_d3_map(request):
 
 def population_zoom_png(request=None):
     path = workspace_path(scenario_filename() + '/population_map.png')
+    thumb_path = workspace_path(scenario_filename() + '/population_thumbnail.png')
     try:
         with open(path, "rb") as img_file:  #TODO: remove "rb"
             return HttpResponse(img_file.read(), content_type='image/png')
@@ -169,5 +171,7 @@ def population_zoom_png(request=None):
                 if not os.path.exists(workspace_path(scenario_filename())):
                     os.makedirs(workspace_path(scenario_filename()))
                 FigureCanvas(fig).print_png(path)
+                thumbnail(path, thumb_path, scale=0.1923)
+                
             print("Finished Population Map")
             return response
