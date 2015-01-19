@@ -8,22 +8,32 @@
         <img src="/results/Population.png" alt="Unit Locations"/>
     {% else %}
 {#        <object type="image/svg+xml"  data="/results/population_d3_map" alt="Unit Locations" width="516px" height="516px">Interactive Graph Failed to Load</object>#}
-        <div id="population_zoom" style="cursor: -webkit-zoom-in; height: 80vh;">
-            <img src="/results/population_zoom.png" alt="" style="height: 80vh; display: inline-block; "/>
-        </div>
-        <script src="{{ STATIC_URL }}zoom-master/jquery.zoom.js"></script>
-        <script>
-            $(document).ready(function(){
-                $('#population_zoom').zoom({on:'click'});
-
-                var refreshInterval = setInterval(function(){
-                    if (results_status.get_last_progress() < 1)
-                        $('#summaryData').load(' #summaryData > table');
-                    else
-                        clearInterval(refreshInterval);
-                }, 300000);
-            });
-        </script>
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/mapbox.css" />
+        <script type="text/javascript" src="{{ STATIC_URL }}js/mousewheel.js"></script> 
+        <script type="text/javascript" src="{{ STATIC_URL }}js/mapbox.js"></script> 
+{#        <div id="population_zoom" style="cursor: -webkit-zoom-in; height: 80vh;">#}
+{#            <img src="/results/population_zoom.png" alt="" style="height: 80vh; display: inline-block; "/>#}
+{#        </div>#}
+        <div class="mapwrapper">
+            <div id="viewport">
+                <div style="background: url(/results/population_zoom.png) no-repeat; height: 800px; width: 923px;">
+                    <!--top level map content goes here-->
+                </div>
+                <div style="height: 1097px; width: 1286px;">
+                    <img src="/results/population_zoom.png" alt="" />
+                    <div class="mapcontent"></div>
+                </div> 
+                <div style="height: 4160px; width: 4800px;"> 
+                    <img src="/results/population_zoom.png" alt="" />
+                    <div class="mapcontent"></div>
+                </div>
+            </div> 
+        </div> 
+        <script type="text/javascript"> 
+            $(document).ready(function() { 
+                $("#viewport").mapbox({mousewheel: true}); 
+            }); 
+        </script> 
     {% endif %}
 
     <div class="progress" style="width:92vh; position: relative;">

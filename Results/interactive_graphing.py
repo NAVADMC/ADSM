@@ -109,7 +109,6 @@ def population_results_map():
     ax.autoscale_view('tight')
     ax.grid(color='white', linestyle='solid')
     rstyle(ax)
-    ax.set_title("Population Locations and IDs", size=20)
 
     queryset = Unit.objects.all()
     # It might be faster to request a flat value list and then construct new tuples based on that
