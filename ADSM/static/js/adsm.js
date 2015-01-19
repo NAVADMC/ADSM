@@ -6,9 +6,10 @@ safe_save = function(url, data){
         $.post(url, data, function() { window.location.reload() });
     } else { //confirmation dialog so we don't clobber outputs
         var dialog = new BootstrapDialog.show({
-            title: 'Delete Results Confirmation',
+            closable: false,
+            title: '',
             type: BootstrapDialog.TYPE_WARNING,
-            message: 'You must delete your previously computed <strong><u>Results</u></strong> to change input parameters.  Are you sure you want to delete your Results?',
+            message: 'Changing input parameters will invalidate the currently computed results. Would you like to <strong><u>Delete the Results</u></strong> and proceed?',
             buttons: [
                 {
                     label: 'Cancel',
@@ -18,8 +19,8 @@ safe_save = function(url, data){
                     }
                 },
                 {
-                    label: 'Delete Results',
-                    cssClass: 'btn-danger',
+                    label: 'Proceed',
+                    cssClass: 'btn-danger btn-save',
                     action: function(dialog){
                         outputs_computed = false;
                         $.post(url, data, function(){
@@ -102,7 +103,7 @@ $(function(){
 
     $(document).on('click', '.btn-save', function() {
         if ($(this).closest('form').find(':invalid').length == 0) {
-            $('.blocking-overlay').show().find('.message').text('Saving file...');
+            $('.blocking-overlay').show().find('.message').text('Working...');
         }
     });
 
@@ -284,6 +285,7 @@ var check_file_saved = function(){
         var filename = $('body header form .filename input').attr('value')
         var dialog = new BootstrapDialog.show({
             title: 'Unsaved Scenario Confirmation',
+            closable: false,
             type: BootstrapDialog.TYPE_WARNING,
             message: 'Would you like to save your changes to <strong>' + filename + '</strong> before proceeding?',
             buttons: [
