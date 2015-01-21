@@ -8,6 +8,7 @@ the point labels.
 Use the toolbar buttons at the bottom-right of the plot to enable zooming
 and panning, and to reset the view.
 """
+from time import sleep
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import ListedColormap
 from matplotlib.patches import Circle, Rectangle
@@ -159,11 +160,11 @@ def population_zoom_png(request=None):
         with open(path, "rb") as img_file:
             return HttpResponse(img_file.read(), content_type='image/png')
     except IOError:
-        print("Calculating a new Population Map")
         save_image = iteration_progress() == 1.0  # we want to check this before reading the stats, this is in motion
         if not save_image:  # in order to avoid database locked Issue #150
             return population_png(request, 58.5, 52)
         else:
+            print("Calculating a new Population Map")
             fig = population_results_map()
             response = HttpResponse(content_type='image/png')
             FigureCanvas(fig).print_png(response)
@@ -184,9 +185,11 @@ def population_thumbnail_png(request, second_try=False):
         with open(thumb_path, "rb") as f:
             return HttpResponse(f.read(), content_type="image/png")
     except IOError:
-        if os.path.exists(path) and not second_try:
+        if os.path.exists(path):
+            if second_try:
+               sleep(1) 
             thumbnail(path, thumb_path, scale=0.1923)  # create the thumbnail
             return population_thumbnail_png(request, second_try=True)
         else:
-            with open(os.path.join('ADSM','static','working.gif'), "rb") as f:
-                return HttpResponse(f.read(), content_type="image/gif")
+            sleep(5)
+            return population_thumbnail_png(request, second_try=False)
