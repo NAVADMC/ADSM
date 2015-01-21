@@ -37,5 +37,6 @@ urlpatterns = generate_urls_from_models(
      "url('^(?P<model_name>\w+)/(?P<field_name>\w+)/(?P<iteration>\d*)/?(?P<zone>[^/]*)/?Graph\.png$', 'Results.graphing.graph_field_png')",
      "url('^Inputs/$', 'Results.views.back_to_inputs')",
      "url('^simulation_status.json$', 'Results.views.simulation_status')",
+     "url('^abort_simulation$', 'Results.models.abort_simulation')",  # I know it should be in views, figure out a non-circular import
      ])
 
