@@ -125,6 +125,7 @@ def simulation_process(iteration_number, adsm_cmd, event, production_types, zone
 def simulation_status(request):
     output_settings = OutputSettings.objects.get_or_create()[0]
     status = {
+        'simulation_running': any([thread.name == 'simulation_control_thread' for thread in threading.enumerate()]),  # different from being completed
         'iterations_total': output_settings.iterations,
         'iterations_started': len(list_of_iterations()),
         'iterations_completed': iterations_complete(),
