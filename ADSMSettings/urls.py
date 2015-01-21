@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     
     url(r'^ImportScenario/$', 'ADSMSettings.views.import_naadsm_scenario'),
     url(r'^OpenScenario/(?P<target>.+)/$', 'ADSMSettings.views.open_scenario'),  # includes .extension
+    url(r'^OpenTestScenario/(?P<target>.+)/$', 'ADSMSettings.views.open_test_scenario'),  # includes .extension
     url(r'^DeleteFile/(?P<target>.+)/$', 'ADSMSettings.views.delete_file'),
     url(r'^Download/(?P<target>.+)/$', 'ADSMSettings.views.download_file'),
     url(r'^Copy/(?P<target>.+)/$', 'ADSMSettings.views.copy_file'),

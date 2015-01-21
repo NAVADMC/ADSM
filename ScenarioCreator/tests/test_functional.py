@@ -517,7 +517,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.assertIn("none", mean_field.value_of_css_property("display"))
 
     def test_disable_control_master_plan(self):
-        self.client.get('/app/OpenScenario/Roundtrip.sqlite3/')
+        self.client.get('/app/OpenTestScenario/ScenarioCreator/tests/population_fixtures/Roundtrip.sqlite3/')
         delete_all_outputs()
 
         self.click_navbar_element("Controls")
@@ -553,7 +553,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             in control master plan re-enables the elements and menu
             items
         """
-        self.client.get('/app/OpenScenario/Roundtrip.sqlite3/')
+        self.client.get('/app/OpenTestScenario/ScenarioCreator/tests/population_fixtures/Roundtrip.sqlite3/')
         delete_all_outputs()
 
         control_master_plan = ControlMasterPlan.objects.first()

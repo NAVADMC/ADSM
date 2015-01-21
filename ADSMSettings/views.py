@@ -83,17 +83,23 @@ def upload_scenario(request):
         raise ValueError("You can only submit files with '.sqlite' in the file name.")  # ugly error should be caught by Javascript first
 
 
-def open_scenario(request, target):
-    print("Copying ", workspace_path(target), "to", db_name(), ". This could take several minutes...")
+def open_scenario(request, target, wrap_target=True):
+    if wrap_target:
+        target = workspace_path(target)
+    print("Copying ", target, "to", db_name(), ". This could take several minutes...")
     close_old_connections()
-    shutil.copy(workspace_path(target), db_name())
-    scenario_filename(target)
+    shutil.copy(target, db_name())
+    scenario_filename(os.path.basename(target))
     print('Sessions overwritten with ', target)
     update_db_version()
     unsaved_changes(False)  # File is now in sync
     # else:
     #     print('File does not exist')
     return redirect('/setup/Scenario/1/')
+
+
+def open_test_scenario(request, target):
+    return open_scenario(request, target, False)
 
 
 def save_scenario(request=None):
@@ -105,7 +111,7 @@ def save_scenario(request=None):
     except:
         target = scenario_filename()
     print('Copying database to', target)
-    full_path = workspace_path(target) + ('.sqlite3' if target[-8:] != '.sqlite3' else '')
+    full_path = workspace_path(target) + ('.sqlite3' if not target.endswith('.sqlite3') else '')
     save_error = None
     try:
         assert(r'\\' not in target and '/' not in target)

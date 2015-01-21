@@ -143,7 +143,7 @@ class ViewTests(TransactionTestCase):
     multi_db = True
 
     def test_delete_links_exist(self):
-        self.client.get('/app/OpenScenario/Roundtrip.sqlite3/')
+        self.client.get('/app/OpenTestScenario/ScenarioCreator/tests/population_fixtures/Roundtrip.sqlite3/')
 
         r = self.client.get('/setup/Populations/')
         self.assertIn('data-delete-link', r.content.decode())

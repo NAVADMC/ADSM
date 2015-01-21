@@ -16,7 +16,7 @@ class SimulationTest(TransactionTestCase):
 
     @classmethod
     def setUpClass(cls):
-        source_db = os.path.join('workspace', 'Roundtrip.sqlite3')
+        source_db = os.path.join('ScenarioCreator','tests','population_fixtures','Roundtrip.sqlite3')
         cls.destination_db = os.path.join('workspace', 'Roundtrip_test.sqlite3')
         shutil.copy(source_db, cls.destination_db)
         cls.scenario_directory = os.path.join('workspace', 'Roundtrip_test')
