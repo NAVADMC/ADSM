@@ -15,6 +15,7 @@ import os
 import threading
 from django.db import models
 import shutil
+from django.shortcuts import redirect
 from ScenarioCreator.models import ProductionType, Zone, Unit
 import re
 from ADSMSettings.models import scenario_filename, SingletonManager
@@ -400,11 +401,18 @@ class ResultsVersion(OutputBaseModel):
         return super(ResultsVersion, self).save(force_insert, force_update, using, update_fields)
 
 
-def delete_all_outputs():
+def abort_simulation(request=None):
     for thread in threading.enumerate():
         if thread.name == 'simulation_control_thread':
+            print("Aborting Simulation Thread")
             thread.stop()
             thread.join()
+    if request is not None:
+        return redirect('/results/')
+
+
+def delete_all_outputs():
+    abort_simulation()
     if DailyControls.objects.count() > 0:
         print("DELETING ALL OUTPUTS")
     for model in [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]:
