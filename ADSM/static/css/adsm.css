@@ -517,18 +517,21 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 
 #sim_progress_and_button {
     position: relative;
+    display: table;
+    margin-bottom: 20px;
 }
 
 #sim_progress_and_button .btn, #sim_progress_and_button .progress {
-    position: relative;
-    top: 50%;
-    transform: translateY(-50%);
+    display: table-cell;
+    vertical-align: middle;
+    /*top: 50%;*/
+    /*transform: translateY(-50%);*/
 }
 
 #sim_progress_and_button .btn {
-    display: inline-block;
+    /*display: inline-block;*/
     width: 80px;
-    line-height: 20px;
+    /*line-height: 20px;*/
     padding: 0;
     margin: 0 5px 0 0;
     background-color: #ba3e44;
@@ -539,7 +542,11 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 }
 
 #sim_progress_and_button .progress {
-    display: inline-block;
+    /*display: inline-block;*/
     width: 60vw;
     margin: 0px;
+}
+
+.spacer {
+    height: 100px;
 }

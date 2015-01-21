@@ -35,14 +35,15 @@
 {#    {% endif %}#}
 
     <div id="sim_progress_and_button">
-        <a href="/results/abort_simulation" class="btn">Abort</a>
+        {% if simulation_running %}
+            <a href="/results/abort_simulation" class="btn">Abort</a>
+        {% endif %}
         <div class="progress">
             <span class="simulation-status status-text"></span>
             <div class="simulation-progress progress-bar {% if results_progress == 100 %} done{% endif %}" style="width:{{ results_progress|floatformat:"0" }}%"></div>
         </div>
     </div>
 
-    <p>Distribution of Outcomes for all Units in the simulation</p>
     <p>Version: {{ version_number }}</p>
 
     <div id="summaryData">
@@ -66,5 +67,5 @@
             </div>
         </div>
     {% endif %}
-
+    <div class="spacer"></div>
 {% endblock %}

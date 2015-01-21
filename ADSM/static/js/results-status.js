@@ -4,6 +4,11 @@ var results_status  = (function(pollTime){
 
     var update_results_status = function() {
         $.get('/results/simulation_status.json').done(function (status) {
+            console.log('st', status.simulation_running)
+            if(status.simulation_running != true) {
+                stop_poll()
+                return
+            }
             var simulation_complete = status.iterations_completed == status.iterations_total,
                 simulation_progress = status.iterations_total === 0 ? 0 :
                                         Math.max(status.iterations_completed / status.iterations_total,
@@ -33,7 +38,7 @@ var results_status  = (function(pollTime){
 
     return {
         start_poll: start_poll,
-        stop_poll: start_poll,
+        stop_poll: stop_poll,
         get_last_progress: function() { return last_progress; }
     };
 })(5000);
