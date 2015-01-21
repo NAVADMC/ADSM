@@ -29,8 +29,9 @@ urlpatterns = generate_urls_from_models(
     os.path.join(settings.BASE_DIR, 'Results','models.py'),
     ["url('^$', 'Results.views.results_home')",
      "url('^RunSimulation/$', 'Results.views.run_simulation')",
-     "url('^Population.png$', 'Results.graphing.population_png')",
+     "url('^Population\.png$', 'Results.graphing.population_png')",
      "url('^population_d3_map/$', 'Results.interactive_graphing.population_d3_map')",
+     "url('^population_thumbnail\.png$', 'Results.interactive_graphing.population_thumbnail_png')",
      "url('^population_zoom\.png$', 'Results.interactive_graphing.population_zoom_png')",
      "url('^(?P<model_name>\w+)/(?P<field_name>\w+)/(?P<iteration>\d*)/?$', 'Results.views.graph_field')",  # optional iteration argument
      "url('^(?P<model_name>\w+)/(?P<field_name>\w+)/(?P<iteration>\d*)/?(?P<zone>[^/]*)/?Graph\.png$', 'Results.graphing.graph_field_png')",

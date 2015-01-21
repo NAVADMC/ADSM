@@ -156,7 +156,7 @@ def population_zoom_png(request=None):
     path = workspace_path(scenario_filename() + '/population_map.png')
     thumb_path = workspace_path(scenario_filename() + '/population_thumbnail.png')
     try:
-        with open(path, "rb") as img_file:  #TODO: remove "rb"
+        with open(path, "rb") as img_file:
             return HttpResponse(img_file.read(), content_type='image/png')
     except IOError:
         print("Calculating a new Population Map")
@@ -175,3 +175,18 @@ def population_zoom_png(request=None):
                 
             print("Finished Population Map")
             return response
+
+
+def population_thumbnail_png(request, second_try=False):
+    path = workspace_path(scenario_filename() + '/population_map.png')
+    thumb_path = workspace_path(scenario_filename() + '/population_thumbnail.png')
+    try:
+        with open(thumb_path, "rb") as f:
+            return HttpResponse(f.read(), content_type="image/png")
+    except IOError:
+        if os.path.exists(path) and not second_try:
+            thumbnail(path, thumb_path, scale=0.1923)  # create the thumbnail
+            return population_thumbnail_png(request, second_try=True)
+        else:
+            with open(os.path.join('ADSM','static','working.gif'), "rb") as f:
+                return HttpResponse(f.read(), content_type="image/gif")
