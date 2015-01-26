@@ -16,6 +16,7 @@ from matplotlib.image import thumbnail
 from matplotlib import pyplot
 from time import sleep, time
 import os
+import threading
 from django.http import HttpResponse
 from django.db.models import Max
 
@@ -158,25 +159,25 @@ def population_d3_map(request):
     return HttpResponse()#html)
 
 
-def lock_file(path):
-    open(path + '.lock', 'a').close()  # lock
+class PopulationWorker(threading.Thread):
+    def __init__(self, path, thumb_path, **kwargs):
+        kwargs['name'] = 'population_map_thread'
+        self.path, self.thumb_path = path, thumb_path
+        super(PopulationWorker, self,).__init__(**kwargs)
+        
+    def make_population_map_file(self):
+        if not os.path.exists(workspace_path(scenario_filename())):
+            os.makedirs(workspace_path(scenario_filename()))
+        print("Calculating a new Population Map")
+        fig = population_results_map()
+        FigureCanvas(fig).print_png(self.path)
+        thumbnail(self.path, self.thumb_path, scale=0.1923)
+        print("Finished Population Map")
 
-
-def unlock_file(path):
-    os.remove(path + '.lock')  # unlock
-
-
-def make_population_map_file(path, thumb_path):
-    if not os.path.exists(workspace_path(scenario_filename())):
-        os.makedirs(workspace_path(scenario_filename()))
-    lock_file(path)
-    print("Calculating a new Population Map")
-    fig = population_results_map()
-    FigureCanvas(fig).print_png(path)
-    thumbnail(path, thumb_path, scale=0.1923)
-    print("Finished Population Map")
-    unlock_file(path)
-
+    def run(self):
+        self.make_population_map_file()
+        
+        
 
 def population_zoom_png(request=None):
     path = workspace_path(scenario_filename() + '/population_map.png')
@@ -189,11 +190,13 @@ def population_zoom_png(request=None):
         if not save_image:  # in order to avoid database locked Issue #150
             return population_png(request, 58.5, 52)
         else:
-            if os.path.exists(path + '.lock'):
+
+            if any(thread.name == 'population_map_thread' for thread in threading.enumerate()):
                 print("Waiting on a Population Map")
                 sleep(5)
             else:
-                make_population_map_file(path, thumb_path)
+                PopulationWorker(path, thumb_path).start()
+                sleep(.5)
             return population_zoom_png(request)
 
 
