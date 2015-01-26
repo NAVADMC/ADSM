@@ -8,7 +8,7 @@ the point labels.
 Use the toolbar buttons at the bottom-right of the plot to enable zooming
 and panning, and to reset the view.
 """
-from time import sleep
+from time import sleep, time
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import ListedColormap
 from matplotlib.patches import Circle, Rectangle
@@ -106,6 +106,7 @@ def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated
 
 
 def population_results_map():
+    start_time = time()
     fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(60,52), frameon=True)  # Issue #168 aspect ratio doesn't adjust currently
     pyplot.tight_layout()
     ax.autoscale_view('tight')
@@ -129,15 +130,16 @@ def population_results_map():
     graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus)
     graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated, destroyed)
     
-    longitude = [entry[1] for entry in latlong if not any(x > 0 for x in (entry[2], entry[3], entry[4]))]
-    latitude =  [entry[0] for entry in latlong if not any(x > 0 for x in (entry[2], entry[3], entry[4]))]
+    neutral_longitude = [entry[1] for entry in latlong if not any(x > 0 for x in (entry[2], entry[3], entry[4]))]
+    neutral_latitude = [entry[0] for entry in latlong if not any(x > 0 for x in (entry[2], entry[3], entry[4]))]
     # to ensure zero occurrences has a different color
-    uninvolved = ax.scatter(longitude,
-                            latitude,
+    uninvolved = ax.scatter(neutral_longitude,
+                            neutral_latitude,
                             marker='s',
-                            s=[max(1, size // 10) for size in herd_size],
+                            s=[min(max(10, size // 100), 1000) for size in herd_size],
                             color=(0.6, 0.6, 0.6, 1.0),
                             zorder=1000)
+    print("Population Map took %i seconds" % int(time() - start_time))
     return fig
 
 
