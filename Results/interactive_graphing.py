@@ -8,12 +8,13 @@ the point labels.
 Use the toolbar buttons at the bottom-right of the plot to enable zooming
 and panning, and to reset the view.
 """
-from time import sleep, time
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import ListedColormap
+from matplotlib.figure import Figure
 from matplotlib.patches import Circle, Rectangle
 from matplotlib.image import thumbnail
 from matplotlib import pyplot
+from time import sleep, time
 import os
 from django.http import HttpResponse
 from django.db.models import Max
@@ -106,9 +107,11 @@ def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated
 
 
 def population_results_map():
+    """Creates a map that summarizes the range of outcomes amongst all iterations of a simulation.
+    Estimated time = Unit.objects.count() / 650 in seconds.   """
     start_time = time()
-    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(60,52), frameon=True)  # Issue #168 aspect ratio doesn't adjust currently
-    pyplot.tight_layout()
+    fig= Figure(figsize=(60,52), frameon=True, tight_layout=True)  # Issue #168 aspect ratio doesn't adjust currently
+    ax = fig.add_subplot(1,1,1, axisbg='#DDDDDD')
     ax.autoscale_view('tight')
     ax.grid(color='white', linestyle='solid')
     rstyle(ax)
@@ -155,6 +158,26 @@ def population_d3_map(request):
     return HttpResponse()#html)
 
 
+def lock_file(path):
+    open(path + '.lock', 'a').close()  # lock
+
+
+def unlock_file(path):
+    os.remove(path + '.lock')  # unlock
+
+
+def make_population_map_file(path, thumb_path):
+    if not os.path.exists(workspace_path(scenario_filename())):
+        os.makedirs(workspace_path(scenario_filename()))
+    lock_file(path)
+    print("Calculating a new Population Map")
+    fig = population_results_map()
+    FigureCanvas(fig).print_png(path)
+    thumbnail(path, thumb_path, scale=0.1923)
+    print("Finished Population Map")
+    unlock_file(path)
+
+
 def population_zoom_png(request=None):
     path = workspace_path(scenario_filename() + '/population_map.png')
     thumb_path = workspace_path(scenario_filename() + '/population_thumbnail.png')
@@ -166,18 +189,12 @@ def population_zoom_png(request=None):
         if not save_image:  # in order to avoid database locked Issue #150
             return population_png(request, 58.5, 52)
         else:
-            print("Calculating a new Population Map")
-            fig = population_results_map()
-            response = HttpResponse(content_type='image/png')
-            FigureCanvas(fig).print_png(response)
-            if save_image:
-                if not os.path.exists(workspace_path(scenario_filename())):
-                    os.makedirs(workspace_path(scenario_filename()))
-                FigureCanvas(fig).print_png(path)
-                thumbnail(path, thumb_path, scale=0.1923)
-                
-            print("Finished Population Map")
-            return response
+            if os.path.exists(path + '.lock'):
+                print("Waiting on a Population Map")
+                sleep(5)
+            else:
+                make_population_map_file(path, thumb_path)
+            return population_zoom_png(request)
 
 
 def population_thumbnail_png(request, second_try=False):

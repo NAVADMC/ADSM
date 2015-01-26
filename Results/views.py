@@ -212,7 +212,7 @@ def results_home(request):
     if DailyControls.objects.all().count() > 0:
         context['summary'] = Results.summary.summarize_results()
         context['iterations'] = len(list_of_iterations())
-        context['large_population'] = Unit.objects.count() > 10000  # determines slower interactive map vs fast matplotlib
+        context['population_eta'] = Unit.objects.count() / 650  # estimate slow map calc in matplotlib
         try:
             v = ResultsVersion.objects.get()
             context['version_number'] = '.'.join([v.versionMajor, v.versionMinor, v.versionRelease])
