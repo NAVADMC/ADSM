@@ -128,8 +128,6 @@ def update_requested():
         return False
         
     try:
-        graceful_startup()
-
         session = SmSession.objects.get()
         if session.update_on_startup:
             return True
