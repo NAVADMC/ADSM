@@ -78,7 +78,6 @@ def graceful_startup():
         
     session = SmSession.objects.get()
     session.update_on_startup = False
-    session.update_available = False
     session.save()
 
 
@@ -197,10 +196,13 @@ def update_adsm():
 
             return False
         finally:
-            session = SmSession.objects.get()
-            session.update_on_startup = False
-            session.update_available = False
-            session.save()
+            try:
+                session = SmSession.objects.get()
+                session.update_on_startup = False
+                session.update_available = False
+                session.save()
+            except:
+                pass
             
             command = git + ' stash apply'
             subprocess.call(command, shell=True)  # TODO: What if the stash apply has a conflict?
@@ -235,6 +237,14 @@ def reset_and_update_adsm():
         except:
             print("Failed to reset files! You are probably in a bad state.")
         return False
+    finally:
+        try:
+            session = SmSession.objects.get()
+            session.update_on_startup = False
+            session.update_available = False
+            session.save()
+        except:
+            pass
 
 
 def supplemental_folder_has_contents(subfolder=''):
