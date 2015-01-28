@@ -75,6 +75,11 @@ def graceful_startup():
     except OperationalError:
         reset_db('scenario_db')
         update_db_version()
+        
+    session = SmSession.objects.get()
+    session.update_on_startup = False
+    session.update_available = False
+    session.save()
 
 
 def reset_db(name, fail_ok=True):
@@ -192,10 +197,43 @@ def update_adsm():
 
             return False
         finally:
+            session = SmSession.objects.get()
+            session.update_on_startup = False
+            session.save()
+            
             command = git + ' stash apply'
             subprocess.call(command, shell=True)  # TODO: What if the stash apply has a conflict?
     else:
         return True
+
+
+def reset_and_update_adsm():
+    try:
+        print("Resetting all files to base state...")
+        command = git + ' reset --hard'
+        subprocess.call(command, shell=True)
+
+        print("Attempting to update files...")
+        command = git + ' rev-parse --abbrev-ref HEAD'
+        current_branch = subprocess.check_output(command, shell=True).decode().strip()
+
+        # Go ahead and fetch the current branch
+        command = git + ' fetch origin ' + current_branch
+        subprocess.call(command, shell=True)
+
+        command = git + ' rebase FETCH_HEAD'
+        git_status = subprocess.check_output(command, shell=True)
+
+        print("Successfully updated.")
+        return True
+    except:
+        print("Failed to update!")
+        try:
+            command = git + ' reset --hard'
+            subprocess.call(command, shell=True)
+        except:
+            print("Failed to reset files! You are probably in a bad state.")
+        return False
 
 
 def supplemental_folder_has_contents(subfolder=''):
