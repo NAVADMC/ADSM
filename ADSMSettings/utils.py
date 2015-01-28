@@ -75,6 +75,10 @@ def graceful_startup():
     except OperationalError:
         reset_db('scenario_db')
         update_db_version()
+        
+    session = SmSession.objects.get()
+    session.update_on_startup = False
+    session.save()
 
 
 def reset_db(name, fail_ok=True):
@@ -120,16 +124,14 @@ def update_db_version():
 
 def update_requested():
     try:
-        a_size = os.stat(connections['scenario_db']['NAME']).st_size
-        s_size = os.stat(connections['default']['NAME']).st_size
+        a_size = os.stat(connections.databases['scenario_db']['NAME']).st_size
+        s_size = os.stat(connections.databases['default']['NAME']).st_size
         if a_size < 500 or s_size < 500:  # size in bytes
             return False
     except:
         return False
         
     try:
-        graceful_startup()
-
         session = SmSession.objects.get()
         if session.update_on_startup:
             return True
@@ -194,10 +196,55 @@ def update_adsm():
 
             return False
         finally:
+            try:
+                session = SmSession.objects.get()
+                session.update_on_startup = False
+                session.update_available = False
+                session.save()
+            except:
+                pass
+            
             command = git + ' stash apply'
             subprocess.call(command, shell=True)  # TODO: What if the stash apply has a conflict?
     else:
         return True
+
+
+def reset_and_update_adsm():
+    try:
+        print("Resetting all files to base state...")
+        command = git + ' reset --hard'
+        subprocess.call(command, shell=True)
+
+        print("Attempting to update files...")
+        command = git + ' rev-parse --abbrev-ref HEAD'
+        current_branch = subprocess.check_output(command, shell=True).decode().strip()
+
+        # Go ahead and fetch the current branch
+        command = git + ' fetch origin ' + current_branch
+        subprocess.call(command, shell=True)
+
+        command = git + ' rebase FETCH_HEAD'
+        git_status = subprocess.check_output(command, shell=True)
+
+        print("Successfully updated.")
+        return True
+    except:
+        print("Failed to update!")
+        try:
+            command = git + ' reset --hard'
+            subprocess.call(command, shell=True)
+        except:
+            print("Failed to reset files! You are probably in a bad state.")
+        return False
+    finally:
+        try:
+            session = SmSession.objects.get()
+            session.update_on_startup = False
+            session.update_available = False
+            session.save()
+        except:
+            pass
 
 
 def supplemental_folder_has_contents(subfolder=''):
