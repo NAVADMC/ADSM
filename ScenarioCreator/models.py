@@ -115,6 +115,10 @@ class InputSingleton(BaseModel):
         abstract = True
 
 
+class FloatField(models.FloatField):
+    template_name = 'floppyforms/input.html'  # critically important that floating point values have step="any" on the input
+    
+
 class Population(InputSingleton):
     source_file = models.CharField(max_length=255, blank=True)  # source_file made generic CharField so Django doesn't try to copy and save the raw file
 
@@ -231,39 +235,39 @@ class ProbabilityFunction(Function):
                     "Inverse Gaussian", "Logistic", "LogLogistic", "Lognormal",
                     "Negative Binomial", "Pareto", "Pearson 5", "Piecewise", "Poisson",
                     "Triangular", "Uniform", "Weibull"))
-    mean = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    mean = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Functions: Inverse Gaussian, Gaussian, Lognormal, Poisson, Exponential.', )
-    std_dev = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    std_dev = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Functions: Gaussian, Lognormal.', )
-    min = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    min = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Functions: Discrete Uniform, Uniform, Triangular, Beta, BetaPERT.', )
-    mode = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    mode = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Functions: Fixed Value, Triangular, BetaPERT.', )
-    max = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    max = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Functions: Discrete Uniform, Uniform, Triangular, Beta, BetaPERT.', )
-    alpha = models.FloatField(blank=True, null=True,
+    alpha = FloatField(blank=True, null=True,
         help_text='Functions: Gamma, Weibull, Pearson 5, Beta.', )
-    alpha2 = models.FloatField(blank=True, null=True,
+    alpha2 = FloatField(blank=True, null=True,
         help_text='Functions: Beta.', )
-    beta = models.FloatField(blank=True, null=True,
+    beta = FloatField(blank=True, null=True,
         help_text='Functions: Gamma, Weibull, Pearson 5.', )
-    location = models.FloatField(blank=True, null=True,
+    location = FloatField(blank=True, null=True,
         help_text='Functions: Logistic, LogLogistic.', )
-    scale = models.FloatField(blank=True, null=True,
+    scale = FloatField(blank=True, null=True,
         help_text='Functions: Logistic, LogLogistic.', )
-    shape = models.FloatField(blank=True, null=True,
+    shape = FloatField(blank=True, null=True,
         help_text='Functions: LogLogistic, Inverse Gaussian.', )
     n = models.PositiveIntegerField(validators=[MinValueValidator(0)], blank=True, null=True,
         help_text='Functions: Hypergeometric.', )
-    p = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(1.0)], blank=True, null=True,
+    p = FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(1.0)], blank=True, null=True,
         help_text='Functions: Binomial, Negative Binomial, Bernoulli.', )
     m = models.PositiveIntegerField(validators=[MinValueValidator(0)], blank=True, null=True,
         help_text='Functions: Hypergeometric.', )
     d = models.PositiveIntegerField(validators=[MinValueValidator(0)], blank=True, null=True,
         help_text='Functions: Hypergeometric.', )
-    theta = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    theta = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Functions: Pareto.', )
-    a = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    a = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Functions:Pareto.', )
     s = models.PositiveIntegerField(validators=[MinValueValidator(0)], blank=True, null=True,
         help_text='Functions: Binomial, Negative Binomial.', )
@@ -278,8 +282,8 @@ class RelationalFunction(Function):
 
 class RelationalPoint(BaseModel):
     relational_function = models.ForeignKey(RelationalFunction)
-    x = models.FloatField(validators=[MinValueValidator(0.0)], )
-    y = models.FloatField(validators=[MinValueValidator(0.0)], )
+    x = FloatField(validators=[MinValueValidator(0.0)], )
+    y = FloatField(validators=[MinValueValidator(0.0)], )
     def __str__(self):
         return '%i Point(%s, %s)' % (self.relational_function.id, self.x, self.y)
 
@@ -355,7 +359,7 @@ class ControlProtocol(BaseModel):
         help_text='Indicates if detected units of this ' + wiki("production type") + ' will be destroyed.', )
     destruction_is_a_ring_trigger = models.BooleanField(default=False,
         help_text='Indicates if detection of a unit of this ' + wiki("production type") + ' will trigger the formation of a destruction ring.', )
-    destruction_ring_radius = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    destruction_ring_radius = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Radius in kilometers of the destruction ring.', )
     destruction_is_a_ring_target = models.BooleanField(default=False,
         help_text='Indicates if unit of this ' + wiki("production type") + ' will be subject to preemptive ring destruction.', )
@@ -381,7 +385,7 @@ class ControlProtocol(BaseModel):
         help_text='Defines the '+ wiki("vaccine immune") + ' period for units of this ' + wiki("production type") + '.', )
     trigger_vaccination_ring = models.BooleanField(default=False,
         help_text='Indicates if detection of a unit of this type will trigger a vaccination ring.', )
-    vaccination_ring_radius = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    vaccination_ring_radius = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Radius in kilometers of the vaccination ring.', )
     vaccination_priority = models.PositiveIntegerField(default=5, blank=True, null=True,
         help_text='The vaccination priority of this production type relative to other production types.  A lower number indicates a higher priority.', )
@@ -393,25 +397,25 @@ class ControlProtocol(BaseModel):
     examine_direct_forward_traces = models.BooleanField(default=False,
         help_text='Indicator if units identified by the '+wiki("trace forward")+' of '+wiki("direct contact")+' will be examined for '+
                   wiki("clinical signs", "clinically-infectious")+' of disease.', )
-    exam_direct_forward_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    exam_direct_forward_success_multiplier = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Multiplier for the probability of observing '+wiki("clinical signs", "clinically-infectious")+' in units identified by the '+
                   wiki("trace forward")+' of '+wiki("direct contact")+'.', )
     examine_indirect_forward_traces = models.BooleanField(default=False,
         help_text='Indicator if units identified by the '+wiki("trace forward")+' of '+wiki("indirect contact")+' will be examined for '+
                   wiki("clinical signs", "clinically-infectious")+ ' of disease.', )
-    exam_indirect_forward_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    exam_indirect_forward_success_multiplier = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Multiplier for the probability of observing '+wiki("clinical signs", "clinically-infectious")+
             ' in units identified by the '+wiki("trace forward")+' of '+wiki("indirect contact")+' .', )
     examine_direct_back_traces = models.BooleanField(default=False,
         help_text='Indicator if units identified by the '+wiki("trace back")+' of '+wiki("direct contact")+' will be examined for '+
                   wiki("clinical signs", "clinically-infectious")+ ' of disease.', )
-    exam_direct_back_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    exam_direct_back_success_multiplier = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Multiplier for the probability of observing '+wiki("clinical signs", "clinically-infectious")+
             ' in units identified by the '+wiki("trace back")+' of '+wiki("direct contact")+'.', )
     examine_indirect_back_traces = models.BooleanField(default=False,
         help_text='Indicator if units identified by the '+wiki("trace back")+' of '+wiki("indirect contact")+' will be examined for '+
                   wiki("clinical signs", "clinically-infectious")+ ' of disease.', )
-    examine_indirect_back_success_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    examine_indirect_back_success_multiplier = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Multiplier for the probability of observing '+wiki("clinical signs", "clinically-infectious")+
                   ' in units identified by the '+wiki("trace back")+' of '+wiki("indirect contact")+'.', )
     use_testing = models.BooleanField(default=False, )
@@ -423,9 +427,9 @@ class ControlProtocol(BaseModel):
         help_text='Indicator that diagnostic testing should be performed on units identified by '+wiki("trace back")+' of '+wiki("direct contact")+'s.', )
     test_indirect_back_traces = models.BooleanField(default=False,
         help_text='Indicator that diagnostic testing should be performed on units identified by '+wiki("trace back")+' of '+wiki("indirect contact")+'s.', )
-    test_specificity = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    test_specificity = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text=link("Test Specificity", "http://en.wikipedia.org/wiki/Sensitivity_and_specificity") + ' for units of this production type', )
-    test_sensitivity = models.FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
+    test_sensitivity = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text=link("Test Sensitivity", "http://en.wikipedia.org/wiki/Sensitivity_and_specificity") + ' for units of this production type', )
     test_delay = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Function that describes the delay in obtaining test results.', )
@@ -535,7 +539,7 @@ class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indire
         help_text='Indicates if ' + wiki("Subclinical", "subclinically-infectious") + 
                   ' units of the source type can spread disease by ' + wiki("direct", "direct-contact") + ' or '+ 
                   wiki("indirect contact") + '. ', )
-    contact_rate = models.FloatField(validators=[MinValueValidator(0.0)],
+    contact_rate = FloatField(validators=[MinValueValidator(0.0)],
          # Important: Contact_rate help_text has been given special behavior vial two data-visibility-controller 's.
         help_text=mark_safe("""<div class="help-block" data-visibility-controller="use_fixed_contact_rate" data-disabled-value="true">
                                     Fixed baseline contact rate (in outgoing contacts/unit/day) for <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#direct-contact" class="wiki">direct</a> or <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#indirect-contact" class="wiki">indirect contact</a> models.</div>
@@ -583,7 +587,7 @@ class DirectSpread(AbstractSpread):
 class AirborneSpread(DiseaseSpread):
     spread_1km_probability = PercentField(validators=[MinValueValidator(0.0), MaxValueValidator(.999)],
         help_text='The probability that disease will be spread to unit 1 km away from the source unit.', )
-    max_distance = models.FloatField(validators=[MinValueValidator(1.1)], blank=True, null=True,
+    max_distance = FloatField(validators=[MinValueValidator(1.1)], blank=True, null=True,
         help_text='The maximum distance in KM of ' + wiki("airborne spread", "airborne-transmission") + '.  Only used in Linear Airborne Decay.', )
     exposure_direction_start = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=0,
         help_text='The start angle in degrees of the area at risk of ' + wiki("airborne spread", "airborne-transmission") + '.  0 is North.', )
@@ -680,7 +684,7 @@ class DiseaseSpreadAssignment(BaseModel):
 class Zone(BaseModel):
     name = models.TextField(
         help_text='Description of the ' + wiki("Zone"), )
-    radius = models.FloatField(validators=[MinValueValidator(0.0)],
+    radius = FloatField(validators=[MinValueValidator(0.0)],
         help_text='Radius in kilometers of the '+wiki("Zone")+'', )
 
     def clean_fields(self, exclude=None):
@@ -697,7 +701,7 @@ class ZoneEffect(BaseModel):
         help_text='Function the describes direct movement rate.', )
     zone_indirect_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Function the describes indirect movement rate.', )
-    zone_detection_multiplier = models.FloatField(validators=[MinValueValidator(0.0)], default=1.0,
+    zone_detection_multiplier = FloatField(validators=[MinValueValidator(0.0)], default=1.0,
         help_text='Multiplier for the probability of observing '+wiki("clinical signs", "clinically-infectious")+' in units of this ' + 
                   wiki("production type") + ' in this '+wiki("Zone")+'.', )
     cost_of_surveillance_per_animal_day = MoneyField(default=0.0,

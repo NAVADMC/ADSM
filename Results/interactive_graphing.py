@@ -8,13 +8,15 @@ the point labels.
 Use the toolbar buttons at the bottom-right of the plot to enable zooming
 and panning, and to reset the view.
 """
-from time import sleep
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import ListedColormap
+from matplotlib.figure import Figure
 from matplotlib.patches import Circle, Rectangle
 from matplotlib.image import thumbnail
 from matplotlib import pyplot
+from time import sleep, time
 import os
+import threading
 from django.http import HttpResponse
 from django.db.models import Max
 
@@ -106,8 +108,11 @@ def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated
 
 
 def population_results_map():
-    fig, ax = pyplot.subplots(subplot_kw=dict(axisbg='#DDDDDD'), figsize=(60,52), frameon=True)  # Issue #168 aspect ratio doesn't adjust currently
-    pyplot.tight_layout()
+    """Creates a map that summarizes the range of outcomes amongst all iterations of a simulation.
+    Estimated time = Unit.objects.count() / 650 in seconds.   """
+    start_time = time()
+    fig= Figure(figsize=(60,52), frameon=True, tight_layout=True)  # Issue #168 aspect ratio doesn't adjust currently
+    ax = fig.add_subplot(1,1,1, axisbg='#DDDDDD')
     ax.autoscale_view('tight')
     ax.grid(color='white', linestyle='solid')
     rstyle(ax)
@@ -129,15 +134,16 @@ def population_results_map():
     graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus)
     graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated, destroyed)
     
-    longitude = [entry[1] for entry in latlong if not any(x > 0 for x in (entry[2], entry[3], entry[4]))]
-    latitude =  [entry[0] for entry in latlong if not any(x > 0 for x in (entry[2], entry[3], entry[4]))]
+    neutral_longitude = [entry[1] for entry in latlong if not any(x > 0 for x in (entry[2], entry[3], entry[4]))]
+    neutral_latitude = [entry[0] for entry in latlong if not any(x > 0 for x in (entry[2], entry[3], entry[4]))]
     # to ensure zero occurrences has a different color
-    uninvolved = ax.scatter(longitude,
-                            latitude,
+    uninvolved = ax.scatter(neutral_longitude,
+                            neutral_latitude,
                             marker='s',
-                            s=[max(1, size // 10) for size in herd_size],
+                            s=[min(max(10, size // 100), 1000) for size in herd_size],
                             color=(0.6, 0.6, 0.6, 1.0),
                             zorder=1000)
+    print("Population Map took %i seconds" % int(time() - start_time))
     return fig
 
 
@@ -153,6 +159,26 @@ def population_d3_map(request):
     return HttpResponse()#html)
 
 
+class PopulationWorker(threading.Thread):
+    def __init__(self, path, thumb_path, **kwargs):
+        kwargs['name'] = 'population_map_thread'
+        self.path, self.thumb_path = path, thumb_path
+        super(PopulationWorker, self,).__init__(**kwargs)
+        
+    def make_population_map_file(self):
+        if not os.path.exists(workspace_path(scenario_filename())):
+            os.makedirs(workspace_path(scenario_filename()))
+        print("Calculating a new Population Map")
+        fig = population_results_map()
+        FigureCanvas(fig).print_png(self.path)
+        thumbnail(self.path, self.thumb_path, scale=0.1923)
+        print("Finished Population Map")
+
+    def run(self):
+        self.make_population_map_file()
+        
+        
+
 def population_zoom_png(request=None):
     path = workspace_path(scenario_filename() + '/population_map.png')
     thumb_path = workspace_path(scenario_filename() + '/population_thumbnail.png')
@@ -164,18 +190,14 @@ def population_zoom_png(request=None):
         if not save_image:  # in order to avoid database locked Issue #150
             return population_png(request, 58.5, 52)
         else:
-            print("Calculating a new Population Map")
-            fig = population_results_map()
-            response = HttpResponse(content_type='image/png')
-            FigureCanvas(fig).print_png(response)
-            if save_image:
-                if not os.path.exists(workspace_path(scenario_filename())):
-                    os.makedirs(workspace_path(scenario_filename()))
-                FigureCanvas(fig).print_png(path)
-                thumbnail(path, thumb_path, scale=0.1923)
-                
-            print("Finished Population Map")
-            return response
+
+            if any(thread.name == 'population_map_thread' for thread in threading.enumerate()):
+                print("Waiting on a Population Map")
+                sleep(5)
+            else:
+                PopulationWorker(path, thumb_path).start()
+                sleep(.5)
+            return population_zoom_png(request)
 
 
 def population_thumbnail_png(request, second_try=False):

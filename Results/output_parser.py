@@ -1,11 +1,13 @@
 import re
 from django.db import connections
 import Results.models
-from ScenarioCreator.models import Zone, ProductionType
 
 
 def camel_case_spaces(name_with_spaces):
-    return re.sub(r' (\w)', lambda match: match.group(1).upper(), name_with_spaces)
+    r = re.sub(r' +(\w)', lambda match: match.group(1).upper(), name_with_spaces).strip()  # upper case first letter of any word
+    if r:
+        r = r[0].upper() + r[1:]  # upper case first letter
+    return r
 
 
 def number(string):
@@ -108,7 +110,7 @@ class DailyParser(object):
                     zone = [x[0] for x in self.zones if x[1] == zone_name][0]
                 except IndexError:
                     zone = None
-                daily_by_pt_zone[camel_case_spaces(zone_name + pt_name)] = \
+                daily_by_pt_zone[camel_case_spaces(zone_name) + camel_case_spaces(pt_name)] = \
                     Results.models.DailyByZoneAndProductionType(production_type_id=pt, zone_id=zone, iteration=iteration, day=day, last_day=last_line)
 
         daily_instances["DailyControls"] = {'': Results.models.DailyControls(iteration=iteration, day=day, last_day=last_line)}  # there's only one of these
