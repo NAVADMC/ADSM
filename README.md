@@ -48,6 +48,7 @@ Using the pip in your new Virtual Environment (`/path/to/adsm_venv/Scripts/pip`)
     pip install matplotlib==1.4.2
     pip install pandas==0.15.1
     pip install pyproj==1.9.4
+    pip install psutil
 
 **If you are on Windows**, these packages need a special installation: 
 
@@ -57,12 +58,14 @@ Using the pip in your new Virtual Environment (`/path/to/adsm_venv/Scripts/pip`)
     - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/pandas-0.15.2.win-amd64-py3.4.exe
     - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/matplotlib-1.4.2.win-amd64-py3.4.exe
     - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/pyproj-1.9.4dev.win-amd64-py3.4.exe
+    - http://www.lfd.uci.edu/~gohlke/pythonlibs/psutil-2.2.0-cp34-none-win_amd64.whl
   - Now, using the easy_install (for exe) or pip (for whl) in your new Virtual Environment (`/path/to/adsm_venv/Scripts/easy_install`), install the following packages:
         
         easy_install numpy-MKL-1.9.1.win-amd64-py3.4.exe  
         easy_install pandas-0.15.1.win-amd64-py3.4.exe  
         easy_install matplotlib-1.4.2.win-amd64-py3.4.exe  
         easy_install pyproj-1.9.4dev.win-amd64-py3.4.exe  
+        pip install psutil-2.2.0-cp34-none-win_amd64.whl
 
 ###Compile chain (optional)
 If you plan on compiling a distributable version of the project, then use the following instructions.

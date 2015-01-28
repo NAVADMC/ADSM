@@ -16,6 +16,7 @@ import threading
 from django.db import models
 import shutil
 from django.shortcuts import redirect
+import psutil
 from ScenarioCreator.models import ProductionType, Zone, Unit
 import re
 from ADSMSettings.models import scenario_filename, SingletonManager
@@ -401,12 +402,14 @@ class ResultsVersion(OutputBaseModel):
         return super(ResultsVersion, self).save(force_insert, force_update, using, update_fields)
 
 
+def get_simulation_controllers():
+    return [process for process in psutil.process_iter() if process.name == 'ADSM Simulation Controller']
+
+
 def abort_simulation(request=None):
-    for thread in threading.enumerate():
-        if thread.name == 'simulation_control_thread':
-            print("Aborting Simulation Thread")
-            thread.stop()
-            thread.join()
+    for process in get_simulation_controllers():
+        print("Aborting Simulation Thread")
+        process.kill()
     if request is not None:
         return redirect('/results/')
 
@@ -429,5 +432,4 @@ def delete_supplemental_folder():
 
         from django.db import connections
         connections['scenario_db'].cursor().execute('VACUUM')
-
 
