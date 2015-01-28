@@ -2,28 +2,26 @@ from collections import defaultdict
 from itertools import chain
 import zipfile
 from glob import glob
-import threading
-from django.http import HttpResponse
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, PermissionDenied
-from django.forms.models import modelformset_factory
-from django.shortcuts import render, redirect
-from django.db import transaction, close_old_connections
 import subprocess
 import time
 import json
-from ScenarioCreator.models import OutputSettings
+import multiprocessing
+
+from django.http import HttpResponse
+from django.forms.models import modelformset_factory
+from django.shortcuts import render
+from django.db import transaction, close_old_connections
 from django.db.models import Max
-from Results.models import *  # necessary
+
+from ScenarioCreator.models import OutputSettings
 from Results.forms import *  # necessary
 import Results.output_parser
-from Results.summary import list_of_iterations, summarize_results, iterations_complete
+from Results.summary import list_of_iterations, iterations_complete
 from ADSMSettings.models import scenario_filename
 import Results.graphing  # necessary to select backend Agg first
 from Results.interactive_graphing import population_zoom_png
 from ADSMSettings.utils import adsm_executable_command, workspace_path, supplemental_folder_has_contents
 from ADSMSettings.views import save_scenario
-
-import multiprocessing
 from Results.django_queue import DjangoManager
 
 
@@ -125,7 +123,7 @@ def simulation_process(iteration_number, adsm_cmd, event, production_types, zone
 def simulation_status(request):
     output_settings = OutputSettings.objects.get_or_create()[0]
     status = {
-        'simulation_running': any([thread.name == 'simulation_control_thread' for thread in threading.enumerate()]),  # different from being completed
+        'simulation_running': len(get_simulation_controllers()) > 0,  # different from being completed
         'iterations_total': output_settings.iterations,
         'iterations_started': len(list_of_iterations()),
         'iterations_completed': iterations_complete(),
@@ -154,22 +152,24 @@ def zip_map_directory_if_it_exists():
         print("Folder is empty: ", dir_to_zip)
 
 
-class Simulation(threading.Thread):
+class Simulation(multiprocessing.Process):
     import django
     django.setup()
 
     """Execute system commands in a separate thread so as not to interrupt the webpage.
     Saturate the computer's processors with parallel simulation iterations"""
     def __init__(self, max_iteration, **kwargs):
-        kwargs['name'] = 'simulation_control_thread'
         self.manager = DjangoManager()
         self.stop_event = self.manager.Event()
         self.max_iteration = max_iteration
         self.production_types = ProductionType.objects.values_list('id', 'name')
         self.zones = Zone.objects.values_list('id', 'name')
-        super(Simulation, self).__init__(**kwargs)
+        print("Almost done")
+        super(Simulation, self).__init__(name='ADSM Simulation Controller', **kwargs)
+        print("done super")
 
     def run(self):
+        print("Starting run")
         num_cores = multiprocessing.cpu_count()
         if num_cores > 2:
             num_cores -= 1
@@ -233,10 +233,18 @@ def create_blank_unit_stats():
     print("Finished Unit Stat creation")
 
 
+def foo():
+    for i in range(10):
+        print('hello')
+        time.sleep(1)
+
+
 def run_simulation(request):
     delete_all_outputs()
     delete_supplemental_folder()
     create_blank_unit_stats()  # create UnitStats before we risk the simulation writing to them
+    # p = multiprocessing.Process(target=foo, name='AAAAAAA')
+    # p.start()
     sim = Simulation(OutputSettings.objects.all().first().iterations)
     sim.start()  # starts a new thread
     time.sleep(5) # give initial threads time to initialize their db connection
@@ -369,6 +377,5 @@ def model_list(request):
 def filtered_list(request, prefix):
     model_name, model = get_model_name_and_model(request)
     return result_table(request, model_name, model, globals()[model_name + 'Form'], True, prefix)
-
 
 
