@@ -199,6 +199,7 @@ def update_adsm():
         finally:
             session = SmSession.objects.get()
             session.update_on_startup = False
+            session.update_available = False
             session.save()
             
             command = git + ' stash apply'
