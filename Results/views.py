@@ -1,187 +1,39 @@
 from collections import defaultdict
 from itertools import chain
-import zipfile
+import os
 from glob import glob
-import subprocess
 import time
 import json
-import multiprocessing
 
 from django.http import HttpResponse
 from django.forms.models import modelformset_factory
-from django.shortcuts import render
-from django.db import transaction, close_old_connections
+from django.shortcuts import render, redirect
 from django.db.models import Max
 
+from ADSMSettings.models import scenario_filename
 from ScenarioCreator.models import OutputSettings
+from Results.graphing import construct_title
 from Results.forms import *  # necessary
+from Results.simulation import Simulation
+from Results.utils import delete_supplemental_folder, is_simulation_running, map_zip_file, delete_all_outputs
 import Results.output_parser
 from Results.summary import list_of_iterations, iterations_complete
-from ADSMSettings.models import scenario_filename
-import Results.graphing  # necessary to select backend Agg first
-from Results.interactive_graphing import population_zoom_png
-from ADSMSettings.utils import adsm_executable_command, workspace_path, supplemental_folder_has_contents
-from ADSMSettings.views import save_scenario
 
 
 def back_to_inputs(request):
     return redirect('/setup/')
 
 
-def non_empty_lines(line):
-    output_lines = []
-    line = line.decode("utf-8").strip()
-    if len(line):
-        output_lines += line.split('\n')  # entries can be more than one line
-    return output_lines
-
-
-def set_pragma(setting, value, connection='default'):
-    from django.db import connections
-
-    cursor = connections[connection].cursor()
-    raw_sql = "PRAGMA {0} = {1}".format(setting, value)
-
-    cursor.execute(raw_sql)
-
-
-def simulation_process(iteration_number, adsm_cmd, production_types, zones):
-    start = time.time()
-
-    # import cProfile, pstats
-    # profiler = cProfile.Profile()
-    # profiler.enable()
-    
-    simulation = subprocess.Popen(adsm_cmd,
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE,
-                                  bufsize=1)
-    headers = simulation.stdout.readline().decode()
-    from Results.output_parser import DailyParser
-    p = DailyParser(headers, production_types, zones)
-    adsm_result = []
-    prev_line = ''
-    while True:
-        line = simulation.stdout.readline()  # TODO: Has the potential to lock up if CEngine crashes (blocking io)
-        line = line.decode().strip()
-        parse_result = p.parse_daily_strings(prev_line, False)
-        adsm_result.extend(parse_result)
-        if not line:
-            break
-        prev_line = line
-    adsm_result.extend(p.parse_daily_strings(prev_line, last_line=True, create_version_entry=iteration_number==1))
-
-    with transaction.atomic(using='scenario_db'):
-        prev_line = ''
-        unit_stats_headers = simulation.stdout.readline().decode()  # TODO: Currently we don't use the headers to find which row to insert into.
-        for line in simulation.stdout.readlines():
-            line = line.decode().strip()
-            p.parse_unit_stats_string(prev_line)
-            prev_line = line
-        p.parse_unit_stats_string(prev_line)
-
-    outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
-    if errors:  # this will only print out error messages after the simulation has halted
-        print(errors)
-    
-    sorted_results = defaultdict(lambda: [] )
-    for result in adsm_result:
-        result_type = type(result).__name__
-        sorted_results[result_type].append(result)
-
-    set_pragma("synchronous", "OFF", connection='scenario_db')
-    set_pragma("journal_mode", "MEMORY", connection='scenario_db')
-
-    DailyReport.objects.bulk_create(sorted_results['DailyReport'])
-    DailyControls.objects.bulk_create(sorted_results['DailyControls'])
-    DailyByZoneAndProductionType.objects.bulk_create(sorted_results['DailyByZoneAndProductionType'])
-    DailyByProductionType.objects.bulk_create(sorted_results['DailyByProductionType'])
-    DailyByZone.objects.bulk_create(sorted_results['DailyByZone'])
-    try:
-        ResultsVersion.objects.bulk_create(sorted_results['ResultsVersion'])
-    except KeyError:
-        pass
-
-    end = time.time()
-    
-    # profiler.disable()
-    # profiler.dump_stats("parser.prof")
-    # stats = pstats.Stats("parser.prof")
-    # stats.sort_stats('time')
-    # stats.print_stats(10)
-    
-    return end-start
-
-
 def simulation_status(request):
     output_settings = OutputSettings.objects.get()
     status = {
-        'simulation_running': simulation_running(),  # different from being completed
+        'is_simulation_running': is_simulation_running(),  # different from being completed
         'iterations_total': output_settings.iterations,
         'iterations_started': len(list_of_iterations()),
         'iterations_completed': iterations_complete(),
         'status_text': "running?",
     }
     return HttpResponse(json.dumps(status), content_type="application/json")
-
-
-def map_zip_file():
-    """This is a file named after the scenario in the folder that's also named after the scenario."""
-    return workspace_path(scenario_filename() + '/' + scenario_filename() + " Map Output.zip")
-
-
-def zip_map_directory_if_it_exists():
-    dir_to_zip = workspace_path(scenario_filename() + "/Map")
-    if os.path.exists(dir_to_zip) and supplemental_folder_has_contents(subfolder='/Map'):
-        zipname = map_zip_file()
-        dir_to_zip_len = len(dir_to_zip.rstrip(os.sep)) + 1
-        with zipfile.ZipFile(zipname, mode='w', compression=zipfile.ZIP_DEFLATED) as zf:
-            for dirname, subdirs, files in os.walk(dir_to_zip):
-                for filename in files:
-                    path = os.path.join(dirname, filename)
-                    entry = path[dir_to_zip_len:]
-                    zf.write(path, entry)
-    else:
-        print("Folder is empty: ", dir_to_zip)
-
-
-class Simulation(multiprocessing.Process):
-    import django
-    django.setup()
-
-    """Execute system commands in a separate thread so as not to interrupt the webpage.
-    Saturate the computer's processors with parallel simulation iterations"""
-    def __init__(self, max_iteration, **kwargs):
-        super(Simulation, self).__init__(name='ADSM Simulation Controller', **kwargs)
-        self.max_iteration = max_iteration
-        self.production_types = ProductionType.objects.values_list('id', 'name')
-        self.zones = Zone.objects.values_list('id', 'name')
-
-    def run(self):
-        print("Starting run")
-        num_cores = multiprocessing.cpu_count()
-        if num_cores > 2:
-            num_cores -= 1
-        executable_cmd = adsm_executable_command()  # only want to do this once
-        statuses = []
-        pool = multiprocessing.Pool(num_cores)
-        for iteration in range(1, self.max_iteration + 1):
-            adsm_cmd = executable_cmd + ['-i', str(iteration)]
-            res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, self.production_types, self.zones))
-            statuses.append(res)
-
-        pool.close()
-
-        simulation_times = []
-        for status in statuses:
-            simulation_times.append(status.get())
-
-        print(simulation_times)
-        print("Average Time:", sum(simulation_times)/len(simulation_times))
-        population_zoom_png()
-        zip_map_directory_if_it_exists()
-        save_scenario()
-        close_old_connections()
 
 
 def results_home(request):
@@ -213,12 +65,6 @@ def create_blank_unit_stats():
     print("Finished Unit Stat creation")
 
 
-def foo():
-    for i in range(10):
-        print('hello')
-        time.sleep(1)
-
-
 def run_simulation(request):
     delete_all_outputs()
     delete_supplemental_folder()
@@ -235,7 +81,7 @@ def list_entries(model_name, model, iteration=1):
 
 def graph_field_by_zone(request, model_name, field_name, iteration=None):
     links = [request.path + zone + '/Graph.png' for zone in Zone.objects.all().values_list('name', flat=True)]
-    explanation, title = Results.graphing.construct_title(field_name, iteration, globals()[model_name])
+    explanation, title = construct_title(field_name, iteration, globals()[model_name])
     context = {'title': title,
                'image_links': links}
     return render(request, 'Results/Graph.html', context)
@@ -355,5 +201,4 @@ def model_list(request):
 def filtered_list(request, prefix):
     model_name, model = get_model_name_and_model(request)
     return result_table(request, model_name, model, globals()[model_name + 'Form'], True, prefix)
-
 

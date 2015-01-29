@@ -7,10 +7,9 @@ import platform
 from collections import defaultdict
 
 from git.git import git
-from django.db import OperationalError, close_old_connections
+from django.db import OperationalError
 from django.core.management import call_command
 from django.db import connections, close_old_connections
-from ScenarioCreator.models import ZoneEffect
 from django.conf import settings
 from ADSMSettings.models import SmSession, scenario_filename
 
@@ -71,6 +70,7 @@ def graceful_startup():
     except OperationalError:
         reset_db('default')
     try:
+        from ScenarioCreator.models import ZoneEffect
         ZoneEffect.objects.count()
     except OperationalError:
         reset_db('scenario_db')

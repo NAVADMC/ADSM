@@ -41,8 +41,9 @@ from django_extras.db.models import LatitudeField, LongitudeField, MoneyField
 from ADSMSettings.models import SingletonManager
 from ScenarioCreator.custom_fields import PercentField
 from ScenarioCreator.templatetags.db_status_tags import wiki, link
-import ScenarioCreator.parser
+import ScenarioCreator.population_parser
 import ADSMSettings.models
+from Results.utils import delete_all_outputs
 
 
 def chc(*choice_list):
@@ -88,14 +89,12 @@ def delete_repo(sender, instance, **kwargs):
 
 class BaseModel(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        ADSMSettings.models.unsaved_changes(True)  # avoid infinite loop by ensuring unsaved_changes doesn't call BaseModel from SmSession
-        from Results.models import delete_all_outputs  # I quickly get circular imports if this is higher up
+        ADSMSettings.models.unsaved_changes(True) 
         delete_all_outputs()
         return super(BaseModel, self).save(force_insert, force_update, using, update_fields)
 
     def delete(self, using=None):
         ADSMSettings.models.unsaved_changes(True)
-        from Results.models import delete_all_outputs  # I quickly get circular imports if this is higher up
         delete_all_outputs()
         return super(BaseModel, self).delete(using)
 
@@ -140,7 +139,7 @@ class Population(InputSingleton):
         start_time = time.clock()  # perf_counter() would also work
         session.set_population_upload_status("Parsing")
         try:
-            p = ScenarioCreator.parser.PopulationParser(self.source_file)
+            p = ScenarioCreator.population_parser.PopulationParser(self.source_file)
         except BaseException as error:
             self.delete()
             raise error
