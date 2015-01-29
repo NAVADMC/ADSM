@@ -114,9 +114,9 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones):
 
 
 def simulation_status(request):
-    output_settings = OutputSettings.objects.get_or_create()[0]
+    output_settings = OutputSettings.objects.get()
     status = {
-        'simulation_running': len(get_simulation_controllers()) > 0,  # different from being completed
+        'simulation_running': simulation_running(),  # different from being completed
         'iterations_total': output_settings.iterations,
         'iterations_started': len(list_of_iterations()),
         'iterations_completed': iterations_complete(),
