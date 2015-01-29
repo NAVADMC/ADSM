@@ -143,7 +143,6 @@ $(function(){
         if (hide_target.length == 0 || $(self).attr('class') === 'help-block'){  //Sometimes it's not in a form group
             hide_target = $(self)
         }
-        console.log("attached to", self, controller)
         var disabled_value = $(self).attr('data-disabled-value')
         var required_value = $(self).attr('data-required-value')
 
@@ -163,7 +162,6 @@ $(function(){
                         if($(this).val() == required_value || $(this).val() == ''){
                             hide_target.show()
                         }else{
-                            console.log("Hiding", hide_target)
                             hide_target.hide()
                         }
                     }else{
