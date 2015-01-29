@@ -11,7 +11,7 @@ from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
     DirectSpread, IndirectSpread, AirborneSpread, ProductionType, \
     DiseaseProgressionAssignment, Unit, ControlMasterPlan
 from ADSMSettings.utils import workspace_path
-from Results.models import delete_all_outputs
+from Results.utils import delete_all_outputs
 
 
 class M2mDSL(object):
