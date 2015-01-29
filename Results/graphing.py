@@ -13,7 +13,7 @@ from matplotlib.colorbar import ColorbarBase
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from ScenarioCreator.models import Zone, ProductionType, Unit, OutputSettings
+from ScenarioCreator.models import Zone, ProductionType, Unit
 from Results.summary import list_of_iterations
 from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType
 
@@ -159,7 +159,7 @@ def create_time_series_lines(field_name, model, iteration=None, zone=''):
             lines.append(list(model.objects.filter(**filter_dict).order_by('day').values_list(field_name, flat=True)))
     else:  # summary of all iterations is a single query for performance reasons
         max_size = model.objects.all().aggregate(Max('day'))['day__max']
-        for row in range(OutputSettings.objects.get().iterations):  # iteration = index
+        for row in range(len(list_of_iterations())):  # iteration = index
             lines.append([None] * max_size)
         objs = model.objects.filter(**filter_sequence[0]).values_list('iteration', 'day', field_name)
         for entry in objs:
@@ -268,7 +268,7 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
 
     if iteration:  # for a single iteration, we don't need all the hist2d prep
         return single_iteration_line_graph(iteration, field_name, model_name, model, time_series, columns, time_graph, boxplot_graph, fig)
-    if OutputSettings.objects.get().iterations < 100:
+    if len(list_of_iterations()) < 50:
         # do a stacked line graph instead of a histogram    
         return single_iteration_line_graph(iteration, field_name, model_name, model, time_series, columns, time_graph, boxplot_graph, fig)
 

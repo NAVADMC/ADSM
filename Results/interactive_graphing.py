@@ -128,7 +128,7 @@ def population_results_map():
                 u.initial_size,
                 "%s %s %i" % (u.production_type.name, u.user_notes, u.unitstats.cumulative_destroyed) 
                 ) for u in queryset]
-    total_iterations = float(len(list_of_iterations()))  # This is slower but more accurate than OutputSettings[0].iterations
+    total_iterations = float(len(list_of_iterations()))
     latitude, longitude, infected, vaccinated, destroyed, zone_focus, herd_size, names = zip(*latlong)
     zone_blues, red_infected, green_vaccinated = define_color_mappings()
     

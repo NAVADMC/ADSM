@@ -110,7 +110,7 @@ class Simulation(multiprocessing.Process):
     """Execute system commands in a separate thread so as not to interrupt the webpage.
     Saturate the computer's processors with parallel simulation iterations"""
     def __init__(self, max_iteration, **kwargs):
-        super(Simulation, self).__init__(name='ADSM Simulation Controller', **kwargs)
+        super(Simulation, self).__init__(**kwargs)
         self.max_iteration = max_iteration
         self.production_types = ProductionType.objects.values_list('id', 'name')
         self.zones = Zone.objects.values_list('id', 'name')
