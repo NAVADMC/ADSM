@@ -6,9 +6,6 @@
 # SpreadModel Build
 #################
 ## Only Ignore In Master ##
-workspace/Population_Test_Invalid.xml
-workspace/Population_Test_Zone_Assignment
-adsm-env
 msvc*
 python33.dll
 pywintypes33.dll
@@ -25,6 +22,9 @@ lib/
 *.pyo
 
 ## Always Ignore ##
+workspace/Population_Test_Invalid.xml
+workspace/Population_Test_Zone_Assignment
+adsm-env
 build/
 cef/out/
 *.manifest
