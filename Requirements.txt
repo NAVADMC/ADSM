@@ -16,6 +16,7 @@ numpy==1.9.1
 matplotlib==1.4.2
 pandas==0.15.2
 pyproj==1.9.4
+psutil==2.2.0
 
 pywin32==219
 cx-freeze==4.3.4

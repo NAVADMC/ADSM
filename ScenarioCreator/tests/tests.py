@@ -6,7 +6,7 @@ from ScenarioCreator.models import (Scenario, choice_char_from_value, squish_nam
                                     Unit, Population, ProductionType, IndirectSpread,
                                     ProbabilityFunction, RelationalFunction, Disease,
                                     ControlMasterPlan, OutputSettings)
-from ScenarioCreator.parser import PopulationParser
+from ScenarioCreator.population_parser import PopulationParser
 from ScenarioCreator.forms import IndirectSpreadForm
 from ADSMSettings.models import SingletonManager
 

@@ -7,10 +7,9 @@ import platform
 from collections import defaultdict
 
 from git.git import git
-from django.db import OperationalError, close_old_connections
+from django.db import OperationalError
 from django.core.management import call_command
 from django.db import connections, close_old_connections
-from ScenarioCreator.models import ZoneEffect
 from django.conf import settings
 from ADSMSettings.models import SmSession, scenario_filename
 
@@ -70,12 +69,14 @@ def graceful_startup():
         SmSession.objects.get().update_available
     except OperationalError:
         reset_db('default')
+        
     try:
+        from ScenarioCreator.models import ZoneEffect
         ZoneEffect.objects.count()
     except OperationalError:
         reset_db('scenario_db')
-        update_db_version()
-        
+    
+    update_db_version()
     session = SmSession.objects.get()
     session.update_on_startup = False
     session.save()
@@ -115,8 +116,7 @@ def update_db_version():
     try:
         call_command('migrate',
                      # verbosity=0,
-                     interactive=False,
-                     database=connections['scenario_db'].alias)
+                     interactive=False)
     except:
         print("Error: Migration failed.")
     print('Done creating database')

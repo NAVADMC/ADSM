@@ -1,21 +1,21 @@
-from django.http import HttpResponse
-from django.db.models import Max
-from itertools import chain
 import matplotlib
 matplotlib.use('Agg')  # Force matplotlib to not use any Xwindows backend.
 from matplotlib import rc
 rc("figure", facecolor="white")
+
 from matplotlib import gridspec
+from itertools import chain
+from django.http import HttpResponse
+from django.db.models import Max
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import LogNorm
 from matplotlib.colorbar import ColorbarBase
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from ScenarioCreator.models import Zone, ProductionType, Unit, OutputSettings
+from ScenarioCreator.models import Zone, ProductionType, Unit
 from Results.summary import list_of_iterations
 from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType
-
 
 
 def HttpFigure(fig):
@@ -66,6 +66,17 @@ def rstyle(axis):
     plt.rcParams['ytick.direction'] = 'out'
     axis.xaxis.set_ticks_position('bottom')
     axis.yaxis.set_ticks_position('left')
+
+
+def construct_title(field_name, iteration, model, zone=''):
+    pt_mention = ' for all Production Types' if model in [DailyByProductionType, DailyByZoneAndProductionType] and not iteration else ''
+    explanation = model._meta.get_field_by_name(field_name)[0].verbose_name
+    iter_str = " iteration " + str(iteration) if iteration else ' for all iterations'
+    if zone:
+        title = "%s %s\n%s%s" % (zone, explanation, pt_mention, iter_str)
+    else:
+        title = "%s\n%s%s" % (explanation, pt_mention, iter_str)
+    return explanation, title
 
 
 def population_png(request, width_inches=4.5, height_inches=4):
@@ -148,7 +159,7 @@ def create_time_series_lines(field_name, model, iteration=None, zone=''):
             lines.append(list(model.objects.filter(**filter_dict).order_by('day').values_list(field_name, flat=True)))
     else:  # summary of all iterations is a single query for performance reasons
         max_size = model.objects.all().aggregate(Max('day'))['day__max']
-        for row in range(OutputSettings.objects.get().iterations):  # iteration = index
+        for row in range(len(list_of_iterations())):  # iteration = index
             lines.append([None] * max_size)
         objs = model.objects.filter(**filter_sequence[0]).values_list('iteration', 'day', field_name)
         for entry in objs:
@@ -189,17 +200,6 @@ def collect_boxplot_data(padded_lines, explanation):
     else:  # this field is cumulative
         boxplot_data = (line[-1] for line in padded_lines)  # only last day is relevant
     return boxplot_data
-
-
-def construct_title(field_name, iteration, model, zone=''):
-    pt_mention = ' for all Production Types' if model in [DailyByProductionType, DailyByZoneAndProductionType] and not iteration else ''
-    explanation = model._meta.get_field_by_name(field_name)[0].verbose_name
-    iter_str = " iteration " + str(iteration) if iteration else ' for all iterations'
-    if zone:
-        title = "%s %s\n%s%s" % (zone, explanation, pt_mention, iter_str)
-    else:
-        title = "%s\n%s%s" % (explanation, pt_mention, iter_str)
-    return explanation, title
 
 
 def single_iteration_line_graph(iteration, field_name, model_name, model, time_series, columns, time_graph, boxplot_graph, fig):
@@ -268,8 +268,9 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
 
     if iteration:  # for a single iteration, we don't need all the hist2d prep
         return single_iteration_line_graph(iteration, field_name, model_name, model, time_series, columns, time_graph, boxplot_graph, fig)
-    if OutputSettings.objects.get().iterations < 100:
+    if len(list_of_iterations()) < 50:
         # do a stacked line graph instead of a histogram    
         return single_iteration_line_graph(iteration, field_name, model_name, model, time_series, columns, time_graph, boxplot_graph, fig)
 
     return TwoD_histogram(fig, gs, time_graph, time_series)
+

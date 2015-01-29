@@ -11,15 +11,13 @@ Model Declarations: Each model creates a table in sqlite3 and a 'model' for tabl
  which is significantly more obscure.
  The code in scripts/Output_Table.py (.ipynb) was used to generate these name declarations.  Also, if you're reading this
  doc and you don't know about IPython Notebooks, go get IPython Notebooks."""
-import os
-import threading
-from django.db import models
-import shutil
-from ScenarioCreator.models import ProductionType, Zone, Unit
 import re
-from ADSMSettings.models import scenario_filename, SingletonManager
-from Results.output_grammar import explain
 from ast import literal_eval
+from django.db import models
+
+from ADSMSettings.models import SingletonManager
+from ScenarioCreator.models import ProductionType, Zone, Unit
+from Results.output_grammar import explain
 
 
 def printable_name(underscores_name):
@@ -398,28 +396,4 @@ class ResultsVersion(OutputBaseModel):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.id=1
         return super(ResultsVersion, self).save(force_insert, force_update, using, update_fields)
-
-
-def delete_all_outputs():
-    for thread in threading.enumerate():
-        if thread.name == 'simulation_control_thread':
-            thread.stop()
-            thread.join()
-    if DailyControls.objects.count() > 0:
-        print("DELETING ALL OUTPUTS")
-    for model in [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]:
-        model.objects.all().delete()
-
-
-def delete_supplemental_folder():
-    scenario_folder = scenario_filename()
-    if scenario_folder != '':
-        try:
-            shutil.rmtree(os.path.join('workspace', scenario_folder))
-        except:
-            pass  # because the folder doesn't exist (which is fine)
-
-        from django.db import connections
-        connections['scenario_db'].cursor().execute('VACUUM')
-
 

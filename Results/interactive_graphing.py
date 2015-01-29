@@ -8,12 +8,12 @@ the point labels.
 Use the toolbar buttons at the bottom-right of the plot to enable zooming
 and panning, and to reset the view.
 """
+import Results.graphing # necessary to select backend Agg first
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import ListedColormap
 from matplotlib.figure import Figure
 from matplotlib.patches import Circle, Rectangle
 from matplotlib.image import thumbnail
-from matplotlib import pyplot
 from time import sleep, time
 import os
 import threading
@@ -21,7 +21,8 @@ from django.http import HttpResponse
 from django.db.models import Max
 
 from Results.models import Unit
-from Results.summary import list_of_iterations, iteration_progress
+from Results.utils import is_simulation_running
+from Results.summary import list_of_iterations
 from Results.graphing import rstyle, population_png
 from ADSMSettings.utils import workspace_path
 from ADSMSettings.models import scenario_filename
@@ -127,7 +128,7 @@ def population_results_map():
                 u.initial_size,
                 "%s %s %i" % (u.production_type.name, u.user_notes, u.unitstats.cumulative_destroyed) 
                 ) for u in queryset]
-    total_iterations = float(len(list_of_iterations()))  # This is slower but more accurate than OutputSettings[0].iterations
+    total_iterations = float(len(list_of_iterations()))
     latitude, longitude, infected, vaccinated, destroyed, zone_focus, herd_size, names = zip(*latlong)
     zone_blues, red_infected, green_vaccinated = define_color_mappings()
     
@@ -186,7 +187,7 @@ def population_zoom_png(request=None):
         with open(path, "rb") as img_file:
             return HttpResponse(img_file.read(), content_type='image/png')
     except IOError:
-        save_image = iteration_progress() == 1.0  # we want to check this before reading the stats, this is in motion
+        save_image = not is_simulation_running()  # we want to check this before reading the stats, this is in motion
         if not save_image:  # in order to avoid database locked Issue #150
             return population_png(request, 58.5, 52)
         else:

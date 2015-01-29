@@ -1,6 +1,11 @@
 from django.db import models
 
 
+class SimulationProcessRecord(models.Model):
+    is_parser = models.BooleanField(default=True)
+    pid = models.IntegerField(default=0)
+    time_created = models.DateTimeField(auto_now_add=True)
+
 
 class SingletonManager(models.Manager):
     def get(self, **kwargs):
