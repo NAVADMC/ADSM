@@ -22,7 +22,6 @@ import Results.graphing  # necessary to select backend Agg first
 from Results.interactive_graphing import population_zoom_png
 from ADSMSettings.utils import adsm_executable_command, workspace_path, supplemental_folder_has_contents
 from ADSMSettings.views import save_scenario
-from Results.django_queue import DjangoManager
 
 
 def back_to_inputs(request):
@@ -46,7 +45,7 @@ def set_pragma(setting, value, connection='default'):
     cursor.execute(raw_sql)
 
 
-def simulation_process(iteration_number, adsm_cmd, event, production_types, zones):
+def simulation_process(iteration_number, adsm_cmd, production_types, zones):
     start = time.time()
 
     # import cProfile, pstats
@@ -64,9 +63,6 @@ def simulation_process(iteration_number, adsm_cmd, event, production_types, zone
     prev_line = ''
     while True:
         line = simulation.stdout.readline()  # TODO: Has the potential to lock up if CEngine crashes (blocking io)
-        if event.is_set():
-            simulation.terminate()
-            return
         line = line.decode().strip()
         parse_result = p.parse_daily_strings(prev_line, False)
         adsm_result.extend(parse_result)
@@ -79,9 +75,6 @@ def simulation_process(iteration_number, adsm_cmd, event, production_types, zone
         prev_line = ''
         unit_stats_headers = simulation.stdout.readline().decode()  # TODO: Currently we don't use the headers to find which row to insert into.
         for line in simulation.stdout.readlines():
-            if event.is_set():
-                simulation.terminate()
-                return
             line = line.decode().strip()
             p.parse_unit_stats_string(prev_line)
             prev_line = line
@@ -159,14 +152,10 @@ class Simulation(multiprocessing.Process):
     """Execute system commands in a separate thread so as not to interrupt the webpage.
     Saturate the computer's processors with parallel simulation iterations"""
     def __init__(self, max_iteration, **kwargs):
-        self.manager = DjangoManager()
-        self.stop_event = self.manager.Event()
+        super(Simulation, self).__init__(name='ADSM Simulation Controller', **kwargs)
         self.max_iteration = max_iteration
         self.production_types = ProductionType.objects.values_list('id', 'name')
         self.zones = Zone.objects.values_list('id', 'name')
-        print("Almost done")
-        super(Simulation, self).__init__(name='ADSM Simulation Controller', **kwargs)
-        print("done super")
 
     def run(self):
         print("Starting run")
@@ -178,7 +167,7 @@ class Simulation(multiprocessing.Process):
         pool = multiprocessing.Pool(num_cores)
         for iteration in range(1, self.max_iteration + 1):
             adsm_cmd = executable_cmd + ['-i', str(iteration)]
-            res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, self.stop_event, self.production_types, self.zones))
+            res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, self.production_types, self.zones))
             statuses.append(res)
 
         pool.close()
@@ -186,12 +175,6 @@ class Simulation(multiprocessing.Process):
         simulation_times = []
         for status in statuses:
             simulation_times.append(status.get())
-            if self.stop_event.is_set():
-                pool.terminate()
-                pool.join()
-                close_old_connections()
-                print("Simulation halted")
-                return
 
         print(simulation_times)
         print("Average Time:", sum(simulation_times)/len(simulation_times))
@@ -199,9 +182,6 @@ class Simulation(multiprocessing.Process):
         zip_map_directory_if_it_exists()
         save_scenario()
         close_old_connections()
-
-    def stop(self):
-        self.stop_event.set()
 
 
 def results_home(request):
@@ -243,8 +223,6 @@ def run_simulation(request):
     delete_all_outputs()
     delete_supplemental_folder()
     create_blank_unit_stats()  # create UnitStats before we risk the simulation writing to them
-    # p = multiprocessing.Process(target=foo, name='AAAAAAA')
-    # p.start()
     sim = Simulation(OutputSettings.objects.all().first().iterations)
     sim.start()  # starts a new thread
     time.sleep(5) # give initial threads time to initialize their db connection
