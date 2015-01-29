@@ -5,7 +5,7 @@ from django.shortcuts import redirect
 
 import psutil
 
-from ADSMSettings.models import scenario_filename
+from ADSMSettings.models import scenario_filename, SimulationProcessRecord
 from ADSMSettings.utils import workspace_path, supplemental_folder_has_contents
 
 
@@ -14,7 +14,16 @@ def is_simulation_running():
 
 
 def get_simulation_controllers():
-    return [process for process in psutil.process_iter() if process.name == 'ADSM Simulation Controller']
+    results = []
+    records = SimulationProcessRecord.objects.all()  # really shouldn't be longer than 1
+    for record in records:
+        for process in psutil.process_iter():
+            if process.pid == record.pid:
+                if 'python' not in process.name():
+                    record.delete()  # stale process record where the pid was reused
+                else:  # process call python
+                    results.append(process)
+    return results
 
 
 def delete_supplemental_folder():
