@@ -4,11 +4,17 @@ body {
     font-family: 'Source Sans Pro', sans-serif;
     font-size: 10pt;
     font-weight: 400;
+    box-sizing:border-box;
 }
 
-h1, h2, h3, h4 {
-    font-size: 14pt;
-    font-weight: 600;
+h2{
+    font-size:15px;
+    font-weight:600;
+}
+
+h3, h4 {
+    font-size: 13px;
+    font-weight: 400;
 }
 
 .panel-heading h1, .panel-heading h2, .panel-heading h3{
@@ -117,9 +123,7 @@ body>nav {
     top: 44px;
     bottom: 0;
     left: 0;
-    width: 220px;
-    overflow: auto;
-    /*background-color: #DDD;*/
+    width: 170px;
 }
 
 body>section {
@@ -137,54 +141,67 @@ ul {
     list-style: none;
     padding-left: 0;
     margin-bottom: 54px;
+    margin-top:5px;
+}
+
+#setupMenu h2:first-child a{
+    border-top:1px solid #eeeeee;
 }
 
 #setupMenu h2, #setupMenu h3, #setupMenu h4 {
     margin-top: 0;
     margin-bottom: 0; /* These are meant to stack */
-    padding-top: 4px;
+    border-bottom:1px solid #eeeeee;
+    -webkit-border-radius:0 2px 2px 0;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 #setupMenu a {
-    color: black;
+    color: #606060;
     display:block;
     text-decoration: none;
-    background-color: #E4E4E4;
     line-height: 35px;
-    padding-left: 8px;
+    padding-left: 15px;
+    transition:background-color .2s ease;
 }
 
-#setupMenu h3 a {
-    font-weight: 400;
-    background-color: #EEEEEE;
+#setupMenu a:hover{
+    background-color:#eeeeee;
 }
 
-#setupMenu h4 a {
-    background-color: #FFFFFF;
+#setupMenu a.active:hover{
+    background-color:#606060;
 }
 
-#setupMenu a:hover {
-    width: 215px;
+#setupMenu h3 a, #setupMenu h4 a {
+    padding-left:30px;
 }
+
 
 #setupMenu .active {
-    background-color: #B1B1B1
+    background-color: #606060;
+    margin-right:15px;
+    color:white;
+    font-weight:400;
+    -webkit-border-radius:0 4px 4px 0;
 }
 
 #setupMenu span {
     width: 5px;
     height: 35px;
+    -webkit-border-radius:0 2px 2px 0;
 }
 
 #setupMenu .incomplete {
     font-weight: 600;
     font-style: italic;
     color: #999;
-    background-color: #FFDD4A;
+    background-color: #f6da40;
 }
 
 #setupMenu .completed, .completed {
-    background-color: #B6F3A7;
+    background-color: #68be5e;
 }
 
 #setupMenu .empty_subcategory {
@@ -193,15 +210,23 @@ ul {
 
 #RunSimulation {
     position: fixed;
-    bottom: 0;
+    bottom: 10px;
     left: 0;
-    width:  220px;
+    width:  170px;
+    background-color:#68be5e;
 }
 
 #RunSimulation a {
     height: 50px;
     line-height: 50px;
     text-align: center;
+    font-size:18px;
+    font-style:italic;
+    transition: color .3s ease;
+}
+#RunSimulation:hover a, #RunSimulation:hover .glyphicon{
+    background-color:#68be5e;
+    color:black;
 }
 
 #RunSimulation a.tall {
@@ -211,8 +236,10 @@ ul {
 }
 
 #RunSimulation .glyphicon {
-    font-size: 30px;
-    top: 6px;
+    font-size: 21px;
+    top: 3px;
+    color:#606060;
+    transition: all .3s ease;
     /*vertical-align: middle;*/
 }
 
