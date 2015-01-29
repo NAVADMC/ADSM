@@ -6,6 +6,9 @@
 # SpreadModel Build
 #################
 ## Only Ignore In Master ##
+workspace/Population_Test_Invalid.xml
+workspace/Population_Test_Zone_Assignment
+adsm-env
 msvc*
 python33.dll
 pywintypes33.dll
@@ -212,4 +215,5 @@ htmlcov
 /*.csv
 
 /activeSession.sqlite3
+/settings.sqlite3
 /scripts/Pandas
