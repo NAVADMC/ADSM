@@ -4,10 +4,10 @@ var results_status  = (function(pollTime){
 
     var update_results_status = function() {
         $.get('/results/simulation_status.json').done(function (status) {
-            console.log('st', status.simulation_running)
-            if(status.simulation_running != true) {
+            console.log('st', status.is_simulation_running)
+            if(status.is_simulation_running != true) {
                 stop_poll()
-                return
+                //return
             }
             var simulation_complete = status.iterations_completed == status.iterations_total,
                 simulation_progress = status.iterations_total === 0 ? 0 :
@@ -33,7 +33,10 @@ var results_status  = (function(pollTime){
     },
 
         start_poll = function() { pollInterval = setInterval(update_results_status, pollTime); update_results_status(); },
-        stop_poll = function() { clearInterval(pollInterval); };
+        stop_poll = function() {
+            console.log("Stopping polling")
+            clearInterval(pollInterval); 
+        };
 
 
     return {
