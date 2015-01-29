@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 import multiprocessing
 import time
@@ -8,6 +9,7 @@ from django.db import transaction, close_old_connections
 from Results.interactive_graphing import population_zoom_png
 from ADSMSettings.views import save_scenario
 from ADSMSettings.utils import adsm_executable_command
+from ADSMSettings.models import SimulationProcessRecord
 from Results.models import DailyReport, DailyControls, DailyByZoneAndProductionType, DailyByProductionType, DailyByZone, ResultsVersion
 from Results.utils import zip_map_directory_if_it_exists
 from ScenarioCreator.models import ProductionType, Zone
@@ -114,27 +116,38 @@ class Simulation(multiprocessing.Process):
         self.zones = Zone.objects.values_list('id', 'name')
 
     def run(self):
-        print("Starting run")
-        num_cores = multiprocessing.cpu_count()
-        if num_cores > 2:
-            num_cores -= 1
-        executable_cmd = adsm_executable_command()  # only want to do this once
-        statuses = []
-        pool = multiprocessing.Pool(num_cores)
-        for iteration in range(1, self.max_iteration + 1):
-            adsm_cmd = executable_cmd + ['-i', str(iteration)]
-            res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, self.production_types, self.zones))
-            statuses.append(res)
+        pid = os.getpid()
+        simRecord = SimulationProcessRecord(is_parser=False, pid=pid)
+        try:
+            print("Starting run")
 
-        pool.close()
+            simRecord.save()
 
-        simulation_times = []
-        for status in statuses:
-            simulation_times.append(status.get())
+            num_cores = multiprocessing.cpu_count()
+            if num_cores > 2:
+                num_cores -= 1
+            executable_cmd = adsm_executable_command()  # only want to do this once
+            statuses = []
+            pool = multiprocessing.Pool(num_cores)
+            for iteration in range(1, self.max_iteration + 1):
+                adsm_cmd = executable_cmd + ['-i', str(iteration)]
+                res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, self.production_types, self.zones))
+                statuses.append(res)
 
-        print(simulation_times)
-        print("Average Time:", sum(simulation_times)/len(simulation_times))
-        population_zoom_png()
-        zip_map_directory_if_it_exists()
-        save_scenario()
-        close_old_connections()
+            pool.close()
+
+            simulation_times = []
+            for status in statuses:
+                simulation_times.append(status.get())
+
+            print(simulation_times)
+            print("Average Time:", sum(simulation_times)/len(simulation_times))
+            population_zoom_png()
+            zip_map_directory_if_it_exists()
+            save_scenario()
+            close_old_connections()
+        except:
+            raise
+        finally:
+            if simRecord.id:
+                simRecord.delete()
