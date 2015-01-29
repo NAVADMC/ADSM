@@ -138,10 +138,10 @@ class Simulation(multiprocessing.Process):
 
             simulation_times = []
             for status in statuses:
-                simulation_times.append(status.get())
+                simulation_times.append(round(status.get()))
 
             print(simulation_times)
-            print("Average Time:", sum(simulation_times)/len(simulation_times))
+            print("Average Time:", round(sum(simulation_times)/len(simulation_times), 2))
             population_zoom_png()
             zip_map_directory_if_it_exists()
             save_scenario()
