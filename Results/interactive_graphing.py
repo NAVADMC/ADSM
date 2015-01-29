@@ -8,19 +8,20 @@ the point labels.
 Use the toolbar buttons at the bottom-right of the plot to enable zooming
 and panning, and to reset the view.
 """
+import Results.graphing # necessary to select backend Agg first
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import ListedColormap
 from matplotlib.figure import Figure
 from matplotlib.patches import Circle, Rectangle
 from matplotlib.image import thumbnail
-from matplotlib import pyplot
 from time import sleep, time
 import os
 import threading
 from django.http import HttpResponse
 from django.db.models import Max
 
-from Results.models import Unit, simulation_running
+from Results.models import Unit
+from Results.utils import is_simulation_running
 from Results.summary import list_of_iterations
 from Results.graphing import rstyle, population_png
 from ADSMSettings.utils import workspace_path
@@ -186,7 +187,7 @@ def population_zoom_png(request=None):
         with open(path, "rb") as img_file:
             return HttpResponse(img_file.read(), content_type='image/png')
     except IOError:
-        save_image = not simulation_running()  # we want to check this before reading the stats, this is in motion
+        save_image = not is_simulation_running()  # we want to check this before reading the stats, this is in motion
         if not save_image:  # in order to avoid database locked Issue #150
             return population_png(request, 58.5, 52)
         else:

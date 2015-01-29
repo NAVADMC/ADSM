@@ -1,6 +1,7 @@
 from collections import defaultdict
 import copy
 from itertools import product
+import Results.models
 
 
 explanations = {'A': 'Animals',
@@ -79,13 +80,13 @@ grammars = {'exp': [('c', 'n'), ('U', 'A'), ('', 'Dir', 'Ind', 'Air')],
             'desw': [('U', 'A')],
 }
 
-DailyControls = {'desw': [('U', 'A'), ('Max', 'MaxDay', 'TimeMax', 'TimeAvg', 'DaysInQueue'), ]}
+daily_controls_grammar = {'desw': [('U', 'A'), ('Max', 'MaxDay', 'TimeMax', 'TimeAvg', 'DaysInQueue'), ]}
 
 ZONES = ('Background', 'HighRisk', 'MediumRisk')
 PT = ('', 'Cattle', 'Swine')
-DailyByZoneAndProductionType = {'animalDaysInZone': [ZONES, PT],
-                                'unitDaysInZone': [ZONES, PT],
-                                'unitsInZone': [ZONES, PT]}
+daily_by_pt_z_grammar = {'animalDaysInZone': [ZONES, PT],
+                         'unitDaysInZone': [ZONES, PT],
+                         'unitsInZone': [ZONES, PT]}
 
 
 def push_explanation(field_name, start, explanation=None):

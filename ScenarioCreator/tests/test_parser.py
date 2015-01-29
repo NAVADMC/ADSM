@@ -4,7 +4,7 @@ from django.test import TestCase
 
 # Create your tests here.
 from ScenarioCreator.models import Scenario, choice_char_from_value, squish_name, Unit, Population, ProductionType
-from ScenarioCreator.parser import PopulationParser
+from ScenarioCreator.population_parser import PopulationParser
 
 POPULATION_FIXTURES = 'ScenarioCreator/tests/population_fixtures/'
 
