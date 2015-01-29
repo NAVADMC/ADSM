@@ -406,6 +406,10 @@ def get_simulation_controllers():
     return [process for process in psutil.process_iter() if process.name == 'ADSM Simulation Controller']
 
 
+def simulation_running():
+    return len(get_simulation_controllers()) > 0
+
+
 def abort_simulation(request=None):
     for process in get_simulation_controllers():
         print("Aborting Simulation Thread")
