@@ -19,7 +19,7 @@ def get_simulation_controllers():
     for record in records:
         for process in psutil.process_iter():
             if process.pid == record.pid:
-                if 'python' not in process.name():
+                if 'python' not in process.name() and 'ADSM' not in process.name():
                     record.delete()  # stale process record where the pid was reused
                 else:  # process call python
                     results.append(process)
