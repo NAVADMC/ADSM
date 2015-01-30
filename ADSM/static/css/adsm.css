@@ -110,7 +110,8 @@ header div {
 .filename input {
     border: none;
     width: 100%;
-    color: #666;
+    color: white;
+    background:#606060; 
 }
 
 header #admin_link {
