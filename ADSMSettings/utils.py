@@ -11,7 +11,7 @@ from django.db import OperationalError
 from django.core.management import call_command
 from django.db import connections, close_old_connections
 from django.conf import settings
-from ADSMSettings.models import SmSession, scenario_filename
+from ADSMSettings.models import SmSession, scenario_filename, SimulationProcessRecord
 
 
 def db_name(name='scenario_db'):
@@ -66,13 +66,14 @@ def adsm_executable_command():
 def graceful_startup():
     """Checks something inside of each of the database files to see if it's valid.  If not, rebuild the database."""
     try:
-        SmSession.objects.get().update_available
+        x = SmSession.objects.get().scenario_filename  # this should be in the initial migration
+        print(x)
     except OperationalError:
         reset_db('default')
         
     try:
         from ScenarioCreator.models import ZoneEffect
-        ZoneEffect.objects.count()
+        ZoneEffect.objects.count()  # this should be in the initial migration
     except OperationalError:
         reset_db('scenario_db')
     
@@ -83,27 +84,33 @@ def graceful_startup():
 
 
 def reset_db(name, fail_ok=True):
-    """ It now checks if the file exists.  This will throw a PermissionError if the user has the DB open in another program."""
+    """Resets the database to a healthy state by any means necessary.  Tries to delete the file, or flush all tables, then runs the migrations from scratch.
+     It now checks if the file exists.  This will throw a PermissionError if the user has the DB open in another program."""
     print("Deleting", db_name(name))
     close_old_connections()
     delete_failed = False
-    if os.path.exists(db_name(name)):
+    if os.path.exists(db_name(name)):  # your database is corrupted and must be destroyed
         connections[name].close()
         try:
+            # or you could http://stackoverflow.com/a/24501130/2291495
             os.remove(db_name(name))
-        except PermissionError as err:
+        except PermissionError as err:  # must still be holding onto the file lock, clear out contents instead
             if not fail_ok:
                 raise err
-            else: 
-                delete_failed = True
+            else:  # I already tried manage.py flush.  It doesn't do enough
+                execute = connections[name].cursor().execute
+                # raw_sql = "select 'drop table ' || name || ';' from sqlite_master where type = 'table';"
+                execute("PRAGMA writable_schema = 1;")
+                execute("delete from sqlite_master where type in ('table', 'index', 'trigger');")
+                execute("PRAGMA writable_schema = 0;")
+                execute("VACUUM;")
+                execute("PRAGMA INTEGRITY_CHECK;")
+                print("===Dropping all Tables===")
     else:
         print(db_name(name), "does not exist")
-    #creates a new blank file by migrate 
-    call_command('migrate',
-                 # verbosity=0,
-                 interactive=False,
-                 database=connections[name].alias)
-    if name == 'default' and not delete_failed:  # create super user
+    #creates a new blank file by migrate
+    call_command('migrate', interactive=False)
+    if name == 'default':  # create super user
         from django.contrib.auth.models import User
         u = User(username='ADSM', is_superuser=True, is_staff=True)
         u.set_password('ADSM')
