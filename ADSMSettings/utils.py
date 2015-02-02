@@ -11,7 +11,7 @@ from django.db import OperationalError
 from django.core.management import call_command
 from django.db import connections, close_old_connections
 from django.conf import settings
-from ADSMSettings.models import SmSession, scenario_filename, SimulationProcessRecord
+from ADSMSettings.models import SmSession, scenario_filename
 
 
 def db_name(name='scenario_db'):
