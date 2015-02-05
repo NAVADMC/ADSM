@@ -113,7 +113,7 @@ header div {
 
 .filename {
     float: left;
-    width: 700px;
+    width: auto;
     padding: 5px 20px;
     font-size: 20pt;
     font-weight: 400;
@@ -133,33 +133,55 @@ header #admin_link {
     top: 0;
     right: 0;
     margin-right: 0px;
+    min-width: 230px;
+}
+
+header .buttonHolder{
+    padding-top:14px;
+}
+header .buttonHolder .btn {
+    background-color:transparent;
+    transition: all .1s ease;
+    color: rgba(255, 255, 255, .7);
+    margin-left:5px;
+    height:20px;
+    padding:0;
+    margin-top:0;
+    color: rgba(255, 255, 255, .7);
+}
+header form .buttonHolder .icon{
+    max-height: 14px;
+    margin-right: 3px;
+    margin-bottom: 2px;
+    opacity:.7;
+}
+header form .buttonHolder .btn {
+    width: 78px;
+}
+header form .buttonHolder {
+    margin-top:-5px;
 }
 
 header #admin_link .btn{
     background-color:transparent;
     transition: all .1s ease;
-    color: rgba(255, 255, 255, .7);
+    padding: 0px 10px;
+    margin-left: 0px; 
+}
+header .buttonHolder .btn:first-child {
+    border-right:1px solid rgba(255, 255, 255, .7);
 }
 
-header #admin_link .btn:first-child:after{
-    content:"";
-    position:absolute;
-    height: 20px;
-    width: 1px; 
-    background-color: rgba(255, 255, 255, .7);
-    left: 105px;
-    top: 11px;
+header form .buttonHolder .btn:last-child {
+    height:30px;
+    border:1px solid gray;
+    background-color: #707070;
 }
 
-header #admin_link .btn:hover {
+header .buttonHolder .btn:hover {
     color: rgba(255, 255, 255, 1);
 }
 
-header #admin_link .btn:active {
-    opacity: 1;
-    color: white;
-    border: none;
-}
 header #admin_link .btn:focus {
     border: 1px solid rgba(255, 255, 255, .8);
     color: white;
@@ -620,3 +642,4 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 .spacer {
     height: 100px;
 }
+
