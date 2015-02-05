@@ -126,7 +126,7 @@ body>nav {
     top: 44px;
     bottom: 0;
     left: 0;
-    width: 170px;
+    width: 175px;
 }
 
 body>section {
@@ -154,10 +154,10 @@ ul {
 #setupMenu h2, #setupMenu h3, #setupMenu h4 {
     margin-top: 0;
     margin-bottom: 0; /* These are meant to stack */
-    border-bottom:1px solid #eeeeee;
     -webkit-border-radius:0 2px 2px 0;
     overflow: hidden;
     white-space: nowrap;
+    /*width:170px;*/
 }
 
 #setupMenu a {
@@ -167,6 +167,20 @@ ul {
     line-height: 35px;
     padding-left: 15px;
     transition:background-color .2s ease;
+    width:170px;
+    position:relative;
+    margin-bottom:1px;
+}
+
+#setupMenu a:before {
+    content:"";
+    display:block;
+    width:100%;
+    height:1px;
+    background-color:#eeeeee;
+    position:absolute;
+    bottom:-1px;
+    left:-5px;
 }
 
 #setupMenu a:hover{
@@ -181,13 +195,13 @@ ul {
     padding-left:30px;
 }
 
-
-#setupMenu .active {
+#setupMenu a.active {
     background-color: #606060;
-    margin-right:15px;
+    margin-left:0;
     color:white;
     font-weight:400;
     -webkit-border-radius:0 4px 4px 0;
+    width:175px;
 }
 
 #setupMenu span {
