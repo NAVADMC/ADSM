@@ -70,9 +70,17 @@ header {
     z-index: 100;
     background-color: #606060;
     width: 100%;
-    height: 44px;
+    height: 50px;
     top: 0;
-    border-bottom: 4px solid black;
+}
+header:after{
+    content: "";
+    width: 100%;
+    height: 1px;
+    background-color: white;
+    position: absolute;
+    bottom: 5px;
+    left: 0px;
 }
 
 header a, header button {
@@ -85,6 +93,7 @@ header .btn, #header .btn {
 }
 header .buttonHolder {
     min-width: 256px;
+    margin-top: 1px;
 }
 header h1 {
     margin: 0 0px;
@@ -100,7 +109,7 @@ header div {
 .filename {
     float: left;
     width: 700px;
-    padding: 0 20px;
+    padding: 5px 20px;
     font-size: 20pt;
     font-weight: 400;
     background:#606060;
@@ -121,9 +130,39 @@ header #admin_link {
     margin-right: 0px;
 }
 
+header #admin_link .btn{
+    background-color:transparent;
+    transition: all .1s ease;
+    color: rgba(255, 255, 255, .7);
+}
+
+header #admin_link .btn:first-child:after{
+    content:"";
+    position:absolute;
+    height: 20px;
+    width: 1px; 
+    background-color: rgba(255, 255, 255, .7);
+    left: 105px;
+    top: 11px;
+}
+
+header #admin_link .btn:hover {
+    color: rgba(255, 255, 255, 1);
+}
+
+header #admin_link .btn:active {
+    opacity: 1;
+    color: white;
+    border: none;
+}
+header #admin_link .btn:focus {
+    border: 1px solid rgba(255, 255, 255, .8);
+    color: white;
+}
+
 body>nav {
     position: fixed;
-    top: 44px;
+    top: 49px;
     bottom: 0;
     left: 0;
     width: 175px;
@@ -154,7 +193,6 @@ ul {
 #setupMenu h2, #setupMenu h3, #setupMenu h4 {
     margin-top: 0;
     margin-bottom: 0; /* These are meant to stack */
-    -webkit-border-radius:0 2px 2px 0;
     overflow: hidden;
     white-space: nowrap;
     /*width:170px;*/
@@ -230,19 +268,28 @@ ul {
     bottom: 10px;
     left: 0;
     width:  170px;
+}
+
+#RunSimulation.incomplete,
+#RunSimulation.incomplete:hover,
+#RunSimulation a.incomplete:hover {
+    background-color:#f6da40;
+}
+
+#RunSimulation.completed,
+#RunSimulation.completed:hover,
+#RunSimulation a.completed:hover {
     background-color:#68be5e;
 }
 
 #RunSimulation a {
     height: 50px;
     line-height: 50px;
-    text-align: center;
-    font-size:18px;
+    font-size:17px;
     font-style:italic;
-    transition: color .3s ease;
+    transition: color .1s ease;
 }
 #RunSimulation:hover a, #RunSimulation:hover .glyphicon{
-    background-color:#68be5e;
     color:black;
 }
 
@@ -253,11 +300,12 @@ ul {
 }
 
 #RunSimulation .glyphicon {
-    font-size: 21px;
-    top: 3px;
-    color:#606060;
-    transition: all .3s ease;
-    /*vertical-align: middle;*/
+    font-size: 18px;
+    top: 2px;
+    transition: color .1s ease;
+}
+#RunSimulation a:before {
+    display:none;
 }
 
 .blocking-overlay {
