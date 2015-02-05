@@ -79,10 +79,10 @@ def construct_title(field_name, iteration, model, zone=''):
     return explanation, title
 
 
-def population_png(request, width_inches=4.5, height_inches=4):
+def population_png(request, width_inches=8.5, height_inches=8):
     latlong = [(u.latitude, u.longitude) for u in Unit.objects.all()]
     df = pd.DataFrame.from_records(latlong, columns=['Latitude', 'Longitude'])
-    axis = df.plot('Longitude', 'Latitude', kind='scatter', color='black', figsize=(width_inches, height_inches))
+    axis = df.plot('Longitude', 'Latitude', kind='scatter', color='black', s=0.25, figsize=(width_inches, height_inches))
     return HttpFigure(axis.figure)
 
 
