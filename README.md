@@ -11,16 +11,25 @@ Operating system:
 Python 3.4.2 (x64): 
  
   - Windows: https://www.python.org/ftp/python/3.4.2/python-3.4.2.amd64.msi
-  - Linux: https://www.python.org/ftp/python/3.4.2/Python-3.4.2.tgz (Please find instructions for compiling on your platform)
+  - Linux: https://www.python.org/ftp/python/3.4.2/Python-3.4.2.tgz (Please find instructions for compiling on your platform. Note: Ubuntu now ships with python3. We will give instructions assuming this version.)
+    - Note that Linux Python3 ships with broken pip and setup tools. Run this command to fix the issue `curl https://bootstrap.pypa.io/get-pip.py | python3`
   - Mac: https://www.python.org/ftp/python/3.4.2/python-3.4.2-macosx10.6.pkg
 
 Once Python is installed, you will need to create a Virtual Environment for the ADSM Project.
 This is important, especially if you plan on compiling a distributable version, as we will package the Virtual Environment to send off with the deployable. So make sure that your Virtual Environment is dedicated to this project and clean of unneeded package installations.
 
-Create Virtual Environment: `/path/to/py3.4/python -m venv /path/to/adsm_venv`
+Create Virtual Environment:
+
+  - Windows: `/path/to/py3.4/python -m venv /path/to/adsm_venv`
+    - Activate with `/path/to/adsm_venv/Scripts/activate.bat`
+  - Linux: `python3 -m venv /path/to/adsm_venv`
+    - Activate with `source /path/to/adsm_venv/bin/activate`
+    - Install required python dev files: `sudo apt-get install build-essential python3-dev; sudo apt-get build-dep python3-matplotlib`
+    
+Please make sure that NO packages from your global install made it into your Virtual Environment. Use `pip freeze` to confirm nothing is installed.
 
 Now that we have a Virtual Environment, we need to install all the Python Packages that ADSM uses.
-Using the pip in your new Virtual Environment (`/path/to/adsm_venv/Scripts/pip`), install the following packages.
+Using the pip in your new Virtual Environment (confirm Virtual Environment Activation with `where pip` or `which pip`), install the following packages.
 
     pip install CherryPy==3.6.0
     pip install Django==1.7.1
@@ -41,14 +50,10 @@ Using the pip in your new Virtual Environment (`/path/to/adsm_venv/Scripts/pip`)
 **If you are on Linux or Mac**, then you can install the following:
 
     pip install numpy==1.9.1
-
-    # Linux requires a special step here: 
-    sudo apt-get build-dep python-matplotlib
-
     pip install matplotlib==1.4.2
-    pip install pandas==0.15.1
+    pip install pandas==0.15.2
     pip install pyproj==1.9.4
-    pip install psutil
+    pip install psutil==2.2.0
 
 **If you are on Windows**, these packages need a special installation: 
 
