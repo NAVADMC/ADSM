@@ -147,7 +147,7 @@ header .buttonHolder{
 }
 header .buttonHolder .btn {
     background-color:transparent;
-    transition: all .1s ease;
+    transition: all .2s ease;
     color: rgba(255, 255, 255, .7);
     margin-left:5px;
     height:20px;
@@ -160,6 +160,7 @@ header form .buttonHolder .icon{
     margin-right: 3px;
     margin-bottom: 2px;
     opacity:.7;
+    transition: opacity .2s ease;
 }
 header form .buttonHolder .btn {
     width: 78px;
@@ -170,7 +171,7 @@ header form .buttonHolder {
 
 header #admin_link .btn{
     background-color:transparent;
-    transition: all .1s ease;
+    transition: all .2s ease;
     padding: 0px 10px;
     margin-left: 0px; 
 }
@@ -186,6 +187,13 @@ header form .buttonHolder .btn:last-child {
 
 header .buttonHolder .btn:hover {
     color: rgba(255, 255, 255, 1);
+}
+header a:hover .icon {
+    opacity: 1;
+}
+
+header form .buttonHolder .btn:last-child:hover {
+    background-color: #a8a8a8;
 }
 
 header #admin_link .btn:focus {
@@ -320,7 +328,7 @@ ul {
     line-height: 50px;
     font-size:17px;
     font-style:italic;
-    transition: color .1s ease;
+    transition: color .2s ease;
 }
 #RunSimulation:hover a, #RunSimulation:hover .glyphicon{
     color:black;
@@ -335,7 +343,7 @@ ul {
 #RunSimulation .glyphicon {
     font-size: 18px;
     top: 2px;
-    transition: color .1s ease;
+    transition: color .2s ease;
 }
 #RunSimulation a:before {
     display:none;
