@@ -219,7 +219,7 @@ body>section {
     padding-top: 1px;
     margin-left: 280px;
     min-width:600px;
-    padding-left: calc((100% - 1180px) / 2);
+    padding-left: calc((100% - 1280px) / 2);
 }
 
 ul {
@@ -242,6 +242,7 @@ ul {
     margin-bottom: 0; /* These are meant to stack */
     overflow: hidden;
     white-space: nowrap;
+    position:relative;
     /*width:170px;*/
 }
 
@@ -294,6 +295,22 @@ ul {
     height: 35px;
     -webkit-border-radius:0 2px 2px 0;
 }
+/*--------- right border on results nav menu -----*/
+#setupMenu h2:before,
+#setupMenu h3:before,
+#setupMenu h4:before {
+    content: "";
+    width: 5px;
+    height: 37px;
+    display: block;
+    position: absolute;
+    right: 5px;
+    top: -1px;
+    border-top: 1px solid #ebebeb;
+    border-right: 1px solid #ebebeb;
+    border-bottom: 1px solid #ebebeb;
+    border-radius: 0 2px 2px 0;
+}
 
 #setupMenu .incomplete {
     font-weight: 600;
@@ -311,7 +328,7 @@ ul {
 }
 
 #RunSimulation {
-    position: fixed;
+    position: fixed !important;
     bottom: 10px;
     left: 0;
     width:  170px;
@@ -486,16 +503,16 @@ select {
 }
 .progress-bar-mini {
     display:block;
-    margin-top: -4px;
+    margin-top: -7px;
     margin-right: 8px;
-    padding-bottom: 4px;
+    padding-bottom: 3px;
 }
 .progress-bar-mini .bar {
     height: 3px;
-    background-color: #3577b1;
+    background-color: #68be5e;
 }
 .progress-bar-mini .bar.done, .progress-bar.done {
-    background-color: #B6F3A7;
+    background-color: #68be5e;
 }
 
 /**********************/
@@ -685,4 +702,5 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 .spacer {
     height: 100px;
 }
+/*-----testing results nav span fix-------*/
 
