@@ -554,6 +554,19 @@ input[type=file], button {
     min-width: 400px;
 }
 
+#file_list .addNew {
+    border-bottom: none;
+}
+
+#file_list .addNew a{
+    color: #3577b1;
+    opacity: .8;
+    transition: opacity .2s ease;
+}
+
+#file_list .addNew a:hover {
+    opacity: 1;
+}
 /**************************/
 
 #farm_list {
