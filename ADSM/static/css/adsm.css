@@ -84,6 +84,7 @@ header {
     width: 100%;
     height: 50px;
     top: 0;
+    min-width:1000px;
 }
 header:after{
     content: "";
@@ -213,8 +214,10 @@ body>nav {
 body>section {
     margin-top: 44px;
     padding-top: 1px;
-    margin-left:  240px;
-    padding-left: 40px;
+    margin-left: 280px;
+    width: calc(100% - 360px);
+    min-width:600px;
+    padding-left: calc((100% - 1080px) / 2);
 }
 
 ul {
