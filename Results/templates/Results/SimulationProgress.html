@@ -3,10 +3,6 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-{#    {% if large_population %}#}
-{#        <h2>Locations of all Units in this Population (Large)</h2>#}
-{#        <img src="/results/Population.png" alt="Unit Locations"/>#}
-{#    {% else %}#}
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/mapbox.css" />
     <script type="text/javascript" src="{{ STATIC_URL }}js/mousewheel.js"></script> 
     <script type="text/javascript" src="{{ STATIC_URL }}js/mapbox.js"></script> 
@@ -38,13 +34,12 @@
         {% if is_simulation_running %}
             <a href="/results/abort_simulation" class="btn">Abort</a>
         {% endif %}
-        <div class="progress" style="width:92vh; position: relative;">
+        <div class="progress">
             <span class="simulation-status status-text"></span>
             <div class="simulation-progress progress-bar {% if results_progress == 100 %} done{% endif %}" style="width:{{ results_progress|floatformat:"0" }}%"></div>
         </div>
     </div>
 
-    <p>Distribution of Outcomes for all Units in the simulation</p>
     <p>Version: {{ version_number }}</p>
 
     <div id="summaryData">
@@ -68,6 +63,5 @@
             </div>
         </div>
     {% endif %}
-
-    <textarea name="output" id="" cols="30" rows="10">{{ output }}</textarea>
+    <div class="spacer"></div>
 {% endblock %}
