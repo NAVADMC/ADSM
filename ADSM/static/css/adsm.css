@@ -30,8 +30,9 @@ h3, h4 {
 }
 
 section h1 {
-    font-size: 16pt;
+    font-size: 18px;
     margin-left: -15px;
+    font-weight:600;
 }
 
 section h1, section h2 {
@@ -495,9 +496,11 @@ select {
 /**********************/
 
 #file_list li {
-    font-size: 14pt;
+    font-size: 13px;
+    line-height:27px;
     text-decoration: none;
-    border-bottom: 2px solid #d9d9d9;
+    border-bottom: 1px solid #ebebeb;
+    padding-left: 5px;
 }
 
 #file_list {
@@ -592,9 +595,9 @@ body .modal-dialog {
     background-color: #808080;
     padding:5px 10px;
     color: white;
-    font-size: 14pt;
+    font-size: 15px;
     max-width: 600px;
-    line-height: 27px;
+    line-height: 24px;
 }
 
 .model-banner a{
