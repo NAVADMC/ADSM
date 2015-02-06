@@ -5,6 +5,9 @@
     background-color:white;
 }
 
+a:focus{
+    outline-offset:0;
+}
 body {
     font-family: 'Source Sans Pro', sans-serif;
     font-size: 10pt;
@@ -68,6 +71,9 @@ a.wiki, a.wiki:visited {
 .icon {
     max-height: 20px;
     max-width: 20px;
+}
+section .icon{
+    max-height: 16px;
 }
 
 header {
@@ -198,7 +204,7 @@ body>nav {
 body>section {
     margin-top: 44px;
     padding-top: 1px;
-    margin-left:  220px;
+    margin-left:  240px;
     padding-left: 40px;
 }
 
@@ -359,6 +365,7 @@ ul {
     color: #ffffff;
     border-radius: 0;
     border: 0px;
+    transition: all .2s ease;
 }
 
 .btn-add {
@@ -374,28 +381,40 @@ ul {
     background-color: #b1b1b1;
 }
 
-.btn-primary {
-    background-color: #00477f;
+.btn-primary,
+.btn-usaved {
+    background-color: #3577b1;
+    transition: all ..2s ease;
 }
 
-.btn-primary :focus {
-    background-color: #00477f;
-    border-color: #3276b1;
+.btn-primary:hover,
+.btn.unsaved:hover {
+    background-color: #4499e3;
+    color:white;
+}
+
+section .btn-primary:focus,
+.btn-unsaved:focus,
+.btn-danger:focus {
+    outline: 2px solid rgba(99, 215, 253, .5) !important;
+    color:white;
+}
+.btn-danger:focus {
+    border:none;
+    background-color: #e0383e;
 }
 
 .btn-primary.disabled, .btn-primary[disabled] {
     background-color: #7B8893;
+    color: rgba(255, 255, 255, .8);
 }
 .btn-danger {
-    background-color: darkred;
+    background-color: #d0343a;
+    transition: all .2s ease;
 }
 
-.btn.unsaved {
-    background-color: #7cb9ff;
-}
-
-.btn.unsaved:hover {
-    background-color: #479DFF;
+.btn-danger:hover{
+    background-color:#e0383e;
 }
 
 textarea {
@@ -459,7 +478,7 @@ select {
 }
 .progress-bar-mini .bar {
     height: 3px;
-    background-color: #00477f;
+    background-color: #3577b1;
 }
 .progress-bar-mini .bar.done, .progress-bar.done {
     background-color: #B6F3A7;
@@ -562,8 +581,8 @@ body .modal-dialog {
 }
 
 .model-banner {
-    background-color: #00477f;
-    border:5px solid #00477f;
+    background-color: #808080;
+    padding:5px 10px;
     color: white;
     font-size: 14pt;
     max-width: 600px;
@@ -572,6 +591,14 @@ body .modal-dialog {
 
 .model-banner a{
     color:white;
+}
+
+.model-banner a:hover,
+.model-banner a:focus {
+    text-decoration: none;
+    border: none;
+    outline: 0;
+    background: #808080;
 }
 
 a.collapsed img {
