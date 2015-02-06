@@ -160,17 +160,17 @@ header .buttonHolder .btn {
     margin-top:0;
     color: rgba(255, 255, 255, .7);
 }
-header form .buttonHolder .icon{
+header #file_actions .icon{
     max-height: 14px;
     margin-right: 3px;
     margin-bottom: 2px;
     opacity:.7;
     transition: opacity .2s ease;
 }
-header form .buttonHolder .btn {
+header #file_actions .btn {
     width: 78px;
 }
-header form .buttonHolder {
+header #file_actions {
     margin-top:-5px;
 }
 
@@ -184,7 +184,7 @@ header .buttonHolder .btn:first-child {
     border-right:1px solid rgba(255, 255, 255, .7);
 }
 
-header form .buttonHolder .btn:last-child {
+header #file_actions .btn:last-child {
     height:30px;
     border:1px solid gray;
     background-color: #707070;
@@ -193,11 +193,11 @@ header form .buttonHolder .btn:last-child {
 header .buttonHolder .btn:hover {
     color: rgba(255, 255, 255, 1);
 }
-header a:hover .icon {
+header #file_actions a:hover .icon {
     opacity: 1;
 }
 
-header form .buttonHolder .btn:last-child:hover {
+header #file_actions .btn:last-child:hover {
     background-color: #a8a8a8;
 }
 
