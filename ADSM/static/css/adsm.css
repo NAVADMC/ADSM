@@ -497,9 +497,12 @@ select {
     position: absolute;
     width: 100%;
     text-align: center;
-    font-weight: bold;
-    text-shadow: 0 -1px 1px #fff;
-    font-size:1.2em
+    font-size: 15px;
+    color: #404040;
+    line-height: 20px;
+}
+.progress {
+    border-radius: 2px;
 }
 .progress-bar-mini {
     display:block;
@@ -708,7 +711,7 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 
 #sim_progress_and_button .progress {
     /*display: inline-block;*/
-    width: 60vw;
+    width: 923px;
     margin: 0px;
 }
 
