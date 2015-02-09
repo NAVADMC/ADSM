@@ -417,6 +417,10 @@ section .btn-primary:focus,
     background-color:#e0383e;
 }
 
+.btn.loading{
+    background: url(../working.gif) no-repeat center ;
+}
+
 textarea {
     width: 400px;
     height: 70px;

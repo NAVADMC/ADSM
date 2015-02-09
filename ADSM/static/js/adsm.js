@@ -60,7 +60,12 @@ $(function(){
         });
     });
     
+    $(document).on('click', '#check_update', function(event) {
+        $(this).addClass('loading')
+    });
+    
     $(document).on('click', '#update_adsm', function(event){
+        $(this).addClass('loading')
         event.preventDefault();
         $.get('/app/Update/', function(result){
             if( result == "success"){
