@@ -109,7 +109,7 @@ def reset_db(name, fail_ok=True):
     else:
         print(db_name(name), "does not exist")
     #creates a new blank file by migrate
-    call_command('migrate', interactive=False)
+    call_command('migrate', database=name, interactive=False)
     if name == 'default':  # create super user
         from django.contrib.auth.models import User
         u = User(username='ADSM', is_superuser=True, is_staff=True)
