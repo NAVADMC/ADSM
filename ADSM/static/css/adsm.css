@@ -14,6 +14,9 @@ body {
     font-weight: 400;
     box-sizing:border-box;
 }
+section{
+    margin-bottom:50px;
+}
 
 h2{
     font-size:15px;
@@ -30,8 +33,9 @@ h3, h4 {
 }
 
 section h1 {
-    font-size: 16pt;
+    font-size: 18px;
     margin-left: -15px;
+    font-weight:600;
 }
 
 section h1, section h2 {
@@ -83,6 +87,7 @@ header {
     width: 100%;
     height: 50px;
     top: 0;
+    min-width:1000px;
 }
 header:after{
     content: "";
@@ -119,7 +124,7 @@ header div {
 
 .filename {
     float: left;
-    width: auto;
+    min-width: 500px;
     padding: 5px 20px;
     font-size: 20pt;
     font-weight: 400;
@@ -147,7 +152,7 @@ header .buttonHolder{
 }
 header .buttonHolder .btn {
     background-color:transparent;
-    transition: all .1s ease;
+    transition: all .2s ease;
     color: rgba(255, 255, 255, .7);
     margin-left:5px;
     height:20px;
@@ -155,22 +160,23 @@ header .buttonHolder .btn {
     margin-top:0;
     color: rgba(255, 255, 255, .7);
 }
-header form .buttonHolder .icon{
+header #file_actions .icon{
     max-height: 14px;
     margin-right: 3px;
     margin-bottom: 2px;
     opacity:.7;
+    transition: opacity .2s ease;
 }
-header form .buttonHolder .btn {
+header #file_actions .btn {
     width: 78px;
 }
-header form .buttonHolder {
+header #file_actions {
     margin-top:-5px;
 }
 
 header #admin_link .btn{
     background-color:transparent;
-    transition: all .1s ease;
+    transition: all .2s ease;
     padding: 0px 10px;
     margin-left: 0px; 
 }
@@ -178,7 +184,7 @@ header .buttonHolder .btn:first-child {
     border-right:1px solid rgba(255, 255, 255, .7);
 }
 
-header form .buttonHolder .btn:last-child {
+header #file_actions .btn:last-child {
     height:30px;
     border:1px solid gray;
     background-color: #707070;
@@ -186,6 +192,13 @@ header form .buttonHolder .btn:last-child {
 
 header .buttonHolder .btn:hover {
     color: rgba(255, 255, 255, 1);
+}
+header #file_actions a:hover .icon {
+    opacity: 1;
+}
+
+header #file_actions .btn:last-child:hover {
+    background-color: #a8a8a8;
 }
 
 header #admin_link .btn:focus {
@@ -204,8 +217,9 @@ body>nav {
 body>section {
     margin-top: 44px;
     padding-top: 1px;
-    margin-left:  240px;
-    padding-left: 40px;
+    margin-left: 280px;
+    min-width:600px;
+    padding-left: calc((100% - 1280px) / 2);
 }
 
 ul {
@@ -228,6 +242,7 @@ ul {
     margin-bottom: 0; /* These are meant to stack */
     overflow: hidden;
     white-space: nowrap;
+    position:relative;
     /*width:170px;*/
 }
 
@@ -280,6 +295,22 @@ ul {
     height: 35px;
     -webkit-border-radius:0 2px 2px 0;
 }
+/*--------- right border on results nav menu -----*/
+#setupMenu h2:before,
+#setupMenu h3:before,
+#setupMenu h4:before {
+    content: "";
+    width: 5px;
+    height: 37px;
+    display: block;
+    position: absolute;
+    right: 5px;
+    top: -1px;
+    border-top: 1px solid #ebebeb;
+    border-right: 1px solid #ebebeb;
+    border-bottom: 1px solid #ebebeb;
+    border-radius: 0 2px 2px 0;
+}
 
 #setupMenu .incomplete {
     font-weight: 600;
@@ -297,7 +328,7 @@ ul {
 }
 
 #RunSimulation {
-    position: fixed;
+    position: fixed !important;
     bottom: 10px;
     left: 0;
     width:  170px;
@@ -320,7 +351,7 @@ ul {
     line-height: 50px;
     font-size:17px;
     font-style:italic;
-    transition: color .1s ease;
+    transition: color .2s ease;
 }
 #RunSimulation:hover a, #RunSimulation:hover .glyphicon{
     color:black;
@@ -335,7 +366,7 @@ ul {
 #RunSimulation .glyphicon {
     font-size: 18px;
     top: 2px;
-    transition: color .1s ease;
+    transition: color .2s ease;
 }
 #RunSimulation a:before {
     display:none;
@@ -470,30 +501,35 @@ select {
     position: absolute;
     width: 100%;
     text-align: center;
-    font-weight: bold;
-    text-shadow: 0 -1px 1px #fff;
-    font-size:1.2em
+    font-size: 15px;
+    color: #404040;
+    line-height: 20px;
+}
+.progress {
+    border-radius: 2px;
 }
 .progress-bar-mini {
     display:block;
-    margin-top: -4px;
+    margin-top: -7px;
     margin-right: 8px;
-    padding-bottom: 4px;
+    padding-bottom: 3px;
 }
 .progress-bar-mini .bar {
     height: 3px;
-    background-color: #3577b1;
+    background-color: #68be5e;
 }
 .progress-bar-mini .bar.done, .progress-bar.done {
-    background-color: #B6F3A7;
+    background-color: #68be5e;
 }
 
 /**********************/
 
 #file_list li {
-    font-size: 14pt;
+    font-size: 13px;
+    line-height:27px;
     text-decoration: none;
-    border-bottom: 2px solid #d9d9d9;
+    border-bottom: 1px solid #ebebeb;
+    padding-left: 5px;
 }
 
 #file_list {
@@ -525,6 +561,19 @@ input[type=file], button {
     min-width: 400px;
 }
 
+#file_list .addNew {
+    border-bottom: none;
+}
+
+#file_list .addNew a{
+    color: #3577b1;
+    opacity: .8;
+    transition: opacity .2s ease;
+}
+
+#file_list .addNew a:hover {
+    opacity: 1;
+}
 /**************************/
 
 #farm_list {
@@ -588,9 +637,9 @@ body .modal-dialog {
     background-color: #808080;
     padding:5px 10px;
     color: white;
-    font-size: 14pt;
+    font-size: 15px;
     max-width: 600px;
-    line-height: 27px;
+    line-height: 24px;
 }
 
 .model-banner a{
@@ -666,11 +715,12 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 
 #sim_progress_and_button .progress {
     /*display: inline-block;*/
-    width: 60vw;
+    width: 923px;
     margin: 0px;
 }
 
 .spacer {
     height: 100px;
 }
+/*-----testing results nav span fix-------*/
 

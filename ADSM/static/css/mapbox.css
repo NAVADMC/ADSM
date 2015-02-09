@@ -6,8 +6,11 @@
 #viewport, #viewport2 {
     height: 800px;
     width: 923px;
-    cursor: move;
+    cursor: zoom-in;
     overflow: hidden;
+}
+#viewport:active, #viewport2:active {
+    cursor: move;
 }
 .mapwrapper {
     position: relative;

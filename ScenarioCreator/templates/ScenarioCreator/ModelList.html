@@ -15,8 +15,7 @@
             </div>
             <div id="sub-model{{forloop.counter}}" class="panel-collapse collapse in" style="height: auto;">
                 <ul id="file_list">
-                    <li><a href="/setup/{{model.class}}/new/"><i> + New {{ model.name }}</i></a>
-
+                    
                     {% for entry in model.entries %}
                         <li><a href="/setup/{{model.class}}/{{entry.pk}}/">{{ entry }}</a>
                             {% if not 'Function' in  model.name %}
@@ -25,6 +24,8 @@
                             <a href="/setup/{{model.class}}/{{entry.pk}}/copy/" ><img alt="Copy" src="{{ STATIC_URL }}icons/copy.png" class="icon pull-right"></a>
                             </li>
                     {% endfor %}
+
+                    <li class="addNew"><a href="/setup/{{model.class}}/new/"><i> + New {{ model.name }}</i></a>
                 </ul>
             </div>
         </div>
