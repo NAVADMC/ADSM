@@ -3,12 +3,12 @@
 
 {% block main %}
     <nav id="setupMenu">
-		<h2><a href="/results/" class="{{"results/$"|active:active_link}}">Results Home
+		<h2><a href="/results/" class="{{"^$"|active:active_link}}">Results Home
             <div class="progress-bar-mini">
                 <div class="simulation-progress bar{% if results_progress == 100 %} done{% endif %}" style="width:{{ results_progress|floatformat:"0" }}%"></div>
             </div>
         </a></h2>
-		<h2><a href="/results/DailyByProductionType/" class="{{"DailyByProductionType"|active:active_link}}">Production Type</a></h2>
+		<h2><a href="/results/DailyByProductionType/" class="{{"DailyByProductionType/$"|active:active_link}}">Production Type</a></h2>
             <h3><a href="/results/DailyByProductionType/prefix/exp/" class="{{"DailyByProductionType/prefix/exp"|active:active_link}} ">Exposures</a></h3>
             <h3><a href="/results/DailyByProductionType/prefix/inf/" class="{{"DailyByProductionType/prefix/inf"|active:active_link}} ">Infections</a></h3>
             <h3><a href="/results/DailyByProductionType/prefix/vac/" class="{{"DailyByProductionType/prefix/vac"|active:active_link}} {{vac}}">Vaccinations</a></h3>

@@ -8,7 +8,8 @@ register = template.Library()
 
 @register.filter()
 def active(target_address, url):
-    if target_address.lower() in url.lower():
+    print(target_address, url)
+    if re.search(target_address, url, flags=re.IGNORECASE):
         return 'active '
     return ''
 
