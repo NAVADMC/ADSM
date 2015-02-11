@@ -15,7 +15,7 @@ Python 3.4.2 (x64):
     - Note that Linux Python3 ships with broken pip and setup tools. Run this command to fix the issue `curl https://bootstrap.pypa.io/get-pip.py | python3`
   - Mac: https://www.python.org/ftp/python/3.4.2/python-3.4.2-macosx10.6.pkg
 
-Once Python is installed, you will need to create a Virtual Environment for the ADSM Project.
+Once Python is installed, you will need to create a Virtual Environment for the ADSM Project.  
 This is important, especially if you plan on compiling a distributable version, as we will package the Virtual Environment to send off with the deployable. So make sure that your Virtual Environment is dedicated to this project and clean of unneeded package installations.
 
 Create Virtual Environment:
@@ -28,7 +28,7 @@ Create Virtual Environment:
     
 Please make sure that NO packages from your global install made it into your Virtual Environment. Use `pip freeze` to confirm nothing is installed.
 
-Now that we have a Virtual Environment, we need to install all the Python Packages that ADSM uses.
+Now that we have a Virtual Environment, we need to install all the Python Packages that ADSM uses.  
 Using the pip in your new Virtual Environment (confirm Virtual Environment Activation with `where pip` or `which pip`), install the following packages.
 
     pip install CherryPy==3.6.0
@@ -79,6 +79,8 @@ Linux:
  
   - Requires ldd and objdump installed (probably already on your system)  
   - `pip install cx-freeze==4.3.3`
+    - If the above install fails, then there is a problem with your python shared libraries, I have a clone of the cx_freeze repo with a temp fix
+      - CD to a directory where you want to download it, then `git clone git@git.newline.us:BryanHurst/cx_freeze.git; cd cx_freeze; python setup.py install`
  
 Mac:  
  
