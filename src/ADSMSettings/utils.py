@@ -62,7 +62,7 @@ def prepare_supplemental_output_directory():
 def adsm_executable_command():
     executables = {"Windows": 'adsm_simulation.exe', "Linux": 'adsm_simulation', "Darwin": 'adsm_simulation'}
     executables = defaultdict(lambda: 'adsm_simulation', executables)
-    system_executable = os.path.join(settings.BASE_DIR, '..', executables[platform.system()])
+    system_executable = os.path.join(settings.BASE_DIR, '..', 'bin', executables[platform.system()])
     output_args = prepare_supplemental_output_directory()
     return [system_executable, db_path('scenario_db')] + output_args
 
