@@ -22,8 +22,8 @@ lib/
 *.pyo
 
 ## Always Ignore ##
-workspace/Population_Test_Invalid.xml
-workspace/Population_Test_Zone_Assignment
+Sample\ Scenarios/Population_Test_Invalid.xml
+Sample\ Scenarios/Population_Test_Zone_Assignment
 adsm-env
 build/
 cef/out/

@@ -30,7 +30,7 @@ def delete_supplemental_folder():
     scenario_folder = scenario_filename()
     if scenario_folder != '':
         try:
-            shutil.rmtree(os.path.join('workspace', scenario_folder))
+            shutil.rmtree(workspace_path(scenario_folder))
         except:
             pass  # because the folder doesn't exist (which is fine)
 

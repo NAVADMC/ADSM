@@ -11,6 +11,7 @@ from django.shortcuts import render, redirect
 from django.db.models import Max
 
 from ADSMSettings.models import scenario_filename
+from ADSMSettings.utils import workspace_path
 from ScenarioCreator.models import OutputSettings
 from Results.graphing import construct_title
 from Results.forms import *  # necessary
@@ -37,10 +38,11 @@ def simulation_status(request):
 
 
 def results_home(request):
-    path_ex = os.path.join("workspace", scenario_filename(), "*.csv")
-    context = {'supplemental_files': [os.path.relpath(file_path, start="workspace") for file_path in glob(path_ex)]}
+    path_ex = workspace_path(scenario_filename() +"/*.csv")
+    start = os.path.basename(workspace_path())
+    context = {'supplemental_files': [os.path.relpath(file_path, start=start) for file_path in glob(path_ex)]}
     if os.path.exists(map_zip_file()):
-        context['supplemental_files'].append(os.path.relpath(map_zip_file(), start="workspace"))
+        context['supplemental_files'].append(os.path.relpath(map_zip_file(), start=start))
     # TODO: value dict file sizes
     if DailyControls.objects.all().count() > 0:
         context['summary'] = Results.summary.summarize_results()

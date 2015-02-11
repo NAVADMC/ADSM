@@ -2,6 +2,7 @@ from django.test import TestCase, TransactionTestCase
 from django.db import close_old_connections
 import os, shutil
 import zipfile
+from ADSMSettings.utils import workspace_path
 
 from Results.views import Simulation
 from ScenarioCreator.models import OutputSettings, ProductionType
@@ -17,9 +18,9 @@ class SimulationTest(TransactionTestCase):
     @classmethod
     def setUpClass(cls):
         source_db = os.path.join('ScenarioCreator','tests','population_fixtures','Roundtrip.sqlite3')
-        cls.destination_db = os.path.join('workspace', 'Roundtrip_test.sqlite3')
+        cls.destination_db = workspace_path('Roundtrip_test.sqlite3')
         shutil.copy(source_db, cls.destination_db)
-        cls.scenario_directory = os.path.join('workspace', 'Roundtrip_test')
+        cls.scenario_directory = workspace_path('Roundtrip_test')
 
     @classmethod
     def tearDownClass(cls):

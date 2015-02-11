@@ -1,6 +1,7 @@
 import unittest
 from django.core.exceptions import ValidationError
 from django.test import TestCase, TransactionTestCase
+from ADSMSettings.utils import workspace_path
 
 from ScenarioCreator.models import (Scenario, choice_char_from_value, squish_name,
                                     Unit, Population, ProductionType, IndirectSpread,
@@ -86,7 +87,7 @@ class ModelUtilsTest(TestCase):
 
     def test_population_link(self):
         index = Unit.objects.count()
-        p = Population(source_file='workspace/Population_Grid.xml')
+        p = Population(source_file=workspace_path('Population_Grid.xml'))
         p.save()
 
         new_unit = p.unit_set.first()

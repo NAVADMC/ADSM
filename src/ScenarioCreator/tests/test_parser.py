@@ -3,6 +3,7 @@ from xml.etree.ElementTree import ParseError
 from django.test import TestCase
 
 # Create your tests here.
+from ADSMSettings.utils import workspace_path
 from ScenarioCreator.models import Scenario, choice_char_from_value, squish_name, Unit, Population, ProductionType
 from ScenarioCreator.population_parser import PopulationParser
 
@@ -18,7 +19,7 @@ class PopulationParserTestCase(TestCase):
 
     def test_parser_load_blank_file(self):
         with self.assertRaises(EOFError) as e:
-            p = PopulationParser('workspace/Blank.xml')
+            p = PopulationParser(workspace_path('Blank.xml'))
 
         self.assertEqual(str(e.exception), "File Read returned a blank string.")
 

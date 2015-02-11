@@ -19,15 +19,18 @@ def db_name(name='scenario_db'):
     return os.path.basename(full_path)
 
 
-def workspace_path(target):
+def workspace_path(target=None):
+    home = os.path.join(os.path.expanduser("~"), "Documents")
+    if target is None:
+        return os.path.join(home, "ADSM Workspace")
     if '/' in target or '\\' in target:
         parts = re.split(r'[/\\]+', target)  # the slashes here are coming in from URL so they probably don't match os.path.split()
-        return os.path.join("workspace", *parts)
-    return os.path.join("workspace", target)
+        return os.path.join(home, "ADSM Workspace", *parts)
+    return os.path.join(home, "ADSM Workspace", target)
 
 
 def file_list(extension=''):
-    db_files = sorted(glob("./workspace/*" + extension), key=lambda s: s.lower())  # alphabetical, no case
+    db_files = sorted(glob(workspace_path("*" + extension)), key=lambda s: s.lower())  # alphabetical, no case
     return map(lambda f: os.path.basename(f), db_files)  # remove directory and extension
 
 
