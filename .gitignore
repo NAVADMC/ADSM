@@ -29,8 +29,8 @@ build/
 cef/out/
 *.manifest
 debug.log
-ADSM_Distributable.zip
-ADSM_Distributable.tar.bz2
+ADSM_*.zip
+ADSM_*.tar.bz2
 nginx/
 
 #################
@@ -59,7 +59,7 @@ media/*
 *.pydevproject
 .project
 .metadata
-bin/
+#bin/
 tmp/
 *.tmp
 *.bak
@@ -186,7 +186,7 @@ Desktop.ini
 
 # Packages
 parts
-bin
+#bin
 var
 sdist
 develop-eggs
