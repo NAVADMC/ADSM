@@ -16,7 +16,10 @@ if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(sys.executable)
 else:
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+    
+DB_BASE_DIR = os.path.join(os.path.expanduser("~"), "Documents", "ADSM Workspace", "settings")
+if not os.path.exists(DB_BASE_DIR):
+    os.makedirs(DB_BASE_DIR, exist_ok=True)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
@@ -71,16 +74,17 @@ CRISPY_TEMPLATE_PACK = 'bootstrap'
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
-        'NAME': os.path.join(BASE_DIR, 'settings.sqlite3'),
+        'NAME': os.path.join(DB_BASE_DIR, 'settings.sqlite3'),
         'ENGINE': 'django.db.backends.sqlite3',
-        'TEST_NAME': os.path.join(BASE_DIR, 'test_settings.sqlite3'),
+        'TEST_NAME': os.path.join(DB_BASE_DIR, 'test_settings.sqlite3'),
     },
     'scenario_db': {
-        'NAME': os.path.join(BASE_DIR, 'activeSession.sqlite3'),
+        'NAME': os.path.join(DB_BASE_DIR, 'activeSession.sqlite3'),
         'ENGINE': 'django.db.backends.sqlite3',
-        'TEST_NAME': os.path.join(BASE_DIR, 'test_activeSession.sqlite3'),
+        'TEST_NAME': os.path.join(DB_BASE_DIR, 'test_activeSession.sqlite3'),
         'OPTIONS': {
             'timeout': 300,
         }

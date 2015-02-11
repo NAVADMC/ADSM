@@ -24,8 +24,8 @@ if __name__ == "__main__":
 
 
     if len(sys.argv) == 4:  # single command line invocation
-        shutil.copy(db_name(), 'activeSession.bak')
-        shutil.copy('settings.sqlite3', 'settings.bak')
+        shutil.copy(db_name(), workspace_path('activeSession.bak'))
+        shutil.copy(workspace_path('settings.sqlite3'), workspace_path('settings.bak'))
         
         popul_path = sys.argv[1]
         param_path = sys.argv[2]
@@ -37,5 +37,5 @@ if __name__ == "__main__":
         save_scenario()
         shutil.move(workspace_path(scenario_name), scenario_path)
         
-        shutil.copy('activeSession.bak', db_name())
-        shutil.copy('settings.bak', 'settings.sqlite3')
+        shutil.copy(workspace_path('activeSession.bak'), db_name())
+        shutil.copy(workspace_path('settings.bak'), workspace_path('settings.sqlite3'))

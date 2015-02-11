@@ -1,5 +1,6 @@
 from itertools import chain
 import os
+import shlex
 import shutil
 import subprocess
 import re
@@ -23,11 +24,13 @@ def db_name(name='scenario_db'):
 def workspace_path(target=None):
     home = os.path.join(os.path.expanduser("~"), "Documents")
     if target is None:
-        return os.path.join(home, "ADSM Workspace")
-    if '/' in target or '\\' in target:
+        path = os.path.join(home, "ADSM Workspace")
+    elif '/' in target or '\\' in target:
         parts = re.split(r'[/\\]+', target)  # the slashes here are coming in from URL so they probably don't match os.path.split()
-        return os.path.join(home, "ADSM Workspace", *parts)
-    return os.path.join(home, "ADSM Workspace", target)
+        path = os.path.join(home, "ADSM Workspace", *parts)
+    else: 
+        path = os.path.join(home, "ADSM Workspace", target)
+    return path  # shlex.quote(path)
 
 
 def file_list(extension=''):

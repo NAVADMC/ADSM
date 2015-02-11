@@ -14,11 +14,11 @@ class ScenarioTestCase(TestCase):
         try:
             os.remove(file_path)
         except:
-            pass
+            print("Failed to delete", file_path)
 
     def test_post_success(self):
-        file_name = 'Test Scenario 123 AZ'
-        file_path = workspace_path(file_name) + '.sqlite3'
+        file_name = 'Test Scenario 123 AZ.sqlite3'
+        file_path = workspace_path(file_name)
 
         self.remove_test_file(file_path)
 
@@ -28,7 +28,8 @@ class ScenarioTestCase(TestCase):
             self.assertEqual(r.status_code, 302)
             self.assertTrue(os.path.isfile(file_path))
         finally:
-            self.remove_test_file(file_path)
+            pass
+        #     self.remove_test_file(file_path)
 
     def test_post_failure(self):
         file_name = 'Test \/ Scenario 123 AZ' # this should break Windows and Linux
