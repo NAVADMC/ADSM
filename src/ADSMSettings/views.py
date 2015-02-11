@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render, HttpResponse
 from ADSMSettings.models import scenario_filename, SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
-from ADSMSettings.utils import update_is_needed, graceful_startup, reset_db, update_db_version, db_name, workspace_path, file_list, handle_file_upload
+from ADSMSettings.utils import update_is_needed, graceful_startup, reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload
 
 
 def loading_screen(request):
@@ -86,9 +86,9 @@ def upload_scenario(request):
 def open_scenario(request, target, wrap_target=True):
     if wrap_target:
         target = workspace_path(target)
-    print("Copying ", target, "to", db_name(), ". This could take several minutes...")
+    print("Copying ", target, "to", db_path(), ". This could take several minutes...")
     close_old_connections()
-    shutil.copy(target, db_name())
+    shutil.copy(target, db_path())
     scenario_filename(os.path.basename(target))
     print('Sessions overwritten with ', target)
     update_db_version()
@@ -115,7 +115,7 @@ def save_scenario(request=None):
     save_error = None
     try:
         assert(r'\\' not in target and '/' not in target)
-        shutil.copy(db_name(), full_path)
+        shutil.copy(db_path(), full_path)
         unsaved_changes(False)  # File is now in sync
         print('Done Copying database to', full_path)
     except (IOError, AssertionError):

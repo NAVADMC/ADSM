@@ -1,6 +1,5 @@
 from itertools import chain
 import os
-import shlex
 import shutil
 import subprocess
 import re
@@ -16,9 +15,8 @@ from django.conf import settings
 from ADSMSettings.models import SmSession, scenario_filename
 
 
-def db_name(name='scenario_db'):
-    full_path = settings.DATABASES[name]['NAME']
-    return os.path.basename(full_path)
+def db_path(name='scenario_db'):
+    return settings.DATABASES[name]['NAME']
 
 
 def workspace_path(target=None):
@@ -30,7 +28,7 @@ def workspace_path(target=None):
         path = os.path.join(home, "ADSM Workspace", *parts)
     else: 
         path = os.path.join(home, "ADSM Workspace", target)
-    return path  # shlex.quote(path)
+    return path  # shlex.quote(path) if you want security
 
 
 def file_list(extension=''):
@@ -98,14 +96,14 @@ def graceful_startup():
 def reset_db(name, fail_ok=True):
     """Resets the database to a healthy state by any means necessary.  Tries to delete the file, or flush all tables, then runs the migrations from scratch.
      It now checks if the file exists.  This will throw a PermissionError if the user has the DB open in another program."""
-    print("Deleting", db_name(name))
+    print("Deleting", db_path(name))
     close_old_connections()
     delete_failed = False
-    if os.path.exists(db_name(name)):  # your database is corrupted and must be destroyed
+    if os.path.exists(db_path(name)):  # your database is corrupted and must be destroyed
         connections[name].close()
         try:
             # or you could http://stackoverflow.com/a/24501130/2291495
-            os.remove(db_name(name))
+            os.remove(db_path(name))
         except PermissionError as err:  # must still be holding onto the file lock, clear out contents instead
             if not fail_ok:
                 raise err
@@ -119,7 +117,7 @@ def reset_db(name, fail_ok=True):
                 execute("PRAGMA INTEGRITY_CHECK;")
                 print("===Dropping all Tables===")
     else:
-        print(db_name(name), "does not exist")
+        print(db_path(name), "does not exist")
     #creates a new blank file by migrate
     call_command('migrate', database=name, interactive=False)
     if name == 'default':  # create super user
