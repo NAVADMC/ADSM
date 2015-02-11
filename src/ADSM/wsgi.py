@@ -8,6 +8,16 @@ https://docs.djangoproject.com/en/1.6/howto/deployment/wsgi/
 """
 
 import os
+import sys
+
+
+if getattr(sys, 'frozen', False):
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+sys.path.append(os.path.dirname(BASE_DIR))
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
 
 from django.core.wsgi import get_wsgi_application
