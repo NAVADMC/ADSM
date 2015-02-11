@@ -1,0 +1,672 @@
+@import "../fonts/source-sans-pro/source-sans-pro.css";
+
+:focus{
+    outline: 2px solid rgba(99, 215, 253, .5);
+    background-color:white;
+}
+
+a:focus{
+    outline-offset:0;
+}
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 10pt;
+    font-weight: 400;
+    box-sizing:border-box;
+}
+
+h2{
+    font-size:15px;
+    font-weight:600;
+}
+
+h3, h4 {
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.panel-heading h1, .panel-heading h2, .panel-heading h3{
+    margin: 0 0 5px 0;
+}
+
+section h1 {
+    font-size: 16pt;
+    margin-left: -15px;
+}
+
+section h1, section h2 {
+    margin-bottom: 20px;
+}
+
+h3, h4 {
+    font-weight: 400;
+}
+
+section h4 {
+    font-size: 11pt;
+}
+
+a {
+    color: #7cb9ff;
+}
+
+a:hover {
+    color: #7cb9ff;
+    /*with underline*/
+}
+
+a.wiki, a.wiki:visited {
+    color: #B95E07;
+}
+
+.help-block {  
+    font-weight: bold; /* check boxes are bold from mixins.less and I think it looks better with definitions*/
+}
+
+.help-inline strong {  /* validation errors from the server */
+    background-color: #D13737;
+    color: white;
+}
+
+.icon {
+    max-height: 20px;
+    max-width: 20px;
+}
+section .icon{
+    max-height: 16px;
+}
+
+header {
+    position: fixed;
+    z-index: 100;
+    background-color: #606060;
+    width: 100%;
+    height: 50px;
+    top: 0;
+}
+header:after{
+    content: "";
+    width: 100%;
+    height: 1px;
+    background-color: white;
+    position: absolute;
+    bottom: 5px;
+    left: 0px;
+}
+
+header a, header button {
+    height: 35px;
+    line-height: 35px;
+}
+
+header .btn, #header .btn {
+    padding: 8px 10px 8px 10px;
+}
+header .buttonHolder {
+    min-width: 256px;
+    margin-top: 1px;
+}
+header h1 {
+    margin: 0 0px;
+    float: left;
+}
+
+header div {
+    width: 226px;
+    overflow:auto;
+    float: left;
+}
+
+.filename {
+    float: left;
+    width: auto;
+    padding: 5px 20px;
+    font-size: 20pt;
+    font-weight: 400;
+    background:#606060;
+    color:white;
+}
+
+.filename input {
+    border: none;
+    width: 100%;
+    color: white;
+    background:#606060; 
+}
+
+header #admin_link {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-right: 0px;
+    min-width: 230px;
+}
+
+header .buttonHolder{
+    padding-top:14px;
+}
+header .buttonHolder .btn {
+    background-color:transparent;
+    transition: all .1s ease;
+    color: rgba(255, 255, 255, .7);
+    margin-left:5px;
+    height:20px;
+    padding:0;
+    margin-top:0;
+    color: rgba(255, 255, 255, .7);
+}
+header form .buttonHolder .icon{
+    max-height: 14px;
+    margin-right: 3px;
+    margin-bottom: 2px;
+    opacity:.7;
+}
+header form .buttonHolder .btn {
+    width: 78px;
+}
+header form .buttonHolder {
+    margin-top:-5px;
+}
+
+header #admin_link .btn{
+    background-color:transparent;
+    transition: all .1s ease;
+    padding: 0px 10px;
+    margin-left: 0px; 
+}
+header .buttonHolder .btn:first-child {
+    border-right:1px solid rgba(255, 255, 255, .7);
+}
+
+header form .buttonHolder .btn:last-child {
+    height:30px;
+    border:1px solid gray;
+    background-color: #707070;
+}
+
+header .buttonHolder .btn:hover {
+    color: rgba(255, 255, 255, 1);
+}
+
+header #admin_link .btn:focus {
+    border: 1px solid rgba(255, 255, 255, .8);
+    color: white;
+}
+
+body>nav {
+    position: fixed;
+    top: 49px;
+    bottom: 0;
+    left: 0;
+    width: 175px;
+}
+
+body>section {
+    margin-top: 44px;
+    padding-top: 1px;
+    margin-left:  240px;
+    padding-left: 40px;
+}
+
+ul {
+    padding-left: 5px; /*prevent style inheritance from above*/
+}
+
+#setupMenu {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 54px;
+    margin-top:5px;
+}
+
+#setupMenu h2:first-child a{
+    border-top:1px solid #eeeeee;
+}
+
+#setupMenu h2, #setupMenu h3, #setupMenu h4 {
+    margin-top: 0;
+    margin-bottom: 0; /* These are meant to stack */
+    overflow: hidden;
+    white-space: nowrap;
+    /*width:170px;*/
+}
+
+#setupMenu a {
+    color: #606060;
+    display:block;
+    text-decoration: none;
+    line-height: 35px;
+    padding-left: 15px;
+    transition:background-color .2s ease;
+    width:170px;
+    position:relative;
+    margin-bottom:1px;
+}
+
+#setupMenu a:before {
+    content:"";
+    display:block;
+    width:100%;
+    height:1px;
+    background-color:#eeeeee;
+    position:absolute;
+    bottom:-1px;
+    left:-5px;
+}
+
+#setupMenu a:hover{
+    background-color:#eeeeee;
+}
+
+#setupMenu a.active:hover{
+    background-color:#606060;
+}
+
+#setupMenu h3 a, #setupMenu h4 a {
+    padding-left:30px;
+}
+
+#setupMenu a.active {
+    background-color: #606060;
+    margin-left:0;
+    color:white;
+    font-weight:400;
+    -webkit-border-radius:0 4px 4px 0;
+    width:175px;
+}
+
+#setupMenu span {
+    width: 5px;
+    height: 35px;
+    -webkit-border-radius:0 2px 2px 0;
+}
+
+#setupMenu .incomplete {
+    font-weight: 600;
+    font-style: italic;
+    color: #999;
+    background-color: #f6da40;
+}
+
+#setupMenu .completed, .completed {
+    background-color: #68be5e;
+}
+
+#setupMenu .empty_subcategory {
+    display: none;
+}
+
+#RunSimulation {
+    position: fixed;
+    bottom: 10px;
+    left: 0;
+    width:  170px;
+}
+
+#RunSimulation.incomplete,
+#RunSimulation.incomplete:hover,
+#RunSimulation a.incomplete:hover {
+    background-color:#f6da40;
+}
+
+#RunSimulation.completed,
+#RunSimulation.completed:hover,
+#RunSimulation a.completed:hover {
+    background-color:#68be5e;
+}
+
+#RunSimulation a {
+    height: 50px;
+    line-height: 50px;
+    font-size:17px;
+    font-style:italic;
+    transition: color .1s ease;
+}
+#RunSimulation:hover a, #RunSimulation:hover .glyphicon{
+    color:black;
+}
+
+#RunSimulation a.tall {
+    padding-top: 10px;
+    height: 75px;
+    line-height: 20px;
+}
+
+#RunSimulation .glyphicon {
+    font-size: 18px;
+    top: 2px;
+    transition: color .1s ease;
+}
+#RunSimulation a:before {
+    display:none;
+}
+
+.blocking-overlay {
+    display:none;
+    position: fixed;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10000;
+    background: rgba(255,255,255,0.6);
+    box-shadow: inset 0 0 25px #888;
+}
+.overlay-content {
+    text-align: center;
+    margin-top:calc(50vh - 50px);
+    color: #666;
+    text-shadow: 1px 1px 1px #fff, 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff;
+}
+
+.btn {
+    font-style: italic;
+    margin: 3px 1px 0px 1px;
+    color: #ffffff;
+    border-radius: 0;
+    border: 0px;
+    transition: all .2s ease;
+}
+
+.btn-add {
+    background: none;
+    padding: 0 0 6px 3px;
+    border-width: 0;
+    color: #007700;
+    vertical-align: middle;
+    margin: 8px 0;
+}
+
+.btn-default {
+    background-color: #b1b1b1;
+}
+
+.btn-primary,
+.btn-usaved {
+    background-color: #3577b1;
+    transition: all ..2s ease;
+}
+
+.btn-primary:hover,
+.btn.unsaved:hover {
+    background-color: #4499e3;
+    color:white;
+}
+
+section .btn-primary:focus,
+.btn-unsaved:focus,
+.btn-danger:focus {
+    outline: 2px solid rgba(99, 215, 253, .5) !important;
+    color:white;
+}
+.btn-danger:focus {
+    border:none;
+    background-color: #e0383e;
+}
+
+.btn-primary.disabled, .btn-primary[disabled] {
+    background-color: #7B8893;
+    color: rgba(255, 255, 255, .8);
+}
+.btn-danger {
+    background-color: #d0343a;
+    transition: all .2s ease;
+}
+
+.btn-danger:hover{
+    background-color:#e0383e;
+}
+
+textarea {
+    width: 400px;
+    height: 70px;
+}
+
+#id_description {
+    width: 602px; 
+    height: 200px;
+}
+
+td, th {
+    padding-bottom: 8px;
+    padding-right: 10px;
+}
+
+th, td label{
+    padding-right: 20px;
+    font-size: 11pt;
+}
+
+.result-table {
+    table-layout: fixed;
+}
+
+.result-table tr th:first-child {
+    width: 420px;
+}
+
+.result-table thead tr th {
+    font-size: 16pt;
+    font-weight: bold;
+}
+
+ul.minor {
+    list-style-type: circle;
+    color: #808080;
+}
+ul.minor li {
+    font-size: 11pt;
+}
+
+select {
+    margin: 8px 4px;
+}
+
+.progress .status-text {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    text-shadow: 0 -1px 1px #fff;
+    font-size:1.2em
+}
+.progress-bar-mini {
+    display:block;
+    margin-top: -4px;
+    margin-right: 8px;
+    padding-bottom: 4px;
+}
+.progress-bar-mini .bar {
+    height: 3px;
+    background-color: #3577b1;
+}
+.progress-bar-mini .bar.done, .progress-bar.done {
+    background-color: #B6F3A7;
+}
+
+/**********************/
+
+#file_list li {
+    font-size: 14pt;
+    text-decoration: none;
+    border-bottom: 2px solid #d9d9d9;
+}
+
+#file_list {
+    list-style: none;
+    margin-top: 5px;
+    margin-bottom: 27px;
+    max-width: 600px
+}
+
+#file_list a {
+    color: black;
+    text-decoration: none;
+}
+
+#file_list a:hover {
+    color: #7cb9ff;;
+}
+
+#file_list .icon {
+    margin-top: 5px;
+    margin-left: 15px;
+}
+
+input[type=file], button {
+    display: inline;
+}
+
+#div_id_name div input {
+    min-width: 400px;
+}
+
+/**************************/
+
+#farm_list {
+    margin-bottom: 10px;
+}
+
+#farm_list{
+    display: inline-block;
+    max-height: 500px;
+    max-width: 900px;
+    overflow-y: auto;
+    padding-right: 20px; /*for windows scrollbar*/
+}
+
+#farm_list input, #farm_list select{
+    border: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+#farm_list th{
+    /*border: 1px solid black;*/
+    font-size: 12pt;
+    padding: 2px 8px 2px 0;
+    background: linear-gradient(to bottom, rgba(249,249,249,1) 0%,rgba(224,224,224,1) 100%);
+    white-space: nowrap;
+}
+
+th .sortControls{
+    opacity:0;
+}
+.sortControls a {
+    color: darkgray;
+}
+th:hover .sortControls{
+    opacity:1;
+}
+.sortControls a{
+    opacity:0.7;
+}
+.sortControls a:hover{
+    opacity:1;
+}
+
+
+body .modal-dialog {
+    width: 50%;
+    margin-left: 25%;
+}
+
+.type-warning {
+    font-size: 14pt;
+}
+
+.controls ul li label {  /*Radio buttons on multi-choice fields are giant without this */
+    font-size: 10pt;
+    font-weight: 400;
+}
+
+.model-banner {
+    background-color: #808080;
+    padding:5px 10px;
+    color: white;
+    font-size: 14pt;
+    max-width: 600px;
+    line-height: 27px;
+}
+
+.model-banner a{
+    color:white;
+}
+
+.model-banner a:hover,
+.model-banner a:focus {
+    text-decoration: none;
+    border: none;
+    outline: 0;
+    background: #808080;
+}
+
+a.collapsed img {
+    -webkit-transform: scaleY(-1);
+}
+
+.icon-flipped {
+    -webkit-transform: scaleX(-1);
+}
+
+table tbody span {
+    width: 139px;
+    line-height: 21px;
+    display: block;
+}
+
+table tbody span:hover { /*necessary in addtion to disableSelection() to preserve cursor appearance*/
+    cursor: pointer;
+}
+
+.relevant .selected, .highlight { /*column is relevant and user has selected the row for many-to many-widget.js*/
+    font-weight: 600;
+    background-color: #d7f5ff;
+}
+
+/*Disabled control fields: include text labels*/
+[disabled] {
+    opacity: .5;
+}
+
+.visually-disabled {
+    opacity: .5;
+    pointer-events: none;
+}
+
+#sim_progress_and_button {
+    position: relative;
+    display: table;
+    margin-bottom: 20px;
+}
+
+#sim_progress_and_button .btn, #sim_progress_and_button .progress {
+    display: table-cell;
+    vertical-align: middle;
+    /*top: 50%;*/
+    /*transform: translateY(-50%);*/
+}
+
+#sim_progress_and_button .btn {
+    /*display: inline-block;*/
+    width: 80px;
+    /*line-height: 20px;*/
+    padding: 0;
+    margin: 0 5px 0 0;
+    background-color: #ba3e44;
+    color: white;
+    font-size: 15px ;
+    /*font-family: Source Sans Semibold, sans-serif;*/
+    font-style: italic;
+}
+
+#sim_progress_and_button .progress {
+    /*display: inline-block;*/
+    width: 60vw;
+    margin: 0px;
+}
+
+.spacer {
+    height: 100px;
+}
+

@@ -6,20 +6,20 @@
 # SpreadModel Build
 #################
 ## Only Ignore In Master ##
-msvc*
-python33.dll
-pywintypes33.dll
-library.zip
-ADSM.exe
-sqlite3.dll
-Lib/
-lib/
+
 # Don't ignore these in the root folder of production branches but still everywhere else
 *.so
 *.so.*
 *.pyc
 *.pyd
 *.pyo
+!/*.so
+!/*.so.*
+!/*.pyc
+!/*.pyd
+!/*.pyo
+!Lib/*.pyd
+!lib/*.pyd
 
 ## Always Ignore ##
 Sample\ Scenarios/Population_Test_Invalid.xml
