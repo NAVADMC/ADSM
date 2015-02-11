@@ -1,5 +1,6 @@
 from itertools import chain
 import os
+import shutil
 import subprocess
 import re
 from glob import glob
@@ -68,6 +69,11 @@ def adsm_executable_command():
 
 def graceful_startup():
     """Checks something inside of each of the database files to see if it's valid.  If not, rebuild the database."""
+    if not os.path.exists(workspace_path()):
+        print("Creating User Directory...")
+        os.makedirs(os.path.dirname(workspace_path()), exist_ok=True)
+        print("Copying Sample Scenarios")
+        shutil.copytree(os.path.join(settings.BASE_DIR, "..", "Sample Scenarios"), workspace_path())
     try:
         x = SmSession.objects.get().scenario_filename  # this should be in the initial migration
         print(x)
