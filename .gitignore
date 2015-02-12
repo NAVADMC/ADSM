@@ -20,6 +20,8 @@
 !/*.pyo
 !Lib/*.pyd
 !lib/*.pyd
+!Lib/*.pyo
+!lib/*.pyo
 
 ## Always Ignore ##
 Sample\ Scenarios/Population_Test_Invalid.xml
