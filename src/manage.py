@@ -4,9 +4,9 @@ from django.core.management import execute_from_command_line
 
 
 if getattr(sys, 'frozen', False):
-    BASE_DIR = os.path.dirname(sys.executable)
+    BASE_DIR = os.path.join(os.path.dirname(sys.executable), 'src')
 else:
-    BASE_DIR = os.path.abspath(__file__)
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def main(*args):
