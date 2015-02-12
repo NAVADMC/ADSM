@@ -57,12 +57,14 @@ compile_c_engine = query_yes_no("\nDo you want to attempt to compile the CEngine
 # This is done before all other imports since we will need to clean out some pyd files that get loaded by python
 ##########
 print("Cleaning base directory...")
-BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
+os.chdir(BASE_DIR)
 
 from distutils.dir_util import copy_tree, remove_tree
 
 # Remove these folders from any previous compiles
-folders_to_delete = ['build', 'Lib']
+folders_to_delete = ['build', 'Lib', os.path.join('src', 'nginx')]
 for folder in folders_to_delete:
     try:
         remove_tree(os.path.join(BASE_DIR, folder))
@@ -70,23 +72,15 @@ for folder in folders_to_delete:
         pass
 
 files_to_save = ['adsm_simulation.exe', 'libglib-2.0-0.dll', 'libiconv-2.dll', 'libintl-8.dll', 'sqlite3.exe']
-for file in os.listdir(BASE_DIR):
+for file in os.listdir(os.path.join(BASE_DIR, "bin")):
     # Only delete these files from the top directory
     if (file.endswith(".pyd") or file.endswith(".dll") or file.endswith(".zip") or file.endswith(".exe") or file.endswith(".manifest")) and file not in files_to_save:
-        os.remove(file)
+        os.remove(os.path.join(BASE_DIR, 'bin', file))
 for root, dirs, files in os.walk(BASE_DIR):
     for file in files:
         # Delete all these from any where
-        if (file.endswith(".pyc") or file.endswith(".pyo")) and file not in files_to_save:
+        if (file.endswith(".pyc") or file.endswith(".pyo")):
             os.remove(os.path.join(root, file))
-
-# Specific files to delete in the root that aren't caught in the general case above
-files_to_delete = ['activeSession.sqlite3', 'settings.sqlite3']
-for file in files_to_delete:
-    try:
-        os.remove(os.path.join(BASE_DIR, file))
-    except:
-        pass
 
 # Undelete any specific files needed
 import subprocess
@@ -110,14 +104,14 @@ import zipfile
 print("Noting directory structure.")
 
 print("Project:", BASE_DIR)
-os.chdir(BASE_DIR)
-
 PYTHON_INSTALL = getattr(sys, 'prefix', None)
 PYTHON = os.path.join(PYTHON_INSTALL, 'Scripts', 'python.exe')
 
 print("Python:", PYTHON_INSTALL)
 if not PYTHON_INSTALL:
     sys.exit()
+
+os.chdir(os.path.join(BASE_DIR, "src"))
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
 import django
@@ -210,7 +204,9 @@ if compile_c_engine and os.path.isfile(os.path.join(BASE_DIR, 'CEngine', 'bootst
 ##########
 print("Compiling ADSM.py and Python into executable...")
 
-SETUP_FILE = os.path.join(BASE_DIR, 'setup.py')
+os.chdir(os.path.join(BASE_DIR, 'src'))
+
+SETUP_FILE = os.path.join(BASE_DIR, 'src', 'setup.py')
 subprocess.call(PYTHON + ' ' + SETUP_FILE + ' build_exe', shell=True)
 
 ##########
@@ -222,14 +218,22 @@ print("Preparing project root for deployment")
 
 management.call_command('collectstatic', interactive=False, clear=True)
 print("\n")
-copy_tree(os.path.join(BASE_DIR, 'build', 'exe.win-amd64-3.4'), BASE_DIR)
 
-# Checkout old versions of files that probably didn't change (mostly update executables)
-files_to_reset = ['adsm_update.exe', 'adsm_force_reset_and_update.exe']
-from git.git import git
-for file in files_to_reset:
-    command = git + ' checkout ' + file
-    subprocess.call(command, shell=True)
+os.chdir(BASE_DIR)
+
+copy_tree(os.path.join(BASE_DIR, 'src', 'build', 'exe.win-amd64-3.4'), os.path.join(BASE_DIR, 'bin'))
+shutil.move(os.path.join(BASE_DIR, 'bin', 'ADSM.exe'), os.path.join(BASE_DIR, 'ADSM.exe'))
+shutil.move(os.path.join(BASE_DIR, 'bin', 'library.zip'), os.path.join(BASE_DIR, 'library.zip'))
+
+remove_tree(os.path.join(BASE_DIR, 'src', 'build'))
+
+if not query_yes_no("Did either adsm_update.exe or adsm_force_reset_and_update.exe change?", default='no'):
+    # Checkout old versions of files that probably didn't change (mostly update executables)
+    files_to_reset = [os.path.join(BASE_DIR, 'bin', 'adsm_update.exe'), os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.exe')]
+    from git.git import git
+    for file in files_to_reset:
+        command = git + ' checkout ' + file
+        subprocess.call(command, shell=True)
 
 print("Please move to another terminal (or PyCharm) and run the Test Suite now before committing.")
 if not query_yes_no("Were the Test Suite results acceptable?", default='yes'):
