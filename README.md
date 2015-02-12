@@ -72,6 +72,24 @@ Using the pip in your new Virtual Environment (confirm Virtual Environment Activ
         easy_install pyproj-1.9.4dev.win-amd64-py3.4.exe  
         pip install psutil-2.2.0-cp34-none-win_amd64.whl
 
+###Setup Pycharm IDE
+The main developers of ADSM developed in Pycharm 4, so here's the IDE specific instructions to get your dev server running from a fresh clone.
+* Launch Pycharm > Checkout from VCS > GitHub > Paste "git@github.com:NAVADMC/ADSM.git" into source (SSH method).
+* Open up File > Settings.  Search "Django".  Languages and Frameworks > Django > 
+    * root = C:\Users\Josiah\Documents\ADSM\src
+    * settings = ADSM/settings.py
+    * Apply
+* Search "Project".  Project: ADSM > Interpreter = path to your virtual environment folder.  Apply
+* Project: ADSM > Project Structure.  Tag 'src' as a source folder.  Tag every 'templates' folder as Templates.
+    * ADSMSettings/templtates
+    * Results/templtates
+    * ScenarioCreator/templtates 
+* Apply. Exit Settings.  Edit Run Configurations
+    * '+' new run configuration > Django server
+    * Name it ADSM
+    * both checkboxes checked for including in PYTHONPATH
+    * no other settings required
+
 ###Compile chain (optional)
 If you plan on compiling a distributable version of the project, then use the following instructions.
 
