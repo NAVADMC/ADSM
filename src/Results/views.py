@@ -22,7 +22,7 @@ from Results.summary import list_of_iterations, iterations_complete
 
 
 def back_to_inputs(request):
-    return redirect('/setup/')
+    return redirect('/setup/OutputSettings/1')
 
 
 def simulation_status(request):
