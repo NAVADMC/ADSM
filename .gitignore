@@ -15,18 +15,20 @@
 *.pyo
 !/*.so
 !/*.so.*
-!/*.pyc
 !/*.pyd
 !/*.pyo
 !bin/*.so
 !bin/*.so.*
-!bin/*.pyc
 !bin/*.pyd
 !bin/*.pyo
 !Lib/*.pyd
 !lib/*.pyd
 !Lib/*.pyo
 !lib/*.pyo
+!Lib/*.so
+!lib/*.so
+!Lib/*.so.*
+!lib/*.so.*
 
 ## Always Ignore ##
 Sample\ Scenarios/Population_Test_Invalid.xml
@@ -206,9 +208,6 @@ pip-log.txt
 .coverage
 htmlcov
 .tox
-
-#Translations
-*.mo
 
 #Mr Developer
 .mr.developer.cfg
