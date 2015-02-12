@@ -239,13 +239,9 @@ if query_yes_no("Would you like to zip up the deployable?", default='no'):
 
     with zipfile.ZipFile(deployable_path, mode='w', compression=zipfile.ZIP_DEFLATED) as deployable:
         for root, dirs, files in os.walk(BASE_DIR):
-            if root in folders_to_ignore:
-                continue
-            else:
+            if not any([ignored in root for ignored in folders_to_ignore]):
                 for filename in files:
-                    if filename in files_to_ignore:
-                        continue
-                    else:
+                    if filename not in files_to_ignore:
                         path = os.path.join(root, filename)
                         entry = path[deployable_path_len:]
                         deployable.write(os.path.join('ADSM', path), entry)
