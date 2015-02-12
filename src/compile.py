@@ -204,9 +204,9 @@ if compile_c_engine and os.path.isfile(os.path.join(BASE_DIR, 'CEngine', 'bootst
 ##########
 print("Compiling ADSM.py and Python into executable...")
 
-os.chdir(os.path.join(BASE_DIR, 'src'))
+os.chdir(BASE_DIR)
 
-SETUP_FILE = os.path.join(BASE_DIR, 'src', 'setup.py')
+SETUP_FILE = os.path.join(BASE_DIR, 'setup.py')
 subprocess.call(PYTHON + ' ' + SETUP_FILE + ' build_exe', shell=True)
 
 ##########
@@ -216,16 +216,18 @@ subprocess.call(PYTHON + ' ' + SETUP_FILE + ' build_exe', shell=True)
 ##########
 print("Preparing project root for deployment")
 
+os.chdir(os.path.join(BASE_DIR, 'src'))
+
 management.call_command('collectstatic', interactive=False, clear=True)
 print("\n")
 
 os.chdir(BASE_DIR)
 
-copy_tree(os.path.join(BASE_DIR, 'src', 'build', 'exe.win-amd64-3.4'), os.path.join(BASE_DIR, 'bin'))
+copy_tree(os.path.join(BASE_DIR, 'build', 'exe.win-amd64-3.4'), os.path.join(BASE_DIR, 'bin'))
 shutil.move(os.path.join(BASE_DIR, 'bin', 'ADSM.exe'), os.path.join(BASE_DIR, 'ADSM.exe'))
 shutil.copy(os.path.join(BASE_DIR, 'bin', 'library.zip'), os.path.join(BASE_DIR, 'library.zip'))
 
-remove_tree(os.path.join(BASE_DIR, 'src', 'build'))
+remove_tree(os.path.join(BASE_DIR, 'build'))
 
 if not query_yes_no("Did either adsm_update.exe or adsm_force_reset_and_update.exe change?", default='no'):
     # Checkout old versions of files that probably didn't change (mostly update executables)
@@ -264,16 +266,23 @@ if query_yes_no("Would you like to commit this compile?", default='no'):
 if query_yes_no("Would you like to zip up the deployable?", default='no'):
     # TODO: Fix zipping files as it doesn't work yet.
     print("Zipping output into deployable...")
-    deployable_path = os.path.join(BASE_DIR, 'ADSM_Distributable.zip')
+
+    # Figure out the name of the zip file
+    sys.stdout.write('\nWhat is the ADSM Simulation Version (3.2.22)? ')
+    sim_version = input()
+    sys.stdout.write('\nWhat is the ADSM Viewer Version (RC4.1)? ')
+    viewer_version = input()
+
+    deployable_path = os.path.join(BASE_DIR, 'ADSM_' + str(sim_version) + '-' + str(viewer_version) + '.zip')
     if os.path.exists(deployable_path):
         os.remove(deployable_path)
 
     deployable_path_len = len(os.path.dirname(deployable_path).rstrip(os.sep)) + 1
 
-    folders_to_ignore = ['build', '.idea', 'cef', 'CEngine', 'development_scripts']
+    folders_to_ignore = ['build', '.idea', os.path.join('src', 'cef'), os.path.join('src', 'CEngine'), os.path.join('src', 'development_scripts')]
     folders_to_ignore = [os.path.join(BASE_DIR, x) for x in folders_to_ignore]
 
-    files_to_ignore = ['ADSM_Distributable.zip', ]
+    files_to_ignore = [os.path.basename(deployable_path), ]
 
     with zipfile.ZipFile(deployable_path, mode='w', compression=zipfile.ZIP_DEFLATED) as deployable:
         for root, dirs, files in os.walk(BASE_DIR):
