@@ -7,9 +7,9 @@ from time import sleep
 print("Importing Python dependencies and setting local path...")
 
 if getattr(sys, 'frozen', False):
-    BASE_DIR = os.path.dirname(sys.executable)
+    BASE_DIR = os.path.join(os.path.dirname(sys.executable), "..")
 else:
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 print(BASE_DIR)
 
 os.chdir(BASE_DIR)
@@ -28,8 +28,9 @@ sys.path.append(os.path.join(BASE_DIR, "DLLs"))
 sys.path.append(os.path.join(BASE_DIR, "Lib"))
 sys.path.append(os.path.join(BASE_DIR, "Lib", "plat-win"))
 sys.path.append(os.path.join(BASE_DIR, "Lib", "lib-tk"))
-sys.path.append(os.path.join(BASE_DIR, "Scripts"))
 sys.path.append(os.path.join(BASE_DIR, "Lib", "site-packages"))
+sys.path.append(os.path.join(BASE_DIR, "bin"))
+sys.path.append(os.path.join(BASE_DIR, "Scripts"))
 path_all_the_eggs()
 
 def forceful_git_cleanup():
@@ -53,6 +54,8 @@ def forceful_git_cleanup():
             quit()
             
 forceful_git_cleanup()
+
+os.chdir(os.path.join(BASE_DIR, "src"))
 
 # Discretely import django items
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")

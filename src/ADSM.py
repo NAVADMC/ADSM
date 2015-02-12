@@ -8,7 +8,7 @@ print("Importing Python dependencies and setting local path...")
 if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(sys.executable)
 else:
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 print(BASE_DIR)
 
 os.chdir(BASE_DIR)
@@ -27,8 +27,9 @@ sys.path.append(os.path.join(BASE_DIR, "DLLs"))
 sys.path.append(os.path.join(BASE_DIR, "Lib"))
 sys.path.append(os.path.join(BASE_DIR, "Lib", "plat-win"))
 sys.path.append(os.path.join(BASE_DIR, "Lib", "lib-tk"))
-sys.path.append(os.path.join(BASE_DIR, "Scripts"))
 sys.path.append(os.path.join(BASE_DIR, "Lib", "site-packages"))
+sys.path.append(os.path.join(BASE_DIR, "bin"))
+sys.path.append(os.path.join(BASE_DIR, "Scripts"))
 path_all_the_eggs()
 
 import multiprocessing
@@ -108,6 +109,8 @@ args = parser.parse_args()
 
 print("Preparing Django environment...")
 
+os.chdir(os.path.join(BASE_DIR, "src"))
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
 
 exec("import django")
@@ -118,7 +121,7 @@ exec("from django.core import management")
 if not args.skip_update:
     exec("from ADSMSettings.utils import update_requested")
     if update_requested():
-        UPDATE_PROGRAM = os.path.join(BASE_DIR, 'adsm_update.exe')
+        UPDATE_PROGRAM = os.path.join(BASE_DIR, 'bin', 'adsm_update.exe')
         subprocess.Popen(UPDATE_PROGRAM)
         sys.exit()
 
