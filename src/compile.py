@@ -46,8 +46,9 @@ if not query_yes_no("Are you in a CLEAN Python Environment?", default='no'):
     sys.exit()
 
 print("\nDO NOT deploy with a folder that has your Git Credentials in it!\n"
-      "You MUST be running this compile script in a repo that you Checked Out as an Anonymous User (https) with Read Only access!")
-if not query_yes_no("Are you in a Repo that is Checked Out by an Anonymous User?", default='no'):
+      "You MUST be running this compile script in a repo that you Checked Out as an Anonymous User (https) with Read Only access!\n"
+      "You should also only run the compile script in a repo that has only a single branch checked out.")
+if not query_yes_no("Are you in a Repo that Single Branch Checked Out by an Anonymous User?", default='no'):
     sys.exit()
 
 ##########
@@ -72,12 +73,12 @@ for folder in folders_to_delete:
 files_to_save = ['adsm_simulation.exe', 'libglib-2.0-0.dll', 'libiconv-2.dll', 'libintl-8.dll', 'sqlite3.exe']
 for file in os.listdir(os.path.join(BASE_DIR, "bin")):
     # Only delete these files from the top directory
-    if (file.endswith(".pyd") or file.endswith(".dll") or file.endswith(".zip") or file.endswith(".exe") or file.endswith(".manifest")) and file not in files_to_save:
+    if (file.endswith(".pyd") or file.endswith(".dll") or file.endswith(".zip") or file.endswith(".exe") or file.endswith(".manifest") or file.endswith(".log")) and file not in files_to_save:
         os.remove(os.path.join(BASE_DIR, 'bin', file))
 for root, dirs, files in os.walk(BASE_DIR):
     for file in files:
         # Delete all these from any where
-        if (file.endswith(".pyc") or file.endswith(".pyo")):
+        if (file.endswith(".pyc") or file.endswith(".pyo") or file.endswith(".log")):
             os.remove(os.path.join(root, file))
 
 # Undelete any specific files needed
@@ -176,6 +177,14 @@ remove_tree(os.path.join(BASE_DIR, 'build'))
 if not query_yes_no("Did either adsm_update.exe or adsm_force_reset_and_update.exe change?", default='no'):
     # Checkout old versions of files that probably didn't change (mostly update executables)
     files_to_reset = [os.path.join(BASE_DIR, 'bin', 'adsm_update.exe'), os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.exe')]
+    from git.git import git
+    for file in files_to_reset:
+        command = git + ' checkout ' + file
+        subprocess.call(command, shell=True)
+
+if not query_yes_no("Did the ADSM.exe change?", default='no'):
+    # Checkout old versions of files that probably didn't change (mostly update executables)
+    files_to_reset = [os.path.join(BASE_DIR, 'bin', 'library.zip'), os.path.join(BASE_DIR, 'library.zip'), os.path.join(BASE_DIR, 'adsm.exe')]
     from git.git import git
     for file in files_to_reset:
         command = git + ' checkout ' + file
