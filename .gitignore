@@ -18,6 +18,11 @@
 !/*.pyc
 !/*.pyd
 !/*.pyo
+!bin/*.so
+!bin/*.so.*
+!bin/*.pyc
+!bin/*.pyd
+!bin/*.pyo
 !Lib/*.pyd
 !lib/*.pyd
 !Lib/*.pyo
