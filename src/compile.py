@@ -223,7 +223,7 @@ os.chdir(BASE_DIR)
 
 copy_tree(os.path.join(BASE_DIR, 'src', 'build', 'exe.win-amd64-3.4'), os.path.join(BASE_DIR, 'bin'))
 shutil.move(os.path.join(BASE_DIR, 'bin', 'ADSM.exe'), os.path.join(BASE_DIR, 'ADSM.exe'))
-shutil.move(os.path.join(BASE_DIR, 'bin', 'library.zip'), os.path.join(BASE_DIR, 'library.zip'))
+shutil.copy(os.path.join(BASE_DIR, 'bin', 'library.zip'), os.path.join(BASE_DIR, 'library.zip'))
 
 remove_tree(os.path.join(BASE_DIR, 'src', 'build'))
 
