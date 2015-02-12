@@ -8,6 +8,7 @@ print("Importing Python dependencies and setting local path...")
 
 if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(os.path.dirname(sys.executable))
+    sys.path.append(os.path.join(BASE_DIR, 'src'))
 else:
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 print(BASE_DIR)
