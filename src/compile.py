@@ -46,11 +46,9 @@ if not query_yes_no("Are you in a CLEAN Python Environment?", default='no'):
     sys.exit()
 
 print("\nDO NOT deploy with a folder that has your Git Credentials in it!\n"
-      "You MUST be running this compile script in a repo that you Checked Out as an Anonymous User with Read Only access!")
+      "You MUST be running this compile script in a repo that you Checked Out as an Anonymous User (https) with Read Only access!")
 if not query_yes_no("Are you in a Repo that is Checked Out by an Anonymous User?", default='no'):
     sys.exit()
-
-compile_c_engine = query_yes_no("\nDo you want to attempt to compile the CEngine?", default='no')
 
 ##########
 # Cleanup root folder
@@ -143,60 +141,6 @@ for root, dirs, files in os.walk(os.path.join(BASE_DIR, 'Lib')):
             os.remove(os.path.join(root, filename))
     if root.endswith(".egg-info"):
         remove_tree(root)
-
-
-##########
-# Compile CEngine
-##########
-# Compile the CEngine (but only if required environment is correctly setup, else pull already compiled exe into root)
-if compile_c_engine and os.path.isfile(os.path.join(BASE_DIR, 'CEngine', 'bootstrap')):
-    print("Compiling CEngine...")
-    any_compile_step_failed = False
-    os.chdir(os.path.join(BASE_DIR, 'CEngine'))
-    print('Running bootstrap script...', end=' ')
-    try:
-        subprocess.check_output(['sh', 'bootstrap'], stderr=subprocess.STDOUT)
-        print('succeeded')
-    except CalledProcessError as e:
-        any_compile_step_failed = True
-        print('failed')
-        print(e.output)
-    
-    if not any_compile_step_failed:
-        print('Running configure script...', end=' ')
-        try:
-            subprocess.check_output(['sh', 'configure', '--disable-debug'], stderr=subprocess.STDOUT)
-            print('succeeded')
-        except CalledProcessError as e:
-            any_compile_step_failed = True
-            print('failed')
-            print(e.output)
-    
-    if not any_compile_step_failed:
-        print('Running make...', end=' ')
-        try:
-            subprocess.check_output(['make'], stderr=subprocess.STDOUT)
-            print('succeeded')
-        except CalledProcessError as e:
-            if 'dia: Command not found' in e.output:
-                # This error message is OK. The Dia diagramming tool is used to
-                # create images for the built-in documentation, but Dia is not
-                # available in MinGW. But if "make" gets to this point, then it
-                # succeeded in making the executable.
-                print('succeeded')
-            else:
-                any_compile_step_failed = True
-                print('failed')
-                print(e.output)
-    
-    exe_name = 'adsm_simulation.exe'
-    
-    if any_compile_step_failed:
-        print('One or more compile steps failed. Will not overwrite %s in top-level directory.' % exe_name)
-    else:
-        print('Copying %s to top-level directory.' % exe_name)
-        shutil.copy(os.path.join(os.curdir, 'main_loop', exe_name), BASE_DIR)
-    os.chdir(BASE_DIR)
 
 ##########
 # Compile the Python Entry Point and Python Executable
