@@ -4,9 +4,11 @@ from django.core.management import execute_from_command_line
 
 
 if getattr(sys, 'frozen', False):
-    BASE_DIR = os.path.dirname(sys.executable)
+    BASE_DIR = os.path.join(os.path.dirname(sys.executable), 'src')
 else:
-    BASE_DIR = os.path.abspath(__file__)
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+sys.path.append(BASE_DIR)
 
 
 def main(*args):
@@ -14,7 +16,5 @@ def main(*args):
 
 if __name__ == "__main__":
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ADSM.settings')
-
-    sys.path.append(os.path.dirname(BASE_DIR))
 
     main(sys.argv)
