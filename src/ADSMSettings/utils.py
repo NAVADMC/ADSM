@@ -73,11 +73,12 @@ def graceful_startup():
         print("Creating User Directory...")
         os.makedirs(os.path.dirname(workspace_path()), exist_ok=True)
 
-    for dirpath, dirnames, files in os.walk(workspace_path()):
-        if not files:
-            print("Copying Sample Scenarios")
-            shutil.copytree(os.path.join(settings.BASE_DIR, "..", "Sample Scenarios"), workspace_path())
-        break
+    for dirpath, dirnames, files in os.walk(os.path.join(os.path.dirname(settings.BASE_DIR), "Sample Scenarios")):
+        for file in files:
+            try:
+                shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), file))
+            except:
+                pass
 
     try:
         x = SmSession.objects.get().scenario_filename  # this should be in the initial migration
