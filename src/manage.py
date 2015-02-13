@@ -8,13 +8,13 @@ if getattr(sys, 'frozen', False):
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+sys.path.append(os.path.dirname(BASE_DIR))
+
 
 def main(*args):
     execute_from_command_line(*args)
 
 if __name__ == "__main__":
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ADSM.settings')
-
-    sys.path.append(os.path.dirname(BASE_DIR))
 
     main(sys.argv)
