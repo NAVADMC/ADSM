@@ -124,7 +124,7 @@ header div {
 
 .filename {
     float: left;
-    min-width: 500px;
+    min-width: 540px;
     padding: 5px 20px;
     font-size: 20pt;
     font-weight: 400;
@@ -327,48 +327,86 @@ ul {
     display: none;
 }
 
-#RunSimulation {
+#RunSimulationIn,
+#RunSimulationRes {
     position: fixed !important;
     bottom: 10px;
     left: 0;
     width:  170px;
 }
+/*----------------------need to remove the glypicon element and make a left facing arrow with hook for results------*/
+#RunSimulationRes a{
+    color: rgba(255, 255, 255, .8);
+}
+#RunSimulationIn a:after {
+    content: "";
+    position: absolute;
+    top: 17px;
+    margin-left: 8px;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 11px solid #606060;
+    transition: all .2s ease;
+}
+#RunSimulationRes a:after {
+    content: "";
+    position: relative;
+    float:left;
+    top: 17px;
+    margin-right: 10px;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 11px solid rgba(255, 255, 255, .8);
+    transition: all .2s ease;
+}
 
-#RunSimulation.incomplete,
-#RunSimulation.incomplete:hover,
-#RunSimulation a.incomplete:hover {
+#RunSimulationIn.incomplete,
+#RunSimulationIn.incomplete:hover,
+#RunSimulationIn a.incomplete:hover {
     background-color:#f6da40;
 }
 
-#RunSimulation.completed,
-#RunSimulation.completed:hover,
-#RunSimulation a.completed:hover {
+#RunSimulationIn.completed,
+#RunSimulationIn.completed:hover,
+#RunSimulationIn a.completed:hover {
     background-color:#68be5e;
 }
+#RunSimulationRes,
+#RunSimulationRes:hover,
+#RunSimulationRes a.completed,
+#RunSimulationRes a.completed:hover {
+    background-color: #3577b1;
+}
 
-#RunSimulation a {
+#RunSimulationIn a,
+#RunSimulationRes a {
     height: 50px;
     line-height: 50px;
     font-size:17px;
     font-style:italic;
     transition: color .2s ease;
 }
-#RunSimulation:hover a, #RunSimulation:hover .glyphicon{
-    color:black;
+#RunSimulationIn:hover a {
+    color: black;
 }
-
-#RunSimulation a.tall {
+#RunSimulationRes:hover a {
+    color: rgba(255, 255, 255, 1);
+}
+#RunSimulationIn:hover a:after{
+    border-left: 11px solid black;
+}
+#RunSimulationRes:hover a:after{
+    border-right: 11px solid rgba(255, 255, 255, 1);
+}
+#RunSimulationIn a.tall,
+#RunSimulationRes a.tall {
     padding-top: 10px;
     height: 75px;
     line-height: 20px;
 }
 
-#RunSimulation .glyphicon {
-    font-size: 18px;
-    top: 2px;
-    transition: color .2s ease;
-}
-#RunSimulation a:before {
+#RunSimulationIn a:before,
+#RunSimulationRes a:before {
     display:none;
 }
 
@@ -385,9 +423,14 @@ ul {
 }
 .overlay-content {
     text-align: center;
-    margin-top:calc(50vh - 50px);
+    margin-top:calc(45vh - 50px);
     color: #666;
     text-shadow: 1px 1px 1px #fff, 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff;
+}
+
+.overlay-content img {
+    height: 30px;
+    margin-left:-14px;
 }
 
 .btn {
@@ -446,10 +489,6 @@ section .btn-primary:focus,
 
 .btn-danger:hover{
     background-color:#e0383e;
-}
-
-.btn.loading{
-    background: url(../working.gif) no-repeat center ;
 }
 
 textarea {

@@ -39,22 +39,22 @@
             <h2><a href="/setup/OutputSettings/1/" class="{{"OutputSettings"|active:active_link}}">
                 <span class="pull-right {{OutputSetting|completed}}"> </span>Output Settings</a></h2>
 
-            <h2 id="RunSimulation">
+            <h2 id="RunSimulationIn">
                 {% if outputs_computed %}
                     <a href="/results/" class="completed ">
-                    View Results <i class="glyphicon glyphicon-play"></i></a>
+                    View Results </a>
                 {% else %}
                     {% if Simulation_ready or dry_run_passed %}
                         {% if supplemental_folder_has_contents %}
                             <a href="/?loading_url=/results/RunSimulation/" class="incomplete tall">
-                            Delete Supplementals and Run Simulation <i class="glyphicon glyphicon-play"></i></a>
+                            Delete Supplementals and Run Simulation </a>
                         {% else %}
                             <a href="/?loading_url=/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
-                            Run Simulation <i class="glyphicon glyphicon-play"></i></a>
+                            Run Simulation </a>
                         {% endif %}
                     {% else %}
                         <a href="/setup/ValidateScenario/" class=" {{Simulation_ready|completed}}">
-                        Validate Scenario <i class="glyphicon glyphicon-play"></i></a>
+                        Validate Scenario </a>
                     {% endif %}
             {% endif %}
             </h2>
