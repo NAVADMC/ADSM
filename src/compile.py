@@ -171,6 +171,7 @@ os.chdir(BASE_DIR)
 copy_tree(os.path.join(BASE_DIR, 'build', 'exe.win-amd64-3.4'), os.path.join(BASE_DIR, 'bin'))
 shutil.move(os.path.join(BASE_DIR, 'bin', 'ADSM.exe'), os.path.join(BASE_DIR, 'ADSM.exe'))
 shutil.copy(os.path.join(BASE_DIR, 'bin', 'library.zip'), os.path.join(BASE_DIR, 'library.zip'))
+shutil.copy(os.path.join(BASE_DIR, 'bin', 'MSVCR100.dll'), os.path.join(BASE_DIR, 'MSVCR100.dll'))
 
 remove_tree(os.path.join(BASE_DIR, 'build'))
 
