@@ -87,10 +87,12 @@ def graceful_startup():
         print("Creating User Directory...")
         os.makedirs(os.path.dirname(workspace_path()), exist_ok=True)
 
-    for dirpath, dirnames, files in os.walk(os.path.join(os.path.dirname(settings.BASE_DIR), "Sample Scenarios")):
+    samples_dir = os.path.join(os.path.dirname(settings.BASE_DIR), "Sample Scenarios")
+    for dirpath, dirnames, files in os.walk(samples_dir):
+        subdir = str(dirpath).replace(str(samples_dir) + os.path.sep, '')
         for file in files:
             try:
-                shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), file))
+                shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), subdir, file))
             except:
                 pass
 
