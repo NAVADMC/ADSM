@@ -467,6 +467,15 @@ class DestructionWaitTimeForm(BaseForm):
 
 
 class SpreadBetweenGroupsForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            'number_of_groups',
+            'relevant_groups',
+            HTML(r"<a href='/setup/ProductionGroup/new'>+ define new group</a>"),
+            submit_button()
+        )
+        super(SpreadBetweenGroupsForm, self).__init__(*args, **kwargs)
     class Meta(object):
         model = SpreadBetweenGroups
         exclude = []
