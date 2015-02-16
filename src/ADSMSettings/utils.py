@@ -144,12 +144,13 @@ def reset_db(name, fail_ok=True):
 
 
 def update_db_version():
+    """It is critical to call migrate only with a database specified in order for the django_migration history
+    to stay current with activeSession."""
     print("Checking Scenario version")
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
     try:
-        call_command('migrate',
-                     # verbosity=0,
-                     interactive=False)
+        call_command('migrate', database='scenario_db', interactive=False)
+        call_command('migrate', database='default', interactive=False)
     except:
         print("Error: Migration failed.")
     print('Done creating database')
