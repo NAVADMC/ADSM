@@ -304,8 +304,6 @@ class ControlMasterPlan(InputSingleton):
         # old DB: 'basic,direct-forward,ring,indirect-forward,direct-back,indirect-back'
         # old UI: Detected, Trace forward of direct contact, Ring, Trace forward of indirect contact, Trace back of direct contact, Trace back of indirect contact
         help_text='The secondary priority order for destruction.', )
-    units_detected_before_triggering_vaccination = models.PositiveIntegerField(blank=True, null=True,
-        help_text='The number of ' + wiki("Units", "unit") + ' which must be detected before the initiation of a vaccination program.', )
     vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the daily vaccination capacity.', )
     vaccination_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
