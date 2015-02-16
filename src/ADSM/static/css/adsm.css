@@ -109,7 +109,6 @@ header .btn, #header .btn {
 }
 header .buttonHolder {
     min-width: 256px;
-    margin-top: 1px;
 }
 header h1 {
     margin: 0 0px;
@@ -141,24 +140,26 @@ header div {
 
 header #admin_link {
     position: absolute;
-    top: 0;
+
     right: 0;
     margin-right: 0px;
     min-width: 230px;
+    padding-top:9px;
 }
 
 header .buttonHolder{
-    padding-top:14px;
+    padding-top:8px;
 }
 header .buttonHolder .btn {
-    background-color:transparent;
+    background-color: transparent;
     transition: all .2s ease;
     color: rgba(255, 255, 255, .7);
-    margin-left:5px;
-    height:20px;
-    padding:0;
-    margin-top:0;
+    margin-left: 5px;
+    height: 20px;
+    padding: 0;
+    margin-top: 0;
     color: rgba(255, 255, 255, .7);
+    position: relative;
 }
 header #file_actions .icon{
     max-height: 14px;
@@ -170,18 +171,30 @@ header #file_actions .icon{
 header #file_actions .btn {
     width: 78px;
 }
-header #file_actions {
-    margin-top:-5px;
-}
+
 
 header #admin_link .btn{
     background-color:transparent;
     transition: all .2s ease;
-    padding: 0px 10px;
+    padding: 4px 10px;
     margin-left: 0px; 
+    height: 30px;
 }
-header .buttonHolder .btn:first-child {
-    border-right:1px solid rgba(255, 255, 255, .7);
+header .admin .btn{
+    padding-top: 1px !important;
+}
+header .buttonHolder .btn:first-child:after{
+    content:"";
+    width: 1px;
+    height: 20px;
+    display: block;
+    background-color: rgba(255, 255, 255, .7);
+    position: absolute;
+    top: 5px;
+    right: -1px;
+}
+header #file_actions .btn:first-child:after {
+    top: 0px;
 }
 
 header #file_actions .btn:last-child {
@@ -204,6 +217,17 @@ header #file_actions .btn:last-child:hover {
 header #admin_link .btn:focus {
     border: 1px solid rgba(255, 255, 255, .8);
     color: white;
+    box-sizing: border-box;
+    padding: 4px 10px;
+    margin-left: 0;
+}
+.loading_button {
+    background: url("../working.gif") no-repeat center;
+    background-color: #808080 !important;
+    color: rgba(255, 255, 255, .2) !important;
+    background-size: 38px;
+    outline: 1px solid #909090;
+    outline-offset: -1px;
 }
 
 body>nav {
