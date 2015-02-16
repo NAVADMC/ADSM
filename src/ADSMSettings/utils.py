@@ -89,12 +89,16 @@ def graceful_startup():
 
     samples_dir = os.path.join(os.path.dirname(settings.BASE_DIR), "Sample Scenarios")
     for dirpath, dirnames, files in os.walk(samples_dir):
-        subdir = str(dirpath).replace(str(samples_dir) + os.path.sep, '')
+        subdir = str(dirpath).replace(samples_dir, '')
+        if subdir.startswith(os.path.sep):
+            subdir = subdir.replace(os.path.sep, '', 1)
+        if subdir.strip():
+            os.makedirs(os.path.join(workspace_path(), subdir))
         for file in files:
             try:
                 shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), subdir, file))
-            except:
-                pass
+            except Exception as e:
+                print(e)
 
     try:
         x = SmSession.objects.get().scenario_filename  # this should be in the initial migration
