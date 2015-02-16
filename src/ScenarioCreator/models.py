@@ -311,8 +311,8 @@ class ControlMasterPlan(InputSingleton):
     vaccination_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
         help_text='The primary priority criteria for order of vaccinations.',
         choices=priority_choices(), )
-    # vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True,
-    #     help_text='Number of days in retrospect that should be used to determine which herds to vaccinate.', )
+    vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True, default=0, 
+        help_text='Once a vaccination program starts, this number determines how many days previous to the start of the vaccination program a detection will trigger vaccination.', )
     def __str__(self):
         return str(self.name)
 
