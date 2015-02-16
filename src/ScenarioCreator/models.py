@@ -35,12 +35,13 @@ import time
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django_extras.db.models import LatitudeField, LongitudeField, MoneyField
 
 from ADSMSettings.models import SingletonManager
 from ScenarioCreator.custom_fields import PercentField
-from ScenarioCreator.templatetags.db_status_tags import wiki, link
+from ScenarioCreator.templatetags.db_status_tags import wiki, link, bold
 import ScenarioCreator.population_parser
 import ADSMSettings.models
 from Results.utils import delete_all_outputs
@@ -739,6 +740,8 @@ class ZoneEffectAssignment(BaseModel):
 class ProductionGroup(BaseModel):
     name = models.CharField(max_length=255, )
     group = models.ManyToManyField(ProductionType, )
+    def __str__(self):
+        return self.name
 
 
 class VaccinationTrigger(BaseModel):
@@ -754,29 +757,50 @@ class FilteredVaccinationTrigger(VaccinationTrigger):
         
 class DiseaseDetection(FilteredVaccinationTrigger):
     number_of_units = models.PositiveIntegerField()
+    def __str__(self):
+        bold_values = tuple(bold(str(x)) for x in [self.number_of_units, ', '.join(pt.name for pt in self.trigger_group.all())])
+        s = format_html("{0} infected units detected in {1}", *bold_values)
+        return s
     
 
 class RateOfNewDetections(FilteredVaccinationTrigger):
     number_of_units = models.PositiveIntegerField(help_text='The threshold is specified by a number of units and a number of days, for example, "3 or more units detected within 5 days."')
     days = models.PositiveIntegerField()
+    def __str__(self):
+        bold_values = tuple(bold(str(x)) for x in [self.number_of_units, self.days, ', '.join(pt.name for pt in self.trigger_group.all())])
+        return format_html('{0} infected units within {1} days, detected in {2}', *bold_values)
 
 
 class DisseminationRate(FilteredVaccinationTrigger):
-    ratio = models.FloatField(help_text='The threshold is specified by a number of days and a ratio, for example, "initiate a vaccination program if the number of units detected in the last 5 days is 1.5× or more than the number of units detected in the 5 days before that."')
+    ratio = FloatField(help_text='The threshold is specified by a number of days and a ratio, for example, "initiate a vaccination program if the number of units detected in the last 5 days is 1.5× or more than the number of units detected in the 5 days before that."')
     days = models.PositiveIntegerField(help_text='Moving window size for calculating growth ratio.')
+    def __str__(self):
+        bold_values = tuple(bold(str(x)) for x in [self.ratio, self.days, ', '.join(pt.name for pt in self.trigger_group.all())])
+        return format_html("Rate of spread has grown by more than {0}x in the past {1} day period for units in {2}", *bold_values)
 
 
 class TimeFromFirstDetection(FilteredVaccinationTrigger):
-    days = models.PositiveIntegerField(help_text='The number of days to elapse since the first detection')
+    days = models.PositiveIntegerField(help_text='The number of days to elapsed since the first detection')
+    def __str__(self):
+        bold_values = tuple(bold(str(x)) for x in [self.days, ', '.join(pt.name for pt in self.trigger_group.all())])
+        return format_html("{0} days elapsed since First Detection in {1}", *bold_values)
     
     
 class DestructionWaitTime(FilteredVaccinationTrigger):
     days = models.PositiveIntegerField(help_text='Maximum number of days an infected premise should have to wait until destroyed.  The intention of this trigger is to initiate a vaccination program when destruction resources appear to be overwhelmed.')
+    def __str__(self):
+        bold_values = tuple(bold(str(x)) for x in [self.days, ', '.join(pt.name for pt in self.trigger_group.all())])
+        return format_html("{0} days spent waiting in the Destruction Queue for units in {1}", *bold_values)
 
 
 class SpreadBetweenGroups(VaccinationTrigger):  # doesn't need trigger_group so it doesn't inherit FilteredVaccinationTrigger
     number_of_groups = models.PositiveIntegerField(help_text="Specify in how many groups disease must be detected to trigger a vaccination program")
     relevant_groups = models.ManyToManyField(ProductionGroup, )
+    def __str__(self):
+        bold_values = tuple(bold(str(x)) for x in [self.number_of_groups, ', '.join(group.name for group in self.relevant_groups.all())])
+        return format_html("{0} groups infected between {1}", *bold_values)
+
+    
 
 
 
