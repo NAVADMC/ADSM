@@ -219,7 +219,7 @@ body>section {
     padding-top: 1px;
     margin-left: 280px;
     min-width:600px;
-    padding-left: calc((100% - 1280px) / 2);
+/*    padding-left: calc((100% - 1280px) / 2);*/
 }
 
 ul {
