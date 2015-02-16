@@ -421,3 +421,61 @@ class ZoneEffectAssignmentForm(BaseForm):
         widgets = {'zone': HiddenInput(),
                    'production_type': HiddenInput(),
                    'effect': AddOrSelect(attrs={'data-new-item-url': '/setup/ZoneEffect/new/'})}
+
+
+
+class ProductionGroupForm(BaseForm):
+    class Meta(object):
+        model = ProductionGroup
+        exclude = []
+        widgets = {}
+
+
+class DiseaseDetectionForm(BaseForm):
+    class Meta(object):
+        model = DiseaseDetection
+        exclude = []
+        widgets = {}
+
+
+class RateOfNewDetectionsForm(BaseForm):
+    class Meta(object):
+        model = RateOfNewDetections
+        exclude = []
+        widgets = {}
+
+
+class DisseminationRateForm(BaseForm):
+    class Meta(object):
+        model = DisseminationRate
+        exclude = []
+        widgets = {}
+
+
+class TimeFromFirstDetectionForm(BaseForm):
+    class Meta(object):
+        model = TimeFromFirstDetection
+        exclude = []
+        widgets = {}
+
+
+class DestructionWaitTimeForm(BaseForm):
+    class Meta(object):
+        model = DestructionWaitTime
+        exclude = []
+        widgets = {}
+
+
+class SpreadBetweenGroupsForm(BaseForm):
+    class Meta(object):
+        model = SpreadBetweenGroups
+        exclude = []
+        widgets = {}
+
+
+
+
+
+
+
+

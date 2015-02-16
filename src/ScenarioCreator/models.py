@@ -736,3 +736,57 @@ class ZoneEffectAssignment(BaseModel):
 
     def __str__(self):
         return "%s Zone -> %s = %s" % (self.zone.name, self.production_type, self.effect.name if self.effect else "None")
+
+
+class ProductionGroup(BaseModel):
+    group = models.ManyToManyField(ProductionType, )
+
+
+class VaccinationTrigger(BaseModel):
+    class Meta(object):
+        abstract = True
+      
+
+class FilteredVaccinationTrigger(VaccinationTrigger):
+    trigger_group = models.ManyToManyField(ProductionType, )
+    class Meta(object):
+        abstract = True
+      
+        
+class DiseaseDetection(FilteredVaccinationTrigger):
+    number_of_units = models.PositiveIntegerField()
+    
+
+class RateOfNewDetections(FilteredVaccinationTrigger):
+    number_of_units = models.PositiveIntegerField(help_text='The threshold is specified by a number of units and a number of days, for example, "3 or more units detected within 5 days."')
+    days = models.PositiveIntegerField()
+
+
+class DisseminationRate(FilteredVaccinationTrigger):
+    ratio = models.FloatField(help_text='The threshold is specified by a number of days and a ratio, for example, "initiate a vaccination program if the number of units detected in the last 5 days is 1.5× or more than the number of units detected in the 5 days before that."')
+    days = models.PositiveIntegerField(help_text='Moving window size for calculating growth ratio.')
+
+
+class TimeFromFirstDetection(FilteredVaccinationTrigger):
+    days = models.PositiveIntegerField(help_text='The number of days to elapse since the first detection')
+    
+    
+class DestructionWaitTime(FilteredVaccinationTrigger):
+    days = models.PositiveIntegerField(help_text='Maximum number of days an infected premise should have to wait until destroyed.  The intention of this trigger is to initiate a vaccination program when destruction resources appear to be overwhelmed.')
+
+
+class SpreadBetweenGroups(VaccinationTrigger):  # doesn't need trigger_group so it doesn't inherit FilteredVaccinationTrigger
+    number_of_groups = models.PositiveIntegerField(help_text="Specify in how many groups disease must be detected to trigger a vaccination program")
+    relevant_groups = models.ManyToManyField(ProductionGroup, )
+
+
+
+
+
+
+
+
+
+
+
+
