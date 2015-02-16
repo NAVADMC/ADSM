@@ -739,6 +739,7 @@ class ZoneEffectAssignment(BaseModel):
 
 
 class ProductionGroup(BaseModel):
+    name = models.CharField(max_length=255, )
     group = models.ManyToManyField(ProductionType, )
 
 
