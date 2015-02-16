@@ -16,8 +16,16 @@ if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(sys.executable)
 else:
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    
-DB_BASE_DIR = os.path.join(os.path.expanduser("~"), "Documents", "ADSM Workspace", "settings")
+
+DB_BASE_DIR = None
+if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.
+    try:
+        from win32com.shell import shell, shellcon
+        DB_BASE_DIR = os.path.join(shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0), "ADSM Workspace", "settings")
+    except:
+        DB_BASE_DIR = None
+if not DB_BASE_DIR:
+    DB_BASE_DIR = os.path.join(os.path.expanduser("~"), "Documents", "ADSM Workspace", "settings")
 if not os.path.exists(DB_BASE_DIR):
     os.makedirs(DB_BASE_DIR, exist_ok=True)
 

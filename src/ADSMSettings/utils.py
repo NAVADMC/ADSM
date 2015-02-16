@@ -14,13 +14,24 @@ from django.db import connections, close_old_connections
 from django.conf import settings
 from ADSMSettings.models import SmSession, scenario_filename
 
+if os.name == "nt":
+    from win32com.shell import shell, shellcon
+
 
 def db_path(name='scenario_db'):
     return settings.DATABASES[name]['NAME']
 
 
 def workspace_path(target=None):
-    home = os.path.join(os.path.expanduser("~"), "Documents")
+    home = None
+    if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.
+        try:
+            home = shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
+        except:
+            home = None
+    if not home:
+        home = os.path.join(os.path.expanduser("~"), "Documents")
+
     if target is None:
         path = os.path.join(home, "ADSM Workspace")
     elif '/' in target or '\\' in target:
@@ -62,7 +73,7 @@ def prepare_supplemental_output_directory():
 def adsm_executable_command():
     executables = {"Windows": 'adsm_simulation.exe', "Linux": 'adsm_simulation', "Darwin": 'adsm_simulation'}
     executables = defaultdict(lambda: 'adsm_simulation', executables)
-    system_executable = os.path.join(settings.BASE_DIR, '..', 'bin', executables[platform.system()])
+    system_executable = os.path.join(os.path.dirname(settings.BASE_DIR), 'bin', executables[platform.system()])
     output_args = prepare_supplemental_output_directory()
     return [system_executable, db_path('scenario_db')] + output_args
 
