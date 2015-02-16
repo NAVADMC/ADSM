@@ -15,7 +15,10 @@ from django.conf import settings
 from ADSMSettings.models import SmSession, scenario_filename
 
 if os.name == "nt":
-    from win32com.shell import shell, shellcon
+    try:
+        from win32com.shell import shell, shellcon
+    except:
+        pass  # We are already handling the exception case below
 
 
 def db_path(name='scenario_db'):
