@@ -5499,7 +5499,7 @@
 </deterministic-test>
 
 <deterministic-test>
-  <category>ring-vaccination</category>
+  <category>ring_vaccination</category>
   <short-name>retrospective vaccination 0 days, 3 detections to trigger</short-name>
 
   <description>
@@ -5558,7 +5558,7 @@
 </deterministic-test>
 
 <deterministic-test>
-  <category>ring-vaccination</category>
+  <category>ring_vaccination</category>
   <short-name>retrospective vaccination 1 day, 3 detections to trigger</short-name>
 
   <description>
@@ -5621,7 +5621,7 @@
 </deterministic-test>
 
 <deterministic-test>
-  <category>ring-vaccination</category>
+  <category>ring_vaccination</category>
   <short-name>retrospective vaccination 3 days, 4 detections to trigger</short-name>
 
   <description>
