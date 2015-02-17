@@ -5498,6 +5498,194 @@
   </output>
 </deterministic-test>
 
+<deterministic-test>
+  <category>ring-vaccination</category>
+  <short-name>retrospective vaccination 0 days, 3 detections to trigger</short-name>
+
+  <description>
+    This test is one of a set to test retrospective vaccination.  There are 2 rows of
+    units, cattle across the bottom and pigs across the top.  Infection spreads across
+    the row of cattle units, resulting in 1 detection per day when the units are turning
+    Clinical.  When a cattle unit is detected, a small vaccination circle is drawn,
+    covering just the pig unit directly above that cattle unit.
+
+    In this test, vaccination is initiated once 3 infected units have been detected.
+    Retrospective vaccination is given as 0 days.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>21 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows</population-file>
+
+  <parameter-file>vacc_3detect_retro0</parameter-file>
+
+  <parameter-description>
+    For cattle (the bottom row of units), the latent period lasts 1 day, then the unit
+    becomes infectious clinical.  Direct contact spread is set up such that each unit
+    infects the one to its right.
+
+    Diseased cattle units will be detected (by self-reporting) on their first day
+    showing clinical signs.
+    
+    Vaccination begins when disease has been detected in 3 units.  Retrospective
+    vaccination is set at 0 days.  Pig units within 0.75 km of a detected unit will be
+    vaccinated.  Vaccination resources allow for 1 unit to be vaccinated per day.
+
+    What should happen:
+     - Day 1: Unit 0 will be latent.  It will infect unit 1.
+     - Day 2-5: On each of these days, a detection will occur, starting with unit 0 on
+       day 2 and ending with unit 3 on day 5.
+     - Day 4: The 3rd detection (unit 2) occurs on this day.  A vaccination program will
+       be initiated, and the pig unit directly above unit 2 (unit 6) will be added to the
+       vaccination queue.
+     - Day 5: Unit 6 will be vaccinated (its state will show as vaccine immune on day 6).
+       Unit 3 is detected on this day, and unit 7 is added to the vaccination queue.
+     - Day 6: Unit 7 will be vaccinated (its state will show as vaccine immune on day 7).
+  </parameter-description>
+
+  <output>
+    <!--  Cattle Pigs       -->
+    <tr><td>LSSS SSSS</td></tr>
+    <tr><td>CLSS SSSS</td></tr>
+    <tr><td>CCLS SSSS</td></tr>
+    <tr><td>DCCL SSSS</td></tr>
+    <tr><td>DDCC SSSS</td></tr>
+    <tr><td>DDDC SSVS</td></tr>
+    <tr><td>DDDD SSVV</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring-vaccination</category>
+  <short-name>retrospective vaccination 1 day, 3 detections to trigger</short-name>
+
+  <description>
+    This test is one of a set to test retrospective vaccination.  There are 2 rows of
+    units, cattle across the bottom and pigs across the top.  Infection spreads across
+    the row of cattle units, resulting in 1 detection per day when the units are turning
+    Clinical.  When a cattle unit is detected, a small vaccination circle is drawn,
+    covering just the pig unit directly above that cattle unit.
+
+    In this test, vaccination is initiated once 3 infected units have been detected.
+    Retrospective vaccination is given as 1 day.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>21 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows</population-file>
+
+  <parameter-file>vacc_3detect_retro1</parameter-file>
+
+  <parameter-description>
+    For cattle (the bottom row of units), the latent period lasts 1 day, then the unit
+    becomes infectious clinical.  Direct contact spread is set up such that each unit
+    infects the one to its right.
+
+    Diseased cattle units will be detected (by self-reporting) on their first day
+    showing clinical signs.
+    
+    Vaccination begins when disease has been detected in 3 units.  Retrospective
+    vaccination is set at 1 day.  Pig units within 0.75 km of a detected unit will be
+    vaccinated.  Vaccination resources allow for 1 unit to be vaccinated per day.
+
+    What should happen:
+     - Day 1: Unit 0 will be latent.  It will infect unit 1.
+     - Day 2-5: On each of these days, a detection will occur, starting with unit 0 on
+       day 2 and ending with unit 3 on day 5.
+     - Day 4: The 3rd detection (unit 2) occurs on this day.  A vaccination program will
+       be initiated, and the pig unit directly above unit 2 (unit 6) will be added to the
+       vaccination queue.  Unit 5 will also be added to the vaccination queue, and it
+       will count as an older vaccination request, because it is in a ring around unit 1
+       which was detected 1 day ago (retrospective).
+     - Day 5: Unit 5 will be vaccinated (its state will show as vaccine immune on day 6).
+       Unit 3 is detected on this day, and unit 7 is added to the vaccination queue.
+     - Day 6: Unit 6 will be vaccinated (its state will show as vaccine immune on day 7).
+     - Day 7: Unit 7 will be vaccinated (its state will show as vaccine immune on day 8).
+  </parameter-description>
+
+  <output>
+    <!--  Cattle Pigs       -->
+    <tr><td>LSSS SSSS</td></tr>
+    <tr><td>CLSS SSSS</td></tr>
+    <tr><td>CCLS SSSS</td></tr>
+    <tr><td>DCCL SSSS</td></tr>
+    <tr><td>DDCC SSSS</td></tr>
+    <tr><td>DDDC SVSS</td></tr>
+    <tr><td>DDDD SVVS</td></tr>
+    <tr><td>DDDD SVVV</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring-vaccination</category>
+  <short-name>retrospective vaccination 3 days, 4 detections to trigger</short-name>
+
+  <description>
+    This test is one of a set to test retrospective vaccination.  There are 2 rows of
+    units, cattle across the bottom and pigs across the top.  Infection spreads across
+    the row of cattle units, resulting in 1 detection per day when the units are turning
+    Clinical.  When a cattle unit is detected, a small vaccination circle is drawn,
+    covering just the pig unit directly above that cattle unit.
+
+    In this test, vaccination is initiated once 4 infected units have been detected.
+    Retrospective vaccination is given as 3 days.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>21 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows</population-file>
+
+  <parameter-file>vacc_4detect_retro3</parameter-file>
+
+  <parameter-description>
+    For cattle (the bottom row of units), the latent period lasts 1 day, then the unit
+    becomes infectious clinical.  Direct contact spread is set up such that each unit
+    infects the one to its right.
+
+    Diseased cattle units will be detected (by self-reporting) on their first day
+    showing clinical signs.
+    
+    Vaccination begins when disease has been detected in 4 units.  Retrospective
+    vaccination is set at 3 days.  Pig units within 0.75 km of a detected unit will be
+    vaccinated.  Vaccination resources allow for 1 unit to be vaccinated per day.
+
+    What should happen:
+     - Day 1: Unit 0 will be latent.  It will infect unit 1.
+     - Day 2-5: On each of these days, a detection will occur, starting with unit 0 on
+       day 2 and ending with unit 3 on day 5.
+     - Day 5: The 4th detection (unit 3) occurs on this day.  A vaccination program will
+       be initiated, and the pig unit directly above unit 3 (unit 7) will be added to the
+       vaccination queue.  Units 4, 5, and 6 will also be added to the vaccination queue,
+       with unit 4 counting as the oldest request, because those units are in rings
+       around units 0, 1, and 2, which were detected within the last 3 days
+       (retrospective).
+     - Day 6: Unit 4 will be vaccinated (its state will show as vaccine immune on day 7).
+     - Day 7: Unit 5 will be vaccinated (its state will show as vaccine immune on day 9).
+     - Day 8: Unit 6 will be vaccinated (its state will show as vaccine immune on day 9).
+     - Day 9: Unit 7 will be vaccinated (its state will show as vaccine immune on day 10).
+  </parameter-description>
+
+  <output>
+    <!--               Cattle Pigs                    -->
+    <tr><td>LSSS SSSS</td></tr>
+    <tr><td>CLSS SSSS</td></tr>
+    <tr><td>CCLS SSSS</td></tr>
+    <tr><td>DCCL SSSS</td></tr>
+    <tr><td>DDCC SSSS</td></tr>
+    <tr><td>DDDC SSSS</td></tr>
+    <tr><td>DDDD VSSS</td></tr>
+    <tr><td>DDDD VVSS</td></tr>
+    <tr><td>DDDD VVVS</td></tr>
+    <tr><td>DDDD VVVV</td></tr>
+  </output>
+</deterministic-test>
+
 <variable-test>
   <category>ring_vaccination</category>
   <short-name>vaccination request from exam, cancellation from test</short-name>
