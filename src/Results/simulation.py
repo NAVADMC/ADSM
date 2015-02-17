@@ -4,6 +4,7 @@ import multiprocessing
 import time
 import subprocess
 from django.db import transaction, close_old_connections
+from django.conf import settings
 
 
 from Results.interactive_graphing import population_zoom_png
@@ -34,8 +35,12 @@ def set_pragma(setting, value, connection='default'):
     cursor.execute(raw_sql)
 
 
-def simulation_process(iteration_number, adsm_cmd, production_types, zones):
+def simulation_process(iteration_number, adsm_cmd, production_types, zones, testing=False):
     start = time.time()
+
+    if testing:
+        for database in settings.DATABASES:
+            settings.DATABASES[database]['NAME'] = settings.DATABASES[database]['TEST']['NAME'] if 'TEST' in settings.DATABASES[database] else settings.DATABASES[database]['TEST_NAME']
 
     # import cProfile, pstats
     # profiler = cProfile.Profile()
@@ -102,21 +107,28 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones):
     return end-start
 
 
-
 class Simulation(multiprocessing.Process):
     import django
     django.setup()
 
+    testing = False
+
     """Execute system commands in a separate thread so as not to interrupt the webpage.
     Saturate the computer's processors with parallel simulation iterations"""
-    def __init__(self, max_iteration, **kwargs):
+    def __init__(self, max_iteration, testing=False, **kwargs):
         super(Simulation, self).__init__(**kwargs)
         self.max_iteration = max_iteration
         self.production_types = ProductionType.objects.values_list('id', 'name')
         self.zones = Zone.objects.values_list('id', 'name')
+        self.testing = testing
 
     def run(self):
         pid = os.getpid()
+
+        if self.testing:
+            for database in settings.DATABASES:
+                settings.DATABASES[database]['NAME'] = settings.DATABASES[database]['TEST']['NAME'] if 'TEST' in settings.DATABASES[database] else settings.DATABASES[database]['TEST_NAME']
+
         simRecord = SimulationProcessRecord(is_parser=False, pid=pid)
         try:
             print("Starting run")
@@ -131,7 +143,7 @@ class Simulation(multiprocessing.Process):
             pool = multiprocessing.Pool(num_cores)
             for iteration in range(1, self.max_iteration + 1):
                 adsm_cmd = executable_cmd + ['-i', str(iteration)]
-                res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, self.production_types, self.zones))
+                res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, self.production_types, self.zones, self.testing))
                 statuses.append(res)
 
             pool.close()
