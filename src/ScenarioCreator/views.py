@@ -24,7 +24,14 @@ abstract_models = {
     'DiseaseSpread':
         [('DirectSpread', DirectSpread),
          ('IndirectSpread', IndirectSpread),
-         ('AirborneSpread', AirborneSpread)]}
+         ('AirborneSpread', AirborneSpread)],
+    'VaccinationTrigger':
+        [('DiseaseDetection', DiseaseDetection),
+         ('RateOfNewDetections', RateOfNewDetections),
+         ('DisseminationRate', DisseminationRate),
+         ('SpreadBetweenGroups', SpreadBetweenGroups),
+         ('TimeFromFirstDetection', TimeFromFirstDetection),
+         ('DestructionWaitTime', DestructionWaitTime),]}
 
 
 def spaces_for_camel_case(text):
