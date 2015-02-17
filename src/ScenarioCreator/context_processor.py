@@ -5,7 +5,8 @@ from django.db.models import F
 
 from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Population, Unit, Disease, DiseaseProgression, \
     DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
-    ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
+    ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment, VaccinationTrigger, SpreadBetweenGroups, \
+    DestructionWaitTime, TimeFromFirstDetection, DisseminationRate, RateOfNewDetections, DiseaseDetection
 from Results.models import DailyControls
 from ADSMSettings.models import scenario_filename, SmSession
 from ADSMSettings.views import unsaved_changes
@@ -55,6 +56,8 @@ def basic_context(request):
                                     direct_contact_spread__isnull=False
                                 ).count() >= pt_count,
                'ControlMasterPlan': ControlMasterPlan.objects.count(),
+               'VaccinationTrigger': any([m.objects.count() for m in 
+                                          [DiseaseDetection,RateOfNewDetections,DisseminationRate,TimeFromFirstDetection,DestructionWaitTime,SpreadBetweenGroups]]),
                'Protocols': ControlProtocol.objects.count(),
                'ProtocolAssignments': ProtocolAssignment.objects.count(),
                'Zones': Zone.objects.count(),
