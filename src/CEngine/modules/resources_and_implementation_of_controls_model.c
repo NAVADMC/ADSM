@@ -327,6 +327,7 @@ typedef struct
     we ever test). */
   unsigned int ndetected_units; /**< The number of diseased units detected so
     far. */
+  int vaccination_retrospective_days;
   REL_chart_t *vaccination_capacity; /**< The maximum number of units the
     authorities can vaccinate in a day. */
   gboolean vaccination_capacity_goes_to_0; /**< A flag indicating that at some
@@ -365,17 +366,21 @@ local_data_t;
 
 
 /**
- * Cancels a vaccination.
+ * Cancels vaccinations for a unit.
  *
  * @param unit a unit.
  * @param day the current simulation day.
  * @param vaccination_status from local_data.
  * @param pending_vaccinations from local_data.
+ * @param older_than only delete vaccination requests older than this number of
+ *   days. This is how "retrospective" vaccination is accomplished. If 0, all
+ *   vaccination requests are deleted.
  * @param queue for any new events the function creates.
  */
 void
 cancel_vaccination (UNT_unit_t * unit, int day,
                     GHashTable * vaccination_status, GPtrArray * pending_vaccinations,
+                    int older_than,
                     EVT_event_queue_t * queue)
 {
   GQueue *locations_in_queue;
@@ -389,26 +394,34 @@ cancel_vaccination (UNT_unit_t * unit, int day,
   g_debug ("----- ENTER cancel_vaccination (%s)", MODEL_NAME);
 #endif
     
-  /* If the unit is on the vaccination waiting list, remove it. */
+  /* If the unit is on the vaccination waiting list, remove the vaccination requests. */
   locations_in_queue = (GQueue *) g_hash_table_lookup (vaccination_status, unit);
   if (locations_in_queue != NULL)
     {
+      /* Delete from the head of the queue (that's where the oldest requests are).  Stop
+       * when the queue is empty, or when we encounter a request that is too new
+       * according to the older_than parameter. */
       while (!g_queue_is_empty (locations_in_queue))
         {
-          link = (GList *) g_queue_pop_head (locations_in_queue);
-          /* Delete both the RequestForVaccination structure and the GQueue link
-           * that holds it. */
+          link = (GList *) g_queue_peek_head (locations_in_queue);
           request = (EVT_event_t *) (link->data);
           details = &(request->u.request_for_vaccination);
+          if ((day - details->day_commitment_made) <= older_than)
+            break;
+          g_queue_pop_head (locations_in_queue);
+          /* Delete both the RequestForVaccination structure and the GQueue link
+           * that holds it. */
           cancellation_event = EVT_new_vaccination_canceled_event (unit, day, details->day_commitment_made);
 
           q = (GQueue *) g_ptr_array_index (pending_vaccinations, details->priority - 1);
           EVT_free_event (request);
           g_queue_delete_link (q, link);
 
-          EVT_event_enqueue (queue, cancellation_event);
+          if (queue != NULL)
+            EVT_event_enqueue (queue, cancellation_event);
         }
-      g_hash_table_remove (vaccination_status, unit);
+      if (g_queue_is_empty (locations_in_queue))
+        g_hash_table_remove (vaccination_status, unit);
     }
 
 #if DEBUG
@@ -447,7 +460,8 @@ destroy (struct adsm_module_t_ *self, UNT_unit_t * unit,
 
   /* Take the unit off the vaccination waiting list, if needed. */
   cancel_vaccination (unit, day, local_data->vaccination_status,
-                      local_data->pending_vaccinations, queue);
+                      local_data->pending_vaccinations, /* older_than = */ 0,
+                      queue);
 
 #if DEBUG
   g_debug ("----- EXIT destroy (%s)", MODEL_NAME);
@@ -867,20 +881,44 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
 
 
 
+/**
+ * Removes all pending vaccination from the queues.  If queue is not NULL,
+ * issues VaccinationCanceled events.  (This function is called when resetting
+ * or freeing the module, and in those cases we don't need it to send events to
+ * the event queue.)
+ */
 static void
-clear_all_pending_vaccinations (local_data_t *local_data)
+clear_all_pending_vaccinations (local_data_t *local_data,
+                                int day,
+                                EVT_event_queue_t *queue)
 {
-  guint npriorities, i;
-  GQueue *q;
+  GList *units_awaiting_vaccination, *iter;
+  UNT_unit_t *unit;
 
-  npriorities = local_data->pending_vaccinations->len;
-  g_hash_table_remove_all (local_data->vaccination_status);
-  for (i = 0; i < npriorities; i++)
+  #if DEBUG
+    g_debug ("----- ENTER clear_all_pending_vaccinations (%s)", MODEL_NAME);
+  #endif
+
+  /* Units that are awaiting vaccination are present as keys in local_data->
+   * vaccination_status.  Get a list of those units and call cancel_vaccination
+   * on each of them.  (Can't use g_hash_table_foreach in this case because
+   * cancel_vaccination modifies the hash table.) */
+  units_awaiting_vaccination = g_hash_table_get_keys (local_data->vaccination_status);   
+  for (iter = g_list_first (units_awaiting_vaccination) ;
+       iter != NULL ;
+       iter = g_list_next (iter))
     {
-      q = (GQueue *) g_ptr_array_index (local_data->pending_vaccinations, i);
-      while (!g_queue_is_empty (q))
-        EVT_free_event (g_queue_pop_head (q));
+      unit = (UNT_unit_t *)(iter->data);
+      cancel_vaccination (unit, day,
+                          local_data->vaccination_status,
+                          local_data->pending_vaccinations,
+                          local_data->vaccination_retrospective_days,
+                          queue);
     }
+  g_list_free (units_awaiting_vaccination);
+  #if DEBUG
+    g_debug ("----- EXIT clear_all_pending_vaccinations (%s)", MODEL_NAME);
+  #endif
   return;
 }
 
@@ -926,7 +964,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   g_hash_table_remove_all (local_data->destroyed_today);
 
   /* Empty the prioritized pending vaccinations lists. */
-  clear_all_pending_vaccinations (local_data);
+  clear_all_pending_vaccinations (local_data, /* day = */ 0, /* event queue = */ NULL);
   local_data->nvaccinated_today = 0;
 
   for (i = 0; i < local_data->nunits; i++)
@@ -988,7 +1026,7 @@ handle_new_day_event (struct adsm_module_t_ *self,
         g_debug ("# detections so far (%u) < vaccination threshold (%u), deleting yesterday's requests to vaccinate",
                  local_data->ndetected_units, local_data->vaccination_program_threshold);
       #endif
-      clear_all_pending_vaccinations (local_data);
+      clear_all_pending_vaccinations (local_data, event->day, queue);
     }
   else
     {
@@ -1079,6 +1117,7 @@ handle_detection_event (struct adsm_module_t_ *self,
           cancel_vaccination (unit, event->day,
                               local_data->vaccination_status,
                               local_data->pending_vaccinations,
+                              /* older_than = */ 0,
                               queue);
         }
     }
@@ -1528,7 +1567,7 @@ local_free (struct adsm_module_t_ *self)
   g_hash_table_destroy (local_data->destroyed_today);
 
   REL_free_chart (local_data->vaccination_capacity);
-  clear_all_pending_vaccinations (local_data);
+  clear_all_pending_vaccinations (local_data, /* day = */ 0, /* event queue = */ NULL);
   g_hash_table_destroy (local_data->vaccination_status);
   npriorities = local_data->pending_vaccinations->len;
   for (i = 0; i < npriorities; i++)
@@ -1578,7 +1617,7 @@ set_params (void *data, GHashTable *dict)
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
-  g_assert (g_hash_table_size (dict) == 6);
+  g_assert (g_hash_table_size (dict) == 7);
 
   tmp_text = g_hash_table_lookup (dict, "destruction_program_delay");
   if (tmp_text != NULL)
@@ -1748,6 +1787,18 @@ set_params (void *data, GHashTable *dict)
       local_data->vaccination_time_waiting_priority = 3;
     }
 
+  tmp_text = g_hash_table_lookup (dict, "vaccinate_retrospective_days");
+  if (tmp_text != NULL)
+    {
+      errno = 0;
+      local_data->vaccination_retrospective_days = strtol (tmp_text, NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);  
+    }
+  else
+    {
+      local_data->vaccination_retrospective_days = 0;
+    }
+
   #if DEBUG
     g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
   #endif
@@ -1825,7 +1876,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read the parameters. */
   local_data->db = params,
   sqlite3_exec_dict (params,
-                     "SELECT destruction_program_delay,destruction_capacity_id,destruction_priority_order,units_detected_before_triggering_vaccination,vaccination_capacity_id,vaccination_priority_order "
+                     "SELECT destruction_program_delay,destruction_capacity_id,destruction_priority_order,"
+                     "units_detected_before_triggering_vaccination,vaccination_capacity_id,vaccination_priority_order,"
+                     "vaccinate_retrospective_days "
                      "FROM ScenarioCreator_controlmasterplan",
                      set_params, self, &sqlerr);
   if (sqlerr)
