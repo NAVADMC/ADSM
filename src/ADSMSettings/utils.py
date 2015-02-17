@@ -17,8 +17,8 @@ from ADSMSettings.models import SmSession, scenario_filename
 if os.name == "nt":
     try:
         from win32com.shell import shell, shellcon
-    except ImportError:  # already checking for failure case down below
-        pass
+    except:
+        pass  # We are already handling the exception case below
 
 
 def db_path(name='scenario_db'):
@@ -87,12 +87,18 @@ def graceful_startup():
         print("Creating User Directory...")
         os.makedirs(os.path.dirname(workspace_path()), exist_ok=True)
 
-    for dirpath, dirnames, files in os.walk(os.path.join(os.path.dirname(settings.BASE_DIR), "Sample Scenarios")):
+    samples_dir = os.path.join(os.path.dirname(settings.BASE_DIR), "Sample Scenarios")
+    for dirpath, dirnames, files in os.walk(samples_dir):
+        subdir = str(dirpath).replace(samples_dir, '')
+        if subdir.startswith(os.path.sep):
+            subdir = subdir.replace(os.path.sep, '', 1)
+        if subdir.strip():
+            os.makedirs(os.path.join(workspace_path(), subdir))
         for file in files:
             try:
-                shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), file))
-            except:
-                pass
+                shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), subdir, file))
+            except Exception as e:
+                print(e)
 
     try:
         x = SmSession.objects.get().scenario_filename  # this should be in the initial migration
