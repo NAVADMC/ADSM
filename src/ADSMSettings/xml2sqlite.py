@@ -1282,7 +1282,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
         if useVaccination:
             try:
-                unitsDetectedBeforeTriggeringVaccination = int( el.find( './vaccination-program-delay' ).text )
+                unitsDetectedBeforeTriggeringVaccination = max( 1, int( el.find( './vaccination-program-delay' ).text ))
             except AttributeError:
                 unitsDetectedBeforeTriggeringVaccination = 1 # default
             trigger = DiseaseDetection(
