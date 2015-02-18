@@ -7,11 +7,10 @@ from time import sleep
 print("Importing Python dependencies and setting local path...")
 
 if getattr(sys, 'frozen', False):
-    BASE_DIR = os.path.dirname(os.path.dirname(sys.executable))
-    sys.path.append(os.path.join(BASE_DIR, 'src'))
-    os.environ["PATH"] += os.pathsep + os.path.join(BASE_DIR, 'bin')
+    BASE_DIR = os.path.join(os.path.dirname(os.path.dirname(sys.executable)), 'src')
+    os.environ["PATH"] += os.pathsep + os.path.join(os.path.dirname(BASE_DIR), 'bin')
 else:
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 print(BASE_DIR)
 
 os.chdir(BASE_DIR)
@@ -35,6 +34,7 @@ sys.path.append(os.path.join(BASE_DIR, "bin"))
 sys.path.append(os.path.join(BASE_DIR, "Scripts"))
 path_all_the_eggs()
 
+
 def forceful_git_cleanup():
     import psutil
     print("Kill all git processes")
@@ -53,11 +53,9 @@ def forceful_git_cleanup():
         except:
             print("IMPORTANT: You will need to manually delete ", lock_file, "before ADSM can update.")
             sleep(10)
-            quit()
+            sys.exit()
             
 forceful_git_cleanup()
-
-os.chdir(os.path.join(BASE_DIR, "src"))
 
 # Discretely import django items
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
@@ -69,4 +67,4 @@ exec("from ADSMSettings.utils import reset_and_update_adsm")
 
 reset_and_update_adsm()# This will always complain in an editor. Ignore it.
 
-quit()
+sys.exit()
