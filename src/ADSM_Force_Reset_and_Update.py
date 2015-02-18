@@ -12,12 +12,13 @@ if getattr(sys, 'frozen', False):
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 print(BASE_DIR)
+TOP_DIR = os.path.dirname(BASE_DIR)
 
 os.chdir(BASE_DIR)
 
 
 def path_all_the_eggs():
-    packages = os.path.join(BASE_DIR, "Lib", "site-packages")
+    packages = os.path.join(TOP_DIR, "Lib", "site-packages")
     for folder in os.listdir(packages):
         subfolder = os.path.join(packages, folder)
         if os.path.isdir(subfolder):
@@ -25,13 +26,13 @@ def path_all_the_eggs():
                 sys.path.append(subfolder)
 
 sys.path.append(BASE_DIR)
-sys.path.append(os.path.join(BASE_DIR, "DLLs"))
-sys.path.append(os.path.join(BASE_DIR, "Lib"))
-sys.path.append(os.path.join(BASE_DIR, "Lib", "plat-win"))
-sys.path.append(os.path.join(BASE_DIR, "Lib", "lib-tk"))
-sys.path.append(os.path.join(BASE_DIR, "Lib", "site-packages"))
-sys.path.append(os.path.join(BASE_DIR, "bin"))
-sys.path.append(os.path.join(BASE_DIR, "Scripts"))
+sys.path.append(os.path.join(TOP_DIR, "DLLs"))
+sys.path.append(os.path.join(TOP_DIR, "Lib"))
+sys.path.append(os.path.join(TOP_DIR, "Lib", "plat-win"))
+sys.path.append(os.path.join(TOP_DIR, "Lib", "lib-tk"))
+sys.path.append(os.path.join(TOP_DIR, "Lib", "site-packages"))
+sys.path.append(os.path.join(TOP_DIR, "bin"))
+sys.path.append(os.path.join(TOP_DIR, "Scripts"))
 path_all_the_eggs()
 
 
