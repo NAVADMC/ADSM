@@ -69,7 +69,9 @@ typedef enum
   EVT_Detection,
   EVT_Quarantine,
   EVT_PublicAnnouncement, EVT_Exam, EVT_AttemptToTrace,
-  EVT_TraceResult, EVT_Test, EVT_TestResult, EVT_RequestForVaccination,
+  EVT_TraceResult, EVT_Test, EVT_TestResult,
+  EVT_RequestToInitiateVaccination,
+  EVT_RequestForVaccination,
   EVT_CommitmentToVaccinate, EVT_VaccinationCanceled,
   EVT_Vaccination, EVT_RequestForDestruction, EVT_CommitmentToDestroy,
   EVT_Destruction, EVT_RequestForZoneFocus, EVT_EndOfDay,
@@ -305,6 +307,16 @@ EVT_test_result_event_t;
 
 
 
+/** A "request to initiate vaccination" event. */
+typedef struct
+{
+  int day;
+  char *trigger_name;
+}
+EVT_request_to_initiate_vaccination_event_t;
+
+
+
 /** A "request for vaccination" event. */
 typedef struct
 {
@@ -520,6 +532,7 @@ typedef struct
     EVT_trace_result_event_t trace_result;
     EVT_test_event_t test;
     EVT_test_result_event_t test_result;
+    EVT_request_to_initiate_vaccination_event_t request_to_initiate_vaccination;
     EVT_request_for_vaccination_event_t request_for_vaccination;
     EVT_commitment_to_vaccinate_event_t commitment_to_vaccinate;
     EVT_vaccination_canceled_event_t vaccination_canceled;
@@ -600,6 +613,8 @@ EVT_event_t *EVT_new_test_result_event (UNT_unit_t *,
                                         gboolean positive,
                                         gboolean correct,
                                         ADSM_control_reason);
+EVT_event_t *EVT_new_request_to_initiate_vaccination_event (int day,
+                                                            char *trigger_name);
 EVT_event_t *EVT_new_request_for_vaccination_event (UNT_unit_t *,
                                                     int day,
                                                     ADSM_control_reason,

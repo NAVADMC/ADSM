@@ -48,6 +48,7 @@ const char *EVT_event_type_name[] = {
   "Quarantine",
   "PublicAnnouncement", "Exam", "AttemptToTrace", "TraceResult", "Test",
   "TestResult",
+  "RequestToInitiateVaccination",
   "RequestForVaccination", "CommitmentToVaccinate", "VaccinationCanceled",
   "Vaccination", "RequestForDestruction",
   "CommitmentToDestroy", "Destruction",
@@ -811,6 +812,44 @@ EVT_test_result_event_to_string (EVT_test_result_event_t * event)
 
 
 /**
+ * Creates a new "request to initiate vaccination" event.
+ *
+ * @return a pointer to a newly-created EVT_event_t structure.
+ */
+EVT_event_t *
+EVT_new_request_to_initiate_vaccination_event (int day, char *trigger_name)
+{
+  EVT_event_t *event;
+
+  event = g_new (EVT_event_t, 1);
+  event->type = EVT_RequestToInitiateVaccination;
+  event->u.request_to_initiate_vaccination.day = day;
+  event->u.request_to_initiate_vaccination.trigger_name = trigger_name;
+  return event;
+}
+
+
+
+/**
+ * Returns a text representation of a request to initiate vaccination event.
+ *
+ * @param event a request to initiate vaccination event.
+ * @return a string.
+ */
+char *EVT_request_to_initiate_vaccination_event_to_string (EVT_request_to_initiate_vaccination_event_t * event)
+{
+  GString *s;
+
+  s = g_string_new (NULL);
+  g_string_sprintf (s, "<Request to initiate vaccination event day=%d triggered by %s>",
+                    event->day, event->trigger_name);
+  /* don't return the wrapper object */
+  return g_string_free (s, /* free_segment = */ FALSE);
+}
+
+
+
+/**
  * Creates a new "request for vaccination" event.
  *
  * @return a pointer to a newly-created EVT_event_t structure.
@@ -1469,6 +1508,7 @@ EVT_free_event (EVT_event_t * event)
     case EVT_TraceResult:
     case EVT_Test:
     case EVT_TestResult:
+    case EVT_RequestToInitiateVaccination:
     case EVT_RequestForVaccination:
     case EVT_CommitmentToVaccinate:
     case EVT_VaccinationCanceled:
@@ -1647,6 +1687,9 @@ EVT_event_to_string (EVT_event_t * event)
       break;
     case EVT_TestResult:
       s = EVT_test_result_event_to_string (&(event->u.test_result));
+      break;
+    case EVT_RequestToInitiateVaccination:
+      s = EVT_request_to_initiate_vaccination_event_to_string (&(event->u.request_to_initiate_vaccination));
       break;
     case EVT_RequestForVaccination:
       s = EVT_request_for_vaccination_event_to_string (&(event->u.request_for_vaccination));
