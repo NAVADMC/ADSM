@@ -232,6 +232,7 @@
 #define handle_new_day_event resources_and_implementation_of_controls_model_handle_new_day_event
 #define handle_detection_event resources_and_implementation_of_controls_model_handle_detection_event
 #define handle_request_for_destruction_event resources_and_implementation_of_controls_model_handle_request_for_destruction_event
+#define handle_request_to_initiate_vaccination_event resources_and_implementation_of_controls_model_handle_request_to_initiate_vaccination_event
 #define handle_request_for_vaccination_event resources_and_implementation_of_controls_model_handle_request_for_vaccination_event
 #define handle_vaccination_event resources_and_implementation_of_controls_model_handle_vaccination_event
 
@@ -1008,7 +1009,7 @@ handle_new_day_event (struct adsm_module_t_ *self,
     destroy_by_priority (self, event->day, queue);
 
   local_data->nvaccinated_today = 0;
-  if (local_data->vaccination_active)
+  if (local_data->vaccination_active == FALSE)
     {
       /* If we haven't initiated a vaccination program yet, remove any
        * requests for vaccination that happened as a result of detections
@@ -1273,6 +1274,40 @@ end:
 
 
 /**
+ * Responds to a request to initiate vaccination event by setting a flag indicating that
+ * the first vaccinations can occur tomorrow (resources permitting).
+ *
+ * @param self this module.
+ * @param event a request to initiate vaccination event.
+ */
+void
+handle_request_to_initiate_vaccination_event (struct adsm_module_t_ *self,
+                                              EVT_request_to_initiate_vaccination_event_t * event)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_request_to_initiate_vaccination_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  if (local_data->vaccination_active == FALSE)
+    {
+      local_data->vaccination_active = TRUE;
+      #if DEBUG
+        g_debug ("initiating vaccination, day %i", event->day);
+      #endif
+    }
+  #if DEBUG
+    g_debug ("----- EXIT handle_request_to_initiate_vaccination_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
+
+
+
+/**
  * Responds to a request for vaccination event by committing to do the
  * vaccination.
  *
@@ -1405,6 +1440,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
       break;
     case EVT_RequestForDestruction:
       handle_request_for_destruction_event (self, event, queue);
+      break;
+    case EVT_RequestToInitiateVaccination:
+      handle_request_to_initiate_vaccination_event (self, &(event->u.request_to_initiate_vaccination));
       break;
     case EVT_RequestForVaccination:
       handle_request_for_vaccination_event (self, event, queue);
@@ -1786,6 +1824,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_NewDay,
     EVT_Detection,
     EVT_RequestForDestruction,
+    EVT_RequestToInitiateVaccination,
     EVT_RequestForVaccination,
     EVT_Vaccination,
     0
