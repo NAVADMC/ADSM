@@ -45,14 +45,14 @@ class SimulationTest(TransactionTestCase):
         sim.join()
 
         # 10 days for each iteration, so 50 reports total
-        self.assertEqual(DailyControls.objects.count(), 55)  # TODO: Confirm that this is the correct expected outcome!
+        self.assertEqual(DailyControls.objects.count(), 50)
 
     def test_single_thread(self):
         sim = Simulation(1, testing=True)
         sim.start()
         sim.join()
 
-        self.assertEqual(DailyControls.objects.count(), 11)  # TODO: Confirm that this is the correct expected outcome!
+        self.assertEqual(DailyControls.objects.count(), 10)
 
     def test_supplemental_output_created(self):
         """
