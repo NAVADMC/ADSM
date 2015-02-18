@@ -14,13 +14,27 @@ from django.db import connections, close_old_connections
 from django.conf import settings
 from ADSMSettings.models import SmSession, scenario_filename
 
+if os.name == "nt":
+    try:
+        from win32com.shell import shell, shellcon
+    except:
+        pass  # We are already handling the exception case below
+
 
 def db_path(name='scenario_db'):
     return settings.DATABASES[name]['NAME']
 
 
 def workspace_path(target=None):
-    home = os.path.join(os.path.expanduser("~"), "Documents")
+    home = None
+    if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.
+        try:
+            home = shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
+        except:
+            home = None
+    if not home:
+        home = os.path.join(os.path.expanduser("~"), "Documents")
+
     if target is None:
         path = os.path.join(home, "ADSM Workspace")
     elif '/' in target or '\\' in target:
@@ -62,7 +76,7 @@ def prepare_supplemental_output_directory():
 def adsm_executable_command():
     executables = {"Windows": 'adsm_simulation.exe', "Linux": 'adsm_simulation', "Darwin": 'adsm_simulation'}
     executables = defaultdict(lambda: 'adsm_simulation', executables)
-    system_executable = os.path.join(settings.BASE_DIR, '..', 'bin', executables[platform.system()])
+    system_executable = os.path.join(os.path.dirname(settings.BASE_DIR), 'bin', executables[platform.system()])
     output_args = prepare_supplemental_output_directory()
     return [system_executable, db_path('scenario_db')] + output_args
 
@@ -73,12 +87,18 @@ def graceful_startup():
         print("Creating User Directory...")
         os.makedirs(os.path.dirname(workspace_path()), exist_ok=True)
 
-    for dirpath, dirnames, files in os.walk(os.path.join(os.path.dirname(settings.BASE_DIR), "Sample Scenarios")):
+    samples_dir = os.path.join(os.path.dirname(settings.BASE_DIR), "Sample Scenarios")
+    for dirpath, dirnames, files in os.walk(samples_dir):
+        subdir = str(dirpath).replace(samples_dir, '')
+        if subdir.startswith(os.path.sep):
+            subdir = subdir.replace(os.path.sep, '', 1)
+        if subdir.strip():
+            os.makedirs(os.path.join(workspace_path(), subdir))
         for file in files:
             try:
-                shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), file))
-            except:
-                pass
+                shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), subdir, file))
+            except Exception as e:
+                print(e)
 
     try:
         x = SmSession.objects.get().scenario_filename  # this should be in the initial migration
@@ -133,12 +153,13 @@ def reset_db(name, fail_ok=True):
 
 
 def update_db_version():
+    """It is critical to call migrate only with a database specified in order for the django_migration history
+    to stay current with activeSession."""
     print("Checking Scenario version")
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
     try:
-        call_command('migrate',
-                     # verbosity=0,
-                     interactive=False)
+        call_command('migrate', database='scenario_db', interactive=False)
+        call_command('migrate', database='default', interactive=False)
     except:
         print("Error: Migration failed.")
     print('Done creating database')

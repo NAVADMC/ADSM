@@ -1,7 +1,7 @@
 
 
 def part_of_scenario(model):
-    return model._meta.app_label in ['ScenarioCreator', 'Results', 'south']
+    return model._meta.app_label in ['ScenarioCreator', 'Results']
 
 
 def route_by_app(model):

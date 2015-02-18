@@ -1,5 +1,6 @@
 from django.test import TestCase, TransactionTestCase
 from django.db import close_old_connections
+from django.conf import settings
 import os, shutil
 import zipfile
 from ADSMSettings.utils import workspace_path
@@ -17,7 +18,7 @@ class SimulationTest(TransactionTestCase):
 
     @classmethod
     def setUpClass(cls):
-        source_db = os.path.join('ScenarioCreator','tests','population_fixtures','Roundtrip.sqlite3')
+        source_db = os.path.join(settings.BASE_DIR, 'ScenarioCreator', 'tests', 'population_fixtures', 'Roundtrip.sqlite3')
         cls.destination_db = workspace_path('Roundtrip_test.sqlite3')
         shutil.copy(source_db, cls.destination_db)
         cls.scenario_directory = workspace_path('Roundtrip_test')
@@ -39,7 +40,7 @@ class SimulationTest(TransactionTestCase):
         shutil.rmtree(self.scenario_directory, ignore_errors=True)
 
     def test_multiple_threads(self):
-        sim = Simulation(5)
+        sim = Simulation(5, testing=True)
         sim.start()
         sim.join()
 
@@ -47,7 +48,7 @@ class SimulationTest(TransactionTestCase):
         self.assertEqual(DailyControls.objects.count(), 50)
 
     def test_single_thread(self):
-        sim = Simulation(1)
+        sim = Simulation(1, testing=True)
         sim.start()
         sim.join()
 
@@ -65,7 +66,7 @@ class SimulationTest(TransactionTestCase):
         close_old_connections()
         output_file = os.path.join(self.scenario_directory, 'states_1.csv')
 
-        sim = Simulation(1)
+        sim = Simulation(1, testing=True)
         sim.start()
         sim.join()
 
@@ -80,7 +81,7 @@ class SimulationTest(TransactionTestCase):
         file_name = os.path.join(self.scenario_directory, 'Roundtrip_test Map Output.zip')
         folder_name = os.path.join(self.scenario_directory, 'Map')
 
-        sim = Simulation(1)
+        sim = Simulation(1, testing=True)
         sim.start()
         sim.join()
 
@@ -97,7 +98,7 @@ class SimulationTest(TransactionTestCase):
         file_name = os.path.join(self.scenario_directory, 'Roundtrip_test Map Output.zip')
         folder_name = os.path.join(self.scenario_directory, 'Map')
 
-        sim = Simulation(1)
+        sim = Simulation(1, testing=True)
         sim.start()
         sim.join()
 
