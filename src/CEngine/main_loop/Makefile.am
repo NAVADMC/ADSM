@@ -54,6 +54,7 @@ libadsm_a_SOURCES = main_loop.c module_loader.c module_loader.h \
   $(top_srcdir)/modules/quarantine_model.c $(top_srcdir)/modules/quarantine_model.h \
   $(top_srcdir)/modules/basic_destruction_model.c $(top_srcdir)/modules/basic_destruction_model.h \
   $(top_srcdir)/modules/ring_destruction_model.c $(top_srcdir)/modules/ring_destruction_model.h \
+  $(top_srcdir)/modules/number_of_detections_vaccination_trigger.c $(top_srcdir)/modules/number_of_detections_vaccination_trigger.h \
   $(top_srcdir)/modules/ring_vaccination_model.c $(top_srcdir)/modules/ring_vaccination_model.h \
   $(top_srcdir)/modules/trace_model.c $(top_srcdir)/modules/trace_model.h \
   $(top_srcdir)/modules/trace_destruction_model.c $(top_srcdir)/modules/trace_destruction_model.h \
