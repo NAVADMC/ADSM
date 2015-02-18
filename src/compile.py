@@ -176,7 +176,9 @@ shutil.copy(os.path.join(BASE_DIR, 'bin', 'python34.dll'), os.path.join(BASE_DIR
 
 remove_tree(os.path.join(BASE_DIR, 'build'))
 
+library_update_required = 2
 if not query_yes_no("Did either adsm_update.exe or adsm_force_reset_and_update.exe change?", default='no'):
+    library_update_required -= 1
     # Checkout old versions of files that probably didn't change (mostly update executables)
     files_to_reset = [os.path.join(BASE_DIR, 'bin', 'adsm_update.exe'), os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.exe')]
     from git.git import git
@@ -185,8 +187,17 @@ if not query_yes_no("Did either adsm_update.exe or adsm_force_reset_and_update.e
         subprocess.call(command, shell=True)
 
 if not query_yes_no("Did the ADSM.exe change?", default='no'):
+    library_update_required -= 1
     # Checkout old versions of files that probably didn't change (mostly update executables)
-    files_to_reset = [os.path.join(BASE_DIR, 'bin', 'library.zip'), os.path.join(BASE_DIR, 'library.zip'), os.path.join(BASE_DIR, 'adsm.exe')]
+    files_to_reset = [os.path.join(BASE_DIR, 'adsm.exe'),]
+    from git.git import git
+    for file in files_to_reset:
+        command = git + ' checkout ' + file
+        subprocess.call(command, shell=True)
+
+if not library_update_required:
+    # Checkout old versions of files that probably didn't change (mostly update executables)
+    files_to_reset = [os.path.join(BASE_DIR, 'bin', 'library.zip'), os.path.join(BASE_DIR, 'library.zip')]
     from git.git import git
     for file in files_to_reset:
         command = git + ' checkout ' + file
