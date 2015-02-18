@@ -58,10 +58,10 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones, test
     while True:
         line = simulation.stdout.readline()  # TODO: Has the potential to lock up if CEngine crashes (blocking io)
         line = line.decode().strip()
-        parse_result = p.parse_daily_strings(prev_line, False)
-        adsm_result.extend(parse_result)
         if not line:
             break
+        parse_result = p.parse_daily_strings(prev_line, False)
+        adsm_result.extend(parse_result)
         prev_line = line
     adsm_result.extend(p.parse_daily_strings(prev_line, last_line=True, create_version_entry=iteration_number==1))
 
