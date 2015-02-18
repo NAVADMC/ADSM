@@ -12,8 +12,6 @@
  *     announces a PublicAnnouncement event
  *   <li>
  *     starts counting down days until a destruction program can begin
- *   <li>
- *     starts counting detections until a vaccination program begins
  * </ol>
  *
  * <b>Vaccinating units</b>
@@ -320,13 +318,7 @@ typedef struct
     or absence of a key is all we ever test). */
 
   /* Parameters concerning vaccination. */
-  unsigned int vaccination_program_threshold; /**< The number of diseased units
-    that must be detected before vaccination will begin. */
-  GHashTable *detected_units; /**< The diseased units detected so far.  Keys
-    are units (UNT_unit_t *), values are unimportant (presence of a key is all
-    we ever test). */
-  unsigned int ndetected_units; /**< The number of diseased units detected so
-    far. */
+  gboolean vaccination_active;
   int vaccination_retrospective_days;
   REL_chart_t *vaccination_capacity; /**< The maximum number of units the
     authorities can vaccinate in a day. */
@@ -946,8 +938,6 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
 
   local_data = (local_data_t *) (self->model_data);
   local_data->outbreak_known = FALSE;
-  g_hash_table_remove_all (local_data->detected_units);
-  local_data->ndetected_units = 0;
   local_data->destruction_program_begin_day = 0;
 
   npriorities = local_data->pending_destructions->len;
@@ -963,6 +953,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   local_data->no_more_destructions = FALSE;
   g_hash_table_remove_all (local_data->destroyed_today);
 
+  local_data->vaccination_active = FALSE;
   /* Empty the prioritized pending vaccinations lists. */
   clear_all_pending_vaccinations (local_data, /* day = */ 0, /* event queue = */ NULL);
   local_data->nvaccinated_today = 0;
@@ -1017,14 +1008,13 @@ handle_new_day_event (struct adsm_module_t_ *self,
     destroy_by_priority (self, event->day, queue);
 
   local_data->nvaccinated_today = 0;
-  if (local_data->ndetected_units < local_data->vaccination_program_threshold)
+  if (local_data->vaccination_active)
     {
-      /* If we haven't passed the threshold for vaccination yet, remove any
+      /* If we haven't initiated a vaccination program yet, remove any
        * requests for vaccination that happened as a result of detections
        * yesterday. */
       #if DEBUG
-        g_debug ("# detections so far (%u) < vaccination threshold (%u), deleting yesterday's requests to vaccinate",
-                 local_data->ndetected_units, local_data->vaccination_program_threshold);
+        g_debug ("vaccination program not initiated yet, deleting yesterday's requests to vaccinate");
       #endif
       clear_all_pending_vaccinations (local_data, event->day, queue);
     }
@@ -1067,8 +1057,6 @@ handle_detection_event (struct adsm_module_t_ *self,
 
   local_data = (local_data_t *) (self->model_data);
 
-  g_hash_table_insert (local_data->detected_units, event->unit, GINT_TO_POINTER(1));
-  local_data->ndetected_units = g_hash_table_size (local_data->detected_units);
   if (!local_data->outbreak_known)
     {
       local_data->outbreak_known = TRUE;
@@ -1085,14 +1073,6 @@ handle_detection_event (struct adsm_module_t_ *self,
       g_debug ("destruction program delayed %hu days (will begin on day %hu)",
                local_data->destruction_program_delay, local_data->destruction_program_begin_day);
 #endif
-    }
-
-  if (local_data->ndetected_units == local_data->vaccination_program_threshold)
-    {
-#if DEBUG
-      g_debug ("%u detections, vaccination program begins", local_data->ndetected_units);
-#endif
-      ;
     }
 
   /* If the unit is awaiting vaccination, and the request(s) can be canceled by
@@ -1462,9 +1442,9 @@ has_pending_actions (struct adsm_module_t_ * self)
   local_data = (local_data_t *) (self->model_data);
 
   /* We only bother checking for pending vaccinations if the vaccination
-   * program threshold has been passed and if there is or will be capacity to
+   * program has been initiated and if there is or will be capacity to
    * vaccinate. */
-  if (local_data->ndetected_units >= local_data->vaccination_program_threshold
+  if (local_data->vaccination_active
       && !local_data->no_more_vaccinations)
     {
       npriorities = local_data->pending_vaccinations->len;
@@ -1518,9 +1498,6 @@ to_string (struct adsm_module_t_ *self)
   substring = REL_chart_to_string (local_data->destruction_capacity);
   g_string_sprintfa (s, "  destruction-capacity=%s\n", substring);
   g_free (substring);
-
-  g_string_sprintfa (s, "  vaccination-program-threshold=%u\n",
-                     local_data->vaccination_program_threshold);
 
   substring = REL_chart_to_string (local_data->vaccination_capacity);
   g_string_sprintfa (s, "  vaccination-capacity=%s>", substring);
@@ -1576,7 +1553,6 @@ local_free (struct adsm_module_t_ *self)
       g_queue_free (q);
     }
   g_ptr_array_free (local_data->pending_vaccinations, TRUE);
-  g_hash_table_destroy (local_data->detected_units);
   g_hash_table_destroy (local_data->detected_today);
   g_free (local_data->day_last_vaccinated);
   g_free (local_data->min_next_vaccination_day);
@@ -1617,7 +1593,7 @@ set_params (void *data, GHashTable *dict)
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
-  g_assert (g_hash_table_size (dict) == 7);
+  g_assert (g_hash_table_size (dict) == 6);
 
   tmp_text = g_hash_table_lookup (dict, "destruction_program_delay");
   if (tmp_text != NULL)
@@ -1701,18 +1677,6 @@ set_params (void *data, GHashTable *dict)
       local_data->destruction_reason_priority = 1;
       local_data->destruction_prod_type_priority = 2;
       local_data->destruction_time_waiting_priority = 3;
-    }
-
-  tmp_text = g_hash_table_lookup (dict, "units_detected_before_triggering_vaccination");
-  if (tmp_text != NULL)
-    {
-      errno = 0;
-      local_data->vaccination_program_threshold = strtol (tmp_text, NULL, /* base */ 10);
-      g_assert (errno != ERANGE && errno != EINVAL);  
-    }
-  else
-    {
-      local_data->vaccination_program_threshold = 0;
     }
 
   tmp_text = g_hash_table_lookup (dict, "vaccination_capacity_id");
@@ -1854,7 +1818,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* No outbreak has been detected yet. */
   local_data->outbreak_known = FALSE;
   local_data->destruction_program_begin_day = 0;
-  local_data->ndetected_units = 0;
 
   /* No units have been destroyed or slated for destruction yet. */
   local_data->destruction_status = g_new0 (GList *, local_data->nunits);
@@ -1870,14 +1833,13 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->day_last_vaccinated = g_new0 (int, local_data->nunits);
   local_data->min_next_vaccination_day = g_new0 (int, local_data->nunits);
   local_data->no_more_vaccinations = FALSE;
-  local_data->detected_units = g_hash_table_new (g_direct_hash, g_direct_equal);
   local_data->detected_today = g_hash_table_new (g_direct_hash, g_direct_equal);
 
   /* Call the set_params function to read the parameters. */
   local_data->db = params,
   sqlite3_exec_dict (params,
                      "SELECT destruction_program_delay,destruction_capacity_id,destruction_priority_order,"
-                     "units_detected_before_triggering_vaccination,vaccination_capacity_id,vaccination_priority_order,"
+                     "vaccination_capacity_id,vaccination_priority_order,"
                      "vaccinate_retrospective_days "
                      "FROM ScenarioCreator_controlmasterplan",
                      set_params, self, &sqlerr);
