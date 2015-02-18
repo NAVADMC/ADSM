@@ -215,7 +215,8 @@ header #file_actions .btn:last-child:hover {
 }
 
 header #admin_link .btn:focus {
-    border: 1px solid rgba(255, 255, 255, .8);
+    outline: 1px solid rgba(255, 255, 255, .8) !important;
+    outline-offset: -1px;
     color: white;
     box-sizing: border-box;
     padding: 4px 10px;
