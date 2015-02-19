@@ -62,9 +62,14 @@
             </h2>
          
     </nav>
-    <section>
+    <section id="left-panel" class="layout-panel">
         {% block content %}
 
         {% endblock %}
     </section>
+    <section id="center-panel" class="layout-panel"></section>
+    <section id="right-panel" class="layout-panel"></section>
+
+    {% include "population_panel.html" %}
+  
 {% endblock %}
