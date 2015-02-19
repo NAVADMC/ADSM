@@ -14,6 +14,7 @@
     <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-dialog.js"></script>
     <script src="{{ STATIC_URL }}js/adsm.js"></script>
+    <script src="{{ STATIC_URL }}js/population-panel.js"></script>
     {% load db_status_tags %}
 </head>
 <body>
@@ -60,5 +61,19 @@
         <img src="{{ STATIC_URL }}working.gif">
     </div>
 </div>
+
+<div id="population_panel">
+    <ul id="ProductionTypes">
+        {% for pt in ProductionTypes %}
+            <li><a href="#">{{ pt.name }}</a></li>
+        {% endfor %}
+    </ul>
+    <ul id="ProductionGroups">
+        {% for group in ProductionGroups %}
+            <li><a href="#">{{ group.name }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+  
 </body>
 </html>

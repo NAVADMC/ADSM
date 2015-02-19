@@ -724,3 +724,12 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 }
 /*-----testing results nav span fix-------*/
 
+#population_panel {
+    position: fixed;
+    right: 0;
+}
+
+select[multiple] {
+    min-height: 150px;
+}
+

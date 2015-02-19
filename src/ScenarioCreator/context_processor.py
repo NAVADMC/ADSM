@@ -6,7 +6,7 @@ from django.db.models import F
 from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Population, Unit, Disease, DiseaseProgression, \
     DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
     ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment, VaccinationTrigger, SpreadBetweenGroups, \
-    DestructionWaitTime, TimeFromFirstDetection, DisseminationRate, RateOfNewDetections, DiseaseDetection
+    DestructionWaitTime, TimeFromFirstDetection, DisseminationRate, RateOfNewDetections, DiseaseDetection, ProductionGroup
 from Results.models import DailyControls
 from ADSMSettings.models import scenario_filename, SmSession
 from ADSMSettings.views import unsaved_changes
@@ -43,8 +43,9 @@ def basic_context(request):
         context.update({
                'Scenario': Scenario.objects.count(),
                'OutputSetting': OutputSettings.objects.count(),
-               'Population': Population.objects.count(),
-               'ProductionTypes': pt_count,
+               'Population': Unit.objects.count(),
+               'ProductionTypes': list(ProductionType.objects.all().values('name')),
+               'ProductionGroups': list(ProductionGroup.objects.all().values('name')),
                'Farms': Unit.objects.count(),
                'Disease': Disease.objects.all().exclude(name='').count(),
                'Progressions': DiseaseProgression.objects.count(),
