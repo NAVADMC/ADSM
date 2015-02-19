@@ -5498,6 +5498,313 @@
   </output>
 </deterministic-test>
 
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 1 detection in any type</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on number of
+    detections.  There are 4 units of type A, A, B, and C, which get detected
+    one per day.  Above those are a row of units of type D, which get
+    vaccinated if/when a vaccination program is initiated.
+
+    In this test, vaccination is triggered by detection of 1 unit of any type.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows_4</population-file>
+
+  <parameter-file>trigger_1detect_in_anytype</parameter-file>
+
+  <parameter-description>
+    For all production types, there is no latent period and the clinical
+    period lasts 10 days.
+
+    Airborne spread is set up such that infection will spread from unit 1
+    (lower row, far left) across the lower row, with 1 new unit infected each
+    day. Detection occurs on the first day clinical.
+
+    Vaccination begins when disease has been detected in 1 unit of any type.
+
+    What should happen:
+     - On day 1 unit 1 will be Infectious Clinical.  It will be detected and
+       a vaccination program will be initiated.
+     - On day 2 the top row of units will be vaccinated.  The simulation
+       is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detcU</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>2</td>  <td>2</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 3 detections in any type</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on number of
+    detections.  There are 4 units of type A, A, B, and C, which get detected
+    one per day.  Above those are a row of units of type D, which get
+    vaccinated if/when a vaccination program is initiated.
+
+    In this test, vaccination is triggered by detection of 3 units of any type.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows_4</population-file>
+
+  <parameter-file>trigger_3detect_in_anytype</parameter-file>
+
+  <parameter-description>
+    Parameter setup is similar to “trigger on 1 detection in any type” above,
+    but vaccination begins when disease has been detected in 3 units of any
+    type.
+
+    What should happen:
+     - On day 1 unit 1 will be Infectious Clinical.  It will be detected.
+     - On day 2 unit 2 will be Infectious Clinical.  It will be detected.
+     - On day 3 unit 3 will be Infectious Clinical.  It will be detected and,
+       since this is the 3rd detection, a vaccination program will be initiated.
+     - On day 4 the top row of units will be vaccinated.  The simulation
+       is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detcU</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>2</td>  <td></td></tr>
+    <tr><td>3</td>  <td></td></tr>
+    <tr><td>4</td>  <td>4</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 2 detections in type A</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on number of
+    detections.  There are 4 units of type A, A, B, and C, which get detected
+    one per day.  Above those are a row of units of type D, which get
+    vaccinated if/when a vaccination program is initiated.
+
+    In this test, vaccination is triggered by detection of 2 units of type A.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows_4</population-file>
+
+  <parameter-file>trigger_2detect_in_typeA</parameter-file>
+
+  <parameter-description>
+    Parameter setup is similar to “trigger on 1 detection in any type” above,
+    but vaccination begins when disease has been detected in 2 units of type
+    A.
+
+    What should happen:
+     - On day 1 unit 1 will be Infectious Clinical.  It will be detected.
+     - On day 2 unit 2 will be Infectious Clinical.  It will be detected and,
+       since this is the 2nd detection of an “A” unit, a vaccination program
+       will be initiated.
+     - On day 3 the top row of units will be vaccinated.  The simulation
+       is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detcUA</td>
+      <td>detcUB</td>
+      <td>detcUC</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>0</td>  <td>3</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 3 detections in type A</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on number of
+    detections.  There are 4 units of type A, A, B, and C, which get detected
+    one per day.  Above those are a row of units of type D, which get
+    vaccinated if/when a vaccination program is initiated.
+
+    In this test, vaccination is triggered by detection of 3 units of type A
+    (which never happens).
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows_4</population-file>
+
+  <parameter-file>trigger_3detect_in_typeA</parameter-file>
+
+  <parameter-description>
+    Parameter setup is similar to “trigger on 1 detection in any type” above,
+    but vaccination begins when disease has been detected in 3 units of type
+    A.
+
+    What should happen:
+     - On day 1 unit 1 will be Infectious Clinical.  It will be detected.
+     - On day 2 unit 2 will be Infectious Clinical.  It will be detected.
+     - On day 3 unit 3 will be Infectious Clinical.  It will be detected.  This
+       is the 3rd detection, but there have only been 2 detections of “A” units
+       and 1 of a “B” unit, so vaccination will not be initiated.
+     - On day 4 unit 4 will be Infectious Clinical.  It will be detected.
+       Vaccination still will not be initiated.
+     - The simulation will end when all units are either Destroyed or
+       Susceptible.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detcUA</td>
+      <td>detcUB</td>
+      <td>detcUC</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td></td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 1 detection in type B or C</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on number of
+    detections.  There are 4 units of type A, A, B, and C, which get detected
+    one per day.  Above those are a row of units of type D, which get
+    vaccinated if/when a vaccination program is initiated.
+
+    In this test, vaccination is triggered by detection of 1 unit of type B or
+    C.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows_4</population-file>
+
+  <parameter-file>trigger_1detect_in_typeBorC</parameter-file>
+
+  <parameter-description>
+    Parameter setup is similar to “trigger on 1 detection in any type” above,
+    but vaccination begins when disease has been detected in 1 unit of type B
+    or C.
+
+    What should happen:
+     - On day 1 unit 1 will be Infectious Clinical. It will be detected. This
+       unit is type “A” so it does not get counted towards initiating
+       vaccination.
+     - On day 2 unit 2 will be Infectious Clinical. It will be detected. Again
+       this unit is type “A” so it does not get counted towards initiating
+       vaccination.
+     - On day 3 unit 3 will be Infectious Clinical. It will be detected. This
+       unit is of type “B”, so vaccination will be initiated.
+     - On day 4 the top row of units will be vaccinated.  The simulation
+       is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detcUA</td>
+      <td>detcUB</td>
+      <td>detcUC</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td>4</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 1 detection in type C</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on number of
+    detections.  There are 4 units of type A, A, B, and C, which get detected
+    one per day.  Above those are a row of units of type D, which get
+    vaccinated if/when a vaccination program is initiated.
+
+    In this test, vaccination is triggered by detection of 1 unit of type C.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows_4</population-file>
+
+  <parameter-file>trigger_1detect_in_typeC</parameter-file>
+
+  <parameter-description>
+    Parameter setup is similar to “trigger on 1 detection in any type” above,
+    but vaccination begins when disease has been detected in 1 unit of type C.
+
+    What should happen:
+     - On day 1 unit 1 will be Infectious Clinical. It will be detected. This
+       unit is type “A” so it does not get counted towards initiating
+       vaccination.
+     - On day 2 unit 2 will be Infectious Clinical. It will be detected. Again
+       this unit is type “A” so it does not get counted towards initiating
+       vaccination.
+     - On day 3 unit 3 will be Infectious Clinical. It will be detected. Again
+       this unit is type “B” so it does not get counted towards initiating
+       vaccination. This
+     - On day 4 unit 4 will be Infectious Clinical. It will be detected. This
+       unit is of type “C”, so vaccination will be initiated.
+     - On day 5 the top row of units will be vaccinated.  The simulation
+       is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detcUA</td>
+      <td>detcUB</td>
+      <td>detcUC</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td>5</td></tr>
+  </output>
+</variable-test>
 <deterministic-test>
   <category>ring_vaccination</category>
   <short-name>retrospective vaccination 0 days, 3 detections to trigger</short-name>
