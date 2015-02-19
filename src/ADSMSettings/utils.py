@@ -93,7 +93,7 @@ def graceful_startup():
         if subdir.startswith(os.path.sep):
             subdir = subdir.replace(os.path.sep, '', 1)
         if subdir.strip():
-            if not os.path.exists(subdir):
+            if not os.path.join(workspace_path(), subdir):
                 os.makedirs(os.path.join(workspace_path(), subdir))
         for file in files:
             try:
