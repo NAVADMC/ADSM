@@ -37,8 +37,12 @@ class Command(BaseCommand):
                                 'timeout': 300,
                             }
                         }
-                        call_command('migrate', database='temp_migration', interactive=False)
-                        print("Done.")
+                        try:
+                            call_command('migrate', database='temp_migration', interactive=False)
+                            print("Done.")
+                        except Exception as e:
+                            print("Failed to migrate", file + "!\n", e)
+                            continue
 
         try:
             del(settings.DATABASES['temp_migration'])
