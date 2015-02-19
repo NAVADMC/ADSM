@@ -12,7 +12,7 @@ class Command(BaseCommand):
         make_option('--skip-workspace',
                     action='store_true',
                     dest='skip_workspace',
-                    default=False,
+                    default=True,
                     help="Skip migrating scenario files in the User's Workspace folder"),
     )
     
@@ -30,7 +30,7 @@ class Command(BaseCommand):
                 for file in files:
                     if file.endswith(".sqlite3") and file != "settings.sqlite3":
                         print("Migrating", file, "in", root + "...")
-                        settings.DATABASES['temp_migration'] = {
+                        settings.DATABASES['scenario_db'] = {
                             'NAME': os.path.join(root, file),
                             'ENGINE': 'django.db.backends.sqlite3',
                             'OPTIONS': {
@@ -38,15 +38,15 @@ class Command(BaseCommand):
                             }
                         }
                         try:
-                            call_command('migrate', database='temp_migration', interactive=False)
-                            print("Done.")
+                            call_command('migrate', database='scenario_db', interactive=False)
+                            print("\nDone.")
                         except Exception as e:
-                            print("Failed to migrate", file + "!\n", e)
+                            print("\nFailed to migrate", file + "!", e)
                             continue
 
         try:
-            del(settings.DATABASES['temp_migration'])
+            del(settings.DATABASES['scenario_db'])
         except:
-            print("Failed to remove temp_migration database from settings!")
+            print("Failed to remove modified scenario_db database from settings!")
 
         print("Completed migrating all Scenario Databases.")
