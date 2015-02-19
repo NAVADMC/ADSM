@@ -63,6 +63,7 @@ EXTRA_DIST = radius_0.xml radius_0_w_vars.xml radius_0.5.xml radius_1.xml \
  trigger_3detect_in_typeA_8units_2rows_4.sqlite3 \
  trigger_1detect_in_typeBorC_8units_2rows_4.sqlite3 \
  trigger_1detect_in_typeC_8units_2rows_4.sqlite3 \
+ trigger_3detect_in_typeA_or_2detect_in_typeBorC_8units_2rows_4.sqlite3 \
  vacc_3detect_retro0_8units_2rows.sqlite3 vacc_3detect_retro1_8units_2rows.sqlite3 \
  vacc_4detect_retro3_8units_2rows.sqlite3 \
  vacc_request_from_exam_cancellation_from_test.xml

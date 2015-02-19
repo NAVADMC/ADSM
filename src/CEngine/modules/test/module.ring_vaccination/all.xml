@@ -5805,6 +5805,63 @@
     <tr><td>2</td>  <td>1</td>  <td>1</td>  <td>5</td></tr>
   </output>
 </variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 3 detections in type A or 2 detections in type B or C</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on number of
+    detections.  There are 4 units of type A, A, B, and C, which get detected
+    one per day.  Above those are a row of units of type D, which get
+    vaccinated if/when a vaccination program is initiated.
+
+    In this test, vaccination is triggered by detection of 3 units of type A or
+    detection of 2 units of type B or C.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows_4</population-file>
+
+  <parameter-file>trigger_3detect_in_typeA_or_2detect_in_typeBorC</parameter-file>
+
+  <parameter-description>
+    Parameter setup is similar to “trigger on 1 detection in any type” above,
+    but vaccination begins when disease has been detected in 3 units of type A,
+    or 2 units of type B or C.
+
+    What should happen:
+     - On day 1 unit 1 will be Infectious Clinical. It will be detected. This
+       makes 1 unit of type “A” detected, not enough to initiate vaccination.
+     - On day 2 unit 2 will be Infectious Clinical. It will be detected. This
+       makes 2 units of type “A” detected, not enough to initiate vaccination.
+     - On day 3 unit 3 will be Infectious Clinical. It will be detected. This
+       makes 1 unit of type “B” detected, not enough to initiate vaccination.
+     - On day 4 unit 4 will be Infectious Clinical. It will be detected. This
+       makes 1 unit of type “B” and 1 unit of type “C” detected, so
+       vaccination will be initiated.
+     - On day 5 the top row of units will be vaccinated.  The simulation
+       is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detcUA</td>
+      <td>detcUB</td>
+      <td>detcUC</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td>5</td></tr>
+  </output>
+</variable-test>
+
 <deterministic-test>
   <category>ring_vaccination</category>
   <short-name>retrospective vaccination 0 days, 3 detections to trigger</short-name>
