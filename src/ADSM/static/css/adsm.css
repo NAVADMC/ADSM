@@ -481,9 +481,9 @@ ul {
 }
 
 .btn-primary,
-.btn-usaved {
+.btn-unsaved {
     background-color: #3577b1;
-    transition: all ..2s ease;
+    transition: all 2s ease;
 }
 
 .btn-primary:hover,
