@@ -16,7 +16,7 @@ from ADSMSettings.models import SmSession, scenario_filename
 
 if os.name == "nt":
     try:
-        from win32com.shell import shell, shellcon
+        import ctypes.wintypes
     except:
         pass  # We are already handling the exception case below
 
@@ -29,7 +29,11 @@ def workspace_path(target=None):
     home = None
     if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.
         try:
-            home = shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
+            CSIDL_PERSONAL = 5
+            SHGFP_TYPE_CURRENT = 0
+            buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+            ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_PERSONAL, 0, SHGFP_TYPE_CURRENT, buf)
+            home = buf.value
         except:
             home = None
     if not home:
