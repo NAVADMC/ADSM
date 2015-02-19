@@ -36,9 +36,10 @@ safe_save = function(url, data){
     
 
 $(function(){
-    $(document).on('click', '[load-target]', function(event){
+    $(document).on('click', 'a[load-target]', function(event){
         event.preventDefault()
-        alert("Special load")
+        var selector = $(this).attr('load-target')
+        $(selector).load($(this).attr('href'))
     })
     
     $(document).on('click', '[data-click-toggle]', function(){
