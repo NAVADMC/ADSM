@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand
 from optparse import make_option
 from django.conf import settings
 from django.core.management import call_command
+from django.db import connections, close_old_connections
 
 from ADSMSettings.utils import workspace_path
 
@@ -29,7 +30,11 @@ class Command(BaseCommand):
             for root, dirs, files in os.walk(location):
                 for file in files:
                     if file.endswith(".sqlite3") and file != "settings.sqlite3":
-                        print("Migrating", file, "in", root + "...")
+                        print("\nMigrating", file, "in", root + "...")
+
+                        connections['scenario_db'].close()
+                        close_old_connections()
+
                         settings.DATABASES['scenario_db'] = {
                             'NAME': os.path.join(root, file),
                             'ENGINE': 'django.db.backends.sqlite3',
@@ -37,6 +42,7 @@ class Command(BaseCommand):
                                 'timeout': 300,
                             }
                         }
+
                         try:
                             call_command('migrate', database='scenario_db', interactive=False)
                             print("\nDone.")
