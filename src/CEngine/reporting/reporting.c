@@ -104,10 +104,6 @@ RPT_reporting_value_to_string (RPT_reporting_t * reporting, char *format)
   GString *s;
   char *chararray;
 
-#if DEBUG
-  g_debug ("----- ENTER RPT_reporting_value_to_string");
-#endif
-
   s = g_string_new (NULL);
   /* Represent an output variable that is null (has no meaningful value yet)
    * by an empty string, except in the case of a group variable that has sub-
@@ -135,10 +131,6 @@ RPT_reporting_value_to_string (RPT_reporting_t * reporting, char *format)
   /* don't return the wrapper object */
   chararray = s->str;
   g_string_free (s, FALSE);
-
-#if DEBUG
-  g_debug ("----- EXIT RPT_reporting_value_to_string");
-#endif
 
   return chararray;
 }
@@ -198,10 +190,6 @@ RPT_fprintf_reporting (FILE * stream, RPT_reporting_t * reporting)
 void
 RPT_free_reporting (RPT_reporting_t * reporting)
 {
-#if DEBUG
-  g_debug ("----- ENTER RPT_free_reporting");
-#endif
-
   if (reporting != NULL)
     {
       g_free (reporting->name);
@@ -217,9 +205,6 @@ RPT_free_reporting (RPT_reporting_t * reporting)
       g_free (reporting);
     }
 
-#if DEBUG
-  g_debug ("----- EXIT RPT_free_reporting");
-#endif
   return;
 }
 
@@ -440,10 +425,6 @@ RPT_clone_reporting (RPT_reporting_t * original)
 {
   RPT_reporting_t *copy;
 
-#if DEBUG
-  g_debug ("----- ENTER RPT_clone_reporting");
-#endif
-
   copy = NULL;
 
   if (original != NULL)
@@ -463,10 +444,6 @@ RPT_clone_reporting (RPT_reporting_t * original)
         }
       copy->is_null = original->is_null;
     }
-
-#if DEBUG
-  g_debug ("----- EXIT RPT_clone_reporting");
-#endif
 
   return copy;
 }
