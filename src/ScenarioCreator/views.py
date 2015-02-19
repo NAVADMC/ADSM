@@ -52,18 +52,6 @@ def home(request):
     return redirect('/setup/Scenario/1/')
 
 
-def extra_forms_needed():
-    missing = list(ProductionType.objects.all())
-    for entry in DiseaseSpreadAssignment.objects.all():
-        if entry.destination_production_type_id == entry.source_production_type_id:  #Spread within a species
-            missing.remove(entry.source_production_type)
-    extra_count = len(missing)
-    if not missing and DiseaseSpreadAssignment.objects.count() < ProductionType.objects.count() ** 2:
-        #all possible interactions are not accounted for
-        extra_count = 1  # add one more blank possibility
-    return extra_count, missing
-
-
 def initialize_spread_assignments():
     pts = list(ProductionType.objects.all())
     for source in pts:
@@ -74,7 +62,7 @@ def initialize_spread_assignments():
         
 
 def assign_disease_spread(request):
-    if not DiseaseSpreadAssignment.objects.count():
+    if DiseaseSpreadAssignment.objects.count() < ProductionType.objects.count() ** 2:
         initialize_spread_assignments()
 
     SpreadSet = modelformset_factory(DiseaseSpreadAssignment, extra=0, form=DiseaseSpreadAssignmentForm)
