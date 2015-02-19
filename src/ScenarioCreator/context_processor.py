@@ -1,7 +1,7 @@
 import subprocess
 import re
 
-from django.db.models import F
+from django.db.models import F, Count
 
 from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Population, Unit, Disease, DiseaseProgression, \
     DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
@@ -44,8 +44,8 @@ def basic_context(request):
                'Scenario': Scenario.objects.count(),
                'OutputSetting': OutputSettings.objects.count(),
                'Population': Unit.objects.count(),
-               'ProductionTypes': list(ProductionType.objects.all().values('name')),
-               'ProductionGroups': list(ProductionGroup.objects.all().values('name')),
+               'ProductionTypes': ProductionType.objects.all().annotate(unit_count=Count('unit')).values('name', 'unit_count', 'description'),
+               'ProductionGroups': ProductionGroup.objects.all(),
                'Farms': Unit.objects.count(),
                'Disease': Disease.objects.all().exclude(name='').count(),
                'Progressions': DiseaseProgression.objects.count(),

@@ -1,0 +1,15 @@
+<div id="population_panel">
+    <ul id="ProductionTypes">
+        {% for pt in ProductionTypes %}
+            <li><a href="#">{{ pt.name }}</a><span>({{ pt.unit_count }} units)</span><span>{{pt.description}}</span></li>
+        {% endfor %}
+    </ul>
+    <ul id="ProductionGroups">
+        {% for group in ProductionGroups %}
+            <li><a href="#">{{ group.name }}</a><span>
+                {% for member in group.group.all %}
+                    {{ member.name }},&nbsp;
+                {% endfor %}</span></li>
+        {% endfor %}
+    </ul>
+</div>

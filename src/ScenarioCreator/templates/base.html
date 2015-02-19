@@ -62,18 +62,7 @@
     </div>
 </div>
 
-<div id="population_panel">
-    <ul id="ProductionTypes">
-        {% for pt in ProductionTypes %}
-            <li><a href="#">{{ pt.name }}</a></li>
-        {% endfor %}
-    </ul>
-    <ul id="ProductionGroups">
-        {% for group in ProductionGroups %}
-            <li><a href="#">{{ group.name }}</a></li>
-        {% endfor %}
-    </ul>
-</div>
+{% include "population_panel.html" %}
   
 </body>
 </html>
