@@ -423,6 +423,8 @@ class ZoneEffectAssignmentForm(BaseForm):
                    'effect': AddOrSelect(attrs={'data-new-item-url': '/setup/ZoneEffect/new/'})}
 
 
+## V3.3 Vaccination Triggers ##
+
 class ProductionTypeList(SelectMultiple):
     def __init__(self, starting_attrs=None):
         attrs = {'class': 'production_list'}
