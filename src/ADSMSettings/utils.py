@@ -69,7 +69,7 @@ def prepare_supplemental_output_directory():
     output_dir = workspace_path(scenario_filename())  # this does not have the .sqlite3 suffix
     output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm_simulation.exe
     if not os.path.exists(output_dir):
-        os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(output_dir)
     return output_args
 
 
@@ -93,7 +93,8 @@ def graceful_startup():
         if subdir.startswith(os.path.sep):
             subdir = subdir.replace(os.path.sep, '', 1)
         if subdir.strip():
-            os.makedirs(os.path.join(workspace_path(), subdir), exist_ok=True)
+            if not os.path.exists(subdir):
+                os.makedirs(os.path.join(workspace_path(), subdir))
         for file in files:
             try:
                 shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), subdir, file))
