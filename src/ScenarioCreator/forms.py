@@ -9,7 +9,7 @@ from django.forms.models import inlineformset_factory
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
-from floppyforms import Select, NumberInput, HiddenInput
+from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple
 from crispy_forms.helper import FormHelper
 
 
@@ -423,6 +423,15 @@ class ZoneEffectAssignmentForm(BaseForm):
                    'effect': AddOrSelect(attrs={'data-new-item-url': '/setup/ZoneEffect/new/'})}
 
 
+## V3.3 Vaccination Triggers ##
+
+class ProductionTypeList(SelectMultiple):
+    def __init__(self, starting_attrs=None):
+        attrs = {'class': 'production_list'}
+        if starting_attrs is not None:
+            attrs.update(starting_attrs)
+        super(ProductionTypeList, self).__init__(attrs)
+
 
 class ProductionGroupForm(BaseForm):
     class Meta(object):
@@ -435,35 +444,35 @@ class DiseaseDetectionForm(BaseForm):
     class Meta(object):
         model = DiseaseDetection
         exclude = []
-        widgets = {}
+        widgets = {'trigger_group': ProductionTypeList()}
 
 
 class RateOfNewDetectionsForm(BaseForm):
     class Meta(object):
         model = RateOfNewDetections
         exclude = []
-        widgets = {}
+        widgets = {'trigger_group': ProductionTypeList()}
 
 
 class DisseminationRateForm(BaseForm):
     class Meta(object):
         model = DisseminationRate
         exclude = []
-        widgets = {}
+        widgets = {'trigger_group': ProductionTypeList()}
 
 
 class TimeFromFirstDetectionForm(BaseForm):
     class Meta(object):
         model = TimeFromFirstDetection
         exclude = []
-        widgets = {}
+        widgets = {'trigger_group': ProductionTypeList()}
 
 
 class DestructionWaitTimeForm(BaseForm):
     class Meta(object):
         model = DestructionWaitTime
         exclude = []
-        widgets = {}
+        widgets = {'trigger_group': ProductionTypeList()}
 
 
 class SpreadBetweenGroupsForm(BaseForm):
@@ -479,7 +488,7 @@ class SpreadBetweenGroupsForm(BaseForm):
     class Meta(object):
         model = SpreadBetweenGroups
         exclude = []
-        widgets = {}
+        widgets = {'relevant_groups': SelectMultiple(attrs={'class':'group_list'})}
 
 
 
