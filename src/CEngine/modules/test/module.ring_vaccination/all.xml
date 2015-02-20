@@ -5862,6 +5862,118 @@
   </output>
 </variable-test>
 
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 4 detections over 3 days, any type</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on rate of
+    detections.  There are 8 units of types A-H, all starting latent, so the
+    disease parameters can be manipulated to produce any number of newly
+    Clinical units to detect on a particular day.  The “H” unit is the one that
+    gets vaccinated.
+
+    In this test, vaccination is triggered by detection of 4 units over 3 days,
+    any production type.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>13 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_4detect3days_in_anytype</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 0, 1, 1, 0, 2, 1, 1, 1.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins when disease has been detected in 4 units over 3 days
+    (1.333 units per day), in units of any type.
+
+    What should happen:
+     - Day 1: 0 detections, count over the past 3 days = 0. Rate = 0/3 = 0.
+     - Day 2: 1 detection, count over the past 3 days = 1. Rate = 1/3 = 0.333.
+     - Day 3: 1 detection, count over the past 3 days = 2. Rate = 2/3 = 0.667.
+     - Day 4: 0 detections, count over the past 3 days = 2. Rate = 2/3 = 0.667.
+     - Day 5: 2 detections, count over the past 3 days = 3. Rate = 3/3 = 1.0.
+     - Day 6: 1 detection, count over the past 3 days = 3. Rate = 3/3 = 1.0.
+     - Day 7: 1 detection, count over the past 3 days = 4. Vaccination will be
+       initiated.
+     - Day 8: 1 detection, count over the past 3 days = 3. The “H” unit will be
+       vaccinated on this day.  The simulation is deliberately stopped at this
+       point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnU</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td></td></tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>1</td>  <td>8</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 6 detections over 4 days, any type, reach equivalent rate 1.5 by 2 days</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on rate of
+    detections.  There are 8 units of types A-H, all starting latent, so the
+    disease parameters can be manipulated to produce any number of newly
+    Clinical units to detect on a particular day.  The “H” unit is the one that
+    gets vaccinated.
+
+    In this test, vaccination is triggered by detection of 6 units over 4 days,
+    any production type. The equivalent rate (1.5 units per day) is reached
+    after only 2 days, but that should not trigger detection, since the point
+    of counting the number of detections over 4 days is to smooth out spikes.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>3 April 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_6detect4days_in_anytype</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 1, 2, 0, 0, 0, 0, 0, 0.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins when disease has been detected in 6 units over 4 days,
+    in units of any type.
+
+    What should happen:
+     - Day 1: 1 detection, count over the past 4 days = 1.
+     - Day 2: 2 detections, count over the past 4 days = 3.
+     - There are no more detections after this point and vaccination will not
+       be triggered.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnU</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>2</td>  <td></td></tr>
+    <tr><td>0</td>  <td></td></tr>
+  </output>
+</variable-test>
+
 <deterministic-test>
   <category>ring_vaccination</category>
   <short-name>retrospective vaccination 0 days, 3 detections to trigger</short-name>
