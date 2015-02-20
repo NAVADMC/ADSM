@@ -44,12 +44,13 @@ typedef struct
     counting. */
   GPtrArray *production_types; /**< Production type names. Each item in the
     array is a (char *). */
-  guint threshold;
+  guint threshold; /**< The number of detections at which we initiate
+    vaccination. */
   guint num_detected; /**< Number of unique units of the desired production
     type(s) that have been detected so far. */
-  GHashTable *detected; /**< Herds detected so far.  Hash table used as a set
-    data type to eliminate duplicates (e.g., a single herd can create detection
-    events both by clinical signs and by lab test).  Keys are herd pointers
+  GHashTable *detected; /**< Units detected so far.  Hash table used as a set
+    data type to eliminate duplicates (e.g., a single unit can create detection
+    events both by clinical signs and by lab test).  Keys are unit pointers
     (UNT_unit_t *), values are unimportant (presence or absence of a key is all
     we ever test. */
   sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
@@ -120,6 +121,10 @@ handle_detection_event (struct adsm_module_t_ *self,
             g_debug ("%u units detected, requesting initiation of vaccination program",
                      local_data->num_detected);
           #endif
+          /* Note that these messages can be sent even if a vaccination program
+           * is currently active. To keep the trigger modules simple, it's the
+           * resources model's problem to ignore multiple/redundant requests to
+           * initiate vaccination. */
           EVT_event_enqueue (queue, EVT_new_request_to_initiate_vaccination_event (event->day, MODEL_NAME));
         } /* end of if threshold reached */
     } /* end of if unit has not been detected before and trigger is interested in this production type */          
@@ -369,7 +374,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   local_data->production_types = units->production_type_names;
 
-  /* A hash table (used as set data type) for counting unique detected herds. */
+  /* A hash table (used as set data type) for counting unique detected units. */
   local_data->detected = g_hash_table_new (g_direct_hash, g_direct_equal);
 
   /* Call the set_params function to read trigger's details. */
