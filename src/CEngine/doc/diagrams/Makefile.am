@@ -101,6 +101,7 @@ dist_noinst_DATA = state-transition.png \
   8units_2rows.png \
   8units_2rows_2.png \
   8units_2rows_3.png \
+  8units_2rows_4.png \
   9units.png \
   9units_2_zone_holes.png \
   units_circle.png \
@@ -322,6 +323,8 @@ priority_queues_png_SOURCES = priority_queues.dia
 8units_2rows_png_SOURCES = $(top_srcdir)/models/test/8units_2rows.xml
 
 8units_2rows_2_png_SOURCES = $(top_srcdir)/models/test/8units_2rows_2.xml
+
+8units_2rows_4_png_SOURCES = $(top_srcdir)/models/test/8units_2rows_4.xml
 
 9units_png_SOURCES = $(top_srcdir)/models/test/9units.xml
 
