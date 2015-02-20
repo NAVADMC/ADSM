@@ -140,6 +140,7 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
                    GError **error)
 {
   GPtrArray *instantiation_fns;
+  GPtrArray *factory_fns;
   gboolean instantiation_failures;
   GError *instantiation_error = NULL;
   gboolean disable_all_controls;
@@ -151,6 +152,7 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
   gboolean include_vaccination;
   gboolean include_destruction;
   gboolean include_economic;
+  GPtrArray *tmp_models;
   int nmodels;
   int i;                        /* loop counter */
   unsigned int nzones;
@@ -172,8 +174,10 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
 
   /* Modules will be instantiated based on which features are active in the
    * scenario. Start by gathering a list of function pointers for the
-   * instantiation functions. */
+   * instantiation functions (which return one new module) and factory
+   * functions (which return one or more new modules). */
   instantiation_fns = g_ptr_array_new();
+  factory_fns = g_ptr_array_new();
 
   if (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_diseaseprogressionassignment") >= 1)
     {
@@ -247,7 +251,7 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
     {
       g_ptr_array_add (instantiation_fns, vaccine_model_new);
       g_ptr_array_add (instantiation_fns, ring_vaccination_model_new);
-      g_ptr_array_add (instantiation_fns, number_of_detections_vaccination_trigger_new);
+      g_ptr_array_add (factory_fns, number_of_detections_vaccination_trigger_factory);
     }
 
   include_destruction = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND (use_destruction=1 OR destruction_is_a_ring_target=1 OR destroy_direct_back_traces=1 OR destroy_direct_forward_traces=1 OR destroy_indirect_back_traces=1 OR destroy_indirect_forward_traces=1)") >= 1);
@@ -323,15 +327,15 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
 
   /* Instantiate the modules. If creation of any of them fails, output a
    * warning. */
-  nmodels = instantiation_fns->len;
-  *models = g_new (adsm_module_t *, nmodels);
+  tmp_models = g_ptr_array_new();
   instantiation_failures = FALSE;
-  for (i = 0; i < nmodels; i++)
+  for (i = 0; i < instantiation_fns->len; i++)
     {
       adsm_model_new_t instantiation_fn;
 
       instantiation_fn = g_ptr_array_index (instantiation_fns, i);
-      (*models)[i] = instantiation_fn (scenario_db, units, projection, zones, &instantiation_error);
+      model = instantiation_fn (scenario_db, units, projection, zones, &instantiation_error);
+      g_ptr_array_add (tmp_models, model);
       if (instantiation_error)
         {
           g_warning ("%s", instantiation_error->message);
@@ -341,13 +345,45 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
       else
         {
           #if DEBUG
-            model = (*models)[i];
             s = model->to_string (model);
             g_debug ("%s", s);
             g_free (s);
           #endif
         }
     }
+  for (i = 0; i < factory_fns->len; i++)
+    {
+      adsm_model_factory_t factory_fn;
+      GSList *returned_models;
+
+      factory_fn = g_ptr_array_index (factory_fns, i);
+      returned_models = factory_fn (scenario_db, units, projection, zones, &instantiation_error);
+      /* Warn about any instantiation failure, but still keep any returned
+       * models that worked. */
+      if (instantiation_error)
+        {
+          g_warning ("%s", instantiation_error->message);
+          g_clear_error (&instantiation_error);
+          instantiation_failures = TRUE;
+        }
+      while (returned_models)
+        {
+          GSList *first_link;
+          
+          first_link = g_slist_nth (returned_models, 0);
+          model = first_link->data;
+          g_ptr_array_add (tmp_models, model);
+          #if DEBUG
+            s = model->to_string (model);
+            g_debug ("%s", s);
+            g_free (s);
+          #endif
+          returned_models = g_slist_delete_link (returned_models, first_link);
+        }
+    }
+  nmodels = tmp_models->len;
+  /* Keep the array of model pointers, discard the wrapper object */
+  *models = (adsm_module_t **)g_ptr_array_free(tmp_models, /* free_seg = */ FALSE);
 
   if (instantiation_failures)
     {
