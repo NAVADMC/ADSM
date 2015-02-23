@@ -121,10 +121,14 @@ $(function(){
     $(document).on('mousedown', '[data-new-item-url]', function(e){
             $(this).prop('last-selected', $(this).val()); // cache old selection
     });
-    $(document).on('change', '[data-new-item-url]', function(e){
-        if ($(this).val() == "data-add-new") {
-            modelModal.show($(this))
-        }
+    $(document).on('change', '[data-new-item-url]', function(event){
+        //event.preventDefault()
+        var selector = '#right-panel'
+        var url = $(this).attr('data-new-item-url');
+        if($(this).val() != 'data-add-new' && $(this).val() != '')
+            url = url.replace('new', $(this).val());//will edit already existing model
+        $(selector).load(url)
+        //TODO: add newly saved model to the list of options
     });
     
     /*$('[data-visibility-controller]').each(function(){
