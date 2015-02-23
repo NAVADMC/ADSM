@@ -2,7 +2,7 @@
 {% load db_status_tags %}
 
 {% block main %}
-    <nav id="setupMenu">
+    <nav id="setupMenu" class="col-md-1">
          
             <h2><a href="/setup/Scenario/1/" class="{{ "Scenario"|active:active_link}}">
                 <span class="pull-right {{Scenario|completed}}"> </span>Scenario Description</a></h2>
@@ -62,13 +62,13 @@
             </h2>
          
     </nav>
-    <section id="left-panel" class="layout-panel">
+    <section id="left-panel" class="layout-panel col-md-3">
         {% block content %}
 
         {% endblock %}
     </section>
-    <section id="center-panel" class="layout-panel"></section>
-    <section id="right-panel" class="layout-panel"></section>
+    <section id="center-panel" class="layout-panel col-md-3"></section>
+    <section id="right-panel" class="layout-panel col-md-3"></section>
 
     {% include "population_panel.html" %}
   

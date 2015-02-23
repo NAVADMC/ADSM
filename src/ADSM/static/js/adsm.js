@@ -121,7 +121,7 @@ $(function(){
     $(document).on('mousedown', '[data-new-item-url]', function(e){
             $(this).prop('last-selected', $(this).val()); // cache old selection
     });
-    $(document).on('change', '[data-new-item-url]', function(event){
+    $(document).on('change focus', '[data-new-item-url]', function(event){
         //event.preventDefault()
         var selector = '#right-panel'
         var url = $(this).attr('data-new-item-url');

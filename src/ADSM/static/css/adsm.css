@@ -236,15 +236,19 @@ body>nav {
     top: 49px;
     bottom: 0;
     left: 0;
-    width: 175px;
+    min-width: 185px;
 }
 
-body>section {
-    margin-top: 44px;
-    padding-top: 1px;
-    margin-left: 280px;
-    min-width:600px;
+/*#left-panel {*/
+    /*margin-top: 44px;*/
+    /*padding-top: 1px;*/
+    /*margin-left: 280px;*/
+    /*min-width:600px;*/
 /*    padding-left: calc((100% - 1280px) / 2);*/
+/*}*/
+
+.layout-panel {
+    margin-top: 54px;
 }
 
 ul {
