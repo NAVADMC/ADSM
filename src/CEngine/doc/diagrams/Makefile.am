@@ -327,6 +327,8 @@ priority_queues_png_SOURCES = priority_queues.dia
 
 8units_2rows_2_png_SOURCES = $(top_srcdir)/models/test/8units_2rows_2.xml
 
+8units_2rows_3_png_SOURCES = $(top_srcdir)/models/test/8units_2rows_3.xml
+
 8units_2rows_4_png_SOURCES = $(top_srcdir)/models/test/8units_2rows_4.xml
 
 9units_png_SOURCES = $(top_srcdir)/models/test/9units.xml
