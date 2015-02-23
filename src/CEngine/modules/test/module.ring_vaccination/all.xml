@@ -5974,6 +5974,66 @@
   </output>
 </variable-test>
 
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on EDR 1.5 measured over last 3 days divided by 3 days before that</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on EDR.  There
+    are 8 units of types A-H, all starting latent, so the disease parameters
+    can be manipulated to produce any number of newly Clinical units to detect
+    on a particular day.  The “H” unit is the one that gets vaccinated.
+
+    In this test, vaccination is triggered by an EDR of 1.5 or higher,
+    measured by detections in the last 3 days divided by detections in the 3
+    days before that.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>14 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_1.5edr3days_in_anytype</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 0, 0, 2, 0, 0, 1, 2, 1.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins when the EDR is 1.5 or higher, based on detections in
+    units of any type.
+
+    What should happen:
+     - Day 1: 0 detections, EDR = (0+0+0)/(0+0+0) = undefined.
+     - Day 2: 0 detections, EDR = (0+0+0)/(0+0+0) = undefined.
+     - Day 3: 2 detections, EDR = (2+0+0)/(0+0+0) = undefined.
+     - Day 4: 0 detections, EDR = (0+2+0)/(0+0+0) = undefined.
+     - Day 5: 0 detections, EDR = (0+0+2)/(0+0+0) = undefined.
+     - Day 6: 1 detection,  EDR = (1+0+0)/(2+0+0) = 0.5, too low.
+     - Day 7: 2 detections, EDR = (2+1+0)/(0+2+0) = 1.5. Vaccination will be
+       initiated.
+     - Day 8: 1 detection. The “H” unit will be vaccinated on this day.  The
+       simulation is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnU</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td></td></tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>2</td>  <td></td></tr>
+    <tr><td>1</td>  <td>8</td></tr>
+  </output>
+</variable-test>
+
 <deterministic-test>
   <category>ring_vaccination</category>
   <short-name>retrospective vaccination 0 days, 3 detections to trigger</short-name>
