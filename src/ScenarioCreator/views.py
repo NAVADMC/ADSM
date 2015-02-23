@@ -232,6 +232,7 @@ def relational_function(request, primary_key=None, doCopy=False):
     context['formset'].  The extra logic for formsets could be kicked in only when one or more formsets are present. At
     the moment integration looks like a bad idea because it would mangle the happy path for the sake of one edge case."""
     context = initialize_relational_form({}, primary_key, request)
+    context['action'] = request.path
     if 'file' in request.FILES:  # data file is present
         request = initialize_points_from_csv(request)
     context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
@@ -305,7 +306,7 @@ def new_entry(request, second_try=False):
     if model_name == 'RelationalFunction':
         return relational_function(request)
     initialized_form = form(request.POST or None)
-    context = {'form': initialized_form, 'title': "Create a new " + spaces_for_camel_case(model_name)}
+    context = {'form': initialized_form, 'title': "Create a new " + spaces_for_camel_case(model_name), 'action': request.path}
     add_breadcrumb_context(context, model_name)
     try:
         return new_form(request, initialized_form, context)
@@ -331,7 +332,8 @@ def edit_entry(request, primary_key):
             return ajax_success(model_instance, model_name)
 
     context = {'form': initialized_form,
-               'title': str(initialized_form.instance)}
+               'title': str(initialized_form.instance),
+               'action': request.path}
     add_breadcrumb_context(context, model_name, primary_key)
 
     if model_name == 'ProbabilityFunction':
@@ -353,7 +355,8 @@ def copy_entry(request, primary_key):
         initialized_form.instance.pk = None  # This will cause a new instance to be created
         return save_new_instance(initialized_form, request)
     context = {'form': initialized_form,
-               'title': "Copy a " + spaces_for_camel_case(model_name)}
+               'title': "Copy a " + spaces_for_camel_case(model_name),
+               'action': request.path}
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
