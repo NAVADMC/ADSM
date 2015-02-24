@@ -61,6 +61,7 @@
 #include "number_of_detections_vaccination_trigger.h"
 #include "detection_rate_vaccination_trigger.h"
 #include "estimated_dissemination_rate_vaccination_trigger.h"
+#include "days_since_first_detection_vaccination_trigger.h"
 #include "ring_vaccination_model.h"
 #include "state_table_writer.h"
 #include "summary_gis_writer.h"
@@ -256,6 +257,7 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
       g_ptr_array_add (factory_fns, number_of_detections_vaccination_trigger_factory);
       g_ptr_array_add (factory_fns, detection_rate_vaccination_trigger_factory);
       g_ptr_array_add (factory_fns, estimated_dissemination_rate_vaccination_trigger_factory);
+      g_ptr_array_add (factory_fns, days_since_first_detection_vaccination_trigger_factory);
     }
 
   include_destruction = (!disable_all_controls) && (PAR_get_int (scenario_db, "SELECT COUNT(*) FROM ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment assignment WHERE assignment.control_protocol_id=protocol.id AND (use_destruction=1 OR destruction_is_a_ring_target=1 OR destroy_direct_back_traces=1 OR destroy_direct_forward_traces=1 OR destroy_indirect_back_traces=1 OR destroy_indirect_forward_traces=1)") >= 1);

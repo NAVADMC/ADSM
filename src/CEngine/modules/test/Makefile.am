@@ -73,6 +73,7 @@ miniadsm_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/main_lo
   $(top_srcdir)/modules/number_of_detections_vaccination_trigger.c $(top_srcdir)/modules/number_of_detections_vaccination_trigger.h \
   $(top_srcdir)/modules/detection_rate_vaccination_trigger.c $(top_srcdir)/modules/detection_rate_vaccination_trigger.h \
   $(top_srcdir)/modules/estimated_dissemination_rate_vaccination_trigger.c $(top_srcdir)/modules/estimated_dissemination_rate_vaccination_trigger.h \
+  $(top_srcdir)/modules/days_since_first_detection_vaccination_trigger.c $(top_srcdir)/modules/days_since_first_detection_vaccination_trigger.h \
   $(top_srcdir)/modules/ring_vaccination_model.c $(top_srcdir)/modules/ring_vaccination_model.h \
   $(top_srcdir)/modules/trace_model.c $(top_srcdir)/modules/trace_model.h \
   $(top_srcdir)/modules/trace_destruction_model.c $(top_srcdir)/modules/trace_destruction_model.h \
