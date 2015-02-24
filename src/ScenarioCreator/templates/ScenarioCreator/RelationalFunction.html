@@ -11,7 +11,7 @@
 {#    {{ title }}</h1>#}
 
 
-<form method="post" enctype="multipart/form-data">
+<form method="post" action="{{ action }}" enctype="multipart/form-data">
     {% crispy form %}
     <label for="file">Or Import Points from File... &nbsp</label>    
     <input type="file" id="file" name="file" accept="text/csv">

@@ -3,6 +3,7 @@ import os
 import subprocess
 import json
 import itertools
+from crispy_forms.utils import render_crispy_form
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
@@ -247,35 +248,26 @@ def relational_function(request, primary_key=None, doCopy=False):
             context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
         if context['formset'].is_valid():
             context['formset'].save()
-            if request.is_ajax():
-                return ajax_success(created_instance, "RelationalFunction")
-            return redirect('/setup/RelationalFunction/%i/' % created_instance.id)
+            context['action'] = '/setup/RelationalFunction/%i/' % created_instance.id
     context['title'] = "Create a Relational Function"
     add_breadcrumb_context(context, "RelationalFunction")
     return render(request, 'ScenarioCreator/RelationalFunction.html', context)
 
 
-def ajax_success(model_instance, model_name):
-    msg = {'pk': model_instance.pk,
-           'title': spaces_for_camel_case(str(model_instance)),
-           'model': model_name,
-           'status': 'success'}
-    return HttpResponse(json.dumps(msg), content_type="application/json")
-
-
-def save_new_instance(initialized_form, request):
+def save_new_instance(initialized_form, request, context):
     model_instance = initialized_form.save()  # write to database
     model_name = model_instance.__class__.__name__
-    if request.is_ajax():
-        return ajax_success(model_instance, model_name)
-    if model_name in singletons:
+    if model_name in singletons:  #they could have their own special page: e.g. Population
         return redirect('/setup/%s/1/' % model_name)
-    return redirect('/setup/%s/' % model_name)  # redirect to list URL
+    return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
 def new_form(request, initialized_form, context):
     if initialized_form.is_valid():
-        return save_new_instance(initialized_form, request)
+        model_instance = initialized_form.save()  # write to database
+    model_name, model = get_model_name_and_model(request)
+    if model_name in singletons:  # they could have their own special page: e.g. Population
+        return render(request, 'ScenarioCreator/Crispy-Singleton-Form.html', context)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages
 
 
@@ -306,7 +298,9 @@ def new_entry(request, second_try=False):
     if model_name == 'RelationalFunction':
         return relational_function(request)
     initialized_form = form(request.POST or None)
-    context = {'form': initialized_form, 'title': "Create a new " + spaces_for_camel_case(model_name), 'action': request.path}
+    context = {'form': initialized_form, 
+               'title': "Create a new " + spaces_for_camel_case(model_name), 
+               'action': request.path}
     add_breadcrumb_context(context, model_name)
     try:
         return new_form(request, initialized_form, context)
@@ -326,11 +320,6 @@ def edit_entry(request, primary_key):
         initialized_form, model_name = initialize_from_existing_model(primary_key, request)
     except (ObjectDoesNotExist, OperationalError):
         return redirect('/setup/%s/new/' % model_name)
-    if initialized_form.is_valid() and request.method == 'POST':
-        model_instance = initialized_form.save()  # write instance updates to database
-        if request.is_ajax():
-            return ajax_success(model_instance, model_name)
-
     context = {'form': initialized_form,
                'title': str(initialized_form.instance),
                'action': request.path}
@@ -340,7 +329,7 @@ def edit_entry(request, primary_key):
         context['backlinks'] = collect_backlinks(initialized_form.instance)
         context['deletable'] = 'delete/'
 
-    return render(request, 'ScenarioCreator/crispy-model-form.html', context)
+    return new_form(request, initialized_form, context)
 
 
 def copy_entry(request, primary_key):
@@ -351,12 +340,12 @@ def copy_entry(request, primary_key):
         initialized_form, model_name = initialize_from_existing_model(primary_key, request)
     except ObjectDoesNotExist:
         return redirect('/setup/%s/new/' % model_name)
-    if initialized_form.is_valid() and request.method == 'POST':
-        initialized_form.instance.pk = None  # This will cause a new instance to be created
-        return save_new_instance(initialized_form, request)
     context = {'form': initialized_form,
                'title': "Copy a " + spaces_for_camel_case(model_name),
                'action': request.path}
+    if initialized_form.is_valid() and request.method == 'POST':
+        initialized_form.instance.pk = None  # This will cause a new instance to be created
+        return save_new_instance(initialized_form, request, context)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
