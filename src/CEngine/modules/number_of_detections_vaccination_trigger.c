@@ -450,7 +450,7 @@ create_trigger (void *data, GHashTable *dict)
 
 
 /**
- * Returns one or more new number-of-detections vaccination trigger module.
+ * Returns one or more new number-of-detections vaccination trigger modules.
  */
 GSList *
 factory (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
