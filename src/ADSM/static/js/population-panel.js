@@ -34,12 +34,12 @@ $(document).on('load', '.production_list, .group_list', function(event){
     check_empty_status(this)
 })
 
-$(document).on('click', '#population_panel #ProductionTypes a', function(event){
+$(document).on('click', '#population_panel #ProductionTypes a, .production_list option', function(event){
     event.preventDefault()
     select_production_type($(this).text(), '.production_list option')
 })
 
-$(document).on('click', '#population_panel #ProductionGroups a', function(event){
+$(document).on('click', '#population_panel #ProductionGroups a, .production_list option', function(event){
     event.preventDefault()
     select_production_type($(this).text(), '.group_list option')
 })
