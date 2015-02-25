@@ -168,7 +168,7 @@ class PopulationWorker(threading.Thread):
         
     def make_population_map_file(self):
         if not os.path.exists(workspace_path(scenario_filename())):
-            os.makedirs(workspace_path(scenario_filename()), exist_ok=True)
+            os.makedirs(workspace_path(scenario_filename()))
         print("Calculating a new Population Map")
         fig = population_results_map()
         FigureCanvas(fig).print_png(self.path)

@@ -88,7 +88,7 @@ def open_scenario(request, target, wrap_target=True):
         target = workspace_path(target)
     print("Copying ", target, "to", db_path(), ". This could take several minutes...")
     close_old_connections()
-    shutil.copy(target, db_path())
+    shutil.copy(target, db_path(name='scenario_db'))
     scenario_filename(os.path.basename(target))
     print('Sessions overwritten with ', target)
     update_db_version()
