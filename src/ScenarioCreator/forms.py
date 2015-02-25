@@ -9,7 +9,7 @@ from django.forms.models import inlineformset_factory
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
-from floppyforms import Select, NumberInput, HiddenInput, CheckboxSelectMultiple
+from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple
 from crispy_forms.helper import FormHelper
 
 
@@ -425,13 +425,18 @@ class ZoneEffectAssignmentForm(BaseForm):
 
 ## V3.3 Vaccination Triggers ##
 
-class ProductionTypeList(CheckboxSelectMultiple):
-    template_name = 'floppyforms/checkbox_select.html'
+class ProductionTypeList(SelectMultiple):
+    template_name = 'floppyforms/multiselect.html'
     def __init__(self, starting_attrs=None):
         attrs = {'class': 'production_list empty'}
         if starting_attrs is not None:
             attrs.update(starting_attrs)
         super(ProductionTypeList, self).__init__(attrs)
+
+    def get_context(self, name, value, attrs=None, choices=()):
+        context = super(SelectMultiple, self).get_context(name, value, attrs)
+        context['help_text'] = mark_safe("To add production types to the trigger click on a Type or Group from the <em>Population Panel</em>") 
+        return context
 
 
 class ProductionGroupForm(BaseForm):
@@ -489,7 +494,7 @@ class SpreadBetweenGroupsForm(BaseForm):
     class Meta(object):
         model = SpreadBetweenGroups
         exclude = []
-        widgets = {'relevant_groups': CheckboxSelectMultiple(attrs={'class':'group_list empty'})}
+        widgets = {'relevant_groups': SelectMultiple(attrs={'class':'group_list'})}
 
 
 
