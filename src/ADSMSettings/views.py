@@ -121,7 +121,8 @@ def save_scenario(request=None):
     except (IOError, AssertionError):
         save_error = 'Failed to save filename.'
         print('Encountered an error while copying file', full_path)
-    if request is not None and request.is_ajax():
+        
+    if request is not None and request.is_ajax():  # TODO: change this part to return HTML
         if save_error:
             json_response = '{"status": "failed", "message": "%s"}' % save_error
         else:

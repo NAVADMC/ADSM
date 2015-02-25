@@ -19,22 +19,8 @@
 </head>
 <body>
 <header>
-    <form class="ajax" method="post" action="/app/SaveScenario/">
-        <div id="file_actions" class="buttonHolder">
-            {% spaceless %}
-            <a href="/?loading_url=/app/NewScenario/" class="btn btn-primary"><img src="{{ STATIC_URL }}icons/new.png" class="icon"> new</a>
-            <a href="/app/Workspace/"  class="btn btn-primary"><img src="{{ STATIC_URL }}icons/open.png" class="icon">&nbsp open</a>
-            <button type="submit" class="btn btn-primary btn-save {% if unsaved_changes %} unsaved {% endif %}"><img src="{{ STATIC_URL }}icons/save.png" class="icon">&nbsp save</button>
-            {% endspaceless %}
-        </div>
-        <h1 class="filename">
-            <input type="text" name="filename" value="{{ filename }}">
-        </h1>
-            {#        <div class="alert alert-info alert-dismissable">#}
-            {#            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>#}
-            {#            <strong>Success!</strong> File saved to {{ filename }}#}
-            {#        </div>#}
-    </form>
+    {% include 'ScenarioName.html' %}
+
     <div id="admin_link" class="buttonHolder">
         {% if update_available %}
             <a href="#" class="btn btn-default" id="update_adsm" title="{{dev_version}}">update ADSM</a>

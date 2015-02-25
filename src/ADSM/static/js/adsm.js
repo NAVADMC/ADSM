@@ -64,7 +64,7 @@ $(function(){
             $('.blocking-overlay').hide();
         });
     })
-    //
+
     ////This is probably the code used for reporting bad scenario titles
     //$(document).on('submit', '.ajax', function(evt) {
     //    evt.preventDefault();
@@ -148,6 +148,8 @@ $(function(){
         if($(this).val() != 'data-add-new' && $(this).val() != '')
             url = url.replace('new', $(this).val());//will edit already existing model
         $(selector).load(url)
+        $(this).closest('.layout-panel').find('select').removeClass('active')  // nix .active from the earlier select
+        $(this).addClass("active")  //@tjmahlin use .active to to style links between panels 
         //TODO: add newly saved model to the list of options
     });
     
