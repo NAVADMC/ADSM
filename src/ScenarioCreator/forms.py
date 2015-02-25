@@ -9,7 +9,7 @@ from django.forms.models import inlineformset_factory
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
-from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple
+from floppyforms import Select, NumberInput, HiddenInput, CheckboxSelectMultiple
 from crispy_forms.helper import FormHelper
 
 
@@ -246,8 +246,8 @@ class DiseaseProgressionForm(BaseForm):
                    'disease_clinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_prevalence': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/',
-                                                            'data-visibility-context': 'use_within_unit_prevalence'
-                                                            })}
+                                                            'data-visibility-context': 'use_within_unit_prevalence'})
+        }
 
 
 class IndirectSpreadForm(BaseForm):
@@ -425,9 +425,10 @@ class ZoneEffectAssignmentForm(BaseForm):
 
 ## V3.3 Vaccination Triggers ##
 
-class ProductionTypeList(SelectMultiple):
+class ProductionTypeList(CheckboxSelectMultiple):
+    template_name = 'floppyforms/checkbox_select.html'
     def __init__(self, starting_attrs=None):
-        attrs = {'class': 'production_list'}
+        attrs = {'class': 'production_list empty'}
         if starting_attrs is not None:
             attrs.update(starting_attrs)
         super(ProductionTypeList, self).__init__(attrs)
@@ -488,7 +489,7 @@ class SpreadBetweenGroupsForm(BaseForm):
     class Meta(object):
         model = SpreadBetweenGroups
         exclude = []
-        widgets = {'relevant_groups': SelectMultiple(attrs={'class':'group_list'})}
+        widgets = {'relevant_groups': CheckboxSelectMultiple(attrs={'class':'group_list empty'})}
 
 
 
