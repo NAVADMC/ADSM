@@ -124,10 +124,10 @@ def save_scenario(request=None):
         
     if request is not None and request.is_ajax():  # TODO: change this part to return HTML
         if save_error:
-            json_response = '{"status": "failed", "message": "%s"}' % save_error
+            context = {"failure_message": save_error} 
         else:
-            json_response = '{"status": "success"}'
-        return HttpResponse(json_response, content_type="application/json")
+            context = {"success_message": "File saved to " + target}
+        return render(request, 'ScenarioName.html', context)
     else:
         return redirect('/setup/Scenario/1/')
 

@@ -9,8 +9,16 @@
         <h1 class="filename">
             <input type="text" name="filename" value="{{ filename }}">
         </h1>
-            {#        <div class="alert alert-info alert-dismissable">#}
-            {#            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>#}
-            {#            <strong>Success!</strong> File saved to {{ filename }}#}
-            {#        </div>#}
+        {% if failure_message %}
+            <div class="alert alert-danger alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <strong>Error:</strong> {{ failure_message }}
+            </div>
+        {% endif %}
+        {% if success_message %}
+            <div class="alert alert-info alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <strong>Success!</strong> {{ success_message }}
+            </div>
+        {% endif %}
     </form>
