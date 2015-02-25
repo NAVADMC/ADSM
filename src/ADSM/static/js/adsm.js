@@ -141,17 +141,29 @@ $(function(){
     $(document).on('mousedown', '[data-new-item-url]', function(e){
             $(this).prop('last-selected', $(this).val()); // cache old selection
     });
+
+    function populate_pdf_panel(self) {
+        var selector = '#right-panel'
+        var url = $(self).attr('data-new-item-url');
+        if ($(self).val() != 'data-add-new' && $(self).val() != '')
+            url = url.replace('new', $(self).val());//will edit already existing model
+        $(selector).load(url)
+        $(self).closest('.layout-panel').find('select').removeClass('active')  // nix .active from the earlier select
+        $(self).addClass("active")  //@tjmahlin use .active to to style links between panels 
+        //TODO: add newly saved model to the list of options
+    }
+
     $(document).on('change focus', '[data-new-item-url]', function(event){
         //event.preventDefault()
-        var selector = '#right-panel'
-        var url = $(this).attr('data-new-item-url');
-        if($(this).val() != 'data-add-new' && $(this).val() != '')
-            url = url.replace('new', $(this).val());//will edit already existing model
-        $(selector).load(url)
-        $(this).closest('.layout-panel').find('select').removeClass('active')  // nix .active from the earlier select
-        $(this).addClass("active")  //@tjmahlin use .active to to style links between panels 
-        //TODO: add newly saved model to the list of options
+        populate_pdf_panel(this);
     });
+    
+    $(document).on('click', '[data-new-item-url] + a i', function(event) {
+        event.preventDefault()
+        var select = $(this).closest('.control-group, td').find('select');
+        populate_pdf_panel(select);
+
+    })
     
     /*$('[data-visibility-controller]').each(function(){
         var controller = '[name=' + $(this).attr('data-visibility-controller') + ']'
@@ -276,11 +288,11 @@ $(function(){
         });
     });
 
-    $(document).on('click', 'select + a i', function(event){
-        var select = $(this).closest('.control-group, td').find('select');
-        modelModal.show(select);
-        event.preventDefault();
-    });
+    //$(document).on('click', 'select + a i', function(event){
+    //    var select = $(this).closest('.control-group, td').find('select');
+    //    modelModal.show(select);
+    //    event.preventDefault();
+    //});
 
 
     $('#id_disable_all_controls').change(function(event){
