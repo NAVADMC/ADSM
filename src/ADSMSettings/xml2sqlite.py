@@ -138,7 +138,7 @@ def getPdf( xml, nameGenerator ):
         args['alpha'] = float( firstChild.find( './alpha' ).text )
         args['beta'] = float( firstChild.find( './beta' ).text )
     elif pdfType == 'piecewise':
-        graph = RelationalFunction( name=name + ' histogram data' )
+        graph = RelationalFunction( name=name + ' piecewise data' )
         graph.save()
         # NAADSM had both "old" and "new" style piecewise PDFs. The old style
         # contained a sequence of <value> <p> <value> <p>... elements. The new
