@@ -36,19 +36,30 @@ class PopulationParser(object):
             pass  # csv parsing already done
         return self.population
 
-    def __parse_csv(self, filename):
-        """Based on FLAPS example"""
+    def __parse_csv_units(self, filename, mapping):
         with open(filename) as csvfile:
             reader = csv.DictReader(lowercase_header(csvfile))
-            mapping = {'commoditytype':'production_type',
-                        'longitude':'longitude',
-                        'latitude':'latitude',
-                        'population':'initial_size',}
             for unit in reader:
-                entry = {store_key : unit[header] for header, store_key in mapping.items()}
-                #preserve the information from any colulmns I didn't use
-                entry['user_notes'] =  ', '.join(["%s=%s" %(key, value) for key, value in unit.items() if key not in mapping])
+                entry = {store_key: unit[header] for header, store_key in mapping.items()}
+                # preserve the information from any colulmns I didn't use
+                entry['user_notes'] = ', '.join(["%s=%s" % (key, value) for key, value in unit.items() if key not in mapping])
                 self.population.append(entry)
+
+    def __parse_csv(self, filename):
+        """Based on FLAPS example, and a NAADSM csv example"""
+        try:
+            mapping = {'commoditytype': 'production_type',  # FLAPS Mapping
+                       'longitude': 'longitude',
+                       'latitude': 'latitude',
+                       'population': 'initial_size', }
+            self.__parse_csv_units(filename, mapping)
+        except KeyError:
+            mapping = {'production-type': 'production_type',  # NAADSM CSV mapping
+                       'longitude': 'longitude',
+                       'latitude': 'latitude',
+                       'size': 'initial_size', 
+                       'status': 'initial_state'}
+            self.__parse_csv_units(filename, mapping)
 
 
     def __parse_xml_population_fields(self, text_fields):
