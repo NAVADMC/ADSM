@@ -413,9 +413,9 @@ ul {
 }
 
 .btn-primary,
-.btn-usaved {
+.btn-unsaved {
     background-color: #3577b1;
-    transition: all ..2s ease;
+    transition: all .2s ease;
 }
 
 .btn-primary:hover,
@@ -594,6 +594,14 @@ input[type=file], button {
     margin: 0px;
 }
 
+#farm_list input[type=number] {
+    width: 80px;
+}
+
+#farm_list select {
+    width: 100px;
+}
+
 #farm_list th{
     /*border: 1px solid black;*/
     font-size: 12pt;
@@ -618,6 +626,7 @@ th:hover .sortControls{
     opacity:1;
 }
 
+/********/
 
 body .modal-dialog {
     width: 50%;

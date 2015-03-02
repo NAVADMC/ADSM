@@ -290,18 +290,6 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         section = self.selenium.find_element_by_tag_name('section')
         self.assertIn('Load a Population', section.text)
 
-    def test_delete_unit(self):
-        population = Population.objects.create(source_file="ScenarioCreator/tests/population_fixtures/Population_Test_UTF8.xml")
-        old_count = Unit.objects.count()
-
-        self.click_navbar_element('Population')
-
-        self.selenium.find_element_by_id('id_form-0-DELETE').click()
-        self.selenium.find_element_by_id('submit-id-submit').click()
-        time.sleep(2)
-
-        self.assertEqual(old_count - 1, Unit.objects.count())
-
     def test_assign_disease_spread_layout(self):
         self.setup_scenario()
 
