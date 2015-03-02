@@ -1,6 +1,7 @@
 import csv
 import os
 import xml.etree.ElementTree as ET
+from ScenarioCreator.utils import lowercase_header
 
 
 def gettext(elem):
@@ -38,9 +39,8 @@ class PopulationParser(object):
     def __parse_csv(self, filename):
         """Based on FLAPS example"""
         with open(filename) as csvfile:
-            reader = csv.DictReader(csvfile)
-            # TODO: lower case the user provided header
-            mapping = {'commodityType':'production_type',
+            reader = csv.DictReader(lowercase_header(csvfile))
+            mapping = {'commoditytype':'production_type',
                         'longitude':'longitude',
                         'latitude':'latitude',
                         'population':'initial_size',}

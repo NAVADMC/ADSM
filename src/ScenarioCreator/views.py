@@ -16,6 +16,8 @@ from ADSMSettings.utils import graceful_startup, file_list, handle_file_upload, 
 
 
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
+from ScenarioCreator.utils import lowercase_header
+
 singletons = ['Scenario', 'Population', 'Disease', 'ControlMasterPlan', 'OutputSettings']
 abstract_models = {
     'Function':
@@ -200,7 +202,7 @@ def deepcopy_points(request, primary_key, created_instance):
 def initialize_points_from_csv(request):
     file_path = handle_file_upload(request)
     with open(file_path) as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.read(1024))
+        dialect = csv.Sniffer().sniff(csvfile.read(1024))  # is this necessary?
         csvfile.seek(0)
         header = csv.Sniffer().has_header(csvfile.read(1024))
         csvfile.seek(0)
@@ -208,8 +210,7 @@ def initialize_points_from_csv(request):
             header = None  #DictReader will pull it off the first line
         else:
             header = ['x', 'y']
-        reader = csv.DictReader(csvfile, fieldnames=header, dialect=dialect)
-        #TODO: lower case the user provided header
+        reader = csv.DictReader(lowercase_header(csvfile), fieldnames=header, dialect=dialect)
         entries = [line for line in reader]  # ordered list
         initial_values = {}
         for index, point in enumerate(entries):
@@ -462,7 +463,7 @@ def population(request):
         context['filter_info'] = filter_info(request, params)
         context['deletable'] = '/setup/Population/1/delete/'
     else:
-        context['xml_files'] = file_list(".xml")
+        context['xml_files'] = file_list([".xml", ".csv"])
     return render(request, 'ScenarioCreator/Population.html', context)
 
 
