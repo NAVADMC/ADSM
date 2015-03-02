@@ -158,7 +158,8 @@ many_to_many_widget = (function(form_state){
             var bulk_select = $(this).find('select').clone()
             bulk_select.attr('id', bulk_select.attr('id').replace(form_prefix, 'bulk-')).val("");
             bulk_select.find('option[value="data-add-new"]').remove()
-            my_table.find('thead tr:nth-child(2)').append($('<td>').append(bulk_select)); //sensitive selector
+            var button = $('<button>Apply</button>').addClass('bulk-apply')
+            my_table.find('thead tr:nth-child(2)').append($('<td>').append(bulk_select).append(button)); //sensitive selector
         });
     }
 
@@ -169,7 +170,7 @@ many_to_many_widget = (function(form_state){
         }
     }
 
-    function render_row(header_information, column_information, row_index){
+    function render_row(header_information, row_index){
         var row = $('<tr>')
         for(var col_index in [0,1]){ //list row headers from header_information
             var th = $('<th>').append('<span data-click-toggle="selected" data-pk="'+
@@ -178,12 +179,6 @@ many_to_many_widget = (function(form_state){
             th.addClass('relevant');
             row.append(th); //column contains row list
         }
-        $.each(column_information, function(col_index, column){//for each column
-            if(header_information[1][row_index]) //check if there's something in the second column (could be ragged)
-                row.append($('<td>').append(column.clone())); // column contains select
-            else
-                row.append($('<td>'));//blank cell
-        })
         return row;
     }
 
@@ -194,16 +189,9 @@ many_to_many_widget = (function(form_state){
             header_information[index] = $(this).find('option').map(extract_options);
         })
 
-        var column_information = [];
-        $('section form table tbody tr:last-child td').each(function (index) {//copy the select
-            bulk_select = $(this).find('select').clone().val('').removeAttr('id');
-            bulk_select.find('option[value="data-add-new"]').remove();
-            column_information[index] = bulk_select;
-        });
-
         var num_rows = Math.max(header_information[0].length, header_information[1].length);
         for (var i = 0; i < num_rows; i++) {
-            tbody.append(render_row(header_information, column_information, i));
+            tbody.append(render_row(header_information, i));
         }
         return tbody;
     }
@@ -279,26 +267,6 @@ many_to_many_widget = (function(form_state){
 
     //draw arrows
 
-    function highlight_hints_events() {
-        function highlight_source_if_blank() {
-            var sources_selected = $('tbody th:first-child .selected')
-            return sources_selected.length ? '' : '-n+'; //will also select the first column
-        }
-
-        $(document).on('mouseover', 'tbody td', function () {
-            var row = $(this).closest('tr');
-            $(row).find('th:nth-child('+highlight_source_if_blank()+'2) span').addClass('highlight');
-            var second_column = my_table.find('tbody th:nth-child(2)');
-            second_column.removeClass('relevant');
-        });
-        $(document).on('mouseout', 'tbody td', function () {
-            var row = $(this).closest('tr');
-            $(row).find('th:nth-child('+highlight_source_if_blank()+'2) span').removeClass('highlight')
-            var second_column = my_table.find('tbody th:nth-child(2)');
-            second_column.addClass('relevant');
-        });
-    }
-
     function register_event_hooks(){
         /*EVENT HOOKS*/
         var prev_click;
@@ -339,8 +307,6 @@ many_to_many_widget = (function(form_state){
             console.log(selector);
             $(selector).trigger('change');
         })
-
-        highlight_hints_events();
     }
 
     return {
