@@ -410,11 +410,11 @@ def upload_population(request):
 
     session.set_population_upload_status("Processing file")
     file_path = workspace_path(request.POST.get('filename')) if 'filename' in request.POST else handle_file_upload(request)
-    model = Population(source_file=file_path)
     try:
+        model = Population(source_file=file_path)
         model.save()
-    except (EOFError, ParseError) as e:
-        return HttpResponse('{"status": "failed", "message": "%s"}' % e, content_type="application/json")
+    except (EOFError, ParseError) as error:
+        return HttpResponse('{"status": "failed", "message": "%s"}' % error, content_type="application/json")
     # wait for Population parsing (up to 5 minutes)
     session.reset_population_upload_status()
     return HttpResponse('{"status": "complete", "redirect": "/setup/Populations/"}', content_type="application/json")

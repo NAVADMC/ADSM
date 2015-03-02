@@ -265,6 +265,15 @@ $(function(){
         // window.location.reload();
     });
     
+    $('#pop-upload').on('submit',function(event){
+        var filename = $(this).find('input[type=file]').val()
+        if( filename.indexOf('.xml') == -1 && filename.indexOf('.csv') == -1) {
+            alert("Uploaded files must have .xml or .csv in the name: " + filename)
+            event.preventDefault();
+            return false;
+        }
+    });
+    
     $('#file-upload').on('submit',function(event){
         var filename = $(this).find('input[type=file]').val()
         var valid_extensions = {"application/x-sqlite3": '.sqlite3',

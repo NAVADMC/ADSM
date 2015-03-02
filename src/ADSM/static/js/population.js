@@ -67,7 +67,7 @@ $(function(){
     });
 
 
-    $(document).on('submit', '#file-upload', function(e){
+    $(document).on('submit', '#pop-upload', function(e){
         e.preventDefault();
         var formData = new FormData($(this)[0]);
         $.ajax({
