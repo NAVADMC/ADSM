@@ -138,7 +138,33 @@ def getPdf( xml, nameGenerator ):
         args['alpha'] = float( firstChild.find( './alpha' ).text )
         args['beta'] = float( firstChild.find( './beta' ).text )
     elif pdfType == 'piecewise':
-        raise NotImplementedError
+        graph = RelationalFunction( name=name + ' histogram data' )
+        graph.save()
+        # NAADSM had both "old" and "new" style piecewise PDFs. The old style
+        # contained a sequence of <value> <p> <value> <p>... elements. The new
+        # style contained a sequence of <value> elements each containing an <x>
+        # and a <p> element.
+        newStyle = firstChild.find( './/x' ) is not None
+        if newStyle:
+            for value in firstChild.findall( './value' ):
+                x = float( value.find( './x' ).text )
+                p = float( value.find( './p' ).text )
+                point = RelationalPoint( relational_function = graph, x = x, y = p )
+                point.save()
+            # end of loop over <value> elements
+        else:
+            atX = True
+            for element in list( firstChild ):
+                if atX:
+                    x = float( element.text )
+                    atX = False
+                else:
+                    p = float( element.text )
+                    point = RelationalPoint( relational_function = graph, x = x, y = p )
+                    point.save()
+                    atX = True
+            # end of loop over <value> and <p> elements
+        args['graph'] = graph
     elif pdfType == 'point':
         args['equation_type'] = 'Fixed Value'
         args['mode'] = float( firstChild.text )
