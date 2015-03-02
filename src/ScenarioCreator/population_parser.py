@@ -57,9 +57,12 @@ class PopulationParser(object):
             mapping = {'production-type': 'production_type',  # NAADSM CSV mapping
                        'longitude': 'longitude',
                        'latitude': 'latitude',
-                       'size': 'initial_size', 
+                       'size': 'initial_size',
                        'status': 'initial_state'}
-            self.__parse_csv_units(filename, mapping)
+            try:
+                self.__parse_csv_units(filename, mapping)
+            except KeyError:
+                raise ET.ParseError("Unrecognized csv header format. Please use: " + ', '.join(list(mapping.keys())))
 
 
     def __parse_xml_population_fields(self, text_fields):

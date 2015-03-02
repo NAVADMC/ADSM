@@ -140,10 +140,10 @@ class Population(InputSingleton):
         session.set_population_upload_status("Parsing")
         try:
             p = ScenarioCreator.population_parser.PopulationParser(self.source_file)
+            data = p.parse_to_dictionary()
         except BaseException as error:
             self.delete()
             raise error
-        data = p.parse_to_dictionary()
         session.set_population_upload_status("Creating objects")
         total = len(data)
 
