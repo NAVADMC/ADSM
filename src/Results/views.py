@@ -10,7 +10,7 @@ from django.forms.models import modelformset_factory
 from django.shortcuts import render, redirect
 from django.db.models import Max
 
-from ADSMSettings.models import scenario_filename
+from ADSMSettings.models import scenario_filename, SmSession
 from ADSMSettings.utils import workspace_path
 from ScenarioCreator.models import OutputSettings
 from Results.graphing import construct_title
@@ -27,8 +27,10 @@ def back_to_inputs(request):
 
 def simulation_status(request):
     output_settings = OutputSettings.objects.get()
+    running = is_simulation_running()
     status = {
-        'is_simulation_running': is_simulation_running(),  # different from being completed
+        'simulation_has_started': SmSession.objects.get().simulation_has_started,
+        'is_simulation_running': running,  # different from being completed
         'iterations_total': output_settings.iterations,
         'iterations_started': len(list_of_iterations()),
         'iterations_completed': iterations_complete(),

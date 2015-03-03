@@ -5,12 +5,17 @@ from django.shortcuts import redirect
 
 import psutil
 
-from ADSMSettings.models import scenario_filename, SimulationProcessRecord
+from ADSMSettings.models import scenario_filename, SimulationProcessRecord, SmSession
 from ADSMSettings.utils import workspace_path, supplemental_folder_has_contents
 
 
 def is_simulation_running():
-    return len(get_simulation_controllers()) > 0
+    if len(get_simulation_controllers()) > 0:
+        a = SmSession.objects.get()
+        a.simulation_has_started = True
+        a.save()
+        return True
+    return False
 
 
 def get_simulation_controllers():

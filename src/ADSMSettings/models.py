@@ -38,6 +38,7 @@ class SmSession(models.Model):
     update_on_startup = models.BooleanField(default=False, help_text='The user has requested to install the update.')
     population_upload_status = models.CharField(default='', null=True, blank=True, max_length=255)
     population_upload_percent = models.FloatField(default=0)
+    simulation_has_started = models.BooleanField(default=False)
 
     def set_population_upload_status(self, status=None, percent=None):
         if status:
