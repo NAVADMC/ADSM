@@ -21,7 +21,7 @@ from django.http import HttpResponse
 from django.db.models import Max
 
 from Results.models import Unit
-from Results.utils import is_simulation_running
+from Results.utils import is_simulation_stopped
 from Results.summary import list_of_iterations
 from Results.graphing import rstyle, population_png
 from ADSMSettings.utils import workspace_path
@@ -187,7 +187,7 @@ def population_zoom_png(request=None):
         with open(path, "rb") as img_file:
             return HttpResponse(img_file.read(), content_type='image/png')
     except IOError:
-        save_image = not is_simulation_running()  # we want to check this before reading the stats, this is in motion
+        save_image = is_simulation_stopped()  # we want to check this before reading the stats, this is in motion
         if not save_image:  # in order to avoid database locked Issue #150
             return population_png(request, 58.5, 52)
         else:

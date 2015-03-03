@@ -31,7 +31,7 @@
 {#    {% endif %}#}
 
     <div id="sim_progress_and_button">
-        {% if is_simulation_running %}
+        {% if is_simulation_stopped or not simulation_has_started %}
             <a href="/results/abort_simulation" class="btn">Abort</a>
         {% endif %}
         <div class="progress">

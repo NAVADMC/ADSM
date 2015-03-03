@@ -10,12 +10,16 @@ from ADSMSettings.utils import workspace_path, supplemental_folder_has_contents
 
 
 def is_simulation_running():
+    """Returns True if the simulation is currently active.  Also sets the simulation_has_started for historical context."""
     if len(get_simulation_controllers()) > 0:
-        a = SmSession.objects.get()
-        a.simulation_has_started = True
-        a.save()
+        SmSession.objects.all().update(simulation_has_started = True)
         return True
     return False
+
+def is_simulation_stopped():
+    """ :return: True if the Simulation has started and either completed or been aborted 
+    """
+    return not is_simulation_running() and SmSession.objects.get().simulation_has_started  
 
 
 def get_simulation_controllers():

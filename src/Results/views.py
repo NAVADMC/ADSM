@@ -72,10 +72,11 @@ def create_blank_unit_stats():
 def run_simulation(request):
     delete_all_outputs()
     delete_supplemental_folder()
+    SmSession.objects.all().update(simulation_has_started=False)  # This is the only place where this gets reset
     create_blank_unit_stats()  # create UnitStats before we risk the simulation writing to them
     sim = Simulation(OutputSettings.objects.all().first().iterations)
     sim.start()  # starts a new thread
-    time.sleep(5) # give initial threads time to initialize their db connection
+    # time.sleep(5) # give initial threads time to initialize their db connection
     return redirect('/results/')
 
 

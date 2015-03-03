@@ -9,7 +9,8 @@ var results_status  = (function(pollTime){
                 return
             }
             if( context.simulation_has_started && !context.is_simulation_running ){ //not running but has started means it is now stopped 
-                stop_poll()
+                //stop_poll()
+                console.log("Stopping Poll", context.simulation_has_started, context.is_simulation_running)
                 //return
             }
             if( context.simulation_has_started) {
