@@ -58,6 +58,7 @@ libadsm_a_SOURCES = main_loop.c module_loader.c module_loader.h \
   $(top_srcdir)/modules/detection_rate_vaccination_trigger.c $(top_srcdir)/modules/detection_rate_vaccination_trigger.h \
   $(top_srcdir)/modules/estimated_dissemination_rate_vaccination_trigger.c $(top_srcdir)/modules/estimated_dissemination_rate_vaccination_trigger.h \
   $(top_srcdir)/modules/days_since_first_detection_vaccination_trigger.c $(top_srcdir)/modules/days_since_first_detection_vaccination_trigger.h \
+  $(top_srcdir)/modules/number_of_groups_vaccination_trigger.c $(top_srcdir)/modules/number_of_groups_vaccination_trigger.h \
   $(top_srcdir)/modules/destruction_wait_time_vaccination_trigger.c $(top_srcdir)/modules/destruction_wait_time_vaccination_trigger.h \
   $(top_srcdir)/modules/ring_vaccination_model.c $(top_srcdir)/modules/ring_vaccination_model.h \
   $(top_srcdir)/modules/trace_model.c $(top_srcdir)/modules/trace_model.h \

@@ -6257,6 +6257,169 @@
 
 <variable-test>
   <category>ring_vaccination</category>
+  <short-name>trigger on detection in 1 group (A,B)</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination once detections
+    have occurred in a given number of production type groups.  There are 8
+    units of types A-H, all starting latent, so the disease parameters can be
+    manipulated to produce any number of newly Clinical units to detect on a
+    particular day.  The “H” unit is the one that gets vaccinated.
+
+    In this test, vaccination is triggered when detections have occurred in 1
+    group, containing types “A” and “B”.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>20 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_1groupAB</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 1, 1, 1, 1, 1, 1, 1, 1.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins after detection has occurred in 1 group.  The group
+    contains production types “A” and “B”.
+
+    What should happen:
+     - Day 1: 1 detection of an “A” unit. Vaccination will be initiated.
+     - Day 2: 1 The “H” unit will be vaccinated on this day.  The
+       simulation is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>2</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on detection in 1 group (C,D)</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination once detections
+    have occurred in a given number of production type groups.  There are 8
+    units of types A-H, all starting latent, so the disease parameters can be
+    manipulated to produce any number of newly Clinical units to detect on a
+    particular day.  The “H” unit is the one that gets vaccinated.
+
+    In this test, vaccination is triggered when detections have occurred in 1
+    group, containing types “C” and “D”.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>20 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_1groupCD</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 1, 1, 1, 1, 1, 1, 1, 1.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins after detection has occurred in 1 group.  The group
+    contains production types “C” and “D”.
+
+    What should happen:
+     - Day 1: 1 detection of an “A” unit.
+     - Day 2: 1 detection of a “B” unit.
+     - Day 3: 1 detection of a “C” unit. Vaccination will be initiated.
+     - Day 4: 1 The “H” unit will be vaccinated on this day.  The
+       simulation is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>detnUC</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td>  <td></td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>4</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on detection in 2 groups (A,B,C) (E,F)</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination once detections
+    have occurred in a given number of production type groups.  There are 8
+    units of types A-H, all starting latent, so the disease parameters can be
+    manipulated to produce any number of newly Clinical units to detect on a
+    particular day.  The “H” unit is the one that gets vaccinated.
+
+    In this test, vaccination is triggered when detections have occurred in 2
+    groups. One group contains types “A”, “B”, and “C”, and the other group
+    contains types “E” and “F”.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>20 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_2groupsABC_EF</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 1, 1, 1, 1, 1, 1, 1, 1.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins after detection has occurred in 2 groups. One group
+    contains types “A”, “B”, and “C”, and the other group contains types “E”
+    and “F”.
+
+    What should happen:
+     - Day 1: 1 detection of an “A” unit. Detection has now occurred in group 1.
+     - Day 2: 1 detection of a “B” unit.
+     - Day 3: 1 detection of a “C” unit.
+     - Day 4: 1 detection of a “D” unit.
+     - Day 5: 1 detection of an “E” unit. Detection has now occurred in a second
+       group. Vaccination will be initiated.
+     - Day 6: 1 The “H” unit will be vaccinated on this day.  The simulation is
+       deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>detnUC</td>
+      <td>detnUE</td>
+      <td>detnUF</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>1</td>  <td>6</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
   <short-name>trigger on unit waiting 1 day for destruction, 0 destruction capacity</short-name>
 
   <description>

@@ -62,6 +62,7 @@
 #include "detection_rate_vaccination_trigger.h"
 #include "estimated_dissemination_rate_vaccination_trigger.h"
 #include "days_since_first_detection_vaccination_trigger.h"
+#include "number_of_groups_vaccination_trigger.h"
 #include "destruction_wait_time_vaccination_trigger.h"
 #include "ring_vaccination_model.h"
 #include "state_table_writer.h"
@@ -259,6 +260,7 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
       g_ptr_array_add (factory_fns, detection_rate_vaccination_trigger_factory);
       g_ptr_array_add (factory_fns, estimated_dissemination_rate_vaccination_trigger_factory);
       g_ptr_array_add (factory_fns, days_since_first_detection_vaccination_trigger_factory);
+      g_ptr_array_add (factory_fns, number_of_groups_vaccination_trigger_factory);
       g_ptr_array_add (factory_fns, destruction_wait_time_vaccination_trigger_factory);
     }
 
