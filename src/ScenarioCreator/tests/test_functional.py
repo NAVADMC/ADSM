@@ -251,7 +251,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         time.sleep(3) # may need to be adjusted for slow computers or if the file grows
 
         section = self.selenium.find_element_by_tag_name('section')
-        self.assertIn('Current Units:', section.text)
+        self.assertIn('Population File:', section.text)
 
     def test_upload_blank_population_file(self):
         self.selenium.find_element_by_tag_name('nav').find_element_by_link_text('Population').click()
