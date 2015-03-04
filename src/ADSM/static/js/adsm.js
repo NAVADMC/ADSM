@@ -40,8 +40,8 @@ $(function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });
 
-    $(document).on('submit', '.ajax', function(evt) {
-        evt.preventDefault();
+    $(document).on('submit', '.ajax', function(event) {
+        event.preventDefault();
         $.post($(this).attr('action'), $(this).serialize())
             .done(function( data ) {
                 if (data.status == "success") {
@@ -91,10 +91,10 @@ $(function(){
         $(this).find('.unsaved').removeClass('unsaved');
     })
 
-    $(document).on('click', '#open_scenario, #new_scenario', function(evt){
+    $(document).on('click', '#open_scenario, #new_scenario', function(event){
         var dialog = check_file_saved();
         if(dialog){
-            evt.preventDefault();
+            event.preventDefault();
             var link = $(this).attr('href');
             dialog.$modal.on('hidden.bs.modal', function(){
                 window.location = link})
