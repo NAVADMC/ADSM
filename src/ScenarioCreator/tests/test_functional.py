@@ -243,7 +243,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         self.assertIn("Create a new Disease Progression", modal.text)
 
-    def test_upload_population_file(self):
+    def old_test_upload_population_file(self):
         self.selenium.find_element_by_tag_name('nav').find_element_by_link_text('Population').click()
         time.sleep(1)
 
@@ -290,7 +290,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         section = self.selenium.find_element_by_tag_name('section')
         self.assertIn('Load a Population', section.text)
 
-    def test_assign_disease_spread_layout(self):
+    def old_test_assign_disease_spread_layout(self):
         self.setup_scenario()
 
         self.selenium.find_element_by_tag_name('nav') \
@@ -420,7 +420,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             else:
                 self.assertEqual(interaction['disease'], u"---------")
 
-    def test_assign_disease_spread_select_all_button_source(self):
+    def old_test_assign_disease_spread_select_all_button_source(self):
         """
             clicking the select all button for sources in the m2m widget
             will cause all production types to be selected
@@ -433,7 +433,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         source_types = self.get_selected_production_types()
         self.assertEqual(len(source_types), 4)
 
-    def test_assign_disease_spread_select_all_button_destination(self):
+    def old_test_assign_disease_spread_select_all_button_destination(self):
         """
             clicking the select all button for destinations in the m2m widget
             will cause all production types to be selected
