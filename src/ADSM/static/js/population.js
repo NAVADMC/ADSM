@@ -8,7 +8,7 @@ var progressBar = (function(){
         $.get('/setup/UploadPopulation/', function(data){
             var newWidth;
             if (data.percent <= 0) {
-                newWidth = progressBar.width() < 100 ? progressBar.width()+2 : null;
+                newWidth = 10
                 setStatus(data.status, newWidth);
             } else if (data.percent >= 100) {
                 newWidth = progressBar.width() < 500 ? progressBar.width()+1 : null;

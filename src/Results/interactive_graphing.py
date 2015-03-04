@@ -129,7 +129,7 @@ def population_results_map():
                 "%s %s %i" % (u.production_type.name, u.user_notes, u.unitstats.cumulative_destroyed) 
                 ) for u in queryset]
     total_iterations = float(len(list_of_iterations()))
-    latitude, longitude, infected, vaccinated, destroyed, zone_focus, herd_size, names = zip(*latlong)
+    latitude, longitude, infected, vaccinated, destroyed, zone_focus, herd_size, names = zip(*latlong)  #TODO: remove names!
     zone_blues, red_infected, green_vaccinated = define_color_mappings()
     
     graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus)
