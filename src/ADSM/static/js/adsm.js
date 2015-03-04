@@ -91,9 +91,8 @@ $(function(){
         $(this).find('.unsaved').removeClass('unsaved');
     })
 
-    $(document).on('click', 'header .buttonHolder a', function(evt){ //currently "Save is a button, not <a>.  This would be annoying otherwise
+    $(document).on('click', '#open_scenario, #new_scenario', function(evt){
         var dialog = check_file_saved();
-        console.log(dialog);
         if(dialog){
             evt.preventDefault();
             var link = $(this).attr('href');
