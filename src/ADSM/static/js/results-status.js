@@ -4,13 +4,9 @@ var results_status  = (function(pollTime){
 
     var update_results_status = function() {
         $.get('/results/simulation_status.json').done(function (context) {
-            if( !context.simulation_has_started) { //simulation hasn't started
-                $('.simulation-status').text("Starting Simulation...")
-                return
-            }
-            if( context.simulation_has_started && !context.is_simulation_running ){ //not running but has started means it is now stopped 
-                //stop_poll()
-                console.log("Stopping Poll", context.simulation_has_started, context.is_simulation_running)
+            if( context.is_simulation_stopped ){ //not running but has started means it is now stopped 
+                stop_poll()
+                window.location.reload();
                 //return
             }
             if( context.simulation_has_started) {
@@ -24,12 +20,11 @@ var results_status  = (function(pollTime){
                 if (simulation_complete) {
                     $('.simulation-progress').addClass('done');
                     status_text = "Simulation complete.  " + context.iterations_total + " iterations run.";
-                    stop_poll();
-                    if (last_progress < 1) {
-                        window.location.reload();
-                    }
                 }
                 $('.simulation-progress').width(simulation_progress * 100 + "%");
+            }
+            else {  //simulation hasn't started
+                status_text = "Starting Simulation..."
             }
             $('.simulation-status').text(status_text);
 

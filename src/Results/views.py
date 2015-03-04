@@ -16,7 +16,7 @@ from ScenarioCreator.models import OutputSettings
 from Results.graphing import construct_title
 from Results.forms import *  # necessary
 from Results.simulation import Simulation
-from Results.utils import delete_supplemental_folder, is_simulation_running, map_zip_file, delete_all_outputs
+from Results.utils import delete_supplemental_folder, map_zip_file, delete_all_outputs, is_simulation_stopped
 import Results.output_parser
 from Results.summary import list_of_iterations, iterations_complete
 
@@ -27,10 +27,9 @@ def back_to_inputs(request):
 
 def simulation_status(request):
     output_settings = OutputSettings.objects.get()
-    running = is_simulation_running()
     status = {
+        'is_simulation_stopped': is_simulation_stopped(),
         'simulation_has_started': SmSession.objects.get().simulation_has_started,
-        'is_simulation_running': running,  # different from being completed
         'iterations_total': output_settings.iterations,
         'iterations_started': len(list_of_iterations()),
         'iterations_completed': iterations_complete(),

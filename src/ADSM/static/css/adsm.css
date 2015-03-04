@@ -508,18 +508,17 @@ select {
 .progress {
     border-radius: 2px;
 }
-.progress-bar-mini {
+.progress-bar.done {
+    background-color: #68be5e;
+}
+
+.placeholder p {
     display:block;
-    margin-top: -7px;
-    margin-right: 8px;
-    padding-bottom: 3px;
+    font-size: 16pt;
+    color: grey;
 }
-.progress-bar-mini .bar {
-    height: 3px;
-    background-color: #68be5e;
-}
-.progress-bar-mini .bar.done, .progress-bar.done {
-    background-color: #68be5e;
+.placeholder img {
+    display:block;
 }
 
 /**********************/
