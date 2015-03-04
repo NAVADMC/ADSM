@@ -462,6 +462,7 @@ def population(request):
         context['formset'] = initialized_formset
         context['filter_info'] = filter_info(request, params)
         context['deletable'] = '/setup/Population/1/delete/'
+        context['population_file'] = os.path.basename(Population.objects.get().source_file)
     else:
         context['xml_files'] = file_list([".xml", ".csv"])
     return render(request, 'ScenarioCreator/Population.html', context)

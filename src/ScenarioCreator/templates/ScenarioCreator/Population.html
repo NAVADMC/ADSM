@@ -2,6 +2,7 @@
 {% load floppyforms %}
 {% load crispy_forms_tags  %}
 {% load db_status_tags %}
+{% load humanize %}
 
 {% block content %}
     <script type="text/javascript" src="{{ STATIC_URL }}js/population.js"></script>
@@ -27,7 +28,7 @@
     </div>
 
 {% else %}
-    <h1>Current {{"Units"|wiki:"unit"}}:</h1>
+    <h1><strong>Population File:</strong> {{ population_file }} ({{ Farms|intcomma }} units)</h1>
     <img src="/results/Population.png" alt="Unit Locations"/>
     <p></p>
 
