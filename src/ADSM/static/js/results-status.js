@@ -14,8 +14,7 @@ var results_status  = (function(pollTime){
                 var simulation_progress = context.iterations_total === 0 ? 0 :
                         Math.max(context.iterations_completed / context.iterations_total,
                             0.5 / context.iterations_total)
-                var status_text = context.iterations_started + " of " + context.iterations_total + " iterations in progress. " +
-                        context.iterations_completed + " of " + context.iterations_total + " iterations completed.";
+                var status_text = context.iterations_completed + " of " + context.iterations_total + " iterations completed.";
 
                 if (simulation_complete) {
                     $('.simulation-progress').addClass('done');
