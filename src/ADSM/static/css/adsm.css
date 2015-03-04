@@ -513,12 +513,12 @@ select {
 }
 
 .placeholder p {
-    display:block;
+    display:inline;
     font-size: 16pt;
     color: grey;
 }
 .placeholder img {
-    display:block;
+    display:inline;
 }
 
 /**********************/

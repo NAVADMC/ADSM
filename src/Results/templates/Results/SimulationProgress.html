@@ -38,7 +38,7 @@
     {% if is_simulation_stopped %}
         <div id="sim_progress_and_button">
             <div class="progress">
-                <span class="simulation-status status-text">Simulation complete.</span>
+                <span class="simulation-status status-text">Simulation complete.  {{ iterations_completed }} iterations.</span>
                 <div class="simulation-progress progress-bar done" style="width: 100%;"></div>
             </div>
         </div>
