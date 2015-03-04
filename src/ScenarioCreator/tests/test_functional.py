@@ -243,7 +243,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         self.assertIn("Create a new Disease Progression", modal.text)
 
-    def old_test_upload_population_file(self):
+    def test_upload_population_file(self):
         self.selenium.find_element_by_tag_name('nav').find_element_by_link_text('Population').click()
         time.sleep(1)
 
