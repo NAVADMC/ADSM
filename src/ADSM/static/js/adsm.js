@@ -324,9 +324,9 @@ var check_file_saved = function(){
 
 two_state_button = function(){
     if(typeof outputs_computed === 'undefined' || outputs_computed == false) {
-        return 'class="btn btn-primary">Save changes'
+        return 'class="btn btn-primary btn-save">Save changes'
     } else {
-        return 'class="btn btn-danger">Delete Results and Save Changes'
+        return 'class="btn btn-danger btn-save">Delete Results and Save Changes'
     }
 }
 
@@ -334,17 +334,23 @@ two_state_button = function(){
 var modelModal = {
 
     ajax_submit: function($form, url, success_callback, fail_callback){
-        return $.ajax({url: url, type: "POST", data: new FormData($form[0]), success: function(data, status, xhr){
-            if(typeof(data) == 'object') {
-                if (data['status']=='success') { //redundant for now
-                    success_callback(data)
-                }
-            } else {//html dataType  == failure probably validation errors
-                fail_callback(data)
-            }
-        },
-        processData: false,
-        contentType: false});
+        return $.ajax({url: url, 
+                type: "POST", 
+                data: new FormData($form[0]), 
+                success: function(data, status, xhr){
+                    if(typeof(data) == 'object') {
+                        if (data['status']=='success') { //redundant for now
+                            success_callback(data)
+                        }
+                    } else {//html dataType  == failure probably validation errors
+                        fail_callback(data)
+                    }
+                },
+                processData: false,
+                contentType: false}
+            ).always(function() {
+                $('.blocking-overlay').hide();
+            });
     },
 
     ajax_success: function(modal, selectInput){
@@ -386,7 +392,7 @@ var modelModal = {
             modal.find('.modal-title').html($newForm.find('#title').html());
             $('body').append(modal);
             $('#id_equation_type').trigger('change'); //see also probability-functions.js
-            modal.find('.modal-footer .btn-primary').on('click', function() {
+            modal.find('.modal-footer button[type=submit]').on('click', function() {
                 self.ajax_submit($form, url, self.ajax_success(modal, selectInput), self.validation_error(modal));
             });
 
@@ -408,8 +414,8 @@ var modelModal = {
                       <div class="modal-body">\
                       </div>\
                       <div class="modal-footer">\
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>\
-                        <button type="button"' + two_state_button() + '</button>\
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>\
+                            <button type="submit"' + two_state_button() + '</button>\
                       </div>\
                     </div>\
                   </div>\
