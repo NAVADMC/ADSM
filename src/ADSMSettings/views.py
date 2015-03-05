@@ -3,6 +3,7 @@ import os
 import shutil
 from django.db import close_old_connections
 from django.shortcuts import redirect, render, HttpResponse
+from django.utils.html import strip_tags
 from ADSMSettings.models import scenario_filename, SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
@@ -107,7 +108,8 @@ def save_scenario(request=None):
     """
     try:
         target = request.POST['filename'] if 'filename' in request.POST else scenario_filename()
-        if r'\\' in target or '/' in target:
+        target = strip_tags(target)
+        if '\\' in target or '/' in target:  # this validation has to be outside of scenario_filename in order for open_test_scenario to work
             raise ValueError("Slashes are not allowed: " + target)
         scenario_filename(target)
         print('Copying database to', target)

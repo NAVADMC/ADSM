@@ -588,15 +588,16 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
     def test_save_scenario_failure(self):
         filename_field = self.selenium.find_element_by_css_selector('header form .filename input')
         try:
-            filename_field.send_keys('/\\ 123 AZ')
+            filename_field.send_keys('./\\ 123&% AZ')
             filename_field.submit()
             time.sleep(1)
 
-            alert = self.selenium.find_element_by_css_selector('.alert.alert-danger')
-            self.assertIn("Failed to save filename.", alert.text)
+            alert = self.selenium.find_element_by_css_selector('alert-danger')
+            
+            self.assertIn("ValueError", alert.text)
         finally:
             try:
-                os.remove(workspace_path('Untitled Scenario/\\ 123 AZ.sqlite3'))
+                os.remove(workspace_path('Untitled Scenario./\\ 123&% AZ.sqlite3'))
             except:
                 pass
 
