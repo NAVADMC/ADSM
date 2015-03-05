@@ -108,7 +108,7 @@ def save_scenario(request=None):
     try:
         target = request.POST['filename'] if 'filename' in request.POST else scenario_filename()
         if r'\\' in target or '/' in target:
-            raise ValueError("Slashes are not allowed" + target)
+            raise ValueError("Slashes are not allowed: " + target)
         scenario_filename(target)
         print('Copying database to', target)
         full_path = workspace_path(target) + ('.sqlite3' if not target.endswith('.sqlite3') else '')
@@ -119,7 +119,7 @@ def save_scenario(request=None):
         json_response = '{"status": "success"}'
 
     except (ValueError, IOError, AssertionError) as error:
-        print('Encountered an error while copying file', error)
+        print(error)
         json_response = '{"status": "failed", "message": "%s"}' % error
 
     if request is not None and request.is_ajax():

@@ -46,6 +46,7 @@ $(function(){
             .done(function( data ) {
                 if (data.status == "success") {
                     $('.ajax').trigger('saved');
+                    $('.alert .close').click()
                 } else if (data.status == "failed") {
                     alert_template = '<div class="alert alert-danger">' +
                                         '<a href="#" class="close" data-dismiss="alert">' +
