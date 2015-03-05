@@ -7,9 +7,6 @@ from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Pop
     DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
     ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
 from Results.models import DailyControls
-from ADSMSettings.models import scenario_filename, SmSession
-from ADSMSettings.views import unsaved_changes
-from ADSMSettings.utils import graceful_startup, supplemental_folder_has_contents
 from git.git import git
 
 
@@ -64,7 +61,6 @@ def basic_context(request):
                'RelationalFunctions': RelationalFunction.objects.count(),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
                'outputs_computed': DailyControls.objects.count() > 0,
-               'supplemental_folder_has_contents': supplemental_folder_has_contents()
                })
 
         validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment',
