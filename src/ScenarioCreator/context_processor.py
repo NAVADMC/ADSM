@@ -1,18 +1,17 @@
 import subprocess
-import re
-
 from django.db.models import F
 
 from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Population, Unit, Disease, DiseaseProgression, \
     DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
     ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
+from ScenarioCreator.utils import whole_scenario_validation
 from Results.models import DailyControls
 from git.git import git
 
 
 def simulation_ready_to_run(context):
-    status_lights = [ready for name, ready in context['relevant_keys'].items()]  # The value here is a tuple which includes the name see basic_context()
-    return all(status_lights)  # All green status_lights  (It's a metaphor)
+    status_lights = [ready for name, ready in context['missing_values'].items()]  # The value here is a tuple which includes the name see basic_context()
+    return all(status_lights) and len(context['whole_scenario_warnings']) == 0  # All green status_lights  (It's a metaphor)
 
 
 def js(var):
@@ -61,12 +60,13 @@ def basic_context(request):
                'RelationalFunctions': RelationalFunction.objects.count(),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
                'outputs_computed': DailyControls.objects.count() > 0,
+               'whole_scenario_warnings': whole_scenario_validation(),
                })
 
         validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment',
                              'DirectSpreads', 'AssignSpreads', 'ControlMasterPlan', 'Protocols', 'ProtocolAssignments', 'Zones', 'ZoneEffects',
                              'ZoneEffectAssignments']
-        context['relevant_keys'] = {name: context[name] for name in validation_models}
+        context['missing_values'] = {name: context[name] for name in validation_models if not context[name]}
         context['Simulation_ready'] = simulation_ready_to_run(context)
         disease = Disease.objects.get()
         context['javascript_variables'] = {'use_within_unit_prevalence':      js(disease.use_within_unit_prevalence),

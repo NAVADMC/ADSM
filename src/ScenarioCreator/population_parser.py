@@ -1,11 +1,16 @@
 import csv
+import itertools
 import os
 import xml.etree.ElementTree as ET
-from ScenarioCreator.utils import lowercase_header
 
 
 def gettext(elem):
     return ",".join(elem.itertext())
+
+
+def lowercase_header(iterator):
+    """Source: http://stackoverflow.com/questions/16937457/python-dictreader-how-to-make-csv-column-names-lowercase"""
+    return itertools.chain([next(iterator).lower()], iterator)
 
 
 class PopulationParser(object):
