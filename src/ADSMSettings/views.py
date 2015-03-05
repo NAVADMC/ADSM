@@ -106,26 +106,23 @@ def save_scenario(request=None):
     """Save to the existing session of a new file name if target is provided
     """
     try:
-        target = request.POST['filename']
+        target = request.POST['filename'] if 'filename' in request.POST else scenario_filename()
+        if r'\\' in target or '/' in target:
+            raise ValueError("Slashes are not allowed" + target)
         scenario_filename(target)
-    except:
-        target = scenario_filename()
-    print('Copying database to', target)
-    full_path = workspace_path(target) + ('.sqlite3' if not target.endswith('.sqlite3') else '')
-    save_error = None
-    try:
-        assert(r'\\' not in target and '/' not in target)
+        print('Copying database to', target)
+        full_path = workspace_path(target) + ('.sqlite3' if not target.endswith('.sqlite3') else '')
+        
         shutil.copy(db_path(), full_path)
         unsaved_changes(False)  # File is now in sync
         print('Done Copying database to', full_path)
-    except (IOError, AssertionError):
-        save_error = 'Failed to save filename.'
-        print('Encountered an error while copying file', full_path)
+        json_response = '{"status": "success"}'
+
+    except (ValueError, IOError, AssertionError) as error:
+        print('Encountered an error while copying file', error)
+        json_response = '{"status": "failed", "message": "%s"}' % error
+
     if request is not None and request.is_ajax():
-        if save_error:
-            json_response = '{"status": "failed", "message": "%s"}' % save_error
-        else:
-            json_response = '{"status": "success"}'
         return HttpResponse(json_response, content_type="application/json")
     else:
         return redirect('/setup/Scenario/1/')

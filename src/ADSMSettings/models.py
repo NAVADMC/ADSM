@@ -71,6 +71,8 @@ def unsaved_changes(new_value=None):
 def scenario_filename(new_value=None):
     session = SmSession.objects.get()  # This keeps track of the state for all views and is used by basic_context
     if new_value:
+        if "'" in new_value:
+            raise ValueError("Apostrophes are not allowed: " + new_value)
         session.scenario_filename = new_value.replace('.sqlite3', '')
         session.save()
     return session.scenario_filename
