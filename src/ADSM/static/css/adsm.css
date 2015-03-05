@@ -511,16 +511,41 @@ select {
 .progress-bar.done {
     background-color: #68be5e;
 }
-
+.placeholder {
+    position: relative;
+    margin-left: 16.66vw;
+    height: 60px;
+    padding-top: 20px;
+}
 .placeholder p {
     display:inline;
-    font-size: 16pt;
-    color: grey;
+    font-size: 15px;
+    color: #a1a1a1;
+    font-weight: 300;
+    margin-right: 10px;
 }
 .placeholder img {
     display:inline;
+    width: 30px;
+}
+.placeholder:after {
+    content: "";
+    display: block;
+    position: absolute;
+    left: 130px;
+    top: 20px;
+    height: 20px; 
+    background-color: white;
+    opacity: .3;
+    -webkit-animation: Placeholder-wash .98s infinite;
 }
 
+@-webkit-keyframes Placeholder-wash {
+    0% {left: 119px;
+        width: 11px;}
+    100% {left: 130px;
+        width: 0px;}
+}
 /**********************/
 
 #file_list li {
