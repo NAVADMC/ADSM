@@ -47,6 +47,11 @@ def home(request):
     return redirect('/setup/Scenario/1/')
 
 
+def production_type_list_json(request):
+    msg = list(ProductionType.objects.values_list('name', 'id'))
+    return HttpResponse(json.dumps(msg), content_type="application/json")
+
+
 def extra_forms_needed():
     missing = list(ProductionType.objects.all())
     for entry in DiseaseSpreadAssignment.objects.all():
