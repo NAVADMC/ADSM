@@ -57,8 +57,8 @@ class PopulationTestCase(TestCase):
         with open(POPULATION_FIXTURES + 'Population_Test_Invalid.xml', mode='rb') as fp:
             r = self.client.post('/setup/UploadPopulation/', {'file': fp})
 
-        data = json.loads(r.content.decode())
-        self.assertEqual(data, expected_results)
+        # data = json.loads(r.content.decode())
+        self.assertJSONEqual(r.content.decode(), expected_results)
 
 class RelationalFunctionTestCase(TestCase):
     multi_db = True
