@@ -40,6 +40,7 @@
 /** Specialized information for this module. */
 typedef struct
 {
+  guint trigger_id;
   GArray **production_type_in_groups; /**< Which groups a given production
     type is in. production_type_in_groups[prodtype] gives a GArray of guints,
     each guint being a group index. */
@@ -535,6 +536,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* Call the set_params function to read trigger's details. */
   trigger_id = GPOINTER_TO_UINT(user_data);
+  local_data->trigger_id = trigger_id;
   sql = g_strdup_printf ("SELECT id,number_of_groups "
                          "FROM ScenarioCreator_spreadbetweengroups "
                          "WHERE id=%u", trigger_id);

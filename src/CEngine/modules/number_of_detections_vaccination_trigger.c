@@ -40,6 +40,7 @@
 /** Specialized information for this module. */
 typedef struct
 {
+  guint trigger_id;
   gboolean *production_type; /**< Which production types we are interested in
     counting. */
   GPtrArray *production_types; /**< Production type names. Each item in the
@@ -379,6 +380,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* Call the set_params function to read trigger's details. */
   trigger_id = GPOINTER_TO_UINT(user_data);
+  local_data->trigger_id = trigger_id;
   sql = g_strdup_printf ("SELECT id,number_of_units "
                          "FROM ScenarioCreator_diseasedetection "
                          "WHERE id=%u", trigger_id);
