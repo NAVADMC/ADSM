@@ -413,9 +413,9 @@ ul {
 }
 
 .btn-primary,
-.btn-usaved {
+.btn-unsaved {
     background-color: #3577b1;
-    transition: all ..2s ease;
+    transition: all .2s ease;
 }
 
 .btn-primary:hover,
@@ -508,20 +508,44 @@ select {
 .progress {
     border-radius: 2px;
 }
-.progress-bar-mini {
-    display:block;
-    margin-top: -7px;
-    margin-right: 8px;
-    padding-bottom: 3px;
-}
-.progress-bar-mini .bar {
-    height: 3px;
+.progress-bar.done {
     background-color: #68be5e;
 }
-.progress-bar-mini .bar.done, .progress-bar.done {
-    background-color: #68be5e;
+.placeholder {
+    position: relative;
+    margin-left: 16.66vw;
+    height: 60px;
+    padding-top: 20px;
+}
+.placeholder p {
+    display:inline;
+    font-size: 15px;
+    color: #a1a1a1;
+    font-weight: 300;
+    margin-right: 10px;
+}
+.placeholder img {
+    display:inline;
+    width: 30px;
+}
+.placeholder:after {
+    content: "";
+    display: block;
+    position: absolute;
+    left: 130px;
+    top: 20px;
+    height: 20px; 
+    background-color: white;
+    opacity: .3;
+    -webkit-animation: Placeholder-wash .98s infinite;
 }
 
+@-webkit-keyframes Placeholder-wash {
+    0% {left: 119px;
+        width: 11px;}
+    100% {left: 130px;
+        width: 0px;}
+}
 /**********************/
 
 #file_list li {
@@ -594,6 +618,14 @@ input[type=file], button {
     margin: 0px;
 }
 
+#farm_list input[type=number] {
+    width: 80px;
+}
+
+#farm_list select {
+    width: 100px;
+}
+
 #farm_list th{
     /*border: 1px solid black;*/
     font-size: 12pt;
@@ -618,6 +650,7 @@ th:hover .sortControls{
     opacity:1;
 }
 
+/********/
 
 body .modal-dialog {
     width: 50%;
