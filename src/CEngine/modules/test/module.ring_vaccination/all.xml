@@ -5830,8 +5830,8 @@
 
   <parameter-description>
     Parameter setup is similar to “trigger on 1 detection in any type” above,
-    but vaccination begins when disease has been detected in 3 units of type A,
-    or 2 units of type B or C.
+    but vaccination begins when disease has been detected in 3 units of type A
+    (trigger #1) or 2 units of type B or C (trigger #2).
 
     What should happen:
      - On day 1 unit 1 will be Infectious Clinical. It will be detected. This
@@ -5842,7 +5842,7 @@
        makes 1 unit of type “B” detected, not enough to initiate vaccination.
      - On day 4 unit 4 will be Infectious Clinical. It will be detected. This
        makes 1 unit of type “B” and 1 unit of type “C” detected, so
-       vaccination will be initiated.
+       vaccination will be initiated by trigger #2.
      - On day 5 the top row of units will be vaccinated.  The simulation
        is deliberately stopped at this point.
   </parameter-description>
@@ -5852,13 +5852,14 @@
       <td>detcUA</td>
       <td>detcUB</td>
       <td>detcUC</td>
+      <td>vaccTriggered</td>
       <td>firstVaccination</td>
     </tr>
-    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td></td></tr>
-    <tr><td>2</td>  <td>0</td>  <td>0</td>  <td></td></tr>
-    <tr><td>2</td>  <td>1</td>  <td>0</td>  <td></td></tr>
-    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td></td></tr>
-    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td>5</td></tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td></td>   <td></td></tr>
+    <tr><td>2</td>  <td>0</td>  <td>0</td>  <td></td>   <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>0</td>  <td></td>   <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td>2</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td>2</td>  <td>5</td></tr>
   </output>
 </variable-test>
 
