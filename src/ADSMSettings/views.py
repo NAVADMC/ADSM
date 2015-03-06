@@ -106,15 +106,18 @@ def open_test_scenario(request, target):
 def save_scenario(request=None):
     """Save to the existing session of a new file name if target is provided
     """
+    if request is not None and 'filename' in request.POST:
+        target = request.POST['filename'] 
+    else:
+        target = scenario_filename()
     try:
-        target = request.POST['filename'] if 'filename' in request.POST else scenario_filename()
         target = strip_tags(target)
         if '\\' in target or '/' in target:  # this validation has to be outside of scenario_filename in order for open_test_scenario to work
             raise ValueError("Slashes are not allowed: " + target)
         scenario_filename(target)
         print('Copying database to', target)
         full_path = workspace_path(target) + ('.sqlite3' if not target.endswith('.sqlite3') else '')
-        
+
         shutil.copy(db_path(), full_path)
         unsaved_changes(False)  # File is now in sync
         print('Done Copying database to', full_path)
