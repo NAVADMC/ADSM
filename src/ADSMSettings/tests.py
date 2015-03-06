@@ -60,7 +60,7 @@ class ScenarioTestCase(TestCase):
             self.assertIn('status', data)
             self.assertEqual(data['status'], 'failed')
             self.assertIn('message', data)
-            self.assertEqual(data['message'], 'Failed to save filename.')
+            self.assertEqual(data['message'], 'Slashes are not allowed: Test / Scenario 123 AZ')
             self.assertFalse(os.path.isfile(file_path))
         finally:
             self.remove_test_file(file_path)

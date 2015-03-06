@@ -757,7 +757,8 @@ new (sqlite3 * params, UNT_unit_list_t *units, projPJ projection,
                      "SELECT prodtype.name AS prodtype,test_delay_id,test_sensitivity,test_specificity "
                      "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref "
                      "WHERE prodtype.id=xref.production_type_id "
-                     "AND xref.control_protocol_id=protocol.id",
+                     "AND xref.control_protocol_id=protocol.id "
+                     "AND (test_direct_back_traces=1 OR test_direct_forward_traces=1 OR test_indirect_back_traces=1 OR test_indirect_forward_traces=1)",
                      set_params, self, &sqlerr);
   if (sqlerr)
     {

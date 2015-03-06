@@ -49,8 +49,11 @@ def workspace_path(target=None):
     return path  # shlex.quote(path) if you want security
 
 
-def file_list(extension=''):
-    db_files = sorted(glob(workspace_path("*" + extension)), key=lambda s: s.lower())  # alphabetical, no case
+def file_list(extensions=[]):
+    if isinstance(extensions, str):
+        extensions = [extensions]  # container around a string
+    files = [glob(workspace_path("*" + ext)) for ext in extensions]
+    db_files = sorted(chain(*files), key=lambda s: s.lower())  # alphabetical, no case
     return map(lambda f: os.path.basename(f), db_files)  # remove directory and extension
 
 

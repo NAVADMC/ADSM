@@ -74,7 +74,7 @@ form_state = (function(form){
         return matching_rows
     };
 
-    var get_consensus = function(filters){
+    var get_consensus = function(filters){ //TODO: can probably be delete
         var matching_rows = get(filters);
         var consensus_row = matching_rows[0];//TODO: handle empty
         $.each(matching_rows, function(row_index, row_values){
@@ -163,37 +163,41 @@ many_to_many_widget = (function(form_state){
         });
     }
 
-    function extract_options(index, element){//grab each option and generate row
-        var value = $(element).attr('value');
-        if(value && value != 'data-add-new'){//not "-----" or "Add..."
-            return [[$(element).text(), value]];
-        }
-    }
-
-    function render_row(header_information, row_index){
+    function render_row(header_information, column_information, row_index){
         var row = $('<tr>')
         for(var col_index in [0,1]){ //list row headers from header_information
             var th = $('<th>').append('<span data-click-toggle="selected" data-pk="'+
-                header_information[col_index][row_index][1] + '">' +
-                header_information[col_index][row_index][0] + '</span>').disableSelection()
+                header_information[row_index][1] + '">' +
+                header_information[row_index][0] + '</span>').disableSelection()
             th.addClass('relevant');
             row.append(th); //column contains row list
         }
+        $.each(column_information, function(col_index, column){//for each column
+            if(header_information[1][row_index]) //check if there's something in the second column (could be ragged)
+                row.append($('<td>').append(column.clone())); // column contains select
+            else
+                row.append($('<td>'));//blank cell
+        })
         return row;
     }
 
     function create_body_rows() {
-        var tbody = $('<tbody>');
-        var header_information = [];
-        $('section form table tbody tr:last-child th').each(function (index) {
-            header_information[index] = $(this).find('option').map(extract_options);
-        })
+        $.get('/setup/ProductionTypeList.json', function(header_information){
+            var tbody = $('<tbody>');
+            var column_information = [];
+            $('section form table tbody tr:last-child td').each(function (index) {//copy the select
+                bulk_select = $(this).find('select').clone().val('').removeAttr('id');
+                bulk_select.find('option[value="data-add-new"]').remove();
+                bulk_select.attr('hidden', 'hidden')
+                column_information[index] = bulk_select;
+            });
 
-        var num_rows = Math.max(header_information[0].length, header_information[1].length);
-        for (var i = 0; i < num_rows; i++) {
-            tbody.append(render_row(header_information, i));
-        }
-        return tbody;
+            var num_rows = Math.max(header_information[0].length, header_information[1].length);
+            for (var i = 0; i < num_rows; i++) {
+                tbody.append(render_row(header_information, column_information, i));
+            }
+            my_table.append(tbody)
+        })
     }
 
     function get_column_name(column_index){
@@ -205,11 +209,11 @@ many_to_many_widget = (function(form_state){
         my_table = $('<table>').append($('section form table thead').clone());
         insert_select_buttons();
         insert_bulk_selectors();
-        my_table.append(create_body_rows())
+        create_body_rows()
         update_display_inputs() //called from events normally, but we want to initialize
 
         $('.m2mtable').append(my_table);
-        my_table.find('tbody select').on('change', update_state_inputs)//register event listener
+        $(document).on('change', '.m2mtable tbody select', update_state_inputs)//register event listener
         add_checkboxes_to_headers();
     };
 
@@ -253,10 +257,10 @@ many_to_many_widget = (function(form_state){
     function bulk_apply($bulk_selector){
         var column_number = $bulk_selector.closest('td').index() + 1
         var destinations_selected = $('tbody th:nth-child(2) .selected')
-        if( !destinations_selected.length )//empty =>  Drop .selected criteria and treat the whole column as selected
-            $bulk_selector.closest('table').find('tbody tr :nth-child('+column_number+') :input')
-                .val($bulk_selector.val()).trigger('change'); //set all values in the whole column
-        else{
+        if( !destinations_selected.length ){  //empty =>
+            //TODO: flash the destination column red
+            return
+        } else {
             $bulk_selector.closest('table').find('tbody tr').each(function(){ //for each row
                 if($(this).find('th:nth-child(2) .selected').length)   //if destination .selected
                     $(this).find('td:nth-child('+column_number+') :input')  //set the input value

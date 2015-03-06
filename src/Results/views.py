@@ -10,13 +10,13 @@ from django.forms.models import modelformset_factory
 from django.shortcuts import render, redirect
 from django.db.models import Max
 
-from ADSMSettings.models import scenario_filename
+from ADSMSettings.models import scenario_filename, SmSession
 from ADSMSettings.utils import workspace_path
 from ScenarioCreator.models import OutputSettings
 from Results.graphing import construct_title
 from Results.forms import *  # necessary
 from Results.simulation import Simulation
-from Results.utils import delete_supplemental_folder, is_simulation_running, map_zip_file, delete_all_outputs
+from Results.utils import delete_supplemental_folder, map_zip_file, delete_all_outputs, is_simulation_stopped
 import Results.output_parser
 from Results.summary import list_of_iterations, iterations_complete
 
@@ -28,7 +28,8 @@ def back_to_inputs(request):
 def simulation_status(request):
     output_settings = OutputSettings.objects.get()
     status = {
-        'is_simulation_running': is_simulation_running(),  # different from being completed
+        'is_simulation_stopped': is_simulation_stopped(),
+        'simulation_has_started': SmSession.objects.get().simulation_has_started,
         'iterations_total': output_settings.iterations,
         'iterations_started': len(list_of_iterations()),
         'iterations_completed': iterations_complete(),
@@ -70,10 +71,11 @@ def create_blank_unit_stats():
 def run_simulation(request):
     delete_all_outputs()
     delete_supplemental_folder()
+    SmSession.objects.all().update(simulation_has_started=False)  # This is the only place where this gets reset
     create_blank_unit_stats()  # create UnitStats before we risk the simulation writing to them
     sim = Simulation(OutputSettings.objects.all().first().iterations)
     sim.start()  # starts a new thread
-    time.sleep(5) # give initial threads time to initialize their db connection
+    # time.sleep(5) # give initial threads time to initialize their db connection
     return redirect('/results/')
 
 

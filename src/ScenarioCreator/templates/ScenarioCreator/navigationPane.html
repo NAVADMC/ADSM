@@ -45,13 +45,8 @@
                     View Results <i class="glyphicon glyphicon-play"></i></a>
                 {% else %}
                     {% if Simulation_ready or dry_run_passed %}
-                        {% if supplemental_folder_has_contents %}
-                            <a href="/?loading_url=/results/RunSimulation/" class="incomplete tall">
-                            Delete Supplementals and Run Simulation <i class="glyphicon glyphicon-play"></i></a>
-                        {% else %}
-                            <a href="/?loading_url=/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
-                            Run Simulation <i class="glyphicon glyphicon-play"></i></a>
-                        {% endif %}
+                        <a href="/?loading_url=/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
+                        Run Simulation <i class="glyphicon glyphicon-play"></i></a>
                     {% else %}
                         <a href="/setup/ValidateScenario/" class=" {{Simulation_ready|completed}}">
                         Validate Scenario <i class="glyphicon glyphicon-play"></i></a>
