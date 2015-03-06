@@ -817,13 +817,15 @@ EVT_test_result_event_to_string (EVT_test_result_event_t * event)
  * @return a pointer to a newly-created EVT_event_t structure.
  */
 EVT_event_t *
-EVT_new_request_to_initiate_vaccination_event (int day, char *trigger_name)
+EVT_new_request_to_initiate_vaccination_event (int day, guint trigger_id,
+                                               char *trigger_name)
 {
   EVT_event_t *event;
 
   event = g_new (EVT_event_t, 1);
   event->type = EVT_RequestToInitiateVaccination;
   event->u.request_to_initiate_vaccination.day = day;
+  event->u.request_to_initiate_vaccination.trigger_id = trigger_id;
   event->u.request_to_initiate_vaccination.trigger_name = trigger_name;
   return event;
 }
@@ -841,8 +843,8 @@ char *EVT_request_to_initiate_vaccination_event_to_string (EVT_request_to_initia
   GString *s;
 
   s = g_string_new (NULL);
-  g_string_sprintf (s, "<Request to initiate vaccination event day=%d triggered by %s>",
-                    event->day, event->trigger_name);
+  g_string_sprintf (s, "<Request to initiate vaccination event day=%d triggered by %s (#%u)>",
+                    event->day, event->trigger_name, event->trigger_id);
   /* don't return the wrapper object */
   return g_string_free (s, /* free_segment = */ FALSE);
 }

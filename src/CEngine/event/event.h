@@ -311,6 +311,7 @@ EVT_test_result_event_t;
 typedef struct
 {
   int day;
+  guint trigger_id;
   char *trigger_name;
 }
 EVT_request_to_initiate_vaccination_event_t;
@@ -614,6 +615,7 @@ EVT_event_t *EVT_new_test_result_event (UNT_unit_t *,
                                         gboolean correct,
                                         ADSM_control_reason);
 EVT_event_t *EVT_new_request_to_initiate_vaccination_event (int day,
+                                                            guint trigger_id,
                                                             char *trigger_name);
 EVT_event_t *EVT_new_request_for_vaccination_event (UNT_unit_t *,
                                                     int day,

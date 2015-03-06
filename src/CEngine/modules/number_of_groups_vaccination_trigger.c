@@ -146,7 +146,10 @@ handle_detection_event (struct adsm_module_t_ *self,
                    * program is currently active. To keep the trigger modules
                    * simple, it's the resources model's problem to ignore
                    * multiple/redundant requests to initiate vaccination. */
-                  EVT_event_enqueue (queue, EVT_new_request_to_initiate_vaccination_event (event->day, MODEL_NAME));
+                  EVT_event_enqueue (queue,
+                    EVT_new_request_to_initiate_vaccination_event (event->day,
+                                                                   local_data->trigger_id,
+                                                                   MODEL_NAME));
                   already_triggered = TRUE;
                 }      
             } /* end of "if this group has no detections yet" */

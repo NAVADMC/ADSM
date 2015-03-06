@@ -131,7 +131,10 @@ handle_detection_event (struct adsm_module_t_ *self,
                * program is currently active. To keep the trigger modules
                * simple, it's the resources model's problem to ignore multiple/
                * redundant requests to initiate vaccination. */
-              EVT_event_enqueue (queue, EVT_new_request_to_initiate_vaccination_event (event->day, MODEL_NAME));
+              EVT_event_enqueue (queue,
+                EVT_new_request_to_initiate_vaccination_event (event->day,
+                                                               local_data->trigger_id,
+                                                               MODEL_NAME));
             }
           else
             {
@@ -179,7 +182,10 @@ handle_new_day_event (struct adsm_module_t_ *self,
       #if DEBUG
         g_debug ("requesting initiation of vaccination program");
       #endif
-      EVT_event_enqueue (queue, EVT_new_request_to_initiate_vaccination_event (event->day, MODEL_NAME));
+      EVT_event_enqueue (queue,
+        EVT_new_request_to_initiate_vaccination_event (event->day,
+                                                       local_data->trigger_id,
+                                                       MODEL_NAME));
     }
 
   #if DEBUG

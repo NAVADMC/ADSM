@@ -245,7 +245,10 @@ handle_end_of_day_event (struct adsm_module_t_ *self,
         g_debug ("%u units have been waiting %u days, requesting initiation of vaccination program",
                  num_oldest_requests, local_data->num_days - 1);
       #endif
-      EVT_event_enqueue (queue, EVT_new_request_to_initiate_vaccination_event (event->day, MODEL_NAME));
+      EVT_event_enqueue (queue,
+        EVT_new_request_to_initiate_vaccination_event (event->day,
+                                                       local_data->trigger_id,
+                                                       MODEL_NAME));
     }
 
   #if DEBUG
