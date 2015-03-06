@@ -67,13 +67,13 @@ class M2mDSL(object):
     def get_bulk_production_types(self):
         row_selector = '.m2mtable > table > tbody > tr'
         source_selector = 'th:first-of-type span'
-        select_selector = 'td:first-of-type select'
+        select_selector = 'thead td:nth-child(3) select'
         rows = self.selenium.find_elements_by_css_selector(row_selector)
 
         production_types = []
         for row in rows:
             source = row.find_element_by_css_selector(source_selector)
-            select = Select(row.find_element_by_css_selector(select_selector))
+            select = Select(self.selenium.find_element_by_css_selector(select_selector))
             production_type = {}
             production_type['source'] = source.text
             production_type['disease'] = select.first_selected_option.text
@@ -251,7 +251,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         time.sleep(3) # may need to be adjusted for slow computers or if the file grows
 
         section = self.selenium.find_element_by_tag_name('section')
-        self.assertIn('Current Units:', section.text)
+        self.assertIn('Population File:', section.text)
 
     def test_upload_blank_population_file(self):
         self.selenium.find_element_by_tag_name('nav').find_element_by_link_text('Population').click()
@@ -290,19 +290,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         section = self.selenium.find_element_by_tag_name('section')
         self.assertIn('Load a Population', section.text)
 
-    def test_delete_unit(self):
-        population = Population.objects.create(source_file="ScenarioCreator/tests/population_fixtures/Population_Test_UTF8.xml")
-        old_count = Unit.objects.count()
-
-        self.click_navbar_element('Population')
-
-        self.selenium.find_element_by_id('id_form-0-DELETE').click()
-        self.selenium.find_element_by_id('submit-id-submit').click()
-        time.sleep(2)
-
-        self.assertEqual(old_count - 1, Unit.objects.count())
-
-    def test_assign_disease_spread_layout(self):
+    def old_test_assign_disease_spread_layout(self):
         self.setup_scenario()
 
         self.selenium.find_element_by_tag_name('nav') \
@@ -324,9 +312,9 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         # and selects
         selects = m2m_widget.find_elements_by_tag_name('select')
-        self.assertEqual(len(selects), 15)
+        self.assertEqual(len(selects), 3)
 
-    def test_assign_disease_spread_bulk_operator_default(self):
+    def old_test_assign_disease_spread_bulk_operator_default(self):
         """
             bulk operator applies disease spreads to interactions
             with the same production type for source and destination
@@ -349,7 +337,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             else:
                 self.assertEqual(interaction['disease'], u'---------')
 
-    def test_assign_disease_spread_bulk_operator_single_source_selected(self):
+    def old_test_assign_disease_spread_bulk_operator_single_source_selected(self):
         """
             bulk operator applies disease spreads to all interactions
             with the same source production type for source selected
@@ -372,7 +360,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             else:
                 self.assertEqual(interaction['disease'], u"---------")
 
-    def test_assign_disease_spread_bulk_operator_multiple_sources_selected(self):
+    def old_test_assign_disease_spread_bulk_operator_multiple_sources_selected(self):
         """
             bulk operator applies disease spreads to interactions
             with the same source production types for source selected
@@ -397,7 +385,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             else:
                 self.assertEqual(interaction['disease'], u"---------")
 
-    def test_assign_disease_spread_bulk_operator_multiple_sources_and_destinations_selected(self):
+    def old_test_assign_disease_spread_bulk_operator_multiple_sources_and_destinations_selected(self):
         """
             bulk operator applies disease spreads to interactions
             with the same source production types and destination types
@@ -432,7 +420,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             else:
                 self.assertEqual(interaction['disease'], u"---------")
 
-    def test_assign_disease_spread_select_all_button_source(self):
+    def old_test_assign_disease_spread_select_all_button_source(self):
         """
             clicking the select all button for sources in the m2m widget
             will cause all production types to be selected
@@ -445,7 +433,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         source_types = self.get_selected_production_types()
         self.assertEqual(len(source_types), 4)
 
-    def test_assign_disease_spread_select_all_button_destination(self):
+    def old_test_assign_disease_spread_select_all_button_destination(self):
         """
             clicking the select all button for destinations in the m2m widget
             will cause all production types to be selected
@@ -600,15 +588,16 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
     def test_save_scenario_failure(self):
         filename_field = self.selenium.find_element_by_css_selector('header form .filename input')
         try:
-            filename_field.send_keys('/\\ 123 AZ')
+            filename_field.send_keys('./\\ 123&% AZ')
             filename_field.submit()
             time.sleep(1)
 
-            alert = self.selenium.find_element_by_css_selector('.alert.alert-danger')
-            self.assertIn("Failed to save filename.", alert.text)
+            alert = self.selenium.find_element_by_css_selector('alert-danger')
+            
+            self.assertIn("ValueError", alert.text)
         finally:
             try:
-                os.remove(workspace_path('Untitled Scenario/\\ 123 AZ.sqlite3'))
+                os.remove(workspace_path('Untitled Scenario./\\ 123&% AZ.sqlite3'))
             except:
                 pass
 

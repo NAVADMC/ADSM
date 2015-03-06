@@ -6,21 +6,21 @@
     <h1>{{ title }}</h1>
 
     <h4>Upload a Scenario File (sqlite3)</h4>
-    <form id="file-upload" method="post" action="/app/Upload/" enctype="multipart/form-data">
-        <input type="file" id="file-input" name="file" accept="application/x-sqlite3">
-        <button type="submit" class="btn btn-primary">Upload Scenario &nbsp<img src="{{ STATIC_URL }}icons/upload.png" class="icon"></button>
-        <p class="help-block">You can upload a file from anywhere on your computer and it will be imported to the ADSM workspace.</p>
-    </form>
-    <h3> - Or - </h3>
+{#    <form id="file-upload" method="post" action="/app/Upload/" enctype="multipart/form-data">#}
+{#        <input type="file" id="file-input" name="file" accept="application/x-sqlite3">#}
+{#        <button type="submit" class="btn btn-primary">Upload Scenario &nbsp<img src="{{ STATIC_URL }}icons/upload.png" class="icon"></button>#}
+{#        <p class="help-block">You can upload a file from anywhere on your computer and it will be imported to the ADSM workspace.</p>#}
+{#    </form>#}
+    <p class="help-block">This is the ADSM Workspace folder where all of your scenarios are stored.  You can access this folder at: {{ workspace_path }}</p>
     <a href="/app/ImportScenario/" class="btn btn-default">Import NAADSM Legacy Scenario</a>
 
     <h3>Available Scenarios:</h3>
     <ul id="file_list">
         {% for file in db_files %}
             <li><a href="/?loading_url=/app/OpenScenario/{{ file }}/">{{ file }}</a>
-                <a href="#" class="delete-button ajax-post" data-delete-link="/app/DeleteFile/{{ file }}/"><img src="{{ STATIC_URL }}icons/delete.png" alt="Delete" class="icon pull-right"></a>
-                <a href="/app/Copy/{{ file }}/" ><img alt="Copy" src="{{ STATIC_URL }}icons/copy.png" class="icon pull-right btn-save"></a>
-                <a href="/app/Download/{{ file }}/" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
+                <a href="#" class="delete-button ajax-post" data-delete-link="/app/DeleteFile/{{ file }}/"><img src="{{ STATIC_URL }}icons/delete.png" alt="Delete" class="icon pull-right" title="Delete"></a>
+                <a href="/app/Copy/{{ file }}/" ><img alt="Copy" src="{{ STATIC_URL }}icons/copy.png" class="icon pull-right btn-save" title="Copy"></a>
+                {#<a href="/app/Download/{{ file }}/" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>#}
                 </li>
         {% endfor %}
     </ul>

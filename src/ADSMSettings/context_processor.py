@@ -1,7 +1,7 @@
 import re
 from ADSMSettings.models import scenario_filename, SmSession
 from ADSMSettings.models import unsaved_changes
-from ADSMSettings.utils import graceful_startup
+from ADSMSettings.utils import graceful_startup, workspace_path
 from ScenarioCreator.context_processor import git_adsm_sha
 
 
@@ -16,6 +16,7 @@ def adsm_context(request):
                    'url': request.path,
                    'active_link': '/'.join(re.split('\W+', request.path)[2:]),
                    'dev_version': git_adsm_sha(),
+                   'workspace_path': workspace_path(),
         }
 
     return context

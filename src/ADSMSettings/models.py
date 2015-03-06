@@ -1,3 +1,4 @@
+import re
 from django.db import models
 
 
@@ -38,6 +39,7 @@ class SmSession(models.Model):
     update_on_startup = models.BooleanField(default=False, help_text='The user has requested to install the update.')
     population_upload_status = models.CharField(default='', null=True, blank=True, max_length=255)
     population_upload_percent = models.FloatField(default=0)
+    simulation_has_started = models.BooleanField(default=False)
 
     def set_population_upload_status(self, status=None, percent=None):
         if status:
@@ -70,7 +72,10 @@ def unsaved_changes(new_value=None):
 def scenario_filename(new_value=None):
     session = SmSession.objects.get()  # This keeps track of the state for all views and is used by basic_context
     if new_value:
-        session.scenario_filename = new_value.replace('.sqlite3', '')
+        new_value = new_value.replace('.sqlite3', '')
+        if re.search(r'[^\w\d \\/_\(\)]', new_value):  # negative set, list of allowed characters
+            raise ValueError("Special characters are not allowed: " + new_value)
+        session.scenario_filename = new_value
         session.save()
     return session.scenario_filename
 
