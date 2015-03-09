@@ -79,7 +79,9 @@ a.wiki, a.wiki:visited {
 section .icon{
     max-height: 16px;
 }
-
+/*-------------------------------------------------------------*/
+/*-----header-----*/
+/*-------------------------------------------------------------*/
 header {
     position: fixed;
     z-index: 100;
@@ -250,7 +252,90 @@ body>section {
 ul {
     padding-left: 5px; /*prevent style inheritance from above*/
 }
+/*-------------------------------------------------------------*/
+/*-----toolbar-----*/
+/*-------------------------------------------------------------*/
+#toolbar {
+    position: absolute;
+    top: 55px;
+    right: 0px;
+}
+.TB_btn {
+    width: 50px;
+    height: 50px;
+    display: block;
+    opacity: .5;
+    background-repeat: no-repeat;
+    transition: opacity .2s ease;
+    position: relative;
+}
+.TB_btn:hover {
+    opacity: 1;
+}
+.TB_btn.active {
+    background-color: transparent;
+    box-sizing: border-box;
+    outline: 0;
+    opacity: 1;
+    box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
+    border-bottom: 1px solid #cec7c0;
+    border-top: 1px solid #cec7c0;
+    transition: background-position-x .05s ease;
+}
+.TB_btn.active:before {
+    content: "";
+    width: 20px;
+    height: 48px;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0)), color-stop(10%,rgba(255,255,255,1)), color-stop(90%,rgba(255,255,255,1)), color-stop(100%,rgba(255,255,255,0.2)));
+    position: absolute;
+    top: 0;
+    left: -10px;
+}
+.TB_btn.active:after {
+    content: "";
+    position: absolute;
+    display: block;
+    top: 8px;
+    height: 34px;
+    width: 50px;
+    border-left: 1px solid #cdc7c0;
+    border-top: 17px solid rgba (0, 0, 0, 0);
+    border-bottom: 17px solid rgba (0, 0, 0, 0);
+    opacity: .5;
+}
+.TB_btn.active:hover {
+    background-position-x: 5px;
+}
 
+.TB_btn.active:hover::after {
+    border-left: 10px solid #707070;
+    border-top: 17px solid transparent;
+    border-bottom: 17px solid transparent;
+    opacity: 1;
+}
+.TB_btn.disabled {
+    opacity: .25;
+    cursor: default;
+}
+.TB_btn.disabled:hover {
+    cursor: default;
+    opacity: 0.25;
+}
+#TB_file {
+    background-image: url("../icons/TB_file_btn.png");
+}
+#TB_settings {
+    background-image: url("../icons/TB_settings_btn.png");
+}
+#TB_population {
+    background-image: url("../icons/TB_population_btn.png");
+}
+#TB_functions {
+    background-image: url("../icons/TB_function_btn.png");
+}
+/*-------------------------------------------------------------*/
+/*-----navigation menu-----*/
+/*-------------------------------------------------------------*/
 #setupMenu {
     list-style: none;
     padding-left: 0;
@@ -434,7 +519,9 @@ ul {
 #RunSimulationRes a:before {
     display:none;
 }
-
+/*-------------------------------------------------------------*/
+/*-----blocking overlay-----*/
+/*-------------------------------------------------------------*/
 .blocking-overlay {
     display:none;
     position: fixed;
@@ -457,7 +544,9 @@ ul {
     height: 30px;
     margin-left:-14px;
 }
-
+/*-------------------------------------------------------------*/
+/*-----button stuff-----*/
+/*-------------------------------------------------------------*/
 .btn {
     font-style: italic;
     margin: 3px 1px 0px 1px;
@@ -897,12 +986,13 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     top:55px;
     margin-right: 50px;
     max-width: 460px;
+    min-height: 200px;
     -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
     border: 1px solid #cec7c0;
     padding: 0 15px 15px 15px; 
     overflow: scroll;
     max-height: calc(100vh - 120px);
-    display: none;
+    background-color: white;
 }
 #population_panel h2 {
     margin-top: 12px;
