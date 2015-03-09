@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ScenarioCreator', '0004_controlmasterplan_vaccinate_retrospective_days'),
+        ('ScenarioCreator', '0005_controlmasterplan_vaccinate_retrospective_days'),
     ]
 
     operations = [

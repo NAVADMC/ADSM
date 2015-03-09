@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ScenarioCreator', '0005_vacc_triggers_initial'),
+        ('ScenarioCreator', '0006_vacc_triggers_initial'),
     ]
 
     operations = [

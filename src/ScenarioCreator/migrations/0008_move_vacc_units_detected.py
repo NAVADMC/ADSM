@@ -26,7 +26,7 @@ def backwards(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ScenarioCreator', '0006_productiongroup_name'),
+        ('ScenarioCreator', '0007_productiongroup_name'),
     ]
 
     operations = [
