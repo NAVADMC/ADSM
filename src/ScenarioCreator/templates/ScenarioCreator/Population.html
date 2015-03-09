@@ -27,18 +27,22 @@
     </div>
 
 {% else %}
+    <div id="edit-mask"></div>
     <h1>Current {{"Units"|wiki:"unit"}}:</h1>
     <img src="/results/Population.png" alt="Unit Locations"/>
     <p></p>
+    <div id="population_grid_wraper">
+        
+        <form method="post">
+            <div id="farm_list_container">
+            <div id="farm_list">  {#So it can be targetted by CSS #}
+                {% include "ScenarioCreator/PopulationFormset.html" %}
+            </div></div>
+            {% include "ScenarioCreator/EditButtons.html" %}
+        </form>
 
-    {% include "ScenarioCreator/PopulationFilters.html" %}
-
-    <form method="post">
-        <div id="farm_list_container">
-        <div id="farm_list">  {#So it can be targetted by CSS #}
-            {% include "ScenarioCreator/PopulationFormset.html" %}
-        </div></div>
-        {% include "ScenarioCreator/EditButtons.html" %}
-    </form>
+        {% include "ScenarioCreator/PopulationFilters.html" %}
+        
+    </div>
 {% endif %}
 {% endblock %}
