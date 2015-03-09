@@ -1,4 +1,5 @@
 {# Similar to EmbeddedFormset but includes links for sorting by column #}
+    {% load cycle from future%}
     {{ formset.non_form_errors.as_ul }}
     {{ formset.management_form }}
     <table id="formset" class="form">

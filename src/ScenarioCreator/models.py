@@ -141,10 +141,10 @@ class Population(InputSingleton):
         session.set_population_upload_status("Parsing")
         try:
             p = ScenarioCreator.population_parser.PopulationParser(self.source_file)
+            data = p.parse_to_dictionary()
         except BaseException as error:
             self.delete()
             raise error
-        data = p.parse_to_dictionary()
         session.set_population_upload_status("Creating objects")
         total = len(data)
 
@@ -180,7 +180,7 @@ class Unit(BaseModel):
                ('N', 'Naturally Immune'),
                ('V', 'Vaccine Immune'),
                ('D', 'Destroyed'))
-    initial_state = models.CharField(max_length=255, default='S',
+    initial_state = models.CharField(max_length=1, default='S',
                                      help_text='Code indicating the actual disease state of the ' + wiki("Unit") + ' at the beginning of the simulation.',
                                      choices=initial_state_choices)
     days_in_initial_state = models.IntegerField(blank=True, null=True,
@@ -189,7 +189,7 @@ class Unit(BaseModel):
         help_text='Used for setting up scripted scenarios.', )
     initial_size = models.PositiveIntegerField(validators=[MinValueValidator(1)],
         help_text='The number of animals in the ' + wiki("Unit") + '.', )
-    user_notes = models.TextField(blank=True)
+    user_notes = models.CharField(max_length=255, blank=True, null=True)  # as long as possible
 
     @classmethod
     def create(cls, **kwargs):
@@ -650,13 +650,16 @@ class ProductionType(BaseModel):
     description = models.TextField(blank=True, null=True)
 
     def clean_fields(self, exclude=None):
-        if re.findall(r'\W', self.name) or self.name.lower() in sqlite_keywords + 'All Ind Dir Air'.split():
-            print("Conflicts:", re.findall(r'\W', self.name))
-            raise ValidationError(self.name + " must only have alpha-numeric characters.  Keywords not allowed.")
-        if re.match(r'[0-9]', self.name[0]):
-            raise ValidationError(self.name + " cannot start with a number.")
-        if self.name in [z.name for z in Zone.objects.all()]:  # forbid zone names
-            raise ValidationError("You really shouldn't have matching Zone and Production Type names.  It makes the output confusing.")
+        footer = "  Please rename the Production Type before proceeding."
+        if re.search(r'[,\'"\\]', self.name):
+            raise ValidationError(self.name + " CSV special characters not allowed." + footer)
+        if self.name.lower() in sqlite_keywords + 'All Ind Dir Air'.split():
+            print("Conflicts:", [w for w in sqlite_keywords if w in self.name])
+            raise ValidationError(self.name + " Sqlite keywords not allowed." + footer)
+        # if re.match(r'[0-9]', self.name[0]):
+        #     raise ValidationError(self.name + " cannot start with a number.")
+        if self.name in [z for z in Zone.objects.all().values_list('name', flat=True)]:  # forbid zone names
+            raise ValidationError("You really shouldn't have matching Zone and Production Type names.  It makes the output confusing." + footer)
 
     def __str__(self):
         return self.name

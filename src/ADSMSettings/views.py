@@ -2,7 +2,9 @@ import re
 import os
 import shutil
 from django.db import close_old_connections
+from django.http import JsonResponse
 from django.shortcuts import redirect, render, HttpResponse
+from django.utils.html import strip_tags
 from ADSMSettings.models import scenario_filename, SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
@@ -105,28 +107,29 @@ def open_test_scenario(request, target):
 def save_scenario(request=None):
     """Save to the existing session of a new file name if target is provided
     """
-    try:
-        target = request.POST['filename']
-        scenario_filename(target)
-    except:
+    if request is not None and 'filename' in request.POST:
+        target = request.POST['filename'] 
+    else:
         target = scenario_filename()
-    print('Copying database to', target)
-    full_path = workspace_path(target) + ('.sqlite3' if not target.endswith('.sqlite3') else '')
-    save_error = None
     try:
-        assert(r'\\' not in target and '/' not in target)
+        target = strip_tags(target)
+        if '\\' in target or '/' in target:  # this validation has to be outside of scenario_filename in order for open_test_scenario to work
+            raise ValueError("Slashes are not allowed: " + target)
+        scenario_filename(target)
+        print('Copying database to', target)
+        full_path = workspace_path(target) + ('.sqlite3' if not target.endswith('.sqlite3') else '')
+
         shutil.copy(db_path(), full_path)
         unsaved_changes(False)  # File is now in sync
         print('Done Copying database to', full_path)
-    except (IOError, AssertionError):
-        save_error = 'Failed to save filename.'
-        print('Encountered an error while copying file', full_path)
+        json_message = {"status": "success"}
+
+    except (ValueError, IOError, AssertionError) as error:
+        print(error)
+        json_message = {"status": "failed", "message": str(error)} 
+
     if request is not None and request.is_ajax():
-        if save_error:
-            json_response = '{"status": "failed", "message": "%s"}' % save_error
-        else:
-            json_response = '{"status": "success"}'
-        return HttpResponse(json_response, content_type="application/json")
+        return JsonResponse(json_message, )
     else:
         return redirect('/setup/Scenario/1/')
 

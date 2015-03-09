@@ -14,6 +14,9 @@ import sys
 
 if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(sys.executable)
+    if BASE_DIR.endswith('bin'):
+        BASE_DIR = os.path.dirname(BASE_DIR)
+    BASE_DIR = os.path.join(BASE_DIR, 'src')
 else:
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -53,6 +56,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.humanize',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',

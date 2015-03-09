@@ -1,9 +1,8 @@
 import csv
 import os
 import subprocess
-import json
 import itertools
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
 from django.db.models import Q, ObjectDoesNotExist
@@ -13,9 +12,11 @@ from Results.models import *  # This is absolutely necessary for dynamic form lo
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from ADSMSettings.models import unsaved_changes
 from ADSMSettings.utils import graceful_startup, file_list, handle_file_upload, workspace_path, adsm_executable_command
+from ScenarioCreator.population_parser import lowercase_header
 
 
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
+
 singletons = ['Scenario', 'Population', 'Disease', 'ControlMasterPlan', 'OutputSettings']
 abstract_models = {
     'Function':
@@ -50,6 +51,11 @@ def add_breadcrumb_context(context, model_name, primary_key=None):
 
 def home(request):
     return redirect('/setup/Scenario/1/')
+
+
+def production_type_list_json(request):
+    msg = list(ProductionType.objects.values_list('name', 'id'))
+    return JsonResponse(msg, safe=False)  # necessary to serialize a list object
 
 
 def initialize_spread_assignments():
@@ -195,7 +201,7 @@ def deepcopy_points(request, primary_key, created_instance):
 def initialize_points_from_csv(request):
     file_path = handle_file_upload(request)
     with open(file_path) as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.read(1024))
+        dialect = csv.Sniffer().sniff(csvfile.read(1024))  # is this necessary?
         csvfile.seek(0)
         header = csv.Sniffer().has_header(csvfile.read(1024))
         csvfile.seek(0)
@@ -203,8 +209,7 @@ def initialize_points_from_csv(request):
             header = None  #DictReader will pull it off the first line
         else:
             header = ['x', 'y']
-        reader = csv.DictReader(csvfile, fieldnames=header, dialect=dialect)
-        #TODO: lower case the user provided header
+        reader = csv.DictReader(lowercase_header(csvfile), fieldnames=header, dialect=dialect)
         entries = [line for line in reader]  # ordered list
         initial_values = {}
         for index, point in enumerate(entries):
@@ -259,7 +264,7 @@ def ajax_success(model_instance, model_name):
            'title': spaces_for_camel_case(str(model_instance)),
            'model': model_name,
            'status': 'success'}
-    return HttpResponse(json.dumps(msg), content_type="application/json")
+    return JsonResponse(msg)
 
 
 def save_new_instance(initialized_form, request):
@@ -400,19 +405,20 @@ def upload_population(request):
     from xml.etree.ElementTree import ParseError
     session = SmSession.objects.get()
     if 'GET' in request.method:
-        json_response = '{"status": "%s", "percent": "%s"}' % (session.population_upload_status, session.population_upload_percent*100)
-        return HttpResponse(json_response, content_type="application/json")
+        json_response = {"status": session.population_upload_status, "percent": session.population_upload_percent*100} 
+        return JsonResponse(json_response)
 
     session.set_population_upload_status("Processing file")
     file_path = workspace_path(request.POST.get('filename')) if 'filename' in request.POST else handle_file_upload(request)
-    model = Population(source_file=file_path)
     try:
+        model = Population(source_file=file_path)
         model.save()
-    except (EOFError, ParseError) as e:
-        return HttpResponse('{"status": "failed", "message": "%s"}' % e, content_type="application/json")
+    except (EOFError, ParseError) as error:
+        session.set_population_upload_status(status='Failed: %s' % error)
+        return JsonResponse({"status": "failed", "message": str(error)})  # make sure to cast errors to string first
     # wait for Population parsing (up to 5 minutes)
     session.reset_population_upload_status()
-    return HttpResponse('{"status": "complete", "redirect": "/setup/Populations/"}', content_type="application/json")
+    return JsonResponse({"status": "complete", "redirect": "/setup/Populations/"})
    
 
 def filtering_params(request):
@@ -443,7 +449,7 @@ def filter_info(request, params):
 def population(request):
     """"See also Pagination https://docs.djangoproject.com/en/dev/topics/pagination/"""
     context = {}
-    FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated, can_delete=True)
+    FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated, can_delete=False)
     if save_formset_succeeded(FarmSet, Unit, context, request):
         return redirect(request.path)
     if Population.objects.filter(id=1).exists():
@@ -456,25 +462,10 @@ def population(request):
         context['formset'] = initialized_formset
         context['filter_info'] = filter_info(request, params)
         context['deletable'] = '/setup/Population/1/delete/'
+        context['population_file'] = os.path.basename(Population.objects.get().source_file)
     else:
-        context['xml_files'] = file_list(".xml")
+        context['xml_files'] = file_list([".xml", ".csv"])
     return render(request, 'ScenarioCreator/Population.html', context)
-
-
-def whole_scenario_validation():
-    fatal_errors = []
-    for pt in ProductionType.objects.all():
-        count = DiseaseProgressionAssignment.objects.filter(production_type=pt, progression__isnull=False).count()
-        if not count:
-            fatal_errors.append(pt.name + " has no Disease Progression assigned and so is a non-participant in the simulation.")
-        count = DiseaseSpreadAssignment.objects.filter(source_production_type=pt, 
-                                                              destination_production_type=pt,
-                                                              direct_contact_spread__isnull=False).count()
-        if not count:
-            fatal_errors.append(pt.name + " cannot spread disease from one animal to another, because Direct Spread %s -> %s has not been assigned." % (pt.name, pt.name))
-    if not Disease.objects.get_or_create()[0].include_direct_contact_spread:
-        fatal_errors.append("Direct Spread is not enabled in this Simulation.")
-    return fatal_errors
 
 
 def validate_scenario(request):
@@ -484,10 +475,8 @@ def validate_scenario(request):
                                   stderr=subprocess.PIPE)
     stdout, stderr = simulation.communicate()  # still running while we work on python validation
     
-    fatal_errors = whole_scenario_validation()
     simulation.wait()  # simulation will process db then exit
-    print("Return code", simulation.returncode)
+    print("C Engine Exit Code:", simulation.returncode)
     context = {'dry_run_passed': simulation.returncode == 0 and not stderr,
-               'sim_output': stdout + stderr,
-               'fatal_errors': fatal_errors}
+               'sim_output': stdout.decode() + stderr.decode(),}
     return render(request, 'ScenarioCreator/Validation.html', context)

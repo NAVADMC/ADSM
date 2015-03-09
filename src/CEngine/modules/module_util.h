@@ -21,9 +21,12 @@
 
 #include "module.h"
 
+#define ADSM_MODULE_ERROR adsm_module_error_quark()
+
 
 
 /* Prototypes. */
+GQuark adsm_module_error_quark (void);
 guint adsm_read_prodtype (char *, GPtrArray *);
 guint adsm_read_zone (char *, ZON_zone_list_t *);
 void adsm_extend_rotating_array (GPtrArray * array, unsigned int length, unsigned int index);

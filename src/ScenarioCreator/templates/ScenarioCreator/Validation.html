@@ -9,29 +9,25 @@
         <h2>The simulation will successfully load with the current settings.  You may proceed...</h2>
     {% endif %}
         <p>Simulation output:</p>
-        <ul>
-            {% for line in sim_output %}
-                <li>{{line}}</li>
-            {% endfor %}
-        </ul>
-{% if fatal_errors %}
-<h3>Fatal Errors:</h3>
+        <p>{{ sim_output }}</p>
+        <span></span>
+{% if whole_scenario_warnings %}
+<h2>Whole Scenario Validation Warnings:</h2>
     <ul>
-        {% for line in fatal_errors %}
+        {% for line in whole_scenario_warnings %}
             <li>{{line}}</li>
         {% endfor %}
     </ul>
 {% endif %}
     
-<h3>Warnings: Missing forms</h3>
+{% if missing_values %}
+    <h2>Warnings: Missing forms</h2>
     <p>The following either don't exist or have missing assignments:</p>
     <ul class="validation-checklist">
-        {% for name, ready in relevant_keys.items %}
-            {% if not ready %}
-                <li>{{ name }}</li>
-            {% endif %}
+        {% for name in missing_values.keys %}
+            <li>{{ name }}</li>
         {% endfor %}
     </ul>
-
+{% endif %}
 
 {% endblock %}

@@ -1,17 +1,23 @@
+import math
 import matplotlib
+import numpy
+
 matplotlib.use('Agg')  # Force matplotlib to not use any Xwindows backend.
 from matplotlib import rc
 rc("figure", facecolor="white")
 
+from time import time
 from matplotlib import gridspec
 from itertools import chain
 from django.http import HttpResponse
-from django.db.models import Max
+from django.db.models import Max, Min
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.colors import LogNorm
+from matplotlib.colors import LogNorm, ListedColormap
 from matplotlib.colorbar import ColorbarBase
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib import cm
 
 from ScenarioCreator.models import Zone, ProductionType, Unit
 from Results.summary import list_of_iterations
@@ -20,7 +26,7 @@ from Results.models import DailyControls, DailyByProductionType, DailyByZone, Da
 
 def HttpFigure(fig):
     response = HttpResponse(content_type='image/png')
-    FigureCanvas(fig).print_png(response)
+    FigureCanvas(fig).print_png(response, bbox_inches='tight')
     plt.close(fig)
     return response
 
@@ -79,11 +85,29 @@ def construct_title(field_name, iteration, model, zone=''):
     return explanation, title
 
 
+
+
 def population_png(request, width_inches=8.5, height_inches=8):
-    latlong = [(u.latitude, u.longitude) for u in Unit.objects.all()]
-    df = pd.DataFrame.from_records(latlong, columns=['Latitude', 'Longitude'])
-    axis = df.plot('Longitude', 'Latitude', kind='scatter', color='black', s=0.25, figsize=(width_inches, height_inches))
-    return HttpFigure(axis.figure)
+    start_time = time()
+    qualitative_colors = ListedColormap(['#1f78b4', '#33a02c','#e31a1c', '#ff7f00','#6a3d9a', '#b15928'])
+    latlong = [(u.latitude, u.longitude, u.production_type_id) for u in Unit.objects.all()]
+    longitude, latitude, pts = zip(*latlong)
+    fig = Figure(figsize=(width_inches, height_inches), frameon=True, tight_layout=True)  # Issue #168 aspect ratio doesn't adjust currently
+    ax = fig.add_subplot(1, 1, 1, axisbg='#FFFFFF')
+    max_pt = ProductionType.objects.count()
+    colors = [pt/max_pt for pt in pts]
+    size = 3000 / math.sqrt(len(longitude))
+    ax.scatter(latitude,
+               longitude,
+               marker='s',
+               linewidths=0,
+               cmap=qualitative_colors,
+               s=size,
+               c=colors,)
+    ax.set_ylim(Unit.objects.all().aggregate(Min('latitude'))['latitude__min'], Unit.objects.all().aggregate(Max('latitude'))['latitude__max'])
+    ax.set_xlim(Unit.objects.all().aggregate(Min('longitude'))['longitude__min'], Unit.objects.all().aggregate(Max('longitude'))['longitude__max'])
+    print("Population Map took %i seconds" % int(time() - start_time))
+    return HttpFigure(fig)
 
 
 def breakdown_dictionary(iterate_pt, iterate_zone):
