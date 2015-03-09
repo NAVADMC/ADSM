@@ -2,6 +2,7 @@
 {% load floppyforms %}
 {% load crispy_forms_tags  %}
 {% load db_status_tags %}
+{% load humanize %}
 
 {% block content %}
     <script type="text/javascript" src="{{ STATIC_URL }}js/population.js"></script>
@@ -9,10 +10,10 @@
 {% if not Population %}
     <h1 id="title">Load a Population</h1>
     <div id="load_population_widget">
-        <form id="file-upload" method="post" action="/setup/UploadPopulation/" enctype="multipart/form-data">
-            <input type="file" name="file" accept="application/xml">
-            <button type="submit" class="btn btn-primary">Upload a Population &nbsp;<img src="{{ STATIC_URL }}icons/upload.png" class="icon"></button>
-            <p class="help-block">You can upload a file from anywhere on your computer and it will be imported to the ADSM workspace.</p>
+        <form id="pop-upload" method="post" action="/setup/UploadPopulation/" enctype="multipart/form-data">
+            <input type="file" name="file" accept="application/xml text/csv">
+            <button type="submit" class="btn btn-primary">Import a Population (XML or CSV)&nbsp;<img src="{{ STATIC_URL }}icons/upload.png" class="icon"></button>
+            <p class="help-block">You can import a file from anywhere on your computer and it will be added to the ADSM workspace.</p>
         </form>
 
         <h3>Available Population Files:</h3>
@@ -27,7 +28,7 @@
     </div>
 
 {% else %}
-    <h1>Current {{"Units"|wiki:"unit"}}:</h1>
+    <h1><strong>Population File:</strong> {{ population_file }} ({{ Farms|intcomma }} units)</h1>
     <img src="/results/Population.png" alt="Unit Locations"/>
     <p></p>
 

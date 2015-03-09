@@ -16,9 +16,9 @@ from ADSMSettings.models import SmSession, scenario_filename
 
 if os.name == "nt":
     try:
-        from win32com.shell import shell, shellcon
-    except ImportError:  # already checking for failure case down below
-        pass
+        import ctypes.wintypes
+    except:
+        pass  # We are already handling the exception case below
 
 
 def db_path(name='scenario_db'):
@@ -29,7 +29,11 @@ def workspace_path(target=None):
     home = None
     if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.
         try:
-            home = shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
+            CSIDL_PERSONAL = 5
+            SHGFP_TYPE_CURRENT = 0
+            buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+            ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_PERSONAL, 0, SHGFP_TYPE_CURRENT, buf)
+            home = buf.value
         except:
             home = None
     if not home:
@@ -45,8 +49,11 @@ def workspace_path(target=None):
     return path  # shlex.quote(path) if you want security
 
 
-def file_list(extension=''):
-    db_files = sorted(glob(workspace_path("*" + extension)), key=lambda s: s.lower())  # alphabetical, no case
+def file_list(extensions=[]):
+    if isinstance(extensions, str):
+        extensions = [extensions]  # container around a string
+    files = [glob(workspace_path("*" + ext)) for ext in extensions]
+    db_files = sorted(chain(*files), key=lambda s: s.lower())  # alphabetical, no case
     return map(lambda f: os.path.basename(f), db_files)  # remove directory and extension
 
 
@@ -87,12 +94,19 @@ def graceful_startup():
         print("Creating User Directory...")
         os.makedirs(os.path.dirname(workspace_path()), exist_ok=True)
 
-    for dirpath, dirnames, files in os.walk(os.path.join(os.path.dirname(settings.BASE_DIR), "Sample Scenarios")):
+    samples_dir = os.path.join(os.path.dirname(settings.BASE_DIR), "Sample Scenarios")
+    for dirpath, dirnames, files in os.walk(samples_dir):
+        subdir = str(dirpath).replace(samples_dir, '')
+        if subdir.startswith(os.path.sep):
+            subdir = subdir.replace(os.path.sep, '', 1)
+        if subdir.strip():
+            if not os.path.join(workspace_path(), subdir):
+                os.makedirs(os.path.join(workspace_path(), subdir))
         for file in files:
             try:
-                shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), file))
-            except:
-                pass
+                shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), subdir, file))
+            except Exception as e:
+                print(e)
 
     try:
         x = SmSession.objects.get().scenario_filename  # this should be in the initial migration

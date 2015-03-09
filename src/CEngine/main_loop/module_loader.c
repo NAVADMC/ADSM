@@ -20,6 +20,7 @@
 #endif
 
 #include "module_loader.h"
+#include "module_util.h"
 #include "gis.h"
 #include "reporting.h"
 
@@ -349,7 +350,7 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
 
   if (instantiation_failures)
     {
-      g_set_error (error, g_quark_from_string(G_LOG_DOMAIN), 0,
+      g_set_error (error, ADSM_MODULE_ERROR, 0,
                    "One or more modules could not be initialized");
     }
 

@@ -14,14 +14,21 @@ import sys
 
 if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(sys.executable)
+    if BASE_DIR.endswith('bin'):
+        BASE_DIR = os.path.dirname(BASE_DIR)
+    BASE_DIR = os.path.join(BASE_DIR, 'src')
 else:
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 DB_BASE_DIR = None
 if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.
     try:
-        from win32com.shell import shell, shellcon
-        DB_BASE_DIR = os.path.join(shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0), "ADSM Workspace", "settings")
+        import ctypes.wintypes
+        CSIDL_PERSONAL = 5
+        SHGFP_TYPE_CURRENT = 0
+        buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+        ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_PERSONAL, 0, SHGFP_TYPE_CURRENT, buf)
+        DB_BASE_DIR = os.path.join(buf.value, "ADSM Workspace", "settings")
     except:
         DB_BASE_DIR = None
 if not DB_BASE_DIR:
@@ -49,6 +56,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.humanize',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',

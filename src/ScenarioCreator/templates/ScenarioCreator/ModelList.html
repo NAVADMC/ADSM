@@ -21,7 +21,7 @@
                             {% if not 'Function' in  model.name %}
                                 <a href="#" class="delete-button" data-delete-link="/setup/{{model.class}}/{{entry.pk}}/delete/"><img src="{{ STATIC_URL }}icons/delete.png" alt="Delete" class="icon pull-right"></a>
                             {% endif %}
-                            <a href="/setup/{{model.class}}/{{entry.pk}}/copy/" ><img alt="Copy" src="{{ STATIC_URL }}icons/copy.png" class="icon pull-right"></a>
+                            <a href="/setup/{{model.class}}/{{entry.pk}}/copy/" ><img alt="Copy" src="{{ STATIC_URL }}icons/copy.png" class="icon pull-right" title="Copy"></a>
                             </li>
                     {% endfor %}
 

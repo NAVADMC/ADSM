@@ -140,10 +140,10 @@ class Population(InputSingleton):
         session.set_population_upload_status("Parsing")
         try:
             p = ScenarioCreator.population_parser.PopulationParser(self.source_file)
+            data = p.parse_to_dictionary()
         except BaseException as error:
             self.delete()
             raise error
-        data = p.parse_to_dictionary()
         session.set_population_upload_status("Creating objects")
         total = len(data)
 
@@ -179,7 +179,7 @@ class Unit(BaseModel):
                ('N', 'Naturally Immune'),
                ('V', 'Vaccine Immune'),
                ('D', 'Destroyed'))
-    initial_state = models.CharField(max_length=255, default='S',
+    initial_state = models.CharField(max_length=1, default='S',
                                      help_text='Code indicating the actual disease state of the ' + wiki("Unit") + ' at the beginning of the simulation.',
                                      choices=initial_state_choices)
     days_in_initial_state = models.IntegerField(blank=True, null=True,
@@ -188,7 +188,7 @@ class Unit(BaseModel):
         help_text='Used for setting up scripted scenarios.', )
     initial_size = models.PositiveIntegerField(validators=[MinValueValidator(1)],
         help_text='The number of animals in the ' + wiki("Unit") + '.', )
-    user_notes = models.TextField(blank=True)
+    user_notes = models.CharField(max_length=255, blank=True, null=True)  # as long as possible
 
     @classmethod
     def create(cls, **kwargs):

@@ -3,25 +3,29 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/mapbox.css" />
-    <script type="text/javascript" src="{{ STATIC_URL }}js/mousewheel.js"></script> 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/mapbox.js"></script> 
-    <div class="mapwrapper">
-        <div id="viewport" style="background: url({{ STATIC_URL }}working.gif) no-repeat center;height: 800px; width: 923px;">
-            <div style="background: url(/results/population_thumbnail.png) no-repeat center;height: 800px; width: 923px;">
-                <!--top level map content goes here-->
-            </div>
-            <div style="height: 2080px; width: 2400px;">
-                <img src="/results/population_zoom.png" alt="" />
-                <div class="mapcontent"></div>
+    {% if is_simulation_stopped %}
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/mapbox.css" />
+        <script type="text/javascript" src="{{ STATIC_URL }}js/mousewheel.js"></script> 
+        <script type="text/javascript" src="{{ STATIC_URL }}js/mapbox.js"></script> 
+        <div class="mapwrapper">
+            <div id="viewport" style="background: url({{ STATIC_URL }}working.gif) no-repeat center;height: 800px; width: 923px;">
+                <div style="background: url(/results/population_thumbnail.png) no-repeat center;height: 800px; width: 923px;">
+                    <!--top level map content goes here-->
+                </div>
+                <div style="height: 2080px; width: 2400px;">
+                    <img src="/results/population_zoom.png" alt="" />
+                    <div class="mapcontent"></div>
+                </div> 
+                <div style="height: 4160px; width: 4800px;"> 
+                    <img src="/results/population_zoom.png" alt="" />
+                    <div class="mapcontent"></div>
+                </div>
             </div> 
-            <div style="height: 4160px; width: 4800px;"> 
-                <img src="/results/population_zoom.png" alt="" />
-                <div class="mapcontent"></div>
-            </div>
         </div> 
     </div> 
-    <div id="legend"><p>Red = Infected, Green = Vaccinated, Black = Destroyed.  Zone probability shown from 100% (Dark Blue) to >1% (White).
+    <div id="legend"><p>Red = Infected, Green = Vaccinated, Black = Destroyed.  
+    The height of each tiny bar graph is the percentage of iterations in which that unit was Infected, Vaccinated, or Destroyed.  
+    Zone probability shown from 100% (Dark Blue) to >1% (White).
     Uninvolved Units are shown in grey, scaled by Unit size.</p></div>
     <script type="text/javascript"> 
         $(document).ready(function() { 
@@ -38,10 +42,35 @@
             <span class="simulation-status status-text"></span>
             <div class="simulation-progress progress-bar {% if results_progress == 100 %} done{% endif %}" style="width:{{ results_progress|floatformat:"0" }}%"></div>
         </div>
-    </div>
+    {% endif %}
+    
+    {% if is_simulation_stopped %}
+        <div id="sim_progress_and_button">
+            <div class="progress">
+                <span class="simulation-status status-text">Simulation complete.  {{ iterations_completed }} iterations.</span>
+                <div class="simulation-progress progress-bar done" style="width: 100%;"></div>
+            </div>
+        </div>
+    {% else %}
+        <div id="sim_progress_and_button">
+            {% if is_simulation_stopped or not simulation_has_started %}
+                <a href="/results/abort_simulation" class="btn">Abort</a>
+            {% endif %}
+            <div class="progress">
+                <span class="simulation-status status-text"></span>
+                <div class="simulation-progress progress-bar {% if results_progress == 100 %} done{% endif %}" style="width:{{ results_progress|floatformat:"0" }}%"></div>
+            </div>
+        </div>
+        <script src="{{ STATIC_URL }}js/results-status.js"></script>  {# Javascript to refresh the progress bar #}
+        
+    {% endif %}
 
     <p>Version: {{ version_number }}</p>
 
+    {% if not is_simulation_stopped %}
+        <a href="/results/">Recalculate Summary Statistics</a>
+    {% endif %}
+    
     <div id="summaryData">
     {% include "Results/Summary.html" %}
     </div>

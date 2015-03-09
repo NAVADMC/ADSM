@@ -8,7 +8,7 @@ var progressBar = (function(){
         $.get('/setup/UploadPopulation/', function(data){
             var newWidth;
             if (data.percent <= 0) {
-                newWidth = progressBar.width() < 100 ? progressBar.width()+2 : null;
+                newWidth = 10
                 setStatus(data.status, newWidth);
             } else if (data.percent >= 100) {
                 newWidth = progressBar.width() < 500 ? progressBar.width()+1 : null;
@@ -60,14 +60,19 @@ $(function(){
 
     $(document).on('click','.ajax-post', function(e) {
         e.preventDefault();
-        $.post($(this).attr('href'), $(this).data(), completeHandler);
+        $.ajax({
+            type: "POST",
+            url: $(this).attr('href'),
+            data: $(this).data(), 
+            success: completeHandler
+        })
         progressBar.show();
         progressBar.setStatus('Loading...', 10);
         progressBar.startProgressChecker();
     });
 
 
-    $(document).on('submit', '#file-upload', function(e){
+    $(document).on('submit', '#pop-upload', function(e){
         e.preventDefault();
         var formData = new FormData($(this)[0]);
         $.ajax({
