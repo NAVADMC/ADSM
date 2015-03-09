@@ -82,8 +82,6 @@ typedef struct
     the form param_block[production_type] to get a pointer to a particular
     param_block. */
   RPT_reporting_t *elapsed_time;
-  sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
-    so that it will be available to the set_params function. */
 }
 local_data_t;
 
@@ -491,10 +489,21 @@ local_free (struct adsm_module_t_ *self)
 
 
 
+typedef struct
+{
+  adsm_module_t *self;
+  sqlite3 *db;
+  GError **error;
+}
+set_params_args_t;
+
+
+
 /**
  * Adds a set of parameters to a disease model.
  *
- * @param data this module ("self"), but cast to a void *.
+ * @param data a set_params_args_t structure, containing this module ("self")
+ *   and a GError pointer to fill in if errors occur.
  * @param dict the SQL query result as a GHashTable in which key = colname,
  *   value = value, both in (char *) format.
  * @return 0
@@ -502,10 +511,12 @@ local_free (struct adsm_module_t_ *self)
 static int
 set_params (void *data, GHashTable *dict)
 {
+  set_params_args_t *args;
   adsm_module_t *self;
+  GError **error;
   local_data_t *local_data;
   sqlite3 *params;
-  guint production_type;
+  guint production_type_id;
   param_block_t *p;
   guint pdf_id, rel_id;
   char *tmp_text;
@@ -514,22 +525,24 @@ set_params (void *data, GHashTable *dict)
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
 #endif
 
-  self = (adsm_module_t *)data;
+  args = data;
+  self = args->self;
   local_data = (local_data_t *) (self->model_data);
-  params = local_data->db;
+  params = args->db;
+  error = args->error;
 
   /* Find out which production type these parameters apply to. */
-  production_type =
+  production_type_id =
     adsm_read_prodtype (g_hash_table_lookup (dict, "prodtype"),
                         local_data->production_types);
 
   /* Check that we are not overwriting an existing parameter block (that would
    * indicate a bug). */
-  g_assert (local_data->param_block[production_type] == NULL);
+  g_assert (local_data->param_block[production_type_id] == NULL);
 
   /* Create a new parameter block. */
   p = g_new (param_block_t, 1);
-  local_data->param_block[production_type] = p;  
+  local_data->param_block[production_type_id] = p;  
 
   /* Read the parameters. */
   g_assert (g_hash_table_size (dict) == 6);
@@ -546,16 +559,24 @@ set_params (void *data, GHashTable *dict)
     {
       rel_id = strtol(tmp_text, NULL, /* base */ 10);
       p->prevalence = PAR_get_relchart (params, rel_id);
+      /* Scale and translate so that the x-values go from 0 to 1. */
+      REL_chart_set_domain (p->prevalence, 0, 1);
       if (REL_chart_min (p->prevalence) < 0)
         {
-          g_error ("Y-values <0 are not allowed in a prevalence chart");
+          g_set_error (error, ADSM_MODULE_ERROR, 0,
+                       "Y-values <0 are not allowed in the prevalence chart for production type \"%s\"",
+                       g_ptr_array_index (local_data->production_types, production_type_id));
+          REL_free_chart (p->prevalence);
+          p->prevalence = NULL;
         }
       if (REL_chart_max (p->prevalence) > 1)
         {
-          g_error ("Y-values >1 are not allowed in a prevalence chart");
+          g_set_error (error, ADSM_MODULE_ERROR, 0,
+                       "Y-values >1 are not allowed in the prevalence chart for production type \"%s\"",
+                       g_ptr_array_index (local_data->production_types, production_type_id));
+          REL_free_chart (p->prevalence);
+          p->prevalence = NULL;
         }
-      /* Scale and translate so that the x-values go from 0 to 1. */
-      REL_chart_set_domain (p->prevalence, 0, 1);
     }
   else
     {
@@ -586,6 +607,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     0
   };
   unsigned int nprod_types;
+  set_params_args_t set_params_args;
   char *sqlerr;
 
 #if DEBUG
@@ -614,18 +636,19 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* Call the set_params function to read the production type combination
    * specific parameters. */
-  local_data->db = params;
+  set_params_args.self = self;
+  set_params_args.db = params;
+  set_params_args.error = error;
   sqlite3_exec_dict (params,
                      "SELECT prodtype.name AS prodtype,disease_latent_period_id,disease_subclinical_period_id,disease_clinical_period_id,disease_immune_period_id,disease_prevalence_id "
                      "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_diseaseprogressionassignment xref,ScenarioCreator_diseaseprogression disease "
                      "WHERE prodtype.id=xref.production_type_id "
                      "AND xref.progression_id = disease.id",
-                     set_params, self, &sqlerr);
+                     set_params, &set_params_args, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
     }
-  local_data->db = NULL;
 
   /* Attach the relevant prevalence chart to each unit structure. */
   attach_prevalence_charts (self, units);
