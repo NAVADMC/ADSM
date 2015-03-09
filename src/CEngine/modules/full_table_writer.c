@@ -129,13 +129,6 @@ handle_before_any_simulations_event (struct adsm_module_t_ * self,
 
   local_data->printed_header = FALSE;
 
-  #ifdef G_OS_UNIX
-    local_data->channel = g_io_channel_unix_new (STDOUT_FILENO);
-  #endif
-  #ifdef G_OS_WIN32
-    local_data->channel = g_io_channel_win32_new_fd (STDOUT_FILENO);
-  #endif
-
 #if DEBUG
   g_debug ("----- EXIT handle_before_any_simulations_event (%s)", MODEL_NAME);
 #endif
@@ -650,6 +643,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
    * simulations begin, we will gather all the output variables available from
    * other modules. */
 
+  #ifdef G_OS_UNIX
+    local_data->channel = g_io_channel_unix_new (STDOUT_FILENO);
+  #endif
+  #ifdef G_OS_WIN32
+    local_data->channel = g_io_channel_win32_new_fd (STDOUT_FILENO);
+  #endif
   local_data->buf = g_string_new (NULL);
   local_data->unit_stats =
     g_hash_table_new_full (g_direct_hash, g_direct_equal,

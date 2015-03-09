@@ -35,6 +35,14 @@
 
 
 
+GQuark
+adsm_module_error_quark (void)
+{
+  return g_quark_from_static_string ("ADSM_MODULE_ERROR");
+}
+
+
+
 /**
  * Compares a text string against a list of production type names. Returns the
  * position of the matching name in the list.

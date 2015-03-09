@@ -578,8 +578,8 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             "Assign Effects",
             "Functions",
             "Output Settings",
-            "Run Simulation",
-            "Delete Supplementals and Run Simulation"
+            "Validate Scenario",
+            "Run Simulation"
         ]
 
         for element in setup_menu.find_elements_by_tag_name("a"):
@@ -592,7 +592,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             self.selenium.find_element_by_css_selector('#save_scenario').click()
             time.sleep(1)
 
-            alert = self.selenium.find_element_by_css_selector('alert-danger')  # this works fine in the actual program.
+            alert = self.selenium.find_element_by_css_selector('.alert-danger')  # this works fine in the actual program.
             
             self.assertIn("Error", alert.text)
         finally:
