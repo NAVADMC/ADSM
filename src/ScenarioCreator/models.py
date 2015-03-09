@@ -311,8 +311,8 @@ class ControlMasterPlan(InputSingleton):
     vaccination_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
         help_text='The primary priority criteria for order of vaccinations.',
         choices=priority_choices(), )
-    # vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True,
-    #     help_text='Number of days in retrospect that should be used to determine which herds to vaccinate.', )
+    vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True, default=0, 
+        help_text='Once a vaccination program starts, this number determines how many days previous to the start of the vaccination program a detection will trigger vaccination.', )
     def __str__(self):
         return str(self.name)
 
@@ -651,13 +651,16 @@ class ProductionType(BaseModel):
     description = models.TextField(blank=True, null=True)
 
     def clean_fields(self, exclude=None):
-        if re.findall(r'\W', self.name) or self.name.lower() in sqlite_keywords + 'All Ind Dir Air'.split():
-            print("Conflicts:", re.findall(r'\W', self.name))
-            raise ValidationError(self.name + " must only have alpha-numeric characters.  Keywords not allowed.")
-        if re.match(r'[0-9]', self.name[0]):
-            raise ValidationError(self.name + " cannot start with a number.")
-        if self.name in [z.name for z in Zone.objects.all()]:  # forbid zone names
-            raise ValidationError("You really shouldn't have matching Zone and Production Type names.  It makes the output confusing.")
+        footer = "  Please rename the Production Type before proceeding."
+        if re.search(r'[,\'"\\]', self.name):
+            raise ValidationError(self.name + " CSV special characters not allowed." + footer)
+        if self.name.lower() in sqlite_keywords + 'All Ind Dir Air'.split():
+            print("Conflicts:", [w for w in sqlite_keywords if w in self.name])
+            raise ValidationError(self.name + " Sqlite keywords not allowed." + footer)
+        # if re.match(r'[0-9]', self.name[0]):
+        #     raise ValidationError(self.name + " cannot start with a number.")
+        if self.name in [z for z in Zone.objects.all().values_list('name', flat=True)]:  # forbid zone names
+            raise ValidationError("You really shouldn't have matching Zone and Production Type names.  It makes the output confusing." + footer)
 
     def __str__(self):
         return self.name
