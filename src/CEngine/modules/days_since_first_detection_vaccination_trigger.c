@@ -1,7 +1,7 @@
-/** @file number_of_detections_vaccination_trigger.c
+/** @file days_since_first_detection_vaccination_trigger.c
  * Module that requests initiation of a vaccination program once a certain
- * number of detections (possibly restricted to a subset of production types)
- * have occurred.
+ * number of days have passed since the first detection (possibly restricted to
+ * detections in a subset of production types).
  *
  * @author nharve01@uoguelph.ca<br>
  *   School of Computer Science, University of Guelph<br>
@@ -19,21 +19,22 @@
 #endif
 
 /* To avoid name clashes when multiple modules have the same interface. */
-#define new number_of_detections_vaccination_trigger_new
-#define factory number_of_detections_vaccination_trigger_factory
-#define run number_of_detections_vaccination_trigger_run
-#define to_string number_of_detections_vaccination_trigger_to_string
-#define local_free number_of_detections_vaccination_trigger_free
-#define handle_before_each_simulation_event number_of_detections_vaccination_trigger_handle_before_each_simulation_event
-#define handle_detection_event number_of_detections_vaccination_trigger_handle_detection_event
+#define new days_since_first_detection_vaccination_trigger_new
+#define factory days_since_first_detection_vaccination_trigger_factory
+#define run days_since_first_detection_vaccination_trigger_run
+#define to_string days_since_first_detection_vaccination_trigger_to_string
+#define local_free days_since_first_detection_vaccination_trigger_free
+#define handle_before_each_simulation_event days_since_first_detection_vaccination_trigger_handle_before_each_simulation_event
+#define handle_detection_event days_since_first_detection_vaccination_trigger_handle_detection_event
+#define handle_new_day_event days_since_first_detection_vaccination_trigger_handle_new_day_event
 
 #include "module.h"
 #include "module_util.h"
 #include "sqlite3_exec_dict.h"
-#include "number_of_detections_vaccination_trigger.h"
+#include "days_since_first_detection_vaccination_trigger.h"
 
 /** This must match an element name in the DTD. */
-#define MODEL_NAME "number-of-detections-vaccination-trigger"
+#define MODEL_NAME "days-since-first-detection-vaccination-trigger"
 
 
 
@@ -45,15 +46,16 @@ typedef struct
     counting. */
   GPtrArray *production_types; /**< Production type names. Each item in the
     array is a (char *). */
-  guint threshold; /**< The number of detections at which we initiate
-    vaccination. */
-  guint num_detected; /**< Number of unique units of the desired production
-    type(s) that have been detected so far. */
+  guint num_days; /**< The number of days after the first detection when
+    vaccinations should begin. */
   GHashTable *detected; /**< Units detected so far.  Hash table used as a set
     data type to eliminate duplicates (e.g., a single unit can create detection
     events both by clinical signs and by lab test).  Keys are unit pointers
     (UNT_unit_t *), values are unimportant (presence or absence of a key is all
     we ever test. */
+  gboolean seen_detection; /**< Whether there has been a detection yet */
+  guint day_to_initiate_vaccination; /**< The day to send out the
+    InitiateVaccination message. Only meaningful if seen_detection=TRUE. */
   sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
     so that it will be available to the set_params function. */
 }
@@ -77,7 +79,8 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
 
   local_data = (local_data_t *) (self->model_data);
   g_hash_table_remove_all (local_data->detected);
-  local_data->num_detected = 0;
+  local_data->seen_detection = FALSE;
+  local_data->day_to_initiate_vaccination = 0;
 
   #if DEBUG
     g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -87,8 +90,8 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
 
 
 /**
- * Responds to a detection event by counting it, and sending out an
- * InitiateVaccination event if the threshold has been crossed.
+ * Responds to a detection event by setting the day on which to send out a
+ * InitiateVaccination.
  *
  * @param self this module.
  * @param event a detection event.
@@ -111,30 +114,82 @@ handle_detection_event (struct adsm_module_t_ *self,
   
   /* Process this event only if this unit has not been detected before and it
    * is a production type we're interested in. */
-  if (g_hash_table_lookup (local_data->detected, unit) == NULL
-      && local_data->production_type[unit->production_type] == TRUE)
+  if (local_data->production_type[unit->production_type] == TRUE
+      && g_hash_table_lookup (local_data->detected, unit) == NULL)
     {
       g_hash_table_insert (local_data->detected, unit, GINT_TO_POINTER(1));
-      local_data->num_detected++;
-      if (local_data->num_detected == local_data->threshold)
+      if (local_data->seen_detection == FALSE)
         {
-          #if DEBUG
-            g_debug ("%u units detected, requesting initiation of vaccination program",
-                     local_data->num_detected);
-          #endif
-          /* Note that these messages can be sent even if a vaccination program
-           * is currently active. To keep the trigger modules simple, it's the
-           * resources model's problem to ignore multiple/redundant requests to
-           * initiate vaccination. */
-          EVT_event_enqueue (queue,
-            EVT_new_request_to_initiate_vaccination_event (event->day,
-                                                           local_data->trigger_id,
-                                                           MODEL_NAME));
-        } /* end of if threshold reached */
+          local_data->seen_detection = TRUE;
+          local_data->day_to_initiate_vaccination = event->day + local_data->num_days - 1;
+          if (local_data->day_to_initiate_vaccination == event->day)
+            {
+              #if DEBUG
+                g_debug ("requesting initiation of vaccination program");
+              #endif
+              /* Note that these messages can be sent even if a vaccination
+               * program is currently active. To keep the trigger modules
+               * simple, it's the resources model's problem to ignore multiple/
+               * redundant requests to initiate vaccination. */
+              EVT_event_enqueue (queue,
+                EVT_new_request_to_initiate_vaccination_event (event->day,
+                                                               local_data->trigger_id,
+                                                               MODEL_NAME));
+            }
+          else
+            {
+              #if DEBUG
+                g_debug ("will request vaccination to begin on day %u\n", 
+                         event->day + local_data->num_days);
+              #endif
+              ;
+            }
+        } /* end of if this is the first detection seen */
     } /* end of if unit has not been detected before and trigger is interested in this production type */          
 
   #if DEBUG
     g_debug ("----- EXIT handle_detection_event (%s)", MODEL_NAME);
+  #endif
+  return;
+}
+
+
+
+/**
+ * Responds to a new day event by sending out an InitiateVaccination event,
+ * if this is the right day.
+ *
+ * @param self this module.
+ * @param event a new day event.
+ * @param queue for any new events this module creates.
+ */
+void
+handle_new_day_event (struct adsm_module_t_ *self,
+                      EVT_new_day_event_t *event,
+                      EVT_event_queue_t *queue)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_new_day_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+
+  if (local_data->seen_detection == TRUE
+      && event->day == local_data->day_to_initiate_vaccination)
+    {
+      #if DEBUG
+        g_debug ("requesting initiation of vaccination program");
+      #endif
+      EVT_event_enqueue (queue,
+        EVT_new_request_to_initiate_vaccination_event (event->day,
+                                                       local_data->trigger_id,
+                                                       MODEL_NAME));
+    }
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
   #endif
   return;
 }
@@ -166,6 +221,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
       break;
     case EVT_Detection:
       handle_detection_event (self, &(event->u.detection), queue);
+      break;
+    case EVT_NewDay:
+      handle_new_day_event (self, &(event->u.new_day), queue);
       break;
     default:
       g_error
@@ -211,7 +269,7 @@ to_string (struct adsm_module_t_ *self)
             already_names = TRUE;
           }
       }
-  g_string_append_printf (s, " threshold=%u", local_data->threshold);
+  g_string_append_printf (s, " days=%u", local_data->num_days);
   g_string_append_c (s, '>');
 
   /* don't return the wrapper object */
@@ -281,7 +339,7 @@ set_trigger_prodtype (void *data, GHashTable *dict)
 
 
 /**
- * Adds a set of parameters to a number-of-detections vaccination trigger module.
+ * Adds a set of parameters to a days-since-detection vaccination trigger module.
  *
  * @param data this module ("self"), but cast to a void *.
  * @param dict the SQL query result as a GHashTable in which key = colname,
@@ -308,15 +366,15 @@ set_params (void *data, GHashTable *dict)
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
-  local_data->threshold = strtol(g_hash_table_lookup (dict, "number_of_units"), NULL, /* base */ 10);
+  local_data->num_days = strtol(g_hash_table_lookup (dict, "days"), NULL, /* base */ 10);
 
   /* Fill in the production types that this trigger counts. */
   nprod_types = local_data->production_types->len;
   local_data->production_type = g_new(gboolean, nprod_types);
   trigger_id = strtol(g_hash_table_lookup (dict, "id"), NULL, /* base */ 10);
   sql = g_strdup_printf ("SELECT prodtype.name AS prodtype "
-                         "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_diseasedetection_trigger_group trigger "
-                         "WHERE trigger.diseasedetection_id=%u "
+                         "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_timefromfirstdetection_trigger_group trigger "
+                         "WHERE trigger.timefromfirstdetection_id=%u "
                          "AND prodtype.id=trigger.productiontype_id",
                          trigger_id);
   args.flags = local_data->production_type;
@@ -339,7 +397,7 @@ set_params (void *data, GHashTable *dict)
 
 
 /**
- * Returns a new number-of-detections vaccination trigger module.
+ * Returns a new days-since-detection vaccination trigger module.
  */
 adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
@@ -350,6 +408,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   EVT_event_type_t events_listened_for[] = {
     EVT_BeforeEachSimulation,
     EVT_Detection,
+    EVT_NewDay,
     0
   };
   guint trigger_id;
@@ -384,8 +443,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read trigger's details. */
   trigger_id = GPOINTER_TO_UINT(user_data);
   local_data->trigger_id = trigger_id;
-  sql = g_strdup_printf ("SELECT id,number_of_units "
-                         "FROM ScenarioCreator_diseasedetection "
+  sql = g_strdup_printf ("SELECT id,days "
+                         "FROM ScenarioCreator_timefromfirstdetection "
                          "WHERE id=%u", trigger_id);
   local_data->db = params;
   sqlite3_exec_dict (params, sql, set_params, self, &sqlerr);
@@ -443,7 +502,7 @@ create_trigger (void *data, GHashTable *dict)
   /* Call the "new" function to instantiate a module for the trigger with that
    * ID. */
   module =
-    number_of_detections_vaccination_trigger_new (args->params, args->units,
+    days_since_first_detection_vaccination_trigger_new (args->params, args->units,
       args->projection, args->zones, GUINT_TO_POINTER(trigger_id), args->error);
 
   /* Add the new module to the list returned by the factory. */
@@ -455,7 +514,7 @@ create_trigger (void *data, GHashTable *dict)
 
 
 /**
- * Returns one or more new number-of-detections vaccination trigger modules.
+ * Returns one or more new days-since-detection vaccination trigger modules.
  */
 GSList *
 factory (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
@@ -480,7 +539,7 @@ factory (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   args.error = error;
   args.triggers = NULL;
   sqlite3_exec_dict (params,
-                     "SELECT id FROM ScenarioCreator_diseasedetection",
+                     "SELECT id FROM ScenarioCreator_timefromfirstdetection",
                      create_trigger, &args, &sqlerr);
   if (sqlerr)
     {
@@ -495,4 +554,4 @@ factory (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   return modules;
 }
 
-/* end of file number_of_detections_vaccination_trigger.c */
+/* end of file days_since_first_detection_vaccination_trigger.c */

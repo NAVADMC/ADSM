@@ -71,6 +71,7 @@ typedef enum
   EVT_PublicAnnouncement, EVT_Exam, EVT_AttemptToTrace,
   EVT_TraceResult, EVT_Test, EVT_TestResult,
   EVT_RequestToInitiateVaccination,
+  EVT_VaccinationInitiated,
   EVT_RequestForVaccination,
   EVT_CommitmentToVaccinate, EVT_VaccinationCanceled,
   EVT_Vaccination, EVT_RequestForDestruction, EVT_CommitmentToDestroy,
@@ -311,9 +312,20 @@ EVT_test_result_event_t;
 typedef struct
 {
   int day;
+  guint trigger_id;
   char *trigger_name;
 }
 EVT_request_to_initiate_vaccination_event_t;
+
+
+
+/** A "vaccination initiated" event. */
+typedef struct
+{
+  int day;
+  guint trigger_id;
+}
+EVT_vaccination_initiated_event_t;
 
 
 
@@ -533,6 +545,7 @@ typedef struct
     EVT_test_event_t test;
     EVT_test_result_event_t test_result;
     EVT_request_to_initiate_vaccination_event_t request_to_initiate_vaccination;
+    EVT_vaccination_initiated_event_t vaccination_initiated;
     EVT_request_for_vaccination_event_t request_for_vaccination;
     EVT_commitment_to_vaccinate_event_t commitment_to_vaccinate;
     EVT_vaccination_canceled_event_t vaccination_canceled;
@@ -614,7 +627,10 @@ EVT_event_t *EVT_new_test_result_event (UNT_unit_t *,
                                         gboolean correct,
                                         ADSM_control_reason);
 EVT_event_t *EVT_new_request_to_initiate_vaccination_event (int day,
+                                                            guint trigger_id,
                                                             char *trigger_name);
+EVT_event_t *EVT_new_vaccination_initiated_event (int day,
+                                                  guint trigger_id);
 EVT_event_t *EVT_new_request_for_vaccination_event (UNT_unit_t *,
                                                     int day,
                                                     ADSM_control_reason,

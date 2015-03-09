@@ -18,6 +18,12 @@ adsm_module_t *number_of_detections_vaccination_trigger_new (sqlite3 *,
                                                              UNT_unit_list_t *,
                                                              projPJ,
                                                              ZON_zone_list_t *,
+                                                             gpointer user_data,
                                                              GError **);
+GSList *number_of_detections_vaccination_trigger_factory (sqlite3 *,
+                                                          UNT_unit_list_t *,
+                                                          projPJ,
+                                                          ZON_zone_list_t *,
+                                                          GError **);
 
 #endif

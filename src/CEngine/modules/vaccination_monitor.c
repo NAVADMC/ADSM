@@ -26,6 +26,7 @@
 #define local_free vaccination_monitor_free
 #define handle_before_each_simulation_event vaccination_monitor_handle_before_each_simulation_event
 #define handle_new_day_event vaccination_monitor_handle_new_day_event
+#define handle_vaccination_initiated_event vaccination_monitor_handle_vaccination_initiated_event
 #define handle_vaccination_event vaccination_monitor_handle_vaccination_event
 
 #include "module.h"
@@ -45,6 +46,7 @@
 typedef struct
 {
   GPtrArray *production_types;
+  RPT_reporting_t   *vaccination_initiated_by_trigger;
   RPT_reporting_t   *vaccination_occurred;
   RPT_reporting_t   *first_vaccination;
   RPT_reporting_t  **first_vaccination_by_reason;
@@ -130,6 +132,34 @@ handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event)
 #if DEBUG
   g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
 #endif
+}
+
+
+
+/**
+ * Responds to a Vaccination Initiated event by recording the ID of the trigger
+ * that caused vaccination to be initiated.
+ *
+ * @param self this module.
+ * @param event a vaccination initiated event.
+ */
+void
+handle_vaccination_initiated_event (struct adsm_module_t_ *self,
+                                    EVT_vaccination_initiated_event_t * event)
+{
+  local_data_t *local_data;
+  
+  #if DEBUG
+    g_debug ("----- ENTER handle_vaccination_initiated_event (%s)", MODEL_NAME);
+  #endif 
+  
+  local_data = (local_data_t *) (self->model_data);
+  RPT_reporting_set_integer (local_data->vaccination_initiated_by_trigger, event->trigger_id);
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_vaccination_initiated_event (%s)", MODEL_NAME);
+  #endif
+  return;
 }
 
 
@@ -247,6 +277,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day));
       break;
+    case EVT_VaccinationInitiated:
+      handle_vaccination_initiated_event (self, &(event->u.vaccination_initiated));
+      break;
     case EVT_Vaccination:
       handle_vaccination_event (self, &(event->u.vaccination));
       break;
@@ -306,6 +339,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_BeforeAnySimulations,
     EVT_BeforeEachSimulation,
     EVT_NewDay,
+    EVT_VaccinationInitiated,
     EVT_Vaccination,
     0
   };
@@ -340,6 +374,11 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   nprodtypes = local_data->production_types->len;
   {
     RPT_bulk_create_t outputs[] = {
+      { &local_data->vaccination_initiated_by_trigger, "vaccTriggered", RPT_integer,
+        RPT_NoSubcategory, NULL, 0,
+        RPT_NoSubcategory, NULL, 0,
+        self->outputs, local_data->null_outputs },
+
       { &local_data->vaccination_occurred, "vaccOccurred", RPT_integer,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,

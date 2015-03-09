@@ -98,9 +98,11 @@ dist_noinst_DATA = state-transition.png \
   6units_2.png \
   7units.png \
   8units_all_infected.png \
+  8units_all_infected_diff_types.png \
   8units_2rows.png \
   8units_2rows_2.png \
   8units_2rows_3.png \
+  8units_2rows_4.png \
   9units.png \
   9units_2_zone_holes.png \
   units_circle.png \
@@ -319,9 +321,15 @@ priority_queues_png_SOURCES = priority_queues.dia
 
 8units_all_infected_png_SOURCES = $(top_srcdir)/models/test/8units_all_infected.xml
 
+8units_all_infected_diff_types_png_SOURCES = $(top_srcdir)/models/test/8units_all_infected_diff_types.xml
+
 8units_2rows_png_SOURCES = $(top_srcdir)/models/test/8units_2rows.xml
 
 8units_2rows_2_png_SOURCES = $(top_srcdir)/models/test/8units_2rows_2.xml
+
+8units_2rows_3_png_SOURCES = $(top_srcdir)/models/test/8units_2rows_3.xml
+
+8units_2rows_4_png_SOURCES = $(top_srcdir)/models/test/8units_2rows_4.xml
 
 9units_png_SOURCES = $(top_srcdir)/models/test/9units.xml
 

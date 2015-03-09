@@ -165,6 +165,14 @@ $(function(){
 
     })
     
+    $(document).on('change', 'input, select', function(){
+        $('.btn-save').removeAttr('disabled')
+    });
+    
+    $(document).on('focus', 'input', function(){
+        $('.btn-save').removeAttr('disabled')
+    });
+    
     /*$('[data-visibility-controller]').each(function(){
         var controller = '[name=' + $(this).attr('data-visibility-controller') + ']'
         var hide_target = $(this).parents('.control-group, td')

@@ -1279,10 +1279,12 @@ end:
  *
  * @param self this module.
  * @param event a request to initiate vaccination event.
+ * @param queue for any new events the module creates.
  */
 void
 handle_request_to_initiate_vaccination_event (struct adsm_module_t_ *self,
-                                              EVT_request_to_initiate_vaccination_event_t * event)
+                                              EVT_request_to_initiate_vaccination_event_t * event,
+                                              EVT_event_queue_t *queue)
 {
   local_data_t *local_data;
 
@@ -1297,6 +1299,7 @@ handle_request_to_initiate_vaccination_event (struct adsm_module_t_ *self,
       #if DEBUG
         g_debug ("initiating vaccination, day %i", event->day);
       #endif
+      EVT_event_enqueue (queue, EVT_new_vaccination_initiated_event (event->day, event->trigger_id));
     }
   #if DEBUG
     g_debug ("----- EXIT handle_request_to_initiate_vaccination_event (%s)", MODEL_NAME);
@@ -1442,7 +1445,7 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
       handle_request_for_destruction_event (self, event, queue);
       break;
     case EVT_RequestToInitiateVaccination:
-      handle_request_to_initiate_vaccination_event (self, &(event->u.request_to_initiate_vaccination));
+      handle_request_to_initiate_vaccination_event (self, &(event->u.request_to_initiate_vaccination), queue);
       break;
     case EVT_RequestForVaccination:
       handle_request_for_vaccination_event (self, event, queue);
