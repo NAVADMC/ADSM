@@ -578,8 +578,8 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             "Assign Effects",
             "Functions",
             "Output Settings",
-            "Run Simulation",
-            "Delete Supplementals and Run Simulation"
+            "Validate Scenario",
+            "Run Simulation"
         ]
 
         for element in setup_menu.find_elements_by_tag_name("a"):
@@ -589,12 +589,12 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         filename_field = self.selenium.find_element_by_css_selector('header form .filename input')
         try:
             filename_field.send_keys('./\\ 123&% AZ')
-            filename_field.submit()
+            self.selenium.find_element_by_css_selector('#save_scenario').click()
             time.sleep(1)
 
-            alert = self.selenium.find_element_by_css_selector('alert-danger')
+            alert = self.selenium.find_element_by_css_selector('.alert-danger')  # this works fine in the actual program.
             
-            self.assertIn("ValueError", alert.text)
+            self.assertIn("Error", alert.text)
         finally:
             try:
                 os.remove(workspace_path('Untitled Scenario./\\ 123&% AZ.sqlite3'))

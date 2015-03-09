@@ -2,10 +2,8 @@ from collections import defaultdict
 from itertools import chain
 import os
 from glob import glob
-import time
-import json
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.forms.models import modelformset_factory
 from django.shortcuts import render, redirect
 from django.db.models import Max
@@ -35,7 +33,7 @@ def simulation_status(request):
         'iterations_completed': iterations_complete(),
         'status_text': "running?",
     }
-    return HttpResponse(json.dumps(status), content_type="application/json")
+    return JsonResponse(status)
 
 
 def results_home(request):

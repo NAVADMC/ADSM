@@ -1,9 +1,8 @@
 import csv
 import os
 import subprocess
-import json
 import itertools
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
 from django.db.models import Q, ObjectDoesNotExist
@@ -49,7 +48,7 @@ def home(request):
 
 def production_type_list_json(request):
     msg = list(ProductionType.objects.values_list('name', 'id'))
-    return HttpResponse(json.dumps(msg), content_type="application/json")
+    return JsonResponse(msg, safe=False)  # necessary to serialize a list object
 
 
 def extra_forms_needed():
@@ -270,7 +269,7 @@ def ajax_success(model_instance, model_name):
            'title': spaces_for_camel_case(str(model_instance)),
            'model': model_name,
            'status': 'success'}
-    return HttpResponse(json.dumps(msg), content_type="application/json")
+    return JsonResponse(msg)
 
 
 def save_new_instance(initialized_form, request):
@@ -411,8 +410,8 @@ def upload_population(request):
     from xml.etree.ElementTree import ParseError
     session = SmSession.objects.get()
     if 'GET' in request.method:
-        json_response = '{"status": "%s", "percent": "%s"}' % (session.population_upload_status, session.population_upload_percent*100)
-        return HttpResponse(json_response, content_type="application/json")
+        json_response = {"status": session.population_upload_status, "percent": session.population_upload_percent*100} 
+        return JsonResponse(json_response)
 
     session.set_population_upload_status("Processing file")
     file_path = workspace_path(request.POST.get('filename')) if 'filename' in request.POST else handle_file_upload(request)
@@ -420,10 +419,11 @@ def upload_population(request):
         model = Population(source_file=file_path)
         model.save()
     except (EOFError, ParseError) as error:
-        return HttpResponse('{"status": "failed", "message": "%s"}' % error, content_type="application/json")
+        session.set_population_upload_status(status='Failed: %s' % error)
+        return JsonResponse({"status": "failed", "message": str(error)})  # make sure to cast errors to string first
     # wait for Population parsing (up to 5 minutes)
     session.reset_population_upload_status()
-    return HttpResponse('{"status": "complete", "redirect": "/setup/Populations/"}', content_type="application/json")
+    return JsonResponse({"status": "complete", "redirect": "/setup/Populations/"})
    
 
 def filtering_params(request):

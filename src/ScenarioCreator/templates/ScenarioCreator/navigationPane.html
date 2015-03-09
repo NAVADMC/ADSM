@@ -44,7 +44,7 @@
                     <a href="/results/" class="completed ">
                     View Results <i class="glyphicon glyphicon-play"></i></a>
                 {% else %}
-                    {% if Simulation_ready or dry_run_passed %}
+                    {% if dry_run_passed %}
                         <a href="/?loading_url=/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
                         Run Simulation <i class="glyphicon glyphicon-play"></i></a>
                     {% else %}

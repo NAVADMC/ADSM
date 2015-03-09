@@ -2,6 +2,7 @@ import re
 import os
 import shutil
 from django.db import close_old_connections
+from django.http import JsonResponse
 from django.shortcuts import redirect, render, HttpResponse
 from django.utils.html import strip_tags
 from ADSMSettings.models import scenario_filename, SmSession, unsaved_changes
@@ -121,14 +122,14 @@ def save_scenario(request=None):
         shutil.copy(db_path(), full_path)
         unsaved_changes(False)  # File is now in sync
         print('Done Copying database to', full_path)
-        json_response = '{"status": "success"}'
+        json_message = {"status": "success"}
 
     except (ValueError, IOError, AssertionError) as error:
         print(error)
-        json_response = '{"status": "failed", "message": "%s"}' % error
+        json_message = {"status": "failed", "message": str(error)} 
 
     if request is not None and request.is_ajax():
-        return HttpResponse(json_response, content_type="application/json")
+        return JsonResponse(json_message, )
     else:
         return redirect('/setup/Scenario/1/')
 

@@ -437,6 +437,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->daily_outputs = g_ptr_array_new();
   local_data->production_types = units->production_type_names;
   nprodtypes = local_data->production_types->len;
+  local_data->nunits_of_prodtype = NULL;
+  local_data->nanimals_of_prodtype = NULL;
   {
     RPT_bulk_create_t outputs[] = {
       { &local_data->num_units_in_state, "tsdU%s", RPT_integer,
