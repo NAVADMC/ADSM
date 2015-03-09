@@ -115,8 +115,8 @@ header h1 {
     float: left;
 }
 
-header div {
-    width: 226px;
+header div {  
+    /*width: 226px;  too generic*/
     overflow:auto;
     float: left;
 }
