@@ -46,9 +46,7 @@
         </div>
     {% else %}
         <div id="sim_progress_and_button">
-            {% if not is_simulation_stopped or not simulation_has_started %}
-                <a href="/results/abort_simulation" class="btn">Abort</a>
-            {% endif %}
+            <a href="/results/abort_simulation" class="btn">Abort</a>
             <div class="progress">
                 <span class="simulation-status status-text"></span>
                 <div class="simulation-progress progress-bar" style="width:{{ results_progress|floatformat:"0" }}%"></div>
