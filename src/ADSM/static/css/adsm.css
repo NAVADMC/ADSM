@@ -256,7 +256,7 @@ ul {
 /*-----TOOLBAR-----*/
 /*-------------------------------------------------------------*/
 #toolbar {
-    position: absolute;
+    position: fixed;
     top: 55px;
     right: 0px;
     background-color: white;
@@ -354,6 +354,9 @@ ul {
 }
 .TB_panel.TB_panel_closed {
     margin-right: calc(50px - 33.33vw);
+}
+.TB_panel_over { /*--floats panel over content for static page layouts--*/
+    -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2), -5px 5px 5px -5px rgba(0, 0, 0, .3);
 }
 /*-------------------------------------------------------------*/
 /*-----file panel-----*/
