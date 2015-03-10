@@ -442,7 +442,7 @@ def filter_info(request, params):
     info['select_fields'] = {'production_type__name': [x.name for x in ProductionType.objects.all()],
                              'initial_state': Unit.initial_state_choices}
     info['numeric_fields'] = ["latitude","longitude", "initial_size"]
-    info['remaining_filters'] = [x for x in info['select_fields'] if x not in params.keys()] #TODO: add numeric_fields
+    info['remaining_filters'] = [x for x in info['select_fields'] if x not in params.keys()]
     return info
 
 
@@ -458,7 +458,7 @@ def population(request):
         params = filtering_params(request)
         for key, value in params.items():  # loops through params and stacks filters in an AND fashion
             query_filter = query_filter & Q(**{key: value})
-        initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:30])
+        initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:100])
         context['formset'] = initialized_formset
         context['filter_info'] = filter_info(request, params)
         context['deletable'] = '/setup/Population/1/delete/'
