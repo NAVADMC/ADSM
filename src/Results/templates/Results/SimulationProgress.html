@@ -22,26 +22,15 @@
                 </div>
             </div> 
         </div> 
-    </div> 
-    <div id="legend"><p>Red = Infected, Green = Vaccinated, Black = Destroyed.  
-    The height of each tiny bar graph is the percentage of iterations in which that unit was Infected, Vaccinated, or Destroyed.  
-    Zone probability shown from 100% (Dark Blue) to >1% (White).
-    Uninvolved Units are shown in grey, scaled by Unit size.</p></div>
-    <script type="text/javascript"> 
-        $(document).ready(function() { 
-            $("#viewport").mapbox({mousewheel: true}); 
-        }); 
-    </script> 
-{#    {% endif %}#}
-
-    <div id="sim_progress_and_button">
-        {% if is_simulation_running %}
-            <a href="/results/abort_simulation" class="btn">Abort</a>
-        {% endif %}
-        <div class="progress">
-            <span class="simulation-status status-text"></span>
-            <div class="simulation-progress progress-bar {% if results_progress == 100 %} done{% endif %}" style="width:{{ results_progress|floatformat:"0" }}%"></div>
-        </div>
+        <div id="legend"><p>Red = Infected, Green = Vaccinated, Black = Destroyed.  
+        The height of each tiny bar graph is the percentage of iterations in which that unit was Infected, Vaccinated, or Destroyed.  
+        Zone probability shown from 100% (Dark Blue) to >1% (White).
+        Uninvolved Units are shown in grey, scaled by Unit size.</p></div>
+        <script type="text/javascript"> 
+            $(document).ready(function() { 
+                $("#viewport").mapbox({mousewheel: true}); 
+            }); 
+        </script> 
     {% endif %}
     
     {% if is_simulation_stopped %}
@@ -58,7 +47,7 @@
             {% endif %}
             <div class="progress">
                 <span class="simulation-status status-text"></span>
-                <div class="simulation-progress progress-bar {% if results_progress == 100 %} done{% endif %}" style="width:{{ results_progress|floatformat:"0" }}%"></div>
+                <div class="simulation-progress progress-bar" style="width:{{ results_progress|floatformat:"0" }}%"></div>
             </div>
         </div>
         <script src="{{ STATIC_URL }}js/results-status.js"></script>  {# Javascript to refresh the progress bar #}
