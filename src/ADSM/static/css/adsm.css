@@ -253,12 +253,13 @@ ul {
     padding-left: 5px; /*prevent style inheritance from above*/
 }
 /*-------------------------------------------------------------*/
-/*-----toolbar-----*/
+/*-----TOOLBAR-----*/
 /*-------------------------------------------------------------*/
 #toolbar {
     position: absolute;
     top: 55px;
     right: 0px;
+    background-color: white;
 }
 .TB_btn {
     width: 50px;
@@ -333,6 +334,96 @@ ul {
 #TB_functions {
     background-image: url("../icons/TB_function_btn.png");
 }
+/*-------------------------------------------------------------*/
+/*-----TOOLBAR panels-----*/
+/*-------------------------------------------------------------*/
+.TB_panel {
+    position: fixed;
+    right: 0;
+    top:55px;
+    margin-right: 50px;
+    max-width: 460px;
+    min-height: 200px;
+    overflow-y: auto;
+    -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
+    border: 1px solid #cec7c0;
+    padding: 0 15px 15px 15px; 
+    max-height: calc(100vh - 120px);
+    background-color: white;
+    transition: margin-right .2s ease;
+}
+.TB_panel.TB_panel_closed {
+    margin-right: calc(50px - 33.33vw);
+}
+/*-------------------------------------------------------------*/
+/*-----file panel-----*/
+/*-------------------------------------------------------------*/
+#file_panel{}
+
+/*-------------------------------------------------------------*/
+/*-----settings panel-----*/
+/*-------------------------------------------------------------*/
+#settings_panel{}
+
+/*-------------------------------------------------------------*/
+/*-----population panel-----*/
+/*-------------------------------------------------------------*/
+#population_panel h2 {
+    margin-top: 12px;
+}
+#population_panel h2:last-of-type:before{
+    content: "";
+    display: block;
+    border-top: 1px solid #cccccc;
+    margin: 0 -5px 5px -5px;
+
+}
+#population_panel ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+#population_panel ul li {
+    height: 27px;
+    font-size: 13px;
+    overflow:hidden;
+    padding: 4px 0 0 10px;
+}
+#population_panel ul li:hover {
+    background-color: #ebebeb;
+    cursor: url("../icons/add_cursor.png"), auto;
+}
+#population_panel ul li:hover, #population_panel ul li a:hover {
+    cursor: url("../icons/add_cursor.png"), auto;
+}
+#population_panel a:focus {
+    background-color: transparent;
+    border: none;
+    outline: 0;
+}
+#population_panel ul li a, #population_panel ul li span:first-of-type {
+    width: 25%;
+    min-width: 95px;
+    display: inline-block;
+    padding-right: 10px;
+    overflow:hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #606060;
+    text-decoration: none;
+}
+#population_panel ul li span:last-child {
+    display:inline-block;
+    max-width: 50%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-style: italic;
+    color: #606060;
+}
+/*-------------------------------------------------------------*/
+/*-----functions panel-----*/
+/*-------------------------------------------------------------*/
+#functions {}
 /*-------------------------------------------------------------*/
 /*-----navigation menu-----*/
 /*-------------------------------------------------------------*/
@@ -976,76 +1067,7 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 .spacer {
     height: 100px;
 }
-/*-------------------------------------------------------------*/
-/*-----population panel-----*/
-/*-------------------------------------------------------------*/
 
-#population_panel {
-    position: fixed;
-    right: 0;
-    top:55px;
-    margin-right: 50px;
-    max-width: 460px;
-    min-height: 200px;
-    -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
-    border: 1px solid #cec7c0;
-    padding: 0 15px 15px 15px; 
-    overflow: scroll;
-    max-height: calc(100vh - 120px);
-    background-color: white;
-}
-#population_panel h2 {
-    margin-top: 12px;
-}
-#population_panel h2:last-of-type:before{
-    content: "";
-    display: block;
-    border-top: 1px solid #cccccc;
-    margin: 0 -5px 5px -5px;
-
-}
-#population_panel ul {
-    list-style-type: none;
-    padding-left: 0;
-}
-#population_panel ul li {
-    height: 27px;
-    font-size: 13px;
-    overflow:hidden;
-    padding: 4px 0 0 10px;
-}
-#population_panel ul li:hover {
-    background-color: #ebebeb;
-    cursor: url("../icons/add_cursor.png"), auto;
-}
-#population_panel ul li:hover, #population_panel ul li a:hover {
-    cursor: url("../icons/add_cursor.png"), auto;
-}
-#population_panel a:focus {
-    background-color: transparent;
-    border: none;
-    outline: 0;
-}
-#population_panel ul li a, #population_panel ul li span:first-of-type {
-    width: 25%;
-    min-width: 95px;
-    display: inline-block;
-    padding-right: 10px;
-    overflow:hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    color: #606060;
-    text-decoration: none;
-}
-#population_panel ul li span:last-child {
-    display:inline-block;
-    max-width: 50%;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    font-style: italic;
-    color: #606060;
-}
 
 /*-------------------------------------------------------------*/
 /*-----vaccination triggers-----*/
