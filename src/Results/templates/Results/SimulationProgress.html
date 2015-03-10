@@ -31,6 +31,10 @@
                 $("#viewport").mapbox({mousewheel: true}); 
             }); 
         </script> 
+    {% else %}  {# map placeholder #}
+        <div class="placeholder">
+            <p>Running Simulation...</p><img src="{{ STATIC_URL }}working.gif" alt="working"/>
+        </div>
     {% endif %}
     
     {% if is_simulation_stopped %}
@@ -42,7 +46,7 @@
         </div>
     {% else %}
         <div id="sim_progress_and_button">
-            {% if is_simulation_stopped or not simulation_has_started %}
+            {% if not is_simulation_stopped or not simulation_has_started %}
                 <a href="/results/abort_simulation" class="btn">Abort</a>
             {% endif %}
             <div class="progress">
