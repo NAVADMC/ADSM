@@ -1,8 +1,8 @@
 import os
 import shutil
 import zipfile
-from django.shortcuts import redirect
 
+from django.shortcuts import redirect
 import psutil
 
 from ADSMSettings.models import scenario_filename, SimulationProcessRecord, SmSession
@@ -19,7 +19,7 @@ def is_simulation_running():
 def is_simulation_stopped():
     """ :return: True if the Simulation has started and either completed or been aborted 
     """
-    return SmSession.objects.get().simulation_has_started and not is_simulation_running()   
+    return not is_simulation_running() and SmSession.objects.get().simulation_has_started  # This order is important   
 
 
 def get_simulation_controllers():
@@ -82,5 +82,5 @@ def delete_all_outputs():
         print("DELETING ALL OUTPUTS")
     for model in [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]:
         model.objects.all().delete()
-    SmSession.objects.all().update(iteration_text = '')
+    SmSession.objects.all().update(iteration_text = '', simulation_has_started=False)  # This is also reset from open_scenario
 

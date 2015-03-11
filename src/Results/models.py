@@ -397,3 +397,6 @@ class ResultsVersion(OutputBaseModel):
         self.id=1
         return super(ResultsVersion, self).save(force_insert, force_update, using, update_fields)
 
+
+def outputs_exist():
+    return DailyControls.objects.count() > 0

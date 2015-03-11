@@ -5,7 +5,7 @@ from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Pop
     DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
     ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
 from ScenarioCreator.utils import whole_scenario_validation
-from Results.models import DailyControls
+from Results.models import outputs_exist
 from git.git import git
 
 
@@ -59,7 +59,7 @@ def basic_context(request):
                'ProbabilityFunctions': ProbabilityFunction.objects.count(),
                'RelationalFunctions': RelationalFunction.objects.count(),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
-               'outputs_computed': DailyControls.objects.count() > 0,
+               'outputs_exist': outputs_exist(),
                'whole_scenario_warnings': whole_scenario_validation(),
                })
 
@@ -74,7 +74,7 @@ def basic_context(request):
                                            'include_direct_contact_spread':   js(disease.include_direct_contact_spread),
                                            'include_indirect_contact_spread': js(disease.include_indirect_contact_spread),
                                            'include_airborne_spread':         js(disease.include_airborne_spread),
-                                           'outputs_computed':                js(DailyControls.objects.count() > 0),
+                                           'outputs_exist':                js(outputs_exist()),
         }
         
         

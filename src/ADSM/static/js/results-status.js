@@ -45,6 +45,6 @@ var results_status  = (function(pollTime){
         stop_poll: stop_poll,
         get_last_progress: function() { return last_progress; }
     };
-})(5000);
+})(3000);
 
 results_status.start_poll();

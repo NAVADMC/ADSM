@@ -2,7 +2,7 @@ function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTim
 
 
 safe_save = function(url, data){
-    if(typeof outputs_computed === 'undefined' || outputs_computed == false) { 
+    if(typeof outputs_exist === 'undefined' || outputs_exist == false) { 
         $.post(url, data, function() { window.location.reload() });
     } else { //confirmation dialog so we don't clobber outputs
         var dialog = new BootstrapDialog.show({
@@ -22,7 +22,7 @@ safe_save = function(url, data){
                     label: 'Proceed',
                     cssClass: 'btn-danger btn-save',
                     action: function(dialog){
-                        outputs_computed = false;
+                        outputs_exist = false;
                         $.post(url, data, function(){
                             window.location.reload()
                         });
@@ -222,7 +222,7 @@ $(function(){
         var object_type = link.split('/')[2]
         if (typeof object_type === 'undefined') {object_type = 'object'}
         var additional_msg = ''
-        if(typeof outputs_computed !== 'undefined' && outputs_computed){
+        if(typeof outputs_exist !== 'undefined' && outputs_exist){
             additional_msg = ' and <strong><u>All Results</u></strong>' 
         }
         var dialog = new BootstrapDialog.show({
@@ -331,7 +331,7 @@ var check_file_saved = function(){
 
 
 two_state_button = function(){
-    if(typeof outputs_computed === 'undefined' || outputs_computed == false) {
+    if(typeof outputs_exist === 'undefined' || outputs_exist == false) {
         return 'class="btn btn-primary btn-save">Save changes'
     } else {
         return 'class="btn btn-danger btn-save">Delete Results and Save Changes'
