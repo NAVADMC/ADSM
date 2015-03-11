@@ -60,4 +60,9 @@
 
         {% endblock %}
     </section>
+    
+    {% if outputs_exist %}
+        {% include "Results/SimulationProgressBar.html" %}
+    {% endif %}
+    
 {% endblock %}

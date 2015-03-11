@@ -1,20 +1,23 @@
 from ADSMSettings.models import SmSession
 from Results.summary import iteration_progress, iterations_complete
 from Results.views import excluded_headers
+from Results.models import DailyControls
 from Results.utils import is_simulation_running, is_simulation_stopped
 
 
 def results_context(request):
     context = {}
+    context.update({'simulation_has_started': SmSession.objects.get().simulation_has_started,
+                    'outputs_exist': DailyControls.objects.count() > 0,
+                    'results_progress': iteration_progress() * 100,})
 
-    if 'results/' in request.path:  # results specific context
-        context.update({'results_progress': iteration_progress() * 100,
-                        'simulation_has_started': SmSession.objects.get().simulation_has_started,
-                        'is_simulation_running': is_simulation_running(),
-                        'is_simulation_stopped': is_simulation_stopped(),
-                        'iterations_completed': iterations_complete(),
+    # if 'results/' in request.path:  # results specific context
+    context.update({
+                    'is_simulation_running': is_simulation_running(),
+                    'is_simulation_stopped': is_simulation_stopped(),
+                    'iterations_completed': iterations_complete(),
 
-        })
-        context.update(excluded_headers())
+    })
+    context.update(excluded_headers())
 
     return context

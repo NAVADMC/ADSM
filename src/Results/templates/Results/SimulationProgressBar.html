@@ -1,0 +1,20 @@
+    
+    {% if is_simulation_stopped %}
+        <div id="sim_progress_and_button">
+            <div class="progress">
+                <span class="simulation-status status-text">Simulation complete.  {{ iterations_completed }} iterations.</span>
+                <div class="simulation-progress progress-bar done" style="width: 100%;"></div>
+            </div>
+        </div>
+    {% else %}
+        <div id="sim_progress_and_button">
+            <a href="/results/abort_simulation" class="btn">Abort</a>
+            <div class="progress">
+                <span class="simulation-status status-text"></span>
+                <div class="simulation-progress progress-bar" style="width:{{ results_progress|floatformat:"0" }}%"></div>
+            </div>
+        </div>
+{#        <div id="iteration_stream">{{ iteration_stream }}</div>#}
+        <script src="{{ STATIC_URL }}js/results-status.js"></script>  {# Javascript to refresh the progress bar #}
+        
+    {% endif %}

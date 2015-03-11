@@ -78,6 +78,6 @@ def iterations_complete():
 
 
 def iteration_progress():
-    output_settings = OutputSettings.objects.get_or_create()[0]
+    output_settings = OutputSettings.objects.get()
     iterations_started = output_settings.iterations
     return iterations_complete() / iterations_started if iterations_started else 0

@@ -19,7 +19,7 @@ def is_simulation_running():
 def is_simulation_stopped():
     """ :return: True if the Simulation has started and either completed or been aborted 
     """
-    return not is_simulation_running() and SmSession.objects.get().simulation_has_started  
+    return SmSession.objects.get().simulation_has_started and not is_simulation_running()   
 
 
 def get_simulation_controllers():
