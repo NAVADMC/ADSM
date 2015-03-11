@@ -70,7 +70,7 @@ for folder in folders_to_delete:
     except:
         pass
 
-files_to_save = ['adsm_simulation.exe', 'libglib-2.0-0.dll', 'libiconv-2.dll', 'libintl-8.dll', 'sqlite3.exe', 'msvcp100.dll']
+files_to_save = ['adsm_simulation.exe', 'libglib-2.0-0.dll', 'libiconv-2.dll', 'libintl-8.dll', 'sqlite3.exe', 'msvcp100.dll', 'libsqlite3-0.dll']
 for file in os.listdir(os.path.join(BASE_DIR, "bin")):
     # Only delete these files from the top directory
     if (file.endswith(".pyd") or file.endswith(".dll") or file.endswith(".zip") or file.endswith(".exe") or file.endswith(".manifest") or file.endswith(".log")) and file not in files_to_save:
