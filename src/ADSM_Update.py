@@ -50,6 +50,6 @@ exec("from ADSMSettings.utils import update_adsm")
 # This will always complain in an editor. Ignore it.
 update_adsm()
 
-MAIN_PROGRAM = os.path.join(os.path.dirname(BASE_DIR), 'ADSM.exe --skip_update')
+MAIN_PROGRAM = os.path.join(BASE_DIR, 'ADSM.exe --skip_update')
 subprocess.Popen(MAIN_PROGRAM)
 sys.exit()
