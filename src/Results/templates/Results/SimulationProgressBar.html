@@ -13,8 +13,8 @@
                 <span class="simulation-status status-text"></span>
                 <div class="simulation-progress progress-bar" style="width:{{ results_progress|floatformat:"0" }}%"></div>
             </div>
+            <ul id="iteration_text"></ul>
         </div>
-{#        <div id="iteration_stream">{{ iteration_stream }}</div>#}
         <script src="{{ STATIC_URL }}js/results-status.js"></script>  {# Javascript to refresh the progress bar #}
         
     {% endif %}

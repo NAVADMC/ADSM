@@ -7,17 +7,18 @@ from Results.utils import is_simulation_running, is_simulation_stopped
 
 def results_context(request):
     context = {}
-    context.update({'simulation_has_started': SmSession.objects.get().simulation_has_started,
-                    'outputs_exist': DailyControls.objects.count() > 0,
-                    'results_progress': iteration_progress() * 100,})
-
-    # if 'results/' in request.path:  # results specific context
-    context.update({
-                    'is_simulation_running': is_simulation_running(),
-                    'is_simulation_stopped': is_simulation_stopped(),
-                    'iterations_completed': iterations_complete(),
-
-    })
-    context.update(excluded_headers())
+    
+    if 'results/' in request.path or 'setup/' in request.path:  # results specific context
+        context.update({'simulation_has_started': SmSession.objects.get().simulation_has_started,
+                        'outputs_exist': DailyControls.objects.count() > 0,
+                        'results_progress': iteration_progress() * 100,})
+    
+        context.update({
+                        'is_simulation_running': is_simulation_running(),
+                        'is_simulation_stopped': is_simulation_stopped(),
+                        'iterations_completed': iterations_complete(),
+    
+        })
+        context.update(excluded_headers())
 
     return context

@@ -82,4 +82,5 @@ def delete_all_outputs():
         print("DELETING ALL OUTPUTS")
     for model in [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]:
         model.objects.all().delete()
+    SmSession.objects.all().update(iteration_text = '')
 

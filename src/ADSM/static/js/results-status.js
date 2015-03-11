@@ -21,6 +21,8 @@ var results_status  = (function(pollTime){
                     status_text = "Simulation complete.  " + context.iterations_total + " iterations run.";
                 }
                 $('.simulation-progress').width(simulation_progress * 100 + "%");
+                
+                $('#iteration_text').html(context.iteration_text)
             }
             else {  //simulation hasn't started
                 status_text = "Starting Simulation..."
