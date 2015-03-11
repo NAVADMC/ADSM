@@ -70,6 +70,8 @@ class Command(BaseCommand):
         server.socket_port = self.options['app_port']
         server.thread_pool = 30
 
+        server.max_request_body_size = 10737412742
+
         # For SSL Support
         # server.ssl_module = 'pyopenssl'
         # server.ssl_certificate = 'ssl/certificate.crt'

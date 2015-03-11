@@ -60,7 +60,12 @@ $(function(){
 
     $(document).on('click','.ajax-post', function(e) {
         e.preventDefault();
-        $.post($(this).attr('href'), $(this).data(), completeHandler);
+        $.ajax({
+            type: "POST",
+            url: $(this).attr('href'),
+            data: $(this).data(), 
+            success: completeHandler
+        })
         progressBar.show();
         progressBar.setStatus('Loading...', 10);
         progressBar.startProgressChecker();
