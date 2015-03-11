@@ -96,7 +96,7 @@ def population_png(request, width_inches=8.5, height_inches=8):
     ax = fig.add_subplot(1, 1, 1, axisbg='#FFFFFF')
     max_pt = ProductionType.objects.count()
     colors = [pt/max_pt for pt in pts]
-    size = 3000 / math.sqrt(len(longitude))
+    size = 1000 / math.sqrt(len(longitude))
     ax.scatter(latitude,
                longitude,
                marker='s',

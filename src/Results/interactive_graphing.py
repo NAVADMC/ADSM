@@ -140,7 +140,7 @@ def population_results_map():
     uninvolved = ax.scatter(neutral_longitude,
                             neutral_latitude,
                             marker='s',
-                            s=[min(max(10, size // 100), 1000) for size in herd_size],
+                            s=[min(max(0.25, size / 100), 1000) for size in herd_size],
                             color=(0.6, 0.6, 0.6, 1.0),
                             zorder=1000)
     print("Population Map took %i seconds" % int(time() - start_time))
