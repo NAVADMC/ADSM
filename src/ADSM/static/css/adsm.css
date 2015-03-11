@@ -757,3 +757,12 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 }
 /*-----testing results nav span fix-------*/
 
+/*----------------------------------------------------*/
+/*----- Assign Disease Spread -----*/
+/*----------------------------------------------------*/
+.intro_text, #assign_spread_wrapper{
+    padding: 0;
+}
+.intro_text, .intro_text p {
+    color: #606060;
+}

@@ -7,19 +7,22 @@
     <script src="{{ STATIC_URL }}js/probability-functions.js"></script>
 
     <h1 id="title">{{ title }}</h1>
-    <div class="row">
-        <p class="col-lg-6">Here you define how disease spreads from each production type to every other production type.  There are three
-        types of spread: 1) Direct contact where two animals coming in physical contact with one another, 2) Indirect contact
-        where animals share objects, vehicles, or people in common 3) Airborne Spread where the disease itself can be carried in the air.
-        Airborne spread can also be used for local area spread.</p>
-    </div>
-    <div class="row">
-        <p class="col-lg-6">Since the number of possible contact pairs is exponential, you can use this page to select groups of production types that all 
+    <div class="col-xs-9 intro_text">
+        <p>Here you define how disease spreads from each production type to every other production type.  There are three
+        types of spread:
+            <ol>
+                <li>Direct contact where two animals coming in physical contact with one another. </li>
+                <li>Indirect contact where animals share objects, vehicles, or people in common. </li>
+                <li>Airborne Spread where the disease itself can be carried in the air. Airborne spread can also be used for local area spread. </li>
+            </ol>
+        </p>
+
+        <p>Since the number of possible contact pairs is exponential, you can use this page to select groups of production types that all 
         have similar Disease Spread parameters.  Select multiple production types in source and/or destination then use "Apply" to set them all to the same value.
         Or check your work by hand under "All Possible Interactions".</p>
     </div>
                 
-    <div class="row col-md-9">
+    <div class="col-md-9" id="assign_spread_wrapper">
         <div class="m2mtable"></div>
 
         <form method="post" action="">
