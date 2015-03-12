@@ -29,8 +29,9 @@
 
 {% else %}
     <h1><strong>Population File:</strong> {{ population_file }} ({{ Farms|intcomma }} units)</h1>
-    <img src="/results/Population.png" alt="Unit Locations"/>
-    <p></p>
+    <div id="population_map_container">
+        <img src="/results/Population.png" alt="Unit Locations"/>
+    </div>
 
     {% include "ScenarioCreator/PopulationFilters.html" %}
 
