@@ -7,12 +7,14 @@
 <h1>Whole Scenario Validation</h1>
     {%  if dry_run_passed %}
         <h2>The simulation will successfully load with the current settings.  You may proceed...</h2>
+    {% else %}
+        <h2>Critical Simulation Error:</h2>
+        <p>Correct the following erro and try again:</p>
     {% endif %}
-        <p>Simulation output:</p>
         <p>{{ sim_output }}</p>
-        <span></span>
+    <span></span>
 {% if whole_scenario_warnings %}
-<h2>Whole Scenario Validation Warnings:</h2>
+<h2>Warnings: Whole Scenario Validation </h2>
     <ul>
         {% for line in whole_scenario_warnings %}
             <li>{{line}}</li>
@@ -25,7 +27,7 @@
     <p>The following either don't exist or have missing assignments:</p>
     <ul class="validation-checklist">
         {% for name in missing_values.keys %}
-            <li>{{ name }}</li>
+            <li><a href="/setup/{{ name }}/">{{ name }}</a></li>
         {% endfor %}
     </ul>
 {% endif %}
