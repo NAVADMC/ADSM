@@ -176,11 +176,20 @@ shutil.copy(os.path.join(BASE_DIR, 'bin', 'python34.dll'), os.path.join(BASE_DIR
 
 remove_tree(os.path.join(BASE_DIR, 'build'))
 
-library_update_required = 2
-if not query_yes_no("Did either adsm_update.exe or adsm_force_reset_and_update.exe change?", default='no'):
+library_update_required = 3
+if not query_yes_no("Did adsm_update.exe change?", default='no'):
     library_update_required -= 1
     # Checkout old versions of files that probably didn't change (mostly update executables)
-    files_to_reset = [os.path.join(BASE_DIR, 'bin', 'adsm_update.exe'), os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.exe')]
+    files_to_reset = [os.path.join(BASE_DIR, 'bin', 'adsm_update.exe'), ]
+    from git.git import git
+    for file in files_to_reset:
+        command = git + ' checkout ' + file
+        subprocess.call(command, shell=True)
+
+if not query_yes_no("Did adsm_force_reset_and_update.exe change?", default='no'):
+    library_update_required -= 1
+    # Checkout old versions of files that probably didn't change (mostly update executables)
+    files_to_reset = [os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.exe'), ]
     from git.git import git
     for file in files_to_reset:
         command = git + ' checkout ' + file
@@ -245,7 +254,7 @@ if query_yes_no("Would you like to zip up the deployable?", default='no'):
 
     deployable_path_len = len(os.path.dirname(deployable_path).rstrip(os.sep)) + 1
 
-    folders_to_ignore = ['build', '.idea', os.path.join('src', 'cef'), os.path.join('src', 'CEngine'), os.path.join('src', 'development_scripts')]
+    folders_to_ignore = ['build', '.idea', ]
     folders_to_ignore = [os.path.join(BASE_DIR, x) for x in folders_to_ignore]
 
     files_to_ignore = [os.path.basename(deployable_path), ]
