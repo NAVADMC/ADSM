@@ -230,8 +230,9 @@ many_to_many_widget = (function(form_state){
 
     function check_valid_selection(){
         if($('tbody th:nth-child(1) .selected').length && $('tbody th:nth-child(2) .selected').length) {  //if destination and source .selected
-            console.log("Clear disabled")
             $('.bulk-apply').removeAttr('disabled')
+        } else {
+            $('.bulk-apply').attr('disabled', 'disabled')
         }
     }
     
