@@ -73,8 +73,7 @@ def initialize_spread_assignments():
         
 
 def assign_disease_spread(request):
-    if not DiseaseSpreadAssignment.objects.count():
-        initialize_spread_assignments()
+    initialize_spread_assignments()
 
     SpreadSet = modelformset_factory(DiseaseSpreadAssignment, extra=0, form=DiseaseSpreadAssignmentForm)
     include_spread_form = DiseaseIncludeSpreadForm(request.POST or None, instance=Disease.objects.get())

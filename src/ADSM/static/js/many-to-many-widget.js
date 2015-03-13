@@ -74,7 +74,7 @@ form_state = (function(form){
         return matching_rows
     };
 
-    var get_consensus = function(filters){ //TODO: can probably be delete
+    var get_consensus = function(filters){ //TODO: can probably be deleted
         var matching_rows = get(filters);
         var consensus_row = matching_rows[0];//TODO: handle empty
         $.each(matching_rows, function(row_index, row_values){
@@ -127,7 +127,7 @@ many_to_many_widget = (function(form_state){
                 var $m2m_checkbox = $('<input type="checkbox"' + is_checked + ' />');
                 $(this).html($('<label class="checkbox">' + $(this).text() + '</label>').prepend($m2m_checkbox));
 
-                var m2m_table_column = my_table.find('tr :nth-child('+column+')').children().not('label'),
+                var m2m_table_column = my_table.find('tr :nth-child('+column+') select').not('label'),
                     full_table_column = $('#full_assign_spread').find('tr :nth-child('+column+')');
 
                 $m2m_checkbox.on('change', function() {
@@ -158,7 +158,7 @@ many_to_many_widget = (function(form_state){
             var bulk_select = $(this).find('select').clone()
             bulk_select.attr('id', bulk_select.attr('id').replace(form_prefix, 'bulk-')).val("");
             bulk_select.find('option[value="data-add-new"]').remove()
-            var button = $('<button>Apply</button>').addClass('bulk-apply')
+            var button = $('<button class="bulk-apply" disabled="disabled">Apply</button>')
             my_table.find('thead tr:nth-child(2)').append($('<td>').append(bulk_select).append(button)); //sensitive selector
         });
     }
@@ -228,9 +228,18 @@ many_to_many_widget = (function(form_state){
         return filter
     };
 
+    function check_valid_selection(){
+        if($('tbody th:nth-child(1) .selected').length && $('tbody th:nth-child(2) .selected').length) {  //if destination and source .selected
+            $('.bulk-apply').removeAttr('disabled')
+        } else {
+            $('.bulk-apply').attr('disabled', 'disabled')
+        }
+    }
+    
     /*Ensures that the state of the displayed widget is consistent with form_state for the appropriate
     * row / column pairs.*/
     function update_display_inputs(){
+        check_valid_selection()
         my_table.find('tbody tr').each(function(row_index, row){
             var filter = construct_filter(row)
             var row_values = form_state.get_consensus(filter);
@@ -292,9 +301,6 @@ many_to_many_widget = (function(form_state){
             many_to_many_widget.update_display_inputs();
             prev_click = this;
         });
-        $(document).on('change', 'thead select', function(){ //update every click
-            many_to_many_widget.bulk_apply($(this));
-        });
 
         $(document).on('click', 'button.select-all', function(){
             var col = $(this).closest('td').index()+1;
@@ -306,10 +312,16 @@ many_to_many_widget = (function(form_state){
             $(this).closest('table').find('tbody tr :nth-child('+col+') span').removeClass('selected')
             many_to_many_widget.update_display_inputs();
         })
+        
         $(document).on('click', 'button.bulk-apply', function(){
-            var selector = $(this).closest('td').find('select');
-            console.log(selector);
-            $(selector).trigger('change');
+            var select_el = $(this).closest('td').find('select');
+            console.log(select_el);
+            many_to_many_widget.bulk_apply($(select_el));
+            $(this).attr('disabled', 'disabled')
+        })
+        $(document).on('change', 'thead select', function(){  // use apply button once the bulk select changes
+            //$(this).closest('td').find('button.bulk-apply').removeAttr('disabled')
+            check_valid_selection()
         })
     }
 
@@ -318,6 +330,7 @@ many_to_many_widget = (function(form_state){
         'get_column_name': get_column_name,
         'update_display_inputs': update_display_inputs,
         'bulk_apply': bulk_apply,
+        'check_valid_selection': check_valid_selection,
         'update_state_inputs': update_state_inputs,
         'register_event_hooks': register_event_hooks
     }
