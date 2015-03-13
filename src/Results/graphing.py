@@ -87,7 +87,7 @@ def construct_title(field_name, iteration, model, zone=''):
 
 
 
-def population_png(request, width_inches=8.5, height_inches=8):
+def population_png(request, width_inches=8, height_inches=8):
     start_time = time()
     qualitative_colors = ListedColormap(['#1f78b4', '#33a02c','#e31a1c', '#ff7f00','#6a3d9a', '#b15928'])
     latlong = [(u.latitude, u.longitude, u.production_type_id) for u in Unit.objects.all()]
@@ -104,8 +104,13 @@ def population_png(request, width_inches=8.5, height_inches=8):
                cmap=qualitative_colors,
                s=size,
                c=colors,)
-    ax.set_ylim(Unit.objects.all().aggregate(Min('latitude'))['latitude__min'], Unit.objects.all().aggregate(Max('latitude'))['latitude__max'])
-    ax.set_xlim(Unit.objects.all().aggregate(Min('longitude'))['longitude__min'], Unit.objects.all().aggregate(Max('longitude'))['longitude__max'])
+    # Math for aspect ratio and range of axes
+    ymin, ymax = Unit.objects.all().aggregate(Min('latitude'))['latitude__min'], Unit.objects.all().aggregate(Max('latitude'))['latitude__max']
+    xmin, xmax = Unit.objects.all().aggregate(Min('longitude'))['longitude__min'], Unit.objects.all().aggregate(Max('longitude'))['longitude__max']
+    x_center, y_center = (xmin + xmax)/2,  (ymin + ymax)/2
+    largest_range = max(abs(ymax-ymin), abs(xmax-xmin)) / 2 
+    ax.set_ylim(y_center - largest_range, y_center + largest_range)
+    ax.set_xlim(x_center - largest_range, x_center + largest_range)
     print("Population Map took %i seconds" % int(time() - start_time))
     return HttpFigure(fig)
 
