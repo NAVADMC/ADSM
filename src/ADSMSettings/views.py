@@ -149,7 +149,8 @@ def copy_file(request, target):
     return redirect('/app/Workspace/')
 
 
-def download_file(request, target):
+def download_file(request):
+    target = request.GET['target']
     file_path = workspace_path(target)
     f = open(file_path, "rb")
     response = HttpResponse(f, content_type="application/x-sqlite")  # TODO: generic content type
