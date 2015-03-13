@@ -292,9 +292,6 @@ many_to_many_widget = (function(form_state){
             many_to_many_widget.update_display_inputs();
             prev_click = this;
         });
-        $(document).on('change', 'thead select', function(){ //update every click
-            many_to_many_widget.bulk_apply($(this));
-        });
 
         $(document).on('click', 'button.select-all', function(){
             var col = $(this).closest('td').index()+1;
@@ -307,9 +304,9 @@ many_to_many_widget = (function(form_state){
             many_to_many_widget.update_display_inputs();
         })
         $(document).on('click', 'button.bulk-apply', function(){
-            var selector = $(this).closest('td').find('select');
-            console.log(selector);
-            $(selector).trigger('change');
+            var select_el = $(this).closest('td').find('select');
+            console.log(select_el);
+            many_to_many_widget.bulk_apply($(select_el));
         })
     }
 
