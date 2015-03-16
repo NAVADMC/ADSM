@@ -315,7 +315,7 @@ def readPopulation( populationFileName ):
             try:
                 state = stateCodes[state]
             except KeyError:
-                raise Exception( '%s is not a valid state' % state )
+                state = Unit._meta.get_field('initial_state').get_default()
         daysInState = el.find( './days-in-status' )
         if daysInState is not None:
             daysInState = int( daysInState.text )
