@@ -89,21 +89,31 @@ def construct_title(field_name, iteration, model, zone=''):
 
 def population_png(request, width_inches=8, height_inches=8):
     start_time = time()
-    qualitative_colors = ['#1f78b4', '#33a02c','#e31a1c', '#ff7f00','#6a3d9a', '#b15928']
     #dark_and_light = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928', ]
+    dark_colors = ['#1f78b4', '#33a02c','#e31a1c', '#ff7f00','#6a3d9a', '#b15928']
+    light_colors = ['#a6cee3', '#b2df8a', '#fb9a99', '#fdbf6f', '#cab2d6'] # , '#ffff99']
     fig = Figure(figsize=(width_inches, height_inches), frameon=True, tight_layout=True)  # Issue #168 aspect ratio doesn't adjust currently
     ax = fig.add_subplot(1, 1, 1, axisbg='#FFFFFF')
     size = 3000 / math.sqrt(Unit.objects.count())
     for index, production_type in enumerate(ProductionType.objects.all()):
-        latlong = [(u.latitude, u.longitude) for u in Unit.objects.filter(production_type=production_type)]
-        longitude, latitude = zip(*latlong)
+        longitude, latitude = zip(*[(u.latitude, u.longitude) for u in Unit.objects.filter(production_type=production_type)])
         ax.scatter(latitude,
                    longitude,
                    marker='s',
                    linewidths=0.005,  # for some reason won't draw if linewidths = 0
                    s=size,
-                   color=qualitative_colors[index % len(qualitative_colors)],
+                   color=light_colors[index % len(light_colors)],
                    label=production_type.name)
+    infected = Unit.objects.all().exclude(initial_state='S')
+    if infected:
+        longitude, latitude = zip(*[(u.latitude, u.longitude) for u in infected])
+        ax.scatter(latitude,
+                   longitude,
+                   marker='x',
+                   linewidths=1.0,
+                   s=size*10,
+                   color='#FF0000',
+                   label='Infected')
     ax.legend(scatterpoints=3,
               loc='lower left',
               ncol=4,
