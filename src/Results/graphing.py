@@ -89,21 +89,26 @@ def construct_title(field_name, iteration, model, zone=''):
 
 def population_png(request, width_inches=8, height_inches=8):
     start_time = time()
-    qualitative_colors = ListedColormap(['#1f78b4', '#33a02c','#e31a1c', '#ff7f00','#6a3d9a', '#b15928'])
-    latlong = [(u.latitude, u.longitude, u.production_type_id) for u in Unit.objects.all()]
-    longitude, latitude, pts = zip(*latlong)
+    qualitative_colors = ['#1f78b4', '#33a02c','#e31a1c', '#ff7f00','#6a3d9a', '#b15928']
+    #dark_and_light = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928', ]
     fig = Figure(figsize=(width_inches, height_inches), frameon=True, tight_layout=True)  # Issue #168 aspect ratio doesn't adjust currently
     ax = fig.add_subplot(1, 1, 1, axisbg='#FFFFFF')
-    max_pt = ProductionType.objects.count()
-    colors = [pt/max_pt for pt in pts]
-    size = 3000 / math.sqrt(len(longitude))
-    ax.scatter(latitude,
-               longitude,
-               marker='s',
-               linewidths=0,
-               cmap=qualitative_colors,
-               s=size,
-               c=colors,)
+    size = 3000 / math.sqrt(Unit.objects.count())
+    for index, production_type in enumerate(ProductionType.objects.all()):
+        latlong = [(u.latitude, u.longitude) for u in Unit.objects.filter(production_type=production_type)]
+        longitude, latitude = zip(*latlong)
+        ax.scatter(latitude,
+                   longitude,
+                   marker='s',
+                   linewidths=0.005,  # for some reason won't draw if linewidths = 0
+                   s=size,
+                   color=qualitative_colors[index % len(qualitative_colors)],
+                   label=production_type.name)
+    ax.legend(scatterpoints=3,
+              loc='lower left',
+              ncol=4,
+              fontsize=10)
+        
     # Math for aspect ratio and range of axes
     ymin, ymax = Unit.objects.all().aggregate(Min('latitude'))['latitude__min'], Unit.objects.all().aggregate(Max('latitude'))['latitude__max']
     xmin, xmax = Unit.objects.all().aggregate(Min('longitude'))['longitude__min'], Unit.objects.all().aggregate(Max('longitude'))['longitude__max']
