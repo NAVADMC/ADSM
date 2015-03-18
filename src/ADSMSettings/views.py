@@ -55,8 +55,12 @@ def file_dialog(request):
 def run_importer(request):
     param_path = handle_file_upload(request, 'parameters_xml', is_temp_file=True)  # we don't want param XMLs stored next to population XMLs
     popul_path = handle_file_upload(request, 'population_xml')
+    import_legacy_scenario(param_path, popul_path)
+
+
+def import_legacy_scenario(param_path, popul_path):
     names_without_extensions = tuple(os.path.splitext(os.path.basename(x))[0] for x in [param_path, popul_path])  # stupid generators...
-    new_scenario(request)  # I realized this was WAY simpler than creating a new database connection
+    new_scenario()  # I realized this was WAY simpler than creating a new database connection
     import_naadsm_xml(popul_path, param_path)  # puts all the data in activeSession
     scenario_filename('%s with %s' % names_without_extensions)
     return save_scenario(None)  # This will overwrite a file of the same name without prompting

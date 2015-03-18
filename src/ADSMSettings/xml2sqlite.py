@@ -536,9 +536,8 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         for fromTypeName in getProductionTypes( el, 'from-production-type', productionTypeNames ):
             for toTypeName in getProductionTypes( el, 'to-production-type', productionTypeNames ):
                 if el.attrib['contact-type'] == 'direct':
-                    contactSpreadModel = DirectSpread(
+                    contactSpreadModel, created = DirectSpread.objects.get_or_create(
                         _disease = disease,
-                        name='Direct %s -> %s' % (fromTypeName, toTypeName),
                         use_fixed_contact_rate = fixedRate,
                         contact_rate = contactRate,
                         movement_control = movementControl,
@@ -549,10 +548,12 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                         subclinical_animals_can_infect_others = subclinicalCanInfect
                     )
                     disease.include_direct_contact_spread = True
+                    if created:
+                        contactSpreadModel.name = 'Direct %s -> %s' % (fromTypeName, toTypeName)
+                    
                 elif el.attrib['contact-type'] == 'indirect':
-                    contactSpreadModel = IndirectSpread(
+                    contactSpreadModel, created = IndirectSpread.objects.get_or_create(
                         _disease = disease,
-                        name='Indirect %s -> %s' % (fromTypeName, toTypeName),
                         use_fixed_contact_rate = fixedRate,
                         contact_rate = contactRate,
                         movement_control = movementControl,
@@ -562,10 +563,11 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                         subclinical_animals_can_infect_others = subclinicalCanInfect
                     )
                     disease.include_indirect_contact_spread = True
+                    if created:
+                        contactSpreadModel.name = 'Indirect %s -> %s' % (fromTypeName, toTypeName)
                 else:
                     assert False
                 contactSpreadModel.save()
-                disease.save()
 
                 pairing, created = DiseaseSpreadAssignment.objects.get_or_create(
                     source_production_type = ProductionType.objects.get( name=fromTypeName ),
@@ -577,6 +579,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     pairing.indirect_contact_spread = contactSpreadModel
                 pairing.save()
             # end of loop over to-production-types covered by this <contact-spread-model> element
+        disease.save()
         # end of loop over from-production-types covered by this <contact-spread-model> element
     # end of loop over <contact-spread-model> elements without a "zone" attribute
 
