@@ -113,7 +113,7 @@ def population_results_map():
     Estimated time = Unit.objects.count() / 650 in seconds.   """
     start_time = time()
     fig= Figure(figsize=(60,52), frameon=True, tight_layout=True)  # Issue #168 aspect ratio doesn't adjust currently
-    ax = fig.add_subplot(1,1,1, axisbg='#DDDDDD')
+    ax = fig.add_subplot(1,1,1, axisbg='#EEEEEE')
     ax.autoscale_view('tight')
     ax.grid(color='white', linestyle='solid')
     rstyle(ax)
