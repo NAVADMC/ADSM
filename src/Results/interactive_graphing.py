@@ -141,8 +141,9 @@ def population_results_map():
                             neutral_latitude,
                             marker='s',
                             s=[min(max(10, size // 100), 1000) for size in herd_size],
-                            color=(0.4, 0.4, 0.4, 1.0),
+                            color=(0.2, 0.2, 0.2, 1.0),
                             zorder=1000)
+    Results.graphing.crop_to_fit_map(ax)
     print("Population Map took %i seconds" % int(time() - start_time))
     return fig
 

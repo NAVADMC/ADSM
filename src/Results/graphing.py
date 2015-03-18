@@ -85,6 +85,14 @@ def construct_title(field_name, iteration, model, zone=''):
     return explanation, title
 
 
+def crop_to_fit_map(axis):
+    """Math for aspect ratio and range of axes"""
+    ymin, ymax = Unit.objects.all().aggregate(Min('latitude'))['latitude__min'], Unit.objects.all().aggregate(Max('latitude'))['latitude__max']
+    xmin, xmax = Unit.objects.all().aggregate(Min('longitude'))['longitude__min'], Unit.objects.all().aggregate(Max('longitude'))['longitude__max']
+    x_center, y_center = (xmin + xmax) / 2, (ymin + ymax) / 2
+    largest_range = max(abs(ymax - ymin), abs(xmax - xmin)) / 2
+    axis.set_ylim(y_center - largest_range, y_center + largest_range)
+    axis.set_xlim(x_center - largest_range, x_center + largest_range)
 
 
 def population_png(request, width_inches=8, height_inches=8):
@@ -114,18 +122,12 @@ def population_png(request, width_inches=8, height_inches=8):
                    s=size*10,
                    color='#FF0000',
                    label='Infected')
-    ax.legend(scatterpoints=3,
+    ax.legend(scatterpoints=1,
               loc='lower left',
               ncol=4,
               fontsize=10)
-        
-    # Math for aspect ratio and range of axes
-    ymin, ymax = Unit.objects.all().aggregate(Min('latitude'))['latitude__min'], Unit.objects.all().aggregate(Max('latitude'))['latitude__max']
-    xmin, xmax = Unit.objects.all().aggregate(Min('longitude'))['longitude__min'], Unit.objects.all().aggregate(Max('longitude'))['longitude__max']
-    x_center, y_center = (xmin + xmax)/2,  (ymin + ymax)/2
-    largest_range = max(abs(ymax-ymin), abs(xmax-xmin)) / 2 
-    ax.set_ylim(y_center - largest_range, y_center + largest_range)
-    ax.set_xlim(x_center - largest_range, x_center + largest_range)
+
+    crop_to_fit_map(ax)
     print("Population Map took %i seconds" % int(time() - start_time))
     return HttpFigure(fig)
 
