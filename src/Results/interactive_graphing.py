@@ -65,13 +65,14 @@ def define_color_mappings():
 
 def graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus):
     largest_zone_radius = Zone.objects.aggregate(Max('radius'))['radius__max']
-    for i, freq in [(index, n_times) for index, n_times in enumerate(zone_focus) if n_times > 0]:
-        ax.add_patch(Circle(xy=(longitude[i], latitude[i]),
-                            color=zone_blues(freq / total_iterations),
-                            radius= largest_zone_radius / kilometers_in_one_latitude_degree,
-                            linewidth=0,
-                            zorder=freq,
-        ))
+    if largest_zone_radius:
+        for i, freq in [(index, n_times) for index, n_times in enumerate(zone_focus) if n_times > 0]:
+            ax.add_patch(Circle(xy=(longitude[i], latitude[i]),
+                                color=zone_blues(freq / total_iterations),
+                                radius= largest_zone_radius / kilometers_in_one_latitude_degree,
+                                linewidth=0,
+                                zorder=freq,
+            ))
 
 
 def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated, destroyed):
