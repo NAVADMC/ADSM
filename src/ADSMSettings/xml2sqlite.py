@@ -477,22 +477,23 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
         for fromTypeName in getProductionTypes( el, 'from-production-type', productionTypeNames ):
             for toTypeName in getProductionTypes( el, 'to-production-type', productionTypeNames ):
-                airborneSpread = AirborneSpread(
+                airborneSpread, created = AirborneSpread.objects.get_or_create(
                   _disease = disease,
-                  name = 'Airborne %s -> %s' % (fromTypeName, toTypeName),
                   max_distance = maxDistance,
                   spread_1km_probability = float( el.find( './prob-spread-1km' ).text ),
                   exposure_direction_start = float( el.find( './wind-direction-start/value' ).text ),
                   exposure_direction_end = float( el.find( './wind-direction-end/value' ).text ),
                   transport_delay = delay
                 )
+                if created:
+                    airborneSpread.name = 'Airborne %s -> %s' % (fromTypeName, toTypeName)
                 airborneSpread.save()
 
-                pairing = DiseaseSpreadAssignment(
+                pairing, created = DiseaseSpreadAssignment.objects.get_or_create(
                   source_production_type = ProductionType.objects.get( name=fromTypeName ),
                   destination_production_type = ProductionType.objects.get( name=toTypeName ),
-                  airborne_spread = airborneSpread
                 )
+                pairing.airborne_spread = airborneSpread
                 pairing.save()
             # end of loop over to-production-types covered by this <airborne-spread[-exponential]-model> element
         # end of loop over from-production-types covered by this <airborne-spread[-exponential]-model> element
