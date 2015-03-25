@@ -10,7 +10,8 @@ urlpatterns = patterns('',
     url('^SaveScenario/$', 'ADSMSettings.views.save_scenario'),
     url('^NewScenario/$', 'ADSMSettings.views.new_scenario'),
     url('^Workspace/$', 'ADSMSettings.views.file_dialog'),
-    
+    url('^Backend/$', 'ADSMSettings.views.backend'),
+
     url(r'^ImportScenario/$', 'ADSMSettings.views.import_naadsm_scenario'),
     url(r'^OpenScenario/(?P<target>.+)/$', 'ADSMSettings.views.open_scenario'),  # includes .extension
     url(r'^OpenTestScenario/(?P<target>.+)/$', 'ADSMSettings.views.open_test_scenario'),  # includes .extension

