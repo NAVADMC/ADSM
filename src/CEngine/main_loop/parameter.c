@@ -499,7 +499,13 @@ PAR_get_PDF_callback (void *data, GHashTable *dict)
         variable warning */
       build.x = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
       build.y = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
-      query = g_strdup_printf ("SELECT x,y FROM ScenarioCreator_relationalfunction fn,ScenarioCreator_relationalpoint pt WHERE fn.id=%u AND pt.relational_function_id=fn.id ORDER BY _point_order", rel_id);
+      query =
+        g_strdup_printf ("SELECT x,y "
+                         "FROM ScenarioCreator_relationalfunction fn,ScenarioCreator_relationalpoint pt "
+                         "WHERE fn.id=%u "
+                         "AND pt.relational_function_id=fn.id "
+                         "ORDER BY x",
+                         rel_id);
       sqlite3_exec_dict (args->db, query, PAR_get_relchart_callback, &build, &sqlerr);
       if (sqlerr)
         {

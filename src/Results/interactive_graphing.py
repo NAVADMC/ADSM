@@ -65,13 +65,14 @@ def define_color_mappings():
 
 def graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus):
     largest_zone_radius = Zone.objects.aggregate(Max('radius'))['radius__max']
-    for i, freq in [(index, n_times) for index, n_times in enumerate(zone_focus) if n_times > 0]:
-        ax.add_patch(Circle(xy=(longitude[i], latitude[i]),
-                            color=zone_blues(freq / total_iterations),
-                            radius= largest_zone_radius / kilometers_in_one_latitude_degree,
-                            linewidth=0,
-                            zorder=freq,
-        ))
+    if largest_zone_radius:
+        for i, freq in [(index, n_times) for index, n_times in enumerate(zone_focus) if n_times > 0]:
+            ax.add_patch(Circle(xy=(longitude[i], latitude[i]),
+                                color=zone_blues(freq / total_iterations),
+                                radius= largest_zone_radius / kilometers_in_one_latitude_degree,
+                                linewidth=0,
+                                zorder=freq,
+            ))
 
 
 def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated, destroyed):
@@ -112,9 +113,8 @@ def population_results_map():
     """Creates a map that summarizes the range of outcomes amongst all iterations of a simulation.
     Estimated time = Unit.objects.count() / 650 in seconds.   """
     start_time = time()
-    fig= Figure(figsize=(60,52), frameon=True, tight_layout=True)  # Issue #168 aspect ratio doesn't adjust currently
-    ax = fig.add_subplot(1,1,1, axisbg='#DDDDDD')
-    ax.autoscale_view('tight')
+    fig= Figure(figsize=(60,52), frameon=True, tight_layout=True)
+    ax = fig.add_subplot(1,1,1, axisbg='#EEEEEE')
     ax.grid(color='white', linestyle='solid')
     rstyle(ax)
 
@@ -141,8 +141,9 @@ def population_results_map():
                             neutral_latitude,
                             marker='s',
                             s=[min(max(10, size // 100), 1000) for size in herd_size],
-                            color=(0.6, 0.6, 0.6, 1.0),
+                            color=(0.2, 0.2, 0.2, 1.0),
                             zorder=1000)
+    Results.graphing.crop_to_fit_map(ax)
     print("Population Map took %i seconds" % int(time() - start_time))
     return fig
 

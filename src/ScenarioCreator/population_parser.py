@@ -53,11 +53,18 @@ class PopulationParser(object):
     def __parse_csv(self, filename):
         """Based on FLAPS example, and a NAADSM csv example"""
         try:
-            mapping = {'commoditytype': 'production_type',  # FLAPS Mapping
-                       'longitude': 'longitude',
-                       'latitude': 'latitude',
-                       'population': 'initial_size', }
-            self.__parse_csv_units(filename, mapping)
+            try:
+                mapping = {'productiontype': 'production_type',  # FLAPS Preferred Mapping
+                           'longitude': 'longitude',
+                           'latitude': 'latitude',
+                           'population': 'initial_size', }
+                self.__parse_csv_units(filename, mapping)
+            except KeyError:
+                mapping = {'commoditytype': 'production_type',  # FLAPS Fallback Mapping
+                           'longitude': 'longitude',
+                           'latitude': 'latitude',
+                           'population': 'initial_size', }
+                self.__parse_csv_units(filename, mapping)
         except KeyError:
             mapping = {'production-type': 'production_type',  # NAADSM CSV mapping
                        'longitude': 'longitude',

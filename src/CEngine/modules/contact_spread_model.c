@@ -1821,8 +1821,18 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     double density, area_for_3_doz_units;
 
     density = estimate_density (units);
-    area_for_3_doz_units = 3 * 12 / density;
-    local_data->min_radius = sqrt (area_for_3_doz_units / M_PI);
+    if (density == 0)
+      {
+        /* During a dry run of the simulator to check parameters, there will be
+         * no units, and density will be zero. Fill in an arbitrary value in
+         * this case. */
+         local_data->min_radius = 5;
+       }
+    else
+      {
+        area_for_3_doz_units = 3 * 12 / density;
+        local_data->min_radius = sqrt (area_for_3_doz_units / M_PI);
+      }
     #if DEBUG
       g_debug ("minimum radius = %g km", local_data->min_radius);
     #endif
@@ -1833,6 +1843,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->rare_high_incoming = g_new0 (gboolean, nprod_types);
   local_data->rhi_units = NULL;
   {
+    guint nunits;
     double *rarity;
     double *incoming;
     UNT_production_type_t dest_prodtype;
@@ -1840,6 +1851,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     gboolean any_rare_high_incoming = FALSE;
     guint num_rhi_units = 0;
 
+    nunits = UNT_unit_list_length(units);
     rarity = g_new (double, nprod_types);
     incoming = g_new (double, nprod_types);
     
@@ -1850,7 +1862,10 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         UNT_production_type_t src_prodtype;
 
         ndest_units = g_array_index (units->production_type_counts, guint, dest_prodtype);
-        percent_population = 1.0 * ndest_units / UNT_unit_list_length(units);
+        if (nunits == 0)
+          percent_population = 0;
+        else
+          percent_population = 1.0 * ndest_units / nunits;
         rarity[dest_prodtype] = (1.0 - percent_population) * 2;
         incoming[dest_prodtype] = 0.0;
         for (src_prodtype = 0; src_prodtype < nprod_types; src_prodtype++)

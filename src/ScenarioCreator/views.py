@@ -51,18 +51,6 @@ def production_type_list_json(request):
     return JsonResponse(msg, safe=False)  # necessary to serialize a list object
 
 
-def extra_forms_needed():
-    missing = list(ProductionType.objects.all())
-    for entry in DiseaseSpreadAssignment.objects.all():
-        if entry.destination_production_type_id == entry.source_production_type_id:  #Spread within a species
-            missing.remove(entry.source_production_type)
-    extra_count = len(missing)
-    if not missing and DiseaseSpreadAssignment.objects.count() < ProductionType.objects.count() ** 2:
-        #all possible interactions are not accounted for
-        extra_count = 1  # add one more blank possibility
-    return extra_count, missing
-
-
 def initialize_spread_assignments():
     pts = list(ProductionType.objects.all())
     for source in pts:
@@ -377,7 +365,7 @@ def delete_entry(request, primary_key):
 
 
 def list_per_model(model_name, model):
-    context = {'entries': model.objects.all()[:200],
+    context = {'entries': model.objects.all(),
                'class': model_name,
                'name': spaces_for_camel_case(model_name)}
     return context
