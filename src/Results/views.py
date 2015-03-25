@@ -38,7 +38,7 @@ def simulation_status(request):
 
 def results_home(request):
     path_ex = workspace_path(scenario_filename() +"/*.csv")
-    start = os.path.basename(workspace_path())
+    start = workspace_path()
     context = {'supplemental_files': [os.path.relpath(file_path, start=start) for file_path in glob(path_ex)]}
     if os.path.exists(map_zip_file()):
         context['supplemental_files'].append(os.path.relpath(map_zip_file(), start=start))

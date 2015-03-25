@@ -1,10 +1,11 @@
 from django.test import TestCase
-from django.db import connections
 import os
 import json
+from ScenarioCreator.models import DirectSpread
 
 from ScenarioCreator.views import workspace_path
 from .models import SmSession, SingletonManager
+from .views import import_legacy_scenario
 
 
 class ScenarioTestCase(TestCase):
@@ -132,3 +133,17 @@ class SingletonManagerTestCase(TestCase):
 
         self.assertEqual(result[0].pk, 1)
         self.assertEqual(result[1], True)
+
+
+class LegacyImporterTestCase(TestCase):
+    multi_db = True
+    
+    def test_import_sample_scenario(self):
+        popul_path = r'"C:\Users\Josiah\Documents\ADSM\src\ScenarioCreator\tests\population_fixtures\export_pop.xml"'
+        param_path = r'"C:\Users\Josiah\Documents\ADSM\src\ScenarioCreator\tests\population_fixtures\Sample_export.xml"'
+        import_legacy_scenario(param_path, popul_path)
+        
+        print("DirectSpread.objects.count()", DirectSpread.objects.count())
+
+# if __name__ == "__main__":
+#     test_import_sample_scenario()
