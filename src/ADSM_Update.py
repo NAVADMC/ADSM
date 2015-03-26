@@ -2,6 +2,7 @@ import os
 import sys
 import subprocess
 import shutil
+import zipfile
 from time import sleep
 
 
@@ -64,6 +65,15 @@ else:
         sys.exit()
     else:
         shutil.copy(os.path.join(BASE_DIR, 'bin', 'adsm_update.exe'), os.path.join(BASE_DIR, 'bin', 'adsm_update.now.exe'))
+
+        library = zipfile.ZipFile(os.path.join(BASE_DIR, 'bin', 'library.zip'), 'r')
+        library.extract('adsm_update__main__.pyc', os.path.join(BASE_DIR, 'bin', 'adsm_update.now__main__.pyc'))
+        library.close()
+        os.rename(os.path.join(BASE_DIR, 'bin', 'adsm_update__main__.pyc'), os.path.join(BASE_DIR, 'bin', 'adsm_update.now__main__.pyc'))
+        library = zipfile.ZipFile(os.path.join(BASE_DIR, 'bin', 'library.zip'), 'a')
+        library.write(os.path.join(BASE_DIR, 'bin', 'adsm_update.now__main__.pyc'), 'adsm_update.now__main__.pyc')
+        library.close()
+        os.remove(os.path.join(BASE_DIR, 'bin', 'adsm_update.now__main__.pyc'))
 
         UPDATE_PROGRAM = os.path.join(BASE_DIR, 'bin', 'adsm_update.now.exe')
         subprocess.Popen(UPDATE_PROGRAM)
