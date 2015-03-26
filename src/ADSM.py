@@ -72,31 +72,6 @@ import _pyio
 import ctypes.wintypes
 
 
-def query_yes_no(question, default='yes'):
-    valid = {'yes': True, 'y': True, "no": False, 'n': False}
-
-    if default is None:
-        prompt = " [y/n] "
-    elif default in ['yes', 'y']:
-        prompt = " [Y/n] "
-    elif default in ['no', 'n']:
-        prompt = " [y/N] "
-    else:
-        raise ValueError("Invalid default answer!")
-
-    while True:
-        sys.stdout.write('\n' + question + prompt)
-
-        choice = input().lower()
-
-        if default is not None and choice == '':
-            return valid[default]
-        elif choice in valid:
-            return valid[choice]
-        else:
-            sys.stdout.write("Please respond with 'yes' or 'no'.\n")
-
-
 def launch_viewer():
     subprocess.call(os.path.join(BASE_DIR, 'Viewer', 'ADSM Viewer.exe'))
     print("Closing application!")
@@ -112,6 +87,11 @@ args = parser.parse_args()
 print("Preparing Django environment...")
 
 os.chdir(os.path.join(BASE_DIR, "src"))
+
+if os.path.exists(os.path.join(BASE_DIR, 'bin', 'adsm_update.now.exe')):
+    os.remove(os.path.join(BASE_DIR, 'bin', 'adsm_update.now.exe'))
+if os.path.exists(os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.now.exe')):
+    os.remove(os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.now.exe'))
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
 

@@ -55,19 +55,33 @@ def forceful_git_cleanup():
             print("IMPORTANT: You will need to manually delete ", lock_file, "before ADSM can update.")
             sleep(10)
             sys.exit()
-            
-forceful_git_cleanup()
 
 os.chdir(os.path.join(BASE_DIR, 'src'))
 
-# Discretely import django items
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
+if 'force_reset_and_update.now' in str(__file__).lower():
+    forceful_git_cleanup()
 
-exec("import django")
-django.setup()
-exec("from django.conf import settings")
-exec("from ADSMSettings.utils import reset_and_update_adsm")
+    # Discretely import django items
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
 
-reset_and_update_adsm()# This will always complain in an editor. Ignore it.
+    exec("import django")
+    django.setup()
+    exec("from django.conf import settings")
+    exec("from ADSMSettings.utils import reset_and_update_adsm")
 
-sys.exit()
+    reset_and_update_adsm()# This will always complain in an editor. Ignore it.
+
+    FORCE_UPDATE_PROGRAM = os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.exe')
+    subprocess.Popen(FORCE_UPDATE_PROGRAM)
+    sys.exit()
+else:
+    if os.path.exists(os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.now.exe')):
+        os.remove(os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.now.exe'))
+
+        sys.exit()
+    else:
+        shutil.copy(os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.exe'), os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.now.exe'))
+
+        FORCE_UPDATE_PROGRAM = os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.now.exe')
+        subprocess.Popen(FORCE_UPDATE_PROGRAM)
+        sys.exit()

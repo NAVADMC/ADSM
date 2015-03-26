@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import shutil
 from time import sleep
 
 
@@ -35,21 +36,35 @@ sys.path.append(os.path.join(BASE_DIR, "bin"))
 sys.path.append(os.path.join(BASE_DIR, "Scripts"))
 path_all_the_eggs()
 
-sleep(5)
+sleep(3)
 
 os.chdir(os.path.join(BASE_DIR, 'src'))
 
-# Discretely import django items
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
+if 'update.now' in str(__file__).lower():
+    # Discretely import django items
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
 
-exec("import django")
-django.setup()
-exec("from django.conf import settings")
-exec("from ADSMSettings.utils import update_adsm")
+    exec("import django")
+    django.setup()
+    exec("from django.conf import settings")
+    exec("from ADSMSettings.utils import update_adsm")
 
-# This will always complain in an editor. Ignore it.
-update_adsm()
+    # This will always complain in an editor. Ignore it.
+    update_adsm()
 
-MAIN_PROGRAM = os.path.join(BASE_DIR, 'ADSM.exe --skip_update')
-subprocess.Popen(MAIN_PROGRAM)
-sys.exit()
+    UPDATE_PROGRAM = os.path.join(BASE_DIR, 'bin', 'adsm_update.exe')
+    subprocess.Popen(UPDATE_PROGRAM)
+    sys.exit()
+else:
+    if os.path.exists(os.path.join(BASE_DIR, 'bin', 'adsm_update.now.exe')):
+        os.remove(os.path.join(BASE_DIR, 'bin', 'adsm_update.now.exe'))
+
+        MAIN_PROGRAM = os.path.join(BASE_DIR, 'adsm.exe')
+        subprocess.Popen(MAIN_PROGRAM)
+        sys.exit()
+    else:
+        shutil.copy(os.path.join(BASE_DIR, 'bin', 'adsm_update.exe'), os.path.join(BASE_DIR, 'bin', 'adsm_update.now.exe'))
+
+        UPDATE_PROGRAM = os.path.join(BASE_DIR, 'bin', 'adsm_update.now.exe')
+        subprocess.Popen(UPDATE_PROGRAM)
+        sys.exit()

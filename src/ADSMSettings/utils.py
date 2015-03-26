@@ -267,6 +267,9 @@ def reset_and_update_adsm():
         command = git + ' reset --hard'
         subprocess.call(command, shell=True)
 
+        command = git + ' clean -f -d'
+        subprocess.call(command, shell=True)
+
         print("Attempting to update files...")
         command = git + ' rev-parse --abbrev-ref HEAD'
         current_branch = subprocess.check_output(command, shell=True).decode().strip()
