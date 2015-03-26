@@ -58,7 +58,7 @@ def forceful_git_cleanup():
 
 os.chdir(os.path.join(BASE_DIR, 'src'))
 
-if 'force_reset_and_update.now' in str(__file__).lower():
+if (getattr(sys, 'frozen', False) and 'force_reset_and_update.now' in str(sys.executable).lower()) or ('force_reset_and_update.now' in str(__file__).lower()):
     forceful_git_cleanup()
 
     # Discretely import django items

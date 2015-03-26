@@ -40,7 +40,7 @@ sleep(3)
 
 os.chdir(os.path.join(BASE_DIR, 'src'))
 
-if 'update.now' in str(__file__).lower():
+if (getattr(sys, 'frozen', False) and 'update.now' in str(sys.executable).lower()) or ('update.now' in str(__file__).lower()):
     # Discretely import django items
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
 
