@@ -380,9 +380,6 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         xml = ET.fromstring( fileAsString )
     fp.close()
 
-    # Create a PDF that always returns 0. Will be used as the default for the test delay PDF.
-    zeroDelay = ProbabilityFunction.objects.get_or_create(name='Zero delay', equation_type='Fixed Value', mode=0)[0]
-    
     Scenario.objects.get_or_create(description = xml.find( './description' ).text)
 
     if xml.find( './exit-condition/first-detection' ) is not None:
@@ -674,8 +671,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     name = typeName + " Protocol",
                     use_detection = True,
                     detection_probability_for_observed_time_in_clinical = observing,
-                    detection_probability_report_vs_first_detection = reporting,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    detection_probability_report_vs_first_detection = reporting
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -701,7 +697,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         if el.find( './trace-delay' ) is not None:
             traceDelay = getPdf( el.find( './trace-delay' ), pdfNameSequence )
         else:
-            traceDelay = zeroDelay # default
+            traceDelay = None # default
 
         typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
         for typeName in typeNames:
@@ -712,8 +708,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -752,8 +747,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -804,8 +798,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -848,8 +841,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -875,8 +867,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -909,8 +900,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -945,8 +935,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -981,8 +970,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -1009,8 +997,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -1054,8 +1041,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -1072,7 +1058,6 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol.trace_indirect_forward = True
                 protocol.indirect_trace_success = traceSuccess
                 protocol.indirect_trace_period = tracePeriod
-            protocol.trace_result_delay = zeroDelay
             protocol.save()
         # end of loop to enable trace forward/out from all production types
 
@@ -1093,8 +1078,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     protocol = assignment.control_protocol
                 except ProtocolAssignment.DoesNotExist:
                     protocol = ControlProtocol(
-                        use_detection = False,
-                        test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                        use_detection = False
                     )
                     protocol.save()
                     assignment = ProtocolAssignment(
@@ -1127,8 +1111,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -1165,8 +1148,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -1212,8 +1194,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -1235,8 +1216,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -1378,8 +1358,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
