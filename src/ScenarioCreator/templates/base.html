@@ -35,7 +35,7 @@
             {#        </div>#}
     </form>
     <div id="admin_link" class="buttonHolder">
-        {% if update_available %}
+        {% if update_available and not update_on_startup %}
             <a href="#" class="btn btn-default" id="update_adsm" title="{{dev_version}}">update ADSM</a>
         {%  else %}
             <a href="/app/CheckUpdate/" class="btn btn-default" id="check_update" title="{{dev_version}}">check updates</a>

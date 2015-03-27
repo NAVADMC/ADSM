@@ -12,6 +12,7 @@ def adsm_context(request):
     if request.path != '/' and request.path != '/LoadingScreen/':
         context = {'filename': scenario_filename(),  # context in either mode
                    'unsaved_changes': unsaved_changes(),
+                   'update_on_startup': SmSession.objects.get().update_on_startup,
                    'update_available': SmSession.objects.get().update_available,
                    'url': request.path,
                    'active_link': '/'.join(re.split('\W+', request.path)[2:]),
