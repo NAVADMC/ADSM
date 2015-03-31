@@ -24,6 +24,7 @@
 #define handle_before_any_simulations_event unit_state_monitor_handle_before_any_simulations_event
 #define handle_before_each_simulation_event unit_state_monitor_handle_before_each_simulation_event
 #define handle_unit_state_change_event unit_state_monitor_handle_unit_state_change_event
+#define handle_new_day_event unit_state_monitor_handle_new_day_event
 
 #include "module.h"
 
@@ -216,6 +217,51 @@ handle_unit_state_change_event (struct adsm_module_t_ *self,
 
 
 /**
+ * Responds to a New Day event by updating the disease duration output.
+ *
+ * @param self this module.
+ * @param event a New Day event.
+ * @param units a list of units.
+ */
+void
+handle_new_day_event (struct adsm_module_t_ *self,
+                      EVT_new_day_event_t *event,
+                      UNT_unit_list_t *units)
+{
+  local_data_t *local_data;
+  gboolean active_infections;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_new_day_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+
+  /* The _iteration.infectious_units table contains all units that are Latent,
+   * Infectious Subclinical, or Infectious Clinical. */
+  active_infections = (g_hash_table_size(_iteration.infectious_units) > 0);
+  if (active_infections)
+    {
+      local_data->disease_end_recorded = FALSE;
+    }
+  else
+    {
+      if (local_data->disease_end_recorded == FALSE)
+        {
+          RPT_reporting_set_integer (local_data->last_day_of_disease, event->day - 1);
+          local_data->disease_end_recorded = TRUE;
+        }
+    }
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
+
+
+/**
  * Runs this model.
  *
  * @param self the model.
@@ -243,6 +289,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
       break;
     case EVT_UnitStateChange:
       handle_unit_state_change_event (self, &(event->u.unit_state_change));
+      break;
+    case EVT_NewDay:
+      handle_new_day_event (self, &(event->u.new_day), units);
       break;
     default:
       g_error
@@ -313,6 +362,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_BeforeAnySimulations,
     EVT_BeforeEachSimulation,
     EVT_UnitStateChange,
+    EVT_NewDay,
     0
   };
   guint nprodtypes;
