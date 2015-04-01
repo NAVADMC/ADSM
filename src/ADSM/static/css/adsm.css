@@ -231,6 +231,9 @@ header #admin_link .btn:focus {
     outline-offset: -1px;
 }
 
+body>nav {
+    min-width: 185px;
+}
 
 /*#left-panel {*/
     /*margin-top: 44px;*/
@@ -248,16 +251,15 @@ header #admin_link .btn:focus {
     margin-top: 54px;
 }
 
-body nav ul {
+ul {
     padding-left: 5px; /*prevent style inheritance from above*/
 }
 
 #setupMenu {
     list-style: none;
     padding-left: 0;
-    padding-right: 0px;
     margin-bottom: 54px;
-    min-width: 185px;
+    margin-top:5px;
 }
 
 #setupMenu h2:first-child a{
