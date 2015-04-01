@@ -16,6 +16,13 @@ from Results.models import *
 CREATE_AT_A_TIME = 500 # for bulk object creation
 
 
+def create_no_duplicates(ModelClass, suggested_name, **kwargs):
+    instance, created = ModelClass.objects.get_or_create(**kwargs)
+    if created and suggested_name is not None:  # TODO: use Django _meta to check for a field called "name"
+        instance.name = suggested_name
+        instance.save()
+    return instance, created
+
 
 def getProductionTypes( xml, attributeName, allowedNames ):
     """Returns a list or set of production type names extractedfrom an XML
@@ -38,6 +45,10 @@ def getProductionTypes( xml, attributeName, allowedNames ):
             types = text.split(',')
     return types
 
+
+def getProductionTypeObjects( xml, attributeName, allowedNames ):
+    names = getProductionTypes(xml, attributeName, allowedNames)
+    return [pt for pt in ProductionType.objects.all() if pt.name in names]
 
 
 def sequence( tag ):
@@ -64,7 +75,7 @@ def getPdf( xml, nameGenerator ):
         name = next( nameGenerator )
     pdfType = firstChild.tag
 
-    args = {'equation_type': pdfType.capitalize(), 'name': name}
+    args = {'equation_type': pdfType.capitalize(), }
 
     if pdfType == 'beta':
         args['alpha'] = float( firstChild.find( './alpha' ).text )
@@ -138,7 +149,33 @@ def getPdf( xml, nameGenerator ):
         args['alpha'] = float( firstChild.find( './alpha' ).text )
         args['beta'] = float( firstChild.find( './beta' ).text )
     elif pdfType == 'piecewise':
-        raise NotImplementedError
+        graph = RelationalFunction( name=name + ' piecewise data' )
+        graph.save()
+        # NAADSM had both "old" and "new" style piecewise PDFs. The old style
+        # contained a sequence of <value> <p> <value> <p>... elements. The new
+        # style contained a sequence of <value> elements each containing an <x>
+        # and a <p> element.
+        newStyle = firstChild.find( './/x' ) is not None
+        if newStyle:
+            for value in firstChild.findall( './value' ):
+                x = float( value.find( './x' ).text )
+                p = float( value.find( './p' ).text )
+                point = RelationalPoint( relational_function = graph, x = x, y = p )
+                point.save()
+            # end of loop over <value> elements
+        else:
+            atX = True
+            for element in list( firstChild ):
+                if atX:
+                    x = float( element.text )
+                    atX = False
+                else:
+                    p = float( element.text )
+                    point = RelationalPoint( relational_function = graph, x = x, y = p )
+                    point.save()
+                    atX = True
+            # end of loop over <value> and <p> elements
+        args['graph'] = graph
     elif pdfType == 'point':
         args['equation_type'] = 'Fixed Value'
         args['mode'] = float( firstChild.text )
@@ -155,11 +192,9 @@ def getPdf( xml, nameGenerator ):
         args['alpha'] = float( firstChild.find( './alpha' ).text )
         args['beta'] = float( firstChild.find( './beta' ).text )
     else:
-        print( pdfType )
-        raise NotImplementedError
+        raise NotImplementedError( pdfType )
 
-    pdf = ProbabilityFunction( **args )
-    pdf.save()
+    pdf, created = create_no_duplicates(ProbabilityFunction, name, **args)
     return pdf
 
 
@@ -270,11 +305,7 @@ def readPopulation( populationFileName ):
         else:
             description = description.text
         typeName = el.find( './production-type' ).text
-        try:
-            productionType = ProductionType.objects.get( name=typeName )
-        except ProductionType.DoesNotExist:
-            productionType = ProductionType( name=typeName )
-            productionType.save()
+        productionType = ProductionType.objects.get_or_create( name=typeName )[0]
         size = int( el.find( './size' ).text )
         if not projection:
             lat = float( el.find( './location/latitude' ).text )
@@ -289,7 +320,7 @@ def readPopulation( populationFileName ):
             try:
                 state = stateCodes[state]
             except KeyError:
-                raise Exception( '%s is not a valid state' % state )
+                state = Unit._meta.get_field('initial_state').get_default()
         daysInState = el.find( './days-in-status' )
         if daysInState is not None:
             daysInState = int( daysInState.text )
@@ -316,7 +347,6 @@ def readPopulation( populationFileName ):
         Unit.objects.bulk_create( bulkUnits )
 
     return # from readPopulation
-
 
 
 def readParameters( parameterFileName, saveIterationOutputsForUnits ):
@@ -350,10 +380,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         xml = ET.fromstring( fileAsString )
     fp.close()
 
-    scenario = Scenario(
-        description = xml.find( './description' ).text
-    )
-    scenario.save()
+    Scenario.objects.get_or_create(description = xml.find( './description' ).text)
 
     if xml.find( './exit-condition/first-detection' ) is not None:
         earlyExitCondition = 'first-detection'
@@ -420,22 +447,19 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
         typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
         for typeName in typeNames:
-            diseaseProgression = DiseaseProgression(
+            diseaseProgression, created = create_no_duplicates(DiseaseProgression, typeName + ' Progression',  
                 _disease = disease,
-                name = typeName + ' Progression',
                 disease_latent_period = latentPeriod,
                 disease_subclinical_period = subclinicalPeriod,
                 disease_clinical_period = clinicalPeriod,
                 disease_immune_period = immunePeriod,
                 disease_prevalence = prevalence,
             )
-            diseaseProgression.save()
 
-            diseaseProgressionAssignment = DiseaseProgressionAssignment(
+            DiseaseProgressionAssignment.objects.get_or_create(
                 production_type = ProductionType.objects.get( name=typeName ),
                 progression = diseaseProgression
             )
-            diseaseProgressionAssignment.save()
         # end of loop over production types covered by this <disease-model> element
     # end of loop over <disease-model> elements
 
@@ -451,9 +475,8 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
         for fromTypeName in getProductionTypes( el, 'from-production-type', productionTypeNames ):
             for toTypeName in getProductionTypes( el, 'to-production-type', productionTypeNames ):
-                airborneSpread = AirborneSpread(
+                airborneSpread, created = create_no_duplicates(AirborneSpread, 'Airborne %s -> %s' % (fromTypeName, toTypeName),
                   _disease = disease,
-                  name = 'Airborne %s -> %s' % (fromTypeName, toTypeName),
                   max_distance = maxDistance,
                   spread_1km_probability = float( el.find( './prob-spread-1km' ).text ),
                   exposure_direction_start = float( el.find( './wind-direction-start/value' ).text ),
@@ -462,11 +485,11 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 )
                 airborneSpread.save()
 
-                pairing = DiseaseSpreadAssignment(
+                pairing, created = create_no_duplicates(DiseaseSpreadAssignment, suggested_name=None,
                   source_production_type = ProductionType.objects.get( name=fromTypeName ),
-                  destination_production_type = ProductionType.objects.get( name=toTypeName ),
-                  airborne_spread = airborneSpread
+                  destination_production_type = ProductionType.objects.get( name=toTypeName )
                 )
+                pairing.airborne_spread = airborneSpread  # assign the airborneSpread in addition to the other two spreads
                 pairing.save()
             # end of loop over to-production-types covered by this <airborne-spread[-exponential]-model> element
         # end of loop over from-production-types covered by this <airborne-spread[-exponential]-model> element
@@ -476,8 +499,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         name = el.find( './name' ).text
         radius = float( el.find( './radius/value' ).text )
         if radius > 0:
-            zone = Zone( name=name, radius=radius )
-            zone.save()
+            zone, created = create_no_duplicates(Zone, suggested_name=name, radius=radius )
     # end of loop over <zone-model> elements
 
     for el in xml.findall( './/contact-spread-model' ):
@@ -510,9 +532,8 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         for fromTypeName in getProductionTypes( el, 'from-production-type', productionTypeNames ):
             for toTypeName in getProductionTypes( el, 'to-production-type', productionTypeNames ):
                 if el.attrib['contact-type'] == 'direct':
-                    contactSpreadModel = DirectSpread(
+                    contactSpreadModel, created = create_no_duplicates(DirectSpread, 'Direct %s -> %s' % (fromTypeName, toTypeName), 
                         _disease = disease,
-                        name='Direct %s -> %s' % (fromTypeName, toTypeName),
                         use_fixed_contact_rate = fixedRate,
                         contact_rate = contactRate,
                         movement_control = movementControl,
@@ -524,9 +545,8 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     )
                     disease.include_direct_contact_spread = True
                 elif el.attrib['contact-type'] == 'indirect':
-                    contactSpreadModel = IndirectSpread(
+                    contactSpreadModel, created = create_no_duplicates(IndirectSpread, 'Indirect %s -> %s' % (fromTypeName, toTypeName),
                         _disease = disease,
-                        name='Indirect %s -> %s' % (fromTypeName, toTypeName),
                         use_fixed_contact_rate = fixedRate,
                         contact_rate = contactRate,
                         movement_control = movementControl,
@@ -538,7 +558,6 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     disease.include_indirect_contact_spread = True
                 else:
                     assert False
-                contactSpreadModel.save()
                 disease.save()
 
                 pairing, created = DiseaseSpreadAssignment.objects.get_or_create(
@@ -558,33 +577,27 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         if 'zone' not in el.attrib:
             continue
 
-        fromTypeNames = getProductionTypes( el, 'from-production-type', productionTypeNames )
+        production_types = getProductionTypeObjects( el, 'from-production-type', productionTypeNames )
         if 'contact-type' in el.attrib:
             contactType = el.attrib['contact-type']
             assert (contactType == 'direct' or contactType == 'indirect')
         else:
             contactType = 'both'
-        zoneName = el.attrib['zone']
+        zone = Zone.objects.get(name=el.attrib['zone'])
         movementControl = getRelChart( el.find( './movement-control' ), relChartNameSequence )
 
-        for fromTypeName in fromTypeNames:
+        for fromType in production_types:
             # If a ZoneEffect object has already been assigned to this
             # combination of zone and production type, retrieve it; otherwise,
             # create a new one.
-            try:
-                assignment = ZoneEffectAssignment.objects.get(
-                    zone__name=zoneName,
-                    production_type__name=fromTypeName
-                )
-                effect = assignment.effect
-            except ZoneEffectAssignment.DoesNotExist:
-                effect = ZoneEffect(name = zoneName + ' effect on ' + fromTypeName)
-                effect.save()
-                assignment = ZoneEffectAssignment(
-                    zone = Zone.objects.get( name=zoneName ),
-                    production_type = ProductionType.objects.get( name=fromTypeName ),
-                    effect = effect
-                )
+            assignment, created = create_no_duplicates(ZoneEffectAssignment, suggested_name=None,
+                                                       zone=zone,
+                                                       production_type=fromType)
+            effect = assignment.effect
+            if effect is None:
+                effect = ZoneEffect(name = zone.name + ' effect on ' + fromType.name)
+                effect.save()  # TODO: could be simplified further
+                assignment.effect = effect
                 assignment.save()
             if contactType == 'direct' or contactType == 'both':
                 effect.zone_direct_movement = movementControl
@@ -597,28 +610,24 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     plan = None
     useDetection = (xml.find( './/detection-model' ) is not None)
     useTracing = (
-    (xml.find( './/trace-model' ) is not None)
-    or (xml.find( './/trace-back-destruction-model' ) is not None)
+        (xml.find( './/trace-model' ) is not None)
+        or (xml.find( './/trace-back-destruction-model' ) is not None)
     )
     useVaccination = (
-    (xml.find( './/vaccine-model' ) is not None)
-    or (xml.find( './/ring-vaccination-model' ) is not None)
+        (xml.find( './/vaccine-model' ) is not None)
+        or (xml.find( './/ring-vaccination-model' ) is not None)
     )
     useDestruction = (
-    (xml.find( './/basic-destruction-model' ) is not None)
-    or (xml.find( './/trace-destruction-model' ) is not None)
-    or (xml.find( './/trace-back-destruction-model' ) is not None)
-    or (xml.find( './/ring-destruction-model' ) is not None)
+        (xml.find( './/basic-destruction-model' ) is not None)
+        or (xml.find( './/trace-destruction-model' ) is not None)
+        or (xml.find( './/trace-back-destruction-model' ) is not None)
+        or (xml.find( './/ring-destruction-model' ) is not None)
     )
 
     if useDetection or useTracing or useVaccination or useDestruction:
         plan = ControlMasterPlan()
         plan.save()
 
-    # Create a PDF that always returns 0. Will be used as the default for the
-    # test delay PDF.
-    zeroDelay = ProbabilityFunction( name='Zero delay', equation_type='Fixed Value', mode=0 )
-    zeroDelay.save()
 
     for el in xml.findall( './/detection-model' ):
         # <detection-model> elements come in 2 forms. The first form, with a
@@ -662,8 +671,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     name = typeName + " Protocol",
                     use_detection = True,
                     detection_probability_for_observed_time_in_clinical = observing,
-                    detection_probability_report_vs_first_detection = reporting,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    detection_probability_report_vs_first_detection = reporting
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -689,7 +697,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         if el.find( './trace-delay' ) is not None:
             traceDelay = getPdf( el.find( './trace-delay' ), pdfNameSequence )
         else:
-            traceDelay = zeroDelay # default
+            traceDelay = None # default
 
         typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
         for typeName in typeNames:
@@ -700,8 +708,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -740,8 +747,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -792,8 +798,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -836,8 +841,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -863,8 +867,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -897,8 +900,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -933,8 +935,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -969,8 +970,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -997,8 +997,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -1042,8 +1041,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -1060,7 +1058,6 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol.trace_indirect_forward = True
                 protocol.indirect_trace_success = traceSuccess
                 protocol.indirect_trace_period = tracePeriod
-            protocol.trace_result_delay = zeroDelay
             protocol.save()
         # end of loop to enable trace forward/out from all production types
 
@@ -1081,8 +1078,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     protocol = assignment.control_protocol
                 except ProtocolAssignment.DoesNotExist:
                     protocol = ControlProtocol(
-                        use_detection = False,
-                        test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                        use_detection = False
                     )
                     protocol.save()
                     assignment = ProtocolAssignment(
@@ -1115,8 +1111,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -1153,8 +1148,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -1200,8 +1194,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -1223,8 +1216,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(
@@ -1372,8 +1364,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol = assignment.control_protocol
             except ProtocolAssignment.DoesNotExist:
                 protocol = ControlProtocol(
-                    use_detection = False,
-                    test_delay = zeroDelay # placeholder for now, needed because of NOT NULL constraint
+                    use_detection = False
                 )
                 protocol.save()
                 assignment = ProtocolAssignment(

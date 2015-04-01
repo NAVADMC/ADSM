@@ -715,13 +715,13 @@ run_sim_main (sqlite3 *scenario_db,
   };
 #endif
   /* Get the list of units. */
-  units = UNT_load_unit_list (scenario_db);
+  units = UNT_load_unit_list (scenario_db, /* production_types_only = */ dry_run);
   nunits = UNT_unit_list_length (units);
 
 #if DEBUG
   g_debug ("%i units read", nunits);
 #endif
-  if (nunits == 0)
+  if (nunits == 0 && !dry_run)
     {
       g_warning ("no units in scenario database");
     }

@@ -251,7 +251,7 @@ UNT_unit_list_t *UNT_new_unit_list (void);
 #ifdef USE_SC_GUILIB 
   UNT_unit_list_t *UNT_load_unit_list ( sqlite3 *, GPtrArray *production_types );
 #else
-  UNT_unit_list_t *UNT_load_unit_list (sqlite3 *);
+  UNT_unit_list_t *UNT_load_unit_list (sqlite3 *, gboolean production_types_only);
 #endif
 
 

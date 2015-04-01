@@ -4,6 +4,7 @@
 {% load db_status_tags %}
 
 {% block content %}
+    <script src="{{ STATIC_URL }}js/probability-functions.js"></script>
 {#<h1 id="title">#}
 {#    {% if model_link %}#}
 {#        <a href="{{ model_link|parent_link }}">List {{ pretty_name }}s</a> &nbsp;> &nbsp;#}
@@ -11,7 +12,7 @@
 {#    {{ title }}</h1>#}
 
 
-<form method="post" action="{{ action }}" enctype="multipart/form-data">
+<form id="relational-form" method="post" action="{{ action }}" enctype="multipart/form-data">
     {% crispy form %}
     <label for="file">Or Import Points from File... &nbsp</label>    
     <input type="file" id="file" name="file" accept="text/csv">

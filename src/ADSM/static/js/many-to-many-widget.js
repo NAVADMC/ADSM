@@ -74,7 +74,7 @@ form_state = (function(form){
         return matching_rows
     };
 
-    var get_consensus = function(filters){
+    var get_consensus = function(filters){ //TODO: can probably be deleted
         var matching_rows = get(filters);
         var consensus_row = matching_rows[0];//TODO: handle empty
         $.each(matching_rows, function(row_index, row_values){
@@ -127,7 +127,7 @@ many_to_many_widget = (function(form_state){
                 var $m2m_checkbox = $('<input type="checkbox"' + is_checked + ' />');
                 $(this).html($('<label class="checkbox">' + $(this).text() + '</label>').prepend($m2m_checkbox));
 
-                var m2m_table_column = my_table.find('tr :nth-child('+column+')').children().not('label'),
+                var m2m_table_column = my_table.find('tr :nth-child('+column+') select').not('label'),
                     full_table_column = $('#full_assign_spread').find('tr :nth-child('+column+')');
 
                 $m2m_checkbox.on('change', function() {
@@ -158,23 +158,17 @@ many_to_many_widget = (function(form_state){
             var bulk_select = $(this).find('select').clone()
             bulk_select.attr('id', bulk_select.attr('id').replace(form_prefix, 'bulk-')).val("");
             bulk_select.find('option[value="data-add-new"]').remove()
-            my_table.find('thead tr:nth-child(2)').append($('<td>').append(bulk_select)); //sensitive selector
+            var button = $('<button class="bulk-apply" disabled="disabled">Apply</button>')
+            my_table.find('thead tr:nth-child(2)').append($('<td>').append(bulk_select).append(button)); //sensitive selector
         });
-    }
-
-    function extract_options(index, element){//grab each option and generate row
-        var value = $(element).attr('value');
-        if(value && value != 'data-add-new'){//not "-----" or "Add..."
-            return [[$(element).text(), value]];
-        }
     }
 
     function render_row(header_information, column_information, row_index){
         var row = $('<tr>')
         for(var col_index in [0,1]){ //list row headers from header_information
             var th = $('<th>').append('<span data-click-toggle="selected" data-pk="'+
-                header_information[col_index][row_index][1] + '">' +
-                header_information[col_index][row_index][0] + '</span>').disableSelection()
+                header_information[row_index][1] + '">' +
+                header_information[row_index][0] + '</span>').disableSelection()
             th.addClass('relevant');
             row.append(th); //column contains row list
         }
@@ -188,24 +182,22 @@ many_to_many_widget = (function(form_state){
     }
 
     function create_body_rows() {
-        var tbody = $('<tbody>');
-        var header_information = [];
-        $('section form table tbody tr:last-child th').each(function (index) {
-            header_information[index] = $(this).find('option').map(extract_options);
+        $.get('/setup/ProductionTypeList.json', function(header_information){
+            var tbody = $('<tbody>');
+            var column_information = [];
+            $('section form table tbody tr:last-child td').each(function (index) {//copy the select
+                bulk_select = $(this).find('select').clone().val('').removeAttr('id');
+                bulk_select.find('option[value="data-add-new"]').remove();
+                bulk_select.attr('hidden', 'hidden')
+                column_information[index] = bulk_select;
+            });
+
+            var num_rows = Math.max(header_information[0].length, header_information[1].length);
+            for (var i = 0; i < num_rows; i++) {
+                tbody.append(render_row(header_information, column_information, i));
+            }
+            my_table.append(tbody)
         })
-
-        var column_information = [];
-        $('section form table tbody tr:last-child td').each(function (index) {//copy the select
-            bulk_select = $(this).find('select').clone().val('').removeAttr('id');
-            bulk_select.find('option[value="data-add-new"]').remove();
-            column_information[index] = bulk_select;
-        });
-
-        var num_rows = Math.max(header_information[0].length, header_information[1].length);
-        for (var i = 0; i < num_rows; i++) {
-            tbody.append(render_row(header_information, column_information, i));
-        }
-        return tbody;
     }
 
     function get_column_name(column_index){
@@ -217,11 +209,11 @@ many_to_many_widget = (function(form_state){
         my_table = $('<table>').append($('section form table thead').clone());
         insert_select_buttons();
         insert_bulk_selectors();
-        my_table.append(create_body_rows())
+        create_body_rows()
         update_display_inputs() //called from events normally, but we want to initialize
 
         $('.m2mtable').append(my_table);
-        my_table.find('tbody select').on('change', update_state_inputs)//register event listener
+        $(document).on('change', '.m2mtable tbody select', update_state_inputs)//register event listener
         add_checkboxes_to_headers();
     };
 
@@ -236,9 +228,18 @@ many_to_many_widget = (function(form_state){
         return filter
     };
 
+    function check_valid_selection(){
+        if($('tbody th:nth-child(1) .selected').length && $('tbody th:nth-child(2) .selected').length) {  //if destination and source .selected
+            $('.bulk-apply').removeAttr('disabled')
+        } else {
+            $('.bulk-apply').attr('disabled', 'disabled')
+        }
+    }
+    
     /*Ensures that the state of the displayed widget is consistent with form_state for the appropriate
     * row / column pairs.*/
     function update_display_inputs(){
+        check_valid_selection()
         my_table.find('tbody tr').each(function(row_index, row){
             var filter = construct_filter(row)
             var row_values = form_state.get_consensus(filter);
@@ -265,10 +266,10 @@ many_to_many_widget = (function(form_state){
     function bulk_apply($bulk_selector){
         var column_number = $bulk_selector.closest('td').index() + 1
         var destinations_selected = $('tbody th:nth-child(2) .selected')
-        if( !destinations_selected.length )//empty =>  Drop .selected criteria and treat the whole column as selected
-            $bulk_selector.closest('table').find('tbody tr :nth-child('+column_number+') :input')
-                .val($bulk_selector.val()).trigger('change'); //set all values in the whole column
-        else{
+        if( !destinations_selected.length ){  //empty =>
+            //TODO: flash the destination column red
+            return
+        } else {
             $bulk_selector.closest('table').find('tbody tr').each(function(){ //for each row
                 if($(this).find('th:nth-child(2) .selected').length)   //if destination .selected
                     $(this).find('td:nth-child('+column_number+') :input')  //set the input value
@@ -278,26 +279,6 @@ many_to_many_widget = (function(form_state){
     }
 
     //draw arrows
-
-    function highlight_hints_events() {
-        function highlight_source_if_blank() {
-            var sources_selected = $('tbody th:first-child .selected')
-            return sources_selected.length ? '' : '-n+'; //will also select the first column
-        }
-
-        $(document).on('mouseover', 'tbody td', function () {
-            var row = $(this).closest('tr');
-            $(row).find('th:nth-child('+highlight_source_if_blank()+'2) span').addClass('highlight');
-            var second_column = my_table.find('tbody th:nth-child(2)');
-            second_column.removeClass('relevant');
-        });
-        $(document).on('mouseout', 'tbody td', function () {
-            var row = $(this).closest('tr');
-            $(row).find('th:nth-child('+highlight_source_if_blank()+'2) span').removeClass('highlight')
-            var second_column = my_table.find('tbody th:nth-child(2)');
-            second_column.addClass('relevant');
-        });
-    }
 
     function register_event_hooks(){
         /*EVENT HOOKS*/
@@ -320,9 +301,6 @@ many_to_many_widget = (function(form_state){
             many_to_many_widget.update_display_inputs();
             prev_click = this;
         });
-        $(document).on('change', 'thead select', function(){ //update every click
-            many_to_many_widget.bulk_apply($(this));
-        });
 
         $(document).on('click', 'button.select-all', function(){
             var col = $(this).closest('td').index()+1;
@@ -334,13 +312,17 @@ many_to_many_widget = (function(form_state){
             $(this).closest('table').find('tbody tr :nth-child('+col+') span').removeClass('selected')
             many_to_many_widget.update_display_inputs();
         })
+        
         $(document).on('click', 'button.bulk-apply', function(){
-            var selector = $(this).closest('td').find('select');
-            console.log(selector);
-            $(selector).trigger('change');
+            var select_el = $(this).closest('td').find('select');
+            console.log(select_el);
+            many_to_many_widget.bulk_apply($(select_el));
+            $(this).attr('disabled', 'disabled')
         })
-
-        highlight_hints_events();
+        $(document).on('change', 'thead select', function(){  // use apply button once the bulk select changes
+            //$(this).closest('td').find('button.bulk-apply').removeAttr('disabled')
+            check_valid_selection()
+        })
     }
 
     return {
@@ -348,6 +330,7 @@ many_to_many_widget = (function(form_state){
         'get_column_name': get_column_name,
         'update_display_inputs': update_display_inputs,
         'bulk_apply': bulk_apply,
+        'check_valid_selection': check_valid_selection,
         'update_state_inputs': update_state_inputs,
         'register_event_hooks': register_event_hooks
     }

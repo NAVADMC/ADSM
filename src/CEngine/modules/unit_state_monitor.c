@@ -61,7 +61,6 @@ typedef struct
   RPT_reporting_t ***num_units_in_state_by_prodtype;
   RPT_reporting_t  **num_animals_in_state;
   RPT_reporting_t ***num_animals_in_state_by_prodtype;
-  RPT_reporting_t   *avg_prevalence;
   RPT_reporting_t   *last_day_of_disease;
   gboolean disease_end_recorded;
   GPtrArray *daily_outputs; /**< Daily outputs, in a list to make it easy to
@@ -218,43 +217,7 @@ handle_unit_state_change_event (struct adsm_module_t_ *self,
 
 
 /**
- * A struct for use with the callback function calculate_prevalence below.
- */
-typedef struct
-{
-  UNT_unit_list_t *units;
-  double prevalence_num;
-  double prevalence_denom;
-}
-calculate_prevalence_args_t;
-
-
-
-/**
- * @param key index of a unit in the unit list.
- * @param value not used.
- * @param user_data a calculate_prevalence_args_t structure.
- */
-static void
-calculate_prevalence (gpointer key, gpointer value, gpointer user_data)
-{
-  calculate_prevalence_args_t *args;
-  UNT_unit_t *unit;
-  double nanimals;
-
-  args = (calculate_prevalence_args_t *) user_data; 
-  unit = UNT_unit_list_get (args->units, GPOINTER_TO_UINT(key));
-  nanimals = (double)(unit->size);
-  args->prevalence_num += nanimals * unit->prevalence;
-  args->prevalence_denom += nanimals;
-
-  return;
-}
-
-
-
-/**
- * Responds to a New Day event by updating the average prevalence.
+ * Responds to a New Day event by updating the disease duration output.
  *
  * @param self this module.
  * @param event a New Day event.
@@ -266,7 +229,6 @@ handle_new_day_event (struct adsm_module_t_ *self,
                       UNT_unit_list_t *units)
 {
   local_data_t *local_data;
-  calculate_prevalence_args_t calculate_prevalence_args;
   gboolean active_infections;
 
   #if DEBUG
@@ -281,13 +243,6 @@ handle_new_day_event (struct adsm_module_t_ *self,
   if (active_infections)
     {
       local_data->disease_end_recorded = FALSE;
-      /* Calculate the prevalence. */
-      calculate_prevalence_args.units = units;
-      calculate_prevalence_args.prevalence_num = 0;
-      calculate_prevalence_args.prevalence_denom = 0;
-      g_hash_table_foreach (_iteration.infectious_units, calculate_prevalence, &calculate_prevalence_args);
-      RPT_reporting_set_real (local_data->avg_prevalence,
-                              calculate_prevalence_args.prevalence_num / calculate_prevalence_args.prevalence_denom);
     }
   else
     {
@@ -296,7 +251,6 @@ handle_new_day_event (struct adsm_module_t_ *self,
           RPT_reporting_set_integer (local_data->last_day_of_disease, event->day - 1);
           local_data->disease_end_recorded = TRUE;
         }
-      RPT_reporting_set_real (local_data->avg_prevalence, 0);
     }
 
   #if DEBUG
@@ -305,7 +259,6 @@ handle_new_day_event (struct adsm_module_t_ *self,
 
   return;
 }
-
 
 
 /**
@@ -437,6 +390,8 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->daily_outputs = g_ptr_array_new();
   local_data->production_types = units->production_type_names;
   nprodtypes = local_data->production_types->len;
+  local_data->nunits_of_prodtype = NULL;
+  local_data->nanimals_of_prodtype = NULL;
   {
     RPT_bulk_create_t outputs[] = {
       { &local_data->num_units_in_state, "tsdU%s", RPT_integer,
@@ -458,11 +413,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_CharArray, UNT_state_name, UNT_NSTATES,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->daily_outputs },
-
-      { &local_data->avg_prevalence, "averagePrevalence", RPT_real,
-        RPT_NoSubcategory, NULL, 0,
-        RPT_NoSubcategory, NULL, 0,
-        self->outputs, NULL },
 
       { &local_data->last_day_of_disease, "diseaseDuration", RPT_integer,
         RPT_NoSubcategory, NULL, 0,

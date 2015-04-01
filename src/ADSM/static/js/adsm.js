@@ -46,20 +46,23 @@ $(function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });
 
-    $(document).on('submit', '.ajax', function(event) {
-        event.preventDefault();
-        var $self = $(this)
-        $.ajax({
-            url: $(this).attr('action'),
-            type: "POST",
-            data: $(this).serialize(),
-            success: function(form_html) {
-                // Here we replace the form, for the
-                $self.replaceWith(form_html);
-            },
-            error: function () {
-                $self.find('.error-message').show()
+    $(document).on('submit', '.ajax', function(evt) {
+        evt.preventDefault();
+        $.post($(this).attr('action'), $(this).serialize())
+            .done(function( data ) {
+                if (data.status == "success") {
+                    $('.ajax').trigger('saved');
+                } else if (data.status == "failed") {
+                    alert_template = '<div class="alert alert-danger">' +
+                                        '<a href="#" class="close" data-dismiss="alert">' +
+                                            '&times;' +
+                                        '</a>' +
+                                        '<strong>Error:</strong> ' + data.message +
+                                     '</div>';
+                    $('#title').before(alert_template);
             }
+        }).fail(function () {
+                $('.ajax').find('.error-message').show()
         }).always(function() {
             $('.blocking-overlay').hide();
         });
@@ -91,7 +94,7 @@ $(function(){
     });
     
     $(document).on('click', '#update_adsm', function(event){
-        $(this).addClass('loading_button')
+        $(this).removeClass('loading_button')
         event.preventDefault();
         $.get('/app/Update/', function(result){
             if( result == "success"){
@@ -111,17 +114,17 @@ $(function(){
                 });
             }
         });
-    })
-
+    }); 
+    $('#update_adsm').click() // if the element loads in the page, it will be clicked immediately
+    
     $(document).on('saved', 'form:has(.unsaved)', function(){ //fixes 'Save' button with wrong color state
         $(this).find('.unsaved').removeClass('unsaved');
     })
 
-    $(document).on('click', 'header .buttonHolder a', function(evt){ //currently "Save is a button, not <a>.  This would be annoying otherwise
+    $(document).on('click', '#open_scenario, #new_scenario', function(event){
         var dialog = check_file_saved();
-        console.log(dialog);
         if(dialog){
-            evt.preventDefault();
+            event.preventDefault();
             var link = $(this).attr('href');
             dialog.$modal.on('hidden.bs.modal', function(){
                 window.location = link})
@@ -165,34 +168,14 @@ $(function(){
 
     })
     
-    $(document).on('change', 'input, select', function(){
+    $(document).on('change', ':input, select', function(){
         $('.btn-save').removeAttr('disabled')
     });
     
-    $(document).on('focus', 'input', function(){
+    $(document).on('input', 'input, textarea', function(){
         $('.btn-save').removeAttr('disabled')
     });
     
-    /*$('[data-visibility-controller]').each(function(){
-        var controller = '[name=' + $(this).attr('data-visibility-controller') + ']'
-        var hide_target = $(this).parents('.control-group, td')
-        var required_value = $(this).attr('data-required-value') || 'True'
-        $('body').on('change', controller, function(){
-            if($(this).val() == required_value){
-                hide_target.show()
-            }else{
-                hide_target.hide()
-            }
-        });
-        $(controller).each(function(index, elem){ //each because radio buttons have multiple elem, same name
-            if($(elem).attr('type') != 'radio' || elem.hasAttribute('checked')){
-                //radio buttons are multiple elements with the same name, we only want to fire if its actually checked
-                $(elem).trigger('change');
-            }
-        });
-        $(hide_target).css('margin-left', '26px');
-    }) */
-
     
     var attach_visibility_controller = function (self){
         var controller = '[name=' + $(self).attr('data-visibility-controller') + ']'
@@ -317,6 +300,15 @@ $(function(){
         // window.location.reload();
     });
     
+    $('#pop-upload').on('submit',function(event){
+        var filename = $(this).find('input[type=file]').val()
+        if( filename.indexOf('.xml') == -1 && filename.indexOf('.csv') == -1) {
+            alert("Uploaded files must have .xml or .csv in the name: " + filename)
+            event.preventDefault();
+            return false;
+        }
+    });
+    
     $('#file-upload').on('submit',function(event){
         var filename = $(this).find('input[type=file]').val()
         var valid_extensions = {"application/x-sqlite3": '.sqlite3',
@@ -367,17 +359,19 @@ var check_file_saved = function(){
 
 two_state_button = function(){
     if(typeof outputs_computed === 'undefined' || outputs_computed == false) {
-        return 'class="btn btn-primary">Save changes'
+        return 'class="btn btn-primary btn-save">Save changes'
     } else {
-        return 'class="btn btn-danger">Delete Results and Save Changes'
+        return 'class="btn btn-danger btn-save">Delete Results and Save Changes'
     }
 }
 
 
 var modelModal = {
-
-    ajax_submit: function($form, url, success_callback, fail_callback){
-        return $.ajax({url: url, type: "POST", data: new FormData($form[0]), success: function(data, status, xhr){
+                //processData: false,
+                //contentType: false}
+    ajax_submit: function(url, success_callback, fail_callback){
+        var $form = $('.modal-body form')
+        return $.post( url, $form.serialize()).done(function (data, status, xhr){
             if(typeof(data) == 'object') {
                 if (data['status']=='success') { //redundant for now
                     success_callback(data)
@@ -385,9 +379,9 @@ var modelModal = {
             } else {//html dataType  == failure probably validation errors
                 fail_callback(data)
             }
-        },
-        processData: false,
-        contentType: false});
+        }).always(function() {
+            $('.blocking-overlay').hide();
+        });
     },
 
     ajax_success: function(modal, selectInput){
@@ -404,6 +398,9 @@ var modelModal = {
         var $form = $newForm.filter('section').find('form').first();
         $form.find('.buttonHolder').remove();
         modal.find('.modal-body').html($form);
+        modal.find('.modal-title').html($newForm.find('#title').html());
+        $('body').append(modal);
+        $('#id_equation_type').trigger('change'); //see also probability-functions.js
         return $form;
     },
 
@@ -425,12 +422,9 @@ var modelModal = {
 
         $.get(url, function(newForm){
             var $newForm = $($.parseHTML(newForm));
-            var $form = self.populate_modal_body($newForm, modal);
-            modal.find('.modal-title').html($newForm.find('#title').html());
-            $('body').append(modal);
-            $('#id_equation_type').trigger('change'); //see also probability-functions.js
-            modal.find('.modal-footer .btn-primary').on('click', function() {
-                self.ajax_submit($form, url, self.ajax_success(modal, selectInput), self.validation_error(modal));
+            self.populate_modal_body($newForm, modal);
+            modal.find('.modal-footer button[type=submit]').on('click', function() {
+                self.ajax_submit(url, self.ajax_success(modal, selectInput), self.validation_error(modal));
             });
 
             modal.modal('show');
@@ -451,8 +445,8 @@ var modelModal = {
                       <div class="modal-body">\
                       </div>\
                       <div class="modal-footer">\
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>\
-                        <button type="button"' + two_state_button() + '</button>\
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>\
+                            <button type="submit"' + two_state_button() + '</button>\
                       </div>\
                     </div>\
                   </div>\

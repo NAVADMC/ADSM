@@ -21,7 +21,7 @@ from django.http import HttpResponse
 from django.db.models import Max
 
 from Results.models import Unit
-from Results.utils import is_simulation_running
+from Results.utils import is_simulation_stopped
 from Results.summary import list_of_iterations
 from Results.graphing import rstyle, population_png
 from ADSMSettings.utils import workspace_path
@@ -65,13 +65,14 @@ def define_color_mappings():
 
 def graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus):
     largest_zone_radius = Zone.objects.aggregate(Max('radius'))['radius__max']
-    for i, freq in [(index, n_times) for index, n_times in enumerate(zone_focus) if n_times > 0]:
-        ax.add_patch(Circle(xy=(longitude[i], latitude[i]),
-                            color=zone_blues(freq / total_iterations),
-                            radius= largest_zone_radius / kilometers_in_one_latitude_degree,
-                            linewidth=0,
-                            zorder=freq,
-        ))
+    if largest_zone_radius:
+        for i, freq in [(index, n_times) for index, n_times in enumerate(zone_focus) if n_times > 0]:
+            ax.add_patch(Circle(xy=(longitude[i], latitude[i]),
+                                color=zone_blues(freq / total_iterations),
+                                radius= largest_zone_radius / kilometers_in_one_latitude_degree,
+                                linewidth=0,
+                                zorder=freq,
+            ))
 
 
 def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated, destroyed):
@@ -112,9 +113,8 @@ def population_results_map():
     """Creates a map that summarizes the range of outcomes amongst all iterations of a simulation.
     Estimated time = Unit.objects.count() / 650 in seconds.   """
     start_time = time()
-    fig= Figure(figsize=(60,52), frameon=True, tight_layout=True)  # Issue #168 aspect ratio doesn't adjust currently
-    ax = fig.add_subplot(1,1,1, axisbg='#DDDDDD')
-    ax.autoscale_view('tight')
+    fig= Figure(figsize=(60,52), frameon=True, tight_layout=True)
+    ax = fig.add_subplot(1,1,1, axisbg='#EEEEEE')
     ax.grid(color='white', linestyle='solid')
     rstyle(ax)
 
@@ -126,10 +126,9 @@ def population_results_map():
                 u.unitstats.cumulative_destroyed,
                 u.unitstats.cumulative_zone_focus, 
                 u.initial_size,
-                "%s %s %i" % (u.production_type.name, u.user_notes, u.unitstats.cumulative_destroyed) 
                 ) for u in queryset]
     total_iterations = float(len(list_of_iterations()))
-    latitude, longitude, infected, vaccinated, destroyed, zone_focus, herd_size, names = zip(*latlong)
+    latitude, longitude, infected, vaccinated, destroyed, zone_focus, herd_size = zip(*latlong)
     zone_blues, red_infected, green_vaccinated = define_color_mappings()
     
     graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus)
@@ -142,8 +141,9 @@ def population_results_map():
                             neutral_latitude,
                             marker='s',
                             s=[min(max(10, size // 100), 1000) for size in herd_size],
-                            color=(0.6, 0.6, 0.6, 1.0),
+                            color=(0.2, 0.2, 0.2, 1.0),
                             zorder=1000)
+    Results.graphing.crop_to_fit_map(ax)
     print("Population Map took %i seconds" % int(time() - start_time))
     return fig
 
@@ -187,7 +187,7 @@ def population_zoom_png(request=None):
         with open(path, "rb") as img_file:
             return HttpResponse(img_file.read(), content_type='image/png')
     except IOError:
-        save_image = not is_simulation_running()  # we want to check this before reading the stats, this is in motion
+        save_image = is_simulation_stopped()  # we want to check this before reading the stats, this is in motion
         if not save_image:  # in order to avoid database locked Issue #150
             return population_png(request, 58.5, 52)
         else:

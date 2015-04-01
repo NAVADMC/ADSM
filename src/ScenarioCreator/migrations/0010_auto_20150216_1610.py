@@ -8,7 +8,7 @@ import ScenarioCreator.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ScenarioCreator', '0008_remove_controlmasterplan_units_detected_before_triggering_vaccination'),
+        ('ScenarioCreator', '0009_remove_controlmasterplan_units_detected_before_triggering_vaccination'),
     ]
 
     operations = [

@@ -1,4 +1,5 @@
 {# Similar to EmbeddedFormset but includes links for sorting by column #}
+    {% load cycle from future%}
     {{ formset.non_form_errors.as_ul }}
     {{ formset.management_form }}
     <table id="formset" class="form">
@@ -31,3 +32,4 @@
             </tr>
         {% endfor %}
     </table>
+    <p class="help-block"><em>Showing the first 100 Units.  Use sort and filters to find specific Units.</em></p>

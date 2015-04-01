@@ -130,9 +130,7 @@ class CleanTest(TestCase):
     def test_production_type_names(self):
         pt = ProductionType(name='Bob')
         pt.clean_fields()
-        pt = ProductionType(name='123Bob')
-        self.assertRaises(ValidationError, pt.clean_fields)
-        pt = ProductionType(name='Bob@#$%^&*')
+        pt = ProductionType(name='Bob,')
         self.assertRaises(ValidationError, pt.clean_fields)
         pt = ProductionType(name='TABLE')
         self.assertRaises(ValidationError, pt.clean_fields)

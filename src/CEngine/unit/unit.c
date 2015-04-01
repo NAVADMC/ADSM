@@ -961,6 +961,7 @@ UNT_load_unit_callback (void *data, GHashTable *dict)
       #if DEBUG
         g_debug ("  adding new production type \"%s\"", production_type_name);
       #endif
+      g_array_set_size (units->production_type_counts, production_type_names->len);
     }
   /* This next assignment loses the pointer to the production type name in the
    * row returned by the query. But that is OK, because that string is owned
@@ -1084,6 +1085,35 @@ UNT_load_unit_callback (void *data, GHashTable *dict)
 
 
 /**
+ * Retrieves one production type from the database. This function is only used
+ * during a dry run to check parameters; normally production types are gathered
+ * as the list of units is read in.
+ *
+ * @param data pointer to a UNT_unit_list_t structure.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
+ * @return 0
+ */
+static int
+UNT_load_prodtype_callback (void *data, GHashTable *dict)
+{
+  UNT_unit_list_t *units;
+  char *production_type_name;
+
+  units = (UNT_unit_list_t *) data;
+  production_type_name = g_hash_table_lookup (dict, "name");
+  g_ptr_array_add (units->production_type_names, g_strdup(production_type_name));
+  #if DEBUG
+    g_debug ("  adding new production type \"%s\"", production_type_name);
+  #endif
+  g_array_set_size (units->production_type_counts, units->production_type_names->len);
+
+  return 0;
+}
+
+
+
+/**
  * Loads a unit list from a scenario database.  Use UNT_unit_list_project() to
  * convert the lats and lons to a flat map.  Also, a bounding rectangle has not
  * been computed; use either UNT_unit_list_unoriented_bounding_box() or
@@ -1096,7 +1126,7 @@ UNT_unit_list_t *
 #ifdef USE_SC_GUILIB
 UNT_load_unit_list (sqlite3 *db, GPtrArray *production_types)
 #else
-UNT_load_unit_list (sqlite3 *db)
+UNT_load_unit_list (sqlite3 *db, gboolean production_types_only)
 #endif
 {
   UNT_unit_list_t *units;
@@ -1111,8 +1141,18 @@ UNT_load_unit_list (sqlite3 *db)
   units->production_types = production_types;
 #endif
 
-  sqlite3_exec_dict (db, "SELECT unit.id,name,latitude,longitude,initial_state,days_in_initial_state,days_left_in_initial_state,initial_size,user_notes FROM ScenarioCreator_unit unit,ScenarioCreator_productiontype prodtype where unit.production_type_id=prodtype.id",
-                     UNT_load_unit_callback, units, &sqlerr);
+  /* When doing a dry run to check parameters, all we need is the production
+   * types, not the units. */
+  if (!production_types_only)
+    {
+      sqlite3_exec_dict (db, "SELECT unit.id,name,latitude,longitude,initial_state,days_in_initial_state,days_left_in_initial_state,initial_size,user_notes FROM ScenarioCreator_unit unit,ScenarioCreator_productiontype prodtype where unit.production_type_id=prodtype.id",
+                         UNT_load_unit_callback, units, &sqlerr);
+    }
+  else
+    {
+      sqlite3_exec_dict (db, "SELECT name FROM ScenarioCreator_productiontype ORDER BY id",
+                         UNT_load_prodtype_callback, units, &sqlerr);
+    }
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
@@ -1152,10 +1192,6 @@ UNT_unit_list_append (UNT_unit_list_t * units, UNT_unit_t * unit)
   unit->index = new_length - 1;
 
   /* Update the count of units by production type */
-  if (units->production_type_counts->len <= unit->production_type)
-    {
-      g_array_set_size (units->production_type_counts, unit->production_type + 1);
-    }
   g_array_index (units->production_type_counts, guint, unit->production_type) += 1;
 
   return new_length;

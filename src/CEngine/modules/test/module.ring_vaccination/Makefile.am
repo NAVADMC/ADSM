@@ -15,9 +15,9 @@ all.exp: $(nodist_all_exp_SOURCES)
 
 # Do include the test scenario parameter files in the distribution file.
 
-EXTRA_DIST = radius_0.xml radius_0_w_vars.xml radius_0.5.xml radius_1.xml \
- radius_2.5.xml radius_1_delay_1.xml radius_1_delay_2.xml \
- spread.xml spread_radius_1.xml spread_radius_2.5.xml spread_radius_10.xml \
+EXTRA_DIST = radius_0.xml radius_0_w_vars.xml radius_0point5.xml radius_1.xml \
+ radius_2point5.xml radius_1_delay_1.xml radius_1_delay_2.xml \
+ spread.xml spread_radius_1.xml spread_radius_2point5.xml spread_radius_10.xml \
  2species_same_params.xml 2species_diff_params.xml \
  revaccinate_0.xml revaccinate_1.xml \
  none_trigger_none_vacc.xml cattle_trigger_cattle_vacc.xml \

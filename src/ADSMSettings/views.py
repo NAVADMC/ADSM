@@ -2,7 +2,9 @@ import re
 import os
 import shutil
 from django.db import close_old_connections
+from django.http import JsonResponse
 from django.shortcuts import redirect, render, HttpResponse
+from django.utils.html import strip_tags
 from ADSMSettings.models import scenario_filename, SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
@@ -53,8 +55,12 @@ def file_dialog(request):
 def run_importer(request):
     param_path = handle_file_upload(request, 'parameters_xml', is_temp_file=True)  # we don't want param XMLs stored next to population XMLs
     popul_path = handle_file_upload(request, 'population_xml')
+    import_legacy_scenario(param_path, popul_path)
+
+
+def import_legacy_scenario(param_path, popul_path):
     names_without_extensions = tuple(os.path.splitext(os.path.basename(x))[0] for x in [param_path, popul_path])  # stupid generators...
-    new_scenario(request)  # I realized this was WAY simpler than creating a new database connection
+    new_scenario()  # I realized this was WAY simpler than creating a new database connection
     import_naadsm_xml(popul_path, param_path)  # puts all the data in activeSession
     scenario_filename('%s with %s' % names_without_extensions)
     return save_scenario(None)  # This will overwrite a file of the same name without prompting
@@ -105,16 +111,18 @@ def open_test_scenario(request, target):
 def save_scenario(request=None):
     """Save to the existing session of a new file name if target is provided
     """
-    try:
-        target = request.POST['filename']
-        scenario_filename(target)
-    except:
+    if request is not None and 'filename' in request.POST:
+        target = request.POST['filename'] 
+    else:
         target = scenario_filename()
-    print('Copying database to', target)
-    full_path = workspace_path(target) + ('.sqlite3' if not target.endswith('.sqlite3') else '')
-    save_error = None
     try:
-        assert(r'\\' not in target and '/' not in target)
+        target = strip_tags(target)
+        if '\\' in target or '/' in target:  # this validation has to be outside of scenario_filename in order for open_test_scenario to work
+            raise ValueError("Slashes are not allowed: " + target)
+        scenario_filename(target)
+        print('Copying database to', target)
+        full_path = workspace_path(target) + ('.sqlite3' if not target.endswith('.sqlite3') else '')
+
         shutil.copy(db_path(), full_path)
         unsaved_changes(False)  # File is now in sync
         print('Done Copying database to', full_path)
@@ -147,7 +155,8 @@ def copy_file(request, target):
     return redirect('/app/Workspace/')
 
 
-def download_file(request, target):
+def download_file(request):
+    target = request.GET['target']
     file_path = workspace_path(target)
     f = open(file_path, "rb")
     response = HttpResponse(f, content_type="application/x-sqlite")  # TODO: generic content type
@@ -160,3 +169,14 @@ def new_scenario(request=None):
     reset_db('default')
     update_db_version()
     return redirect('/setup/Scenario/1/')
+
+
+def backend(request):
+    from django.contrib.auth import login
+    from django.contrib.auth.models import User
+    user = User.objects.filter(is_staff=True).first()
+    print(user, user.username)
+    user.backend = 'django.contrib.auth.backends.ModelBackend'
+    login(request, user)
+    return redirect('/admin/')
+

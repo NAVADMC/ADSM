@@ -7,14 +7,14 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ScenarioCreator', '0005_vacc_triggers_initial'),
+        ('ADSMSettings', '0002_simulationprocessrecord'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='productiongroup',
-            name='name',
-            field=models.CharField(default='All', max_length=255),
-            preserve_default=False,
+            model_name='smsession',
+            name='simulation_has_started',
+            field=models.BooleanField(default=False),
+            preserve_default=True,
         ),
     ]

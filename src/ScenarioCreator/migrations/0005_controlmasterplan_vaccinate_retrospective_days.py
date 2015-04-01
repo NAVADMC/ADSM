@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ScenarioCreator', '0003_auto_20150126_1358'),
+        ('ScenarioCreator', '0004_auto_20150302_1619'),
     ]
 
     operations = [
