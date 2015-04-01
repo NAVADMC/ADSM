@@ -122,11 +122,11 @@ $(function(){
         }
     });
     
-    $(document).on('change', 'input, select', function(){
+    $(document).on('change', ':input, select', function(){
         $('.btn-save').removeAttr('disabled')
     });
     
-    $(document).on('focus', 'input', function(){
+    $(document).on('input', 'input, textarea', function(){
         $('.btn-save').removeAttr('disabled')
     });
     
