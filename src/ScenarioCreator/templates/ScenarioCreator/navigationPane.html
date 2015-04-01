@@ -57,13 +57,13 @@
             </h2>
          
     </nav>
-    <section id="left-panel" class="layout-panel col-xs-3">
-        {% block content %}
-
-        {% endblock %}
-    </section>
-    <section id="center-panel" class="layout-panel col-xs-3"></section>
-    <section id="right-panel" class="layout-panel col-xs-3"></section>
+    {% block main_layout %}
+        <section id="main-panel" class="layout-panel col-md-6 center-block">
+            {% block content %}
+    
+            {% endblock %}
+        </section>
+    {% endblock %}
 
     {% include "population_panel.html" %}
   
