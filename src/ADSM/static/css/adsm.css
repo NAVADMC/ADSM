@@ -830,3 +830,12 @@ select[multiple] {
     min-height: 150px;
 }
 
+/*----------------------------------------------------*/
+/*----- Assign Disease Spread -----*/
+/*----------------------------------------------------*/
+.intro_text, #assign_spread_wrapper{
+    padding: 0;
+}
+.intro_text, .intro_text p {
+    color: #606060;
+}

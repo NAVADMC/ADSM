@@ -18,8 +18,8 @@ all.exp: $(nodist_all_exp_SOURCES)
 EXTRA_DIST = delay_0.xml delay_1.xml delay_3.xml \
  delay_0_w_vars.xml delay_1_w_vars.xml delay_3_w_vars.xml \
  delay_0_limit_1.xml delay_0_limit_2.xml \
- delay_0_limit_1-4.xml delay_0_limit_1-4_w_vars.xml \
- delay_3_limit_1-4.xml delay_3_limit_1-4_w_vars.xml \
+ delay_0_limit_1to4.xml delay_0_limit_1to4_w_vars.xml \
+ delay_3_limit_1to4.xml delay_3_limit_1to4_w_vars.xml \
  delay_0_limit_0.xml trace_out_0.xml trace_out_1.xml \
  trace_out_success.xml trace_out_success_w_vars.xml \
  trace_out_failure.xml trace_out_failure_w_vars.xml \
@@ -34,7 +34,7 @@ EXTRA_DIST = delay_0.xml delay_1.xml delay_3.xml \
  priority_prodtype_time_1.xml priority_prodtype_time_2.xml \
  priority_time_prodtype.xml \
  priority_prodtype_time_reason.xml priority_prodtype_reason_time.xml \
- priority_prodtype-1_time_reason.xml priority_reason_time_prodtype-1.xml \
+ priority_prodtype_minus1_time_reason.xml priority_reason_time_prodtype_minus1.xml \
  vacc_priority_prodtype_time_1.xml vacc_priority_prodtype_time_2.xml \
  vacc_priority_time_prodtype.xml vacc_dest_same_day.xml \
  vacc_dest_same_day_2.xml vacc_dest_same_day_3.xml vacc_dest_same_day_4.xml \
@@ -53,7 +53,7 @@ EXTRA_DIST = delay_0.xml delay_1.xml delay_3.xml \
  priority_detect_nearby_trace_nm.xml priority_nearby_detect_trace_nm.xml \
  priority_trace_detect_nearby_nm.xml destruction_list_3_units_3_reasons_nm.xml \
  priority_prodtype_reason_time_nm.xml priority_prodtype_time_reason_nm.xml \
- priority_prodtype-1_time_reason_nm.xml priority_reason_time_prodtype-1_nm.xml \
+ priority_prodtype_minus1_time_reason_nm.xml priority_reason_time_prodtype_minus1_nm.xml \
  trace_in_success.xml trace_line_no_trace.xml trace_line_no_trace_w_vars.xml \
  trace_line_in_out_fail.xml trace_line_in_out_fail_w_vars.xml \
  trace_line_in_out_succeed.xml trace_line_in_out_succeed_w_vars.xml \

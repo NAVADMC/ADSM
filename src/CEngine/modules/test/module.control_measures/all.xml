@@ -439,7 +439,7 @@
 
   <population-file>8units_all_infected</population-file>
 
-  <parameter-file>delay_0_limit_1-4</parameter-file>
+  <parameter-file>delay_0_limit_1to4</parameter-file>
 
   <parameter-description>
     The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
@@ -487,7 +487,7 @@
 
   <population-file>8units_all_infected</population-file>
 
-  <parameter-file>delay_3_limit_1-4</parameter-file>
+  <parameter-file>delay_3_limit_1to4</parameter-file>
 
   <parameter-description>
     The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
@@ -533,7 +533,7 @@
 
   <population-file>8units_all_infected</population-file>
 
-  <parameter-file>delay_0_limit_1-4_w_vars</parameter-file>
+  <parameter-file>delay_0_limit_1to4_w_vars</parameter-file>
 
   <parameter-description>
     The parameters are identical to "1 incr. to 4 units/day destruction limit"
@@ -592,7 +592,7 @@
 
   <population-file>8units_all_infected</population-file>
 
-  <parameter-file>delay_3_limit_1-4_w_vars</parameter-file>
+  <parameter-file>delay_3_limit_1to4_w_vars</parameter-file>
 
   <parameter-description>
     The parameters are identical to "3 days to start destruction program, 1
@@ -3481,7 +3481,7 @@
 
   <population-file>4units_line_4</population-file>
 
-  <parameter-file>priority_prodtype-1_time_reason</parameter-file>
+  <parameter-file>priority_prodtype_minus1_time_reason</parameter-file>
 
   <parameter-description>
     For cattle (unit 0), the latent period lasts 1 day, infectiousness lasts 10
@@ -3565,7 +3565,7 @@
 
   <population-file>4units_line_4</population-file>
 
-  <parameter-file>priority_reason_time_prodtype-1</parameter-file>
+  <parameter-file>priority_reason_time_prodtype_minus1</parameter-file>
 
   <parameter-description>
     For cattle (unit 0), the latent period lasts 1 day, infectiousness lasts 10
@@ -3719,7 +3719,7 @@
 
   <population-file>4units_line_4</population-file>
 
-  <parameter-file>priority_prodtype-1_time_reason_nm</parameter-file>
+  <parameter-file>priority_prodtype_minus1_time_reason_nm</parameter-file>
 
   <parameter-description>
     Parameters: see "priority production type &gt; time waiting &gt; reason, -1
@@ -3759,7 +3759,7 @@
 
   <population-file>4units_line_4</population-file>
 
-  <parameter-file>priority_reason_time_prodtype-1_nm</parameter-file>
+  <parameter-file>priority_reason_time_prodtype_minus1_nm</parameter-file>
 
   <parameter-description>
     Parameters: see "priority reason &gt; time waiting &gt; production type, -1

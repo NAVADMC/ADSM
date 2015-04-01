@@ -66,7 +66,7 @@ $(function(){
     });
     
     $(document).on('click', '#update_adsm', function(event){
-        $(this).addClass('loading_button')
+        $(this).removeClass('loading_button')
         event.preventDefault();
         $.get('/app/Update/', function(result){
             if( result == "success"){
@@ -86,8 +86,9 @@ $(function(){
                 });
             }
         });
-    })
-
+    }); 
+    $('#update_adsm').click() // if the element loads in the page, it will be clicked immediately
+    
     $(document).on('saved', 'form:has(.unsaved)', function(){ //fixes 'Save' button with wrong color state
         $(this).find('.unsaved').removeClass('unsaved');
     })
@@ -379,6 +380,9 @@ var modelModal = {
         var $form = $newForm.filter('section').find('form').first();
         $form.find('.buttonHolder').remove();
         modal.find('.modal-body').html($form);
+        modal.find('.modal-title').html($newForm.find('#title').html());
+        $('body').append(modal);
+        $('#id_equation_type').trigger('change'); //see also probability-functions.js
         return $form;
     },
 
@@ -401,9 +405,6 @@ var modelModal = {
         $.get(url, function(newForm){
             var $newForm = $($.parseHTML(newForm));
             self.populate_modal_body($newForm, modal);
-            modal.find('.modal-title').html($newForm.find('#title').html());
-            $('body').append(modal);
-            $('#id_equation_type').trigger('change'); //see also probability-functions.js
             modal.find('.modal-footer button[type=submit]').on('click', function() {
                 self.ajax_submit(url, self.ajax_success(modal, selectInput), self.validation_error(modal));
             });

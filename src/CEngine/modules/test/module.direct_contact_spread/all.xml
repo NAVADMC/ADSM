@@ -1849,7 +1849,7 @@
 
   <population-file>2units</population-file>
 
-  <parameter-file>fixed_rate_0.5</parameter-file>
+  <parameter-file>fixed_rate_1_every_2</parameter-file>
   
   <parameter-description>
     The latent period lasts 1 day, infectiousness lasts 12 days, clinical signs
@@ -1899,7 +1899,7 @@
 
   <population-file>2units</population-file>
 
-  <parameter-file>fixed_rate_0.33</parameter-file>
+  <parameter-file>fixed_rate_1_every_3</parameter-file>
   
   <parameter-description>
     The latent period lasts 1 day, infectiousness lasts 12 days, clinical signs

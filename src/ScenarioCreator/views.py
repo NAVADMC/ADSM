@@ -68,8 +68,7 @@ def initialize_spread_assignments():
         
 
 def assign_disease_spread(request):
-    if DiseaseSpreadAssignment.objects.count() < ProductionType.objects.count() ** 2:
-        initialize_spread_assignments()
+    initialize_spread_assignments()
 
     SpreadSet = modelformset_factory(DiseaseSpreadAssignment, extra=0, form=DiseaseSpreadAssignmentForm)
     include_spread_form = DiseaseIncludeSpreadForm(request.POST or None, instance=Disease.objects.get())
@@ -373,7 +372,7 @@ def delete_entry(request, primary_key):
 
 
 def list_per_model(model_name, model):
-    context = {'entries': model.objects.all()[:200],
+    context = {'entries': model.objects.all(),
                'class': model_name,
                'name': spaces_for_camel_case(model_name)}
     return context

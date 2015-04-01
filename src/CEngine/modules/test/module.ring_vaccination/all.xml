@@ -131,7 +131,7 @@
 
   <population-file>16units_square</population-file>
 
-  <parameter-file>radius_0.5</parameter-file>
+  <parameter-file>radius_0point5</parameter-file>
 
   <parameter-description>
     The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
@@ -221,7 +221,7 @@
 
   <population-file>16units_square</population-file>
 
-  <parameter-file>radius_2.5</parameter-file>
+  <parameter-file>radius_2point5</parameter-file>
 
   <parameter-description>
     The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
@@ -610,7 +610,7 @@
 
   <population-file>16units_square</population-file>
 
-  <parameter-file>spread_radius_2.5</parameter-file>
+  <parameter-file>spread_radius_2point5</parameter-file>
 
   <parameter-description>
     The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
@@ -3874,7 +3874,7 @@
   <creation-date>28 May 2008</creation-date>
   <model-version>3.1</model-version>
 
-  <population-file>no_rtree_lat-45</population-file>
+  <population-file>no_rtree_lat_minus45</population-file>
 
   <parameter-file>lat_and_rtree</parameter-file>
 
@@ -4025,7 +4025,7 @@
   <creation-date>28 May 2008</creation-date>
   <model-version>3.1</model-version>
 
-  <population-file>rtree_lat-45</population-file>
+  <population-file>rtree_lat_minus45</population-file>
 
   <parameter-file>lat_and_rtree</parameter-file>
 

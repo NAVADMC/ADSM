@@ -88,18 +88,6 @@ typedef struct
   int detection_day;
   RPT_reporting_t *first_det_u_inf;
   RPT_reporting_t *first_det_a_inf;
-  RPT_reporting_t *ratio;
-  unsigned int nrecent_days; /**< The time period over which to compare recent
-    infections.  A value of 14 would mean to report the number of new
-    infections in the last 2 weeks over the number of new infections in the
-    2 weeks before that. */
-  unsigned int *nrecent_infections; /**< The number of new infections on each
-    day in the recent past.  The length of this array is nrecent_days * 2. */
-  unsigned int recent_day_index; /**< The current index into the
-    nrecent_infections array.  The index "rotates" through the array, arriving
-    back at the beginning and starting to overwrite old values every
-    nrecent_days * 2 days. */
-  unsigned int numerator, denominator;
 }
 local_data_t;
 
@@ -114,7 +102,6 @@ void
 handle_before_each_simulation_event (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
-  unsigned int i;
 
   #if DEBUG
     g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -127,9 +114,6 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
    * have no value until there is a detection. */
   RPT_reporting_set_null (local_data->first_det_u_inf);
   RPT_reporting_set_null (local_data->first_det_a_inf);
-  RPT_reporting_set_null (local_data->ratio);
-  for (i = 0; i < local_data->nrecent_days * 2; i++)
-    local_data->nrecent_infections[i] = 0;
 
   #if DEBUG
     g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -151,10 +135,6 @@ void
 handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event)
 {
   local_data_t *local_data;
-  unsigned int current, hi, i, count;
-#if DEBUG
-  GString *s;
-#endif
 
 #if DEBUG
   g_debug ("----- ENTER handle_new_day_event (%s)", MODEL_NAME);
@@ -167,60 +147,6 @@ handle_new_day_event (struct adsm_module_t_ *self, EVT_new_day_event_t * event)
     {
       g_ptr_array_foreach (local_data->daily_outputs, RPT_reporting_zero_as_GFunc, NULL);
     }
-
-  /* Move the pointer for the current day's infection count ahead. */
-  hi = local_data->nrecent_days * 2;
-  if (event->day == 1)
-    {
-      current = local_data->recent_day_index;
-    }
-  else
-    {
-      current = (local_data->recent_day_index + 1) % hi;
-      local_data->recent_day_index = current;
-      /* Zero the current day's count. */
-      local_data->nrecent_infections[current] = 0;
-    }
-
-  /* Compute the denominator of the infection ratio for today. */
-  local_data->denominator = 0;
-  /* The numbers that sum to the denominator start at 1 past the current point
-   * and continue for the period defined by nrecent_days. */
-  for (i = (current + 1) % hi, count = 0;
-       count < local_data->nrecent_days; i = (i + 1) % hi, count++)
-    local_data->denominator += local_data->nrecent_infections[i];
-
-  /* Compute the numerator, minus the current day's infections (which are yet
-   * to happen). */
-  local_data->numerator = 0;
-  for (count = 0; count < local_data->nrecent_days; i = (i + 1) % hi, count++)
-    local_data->numerator += local_data->nrecent_infections[i];
-
-#if DEBUG
-  s = g_string_new (NULL);
-  g_string_append_printf (s, "at beginning of day %i counts of recent infections = [", event->day);
-  for (i = 0; i < hi; i++)
-    {
-      if (i > 0)
-        g_string_append_c (s, ',');
-      g_string_append_printf (s, i == current ? "(%u)" : "%u", local_data->nrecent_infections[i]);
-    }
-  g_string_append_c (s, ']');
-  g_debug ("%s", s->str);
-  g_string_free (s, TRUE);
-  g_debug ("denominator = sum from %u to %u (inclusive) = %u",
-           (current + 1) % hi, (current + local_data->nrecent_days) % hi, local_data->denominator);
-#endif
-
-  /* Set the ratio of recent infections to infections before that.  If there
-   * are no detections in the current day, this will be the value that will be
-   * reported at the end of the day.  Note that the value is undefined until a
-   * certain number of days has passed, e.g., if we are reporting new infection
-   * this week over new infections last week, the value will be undefined until
-   * 2 weeks have passed. */
-  if (event->day >= (local_data->nrecent_days * 2) && local_data->denominator > 0)
-    RPT_reporting_set_real (local_data->ratio,
-                            1.0 * local_data->numerator / local_data->denominator);
 
 #if DEBUG
   g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
@@ -292,10 +218,6 @@ handle_infection_event (struct adsm_module_t_ *self, EVT_infection_event_t * eve
   ADSM_contact_type cause;
   UNT_production_type_t prodtype;
   double nanimals;
-  unsigned int count;
-#if DEBUG
-  GString *s;
-#endif
 
 #if DEBUG
   g_debug ("----- ENTER handle_infection_event (%s)", MODEL_NAME);
@@ -356,50 +278,6 @@ handle_infection_event (struct adsm_module_t_ *self, EVT_infection_event_t * eve
       RPT_reporting_add_integer (local_data->first_det_u_inf, 1);
       RPT_reporting_add_real (local_data->first_det_a_inf, nanimals);
     }
-
-  /* Update the ratio of recent infections to infections before that.  Note
-   * that the value is undefined until a certain number of days has passed,
-   * e.g., if we are reporting new infection this week over new infections last
-   * week, the value will be undefined until 2 weeks have passed. */
-  local_data->nrecent_infections[local_data->recent_day_index]++;
-  count = local_data->nrecent_infections[local_data->recent_day_index];
-#if DEBUG
-  s = g_string_new (NULL);
-  g_string_append_printf (s, "recent infection[%u] now = %u", local_data->recent_day_index, count);
-#endif
-  if (event->day >= local_data->nrecent_days * 2)
-    {
-      if (local_data->denominator > 0)
-        {
-          RPT_reporting_set_real (local_data->ratio,
-                                  1.0 * (local_data->numerator + count) / local_data->denominator);
-#if DEBUG
-          g_string_append_printf (s, ", ratio %u/%u = %g",
-                                  local_data->numerator + count,
-                                  local_data->denominator,
-                                  RPT_reporting_get_real (local_data->ratio));
-#endif
-        }
-      else
-        {
-#if DEBUG
-          g_string_append_printf (s, ", denominator=0, ratio remains at old value of %g",
-                                  RPT_reporting_get_real (local_data->ratio));
-#endif
-          ;
-        }
-    }
-  else
-    {
-#if DEBUG
-      g_string_append_printf (s, ", no ratio before day %u", local_data->nrecent_days * 2);
-#endif
-      ;
-    }
-#if DEBUG
-  g_debug ("%s", s->str);
-  g_string_free (s, TRUE);
-#endif
 
 #if DEBUG
   g_debug ("----- EXIT handle_infection_event (%s)", MODEL_NAME);
@@ -465,18 +343,7 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 char *
 to_string (struct adsm_module_t_ *self)
 {
-  local_data_t *local_data;
-  GString *s;
-  char *chararray;
-
-  local_data = (local_data_t *) (self->model_data);
-  s = g_string_new (NULL);
-  g_string_sprintf (s, "<%s ratio-period=%u>", MODEL_NAME, local_data->nrecent_days);
-
-  /* don't return the wrapper object */
-  chararray = s->str;
-  g_string_free (s, FALSE);
-  return chararray;
+  return g_strdup_printf ("<%s>", MODEL_NAME);
 }
 
 
@@ -499,7 +366,6 @@ local_free (struct adsm_module_t_ *self)
   local_data = (local_data_t *) (self->model_data);
   g_ptr_array_free (local_data->daily_outputs, /* free_seg = */ TRUE);
   g_ptr_array_free (local_data->cumul_outputs, /* free_seg = */ TRUE);
-  g_free (local_data->nrecent_infections);
   g_free (local_data);
   g_ptr_array_free (self->outputs, /* free_seg = */ TRUE); /* also frees all output variables */
   g_free (self);
@@ -647,11 +513,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_NoSubcategory, NULL, 0,
         self->outputs, NULL },
 
-      { &local_data->ratio, "ratio", RPT_real,
-        RPT_NoSubcategory, NULL, 0,
-        RPT_NoSubcategory, NULL, 0,
-        self->outputs, NULL },
-
       { NULL }
     };  
     RPT_bulk_create (outputs);
@@ -670,12 +531,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       g_ptr_array_remove_fast (self->outputs, local_data->num_animals_infected_by_cause_and_prodtype[ADSM_UnspecifiedInfectionType][prodtype] );
       g_ptr_array_remove_fast (self->outputs, local_data->cumul_num_animals_infected_by_cause_and_prodtype[ADSM_UnspecifiedInfectionType][prodtype] );
     }
-
-  /* A list to store the number of new infections on each day for the recent
-   * past. */
-  local_data->nrecent_days = 7;
-  local_data->nrecent_infections = g_new0 (unsigned int, local_data->nrecent_days * 2);
-  local_data->recent_day_index = 0;
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);

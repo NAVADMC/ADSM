@@ -32,6 +32,12 @@ def git_adsm_sha():
     return version
 
 
+def singular(name):
+    if name[-1] == 's':
+        return name[:-1]
+    return name
+
+
 def basic_context(request):
     context = {}
     
@@ -72,7 +78,7 @@ def basic_context(request):
         validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment',
                              'DirectSpreads', 'AssignSpreads', 'ControlMasterPlan', 'Protocols', 'ProtocolAssignments', 'Zones', 'ZoneEffects',
                              'ZoneEffectAssignments']
-        context['missing_values'] = {name: context[name] for name in validation_models if not context[name]}
+        context['missing_values'] = {singular(name): context[name] for name in validation_models if not context[name]}
         context['Simulation_ready'] = simulation_ready_to_run(context)
         disease = Disease.objects.get()
         context['javascript_variables'] = {'use_within_unit_prevalence':      js(disease.use_within_unit_prevalence),

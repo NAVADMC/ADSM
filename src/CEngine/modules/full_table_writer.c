@@ -23,7 +23,6 @@
 #define new full_table_writer_new
 #define run full_table_writer_run
 #define local_free full_table_writer_free
-#define handle_before_any_simulations_event full_table_writer_handle_before_any_simulations_event
 #define handle_declaration_of_outputs_event full_table_writer_handle_declaration_of_outputs_event
 #define handle_before_each_simulation_event full_table_writer_handle_before_each_simulation_event
 #define handle_new_day_event full_table_writer_handle_new_day_event
@@ -103,36 +102,6 @@ typedef struct
     iteration. */
 }
 local_data_t;
-
-
-
-/**
- * Before any simulations, this module:
- * - sets the run number to zero
- * - sets the "printed header" flag to false.
- * - opens its output file and writes the table header
- *
- * @param self the model.
- * @param queue for any new events the model creates.
- */
-void
-handle_before_any_simulations_event (struct adsm_module_t_ * self,
-                                     EVT_event_queue_t * queue)
-{
-  local_data_t *local_data;
-
-#if DEBUG
-  g_debug ("----- ENTER handle_before_any_simulations_event (%s)", MODEL_NAME);
-#endif
-
-  local_data = (local_data_t *) (self->model_data);
-
-  local_data->printed_header = FALSE;
-
-#if DEBUG
-  g_debug ("----- EXIT handle_before_any_simulations_event (%s)", MODEL_NAME);
-#endif
-}
 
 
 
@@ -512,9 +481,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
 
   switch (event->type)
     {
-    case EVT_BeforeAnySimulations:
-      handle_before_any_simulations_event (self, queue);
-      break;
     case EVT_DeclarationOfOutputs:
       handle_declaration_of_outputs_event (self, &(event->u.declaration_of_outputs));
       break;
@@ -569,7 +535,11 @@ local_free (struct adsm_module_t_ *self)
 
   local_data = (local_data_t *) (self->model_data);
 
-  if (local_data->write_unit_stats)
+  /* If no runs were ever done, don't bother writing the unit stats. (This can
+   * happen when using the --dry-run switch.) Since the header for the numeric
+   * table is printed when the first New Day event is received, we can use the
+   * value of printed_header as a test of whether any runs were done. */
+  if (local_data->write_unit_stats && local_data->printed_header)
     {
       /* Write the unit stats table. The free function isn't a great place to do
        * this; maybe an AfterAllSimulations event is needed. */
@@ -607,7 +577,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   adsm_module_t *self;
   local_data_t *local_data;
   EVT_event_type_t events_listened_for[] = {
-    EVT_BeforeAnySimulations,
     EVT_DeclarationOfOutputs,
     EVT_BeforeEachSimulation,
     EVT_NewDay,
@@ -649,6 +618,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   #ifdef G_OS_WIN32
     local_data->channel = g_io_channel_win32_new_fd (STDOUT_FILENO);
   #endif
+  local_data->printed_header = FALSE;
   local_data->buf = g_string_new (NULL);
   local_data->unit_stats =
     g_hash_table_new_full (g_direct_hash, g_direct_equal,
