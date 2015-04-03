@@ -843,6 +843,21 @@ input[type=file], button {
     margin-left: calc(16.666vw - 280px); /*--remove and add col-xs-9 to html--*/
     width: 74.997vw ;
 }
+@media screen and (max-width: 1250px) {  /*--remove after panels are implemented--*/
+    #population_grid_wraper {
+        margin-left:-60px;
+    }
+    #population_grid_wraper:after {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 51px;
+        height: 100%;
+        background-color: #f1f1f1;
+    }
+}
 #unit_map {
     padding: 0;
     margin: 0;
