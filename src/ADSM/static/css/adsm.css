@@ -442,6 +442,38 @@ ul {
     padding-left: 0;
     margin-bottom: 54px;
     margin-top:5px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+#setupMenu:before {
+    content:"";
+    position: fixed;
+    top: 54px;
+    left: 0;
+    display: block;
+    width: 170px;
+    height: 6px;
+    z-index: 100;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.3)), color-stop(100%,rgba(0,0,0,0)));
+    visibility: hidden;
+}
+#setupMenu:after{
+    content:"";
+    position: fixed;
+    top: calc(100vh - 72px);
+    left: 0;
+    display: block;
+    width: 170px;
+    height: 6px;
+    z-index: 100;
+    background: -webkit-gradient(linear, left bottom, left top, color-stop(0%,rgba(0,0,0,0.3)), color-stop(100%,rgba(0,0,0,0)));
+    visibility: hidden;
+}
+#setupMenu {
+    direction: rtl;
+}
+#setupMenu a {
+    direction: ltr;
 }
 
 #setupMenu h2:first-child a{
