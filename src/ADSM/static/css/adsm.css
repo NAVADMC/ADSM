@@ -974,6 +974,75 @@ input[type=file], button {
 #farm_list td:last-child {
     padding-left: 10px;
 }
+/*-------------------------------------------------------------*/
+/*-----population filters-----*/
+/*-------------------------------------------------------------*/
+#farm_filter:before {
+    content:"";
+    width: 22.66vw;
+    position: absolute;
+    display: block;
+    top:-5px;
+    left:0;
+    height: 1px;
+    background: #ebebeb;
+}
+#farm_filter {
+    font-size: 13px;
+    position: relative;
+}
+#farm_filter tr:last-of-type td {
+    position:relative;
+}
+
+#farm_filter tr:last-of-type td:before {
+    display: block;
+    content: "Add Filter";
+    position: absolute;
+    top: 0px;
+    left: 5px;
+    width: 100%;
+    height: 20%;
+    font-style: italic;
+    pointer-events: none;
+    color: #62d7fd;
+    font-size: 13px;
+    font-family: 'Source Sans Pro';
+}
+#farm_filter tr:last-of-type select{
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    opacity: 0;
+    cursor: pointer;
+}
+#farm_filter tr:last-of-type select:active {
+    opacity: 1;
+}
+#farm_filter td {
+    display: inline;
+}
+#latitude td:first-child{
+    width: 60px;
+}
+#farm_filter input {
+    width: 60px;
+}
+#farm_filter tr:not(:last-child) td:first-child select {
+    width: 70px;
+    pointer-events: none;
+    -webkit-appearance: none;
+    border: none;
+    background: none;
+}
+#farm_filter #production_type__name td:first-child select,
+#farm_filter #initial_state td:first-child select {
+    width: 103px;
+}
+#farm_filter #production_type__name td:nth-child(2),
+#farm_filter #initial_state td:nth-child(2) {
+    display:none;
+}
 
 th .sortControls{
     opacity:0;
