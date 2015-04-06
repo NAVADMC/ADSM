@@ -840,6 +840,31 @@ select {
     margin-top: 5px;
     margin-left: 15px;
 }
+.delete-button,
+.copy-button {
+    margin-top: 5px;
+    width: 15px;
+    height: 18px;
+    margin-right: 10px;
+}
+.copy-button {
+    background-image: url('/static/icons/copy_sprite.png');
+    background-position: 0 0;
+}
+.copy-button:hover,
+.copy-button:focus {
+    background-image: url('/static/icons/copy_sprite.png');
+    background-position: 15px  0;
+}
+.delete-button {
+    background-image: url('/static/icons/delete_sprite.png');
+    background-repeat-y: no-repeat;
+    background-position: 0 2px;
+}
+.delete-button:hover,
+.delete-button:focus {
+    background-position: 15px 2px ;
+}
 
 input[type=file], button {
     display: inline;
