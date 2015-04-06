@@ -444,6 +444,7 @@ ul {
     margin-top:5px;
     max-height: calc(100vh - 120px);
     overflow-y: auto;
+    direction: rtl;
 }
 #setupMenu:before {
     content:"";
@@ -469,12 +470,6 @@ ul {
     background: -webkit-gradient(linear, left bottom, left top, color-stop(0%,rgba(0,0,0,0.3)), color-stop(100%,rgba(0,0,0,0)));
     visibility: hidden;
 }
-#setupMenu {
-    direction: rtl;
-}
-#setupMenu a {
-    direction: ltr;
-}
 
 #setupMenu h2:first-child a{
     border-top:1px solid #eeeeee;
@@ -499,6 +494,8 @@ ul {
     width:170px;
     position:relative;
     margin-bottom:1px;
+    margin-right: 5px;
+    direction: ltr;
 }
 
 #setupMenu a:before {
@@ -531,6 +528,7 @@ ul {
     font-weight:400;
     -webkit-border-radius:0 4px 4px 0;
     width:175px;
+    margin-right: 0;
 }
 
 #setupMenu span {
@@ -576,6 +574,10 @@ ul {
     bottom: 10px;
     left: 0;
     width:  170px;
+}
+#RunSimulationIn a,
+#RunSimulationRes a {
+    margin-right: 0;
 }
 /*----------------------need to remove the glypicon element and make a left facing arrow with hook for results------*/
 #RunSimulationRes a{
