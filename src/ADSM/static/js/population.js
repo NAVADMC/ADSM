@@ -209,3 +209,12 @@ $(document).on('click', '#farm_list .sortControls a', function(event){
     update_population_filter_and_sort($(this).attr('data-sort-by'));
     event.preventDefault()
 });
+
+$(document).on('click', '#refresh_map', function(){
+    $('#population_map_container').html('')  //clear previous contents
+    //TODO: set background of container to working.gif
+    //TODO: request 
+    var new_url = '?' + population_filter_string()
+    $('#population_map_container').load('/results/Population.png' + new_url)
+});
+

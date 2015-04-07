@@ -140,7 +140,7 @@ def population_results_map():
     uninvolved = ax.scatter(neutral_longitude,
                             neutral_latitude,
                             marker='s',
-                            s=[min(max(10, size // 100), 1000) for size in herd_size],
+                            s=[min(max(0.25, size / 100), 1000) for size in herd_size],
                             color=(0.2, 0.2, 0.2, 1.0),
                             zorder=1000)
     Results.graphing.crop_to_fit_map(ax)

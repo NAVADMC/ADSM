@@ -74,7 +74,7 @@ def scenario_filename(new_value=None):
     session = SmSession.objects.get()  # This keeps track of the state for all views and is used by basic_context
     if new_value:
         new_value = new_value.replace('.sqlite3', '')
-        if re.search(r'[^\w\d \\/_\(\)]', new_value):  # negative set, list of allowed characters
+        if re.search(r'[^\w\d\- \\/_\(\)]', new_value):  # negative set, list of allowed characters
             raise ValueError("Special characters are not allowed: " + new_value)
         session.scenario_filename = new_value
         session.save()
