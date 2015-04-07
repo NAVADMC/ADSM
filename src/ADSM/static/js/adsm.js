@@ -254,6 +254,15 @@ $(function(){
         // window.location.reload();
     });
     
+    $(window).resize( function(){
+        var nav = document.getElementById('setupMenu');  //need DOM element
+        if(nav.scrollHeight > nav.clientHeight){ // returns true if there's a `vertical` scrollbar, false otherwise..
+            $('#setupMenu-after, #setupMenu-before').css({'visibility': 'visible'})
+        }else{
+            $('#setupMenu-after, #setupMenu-before').css({'visibility': 'hidden'})
+        }
+    }); 
+    
     $('#pop-upload').on('submit',function(event){
         var filename = $(this).find('input[type=file]').val()
         if( filename.indexOf('.xml') == -1 && filename.indexOf('.csv') == -1) {

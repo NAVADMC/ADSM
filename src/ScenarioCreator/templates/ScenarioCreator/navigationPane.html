@@ -2,6 +2,7 @@
 {% load db_status_tags %}
 
 {% block main %}
+    <span id="setupMenu-before"></span>
     <nav id="setupMenu">
          
             <h2><a href="/setup/Scenario/1/" class="{{ "Scenario"|active:active_link}}">
@@ -57,6 +58,7 @@
             </h2>
          
     </nav>
+    <span id="setupMenu-after"></span>
     <section>
         {% block content %}
 

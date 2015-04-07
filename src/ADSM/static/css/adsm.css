@@ -307,8 +307,8 @@ ul {
     height: 34px;
     width: 50px;
     border-left: 1px solid #cdc7c0;
-    border-top: 17px solid rgba (0, 0, 0, 0);
-    border-bottom: 17px solid rgba (0, 0, 0, 0);
+    border-top: 17px solid rgba(0, 0, 0, 0);
+    border-bottom: 17px solid rgba(0, 0, 0, 0);
     opacity: .5;
 }
 .TB_btn.active:hover {
@@ -446,7 +446,7 @@ ul {
     overflow-y: auto;
     direction: rtl;
 }
-#setupMenu:before {
+#setupMenu-before {
     content:"";
     position: fixed;
     top: 54px;
@@ -458,7 +458,7 @@ ul {
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.3)), color-stop(100%,rgba(0,0,0,0)));
     visibility: hidden;
 }
-#setupMenu:after{
+#setupMenu-after{
     content:"";
     position: fixed;
     top: calc(100vh - 72px);
@@ -707,7 +707,7 @@ ul {
 .btn-primary,
 .btn-unsaved {
     background-color: #3577b1;
-    transition: all 2s ease;
+    transition: all .2s ease;
 }
 
 .btn-primary:hover,
@@ -871,15 +871,21 @@ select {
     height: 18px;
     margin-right: 10px;
 }
+
+/*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
 .copy-button {
     background-image: url('/static/icons/copy_sprite.png');
     background-position: 0 0;
 }
+
+/*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
 .copy-button:hover,
 .copy-button:focus {
     background-image: url('/static/icons/copy_sprite.png');
     background-position: 15px  0;
 }
+
+/*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
 .delete-button {
     background-image: url('/static/icons/delete_sprite.png');
     background-repeat-y: no-repeat;
