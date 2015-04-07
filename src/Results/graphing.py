@@ -96,7 +96,7 @@ def crop_to_fit_map(axis):
     axis.set_xlim(x_center - largest_range, x_center + largest_range)
 
 
-def population_png(request, width_inches=8.5, height_inches=8):
+def population_png(request, width_inches=8, height_inches=8):
     query_filter = Q()
     params = filtering_params(request)
     for key, value in params.items():  # loops through params and stacks filters in an AND fashion
