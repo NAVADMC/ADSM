@@ -1054,7 +1054,7 @@ input[type=file], button {
     -webkit-appearance: menulist;
     pointer-events: all;
 }
-#farm_list input.ediable {
+#farm_list input.editable {
     border: 1px solid #ccc;
     pointer-events: all;
 }
