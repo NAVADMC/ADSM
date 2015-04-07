@@ -931,14 +931,21 @@ input[type=file], button {
         background-color: #f1f1f1;
     }
 }
+#population_map_container {
+    min-height: 23.666vw;
+}
 #unit_map {
     padding: 0;
     margin: 0;
-    width: calc(24.999vw + 45px); /*--remove and add col-xs-3 to html--*/
+    width: calc(100% + 15px);
     float: left;
-    margin-top: -35px;
-    margin-left: -45px;
+    margin-left: -15px;
+    margin-top: -6px;
+    margin-bottom: 24px;
 }
+/*#refresh_map {
+    background: transparent;
+}*/
 #farm_list_container{
     float: right;
     width: 49.98vw;
@@ -1289,4 +1296,29 @@ select[multiple] {}
 }
 .intro_text, .intro_text p {
     color: #606060;
+}
+/*----------------------------------------------------*/
+/*----- global overrides -----*/
+/*----------------------------------------------------*/
+.action_link {
+    background: transparent;
+    color: #62d7fd;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    font-weight: 400;
+    margin: 0;
+    padding: 2px;
+    opacity: .7;
+    transition: all .2s ease;
+}
+.action_link:hover,
+.action_link:focus {
+    opacity: 1;
+    background: transparent;
+    color: #62d7fd !important;
+    font-weight: 400;
+}
+.action_link:focus {
+    outline: 1px solid #62d7fd;
 }
