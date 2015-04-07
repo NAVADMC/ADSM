@@ -40,6 +40,7 @@ class SmSession(models.Model):
     population_upload_status = models.CharField(default='', null=True, blank=True, max_length=255)
     population_upload_percent = models.FloatField(default=0)
     simulation_has_started = models.BooleanField(default=False)
+    iteration_text = models.TextField(default='')
 
     def set_population_upload_status(self, status=None, percent=None):
         if status:

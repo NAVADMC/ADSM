@@ -10,7 +10,7 @@ from django.conf import settings
 from Results.interactive_graphing import population_zoom_png
 from ADSMSettings.views import save_scenario
 from ADSMSettings.utils import adsm_executable_command
-from ADSMSettings.models import SimulationProcessRecord
+from ADSMSettings.models import SimulationProcessRecord, SmSession
 from Results.models import DailyReport, DailyControls, DailyByZoneAndProductionType, DailyByProductionType, DailyByZone, ResultsVersion
 from Results.utils import zip_map_directory_if_it_exists
 from ScenarioCreator.models import ProductionType, Zone
@@ -104,7 +104,7 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones, test
     # stats.sort_stats('time')
     # stats.print_stats(10)
     
-    return end-start
+    return iteration_number, end-start
 
 
 class Simulation(multiprocessing.Process):
@@ -150,7 +150,11 @@ class Simulation(multiprocessing.Process):
 
             simulation_times = []
             for status in statuses:
-                simulation_times.append(round(status.get()))
+                iteration_number, s_time = status.get()
+                stream = SmSession.objects.get()
+                stream.iteration_text += "<li>Iteration %i:  %is </li>" % (iteration_number, s_time)
+                stream.save()
+                simulation_times.append(round(s_time))
 
             print(''.join(str(s) + 's, ' for s in simulation_times))
             print("Average Time:", round(sum(simulation_times)/len(simulation_times), 2), 'seconds')

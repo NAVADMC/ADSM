@@ -1250,9 +1250,10 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 }
 
 #sim_progress_and_button {
-    position: relative;
+    position: fixed;
+    bottom: 0 ;
     display: table;
-    margin-bottom: 20px;
+    margin-left: 280px;
 }
 
 #sim_progress_and_button .btn, #sim_progress_and_button .progress {

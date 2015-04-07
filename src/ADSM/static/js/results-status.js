@@ -21,6 +21,8 @@ var results_status  = (function(pollTime){
                     status_text = "Simulation complete.  " + context.iterations_total + " iterations run.";
                 }
                 $('.simulation-progress').width(simulation_progress * 100 + "%");
+                
+                $('#iteration_text').html(context.iteration_text)
             }
             else {  //simulation hasn't started
                 status_text = "Starting Simulation..."
@@ -43,6 +45,6 @@ var results_status  = (function(pollTime){
         stop_poll: stop_poll,
         get_last_progress: function() { return last_progress; }
     };
-})(5000);
+})(3000);
 
 results_status.start_poll();
