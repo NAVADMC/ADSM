@@ -318,8 +318,8 @@ class DiseaseProgressionForm(BaseForm):
                    'disease_clinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_prevalence': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/',
-                                                            'data-visibility-context': 'use_within_unit_prevalence'
-                                                            })}
+                                                            'data-visibility-context': 'use_within_unit_prevalence'})
+        }
 
 
 class IndirectSpreadForm(BaseForm):
@@ -498,11 +498,17 @@ class ZoneEffectAssignmentForm(BaseForm):
 ## V3.3 Vaccination Triggers ##
 
 class ProductionTypeList(SelectMultiple):
+    template_name = 'floppyforms/multiselect.html'
     def __init__(self, starting_attrs=None):
-        attrs = {'class': 'production_list'}
+        attrs = {'class': 'production_list empty'}
         if starting_attrs is not None:
             attrs.update(starting_attrs)
         super(ProductionTypeList, self).__init__(attrs)
+
+    def get_context(self, name, value, attrs=None, choices=()):
+        context = super(SelectMultiple, self).get_context(name, value, attrs)
+        context['help_text'] = mark_safe("To add production types to the trigger click on a Type or Group from the <em>Population Panel</em>") 
+        return context
 
 
 class ProductionGroupForm(BaseForm):

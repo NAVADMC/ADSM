@@ -1,9 +1,11 @@
-<div id="population_panel">
+<div class="col-xs-4 TB_panel TB_panel_closed" id="population_panel">
+    <h2>Population Production Types</h2>
     <ul id="ProductionTypes">
         {% for pt in ProductionTypes %}
             <li><a href="#">{{ pt.name }}</a><span>({{ pt.unit_count }} units)</span><span>{{pt.description}}</span></li>
         {% endfor %}
     </ul>
+    <h2>Production Type Groups</h2>
     <ul id="ProductionGroups">
         {% for group in ProductionGroups %}
             <li><a href="#">{{ group.name }}</a><span>
