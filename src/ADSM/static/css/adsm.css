@@ -381,13 +381,6 @@ ul {
 #population_panel h2 {
     margin-top: 12px;
 }
-#population_panel h2:last-of-type:before{
-    content: "";
-    display: block;
-    border-top: 1px solid #cccccc;
-    margin: 0 -5px 5px -5px;
-
-}
 #population_panel ul {
     list-style-type: none;
     padding-left: 0;
@@ -420,15 +413,6 @@ ul {
     text-overflow: ellipsis;
     color: #606060;
     text-decoration: none;
-}
-#population_panel ul li span:last-child {
-    display:inline-block;
-    max-width: 50%;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    font-style: italic;
-    color: #606060;
 }
 /*-------------------------------------------------------------*/
 /*-----functions panel-----*/
@@ -1011,9 +995,6 @@ input[type=file], button {
     text-align: center;
     width: 12%;
 }
-#farm_list th:last-child, #farm_list td:last-child {
-    width: 23%;
-}
 #farm_list tbody{
     display: inline-block;
     height: calc(100vh - 250px);
@@ -1062,9 +1043,6 @@ input[type=file], button {
     padding-left: 10px;
     pointer-events: none;
 }
-#farm_list td:last-child {
-    padding-left: 10px;
-}
 #farm_list select.editable {
     -webkit-appearance: menulist;
     pointer-events: all;
@@ -1090,34 +1068,6 @@ input[type=file], button {
     font-size: 13px;
     position: relative;
 }
-#farm_filter tr:last-of-type td {
-    position:relative;
-}
-
-#farm_filter tr:last-of-type td:before {
-    display: block;
-    content: "Add Filter";
-    position: absolute;
-    top: 0px;
-    left: 5px;
-    width: 100%;
-    height: 20%;
-    font-style: italic;
-    pointer-events: none;
-    color: #62d7fd;
-    font-size: 13px;
-    font-family: 'Source Sans Pro';
-}
-#farm_filter tr:last-of-type select{
-    -webkit-appearance: none;
-    border: none;
-    background: transparent;
-    opacity: 0;
-    cursor: pointer;
-}
-#farm_filter tr:last-of-type select:active {
-    opacity: 1;
-}
 #farm_filter td {
     display: inline;
 }
@@ -1127,7 +1077,7 @@ input[type=file], button {
 #farm_filter input {
     width: 60px;
 }
-#farm_filter tr:not(:last-child) td:first-child select {
+#farm_filter tr td:first-child select {
     width: 70px;
     pointer-events: none;
     -webkit-appearance: none;

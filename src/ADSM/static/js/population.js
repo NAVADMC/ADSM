@@ -128,35 +128,18 @@ function getQueryParam(name) {
 }
 
 
-/* This watches for the first column select which determines what the Farms are being filtered by.
-It inserts a new row from the example templates with the correct value and input types.  Values of
-these selects are used below to construct a query URL. */
-$(document).on('change', '#farm_filter td:first-child select', function(){
-    if( $(this).val() ){
-        $(this).parents('tr').before($('#farm_filter_templates #' + $(this).val()).clone());
-        $('#farm_filter option[value=' + $(this).val() +']').attr("disabled","disabled");
-    }
-
-    if( !$(this).parents('tr').is(':last-child') ){
-        var my_row = $(this).parents('tr')
-        var prev_val = my_row.attr('id') //re-enable filter option after it's removed
-        $('#farm_filter option[value=' + prev_val +']').removeAttr("disabled");
-        my_row.remove();
-    }
-    else{
-        $(this).val('')
-    }
-});
-
-
-/*Construct a query URL based on the value of the filter selects.  Two major types are
+/* Construct a query URL based on the value of the filter selects.  Two major types are
 * 1) choice selects = fairly simple
-* 2) numeric input = have both min and max fields and require additional handling*/
-var population_filter_string = function(){
-    var filters = $('#farm_filter tr').map(function(){
+* 2) numeric input = have both min and max fields and require additional handling */
+var population_filter_string = function() {
+    var filters = $('#farm_filter tr').map( function() {
         if($(this).find('td:nth-child(3) select').length) { //state select field
-            var str = $(this).attr('id') + '=' + $(this).find('td:nth-child(3) select').val(); //must be a select
-            return str.replace(/ /g, '%20'); // global replace
+            if($(this).find('td:nth-child(3) select').val()) {
+                var str = $(this).attr('id') + '=' + $(this).find('td:nth-child(3) select').val(); //must be a select
+                return str.replace(/ /g, '%20'); // global replace
+            }else {
+                return ''
+            }
         }
         else { //this must be a numeric filter, because of the input field
             var name = $(this).attr('id');
@@ -170,8 +153,7 @@ var population_filter_string = function(){
                 return  minimum + maximum; // return one or the other or a blank string if neither
         }
     });
-    var new_url = filters.get().join('&');
-    return new_url;
+    return filters.get().join('&');
 }
 
 /*Updates the page and URL with the latest filter and sort settings.*/
@@ -215,6 +197,15 @@ $(document).on('click', '#refresh_map', function(){
     //TODO: set background of container to working.gif
     //TODO: request 
     var new_url = '?' + population_filter_string()
-    $('#population_map_container').load('/results/Population.png' + new_url)
+    //$('#population_map_container img').attr('src', '/results/Population.png' + new_url)
+
+    var img = new Image();
+    $(img).load(function(){
+        $('#population_map_container').append($(this));
+    }).attr({
+        id:'unit_map',
+        src: '/results/Population.png' + new_url
+    })
+    
 });
 
