@@ -46,23 +46,25 @@ $(function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });
 
-    $(document).on('submit', '.ajax', function(evt) {
-        evt.preventDefault();
-        $.post($(this).attr('action'), $(this).serialize())
-            .done(function( data ) {
-                if (data.status == "success") {
-                    $('.ajax').trigger('saved');
-                } else if (data.status == "failed") {
-                    alert_template = '<div class="alert alert-danger">' +
-                                        '<a href="#" class="close" data-dismiss="alert">' +
-                                            '&times;' +
-                                        '</a>' +
-                                        '<strong>Error:</strong> ' + data.message +
-                                     '</div>';
-                    $('#title').before(alert_template);
+
+    $(document).on('submit', '.ajax', function(event) {
+        event.preventDefault();
+        var $self = $(this)
+        $.ajax({
+            url: $(this).attr('action'),
+            type: "POST",
+            data: $(this).serialize(),
+            success: function(form_html) {
+                // Here we replace the form, for the
+                if($self.closest('#main-panel').length){ //in the main panel, just reload the page
+                    $('body').replaceWith(form_html);
+                }else{
+                    $self.replaceWith(form_html);
+                }
+            },
+            error: function () {
+                $self.find('.error-message').show()
             }
-        }).fail(function () {
-                $('.ajax').find('.error-message').show()
         }).always(function() {
             $('.blocking-overlay').hide();
         });
