@@ -8,7 +8,8 @@ from django.utils.html import strip_tags
 from ADSMSettings.models import scenario_filename, SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
-from ADSMSettings.utils import update_is_needed, graceful_startup, reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload
+from ADSMSettings.utils import graceful_startup, reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload
+from git.git import update_is_needed
 
 
 def loading_screen(request):
