@@ -212,4 +212,5 @@ $(document).on('click', '#refresh_map', function(){
 $(document).on('click', '#edit_population', function(){
     $('#population_grid_wraper .buttonHolder').removeAttr('hidden')
     $('#edit-mask').css('visibility', 'visible')
+    $('#population_grid_wraper :input').addClass('editable')
 })
