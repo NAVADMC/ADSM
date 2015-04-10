@@ -213,7 +213,4 @@ $(document).on('click', '#edit_population', function(){
     $('#population_grid_wraper .buttonHolder').removeAttr('hidden')
     $('#population_grid_wraper').css('height', '75vh')
     $('#edit-mask').css('visibility', 'visible')
-    $('#farm_list tbody').css('height', 'calc(75vh - 90px')
-    $('#edit_population').css('display', 'none')
-    $('#farm_list select, #farm_list input').addClass('editable')
 })
