@@ -158,12 +158,12 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
   gboolean include_vaccination;
   gboolean include_destruction;
   gboolean include_economic;
+  adsm_module_t *model;
   GPtrArray *tmp_models;
   int nmodels;
   int i;                        /* loop counter */
   unsigned int nzones;
 #if DEBUG
-  adsm_module_t *model;
   char *s;
 #endif
 
