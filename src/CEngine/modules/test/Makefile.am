@@ -165,7 +165,7 @@ EXTRA_DIST = config/unix.exp 1unit.xml 2units.xml \
   2units_1_start_vimmune_1dayleft.xml 2units_1_start_vimmune_2daysleft.xml \
   2units_1_start_destroyed.xml \
   no_rtree_lat0.xml rtree_lat0.xml no_rtree_lat45.xml rtree_lat45.xml \
-  no_rtree_lat-45.xml rtree_lat-45.xml \
+  no_rtree_lat_minus45.xml rtree_lat_minus45.xml \
   no_rtree_contact_spread.xml rtree_contact_spread.xml \
   2units_ascii.xml 2units_iso88591.xml 2units_utf8.xml 2units_utf8_no_bom.xml \
   2units_utf16_big_endian.xml 2units_utf16_big_endian_no_bom.xml \

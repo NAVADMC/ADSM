@@ -66,7 +66,7 @@ $(function(){
     });
     
     $(document).on('click', '#update_adsm', function(event){
-        $(this).addClass('loading')
+        $(this).removeClass('loading')
         event.preventDefault();
         $.get('/app/Update/', function(result){
             if( result == "success"){
@@ -86,8 +86,8 @@ $(function(){
                 });
             }
         });
-    })
-
+    }); 
+    
     $(document).on('saved', 'form:has(.unsaved)', function(){ //fixes 'Save' button with wrong color state
         $(this).find('.unsaved').removeClass('unsaved');
     })

@@ -3766,7 +3766,7 @@
   <creation-date>28 May 2008</creation-date>
   <model-version>3.1</model-version>
 
-  <population-file>no_rtree_lat-45</population-file>
+  <population-file>no_rtree_lat_minus45</population-file>
 
   <parameter-file>zone_area_1</parameter-file>
 
@@ -4037,7 +4037,7 @@
   <creation-date>6 Oct 2008</creation-date>
   <model-version>3.2</model-version>
 
-  <population-file>no_rtree_lat-45</population-file>
+  <population-file>no_rtree_lat_minus45</population-file>
 
   <parameter-file>zone_perimeter_1</parameter-file>
 

@@ -1,7 +1,8 @@
 from django.db import close_old_connections
 from django.core.management.base import BaseCommand
 from ADSMSettings.models import SmSession
-from ADSMSettings.utils import update_adsm, update_requested
+from ADSMSettings.utils import update_requested
+from git.git import update_adsm
 
 
 class Command(BaseCommand):

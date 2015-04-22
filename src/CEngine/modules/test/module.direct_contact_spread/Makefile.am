@@ -26,7 +26,7 @@ EXTRA_DIST = spread_1.xml spread_2.xml spread_2_poisson.xml spread_3.xml \
   spread_delay_1_then_2.xml \
   mult_exposure_1.xml mult_exposure_2.xml mult_exposure_2b.xml \
   fixed_rate_1.xml fixed_rate_2.xml fixed_rate_0.xml \
-  fixed_rate_0.5.xml fixed_rate_0.33.xml \
+  fixed_rate_1_every_2.xml fixed_rate_1_every_3.xml \
   prevalence_1.xml prevalence_0.xml prevalence_day2.xml prevalence_day4.xml \
   advance_along_line_0.8.xml advance_along_line_0.9.xml \
   advance_along_line_0.95.xml drift.xml rtree_fallback.xml \
