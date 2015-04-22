@@ -78,7 +78,7 @@ def update_adsm():
         print("Attempting to update files...")
         try:
             command = git + ' stash'
-            subprocess.call(command, shell=True)  # trying to get rid of settings.sqlite3 change
+            subprocess.call(command, shell=True)  # trying to get rid of working change
             command = git + ' reset --hard'
             subprocess.call(command, shell=True)
 
