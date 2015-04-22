@@ -5,6 +5,7 @@ import re
 from glob import glob
 import platform
 from collections import defaultdict
+import threading
 
 from django.db import OperationalError
 from django.core.management import call_command
@@ -12,6 +13,7 @@ from django.db import connections, close_old_connections
 from django.conf import settings
 
 from ADSMSettings.models import SmSession, scenario_filename
+from git.git import update_is_needed
 
 
 if os.name == "nt":
@@ -173,6 +175,12 @@ def update_db_version():
     print('Done creating database')
 
 
+def supplemental_folder_has_contents(subfolder=''):
+    """Doesn't currently include Map subdirectory.  Instead it checks for the map zip file.  TODO: This could be a page load slow down given that
+    we're checking the file system every page."""
+    return len(list(chain(*[glob(workspace_path(scenario_filename() + subfolder + "/*." + ext)) for ext in ['csv', 'shp', 'shx', 'dbf', 'zip']]))) > 0
+
+
 def update_requested():
     try:
         a_size = os.stat(connections.databases['scenario_db']['NAME']).st_size
@@ -194,12 +202,6 @@ def update_requested():
     return False
 
 
-def supplemental_folder_has_contents(subfolder=''):
-    """Doesn't currently include Map subdirectory.  Instead it checks for the map zip file.  TODO: This could be a page load slow down given that
-    we're checking the file system every page."""
-    return len(list(chain(*[glob(workspace_path(scenario_filename() + subfolder + "/*." + ext)) for ext in ['csv', 'shp', 'shx', 'dbf', 'zip']]))) > 0
-
-
 def clear_update_flag():
     try:  #database may not exist
         session = SmSession.objects.get()
@@ -208,4 +210,11 @@ def clear_update_flag():
         session.save()
     except:
         pass
-    
+
+
+def check_update():
+    close_old_connections()
+    update_available = update_is_needed()
+    session = SmSession.objects.get()
+    session.update_available = update_available
+    session.save()

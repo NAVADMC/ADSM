@@ -2,17 +2,16 @@ import os
 import subprocess
 
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+ADSM_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # TODO: Change this for os specific stuff
-git = '"' + os.path.join(BASE_DIR, 'bin', 'git.exe') + '" '
-
+git = '"' + os.path.join(ADSM_DIR, 'src', 'git', 'bin', 'git.exe') + '" '
 
 
 def update_is_needed():
     print("Checking for updates...")
     try:
-        os.chdir(BASE_DIR)
+        os.chdir(ADSM_DIR)
 
         command = git + ' rev-parse --abbrev-ref HEAD'
         current_branch = subprocess.check_output(command, shell=True).decode().strip()
@@ -34,14 +33,19 @@ def update_is_needed():
     except:
         print ("Failed in checking if an update is required!")
         return False
-    
+    finally:
+        os.chdir(os.path.join(ADSM_DIR, 'src'))
+
     
 def reset_and_update_adsm():
     try:
         print("Resetting all files to base state...")
         command = git + ' reset --hard'
         subprocess.call(command, shell=True)
-
+        
+        command = git + ' clean -f -d'
+        subprocess.call(command, shell=True)
+        
         print("Attempting to update files...")
         command = git + ' rev-parse --abbrev-ref HEAD'
         current_branch = subprocess.check_output(command, shell=True).decode().strip()

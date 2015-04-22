@@ -8,8 +8,7 @@ from django.utils.html import strip_tags
 from ADSMSettings.models import scenario_filename, SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
-from ADSMSettings.utils import graceful_startup, reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload
-from git.git import update_is_needed
+from ADSMSettings.utils import reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload
 
 
 def loading_screen(request):
@@ -34,16 +33,6 @@ def update_adsm_from_git(request):
         except:
             print ("Failed to set DB to update!")
             return HttpResponse("failure")
-
-
-def check_update(request):
-    graceful_startup()
-
-    session = SmSession.objects.get()
-    session.update_available = update_is_needed()
-    session.save()
-
-    return redirect('/setup/')
 
 
 def file_dialog(request):
