@@ -1,18 +1,20 @@
 from itertools import chain
 import os
 import shutil
-import subprocess
 import re
 from glob import glob
 import platform
 from collections import defaultdict
+import threading
 
-from git.git import git
 from django.db import OperationalError
 from django.core.management import call_command
 from django.db import connections, close_old_connections
 from django.conf import settings
+
 from ADSMSettings.models import SmSession, scenario_filename
+from git.git import update_is_needed
+
 
 if os.name == "nt":
     try:
@@ -173,6 +175,12 @@ def update_db_version():
     print('Done creating database')
 
 
+def supplemental_folder_has_contents(subfolder=''):
+    """Doesn't currently include Map subdirectory.  Instead it checks for the map zip file.  TODO: This could be a page load slow down given that
+    we're checking the file system every page."""
+    return len(list(chain(*[glob(workspace_path(scenario_filename() + subfolder + "/*." + ext)) for ext in ['csv', 'shp', 'shx', 'dbf', 'zip']]))) > 0
+
+
 def update_requested():
     try:
         a_size = os.stat(connections.databases['scenario_db']['NAME']).st_size
@@ -194,111 +202,19 @@ def update_requested():
     return False
 
 
-def update_is_needed():
-    print("Checking for updates...")
-    try:
-        os.chdir(settings.BASE_DIR)
-
-        command = git + ' rev-parse --abbrev-ref HEAD'
-        current_branch = subprocess.check_output(command, shell=True).decode().strip()
-
-        # Go ahead and fetch the current branch
-        command = git + ' fetch origin ' + current_branch
-        subprocess.call(command, shell=True)
-
-        command = git + ' rev-parse FETCH_HEAD'
-        fetched_sha = subprocess.check_output(command, shell=True).decode().strip()
-        command = git + ' rev-parse HEAD'
-        head_sha = subprocess.check_output(command, shell=True).decode().strip()
-
-        if fetched_sha != head_sha:
-            print("An update is required.")
-            return True
-        print("There are currently no updates.")
-        return False
+def clear_update_flag():
+    try:  #database may not exist
+        session = SmSession.objects.get()
+        session.update_on_startup = False
+        session.update_available = False
+        session.save()
     except:
-        print ("Failed in checking if an update is required!")
-        return False
+        pass
 
 
-def update_adsm():
-    if update_is_needed():
-        print("Attempting to update files...")
-        try:
-            command = git + ' stash'
-            subprocess.call(command, shell=True)  # trying to get rid of settings.sqlite3 change
-            command = git + ' reset --hard'
-            subprocess.call(command, shell=True)
-
-            command = git + ' rebase FETCH_HEAD'
-            git_status = subprocess.check_output(command, shell=True)
-            # TODO: Make sure the pull actually worked
-
-            print("Successfully updated.")
-            return True
-        except:
-            print("Failed to update!")
-            try:
-                command = git + ' reset'
-                subprocess.call(command, shell=True)
-                print("Reset to original state.")
-            except:
-                print("Failed to gracefully reset to original state!")
-
-            return False
-        finally:
-            try:
-                session = SmSession.objects.get()
-                session.update_on_startup = False
-                session.update_available = False
-                session.save()
-            except:
-                pass
-            
-            command = git + ' stash apply'
-            subprocess.call(command, shell=True)  # TODO: What if the stash apply has a conflict?
-    else:
-        return True
-
-
-def reset_and_update_adsm():
-    try:
-        print("Resetting all files to base state...")
-        command = git + ' reset --hard'
-        subprocess.call(command, shell=True)
-
-        print("Attempting to update files...")
-        command = git + ' rev-parse --abbrev-ref HEAD'
-        current_branch = subprocess.check_output(command, shell=True).decode().strip()
-
-        # Go ahead and fetch the current branch
-        command = git + ' fetch origin ' + current_branch
-        subprocess.call(command, shell=True)
-
-        command = git + ' rebase FETCH_HEAD'
-        git_status = subprocess.check_output(command, shell=True)
-
-        print("Successfully updated.")
-        return True
-    except:
-        print("Failed to update!")
-        try:
-            command = git + ' reset --hard'
-            subprocess.call(command, shell=True)
-        except:
-            print("Failed to reset files! You are probably in a bad state.")
-        return False
-    finally:
-        try:
-            session = SmSession.objects.get()
-            session.update_on_startup = False
-            session.update_available = False
-            session.save()
-        except:
-            pass
-
-
-def supplemental_folder_has_contents(subfolder=''):
-    """Doesn't currently include Map subdirectory.  Instead it checks for the map zip file.  TODO: This could be a page load slow down given that
-    we're checking the file system every page."""
-    return len(list(chain(*[glob(workspace_path(scenario_filename() + subfolder + "/*." + ext)) for ext in ['csv', 'shp', 'shx', 'dbf', 'zip']]))) > 0
+def check_update():
+    close_old_connections()
+    update_available = update_is_needed()
+    session = SmSession.objects.get()
+    session.update_available = update_available
+    session.save()

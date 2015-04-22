@@ -87,7 +87,6 @@ $(function(){
             }
         });
     }); 
-    $('#update_adsm').click() // if the element loads in the page, it will be clicked immediately
     
     $(document).on('saved', 'form:has(.unsaved)', function(){ //fixes 'Save' button with wrong color state
         $(this).find('.unsaved').removeClass('unsaved');

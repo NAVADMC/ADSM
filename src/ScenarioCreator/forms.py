@@ -5,12 +5,14 @@ All forms now have their "submit" button restored and you can choose custom layo
 
 
 from floppyforms.__future__ import ModelForm
+from django.conf import settings
 from django.forms.models import inlineformset_factory
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
 from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple
 from crispy_forms.helper import FormHelper
+import os
 
 
 class AddOrSelect(Select):
@@ -31,7 +33,7 @@ class FixedSelect(Select):
 
 
 def submit_button():
-    return ButtonHolder(HTML(open('ScenarioCreator/templates/ScenarioCreator/EditButtons.html', 'r').read()))
+    return ButtonHolder(HTML(open(os.path.join(settings.BASE_DIR, 'ScenarioCreator','templates','ScenarioCreator','EditButtons.html'), 'r').read()))
 
 
 class BaseForm(ModelForm):
