@@ -15,7 +15,7 @@
 <form id="relational-form" method="post" enctype="multipart/form-data">
     {% crispy form %}
     <label for="file">Or Import Points from File... &nbsp</label>    
-    <input type="file" id="file" name="file" accept="text/csv">
+    <input type="file" id="file" name="file" accept=".csv">
 
     {% include "ScenarioCreator/EmbeddedFormset.html" %}
     {% include "ScenarioCreator/EditButtons.html" %}
