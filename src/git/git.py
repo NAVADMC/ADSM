@@ -40,6 +40,10 @@ def update_is_needed():
 def reset_and_update_adsm():
     try:
         print("Resetting all files to base state...")
+
+        command = git + ' clean -f'
+        subprocess.call(command, shell=True)  # trying to get rid of new files that were added
+        
         command = git + ' reset --hard'
         subprocess.call(command, shell=True)
         
