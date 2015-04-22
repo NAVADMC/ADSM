@@ -15,6 +15,8 @@ print(BASE_DIR)
 
 os.chdir(BASE_DIR)
 
+DETACHED_PROCESS = 0x00000008
+
 
 def path_all_the_eggs():
     packages = os.path.join(BASE_DIR, "Lib", "site-packages")
@@ -78,7 +80,7 @@ def launch_viewer():
     _thread.interrupt_main()
 
 
-parser = argparse.ArgumentParser(prog='ADSM.exe')
+parser = argparse.ArgumentParser(prog='adsm.exe')
 parser.add_argument('-t', '--test', dest='test', help='run the test suite', action='store_true')
 parser.add_argument('-s', '--skip_update', dest='skip_update', help='do not check for updates', action='store_true')
 args = parser.parse_args()
@@ -87,11 +89,6 @@ args = parser.parse_args()
 print("Preparing Django environment...")
 
 os.chdir(os.path.join(BASE_DIR, "src"))
-
-if os.path.exists(os.path.join(BASE_DIR, 'bin', 'adsm_update.now.exe')):
-    os.remove(os.path.join(BASE_DIR, 'bin', 'adsm_update.now.exe'))
-if os.path.exists(os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.now.exe')):
-    os.remove(os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.now.exe'))
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
 
@@ -104,9 +101,11 @@ if not args.skip_update:
     exec("from ADSMSettings.utils import update_requested")
     if update_requested():
         UPDATE_PROGRAM = os.path.join(BASE_DIR, 'bin', 'adsm_update.exe')
-        subprocess.Popen(UPDATE_PROGRAM)
+        subprocess.Popen(UPDATE_PROGRAM, shell=True, creationflags=DETACHED_PROCESS)
         sys.exit()
-
+    else:
+        exec("from ADSMSettings.utils import check_update")
+        threading.Thread(target=check_update, daemon=True).start()
 
 if args.test:
     management.call_command('test')

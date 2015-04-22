@@ -14,7 +14,6 @@ base = 'Console'
 executables = [
     Executable(os.path.join('src', 'ADSM.py'), base=base, targetName='ADSM.exe'),
     Executable(os.path.join('src', 'ADSM_Update.py'), base=base, targetName='adsm_update.exe'),
-    Executable(os.path.join('src', 'ADSM_Force_Reset_and_Update.py'), base=base, targetName='adsm_force_reset_and_update.exe')
 ]
 
 setup(name='ADSM',

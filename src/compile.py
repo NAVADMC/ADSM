@@ -84,7 +84,7 @@ for root, dirs, files in os.walk(BASE_DIR):
 # Undelete any specific files needed
 import subprocess
 from git.git import git
-files_to_undelete = ['Lib/.gitignore', ]
+files_to_undelete = [os.path.join('Lib', '.gitignore'), ]
 for file in files_to_undelete:
     command = git + ' checkout ' + file
     subprocess.call(command, shell=True)
@@ -176,20 +176,11 @@ shutil.copy(os.path.join(BASE_DIR, 'bin', 'python34.dll'), os.path.join(BASE_DIR
 
 remove_tree(os.path.join(BASE_DIR, 'build'))
 
-library_update_required = 3
+library_update_required = 2
 if not query_yes_no("Did adsm_update.exe change?", default='no'):
     library_update_required -= 1
     # Checkout old versions of files that probably didn't change (mostly update executables)
     files_to_reset = [os.path.join(BASE_DIR, 'bin', 'adsm_update.exe'), ]
-    from git.git import git
-    for file in files_to_reset:
-        command = git + ' checkout ' + file
-        subprocess.call(command, shell=True)
-
-if not query_yes_no("Did adsm_force_reset_and_update.exe change?", default='no'):
-    library_update_required -= 1
-    # Checkout old versions of files that probably didn't change (mostly update executables)
-    files_to_reset = [os.path.join(BASE_DIR, 'bin', 'adsm_force_reset_and_update.exe'), ]
     from git.git import git
     for file in files_to_reset:
         command = git + ' checkout ' + file
