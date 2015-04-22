@@ -11,7 +11,7 @@
     <h1 id="title">Load a Population</h1>
     <div id="load_population_widget">
         <form id="pop-upload" method="post" action="/setup/UploadPopulation/" enctype="multipart/form-data">
-            <input type="file" name="file" accept="application/xml text/csv">
+            <input type="file" name="file" accept=".xml,.csv">
             <button type="submit" class="btn btn-primary">Import a Population (XML or CSV)&nbsp;<img src="{{ STATIC_URL }}icons/upload.png" class="icon"></button>
             <p class="help-block">You can import a file from anywhere on your computer and it will be added to the ADSM workspace.</p>
         </form>
