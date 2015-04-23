@@ -447,7 +447,7 @@ def filter_info(request, params):
 
 
 def population(request):
-    """"See also Pagination https://docs.djangoproject.com/en/dev/topics/pagination/"""
+    """"Creates the formset and filter context for Population View"""
     context = {}
     FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated, can_delete=False)
     if save_formset_succeeded(FarmSet, Unit, context, request):
