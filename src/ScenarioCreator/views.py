@@ -428,9 +428,10 @@ def filtering_params(request):
     keys = ['latitude__gte', 'latitude__eq', 'latitude__lte', 'longitude__gte', 'longitude__eq',
             'longitude__lte', 'initial_size__gte', 'initial_size__eq', 'initial_size__lte',  # 3 permutations for each number field
             'production_type__name', 'initial_state']
-    for key in keys:
-        if key in request.GET:
-            params[key] = request.GET.get(key)
+    if request:
+        for key in keys:
+            if key in request.GET:
+                params[key] = request.GET.get(key)
     return params
 
 
