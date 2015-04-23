@@ -922,7 +922,7 @@ input[type=file], button {
 }
 #population_grid_wraper{
     margin-left: calc(16.666vw - 280px); /*--remove and add col-xs-9 to html--*/
-    width: calc(74.997vw + 20px);
+    width: calc(74.997vw + 40px);
     padding: 10px;
     background: white;
     position: relative;
