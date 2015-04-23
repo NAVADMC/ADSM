@@ -13,9 +13,7 @@ body {
     font-size: 10pt;
     font-weight: 400;
     box-sizing:border-box;
-}
-section{
-    margin-bottom:50px;
+    padding-bottom: 50px;
 }
 
 h2{
@@ -684,8 +682,15 @@ ul {
     margin: 8px 0;
 }
 
-.btn-default {
-    background-color: #b1b1b1;
+.btn-default, .btn-default:hover, .btn-default:focus {
+    background-color: white;
+    color: #606060;
+    outline: 1px solid #606060;
+    outline-offset: -1px;
+}
+.btn-default:hover, .btn-default:focus {
+    background: #ebebeb;
+    outline: 1px solid #898989;
 }
 
 .btn-primary,
@@ -712,7 +717,7 @@ section .btn-primary:focus,
 }
 
 .btn-primary.disabled, .btn-primary[disabled] {
-    background-color: #7B8893;
+    background-color: #ccc;
     color: rgba(255, 255, 255, .8);
 }
 .btn-danger {
@@ -904,6 +909,10 @@ input[type=file], button {
 /*-------------------------------------------------------------*/
 /*-----population.html-----*/
 /*-------------------------------------------------------------*/
+#replace_population {
+    padding-top: 3px;
+    padding-left: 10px;
+}
 #farm_list table, #farm_list tr, #farm_list td {
     border-width: 0;
     margin: 0;
@@ -912,27 +921,18 @@ input[type=file], button {
     border-collapse: collapse;
 }
 #population_grid_wraper{
-    margin-bottom: 150px;
     margin-left: calc(16.666vw - 280px); /*--remove and add col-xs-9 to html--*/
-    width: 74.997vw ;
+    width: calc(74.997vw + 20px);
+    padding: 10px;
+    background: white;
+    position: relative;
+    display: block;
+    border-radius: 2px;
+    overflow-y:auto;
 }
-@media screen and (max-width: 1250px) {  /*--remove after panels are implemented--*/
-    #population_grid_wraper {
-        margin-left:-60px;
-    }
-    #population_grid_wraper:after {
-        content: "";
-        display: block;
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 51px;
-        height: 100%;
-        background-color: #f1f1f1;
-    }
-}
+
 #population_map_container {
-    min-height: 23.666vw;
+    min-height: 23.333vw;
 }
 #unit_map {
     padding: 0;
@@ -941,19 +941,19 @@ input[type=file], button {
     float: left;
     margin-left: -15px;
     margin-top: -6px;
-    margin-bottom: 24px;
 }
-/*#refresh_map {
-    background: transparent;
-}*/
+#refresh_map {
+    position: absolute;
+    right: 20px;
+    top: 0;
+}
 #farm_list_container{
     float: right;
     width: 49.98vw;
     overflow-x: auto;
+    padding-left: 0px;
 }
-#farm_list{
-    padding-right: 20px; /*for windows scrollbar*/
-}
+
 #farm_list table {
     table-layout: fixed;
     border-collapse: collapse;
@@ -961,7 +961,7 @@ input[type=file], button {
     border-spacing: 0;
     position: relative;
     width: 100%;
-    min-width: 660px;
+    min-width: 630px;
 }
 #farm_list thead:before {
     position: absolute;
@@ -970,6 +970,7 @@ input[type=file], button {
     height: 6px;
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.15)), color-stop(100%,rgba(0,0,0,0)));
     top: 30px;
+    z-index: 10;
 }
 #farm_list thead{
     background-color: #808080;
@@ -990,18 +991,9 @@ input[type=file], button {
     position: relative;
 }
 #farm_list th, #farm_list td {
-    width: 15%;
-}
-#farm_list th:first-child, #farm_list td:first-child{
-    width: 18%;
-}
-#farm_list th:nth-child(4), #farm_list td:nth-child(4) {
     width: 17%;
 }
-#farm_list td:nth-child(5) #farm_list th:nth-child(5) input {
-    text-align: center;
-    width: 12%;
-}
+
 #farm_list tbody{
     display: inline-block;
     height: calc(100vh - 250px);
@@ -1027,6 +1019,13 @@ input[type=file], button {
     padding-top: 0px;
     vertical-align: middle;
     height: 26px;
+    position: relative;
+}
+#farm_list td a {
+    position: absolute;
+    left: 3px;
+    top: 5px;
+    display: none;
 }
 #farm_list td:nth-child(4), #farm_list td:first-child {
     padding-left: 0;
@@ -1036,9 +1035,7 @@ input[type=file], button {
     margin: 0px;
     width: 100%;
 }
-#farm_list td:nth-child(5) input{
-    text-align: center;
-}
+
 #farm_list select {
     -webkit-appearance: none;
     background-color: transparent;
@@ -1061,44 +1058,140 @@ input[type=file], button {
 /*-------------------------------------------------------------*/
 /*-----population filters-----*/
 /*-------------------------------------------------------------*/
+
+#population_filters {
+    padding-top: 27px;
+}
 #farm_filter:before {
     content:"";
     width: 22.66vw;
     position: absolute;
     display: block;
-    top:-5px;
+    top:-17px;
     left:0;
     height: 1px;
     background: #ebebeb;
 }
+#population_filters span {
+    display: block;
+    width: 42px;
+    height: 20px;
+    background: white;
+    text-transform: uppercase;
+    font-size: 11px;
+    color: #ccc;
+    position: absolute;
+    top: 15px;
+    z-index: 10;
+}
 #farm_filter {
     font-size: 13px;
     position: relative;
+    margin-top: 12px;
+}
+#farm_filter tr {
+    height: 36px;
 }
 #farm_filter td {
-    display: inline;
+    display: inline-block;
 }
-#latitude td:first-child{
-    width: 60px;
+#initial_state td:first-child,
+#production_type_name td:first-child {
+    width: 100px;
+}
+#initial_size td:first-child,
+#longitude td:first-child,
+#latitude td:first-child {
+    width: 66px;
+}
+#farm_filter select {
+    margin: 0;
+    width: 98px;
 }
 #farm_filter input {
     width: 60px;
-}
-#farm_filter tr td:first-child select {
-    width: 70px;
-    pointer-events: none;
-    -webkit-appearance: none;
-    border: none;
-    background: none;
-}
-#farm_filter #production_type__name td:first-child select,
-#farm_filter #initial_state td:first-child select {
-    width: 103px;
+    height: 21px;
 }
 #farm_filter #production_type__name td:nth-child(2),
 #farm_filter #initial_state td:nth-child(2) {
     display:none;
 }
+
+@media screen and (max-width: 1250px) {
+    #farm_filter tr {
+        border-top: 1px solid #ebebeb;
+    }
+    #farm_filter tr:first-child {
+        border-top: none;
+    }
+    #initial_size td:first-child,
+    #longitude td:first-child,
+    #latitude td:first-child {
+    width: 100%;
+    }
+    #farm_filter td:first-child {
+        font-size: 11px;
+        text-transform: uppercase;
+        padding-bottom: 0;
+        width: 100%;
+    }
+    #farm_filter select {
+        width: 200px;
+    }
+}
+
+/*-------------------------------------------------------------*/
+/*-----edit population-----*/
+/*-------------------------------------------------------------*/
+#edit-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .7);
+    visibility: hidden;
+    transition: all .3s ease;
+}
+#farm_list .help-block {
+    margin-top: 8px;
+}
+#edit_population {
+    position: absolute;
+    top: calc(100vh - 204px);
+    right: 25px;
+    transition: opacity .2s ease
+}
+#population_grid_wraper .buttonHolder {
+    position: fixed;
+    top: calc(75vh + 64px);
+    left: calc(91.664vw - 175px);
+    padding: 0 !important;
+    float: none;
+    clear: none;
+}
+
+@media screen and (max-width: 1348px) {
+    #population_grid_wraper .buttonHolder {
+        right: 7.5vw;
+        left: auto;
+    }
+    #edit_population {
+        right: 10px;
+    }
+}
+@media screen and (max-width: 1140px) {
+    #farm_list .help-block {
+        font-size: 11px;
+        margin-top:10px;
+    }
+}
+
+
+/*-------------------------------------------------------------*/
+/*----- -----*/
+/*-------------------------------------------------------------*/
 
 th .sortControls{
     opacity:0;
@@ -1303,22 +1396,31 @@ select[multiple] {}
 .action_link {
     background: transparent;
     color: #62d7fd;
-    border: none;
-    outline: none;
+    border: none !important;
+    outline: none !important;
     font-size: 13px;
-    font-weight: 400;
+    font-weight: 300;
     margin: 0;
     padding: 2px;
     opacity: .7;
     transition: all .2s ease;
 }
+.btn-primary.action_link:hover,
+.btn-primary.action_link:active,
+.btn-primary.action_link:focus,
+.btn-primary.action_link:visited,
 .action_link:hover,
-.action_link:focus {
+.action_link:active,
+.action_link:focus,
+.action_link:visited  {
     opacity: 1;
     background: transparent;
     color: #62d7fd !important;
-    font-weight: 400;
+    font-weight: 300;
+    border: none !important;
+    outline: none !important;
 }
-.action_link:focus {
-    outline: 1px solid #62d7fd;
-}
+/*.action_link:focus {
+    outline: 1px solid #62d7fd !important;
+}*/
+

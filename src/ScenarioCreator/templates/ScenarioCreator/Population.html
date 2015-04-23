@@ -28,10 +28,10 @@
     </div>
 
 {% else %}
-    <div id="edit-mask"></div>
     <h1><strong>Population File:</strong> {{ population_file }} ({{ Farms|intcomma }} units) 
-        <a href="#" data-delete-link="{{deletable}}" class="action_link btn btn-danger">Replace Population</a>
+        <a href="#" data-delete-link="{{deletable}}" id="replace_population" class="action_link btn btn-danger">Replace Population</a>
     </h1>
+    <div id="edit-mask"></div>
     <div id="population_grid_wraper">
         <form method="post" style="float:right;">
             <div id="farm_list_container" class="col-xs-8">
@@ -45,6 +45,7 @@
         <div id="population_map_container" class="col-xs-4">
             <img id="unit_map" src="/results/Population.png" alt="Unit Locations"/>
         </div>
+
         <p></p>
                    
         {% include "ScenarioCreator/PopulationFilters.html" %}
