@@ -571,7 +571,11 @@ class SpreadBetweenGroupsForm(BaseForm):
         widgets = {'relevant_groups': SelectMultiple(attrs={'class':'group_list'})}
 
 
-
+class StopVaccinationForm(BaseForm):
+    class Meta(object):
+        model = StopVaccination
+        exclude = []
+        widgets = {'trigger_group': ProductionTypeList()}
 
 
 

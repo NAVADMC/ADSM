@@ -32,7 +32,8 @@ abstract_models = {
          ('DisseminationRate', DisseminationRate),
          ('SpreadBetweenGroups', SpreadBetweenGroups),
          ('TimeFromFirstDetection', TimeFromFirstDetection),
-         ('DestructionWaitTime', DestructionWaitTime),]}
+         ('DestructionWaitTime', DestructionWaitTime),
+         ('StopVaccination', StopVaccination)]}
 
 
 def spaces_for_camel_case(text):
