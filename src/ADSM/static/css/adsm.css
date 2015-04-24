@@ -575,6 +575,10 @@ ul {
     border-left: 11px solid #606060;
     transition: all .2s ease;
 }
+#RunSimulationIn a.incomplete:after {
+    border-left: 11px solid #999;
+}
+
 #RunSimulationRes a:after {
     content: "";
     position: relative;
@@ -1147,6 +1151,80 @@ input[type=file], button {
         width: 200px;
     }
 }
+@media screen and (max-width: 1100px) {
+    section {
+        margin-left: 195px !important;
+        overflow: auto;
+        min-width: 0 !important;
+    }
+    #population_grid_wraper {
+        margin-left: 0;
+        width: calc(100% + 40px);
+        overflow-x: hidden;
+    }
+    #population_grid_wraper form:first-of-type{
+        float: left !important;
+        padding-right: 0;
+    }
+    #population_filters {
+        position: absolute;
+        top: 275px;
+        width: 270px;
+    }
+    #farm_filter:before {
+        width: 100%;
+    }
+    #population_map_container {
+        position: absolute;
+        width: 270px;
+    }
+    #unit_map {
+        width: 260px;
+    }
+    #farm_list_container {
+        float: left;
+        margin-left: 280px;
+        width: calc(100vw - 530px);
+        border-right: 1px solid #ebebeb;
+        padding-right: 0;
+    }
+    section h1:first-of-type {
+        margin-left: 0;
+    }
+}
+@media screen and (max-width: 960px) {
+    #population_grid_wraper form:first-of-type {
+        float: left !important;
+        margin-top: 303px;
+        width: calc(100% - 90px);
+    }
+    #farm_list_container {
+        position: relative;
+        width: 100%;
+        margin-left: 0;
+    }
+    #population_map_container {
+        left: 285px;
+    }
+    #population_filters {
+        top: 0;
+        left: 0;
+    }
+    #refresh_map {
+        right: -297px;
+        top: 285px;
+    }
+    #farm_filter {
+        margin-top: 0;
+    }
+    #population_filters span {
+        top: 4px;
+    }
+    #unit_map {
+        width: 285px;
+    }
+}   
+
 
 /*-------------------------------------------------------------*/
 /*-----edit population-----*/
@@ -1195,7 +1273,16 @@ input[type=file], button {
         margin-top:10px;
     }
 }
-
+@media screen and (max-width: 960px) {
+    #farm_list .help-block {
+        width: 200px;
+    }
+        #edit_population {
+        left: 10px;
+        right: auto;
+        top: 285px;
+    }
+}
 
 /*-------------------------------------------------------------*/
 /*----- -----*/
@@ -1427,6 +1514,7 @@ select[multiple] {}
     font-weight: 300;
     border: none !important;
     outline: none !important;
+    box-shadow: none;
 }
 /*.action_link:focus {
     outline: 1px solid #62d7fd !important;
