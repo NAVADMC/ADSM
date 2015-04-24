@@ -846,7 +846,7 @@ select {
 }
 
 #file_list a:hover {
-    color: #7cb9ff;;
+    color: #7cb9ff;
 }
 
 #file_list .icon {
@@ -859,24 +859,25 @@ select {
     width: 15px;
     height: 18px;
     margin-right: 10px;
+    display:block;
+    float:right;
 }
 
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
 .copy-button {
-    background-image: url('/static/icons/copy_sprite.png');
+    background-image: url('../icons/copy_sprite.png');
     background-position: 0 0;
 }
 
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
 .copy-button:hover,
 .copy-button:focus {
-    background-image: url('/static/icons/copy_sprite.png');
     background-position: 15px  0;
 }
 
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
 .delete-button {
-    background-image: url('/static/icons/delete_sprite.png');
+    background-image: url('../icons/delete_sprite.png');
     background-repeat-y: no-repeat;
     background-position: 0 2px;
 }
