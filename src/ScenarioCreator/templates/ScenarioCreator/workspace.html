@@ -18,8 +18,8 @@
     <ul id="file_list">
         {% for file in db_files %}
             <li><a href="/?loading_url=/app/OpenScenario/{{ file }}/">{{ file }}</a>
-                <a href="#" class="delete-button ajax-post pull-right title="delete" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
-                <a href="/app/Copy/{{ file }}/" class="copy-button pull-right title="copy" ></a>
+                <a href="#" class="delete-button ajax-post pull-right" title="delete" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
+                <a href="/app/Copy/{{ file }}/" class="copy-button pull-right" title="duplicate" ></a>
                 {#<a href="/app/Download/target={{ file }}/" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>#}
                 </li>
         {% endfor %}
