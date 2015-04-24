@@ -873,6 +873,9 @@ select {
 .copy-button:hover,
 .copy-button:focus {
     background-position: 15px  0;
+    background-image: url('../icons/copy_sprite.png');
+    outline: none;
+    background-color: transparent;
 }
 
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
@@ -884,6 +887,10 @@ select {
 .delete-button:hover,
 .delete-button:focus {
     background-position: 15px 2px ;
+    background-image: url('../icons/delete_sprite.png');
+    background-repeat-y: no-repeat;
+    outline: none;
+    background-color: transparent;
 }
 
 input[type=file], button {
