@@ -52,8 +52,6 @@ class DailyParser(object):
         for suffix_key, instance in instance_dict.items():  # For each combination: DailyByZoneAndProductionType with (Bull_HighRisk), (Swine_MediumRisk), etc.
             instance_needed = False
             for column_name, model_field in field_map.items():
-                if column_name == 'vaccTriggered':
-                    print('Found vaccTriggered', sparse_info['vaccTriggered'])
                 if column_name + suffix_key in sparse_info:
                     setattr(instance, model_field, sparse_info[column_name + suffix_key])
                     instance_needed = True
