@@ -1,3 +1,5 @@
+![BSD](https://cocoapod-badges.herokuapp.com/l/CocoaLumberjack/badge.png) 
+
 ADSM (Animal Disease Spread Model)
 ==========
 Setting up ADSM for Development Work
