@@ -99,7 +99,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
  * today's count to 0.
  *
  * @param self this module.
- * @param event a detection event.
+ * @param event a new day event.
  */
 void
 handle_new_day_event (struct adsm_module_t_ *self,
