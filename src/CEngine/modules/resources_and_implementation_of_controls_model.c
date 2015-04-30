@@ -235,6 +235,7 @@
 #define handle_request_to_initiate_vaccination_event resources_and_implementation_of_controls_model_handle_request_to_initiate_vaccination_event
 #define handle_request_for_vaccination_event resources_and_implementation_of_controls_model_handle_request_for_vaccination_event
 #define handle_vaccination_event resources_and_implementation_of_controls_model_handle_vaccination_event
+#define handle_request_to_terminate_vaccination_event resources_and_implementation_of_controls_model_handle_request_to_terminate_vaccination_event
 
 #include "module.h"
 #include "module_util.h"
@@ -321,6 +322,12 @@ typedef struct
   /* Parameters concerning vaccination. */
   gboolean vaccination_active;
   int vaccination_retrospective_days;
+  int vaccination_initiated_day; /**< This value starts as -1, and is set on the day that
+    the vaccination_active flag is set to TRUE.  Its value will be the day before
+    the first vaccinations happen. */
+  int vaccination_terminated_day; /**< This value starts as -1, and is set on the day
+    that the vaccination_active flag is set to FALSE.  Its value will be the day on which
+    the last vaccination happen. */
   REL_chart_t *vaccination_capacity; /**< The maximum number of units the
     authorities can vaccinate in a day. */
   gboolean vaccination_capacity_goes_to_0; /**< A flag indicating that at some
@@ -955,6 +962,8 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   g_hash_table_remove_all (local_data->destroyed_today);
 
   local_data->vaccination_active = FALSE;
+  local_data->vaccination_initiated_day = -1;
+  local_data->vaccination_terminated_day = -1;
   /* Empty the prioritized pending vaccinations lists. */
   clear_all_pending_vaccinations (local_data, /* day = */ 0, /* event queue = */ NULL);
   local_data->nvaccinated_today = 0;
@@ -1293,9 +1302,12 @@ handle_request_to_initiate_vaccination_event (struct adsm_module_t_ *self,
   #endif
 
   local_data = (local_data_t *) (self->model_data);
-  if (local_data->vaccination_active == FALSE)
+  /* Avoid attempting to stop and start on the same day. */
+  if (local_data->vaccination_active == FALSE
+      && event->day > local_data->vaccination_terminated_day)
     {
       local_data->vaccination_active = TRUE;
+      local_data->vaccination_initiated_day = event->day;
       #if DEBUG
         g_debug ("initiating vaccination, day %i", event->day);
       #endif
@@ -1413,6 +1425,49 @@ handle_vaccination_event (struct adsm_module_t_ *self, EVT_vaccination_event_t *
 
 
 /**
+ * Responds to a request to terminate vaccination event by un-setting the flag indicating
+ * that vaccination is active.
+ *
+ * @param self this module.
+ * @param event a request to terminate vaccination event.
+ * @param queue for any new events this module creates.
+ */
+void
+handle_request_to_terminate_vaccination_event (struct adsm_module_t_ *self,
+                                               EVT_request_to_terminate_vaccination_event_t * event,
+                                               EVT_event_queue_t * queue)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_request_to_terminate_vaccination_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  /* Avoid attempting to stop and start on the same day. */
+  if (local_data->vaccination_active == TRUE
+      && event->day > local_data->vaccination_initiated_day)
+    {
+      local_data->vaccination_active = FALSE;
+      local_data->vaccination_terminated_day = event->day;
+      #if DEBUG
+        g_debug ("terminating vaccination, day %i\n", event->day);
+      #endif
+      EVT_event_enqueue (queue, EVT_new_vaccination_terminated_event (event->day));
+      /* No need to clear out the pending vaccinations.  That will be done when the next
+       * NewDay event arrives. */
+    }
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_request_to_terminate_vaccination_event (%s)", MODEL_NAME);
+  #endif
+
+  return;
+}
+
+
+
+/**
  * Runs this model.
  *
  * @param self the model.
@@ -1452,6 +1507,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
       break;
     case EVT_Vaccination:
       handle_vaccination_event (self, &(event->u.vaccination));
+      break;
+    case EVT_RequestToTerminateVaccination:
+      handle_request_to_terminate_vaccination_event (self, &(event->u.request_to_terminate_vaccination), queue);
       break;
     default:
       g_error
@@ -1830,6 +1888,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_RequestToInitiateVaccination,
     EVT_RequestForVaccination,
     EVT_Vaccination,
+    EVT_RequestToTerminateVaccination,
     0
   };
   char *sqlerr;

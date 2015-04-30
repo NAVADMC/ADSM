@@ -1825,6 +1825,12 @@ EVT_event_to_string (EVT_event_t * event)
     case EVT_Vaccination:
       s = EVT_vaccination_event_to_string (&(event->u.vaccination));
       break;
+    case EVT_RequestToTerminateVaccination:
+      s = EVT_request_to_terminate_vaccination_event_to_string (&(event->u.request_to_terminate_vaccination));
+      break;
+    case EVT_VaccinationTerminated:
+      s = EVT_vaccination_terminated_event_to_string (&(event->u.vaccination_terminated));
+      break;
     case EVT_RequestForDestruction:
       s = EVT_request_for_destruction_event_to_string (&(event->u.request_for_destruction));
       break;

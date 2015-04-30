@@ -77,6 +77,9 @@ EXTRA_DIST = radius_0.xml radius_0_w_vars.xml radius_0point5.xml radius_1.xml \
  trigger_destwait1_cap0_8units_all_infected_diff_types.sqlite3 \
  trigger_destwait3_cap0_8units_all_infected_diff_types.sqlite3 \
  trigger_destwait3_cap3_8units_all_infected_diff_types.sqlite3 \
+ stop_vac_3days_nostop_16units_2rings.sqlite3 \
+ stop_vac_3days_1_16units_2rings.sqlite3 \
+ stop_vac_3days_2_16units_2rings.sqlite3 \
  vacc_3detect_retro0_8units_2rows.sqlite3 vacc_3detect_retro1_8units_2rows.sqlite3 \
  vacc_4detect_retro3_8units_2rows.sqlite3 \
  vacc_request_from_exam_cancellation_from_test.xml

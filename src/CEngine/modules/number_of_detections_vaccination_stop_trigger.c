@@ -502,7 +502,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read trigger's details. */
   trigger_id = GPOINTER_TO_UINT(user_data);
   sql = g_strdup_printf ("SELECT id,number_of_units,days "
-                         "FROM ScenarioCreator_rateofnewdetections "
+                         "FROM ScenarioCreator_stopvaccination "
                          "WHERE id=%u", trigger_id);
   local_data->db = params;
   sqlite3_exec_dict (params, sql, set_params, self, &sqlerr);

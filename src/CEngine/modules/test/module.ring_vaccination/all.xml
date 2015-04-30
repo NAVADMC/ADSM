@@ -6591,6 +6591,187 @@
   </output>
 </variable-test>
 
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>stop vaccination after 3 days with no detections (baseline)</short-name>
+
+  <description>
+    This test is one of a set to test stopping and restarting vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get vaccinated.  Inside
+    the first ring are 2 units of type A, and inside the second ring are 2 units of type B.
+
+    In this test, a baseline, vaccination is initiated but not stopped.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>15 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>stop_vac_3days_nostop</parameter-file>
+
+  <parameter-description>
+    For production type A, the infectious subclinical period is 1 day, and the latent
+    period is 30 days.  This ensures that only unit 2 will be detected during this
+    simulation.
+
+    For production type B, the latent and infectious subclinical period are both 1 day,
+    and then the herd goes directly to immune.  This ensures that neither of the B units
+    will be detected during this simulation.
+    
+    Vaccination begins after 1 detection.  There is capacity to vaccinate 1 unit per
+    day.
+    
+    There is no rule for stopping vaccination.
+
+    What should happen:
+     - Day 1: Unit 2 will be subclinical.
+     - Day 2: Unit 2 will be clinical.  It will be detected and this will initiate a
+       vaccination program.
+     - Days 3-8: On each day, 1 “C” unit will be vaccinated.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>vacnUC</td>
+    </tr>
+    <tr><td>0</td>  <td>0</td></tr>
+    <tr><td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>stop vaccination after 3 days with no detections 1</short-name>
+
+  <description>
+    This test is one of a set to test stopping and restarting vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get vaccinated.  Inside
+    the first ring are 2 units of type A, and inside the second ring are 2 units of type B.
+
+    In this test, there is only a single detection, and 3 days after that vaccination is
+    stopped.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>15 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>stop_vac_3days_1</parameter-file>
+
+  <parameter-description>
+    For production type A, the infectious subclinical period is 1 day, and the latent
+    period is 30 days.  This ensures that only unit 2 will be detected during this
+    simulation.
+
+    For production type B, the latent and infectious subclinical period are both 1 day,
+    and then the herd goes directly to immune.  This ensures that neither of the B units
+    will be detected during this simulation.
+    
+    Vaccination begins after 1 detection.  There is capacity to vaccinate 1 unit per
+    day.
+    
+    Vaccination is stopped after 3 days with no detections.
+
+    What should happen:
+     - Day 1: Unit 2 will be subclinical.
+     - Day 2: Unit 2 will be clinical.  It will be detected and this will initiate a
+       vaccination program.
+     - Days 3-5: On each day, 1 “C” unit will be vaccinated, for a total of 3 units.
+       Since there are no new detections during these 3 days, vaccination will be
+       stopped.
+     - Day 6: There should be no more vaccinations from this day forward.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>vacnUC</td>
+    </tr>
+    <tr><td>0</td>  <td>0</td></tr>
+    <tr><td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>stop vaccination after 3 days with no detections 2</short-name>
+
+  <description>
+    This test is one of a set to test stopping and restarting vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get vaccinated.  Inside
+    the first ring are 2 units of type A, and inside the second ring are 2 units of type B.
+
+    In this test, there is 1 detection (which triggers vaccination), another detection 2
+    days later, and 3 days after that vaccination is stopped.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>15 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>stop_vac_3days_2</parameter-file>
+
+  <parameter-description>
+    For production type A, the latent period is 2 days, and the infectious subclinical
+    period is 1 day.
+
+    For production type B, the latent and infectious subclinical period are both 1 day,
+    and then the herd goes directly to immune.  This ensures that neither of the B units
+    will be detected during this simulation.
+    
+    Vaccination begins after 1 detection.  There is capacity to vaccinate 1 unit per
+    day.
+    
+    Vaccination is stopped after 3 days with no detections.
+
+    What should happen:
+     - Day 1: Unit 2 will be subclinical.
+     - Day 2: Unit 2 will be clinical.  It will be detected and this will initiate a
+       vaccination program.
+     - Day 3: 1 “C” unit will be vaccinated.
+     - Day 4: Unit 1 will be clinical.  It will be detected.  1 “C” unit will be vaccinated.
+     - Day 5-7: On each day, 1 “C” unit will be vaccinated, for a total of 5 units since
+       vaccination began.  Since there are no new detections during these 3 days,
+       vaccination will be stopped.
+     - Day 8: There should be no more vaccinations from this day forward.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>vacnUC</td>
+    </tr>
+    <tr><td>0</td>  <td>0</td></tr>
+    <tr><td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>1</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>0</td></tr>
+  </output>
+</variable-test>
+
 <deterministic-test>
   <category>ring_vaccination</category>
   <short-name>retrospective vaccination 0 days, 3 detections to trigger</short-name>
