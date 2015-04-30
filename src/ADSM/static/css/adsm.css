@@ -959,6 +959,11 @@ input[type=file], button {
     right: 20px;
     top: 0;
 }
+#clear_filters {
+    position: absolute;
+    left: 20px;
+    top: 0;
+}
 #farm_list_container{
     float: right;
     width: 49.98vw;

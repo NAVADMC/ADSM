@@ -171,6 +171,12 @@ function update_population_filter_and_sort(sort_by) {
     $('#farm_list').parent().load(new_url + ' #farm_list');
 }
 
+$(document).on('click', '#clear_filters', function(event){
+    $('#farm_filter input').val('');
+    $('#farm_filter select').val('');
+    update_population_filter_and_sort();
+});
+
 //Validation checking for minimums in the filter
 $(document).on('change', '#farm_filter input', function(event){ //this needs to come before update_population_filter_and_sort()
     var name = $(this).closest('td').prev().text().toLowerCase();
