@@ -102,7 +102,7 @@ def population_png(request, width_inches=8, height_inches=8):
     light_colors = ['#a6cee3', '#b2df8a', '#fb9a99', '#fdbf6f', '#cab2d6'] # , '#ffff99']
     fig = Figure(figsize=(width_inches, height_inches), frameon=True, tight_layout=True)  # Issue #168 aspect ratio doesn't adjust currently
     ax = fig.add_subplot(1, 1, 1, axisbg='#FFFFFF')
-    size = 3000 / math.sqrt(Unit.objects.count())
+    size = min(100, 3000 / math.sqrt(Unit.objects.count()))
     for index, production_type in enumerate(ProductionType.objects.all()):
         longitude, latitude = zip(*[(u.latitude, u.longitude) for u in Unit.objects.filter(production_type=production_type)])
         ax.scatter(latitude,
