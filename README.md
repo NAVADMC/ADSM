@@ -2,8 +2,22 @@
 
 ADSM (Animal Disease Spread Model)
 ==========
+
+Setting up ADSM on your Desktop
+----------
+For detailed installation instructions see: [How to Install ADSM](https://github.com/NAVADMC/ADSM/wiki/How-to-Install-ADSM)
+Overview:
+1. Download the latest ADSM zip file from the [Releases Page](https://github.com/NAVADMC/ADSM/releases).
+2. Extract the downloaded zip folder to your Desktop.
+3. Run (double click) adsm.exe inside your new Desktop folder.
+4. ADSM will create a workspace in "/Documents/ADSM Workspace" to store your scenarios. 
+5. Consult the [User Guide](https://github.com/NAVADMC/ADSM/wiki#user-guide) to get started.
+
+
 Setting up ADSM for Development Work
 ---------
+If you are not a software developer working on modifying ADSM you can ignore the rest of this Readme file.
+
 ADSM has several external dependencies. Getting your environment setup with these dependencies for development work will be outlined in this document.
 
 Operating system:  
