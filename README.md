@@ -3,7 +3,7 @@
 ADSM (Animal Disease Spread Model)
 ==========
 
-Setting up ADSM on your Desktop
+Setting up ADSM on your Windows Desktop
 ----------
 
 For detailed installation instructions see: [How to Install ADSM](https://github.com/NAVADMC/ADSM/wiki/How-to-Install-ADSM)
