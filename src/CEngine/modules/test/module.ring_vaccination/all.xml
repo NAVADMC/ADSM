@@ -5996,7 +5996,7 @@
 
   <population-file>8units_all_infected_diff_types</population-file>
 
-  <parameter-file>trigger_1.5edr3days_in_anytype</parameter-file>
+  <parameter-file>trigger_1point5edr3days_in_anytype</parameter-file>
 
   <parameter-description>
     The production types’ latent periods are set so that there will be this

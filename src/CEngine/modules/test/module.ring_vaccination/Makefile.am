@@ -66,7 +66,7 @@ EXTRA_DIST = radius_0.xml radius_0_w_vars.xml radius_0point5.xml radius_1.xml \
  trigger_3detect_in_typeA_or_2detect_in_typeBorC_8units_2rows_4.sqlite3 \
  trigger_4detect3days_in_anytype_8units_all_infected_diff_types.sqlite3 \
  trigger_6detect4days_in_anytype_8units_all_infected_diff_types.sqlite3 \
- trigger_1.5edr3days_in_anytype_8units_all_infected_diff_types.sqlite3 \
+ trigger_1point5edr3days_in_anytype_8units_all_infected_diff_types.sqlite3 \
  trigger_1daysincedet_anytype_8units_all_infected_diff_types.sqlite3 \
  trigger_2daysincedet_anytype_8units_all_infected_diff_types.sqlite3 \
  trigger_2daysincedet_typeC_8units_all_infected_diff_types.sqlite3 \
