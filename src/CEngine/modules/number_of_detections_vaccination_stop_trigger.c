@@ -430,8 +430,8 @@ set_params (void *data, GHashTable *dict)
   local_data->production_type = g_new(gboolean, nprod_types);
   trigger_id = strtol(g_hash_table_lookup (dict, "id"), NULL, /* base */ 10);
   sql = g_strdup_printf ("SELECT prodtype.name AS prodtype "
-                         "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_rateofnewdetections_trigger_group trigger "
-                         "WHERE trigger.rateofnewdetections_id=%u "
+                         "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_stopvaccination_trigger_group trigger "
+                         "WHERE trigger.stopvaccination_id=%u "
                          "AND prodtype.id=trigger.productiontype_id",
                          trigger_id);
   args.flags = local_data->production_type;
