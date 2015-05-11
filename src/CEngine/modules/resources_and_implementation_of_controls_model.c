@@ -320,6 +320,9 @@ typedef struct
     or absence of a key is all we ever test). */
 
   /* Parameters concerning vaccination. */
+  int first_detection_day_for_vaccination; /** The day of the first detection.
+    Starts at -1, is changed to a value > 0 when the first detection occurs,
+    and is reset to -1 if the vaccination program is terminated. */
   gboolean vaccination_active;
   int vaccination_retrospective_days;
   int vaccination_initiated_day; /**< This value starts as -1, and is set on the day that
@@ -330,6 +333,10 @@ typedef struct
     the last vaccination happen. */
   REL_chart_t *vaccination_capacity; /**< The maximum number of units the
     authorities can vaccinate in a day. */
+  int base_day_for_vaccination_capacity; /** The day that corresponds to x=0
+    on the vaccination capacity chart. See the function
+    handle_request_to_initiate_vaccination_event for detailed notes on how this
+    base day is set. */
   gboolean vaccination_capacity_goes_to_0; /**< A flag indicating that at some
     point vaccination capacity drops to 0 and remains there. */
   int vaccination_capacity_0_day; /**< The day on which the vaccination
@@ -721,11 +728,11 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
   vaccination_capacity =
     (unsigned int)
     round (REL_chart_lookup
-           (day - local_data->first_detection_day - 1, local_data->vaccination_capacity));
+           (day - local_data->base_day_for_vaccination_capacity - 1, local_data->vaccination_capacity));
 
   /* Check whether the vaccination capacity has dropped to 0 for good. */
   if (local_data->vaccination_capacity_goes_to_0
-      && (day - local_data->first_detection_day) >=
+      && (day - local_data->base_day_for_vaccination_capacity) >=
       local_data->vaccination_capacity_0_day)
     {
       local_data->no_more_vaccinations = TRUE;
@@ -961,6 +968,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   local_data->no_more_destructions = FALSE;
   g_hash_table_remove_all (local_data->destroyed_today);
 
+  local_data->first_detection_day_for_vaccination = -1;
   local_data->vaccination_active = FALSE;
   local_data->vaccination_initiated_day = -1;
   local_data->vaccination_terminated_day = -1;
@@ -1083,6 +1091,16 @@ handle_detection_event (struct adsm_module_t_ *self,
       g_debug ("destruction program delayed %hu days (will begin on day %hu)",
                local_data->destruction_program_delay, local_data->destruction_program_begin_day);
 #endif
+    }
+
+  /* We keep track of a "first detection day" separately for vaccination.  This is
+   * because vaccination capacity ramps up relative to 1st detection day, _but_ if the
+   * vaccination program is terminated and then later re-started, vaccination capacity
+   * will then ramp up relative to 1st detection day _post termination of the previous
+   * vaccination program_. */
+  if (local_data->first_detection_day_for_vaccination == -1)
+    {      
+      local_data->first_detection_day_for_vaccination = event->day;
     }
 
   /* If the unit is awaiting vaccination, and the request(s) can be canceled by
@@ -1296,6 +1314,7 @@ handle_request_to_initiate_vaccination_event (struct adsm_module_t_ *self,
                                               EVT_event_queue_t *queue)
 {
   local_data_t *local_data;
+  double zero_day;
 
   #if DEBUG
     g_debug ("----- ENTER handle_request_to_initiate_vaccination_event (%s)", MODEL_NAME);
@@ -1312,6 +1331,33 @@ handle_request_to_initiate_vaccination_event (struct adsm_module_t_ *self,
         g_debug ("initiating vaccination, day %i", event->day);
       #endif
       EVT_event_enqueue (queue, EVT_new_vaccination_initiated_event (event->day, event->trigger_id));
+
+      /* Set the base day for vaccination capacity. Normally, the vaccination
+       * capacity is relative to the day of first detection. If a vaccination
+       * program was initiated, then ended, and now re-started, the vaccination
+       * capacity is relative to the day of first detection post-ending of the
+       * vaccination program. In the unusual case that a vaccination program is
+       * re-started and there have been no new detections post-ending of the
+       * vaccination program, the vaccination capacity will be relative to
+       * today. */
+      if (local_data->first_detection_day_for_vaccination > 0)
+        local_data->base_day_for_vaccination_capacity = local_data->first_detection_day_for_vaccination;
+      else
+        local_data->base_day_for_vaccination_capacity = event->day;
+
+      /* There are a couple of flags/values that are used in this module to decide
+       * whether we have hit a point where no more vaccinations can be done.  Set them
+       * now. */
+      local_data->vaccination_capacity_goes_to_0 = REL_chart_zero_at_right (local_data->vaccination_capacity, &zero_day);
+      if (local_data->vaccination_capacity_goes_to_0)
+        {
+          local_data->vaccination_capacity_0_day = (int) ceil (zero_day);
+          #if DEBUG
+            g_debug ("vaccination capacity drops to 0 on and after the %ith day since 1st detection",
+                     local_data->vaccination_capacity_0_day + 1);
+          #endif
+        }
+      local_data->no_more_vaccinations = FALSE;
     }
   #if DEBUG
     g_debug ("----- EXIT handle_request_to_initiate_vaccination_event (%s)", MODEL_NAME);
@@ -1456,6 +1502,7 @@ handle_request_to_terminate_vaccination_event (struct adsm_module_t_ *self,
       EVT_event_enqueue (queue, EVT_new_vaccination_terminated_event (event->day));
       /* No need to clear out the pending vaccinations.  That will be done when the next
        * NewDay event arrives. */
+      local_data->first_detection_day_for_vaccination = -1;
     }
 
   #if DEBUG
@@ -1789,18 +1836,6 @@ set_params (void *data, GHashTable *dict)
   else
     {
       local_data->vaccination_capacity = REL_new_point_chart (0);
-    }
-  /* Set a flag if the vaccination capacity chart at some point drops to 0 and
-   * stays there. */
-  local_data->vaccination_capacity_goes_to_0 =
-    REL_chart_zero_at_right (local_data->vaccination_capacity, &dummy);
-  if (local_data->vaccination_capacity_goes_to_0)
-    {
-      local_data->vaccination_capacity_0_day = (int) ceil (dummy);
-      #if DEBUG
-        g_debug ("vaccination capacity drops to 0 on and after the %ith day since 1st detection",
-                 local_data->vaccination_capacity_0_day + 1);
-      #endif
     }
 
   tmp_text = g_hash_table_lookup (dict, "vaccination_priority_order");
