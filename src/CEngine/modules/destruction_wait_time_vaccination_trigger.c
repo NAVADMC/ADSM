@@ -29,6 +29,7 @@
 #define handle_commitment_to_destroy_event destruction_wait_time_vaccination_trigger_handle_commitment_to_destroy_event
 #define handle_destruction_event destruction_wait_time_vaccination_trigger_handle_destruction_event
 #define handle_end_of_day_event destruction_wait_time_vaccination_trigger_handle_end_of_day_event
+#define handle_vaccination_terminated_event destruction_wait_time_vaccination_trigger_handle_vaccination_terminated_event
 
 #include "module.h"
 #include "module_util.h"
@@ -260,6 +261,41 @@ handle_end_of_day_event (struct adsm_module_t_ *self,
 
 
 /**
+ * Responds to a vaccination terminated event by clearing the records of
+ * unfulfilled Commitment to Destroy events.  Will start anew with any
+ * Commitment to Destroy events that arrive after the vaccination program has
+ * been ended.
+ *
+ * @param self this module.
+ * @param event a vaccination terminated event.
+ */
+void
+handle_vaccination_terminated_event (struct adsm_module_t_ *self,
+                                     EVT_vaccination_terminated_event_t *event)
+{
+  local_data_t *local_data;
+  guint i;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_vaccination_terminated_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);  
+  g_hash_table_remove_all (local_data->requests);
+  for (i = 0; i < local_data->num_days; i++)
+    {
+      local_data->num_requests[i] = 0;
+    }
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_vaccination_terminated_event (%s)", MODEL_NAME);
+  #endif
+  return;
+}
+
+
+
+/**
  * Runs this module.
  *
  * @param self this module.
@@ -293,6 +329,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
       break;
     case EVT_EndOfDay:
       handle_end_of_day_event (self, &(event->u.end_of_day), queue);
+      break;
+    case EVT_VaccinationTerminated:
+      handle_vaccination_terminated_event (self, &(event->u.vaccination_terminated));
       break;
     default:
       g_error
@@ -488,6 +527,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_CommitmentToDestroy,
     EVT_Destruction,
     EVT_EndOfDay,
+    EVT_VaccinationTerminated,
     0
   };
   guint trigger_id;

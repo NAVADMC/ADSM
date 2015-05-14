@@ -27,6 +27,7 @@
 #define handle_before_each_simulation_event days_since_first_detection_vaccination_trigger_handle_before_each_simulation_event
 #define handle_detection_event days_since_first_detection_vaccination_trigger_handle_detection_event
 #define handle_new_day_event days_since_first_detection_vaccination_trigger_handle_new_day_event
+#define handle_vaccination_terminated_event days_since_first_detection_vaccination_trigger_handle_vaccination_terminated_event
 
 #include "module.h"
 #include "module_util.h"
@@ -197,6 +198,36 @@ handle_new_day_event (struct adsm_module_t_ *self,
 
 
 /**
+ * Responds to a vaccination terminated event by setting the seen_detection
+ * flag to FALSE, so that the trigger is reset and can initiate vaccination
+ * again.
+ *
+ * @param self this module.
+ * @param event a new day event.
+ */
+void
+handle_vaccination_terminated_event (struct adsm_module_t_ *self,
+                                     EVT_vaccination_terminated_event_t *event)
+{
+  local_data_t *local_data;
+
+  #if DEBUG
+    g_debug ("----- ENTER handle_vaccination_terminated_event (%s)", MODEL_NAME);
+  #endif
+
+  local_data = (local_data_t *) (self->model_data);
+  local_data->seen_detection = FALSE;
+  local_data->day_to_initiate_vaccination = 0;
+
+  #if DEBUG
+    g_debug ("----- EXIT handle_vaccination_terminated_event (%s)", MODEL_NAME);
+  #endif
+  return;
+}
+
+
+
+/**
  * Runs this module.
  *
  * @param self this module.
@@ -224,6 +255,9 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
       break;
     case EVT_NewDay:
       handle_new_day_event (self, &(event->u.new_day), queue);
+      break;
+    case EVT_VaccinationTerminated:
+      handle_vaccination_terminated_event (self, &(event->u.vaccination_terminated));
       break;
     default:
       g_error
@@ -409,6 +443,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_BeforeEachSimulation,
     EVT_Detection,
     EVT_NewDay,
+    EVT_VaccinationTerminated,
     0
   };
   guint trigger_id;
