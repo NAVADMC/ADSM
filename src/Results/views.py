@@ -7,6 +7,7 @@ from django.http import HttpResponse, JsonResponse
 from django.forms.models import modelformset_factory
 from django.shortcuts import render, redirect
 from django.db.models import Max
+from django.utils.html import mark_safe
 
 from ADSMSettings.models import scenario_filename, SmSession
 from ADSMSettings.utils import workspace_path
@@ -31,7 +32,7 @@ def simulation_status(request):
         'iterations_total': output_settings.iterations,
         'iterations_started': len(list_of_iterations()),
         'iterations_completed': iterations_complete(),
-        'status_text': "running?",
+        'iteration_text': mark_safe(SmSession.objects.get().iteration_text),
     }
     return JsonResponse(status)
 
@@ -69,7 +70,6 @@ def create_blank_unit_stats():
 def run_simulation(request):
     delete_all_outputs()
     delete_supplemental_folder()
-    SmSession.objects.all().update(simulation_has_started=False)  # This is the only place where this gets reset
     create_blank_unit_stats()  # create UnitStats before we risk the simulation writing to them
     sim = Simulation(OutputSettings.objects.all().first().iterations)
     sim.start()  # starts a new thread
@@ -126,9 +126,10 @@ headers = {'DailyByProductionType': [("Exposures", "exp", ['expnU', 'expcU']),
                                      ("Exams", "exm", ['exmnU', 'exmcU']),
                                      ("Lab Tests", "tst", ['tstnU', 'tstcU']),
                                      ("Tracing", "tr", ['trnU', 'trcU'])],
-           'DailyControls': [("Destruction", 'dest', ['destrSubtotal']),
-                             ("Destruction Wait", 'desw', ['deswUTimeAvg']),
-                             ("Vaccination", 'vacc', ['vaccVaccination'])]}
+           # 'DailyControls': [("Destruction", 'dest', ['destrSubtotal']),  # TODO: figure out why DailyControls subcategories are not displaying right
+           #                   ("Destruction Wait", 'desw', ['deswUTimeAvg']),
+           #                   ("Vaccination", 'vacc', ['vaccVaccination'])]
+           }
 headers = defaultdict(lambda: [('', '', [])], headers)
 
 

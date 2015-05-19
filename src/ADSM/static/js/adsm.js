@@ -2,7 +2,7 @@ function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTim
 
 
 safe_save = function(url, data){
-    if(typeof outputs_computed === 'undefined' || outputs_computed == false) { 
+    if(typeof outputs_exist === 'undefined' || outputs_exist == false) { 
         $.post(url, data, function() { window.location.reload() });
     } else { //confirmation dialog so we don't clobber outputs
         var dialog = new BootstrapDialog.show({
@@ -22,7 +22,7 @@ safe_save = function(url, data){
                     label: 'Proceed',
                     cssClass: 'btn-danger btn-save',
                     action: function(dialog){
-                        outputs_computed = false;
+                        outputs_exist = false;
                         $.post(url, data, function(){
                             window.location.reload()
                         });
@@ -36,6 +36,14 @@ safe_save = function(url, data){
     
 
 $(function(){
+    $(document).on('click', '#TB_population', function(){
+        $('#population_panel').toggleClass('TB_panel_closed')
+    })
+    
+    $('.production_list, .group_list').each(function(){
+        $('#population_panel').removeClass('TB_panel_closed')
+    })
+    
     $(document).on('click', 'a[load-target]', function(event){
         event.preventDefault()
         var selector = $(this).attr('load-target')
@@ -117,7 +125,6 @@ $(function(){
             }
         });
     }); 
-    $('#update_adsm').click() // if the element loads in the page, it will be clicked immediately
     
     $(document).on('saved', 'form:has(.unsaved)', function(){ //fixes 'Save' button with wrong color state
         $(this).find('.unsaved').removeClass('unsaved');
@@ -251,7 +258,7 @@ $(function(){
         var object_type = link.split('/')[2]
         if (typeof object_type === 'undefined') {object_type = 'object'}
         var additional_msg = ''
-        if(typeof outputs_computed !== 'undefined' && outputs_computed){
+        if(typeof outputs_exist !== 'undefined' && outputs_exist){
             additional_msg = ' and <strong><u>All Results</u></strong>' 
         }
         var dialog = new BootstrapDialog.show({
@@ -301,6 +308,15 @@ $(function(){
         safe_save('', form.serialize());//will cause page reload
         // window.location.reload();
     });
+    
+    $(window).resize( function(){
+        var nav = document.getElementById('setupMenu');  //need DOM element
+        if(nav.scrollHeight > nav.clientHeight){ // returns true if there's a `vertical` scrollbar, false otherwise..
+            $('#setupMenu-after, #setupMenu-before').css({'visibility': 'visible'})
+        }else{
+            $('#setupMenu-after, #setupMenu-before').css({'visibility': 'hidden'})
+        }
+    }); 
     
     $('#pop-upload').on('submit',function(event){
         var filename = $(this).find('input[type=file]').val()
@@ -360,7 +376,7 @@ var check_file_saved = function(){
 
 
 two_state_button = function(){
-    if(typeof outputs_computed === 'undefined' || outputs_computed == false) {
+    if(typeof outputs_exist === 'undefined' || outputs_exist == false) {
         return 'class="btn btn-primary btn-save">Save changes'
     } else {
         return 'class="btn btn-danger btn-save">Delete Results and Save Changes'

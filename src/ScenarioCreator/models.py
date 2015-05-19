@@ -307,6 +307,8 @@ class ControlMasterPlan(InputSingleton):
         help_text='The secondary priority order for destruction.', )
     vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the daily vaccination capacity.', )
+    restart_vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
+        help_text='Define if the daily vaccination capacity will be different if started a second time.', )
     vaccination_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
         help_text='The primary priority criteria for order of vaccinations.',
         choices=priority_choices(), )
@@ -803,8 +805,16 @@ class SpreadBetweenGroups(VaccinationTrigger):  # doesn't need trigger_group so 
         bold_values = tuple(bold(str(x)) for x in [self.number_of_groups, ', '.join(group.name for group in self.relevant_groups.all())])
         return format_html("{0} groups infected between {1}", *bold_values)
 
-    
 
+class StopVaccination(FilteredVaccinationTrigger, InputSingleton):
+    number_of_units = models.PositiveIntegerField(
+        help_text='The threshold is specified by a number of units and a number of days. For example, "no more than 3 units detected within 5 days."')
+    days = models.PositiveIntegerField()
+    def __str__(self):
+        bold_values = tuple(bold(str(x)) for x in [self.number_of_units, self.days, ', '.join(pt.name for pt in self.trigger_group.all())])
+        return format_html('{1} days with no more than {0} detections, in {2}', *bold_values)
+
+    
 
 
 

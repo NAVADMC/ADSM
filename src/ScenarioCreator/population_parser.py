@@ -52,29 +52,40 @@ class PopulationParser(object):
 
     def __parse_csv(self, filename):
         """Based on FLAPS example, and a NAADSM csv example"""
-        try:
-            try:
-                mapping = {'productiontype': 'production_type',  # FLAPS Preferred Mapping
-                           'longitude': 'longitude',
-                           'latitude': 'latitude',
-                           'population': 'initial_size', }
-                self.__parse_csv_units(filename, mapping)
-            except KeyError:
-                mapping = {'commoditytype': 'production_type',  # FLAPS Fallback Mapping
-                           'longitude': 'longitude',
-                           'latitude': 'latitude',
-                           'population': 'initial_size', }
-                self.__parse_csv_units(filename, mapping)
-        except KeyError:
-            mapping = {'production-type': 'production_type',  # NAADSM CSV mapping
-                       'longitude': 'longitude',
-                       'latitude': 'latitude',
-                       'size': 'initial_size',
-                       'status': 'initial_state'}
-            try:
-                self.__parse_csv_units(filename, mapping)
-            except KeyError:
-                raise ET.ParseError("Unrecognized csv header format. Please use: " + ', '.join(list(mapping.keys())))
+        possible_formats = [
+            {'productiontype': 'production_type',  # FLAPS Preferred Mapping
+             'longitude': 'longitude',
+             'latitude': 'latitude',
+             'population': 'initial_size', },
+            {'commoditytype': 'production_type',  # FLAPS Fallback Mapping
+             'longitude': 'longitude',
+             'latitude': 'latitude',
+             'population': 'initial_size', },
+            {'production-type': 'production_type',  # NAADSM CSV mapping
+             'longitude': 'longitude',
+             'latitude': 'latitude',
+             'size': 'initial_size',
+             'status': 'initial_state'},
+            {'productiontype': 'production_type',  # NAADSM CSV population export
+             'lon': 'longitude',
+             'lat': 'latitude',
+             'unitsize': 'initial_size',
+             'status': 'initial_state',
+             'daysinstate': 'days_in_initial_state',
+             'daysleftinstate': 'days_left_in_initial_state'}
+        ]
+        parsing_success = False
+        for mapping in possible_formats:
+            if not parsing_success:
+                try:
+                    self.__parse_csv_units(filename, mapping)
+                    parsing_success = True
+                except KeyError:
+                    parsing_success = False
+        if not parsing_success:
+            raise ET.ParseError("Unrecognized csv header format. Please use: " + ', '.join(list(possible_formats[-1].keys())) + 
+                                '.  Export initial states as character codes.')
+
 
 
     def __parse_xml_population_fields(self, text_fields):

@@ -8,7 +8,8 @@ from django.utils.html import strip_tags
 from ADSMSettings.models import scenario_filename, SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
-from ADSMSettings.utils import update_is_needed, graceful_startup, reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload
+from ADSMSettings.utils import reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload
+from Results.models import outputs_exist
 
 
 def loading_screen(request):
@@ -33,16 +34,6 @@ def update_adsm_from_git(request):
         except:
             print ("Failed to set DB to update!")
             return HttpResponse("failure")
-
-
-def check_update(request):
-    graceful_startup()
-
-    session = SmSession.objects.get()
-    session.update_available = update_is_needed()
-    session.save()
-
-    return redirect('/setup/')
 
 
 def file_dialog(request):
@@ -76,7 +67,8 @@ def import_naadsm_scenario(request):
     else:  # GET page for the first time
         initialized_form = ImportForm()
     if initialized_form.is_valid():
-        return run_importer(request)
+        run_importer(request)
+        return redirect('/')
     context = {'form': initialized_form, 'title': "Import Legacy NAADSM Scenario in XML format"}
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages
 
@@ -99,6 +91,7 @@ def open_scenario(request, target, wrap_target=True):
     print('Sessions overwritten with ', target)
     update_db_version()
     unsaved_changes(False)  # File is now in sync
+    SmSession.objects.all().update(iteration_text = '', simulation_has_started=outputs_exist())  # This is also reset from delete_all_outputs
     # else:
     #     print('File does not exist')
     return redirect('/setup/Scenario/1/')

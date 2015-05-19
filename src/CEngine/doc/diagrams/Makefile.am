@@ -108,6 +108,7 @@ dist_noinst_DATA = state-transition.png \
   units_circle.png \
   units_circle2.png \
   16units_square.png \
+  16units_2rings.png \
   no_rtree_lat0.png \
   rtree_lat0.png \
   no_rtree_lat45.png \
@@ -338,6 +339,8 @@ units_circle_png_SOURCES = $(top_srcdir)/models/test/units_circle.xml
 units_circle2_png_SOURCES = $(top_srcdir)/models/test/units_circle2.xml
 
 16units_square_png_SOURCES = $(top_srcdir)/models/test/16units_square.xml
+
+16units_2rings_png_SOURCES = $(top_srcdir)/models/test/16units_2rings.xml
 
 no_rtree_lat0_png_SOURCES = $(top_srcdir)/models/test/no_rtree_lat0.xml
 

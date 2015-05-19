@@ -76,6 +76,7 @@ miniadsm_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/main_lo
   $(top_srcdir)/modules/days_since_first_detection_vaccination_trigger.c $(top_srcdir)/modules/days_since_first_detection_vaccination_trigger.h \
   $(top_srcdir)/modules/number_of_groups_vaccination_trigger.c $(top_srcdir)/modules/number_of_groups_vaccination_trigger.h \
   $(top_srcdir)/modules/destruction_wait_time_vaccination_trigger.c $(top_srcdir)/modules/destruction_wait_time_vaccination_trigger.h \
+  $(top_srcdir)/modules/number_of_detections_vaccination_stop_trigger.c $(top_srcdir)/modules/number_of_detections_vaccination_stop_trigger.h \
   $(top_srcdir)/modules/ring_vaccination_model.c $(top_srcdir)/modules/ring_vaccination_model.h \
   $(top_srcdir)/modules/trace_model.c $(top_srcdir)/modules/trace_model.h \
   $(top_srcdir)/modules/trace_destruction_model.c $(top_srcdir)/modules/trace_destruction_model.h \
@@ -161,7 +162,7 @@ EXTRA_DIST = config/unix.exp 1unit.xml 2units.xml \
   8units_2rows.xml 8units_2rows_2.xml 8units_2rows_3.xml 8herds_2rows_4.xml \
   9units.xml \
   9units_hexagon.xml \
-  units_circle.xml units_circle2.xml 16units_square.xml \
+  units_circle.xml units_circle2.xml 16units_square.xml 16units_2rings.xml \
   1unit_1dayleft.xml 1unit_3daysleft.xml \
   1unit_start_infectious.xml 1unit_start_infectious_1dayleft.xml \
   1unit_start_infectious_2daysleft.xml 1unit_start_subclinical.xml \

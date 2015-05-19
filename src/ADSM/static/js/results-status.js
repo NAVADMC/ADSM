@@ -21,6 +21,13 @@ var results_status  = (function(pollTime){
                     status_text = "Simulation complete.  " + context.iterations_total + " iterations run.";
                 }
                 $('.simulation-progress').width(simulation_progress * 100 + "%");
+
+                var $iterationText = $('#iteration_text')[0];
+                //check scroll position before changing anything
+                var isScrolledToBottom = $iterationText.scrollHeight - $iterationText.clientHeight <= $iterationText.scrollTop + 10;// allow 10px inaccuracy
+                $('#iteration_text').html(context.iteration_text) //insert the text
+                if(isScrolledToBottom) //readjust the scroll
+                    $iterationText.scrollTop = $iterationText.scrollHeight - $iterationText.clientHeight;
             }
             else {  //simulation hasn't started
                 status_text = "Starting Simulation..."
@@ -43,6 +50,6 @@ var results_status  = (function(pollTime){
         stop_poll: stop_poll,
         get_last_progress: function() { return last_progress; }
     };
-})(5000);
+})(3000);
 
 results_status.start_poll();

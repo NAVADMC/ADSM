@@ -5,12 +5,14 @@ All forms now have their "submit" button restored and you can choose custom layo
 
 
 from floppyforms.__future__ import ModelForm
+from django.conf import settings
 from django.forms.models import inlineformset_factory
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
 from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple
 from crispy_forms.helper import FormHelper
+import os
 
 
 class AddOrSelect(Select):
@@ -31,7 +33,7 @@ class FixedSelect(Select):
 
 
 def submit_button():
-    return ButtonHolder(HTML(open('ScenarioCreator/templates/ScenarioCreator/EditButtons.html', 'r').read()))
+    return ButtonHolder(HTML(open(os.path.join(settings.BASE_DIR, 'ScenarioCreator','templates','ScenarioCreator','EditButtons.html'), 'r').read()))
 
 
 class BaseForm(ModelForm):
@@ -112,7 +114,9 @@ class ControlMasterPlanForm(BaseForm):
         model = ControlMasterPlan
         exclude = []
         widgets = {'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
+                   'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'restart_vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   }
 
 
 class ProtocolAssignmentForm(BaseForm):
@@ -318,8 +322,8 @@ class DiseaseProgressionForm(BaseForm):
                    'disease_clinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_prevalence': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/',
-                                                            'data-visibility-context': 'use_within_unit_prevalence'
-                                                            })}
+                                                            'data-visibility-context': 'use_within_unit_prevalence'})
+        }
 
 
 class IndirectSpreadForm(BaseForm):
@@ -498,11 +502,17 @@ class ZoneEffectAssignmentForm(BaseForm):
 ## V3.3 Vaccination Triggers ##
 
 class ProductionTypeList(SelectMultiple):
+    template_name = 'floppyforms/multiselect.html'
     def __init__(self, starting_attrs=None):
-        attrs = {'class': 'production_list'}
+        attrs = {'class': 'production_list empty'}
         if starting_attrs is not None:
             attrs.update(starting_attrs)
         super(ProductionTypeList, self).__init__(attrs)
+
+    def get_context(self, name, value, attrs=None, choices=()):
+        context = super(SelectMultiple, self).get_context(name, value, attrs)
+        context['help_text'] = mark_safe("To add production types to the trigger click on a Type or Group from the <em>Population Panel</em>") 
+        return context
 
 
 class ProductionGroupForm(BaseForm):
@@ -563,7 +573,11 @@ class SpreadBetweenGroupsForm(BaseForm):
         widgets = {'relevant_groups': SelectMultiple(attrs={'class':'group_list'})}
 
 
-
+class StopVaccinationForm(BaseForm):
+    class Meta(object):
+        model = StopVaccination
+        exclude = []
+        widgets = {'trigger_group': ProductionTypeList()}
 
 
 

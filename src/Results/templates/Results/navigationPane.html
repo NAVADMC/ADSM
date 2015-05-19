@@ -2,6 +2,7 @@
 {% load db_status_tags %}
 
 {% block main %}
+    <span id="setupMenu-before"></span>
     <nav id="setupMenu">
 		<h2><a href="/results/" class="{{"^$"|active:active_link}}">Results Home
         </a></h2>
@@ -25,9 +26,13 @@
 		   Back to Inputs </a></h2>
          
     </nav>
+    <span id="setupMenu-after"></span>
     <section>
         {% block content %}
 
         {% endblock %}
     </section>
+    
+    {% include "Results/SimulationProgressBar.html" %}
+    
 {% endblock %}

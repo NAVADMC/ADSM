@@ -10,6 +10,7 @@ from django.db.models import Q, ObjectDoesNotExist
 from django.db import OperationalError
 
 from Results.models import *  # This is absolutely necessary for dynamic form loading
+from ScenarioCreator.models import *
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from ADSMSettings.models import unsaved_changes
 from ADSMSettings.utils import graceful_startup, file_list, handle_file_upload, workspace_path, adsm_executable_command
@@ -33,7 +34,8 @@ abstract_models = {
          ('DisseminationRate', DisseminationRate),
          ('SpreadBetweenGroups', SpreadBetweenGroups),
          ('TimeFromFirstDetection', TimeFromFirstDetection),
-         ('DestructionWaitTime', DestructionWaitTime),]}
+         ('DestructionWaitTime', DestructionWaitTime),
+         ('StopVaccination', StopVaccination)]}
 
 
 def spaces_for_camel_case(text):
@@ -420,9 +422,10 @@ def filtering_params(request):
     keys = ['latitude__gte', 'latitude__eq', 'latitude__lte', 'longitude__gte', 'longitude__eq',
             'longitude__lte', 'initial_size__gte', 'initial_size__eq', 'initial_size__lte',  # 3 permutations for each number field
             'production_type__name', 'initial_state']
-    for key in keys:
-        if key in request.GET:
-            params[key] = request.GET.get(key)
+    if request:
+        for key in keys:
+            if key in request.GET:
+                params[key] = request.GET.get(key)
     return params
 
 
@@ -438,7 +441,7 @@ def filter_info(request, params):
 
 
 def population(request):
-    """"See also Pagination https://docs.djangoproject.com/en/dev/topics/pagination/"""
+    """"Creates the formset and filter context for Population View"""
     context = {}
     FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated, can_delete=False)
     if save_formset_succeeded(FarmSet, Unit, context, request):
