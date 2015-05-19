@@ -239,7 +239,11 @@ header #admin_link .btn:focus {
 }
 
 body>nav {
-    min-width: 185px;
+    position: fixed;
+    top: 49px;
+    bottom: 0;
+    left: 0;
+    width: 175px;
 }
 
 /*#left-panel {*/
