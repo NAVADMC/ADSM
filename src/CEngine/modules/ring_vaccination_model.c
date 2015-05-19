@@ -218,7 +218,7 @@ check_and_choose (int id, gpointer arg)
     goto end;
 
 #if DEBUG
-  g_debug ("unit %s within radius, ordering unit vaccinated", unit2->official_id);
+  g_debug ("unit \"%s\" within radius, ordering unit vaccinated", unit2->official_id);
 #endif
   EVT_event_enqueue (callback_data->queue,
                      EVT_new_request_for_vaccination_event (unit2,

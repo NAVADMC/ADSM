@@ -2,6 +2,7 @@
 {% load db_status_tags %}
 
 {% block main %}
+    <span id="setupMenu-before"></span>
     <nav id="setupMenu">
          
             <h2><a href="/setup/Scenario/1/" class="{{ "Scenario"|active:active_link}}">
@@ -22,6 +23,8 @@
             <h2><a href="/setup/ControlMasterPlan/1/" class="{{"ControlMasterPlan"|active:active_link}}">
                 <span class="pull-right {{ControlMasterPlan|completed}}"> </span>Controls</a>
                 {% if controls_enabled %}
+                 <h3><a href="/setup/VaccinationTrigger/" class="{{"VaccinationTrigger"|active:active_link}}">
+                        <span class="pull-right {{VaccinationTrigger|completed}}"> </span>Vaccination Triggers</a></h3>
                  <h3><a href="/setup/ControlProtocol/" class="{{"ControlProtocol"|active:active_link}}">
                         <span class="pull-right {{Protocols|completed}}"> </span>Control Protocol</a></h3>
                     <h4><a href="/setup/AssignProtocols/" class="{{"AssignProtocols"|active:active_link}}">
@@ -39,25 +42,31 @@
             <h2><a href="/setup/OutputSettings/1/" class="{{"OutputSettings"|active:active_link}}">
                 <span class="pull-right {{OutputSetting|completed}}"> </span>Output Settings</a></h2>
 
-            <h2 id="RunSimulation">
-                {% if outputs_computed %}
+            <h2 id="RunSimulationIn">
+                {% if outputs_exist %}
                     <a href="/results/" class="completed ">
-                    View Results <i class="glyphicon glyphicon-play"></i></a>
+                    View Results </a>
                 {% else %}
                     {% if dry_run_passed %}
                         <a href="/?loading_url=/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
                         Run Simulation <i class="glyphicon glyphicon-play"></i></a>
                     {% else %}
                         <a href="/setup/ValidateScenario/" class=" {{Simulation_ready|completed}}">
-                        Validate Scenario <i class="glyphicon glyphicon-play"></i></a>
+                        Validate Scenario </a>
                     {% endif %}
             {% endif %}
             </h2>
          
     </nav>
+    <span id="setupMenu-after"></span>
     <section>
         {% block content %}
 
         {% endblock %}
     </section>
+    
+    {% if outputs_exist %}
+        {% include "Results/SimulationProgressBar.html" %}
+    {% endif %}
+    
 {% endblock %}

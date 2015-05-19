@@ -28,18 +28,27 @@
     </div>
 
 {% else %}
-    <h1><strong>Population File:</strong> {{ population_file }} ({{ Farms|intcomma }} units)</h1>
-    <img src="/results/Population.png" alt="Unit Locations"/>
-    <p></p>
+    <h1><strong>Population File:</strong> {{ population_file }} ({{ Farms|intcomma }} units) 
+        <a href="#" data-delete-link="{{deletable}}" id="replace_population" class="action_link btn btn-danger">Replace Population</a>
+    </h1>
+    <div id="edit-mask"></div>
+    <div id="population_grid_wraper">
+        <form method="post" style="float:right;">
+            <div id="farm_list_container" class="col-xs-8">
+                <div id="farm_list">  {#So it can be targetted by CSS #}
+                    {% include "ScenarioCreator/PopulationFormset.html" %}
+                </div>
+            </div>
+        </form>
+        <button id="edit_population" class="action_link btn btn-primary">Edit Population</button>
 
-    {% include "ScenarioCreator/PopulationFilters.html" %}
+        <div id="population_map_container" class="col-xs-4">
+            <img id="unit_map" src="/results/Population.png" alt="Unit Locations"/>
+        </div>
 
-    <form method="post">
-        <div id="farm_list_container">
-        <div id="farm_list">  {#So it can be targetted by CSS #}
-            {% include "ScenarioCreator/PopulationFormset.html" %}
-        </div></div>
-        {% include "ScenarioCreator/EditButtons.html" %}
-    </form>
+        <p></p>
+                   
+        {% include "ScenarioCreator/PopulationFilters.html" %}
+    </div>
 {% endif %}
 {% endblock %}

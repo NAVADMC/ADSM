@@ -460,61 +460,6 @@ local_free (struct adsm_module_t_ *self)
 
 
 /**
- * Set the parameters for this module.
- */
-static void
-set_params (struct adsm_module_t_ *self, sqlite3 * params)
-{
-  local_data_t *local_data;
-
-  #if DEBUG
-    g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
-  #endif
-
-  local_data = (local_data_t *) (self->model_data);
-
-  /* Get the filename for the table.  If the filename is omitted, blank, '-',
-   * or 'stdout' (case insensitive), then the table is written to standard
-   * output. */
-  if (TRUE)
-    {
-      local_data->filename = g_strdup ("stdout"); /* just so we have something
-        to display, and to free later */
-      local_data->channel_is_stdout = TRUE;    
-    }
-  else
-    {
-      local_data->filename = NULL; /* PAR_get_text (e); */
-      if (local_data->filename == NULL
-          || g_ascii_strcasecmp (local_data->filename, "") == 0
-          || g_ascii_strcasecmp (local_data->filename, "-") == 0
-          || g_ascii_strcasecmp (local_data->filename, "stdout") == 0)
-        {
-          local_data->channel_is_stdout = TRUE;
-        }
-      else
-        {
-          char *tmp;
-          if (!g_str_has_suffix(local_data->filename, ".csv"))
-            {
-              tmp = local_data->filename;
-              local_data->filename = g_strdup_printf("%s.csv", tmp);
-              g_free(tmp);
-            }
-          local_data->channel_is_stdout = FALSE;
-        }
-    }
-
-  #if DEBUG
-    g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
-  #endif
-
-  return;
-}
-
-
-
-/**
  * Returns a new table writer.
  */
 adsm_module_t *

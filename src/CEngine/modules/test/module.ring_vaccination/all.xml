@@ -5500,6 +5500,1543 @@
 
 <variable-test>
   <category>ring_vaccination</category>
+  <short-name>trigger on 1 detection in any type</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on number of
+    detections.  There are 4 units of type A, A, B, and C, which get detected
+    one per day.  Above those are a row of units of type D, which get
+    vaccinated if/when a vaccination program is initiated.
+
+    In this test, vaccination is triggered by detection of 1 unit of any type.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows_4</population-file>
+
+  <parameter-file>trigger_1detect_in_anytype</parameter-file>
+
+  <parameter-description>
+    For all production types, there is no latent period and the clinical
+    period lasts 10 days.
+
+    Airborne spread is set up such that infection will spread from unit 1
+    (lower row, far left) across the lower row, with 1 new unit infected each
+    day. Detection occurs on the first day clinical.
+
+    Vaccination begins when disease has been detected in 1 unit of any type.
+
+    What should happen:
+     - On day 1 unit 1 will be Infectious Clinical.  It will be detected and
+       a vaccination program will be initiated.
+     - On day 2 the top row of units will be vaccinated.  The simulation
+       is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detcU</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>2</td>  <td>2</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 3 detections in any type</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on number of
+    detections.  There are 4 units of type A, A, B, and C, which get detected
+    one per day.  Above those are a row of units of type D, which get
+    vaccinated if/when a vaccination program is initiated.
+
+    In this test, vaccination is triggered by detection of 3 units of any type.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows_4</population-file>
+
+  <parameter-file>trigger_3detect_in_anytype</parameter-file>
+
+  <parameter-description>
+    Parameter setup is similar to “trigger on 1 detection in any type” above,
+    but vaccination begins when disease has been detected in 3 units of any
+    type.
+
+    What should happen:
+     - On day 1 unit 1 will be Infectious Clinical.  It will be detected.
+     - On day 2 unit 2 will be Infectious Clinical.  It will be detected.
+     - On day 3 unit 3 will be Infectious Clinical.  It will be detected and,
+       since this is the 3rd detection, a vaccination program will be initiated.
+     - On day 4 the top row of units will be vaccinated.  The simulation
+       is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detcU</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>2</td>  <td></td></tr>
+    <tr><td>3</td>  <td></td></tr>
+    <tr><td>4</td>  <td>4</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 2 detections in type A</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on number of
+    detections.  There are 4 units of type A, A, B, and C, which get detected
+    one per day.  Above those are a row of units of type D, which get
+    vaccinated if/when a vaccination program is initiated.
+
+    In this test, vaccination is triggered by detection of 2 units of type A.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows_4</population-file>
+
+  <parameter-file>trigger_2detect_in_typeA</parameter-file>
+
+  <parameter-description>
+    Parameter setup is similar to “trigger on 1 detection in any type” above,
+    but vaccination begins when disease has been detected in 2 units of type
+    A.
+
+    What should happen:
+     - On day 1 unit 1 will be Infectious Clinical.  It will be detected.
+     - On day 2 unit 2 will be Infectious Clinical.  It will be detected and,
+       since this is the 2nd detection of an “A” unit, a vaccination program
+       will be initiated.
+     - On day 3 the top row of units will be vaccinated.  The simulation
+       is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detcUA</td>
+      <td>detcUB</td>
+      <td>detcUC</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>0</td>  <td>3</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 3 detections in type A</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on number of
+    detections.  There are 4 units of type A, A, B, and C, which get detected
+    one per day.  Above those are a row of units of type D, which get
+    vaccinated if/when a vaccination program is initiated.
+
+    In this test, vaccination is triggered by detection of 3 units of type A
+    (which never happens).
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows_4</population-file>
+
+  <parameter-file>trigger_3detect_in_typeA</parameter-file>
+
+  <parameter-description>
+    Parameter setup is similar to “trigger on 1 detection in any type” above,
+    but vaccination begins when disease has been detected in 3 units of type
+    A.
+
+    What should happen:
+     - On day 1 unit 1 will be Infectious Clinical.  It will be detected.
+     - On day 2 unit 2 will be Infectious Clinical.  It will be detected.
+     - On day 3 unit 3 will be Infectious Clinical.  It will be detected.  This
+       is the 3rd detection, but there have only been 2 detections of “A” units
+       and 1 of a “B” unit, so vaccination will not be initiated.
+     - On day 4 unit 4 will be Infectious Clinical.  It will be detected.
+       Vaccination still will not be initiated.
+     - The simulation will end when all units are either Destroyed or
+       Susceptible.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detcUA</td>
+      <td>detcUB</td>
+      <td>detcUC</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td></td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 1 detection in type B or C</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on number of
+    detections.  There are 4 units of type A, A, B, and C, which get detected
+    one per day.  Above those are a row of units of type D, which get
+    vaccinated if/when a vaccination program is initiated.
+
+    In this test, vaccination is triggered by detection of 1 unit of type B or
+    C.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows_4</population-file>
+
+  <parameter-file>trigger_1detect_in_typeBorC</parameter-file>
+
+  <parameter-description>
+    Parameter setup is similar to “trigger on 1 detection in any type” above,
+    but vaccination begins when disease has been detected in 1 unit of type B
+    or C.
+
+    What should happen:
+     - On day 1 unit 1 will be Infectious Clinical. It will be detected. This
+       unit is type “A” so it does not get counted towards initiating
+       vaccination.
+     - On day 2 unit 2 will be Infectious Clinical. It will be detected. Again
+       this unit is type “A” so it does not get counted towards initiating
+       vaccination.
+     - On day 3 unit 3 will be Infectious Clinical. It will be detected. This
+       unit is of type “B”, so vaccination will be initiated.
+     - On day 4 the top row of units will be vaccinated.  The simulation
+       is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detcUA</td>
+      <td>detcUB</td>
+      <td>detcUC</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td>4</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 1 detection in type C</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on number of
+    detections.  There are 4 units of type A, A, B, and C, which get detected
+    one per day.  Above those are a row of units of type D, which get
+    vaccinated if/when a vaccination program is initiated.
+
+    In this test, vaccination is triggered by detection of 1 unit of type C.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows_4</population-file>
+
+  <parameter-file>trigger_1detect_in_typeC</parameter-file>
+
+  <parameter-description>
+    Parameter setup is similar to “trigger on 1 detection in any type” above,
+    but vaccination begins when disease has been detected in 1 unit of type C.
+
+    What should happen:
+     - On day 1 unit 1 will be Infectious Clinical. It will be detected. This
+       unit is type “A” so it does not get counted towards initiating
+       vaccination.
+     - On day 2 unit 2 will be Infectious Clinical. It will be detected. Again
+       this unit is type “A” so it does not get counted towards initiating
+       vaccination.
+     - On day 3 unit 3 will be Infectious Clinical. It will be detected. Again
+       this unit is type “B” so it does not get counted towards initiating
+       vaccination. This
+     - On day 4 unit 4 will be Infectious Clinical. It will be detected. This
+       unit is of type “C”, so vaccination will be initiated.
+     - On day 5 the top row of units will be vaccinated.  The simulation
+       is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detcUA</td>
+      <td>detcUB</td>
+      <td>detcUC</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td>5</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 3 detections in type A or 2 detections in type B or C</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on number of
+    detections.  There are 4 units of type A, A, B, and C, which get detected
+    one per day.  Above those are a row of units of type D, which get
+    vaccinated if/when a vaccination program is initiated.
+
+    In this test, vaccination is triggered by detection of 3 units of type A or
+    detection of 2 units of type B or C.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows_4</population-file>
+
+  <parameter-file>trigger_3detect_in_typeA_or_2detect_in_typeBorC</parameter-file>
+
+  <parameter-description>
+    Parameter setup is similar to “trigger on 1 detection in any type” above,
+    but vaccination begins when disease has been detected in 3 units of type A
+    (trigger #1) or 2 units of type B or C (trigger #2).
+
+    What should happen:
+     - On day 1 unit 1 will be Infectious Clinical. It will be detected. This
+       makes 1 unit of type “A” detected, not enough to initiate vaccination.
+     - On day 2 unit 2 will be Infectious Clinical. It will be detected. This
+       makes 2 units of type “A” detected, not enough to initiate vaccination.
+     - On day 3 unit 3 will be Infectious Clinical. It will be detected. This
+       makes 1 unit of type “B” detected, not enough to initiate vaccination.
+     - On day 4 unit 4 will be Infectious Clinical. It will be detected. This
+       makes 1 unit of type “B” and 1 unit of type “C” detected, so
+       vaccination will be initiated by trigger #2.
+     - On day 5 the top row of units will be vaccinated.  The simulation
+       is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detcUA</td>
+      <td>detcUB</td>
+      <td>detcUC</td>
+      <td>vaccTriggered</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td></td>   <td></td></tr>
+    <tr><td>2</td>  <td>0</td>  <td>0</td>  <td></td>   <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>0</td>  <td></td>   <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td>2</td>  <td></td></tr>
+    <tr><td>2</td>  <td>1</td>  <td>1</td>  <td>2</td>  <td>5</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 4 detections over 3 days, any type</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on rate of
+    detections.  There are 8 units of types A-H, all starting latent, so the
+    disease parameters can be manipulated to produce any number of newly
+    Clinical units to detect on a particular day.  The “H” unit is the one that
+    gets vaccinated.
+
+    In this test, vaccination is triggered by detection of 4 units over 3 days,
+    any production type.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>13 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_4detect3days_in_anytype</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 0, 1, 1, 0, 2, 1, 1, 1.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins when disease has been detected in 4 units over 3 days
+    (1.333 units per day), in units of any type.
+
+    What should happen:
+     - Day 1: 0 detections, count over the past 3 days = 0. Rate = 0/3 = 0.
+     - Day 2: 1 detection, count over the past 3 days = 1. Rate = 1/3 = 0.333.
+     - Day 3: 1 detection, count over the past 3 days = 2. Rate = 2/3 = 0.667.
+     - Day 4: 0 detections, count over the past 3 days = 2. Rate = 2/3 = 0.667.
+     - Day 5: 2 detections, count over the past 3 days = 3. Rate = 3/3 = 1.0.
+     - Day 6: 1 detection, count over the past 3 days = 3. Rate = 3/3 = 1.0.
+     - Day 7: 1 detection, count over the past 3 days = 4. Vaccination will be
+       initiated.
+     - Day 8: 1 detection, count over the past 3 days = 3. The “H” unit will be
+       vaccinated on this day.  The simulation is deliberately stopped at this
+       point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnU</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td></td></tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>1</td>  <td>8</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on 6 detections over 4 days, any type, reach equivalent rate 1.5 by 2 days</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on rate of
+    detections.  There are 8 units of types A-H, all starting latent, so the
+    disease parameters can be manipulated to produce any number of newly
+    Clinical units to detect on a particular day.  The “H” unit is the one that
+    gets vaccinated.
+
+    In this test, vaccination is triggered by detection of 6 units over 4 days,
+    any production type. The equivalent rate (1.5 units per day) is reached
+    after only 2 days, but that should not trigger detection, since the point
+    of counting the number of detections over 4 days is to smooth out spikes.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>3 April 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_6detect4days_in_anytype</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 1, 2, 0, 0, 0, 0, 0, 0.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins when disease has been detected in 6 units over 4 days,
+    in units of any type.
+
+    What should happen:
+     - Day 1: 1 detection, count over the past 4 days = 1.
+     - Day 2: 2 detections, count over the past 4 days = 3.
+     - There are no more detections after this point and vaccination will not
+       be triggered.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnU</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>2</td>  <td></td></tr>
+    <tr><td>0</td>  <td></td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on EDR 1.5 measured over last 3 days divided by 3 days before that</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination on EDR.  There
+    are 8 units of types A-H, all starting latent, so the disease parameters
+    can be manipulated to produce any number of newly Clinical units to detect
+    on a particular day.  The “H” unit is the one that gets vaccinated.
+
+    In this test, vaccination is triggered by an EDR of 1.5 or higher,
+    measured by detections in the last 3 days divided by detections in the 3
+    days before that.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>14 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_1point5edr3days_in_anytype</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 0, 0, 2, 0, 0, 1, 2, 1.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins when the EDR is 1.5 or higher, based on detections in
+    units of any type.
+
+    What should happen:
+     - Day 1: 0 detections, EDR = (0+0+0)/(0+0+0) = undefined.
+     - Day 2: 0 detections, EDR = (0+0+0)/(0+0+0) = undefined.
+     - Day 3: 2 detections, EDR = (2+0+0)/(0+0+0) = undefined.
+     - Day 4: 0 detections, EDR = (0+2+0)/(0+0+0) = undefined.
+     - Day 5: 0 detections, EDR = (0+0+2)/(0+0+0) = undefined.
+     - Day 6: 1 detection,  EDR = (1+0+0)/(2+0+0) = 0.5, too low.
+     - Day 7: 2 detections, EDR = (2+1+0)/(0+2+0) = 1.5. Vaccination will be
+       initiated.
+     - Day 8: 1 detection. The “H” unit will be vaccinated on this day.  The
+       simulation is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnU</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>2</td>  <td></td></tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>2</td>  <td></td></tr>
+    <tr><td>1</td>  <td>8</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger 1 day after first detection in any type</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination a given number of
+    days after the first detection.  There are 8 units of types A-H, all
+    starting latent, so the disease parameters can be manipulated to produce
+    any number of newly Clinical units to detect on a particular day.  The “H”
+    unit is the one that gets vaccinated.
+
+    In this test, vaccination is triggered 1 day after the first detection in
+    any production type.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>15 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_1daysincedet_anytype</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 0, 1, 1, 0, 1, 0, 2, 1.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins 1 day after the first detection, based on detections in
+    units of any type.
+
+    What should happen:
+     - Day 1: 0 detections.
+     - Day 2: 1 detection. First detection.
+     - Day 3: 1 detection. 1 day after 1st detection. The “H” unit will be
+       vaccinated on this day.  The simulation is deliberately stopped at this
+       point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnU</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>1</td>  <td>3</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger 2 days after first detection in any type</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination a given number of
+    days after the first detection.  There are 8 units of types A-H, all
+    starting latent, so the disease parameters can be manipulated to produce
+    any number of newly Clinical units to detect on a particular day.  The “H”
+    unit is the one that gets vaccinated.
+
+    In this test, vaccination is triggered 2 days after the first detection in
+    any production type.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>15 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_2daysincedet_anytype</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 0, 1, 1, 0, 1, 0, 2, 1.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins 2 days after the first detection, based on detections
+    in units of any type.
+
+    What should happen:
+     - Day 1: 0 detections.
+     - Day 2: 1 detection. First detection.
+     - Day 3: 1 detection. 1 day after 1st detection.
+     - Day 4: 0 detections. 2 days after 1st detection. The “H” unit will be
+       vaccinated on this day.  The simulation is deliberately stopped at this
+       point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnU</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>0</td>  <td>4</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger 2 days after first detection in type C</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination a given number of
+    days after the first detection.  There are 8 units of types A-H, all
+    starting latent, so the disease parameters can be manipulated to produce
+    any number of newly Clinical units to detect on a particular day.  The “H”
+    unit is the one that gets vaccinated.
+
+    In this test, vaccination is triggered 2 days after the first detection in
+    a unit of type “C”.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>15 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_2daysincedet_typeC</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 0, 1, 1, 0, 1, 2, 0, 1.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins 2 days after the first detection, based on detections
+    in units of type “C”.
+
+    What should happen:
+     - Day 1: 0 detections.
+     - Day 2: 1 detection of an “A” unit.
+     - Day 3: 1 detection of a “B” unit.
+     - Day 4: 0 detections.
+     - Day 5: 1 detection of a “C” unit. First detection of the desired type.
+     - Day 6: 2 detections. 1 day after 1st detection.
+     - Day 7: 0 detections. 2 days after 1st detection. The “H” unit will be
+       vaccinated on this day.  The simulation is deliberately stopped at this
+       point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUC</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td></td></tr>
+    <tr><td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>7</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger 5 days after first detection in type A or 3 days after first detection in type B</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination a given number of
+    days after the first detection.  There are 8 units of types A-H, all
+    starting latent, so the disease parameters can be manipulated to produce
+    any number of newly Clinical units to detect on a particular day.  The “H”
+    unit is the one that gets vaccinated.
+
+    In this test, vaccination is triggered 5 days after the first detection in
+    a unit of type “A” or 3 days after the first detection in a unit of type
+    “B”.  (The “B” unit will be detected later, but will trigger vaccination
+    first.)
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>15 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_5daysincedet_typeA_3daysincedet_typeB</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 0, 1, 1, 0, 1, 2, 0, 1.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins 5 days after the first detection in units of type “A” or
+    3 days after the first detection in units of type “B”.
+
+    What should happen:
+     - Day 1: 0 detections.
+     - Day 2: 1 detection of an “A” unit. First vaccination should happen on
+       day 2+5 = 7.
+     - Day 3: 1 detection of a “B” unit. First vaccination should happen on
+       day 3+3 = 6.
+     - Day 4: 0 detections.
+     - Day 5: 1 detection of a “C” unit.
+     - Day 6: 2 detections, “D” and “E” units. The “H” unit will be
+       vaccinated on this day.  The simulation is deliberately stopped at this
+       point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>1</td>  <td></td></tr>
+    <tr><td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>6</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on detection in 1 group (A,B)</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination once detections
+    have occurred in a given number of production type groups.  There are 8
+    units of types A-H, all starting latent, so the disease parameters can be
+    manipulated to produce any number of newly Clinical units to detect on a
+    particular day.  The “H” unit is the one that gets vaccinated.
+
+    In this test, vaccination is triggered when detections have occurred in 1
+    group, containing types “A” and “B”.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>20 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_1groupAB</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 1, 1, 1, 1, 1, 1, 1, 1.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins after detection has occurred in 1 group.  The group
+    contains production types “A” and “B”.
+
+    What should happen:
+     - Day 1: 1 detection of an “A” unit. Vaccination will be initiated.
+     - Day 2: 1 The “H” unit will be vaccinated on this day.  The
+       simulation is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>2</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on detection in 1 group (C,D)</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination once detections
+    have occurred in a given number of production type groups.  There are 8
+    units of types A-H, all starting latent, so the disease parameters can be
+    manipulated to produce any number of newly Clinical units to detect on a
+    particular day.  The “H” unit is the one that gets vaccinated.
+
+    In this test, vaccination is triggered when detections have occurred in 1
+    group, containing types “C” and “D”.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>20 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_1groupCD</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 1, 1, 1, 1, 1, 1, 1, 1.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins after detection has occurred in 1 group.  The group
+    contains production types “C” and “D”.
+
+    What should happen:
+     - Day 1: 1 detection of an “A” unit.
+     - Day 2: 1 detection of a “B” unit.
+     - Day 3: 1 detection of a “C” unit. Vaccination will be initiated.
+     - Day 4: 1 The “H” unit will be vaccinated on this day.  The
+       simulation is deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>detnUC</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td>  <td></td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>4</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on detection in 2 groups (A,B,C) (E,F)</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination once detections
+    have occurred in a given number of production type groups.  There are 8
+    units of types A-H, all starting latent, so the disease parameters can be
+    manipulated to produce any number of newly Clinical units to detect on a
+    particular day.  The “H” unit is the one that gets vaccinated.
+
+    In this test, vaccination is triggered when detections have occurred in 2
+    groups. One group contains types “A”, “B”, and “C”, and the other group
+    contains types “E” and “F”.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>20 February 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_2groupsABC_EF</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 1, 1, 1, 1, 1, 1, 1, 1.
+    Detection occurs on the first day clinical.
+
+    Vaccination begins after detection has occurred in 2 groups. One group
+    contains types “A”, “B”, and “C”, and the other group contains types “E”
+    and “F”.
+
+    What should happen:
+     - Day 1: 1 detection of an “A” unit. Detection has now occurred in group 1.
+     - Day 2: 1 detection of a “B” unit.
+     - Day 3: 1 detection of a “C” unit.
+     - Day 4: 1 detection of a “D” unit.
+     - Day 5: 1 detection of an “E” unit. Detection has now occurred in a second
+       group. Vaccination will be initiated.
+     - Day 6: 1 The “H” unit will be vaccinated on this day.  The simulation is
+       deliberately stopped at this point.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>detnUC</td>
+      <td>detnUE</td>
+      <td>detnUF</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>1</td>  <td>6</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on unit waiting 1 day for destruction, 0 destruction capacity</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination once units have
+    been waiting a given number of days for destruction.  There are 8 units of
+    types A-H, all starting latent, so the disease parameters can be
+    manipulated to produce any number of newly Clinical units to detect on a
+    particular day.  The “H” unit is the one that gets vaccinated.
+
+    In this test, vaccination is triggered when any unit has been waiting 1
+    day for destruction.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>6 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_destwait1_cap0</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 1, 1, 1, 1, 1, 1, 1, 1.
+    Detection occurs on the first day clinical.  There is no capacity to
+    destroy diseased units.
+
+    Vaccination begins after any unit has been waiting 1 day for destruction.
+
+    What should happen:
+     - Day 1: 1 detection of an “A” unit.
+     - Day 2: 1 detection of a “B” unit. By the end of this day, the “A” unit
+       counts as having been waiting for 1 day, so vaccination will be initiated.
+     - Day 3: 1 detection of a “C” unit. The “H” unit will be vaccinated on
+       this day.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnU</td>
+      <td>deswU</td>
+      <td>desnU</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td>2</td>  <td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td>3</td>  <td>0</td>  <td>3</td></tr>
+    <tr><td>1</td>  <td>4</td>  <td>0</td>  <td>3</td></tr>
+    <tr><td>1</td>  <td>5</td>  <td>0</td>  <td>3</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on unit waiting 3 days for destruction, 0 destruction capacity</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination once units have
+    been waiting a given number of days for destruction.  There are 8 units of
+    types A-H, all starting latent, so the disease parameters can be
+    manipulated to produce any number of newly Clinical units to detect on a
+    particular day.  The “H” unit is the one that gets vaccinated.
+
+    In this test, vaccination is triggered when any unit has been waiting 3
+    days for destruction.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>6 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_destwait3_cap0</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 1, 1, 1, 1, 1, 1, 1, 1.
+    Detection occurs on the first day clinical.  There is no capacity to
+    destroy diseased units.
+
+    Vaccination begins after any unit has been waiting 3 days for destruction.
+
+    What should happen:
+     - Day 1: 1 detection of an “A” unit.
+     - Day 2: 1 detection of a “B” unit. By the end of this day, the “A” unit
+       counts as having been waiting for 1 day.
+     - Day 3: 1 detection of a “C” unit. The “A” unit counts as having been
+       waiting for 2 days.
+     - Day 4: 1 detection of a “D” unit. The “A” unit counts as having been
+       waiting for 3 days, so vaccination will be initiated.
+     - Day 5: 1 detection of an “E” unit. The “H” unit will be vaccinated on
+       this day.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnU</td>
+      <td>deswU</td>
+      <td>desnU</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td>2</td>  <td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td>3</td>  <td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td>4</td>  <td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td>5</td>  <td>0</td>  <td>5</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>trigger on unit waiting 3 days for destruction, destruction capacity 1 unit/day for 3 days</short-name>
+
+  <description>
+    This test is one of a set to test triggering vaccination once units have
+    been waiting a given number of days for destruction.  There are 8 units of
+    types A-H, all starting latent, so the disease parameters can be
+    manipulated to produce any number of newly Clinical units to detect on a
+    particular day.  The “H” unit is the one that gets vaccinated.
+
+    In this test, vaccination is triggered when any unit has been waiting 3
+    days for destruction.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>6 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_all_infected_diff_types</population-file>
+
+  <parameter-file>trigger_destwait3_cap3</parameter-file>
+
+  <parameter-description>
+    The production types’ latent periods are set so that there will be this
+    number of detections over the sequence of days: 1, 1, 1, 1, 1, 1, 1, 1.
+    Detection occurs on the first day clinical.  There is capacity to destroy 1
+    unit per day for the first 3 days.
+
+    Vaccination begins after any unit has been waiting 3 days for destruction.
+
+    What should happen:
+     - Day 1-3: The “A”, “B”, and “C” units will be detected.  Each of them
+       will be destroyed the day after it is detected.
+     - Day 4: The “D” unit is detected. Because capacity to destroy units has
+       run out, this will be the one that initiates vaccination.
+     - Day 5-7: These count as the 3 days that the “D” unit is waiting.
+     - Day 8: The “H” unit will be vaccinated on this day.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnU</td>
+      <td>deswU</td>
+      <td>desnU</td>
+      <td>firstVaccination</td>
+    </tr>
+    <tr><td>1</td>  <td>1</td>  <td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td>1</td>  <td>1</td>  <td></td></tr>
+    <tr><td>1</td>  <td>1</td>  <td>1</td>  <td></td></tr>
+    <tr><td>1</td>  <td>1</td>  <td>1</td>  <td></td></tr>
+    <tr><td>1</td>  <td>2</td>  <td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td>3</td>  <td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td>4</td>  <td>0</td>  <td></td></tr>
+    <tr><td>1</td>  <td>5</td>  <td>0</td>  <td>8</td></tr>
+    <tr><td>0</td>  <td>5</td>  <td>0</td>  <td>8</td></tr>
+    <tr><td>0</td>  <td>5</td>  <td>0</td>  <td>8</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>stop vaccination after 3 days with no detections (baseline)</short-name>
+
+  <description>
+    This test is one of a set to test stopping and restarting vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get vaccinated.  Inside
+    the first ring are 2 units of type A, and inside the second ring are 2 units of type B.
+
+    In this test, a baseline, vaccination is initiated but not stopped.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>15 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>stop_vac_3days_nostop</parameter-file>
+
+  <parameter-description>
+    For production type A, the infectious subclinical period is 1 day, and the latent
+    period is 30 days.  This ensures that only unit 2 will be detected during this
+    simulation.
+
+    For production type B, the latent and infectious subclinical period are both 1 day,
+    and then the herd goes directly to immune.  This ensures that neither of the B units
+    will be detected during this simulation.
+    
+    Vaccination begins after 1 detection.  There is capacity to vaccinate 1 unit per
+    day.
+    
+    There is no rule for stopping vaccination.
+
+    What should happen:
+     - Day 1: Unit 2 will be subclinical.
+     - Day 2: Unit 2 will be clinical.  It will be detected and this will initiate a
+       vaccination program.
+     - Days 3-8: On each day, 1 “C” unit will be vaccinated.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>vacnUC</td>
+    </tr>
+    <tr><td>0</td>  <td>0</td></tr>
+    <tr><td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>stop vaccination after 3 days with no detections 1</short-name>
+
+  <description>
+    This test is one of a set to test stopping and restarting vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get vaccinated.  Inside
+    the first ring are 2 units of type A, and inside the second ring are 2 units of type B.
+
+    In this test, there is only a single detection, and 3 days after that vaccination is
+    stopped.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>15 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>stop_vac_3days_1</parameter-file>
+
+  <parameter-description>
+    For production type A, the infectious subclinical period is 1 day, and the latent
+    period is 30 days.  This ensures that only unit 2 will be detected during this
+    simulation.
+
+    For production type B, the latent and infectious subclinical period are both 1 day,
+    and then the herd goes directly to immune.  This ensures that neither of the B units
+    will be detected during this simulation.
+    
+    Vaccination begins after 1 detection.  There is capacity to vaccinate 1 unit per
+    day.
+    
+    Vaccination is stopped after 3 days with no detections.
+
+    What should happen:
+     - Day 1: Unit 2 will be subclinical.
+     - Day 2: Unit 2 will be clinical.  It will be detected and this will initiate a
+       vaccination program.
+     - Days 3-5: On each day, 1 “C” unit will be vaccinated, for a total of 3 units.
+       Since there are no new detections during these 3 days, vaccination will be
+       stopped.
+     - Day 6: There should be no more vaccinations from this day forward.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>vacnUC</td>
+    </tr>
+    <tr><td>0</td>  <td>0</td></tr>
+    <tr><td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>stop vaccination after 3 days with no detections 2</short-name>
+
+  <description>
+    This test is one of a set to test stopping and restarting vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get vaccinated.  Inside
+    the first ring are 2 units of type A, and inside the second ring are 2 units of type B.
+
+    In this test, there is 1 detection (which triggers vaccination), another detection 2
+    days later, and 3 days after that vaccination is stopped.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>15 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>stop_vac_3days_2</parameter-file>
+
+  <parameter-description>
+    For production type A, the latent period is 2 days, and the infectious subclinical
+    period is 1 day.
+
+    For production type B, the latent and infectious subclinical period are both 1 day,
+    and then the herd goes directly to immune.  This ensures that neither of the B units
+    will be detected during this simulation.
+    
+    Vaccination begins after 1 detection.  There is capacity to vaccinate 1 unit per
+    day.
+    
+    Vaccination is stopped after 3 days with no detections.
+
+    What should happen:
+     - Day 1: Unit 2 will be subclinical.
+     - Day 2: Unit 2 will be clinical.  It will be detected and this will initiate a
+       vaccination program.
+     - Day 3: 1 “C” unit will be vaccinated.
+     - Day 4: Unit 1 will be clinical.  It will be detected.  1 “C” unit will be vaccinated.
+     - Day 5-7: On each day, 1 “C” unit will be vaccinated, for a total of 5 units since
+       vaccination began.  Since there are no new detections during these 3 days,
+       vaccination will be stopped.
+     - Day 8: There should be no more vaccinations from this day forward.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>vacnUC</td>
+    </tr>
+    <tr><td>0</td>  <td>0</td></tr>
+    <tr><td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>1</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>stop vaccination after 3 days with no detections, restart, same capacity chart</short-name>
+
+  <description>
+    This test is one of a set to test stopping and restarting vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get vaccinated.  Inside
+    the first ring are 2 units of type A, and inside the second ring are 2 units of type B.
+
+    In this test, there is 1 detection which triggers vaccination of the “C” units.  3
+    days after that vaccination is stopped, so not all of the “C” units get vaccinated.
+    A second detection causes the vaccination program to be re-started with “D” units
+    added to the vaccination queue. The same vaccination capacity chart applies the
+    second time the vaccination program is initiated.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>18 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>stop_vac_3days_restart_same_chart</parameter-file>
+
+  <parameter-description>
+    For production type A, the infectious subclinical period is 1 day, and the latent
+    period is 30 days.  This ensures that of the “A” units at the center of circle 1,
+    only unit 2 will be detected during this simulation.
+
+    For production type B, the infectious subclinical period is 6 days, and the latent
+    period is 30 days.  This ensures that of the “B” units at the center of circle 2,
+    only unit 3 will be detected during this simulation, a few days after unit 2.
+    
+    Vaccination begins after 1 detection.  There is capacity to vaccinate 1 unit per
+    day.
+    
+    Vaccination is stopped after 3 days with no detections.
+
+    What should happen:
+     - Day 1: Unit 2 will be subclinical.
+     - Day 2: Unit 2 will be clinical.  It will be detected and this will initiate a
+       vaccination program.  There should be 6 “C” units awaiting vaccination.
+     - Day 3-5: On each day, 1 “C” unit will be vaccinated, for a total of 3 units since
+       vaccination began.  Since there are no new detections during these 3 days,
+       vaccination will be stopped.  When vaccination is stopped, the queue of units
+       awaiting vaccination is emptied, the number of units awaiting vaccination should
+       drop to 0.
+     - Day 7: Unit 3 will be clinical.  It will be detected and this will re-initiate a
+       vaccination program.  There should be 6 “D” units awaiting vaccination.
+     - Day 8-10: On each day, 1 “D” unit will be vaccinated.  Since there are no new
+       detections during these 3 days, vaccination will be stopped again.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>vacnUC</td>
+      <td>vacnUD</td>
+      <td>vacwU</td>
+    </tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>0</td></tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>6</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td>  <td>0</td>  <td>5</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td>  <td>0</td>  <td>4</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td>  <td>0</td>  <td>3</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td>  <td>0</td>  <td>6</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>1</td>  <td>5</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>1</td>  <td>4</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>1</td>  <td>3</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>0</td></tr>
+  </output>
+</variable-test>
+
+<deterministic-test>
+  <category>ring_vaccination</category>
+  <short-name>retrospective vaccination 0 days, 3 detections to trigger</short-name>
+
+  <description>
+    This test is one of a set to test retrospective vaccination.  There are 2 rows of
+    units, cattle across the bottom and pigs across the top.  Infection spreads across
+    the row of cattle units, resulting in 1 detection per day when the units are turning
+    Clinical.  When a cattle unit is detected, a small vaccination circle is drawn,
+    covering just the pig unit directly above that cattle unit.
+
+    In this test, vaccination is initiated once 3 infected units have been detected.
+    Retrospective vaccination is given as 0 days.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>21 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows</population-file>
+
+  <parameter-file>vacc_3detect_retro0</parameter-file>
+
+  <parameter-description>
+    For cattle (the bottom row of units), the latent period lasts 1 day, then the unit
+    becomes infectious clinical.  Direct contact spread is set up such that each unit
+    infects the one to its right.
+
+    Diseased cattle units will be detected (by self-reporting) on their first day
+    showing clinical signs.
+    
+    Vaccination begins when disease has been detected in 3 units.  Retrospective
+    vaccination is set at 0 days.  Pig units within 0.75 km of a detected unit will be
+    vaccinated.  Vaccination resources allow for 1 unit to be vaccinated per day.
+
+    What should happen:
+     - Day 1: Unit 0 will be latent.  It will infect unit 1.
+     - Day 2-5: On each of these days, a detection will occur, starting with unit 0 on
+       day 2 and ending with unit 3 on day 5.
+     - Day 4: The 3rd detection (unit 2) occurs on this day.  A vaccination program will
+       be initiated, and the pig unit directly above unit 2 (unit 6) will be added to the
+       vaccination queue.
+     - Day 5: Unit 6 will be vaccinated (its state will show as vaccine immune on day 6).
+       Unit 3 is detected on this day, and unit 7 is added to the vaccination queue.
+     - Day 6: Unit 7 will be vaccinated (its state will show as vaccine immune on day 7).
+  </parameter-description>
+
+  <output>
+    <!--  Cattle Pigs       -->
+    <tr><td>LSSS SSSS</td></tr>
+    <tr><td>CLSS SSSS</td></tr>
+    <tr><td>CCLS SSSS</td></tr>
+    <tr><td>DCCL SSSS</td></tr>
+    <tr><td>DDCC SSSS</td></tr>
+    <tr><td>DDDC SSVS</td></tr>
+    <tr><td>DDDD SSVV</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_vaccination</category>
+  <short-name>retrospective vaccination 1 day, 3 detections to trigger</short-name>
+
+  <description>
+    This test is one of a set to test retrospective vaccination.  There are 2 rows of
+    units, cattle across the bottom and pigs across the top.  Infection spreads across
+    the row of cattle units, resulting in 1 detection per day when the units are turning
+    Clinical.  When a cattle unit is detected, a small vaccination circle is drawn,
+    covering just the pig unit directly above that cattle unit.
+
+    In this test, vaccination is initiated once 3 infected units have been detected.
+    Retrospective vaccination is given as 1 day.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>21 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows</population-file>
+
+  <parameter-file>vacc_3detect_retro1</parameter-file>
+
+  <parameter-description>
+    For cattle (the bottom row of units), the latent period lasts 1 day, then the unit
+    becomes infectious clinical.  Direct contact spread is set up such that each unit
+    infects the one to its right.
+
+    Diseased cattle units will be detected (by self-reporting) on their first day
+    showing clinical signs.
+    
+    Vaccination begins when disease has been detected in 3 units.  Retrospective
+    vaccination is set at 1 day.  Pig units within 0.75 km of a detected unit will be
+    vaccinated.  Vaccination resources allow for 1 unit to be vaccinated per day.
+
+    What should happen:
+     - Day 1: Unit 0 will be latent.  It will infect unit 1.
+     - Day 2-5: On each of these days, a detection will occur, starting with unit 0 on
+       day 2 and ending with unit 3 on day 5.
+     - Day 4: The 3rd detection (unit 2) occurs on this day.  A vaccination program will
+       be initiated, and the pig unit directly above unit 2 (unit 6) will be added to the
+       vaccination queue.  Unit 5 will also be added to the vaccination queue, and it
+       will count as an older vaccination request, because it is in a ring around unit 1
+       which was detected 1 day ago (retrospective).
+     - Day 5: Unit 5 will be vaccinated (its state will show as vaccine immune on day 6).
+       Unit 3 is detected on this day, and unit 7 is added to the vaccination queue.
+     - Day 6: Unit 6 will be vaccinated (its state will show as vaccine immune on day 7).
+     - Day 7: Unit 7 will be vaccinated (its state will show as vaccine immune on day 8).
+  </parameter-description>
+
+  <output>
+    <!--  Cattle Pigs       -->
+    <tr><td>LSSS SSSS</td></tr>
+    <tr><td>CLSS SSSS</td></tr>
+    <tr><td>CCLS SSSS</td></tr>
+    <tr><td>DCCL SSSS</td></tr>
+    <tr><td>DDCC SSSS</td></tr>
+    <tr><td>DDDC SVSS</td></tr>
+    <tr><td>DDDD SVVS</td></tr>
+    <tr><td>DDDD SVVV</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_vaccination</category>
+  <short-name>retrospective vaccination 3 days, 4 detections to trigger</short-name>
+
+  <description>
+    This test is one of a set to test retrospective vaccination.  There are 2 rows of
+    units, cattle across the bottom and pigs across the top.  Infection spreads across
+    the row of cattle units, resulting in 1 detection per day when the units are turning
+    Clinical.  When a cattle unit is detected, a small vaccination circle is drawn,
+    covering just the pig unit directly above that cattle unit.
+
+    In this test, vaccination is initiated once 4 infected units have been detected.
+    Retrospective vaccination is given as 3 days.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>21 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>8units_2rows</population-file>
+
+  <parameter-file>vacc_4detect_retro3</parameter-file>
+
+  <parameter-description>
+    For cattle (the bottom row of units), the latent period lasts 1 day, then the unit
+    becomes infectious clinical.  Direct contact spread is set up such that each unit
+    infects the one to its right.
+
+    Diseased cattle units will be detected (by self-reporting) on their first day
+    showing clinical signs.
+    
+    Vaccination begins when disease has been detected in 4 units.  Retrospective
+    vaccination is set at 3 days.  Pig units within 0.75 km of a detected unit will be
+    vaccinated.  Vaccination resources allow for 1 unit to be vaccinated per day.
+
+    What should happen:
+     - Day 1: Unit 0 will be latent.  It will infect unit 1.
+     - Day 2-5: On each of these days, a detection will occur, starting with unit 0 on
+       day 2 and ending with unit 3 on day 5.
+     - Day 5: The 4th detection (unit 3) occurs on this day.  A vaccination program will
+       be initiated, and the pig unit directly above unit 3 (unit 7) will be added to the
+       vaccination queue.  Units 4, 5, and 6 will also be added to the vaccination queue,
+       with unit 4 counting as the oldest request, because those units are in rings
+       around units 0, 1, and 2, which were detected within the last 3 days
+       (retrospective).
+     - Day 6: Unit 4 will be vaccinated (its state will show as vaccine immune on day 7).
+     - Day 7: Unit 5 will be vaccinated (its state will show as vaccine immune on day 9).
+     - Day 8: Unit 6 will be vaccinated (its state will show as vaccine immune on day 9).
+     - Day 9: Unit 7 will be vaccinated (its state will show as vaccine immune on day 10).
+  </parameter-description>
+
+  <output>
+    <!--               Cattle Pigs                    -->
+    <tr><td>LSSS SSSS</td></tr>
+    <tr><td>CLSS SSSS</td></tr>
+    <tr><td>CCLS SSSS</td></tr>
+    <tr><td>DCCL SSSS</td></tr>
+    <tr><td>DDCC SSSS</td></tr>
+    <tr><td>DDDC SSSS</td></tr>
+    <tr><td>DDDD VSSS</td></tr>
+    <tr><td>DDDD VVSS</td></tr>
+    <tr><td>DDDD VVVS</td></tr>
+    <tr><td>DDDD VVVV</td></tr>
+  </output>
+</deterministic-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
   <short-name>vaccination request from exam, cancellation from test</short-name>
 
   <description>

@@ -1,5 +1,6 @@
 <herds>
   <herd>
+    <id>0</id>
     <production-type>Cattle</production-type>
     <size>25</size>
     <location>
@@ -9,6 +10,7 @@
     <status>Latent</status>
   </herd>
   <herd>
+    <id>1</id>
     <production-type>Sheep</production-type>
     <size>25</size>
     <location>
@@ -18,6 +20,7 @@
     <status>Susceptible</status>
   </herd>
   <herd>
+    <id>2</id>
     <production-type>Goats</production-type>
     <size>25</size>
     <location>
@@ -27,6 +30,7 @@
     <status>Susceptible</status>
   </herd>
   <herd>
+    <id>3</id>
     <production-type>Pigs</production-type>
     <size>25</size>
     <location>

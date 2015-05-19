@@ -9,6 +9,7 @@ from django.db.models import Q, ObjectDoesNotExist
 from django.db import OperationalError
 
 from Results.models import *  # This is absolutely necessary for dynamic form loading
+from ScenarioCreator.models import *
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from ADSMSettings.models import unsaved_changes
 from ADSMSettings.utils import graceful_startup, file_list, handle_file_upload, workspace_path, adsm_executable_command
@@ -25,7 +26,15 @@ abstract_models = {
     'DiseaseSpread':
         [('DirectSpread', DirectSpread),
          ('IndirectSpread', IndirectSpread),
-         ('AirborneSpread', AirborneSpread)]}
+         ('AirborneSpread', AirborneSpread)],
+    'VaccinationTrigger':
+        [('DiseaseDetection', DiseaseDetection),
+         ('RateOfNewDetections', RateOfNewDetections),
+         ('DisseminationRate', DisseminationRate),
+         ('SpreadBetweenGroups', SpreadBetweenGroups),
+         ('TimeFromFirstDetection', TimeFromFirstDetection),
+         ('DestructionWaitTime', DestructionWaitTime),
+         ('StopVaccination', StopVaccination)]}
 
 
 def spaces_for_camel_case(text):
@@ -421,9 +430,10 @@ def filtering_params(request):
     keys = ['latitude__gte', 'latitude__eq', 'latitude__lte', 'longitude__gte', 'longitude__eq',
             'longitude__lte', 'initial_size__gte', 'initial_size__eq', 'initial_size__lte',  # 3 permutations for each number field
             'production_type__name', 'initial_state']
-    for key in keys:
-        if key in request.GET:
-            params[key] = request.GET.get(key)
+    if request:
+        for key in keys:
+            if key in request.GET:
+                params[key] = request.GET.get(key)
     return params
 
 
@@ -434,12 +444,12 @@ def filter_info(request, params):
     info['select_fields'] = {'production_type__name': [x.name for x in ProductionType.objects.all()],
                              'initial_state': Unit.initial_state_choices}
     info['numeric_fields'] = ["latitude","longitude", "initial_size"]
-    info['remaining_filters'] = [x for x in info['select_fields'] if x not in params.keys()] #TODO: add numeric_fields
+    info['remaining_filters'] = [x for x in info['select_fields'] if x not in params.keys()]
     return info
 
 
 def population(request):
-    """"See also Pagination https://docs.djangoproject.com/en/dev/topics/pagination/"""
+    """"Creates the formset and filter context for Population View"""
     context = {}
     FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated, can_delete=False)
     if save_formset_succeeded(FarmSet, Unit, context, request):
@@ -450,7 +460,7 @@ def population(request):
         params = filtering_params(request)
         for key, value in params.items():  # loops through params and stacks filters in an AND fashion
             query_filter = query_filter & Q(**{key: value})
-        initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:30])
+        initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:100])
         context['formset'] = initialized_formset
         context['filter_info'] = filter_info(request, params)
         context['deletable'] = '/setup/Population/1/delete/'

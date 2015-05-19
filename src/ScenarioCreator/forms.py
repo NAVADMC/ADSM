@@ -10,7 +10,7 @@ from django.forms.models import inlineformset_factory
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
-from floppyforms import Select, NumberInput, HiddenInput
+from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple
 from crispy_forms.helper import FormHelper
 import os
 
@@ -320,8 +320,8 @@ class DiseaseProgressionForm(BaseForm):
                    'disease_clinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_prevalence': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/',
-                                                            'data-visibility-context': 'use_within_unit_prevalence'
-                                                            })}
+                                                            'data-visibility-context': 'use_within_unit_prevalence'})
+        }
 
 
 class IndirectSpreadForm(BaseForm):
@@ -495,3 +495,89 @@ class ZoneEffectAssignmentForm(BaseForm):
         widgets = {'zone': HiddenInput(),
                    'production_type': HiddenInput(),
                    'effect': AddOrSelect(attrs={'data-new-item-url': '/setup/ZoneEffect/new/'})}
+
+
+## V3.3 Vaccination Triggers ##
+
+class ProductionTypeList(SelectMultiple):
+    template_name = 'floppyforms/multiselect.html'
+    def __init__(self, starting_attrs=None):
+        attrs = {'class': 'production_list empty'}
+        if starting_attrs is not None:
+            attrs.update(starting_attrs)
+        super(ProductionTypeList, self).__init__(attrs)
+
+    def get_context(self, name, value, attrs=None, choices=()):
+        context = super(SelectMultiple, self).get_context(name, value, attrs)
+        context['help_text'] = mark_safe("To add production types to the trigger click on a Type or Group from the <em>Population Panel</em>") 
+        return context
+
+
+class ProductionGroupForm(BaseForm):
+    class Meta(object):
+        model = ProductionGroup
+        exclude = []
+        widgets = {}
+
+
+class DiseaseDetectionForm(BaseForm):
+    class Meta(object):
+        model = DiseaseDetection
+        exclude = []
+        widgets = {'trigger_group': ProductionTypeList()}
+
+
+class RateOfNewDetectionsForm(BaseForm):
+    class Meta(object):
+        model = RateOfNewDetections
+        exclude = []
+        widgets = {'trigger_group': ProductionTypeList()}
+
+
+class DisseminationRateForm(BaseForm):
+    class Meta(object):
+        model = DisseminationRate
+        exclude = []
+        widgets = {'trigger_group': ProductionTypeList()}
+
+
+class TimeFromFirstDetectionForm(BaseForm):
+    class Meta(object):
+        model = TimeFromFirstDetection
+        exclude = []
+        widgets = {'trigger_group': ProductionTypeList()}
+
+
+class DestructionWaitTimeForm(BaseForm):
+    class Meta(object):
+        model = DestructionWaitTime
+        exclude = []
+        widgets = {'trigger_group': ProductionTypeList()}
+
+
+class SpreadBetweenGroupsForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            'number_of_groups',
+            'relevant_groups',
+            HTML(r"<a href='/setup/ProductionGroup/new'>+ define new group</a>"),
+            submit_button()
+        )
+        super(SpreadBetweenGroupsForm, self).__init__(*args, **kwargs)
+    class Meta(object):
+        model = SpreadBetweenGroups
+        exclude = []
+        widgets = {'relevant_groups': SelectMultiple(attrs={'class':'group_list'})}
+
+
+class StopVaccinationForm(BaseForm):
+    class Meta(object):
+        model = StopVaccination
+        exclude = []
+        widgets = {'trigger_group': ProductionTypeList()}
+
+
+
+
+
