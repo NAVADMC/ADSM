@@ -2,7 +2,7 @@ function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTim
 
 
 safe_save = function(url, data){
-    if(typeof outputs_computed === 'undefined' || outputs_computed == false) { 
+    if(typeof outputs_exist === 'undefined' || outputs_exist == false) { 
         $.post(url, data, function() { window.location.reload() });
     } else { //confirmation dialog so we don't clobber outputs
         var dialog = new BootstrapDialog.show({
@@ -22,7 +22,7 @@ safe_save = function(url, data){
                     label: 'Proceed',
                     cssClass: 'btn-danger btn-save',
                     action: function(dialog){
-                        outputs_computed = false;
+                        outputs_exist = false;
                         $.post(url, data, function(){
                             window.location.reload()
                         });
@@ -36,6 +36,10 @@ safe_save = function(url, data){
     
 
 $(function(){
+    $(document).on('click', '#TB_population', function(){
+        $('#population_panel').toggleClass('TB_panel_closed')
+    })
+    
     $(document).on('click', '[data-click-toggle]', function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });
@@ -62,11 +66,11 @@ $(function(){
     });
     
     $(document).on('click', '#check_update', function(event) {
-        $(this).addClass('loading')
+        $(this).addClass('loading_button')
     });
     
     $(document).on('click', '#update_adsm', function(event){
-        $(this).removeClass('loading')
+        $(this).removeClass('loading_button')
         event.preventDefault();
         $.get('/app/Update/', function(result){
             if( result == "success"){
@@ -121,34 +125,14 @@ $(function(){
         }
     });
     
-    //$(document).on('change', 'input, select', function(){
-    //    $('.btn-save').removeAttr('disabled')
-    //});
-    //
-    //$(document).on('focus', 'input', function(){
-    //    $('.btn-save').removeAttr('disabled')
-    //});
+    $(document).on('change', ':input, select', function(){
+        $('.btn-save').removeAttr('disabled')
+    });
     
-    /*$('[data-visibility-controller]').each(function(){
-        var controller = '[name=' + $(this).attr('data-visibility-controller') + ']'
-        var hide_target = $(this).parents('.control-group, td')
-        var required_value = $(this).attr('data-required-value') || 'True'
-        $('body').on('change', controller, function(){
-            if($(this).val() == required_value){
-                hide_target.show()
-            }else{
-                hide_target.hide()
-            }
-        });
-        $(controller).each(function(index, elem){ //each because radio buttons have multiple elem, same name
-            if($(elem).attr('type') != 'radio' || elem.hasAttribute('checked')){
-                //radio buttons are multiple elements with the same name, we only want to fire if its actually checked
-                $(elem).trigger('change');
-            }
-        });
-        $(hide_target).css('margin-left', '26px');
-    }) */
-
+    $(document).on('input', 'input, textarea', function(){
+        $('.btn-save').removeAttr('disabled')
+    });
+    
     
     var attach_visibility_controller = function (self){
         var controller = '[name=' + $(self).attr('data-visibility-controller') + ']'
@@ -222,7 +206,7 @@ $(function(){
         var object_type = link.split('/')[2]
         if (typeof object_type === 'undefined') {object_type = 'object'}
         var additional_msg = ''
-        if(typeof outputs_computed !== 'undefined' && outputs_computed){
+        if(typeof outputs_exist !== 'undefined' && outputs_exist){
             additional_msg = ' and <strong><u>All Results</u></strong>' 
         }
         var dialog = new BootstrapDialog.show({
@@ -272,6 +256,15 @@ $(function(){
         safe_save('', form.serialize());//will cause page reload
         // window.location.reload();
     });
+    
+    $(window).resize( function(){
+        var nav = document.getElementById('setupMenu');  //need DOM element
+        if(nav.scrollHeight > nav.clientHeight){ // returns true if there's a `vertical` scrollbar, false otherwise..
+            $('#setupMenu-after, #setupMenu-before').css({'visibility': 'visible'})
+        }else{
+            $('#setupMenu-after, #setupMenu-before').css({'visibility': 'hidden'})
+        }
+    }); 
     
     $('#pop-upload').on('submit',function(event){
         var filename = $(this).find('input[type=file]').val()
@@ -331,7 +324,7 @@ var check_file_saved = function(){
 
 
 two_state_button = function(){
-    if(typeof outputs_computed === 'undefined' || outputs_computed == false) {
+    if(typeof outputs_exist === 'undefined' || outputs_exist == false) {
         return 'class="btn btn-primary btn-save">Save changes'
     } else {
         return 'class="btn btn-danger btn-save">Delete Results and Save Changes'
