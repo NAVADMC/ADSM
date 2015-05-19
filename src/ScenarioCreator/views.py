@@ -9,6 +9,7 @@ from django.db.models import Q, ObjectDoesNotExist
 from django.db import OperationalError
 
 from Results.models import *  # This is absolutely necessary for dynamic form loading
+from ScenarioCreator.models import *
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from ADSMSettings.models import unsaved_changes
 from ADSMSettings.utils import graceful_startup, file_list, handle_file_upload, workspace_path, adsm_executable_command

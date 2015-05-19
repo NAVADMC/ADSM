@@ -36,6 +36,10 @@ safe_save = function(url, data){
     
 
 $(function(){
+    $(document).on('click', '#TB_population', function(){
+        $('#population_panel').toggleClass('TB_panel_closed')
+    })
+    
     $(document).on('click', '[data-click-toggle]', function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });
