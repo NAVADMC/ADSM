@@ -48,8 +48,13 @@ const char *EVT_event_type_name[] = {
   "Quarantine",
   "PublicAnnouncement", "Exam", "AttemptToTrace", "TraceResult", "Test",
   "TestResult",
+  "RequestToInitiateVaccination",
+  "VaccinationInitiated",
   "RequestForVaccination", "CommitmentToVaccinate", "VaccinationCanceled",
-  "Vaccination", "RequestForDestruction",
+  "Vaccination",
+  "RequestToTerminateVaccination",
+  "VaccinationTerminated",
+  "RequestForDestruction",
   "CommitmentToDestroy", "Destruction",
   "RequestForZoneFocus", "EndOfDay",
   "EndOfDay2",
@@ -811,6 +816,84 @@ EVT_test_result_event_to_string (EVT_test_result_event_t * event)
 
 
 /**
+ * Creates a new "request to initiate vaccination" event.
+ *
+ * @return a pointer to a newly-created EVT_event_t structure.
+ */
+EVT_event_t *
+EVT_new_request_to_initiate_vaccination_event (int day, guint trigger_id,
+                                               char *trigger_name)
+{
+  EVT_event_t *event;
+
+  event = g_new (EVT_event_t, 1);
+  event->type = EVT_RequestToInitiateVaccination;
+  event->u.request_to_initiate_vaccination.day = day;
+  event->u.request_to_initiate_vaccination.trigger_id = trigger_id;
+  event->u.request_to_initiate_vaccination.trigger_name = trigger_name;
+  return event;
+}
+
+
+
+/**
+ * Returns a text representation of a request to initiate vaccination event.
+ *
+ * @param event a request to initiate vaccination event.
+ * @return a string.
+ */
+char *EVT_request_to_initiate_vaccination_event_to_string (EVT_request_to_initiate_vaccination_event_t * event)
+{
+  GString *s;
+
+  s = g_string_new (NULL);
+  g_string_sprintf (s, "<Request to initiate vaccination event day=%d triggered by %s (#%u)>",
+                    event->day, event->trigger_name, event->trigger_id);
+  /* don't return the wrapper object */
+  return g_string_free (s, /* free_segment = */ FALSE);
+}
+
+
+
+/**
+ * Creates a new "vaccination initiated" event.
+ *
+ * @return a pointer to a newly-created EVT_event_t structure.
+ */
+EVT_event_t *
+EVT_new_vaccination_initiated_event (int day, guint trigger_id)
+{
+  EVT_event_t *event;
+
+  event = g_new (EVT_event_t, 1);
+  event->type = EVT_VaccinationInitiated;
+  event->u.vaccination_initiated.day = day;
+  event->u.vaccination_initiated.trigger_id = trigger_id;
+  return event;
+}
+
+
+
+/**
+ * Returns a text representation of a vaccination initiated event.
+ *
+ * @param event a vaccination initiated event.
+ * @return a string.
+ */
+char *EVT_vaccination_initiated_event_to_string (EVT_vaccination_initiated_event_t * event)
+{
+  GString *s;
+
+  s = g_string_new (NULL);
+  g_string_sprintf (s, "<Vaccination initiated event day=%i by trigger #%u>",
+                    event->day, event->trigger_id);
+  /* don't return the wrapper object */
+  return g_string_free (s, FALSE);
+}
+
+
+
+/**
  * Creates a new "request for vaccination" event.
  *
  * @return a pointer to a newly-created EVT_event_t structure.
@@ -1036,6 +1119,78 @@ EVT_vaccination_event_to_string (EVT_vaccination_event_t * event)
   chararray = s->str;
   g_string_free (s, FALSE);
   return chararray;
+}
+
+
+
+/**
+ * Creates a new "request to terminate vaccination" event.
+ *
+ * @return a pointer to a newly-created EVT_event_t structure.
+ */
+EVT_event_t *
+EVT_new_request_to_terminate_vaccination_event (int day)
+{
+  EVT_event_t *event;
+
+  event = g_new (EVT_event_t, 1);
+  event->type = EVT_RequestToTerminateVaccination;
+  event->u.request_to_terminate_vaccination.day = day;
+  return event;
+}
+
+
+
+/**
+ * Returns a text representation of a request to terminate vaccination event.
+ *
+ * @param event a request to terminate vaccination event.
+ * @return a string.
+ */
+char *EVT_request_to_terminate_vaccination_event_to_string (EVT_request_to_terminate_vaccination_event_t * event)
+{
+  GString *s;
+
+  s = g_string_new (NULL);
+  g_string_sprintf (s, "<Request to terminate vaccination event day=%d>", event->day);
+  /* don't return the wrapper object */
+  return g_string_free (s, FALSE);
+}
+
+
+
+/**
+ * Creates a new "vaccination terminated" event.
+ *
+ * @return a pointer to a newly-created EVT_event_t structure.
+ */
+EVT_event_t *
+EVT_new_vaccination_terminated_event (int day)
+{
+  EVT_event_t *event;
+
+  event = g_new (EVT_event_t, 1);
+  event->type = EVT_VaccinationTerminated;
+  event->u.vaccination_terminated.day = day;
+  return event;
+}
+
+
+
+/**
+ * Returns a text representation of a vaccination terminated event.
+ *
+ * @param event a vaccination terminated event.
+ * @return a string.
+ */
+char *EVT_vaccination_terminated_event_to_string (EVT_vaccination_terminated_event_t * event)
+{
+  GString *s;
+
+  s = g_string_new (NULL);
+  g_string_sprintf (s, "<Vaccination terminated event day=%d>", event->day);
+  /* don't return the wrapper object */
+  return g_string_free (s, FALSE);
 }
 
 
@@ -1469,10 +1624,14 @@ EVT_free_event (EVT_event_t * event)
     case EVT_TraceResult:
     case EVT_Test:
     case EVT_TestResult:
+    case EVT_RequestToInitiateVaccination:
+    case EVT_VaccinationInitiated:
     case EVT_RequestForVaccination:
     case EVT_CommitmentToVaccinate:
     case EVT_VaccinationCanceled:
     case EVT_Vaccination:
+    case EVT_RequestToTerminateVaccination:
+    case EVT_VaccinationTerminated:
     case EVT_RequestForDestruction:
     case EVT_CommitmentToDestroy:
     case EVT_Destruction:
@@ -1648,6 +1807,12 @@ EVT_event_to_string (EVT_event_t * event)
     case EVT_TestResult:
       s = EVT_test_result_event_to_string (&(event->u.test_result));
       break;
+    case EVT_RequestToInitiateVaccination:
+      s = EVT_request_to_initiate_vaccination_event_to_string (&(event->u.request_to_initiate_vaccination));
+      break;
+    case EVT_VaccinationInitiated:
+      s = EVT_vaccination_initiated_event_to_string (&(event->u.vaccination_initiated));
+      break;
     case EVT_RequestForVaccination:
       s = EVT_request_for_vaccination_event_to_string (&(event->u.request_for_vaccination));
       break;
@@ -1659,6 +1824,12 @@ EVT_event_to_string (EVT_event_t * event)
       break;
     case EVT_Vaccination:
       s = EVT_vaccination_event_to_string (&(event->u.vaccination));
+      break;
+    case EVT_RequestToTerminateVaccination:
+      s = EVT_request_to_terminate_vaccination_event_to_string (&(event->u.request_to_terminate_vaccination));
+      break;
+    case EVT_VaccinationTerminated:
+      s = EVT_vaccination_terminated_event_to_string (&(event->u.vaccination_terminated));
       break;
     case EVT_RequestForDestruction:
       s = EVT_request_for_destruction_event_to_string (&(event->u.request_for_destruction));

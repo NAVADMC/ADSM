@@ -74,6 +74,12 @@ typedef struct adsm_module_t_ *(*adsm_model_new_t) (sqlite3 *,
 
 
 
+/** Type of a function that creates and sets parameters for one or more models. */
+typedef GSList *(*adsm_model_factory_t) (sqlite3 *, UNT_unit_list_t *, projPJ,
+                                         ZON_zone_list_t *, GError **);
+
+
+
 /** Type of a function that frees a model. */
 typedef void (*adsm_model_free_t) (struct adsm_module_t_ *);
 

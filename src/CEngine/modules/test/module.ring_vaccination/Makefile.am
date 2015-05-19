@@ -57,4 +57,29 @@ EXTRA_DIST = radius_0.xml radius_0_w_vars.xml radius_0point5.xml radius_1.xml \
  in_queue_twice.xml in_queue_twice_1_canceled.xml in_queue_twice_both_canceled.xml \
  cancel_max_wait_0.xml cancel_max_wait_1.xml \
  same_unit_detected_twice_check_vacc_threshold.xml \
+ trigger_1detect_in_anytype_8units_2rows_4.sqlite3 \
+ trigger_3detect_in_anytype_8units_2rows_4.sqlite3 \
+ trigger_2detect_in_typeA_8units_2rows_4.sqlite3 \
+ trigger_3detect_in_typeA_8units_2rows_4.sqlite3 \
+ trigger_1detect_in_typeBorC_8units_2rows_4.sqlite3 \
+ trigger_1detect_in_typeC_8units_2rows_4.sqlite3 \
+ trigger_3detect_in_typeA_or_2detect_in_typeBorC_8units_2rows_4.sqlite3 \
+ trigger_4detect3days_in_anytype_8units_all_infected_diff_types.sqlite3 \
+ trigger_6detect4days_in_anytype_8units_all_infected_diff_types.sqlite3 \
+ trigger_1point5edr3days_in_anytype_8units_all_infected_diff_types.sqlite3 \
+ trigger_1daysincedet_anytype_8units_all_infected_diff_types.sqlite3 \
+ trigger_2daysincedet_anytype_8units_all_infected_diff_types.sqlite3 \
+ trigger_2daysincedet_typeC_8units_all_infected_diff_types.sqlite3 \
+ trigger_5daysincedet_typeA_3daysincedet_typeB_8units_all_infected_diff_types.sqlite3 \
+ trigger_1groupAB_8units_all_infected_diff_types.sqlite3 \
+ trigger_1groupCD_8units_all_infected_diff_types.sqlite3 \
+ trigger_2groupsABC_EF_8units_all_infected_diff_types.sqlite3 \
+ trigger_destwait1_cap0_8units_all_infected_diff_types.sqlite3 \
+ trigger_destwait3_cap0_8units_all_infected_diff_types.sqlite3 \
+ trigger_destwait3_cap3_8units_all_infected_diff_types.sqlite3 \
+ stop_vac_3days_nostop_16units_2rings.sqlite3 \
+ stop_vac_3days_1_16units_2rings.sqlite3 \
+ stop_vac_3days_2_16units_2rings.sqlite3 \
+ vacc_3detect_retro0_8units_2rows.sqlite3 vacc_3detect_retro1_8units_2rows.sqlite3 \
+ vacc_4detect_retro3_8units_2rows.sqlite3 \
  vacc_request_from_exam_cancellation_from_test.xml

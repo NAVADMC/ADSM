@@ -1274,9 +1274,15 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
         if useVaccination:
             try:
-                plan.units_detected_before_triggering_vaccination = int( el.find( './vaccination-program-delay' ).text )
+                unitsDetectedBeforeTriggeringVaccination = max( 1, int( el.find( './vaccination-program-delay' ).text ))
             except AttributeError:
-                plan.units_detected_before_triggering_vaccination = 1 # default
+                unitsDetectedBeforeTriggeringVaccination = 1 # default
+            trigger = DiseaseDetection(
+                number_of_units = unitsDetectedBeforeTriggeringVaccination
+            )
+            trigger.save()
+            for productionType in ProductionType.objects.all():
+	            trigger.trigger_group.add( productionType )
             plan.vaccination_capacity = getRelChart( el.find( './vaccination-capacity' ), relChartNameSequence )
             order = el.find( './vaccination-priority-order' ).text.strip()
             # The XML did not put spaces after the commas, but the Django

@@ -1,0 +1,6 @@
+<div class="production_list empty">
+    <p class="help_text">To add production types to the trigger click on a Type or Group from the <em>Population Panel</em></p>
+    <ul>{% for group_name, choices in optgroups %}{% for choice in choices %}
+        <li><label for="{{ attrs.id }}_{{ forloop.counter }}"><input {% if choice.0 in value %}checked="checked" {% endif %}type="checkbox" id="{{ attrs.id }}_{{ forloop.counter }}" name="{{ choice.1 }}" value="{{ choice.0 }}"> {{ choice.1 }}</label></li>
+    {% endfor %}{% endfor %}</ul>
+</div>

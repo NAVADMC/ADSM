@@ -35,7 +35,7 @@ libadsm_a_SOURCES = main_loop.c module_loader.c module_loader.h \
   $(top_srcdir)/gis/gis.c $(top_srcdir)/gis/gis.h \
   $(top_srcdir)/reporting/reporting.c $(top_srcdir)/reporting/reporting.h \
   $(top_srcdir)/rng/rng.c $(top_srcdir)/rng/rng.h \
-  $(top_srcdir)/spatial_search/spatial_search_rtree.c $(top_srcdir)/spatial_search/spatial_search_rtree.h \ 
+  $(top_srcdir)/spatial_search/spatial_search_rtree.c $(top_srcdir)/spatial_search/spatial_search_rtree.h \
   $(top_srcdir)/spatial_search/spatial_search.h \
   $(top_srcdir)/spatial_search/rTreeIndex.c $(top_srcdir)/spatial_search/rTreeIndex.h \
   $(top_srcdir)/spatial_search/ch2d.c $(top_srcdir)/spatial_search/ch2d.h \
@@ -54,6 +54,13 @@ libadsm_a_SOURCES = main_loop.c module_loader.c module_loader.h \
   $(top_srcdir)/modules/quarantine_model.c $(top_srcdir)/modules/quarantine_model.h \
   $(top_srcdir)/modules/basic_destruction_model.c $(top_srcdir)/modules/basic_destruction_model.h \
   $(top_srcdir)/modules/ring_destruction_model.c $(top_srcdir)/modules/ring_destruction_model.h \
+  $(top_srcdir)/modules/number_of_detections_vaccination_trigger.c $(top_srcdir)/modules/number_of_detections_vaccination_trigger.h \
+  $(top_srcdir)/modules/detection_rate_vaccination_trigger.c $(top_srcdir)/modules/detection_rate_vaccination_trigger.h \
+  $(top_srcdir)/modules/estimated_dissemination_rate_vaccination_trigger.c $(top_srcdir)/modules/estimated_dissemination_rate_vaccination_trigger.h \
+  $(top_srcdir)/modules/days_since_first_detection_vaccination_trigger.c $(top_srcdir)/modules/days_since_first_detection_vaccination_trigger.h \
+  $(top_srcdir)/modules/number_of_groups_vaccination_trigger.c $(top_srcdir)/modules/number_of_groups_vaccination_trigger.h \
+  $(top_srcdir)/modules/destruction_wait_time_vaccination_trigger.c $(top_srcdir)/modules/destruction_wait_time_vaccination_trigger.h \
+  $(top_srcdir)/modules/number_of_detections_vaccination_stop_trigger.c $(top_srcdir)/modules/number_of_detections_vaccination_stop_trigger.h \
   $(top_srcdir)/modules/ring_vaccination_model.c $(top_srcdir)/modules/ring_vaccination_model.h \
   $(top_srcdir)/modules/trace_model.c $(top_srcdir)/modules/trace_model.h \
   $(top_srcdir)/modules/trace_destruction_model.c $(top_srcdir)/modules/trace_destruction_model.h \

@@ -571,6 +571,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             "Add Disease Spread",
             "Assign Disease Spread",
             "Controls",
+            "Vaccination Triggers",
             "Control Protocol",
             "Assign Protocols",
             "Zones",

@@ -1,11 +1,14 @@
 import subprocess
-from django.db.models import F
+
+from django.db.models import F, Count
 
 from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Population, Unit, Disease, DiseaseProgression, \
     DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
-    ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
+    ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment, VaccinationTrigger, SpreadBetweenGroups, \
+    DestructionWaitTime, TimeFromFirstDetection, DisseminationRate, RateOfNewDetections, DiseaseDetection, ProductionGroup
+
 from ScenarioCreator.utils import whole_scenario_validation
-from Results.models import DailyControls
+from Results.models import outputs_exist
 from git.git import git
 
 
@@ -44,8 +47,9 @@ def basic_context(request):
         context.update({
                'Scenario': Scenario.objects.count(),
                'OutputSetting': OutputSettings.objects.count(),
-               'Population': Population.objects.count(),
-               'ProductionTypes': pt_count,
+               'Population': Unit.objects.count(),
+               'ProductionTypes': ProductionType.objects.all().annotate(unit_count=Count('unit')).values('name', 'unit_count', 'description'),
+               'ProductionGroups': ProductionGroup.objects.all(),
                'Farms': Unit.objects.count(),
                'Disease': Disease.objects.all().exclude(name='').count(),
                'Progressions': DiseaseProgression.objects.count(),
@@ -57,6 +61,8 @@ def basic_context(request):
                                     direct_contact_spread__isnull=False
                                 ).count() >= pt_count,
                'ControlMasterPlan': ControlMasterPlan.objects.count(),
+               'VaccinationTrigger': any([m.objects.count() for m in 
+                                          [DiseaseDetection,RateOfNewDetections,DisseminationRate,TimeFromFirstDetection,DestructionWaitTime,SpreadBetweenGroups]]),
                'Protocols': ControlProtocol.objects.count(),
                'ProtocolAssignments': ProtocolAssignment.objects.count(),
                'Zones': Zone.objects.count(),
@@ -65,7 +71,7 @@ def basic_context(request):
                'ProbabilityFunctions': ProbabilityFunction.objects.count(),
                'RelationalFunctions': RelationalFunction.objects.count(),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
-               'outputs_computed': DailyControls.objects.count() > 0,
+               'outputs_exist': outputs_exist(),
                'whole_scenario_warnings': whole_scenario_validation(),
                })
 
@@ -80,7 +86,7 @@ def basic_context(request):
                                            'include_direct_contact_spread':   js(disease.include_direct_contact_spread),
                                            'include_indirect_contact_spread': js(disease.include_indirect_contact_spread),
                                            'include_airborne_spread':         js(disease.include_airborne_spread),
-                                           'outputs_computed':                js(DailyControls.objects.count() > 0),
+                                           'outputs_exist':                js(outputs_exist()),
         }
         
         

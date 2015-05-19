@@ -2,10 +2,11 @@
 {% load db_status_tags %}
 
 {% block main %}
+    <span id="setupMenu-before"></span>
     <nav id="setupMenu">
 		<h2><a href="/results/" class="{{"^$"|active:active_link}}">Results Home
         </a></h2>
-		<h2><a href="/results/DailyByProductionType/" class="{{"DailyByProductionType/$"|active:active_link}}">Production Type</a></h2>
+		<h2><a href="/results/DailyByProductionType/" class="{{"DailyByProductionType"|active:active_link}}">Production Type</a></h2>
             <h3><a href="/results/DailyByProductionType/prefix/exp/" class="{{"DailyByProductionType/prefix/exp"|active:active_link}} ">Exposures</a></h3>
             <h3><a href="/results/DailyByProductionType/prefix/inf/" class="{{"DailyByProductionType/prefix/inf"|active:active_link}} ">Infections</a></h3>
             <h3><a href="/results/DailyByProductionType/prefix/vac/" class="{{"DailyByProductionType/prefix/vac"|active:active_link}} {{vac}}">Vaccinations</a></h3>
@@ -21,13 +22,17 @@
             <h3><a href="/results/DailyControls/prefix/vac/" class="{{"DailyControls/prefix/vac"|active:active_link}} {{vacc}}">Vaccination</a></h3>
 {#      <h2><a href="/results/Cost/" class="{{"Cost"|active:active_link}}">Cost Accounting</a></h2>#}
 
-		<h2 id="RunSimulation"><a href="/results/Inputs/" class="{{"Inputs"|active:active_link}} completed">
-		   <i class="glyphicon glyphicon-play icon-flipped"></i> Back to Inputs </a></h2>
+		<h2 id="RunSimulationRes"><a href="/results/Inputs/" class="{{"Inputs"|active:active_link}} completed">
+		   Back to Inputs </a></h2>
          
     </nav>
+    <span id="setupMenu-after"></span>
     <section>
         {% block content %}
 
         {% endblock %}
     </section>
+    
+    {% include "Results/SimulationProgressBar.html" %}
+    
 {% endblock %}

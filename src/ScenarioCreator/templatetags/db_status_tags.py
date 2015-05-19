@@ -43,6 +43,10 @@ def wiki(words, url=None):
     return mark_safe('<a href="'+ url + '" class="wiki">' + words + '</a>')
 
 
+def bold(words):
+    return mark_safe('<strong>' + words + '</strong>')
+
+
 def link(words, url):
     """Like the wiki filter above, but for external links"""
     return mark_safe('<a href="' + url + '" class="wiki">' + words + '</a>')
