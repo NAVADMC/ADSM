@@ -307,6 +307,8 @@ class ControlMasterPlan(InputSingleton):
         help_text='The secondary priority order for destruction.', )
     vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the daily vaccination capacity.', )
+    restart_vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
+        help_text='Define if the daily vaccination capacity will be different if started a second time.', )
     vaccination_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
         help_text='The primary priority criteria for order of vaccinations.',
         choices=priority_choices(), )

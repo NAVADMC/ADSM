@@ -114,7 +114,9 @@ class ControlMasterPlanForm(BaseForm):
         model = ControlMasterPlan
         exclude = []
         widgets = {'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
+                   'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   'restart_vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                   }
 
 
 class ProtocolAssignmentForm(BaseForm):
