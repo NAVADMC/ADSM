@@ -105,30 +105,28 @@ def save_scenario(request=None):
     """Save to the existing session of a new file name if target is provided
     """
     if request is not None and 'filename' in request.POST:
-        target = request.POST['filename'] 
+        target = request.POST['filename']
     else:
         target = scenario_filename()
+    target = strip_tags(target)
+    full_path = workspace_path(target) + ('.sqlite3' if not target.endswith('.sqlite3') else '')
     try:
-        target = strip_tags(target)
         if '\\' in target or '/' in target:  # this validation has to be outside of scenario_filename in order for open_test_scenario to work
             raise ValueError("Slashes are not allowed: " + target)
         scenario_filename(target)
         print('Copying database to', target)
-        full_path = workspace_path(target) + ('.sqlite3' if not target.endswith('.sqlite3') else '')
 
         shutil.copy(db_path(), full_path)
         unsaved_changes(False)  # File is now in sync
         print('Done Copying database to', full_path)
-    except (IOError, AssertionError):
-        save_error = 'Failed to save filename.'
-        print('Encountered an error while copying file', full_path)
-        
-    if request is not None and request.is_ajax():  # TODO: change this part to return HTML
-        if save_error:
-            context = {"failure_message": save_error} 
-        else:
-            context = {"success_message": "File saved to " + target}
-        return render(request, 'ScenarioName.html', context)
+    except (IOError, AssertionError, ValueError) as err:
+        if request is not None:
+            save_error = 'Failed to save filename:' + str(err)
+            print('Encountered an error while copying file', full_path)
+            return render(request, 'ScenarioName.html', {"failure_message": save_error})
+
+    if request is not None and request.is_ajax():
+        return render(request, 'ScenarioName.html', {"success_message": "File saved to " + target})
     else:
         return redirect('/setup/Scenario/1/')
 

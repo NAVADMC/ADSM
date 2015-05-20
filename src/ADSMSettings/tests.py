@@ -1,3 +1,4 @@
+from unittest import skip
 from django.test import TestCase
 import os
 import json
@@ -41,7 +42,7 @@ class ScenarioTestCase(TestCase):
         r = self.client.post('/app/SaveScenario/', {'filename': file_name})
 
         try:
-            self.assertEqual(r.status_code, 302)
+            self.assertEqual(r.status_code, 200)
             self.assertFalse(os.path.isfile(file_path))
         finally:
             self.remove_test_file(file_path)
@@ -57,11 +58,9 @@ class ScenarioTestCase(TestCase):
                              HTTP_X_REQUESTED_WITH='XMLHttpRequest')
 
         try:
-            data = json.loads(r.content.decode())
-            self.assertIn('status', data)
-            self.assertEqual(data['status'], 'failed')
-            self.assertIn('message', data)
-            self.assertEqual(data['message'], 'Slashes are not allowed: Test \\/ Scenario 123 AZ')
+            html_r = r.content.decode()
+            self.assertIn('Failed', html_r)
+            self.assertIn('Slashes are not allowed: Test \\/ Scenario 123 AZ', html_r)
             self.assertFalse(os.path.isfile(file_path))
         finally:
             self.remove_test_file(file_path)
@@ -137,7 +136,8 @@ class SingletonManagerTestCase(TestCase):
 
 class LegacyImporterTestCase(TestCase):
     multi_db = True
-    
+
+    @skip("This test isn't working because of a test-specific database connection problem")
     def test_import_sample_scenario(self):
         popul_path = r'"C:\Users\Josiah\Documents\ADSM\src\ScenarioCreator\tests\population_fixtures\export_pop.xml"'
         param_path = r'"C:\Users\Josiah\Documents\ADSM\src\ScenarioCreator\tests\population_fixtures\Sample_export.xml"'
