@@ -30,13 +30,15 @@ class AirborneSpreadTestCase(TestCase):
         r = self.client.get('/setup/AirborneSpread/new/')
 
         self.assertEqual(r.status_code, 200)
-        self.assertIn('Create a new Airborne Spread', r.content.decode())
+        self.assertIn('Spread 1km probability', r.content.decode())
 
     def test_post_success(self):
         count = AirborneSpread.objects.count()
         r = self.client.post('/setup/AirborneSpread/new/', self.form_data)
-
-        self.assertRedirects(r, '/setup/AirborneSpread/')
+        self.assertEqual(r.status_code, 200)
+        
+        r = self.client.get('/setup/AirborneSpread/')
+        self.assertIn('Test', r.content.decode())
         self.assertEqual(count + 1, AirborneSpread.objects.count())
 
     def test_post_failure(self):

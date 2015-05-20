@@ -386,13 +386,14 @@ def model_list(request):
     model_name, model = get_model_name_and_model(request)
     model_name = promote_to_abstract_parent(model_name)
     context = {'title': "Create " + spaces_for_camel_case(model_name) + "s",
+               'base_page': 'ScenarioCreator/ModelList.html',
                'models': []}
     if model_name in abstract_models.keys():
         for local_name, local_model in abstract_models[model_name]:
             context['models'].append(list_per_model(local_name, local_model))
     else:
         context['models'].append(list_per_model(model_name, model))
-    return render(request, 'ScenarioCreator/ModelList.html', context)
+    return render(request, 'ScenarioCreator/3Panels.html', context)
 
 # Utility Views was moved to the ADSMSettings/connection_handler.py
 

@@ -68,6 +68,7 @@ $(function(){
                     $('body').replaceWith(form_html);
                 }else{
                     $self.replaceWith(form_html);
+                    $('#left-panel').load(window.location + " #left-panel>*")
                 }
             },
             error: function () {
