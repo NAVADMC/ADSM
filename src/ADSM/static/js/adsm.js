@@ -253,9 +253,9 @@ $(function(){
         $(this).parent('form').submit();
     })
 
-    $('[data-delete-link]').click(function(){
+    $(document).on('click', '[data-delete-link]', function(){
         var link = $(this).attr('data-delete-link')
-        var do_async = $(this).hasClass('ajax-post')
+        var do_async = true //$(this).hasClass('ajax-post')
         var object_type = link.split('/')[2]
         if (typeof object_type === 'undefined') {object_type = 'object'}
         var additional_msg = ''

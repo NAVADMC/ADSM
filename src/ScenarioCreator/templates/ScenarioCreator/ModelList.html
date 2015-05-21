@@ -21,7 +21,7 @@
                             {% if not 'Function' in  model.name %}
                                 <a href="#" class="delete-button pull-right" title="delete" data-delete-link="/setup/{{model.class}}/{{entry.pk}}/delete/"></a>
                             {% endif %}
-                            <a href="/setup/{{model.class}}/{{entry.pk}}/copy/" class="copy-button pull-right" title="duplicate"></a>
+                            <a href="/setup/{{model.class}}/{{entry.pk}}/copy/" load-target="#center-panel" class="copy-button pull-right" title="duplicate"></a>
                             </li>
                     {% endfor %}
 
