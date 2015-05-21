@@ -159,24 +159,31 @@ $(function(){
             $(this).prop('last-selected', $(this).val()); // cache old selection
     });
 
-    function populate_pdf_panel(input) {
-        var $input = $(input)
-        var selector = '#right-panel'
-        if($input.closest('.layout-panel').attr('id') == 'left-panel'){ //use the center-panel if this is from left
-            selector = '#center-panel'
+    function populate_pdf_panel(select) {
+        var $input = $(select)
+        var load_target = '#right-panel'
+        var position = $input.closest('.layout-panel').attr('id');
+        if(position == 'left-panel'){ //use the center-panel if this is from left
+            load_target = '#center-panel'
+        }else if(position == 'right-panel'){ // we've run out of room and must use a modal
+            modelModal.show($input);
+            return
         }
         var url = $input.attr('data-new-item-url');
         if ($input.val() != 'data-add-new' && $input.val() != '')
             url = url.replace('new', $input.val());//will edit already existing model
-        $(selector).load(url)
+        $(load_target).load(url)
         $input.closest('.layout-panel').find('select').removeClass('active')  // nix .active from the earlier select
         $input.addClass("active")  //@tjmahlin use .active to to style links between panels 
         //TODO: add newly saved model to the list of options
     }
 
     $(document).on('change focus', '[data-new-item-url]', function(event){
-        //event.preventDefault()
-        populate_pdf_panel(this);
+        //this needs to ignore the event if it's in the right panel, since that will open a modal
+        //#422 "Edits" in the far right will open a modal, since we've run out of space
+        if($(this).closest('.layout-panel').attr('id') != 'right-panel'){
+            populate_pdf_panel(this);
+        }
     });
     
     $(document).on('click', '[data-new-item-url] + a i', function(event) {
@@ -422,7 +429,7 @@ var modelModal = {
     },
 
     populate_modal_body: function($newForm, modal) {
-        var $form = $newForm.filter('section').find('form').first();
+        var $form = $newForm.find('form').first();
         $form.find('.buttonHolder').remove();
         modal.find('.modal-body').html($form);
         modal.find('.modal-title').html($newForm.find('#title').html());
@@ -439,19 +446,19 @@ var modelModal = {
         };
     },
 
-    show: function(selectInput) {
+    show: function($selectInput) {
         var self = this;
         var modal = this.template.clone();
-        modal.attr('id', selectInput.attr('name') + '_modal');
-        var url = selectInput.attr('data-new-item-url');
-        if(selectInput.val() != 'data-add-new' && selectInput.val() != '')
-            url = url.replace('new', selectInput.val());//will edit already existing model
+        modal.attr('id', $selectInput.attr('name') + '_modal');
+        var url = $selectInput.attr('data-new-item-url');
+        if($selectInput.val() != 'data-add-new' && $selectInput.val() != '')
+            url = url.replace('new', $selectInput.val());//will edit already existing model
 
         $.get(url, function(newForm){
             var $newForm = $($.parseHTML(newForm));
             self.populate_modal_body($newForm, modal);
             modal.find('.modal-footer button[type=submit]').on('click', function() {
-                self.ajax_submit(url, self.ajax_success(modal, selectInput), self.validation_error(modal));
+                self.ajax_submit(url, self.ajax_success(modal, $selectInput), self.validation_error(modal));
             });
 
             modal.modal('show');
