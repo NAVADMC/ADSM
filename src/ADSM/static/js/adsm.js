@@ -69,7 +69,7 @@ $(function(){
             success: function(form_html) {
                 // Here we replace the form, for the
                 if($self.closest('#main-panel').length){ //in the main panel, just reload the page
-                    $('body').replaceWith(form_html);
+                    $('#main-panel').replaceWith(form_html);
                 }else{
                     $self.replaceWith(form_html);
                     $('#left-panel').load(window.location + " #left-panel>*")

@@ -273,7 +273,8 @@ def new_form(request, initialized_form, context):
         model_instance = initialized_form.save()  # write to database
     model_name, model = get_model_name_and_model(request)
     if model_name in singletons:  # they could have their own special page: e.g. Population
-        return render(request, 'ScenarioCreator/Crispy-Singleton-Form.html', context)
+        context['base_page'] = 'ScenarioCreator/Crispy-Singleton-Form.html' # #422 Singleton models now load in a fragment to be refreshed the same way that other forms are loaded dynamically
+        return render(request, 'ScenarioCreator/navigationPane.html', context)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages
 
 

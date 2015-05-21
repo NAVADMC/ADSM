@@ -43,7 +43,7 @@ class CreatorTest(TestCase):
         length = Scenario.objects.count()
         r = self.client.post('/setup/Scenario/new/', standardPost)
         #"exit_condition":...
-        self.assertEqual(r.status_code, 302)  #redirects to edit page on post of new content
+        self.assertEqual(r.status_code, 200)  #returns content to edit page on post of new content
         self.assertEqual(Scenario.objects.count(), length + 1)
 
     def test_edit_Scenario(self):
