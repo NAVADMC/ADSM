@@ -33,21 +33,25 @@ safe_save = function(url, data){
         });
     }
 }
+
+function open_panel_if_needed(){
+     $('.production_list, .group_list').each(function(){
+        $('#population_panel').removeClass('TB_panel_closed')
+    })
+}
     
 
 $(function(){
+    open_panel_if_needed();
+    
     $(document).on('click', '#TB_population', function(){
         $('#population_panel').toggleClass('TB_panel_closed')
-    })
-    
-    $('.production_list, .group_list').each(function(){
-        $('#population_panel').removeClass('TB_panel_closed')
     })
     
     $(document).on('click', 'a[load-target]', function(event){
         event.preventDefault()
         var selector = $(this).attr('load-target')
-        $(selector).load($(this).attr('href'))
+        $(selector).load($(this).attr('href'), open_panel_if_needed)
     })
     
     $(document).on('click', '[data-click-toggle]', function(){
