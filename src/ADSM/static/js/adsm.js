@@ -159,14 +159,18 @@ $(function(){
             $(this).prop('last-selected', $(this).val()); // cache old selection
     });
 
-    function populate_pdf_panel(self) {
+    function populate_pdf_panel(input) {
+        var $input = $(input)
         var selector = '#right-panel'
-        var url = $(self).attr('data-new-item-url');
-        if ($(self).val() != 'data-add-new' && $(self).val() != '')
-            url = url.replace('new', $(self).val());//will edit already existing model
+        if($input.closest('.layout-panel').attr('id') == 'left-panel'){ //use the center-panel if this is from left
+            selector = '#center-panel'
+        }
+        var url = $input.attr('data-new-item-url');
+        if ($input.val() != 'data-add-new' && $input.val() != '')
+            url = url.replace('new', $input.val());//will edit already existing model
         $(selector).load(url)
-        $(self).closest('.layout-panel').find('select').removeClass('active')  // nix .active from the earlier select
-        $(self).addClass("active")  //@tjmahlin use .active to to style links between panels 
+        $input.closest('.layout-panel').find('select').removeClass('active')  // nix .active from the earlier select
+        $input.addClass("active")  //@tjmahlin use .active to to style links between panels 
         //TODO: add newly saved model to the list of options
     }
 

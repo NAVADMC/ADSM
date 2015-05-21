@@ -135,7 +135,8 @@ def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, miss
             index += TargetModel.objects.count()
             forms[index].fields['production_type'].initial = pt.id
         context['formset'] = forms
-        return render(request, 'ScenarioCreator/FormSet.html', context)
+        context['base_page'] = 'ScenarioCreator/FormSet.html'
+        return render(request, 'ScenarioCreator/3Panels.html', context)
 
 
 def assign_protocols(request):
@@ -152,7 +153,7 @@ def assign_progressions(request):
     ProgressionSet = modelformset_factory(DiseaseProgressionAssignment,
                                           extra=len(missing),
                                           form=DiseaseProgressionAssignmentForm)
-    context = {'title': 'Set what Progression each Production Type has with the Disease'}
+    context = {'title': 'Set the Disease Progression of each Production Type'}
     return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request)
 
 
