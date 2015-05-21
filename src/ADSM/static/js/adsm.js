@@ -40,6 +40,10 @@ $(function(){
         $('#population_panel').toggleClass('TB_panel_closed')
     })
     
+    $('.production_list, .group_list').each(function(){
+        $('#population_panel').removeClass('TB_panel_closed')
+    })
+    
     $(document).on('click', '[data-click-toggle]', function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });

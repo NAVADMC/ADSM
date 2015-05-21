@@ -41,7 +41,7 @@ class SimulationTest(TransactionTestCase):
     def tearDown(self):
         shutil.rmtree(self.scenario_directory, ignore_errors=True)
 
-    @skip("Waiting on updated adsm_simulation")
+    # @skip("Waiting on updated adsm_simulation")
     def test_multiple_threads(self):
         sim = Simulation(5, testing=True)
         sim.start()
@@ -50,7 +50,7 @@ class SimulationTest(TransactionTestCase):
         # 10 days for each iteration, so 50 reports total
         self.assertEqual(DailyControls.objects.count(), 50)
 
-    @skip("Waiting on updated adsm_simulation")
+    # @skip("Waiting on updated adsm_simulation")
     def test_single_thread(self):
         sim = Simulation(1, testing=True)
         sim.start()
@@ -58,7 +58,7 @@ class SimulationTest(TransactionTestCase):
 
         self.assertEqual(DailyControls.objects.count(), 10)
 
-    @skip("Waiting on updated adsm_simulation")
+    # @skip("Waiting on updated adsm_simulation")
     def test_supplemental_output_created(self):
         """
             Ensures that prepare_supplemental_output_directory
@@ -77,7 +77,7 @@ class SimulationTest(TransactionTestCase):
 
         self.assertTrue(os.access(output_file, os.F_OK))
 
-    @skip("Waiting on updated adsm_simulation")
+    # @skip("Waiting on updated adsm_simulation")
     def test_map_zip_with_output(self):
         settings = OutputSettings.objects.first()
         settings.save_daily_unit_states = True
@@ -96,7 +96,7 @@ class SimulationTest(TransactionTestCase):
         with zipfile.ZipFile(file_name, 'r') as zf:
             self.assertListEqual(zf.namelist(), os.listdir(folder_name))
 
-    @skip("Waiting on updated adsm_simulation")
+    # @skip("Waiting on updated adsm_simulation")
     def test_map_zip_no_output(self):
         settings = OutputSettings.objects.first()
         settings.save_map_output = False

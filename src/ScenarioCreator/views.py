@@ -308,8 +308,11 @@ def initialize_from_existing_model(primary_key, request):
 '''New / Edit / Copy / Delete / List that are called from model generated URLs'''
 def new_entry(request, second_try=False):
     model_name, form = get_model_name_and_form(request)
+    model_name, model = get_model_name_and_model(request)
     if model_name == 'RelationalFunction':
         return relational_function(request)
+    if model_name in singletons and model.objects.count():
+        return edit_entry(request, 1)
     initialized_form = form(request.POST or None)
     context = {'form': initialized_form, 'title': "Create a new " + spaces_for_camel_case(model_name)}
     add_breadcrumb_context(context, model_name)
