@@ -324,6 +324,8 @@ typedef struct
     Starts at -1, is changed to a value > 0 when the first detection occurs,
     and is reset to -1 if the vaccination program is terminated. */
   gboolean vaccination_active;
+  guint vaccination_program_initiation_count; /**< This value starts at 0, and
+    is incremented each time the vaccination program is initiated. */
   int vaccination_retrospective_days;
   int vaccination_initiated_day; /**< This value starts as -1, and is set on the day that
     the vaccination_active flag is set to TRUE.  Its value will be the day before
@@ -333,6 +335,10 @@ typedef struct
     the last vaccination happen. */
   REL_chart_t *vaccination_capacity; /**< The maximum number of units the
     authorities can vaccinate in a day. */
+  REL_chart_t *vaccination_capacity_on_restart; /**< The maximum number of
+    units the authorities can vaccinate in a day. Chart for the second (and
+    subsequent) times the vaccination program is initiated, when ramp-up of
+    resources may be faster. */
   int base_day_for_vaccination_capacity; /** The day that corresponds to x=0
     on the vaccination capacity chart. See the function
     handle_request_to_initiate_vaccination_event for detailed notes on how this
@@ -703,6 +709,7 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
                        EVT_event_queue_t * queue)
 {
   local_data_t *local_data;
+  REL_chart_t *capacity_chart;
   unsigned int vaccination_capacity;
   EVT_event_t *pending_vaccination;
   EVT_request_for_vaccination_event_t *details;
@@ -725,10 +732,14 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
 
   /* Look up the vaccination capacity (which may increase as the outbreak
    * progresses). */
+  if (local_data->vaccination_program_initiation_count <= 1)
+    capacity_chart = local_data->vaccination_capacity;
+  else
+    capacity_chart = local_data->vaccination_capacity_on_restart;
   vaccination_capacity =
     (unsigned int)
     round (REL_chart_lookup
-           (day - local_data->base_day_for_vaccination_capacity - 1, local_data->vaccination_capacity));
+           (day - local_data->base_day_for_vaccination_capacity - 1, capacity_chart));
 
   /* Check whether the vaccination capacity has dropped to 0 for good. */
   if (local_data->vaccination_capacity_goes_to_0
@@ -969,6 +980,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   g_hash_table_remove_all (local_data->destroyed_today);
 
   local_data->first_detection_day_for_vaccination = -1;
+  local_data->vaccination_program_initiation_count = 0;
   local_data->vaccination_active = FALSE;
   local_data->vaccination_initiated_day = -1;
   local_data->vaccination_terminated_day = -1;
@@ -1314,6 +1326,7 @@ handle_request_to_initiate_vaccination_event (struct adsm_module_t_ *self,
                                               EVT_event_queue_t *queue)
 {
   local_data_t *local_data;
+  REL_chart_t *capacity;
   double zero_day;
 
   #if DEBUG
@@ -1327,8 +1340,9 @@ handle_request_to_initiate_vaccination_event (struct adsm_module_t_ *self,
     {
       local_data->vaccination_active = TRUE;
       local_data->vaccination_initiated_day = event->day;
+      local_data->vaccination_program_initiation_count += 1;
       #if DEBUG
-        g_debug ("initiating vaccination, day %i", event->day);
+        g_debug ("initiating vaccination, day %i, time #%i", event->day, local_data->vaccination_program_initiation_count);
       #endif
       EVT_event_enqueue (queue, EVT_new_vaccination_initiated_event (event->day, event->trigger_id));
 
@@ -1348,7 +1362,11 @@ handle_request_to_initiate_vaccination_event (struct adsm_module_t_ *self,
       /* There are a couple of flags/values that are used in this module to decide
        * whether we have hit a point where no more vaccinations can be done.  Set them
        * now. */
-      local_data->vaccination_capacity_goes_to_0 = REL_chart_zero_at_right (local_data->vaccination_capacity, &zero_day);
+      if (local_data->vaccination_program_initiation_count == 1)
+        capacity = local_data->vaccination_capacity;
+      else
+        capacity = local_data->vaccination_capacity_on_restart;
+      local_data->vaccination_capacity_goes_to_0 = REL_chart_zero_at_right (capacity, &zero_day);
       if (local_data->vaccination_capacity_goes_to_0)
         {
           local_data->vaccination_capacity_0_day = (int) ceil (zero_day);
@@ -1632,27 +1650,31 @@ char *
 to_string (struct adsm_module_t_ *self)
 {
   GString *s;
-  char *substring, *chararray;
+  char *substring;
   local_data_t *local_data;
 
   local_data = (local_data_t *) (self->model_data);
   s = g_string_new (NULL);
-  g_string_sprintf (s, "<%s\n", MODEL_NAME);
+  g_string_sprintf (s, "<%s", MODEL_NAME);
 
-  g_string_sprintfa (s, "  destruction-program-delay=%i\n", local_data->destruction_program_delay);
+  g_string_sprintfa (s, "\n  destruction-program-delay=%i", local_data->destruction_program_delay);
 
   substring = REL_chart_to_string (local_data->destruction_capacity);
-  g_string_sprintfa (s, "  destruction-capacity=%s\n", substring);
+  g_string_sprintfa (s, "\n  destruction-capacity=%s", substring);
   g_free (substring);
 
   substring = REL_chart_to_string (local_data->vaccination_capacity);
-  g_string_sprintfa (s, "  vaccination-capacity=%s>", substring);
+  g_string_sprintfa (s, "\n  vaccination-capacity=%s", substring);
   g_free (substring);
 
+  substring = REL_chart_to_string (local_data->vaccination_capacity_on_restart);
+  g_string_sprintfa (s, "\n  vaccination-capacity-on-restart=%s", substring);
+  g_free (substring);
+
+  g_string_append_c (s, '>');
+
   /* don't return the wrapper object */
-  chararray = s->str;
-  g_string_free (s, FALSE);
-  return chararray;
+  return g_string_free (s, FALSE);
 }
 
 
@@ -1690,6 +1712,7 @@ local_free (struct adsm_module_t_ *self)
   g_hash_table_destroy (local_data->destroyed_today);
 
   REL_free_chart (local_data->vaccination_capacity);
+  REL_free_chart (local_data->vaccination_capacity_on_restart);
   clear_all_pending_vaccinations (local_data, /* day = */ 0, /* event queue = */ NULL);
   g_hash_table_destroy (local_data->vaccination_status);
   npriorities = local_data->pending_vaccinations->len;
@@ -1739,7 +1762,7 @@ set_params (void *data, GHashTable *dict)
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
-  g_assert (g_hash_table_size (dict) == 6);
+  g_assert (g_hash_table_size (dict) == 7);
 
   tmp_text = g_hash_table_lookup (dict, "destruction_program_delay");
   if (tmp_text != NULL)
@@ -1836,6 +1859,21 @@ set_params (void *data, GHashTable *dict)
   else
     {
       local_data->vaccination_capacity = REL_new_point_chart (0);
+    }
+
+  tmp_text = g_hash_table_lookup (dict, "restart_vaccination_capacity_id");
+  if (tmp_text != NULL)
+    {
+      errno = 0;
+      rel_id = strtol (tmp_text, NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);  
+      local_data->vaccination_capacity_on_restart = PAR_get_relchart (params, rel_id);
+    }
+  else
+    {
+      /* If a vaccination capacity chart is not specified for a restarted
+       * vaccination program, just re-use the same chart as before. */
+      local_data->vaccination_capacity_on_restart = REL_clone_chart (local_data->vaccination_capacity);
     }
 
   tmp_text = g_hash_table_lookup (dict, "vaccination_priority_order");
@@ -1975,7 +2013,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->db = params,
   sqlite3_exec_dict (params,
                      "SELECT destruction_program_delay,destruction_capacity_id,destruction_priority_order,"
-                     "vaccination_capacity_id,vaccination_priority_order,"
+                     "vaccination_capacity_id,restart_vaccination_capacity_id,vaccination_priority_order,"
                      "vaccinate_retrospective_days "
                      "FROM ScenarioCreator_controlmasterplan",
                      set_params, self, &sqlerr);
