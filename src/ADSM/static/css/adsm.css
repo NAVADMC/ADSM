@@ -72,7 +72,7 @@ a.wiki, a.wiki:visited {
     height: 0;
 }
 
-.help-inline strong {  /* validation errors from the server */
+.error-inline strong {  /* validation errors from the server */
     background-color: #D13737;
     color: white;
 }

@@ -400,18 +400,20 @@ two_state_button = function(){
 }
 
 
+function contains_errors(html) {
+    return $(html).find('span.error-inline').length  //TODO: more specific class
+    
+}
 var modelModal = {
                 //processData: false,
                 //contentType: false}
     ajax_submit: function(url, success_callback, fail_callback){
         var $form = $('.modal-body form')
-        return $.post( url, $form.serialize()).done(function (data, status, xhr){
-            if(typeof(data) == 'object') {
-                if (data['status']=='success') { //redundant for now
-                    success_callback(data)
-                }
-            } else {//html dataType  == failure probably validation errors
-                fail_callback(data)
+        return $.post( url, $form.serialize()).done(function (html, status, xhr){
+            if (contains_errors(html)) { //html dataType  == failure probably validation errors
+                fail_callback(html)
+            } else {
+                success_callback(html)
             }
         }).always(function() {
             $('.blocking-overlay').hide();
@@ -419,11 +421,16 @@ var modelModal = {
     },
 
     ajax_success: function(modal, selectInput){
-        return function(data) {
-            console.log('ajax_success', modal, selectInput, data);
+        return function(html) {
+            console.log('ajax_success', modal, selectInput, html.slice(0,100));
+            var pk = $(html).find('form').first().attr('action').split('/')[3];
+            var title = 'Newest Entry';
+            try{title = $(html).find('input[type="text"]').first().val();
+            }catch(e) {}
+            
             $('select[data-new-item-url="' + selectInput.attr('data-new-item-url') + '"] [value="data-add-new"]')
-                .before($('<option value="'+data['pk']+'">'+data['title'] + '</option>')); // Add option to all similar selects
-            selectInput.val(data['pk']); // select option for select that was originally clicked
+                .before($('<option value="'+ pk+'">'+ title + '</option>')); // Add option to all similar selects
+            selectInput.val(pk); // select option for select that was originally clicked
             modal.modal('hide');
         };
     },
@@ -440,9 +447,9 @@ var modelModal = {
 
     validation_error: function(modal) {
         var self = this;
-        return function(data) {
+        return function(html) {
             console.log('validation_error:\n');
-            self.populate_modal_body($(data), modal);
+            self.populate_modal_body($(html), modal);
         };
     },
 
