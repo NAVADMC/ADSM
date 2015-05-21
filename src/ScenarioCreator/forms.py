@@ -461,10 +461,7 @@ class DiseaseSpreadAssignmentForm(BaseForm):
         exclude = []
         widgets = {  # Production types are not given edit buttons because the user is only allowed to add Production types from a Population XML
                    'source_production_type': FixedSelect(),
-                   'destination_production_type': FixedSelect(),
-                   'direct_contact_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/DirectSpread/new/'}),
-                   'indirect_contact_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/IndirectSpread/new/'}),
-                   'airborne_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/AirborneSpread/new/'})}
+                   'destination_production_type': FixedSelect(),}
 
 
 class DiseaseIncludeSpreadForm(BaseForm):
