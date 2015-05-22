@@ -180,8 +180,18 @@ $(function(){
                     cssClass: 'btn-danger',
                     action: function(dialog){
                         if(do_async){
-                            $.post(link).done(function(){window.location.reload()});
+                            $.post(link).done(function(){
+                                $('#right-panel').html('')
+                                var newLink = '/setup/' + link.split('/')[2] + '/new/' //[2] model name
+                                var pk = link.split('/')[3];
+                                console.log(pk, newLink)
+                                // remove option pointing to delete model
+                                $('select[data-new-item-url="' + newLink + '"] [value="'+ pk +'"]').remove()
+                                console.log('select[data-new-item-url="' + newLink + '"]', $('select[data-new-item-url="' + newLink + '"]'))
+                                dialog.close();
+                            });
                         } else {
+                            dialog.close();
                             window.location = link;
                         }
                     }

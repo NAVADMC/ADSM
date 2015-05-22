@@ -185,9 +185,9 @@ def initialize_relational_form(context, primary_key, request):
         main_form = RelationalFunctionForm(request.POST or None, instance=model)
         context['model_link'] = '/setup/RelationalFunction/' + primary_key + '/'
         context['backlinks'] = collect_backlinks(model)
+        context['deletable'] = context['model_link'] + 'delete/'
     context['form'] = main_form
     context['model'] = model
-    context['deletable'] = 'delete/'
     return context
 
 
@@ -338,7 +338,7 @@ def edit_entry(request, primary_key):
 
     if model_name == 'ProbabilityFunction':
         context['backlinks'] = collect_backlinks(initialized_form.instance)
-        context['deletable'] = 'delete/'
+        context['deletable'] = '/setup/ProbabilityFunction/%s/delete/' % primary_key
 
     return new_form(request, initialized_form, context)
 
