@@ -39,7 +39,36 @@ function open_panel_if_needed(){
         $('#population_panel').removeClass('TB_panel_closed')
     })
 }
-    
+
+function populate_pdf_panel(select) {
+    var $input = $(select)
+    var load_target = '#right-panel'
+    var position = $input.closest('.layout-panel').attr('id');
+    if(position == 'left-panel'){ //use the center-panel if this is from left
+        load_target = '#center-panel'
+    }else if(position == 'right-panel'){ // we've run out of room and must use a modal
+        modelModal.show($input);
+        return
+    }
+    var url = $input.attr('data-new-item-url');
+    if ($input.val() != 'data-add-new' && $input.val() != '')
+        url = url.replace('new', $input.val());//will edit already existing model
+    $(load_target).load(url)
+    $input.closest('.layout-panel').find('select').removeClass('active')  // nix .active from the earlier select
+    $input.addClass("active")  //@tjmahlin use .active to to style links between panels 
+}
+
+
+function get_parent_select($self) {
+    var parent = null
+    var $inDomElement = $( '#'+ $self.find('input').last().attr('id') ) //grab the matching form from the DOM
+    var actives = $inDomElement.closest('.layout-panel').prev('.layout-panel').find('select.active')
+    if(actives.length){
+        parent = actives.first()
+    }
+    return parent
+}
+
 
 $(function(){
     open_panel_if_needed();
@@ -51,6 +80,8 @@ $(function(){
     $(document).on('click', 'a[load-target]', function(event){
         event.preventDefault()
         var selector = $(this).attr('load-target')
+        $(this).closest('.layout-panel').find('a').removeClass('active')  // nix .active from the earlier select
+        $(this).addClass("active")  //@tjmahlin use .active to to style links between panels
         $(selector).load($(this).attr('href'), open_panel_if_needed)
     })
     
@@ -62,17 +93,25 @@ $(function(){
     $(document).on('submit', '.ajax', function(event) {
         event.preventDefault();
         var $self = $(this)
+        var formAction = $(this).attr('action');
         $.ajax({
-            url: $(this).attr('action'),
+            url: formAction,
             type: "POST",
             data: $(this).serialize(),
             success: function(form_html) {
                 // Here we replace the form, for the
                 if($self.closest('#main-panel').length){ //in the main panel, just reload the page
-                    $('#main-panel').replaceWith(form_html);
+                    $('#main-panel').replaceWith(form_html)
                 }else{
-                    $self.replaceWith(form_html);
-                    $('#left-panel').load(window.location + " #left-panel>*")
+                    $self.replaceWith(form_html)
+                    if(formAction.lastIndexOf('new/') != -1){ //new model created
+                        var lastClickedSelect = get_parent_select($self);
+                        if(lastClickedSelect != null){
+                            add_model_option_to_selects(form_html, lastClickedSelect)
+                        } else {//came from a model list
+                            $('#left-panel').load(window.location + " #left-panel>*")
+                        }
+                    }
                 }
             },
             error: function () {
@@ -82,27 +121,6 @@ $(function(){
             $('.blocking-overlay').hide();
         });
     })
-
-    ////This is probably the code used for reporting bad scenario titles
-    //$(document).on('submit', '.ajax', function(evt) {
-    //    evt.preventDefault();
-    //    $.post($(this).attr('action'), $(this).serialize())
-    //        .done(function( data ) {
-    //            if (data.status == "success") {
-    //                $('.ajax').trigger('saved');
-    //            } else if (data.status == "failed") {
-    //                alert_template = '<div class="alert alert-danger">' +
-    //                                    '<a href="#" class="close" data-dismiss="alert">' +
-    //                                        '&times;' +
-    //                                    '</a>' +
-    //                                    '<strong>Error:</strong> ' + data.message +
-    //                                 '</div>';
-    //                $('#title').before(alert_template);
-    //        }
-    //    }).always(function() {
-    //        $('.blocking-overlay').hide();
-    //    });
-    //});
     
     $(document).on('click', '#check_update', function(event) {
         $(this).addClass('loading_button')
@@ -158,25 +176,6 @@ $(function(){
     $(document).on('mousedown', '[data-new-item-url]', function(e){
             $(this).prop('last-selected', $(this).val()); // cache old selection
     });
-
-    function populate_pdf_panel(select) {
-        var $input = $(select)
-        var load_target = '#right-panel'
-        var position = $input.closest('.layout-panel').attr('id');
-        if(position == 'left-panel'){ //use the center-panel if this is from left
-            load_target = '#center-panel'
-        }else if(position == 'right-panel'){ // we've run out of room and must use a modal
-            modelModal.show($input);
-            return
-        }
-        var url = $input.attr('data-new-item-url');
-        if ($input.val() != 'data-add-new' && $input.val() != '')
-            url = url.replace('new', $input.val());//will edit already existing model
-        $(load_target).load(url)
-        $input.closest('.layout-panel').find('select').removeClass('active')  // nix .active from the earlier select
-        $input.addClass("active")  //@tjmahlin use .active to to style links between panels 
-        //TODO: add newly saved model to the list of options
-    }
 
     $(document).on('change focus', '[data-new-item-url]', function(event){
         //this needs to ignore the event if it's in the right panel, since that will open a modal
@@ -404,8 +403,22 @@ function contains_errors(html) {
     return $(html).find('span.error-inline').length  //TODO: more specific class
     
 }
+
+function add_model_option_to_selects(html, selectInput) {
+    var pk = $(html).find('form').first().attr('action').split('/')[3]; //the edit action URL has the pk in it
+    var title = 'Newest Entry';
+    console.log("Adding option", pk, "to selects");
+    try { //TODO: there's a possibility of a form without a name field, in this case the python str() method is preferrable
+        title = $(html).find('input[type="text"]').first().val();
+    } catch (e) { }
+
+    $('select[data-new-item-url="' + selectInput.attr('data-new-item-url') + '"] [value="data-add-new"]')
+        .before($('<option value="' + pk + '">' + title + '</option>')); // Add option to all similar selects
+    selectInput.val(pk); // select option for select that was originally clicked
+}
+
 var modelModal = {
-                //processData: false,
+    //processData: false,
                 //contentType: false}
     ajax_submit: function(url, success_callback, fail_callback){
         var $form = $('.modal-body form')
@@ -422,15 +435,8 @@ var modelModal = {
 
     ajax_success: function(modal, selectInput){
         return function(html) {
-            console.log('ajax_success', modal, selectInput, html.slice(0,100));
-            var pk = $(html).find('form').first().attr('action').split('/')[3];
-            var title = 'Newest Entry';
-            try{title = $(html).find('input[type="text"]').first().val();
-            }catch(e) {}
-            
-            $('select[data-new-item-url="' + selectInput.attr('data-new-item-url') + '"] [value="data-add-new"]')
-                .before($('<option value="'+ pk+'">'+ title + '</option>')); // Add option to all similar selects
-            selectInput.val(pk); // select option for select that was originally clicked
+            //console.log('ajax_success', modal, selectInput, html.slice(0,100));
+            add_model_option_to_selects(html, selectInput);
             modal.modal('hide');
         };
     },

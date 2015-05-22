@@ -8,6 +8,11 @@
 a:focus{
     outline-offset:0;
 }
+
+a.active, select.active {
+    border: solid red 1px;
+}
+
 body {
     font-family: 'Source Sans Pro', sans-serif;
     font-size: 10pt;
