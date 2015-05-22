@@ -1,74 +1,3 @@
-function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTimeout(d),d=setTimeout(function(){d=null,c||a.apply(e,f)},b),c&&!d&&a.apply(e,f)}};
-
-
-safe_save = function(url, data){
-    if(typeof outputs_exist === 'undefined' || outputs_exist == false) { 
-        $.post(url, data, function() { window.location.reload() });
-    } else { //confirmation dialog so we don't clobber outputs
-        var dialog = new BootstrapDialog.show({
-            closable: false,
-            title: '',
-            type: BootstrapDialog.TYPE_WARNING,
-            message: 'Changing input parameters will invalidate the currently computed results. Would you like to <strong><u>Delete the Results</u></strong> and proceed?',
-            buttons: [
-                {
-                    label: 'Cancel',
-                    cssClass: 'btn',
-                    action: function(dialog){
-                        window.location.reload()
-                    }
-                },
-                {
-                    label: 'Proceed',
-                    cssClass: 'btn-danger btn-save',
-                    action: function(dialog){
-                        outputs_exist = false;
-                        $.post(url, data, function(){
-                            window.location.reload()
-                        });
-                        dialog.close()
-                    }
-                }
-            ]
-        });
-    }
-}
-
-function open_panel_if_needed(){
-     $('.production_list, .group_list').each(function(){
-        $('#population_panel').removeClass('TB_panel_closed')
-    })
-}
-
-function populate_pdf_panel(select) {
-    var $input = $(select)
-    var load_target = '#right-panel'
-    var position = $input.closest('.layout-panel').attr('id');
-    if(position == 'left-panel'){ //use the center-panel if this is from left
-        load_target = '#center-panel'
-    }else if(position == 'right-panel'){ // we've run out of room and must use a modal
-        modelModal.show($input);
-        return
-    }
-    var url = $input.attr('data-new-item-url');
-    if ($input.val() != 'data-add-new' && $input.val() != '')
-        url = url.replace('new', $input.val());//will edit already existing model
-    $(load_target).load(url)
-    $input.closest('.layout-panel').find('select').removeClass('active')  // nix .active from the earlier select
-    $input.addClass("active")  //@tjmahlin use .active to to style links between panels 
-}
-
-
-function get_parent_select($self) {
-    var parent = null
-    var $inDomElement = $( '#'+ $self.find('input').last().attr('id') ) //grab the matching form from the DOM
-    var actives = $inDomElement.closest('.layout-panel').prev('.layout-panel').find('select.active')
-    if(actives.length){
-        parent = actives.first()
-    }
-    return parent
-}
-
 
 $(function(){
     open_panel_if_needed();
@@ -201,48 +130,6 @@ $(function(){
     });
     
     
-    var attach_visibility_controller = function (self){
-        var controller = '[name=' + $(self).attr('data-visibility-controller') + ']'
-        var hide_target = $(self).parents('.control-group')
-        if (hide_target.length == 0 || $(self).attr('class') === 'help-block'){  //Sometimes it's not in a form group
-            hide_target = $(self)
-        }
-        var disabled_value = $(self).attr('data-disabled-value')
-        var required_value = $(self).attr('data-required-value')
-
-        $('body').on('change', controller, function(){
-            if($(self).val() == disabled_value){
-                hide_target.hide()
-            }else{
-                if($(this).attr('type') == 'checkbox') {
-                    if( $(this).is(':checked') == (disabled_value === 'false')){
-                        hide_target.show()
-                    }else {
-                        hide_target.hide()
-                    }
-                }
-                else {
-                    if (typeof required_value !== 'undefined'){ //required value is specified
-                        if($(this).val() == required_value || $(this).val() == ''){
-                            hide_target.show()
-                        }else{
-                            hide_target.hide()
-                        }
-                    }else{
-                        hide_target.show()
-                    }
-                }
-            }
-        })
-        $(controller).each(function(index, elem){ //each because radio buttons have multiple elem, same name
-            if($(elem).attr('type') != 'radio' || elem.hasAttribute('checked')){
-                //radio buttons are multiple elements with the same name, we only want to fire if its actually checked
-                $(elem).trigger('change');
-            }
-        });
-        $(hide_target).css('margin-left', '26px');
-    }
-    
     $('[data-visibility-controller]').each(function(){attach_visibility_controller(this)})
     
     
@@ -357,6 +244,122 @@ $(function(){
 
 })
 
+//#####################################################################################//
+//#####################################################################################//
+
+function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTimeout(d),d=setTimeout(function(){d=null,c||a.apply(e,f)},b),c&&!d&&a.apply(e,f)}};
+
+
+safe_save = function(url, data){
+    if(typeof outputs_exist === 'undefined' || outputs_exist == false) { 
+        $.post(url, data, function() { window.location.reload() });
+    } else { //confirmation dialog so we don't clobber outputs
+        var dialog = new BootstrapDialog.show({
+            closable: false,
+            title: '',
+            type: BootstrapDialog.TYPE_WARNING,
+            message: 'Changing input parameters will invalidate the currently computed results. Would you like to <strong><u>Delete the Results</u></strong> and proceed?',
+            buttons: [
+                {
+                    label: 'Cancel',
+                    cssClass: 'btn',
+                    action: function(dialog){
+                        window.location.reload()
+                    }
+                },
+                {
+                    label: 'Proceed',
+                    cssClass: 'btn-danger btn-save',
+                    action: function(dialog){
+                        outputs_exist = false;
+                        $.post(url, data, function(){
+                            window.location.reload()
+                        });
+                        dialog.close()
+                    }
+                }
+            ]
+        });
+    }
+}
+
+function open_panel_if_needed(){
+     $('.production_list, .group_list').each(function(){
+        $('#population_panel').removeClass('TB_panel_closed')
+    })
+}
+
+function populate_pdf_panel(select) {
+    var $input = $(select)
+    var load_target = '#right-panel'
+    var position = $input.closest('.layout-panel').attr('id');
+    if(position == 'left-panel'){ //use the center-panel if this is from left
+        load_target = '#center-panel'
+    }else if(position == 'right-panel'){ // we've run out of room and must use a modal
+        modelModal.show($input);
+        return
+    }
+    var url = $input.attr('data-new-item-url');
+    if ($input.val() != 'data-add-new' && $input.val() != '')
+        url = url.replace('new', $input.val());//will edit already existing model
+    $(load_target).load(url)
+    $input.closest('.layout-panel').find('select').removeClass('active')  // nix .active from the earlier select
+    $input.addClass("active")  //@tjmahlin use .active to to style links between panels 
+}
+
+
+function get_parent_select($self) {
+    var parent = null
+    var $inDomElement = $( '#'+ $self.find('input').last().attr('id') ) //grab the matching form from the DOM
+    var actives = $inDomElement.closest('.layout-panel').prev('.layout-panel').find('select.active')
+    if(actives.length){
+        parent = actives.first()
+    }
+    return parent
+}
+
+
+var attach_visibility_controller = function (self){
+    var controller = '[name=' + $(self).attr('data-visibility-controller') + ']'
+    var hide_target = $(self).parents('.control-group')
+    if (hide_target.length == 0 || $(self).attr('class') === 'help-block'){  //Sometimes it's not in a form group
+        hide_target = $(self)
+    }
+    var disabled_value = $(self).attr('data-disabled-value')
+    var required_value = $(self).attr('data-required-value')
+
+    $('body').on('change', controller, function(){
+        if($(self).val() == disabled_value){
+            hide_target.hide()
+        }else{
+            if($(this).attr('type') == 'checkbox') {
+                if( $(this).is(':checked') == (disabled_value === 'false')){
+                    hide_target.show()
+                }else {
+                    hide_target.hide()
+                }
+            }
+            else {
+                if (typeof required_value !== 'undefined'){ //required value is specified
+                    if($(this).val() == required_value || $(this).val() == ''){
+                        hide_target.show()
+                    }else{
+                        hide_target.hide()
+                    }
+                }else{
+                    hide_target.show()
+                }
+            }
+        }
+    })
+    $(controller).each(function(index, elem){ //each because radio buttons have multiple elem, same name
+        if($(elem).attr('type') != 'radio' || elem.hasAttribute('checked')){
+            //radio buttons are multiple elements with the same name, we only want to fire if its actually checked
+            $(elem).trigger('change');
+        }
+    });
+    $(hide_target).css('margin-left', '26px');
+}
 
 
 var check_file_saved = function(){
