@@ -148,6 +148,7 @@ def copy_file(request, target):
 
 def download_file(request):
     target = request.GET['target']
+    target = target if target[-1] not in r'/\\' else target[:-1]  # shouldn't be a trailing slash
     file_path = workspace_path(target)
     f = open(file_path, "rb")
     response = HttpResponse(f, content_type="application/x-sqlite")  # TODO: generic content type
