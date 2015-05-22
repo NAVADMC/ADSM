@@ -272,6 +272,8 @@ def save_new_instance(initialized_form, request, context):
 def new_form(request, initialized_form, context):
     if initialized_form.is_valid():
         model_instance = initialized_form.save()  # write to database
+        link = context['action'].split('/')
+        context['action'] = '/' + '/'.join([link[0], link[1], str(model_instance.id)])  # not new if it has an id 
     model_name, model = get_model_name_and_model(request)
     if model_name in singletons:  # they could have their own special page: e.g. Population
         context['base_page'] = 'ScenarioCreator/Crispy-Singleton-Form.html' # #422 Singleton models now load in a fragment to be refreshed the same way that other forms are loaded dynamically
