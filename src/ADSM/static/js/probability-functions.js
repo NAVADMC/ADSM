@@ -20,14 +20,4 @@ $(document).ready( function(){
     });
     $('#id_equation_type').trigger('change');
 
-    $(document).on('submit', '#relational-form', function(){
-        $('#formset tbody tr').each(function(){
-            var x = $(this).find('td:first-child input:nth-child(3)').first().val()
-            var y = $(this).find('td:nth-child(2) input:first-child').first().val()
-            console.log(x,y)
-            if(x === '' && y === ''){
-                $(this).find('td:nth-child(3) input:first-child').first().attr('checked','checked')
-            }
-        })
-    });
 });

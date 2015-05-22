@@ -249,13 +249,16 @@ def relational_function(request, primary_key=None, doCopy=False):
             context['form'].instance.pk = None  # This will cause a new instance to be created
             created_instance = context['form'].save()
             context['formset'] = deepcopy_points(request, primary_key, created_instance)
-            return redirect('/setup/RelationalFunction/%i/' % created_instance.id)
         else:
             created_instance = context['form'].save()
             context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
+        context['action'] = '/setup/RelationalFunction/%i/' % created_instance.id
+
         if context['formset'].is_valid():
             context['formset'].save()
-            context['action'] = '/setup/RelationalFunction/%i/' % created_instance.id
+        else:
+            pass #Delete partial RelationalFunction???
+
     context['title'] = "Create a Relational Function"
     add_breadcrumb_context(context, "RelationalFunction")
     return render(request, 'ScenarioCreator/RelationalFunction.html', context)
@@ -332,7 +335,8 @@ def edit_entry(request, primary_key):
     try:
         initialized_form, model_name = initialize_from_existing_model(primary_key, request)
     except (ObjectDoesNotExist, OperationalError):
-        return redirect('/setup/%s/new/' % model_name)
+        request.path = '/setup/%s/new/' % model_name
+        return new_entry(request)
     context = {'form': initialized_form,
                'title': str(initialized_form.instance),
                'action': request.path}

@@ -89,7 +89,7 @@ class RelationalPointForm(BaseForm):
         widgets = {'relational_function': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
-PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint, fields=['relational_function', 'x', 'y'])
+PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint, fields=['relational_function', 'x', 'y'], extra=4)
 
 
 class RelationalFunctionForm(BaseForm):
