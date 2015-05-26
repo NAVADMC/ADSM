@@ -268,7 +268,7 @@ def new_form(request, initialized_form, context):
     if initialized_form.is_valid():
         model_instance = initialized_form.save()  # write to database
         link = context['action'].split('/')
-        context['action'] = '/' + '/'.join([link[0], link[1], str(model_instance.id)])  # not new if it has an id 
+        context['action'] = '/' + '/'.join([link[1], link[2], str(model_instance.id)]) + '/'  # not new if it has an id 
     model_name, model = get_model_name_and_model(request)
     context['model_name'] = model_name
     if model_name in singletons:  # they could have their own special page: e.g. Population

@@ -36,4 +36,9 @@
     <p></p>
 
     <p class="help-text">{{ help_text }}</p>
+    <script>
+        $(document).on('click', '#center-panel .btn-save', function () {
+            setTimeout(reload_left_panel, 500);
+        })
+    </script>
 {% endblock %}

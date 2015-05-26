@@ -38,7 +38,7 @@ $(function(){
                         if(lastClickedSelect != null){
                             add_model_option_to_selects(form_html, lastClickedSelect)
                         } else {//came from a model list
-                            $('#left-panel').load(window.location + " #left-panel>*")
+                            reload_left_panel();
                         }
                     }
                 }
@@ -526,3 +526,6 @@ function check_disabled_controls() {
     }//else do nothing
 };
 
+function reload_left_panel() {
+    $('#left-panel').load(window.location + " #left-panel>*")
+}
