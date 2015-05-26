@@ -26,14 +26,7 @@ abstract_models = {
         [('DirectSpread', DirectSpread),
          ('IndirectSpread', IndirectSpread),
          ('AirborneSpread', AirborneSpread)],
-    'VaccinationTrigger':
-        [('DiseaseDetection', DiseaseDetection),
-         ('RateOfNewDetections', RateOfNewDetections),
-         ('DisseminationRate', DisseminationRate),
-         ('SpreadBetweenGroups', SpreadBetweenGroups),
-         ('TimeFromFirstDetection', TimeFromFirstDetection),
-         ('DestructionWaitTime', DestructionWaitTime),
-         ('StopVaccination', StopVaccination)]}
+}
 
 
 def spaces_for_camel_case(text):
@@ -377,13 +370,6 @@ def delete_entry(request, primary_key):
         return redirect('/setup/%s/new/' % model_name)  # Population can be deleted, maybe others
 
 
-def list_per_model(model_name, model):
-    context = {'entries': model.objects.all(),
-               'class': model_name,
-               'name': spaces_for_camel_case(model_name)}
-    return context
-
-
 def promote_to_abstract_parent(model_name):
     for key, value in abstract_models.items():  # fix for child models (DirectSpread, RelationalFunction) returning to the wrong place
         if model_name in [x[0] for x in value]:
@@ -391,17 +377,58 @@ def promote_to_abstract_parent(model_name):
     return model_name
 
 
+def trigger_list(request):
+    layout = {
+         'Start Triggers':
+             [DiseaseDetection,
+              RateOfNewDetections,
+              DisseminationRate,
+              SpreadBetweenGroups,
+              TimeFromFirstDetection,
+              DestructionWaitTime],
+         'Stop Triggers':
+             [StopVaccination],
+         'Restart Triggers':  #Duplicate list from above because of filtering
+             [DiseaseDetection,
+              RateOfNewDetections,
+              DisseminationRate,
+              SpreadBetweenGroups,
+              TimeFromFirstDetection,
+              DestructionWaitTime],
+    }
+    context = {'title': "Vaccination Triggers", 
+               'base_page': 'ScenarioCreator/VaccinationTriggerList.html',
+               'categories': [{'name':category_name,
+                               'models':[list_per_model(x) for x in layout[category_name]]
+                              } 
+                              for category_name in ['Start Triggers', 'Stop Triggers', 'Restart Triggers']
+                             ]
+               }
+    
+    return context
+
+def list_per_model(model_class):
+    model_name = model_class.__name__
+    context = {'entries': model_class.objects.all(),
+               'class': model_name,
+               'name': spaces_for_camel_case(model_name)}
+    return context
+
+
 def model_list(request):
     model_name, model = get_model_name_and_model(request)
     model_name = promote_to_abstract_parent(model_name)
-    context = {'title': "Create " + spaces_for_camel_case(model_name) + "s",
-               'base_page': 'ScenarioCreator/ModelList.html',
-               'models': []}
-    if model_name in abstract_models.keys():
-        for local_name, local_model in abstract_models[model_name]:
-            context['models'].append(list_per_model(local_name, local_model))
+    if model_name == 'VaccinationTrigger':  # special case
+        context = trigger_list(request)
     else:
-        context['models'].append(list_per_model(model_name, model))
+        context = {'title': "Create " + spaces_for_camel_case(model_name) + "s",
+                   'base_page': 'ScenarioCreator/ModelList.html',
+                   'models': []}
+        if model_name in abstract_models.keys():
+            for local_name, local_model in abstract_models[model_name]:
+                context['models'].append(list_per_model(local_model))
+        else:
+            context['models'].append(list_per_model(model))
     return render(request, 'ScenarioCreator/3Panels.html', context)
 
 # Utility Views was moved to the ADSMSettings/connection_handler.py
