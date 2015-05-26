@@ -105,8 +105,8 @@ def zone_effects(request):
         context['formset_headings'] = Zone.objects.order_by('id')
         context['formset_grouped'] = {k: sorted(v, key=lambda x: x.instance.zone.id) 
                                         for k,v in forms_grouped_by_pt}
-
-        return render(request, 'ScenarioCreator/FormSet2D.html', context)
+        context['base_page'] = 'ScenarioCreator/FormSet2D.html'
+        return render(request, 'ScenarioCreator/3Panels.html', context)
 
 
 def save_formset_succeeded(MyFormSet, TargetModel, context, request):
@@ -122,7 +122,7 @@ def save_formset_succeeded(MyFormSet, TargetModel, context, request):
         return False
 
 
-def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request):
+def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request, template='ScenarioCreator/3Panels.html'):
     """FormSet is pre-populated with existing assignments and it detects and fills in missing
     assignments with a blank form with production type filled in."""
     if save_formset_succeeded(MyFormSet, TargetModel, context, request):
@@ -134,14 +134,14 @@ def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, miss
             forms[index].fields['production_type'].initial = pt.id
         context['formset'] = forms
         context['base_page'] = 'ScenarioCreator/FormSet.html'
-        return render(request, 'ScenarioCreator/3Panels.html', context)
+        return render(request, template, context)
 
 
 def assign_protocols(request):
     missing = ProductionType.objects.filter(protocolassignment__isnull=True)
     ProtocolSet = modelformset_factory(ProtocolAssignment, extra=len(missing), form=ProtocolAssignmentForm)
     context = {'title': 'Assign a Control Protocol to each Production Type'}
-    return populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request)
+    return populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request, template='ScenarioCreator/navigationPane.html')
 
 
 def assign_progressions(request):
