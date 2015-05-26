@@ -52,8 +52,9 @@ def basic_context(request):
                'ProductionGroups': ProductionGroup.objects.all(),
                'Farms': Unit.objects.count(),
                'Disease': Disease.objects.all().exclude(name='').count(),
-               'Progressions': DiseaseProgression.objects.count(),
-               'ProgressionAssignment': pt_count and DiseaseProgressionAssignment.objects.filter(progression__isnull=False).count() == pt_count,
+               'Progressions': DiseaseProgression.objects.count() 
+                               and pt_count 
+                               and DiseaseProgressionAssignment.objects.filter(progression__isnull=False).count() == pt_count,
                'DirectSpreads': DirectSpread.objects.count(),
                'AssignSpreads': pt_count and
                                 DiseaseSpreadAssignment.objects.filter(
@@ -76,7 +77,7 @@ def basic_context(request):
                'whole_scenario_warnings': whole_scenario_validation(),
                })
 
-        validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment',
+        validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions',
                              'DirectSpreads', 'AssignSpreads', 'ControlMasterPlan', 'Protocols', 'ProtocolAssignments', 'Zones', 'ZoneEffects']
         context['missing_values'] = {singular(name): context[name] for name in validation_models if not context[name]}
         context['Simulation_ready'] = simulation_ready_to_run(context)
