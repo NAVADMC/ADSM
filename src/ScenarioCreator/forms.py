@@ -520,35 +520,35 @@ class ProductionGroupForm(BaseForm):
 class DiseaseDetectionForm(BaseForm):
     class Meta(object):
         model = DiseaseDetection
-        exclude = []
+        fields = ['trigger_group', 'number_of_units', 'restart_only']
         widgets = {'trigger_group': ProductionTypeList()}
 
 
 class RateOfNewDetectionsForm(BaseForm):
     class Meta(object):
         model = RateOfNewDetections
-        exclude = []
+        fields = ['trigger_group', 'number_of_units', 'days', 'restart_only']
         widgets = {'trigger_group': ProductionTypeList()}
 
 
 class DisseminationRateForm(BaseForm):
     class Meta(object):
         model = DisseminationRate
-        exclude = []
+        fields = ['trigger_group', 'ratio', 'days', 'restart_only']
         widgets = {'trigger_group': ProductionTypeList()}
 
 
 class TimeFromFirstDetectionForm(BaseForm):
     class Meta(object):
         model = TimeFromFirstDetection
-        exclude = []
+        fields = ['trigger_group', 'days', 'restart_only']
         widgets = {'trigger_group': ProductionTypeList()}
 
 
 class DestructionWaitTimeForm(BaseForm):
     class Meta(object):
         model = DestructionWaitTime
-        exclude = []
+        fields = ['trigger_group', 'days', 'restart_only']
         widgets = {'trigger_group': ProductionTypeList()}
 
 
@@ -559,6 +559,7 @@ class SpreadBetweenGroupsForm(BaseForm):
             'number_of_groups',
             'relevant_groups',
             HTML(r"<a href='/setup/ProductionGroup/new'>+ define new group</a>"),
+            'restart_only',
             submit_button()
         )
         super(SpreadBetweenGroupsForm, self).__init__(*args, **kwargs)
@@ -571,7 +572,7 @@ class SpreadBetweenGroupsForm(BaseForm):
 class StopVaccinationForm(BaseForm):
     class Meta(object):
         model = StopVaccination
-        exclude = []
+        exclude = ['restart_only']
         widgets = {'trigger_group': ProductionTypeList()}
 
 

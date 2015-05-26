@@ -750,6 +750,7 @@ class ProductionGroup(BaseModel):
 
 
 class VaccinationTrigger(BaseModel):
+    restart_only = models.BooleanField(default=False, help_text="Allows you to setup less strict criteria for restarting a vaccination program after an outbreak.")
     class Meta(object):
         abstract = True
       

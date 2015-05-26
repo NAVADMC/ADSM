@@ -398,13 +398,25 @@ def trigger_list(request):
     }
     context = {'title': "Vaccination Triggers", 
                'base_page': 'ScenarioCreator/VaccinationTriggerList.html',
-               'categories': [{'name':category_name,
-                               'models':[list_per_model(x) for x in layout[category_name]]
-                              } 
-                              for category_name in ['Start Triggers', 'Stop Triggers', 'Restart Triggers']
-                             ]
+               'categories': [{'name':'Start Triggers',
+                               'models':[filtered_list_per_model(x, False) for x in layout['Start Triggers']]
+                              }, 
+                              {'name':'Stop Triggers',
+                               'models':[list_per_model(x) for x in layout['Stop Triggers']]
+                              },
+                              {'name':'Restart Triggers',
+                               'models':[filtered_list_per_model(x, True) for x in layout['Restart Triggers']]
+                              }
+                          ]
                }
     
+    return context
+
+def filtered_list_per_model(model_class, restart_trigger):
+    model_name = model_class.__name__
+    context = {'entries': model_class.objects.filter(restart_only=restart_trigger),
+               'class': model_name,
+               'name': spaces_for_camel_case(model_name)}
     return context
 
 def list_per_model(model_class):
