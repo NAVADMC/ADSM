@@ -123,9 +123,7 @@ class ProtocolAssignmentForm(BaseForm):
     class Meta(object):
         model = ProtocolAssignment
         exclude = ['_master_plan', ]
-        widgets = {'_master_plan': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlMasterPlan/new/'}),
-                   'production_type': FixedSelect(),
-                   'control_protocol': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'})}
+        widgets = {'production_type': FixedSelect(),}
 
 
 class DiseaseProgressionAssignmentForm(BaseForm):
