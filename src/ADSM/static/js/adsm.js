@@ -122,11 +122,11 @@ $(function(){
     })
     
     $(document).on('change', ':input, select', function(){
-        $('.btn-save').removeAttr('disabled')
+        $(this).closest('.layout-panel').find('.btn-save').removeAttr('disabled')
     });
     
     $(document).on('input', 'input, textarea', function(){
-        $('.btn-save').removeAttr('disabled')
+        $(this).closest('.layout-panel').find('.btn-save').removeAttr('disabled')
     });
     
     
@@ -460,7 +460,6 @@ var modelModal = {
         modal.find('.modal-body').html($form);
         modal.find('.modal-title').html($newForm.find('#title').html());
         $('body').append(modal);
-        $('#id_equation_type').trigger('change'); //see also probability-functions.js
         return $form;
     },
 
