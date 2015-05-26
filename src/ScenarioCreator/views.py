@@ -1,16 +1,14 @@
 import csv
-import os
 import subprocess
 import itertools
-from crispy_forms.utils import render_crispy_form
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
 from django.db.models import Q, ObjectDoesNotExist
 from django.db import OperationalError
 
 from Results.models import *  # This is absolutely necessary for dynamic form loading
-from ScenarioCreator.models import *
+from ScenarioCreator.models import *  # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from ADSMSettings.models import unsaved_changes
 from ADSMSettings.utils import graceful_startup, file_list, handle_file_upload, workspace_path, adsm_executable_command
@@ -267,6 +265,7 @@ def relational_function(request, primary_key=None, doCopy=False):
 def save_new_instance(initialized_form, request, context):
     model_instance = initialized_form.save()  # write to database
     model_name = model_instance.__class__.__name__
+    context['model_name'] = model_name
     if model_name in singletons:  #they could have their own special page: e.g. Population
         return redirect('/setup/%s/1/' % model_name)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
@@ -278,6 +277,7 @@ def new_form(request, initialized_form, context):
         link = context['action'].split('/')
         context['action'] = '/' + '/'.join([link[0], link[1], str(model_instance.id)])  # not new if it has an id 
     model_name, model = get_model_name_and_model(request)
+    context['model_name'] = model_name
     if model_name in singletons:  # they could have their own special page: e.g. Population
         context['base_page'] = 'ScenarioCreator/Crispy-Singleton-Form.html' # #422 Singleton models now load in a fragment to be refreshed the same way that other forms are loaded dynamically
         return render(request, 'ScenarioCreator/navigationPane.html', context)
@@ -357,9 +357,10 @@ def copy_entry(request, primary_key):
         initialized_form, model_name = initialize_from_existing_model(primary_key, request)
     except ObjectDoesNotExist:
         return redirect('/setup/%s/new/' % model_name)
-    context = {'form': initialized_form,
-               'title': "Copy a " + spaces_for_camel_case(model_name),
-               'action': request.path}
+    context = {'form': initialized_form, 
+               'title': "Copy a " + spaces_for_camel_case(model_name), 
+               'action': request.path, 
+               'model_name': model_name}
     if initialized_form.is_valid() and request.method == 'POST':
         initialized_form.instance.pk = None  # This will cause a new instance to be created
         return save_new_instance(initialized_form, request, context)
