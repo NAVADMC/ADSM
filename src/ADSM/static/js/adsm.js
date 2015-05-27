@@ -1,6 +1,10 @@
 
 $(function(){
     open_panel_if_needed();
+
+    $(document).on('click', 'form.ajax .btn-cancel', function(){
+        $(this).closest('form').closest('div').html('') //delete everything from the div containing the form
+    })
     
     $(document).on('click', '#TB_population', function(){
         $('#population_panel').toggleClass('TB_panel_closed')
