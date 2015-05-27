@@ -6847,6 +6847,85 @@
   </output>
 </variable-test>
 
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>stop vaccination after 3 days with no detections, restart, different capacity chart</short-name>
+
+  <description>
+    This test is one of a set to test stopping and restarting vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get vaccinated.  Inside
+    the first ring are 2 units of type A, and inside the second ring are 2 units of type B.
+
+    In this test, there is 1 detection which triggers vaccination of the “C” units.  3
+    days after that vaccination is stopped, so not all of the “C” units get vaccinated.
+    A second detection causes the vaccination program to be re-started with “D” units
+    added to the vaccination queue. A different vaccination capacity chart applies the
+    second time the vaccination program is initiated.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>18 March 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>stop_vac_3days_restart_diff_chart</parameter-file>
+
+  <parameter-description>
+    For production type A, the infectious subclinical period is 1 day, and the latent
+    period is 30 days.  This ensures that of the “A” units at the center of circle 1,
+    only unit 2 will be detected during this simulation.
+
+    For production type B, the infectious subclinical period is 6 days, and the latent
+    period is 30 days.  This ensures that of the “B” units at the center of circle 2,
+    only unit 3 will be detected during this simulation, a few days after unit 2.
+    
+    Vaccination begins after 1 detection.  The first time vaccination is initiated, there
+    is capacity to vaccinate 1 unit per day.  The second time vaccination is initiated
+    (and subsequent times), the vaccination capacity goes 1 unit on the first day, 2
+    units on the second day, and 3 units on the third day and forward.
+    
+    Vaccination is stopped after 3 days with no detections.
+
+    What should happen:
+     - Day 1: Unit 2 will be subclinical.
+     - Day 2: Unit 2 will be clinical.  It will be detected and this will initiate a
+       vaccination program.  There should be 6 “C” units awaiting vaccination.
+     - Day 3-5: On each day, 1 “C” unit will be vaccinated, for a total of 3 units since
+       vaccination began.  Since there are no new detections during these 3 days,
+       vaccination will be stopped.  When vaccination is stopped, the queue of units
+       awaiting vaccination is emptied, the number of units awaiting vaccination should
+       drop to 0.
+     - Day 7: Unit 3 will be clinical.  It will be detected and this will re-initiate a
+       vaccination program.  There should be 6 “D” units awaiting vaccination.
+     - Day 8: 1 “D” unit will be vaccinated.
+     - Day 9: 2 “D” units will be vaccinated.
+     - Day 10: 3 “D” units will be vaccinated. Since there were no new detections during
+       the 3 days 8-10, vaccination will be stopped again.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>vacnUC</td>
+      <td>vacnUD</td>
+      <td>vacwU</td>
+    </tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>0</td></tr>
+    <tr><td>1</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>6</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td>  <td>0</td>  <td>5</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td>  <td>0</td>  <td>4</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td>  <td>0</td>  <td>3</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td>  <td>0</td>  <td>6</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>1</td>  <td>5</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>2</td>  <td>3</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>3</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td>  <td>0</td>  <td>0</td></tr>
+  </output>
+</variable-test>
+
 <deterministic-test>
   <category>ring_vaccination</category>
   <short-name>retrospective vaccination 0 days, 3 detections to trigger</short-name>
