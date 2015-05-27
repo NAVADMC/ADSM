@@ -111,14 +111,16 @@ def population_png(request, width_inches=8, height_inches=8):
     size = min(100, 3000 / math.sqrt(Unit.objects.count()))
     for index, production_type in enumerate(ProductionType.objects.all()):
         if 'production_type__name' not in params or params['production_type__name'] == production_type.name:
-            longitude, latitude = zip(*[(u.latitude, u.longitude) for u in Unit.objects.filter(Q(production_type=production_type) & query_filter)])
-            ax.scatter(latitude,
-                       longitude,
-                       marker='s',
-                       linewidths=0.005,  # for some reason won't draw if linewidths = 0
-                       s=size,
-                       color=light_colors[index % len(light_colors)],
-                       label=production_type.name)
+            units = Unit.objects.filter(Q(production_type=production_type) & query_filter)
+            if units.count(): # there needs to be at least some matching units
+                longitude, latitude = zip(*[(u.latitude, u.longitude) for u in units])
+                ax.scatter(latitude,
+                           longitude,
+                           marker='s',
+                           linewidths=0.005,  # for some reason won't draw if linewidths = 0
+                           s=size,
+                           color=light_colors[index % len(light_colors)],
+                           label=production_type.name)
         
     infected = Unit.objects.all().exclude(initial_state='S')
     if infected:
