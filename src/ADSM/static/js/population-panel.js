@@ -23,23 +23,23 @@ function select_production_type(text, selector) {
             toggle(this, 'selected')
         }
     })
-    check_empty_status($(selector).first().closest('.production_list'));
+    check_empty_status($(selector).first().closest('.productiontypelist'));
 }
 
-//child has selected attr, then remove .empty  has .production_list
+//child has selected attr, then remove .empty  has .productiontypelist
 //on load have .empty
 //editing existing 
 
-$(document).on('load', '.production_list, .group_list', function(event){
+$(document).on('load', '.productiontypelist, .grouplist', function(event){
     check_empty_status(this)
 })
 
-$(document).on('click', '#population_panel #ProductionTypes a, .production_list option', function(event){
+$(document).on('click', '#population_panel #ProductionTypes a, .productiontypelist option', function(event){
     event.preventDefault()
-    select_production_type($(this).text(), '.production_list option')
+    select_production_type($(this).text(), '.productiontypelist option')
 })
 
-$(document).on('click', '#population_panel #ProductionGroups a, .production_list option', function(event){
+$(document).on('click', '#population_panel #ProductionGroups a, .productiontypelist option', function(event){
     event.preventDefault()
-    select_production_type($(this).text(), '.group_list option')
+    select_production_type($(this).text(), '.grouplist option')
 })
