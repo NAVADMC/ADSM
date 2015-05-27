@@ -25,6 +25,10 @@ if OVERRIDE_DEBUG:
     DEBUG = True
     TEMPLATE_DEBUG = DEBUG
 
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+    os.environ['HTTPS'] = 'off'
+    os.environ['wsgi.url_scheme'] = 'http'
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
 
