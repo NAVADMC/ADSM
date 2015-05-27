@@ -39,11 +39,8 @@ $(function(){
                     $self.replaceWith(form_html)
                     if(formAction.lastIndexOf('new/') != -1){ //new model created
                         var lastClickedSelect = get_parent_select($self);
-                        if(lastClickedSelect != null){
-                            add_model_option_to_selects(form_html, lastClickedSelect)
-                        } else {//came from a model list
-                            reload_left_panel();
-                        }
+                        add_model_option_to_selects(form_html, lastClickedSelect)
+                        reload_model_list($self);
                     }
                 }
             },
@@ -305,7 +302,7 @@ function open_panel_if_needed(){
 
 function populate_pdf_panel(select) {
     var $input = $(select)
-    if($input.hasClass('grouplist'))  //grouplist uses the population_panel instead
+    if($input.hasClass('grouplist') || $input.hasClass('productiontypelist'))  //grouplist uses the population_panel instead
         return;
     var load_target = '#right-panel'
     var position = $input.closest('.layout-panel').attr('id');
@@ -424,16 +421,19 @@ function contains_errors(html) {
 }
 
 function add_model_option_to_selects(html, selectInput) {
-    var pk = $(html).find('form').first().attr('action').split('/')[3]; //the edit action URL has the pk in it
+    var action = $(html).find('form').first().attr('action');
+    var pk = action.split('/')[3]; //the edit action URL has the pk in it
+    var model_link = action.replace(pk, 'new'); //for targetting other selects
     var title = 'Newest Entry';
-    console.log("Adding option", pk, "to selects");
     try { //TODO: there's a possibility of a form without a name field, in this case the python str() method is preferrable
         title = $(html).find('input[type="text"]').first().val();
     } catch (e) { }
 
-    $('select[data-new-item-url="' + selectInput.attr('data-new-item-url') + '"] [value="data-add-new"]')
+    $('select[data-new-item-url="' + model_link + '"] [value="data-add-new"]')
         .before($('<option value="' + pk + '">' + title + '</option>')); // Add option to all similar selects
-    selectInput.val(pk); // select option for select that was originally clicked
+    if(selectInput != null){
+        selectInput.val(pk); // select option for select that was originally clicked
+    }
 }
 
 var modelModal = {
@@ -532,6 +532,10 @@ function check_disabled_controls() {
     }//else do nothing
 };
 
-function reload_left_panel() {
+function reload_model_list($form) {
+    var action = $form.attr('action');
     $('#left-panel').load(window.location + " #left-panel>*")
+    if(action.indexOf('ProductionGroup') != -1 || action.indexOf('ProductionType') != -1){
+        $('#population_panel').load("/setup/OutputSettings/1/ #population_panel>*")
+    }
 }

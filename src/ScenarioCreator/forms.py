@@ -528,7 +528,7 @@ class ProductionGroupForm(BaseForm):
     class Meta(object):
         model = ProductionGroup
         exclude = []
-        widgets = {}
+        widgets = {'group': ProductionTypeList()}
 
 
 class DiseaseDetectionForm(BaseForm):
