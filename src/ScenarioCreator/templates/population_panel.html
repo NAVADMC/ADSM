@@ -1,4 +1,4 @@
-<div class="col-xs-4 TB_panel TB_panel_closed" id="population_panel">
+<div class="col-xs-4 TB_panel TB_panel_closed layout-panel" id="population_panel">
     <h2>Population Production Types</h2>
     <ul id="ProductionTypes">
         {% for pt in ProductionTypes %}
@@ -14,4 +14,6 @@
                 {% endfor %}</span></li>
         {% endfor %}
     </ul>
+    <div id="group-creator"></div> {#load target#} 
+    <a href='/setup/ProductionGroup/new' load-target='#group-creator'>+ define new group</a>
 </div>

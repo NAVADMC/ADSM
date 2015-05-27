@@ -294,13 +294,15 @@ safe_save = function(url, data){
 }
 
 function open_panel_if_needed(){
-     $('.production_list, .group_list').each(function(){
+     $('.productiontypelist, .grouplist').each(function(){
         $('#population_panel').removeClass('TB_panel_closed')
     })
 }
 
 function populate_pdf_panel(select) {
     var $input = $(select)
+    if($input.hasClass('grouplist'))  //grouplist uses the population_panel instead
+        return;
     var load_target = '#right-panel'
     var position = $input.closest('.layout-panel').attr('id');
     if(position == 'left-panel'){ //use the center-panel if this is from left

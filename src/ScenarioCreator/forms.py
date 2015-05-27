@@ -499,7 +499,7 @@ class ZoneEffectAssignmentForm(BaseForm):
 class ProductionTypeList(SelectMultiple):
     template_name = 'floppyforms/multiselect.html'
     def __init__(self, starting_attrs=None):
-        attrs = {'class': 'production_list empty'}
+        attrs = {'data-new-item-url': '/setup/ProductionType/new/'}
         if starting_attrs is not None:
             attrs.update(starting_attrs)
         super(ProductionTypeList, self).__init__(attrs)
@@ -507,6 +507,20 @@ class ProductionTypeList(SelectMultiple):
     def get_context(self, name, value, attrs=None, choices=()):
         context = super(SelectMultiple, self).get_context(name, value, attrs)
         context['help_text'] = mark_safe("To add production types to the trigger click on a Type or Group from the <em>Population Panel</em>") 
+        return context
+
+
+class GroupList(SelectMultiple):
+    template_name = 'floppyforms/multiselect.html'
+    def __init__(self, starting_attrs=None):
+        attrs = {'data-new-item-url': '/setup/ProductionGroup/new/'}
+        if starting_attrs is not None:
+            attrs.update(starting_attrs)
+        super(GroupList, self).__init__(attrs)
+
+    def get_context(self, name, value, attrs=None, choices=()):
+        context = super(SelectMultiple, self).get_context(name, value, attrs)
+        context['help_text'] = mark_safe("Create new Groups in the <em>Population Panel</em>") 
         return context
 
 
@@ -558,7 +572,7 @@ class SpreadBetweenGroupsForm(BaseForm):
         self.helper.layout = Layout(
             'number_of_groups',
             'relevant_groups',
-            HTML(r"<a href='/setup/ProductionGroup/new'>+ define new group</a>"),
+            HTML(r"<a href='/setup/ProductionGroup/new/' load-target='#group-creator'>+ define new group</a>"),
             'restart_only',
             submit_button()
         )
@@ -566,7 +580,7 @@ class SpreadBetweenGroupsForm(BaseForm):
     class Meta(object):
         model = SpreadBetweenGroups
         exclude = []
-        widgets = {'relevant_groups': SelectMultiple(attrs={'class':'group_list'})}
+        widgets = {'relevant_groups': GroupList()}
 
 
 class StopVaccinationForm(BaseForm):
