@@ -503,8 +503,7 @@ var modelModal = {
 
 function check_disabled_controls() {
     /*Disables all the inputs on the Control Master Plan if the disable_all check box is checked on page load */
-    console.log("function check_disabled_controls() {")
-    if (typeof controls_enabled !== 'undefined' && !controls_enabled) { //global from context processor
+    if (typeof controls_enabled !== 'undefined' && !controls_enabled && $('#id_destruction_program_delay').length) { //global from context processor
         $('.layout-panel form').first().children('div:not(#div_id_name)').each(function (index, value) {
             $(value).attr('disabled', 'disabled')
             $(value).find(':input').attr('disabled', true);
