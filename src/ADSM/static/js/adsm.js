@@ -154,7 +154,9 @@ $(function(){
 
     $(document).on('click', '[data-delete-link]', function(){
         var link = $(this).attr('data-delete-link')
-        var do_async = true //$(this).hasClass('ajax-post')
+        var do_reload = $(this).hasClass('ajax-post')
+        var direct_link = $(this).hasClass('direct_link')
+        var $containing_panel = $(this).closest('.layout-panel')
         var object_type = link.split('/')[2]
         if (typeof object_type === 'undefined') {object_type = 'object'}
         var additional_msg = ''
@@ -177,21 +179,26 @@ $(function(){
                     label: 'Delete',
                     cssClass: 'btn-danger',
                     action: function(dialog){
-                        if(do_async){
+                        if(do_reload){
                             $.post(link).done(function(){
-                                $('#right-panel').html('')
-                                var newLink = '/setup/' + link.split('/')[2] + '/new/' //[2] model name
-                                var pk = link.split('/')[3];
-                                console.log(pk, newLink)
-                                // remove option pointing to delete model
-                                $('select[data-new-item-url="' + newLink + '"] [value="'+ pk +'"]').remove()
-                                console.log('select[data-new-item-url="' + newLink + '"]', $('select[data-new-item-url="' + newLink + '"]'))
-                                dialog.close();
+                                window.location.reload()
                             });
                         } else {
-                            dialog.close();
-                            window.location = link;
-                        }
+                            if(direct_link){
+                                dialog.close();
+                                window.location = link;
+                            } else {//neither tag
+                                $.post(link).done(function () {
+                                    $containing_panel.html('')
+                                    var newLink = '/setup/' + link.split('/')[2] + '/new/' //[2] model name
+                                    var pk = link.split('/')[3];
+                                    // remove option pointing to delete model
+                                    $('select[data-new-item-url="' + newLink + '"] [value="' + pk + '"]').remove()
+                                    console.log('select[data-new-item-url="' + newLink + '"]', $('select[data-new-item-url="' + newLink + '"]'))
+                                    dialog.close();
+                                });
+                            }
+                        } 
                     }
                 }
             ]
