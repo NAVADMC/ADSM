@@ -112,7 +112,7 @@ class RelationalFunctionForm(BaseForm):
 class ControlMasterPlanForm(BaseForm):
     class Meta(object):
         model = ControlMasterPlan
-        exclude = []
+        exclude = ['disable_all_controls']
         widgets = {'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'restart_vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),

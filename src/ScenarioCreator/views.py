@@ -52,6 +52,16 @@ def production_type_list_json(request):
     return JsonResponse(msg, safe=False)  # necessary to serialize a list object
 
 
+def disable_all_controls_json(request):
+    if 'POST' in request.method:
+        new_value = request.POST['disable_all_controls']
+        ControlMasterPlan.objects.all().update(disable_all_controls=new_value)
+        return JsonResponse({'status':'success'})
+    else:
+        return JsonResponse({'disable_all_controls': ControlMasterPlan.objects.get().disable_all_controls})
+    
+
+
 def initialize_spread_assignments():
     pts = list(ProductionType.objects.all())
     for source in pts:
