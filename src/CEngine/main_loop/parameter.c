@@ -495,8 +495,9 @@ PAR_get_PDF_callback (void *data, GHashTable *dict)
       char *query;
       char *sqlerr;
 
-      rel_id = 0; /* Filling this in for now just to prevent an uninitialized
-        variable warning */
+      errno = 0;
+      rel_id = strtol (g_hash_table_lookup (dict, "graph_id"), NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);  
       build.x = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
       build.y = g_array_new (/* zero_terminated = */ FALSE, /* clear = */ FALSE, sizeof (double));
       query =
