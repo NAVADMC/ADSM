@@ -54,13 +54,13 @@ def production_type_list_json(request):
 
 def disable_all_controls_json(request):
     if 'POST' in request.method:
-        new_value = request.POST['disable_all_controls']
-        ControlMasterPlan.objects.all().update(disable_all_controls=new_value)
+        new_value = request.POST['use_controls']
+        set_to = new_value == 'false'  #logical inversion because of use_controls vs disable_controls
+        ControlMasterPlan.objects.all().update(disable_all_controls=set_to)
         return JsonResponse({'status':'success'})
     else:
         return JsonResponse({'disable_all_controls': ControlMasterPlan.objects.get().disable_all_controls})
     
-
 
 def initialize_spread_assignments():
     pts = list(ProductionType.objects.all())

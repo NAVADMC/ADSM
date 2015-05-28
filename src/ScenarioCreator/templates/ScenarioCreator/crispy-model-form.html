@@ -4,7 +4,6 @@
 {% load db_status_tags %}
 
 {% block content %}
-    <script>$(document).ready(check_disabled_controls)</script>
     {% if model_name == "ProbabilityFunction" %}
         <script src="{{ STATIC_URL }}js/probability-functions.js"></script>
     {% endif %}

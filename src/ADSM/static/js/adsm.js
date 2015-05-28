@@ -1,7 +1,8 @@
 
 $(function(){
     open_panel_if_needed();
-
+    check_disabled_controls();
+    
     $(document).on('click', 'form.ajax .btn-cancel', function(){
         $(this).closest('form').closest('div').html('') //delete everything from the div containing the form
     })
@@ -51,10 +52,6 @@ $(function(){
             $('.blocking-overlay').hide();
         });
     })
-    
-    $(document).on('click', '#check_update', function(event) {
-        $(this).addClass('loading_button')
-    });
     
     $(document).on('click', '#update_adsm', function(event){
         $(this).removeClass('loading_button')
@@ -202,8 +199,8 @@ $(function(){
     });
 
     $('#id_disable_all_controls').change(function(event){
-        var isChecked = $(this).checked;
-        safe_save('/setup/DisableAllControls.json/', {disable_all_controls: isChecked});
+        var isChecked = $(this).prop('checked');
+        safe_save('/setup/DisableAllControls.json/', {use_controls: isChecked});
     });
     
     $(window).resize( function(){
@@ -247,7 +244,9 @@ function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTim
 
 safe_save = function(url, data){
     if(typeof outputs_exist === 'undefined' || outputs_exist == false) { 
-        $.post(url, data, function() { window.location.reload() });
+        $.post(url, data, function() { 
+            window.location.reload() 
+        });
     } else { //confirmation dialog so we don't clobber outputs
         var dialog = new BootstrapDialog.show({
             closable: false,
@@ -504,15 +503,12 @@ var modelModal = {
 
 function check_disabled_controls() {
     /*Disables all the inputs on the Control Master Plan if the disable_all check box is checked on page load */
-    var form = $('section form');
-    var $checkbox = form.find('#id_disable_all_controls');
-    if($checkbox.length){
-        if ($checkbox.is(':checked')) {
-            form.children('div:not(#div_id_name, #div_id_disable_all_controls)').each(function (index, value) {
-                $(value).attr('disabled', 'disabled')
-                $(value).find(':input').attr('disabled', true);
-            });
-        }
+    console.log("function check_disabled_controls() {")
+    if (typeof controls_enabled !== 'undefined' && !controls_enabled) { //global from context processor
+        $('.layout-panel form').first().children('div:not(#div_id_name)').each(function (index, value) {
+            $(value).attr('disabled', 'disabled')
+            $(value).find(':input').attr('disabled', true);
+        });
     }//else do nothing
 };
 

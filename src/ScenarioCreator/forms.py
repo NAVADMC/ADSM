@@ -10,7 +10,7 @@ from django.forms.models import inlineformset_factory
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
-from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple
+from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple, CheckboxInput
 from crispy_forms.helper import FormHelper
 import os
 
@@ -113,7 +113,9 @@ class ControlMasterPlanForm(BaseForm):
     class Meta(object):
         model = ControlMasterPlan
         exclude = ['disable_all_controls']
-        widgets = {'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+        widgets = {
+                 # 'disable_all_controls': CheckboxInput(attrs={'hidden':'hidden'}),
+                   'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'restart_vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    }

@@ -87,7 +87,8 @@ def basic_context(request):
                                            'include_direct_contact_spread':   js(disease.include_direct_contact_spread),
                                            'include_indirect_contact_spread': js(disease.include_indirect_contact_spread),
                                            'include_airborne_spread':         js(disease.include_airborne_spread),
-                                           'outputs_exist':                js(outputs_exist()),
+                                           'outputs_exist':                   js(outputs_exist()),
+                                           'controls_enabled':                js(context['controls_enabled']),
         }
         
         
