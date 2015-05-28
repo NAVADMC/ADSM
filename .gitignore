@@ -1,5 +1,5 @@
-ADSM/production_settings.py
-./logs/
+src/ADSM/production_settings.py
+/logs/
 
 *.user
 *.autosave
