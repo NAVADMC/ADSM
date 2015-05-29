@@ -7205,3 +7205,271 @@
     <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
   </output>
 </variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>re-trigger on 2 detections in any type</short-name>
+
+  <description>
+    This test is one of a set to test re-triggering vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get
+    vaccinated.  Inside the first ring are 2 units of type A, and inside the
+    second ring are 2 units of type B.
+
+    In this test, 2 “A” units are detected, triggering vaccination the first
+    time.  Vaccination is ended, then 2 “B” units are detected.  The fact that
+    vaccination does not start until the 2nd “B” unit is detected shows that
+    the trigger has reset properly between starts of the vaccination program.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 April 2013</creation-date>
+  <model-version>3.3.0</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>retrigger_2detect</parameter-file>
+
+  <parameter-description>
+    For production type A, the infectious subclinical period is 1 day, and the
+    latent period is 1 day.  This ensures that both “A” units at the center of
+    circle 1 will be detected, one day apart.
+
+    For production type B, the infectious subclinical period is 7 days, and the
+    latent period is 1 day.  This ensures that both “B” units at the center of
+    circle 2 will be detected, also one day apart, but later in the simulation.
+
+    Diseased units will be detected (by self-reporting) on their first day
+    showing clinical signs.
+    
+    Vaccination begins when disease has been detected in 2 units of any type.
+    Units within 1.5 km of a detected unit will be vaccinated. The first time
+    vaccination is initiated, there is capacity to vaccinate 1 unit per day.
+    The second time vaccination is initiated (and subsequent times), the
+    vaccination capacity goes 1 unit on the first day, 2 units on the second
+    day, and 3 units on the third day and forward.
+
+    Vaccination is stopped after 3 days with no detections.
+
+    What should happen:
+     - Day 1: The “A” units will be latent and subclinical, not detectable yet.
+     - Day 2: 1 “A” unit will be clinical. It will be detected.
+     - Day 3: The other “A” unit will be clinical. It will be detected and a
+       vaccination program will be initiated.
+     - Day 4-6: On each of these days, a unit in circle 1 will be vaccinated.
+     - Day 7: 3 days have passed with no new detections, so vaccination is
+       stopped. No units will be vaccinated on this day.
+     - Day 8: 1 “B” unit will be clinical. It will be detected. For the
+       trigger, which has been reset post-ending of the vaccination program,
+       this counts as the first detection.
+     - Day 9: The other “B” unit will be subclinical. It will be detected and
+       the vaccination program will be restarted.
+     - Day 10: 2 units in circle 2 will be vaccinated.  Note that
+       *two* units are vaccinated: the restart capacity chart
+       goes 1,2,3,... but it is relative to the day of first detection, which
+       was 2 days ago on day 7.
+     - Day 11: 3 units in circle 2 will be vaccinated.
+     - Day 12: The remaining 1 unit in circle 2 will be vaccinated.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>vacnU</td>
+    </tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>2</td></tr>
+    <tr><td>0</td> <td>0</td> <td>3</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>re-trigger on 2 detections over 6 days, any type</short-name>
+
+  <description>
+    This test is one of a set to test re-triggering vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get
+    vaccinated.  Inside the first ring are 2 units of type A, and inside the
+    second ring are 2 units of type B.
+
+    In this test, 2 “A” units are detected, triggering vaccination the first
+    time.  Vaccination is ended, then 2 “B” units are detected.  On the day
+    that the first detection of a “B” unit occurs, the 6 day period also covers
+    the last detection of an “A” unit. The fact that vaccination does not start
+    until the 2nd “B” unit is detected shows that the trigger has reset
+    properly between starts of the vaccination program.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 April 2013</creation-date>
+  <model-version>3.3.0</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>retrigger_2detect6days</parameter-file>
+
+  <parameter-description>
+    For production type A, the infectious subclinical period is 1 day, and the
+    latent period is 1 day.  This ensures that both “A” units at the center of
+    circle 1 will be detected, one day apart.
+
+    For production type B, the infectious subclinical period is 7 days, and the
+    latent period is 1 day.  This ensures that both “B” units at the center of
+    circle 2 will be detected, also one day apart, but later in the simulation.
+
+    Diseased units will be detected (by self-reporting) on their first day
+    showing clinical signs.
+    
+    Vaccination begins when disease has been detected in 2 units of any type
+    over 6 days. Units within 1.5 km of a detected unit will be vaccinated. The
+    first time vaccination is initiated, there is capacity to vaccinate 1 unit
+    per day. The second time vaccination is initiated (and subsequent times),
+    the vaccination capacity goes 1 unit on the first day, 2 units on the
+    second day, and 3 units on the third day and forward.
+
+    Vaccination is stopped after 3 days with no detections.
+
+    What should happen:
+     - Day 1: The “A” units will be latent and subclinical, not detectable yet.
+     - Day 2: 1 “A” unit will be clinical. It will be detected.
+     - Day 3: The other “A” unit will be clinical. It will be detected and a
+       vaccination program will be initiated.
+     - Day 4-6: On each of these days, a unit in circle 1 will be vaccinated.
+     - Day 7: 3 days have passed with no new detections, so vaccination is
+       stopped. No units will be vaccinated on this day.
+     - Day 8: 1 “B” unit will be clinical. It will be detected. Note that the
+       past 6 days are (8,7,6,5,4,3), and there was a detection on day 3.
+       However, this trigger has been reset post-ending of the vaccination
+       program, so this new detection counts as the only one in the past 6
+       days.
+     - Day 9: The other “B” unit will be clinical. It will be detected and
+       the vaccination program will be restarted.
+     - Day 10: 2 units in circle 2 will be vaccinated.  Note that
+       *two* units are vaccinated: the restart capacity chart
+       goes 1,2,3,... but it is relative to the day of first detection, which
+       was 2 days ago on day 7.
+     - Day 11: 3 units in circle 2 will be vaccinated.
+     - Day 12: The remaining 1 unit in circle 2 will be vaccinated.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>vacnU</td>
+    </tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>2</td></tr>
+    <tr><td>0</td> <td>0</td> <td>3</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>re-trigger on  detection in 2 groups (A,C) (B,D) or 3 days after first detection</short-name>
+
+  <description>
+    This test is one of a set to test re-triggering vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get
+    vaccinated.  Inside the first ring are 2 units of type A, and inside the
+    second ring are 2 units of type B.
+
+    In this test, vaccination is triggered either a) 3 days after the first
+    detection, or b) when detections have occurred in 2 groups. One group
+    contains types “A” and “C”, and the other group contains types “B” and “D”.
+    One “A” unit is detected early in the simulation, triggering vaccination to
+    begin 3 days later.  Vaccination is ended, then a “B” unit is detected,
+    then an “A” unit the next day. The fact that vaccination does not start
+    until the 2nd “A” unit is detected shows that the number-of-groups trigger
+    has reset properly between starts of the vaccination program.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>12 April 2013</creation-date>
+  <model-version>3.3.0</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>retrigger_2groupsAC_BD_3daysincedet</parameter-file>
+
+  <parameter-description>
+    For production type A, the infectious subclinical period is 1 day, and the
+    latent period is 8 days.  This ensures that one “A” unit gets detected
+    early in the simulation, and the other several days later.
+
+    For production type B, the infectious subclinical period is 8 days, and the
+    latent period is 30 days.  This ensures that only one “B” gets detected.
+
+    Diseased units will be detected (by self-reporting) on their first day
+    showing clinical signs.
+    
+    Vaccination begins when either a) 3 days have passed since the first
+    detection, or b) detections have occurred in 2 groups. One group contains
+    types “A” and “C”, and the other group contains types “B” and “D”. Units
+    within 1.5 km of a detected unit will be vaccinated. There is capacity to
+    vaccinate 1 unit per day.
+
+    Vaccination is stopped after 3 days with no detections.
+
+    What should happen:
+     - Day 1: No units are clinical yet, no detections.
+     - Day 2: 1 “A” unit will be clinical. It will be detected.
+     - Day 3: 1 day after 1st detection.
+     - Day 4. 2 days after 1st detection.
+     - Day 5. 3 days after 1st detection. On this day, and days 6-7, one “C”
+       will be vaccinated each day.
+     - Day 8: 3 days of the vaccination program have passed with no new
+       detections, so vaccination is stopped. No units will be vaccinated on
+       this day.
+     - Day 9: 1 “B” unit will be clinical. It will be detected. Note that if
+       you counted the “A” unit detected back on day 2, there would now be
+       detections in 2 production type groups.  But the number-of-groups
+       trigger has been reset post-ending of the vaccination program, so this
+       new detection counts as the first one.
+     - Day 10: The remaining “A” unit will be clinical. It will be detected and
+       now there have been detections in 2 production type groups, so the
+       vaccination program will be restarted.
+     - Day 11-12: One unit will be vaccinated each day. The simulation is
+       deliberately stopped at 12 days.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>vacnU</td>
+    </tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+  </output>
+</variable-test>

@@ -84,4 +84,7 @@ EXTRA_DIST = radius_0.xml radius_0_w_vars.xml radius_0point5.xml radius_1.xml \
  stop_vac_3days_restart_diff_chart_16units_2rings.sqlite3 \
  vacc_3detect_retro0_8units_2rows.sqlite3 vacc_3detect_retro1_8units_2rows.sqlite3 \
  vacc_4detect_retro3_8units_2rows.sqlite3 \
+ retrigger_2detect_16units_2rings.sqlite3 \
+ retrigger_2detect6days_16units_2rings.sqlite3 \
+ retrigger_2groupsAC_BD_3daysincedet_16units_2rings.sqlite3 \
  vacc_request_from_exam_cancellation_from_test.xml
