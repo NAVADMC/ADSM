@@ -94,7 +94,7 @@ class RelationalFunctionTestCase(TestCase):
         self.assertEqual(RelationalFunction.objects.count(), 1)
         function = RelationalFunction.objects.first()
         self.assertEqual(function.name, 'Test Function')
-        self.assertRedirects(r, '/setup/RelationalFunction/%d/' % function.pk)
+        self.assertIn('/setup/RelationalFunction/%d/' % function.pk, r.content.decode())
 
     def test_post_with_points(self):
         form_data = {
@@ -116,7 +116,7 @@ class RelationalFunctionTestCase(TestCase):
         self.assertEqual(point.x, 0.0)
         self.assertEqual(point.y, 1.0)
         self.assertEqual(function.name, 'Test Function')
-        self.assertRedirects(r, '/setup/RelationalFunction/%d/' % function.pk)
+        self.assertIn('/setup/RelationalFunction/%d/' % function.pk, r.content.decode())
 
     def test_copy_no_points(self):
         form_data = {
@@ -136,7 +136,9 @@ class RelationalFunctionTestCase(TestCase):
         self.assertEqual(qs.count(), 1)
         new_function = qs.first()
 
-        self.assertRedirects(r, '/setup/RelationalFunction/%d/' % new_function.pk)
+        html_response = r.content.decode()
+        print(html_response)
+        self.assertIn('/setup/RelationalFunction/%d/' % new_function.pk, html_response)
 
     def test_copy_with_points(self):
         form_data = {
@@ -165,7 +167,7 @@ class RelationalFunctionTestCase(TestCase):
         self.assertEqual(new_point.x, point.x)
         self.assertEqual(new_point.y, point.y)
 
-        self.assertRedirects(r, '/setup/RelationalFunction/%d/' % new_function.pk)
+        self.assertIn('/setup/RelationalFunction/%d/' % new_function.pk, r.content.decode())
 
     def test_post_with_points_from_file(self):
         points_file = tempfile.NamedTemporaryFile(delete=False)
@@ -192,7 +194,7 @@ class RelationalFunctionTestCase(TestCase):
         point = RelationalPoint.objects.first()
         self.assertEqual(point.x, 0.0)
         self.assertEqual(point.y, 1.0)
-        self.assertRedirects(r, '/setup/RelationalFunction/%d/' % function.pk)
+        self.assertIn('/setup/RelationalFunction/%d/' % function.pk, r.content.decode())
 
         points_file.close()
         os.unlink(points_file.name)
