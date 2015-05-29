@@ -1,5 +1,7 @@
+import glob
 import time
 import os
+from unittest import skip
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
@@ -114,6 +116,7 @@ class M2mDSL(object):
             return rows.find_elements_by_css_selector(destination_selector)
 
 
+
 class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
     multi_db = True
 
@@ -122,6 +125,9 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         cls.selenium = webdriver.Chrome()
         cls.selenium.set_window_size(1280, 800)
         super(FunctionalTests, cls).setUpClass()
+        # if 'ADSMSettings/' not in glob.glob('*/'):
+        #     raise NotADirectoryError("Tests started in the wrong directory! ", os.getcwd())
+            # os.chdir('..') # go up a directory until you find the repo root
 
     @classmethod
     def tearDownClass(cls):
@@ -191,6 +197,12 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             exposure_direction_start=0,
             exposure_direction_end=360,
             max_distance=3)
+
+    def select_option(self, element_id, visible_text):
+        target = self.selenium.find_element_by_id(element_id)
+        Select(target).select_by_visible_text(visible_text)
+        if 'Add' in visible_text:
+            time.sleep(1)
 
     def test_edit_probability_via_modal(self):
         lp_cattle = ProbabilityFunction.objects.create(name="Latent period - cattle", equation_type="Triangular", min=0, mode=3, max=9)
@@ -472,16 +484,20 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         source_types = self.get_selected_production_types("destination")
         self.assertEqual(len(source_types), 0)
 
-    def test_assign_disease_spread_add_disease_modal(self):
+    def test_deepest_modal_edit(self):
         self.setup_scenario()
-        self.click_navbar_element("Assign Disease Spread")
-        target = self.selenium.find_element_by_id('id_form-0-direct_contact_spread')
-        Select(target).select_by_visible_text('Add...')
+        self.click_navbar_element("Disease Progression")
+        
+        self.select_option('id_form-0-progression', 'Add...')
+        self.select_option('id_disease_latent_period','Add...')
+        self.select_option('id_equation_type','Histogram')
+        self.select_option('id_graph','Add...')
+
         time.sleep(1)
 
         modal = self.selenium.find_element_by_css_selector('div.modal')
 
-        self.assertIn("Create a new Direct Spread", modal.text)
+        self.assertIn("Create a Relational Function", modal.text)
 
     def test_modal_hide_unneeded_probability_fields(self):
         """
