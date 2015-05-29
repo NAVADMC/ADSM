@@ -204,7 +204,9 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         if 'Add' in visible_text:
             time.sleep(1)
 
-    def test_edit_probability_via_modal(self):
+    def test_edit_probability_in_progression(self):
+        self.setup_scenario()
+
         lp_cattle = ProbabilityFunction.objects.create(name="Latent period - cattle", equation_type="Triangular", min=0, mode=3, max=9)
         sp_cattle = ProbabilityFunction.objects.create(name="Subclinical period - cattle", equation_type="Triangular", min=1, mode=3, max=5)
         cp_cattle = ProbabilityFunction.objects.create(name="Clinical period - cattle", equation_type="Triangular", min=0, mode=21, max=80)
@@ -217,24 +219,22 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             disease_clinical_period=cp_cattle,
             disease_immune_period=ip_cattle)
 
-        self.selenium.find_element_by_tag_name('nav').find_element_by_link_text('Disease Progression').click()
+        self.click_navbar_element('Disease Progression')
         time.sleep(1)
 
-        self.selenium.find_element_by_link_text('Cattle Reaction').click()
-        time.sleep(1)
+        self.select_option('id_form-0-progression', 'Cattle Reaction')
+        self.select_option('id_disease_latent_period', "Latent period - cattle")
 
-        self.selenium.find_element_by_id('div_id_disease_latent_period').find_element_by_tag_name('i').click()
+        self.selenium.find_element_by_id('id_equation_type')  # just making sure it's there
+        pdf_panel = self.selenium.find_element_by_id('right-panel')
+        pdf_panel.find_element_by_id('id_name').send_keys(' edited')
+        pdf_panel.find_elements_by_link_text('Save')
         time.sleep(1)
-
-        modal = self.selenium.find_element_by_id('disease_latent_period_modal')
-        modal.find_element_by_id('id_name').send_keys(' edited')
-        for button in modal.find_elements_by_tag_name('button'):
-            if button.text == 'Save changes':
-                button.click()
+        pdf_panel.find_elements_by_link_text('Cancel')
         time.sleep(1)
 
         with self.assertRaises(NoSuchElementException):
-            self.selenium.find_element_by_id('disease_latent_period_modal')
+            self.selenium.find_element_by_id('id_equation_type')  # make sure it's gone
 
         lp_cattle = ProbabilityFunction.objects.get(pk=lp_cattle.pk)
         self.assertEqual(lp_cattle.name, "Latent period - cattle edited")
@@ -242,18 +242,18 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
     def test_launch_add_new_modal_when_nothing_selected(self):
         self.setup_scenario()
 
-        self.click_navbar_element("Assign Progression")
+        self.click_navbar_element("Disease Progression")
 
         target = self.selenium.find_element_by_id('id_form-0-progression')
         Select(target).select_by_visible_text(u'---------')
         time.sleep(1)
 
-        target = self.selenium.find_elements_by_class_name('glyphicon-pencil')[0].click()
+        self.selenium.find_elements_by_class_name('glyphicon-pencil')[0].click()
         time.sleep(2)
 
-        modal = self.selenium.find_element_by_id('form-0-progression_modal')
+        center_panel = self.selenium.find_element_by_id('center-panel')
 
-        self.assertIn("Create a new Disease Progression", modal.text)
+        self.assertIn("Disease latent period", center_panel.text)
 
     def test_upload_population_file(self):
         self.selenium.find_element_by_tag_name('nav').find_element_by_link_text('Population').click()
@@ -499,24 +499,24 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         self.assertIn("Create a Relational Function", modal.text)
 
-    def test_modal_hide_unneeded_probability_fields(self):
+    def test_pdf_hide_unneeded_fields(self):
         """
             issue 146: unneeded probability fields are not hidden in modals
         """
         self.setup_scenario()
-        self.click_navbar_element("Assign Progression")
+        self.click_navbar_element("Disease Progression")
 
         target = self.selenium.find_elements_by_class_name('glyphicon-pencil')[0].click()
         time.sleep(2)
 
-        modal = self.selenium.find_element_by_css_selector('div[id$="-progression_modal"]')
+        center = self.selenium.find_element_by_id('center-panel')
 
-        modal.find_elements_by_class_name('glyphicon-pencil')[0].click()
+        center.find_elements_by_class_name('glyphicon-pencil')[0].click()
         time.sleep(2)
 
-        modal_2 = self.selenium.find_element_by_css_selector('div[id$="disease_latent_period_modal"]')
+        right_panel = self.selenium.find_element_by_id('right-panel')
 
-        mean_field = modal_2.find_element_by_id("div_id_mean")
+        mean_field = right_panel.find_element_by_id("div_id_mean")
 
         self.assertIn("none", mean_field.value_of_css_property("display"))
 
@@ -524,9 +524,10 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.client.get('/app/OpenTestScenario/ScenarioCreator/tests/population_fixtures/Roundtrip.sqlite3/')
         delete_all_outputs()
 
-        self.click_navbar_element("Controls")
+        # self.click_navbar_element("Controls")  #not working because of toggle button text
+        self.client.get('/setup/ControlMasterPlan/1/')
 
-        self.selenium.find_element_by_id("id_disable_all_controls").click()
+        self.selenium.find_element_by_id("id_disable_all_controls").parent.click()
         time.sleep(2)
 
         elements = self.selenium.find_elements_by_css_selector("section > form > div")
@@ -544,12 +545,11 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             "Control Protocol",
             "Protocol Assignments",
             "Zone Effects",
-            "Assign Effects"
         ]
 
         for element in setup_menu.find_elements_by_tag_name("a"):
             self.assertNotIn(element.text, hidden_menu_items)
-            "Zones",
+
 
     def test_enable_control_master_plan(self):
         """
@@ -565,15 +565,15 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         control_master_plan.save()
         time.sleep(1)
 
-        self.click_navbar_element("Controls")
+        # self.click_navbar_element("Controls")  #not working because of toggle button text
+        self.client.get('/setup/ControlMasterPlan/1/')
 
-        self.selenium.find_element_by_id("id_disable_all_controls").click()
+        self.selenium.find_element_by_id("id_disable_all_controls").parent.click()
         time.sleep(2)
 
         elements = self.selenium.find_elements_by_css_selector("section > form > div")
 
         for element in elements:
-            el_id = element.get_attribute("id")
             self.assertEqual(element.get_attribute("disabled"), None)
 
         setup_menu = self.selenium.find_element_by_id("setupMenu")
