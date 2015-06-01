@@ -16,6 +16,10 @@ from ADSMSettings.utils import workspace_path
 from Results.utils import delete_all_outputs
 
 
+def parent_of(webElement):
+    return webElement.find_element_by_xpath('..')
+    
+    
 class M2mDSL(object):
     """
         DSL to improve m2m widget tests readability
@@ -527,7 +531,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         # self.click_navbar_element("Controls")  #not working because of toggle button text
         self.client.get('/setup/ControlMasterPlan/1/')
 
-        self.selenium.find_element_by_id("id_disable_all_controls").parent.click()
+        parent_of(self.selenium.find_element_by_id("id_disable_all_controls")).click()
         time.sleep(2)
 
         elements = self.selenium.find_elements_by_css_selector("section > form > div")
@@ -568,7 +572,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         # self.click_navbar_element("Controls")  #not working because of toggle button text
         self.client.get('/setup/ControlMasterPlan/1/')
 
-        self.selenium.find_element_by_id("id_disable_all_controls").parent.click()
+        parent_of(self.selenium.find_element_by_id("id_disable_all_controls")).click()
         time.sleep(2)
 
         elements = self.selenium.find_elements_by_css_selector("section > form > div")
@@ -578,27 +582,19 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         setup_menu = self.selenium.find_element_by_id("setupMenu")
 
-        menu_items = [
-            "Scenario Description",
-            "Population",
-            "Disease",
-            "Disease Progression",
-            "Disease Spread",
-            "Assign Disease Spread",
-            "Controls",
+        control_items = [
+            "On\nOff\nControls",
             "Vaccination Triggers",
             "Control Protocol",
             "Assign Protocols",
             "Zones",
             "Zone Effects",
             "Functions",
-            "Output Settings",
-            "Validate Scenario",
-            "Run Simulation"
         ]
 
-        for element in setup_menu.find_elements_by_tag_name("a"):
-            self.assertIn(element.text, menu_items)
+        actual_menu = [x.text for x in setup_menu.find_elements_by_tag_name("a")]
+        for expected in control_items:
+            self.assertIn(expected, actual_menu)
 
     def test_save_scenario_failure(self):
         filename_field = self.selenium.find_element_by_css_selector('header form .filename input')
@@ -638,3 +634,4 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
                 os.remove(workspace_path('Untitled Scenario123 AZ.sqlite3'))
             except:
                 pass
+
