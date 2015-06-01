@@ -77,9 +77,21 @@ def basic_context(request):
                'whole_scenario_warnings': whole_scenario_validation(),
                })
 
-        validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions',
-                             'DirectSpreads', 'AssignSpreads', 'ControlMasterPlan', 'Protocols', 'ProtocolAssignments', 'Zones', 'ZoneEffects']
-        context['missing_values'] = {singular(name): context[name] for name in validation_models if not context[name]}
+        validation_models = {'Scenario': 'Scenario/1/', 
+                             'OutputSetting': 'OutputSetting/1/', 
+                             'Population': 'Populations/', 
+                             'ProductionTypes': 'ProductionType/', 
+                             'Farms': 'Populations/', 
+                             'Disease': 'Disease/1/', 
+                             'Progressions': 'AssignProgressions/',
+                             'DirectSpreads': 'DirectSpreads/', 
+                             'AssignSpreads': 'AssignSpreads/', 
+                             'ControlMasterPlan': 'ControlMasterPlan/1/', 
+                             'Protocols': 'ControlProtocol/', 
+                             'ProtocolAssignments': 'AssignProtocols/', 
+                             'Zones': 'Zone/', 
+                             'ZoneEffects': 'AssignZoneEffects/'}
+        context['missing_values'] = {singular(name): validation_models[name] for name in validation_models if not context[name]}
         context['Simulation_ready'] = simulation_ready_to_run(context)
         disease = Disease.objects.get()
         context['javascript_variables'] = {'use_within_unit_prevalence':      js(disease.use_within_unit_prevalence),
