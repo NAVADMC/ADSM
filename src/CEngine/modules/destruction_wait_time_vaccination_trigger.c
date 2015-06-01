@@ -56,6 +56,9 @@ typedef struct
   GHashTable *requests; /**< Records the day on which Commitment to Destroy
     events are heard for particular units. Keys are unit pointers (UNT_unit_t *),
     values are days transformed with GINT_TO_POINTER. */
+  gboolean applies_to_first_initiation;
+  gboolean applies_to_reinitiation;
+  gboolean trigger_active;
   sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
     so that it will be available to the set_params function. */
 }
@@ -84,6 +87,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
     {
       local_data->num_requests[i] = 0;
     }
+  local_data->trigger_active = local_data->applies_to_first_initiation;
 
   #if DEBUG
     g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -240,7 +244,7 @@ handle_end_of_day_event (struct adsm_module_t_ *self,
   local_data = (local_data_t *) (self->model_data);
 
   num_oldest_requests = local_data->num_requests[(event->day + 1) % local_data->num_days];
-  if (num_oldest_requests > 0)
+  if (local_data->trigger_active && (num_oldest_requests > 0))
     {
       #if DEBUG
         g_debug ("%u units have been waiting %u days, requesting initiation of vaccination program",
@@ -286,6 +290,7 @@ handle_vaccination_terminated_event (struct adsm_module_t_ *self,
     {
       local_data->num_requests[i] = 0;
     }
+  local_data->trigger_active = local_data->applies_to_reinitiation;
 
   #if DEBUG
     g_debug ("----- EXIT handle_vaccination_terminated_event (%s)", MODEL_NAME);
@@ -461,6 +466,7 @@ set_params (void *data, GHashTable *dict)
   adsm_module_t *self;
   local_data_t *local_data;
   sqlite3 *params;
+  long int tmp;
   guint nprod_types;
   guint trigger_id;
   set_trigger_prodtype_args_t args;
@@ -483,6 +489,13 @@ set_params (void *data, GHashTable *dict)
   /* An array to hold per-day counts of unfulfilled Commitment to Destroy events
    * over the last num_days days. */
   local_data->num_requests = g_new (guint, local_data->num_days);
+
+  errno = 0;
+  tmp = strtol (g_hash_table_lookup (dict, "restart_only"), NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  local_data->applies_to_first_initiation = (tmp == 0);
+  local_data->applies_to_reinitiation = (tmp == 1);
 
   /* Fill in the production types that this trigger counts. */
   nprod_types = local_data->production_types->len;
@@ -563,7 +576,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read trigger's details. */
   trigger_id = GPOINTER_TO_UINT(user_data);
   local_data->trigger_id = trigger_id;
-  sql = g_strdup_printf ("SELECT id,days "
+  sql = g_strdup_printf ("SELECT id,days,restart_only "
                          "FROM ScenarioCreator_destructionwaittime "
                          "WHERE id=%u", trigger_id);
   local_data->db = params;
