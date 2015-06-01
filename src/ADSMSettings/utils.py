@@ -28,27 +28,33 @@ def db_path(name='scenario_db'):
 
 
 def workspace_path(target=None):
-    home = None
-    if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.
-        try:
-            CSIDL_PERSONAL = 5
-            SHGFP_TYPE_CURRENT = 0
-            buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-            ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_PERSONAL, 0, SHGFP_TYPE_CURRENT, buf)
-            home = buf.value
-        except:
-            home = None
-    if not home:
-        home = os.path.join(os.path.expanduser("~"), "Documents")
+    if not hasattr(settings, 'WORKSPACE_PATH') or not settings.WORKSPACE_PATH:
+        home = None
+        if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.
+            try:
+                CSIDL_PERSONAL = 5
+                SHGFP_TYPE_CURRENT = 0
+                buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+                ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_PERSONAL, 0, SHGFP_TYPE_CURRENT, buf)
+                home = buf.value
+            except:
+                home = None
+        if not home:
+            home = os.path.join(os.path.expanduser("~"), "Documents")
+
+        path = os.path.join(home, "ADSM Workspace")
+    else:
+        path = settings.WORKSPACE_PATH
 
     if target is None:
-        path = os.path.join(home, "ADSM Workspace")
+        return path
     elif '/' in target or '\\' in target:
         parts = re.split(r'[/\\]+', target)  # the slashes here are coming in from URL so they probably don't match os.path.split()
-        path = os.path.join(home, "ADSM Workspace", *parts)
+        path = os.path.join(path, *parts)
+        return path
     else: 
-        path = os.path.join(home, "ADSM Workspace", target)
-    return path  # shlex.quote(path) if you want security
+        path = os.path.join(path, target)
+        return path  # shlex.quote(path) if you want security
 
 
 def file_list(extensions=[]):

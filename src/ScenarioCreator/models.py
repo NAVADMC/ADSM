@@ -780,7 +780,7 @@ class RateOfNewDetections(FilteredVaccinationTrigger):
 
 
 class DisseminationRate(FilteredVaccinationTrigger):
-    ratio = FloatField(help_text='The threshold is specified by a number of days and a ratio, for example, "initiate a vaccination program if the number of units detected in the last 5 days is 1.5× or more than the number of units detected in the 5 days before that."')
+    ratio = FloatField(help_text='The threshold is specified by a number of days and a ratio, for example, "initiate a vaccination program if the number of units detected in the last 5 days is 1.5x or more than the number of units detected in the 5 days before that."')
     days = models.PositiveIntegerField(help_text='Moving window size for calculating growth ratio.')
     def __str__(self):
         bold_values = tuple(bold(str(x)) for x in [self.ratio, self.days, ', '.join(pt.name for pt in self.trigger_group.all())])
