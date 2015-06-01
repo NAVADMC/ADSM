@@ -7426,8 +7426,9 @@
     Vaccination begins when either a) 3 days have passed since the first
     detection, or b) detections have occurred in 2 groups. One group contains
     types “A” and “C”, and the other group contains types “B” and “D”. Units
-    within 1.5 km of a detected unit will be vaccinated. There is capacity to
-    vaccinate 1 unit per day.
+    within 1.5 km of a detected unit will be vaccinated. Retrospective
+    vaccination is set at 3 days. There is capacity to vaccinate 1 unit per
+    day.
 
     Vaccination is stopped after 3 days with no detections.
 
@@ -7523,6 +7524,7 @@
     have passed, which creates long wait times.
 
     Vaccination begins after any unit has been waiting 2 days for destruction.
+    Retrospective vaccination is set at 2 days.
     The first time vaccination is initiated, vaccination capacity is 1 unit per
     day.  Vaccination is stopped after 3 days with no detections.  The second
     time vaccination is initiated, vaccination capacity goes up as 1,2,3 over
@@ -7634,6 +7636,7 @@
     have passed, which creates long wait times.
 
     Vaccination begins after any unit has been waiting 2 days for destruction.
+    Retrospective vaccination is set at 2 days.
     The first time vaccination is initiated, vaccination capacity is 1 unit per
     day.  Vaccination is stopped after 3 days with no detections.  The second
     time vaccination is initiated, vaccination capacity goes up as 1,2,3 over
@@ -7744,6 +7747,7 @@
     have passed, which creates long wait times.
 
     Vaccination begins after any unit has been waiting 2 days for destruction.
+    Retrospective vaccination is set at 3 days.
     The first time vaccination is initiated, vaccination capacity is 1 unit per
     day.  Vaccination is stopped after 3 days with no detections.  The second
     time vaccination is initiated, vaccination capacity goes up as 1,2,3 over
