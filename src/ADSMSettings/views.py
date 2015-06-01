@@ -70,7 +70,8 @@ def import_naadsm_scenario(request):
         run_importer(request)
         return redirect('/')
     context = {'form': initialized_form, 'title': "Import Legacy NAADSM Scenario in XML format"}
-    return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages
+    context['base_page'] = 'ScenarioCreator/crispy-model-form.html'
+    return render(request, 'ScenarioCreator/navigationPane.html', context)  # render in validation error messages
 
 
 def upload_scenario(request):
