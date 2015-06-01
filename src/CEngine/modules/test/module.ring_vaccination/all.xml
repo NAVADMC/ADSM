@@ -7806,3 +7806,289 @@
     <tr><!-- 14 --> <td>0</td> <td>0</td> <td>2</td> <td>0</td></tr> <!-- cap 3 -->
   </output>
 </variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>1st/restart trigger on 2 detections in any type</short-name>
+
+  <description>
+    This test is one of a set to test using different triggers for the first
+    initiation of a vaccination program vs. re-starts of the vaccination
+    program.  There are 2 rings of units of type C and D; these are the units
+    that will get vaccinated.  Inside the first ring are 2 units of type A, and
+    inside the second ring are 2 units of type B.
+
+    In this test, a trigger that requires 2 detections is active throughout the
+    simulation. 2 “A” units are detected, triggering vaccination the first
+    time.  Vaccination is ended, then 2 “B” units are detected, triggering
+    vaccination the second time.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>25 April 2013</creation-date>
+  <model-version>3.3.0</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>triggerfirstandrestart_2detect</parameter-file>
+
+  <parameter-description>
+    For production type A, the infectious subclinical period is 1 day, and the
+    latent period is 1 day.  This ensures that both “A” units at the center of
+    circle 1 will be detected, one day apart.
+
+    For production type B, the infectious subclinical period is 7 days, and the
+    latent period is 1 day.  This ensures that both “B” units at the center of
+    circle 2 will be detected, also one day apart, but later in the simulation.
+
+    Diseased units will be detected (by self-reporting) on their first day
+    showing clinical signs.
+    
+    Vaccination begins when disease has been detected in 2 units of any type.
+    This applies to the first initiation of a vaccination program and any
+    re-starts.  Units within 1.5 km of a detected unit will be vaccinated.
+    There is capacity to vaccinate 1 unit per day.
+
+    Vaccination is stopped after 3 days with no detections.
+
+    What should happen:
+     - Day 1: The “A” units will be latent and subclinical, not detectable yet.
+     - Day 2: 1 “A” unit will be clinical. It will be detected.
+     - Day 3: The other “A” unit will be clinical. It will be detected and a
+       vaccination program will be initiated.
+     - Day 4-6: On each of these days, a unit in circle 1 will be vaccinated.
+     - Day 7: 3 days have passed with no new detections, so vaccination is
+       stopped. No units will be vaccinated on this day.
+     - Day 8: 1 “B” unit will be clinical. It will be detected. Note that since
+       the trigger has been reset post-ending of the vaccination program, this
+       new detection counts as the first one.
+     - Day 9: The other “B” unit will be clinical. It will be detected and
+       the vaccination program will be restarted.
+     - Day 10-12: On each of these days, a unit in circle 2 will be vaccinated.
+     - Day 13: 3 days have passed with no new detections, so vaccination is
+       stopped. No units will be vaccinated on this day, and the simulation
+       will exit.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>vacnU</td>
+    </tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>1st-only trigger on 2 detections in any type</short-name>
+
+  <description>
+    This test is one of a set to test using different triggers for the first
+    initiation of a vaccination program vs. re-starts of the vaccination
+    program.  There are 2 rings of units of type C and D; these are the units
+    that will get vaccinated.  Inside the first ring are 2 units of type A, and
+    inside the second ring are 2 units of type B.
+
+    In this test, a trigger that requires 2 detections is active only for the
+    first initiation of a vaccination program.  2 “A” units are detected,
+    triggering vaccination the first time.  Vaccination is ended, then 2 “B”
+    units are detected, but a re-start of vaccination is not triggered.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>25 April 2013</creation-date>
+  <model-version>3.3.0</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>triggerfirstonly_2detect</parameter-file>
+
+  <parameter-description>
+    The parameters are the same as for “1st/restart trigger on 2 detections in
+    any type” above, but this time the trigger applies only for the first
+    initiation of a vaccination program, not for re-starts.
+
+    What should happen:
+     - Day 1: The “A” units will be latent and subclinical, not detectable yet.
+     - Day 2: 1 “A” unit will be clinical. It will be detected.
+     - Day 3: The other “A” unit will be clinical. It will be detected and a
+       vaccination program will be initiated.
+     - Day 4-6: On each of these days, a unit in circle 1 will be vaccinated.
+     - Day 7: 3 days have passed with no new detections, so vaccination is
+       stopped. No units will be vaccinated on this day.
+     - Day 8: 1 “B” unit will be clinical. It will be detected. Note that since
+       the trigger has been reset post-ending of the vaccination program, this
+       new detection counts as the first one.
+     - Day 9: The other “B” unit will be clinical. It will be detected but the
+       trigger is no longer active and the vaccination program will not be
+       restarted.
+     - Day 10: Nothing new happens. The simulation exits.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>vacnU</td>
+    </tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>restart-only trigger on 2 detections in any type</short-name>
+
+  <description>
+    This test is one of a set to test using different triggers for the first
+    initiation of a vaccination program vs. re-starts of the vaccination
+    program.  There are 2 rings of units of type C and D; these are the units
+    that will get vaccinated.  Inside the first ring are 2 units of type A, and
+    inside the second ring are 2 units of type B.
+
+    In this test, a trigger that requires 2 detections is active only for
+    re-starts of a vaccination program.  2 “A” units are detected, then later
+    2 “B” units are detected, but since the only vaccination trigger defined
+    does not apply to first initiation of a vaccination program, no vaccination
+    program is ever initiated.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>25 April 2013</creation-date>
+  <model-version>3.3.0</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>triggerrestartonly_2detect</parameter-file>
+
+  <parameter-description>
+    The parameters are the same as for “1st/restart trigger on 2 detections in
+    any type” above, but this time the trigger applies only for re-starts of a
+    vaccination program, not to the first initiation.
+
+    What should happen:
+     - Day 1: The “A” units will be latent and subclinical, not detectable yet.
+     - Day 2: 1 “A” unit will be clinical. It will be detected.
+     - Day 3: The other “A” unit will be clinical. It will be detected but no
+       vaccination program will be initiated.
+     - Day 4-7: Nothing new happens.
+     - Day 8: 1 “B” unit will be clinical. It will be detected but no
+       vaccination program will be initiated.
+     - Day 9: The other “B” unit will be clinical.It will be detected but no
+       vaccination program will be initiated.
+     - Day 10: Nothing new happens. The simulation exits.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>vacnU</td>
+    </tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>1st-only trigger on 2 detections, restart-only trigger on 1 detection</short-name>
+
+  <description>
+    This test is one of a set to test using different triggers for the first
+    initiation of a vaccination program vs. re-starts of the vaccination
+    program.  There are 2 rings of units of type C and D; these are the units
+    that will get vaccinated.  Inside the first ring are 2 units of type A, and
+    inside the second ring are 2 units of type B.
+
+    In this test, a trigger that requires 2 detections is active only for the
+    first initiation of a vaccination program, and a trigger that requires 1
+    detection is active only for re-starts of a vaccination program.  2 “A”
+    units are detected, triggering vaccination the first time.  Vaccination is
+    ended, then 2 “B” units are detected. The first detection of a “B” unit
+    re-starts the vaccination program.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>25 April 2013</creation-date>
+  <model-version>3.3.0</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>triggerfirst_2detect_triggerrestart_1detect</parameter-file>
+
+  <parameter-description>
+    The parameters are the same as for “1st-only trigger on 2 detections in any
+    type” above, but this time there is another trigger, which applies only for
+    re-starts of a vaccination program, and only requires 1 detection.
+
+    What should happen:
+     - Day 1: The “A” units will be latent and subclinical, not detectable yet.
+     - Day 2: 1 “A” unit will be clinical. It will be detected.
+     - Day 3: The other “A” unit will be clinical. It will be detected and a
+       vaccination program will be initiated.
+     - Day 4-6: On each of these days, a unit in circle 1 will be vaccinated.
+     - Day 7: 3 days have passed with no new detections, so vaccination is
+       stopped. No units will be vaccinated on this day.
+     - Day 8: 1 “B” unit will be clinical. It will be detected and a
+       vaccination program will be initiated.
+     - Day 9: The other “B” unit will be clinical. 1 unit in circle 2 will be
+       vaccinated.
+     - Day 10-12: On each of these days, a unit in circle 2 will be vaccinated.
+     - Day 13: 3 days have passed with no new detections, so vaccination is
+       stopped. No units will be vaccinated on this day, and the simulation
+       will exit.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>vacnU</td>
+    </tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
