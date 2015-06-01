@@ -207,7 +207,17 @@ $(function(){
 
     $('#id_disable_all_controls').change(function(event){
         var isChecked = $(this).prop('checked');
-        safe_save('/setup/DisableAllControls.json/', {use_controls: isChecked});
+        var new_link = window.location;
+        if(!isChecked){ //check if we're currently on a forbidden page
+            var label = $('nav').find('a.active').first().text()
+            $.each(['Vaccination', 'Protocol', 'Zone'], function(index, value){
+                if(label.indexOf(value) != -1){
+                    new_link = '/setup/ControlMasterPlan/1/'
+                    console.log(new_link)
+                }
+            })
+        }
+        safe_save('/setup/DisableAllControls.json/', {use_controls: isChecked}, new_link);
     });
     
     $(window).resize( function(){
@@ -249,10 +259,14 @@ $(function(){
 function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTimeout(d),d=setTimeout(function(){d=null,c||a.apply(e,f)},b),c&&!d&&a.apply(e,f)}};
 
 
-safe_save = function(url, data){
+safe_save = function(url, data, new_link){
     if(typeof outputs_exist === 'undefined' || outputs_exist == false) { 
-        $.post(url, data, function() { 
-            window.location.reload() 
+        $.post(url, data, function() {
+            if(typeof new_link === 'undefined'){
+                window.location.reload();
+            }else{
+                window.location = new_link;
+            }
         });
     } else { //confirmation dialog so we don't clobber outputs
         var dialog = new BootstrapDialog.show({
