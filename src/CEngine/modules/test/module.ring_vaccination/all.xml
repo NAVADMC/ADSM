@@ -7473,3 +7473,336 @@
     <tr><td>0</td> <td>0</td> <td>1</td></tr>
   </output>
 </variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>re-trigger on unit waiting 2 days for destruction, no new detection to anchor chart</short-name>
+
+  <description>
+    This test is one of a set to test re-triggering vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get
+    vaccinated.  Inside the first ring are 2 units of type A, and inside the
+    second ring are 2 units of type B.
+
+    In this test, vaccination is triggered by any unit waiting 2 days for
+    destruction.  The “A” units are used to activate the trigger.  One “A” unit
+    is detected and marked for destruction early in the simulation.  Its wait
+    time causes vaccination to be initiated.  Then vaccination is ended, and
+    later in the simulation, the other “A” unit is marked for destruction
+    because of a trace (not a new detection, but pre-emptive destruction of a
+    trace).  The second “A” unit’s wait time causes vaccination to be
+    re-initiated.  The day of re-initiation provides the anchor for day 0 on
+    the axis of the vaccination capacity chart.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>15 April 2013</creation-date>
+  <model-version>3.3.0</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>retrigger_destwait2_nonewdetect</parameter-file>
+
+  <parameter-description>
+    For production type A, the infectious subclinical period is 1 day, and the
+    latent period is 30 days.  This ensures that one “A” unit gets detected
+    early in the simulation, and the other several does not get detected.
+    
+    There is direct contact between “A” units, which creates dangerous
+    contacts that can be traced.
+
+    For production type B, the infectious subclinical period is 12 days, and
+    the latent period is 30 days.  This ensures that only one “B” gets detected,
+    later in the simulation.
+
+    Diseased units will be detected (by self-reporting) on their first day
+    showing clinical signs.
+
+    Destruction of detected diseased units and destruction of traced direct
+    contacts is enabled, but the destruction capacity is zero until 21 days
+    have passed, which creates long wait times.
+
+    Vaccination begins after any unit has been waiting 2 days for destruction.
+    The first time vaccination is initiated, vaccination capacity is 1 unit per
+    day.  Vaccination is stopped after 3 days with no detections.  The second
+    time vaccination is initiated, vaccination capacity goes up as 1,2,3 over
+    the first 3 days and then remains at 3 units per day.
+
+    What should happen:
+     - Day 1: There is a contact from the subclinical “A” unit to the latent
+       one.
+     - Day 2: 1 “A” unit will be clinical. It will again send a contact to the
+       other “A” unit. It will be detected and marked for destruction. A trace
+       of direct contacts will be initiated. Vaccination will be requested for
+       the ring around the “A” units.
+     - Day 3: By the end of this day, the “A” unit counts as having been
+       waiting for 1 day.
+     - Day 4: The “A” unit counts as having been waiting for 2 days, so vaccination will be initiated.
+     - Day 5: 1 unit will be vaccinated.
+     - Day 6: 1 unit will be vaccinated.
+     - Day 7: 1 unit will be vaccinated. There have been 5 days (days 3-7) with
+       no new detections, so vaccination will be ended.
+     - Day 8: nothing new happens.
+     - Day 9: The trace initiated back on day 2 comes back with results, and
+       the second “A” unit is marked for destruction.
+     - Day 10: By the end of this day, the second “A” unit counts as having
+       been waiting for 1 day.
+     - Day 11: The second “A” unit counts as having been waiting for 2 days, so
+       vaccination will be initiated. Note though that there are currently no
+       units awaiting vaccination.
+     - Day 12: If there were units to vaccinate, there would be capacity to
+       vaccinate 1 today (because vaccination capacity is counted from day 11).
+     - Day 13: If there were units to vaccinate, there would be capacity to
+       vaccinate 2 today. One “B” unit is detected on this day and provides
+       some units to vaccinate tomorrow.
+     - Day 14: 3 of the units in the ring around the “B” unit will be
+       vaccinated.  The simulation is deliberately stopped on this day.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>expnU</td>
+      <td>detnU</td>
+      <td>deswU</td>
+      <td>vacnU</td>
+    </tr>
+    <!--             expnUAll   detnUAll   deswUAll   vacnUAll   -->
+    <tr><!--  1 --> <td>1</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><!--  2 --> <td>1</td> <td>1</td> <td>1</td> <td>0</td></tr>
+    <tr><!--  3 --> <td>0</td> <td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><!--  4 --> <td>0</td> <td>0</td> <td>1</td> <td>0</td></tr> <!-- init         -->
+    <tr><!--  5 --> <td>0</td> <td>0</td> <td>1</td> <td>1</td></tr> <!--        cap 1 -->
+    <tr><!--  6 --> <td>0</td> <td>0</td> <td>1</td> <td>1</td></tr> <!--        cap 1 -->
+    <tr><!--  7 --> <td>0</td> <td>0</td> <td>1</td> <td>1</td></tr> <!-- stop   cap 1 -->
+    <tr><!--  8 --> <td>0</td> <td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><!--  9 --> <td>0</td> <td>0</td> <td>2</td> <td>0</td></tr>
+    <tr><!-- 10 --> <td>0</td> <td>0</td> <td>2</td> <td>0</td></tr>
+    <tr><!-- 11 --> <td>0</td> <td>0</td> <td>2</td> <td>0</td></tr> <!-- init         -->
+    <tr><!-- 12 --> <td>0</td> <td>0</td> <td>2</td> <td>0</td></tr> <!--        cap 1 -->
+    <tr><!-- 13 --> <td>0</td> <td>1</td> <td>2</td> <td>0</td></tr> <!--        cap 2 -->
+    <tr><!-- 14 --> <td>0</td> <td>0</td> <td>2</td> <td>3</td></tr> <!--        cap 3 -->
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>re-trigger on unit waiting 2 days for destruction, new detection 1</short-name>
+
+  <description>
+    This test is one of a set to test re-triggering vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get
+    vaccinated.  Inside the first ring are 2 units of type A, and inside the
+    second ring are 2 units of type B.
+
+    In this test, vaccination is triggered by any unit waiting 2 days for
+    destruction.  The “A” units are used to activate the trigger.  One “A” unit
+    is detected and marked for destruction early in the simulation.  Its wait
+    time causes vaccination to be initiated.  Then vaccination is ended, and
+    later in the simulation, the other “A” unit is marked for destruction
+    because of a trace (not a new detection, but pre-emptive destruction of a
+    trace).  The second “A” unit’s wait time causes vaccination to be
+    re-initiated.  While the second “A” unit is waiting, another detection
+    happens, and that detection provides the anchor for day 0 on the axis of
+    the vaccination capacity chart.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>16 April 2013</creation-date>
+  <model-version>3.3.0</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>retrigger_destwait2_newdetect1</parameter-file>
+
+  <parameter-description>
+    For production type A, the infectious subclinical period is 1 day, and the
+    latent period is 30 days.  This ensures that one “A” unit gets detected
+    early in the simulation, and the other several does not get detected.
+    
+    There is direct contact between “A” units, which creates dangerous
+    contacts that can be traced.
+
+    For production type B, the infectious subclinical period is 9 days, and
+    the latent period is 30 days.  This ensures that only one “B” gets detected,
+    later in the simulation.
+
+    Diseased units will be detected (by self-reporting) on their first day
+    showing clinical signs.
+
+    Destruction of detected diseased units and destruction of traced direct
+    contacts is enabled, but the destruction capacity is zero until 21 days
+    have passed, which creates long wait times.
+
+    Vaccination begins after any unit has been waiting 2 days for destruction.
+    The first time vaccination is initiated, vaccination capacity is 1 unit per
+    day.  Vaccination is stopped after 3 days with no detections.  The second
+    time vaccination is initiated, vaccination capacity goes up as 1,2,3 over
+    the first 3 days and then remains at 3 units per day.
+
+    What should happen:
+     - Day 1: There is a contact from the subclinical “A” unit to the latent
+       one.
+     - Day 2: 1 “A” unit will be clinical. It will again send a contact to the
+       other “A” unit. It will be detected and marked for destruction. A trace
+       of direct contacts will be initiated. Vaccination will be requested for
+       the ring around the “A” units.
+     - Day 3: By the end of this day, the “A” unit counts as having been
+       waiting for 1 day.
+     - Day 4: The “A” unit counts as having been waiting for 2 days, so vaccination will be initiated.
+     - Day 5: 1 unit will be vaccinated.
+     - Day 6: 1 unit will be vaccinated.
+     - Day 7: 1 unit will be vaccinated. There have been 5 days (days 3-7) with
+       no new detections, so vaccination will be ended.
+     - Day 8: nothing new happens.
+     - Day 9: The trace initiated back on day 2 comes back with results, and
+       the second “A” unit is marked for destruction.
+     - Day 10: One “B” unit is detected on this day, but this does not trigger
+       vaccination.  By the end of this day, the second “A” unit counts as
+       having been waiting for 1 day.
+     - Day 11: The second “A” unit counts as having been waiting for 2 days, so
+       vaccination will be initiated.
+     - Day 12: There will be capacity to vaccinate 2 units today, because
+       vaccination capacity is counted from day 10 (the first detection
+       post-ending of the vaccination program).
+     - Day 13: There will be capacity to vaccinate 3 units today.
+     - Day 14: The last unit in the right ring is vaccinated today.  The
+       simulation is deliberately stopped on this day.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>expnU</td>
+      <td>detnU</td>
+      <td>deswU</td>
+      <td>vacnU</td>
+    </tr>
+    <!--             expnUAll   detnUAll   deswUAll   vacnUAll   -->
+    <tr><!--  1 --> <td>1</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><!--  2 --> <td>1</td> <td>1</td> <td>1</td> <td>0</td></tr>
+    <tr><!--  3 --> <td>0</td> <td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><!--  4 --> <td>0</td> <td>0</td> <td>1</td> <td>0</td></tr> <!-- init         -->
+    <tr><!--  5 --> <td>0</td> <td>0</td> <td>1</td> <td>1</td></tr> <!--        cap 1 -->
+    <tr><!--  6 --> <td>0</td> <td>0</td> <td>1</td> <td>1</td></tr> <!--        cap 1 -->
+    <tr><!--  7 --> <td>0</td> <td>0</td> <td>1</td> <td>1</td></tr> <!-- stop   cap 1 -->
+    <tr><!--  8 --> <td>0</td> <td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><!--  9 --> <td>0</td> <td>0</td> <td>2</td> <td>0</td></tr>
+    <tr><!-- 10 --> <td>0</td> <td>1</td> <td>2</td> <td>0</td></tr> <!-- detect       -->
+    <tr><!-- 11 --> <td>0</td> <td>0</td> <td>2</td> <td>0</td></tr> <!-- init   cap 1 -->
+    <tr><!-- 12 --> <td>0</td> <td>0</td> <td>2</td> <td>2</td></tr> <!--        cap 2 -->
+    <tr><!-- 13 --> <td>0</td> <td>0</td> <td>2</td> <td>3</td></tr> <!--        cap 3 -->
+    <tr><!-- 14 --> <td>0</td> <td>0</td> <td>2</td> <td>1</td></tr> <!--        cap 3 -->
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
+  <short-name>re-trigger on unit waiting 2 days for destruction, new detection 2</short-name>
+
+  <description>
+    This test is one of a set to test re-triggering vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get
+    vaccinated.  Inside the first ring are 2 units of type A, and inside the
+    second ring are 2 units of type B.
+
+    In this test, vaccination is triggered by any unit waiting 2 days for
+    destruction.  The “A” units are used to activate the trigger.  One “A” unit
+    is detected and marked for destruction early in the simulation.  Its wait
+    time causes vaccination to be initiated.  Then vaccination is ended.
+    Another detection happens, which does not trigger vaccination (but it does
+    provides the anchor for day 0 on the axis of the vaccination capacity
+    chart late). Later in the simulation, the other “A” unit is marked for
+    destruction because of a trace (not a new detection, but pre-emptive
+    destruction of a trace).  The second “A” unit’s wait time causes
+    vaccination to be re-initiated.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>16 April 2013</creation-date>
+  <model-version>3.3.0</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>retrigger_destwait2_newdetect2</parameter-file>
+
+  <parameter-description>
+    For production type A, the infectious subclinical period is 1 day, and the
+    latent period is 30 days.  This ensures that one “A” unit gets detected
+    early in the simulation, and the other several does not get detected.
+    
+    There is direct contact between “A” units, which creates dangerous
+    contacts that can be traced.
+
+    For production type B, the infectious subclinical period is 7 days, and
+    the latent period is 30 days.  This ensures that only one “B” gets detected,
+    later in the simulation.
+
+    Diseased units will be detected (by self-reporting) on their first day
+    showing clinical signs.
+
+    Destruction of detected diseased units and destruction of traced direct
+    contacts is enabled, but the destruction capacity is zero until 21 days
+    have passed, which creates long wait times.
+
+    Vaccination begins after any unit has been waiting 2 days for destruction.
+    The first time vaccination is initiated, vaccination capacity is 1 unit per
+    day.  Vaccination is stopped after 3 days with no detections.  The second
+    time vaccination is initiated, vaccination capacity goes up as 1,2,3 over
+    the first 3 days and then remains at 3 units per day.
+
+    What should happen:
+     - Day 1: There is a contact from the subclinical “A” unit to the latent
+       one.
+     - Day 2: 1 “A” unit will be clinical. It will again send a contact to the
+       other “A” unit. It will be detected and marked for destruction. A trace
+       of direct contacts will be initiated. Vaccination will be requested for
+       the ring around the “A” units.
+     - Day 3: By the end of this day, the “A” unit counts as having been
+       waiting for 1 day.
+     - Day 4: The “A” unit counts as having been waiting for 2 days, so vaccination will be initiated.
+     - Day 5: 1 unit will be vaccinated.
+     - Day 6: 1 unit will be vaccinated.
+     - Day 7: 1 unit will be vaccinated. There have been 5 days (days 3-7) with
+       no new detections, so vaccination will be ended.
+     - Day 8: One “B” unit is detected on this day, but this does not trigger
+       vaccination.
+     - Day 9: If we were vaccinating, there would be capacity to vaccinate 1
+       unit today (because vaccination capacity is counted from day 8). The
+       trace initiated back on day 2 comes back with results, and the second
+       “A” unit is marked for destruction.
+     - Day 10: If we were vaccinating, there would be capacity to vaccinate 2
+       units today.  By the end of this day, the second “A” unit counts as
+       having been waiting for 1 day.
+     - Day 11: If we were vaccinating, there would be capacity to vaccinate 3
+       units today. The second “A” unit counts as having been waiting for 2
+       days, so vaccination will be initiated.
+     - Day 12: There is capacity to vaccinate 3 units today.
+     - Day 13: There is capacity to vaccinate 3 units today. All units in the
+       right right have been vaccinated now.
+     - Day 14: Nothing new happens.  The simulation is deliberately stopped on
+       this day.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>expnU</td>
+      <td>detnU</td>
+      <td>deswU</td>
+      <td>vacnU</td>
+    </tr>
+    <!--             expnUAll   detnUAll   deswUAll   vacnUAll   -->
+    <tr><!--  1 --> <td>1</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><!--  2 --> <td>1</td> <td>1</td> <td>1</td> <td>0</td></tr>
+    <tr><!--  3 --> <td>0</td> <td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><!--  4 --> <td>0</td> <td>0</td> <td>1</td> <td>0</td></tr> <!-- init         -->
+    <tr><!--  5 --> <td>0</td> <td>0</td> <td>1</td> <td>1</td></tr> <!--        cap 1 -->
+    <tr><!--  6 --> <td>0</td> <td>0</td> <td>1</td> <td>1</td></tr> <!--        cap 1 -->
+    <tr><!--  7 --> <td>0</td> <td>0</td> <td>1</td> <td>1</td></tr> <!-- stop   cap 1 -->
+    <tr><!--  8 --> <td>0</td> <td>1</td> <td>1</td> <td>0</td></tr> <!-- detect       -->
+    <tr><!--  9 --> <td>0</td> <td>0</td> <td>2</td> <td>0</td></tr> <!--        cap 1 -->
+    <tr><!-- 10 --> <td>0</td> <td>0</td> <td>2</td> <td>0</td></tr> <!--        cap 2 -->
+    <tr><!-- 11 --> <td>0</td> <td>0</td> <td>2</td> <td>0</td></tr> <!-- init   cap 3 -->
+    <tr><!-- 12 --> <td>0</td> <td>0</td> <td>2</td> <td>3</td></tr> <!--        cap 3 -->
+    <tr><!-- 13 --> <td>0</td> <td>0</td> <td>2</td> <td>3</td></tr> <!--        cap 3 -->
+    <tr><!-- 14 --> <td>0</td> <td>0</td> <td>2</td> <td>0</td></tr> <!-- cap 3 -->
+  </output>
+</variable-test>
