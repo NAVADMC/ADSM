@@ -1,9 +1,9 @@
 @import "../fonts/source-sans-pro/source-sans-pro.css";
 
-:focus{
+/*:focus{
     outline: 2px solid rgba(99, 215, 253, .5);
     background-color:white;
-}
+}*/
 
 a:focus{
     outline-offset:0;
@@ -1346,13 +1346,9 @@ th:hover .sortControls{
 
 /********/
 
-body .modal-dialog {
-    width: 50%;
-    margin-left: 25%;
-}
-
 .type-warning {
-    font-size: 14pt;
+    font-size: 14px;
+    line-height: 24px;
 }
 
 .controls ul li label {  /*Radio buttons on multi-choice fields are giant without this */
