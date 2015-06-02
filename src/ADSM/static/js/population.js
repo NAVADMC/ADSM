@@ -29,7 +29,8 @@ var progressBar = (function(){
 
     return {
        'hide': function(e){
-            $('#load_population_widget').show().before('<div class="alert alert-warning"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error:</strong> ' + e.message + '</div>');
+            $('#load_population_widget').show().before(
+                '<div class="alert alert-warning"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error:</strong> ' + e.message + '</div>');
             progress.remove();
             progressStatus.hide();
 

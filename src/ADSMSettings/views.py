@@ -44,8 +44,8 @@ def file_dialog(request):
 
 
 def run_importer(request):
-    param_path = handle_file_upload(request, 'parameters_xml', is_temp_file=True)  # we don't want param XMLs stored next to population XMLs
-    popul_path = handle_file_upload(request, 'population_xml')
+    param_path = handle_file_upload(request, 'parameters_xml', is_temp_file=True, overwrite_ok=True)  # we don't want param XMLs stored next to population XMLs
+    popul_path = handle_file_upload(request, 'population_xml', overwrite_ok=True)
     import_legacy_scenario(param_path, popul_path)
 
 
@@ -76,7 +76,7 @@ def import_naadsm_scenario(request):
 
 def upload_scenario(request):
     if '.sqlite' in request.FILES['file']._name:
-        handle_file_upload(request)
+        handle_file_upload(request)  #TODO: This can throw an error, but this method isn't used currently
         return redirect('/app/Workspace/')
     else:
         raise ValueError("You can only submit files with '.sqlite' in the file name.")  # ugly error should be caught by Javascript first

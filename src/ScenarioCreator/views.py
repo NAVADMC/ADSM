@@ -203,7 +203,7 @@ def deepcopy_points(request, primary_key, created_instance):
 
 
 def initialize_points_from_csv(request):
-    file_path = handle_file_upload(request)
+    file_path = handle_file_upload(request, is_temp_file=True, overwrite_ok=True)
     with open(file_path) as csvfile:
         dialect = csv.Sniffer().sniff(csvfile.read(1024))  # is this necessary?
         csvfile.seek(0)
@@ -464,7 +464,16 @@ def upload_population(request):
         return JsonResponse(json_response)
 
     session.set_population_upload_status("Processing file")
-    file_path = workspace_path(request.POST.get('filename')) if 'filename' in request.POST else handle_file_upload(request)
+    if 'filename' in request.POST:
+        file_path = workspace_path(request.POST.get('filename')) 
+    else:
+        overwrite_ok = 'overwrite_ok' in request.POST  # TODO: not used yet
+        try:
+            file_path = handle_file_upload(request, overwrite_ok=overwrite_ok)
+        except FileExistsError:
+            return JsonResponse({"status": "failed", 
+                                 "message": "Cannot import file because a file with the same name already exists in the list below."}) 
+
     try:
         model = Population(source_file=file_path)
         model.save()

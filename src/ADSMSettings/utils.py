@@ -65,18 +65,21 @@ def file_list(extensions=[]):
     return map(lambda f: os.path.basename(f), db_files)  # remove directory and extension
 
 
-def handle_file_upload(request, field_name='file', is_temp_file=False):
+def handle_file_upload(request, field_name='file', is_temp_file=False, overwrite_ok=False):
     """Writes an uploaded file into the project workspace and returns the full path to the file."""
     uploaded_file = request.FILES[field_name]
     prefix = ''
     if is_temp_file:
         prefix = 'temp/'
-        os.makedirs(workspace_path(prefix), exist_ok=True)
-    filename = workspace_path(prefix + uploaded_file._name)
-    with open(filename, 'wb+') as destination:
-        for chunk in uploaded_file.chunks():
-            destination.write(chunk)
-    return filename
+    os.makedirs(workspace_path(prefix), exist_ok=True)
+    file_path = workspace_path(prefix + uploaded_file._name)
+    if os.path.exists(file_path) and not (is_temp_file or overwrite_ok):
+        raise FileExistsError("File with the same name is already in the workspace folder. Please rename or delete the old file.")
+    else:
+        with open(file_path, 'wb+') as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+    return file_path
 
 
 def prepare_supplemental_output_directory():
