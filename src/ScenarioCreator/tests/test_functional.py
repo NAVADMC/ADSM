@@ -625,7 +625,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         try:
             filename_field.send_keys('123 AZ')
             filename_field.submit()
-            time.sleep(2)
+            time.sleep(3)
 
             save_button = self.selenium.find_element_by_css_selector('header form button[type="submit"]')
             self.assertNotIn('unsaved', save_button.get_attribute('class'))

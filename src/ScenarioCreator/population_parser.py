@@ -66,13 +66,23 @@ class PopulationParser(object):
              'latitude': 'latitude',
              'size': 'initial_size',
              'status': 'initial_state'},
-            {'productiontype': 'production_type',  # NAADSM CSV population export
+            {'productiontype': 'production_type',  # NAADSM CSV includes HerdSize synonym
+             'lon': 'longitude',
+             'lat': 'latitude',
+             'herdsize': 'initial_size',
+             'status': 'initial_state',
+             'daysinstate': 'days_in_initial_state',
+             'daysleftinstate': 'days_left_in_initial_state'},
+            {'productiontype': 'production_type',  # NAADSM CSV includes HerdSize synonym without state timers
+             'lon': 'longitude',
+             'lat': 'latitude',
+             'herdsize': 'initial_size',
+             'status': 'initial_state',},
+            {'productiontype': 'production_type',  # NAADSM CSV population export without state timers
              'lon': 'longitude',
              'lat': 'latitude',
              'unitsize': 'initial_size',
-             'status': 'initial_state',
-             'daysinstate': 'days_in_initial_state',
-             'daysleftinstate': 'days_left_in_initial_state'}
+             'status': 'initial_state'}
         ]
         parsing_success = False
         for mapping in possible_formats:
