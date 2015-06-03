@@ -45,6 +45,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'floppyforms',
     'crispy_forms',
+    'productionserver',
 )
 
 MIDDLEWARE_CLASSES = (
