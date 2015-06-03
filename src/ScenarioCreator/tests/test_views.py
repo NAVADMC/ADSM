@@ -30,13 +30,15 @@ class AirborneSpreadTestCase(TestCase):
         r = self.client.get('/setup/AirborneSpread/new/')
 
         self.assertEqual(r.status_code, 200)
-        self.assertIn('Create a new Airborne Spread', r.content.decode())
+        self.assertIn('Spread 1km probability', r.content.decode())
 
     def test_post_success(self):
         count = AirborneSpread.objects.count()
         r = self.client.post('/setup/AirborneSpread/new/', self.form_data)
-
-        self.assertRedirects(r, '/setup/AirborneSpread/')
+        self.assertEqual(r.status_code, 200)
+        
+        r = self.client.get('/setup/AirborneSpread/')
+        self.assertIn('Test', r.content.decode())
         self.assertEqual(count + 1, AirborneSpread.objects.count())
 
     def test_post_failure(self):
@@ -54,6 +56,9 @@ class PopulationTestCase(TestCase):
             'status': 'failed',
             'message': 'mismatched tag: line 17, column 2'
         }
+        try:
+            os.remove(workspace_path('Population_Test_Invalid.xml'),)
+        except OSError: pass
         with open(POPULATION_FIXTURES + 'Population_Test_Invalid.xml', mode='rb') as fp:
             r = self.client.post('/setup/UploadPopulation/', {'file': fp})
 
@@ -92,7 +97,7 @@ class RelationalFunctionTestCase(TestCase):
         self.assertEqual(RelationalFunction.objects.count(), 1)
         function = RelationalFunction.objects.first()
         self.assertEqual(function.name, 'Test Function')
-        self.assertRedirects(r, '/setup/RelationalFunction/%d/' % function.pk)
+        self.assertIn('/setup/RelationalFunction/%d/' % function.pk, r.content.decode())
 
     def test_post_with_points(self):
         form_data = {
@@ -114,7 +119,7 @@ class RelationalFunctionTestCase(TestCase):
         self.assertEqual(point.x, 0.0)
         self.assertEqual(point.y, 1.0)
         self.assertEqual(function.name, 'Test Function')
-        self.assertRedirects(r, '/setup/RelationalFunction/%d/' % function.pk)
+        self.assertIn('/setup/RelationalFunction/%d/' % function.pk, r.content.decode())
 
     def test_copy_no_points(self):
         form_data = {
@@ -134,7 +139,9 @@ class RelationalFunctionTestCase(TestCase):
         self.assertEqual(qs.count(), 1)
         new_function = qs.first()
 
-        self.assertRedirects(r, '/setup/RelationalFunction/%d/' % new_function.pk)
+        html_response = r.content.decode()
+        print(html_response)
+        self.assertIn('/setup/RelationalFunction/%d/' % new_function.pk, html_response)
 
     def test_copy_with_points(self):
         form_data = {
@@ -163,7 +170,7 @@ class RelationalFunctionTestCase(TestCase):
         self.assertEqual(new_point.x, point.x)
         self.assertEqual(new_point.y, point.y)
 
-        self.assertRedirects(r, '/setup/RelationalFunction/%d/' % new_function.pk)
+        self.assertIn('/setup/RelationalFunction/%d/' % new_function.pk, r.content.decode())
 
     def test_post_with_points_from_file(self):
         points_file = tempfile.NamedTemporaryFile(delete=False)
@@ -190,7 +197,7 @@ class RelationalFunctionTestCase(TestCase):
         point = RelationalPoint.objects.first()
         self.assertEqual(point.x, 0.0)
         self.assertEqual(point.y, 1.0)
-        self.assertRedirects(r, '/setup/RelationalFunction/%d/' % function.pk)
+        self.assertIn('/setup/RelationalFunction/%d/' % function.pk, r.content.decode())
 
         points_file.close()
         os.unlink(points_file.name)
@@ -232,7 +239,7 @@ class AssignEffectsTestCase(TestCase):
 
     def test_does_not_error_with_no_zone_effects(self):
         with open(POPULATION_FIXTURES + 'Population_Test_Zone_Assignment.xml', mode='rb') as fp:
-            self.client.post('/setup/UploadPopulation/', {'file': fp})
+            self.client.post('/setup/UploadPopulation/', {'file': fp, 'overwrite_ok':'overwrite_ok'})
         pt_1 = ProductionType.objects.get(name="Free Range Cows")
         Zone.objects.create(name="A", radius=2)
         Zone.objects.create(name="B", radius=4)
@@ -243,7 +250,7 @@ class AssignEffectsTestCase(TestCase):
 
     def test_correctly_initializes_formsets_with_partial_ZoneEffectAssignments(self):
         with open(POPULATION_FIXTURES + 'Population_Test_Zone_Assignment.xml', mode='rb') as fp:
-            self.client.post('/setup/UploadPopulation/', {'file': fp})
+            self.client.post('/setup/UploadPopulation/', {'file': fp, 'overwrite_ok':'overwrite_ok'})
         pt_1 = ProductionType.objects.get(name="Free Range Cows")
         pt_2 = ProductionType.objects.get(name="Dairy Cows")
         zone_a = Zone.objects.create(name="A", radius=2)
@@ -262,7 +269,7 @@ class AssignEffectsTestCase(TestCase):
 
     def test_save_ZoneEffectAssignment(self):
         with open(POPULATION_FIXTURES + 'Population_Test_Zone_Assignment.xml', mode='rb') as fp:
-            self.client.post('/setup/UploadPopulation/', {'file': fp})
+            self.client.post('/setup/UploadPopulation/', {'file': fp, 'overwrite_ok':'overwrite_ok'})
         pt_1 = ProductionType.objects.get(name="Free Range Cows")
         pt_2 = ProductionType.objects.get(name="Dairy Cows")
         zone_a = Zone.objects.create(name="A", radius=2)

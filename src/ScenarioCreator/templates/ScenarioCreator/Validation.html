@@ -26,8 +26,8 @@
     <h2>Warnings: Missing forms</h2>
     <p>The following either don't exist or have missing assignments:</p>
     <ul class="validation-checklist">
-        {% for name in missing_values.keys %}
-            <li><a href="/setup/{{ name }}/">{{ name }}</a></li>
+        {% for name, link in missing_values.items %}
+            <li><a href="/setup/{{ link }}">{{ name }}</a></li>
         {% endfor %}
     </ul>
 {% endif %}

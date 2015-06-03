@@ -10,7 +10,7 @@ from django.forms.models import inlineformset_factory
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
-from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple
+from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple, CheckboxInput
 from crispy_forms.helper import FormHelper
 import os
 
@@ -72,7 +72,8 @@ class UnitFormAbbreviated(BaseForm):
     class Meta(object):
         model = Unit
         exclude = ['_population', 'days_in_initial_state', 'days_left_in_initial_state']
-        widgets = {'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'})}
+        widgets = {}
+        #'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'})
 
 
 class ProbabilityFunctionForm(BaseForm):
@@ -89,7 +90,7 @@ class RelationalPointForm(BaseForm):
         widgets = {'relational_function': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
-PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint, fields=['relational_function', 'x', 'y'])
+PointFormSet = inlineformset_factory(RelationalFunction, RelationalPoint, fields=['relational_function', 'x', 'y'], extra=4)
 
 
 class RelationalFunctionForm(BaseForm):
@@ -112,8 +113,10 @@ class RelationalFunctionForm(BaseForm):
 class ControlMasterPlanForm(BaseForm):
     class Meta(object):
         model = ControlMasterPlan
-        exclude = []
-        widgets = {'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+        exclude = ['disable_all_controls']
+        widgets = {
+                 # 'disable_all_controls': CheckboxInput(attrs={'hidden':'hidden'}),
+                   'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'restart_vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    }
@@ -123,9 +126,7 @@ class ProtocolAssignmentForm(BaseForm):
     class Meta(object):
         model = ProtocolAssignment
         exclude = ['_master_plan', ]
-        widgets = {'_master_plan': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlMasterPlan/new/'}),
-                   'production_type': FixedSelect(),
-                   'control_protocol': AddOrSelect(attrs={'data-new-item-url': '/setup/ControlProtocol/new/'})}
+        widgets = {'production_type': FixedSelect(),}
 
 
 class DiseaseProgressionAssignmentForm(BaseForm):
@@ -461,10 +462,7 @@ class DiseaseSpreadAssignmentForm(BaseForm):
         exclude = []
         widgets = {  # Production types are not given edit buttons because the user is only allowed to add Production types from a Population XML
                    'source_production_type': FixedSelect(),
-                   'destination_production_type': FixedSelect(),
-                   'direct_contact_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/DirectSpread/new/'}),
-                   'indirect_contact_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/IndirectSpread/new/'}),
-                   'airborne_spread': AddOrSelect(attrs={'data-new-item-url': '/setup/AirborneSpread/new/'})}
+                   'destination_production_type': FixedSelect(),}
 
 
 class DiseaseIncludeSpreadForm(BaseForm):
@@ -504,7 +502,7 @@ class ZoneEffectAssignmentForm(BaseForm):
 class ProductionTypeList(SelectMultiple):
     template_name = 'floppyforms/multiselect.html'
     def __init__(self, starting_attrs=None):
-        attrs = {'class': 'production_list empty'}
+        attrs = {'data-new-item-url': '/setup/ProductionType/new/'}
         if starting_attrs is not None:
             attrs.update(starting_attrs)
         super(ProductionTypeList, self).__init__(attrs)
@@ -515,45 +513,59 @@ class ProductionTypeList(SelectMultiple):
         return context
 
 
+class GroupList(SelectMultiple):
+    template_name = 'floppyforms/multiselect.html'
+    def __init__(self, starting_attrs=None):
+        attrs = {'data-new-item-url': '/setup/ProductionGroup/new/'}
+        if starting_attrs is not None:
+            attrs.update(starting_attrs)
+        super(GroupList, self).__init__(attrs)
+
+    def get_context(self, name, value, attrs=None, choices=()):
+        context = super(SelectMultiple, self).get_context(name, value, attrs)
+        context['help_text'] = mark_safe("Create new Groups in the <em>Population Panel</em>") 
+        return context
+
+
 class ProductionGroupForm(BaseForm):
     class Meta(object):
         model = ProductionGroup
         exclude = []
-        widgets = {}
+        widgets = {'group': ProductionTypeList()}
 
 
 class DiseaseDetectionForm(BaseForm):
     class Meta(object):
         model = DiseaseDetection
-        exclude = []
+        fields = ['trigger_group', 'number_of_units', 'restart_only']
         widgets = {'trigger_group': ProductionTypeList()}
 
 
 class RateOfNewDetectionsForm(BaseForm):
     class Meta(object):
         model = RateOfNewDetections
-        exclude = []
+        fields = ['trigger_group', 'number_of_units', 'days', 'restart_only']
         widgets = {'trigger_group': ProductionTypeList()}
 
 
 class DisseminationRateForm(BaseForm):
     class Meta(object):
         model = DisseminationRate
-        exclude = []
+        fields = ['trigger_group', 'ratio', 'days', 'restart_only']
         widgets = {'trigger_group': ProductionTypeList()}
 
 
 class TimeFromFirstDetectionForm(BaseForm):
     class Meta(object):
         model = TimeFromFirstDetection
-        exclude = []
+        fields = ['trigger_group', 'days', 'restart_only']
         widgets = {'trigger_group': ProductionTypeList()}
 
 
 class DestructionWaitTimeForm(BaseForm):
     class Meta(object):
         model = DestructionWaitTime
-        exclude = []
+        fields = ['trigger_group', 'days', 'restart_only']
         widgets = {'trigger_group': ProductionTypeList()}
 
 
@@ -563,20 +575,21 @@ class SpreadBetweenGroupsForm(BaseForm):
         self.helper.layout = Layout(
             'number_of_groups',
             'relevant_groups',
-            HTML(r"<a href='/setup/ProductionGroup/new'>+ define new group</a>"),
+            HTML(r"<a href='/setup/ProductionGroup/new/' load-target='#group-creator'>+ define new group</a>"),
+            'restart_only',
             submit_button()
         )
         super(SpreadBetweenGroupsForm, self).__init__(*args, **kwargs)
     class Meta(object):
         model = SpreadBetweenGroups
         exclude = []
-        widgets = {'relevant_groups': SelectMultiple(attrs={'class':'group_list'})}
+        widgets = {'relevant_groups': GroupList()}
 
 
 class StopVaccinationForm(BaseForm):
     class Meta(object):
         model = StopVaccination
-        exclude = []
+        exclude = ['restart_only']
         widgets = {'trigger_group': ProductionTypeList()}
 
 

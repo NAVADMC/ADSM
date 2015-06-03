@@ -1,4 +1,4 @@
-{% extends 'ScenarioCreator/navigationPane.html' %}
+{#{% extends 'ScenarioCreator/3Panels.html' %}#}
 {% load floppyforms %}
 {% load crispy_forms_tags  %}
 
@@ -17,15 +17,15 @@
                 <ul id="file_list">
                     
                     {% for entry in model.entries %}
-                        <li><a href="/setup/{{model.class}}/{{entry.pk}}/">{{ entry }}</a>
+                        <li><a href="/setup/{{model.class}}/{{entry.pk}}/" load-target="#center-panel">{{ entry }}</a>
                             {% if not 'Function' in  model.name %}
                                 <a href="#" class="delete-button pull-right" title="delete" data-delete-link="/setup/{{model.class}}/{{entry.pk}}/delete/"></a>
                             {% endif %}
-                            <a href="/setup/{{model.class}}/{{entry.pk}}/copy/" class="copy-button pull-right" title="duplicate"></a>
+                            <a href="/setup/{{model.class}}/{{entry.pk}}/copy/" load-target="#center-panel" class="copy-button pull-right" title="duplicate"></a>
                             </li>
                     {% endfor %}
 
-                    <li class="addNew"><a href="/setup/{{model.class}}/new/"><i> + New {{ model.name }}</i></a></li>
+                    <li class="addNew"><a href="/setup/{{model.class}}/new/" load-target="#center-panel"><i> + New {{ model.name }}</i></a></li>
                 </ul>
             </div>
         </div>

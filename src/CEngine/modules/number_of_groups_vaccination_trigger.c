@@ -58,6 +58,9 @@ typedef struct
     events both by clinical signs and by lab test).  Keys are unit pointers
     (UNT_unit_t *), values are unimportant (presence or absence of a key is all
     we ever test. */
+  gboolean applies_to_first_initiation;
+  gboolean applies_to_reinitiation;
+  gboolean trigger_active;
   sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
     so that it will be available to the set_params function. */
 }
@@ -87,6 +90,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
       local_data->detection_in_group[i] = FALSE;
     }
   local_data->num_groups_involved = 0;
+  local_data->trigger_active = local_data->applies_to_first_initiation;
 
   #if DEBUG
     g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -137,7 +141,7 @@ handle_detection_event (struct adsm_module_t_ *self,
               /* This is the first detection in a new group. */
               local_data->detection_in_group[group] = TRUE;
               local_data->num_groups_involved++;
-              if (local_data->num_groups_involved == local_data->threshold)
+              if (local_data->trigger_active && (local_data->num_groups_involved == local_data->threshold))
                 {
                   #if DEBUG
                     g_debug ("%u groups involved, requesting initiation of vaccination program",
@@ -190,6 +194,7 @@ handle_vaccination_terminated_event (struct adsm_module_t_ *self,
       local_data->detection_in_group[i] = FALSE;
     }
   local_data->num_groups_involved = 0;
+  local_data->trigger_active = local_data->applies_to_reinitiation;
 
   #if DEBUG
     g_debug ("----- EXIT handle_vaccination_terminated_event (%s)", MODEL_NAME);
@@ -459,6 +464,7 @@ set_params (void *data, GHashTable *dict)
   adsm_module_t *self;
   local_data_t *local_data;
   sqlite3 *params;
+  long int tmp;
   guint trigger_id;
   GQueue *tmp_groups; /* Each item is of type (gboolean *). */
   create_group_args_t args;
@@ -478,6 +484,13 @@ set_params (void *data, GHashTable *dict)
   #if DEBUG
     g_debug ("threshold is %u groups with detections", local_data->threshold);
   #endif
+
+  errno = 0;
+  tmp = strtol (g_hash_table_lookup (dict, "restart_only"), NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  local_data->applies_to_first_initiation = (tmp == 0);
+  local_data->applies_to_reinitiation = (tmp == 1);
 
   /* Read in the groups. */
   tmp_groups = g_queue_new();
@@ -579,7 +592,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read trigger's details. */
   trigger_id = GPOINTER_TO_UINT(user_data);
   local_data->trigger_id = trigger_id;
-  sql = g_strdup_printf ("SELECT id,number_of_groups "
+  sql = g_strdup_printf ("SELECT id,number_of_groups,restart_only "
                          "FROM ScenarioCreator_spreadbetweengroups "
                          "WHERE id=%u", trigger_id);
   local_data->db = params;

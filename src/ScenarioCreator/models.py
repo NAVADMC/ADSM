@@ -655,9 +655,11 @@ class ProductionType(BaseModel):
         footer = "  Please rename the Production Type before proceeding."
         if re.search(r'[,\'"\\]', self.name):
             raise ValidationError(self.name + " CSV special characters not allowed." + footer)
-        if self.name.lower() in sqlite_keywords + 'All Ind Dir Air'.split():
+        if self.name.lower() in sqlite_keywords + 'All Ind Dir Air'.lower().split():
             print("Conflicts:", [w for w in sqlite_keywords if w in self.name])
             raise ValidationError(self.name + " Sqlite keywords not allowed." + footer)
+        if re.search(r'[^\w\d\- \\/_\(\)]', self.name):  # negative set, list of allowed characters should exclude unicode characters
+            raise ValidationError("Special characters are not allowed: " + self.name)
         # if re.match(r'[0-9]', self.name[0]):
         #     raise ValidationError(self.name + " cannot start with a number.")
         if self.name in [z for z in Zone.objects.all().values_list('name', flat=True)]:  # forbid zone names
@@ -750,6 +752,7 @@ class ProductionGroup(BaseModel):
 
 
 class VaccinationTrigger(BaseModel):
+    restart_only = models.BooleanField(default=False, help_text="Allows you to setup less strict criteria for restarting a vaccination program after an outbreak.")
     class Meta(object):
         abstract = True
       

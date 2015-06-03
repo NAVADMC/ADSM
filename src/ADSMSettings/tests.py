@@ -33,20 +33,6 @@ class ScenarioTestCase(TestCase):
             pass
         #     self.remove_test_file(file_path)
 
-    def test_post_failure(self):
-        file_name = 'Test \/ Scenario 123 AZ' # this should break Windows and Linux
-        file_path = workspace_path(file_name) + '.sqlite3'
-
-        self.remove_test_file(file_path)
-
-        r = self.client.post('/app/SaveScenario/', {'filename': file_name})
-
-        try:
-            self.assertEqual(r.status_code, 302)
-            self.assertFalse(os.path.isfile(file_path))
-        finally:
-            self.remove_test_file(file_path)
-
     def test_post_failure_ajax(self):
         file_name = 'Test \/ Scenario 123 AZ' # this should break Windows and Linux
         file_path = workspace_path(file_name) + '.sqlite3'
@@ -58,11 +44,9 @@ class ScenarioTestCase(TestCase):
                              HTTP_X_REQUESTED_WITH='XMLHttpRequest')
 
         try:
-            data = json.loads(r.content.decode())
-            self.assertIn('status', data)
-            self.assertEqual(data['status'], 'failed')
-            self.assertIn('message', data)
-            self.assertEqual(data['message'], 'Slashes are not allowed: Test \\/ Scenario 123 AZ')
+            html_r = r.content.decode()
+            self.assertIn('Failed', html_r)
+            self.assertIn('Slashes are not allowed: Test \\/ Scenario 123 AZ', html_r)
             self.assertFalse(os.path.isfile(file_path))
         finally:
             self.remove_test_file(file_path)
@@ -138,7 +122,7 @@ class SingletonManagerTestCase(TestCase):
 
 class LegacyImporterTestCase(TestCase):
     multi_db = True
-    
+
     @skip("This test isn't working because of a test-specific database connection problem")
     def test_import_sample_scenario(self):
         popul_path = r'"C:\Users\Josiah\Documents\ADSM\src\ScenarioCreator\tests\population_fixtures\export_pop.xml"'

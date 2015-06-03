@@ -59,6 +59,9 @@ typedef struct
     events both by clinical signs and by lab test).  Keys are unit pointers
     (UNT_unit_t *), values are unimportant (presence or absence of a key is all
     we ever test. */
+  gboolean applies_to_first_initiation;
+  gboolean applies_to_reinitiation;
+  gboolean trigger_active;
   sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
     so that it will be available to the set_params function. */
 }
@@ -87,6 +90,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
     {
       local_data->num_detected[i] = 0;
     }
+  local_data->trigger_active = local_data->applies_to_first_initiation;
 
   #if DEBUG
     g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -164,7 +168,7 @@ handle_detection_event (struct adsm_module_t_ *self,
       g_hash_table_insert (local_data->detected, unit, GINT_TO_POINTER(1));
       local_data->num_detected[event->day % local_data->num_days]++;
       local_data->current_count++;
-      if (local_data->current_count == local_data->threshold)
+      if (local_data->trigger_active && (local_data->current_count == local_data->threshold))
         {
           #if DEBUG
             g_debug ("%u units detected over %u days, requesting initiation of vaccination program",
@@ -214,6 +218,7 @@ handle_vaccination_terminated_event (struct adsm_module_t_ *self,
       local_data->num_detected[i] = 0;
     }
   local_data->current_count = 0;
+  local_data->trigger_active = local_data->applies_to_reinitiation;
 
   #if DEBUG
     g_debug ("----- EXIT handle_vaccination_terminated_event (%s)", MODEL_NAME);
@@ -384,6 +389,7 @@ set_params (void *data, GHashTable *dict)
   adsm_module_t *self;
   local_data_t *local_data;
   sqlite3 *params;
+  long int tmp;
   guint nprod_types;
   guint trigger_id;
   set_trigger_prodtype_args_t args;
@@ -403,6 +409,13 @@ set_params (void *data, GHashTable *dict)
 
   /* An array to hold per-day detection counts over the last num_days days. */
   local_data->num_detected = g_new (guint, local_data->num_days);
+
+  errno = 0;
+  tmp = strtol (g_hash_table_lookup (dict, "restart_only"), NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  local_data->applies_to_first_initiation = (tmp == 0);
+  local_data->applies_to_reinitiation = (tmp == 1);
 
   /* Fill in the production types that this trigger counts. */
   nprod_types = local_data->production_types->len;
@@ -480,7 +493,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_params function to read trigger's details. */
   trigger_id = GPOINTER_TO_UINT(user_data);
   local_data->trigger_id = trigger_id;
-  sql = g_strdup_printf ("SELECT id,number_of_units,days "
+  sql = g_strdup_printf ("SELECT id,number_of_units,days,restart_only "
                          "FROM ScenarioCreator_rateofnewdetections "
                          "WHERE id=%u", trigger_id);
   local_data->db = params;

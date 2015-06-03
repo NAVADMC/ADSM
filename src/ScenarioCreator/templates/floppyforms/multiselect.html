@@ -3,4 +3,6 @@
 	<optgroup label="{{ group_name }}">{% endif %}{% for option in group_choices %}
 	<option value="{{ option.0 }}"{% if option.0 in value %} selected="selected"{% endif %}>{{ option.1 }}</option>{% endfor %}{% if group_name %}
 	</optgroup>{% endif %}{% endfor %}
+	<option value="data-add-new">Add...</option>
 </select>
+

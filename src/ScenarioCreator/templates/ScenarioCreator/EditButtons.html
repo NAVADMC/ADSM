@@ -2,7 +2,7 @@
     <h3>Referenced by:</h3>
     <ul>
         {% for text, link in backlinks.items %}
-            <li><a href="{{ link }}">{{ text }}</a></li>
+            <li><a load-target="#center-panel" href="{{ link }}">{{ text }}</a></li>
         {% endfor %}
     </ul>    
 {% endif %}
@@ -11,7 +11,8 @@
     {% if outputs_exist %}
         <button type="submit" class="btn btn-danger btn-save" id="submit-id-submit">Delete Results and Save changes</button>
     {% else %}
-        <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled="disabled">Save changes</button>
+        <button type="button" class="btn btn-default btn-cancel" id="id-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled>Save</button>
     {% endif %}
     {% if backlinks %}
         <button type="submit" disabled class="btn btn-danger">Remove References before Deleting</button>

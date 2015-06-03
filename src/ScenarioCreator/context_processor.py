@@ -52,8 +52,9 @@ def basic_context(request):
                'ProductionGroups': ProductionGroup.objects.all(),
                'Farms': Unit.objects.count(),
                'Disease': Disease.objects.all().exclude(name='').count(),
-               'Progressions': DiseaseProgression.objects.count(),
-               'ProgressionAssignment': pt_count and DiseaseProgressionAssignment.objects.filter(progression__isnull=False).count() == pt_count,
+               'Progressions': DiseaseProgression.objects.count() 
+                               and pt_count 
+                               and DiseaseProgressionAssignment.objects.filter(progression__isnull=False).count() == pt_count,
                'DirectSpreads': DirectSpread.objects.count(),
                'AssignSpreads': pt_count and
                                 DiseaseSpreadAssignment.objects.filter(
@@ -66,8 +67,9 @@ def basic_context(request):
                'Protocols': ControlProtocol.objects.count(),
                'ProtocolAssignments': ProtocolAssignment.objects.count(),
                'Zones': Zone.objects.count(),
-               'ZoneEffects': ZoneEffect.objects.count(),
-               'ZoneEffectAssignments': ZoneEffectAssignment.objects.filter(effect__isnull=False).count() >= Zone.objects.count() and Zone.objects.count(),
+               'ZoneEffects': ZoneEffect.objects.count() 
+                              and ZoneEffectAssignment.objects.filter(effect__isnull=False).count() >= Zone.objects.count() 
+                              and Zone.objects.count(),
                'ProbabilityFunctions': ProbabilityFunction.objects.count(),
                'RelationalFunctions': RelationalFunction.objects.count(),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
@@ -75,10 +77,21 @@ def basic_context(request):
                'whole_scenario_warnings': whole_scenario_validation(),
                })
 
-        validation_models = ['Scenario', 'OutputSetting', 'Population', 'ProductionTypes', 'Farms', 'Disease', 'Progressions', 'ProgressionAssignment',
-                             'DirectSpreads', 'AssignSpreads', 'ControlMasterPlan', 'Protocols', 'ProtocolAssignments', 'Zones', 'ZoneEffects',
-                             'ZoneEffectAssignments']
-        context['missing_values'] = {singular(name): context[name] for name in validation_models if not context[name]}
+        validation_models = {'Scenario': 'Scenario/1/', 
+                             'OutputSetting': 'OutputSetting/1/', 
+                             'Population': 'Populations/', 
+                             'ProductionTypes': 'ProductionType/', 
+                             'Farms': 'Populations/', 
+                             'Disease': 'Disease/1/', 
+                             'Progressions': 'AssignProgressions/',
+                             'DirectSpreads': 'DirectSpreads/', 
+                             'AssignSpreads': 'AssignSpreads/', 
+                             'ControlMasterPlan': 'ControlMasterPlan/1/', 
+                             'Protocols': 'ControlProtocol/', 
+                             'ProtocolAssignments': 'AssignProtocols/', 
+                             'Zones': 'Zone/', 
+                             'ZoneEffects': 'AssignZoneEffects/'}
+        context['missing_values'] = {singular(name): validation_models[name] for name in validation_models if not context[name]}
         context['Simulation_ready'] = simulation_ready_to_run(context)
         disease = Disease.objects.get()
         context['javascript_variables'] = {'use_within_unit_prevalence':      js(disease.use_within_unit_prevalence),
@@ -86,7 +99,8 @@ def basic_context(request):
                                            'include_direct_contact_spread':   js(disease.include_direct_contact_spread),
                                            'include_indirect_contact_spread': js(disease.include_indirect_contact_spread),
                                            'include_airborne_spread':         js(disease.include_airborne_spread),
-                                           'outputs_exist':                js(outputs_exist()),
+                                           'outputs_exist':                   js(outputs_exist()),
+                                           'controls_enabled':                js(context['controls_enabled']),
         }
         
         
