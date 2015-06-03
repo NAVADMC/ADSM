@@ -467,9 +467,8 @@ def upload_population(request):
     if 'filename' in request.POST:
         file_path = workspace_path(request.POST.get('filename')) 
     else:
-        overwrite_ok = 'overwrite_ok' in request.POST  # TODO: not used yet
         try:
-            file_path = handle_file_upload(request, overwrite_ok=overwrite_ok)
+            file_path = handle_file_upload(request, overwrite_ok=True)
         except FileExistsError:
             return JsonResponse({"status": "failed", 
                                  "message": "Cannot import file because a file with the same name already exists in the list below."}) 
