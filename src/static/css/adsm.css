@@ -1,13 +1,18 @@
 @import "../fonts/source-sans-pro/source-sans-pro.css";
 
-:focus{
+/*:focus{
     outline: 2px solid rgba(99, 215, 253, .5);
     background-color:white;
-}
+}*/
 
 a:focus{
     outline-offset:0;
 }
+
+.layout-panel a.active, .layout-panel select.active {
+    border: solid red 1px;
+}
+
 body {
     font-family: 'Source Sans Pro', sans-serif;
     font-size: 10pt;
@@ -16,15 +21,17 @@ body {
     padding-bottom: 50px;
 }
 
-h2{
+h2, h2 a{
     font-size:15px;
     font-weight:600;
+    color:inherit;
 }
 
 h3, h4 {
     font-size: 13px;
     font-weight: 400;
 }
+
 
 .panel-heading h1, .panel-heading h2, .panel-heading h3{
     margin: 0 0 5px 0;
@@ -72,7 +79,7 @@ a.wiki, a.wiki:visited {
     height: 0;
 }
 
-.help-inline strong {  /* validation errors from the server */
+.error-inline strong {  /* validation errors from the server */
     background-color: #D13737;
     color: white;
 }
@@ -246,12 +253,20 @@ body>nav {
     width: 175px;
 }
 
-body>section {
-    margin-top: 44px;
-    padding-top: 1px;
-    margin-left: 280px;
-    min-width:600px;
+/*#left-panel {*/
+    /*margin-top: 44px;*/
+    /*padding-top: 1px;*/
+    /*margin-left: 280px;*/
+    /*min-width:600px;*/
 /*    padding-left: calc((100% - 1280px) / 2);*/
+/*}*/
+
+#main-panel {
+    float:none;
+}
+
+.layout-panel {
+    margin-top: 54px;
 }
 
 ul {
@@ -1331,13 +1346,9 @@ th:hover .sortControls{
 
 /********/
 
-body .modal-dialog {
-    width: 50%;
-    margin-left: 25%;
-}
-
 .type-warning {
-    font-size: 14pt;
+    font-size: 14px;
+    line-height: 24px;
 }
 
 .controls ul li label {  /*Radio buttons on multi-choice fields are giant without this */
@@ -1451,24 +1462,24 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
     padding: 10px 20px;
 }
-.productiontypelist option {
+.productiontypelist option, .grouplist option  {
     display:none;
     background-color: transparent;
 }
-.productiontypelist option[selected] {
+.productiontypelist option[selected] , .grouplist option[selected]  {
     display: block;
     background-color: transparent !important;
     height: 27px;
     margin: 0 -10px;
     padding: 4px 10px 0px 10px;
 }
-.productiontypelist option[selected]:hover {
+.productiontypelist option[selected]:hover, .grouplist option[selected]:hover  {
     background-color: #ebebeb;
 }
   
 select[multiple] {}
 
-.productiontypelist {
+.productiontypelist, .grouplist  {
     margin-left: 0px;
     min-height: 50px;
     width: 400px;
