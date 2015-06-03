@@ -5125,7 +5125,8 @@ button.close {
 .modal-dialog {
   position: relative;
   width: auto;
-  margin: 10px;
+  max-width: 400px;
+  margin: 60px auto;
 }
 .modal-content {
   position: relative;
@@ -5133,7 +5134,6 @@ button.close {
   background-clip: padding-box;
   border: 1px solid #999;
   border: 1px solid rgba(0, 0, 0, .2);
-  border-radius: 6px;
   outline: none;
   -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
           box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
@@ -5158,7 +5158,7 @@ button.close {
 .modal-header {
   min-height: 16.428571429px;
   padding: 15px;
-  border-bottom: 1px solid #e5e5e5;
+/*  border-bottom: 1px solid #e5e5e5;*/
 }
 .modal-header .close {
   margin-top: -2px;
@@ -5169,17 +5169,22 @@ button.close {
 }
 .modal-body {
   position: relative;
-  padding: 20px;
+  padding: 20px 30px;
 }
 .modal-footer {
-  padding: 19px 20px 20px;
-  margin-top: 15px;
+  padding: 5px 10px 8px;
   text-align: right;
-  border-top: 1px solid #e5e5e5;
+/*  border-top: 1px solid #e4e5e5;*/
+}
+.modal-footer:before {
+  padding-top: 5px;
+  width: 100%;
+  height: 1px;
+  border-top: 1px solid #cecece;
 }
 .modal-footer .btn + .btn {
   margin-bottom: 0;
-  margin-left: 5px;
+  margin-left: 10px;
 }
 .modal-footer .btn-group .btn + .btn {
   margin-left: -1px;
@@ -5189,8 +5194,10 @@ button.close {
 }
 @media (min-width: 768px) {
   .modal-dialog {
-    width: 600px;
-    margin: 30px auto;
+    width: 38%;
+    margin: 60px auto;
+    max-width: 550px;
+    min-width: 400px;
   }
   .modal-content {
     -webkit-box-shadow: 0 5px 15px rgba(0, 0, 0, .5);

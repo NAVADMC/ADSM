@@ -273,7 +273,7 @@ safe_save = function(url, data, new_link){
             closable: false,
             title: '',
             type: BootstrapDialog.TYPE_WARNING,
-            message: 'Changing input parameters will invalidate the currently computed results. Would you like to <strong><u>Delete the Results</u></strong> and proceed?',
+            message: 'Changing input parameters will invalidate the currently computed results. Select "Proceed" to <strong>delete the results set</strong> and commit your changes.',
             buttons: [
                 {
                     label: 'Cancel',
