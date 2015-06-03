@@ -1,0 +1,15 @@
+{#{% extends 'ScenarioCreator/navigationPane.html' %}#}
+{% extends 'ScenarioCreator/Fragment.html' %}
+{% load floppyforms %}
+{% load crispy_forms_tags  %}
+
+{% block content %}
+
+    <h1 id="title"> {{ title }}</h1>
+    
+    <form class="ajax" action="{{ action }}">
+        {% crispy form %}
+    </form>
+
+
+{% endblock %}

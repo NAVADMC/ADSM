@@ -192,7 +192,7 @@ many_to_many_widget = (function(form_state){
                 column_information[index] = bulk_select;
             });
 
-            var num_rows = Math.max(header_information[0].length, header_information[1].length);
+            var num_rows = header_information.length;
             for (var i = 0; i < num_rows; i++) {
                 tbody.append(render_row(header_information, column_information, i));
             }

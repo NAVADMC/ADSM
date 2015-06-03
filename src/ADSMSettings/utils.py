@@ -28,27 +28,33 @@ def db_path(name='scenario_db'):
 
 
 def workspace_path(target=None):
-    home = None
-    if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.
-        try:
-            CSIDL_PERSONAL = 5
-            SHGFP_TYPE_CURRENT = 0
-            buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-            ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_PERSONAL, 0, SHGFP_TYPE_CURRENT, buf)
-            home = buf.value
-        except:
-            home = None
-    if not home:
-        home = os.path.join(os.path.expanduser("~"), "Documents")
+    if not hasattr(settings, 'WORKSPACE_PATH') or not settings.WORKSPACE_PATH:
+        home = None
+        if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.
+            try:
+                CSIDL_PERSONAL = 5
+                SHGFP_TYPE_CURRENT = 0
+                buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+                ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_PERSONAL, 0, SHGFP_TYPE_CURRENT, buf)
+                home = buf.value
+            except:
+                home = None
+        if not home:
+            home = os.path.join(os.path.expanduser("~"), "Documents")
+
+        path = os.path.join(home, "ADSM Workspace")
+    else:
+        path = settings.WORKSPACE_PATH
 
     if target is None:
-        path = os.path.join(home, "ADSM Workspace")
+        return path
     elif '/' in target or '\\' in target:
         parts = re.split(r'[/\\]+', target)  # the slashes here are coming in from URL so they probably don't match os.path.split()
-        path = os.path.join(home, "ADSM Workspace", *parts)
+        path = os.path.join(path, *parts)
+        return path
     else: 
-        path = os.path.join(home, "ADSM Workspace", target)
-    return path  # shlex.quote(path) if you want security
+        path = os.path.join(path, target)
+        return path  # shlex.quote(path) if you want security
 
 
 def file_list(extensions=[]):
@@ -59,18 +65,21 @@ def file_list(extensions=[]):
     return map(lambda f: os.path.basename(f), db_files)  # remove directory and extension
 
 
-def handle_file_upload(request, field_name='file', is_temp_file=False):
+def handle_file_upload(request, field_name='file', is_temp_file=False, overwrite_ok=False):
     """Writes an uploaded file into the project workspace and returns the full path to the file."""
     uploaded_file = request.FILES[field_name]
     prefix = ''
     if is_temp_file:
         prefix = 'temp/'
-        os.makedirs(workspace_path(prefix), exist_ok=True)
-    filename = workspace_path(prefix + uploaded_file._name)
-    with open(filename, 'wb+') as destination:
-        for chunk in uploaded_file.chunks():
-            destination.write(chunk)
-    return filename
+    os.makedirs(workspace_path(prefix), exist_ok=True)
+    file_path = workspace_path(prefix + uploaded_file._name)
+    if os.path.exists(file_path) and not (is_temp_file or overwrite_ok):
+        raise FileExistsError("File with the same name is already in the workspace folder. Please rename or delete the old file.")
+    else:
+        with open(file_path, 'wb+') as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+    return file_path
 
 
 def prepare_supplemental_output_directory():

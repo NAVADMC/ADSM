@@ -1,8 +1,7 @@
-{% extends 'ScenarioCreator/navigationPane.html' %}
+{% extends 'ScenarioCreator/Fragment.html' %}
 {% load floppyforms %}
 {% load crispy_forms_tags %}
 {% block content %}
-    <script src="{{ STATIC_URL }}js/probability-functions.js"></script>
     <h1 id="title">{{ title }}</h1>
 
 <form method="post" action="">

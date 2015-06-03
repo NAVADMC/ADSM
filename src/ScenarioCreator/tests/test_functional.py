@@ -1,5 +1,7 @@
+import glob
 import time
 import os
+from unittest import skip
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
@@ -14,6 +16,10 @@ from ADSMSettings.utils import workspace_path
 from Results.utils import delete_all_outputs
 
 
+def parent_of(webElement):
+    return webElement.find_element_by_xpath('..')
+    
+    
 class M2mDSL(object):
     """
         DSL to improve m2m widget tests readability
@@ -114,6 +120,7 @@ class M2mDSL(object):
             return rows.find_elements_by_css_selector(destination_selector)
 
 
+
 class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
     multi_db = True
 
@@ -122,6 +129,9 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         cls.selenium = webdriver.Chrome()
         cls.selenium.set_window_size(1280, 800)
         super(FunctionalTests, cls).setUpClass()
+        # if 'ADSMSettings/' not in glob.glob('*/'):
+        #     raise NotADirectoryError("Tests started in the wrong directory! ", os.getcwd())
+            # os.chdir('..') # go up a directory until you find the repo root
 
     @classmethod
     def tearDownClass(cls):
@@ -192,56 +202,66 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             exposure_direction_end=360,
             max_distance=3)
 
-    def test_edit_probability_via_modal(self):
-        lp_cattle = ProbabilityFunction.objects.create(name="Latent period - cattle", equation_type="Triangular", min=0, mode=3, max=9)
+    def select_option(self, element_id, visible_text):
+        target = self.selenium.find_element_by_id(element_id)
+        Select(target).select_by_visible_text(visible_text)
+        time.sleep(2)  # wait for panel loading
+
+    def test_edit_probability_in_progression(self):
+        self.setup_scenario()
+
+        lp_cattle = ProbabilityFunction.objects.create(name="Renaming Test - cattle", equation_type="Triangular", min=0, mode=3, max=9)
         sp_cattle = ProbabilityFunction.objects.create(name="Subclinical period - cattle", equation_type="Triangular", min=1, mode=3, max=5)
         cp_cattle = ProbabilityFunction.objects.create(name="Clinical period - cattle", equation_type="Triangular", min=0, mode=21, max=80)
         ip_cattle = ProbabilityFunction.objects.create(name="Immune Period", equation_type="Triangular", min=180, mode=270, max=360)
         fmd = Disease.objects.create(name='FMD', disease_description=u'Foot and Mouth Disease')
         disease_progression = DiseaseProgression.objects.create(_disease=fmd,
-            name='Cattle Reaction',
+            name='Rename Test',
             disease_latent_period=lp_cattle,
             disease_subclinical_period=sp_cattle,
             disease_clinical_period=cp_cattle,
             disease_immune_period=ip_cattle)
+        cattle = ProductionType.objects.all().first()
+        DiseaseProgressionAssignment.objects.filter(production_type=cattle).delete()
+        DiseaseProgressionAssignment.objects.create(production_type=cattle, progression=disease_progression)
 
-        self.selenium.find_element_by_tag_name('nav').find_element_by_link_text('Disease Progression').click()
+        self.click_navbar_element('Disease Progression')
+        self.selenium.find_element_by_id('left-panel').find_element_by_class_name('glyphicon-pencil').click()
+        time.sleep(1)
+        self.selenium.find_element_by_id('center-panel').find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(1)
 
-        self.selenium.find_element_by_link_text('Cattle Reaction').click()
+        self.selenium.find_element_by_id('id_equation_type')  # just making sure it's there
+        pdf_panel = self.selenium.find_element_by_id('right-panel')
+        pdf_panel.find_element_by_id('id_name').send_keys(' edited')
         time.sleep(1)
 
-        self.selenium.find_element_by_id('div_id_disease_latent_period').find_element_by_tag_name('i').click()
-        time.sleep(1)
-
-        modal = self.selenium.find_element_by_id('disease_latent_period_modal')
-        modal.find_element_by_id('id_name').send_keys(' edited')
-        for button in modal.find_elements_by_tag_name('button'):
-            if button.text == 'Save changes':
-                button.click()
+        pdf_panel.find_element_by_css_selector('.btn-save').click()
+        time.sleep(1)  # there's a reload here
+        self.selenium.find_element_by_id('right-panel').find_element_by_css_selector('.btn-cancel').click()
         time.sleep(1)
 
         with self.assertRaises(NoSuchElementException):
-            self.selenium.find_element_by_id('disease_latent_period_modal')
+            self.selenium.find_element_by_id('id_equation_type')  # make sure it's gone
 
-        lp_cattle = ProbabilityFunction.objects.get(pk=lp_cattle.pk)
-        self.assertEqual(lp_cattle.name, "Latent period - cattle edited")
+        pdf_updated = ProbabilityFunction.objects.get(pk=lp_cattle.pk)
+        self.assertEqual(pdf_updated.name, "Renaming Test - cattle edited")
 
     def test_launch_add_new_modal_when_nothing_selected(self):
         self.setup_scenario()
 
-        self.click_navbar_element("Assign Progression")
+        self.click_navbar_element("Disease Progression")
 
         target = self.selenium.find_element_by_id('id_form-0-progression')
         Select(target).select_by_visible_text(u'---------')
         time.sleep(1)
 
-        target = self.selenium.find_elements_by_class_name('glyphicon-pencil')[0].click()
+        self.selenium.find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(2)
 
-        modal = self.selenium.find_element_by_id('form-0-progression_modal')
+        center_panel = self.selenium.find_element_by_id('center-panel')
 
-        self.assertIn("Create a new Disease Progression", modal.text)
+        self.assertIn("Disease latent period", center_panel.text)
 
     def test_upload_population_file(self):
         self.selenium.find_element_by_tag_name('nav').find_element_by_link_text('Population').click()
@@ -472,35 +492,40 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         source_types = self.get_selected_production_types("destination")
         self.assertEqual(len(source_types), 0)
 
-    def test_assign_disease_spread_add_disease_modal(self):
+    def test_deepest_modal_edit(self):
         self.setup_scenario()
-        self.click_navbar_element("Assign Disease Spread")
-        target = self.selenium.find_element_by_id('id_form-0-direct_contact_spread')
-        Select(target).select_by_visible_text('Add...')
+        self.click_navbar_element("Disease Progression")
+        
+        self.select_option('id_form-0-progression', 'Add...')
+        self.select_option('id_disease_latent_period','Add...')
+        self.select_option('id_equation_type','Histogram')
+        time.sleep(1)
+        self.select_option('id_graph','Add...')
+
         time.sleep(1)
 
         modal = self.selenium.find_element_by_css_selector('div.modal')
 
-        self.assertIn("Create a new Direct Spread", modal.text)
+        self.assertIn("Create a Relational Function", modal.text)
 
-    def test_modal_hide_unneeded_probability_fields(self):
+    def test_pdf_hide_unneeded_fields(self):
         """
             issue 146: unneeded probability fields are not hidden in modals
         """
         self.setup_scenario()
-        self.click_navbar_element("Assign Progression")
+        self.click_navbar_element("Disease Progression")
 
-        target = self.selenium.find_elements_by_class_name('glyphicon-pencil')[0].click()
+        target = self.selenium.find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(2)
 
-        modal = self.selenium.find_element_by_css_selector('div[id$="-progression_modal"]')
+        center = self.selenium.find_element_by_id('center-panel')
 
-        modal.find_elements_by_class_name('glyphicon-pencil')[0].click()
+        center.find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(2)
 
-        modal_2 = self.selenium.find_element_by_css_selector('div[id$="disease_latent_period_modal"]')
+        right_panel = self.selenium.find_element_by_id('right-panel')
 
-        mean_field = modal_2.find_element_by_id("div_id_mean")
+        mean_field = right_panel.find_element_by_id("div_id_mean")
 
         self.assertIn("none", mean_field.value_of_css_property("display"))
 
@@ -508,10 +533,10 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.client.get('/app/OpenTestScenario/ScenarioCreator/tests/population_fixtures/Roundtrip.sqlite3/')
         delete_all_outputs()
 
-        self.click_navbar_element("Controls")
+        self.click_navbar_element("On\nOff\nControls") 
 
-        self.selenium.find_element_by_id("id_disable_all_controls").click()
-        time.sleep(2)
+        parent_of(self.selenium.find_element_by_id("id_disable_all_controls")).click()
+        time.sleep(1)
 
         elements = self.selenium.find_elements_by_css_selector("section > form > div")
 
@@ -528,12 +553,11 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             "Control Protocol",
             "Protocol Assignments",
             "Zone Effects",
-            "Assign Effects"
         ]
 
         for element in setup_menu.find_elements_by_tag_name("a"):
             self.assertNotIn(element.text, hidden_menu_items)
-            "Zones",
+
 
     def test_enable_control_master_plan(self):
         """
@@ -541,50 +565,36 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             in control master plan re-enables the elements and menu
             items
         """
-        self.client.get('/app/OpenTestScenario/ScenarioCreator/tests/population_fixtures/Roundtrip.sqlite3/')
+        self.setup_scenario()
         delete_all_outputs()
 
-        control_master_plan = ControlMasterPlan.objects.first()
-        control_master_plan.disable_all_controls = True
-        control_master_plan.save()
-        time.sleep(1)
-
-        self.click_navbar_element("Controls")
-
-        self.selenium.find_element_by_id("id_disable_all_controls").click()
-        time.sleep(2)
-
-        elements = self.selenium.find_elements_by_css_selector("section > form > div")
-
-        for element in elements:
-            el_id = element.get_attribute("id")
-            self.assertEqual(element.get_attribute("disabled"), None)
-
-        setup_menu = self.selenium.find_element_by_id("setupMenu")
-
-        menu_items = [
-            "Scenario Description",
-            "Population",
-            "Disease",
-            "Disease Progression",
-            "Assign Progression",
-            "Add Disease Spread",
-            "Assign Disease Spread",
-            "Controls",
+        ControlMasterPlan.objects.get_or_create(disable_all_controls=True)
+        self.click_navbar_element("On\nOff\nControls")
+        control_items = [
             "Vaccination Triggers",
             "Control Protocol",
             "Assign Protocols",
             "Zones",
-            "Zone Effects",
-            "Assign Effects",
-            "Functions",
-            "Output Settings",
-            "Validate Scenario",
-            "Run Simulation"
+            "Zone Effects"
         ]
 
-        for element in setup_menu.find_elements_by_tag_name("a"):
-            self.assertIn(element.text, menu_items)
+        setup_menu = self.selenium.find_element_by_id("setupMenu")
+        actual_menu = [x.text for x in setup_menu.find_elements_by_tag_name("a")]
+        for controls in control_items:
+            self.assertNotIn(controls, actual_menu)
+
+        parent_of(self.selenium.find_element_by_id("id_disable_all_controls")).click()
+        time.sleep(1)
+
+        elements = self.selenium.find_elements_by_css_selector("section > form > div")
+
+        for element in elements:
+            self.assertEqual(element.get_attribute("disabled"), None)
+
+        setup_menu = self.selenium.find_element_by_id("setupMenu")
+        actual_menu = [x.text for x in setup_menu.find_elements_by_tag_name("a")]
+        for controls in control_items:
+            self.assertIn(controls, actual_menu)
 
     def test_save_scenario_failure(self):
         filename_field = self.selenium.find_element_by_css_selector('header form .filename input')
@@ -615,7 +625,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         try:
             filename_field.send_keys('123 AZ')
             filename_field.submit()
-            time.sleep(1)
+            time.sleep(2)
 
             save_button = self.selenium.find_element_by_css_selector('header form button[type="submit"]')
             self.assertNotIn('unsaved', save_button.get_attribute('class'))
@@ -624,3 +634,4 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
                 os.remove(workspace_path('Untitled Scenario123 AZ.sqlite3'))
             except:
                 pass
+

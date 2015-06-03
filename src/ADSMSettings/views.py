@@ -44,8 +44,8 @@ def file_dialog(request):
 
 
 def run_importer(request):
-    param_path = handle_file_upload(request, 'parameters_xml', is_temp_file=True)  # we don't want param XMLs stored next to population XMLs
-    popul_path = handle_file_upload(request, 'population_xml')
+    param_path = handle_file_upload(request, 'parameters_xml', is_temp_file=True, overwrite_ok=True)  # we don't want param XMLs stored next to population XMLs
+    popul_path = handle_file_upload(request, 'population_xml', overwrite_ok=True)
     import_legacy_scenario(param_path, popul_path)
 
 
@@ -70,12 +70,13 @@ def import_naadsm_scenario(request):
         run_importer(request)
         return redirect('/')
     context = {'form': initialized_form, 'title': "Import Legacy NAADSM Scenario in XML format"}
-    return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages
+    context['base_page'] = 'ScenarioCreator/crispy-model-form.html'
+    return render(request, 'ScenarioCreator/navigationPane.html', context)  # render in validation error messages
 
 
 def upload_scenario(request):
     if '.sqlite' in request.FILES['file']._name:
-        handle_file_upload(request)
+        handle_file_upload(request)  #TODO: This can throw an error, but this method isn't used currently
         return redirect('/app/Workspace/')
     else:
         raise ValueError("You can only submit files with '.sqlite' in the file name.")  # ugly error should be caught by Javascript first
@@ -105,28 +106,28 @@ def save_scenario(request=None):
     """Save to the existing session of a new file name if target is provided
     """
     if request is not None and 'filename' in request.POST:
-        target = request.POST['filename'] 
+        target = request.POST['filename']
     else:
         target = scenario_filename()
+    target = strip_tags(target)
+    full_path = workspace_path(target) + ('.sqlite3' if not target.endswith('.sqlite3') else '')
     try:
-        target = strip_tags(target)
         if '\\' in target or '/' in target:  # this validation has to be outside of scenario_filename in order for open_test_scenario to work
             raise ValueError("Slashes are not allowed: " + target)
         scenario_filename(target)
         print('Copying database to', target)
-        full_path = workspace_path(target) + ('.sqlite3' if not target.endswith('.sqlite3') else '')
 
         shutil.copy(db_path(), full_path)
         unsaved_changes(False)  # File is now in sync
         print('Done Copying database to', full_path)
-        json_message = {"status": "success"}
-
-    except (ValueError, IOError, AssertionError) as error:
-        print(error)
-        json_message = {"status": "failed", "message": str(error)} 
+    except (IOError, AssertionError, ValueError) as err:
+        if request is not None:
+            save_error = 'Failed to save filename:' + str(err)
+            print('Encountered an error while copying file', full_path)
+            return render(request, 'ScenarioName.html', {"failure_message": save_error})
 
     if request is not None and request.is_ajax():
-        return JsonResponse(json_message, )
+        return render(request, 'ScenarioName.html', {"success_message": "File saved to " + target})
     else:
         return redirect('/setup/Scenario/1/')
 
@@ -148,6 +149,7 @@ def copy_file(request, target):
 
 def download_file(request):
     target = request.GET['target']
+    target = target if target[-1] not in r'/\\' else target[:-1]  # shouldn't be a trailing slash
     file_path = workspace_path(target)
     f = open(file_path, "rb")
     response = HttpResponse(f, content_type="application/x-sqlite")  # TODO: generic content type

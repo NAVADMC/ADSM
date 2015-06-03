@@ -1,15 +1,14 @@
 import csv
-import os
 import subprocess
 import itertools
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
 from django.db.models import Q, ObjectDoesNotExist
 from django.db import OperationalError
 
 from Results.models import *  # This is absolutely necessary for dynamic form loading
-from ScenarioCreator.models import *
+from ScenarioCreator.models import *  # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic form loading
 from ADSMSettings.models import unsaved_changes
 from ADSMSettings.utils import graceful_startup, file_list, handle_file_upload, workspace_path, adsm_executable_command
@@ -27,14 +26,7 @@ abstract_models = {
         [('DirectSpread', DirectSpread),
          ('IndirectSpread', IndirectSpread),
          ('AirborneSpread', AirborneSpread)],
-    'VaccinationTrigger':
-        [('DiseaseDetection', DiseaseDetection),
-         ('RateOfNewDetections', RateOfNewDetections),
-         ('DisseminationRate', DisseminationRate),
-         ('SpreadBetweenGroups', SpreadBetweenGroups),
-         ('TimeFromFirstDetection', TimeFromFirstDetection),
-         ('DestructionWaitTime', DestructionWaitTime),
-         ('StopVaccination', StopVaccination)]}
+}
 
 
 def spaces_for_camel_case(text):
@@ -59,6 +51,16 @@ def production_type_list_json(request):
     msg = list(ProductionType.objects.values_list('name', 'id'))
     return JsonResponse(msg, safe=False)  # necessary to serialize a list object
 
+
+def disable_all_controls_json(request):
+    if 'POST' in request.method:
+        new_value = request.POST['use_controls']
+        set_to = new_value == 'false'  #logical inversion because of use_controls vs disable_controls
+        ControlMasterPlan.objects.all().update(disable_all_controls=set_to)
+        return JsonResponse({'status':'success'})
+    else:
+        return JsonResponse({'disable_all_controls': ControlMasterPlan.objects.get().disable_all_controls})
+    
 
 def initialize_spread_assignments():
     pts = list(ProductionType.objects.all())
@@ -106,8 +108,8 @@ def zone_effects(request):
         context['formset_headings'] = Zone.objects.order_by('id')
         context['formset_grouped'] = {k: sorted(v, key=lambda x: x.instance.zone.id) 
                                         for k,v in forms_grouped_by_pt}
-
-        return render(request, 'ScenarioCreator/FormSet2D.html', context)
+        context['base_page'] = 'ScenarioCreator/FormSet2D.html'
+        return render(request, 'ScenarioCreator/3Panels.html', context)
 
 
 def save_formset_succeeded(MyFormSet, TargetModel, context, request):
@@ -123,7 +125,7 @@ def save_formset_succeeded(MyFormSet, TargetModel, context, request):
         return False
 
 
-def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request):
+def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request, template='ScenarioCreator/3Panels.html'):
     """FormSet is pre-populated with existing assignments and it detects and fills in missing
     assignments with a blank form with production type filled in."""
     if save_formset_succeeded(MyFormSet, TargetModel, context, request):
@@ -134,14 +136,15 @@ def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, miss
             index += TargetModel.objects.count()
             forms[index].fields['production_type'].initial = pt.id
         context['formset'] = forms
-        return render(request, 'ScenarioCreator/FormSet.html', context)
+        context['base_page'] = 'ScenarioCreator/FormSet.html'
+        return render(request, template, context)
 
 
 def assign_protocols(request):
     missing = ProductionType.objects.filter(protocolassignment__isnull=True)
     ProtocolSet = modelformset_factory(ProtocolAssignment, extra=len(missing), form=ProtocolAssignmentForm)
     context = {'title': 'Assign a Control Protocol to each Production Type'}
-    return populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request)
+    return populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request, template='ScenarioCreator/navigationPane.html')
 
 
 def assign_progressions(request):
@@ -151,7 +154,7 @@ def assign_progressions(request):
     ProgressionSet = modelformset_factory(DiseaseProgressionAssignment,
                                           extra=len(missing),
                                           form=DiseaseProgressionAssignmentForm)
-    context = {'title': 'Set what Progression each Production Type has with the Disease'}
+    context = {'title': 'Set the Disease Progression of each Production Type'}
     return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request)
 
 
@@ -183,9 +186,9 @@ def initialize_relational_form(context, primary_key, request):
         main_form = RelationalFunctionForm(request.POST or None, instance=model)
         context['model_link'] = '/setup/RelationalFunction/' + primary_key + '/'
         context['backlinks'] = collect_backlinks(model)
+        context['deletable'] = context['model_link'] + 'delete/'
     context['form'] = main_form
     context['model'] = model
-    context['deletable'] = 'delete/'
     return context
 
 
@@ -200,7 +203,7 @@ def deepcopy_points(request, primary_key, created_instance):
 
 
 def initialize_points_from_csv(request):
-    file_path = handle_file_upload(request)
+    file_path = handle_file_upload(request, is_temp_file=True, overwrite_ok=True)
     with open(file_path) as csvfile:
         dialect = csv.Sniffer().sniff(csvfile.read(1024))  # is this necessary?
         csvfile.seek(0)
@@ -238,6 +241,7 @@ def relational_function(request, primary_key=None, doCopy=False):
     context['formset'].  The extra logic for formsets could be kicked in only when one or more formsets are present. At
     the moment integration looks like a bad idea because it would mangle the happy path for the sake of one edge case."""
     context = initialize_relational_form({}, primary_key, request)
+    context['action'] = request.path
     if 'file' in request.FILES:  # data file is present
         request = initialize_points_from_csv(request)
     context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
@@ -246,41 +250,40 @@ def relational_function(request, primary_key=None, doCopy=False):
             context['form'].instance.pk = None  # This will cause a new instance to be created
             created_instance = context['form'].save()
             context['formset'] = deepcopy_points(request, primary_key, created_instance)
-            return redirect('/setup/RelationalFunction/%i/' % created_instance.id)
         else:
             created_instance = context['form'].save()
             context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
+        context['action'] = '/setup/RelationalFunction/%i/' % created_instance.id
+
         if context['formset'].is_valid():
             context['formset'].save()
-            if request.is_ajax():
-                return ajax_success(created_instance, "RelationalFunction")
-            return redirect('/setup/RelationalFunction/%i/' % created_instance.id)
+        else:
+            pass #Delete partial RelationalFunction???
+
     context['title'] = "Create a Relational Function"
     add_breadcrumb_context(context, "RelationalFunction")
     return render(request, 'ScenarioCreator/RelationalFunction.html', context)
 
 
-def ajax_success(model_instance, model_name):
-    msg = {'pk': model_instance.pk,
-           'title': spaces_for_camel_case(str(model_instance)),
-           'model': model_name,
-           'status': 'success'}
-    return JsonResponse(msg)
-
-
-def save_new_instance(initialized_form, request):
+def save_new_instance(initialized_form, request, context):
     model_instance = initialized_form.save()  # write to database
     model_name = model_instance.__class__.__name__
-    if request.is_ajax():
-        return ajax_success(model_instance, model_name)
-    if model_name in singletons:
+    context['model_name'] = model_name
+    if model_name in singletons:  #they could have their own special page: e.g. Population
         return redirect('/setup/%s/1/' % model_name)
-    return redirect('/setup/%s/' % model_name)  # redirect to list URL
+    return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
 def new_form(request, initialized_form, context):
     if initialized_form.is_valid():
-        return save_new_instance(initialized_form, request)
+        model_instance = initialized_form.save()  # write to database
+        link = context['action'].split('/')
+        context['action'] = '/' + '/'.join([link[1], link[2], str(model_instance.id)]) + '/'  # not new if it has an id 
+    model_name, model = get_model_name_and_model(request)
+    context['model_name'] = model_name
+    if model_name in singletons:  # they could have their own special page: e.g. Population
+        context['base_page'] = 'ScenarioCreator/Crispy-Singleton-Form.html' # #422 Singleton models now load in a fragment to be refreshed the same way that other forms are loaded dynamically
+        return render(request, 'ScenarioCreator/navigationPane.html', context)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages
 
 
@@ -314,7 +317,9 @@ def new_entry(request, second_try=False):
     if model_name in singletons and model.objects.count():
         return edit_entry(request, 1)
     initialized_form = form(request.POST or None)
-    context = {'form': initialized_form, 'title': "Create a new " + spaces_for_camel_case(model_name)}
+    context = {'form': initialized_form, 
+               'title': "Create a new " + spaces_for_camel_case(model_name), 
+               'action': request.path}
     add_breadcrumb_context(context, model_name)
     try:
         return new_form(request, initialized_form, context)
@@ -333,21 +338,18 @@ def edit_entry(request, primary_key):
     try:
         initialized_form, model_name = initialize_from_existing_model(primary_key, request)
     except (ObjectDoesNotExist, OperationalError):
-        return redirect('/setup/%s/new/' % model_name)
-    if initialized_form.is_valid() and request.method == 'POST':
-        model_instance = initialized_form.save()  # write instance updates to database
-        if request.is_ajax():
-            return ajax_success(model_instance, model_name)
-
+        request.path = '/setup/%s/new/' % model_name
+        return new_entry(request)
     context = {'form': initialized_form,
-               'title': str(initialized_form.instance)}
+               'title': str(initialized_form.instance),
+               'action': request.path}
     add_breadcrumb_context(context, model_name, primary_key)
 
     if model_name == 'ProbabilityFunction':
         context['backlinks'] = collect_backlinks(initialized_form.instance)
-        context['deletable'] = 'delete/'
+        context['deletable'] = '/setup/ProbabilityFunction/%s/delete/' % primary_key
 
-    return render(request, 'ScenarioCreator/crispy-model-form.html', context)
+    return new_form(request, initialized_form, context)
 
 
 def copy_entry(request, primary_key):
@@ -358,11 +360,13 @@ def copy_entry(request, primary_key):
         initialized_form, model_name = initialize_from_existing_model(primary_key, request)
     except ObjectDoesNotExist:
         return redirect('/setup/%s/new/' % model_name)
+    context = {'form': initialized_form, 
+               'title': "Copy a " + spaces_for_camel_case(model_name), 
+               'action': request.path, 
+               'model_name': model_name}
     if initialized_form.is_valid() and request.method == 'POST':
         initialized_form.instance.pk = None  # This will cause a new instance to be created
-        return save_new_instance(initialized_form, request)
-    context = {'form': initialized_form,
-               'title': "Copy a " + spaces_for_camel_case(model_name)}
+        return save_new_instance(initialized_form, request, context)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
@@ -376,13 +380,6 @@ def delete_entry(request, primary_key):
         return redirect('/setup/%s/new/' % model_name)  # Population can be deleted, maybe others
 
 
-def list_per_model(model_name, model):
-    context = {'entries': model.objects.all(),
-               'class': model_name,
-               'name': spaces_for_camel_case(model_name)}
-    return context
-
-
 def promote_to_abstract_parent(model_name):
     for key, value in abstract_models.items():  # fix for child models (DirectSpread, RelationalFunction) returning to the wrong place
         if model_name in [x[0] for x in value]:
@@ -390,17 +387,71 @@ def promote_to_abstract_parent(model_name):
     return model_name
 
 
+def trigger_list(request):
+    layout = {
+         'Start Triggers':
+             [DiseaseDetection,
+              RateOfNewDetections,
+              DisseminationRate,
+              SpreadBetweenGroups,
+              TimeFromFirstDetection,
+              DestructionWaitTime],
+         'Stop Triggers':
+             [StopVaccination],
+         'Restart Triggers':  #Duplicate list from above because of filtering
+             [DiseaseDetection,
+              RateOfNewDetections,
+              DisseminationRate,
+              SpreadBetweenGroups,
+              TimeFromFirstDetection,
+              DestructionWaitTime],
+    }
+    context = {'title': "Vaccination Triggers", 
+               'base_page': 'ScenarioCreator/VaccinationTriggerList.html',
+               'categories': [{'name':'Start Triggers',
+                               'models':[filtered_list_per_model(x, False) for x in layout['Start Triggers']]
+                              }, 
+                              {'name':'Stop Triggers',
+                               'models':[list_per_model(x) for x in layout['Stop Triggers']]
+                              },
+                              {'name':'Restart Triggers',
+                               'models':[filtered_list_per_model(x, True) for x in layout['Restart Triggers']]
+                              }
+                          ]
+               }
+    
+    return context
+
+def filtered_list_per_model(model_class, restart_trigger):
+    model_name = model_class.__name__
+    context = {'entries': model_class.objects.filter(restart_only=restart_trigger),
+               'class': model_name,
+               'name': spaces_for_camel_case(model_name)}
+    return context
+
+def list_per_model(model_class):
+    model_name = model_class.__name__
+    context = {'entries': model_class.objects.all(),
+               'class': model_name,
+               'name': spaces_for_camel_case(model_name)}
+    return context
+
+
 def model_list(request):
     model_name, model = get_model_name_and_model(request)
     model_name = promote_to_abstract_parent(model_name)
-    context = {'title': "Create " + spaces_for_camel_case(model_name) + "s",
-               'models': []}
-    if model_name in abstract_models.keys():
-        for local_name, local_model in abstract_models[model_name]:
-            context['models'].append(list_per_model(local_name, local_model))
+    if model_name == 'VaccinationTrigger':  # special case
+        context = trigger_list(request)
     else:
-        context['models'].append(list_per_model(model_name, model))
-    return render(request, 'ScenarioCreator/ModelList.html', context)
+        context = {'title': "Create " + spaces_for_camel_case(model_name) + "s",
+                   'base_page': 'ScenarioCreator/ModelList.html',
+                   'models': []}
+        if model_name in abstract_models.keys():
+            for local_name, local_model in abstract_models[model_name]:
+                context['models'].append(list_per_model(local_model))
+        else:
+            context['models'].append(list_per_model(model))
+    return render(request, 'ScenarioCreator/3Panels.html', context)
 
 # Utility Views was moved to the ADSMSettings/connection_handler.py
 
@@ -413,7 +464,16 @@ def upload_population(request):
         return JsonResponse(json_response)
 
     session.set_population_upload_status("Processing file")
-    file_path = workspace_path(request.POST.get('filename')) if 'filename' in request.POST else handle_file_upload(request)
+    if 'filename' in request.POST:
+        file_path = workspace_path(request.POST.get('filename')) 
+    else:
+        overwrite_ok = 'overwrite_ok' in request.POST  # TODO: not used yet
+        try:
+            file_path = handle_file_upload(request, overwrite_ok=overwrite_ok)
+        except FileExistsError:
+            return JsonResponse({"status": "failed", 
+                                 "message": "Cannot import file because a file with the same name already exists in the list below."}) 
+
     try:
         model = Population(source_file=file_path)
         model.save()
