@@ -278,6 +278,7 @@ def getBool( xml ):
 
 
 def readPopulation( populationFileName ):
+    print("Reading population file: ", populationFileName)
     fp = open( populationFileName, 'rb' )
     xml = ET.parse( fp ).getroot()
     fp.close()
@@ -350,6 +351,7 @@ def readPopulation( populationFileName ):
 
 
 def readParameters( parameterFileName, saveIterationOutputsForUnits ):
+    print("Reading parameters file:", parameterFileName)
     fp = open( parameterFileName, 'rb' )
     try:
         xml = ET.parse( fp ).getroot()
@@ -379,6 +381,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         fileAsString = fileAsString.replace( 'xmlns:', 'xmlns:xdf="http://xml.gsfc.nasa.gov/XDF" xmlns:', 1 )
         xml = ET.fromstring( fileAsString )
     fp.close()
+    print("Done reading parameters file.  Constructing New Scenario...")
 
     Scenario.objects.get_or_create(description = xml.find( './description' ).text)
 
