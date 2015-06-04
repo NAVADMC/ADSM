@@ -809,6 +809,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     control_protocol = protocol
                 )
                 assignment.save()
+            protocol.use_exams = True
             if contactType == 'direct' or contactType == 'both':
                 if direction == 'out' or direction == 'both':
                     protocol.examine_direct_forward_traces = True
