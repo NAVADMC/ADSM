@@ -13,7 +13,7 @@ from selenium.common.exceptions import NoSuchElementException
 from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
     ProbabilityFunction, RelationalFunction, RelationalPoint, Population, \
     DirectSpread, IndirectSpread, AirborneSpread, ProductionType, \
-    DiseaseProgressionAssignment, Unit, ControlMasterPlan
+    DiseaseProgressionAssignment, Unit, ControlMasterPlan, Zone, ZoneEffect
 from ADSMSettings.utils import workspace_path
 from Results.utils import delete_all_outputs
 
@@ -203,6 +203,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             exposure_direction_start=0,
             exposure_direction_end=360,
             max_distance=3)
+        zone = Zone.objects.create(name="Medium", radius=10)
 
     def select_option(self, element_id, visible_text):
         target = self.selenium.find_element_by_id(element_id)
@@ -229,7 +230,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         self.click_navbar_element('Disease Progression')
         self.selenium.find_element_by_id('left-panel').find_element_by_class_name('glyphicon-pencil').click()
-        time.sleep(2)
+        time.sleep(3)
         self.selenium.find_element_by_id('center-panel').find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(1)
 
@@ -511,15 +512,33 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.assertIn("Import Points from File", modal.text)
 
         #check and see if you can build a Rel from file upload
-        self.selenium.find_element_by_id("file").send_keys(os.path.join(settings.BASE_DIR, "ScenarioCreator\\tests\\population_fixtures\\points.csv"))  # this is sensitive to the starting directory
-        modal.find_element_by_id('id_name').send_keys('imported from file')
-        modal.find_element_by_class_name('btn-save').click()
-        time.sleep(2)
+        self.submit_relational_form_with_file(modal)
         self.selenium.find_element_by_id('right-panel').find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(2)
         modal = self.selenium.find_element_by_css_selector('div.modal')
-        self.assertEqual("123.0", modal.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
+        self.assertEqual("123", modal.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
 
+
+    def test_add_relational_function_by_file(self):
+        self.setup_scenario()
+        self.click_navbar_element("Zone Effects", 2)
+        
+        self.select_option('id_form-0-effect', 'Add...')
+        self.select_option('id_zone_indirect_movement', 'Add...')
+        
+        right_panel = self.selenium.find_element_by_css_selector('#right-panel')
+
+        self.submit_relational_form_with_file(right_panel)
+        right_panel = self.selenium.find_element_by_css_selector('#right-panel')
+        self.assertEqual("123", right_panel.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
+
+
+    def submit_relational_form_with_file(self, container):
+        container.find_element_by_id("file").send_keys(
+            os.path.join(settings.BASE_DIR, "ScenarioCreator\\tests\\population_fixtures\\points.csv"))  # this is sensitive to the starting directory
+        container.find_element_by_id('id_name').send_keys('imported from file')
+        container.find_element_by_class_name('btn-save').click()
+        time.sleep(2)
 
     def test_pdf_hide_unneeded_fields(self):
         """
