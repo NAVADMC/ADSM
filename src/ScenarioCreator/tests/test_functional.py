@@ -506,7 +506,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         modal = self.selenium.find_element_by_css_selector('div.modal')
 
-        self.assertIn("Create a Relational Function", modal.text)
+        self.assertIn("Import Points from File", modal.text)
 
     def test_pdf_hide_unneeded_fields(self):
         """
