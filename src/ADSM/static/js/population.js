@@ -107,7 +107,7 @@ $(function(){
              prompt_for_overwrite(submit_population_upload, form);
         }
         else { //verified it's not a duplicate
-            submit_population_upload()
+            submit_population_upload(form)
         }
     });
     
