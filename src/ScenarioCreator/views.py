@@ -221,6 +221,7 @@ def initialize_points_from_csv(request):
             initial_values['relationalpoint_set-%i-relational_function' % index] = ''
             initial_values['relationalpoint_set-%i-x' % index] = point['x']
             initial_values['relationalpoint_set-%i-y' % index] = point['y']
+            initial_values['relationalpoint_set-%i-DELETE' % index] = ''  # these could be set to delete by the js
         initial_values['relationalpoint_set-TOTAL_FORMS'] = str(len(entries))
         initial_values['relationalpoint_set-INITIAL_FORMS'] = '0'
         initial_values['relationalpoint_set-MAX_NUM_FORMS'] = '1000'
