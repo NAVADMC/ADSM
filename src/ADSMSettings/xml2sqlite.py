@@ -429,7 +429,8 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         include_airborne_spread = xml.find( './/airborne-spread-model' ) is not None or xml.find( './/airborne-spread-exponential-model' ) is not None,
         include_direct_contact_spread = False,
         include_indirect_contact_spread = False,
-        use_airborne_exponential_decay = useAirborneExponentialDecay
+        use_airborne_exponential_decay = useAirborneExponentialDecay,
+        use_within_unit_prevalence = False
     )
     disease.save()
 
@@ -445,6 +446,8 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         immunePeriod = getPdf( el.find( './immunity-period' ), pdfNameSequence )
         if el.find( './prevalence' ) is not None:
             prevalence = getRelChart( el.find( './prevalence' ), relChartNameSequence )
+            disease.use_within_unit_prevalence = True
+            disease.save()
         else:
             prevalence = None
 
