@@ -516,7 +516,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.selenium.find_element_by_id('right-panel').find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(2)
         modal = self.selenium.find_element_by_css_selector('div.modal')
-        self.assertEqual("123", modal.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
+        self.assertEqual("123.1", modal.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
 
 
     def test_add_relational_function_by_file(self):
@@ -530,7 +530,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         self.submit_relational_form_with_file(right_panel)
         right_panel = self.selenium.find_element_by_css_selector('#right-panel')
-        self.assertEqual("123", right_panel.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
+        self.assertEqual("123.1", right_panel.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
 
 
     def submit_relational_form_with_file(self, container):
@@ -631,7 +631,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
     def test_save_scenario_failure(self):
         filename_field = self.selenium.find_element_by_css_selector('header form .filename input')
         try:
-            filename_field.send_keys('./\\ 123&% AZ')
+            filename_field.send_keys('./\\ 123.1&% AZ')
             self.selenium.find_element_by_css_selector('#save_scenario').click()
             time.sleep(1)
 
@@ -640,7 +640,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             self.assertIn("Error", alert.text)
         finally:
             try:
-                os.remove(workspace_path('Untitled Scenario./\\ 123&% AZ.sqlite3'))
+                os.remove(workspace_path('Untitled Scenario./\\ 123.1&% AZ.sqlite3'))
             except:
                 pass
 
@@ -655,7 +655,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         filename_field = self.selenium.find_element_by_css_selector('header form .filename input')
         try:
-            filename_field.send_keys('123 AZ')
+            filename_field.send_keys('123.1 AZ')
             filename_field.submit()
             time.sleep(3)
 
@@ -663,7 +663,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             self.assertNotIn('unsaved', save_button.get_attribute('class'))
         finally:
             try:
-                os.remove(workspace_path('Untitled Scenario123 AZ.sqlite3'))
+                os.remove(workspace_path('Untitled Scenario123.1 AZ.sqlite3'))
             except:
                 pass
 

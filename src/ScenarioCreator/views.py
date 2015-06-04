@@ -215,6 +215,11 @@ def initialize_points_from_csv(request):
             header = ['x', 'y']
         reader = csv.DictReader(lowercase_header(csvfile), fieldnames=header, dialect=dialect)
         entries = [line for line in reader]  # ordered list
+        try:
+            (float(entries[0]['x']), float(entries[0]['y']))  # the header sneaks in when there's a mix of float and int
+        except ValueError:
+            entries = entries[1:]  # clip the header
+        
         initial_values = {}
         for index, point in enumerate(entries):
             initial_values['relationalpoint_set-%i-id' % index] = ''
