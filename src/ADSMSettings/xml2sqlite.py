@@ -304,7 +304,7 @@ def readPopulation( populationFileName ):
         if description is None:
             description = ''
         else:
-            description = description.text
+            description = 'id=' + description.text
         typeName = el.find( './production-type' ).text
         productionType = ProductionType.objects.get_or_create( name=typeName )[0]
         size = int( el.find( './size' ).text )
