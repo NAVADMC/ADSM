@@ -2,9 +2,11 @@ import glob
 import time
 import os
 from unittest import skip
+from django.conf import settings
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 
@@ -227,7 +229,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         self.click_navbar_element('Disease Progression')
         self.selenium.find_element_by_id('left-panel').find_element_by_class_name('glyphicon-pencil').click()
-        time.sleep(1)
+        time.sleep(2)
         self.selenium.find_element_by_id('center-panel').find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(1)
 
@@ -492,7 +494,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         source_types = self.get_selected_production_types("destination")
         self.assertEqual(len(source_types), 0)
 
-    def test_deepest_modal_edit(self):
+    def test_deepest_modal_edit_and_file_upload(self):
         self.setup_scenario()
         self.click_navbar_element("Disease Progression")
         
@@ -507,6 +509,17 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         modal = self.selenium.find_element_by_css_selector('div.modal')
 
         self.assertIn("Import Points from File", modal.text)
+
+        #check and see if you can build a Rel from file upload
+        self.selenium.find_element_by_id("file").send_keys(os.path.join(settings.BASE_DIR, "ScenarioCreator\\tests\\population_fixtures\\points.csv"))  # this is sensitive to the starting directory
+        modal.find_element_by_id('id_name').send_keys('imported from file')
+        modal.find_element_by_class_name('btn-save').click()
+        time.sleep(2)
+        self.selenium.find_element_by_id('right-panel').find_element_by_class_name('glyphicon-pencil').click()
+        time.sleep(2)
+        modal = self.selenium.find_element_by_css_selector('div.modal')
+        self.assertEqual("123.0", modal.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
+
 
     def test_pdf_hide_unneeded_fields(self):
         """
