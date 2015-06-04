@@ -538,7 +538,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             os.path.join(settings.BASE_DIR, "ScenarioCreator\\tests\\population_fixtures\\points.csv"))  # this is sensitive to the starting directory
         container.find_element_by_id('id_name').send_keys('imported from file')
         container.find_element_by_class_name('btn-save').click()
-        time.sleep(2)
+        time.sleep(3)
 
     def test_pdf_hide_unneeded_fields(self):
         """
