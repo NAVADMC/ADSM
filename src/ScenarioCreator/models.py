@@ -204,6 +204,7 @@ class Unit(BaseModel):
                 if len(kwargs[key]) > 1:
                     kwargs[key] = choice_char_from_value(kwargs[key], Unit._meta.get_field_by_name('initial_state')[0]._choices) or 'S'
         unit = cls(**kwargs)
+        unit.full_clean()
         return unit
 
     def __str__(self):

@@ -481,7 +481,7 @@ def upload_population(request):
     try:
         model = Population(source_file=file_path)
         model.save()
-    except (EOFError, ParseError) as error:
+    except (EOFError, ParseError, BaseException) as error:
         session.set_population_upload_status(status='Failed: %s' % error)
         return JsonResponse({"status": "failed", "message": str(error)})  # make sure to cast errors to string first
     # wait for Population parsing (up to 5 minutes)
