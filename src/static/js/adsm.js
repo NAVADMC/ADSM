@@ -28,10 +28,14 @@ $(function(){
         event.preventDefault();
         var $self = $(this)
         var formAction = $(this).attr('action');
+        var formData = new FormData($self[0])
         $.ajax({
             url: formAction,
             type: "POST",
-            data: $(this).serialize(),
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
             success: function(form_html) {
                 // Here we replace the form, for the
                 if($self.closest('#main-panel').length){ //in the main panel, just reload the page
@@ -445,11 +449,19 @@ var modelModal = {
                 //contentType: false}
     ajax_submit: function(url, success_callback, fail_callback){
         var $form = $('.modal-body form')
-        return $.post( url, $form.serialize()).done(function (html, status, xhr){
-            if (contains_errors(html)) { //html dataType  == failure probably validation errors
-                fail_callback(html)
-            } else {
-                success_callback(html)
+        return $.ajax({
+            url: url,
+            type: "POST",
+            data: new FormData($form[0]),
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function(html) {
+                if (contains_errors(html)) { //html dataType  == failure probably validation errors
+                    fail_callback(html)
+                } else {
+                    success_callback(html)
+                }
             }
         }).always(function() {
             $('.blocking-overlay').hide();
