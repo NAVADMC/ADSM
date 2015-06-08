@@ -278,6 +278,7 @@ def getBool( xml ):
 
 
 def readPopulation( populationFileName ):
+    print("Reading population file: ", populationFileName)
     fp = open( populationFileName, 'rb' )
     xml = ET.parse( fp ).getroot()
     fp.close()
@@ -303,7 +304,7 @@ def readPopulation( populationFileName ):
         if description is None:
             description = ''
         else:
-            description = description.text
+            description = 'id=' + description.text
         typeName = el.find( './production-type' ).text
         productionType = ProductionType.objects.get_or_create( name=typeName )[0]
         size = int( el.find( './size' ).text )
@@ -350,6 +351,7 @@ def readPopulation( populationFileName ):
 
 
 def readParameters( parameterFileName, saveIterationOutputsForUnits ):
+    print("Reading parameters file:", parameterFileName)
     fp = open( parameterFileName, 'rb' )
     try:
         xml = ET.parse( fp ).getroot()
@@ -379,6 +381,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         fileAsString = fileAsString.replace( 'xmlns:', 'xmlns:xdf="http://xml.gsfc.nasa.gov/XDF" xmlns:', 1 )
         xml = ET.fromstring( fileAsString )
     fp.close()
+    print("Done reading parameters file.  Constructing New Scenario...")
 
     Scenario.objects.get_or_create(description = xml.find( './description' ).text)
 
@@ -426,7 +429,8 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         include_airborne_spread = xml.find( './/airborne-spread-model' ) is not None or xml.find( './/airborne-spread-exponential-model' ) is not None,
         include_direct_contact_spread = False,
         include_indirect_contact_spread = False,
-        use_airborne_exponential_decay = useAirborneExponentialDecay
+        use_airborne_exponential_decay = useAirborneExponentialDecay,
+        use_within_unit_prevalence = False
     )
     disease.save()
 
@@ -442,6 +446,8 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         immunePeriod = getPdf( el.find( './immunity-period' ), pdfNameSequence )
         if el.find( './prevalence' ) is not None:
             prevalence = getRelChart( el.find( './prevalence' ), relChartNameSequence )
+            disease.use_within_unit_prevalence = True
+            disease.save()
         else:
             prevalence = None
 
@@ -806,6 +812,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     control_protocol = protocol
                 )
                 assignment.save()
+            protocol.use_exams = True
             if contactType == 'direct' or contactType == 'both':
                 if direction == 'out' or direction == 'both':
                     protocol.examine_direct_forward_traces = True

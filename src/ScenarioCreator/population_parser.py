@@ -2,6 +2,7 @@ import csv
 import itertools
 import os
 import xml.etree.ElementTree as ET
+import ScenarioCreator.models
 
 
 def gettext(elem):
@@ -11,6 +12,20 @@ def gettext(elem):
 def lowercase_header(iterator):
     """Source: http://stackoverflow.com/questions/16937457/python-dictreader-how-to-make-csv-column-names-lowercase"""
     return itertools.chain([next(iterator).lower()], iterator)
+
+
+
+def convert_numeric_status_codes(entry):
+    try:
+        state_code = int(entry['initial_state'])
+        letter = ScenarioCreator.models.Unit.initial_state_choices[state_code][0]
+        entry['initial_state'] = letter
+        return entry
+    except ValueError:
+        return entry
+    except IndexError:
+        raise ET.ParseError("State code " + str(entry['initial_state']) + " not recognized.  The only known unit statuses are:" + 
+                         str(ScenarioCreator.models.Unit.initial_state_choices))
 
 
 class PopulationParser(object):
@@ -46,6 +61,7 @@ class PopulationParser(object):
             reader = csv.DictReader(lowercase_header(csvfile))
             for unit in reader:
                 entry = {store_key: unit[header] for header, store_key in mapping.items()}
+                entry = convert_numeric_status_codes(entry)
                 # preserve the information from any colulmns I didn't use
                 entry['user_notes'] = ', '.join(["%s=%s" % (key, value) for key, value in unit.items() if key not in mapping])
                 self.population.append(entry)
@@ -66,13 +82,23 @@ class PopulationParser(object):
              'latitude': 'latitude',
              'size': 'initial_size',
              'status': 'initial_state'},
-            {'productiontype': 'production_type',  # NAADSM CSV population export
+            {'productiontype': 'production_type',  # NAADSM CSV includes HerdSize synonym
+             'lon': 'longitude',
+             'lat': 'latitude',
+             'herdsize': 'initial_size',
+             'status': 'initial_state',
+             'daysinstate': 'days_in_initial_state',
+             'daysleftinstate': 'days_left_in_initial_state'},
+            {'productiontype': 'production_type',  # NAADSM CSV includes HerdSize synonym without state timers
+             'lon': 'longitude',
+             'lat': 'latitude',
+             'herdsize': 'initial_size',
+             'status': 'initial_state',},
+            {'productiontype': 'production_type',  # NAADSM CSV population export without state timers
              'lon': 'longitude',
              'lat': 'latitude',
              'unitsize': 'initial_size',
-             'status': 'initial_state',
-             'daysinstate': 'days_in_initial_state',
-             'daysleftinstate': 'days_left_in_initial_state'}
+             'status': 'initial_state'}
         ]
         parsing_success = False
         for mapping in possible_formats:

@@ -62,15 +62,16 @@ def import_legacy_scenario(param_path, popul_path):
         
     
 def import_naadsm_scenario(request):
-    if request.method == "POST":
+    if 'POST' in request.method:
         initialized_form = ImportForm(request.POST, request.FILES)
     else:  # GET page for the first time
         initialized_form = ImportForm()
     if initialized_form.is_valid():
         run_importer(request)
         return redirect('/')
-    context = {'form': initialized_form, 'title': "Import Legacy NAADSM Scenario in XML format"}
-    context['base_page'] = 'ScenarioCreator/crispy-model-form.html'
+    context = {'form': initialized_form, 
+               'title': "Import Legacy NAADSM Scenario in XML format", 
+               'base_page': 'ScenarioCreator/crispy-model-form.html'}
     return render(request, 'ScenarioCreator/navigationPane.html', context)  # render in validation error messages
 
 
