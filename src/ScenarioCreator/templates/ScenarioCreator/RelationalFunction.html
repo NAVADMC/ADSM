@@ -4,6 +4,15 @@
 {% load db_status_tags %}
 
 {% block content %}
+<form id="relational-form" class="ajax"  method="post" action="{{ action }}" enctype="multipart/form-data">
+    
+{#    <h2 id="title">{{ title }}</h2>#}
+    {% crispy form %}
+    <label for="file">Or Import Points from File... &nbsp</label>    
+    <input type="file" id="file" name="file" accept=".csv">
+
+    {% include "ScenarioCreator/EmbeddedFormset.html" %}
+    {% include "ScenarioCreator/EditButtons.html" %}
     <script>
         $(document).on('submit', '#relational-form', function(){
             $('#formset tbody tr').each(function(){
@@ -15,14 +24,6 @@
             })
         });
     </script>
-<h2 id="title">{{ title }}</h2>
-<form id="relational-form" class="ajax"  method="post" action="{{ action }}" enctype="multipart/form-data">
-    {% crispy form %}
-    <label for="file">Or Import Points from File... &nbsp</label>    
-    <input type="file" id="file" name="file" accept=".csv">
-
-    {% include "ScenarioCreator/EmbeddedFormset.html" %}
-    {% include "ScenarioCreator/EditButtons.html" %}
 </form>
 {#    {% crispy formset helper %}#}
 {% endblock %}

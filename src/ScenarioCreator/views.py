@@ -56,7 +56,9 @@ def disable_all_controls_json(request):
     if 'POST' in request.method:
         new_value = request.POST['use_controls']
         set_to = new_value == 'false'  #logical inversion because of use_controls vs disable_controls
-        ControlMasterPlan.objects.all().update(disable_all_controls=set_to)
+        controls = ControlMasterPlan.objects.get()
+        controls.disable_all_controls = set_to
+        controls.save()
         return JsonResponse({'status':'success'})
     else:
         return JsonResponse({'disable_all_controls': ControlMasterPlan.objects.get().disable_all_controls})
@@ -215,19 +217,22 @@ def initialize_points_from_csv(request):
             header = ['x', 'y']
         reader = csv.DictReader(lowercase_header(csvfile), fieldnames=header, dialect=dialect)
         entries = [line for line in reader]  # ordered list
+        try:
+            (float(entries[0]['x']), float(entries[0]['y']))  # the header sneaks in when there's a mix of float and int
+        except ValueError:
+            entries = entries[1:]  # clip the header
+        
         initial_values = {}
         for index, point in enumerate(entries):
             initial_values['relationalpoint_set-%i-id' % index] = ''
             initial_values['relationalpoint_set-%i-relational_function' % index] = ''
-            initial_values['relationalpoint_set-%i-x' % index] = point['x']
-            initial_values['relationalpoint_set-%i-y' % index] = point['y']
+            initial_values['relationalpoint_set-%i-x' % index] = point['x'].strip()
+            initial_values['relationalpoint_set-%i-y' % index] = point['y'].strip()
+            initial_values['relationalpoint_set-%i-DELETE' % index] = ''  # these could be set to delete by the js
         initial_values['relationalpoint_set-TOTAL_FORMS'] = str(len(entries))
         initial_values['relationalpoint_set-INITIAL_FORMS'] = '0'
         initial_values['relationalpoint_set-MAX_NUM_FORMS'] = '1000'
         request.POST.update(initial_values)
-    try:
-        os.remove(file_path)  # we don't want to keep these files around in the workspace
-    except: pass  # possible that file was never created
     return request
 
 
@@ -467,9 +472,8 @@ def upload_population(request):
     if 'filename' in request.POST:
         file_path = workspace_path(request.POST.get('filename')) 
     else:
-        overwrite_ok = 'overwrite_ok' in request.POST  # TODO: not used yet
         try:
-            file_path = handle_file_upload(request, overwrite_ok=overwrite_ok)
+            file_path = handle_file_upload(request, overwrite_ok=True)
         except FileExistsError:
             return JsonResponse({"status": "failed", 
                                  "message": "Cannot import file because a file with the same name already exists in the list below."}) 

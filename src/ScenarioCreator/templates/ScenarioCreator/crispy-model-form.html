@@ -13,7 +13,11 @@
 {#        <a href="{{ model_link|parent_link }}">List {{ pretty_name }}s</a> &nbsp;> &nbsp;#}
 {#    {% endif %}#}
 {#    {{ title }}</h1>#}
-    <form class="ajax" action="{{ action }}">
-        {% crispy form %}
-    </form>
+    {% if action %}
+        <form class="ajax" action="{{ action }}">
+            {% crispy form %}
+        </form>
+    {% else %}
+            {% crispy form %}
+    {% endif %}
 {% endblock %}

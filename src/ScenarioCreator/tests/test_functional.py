@@ -2,16 +2,18 @@ import glob
 import time
 import os
 from unittest import skip
+from django.conf import settings
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 
 from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
     ProbabilityFunction, RelationalFunction, RelationalPoint, Population, \
     DirectSpread, IndirectSpread, AirborneSpread, ProductionType, \
-    DiseaseProgressionAssignment, Unit, ControlMasterPlan
+    DiseaseProgressionAssignment, Unit, ControlMasterPlan, Zone, ZoneEffect
 from ADSMSettings.utils import workspace_path
 from Results.utils import delete_all_outputs
 
@@ -201,6 +203,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             exposure_direction_start=0,
             exposure_direction_end=360,
             max_distance=3)
+        zone = Zone.objects.create(name="Medium", radius=10)
 
     def select_option(self, element_id, visible_text):
         target = self.selenium.find_element_by_id(element_id)
@@ -227,7 +230,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         self.click_navbar_element('Disease Progression')
         self.selenium.find_element_by_id('left-panel').find_element_by_class_name('glyphicon-pencil').click()
-        time.sleep(1)
+        time.sleep(3)
         self.selenium.find_element_by_id('center-panel').find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(1)
 
@@ -492,7 +495,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         source_types = self.get_selected_production_types("destination")
         self.assertEqual(len(source_types), 0)
 
-    def test_deepest_modal_edit(self):
+    def test_deepest_modal_edit_and_file_upload(self):
         self.setup_scenario()
         self.click_navbar_element("Disease Progression")
         
@@ -506,7 +509,36 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         modal = self.selenium.find_element_by_css_selector('div.modal')
 
-        self.assertIn("Create a Relational Function", modal.text)
+        self.assertIn("Import Points from File", modal.text)
+
+        #check and see if you can build a Rel from file upload
+        self.submit_relational_form_with_file(modal)
+        self.selenium.find_element_by_id('right-panel').find_element_by_class_name('glyphicon-pencil').click()
+        time.sleep(2)
+        modal = self.selenium.find_element_by_css_selector('div.modal')
+        self.assertEqual("123.1", modal.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
+
+
+    def test_add_relational_function_by_file(self):
+        self.setup_scenario()
+        self.click_navbar_element("Zone Effects", 2)
+        
+        self.select_option('id_form-0-effect', 'Add...')
+        self.select_option('id_zone_indirect_movement', 'Add...')
+        
+        right_panel = self.selenium.find_element_by_css_selector('#right-panel')
+
+        self.submit_relational_form_with_file(right_panel)
+        right_panel = self.selenium.find_element_by_css_selector('#right-panel')
+        self.assertEqual("123.1", right_panel.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
+
+
+    def submit_relational_form_with_file(self, container):
+        container.find_element_by_id("file").send_keys(
+            os.path.join(settings.BASE_DIR, "ScenarioCreator\\tests\\population_fixtures\\points.csv"))  # this is sensitive to the starting directory
+        container.find_element_by_id('id_name').send_keys('imported from file')
+        container.find_element_by_class_name('btn-save').click()
+        time.sleep(3)
 
     def test_pdf_hide_unneeded_fields(self):
         """
@@ -599,7 +631,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
     def test_save_scenario_failure(self):
         filename_field = self.selenium.find_element_by_css_selector('header form .filename input')
         try:
-            filename_field.send_keys('./\\ 123&% AZ')
+            filename_field.send_keys('./\\ 123.1&% AZ')
             self.selenium.find_element_by_css_selector('#save_scenario').click()
             time.sleep(1)
 
@@ -608,7 +640,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             self.assertIn("Error", alert.text)
         finally:
             try:
-                os.remove(workspace_path('Untitled Scenario./\\ 123&% AZ.sqlite3'))
+                os.remove(workspace_path('Untitled Scenario./\\ 123.1&% AZ.sqlite3'))
             except:
                 pass
 
@@ -623,15 +655,15 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         filename_field = self.selenium.find_element_by_css_selector('header form .filename input')
         try:
-            filename_field.send_keys('123 AZ')
+            filename_field.send_keys('123.1 AZ')
             filename_field.submit()
-            time.sleep(2)
+            time.sleep(3)
 
             save_button = self.selenium.find_element_by_css_selector('header form button[type="submit"]')
             self.assertNotIn('unsaved', save_button.get_attribute('class'))
         finally:
             try:
-                os.remove(workspace_path('Untitled Scenario123 AZ.sqlite3'))
+                os.remove(workspace_path('Untitled Scenario123.1 AZ.sqlite3'))
             except:
                 pass
 
