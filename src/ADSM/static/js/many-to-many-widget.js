@@ -221,10 +221,8 @@ many_to_many_widget = (function(form_state){
     on the second column. */
     var construct_filter = function (row) {
         var filter = {};
-        var sources_selected = $('tbody th:first-child .selected').map(function(){return $(this).attr('data-pk')});
-        filter[get_column_name(1)] = sources_selected.length ? sources_selected :
-            [$(row).find('th:first-child span').attr('data-pk')];
-        filter[get_column_name(2)] = [$(row).find('th:nth-child(2) span').attr('data-pk')];
+        filter[get_column_name(1)] = [$('tbody th:nth-child(1) .selected').map(function(){return $(this).attr('data-pk')})][0];//[0] is important to get the right data type
+        filter[get_column_name(2)] = [$('tbody th:nth-child(2) .selected').map(function(){return $(this).attr('data-pk')})][0];
         return filter
     };
 
@@ -239,6 +237,7 @@ many_to_many_widget = (function(form_state){
     /*Ensures that the state of the displayed widget is consistent with form_state for the appropriate
     * row / column pairs.*/
     function update_display_inputs(){
+        return;
         check_valid_selection()
         my_table.find('tbody tr').each(function(row_index, row){
             var filter = construct_filter(row)
