@@ -74,19 +74,6 @@ form_state = (function(form){
         return matching_rows
     };
 
-    var get_consensus = function(filters){ //TODO: can probably be deleted
-        var matching_rows = get(filters);
-        var consensus_row = matching_rows[0];//TODO: handle empty
-        $.each(matching_rows, function(row_index, row_values){
-            $.each(row_values, function(key, value){
-                if(consensus_row[key] != value){ //inconsistency
-                    consensus_row[key] = 'differs'
-                }
-            })
-        });
-        return consensus_row
-    };
-
     //This will set all rows that meets the filters criteria.  You can pass in multiple input variables
     //to be set in that row.
     var set = function(filters, variables){
@@ -108,7 +95,6 @@ form_state = (function(form){
     return {
         'get':  get,
         'set':  set,
-        'get_consensus': get_consensus
     };
 })($('section form'));
 
@@ -210,7 +196,6 @@ many_to_many_widget = (function(form_state){
         insert_select_buttons();
         insert_bulk_selectors();
         create_body_rows()
-        update_display_inputs() //called from events normally, but we want to initialize
 
         $('.m2mtable').append(my_table);
         $(document).on('change', '.m2mtable tbody select', update_state_inputs)//register event listener
@@ -219,7 +204,7 @@ many_to_many_widget = (function(form_state){
 
     /*Creates a filter using any selected items from the first column and the matching row header
     on the second column. */
-    var construct_filter = function (row) {
+    var construct_filter = function () {
         var filter = {};
         filter[get_column_name(1)] = [$('tbody th:nth-child(1) .selected').map(function(){return $(this).attr('data-pk')})][0];//[0] is important to get the right data type
         filter[get_column_name(2)] = [$('tbody th:nth-child(2) .selected').map(function(){return $(this).attr('data-pk')})][0];
@@ -233,28 +218,9 @@ many_to_many_widget = (function(form_state){
             $('.bulk-apply').attr('disabled', 'disabled')
         }
     }
-    
-    /*Ensures that the state of the displayed widget is consistent with form_state for the appropriate
-    * row / column pairs.*/
-    function update_display_inputs(){
-        return;
-        check_valid_selection()
-        my_table.find('tbody tr').each(function(row_index, row){
-            var filter = construct_filter(row)
-            var row_values = form_state.get_consensus(filter);
-            $(row).find('td').each(function(column_index, column){
-                var column_name = get_column_name(column_index+3);//+3 = +1 (not zero indexed) + 2 for the two row headers
-                $(column).find('select option.differs').remove();
-                if(row_values[column_name] == 'differs'){
-                    $(column).find('select').append('<option class="differs" value="differs">- Differs -</option>');
-                }
-                $(column).find(':input').val(row_values[column_name]); //set the select to the matching formset select
-            })
-        })
-    };
 
-    function update_state_inputs(){
-        var filters = construct_filter($(this).closest('tr'))
+    function update_state_inputs(){ //TODO: this gets executed twice for some reason.  Could be faster.
+        var filters = construct_filter()
         var col_name = get_column_name($(this).closest('td').index()+1)
         var values = {} //we have to wrap it for a variable dict key
         values[col_name] = $(this).val() // variable key name
@@ -297,19 +263,16 @@ many_to_many_widget = (function(form_state){
                     console.log(col_index, start_row, end_row, rows);
                 }
              }
-            many_to_many_widget.update_display_inputs();
             prev_click = this;
         });
 
         $(document).on('click', 'button.select-all', function(){
             var col = $(this).closest('td').index()+1;
             $(this).closest('table').find('tbody tr :nth-child('+col+') span').addClass('selected')
-            many_to_many_widget.update_display_inputs();
         })
         $(document).on('click', 'button.deselect', function(){
             var col = $(this).closest('td').index()+1;
             $(this).closest('table').find('tbody tr :nth-child('+col+') span').removeClass('selected')
-            many_to_many_widget.update_display_inputs();
         })
         
         $(document).on('click', 'button.bulk-apply', function(){
@@ -327,7 +290,6 @@ many_to_many_widget = (function(form_state){
     return {
         'render': render,
         'get_column_name': get_column_name,
-        'update_display_inputs': update_display_inputs,
         'bulk_apply': bulk_apply,
         'check_valid_selection': check_valid_selection,
         'update_state_inputs': update_state_inputs,
