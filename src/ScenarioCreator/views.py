@@ -522,7 +522,10 @@ def population(request):
     FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated, can_delete=False)
     if save_formset_succeeded(FarmSet, Unit, context, request):
         return redirect(request.path)
-    if Population.objects.filter(id=1).exists():
+    if Population.objects.filter(id=1, ).exists():
+        if not Unit.objects.count(): # #571 no units were imported: error, blank files
+            Population.objects.all().delete()
+            return population(request)  # delete blank and try again
         sort_type = request.GET.get('sort_by', 'initial_state')
         query_filter = Q()
         params = filtering_params(request)
