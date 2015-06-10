@@ -21,14 +21,10 @@
 </head>
 <body>
 <header>
-    {% include 'ScenarioName.html' %}
+    <h1 class="filename">
+        {{ filename }}
+    </h1>
 
-    <div id="admin_link" class="buttonHolder">
-        {% if update_available and not update_on_startup %}
-            <a href="#" class="btn btn-default" id="update_adsm" title="{{dev_version}}">update ADSM</a>
-        {% endif %}
-        <a href="/app/Backend/" class="btn btn-default" title="{{dev_version}}" style="display:inline;">advanced panel</a>
-    </div>
 </header>
 
     {% block main %}
@@ -42,14 +38,14 @@
     </div>
 </div>
     {% include "file_panel.html" %}
-
+    {% include "settings_panel.html" %}
     {% include "population_panel.html" %}
 
 <div id="toolbar">
     <a href="#" title="Project Panel" class="TB_btn" id="TB_file" TB-target="#file_panel"></a>
-    <a href="#" title="Settings Panel" class="TB_btn" id="TB_settings"></a>
+    <a href="#" title="Settings Panel" class="TB_btn" id="TB_settings" TB-target="#settings_panel"></a>
     <a href="#" title="Population Panel" class="TB_btn" id="TB_population" TB-target="#population_panel"></a>
-    <a href="#" title="Functions Panel" class="TB_btn" id="TB_functions"></a>
+    <a href="#" title="Functions Panel" class="TB_btn" id="TB_functions" TB-target="#functions_panel"></a>
 </div>
   
 </body>

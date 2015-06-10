@@ -152,15 +152,6 @@ header div {
     background:#606060; 
 }
 
-header #admin_link {
-    position: absolute;
-
-    right: 0;
-    margin-right: 0px;
-    min-width: 230px;
-    padding-top:9px;
-}
-
 header .buttonHolder{
     padding-top:8px;
 }
@@ -186,14 +177,6 @@ header #file_actions .btn {
     width: 78px;
 }
 
-
-header #admin_link .btn{
-    background-color:transparent;
-    transition: all .2s ease;
-    padding: 4px 10px;
-    margin-left: 0px; 
-    height: 30px;
-}
 header .admin .btn{
     padding-top: 1px !important;
 }
@@ -207,11 +190,11 @@ header .buttonHolder .btn:first-child:after{
     top: 5px;
     right: -1px;
 }
-header #file_actions .btn:first-child:after {
+#file_actions .btn:first-child:after {
     top: 0px;
 }
 
-header #file_actions .btn:last-child {
+#file_actions .btn:last-child {
     height:30px;
     border:1px solid gray;
     background-color: #707070;
@@ -220,22 +203,14 @@ header #file_actions .btn:last-child {
 header .buttonHolder .btn:hover {
     color: rgba(255, 255, 255, 1);
 }
-header #file_actions a:hover .icon {
+#file_actions a:hover .icon {
     opacity: 1;
 }
 
-header #file_actions .btn:last-child:hover {
+ #file_actions .btn:last-child:hover {
     background-color: #a8a8a8;
 }
 
-header #admin_link .btn:focus {
-    outline: 1px solid rgba(255, 255, 255, .8) !important;
-    outline-offset: -1px;
-    color: white;
-    box-sizing: border-box;
-    padding: 4px 10px;
-    margin-left: 0;
-}
 .loading_button {
     background: url("../working.gif") no-repeat center;
     background-color: #808080 !important;
