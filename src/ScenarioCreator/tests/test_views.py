@@ -54,7 +54,7 @@ class PopulationTestCase(TestCase):
     def test_post_failure_bad_xml(self):
         expected_results = {
             'status': 'failed',
-            'message': 'mismatched tag: line 17, column 2'
+            'message': "This is not a valid Population file: "+'mismatched tag: line 17, column 2'
         }
         try:
             os.remove(workspace_path('Population_Test_Invalid.xml'),)

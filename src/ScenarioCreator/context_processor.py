@@ -75,6 +75,7 @@ def basic_context(request):
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
                'outputs_exist': outputs_exist(),
                'whole_scenario_warnings': whole_scenario_validation(),
+               'dev_version': git_adsm_sha(),
                })
 
         validation_models = {'Scenario': 'Scenario/1/', 
