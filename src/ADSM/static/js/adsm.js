@@ -7,8 +7,16 @@ $(function(){
         $(this).closest('form').closest('div').html('') //delete everything from the div containing the form
     })
     
-    $(document).on('click', '#TB_population', function(){
-        $('#population_panel').toggleClass('TB_panel_closed')
+    $(document).on('click', '.TB_btn', function(){
+        var already_open = $(this).hasClass('active') //check before altering anything
+        $('.TB_btn.active').removeClass('active') //close anything that might be open
+        $('.TB_panel').addClass('TB_panel_closed')
+
+        if(!already_open){
+            $(this).addClass('active')
+            var target_str = $(this).attr('TB-target')
+            $(target_str).removeClass('TB_panel_closed')
+        }
     })
     
     $(document).on('click', 'a[load-target]', function(event){

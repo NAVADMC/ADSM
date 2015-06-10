@@ -41,15 +41,14 @@
         <img src="{{ STATIC_URL }}working.gif">
     </div>
 </div>
+    {% include "file_panel.html" %}
 
     {% include "population_panel.html" %}
 
 <div id="toolbar">
-    <a href="#" title="Project Panel" class="TB_btn" id="TB_file"></a>
+    <a href="#" title="Project Panel" class="TB_btn" id="TB_file" TB-target="#file_panel"></a>
     <a href="#" title="Settings Panel" class="TB_btn" id="TB_settings"></a>
-    <a href="#" title="Population Panel" class="TB_btn" id="TB_population"></a>
-
-
+    <a href="#" title="Population Panel" class="TB_btn" id="TB_population" TB-target="#population_panel"></a>
     <a href="#" title="Functions Panel" class="TB_btn" id="TB_functions"></a>
 </div>
   
