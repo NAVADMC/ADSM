@@ -49,6 +49,7 @@ $(function(){
                 if($self.closest('#main-panel').length){ //in the main panel, just reload the page
                     $('#main-panel').replaceWith(form_html)
                 }else{
+                    $('.scenario-status p').addClass('unsaved')
                     $self.replaceWith(form_html)
                     if(formAction.lastIndexOf('new/') != -1){ //new model created
                         var lastClickedSelect = get_parent_select($self);
@@ -86,8 +87,8 @@ $(function(){
                 });
             }
         });
-    }); 
-    
+    });
+
     $(document).on('saved', 'form:has(.unsaved)', function(){ //fixes 'Save' button with wrong color state
         $(this).find('.unsaved').removeClass('unsaved');
     })
@@ -400,9 +401,9 @@ var attach_visibility_controller = function (self){
 
 
 var check_file_saved = function(){
-    if( $('body header form div button').hasClass('unsaved'))
+    if( $('body header .unsaved').length)
     {
-        var filename = $('body header form .filename input').attr('value')
+        var filename = $('header .filename').text().trim()
         var dialog = new BootstrapDialog.show({
             title: 'Unsaved Scenario Confirmation',
             closable: false,

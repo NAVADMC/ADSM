@@ -21,10 +21,21 @@
 </head>
 <body>
 <header>
-    <h1 class="filename">
-        {{ filename }}
-    </h1>
-
+        <div class="row">
+            <div class="col-md-2">
+                <h1>ADSM</h1>
+                <p>Animal Disease Spread Model</p>
+            </div>
+            <div class="col-md-8">
+                <h1 class="filename">
+                    {{ filename }}
+                </h1>
+            </div>
+            <div class="col-md-2 scenario-status">
+                <h2>Base Scenario</h2>
+                <p {% if unsaved_changes %}class="unsaved"{% endif %}>changes pending...</p>
+            </div>
+        </div>
 </header>
 
     {% block main %}
