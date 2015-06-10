@@ -254,13 +254,20 @@ $(function(){
             return false;
         }
     });
-
 })
 
 //#####################################################################################//
 //#####################################################################################//
 
-function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTimeout(d),d=setTimeout(function(){d=null,c||a.apply(e,f)},b),c&&!d&&a.apply(e,f)}};
+function debounce(a, b, c) {
+    var d;
+    return function () {
+        var e = this, f = arguments;
+        clearTimeout(d), d = setTimeout(function () {
+            d = null, c || a.apply(e, f)
+        }, b), c && !d && a.apply(e, f)
+    }
+};
 
 
 safe_save = function(url, data, new_link){
@@ -306,6 +313,7 @@ function open_panel_if_needed(){
      $('.productiontypelist, .grouplist').each(function(){
         $('#population_panel').removeClass('TB_panel_closed')
     })
+    check_if_TB_panel_form_mask_needed()
 }
 
 function populate_pdf_panel(select) {
@@ -549,5 +557,16 @@ function reload_model_list($form) {
     $('#left-panel').load(window.location + " #left-panel>*")
     if(action.indexOf('ProductionGroup') != -1 || action.indexOf('ProductionType') != -1){
         $('#population_panel').load("/setup/OutputSettings/1/ #population_panel>*")
+    }
+}
+
+function check_if_TB_panel_form_mask_needed(){  // I'm currently assuming that all forms are coming from the [load-target] attribute
+    var $form = $('#toolbar form')
+    if($form.length){
+        var mask = $('<div class="modal-backdrop fade in"></div>');
+        $('#toolbar').after(mask)
+        $form.find('.btn-cancel').click(function(){mask.hide()})
+        $form.find('.btn-save').click(function(){mask.hide()})
+        $('#toolbar').css('z-index', 1050)  // can't seem to bring out a smaller sub component with z-index
     }
 }
