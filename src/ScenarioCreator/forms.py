@@ -593,6 +593,11 @@ class StopVaccinationForm(BaseForm):
         widgets = {'trigger_group': ProductionTypeList()}
 
 
-
+class VaccinationRingRuleForm(BaseForm):
+    class Meta(object):
+        model = VaccinationRingRule
+        exclude = []
+        widgets = {'trigger_group': ProductionTypeList(),
+                   'target_group': ProductionTypeList()}
 
 

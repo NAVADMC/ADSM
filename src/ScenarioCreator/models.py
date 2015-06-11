@@ -461,7 +461,7 @@ class ProtocolAssignment(BaseModel):
 
     _master_plan = models.ForeignKey('ControlMasterPlan',
                                      help_text='Points back to a master plan for grouping purposes.')
-    production_type = models.ForeignKey('ProductionType', unique=True,
+    production_type = models.OneToOneField('ProductionType',
         help_text='The production type that these outputs apply to.', )
     control_protocol = models.ForeignKey('ControlProtocol', blank=True, null=True,  # Just to note you're excluding it
         help_text='The control protocol to apply to this production type.')
@@ -515,7 +515,7 @@ class DiseaseProgression(BaseModel):
 
 
 class DiseaseProgressionAssignment(BaseModel):
-    production_type = models.ForeignKey('ProductionType', unique=True,
+    production_type = models.OneToOneField('ProductionType',
         help_text='The ' + wiki("production type") + ' that these outputs apply to.', )
     progression = models.ForeignKey('DiseaseProgression', blank=True, null=True) # can be excluded from disease progression
     # Since there are ProductionTypes that can be listed without having a DiseaseProgressionAssignment,
@@ -822,14 +822,22 @@ class StopVaccination(FilteredVaccinationTrigger, InputSingleton):
         return format_html('{1} days with no more than {0} detections, in {2}', *bold_values)
 
     
+class VaccinationRingRule(BaseModel):
+    trigger_group = models.ManyToManyField(ProductionType, related_name="triggers_vaccination_ring")
+    outer_radius = FloatField(validators=[MinValueValidator(0.001), ], help_text="Outer edge of Vaccination Ring in Kilometers")
+    inner_radius = FloatField(blank=True, null=True, validators=[MinValueValidator(0.001), ],
+        help_text="Inner edge of Vaccination Ring in Kilometers, used to make a doughnut shape (optional)")  # optional, can be null
+    target_group = models.ManyToManyField(ProductionType, related_name="targeted_by_vaccination_ring")
 
-
-
-
-
-
-
-
+    def __str__(self):
+        bold_values = tuple(bold(str(x)) for x in [', '.join(pt.name for pt in self.trigger_group.all()),
+                                                   ', '.join(pt.name for pt in self.target_group.all()),
+                                                    self.outer_radius,])
+        if self.inner_radius:
+            inner = bold(str(self.inner_radius))
+            return format_html('When a Unit of {1} is detected vaccinate {2} Units between {0} km to {3} km', inner, *bold_values)
+        else:
+            return format_html('When a Unit of {0} is detected vaccinate {1} Units within {2} km', *bold_values)
 
 
 
