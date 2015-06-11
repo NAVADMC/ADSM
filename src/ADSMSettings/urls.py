@@ -4,7 +4,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    url('^LoadingScreen/$', 'ADSMSettings.views.loading_screen'),
+    url('^Startup/$', 'ADSMSettings.views.startup'),
     url('^Update/$', 'ADSMSettings.views.update_adsm_from_git'),
     url('^SaveScenario/$', 'ADSMSettings.views.save_scenario'),
     url('^NewScenario/$', 'ADSMSettings.views.new_scenario'),

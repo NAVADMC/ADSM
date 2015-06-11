@@ -1,7 +1,7 @@
     <form class="ajax" method="post" action="/app/SaveScenario/">
         <div id="file_actions" class="buttonHolder">
             {% spaceless %}
-            <a id="new_scenario" href="/?loading_url=/app/NewScenario/" class="btn btn-primary"><img src="{{ STATIC_URL }}icons/new.png" class="icon"> new</a>
+            <a id="new_scenario" href="/LoadingScreen/?loading_url=/app/NewScenario/" class="btn btn-primary"><img src="{{ STATIC_URL }}icons/new.png" class="icon"> new</a>
             <a id="open_scenario" href="/app/Workspace/"  class="btn btn-primary"><img src="{{ STATIC_URL }}icons/open.png" class="icon">&nbsp open</a>
             <button id="save_scenario" type="submit" class="btn btn-primary btn-save {% if unsaved_changes %} unsaved {% endif %}"><img src="{{ STATIC_URL }}icons/save.png" class="icon">&nbsp save</button>
             {% endspaceless %}

@@ -5,7 +5,6 @@ import re
 from glob import glob
 import platform
 from collections import defaultdict
-import threading
 
 from django.db import OperationalError
 from django.core.management import call_command
