@@ -8,8 +8,17 @@ from django.utils.html import strip_tags
 from ADSMSettings.models import scenario_filename, SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
-from ADSMSettings.utils import reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload
+from ADSMSettings.utils import reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup
 from Results.models import outputs_exist
+
+
+def home(request):
+    return redirect('/LoadingScreen/?loading_url=/app/Startup/')
+
+
+def startup(request):
+    graceful_startup()
+    return redirect('/setup/Scenario/1/')
 
 
 def loading_screen(request):
@@ -19,7 +28,7 @@ def loading_screen(request):
     try:
         context = {'loading_url': request.GET['loading_url']}
     except:
-        context = {'loading_url': 'setup/Scenario/1/'}
+        context = {'loading_url': '/setup/Scenario/1/'}
     return render(request, "LoadingScreen.html", context)
 
 
