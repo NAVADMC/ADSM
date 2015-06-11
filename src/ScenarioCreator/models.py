@@ -829,6 +829,13 @@ class VaccinationRingRule(BaseModel):
         help_text="Inner edge of Vaccination Ring in Kilometers, used to make a doughnut shape (optional)")  # optional, can be null
     target_group = models.ManyToManyField(ProductionType, related_name="targeted_by_vaccination_ring")
 
+    def clean_fields(self, exclude=None):
+        """Swap fields if their values are backwards"""
+        if self.inner_radius is not None and self.inner_radius > self.outer_radius:
+            temp = self.outer_radius
+            self.outer_radius = self.inner_radius
+            self.inner_radius = temp
+
     def __str__(self):
         bold_values = tuple(bold(str(x)) for x in [', '.join(pt.name for pt in self.trigger_group.all()),
                                                    ', '.join(pt.name for pt in self.target_group.all()),
