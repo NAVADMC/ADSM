@@ -37,8 +37,7 @@ def update_adsm_from_git(request):
 
 
 def file_dialog(request):
-    db_files = file_list(".sqlite3")
-    context = {'db_files': db_files,
+    context = {'db_files': (file_list(".sqlite3")),
                'title': 'Select a new Scenario to Open'}
     return render(request, 'ScenarioCreator/workspace.html', context)
 

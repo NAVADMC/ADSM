@@ -1,5 +1,19 @@
 <div class="col-xs-4 TB_panel TB_panel_closed layout-panel" id="file_panel">
     <h2>File Management</h2>
-
+    <h3>Currently Open</h3>
     {% include 'ScenarioName.html' %}
+
+    <h3>Available Scenarios</h3>
+    <ul id="file_list">
+        {% for file in db_files %}
+            <li><a href="/?loading_url=/app/OpenScenario/{{ file }}/">{{ file }}</a>
+                <a href="#" class="delete-button ajax-post pull-right" title="delete" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
+                <a href="/app/Copy/{{ file }}/" class="copy-button pull-right" title="duplicate" ></a>
+                {#<a href="/app/Download/target={{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>#}
+                </li>
+        {% endfor %}
+    </ul>
+
+    <a id="new_scenario" href="/?loading_url=/app/NewScenario/" class="btn btn-success">Create New</a>
+    <a href="/app/ImportScenario/" class="btn btn-info">Import NAADSM Legacy Scenario</a>
 </div>

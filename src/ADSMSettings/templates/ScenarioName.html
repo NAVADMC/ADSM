@@ -1,14 +1,15 @@
     <form class="ajax" method="post" action="/app/SaveScenario/">
+        <h4>{{ filename }}</h4>
         <div id="file_actions" class="buttonHolder">
             {% spaceless %}
-            <a id="new_scenario" href="/?loading_url=/app/NewScenario/" class="btn btn-primary"><img src="{{ STATIC_URL }}icons/new.png" class="icon"> new</a>
-            <a id="open_scenario" href="/app/Workspace/"  class="btn btn-primary"><img src="{{ STATIC_URL }}icons/open.png" class="icon">&nbsp open</a>
-            <button id="save_scenario" type="submit" class="btn btn-primary btn-save {% if unsaved_changes %} unsaved {% endif %}"><img src="{{ STATIC_URL }}icons/save.png" class="icon">&nbsp save</button>
+
+                <a href="#" class="delete-button ajax-post pull-right" title="delete" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
+                <a href="/app/Copy/{{ file }}/" class="copy-button pull-right" title="duplicate" ></a>
             {% endspaceless %}
         </div>
-        <h1 class="filename">
-            <input type="text" name="filename" value="{{ filename }}">
-        </h1>
+        {% if unsaved_changes %}
+            <p>Thie file contains unsaved changes.  <a id="save_scenario" type="submit" class="action_link">Save</a> changes?</p>
+        {% endif %}
         {% if failure_message %}
             <div class="alert alert-danger alert-dismissable">
                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
