@@ -24,6 +24,8 @@ function select_production_type(text, selector) {
         }
     })
     check_empty_status($(selector).first().closest('.productiontypelist'));
+    $(selector).closest('.layout-panel').find('.btn-save').removeAttr('disabled')
+
 }
 
 //child has selected attr, then remove .empty  has .productiontypelist
