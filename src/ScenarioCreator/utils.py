@@ -16,6 +16,24 @@ def whole_scenario_validation():
                                                       direct_contact_spread__isnull=False).count():
             warnings.append(
                 pt.name + " cannot spread disease from one animal to another, because Direct Spread %s -> %s has not been assigned." % (pt.name, pt.name))
+
+        if pt.targeted_by_vaccination_ring.count(): # subject to vaccination
+            if pt.protocolassignment is None or pt.protocolassignment.control_protocol is None:
+                warnings.append("FATAL: You must assign a Control Protocol to "+pt.name+" so that you can describe its response to vaccination.")
+            else:
+                protocol = pt.protocolassignment.control_protocol
+                required = ['vaccinate_detected_units',
+                            'days_to_immunity',
+                            'minimum_time_between_vaccinations',
+                            'vaccine_immune_period',
+                            'vaccination_priority',
+                            #'vaccination_demand_threshold',
+                            #'cost_of_vaccination_additional_per_animal',
+                            ]
+                for field in required:
+                    if getattr(protocol, field) is None:
+                        warnings.append("FATAL: The Control Protocol field '"+field+"' is required because "+pt.name+" is a target of vaccination.")
+
     if not Disease.objects.get().include_direct_contact_spread:
         warnings.append("Direct Spread is not enabled in this Simulation.")
     if not Unit.objects.filter(~Q(initial_state='S')).count():
