@@ -269,6 +269,10 @@ body>nav {
     margin-top: 54px;
 }
 
+#center-panel, #right-panel {
+    margin-top: 74px;
+}
+
 ul {
     padding-left: 5px; /*prevent style inheritance from above*/
 }
@@ -1462,6 +1466,7 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
     padding: 10px 20px;
 }
+
 .productiontypelist option, .grouplist option  {
     display:none;
     background-color: transparent;

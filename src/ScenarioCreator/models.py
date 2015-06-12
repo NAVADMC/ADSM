@@ -824,9 +824,8 @@ class StopVaccination(FilteredVaccinationTrigger, InputSingleton):
     
 class VaccinationRingRule(BaseModel):
     trigger_group = models.ManyToManyField(ProductionType, related_name="triggers_vaccination_ring")
-    outer_radius = FloatField(validators=[MinValueValidator(0.001), ], help_text="Outer edge of Vaccination Ring in Kilometers")
-    inner_radius = FloatField(blank=True, null=True, validators=[MinValueValidator(0.001), ],
-        help_text="Inner edge of Vaccination Ring in Kilometers, used to make a doughnut shape (optional)")  # optional, can be null
+    outer_radius = FloatField(validators=[MinValueValidator(0.001), ], )
+    inner_radius = FloatField(blank=True, null=True, validators=[MinValueValidator(0.001), ],)  # optional, can be null
     target_group = models.ManyToManyField(ProductionType, related_name="targeted_by_vaccination_ring")
 
     def clean_fields(self, exclude=None):
