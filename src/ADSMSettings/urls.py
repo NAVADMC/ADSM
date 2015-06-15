@@ -7,7 +7,7 @@ urlpatterns = patterns('',
     url('^Startup/$', 'ADSMSettings.views.startup'),
     url('^Update/$', 'ADSMSettings.views.update_adsm_from_git'),
     url('^SaveScenario/$', 'ADSMSettings.views.save_scenario'),
-    url('^NewScenario/$', 'ADSMSettings.views.new_scenario'),
+    url('^NewScenario/(?P<new_name>.*)$', 'ADSMSettings.views.new_scenario'),
     url('^Workspace/$', 'ADSMSettings.views.file_dialog'),
     url('^Backend/$', 'ADSMSettings.views.backend'),
 

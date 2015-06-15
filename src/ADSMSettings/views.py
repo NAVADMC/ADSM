@@ -169,10 +169,14 @@ def download_file(request):
     return response
 
 
-def new_scenario(request=None):
+def new_scenario(request=None, new_name=None):
     reset_db('scenario_db')
     reset_db('default')
     update_db_version()
+    if new_name:
+        try:
+            scenario_filename(new_name)
+        except: pass # validation may kick it back in which case they'll need to rename it in a file browser
     return redirect('/setup/Scenario/1/')
 
 
