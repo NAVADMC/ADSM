@@ -218,6 +218,38 @@ $(function(){
         });
     });
 
+    $(document).on('click', '[data-copy-link]', function(){
+        var link = $(this).attr('data-copy-link')
+        var is_current_scenario = link == '/app/SaveScenario/'
+        var dialog = new BootstrapDialog.show({
+            title: 'Scenario Save As...',
+            type: BootstrapDialog.TYPE_PRIMARY,
+            message: 'Enter the name of the new scenario: <input type="text" id="new_name">',
+            buttons: [
+                {
+                    label: 'Cancel',
+                    cssClass: 'btn',
+                    action: function(dialog){
+                        dialog.close();
+                    }
+                },
+                {
+                    label: 'Save As',
+                    cssClass: 'btn-primary',
+                    action: function(dialog){
+                            dialog.close();
+                            if(is_current_scenario){
+                                $('.filename input').val($('#new_name').val())
+                                $('.filename').closest('form').submit()
+                            } else {
+                                window.location = link + $('#new_name').val();
+                            }
+                    }
+                }
+            ]
+        });
+    })
+
     $('#id_disable_all_controls').change(function(event){
         var isChecked = $(this).prop('checked');
         var new_link = window.location;

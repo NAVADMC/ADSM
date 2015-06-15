@@ -292,7 +292,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
     def test_delete_population(self):
         population = Population.objects.create(source_file="ScenarioCreator/tests/population_fixtures/Population_Test_UTF8.xml")
 
-        self.click_navbar_element('Population')
+        self.click_navbar_element('Population', 2)
 
         # javascript is attaching to this event
         self.selenium.find_element_by_css_selector('[data-delete-link]').click()

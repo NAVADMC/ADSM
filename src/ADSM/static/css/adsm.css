@@ -149,7 +149,7 @@ header p {
     float: none;
 }
 
-.filename {
+header .filename {
     float: left;
     /*min-width: 540px;*/
     padding: 5px 20px;
@@ -157,9 +157,6 @@ header p {
 
 .filename input {
     border: none;
-    width: 100%;
-    color: white;
-    background:#606060; 
 }
 
 .scenario-status p{
@@ -258,7 +255,7 @@ body>nav {
 }
 
 .layout-panel {
-    margin-top: 54px;
+    margin-top: 75px;
 }
 
 ul {
@@ -349,10 +346,11 @@ ul {
 /*-------------------------------------------------------------*/
 /*-----TOOLBAR panels-----*/
 /*-------------------------------------------------------------*/
-.TB_panel {
+.layout-panel.TB_panel { /*needs to be more specific than the .layout-panel rule */
     position: fixed;
     right: 0;
     top:75px;
+    margin-top: 5px;
     margin-right: 50px;
     max-width: 460px;
     min-height: 200px;
@@ -438,7 +436,7 @@ ul {
 #setupMenu-before {
     content:"";
     position: fixed;
-    top: 54px;
+    top: 75px;
     left: 0;
     display: block;
     width: 170px;

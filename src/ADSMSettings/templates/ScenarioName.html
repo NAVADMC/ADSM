@@ -1,14 +1,17 @@
     <form class="ajax" method="post" action="/app/SaveScenario/">
-        <h4>{{ filename }}</h4>
+        <h3 class="filename">
+            <div class="edit-mask"></div>
+            <input type="text" name="filename" value="{{ filename }}">
+        </h3>
         <div id="file_actions" class="buttonHolder">
             {% spaceless %}
 
                 <a href="#" class="delete-button ajax-post pull-right" title="delete" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
-                <a href="/app/Copy/{{ file }}/" class="copy-button pull-right" title="duplicate" ></a>
+                <a href="#" class="copy-button pull-right" title="duplicate" data-copy-link="/app/SaveScenario/"></a>
             {% endspaceless %}
         </div>
         {% if unsaved_changes %}
-            <p>Thie file contains unsaved changes.  <a id="save_scenario" type="submit" class="action_link">Save</a> changes?</p>
+            <p>Thie file contains unsaved changes.  <input id="save_scenario" type="submit" value="Save" class="action_link"> changes?</p>
         {% endif %}
         {% if failure_message %}
             <div class="alert alert-danger alert-dismissable">

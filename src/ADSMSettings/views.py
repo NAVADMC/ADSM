@@ -148,12 +148,15 @@ def delete_file(request, target):
     return HttpResponse()
 
 
-def copy_file(request, target):
-    copy_name = re.sub(r'(?P<name>.*)\.(?P<ext>.*)', r'\g<name> - Copy.\g<ext>', target)
-    print("Copying", target, "to", copy_name, ". This could take several minutes...")
-    shutil.copy(workspace_path(target), workspace_path(copy_name))
+def copy_file(request, target, destination):
+    if target.replace('.sqlite3', '') == scenario_filename():  # copying the active scenario
+        return save_scenario(request)
+    if not destination.endswith('.sqlite3'):
+        destination = destination + ".sqlite3"
+    print("Copying", target, "to", destination, ". This could take several minutes...")
+    shutil.copy(workspace_path(target), workspace_path(destination))
     print("Done copying", target)
-    return redirect('/app/Workspace/')
+    return redirect('/')
 
 
 def download_file(request):
