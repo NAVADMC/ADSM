@@ -49,7 +49,7 @@
                     View Results </a>
                 {% else %}
                     {% if dry_run_passed %}
-                        <a href="/?loading_url=/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
+                        <a href="/LoadingScreen/?loading_url=/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
                         Run Simulation <i class="glyphicon glyphicon-play"></i></a>
                     {% else %}
                         <a href="/setup/ValidateScenario/" class=" {{Simulation_ready|completed}}">

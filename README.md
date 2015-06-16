@@ -51,7 +51,7 @@ Now that we have a Virtual Environment, we need to install all the Python Packag
 Using the pip in your new Virtual Environment (confirm Virtual Environment Activation with `where pip` or `which pip`), install the following packages.
 
     pip install CherryPy==3.6.0
-    pip install Django==1.7.1
+    pip install Django==1.8.2
     pip install Jinja2==2.7.3
     pip install MarkupSafe==0.23
     pip install django-crispy-forms==1.4.0
