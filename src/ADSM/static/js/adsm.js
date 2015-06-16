@@ -5,7 +5,7 @@ $(function(){
     
     $(document).on('click', 'form.ajax .btn-cancel', function(){
         var container = $(this).closest('form').closest('div');
-        if(container.attr('id') == 'main-panel'){
+        if(container.closest('.layout-panel').attr('id') == 'main-panel'){
             window.location.reload()
         }else{
             container.html('') //delete everything from the div containing the form
