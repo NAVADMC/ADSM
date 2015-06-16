@@ -377,10 +377,16 @@ ul {
     padding: 1px;
 }
 
-.current {
+.current, .current input {
     background-color: white;
     color: black;
     width: 100%;
+}
+
+.current .buttonHolder {
+  position: absolute;
+  right: 24px;
+  top: 40px;
 }
 
 #file_panel h2,
@@ -703,7 +709,7 @@ ul {
 /*-------------------------------------------------------------*/
 .btn {
     font-style: italic;
-    margin: 3px 1px 0px 1px;
+    margin: 3px 6px 3px 1px;
     color: #ffffff;
     border-radius: 0;
     border: 0px;
