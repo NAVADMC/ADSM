@@ -363,7 +363,7 @@ ul {
     transition: margin-right .2s ease;
 }
 .TB_panel.TB_panel_closed {
-    margin-right: calc(50px - 33.33vw);
+    margin-right: calc(0px - 33.33vw);
 }
 .TB_panel_over { /*--floats panel over content for static page layouts--*/
     -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2), -5px 5px 5px -5px rgba(0, 0, 0, .3);
@@ -371,7 +371,31 @@ ul {
 /*-------------------------------------------------------------*/
 /*-----file panel-----*/
 /*-------------------------------------------------------------*/
-#file_panel{}
+#file_panel, #file_panel #file_list a{
+    background-color: #606060;
+    color: rgb(236, 236, 236);
+    padding: 1px;
+}
+
+.current {
+    background-color: white;
+    color: black;
+    width: 100%;
+}
+
+#file_panel h2,
+#file_panel form{
+    padding-left: 10px;
+    padding-right: 5px;
+    margin: 0;
+    font-weight: 100;
+}
+
+#file_panel h2 {
+    color: rgb(216, 216, 216);
+    line-height: 19px;
+    border-bottom: 1px solid rgb(180, 180, 180);
+}
 
 /*-------------------------------------------------------------*/
 /*-----settings panel-----*/

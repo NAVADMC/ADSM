@@ -1,15 +1,17 @@
 <div class="col-xs-4 TB_panel TB_panel_closed layout-panel" id="file_panel">
-    <h2>File Management</h2>
-    <h3>Currently Open</h3>
-    {% include 'ScenarioName.html' %}
-
-    <h3>Available Scenarios</h3>
+    <h2>Currently Open</h2>
+    <div class="current">
+        {% include 'ScenarioName.html' %}
+    </div>
+    <h2>Available Scenarios</h2>
     <ul id="file_list">
         {% for file in db_files %}
             <li><a href="/LoadingScreen/?loading_url=/app/OpenScenario/{{ file }}/">{{ file }}</a>
-                <a href="#" class="delete-button ajax-post pull-right" title="delete" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
-                <a href="#" class="copy-button pull-right" title="duplicate" data-copy-link="/app/Copy/{{ file }}/"></a>
-                {#<a href="/app/Download/target={{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>#}
+                <div class="buttonHolder">
+                    <a href="#" class="delete-button ajax-post pull-right" title="delete" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
+                    <a href="#" class="copy-button pull-right" title="duplicate" data-copy-link="/app/Copy/{{ file }}/"></a>
+                    {#<a href="/app/Download/target={{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>#}
+                </div>
                 </li>
         {% endfor %}
     </ul>
