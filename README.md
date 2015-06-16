@@ -51,7 +51,7 @@ Now that we have a Virtual Environment, we need to install all the Python Packag
 Using the pip in your new Virtual Environment (confirm Virtual Environment Activation with `where pip` or `which pip`), install the following packages.
 
     pip install CherryPy==3.6.0
-    pip install Django==1.8.2
+    pip install git+https://github.com/BryanHurst/django.git@stable/1.8.2-patched  # Note, this currently throws permission errors but actually works. Fix in Pip dev version.
     pip install Jinja2==2.7.3
     pip install MarkupSafe==0.23
     pip install django-crispy-forms==1.4.0
@@ -115,14 +115,14 @@ If you plan on compiling a distributable version of the project, then use the fo
 Linux:  
  
   - Requires ldd and objdump installed (probably already on your system)  
-  - `pip install cx-freeze==4.3.3`
+  - `pip install hg+https://bitbucket.org/BryanHurst/cx_freeze`
     - If the above install fails, then there is a problem with your python shared libraries, I have a clone of the cx_freeze repo with a temp fix
       - CD to a directory where you want to download it, then `git clone git@git.newline.us:BryanHurst/cx_freeze.git; cd cx_freeze; python setup.py install`
  
 Mac:  
  
   - Install Xcode  
-  - `pip install cx-freeze==4.3.3`
+  - `pip install hg+https://bitbucket.org/BryanHurst/cx_freeze`
  
 Windows:  
 
@@ -132,7 +132,7 @@ Windows:
   - Now, using the easy_install in your new Virtual Environment (/path/to/adsm_venv/Scripts/easy_install), install the packages:
         
         easy_install pywin32-219.win-amd64-py3.4.exe
-        easy_install cx_Freeze-4.3.3.win-amd64-py3.4.exe
+        easy_install cx_Freeze-4.3.3.win-amd64-py3.4.exe  # TODO: NOTE: This is outdated and will be revisited later
 
 ###Selenium Tests
 To run the Selenium Tests, you will need Chrome or Chromium installed on your system plus the ChromeDriver v2.12.
