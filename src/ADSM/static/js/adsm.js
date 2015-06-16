@@ -4,7 +4,12 @@ $(function(){
     check_disabled_controls();
     
     $(document).on('click', 'form.ajax .btn-cancel', function(){
-        $(this).closest('form').closest('div').html('') //delete everything from the div containing the form
+        var container = $(this).closest('form').closest('div');
+        if(container.attr('id') == 'main-panel'){
+            window.location.reload()
+        }else{
+            container.html('') //delete everything from the div containing the form
+        }
     })
     
     $(document).on('click', '.TB_btn', function(){
@@ -47,7 +52,7 @@ $(function(){
             success: function(form_html) {
                 // Here we replace the form, for the
                 if($self.closest('#main-panel').length){ //in the main panel, just reload the page
-                    $('#main-panel').replaceWith(form_html)
+                    $('#main-panel').html($(form_html).find('#main_panel')[0])
                 }else{
                     $('.scenario-status p').addClass('unsaved')
                     $self.replaceWith(form_html)
