@@ -377,7 +377,7 @@ ul {
     padding: 1px;
 }
 
-.current, .current input {
+.current, .current .filename {
     background-color: white;
     color: black;
     width: 100%;
