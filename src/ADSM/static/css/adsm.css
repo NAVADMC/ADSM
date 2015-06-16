@@ -397,6 +397,10 @@ ul {
     border-bottom: 1px solid rgb(180, 180, 180);
 }
 
+/*#file_panel .buttonHolder {*/
+    /*float: right;*/
+/*}*/
+
 /*-------------------------------------------------------------*/
 /*-----settings panel-----*/
 /*-------------------------------------------------------------*/
@@ -887,7 +891,8 @@ select {
     margin-left: 15px;
 }
 .delete-button,
-.copy-button {
+.copy-button,
+.open-button {
     margin-top: 5px;
     width: 15px;
     height: 18px;
@@ -909,6 +914,12 @@ select {
     background-image: url('../icons/copy_sprite.png');
     outline: none;
     background-color: transparent;
+}
+
+.open-button {
+    background-image: url('../icons/open.png');
+    background-size: 15px 18px;
+    /*background-position: 0 0;*/
 }
 
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/

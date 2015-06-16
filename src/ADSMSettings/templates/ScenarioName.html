@@ -3,16 +3,14 @@
             <div class="edit-mask"></div>
             <input type="text" name="filename" value="{{ filename }}">
         </h3>
-        <div id="file_actions" class="buttonHolder">
+        <div id="file_actions" class="buttonHolder pull-right">
             {% spaceless %}
 
                 <a href="#" class="delete-button ajax-post pull-right" title="delete" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
                 <a href="#" class="copy-button pull-right" title="duplicate" data-copy-link="/app/SaveScenario/"></a>
             {% endspaceless %}
         </div>
-        {% if unsaved_changes %}
-            <p>Thie file contains unsaved changes.  <input id="save_scenario" type="submit" value="Save" class="action_link"> changes?</p>
-        {% endif %}
+        <hr/>
         {% if failure_message %}
             <div class="alert alert-danger alert-dismissable">
                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
@@ -24,5 +22,8 @@
                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
                 <strong>Success!</strong> {{ success_message }}
             </div>
+        {% endif %}
+        {% if unsaved_changes %}
+            <p>Thie file contains unsaved changes.  <input id="save_scenario" type="submit" value="Save" class="action_link"> changes?</p>
         {% endif %}
     </form>
