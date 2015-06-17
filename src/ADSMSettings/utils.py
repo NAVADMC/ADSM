@@ -5,7 +5,6 @@ import re
 from glob import glob
 import platform
 from collections import defaultdict
-import threading
 
 from django.db import OperationalError
 from django.core.management import call_command
@@ -165,7 +164,7 @@ def reset_db(name, fail_ok=True):
     else:
         print(db_path(name), "does not exist")
     #creates a new blank file by migrate
-    call_command('migrate', database=name, interactive=False)
+    call_command('migrate', database=name, interactive=False, fake_initial=True)
     if name == 'default':  # create super user
         from django.contrib.auth.models import User
         u = User(username='ADSM', is_superuser=True, is_staff=True)
@@ -179,8 +178,8 @@ def update_db_version():
     print("Checking Scenario version")
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
     try:
-        call_command('migrate', database='scenario_db', interactive=False)
-        call_command('migrate', database='default', interactive=False)
+        call_command('migrate', database='scenario_db', interactive=False, fake_initial=True)
+        call_command('migrate', database='default', interactive=False, fake_initial=True)
     except:
         print("Error: Migration failed.")
     print('Done creating database')

@@ -21,14 +21,21 @@
 </head>
 <body>
 <header>
-    {% include 'ScenarioName.html' %}
-
-    <div id="admin_link" class="buttonHolder">
-        {% if update_available and not update_on_startup %}
-            <a href="#" class="btn btn-default" id="update_adsm" title="{{dev_version}}">update ADSM</a>
-        {% endif %}
-        <a href="/app/Backend/" class="btn btn-default" title="{{dev_version}}" style="display:inline;">advanced panel</a>
-    </div>
+        <div class="row">
+            <div class="col-md-2">
+                <h1>ADSM</h1>
+                <p>Animal Disease Spread Model</p>
+            </div>
+            <div class="col-md-8">
+                <h1 class="filename">
+                    {{ filename }}
+                </h1>
+            </div>
+            <div class="col-md-2 scenario-status">
+                <h2>Base Scenario</h2>
+                <p {% if unsaved_changes %}class="unsaved"{% endif %}>changes pending...</p>
+            </div>
+        </div>
 </header>
 
     {% block main %}
@@ -41,15 +48,15 @@
         <img src="{{ STATIC_URL }}working.gif">
     </div>
 </div>
-
-<div id="toolbar">
-    <a href="#" title="Project Panel" class="TB_btn" id="TB_file"></a>
-    <a href="#" title="Settings Panel" class="TB_btn" id="TB_settings"></a>
-    <a href="#" title="Population Panel" class="TB_btn" id="TB_population"></a>
-
+    {% include "file_panel.html" %}
+    {% include "settings_panel.html" %}
     {% include "population_panel.html" %}
 
-    <a href="#" title="Functions Panel" class="TB_btn" id="TB_functions"></a>
+<div id="toolbar">
+    <a href="#" title="Project Panel" class="TB_btn" id="TB_file" TB-target="#file_panel"></a>
+    <a href="#" title="Settings Panel" class="TB_btn" id="TB_settings" TB-target="#settings_panel"></a>
+    <a href="#" title="Population Panel" class="TB_btn" id="TB_population" TB-target="#population_panel"></a>
+    <a href="#" title="Functions Panel" class="TB_btn" id="TB_functions" TB-target="#functions_panel"></a>
 </div>
   
 </body>

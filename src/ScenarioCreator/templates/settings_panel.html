@@ -1,0 +1,16 @@
+<div class="col-xs-4 TB_panel TB_panel_closed layout-panel" id="settings_panel">
+    <h2>Application Settings</h2>
+    You are running...
+    <p><strong>{{dev_version}}</strong></p>
+
+    <hr/>
+
+    {% if update_available and not update_on_startup %}
+        A newer version of ADSM is available.
+        <a href="#" class="btn btn-default" id="update_adsm">update ADSM</a>
+        <hr/>
+    {% endif %}
+
+    <a href="/app/Backend/" class="btn btn-default" style="display:inline;">Go to Database Backend</a>
+
+</div>

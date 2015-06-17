@@ -8,8 +8,17 @@ from django.utils.html import strip_tags
 from ADSMSettings.models import scenario_filename, SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
-from ADSMSettings.utils import reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload
+from ADSMSettings.utils import reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup
 from Results.models import outputs_exist
+
+
+def home(request):
+    return redirect('/LoadingScreen/?loading_url=/app/Startup/')
+
+
+def startup(request):
+    graceful_startup()
+    return redirect('/setup/Scenario/1/')
 
 
 def loading_screen(request):
@@ -19,7 +28,7 @@ def loading_screen(request):
     try:
         context = {'loading_url': request.GET['loading_url']}
     except:
-        context = {'loading_url': 'setup/Scenario/1/'}
+        context = {'loading_url': '/setup/Scenario/1/'}
     return render(request, "LoadingScreen.html", context)
 
 
@@ -37,8 +46,7 @@ def update_adsm_from_git(request):
 
 
 def file_dialog(request):
-    db_files = file_list(".sqlite3")
-    context = {'db_files': db_files,
+    context = {'db_files': (file_list(".sqlite3")),
                'title': 'Select a new Scenario to Open'}
     return render(request, 'ScenarioCreator/workspace.html', context)
 
@@ -140,12 +148,15 @@ def delete_file(request, target):
     return HttpResponse()
 
 
-def copy_file(request, target):
-    copy_name = re.sub(r'(?P<name>.*)\.(?P<ext>.*)', r'\g<name> - Copy.\g<ext>', target)
-    print("Copying", target, "to", copy_name, ". This could take several minutes...")
-    shutil.copy(workspace_path(target), workspace_path(copy_name))
+def copy_file(request, target, destination):
+    if target.replace('.sqlite3', '') == scenario_filename():  # copying the active scenario
+        return save_scenario(request)
+    if not destination.endswith('.sqlite3'):
+        destination = destination + ".sqlite3"
+    print("Copying", target, "to", destination, ". This could take several minutes...")
+    shutil.copy(workspace_path(target), workspace_path(destination))
     print("Done copying", target)
-    return redirect('/app/Workspace/')
+    return redirect('/')
 
 
 def download_file(request):
@@ -158,10 +169,14 @@ def download_file(request):
     return response
 
 
-def new_scenario(request=None):
+def new_scenario(request=None, new_name=None):
     reset_db('scenario_db')
     reset_db('default')
     update_db_version()
+    if new_name:
+        try:
+            scenario_filename(new_name)
+        except: pass # validation may kick it back in which case they'll need to rename it in a file browser
     return redirect('/setup/Scenario/1/')
 
 

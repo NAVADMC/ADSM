@@ -4,11 +4,24 @@ $(function(){
     check_disabled_controls();
     
     $(document).on('click', 'form.ajax .btn-cancel', function(){
-        $(this).closest('form').closest('div').html('') //delete everything from the div containing the form
+        var container = $(this).closest('form').closest('div');
+        if(container.closest('.layout-panel').attr('id') == 'main-panel'){
+            window.location.reload()
+        }else{
+            container.html('') //delete everything from the div containing the form
+        }
     })
     
-    $(document).on('click', '#TB_population', function(){
-        $('#population_panel').toggleClass('TB_panel_closed')
+    $(document).on('click', '.TB_btn', function(){
+        var already_open = $(this).hasClass('active') //check before altering anything
+        $('.TB_btn.active').removeClass('active') //close anything that might be open
+        $('.TB_panel').addClass('TB_panel_closed')
+
+        if(!already_open){
+            $(this).addClass('active')
+            var target_str = $(this).attr('TB-target')
+            $(target_str).removeClass('TB_panel_closed')
+        }
     })
     
     $(document).on('click', 'a[load-target]', function(event){
@@ -39,8 +52,9 @@ $(function(){
             success: function(form_html) {
                 // Here we replace the form, for the
                 if($self.closest('#main-panel').length){ //in the main panel, just reload the page
-                    $('#main-panel').replaceWith(form_html)
+                    $('#main-panel').html($(form_html).find('#main_panel')[0])
                 }else{
+                    $('.scenario-status p').addClass('unsaved')
                     $self.replaceWith(form_html)
                     if(formAction.lastIndexOf('new/') != -1){ //new model created
                         var lastClickedSelect = get_parent_select($self);
@@ -78,8 +92,8 @@ $(function(){
                 });
             }
         });
-    }); 
-    
+    });
+
     $(document).on('saved', 'form:has(.unsaved)', function(){ //fixes 'Save' button with wrong color state
         $(this).find('.unsaved').removeClass('unsaved');
     })
@@ -208,6 +222,38 @@ $(function(){
             ]
         });
     });
+
+    $(document).on('click', '[data-copy-link]', function(){
+        var link = $(this).attr('data-copy-link')
+        var is_current_scenario = link == '/app/SaveScenario/'
+        var dialog = new BootstrapDialog.show({
+            title: 'Scenario Save As...',
+            type: BootstrapDialog.TYPE_PRIMARY,
+            message: 'Enter the name of the new scenario: <input type="text" id="new_name">',
+            buttons: [
+                {
+                    label: 'Cancel',
+                    cssClass: 'btn',
+                    action: function(dialog){
+                        dialog.close();
+                    }
+                },
+                {
+                    label: 'Save As',
+                    cssClass: 'btn-primary',
+                    action: function(dialog){
+                            dialog.close();
+                            if(is_current_scenario){
+                                $('.filename input').val($('#new_name').val())
+                                $('.filename').closest('form').submit()
+                            } else {
+                                window.location = link + $('#new_name').val();
+                            }
+                    }
+                }
+            ]
+        });
+    })
 
     $('#id_disable_all_controls').change(function(event){
         var isChecked = $(this).prop('checked');
@@ -392,9 +438,9 @@ var attach_visibility_controller = function (self){
 
 
 var check_file_saved = function(){
-    if( $('body header form div button').hasClass('unsaved'))
+    if( $('body header .unsaved').length)
     {
-        var filename = $('body header form .filename input').attr('value')
+        var filename = $('header .filename').text().trim()
         var dialog = new BootstrapDialog.show({
             title: 'Unsaved Scenario Confirmation',
             closable: false,
@@ -561,12 +607,13 @@ function reload_model_list($form) {
 }
 
 function check_if_TB_panel_form_mask_needed(){  // I'm currently assuming that all forms are coming from the [load-target] attribute
-    var $form = $('#toolbar form')
-    if($form.length){
+    var button = $('.TB_panel form .btn-cancel')  //cancellable form was the most specific thing I could think of
+    if(button.length && button.closest('form').length){
+        var $form = $(button.closest('form'))
         var mask = $('<div class="modal-backdrop fade in"></div>');
         $('#toolbar').after(mask)
         $form.find('.btn-cancel').click(function(){mask.hide()})
         $form.find('.btn-save').click(function(){mask.hide()})
-        $('#toolbar').css('z-index', 1050)  // can't seem to bring out a smaller sub component with z-index
+        $form.closest('.TB_panel').css('z-index', 1050)  // can't seem to bring out a smaller sub component with z-index
     }
 }

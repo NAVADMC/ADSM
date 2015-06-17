@@ -25,7 +25,8 @@ def create_db_connection(db_name, db_path):
         call_command('migrate',
             # verbosity=0,
             interactive=False,
-            database=db_name)  # connections.databases[db_name].alias,  # database=self.connection.alias,
+            database=db_name,
+            fake_initial=True)  # connections.databases[db_name].alias,  # database=self.connection.alias,
         print('Done creating database')
 
 

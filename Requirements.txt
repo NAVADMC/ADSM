@@ -1,5 +1,5 @@
 CherryPy==3.6.0
-Django==1.7.1
+Django==1.8.2
 Jinja2==2.7.3
 MarkupSafe==0.23
 django-crispy-forms==1.4.0
