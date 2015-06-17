@@ -1,17 +1,20 @@
-<div class="col-xs-4 TB_panel TB_panel_closed layout-panel" id="functions_panel">
     <a href="" class="action_link">Assign</a>
-    <select name="Relational" id=""></select>
-    <select name="Probability" id=""></select>
+    <select name="Relational" id="">
+        {% for entry in models.0.entries %}
+            <option value=""><a href="/setup/RelationalFunction/{{ entry.pk }}/" load-target="{{ load_target }}">{{ entry }}</a></option>
+        {% endfor %}
+    </select>
+    <select name="Probability" id="">
+        {% for entry in models.1.entries %}
+            <option value=""><a href="/setup/ProbabilityFunction/{{ entry.pk }}/" load-target="{{ load_target }}">{{ entry }}</a></option>
+        {% endfor %}
+
+    </select>
 
     <div id="current-function">
-    {% if func_action  %}
+    {% if form  %}
         {% include 'ScenarioCreator/RelationalFunction.html' %}
     {% else %}
-        <script>
-            $(function(){
-                $('#current-function').load('/setup/Function/');
-            });
-        </script>
+        {% include 'ScenarioCreator/ModelList.html' %}
     {% endif %}
     </div>
-</div>
