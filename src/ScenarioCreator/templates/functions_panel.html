@@ -1,0 +1,12 @@
+<div class="col-xs-4 TB_panel TB_panel_closed layout-panel" id="functions_panel">
+    <a href="" class="action_link">Assign</a>
+    <select name="Relational" id=""></select>
+    <select name="Probability" id=""></select>
+
+    <img src="http://placehold.it/350x150">
+{#    <img src="{{func_action}}/graph.png">#}
+
+    {% if func_action  %}
+        {% include 'ScenarioCreator/RelationalFunction.html' %}
+    {% endif %}
+</div>
