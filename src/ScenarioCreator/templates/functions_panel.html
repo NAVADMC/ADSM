@@ -3,10 +3,15 @@
     <select name="Relational" id=""></select>
     <select name="Probability" id=""></select>
 
-    <img src="http://placehold.it/350x150">
-{#    <img src="{{func_action}}/graph.png">#}
-
+    <div id="current-function">
     {% if func_action  %}
         {% include 'ScenarioCreator/RelationalFunction.html' %}
+    {% else %}
+        <script>
+            $(function(){
+                $('#current-function').load('/setup/Function/');
+            });
+        </script>
     {% endif %}
+    </div>
 </div>

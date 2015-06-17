@@ -254,7 +254,7 @@ def relational_function(request, primary_key=None, doCopy=False):
         else:
             created_instance = context['form'].save()
             context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
-        context['action'] = '/setup/RelationalFunction/%i/' % created_instance.id
+        context['func_action'] = '/setup/RelationalFunction/%i/' % created_instance.id
 
         if context['formset'].is_valid():
             context['formset'].save()
@@ -452,6 +452,9 @@ def model_list(request):
                 context['models'].append(list_per_model(local_model))
         else:
             context['models'].append(list_per_model(model))
+    if model_name in 'Function RelationalFunction ProbabilityFunction'.split():
+        context.pop('title')
+        return render(request, 'ScenarioCreator/Fragment.html', context)  # no 3 panel layout
     return render(request, 'ScenarioCreator/3Panels.html', context)
 
 # Utility Views was moved to the ADSMSettings/connection_handler.py
