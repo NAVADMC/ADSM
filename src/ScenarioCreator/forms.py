@@ -33,7 +33,31 @@ class FixedSelect(Select):
 
 
 def submit_button():
-    return ButtonHolder(HTML(open(os.path.join(settings.BASE_DIR, 'ScenarioCreator','templates','ScenarioCreator','EditButtons.html'), 'r').read()))
+    edit_buttons = """
+    {% if backlinks %}
+    <h3>Referenced by:</h3>
+    <ul>
+        {% for text, link in backlinks.items %}
+            <li><a load-target="#center-panel" href="{{ link }}">{{ text }}</a></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div class="buttonHolder">
+        {% if outputs_exist %}
+            <button type="submit" class="btn btn-danger btn-save" id="submit-id-submit">Delete Results and Save changes</button>
+        {% else %}
+            <button type="button" class="btn btn-default btn-cancel" id="id-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled>Save</button>
+        {% endif %}
+        {% if backlinks %}
+            <button type="submit" disabled class="btn btn-danger">Remove References before Deleting</button>
+        {% elif deletable %}
+            <a href="#" data-delete-link="{{deletable}}" class="btn btn-danger">Delete</a>
+        {% endif %}
+    </div>
+    """
+    return ButtonHolder(HTML(edit_buttons))
 
 
 class BaseForm(ModelForm):
