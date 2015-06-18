@@ -9,8 +9,8 @@ from django.shortcuts import render, redirect
 from django.db.models import Max
 from django.utils.html import mark_safe
 
-from ADSMSettings.models import scenario_filename, SmSession
-from ADSMSettings.utils import workspace_path
+from ADSMSettings.models import SmSession
+from ADSMSettings.utils import workspace_path, scenario_filename
 from ScenarioCreator.models import OutputSettings
 from Results.graphing import construct_title
 from Results.forms import *  # necessary
