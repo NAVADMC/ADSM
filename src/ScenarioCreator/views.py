@@ -483,12 +483,8 @@ def open_population(request, target):
     head = Population.objects.using(import_db).get()
     head.source_file = target
     head.save(using='scenario_db')  # 98 all Production Types and Units are saved in the relational backtrace
-    pts = ProductionType.objects.using(import_db).all()
-    print([pt.name for pt in pts])
-    for pt in pts:
-        pt.save(using='scenario_db')
-    units = Unit.objects.using(import_db).all()
-    [unit.save(using='scenario_db') for unit in units]
+    ProductionType.objects.bulk_create(ProductionType.objects.using(import_db).all())
+    Unit.objects.bulk_create(Unit.objects.using(import_db).all())
 
     #close extra database
     close_old_connections()
