@@ -109,7 +109,7 @@ class PopulationParser(object):
                 except KeyError:
                     parsing_success = False
         if not parsing_success:
-            raise ET.ParseError("Unrecognized csv header format. Please use: " + ', '.join(list(possible_formats[-1].keys())) + 
+            raise ET.ParseError("Unrecognized csv header format. Please use: " + ','.join(list(possible_formats[-1].keys())) +
                                 '.  Export initial states as character codes.')
 
 
