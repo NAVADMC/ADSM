@@ -457,25 +457,44 @@ def model_list(request):
 # Utility Views was moved to the ADSMSettings/connection_handler.py
 
 def open_population(request, target):
+    from django.db import connections, close_old_connections
     from ADSMSettings.models import SmSession
     session = SmSession.objects.get()
     session.set_population_upload_status("Processing file")
 
     file_path = workspace_path(target)
     print(file_path)
+    assert os.path.exists(file_path)
     #connect file_path
-    # head = Population.objects.using('import_db').get()
-    # head.using('scenario_db').save() = Population.objects.using('scenario_db').get()
-    #copy all population objects into memory
+    import_db = 'import_db'
+    connections.databases[import_db] = {
+        'NAME': file_path,
+        'ENGINE': 'django.db.backends.sqlite3',
+        'OPTIONS': {
+            'timeout': 300,
+        }
+    }
+
+    Population.objects.all().delete()
+    ProductionType.objects.all().delete()
+    print("pt count", ProductionType.objects.count())
+
+    # copy all population objects into memory
+    head = Population.objects.using(import_db).get()
+    head.source_file = target
+    head.save(using='scenario_db')  # 98 all Production Types and Units are saved in the relational backtrace
+    pts = ProductionType.objects.using(import_db).all()
+    print([pt.name for pt in pts])
+    for pt in pts:
+        pt.save(using='scenario_db')
+    units = Unit.objects.using(import_db).all()
+    [unit.save(using='scenario_db') for unit in units]
+
     #close extra database
+    close_old_connections()
+    connections[import_db].close()
     #output memory to activeSession
 
-    try:
-        model = Population(source_file=file_path)  #TODO: direct import
-        model.save()
-    except BaseException as error:
-        session.set_population_upload_status(status='Failed: %s' % error)
-        return JsonResponse({"status": "failed", "message": str(error)})  # make sure to cast errors to string first
     session.reset_population_upload_status()
     return JsonResponse({"status": "complete", "redirect": "/setup/Populations/"})
 
