@@ -131,4 +131,6 @@ class PopulationParser(object):
             text = gettext(element)
         except:
             raise IOError("Couldn't find '%s' label in xml" % xml_name)
+        if xml_name == 'id' and text:
+            text = 'id=' + text
         self.population[-1][field_name] = text
