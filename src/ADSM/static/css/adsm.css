@@ -9,10 +9,6 @@ a:focus{
     outline-offset:0;
 }
 
-.layout-panel a.active, .layout-panel select.active {
-    border: solid red 1px;
-}
-
 body {
     font-family: 'Source Sans Pro', sans-serif;
     font-size: 10pt;
@@ -299,8 +295,13 @@ section#left-panel h1:first-of-type,
 #main-panel h1:first-of-type {
     margin-top: 2px;
 }
-#center-panel {
-
+#center-panel input {
+    background-color: rgba(244, 230, 0, .2);
+    display: block;
+    border: none;
+    outline: none;
+    box-shadow: inset 0px 0px 6px 2px rgba(0, 0, 0, .1);
+    padding-left: 5px;
 }
 #center-panel .fragment {
     margin-left: 25px;
@@ -313,6 +314,10 @@ section#left-panel h1:first-of-type,
 }
 ul {
     padding-left: 5px; /*prevent style inheritance from above*/
+}
+#id_group:focus,
+#id_trigger_group:focus {
+    outline: rgba(84, 201, 232, .7) solid 2px !important;
 }
 /*-------------------------------------------------------------*/
 /*-----TOOLBAR-----*/
@@ -435,6 +440,11 @@ ul {
 #population_panel h2 {
     margin-top: 12px;
 }
+#population_panel h2:nth-of-type(2) {
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+    margin-top: 20px;
+}
 #population_panel ul {
     list-style-type: none;
     padding-left: 0;
@@ -467,6 +477,14 @@ ul {
     text-overflow: ellipsis;
     color: #606060;
     text-decoration: none;
+}
+#population_panel input {
+    background-color: rgba(244, 230, 0, .2);
+    display: block;
+    border: none;
+    outline: none;
+    box-shadow: inset 0px 0px 6px 2px rgba(0, 0, 0, .1);
+    padding-left: 5px;
 }
 /*-------------------------------------------------------------*/
 /*-----functions panel-----*/
@@ -1577,6 +1595,12 @@ select[multiple] {}
     border: none !important;
     outline: none !important;
     box-shadow: none;
+}
+input:focus {
+  outline: rgba(84, 201, 232, .7) solid 2px !important;
+}
+.checkboxinput:focus {
+    outline: none !important;
 }
 /*.action_link:focus {
     outline: 1px solid #62d7fd !important;
