@@ -154,7 +154,7 @@ def assign_progressions(request):
     ProgressionSet = modelformset_factory(DiseaseProgressionAssignment,
                                           extra=len(missing),
                                           form=DiseaseProgressionAssignmentForm)
-    context = {'title': 'Set the Disease Progression of each Production Type'}
+    context = {'title': 'Disease Progressions'}
     return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request)
 
 

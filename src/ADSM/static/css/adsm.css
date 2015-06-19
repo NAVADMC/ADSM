@@ -19,6 +19,8 @@ body {
     font-weight: 400;
     box-sizing:border-box;
     padding-bottom: 50px;
+    height: 100%;
+    overflow-y: hidden;
 }
 
 h2, h2 a{
@@ -260,15 +262,55 @@ body>nav {
     /*min-width:600px;*/
 /*    padding-left: calc((100% - 1280px) / 2);*/
 /*}*/
-
+/*-------------------------------------------------------------*/
+/*-----3-column layout-----*/
+/*-------------------------------------------------------------*/
 #main-panel {
     float:none;
 }
 
 .layout-panel {
-    margin-top: 54px;
+    margin-top: 60px;
+    display: block;
+    height: calc(100vh - 65px);
+    overflow-y: auto;
+    overflow-x: visible;
+    padding: 0;
+    position: relative;
 }
+.layout-panel .fragment{
+    height: 100%;
+    position: relative;
+    display: block;
+    overflow: scroll;
+    padding-bottom: 10px;
+}
+.layout-panel .fragment input.textinput,
+.layout-panel .fragment input.textInput
+.layout-panel .fragment select,
+.layout-panel select.productiontypelist {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 400px;
+}
+#left-panel .fragment h1:first-of-type,
+section#left-panel h1:first-of-type,
+#main-panel h1:first-of-type {
+    margin-top: 2px;
+}
+#center-panel {
 
+}
+#center-panel .fragment {
+    margin-left: 25px;
+    box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
+    padding: 0 20px 10px 20px;
+    border: 1px solid #cec7c0
+}
+#center-panel .fragment form {
+    margin-top: 10px;
+}
 ul {
     padding-left: 5px; /*prevent style inheritance from above*/
 }
@@ -360,20 +402,19 @@ ul {
 .TB_panel {
     position: fixed;
     right: 0;
-    top:55px;
     margin-right: 50px;
+    width: calc(33.333vw - 75px);
     max-width: 460px;
-    min-height: 200px;
     overflow-y: auto;
     -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
     border: 1px solid #cec7c0;
     padding: 0 15px 15px 15px; 
-    max-height: calc(100vh - 120px);
     background-color: white;
     transition: margin-right .2s ease;
+    overflow: auto;
 }
 .TB_panel.TB_panel_closed {
-    margin-right: calc(50px - 33.33vw);
+    margin-right: -33.3333vw;
 }
 .TB_panel_over { /*--floats panel over content for static page layouts--*/
     -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2), -5px 5px 5px -5px rgba(0, 0, 0, .3);
@@ -916,9 +957,9 @@ input[type=file], button {
     display: inline;
 }
 
-#div_id_name div input {
+/*#div_id_name div input {
     min-width: 400px;
-}
+}*/
 
 #file_list .addNew {
     border-bottom: none;
@@ -1171,12 +1212,12 @@ input[type=file], button {
         width: 200px;
     }
 }
-@media screen and (max-width: 1100px) {
+/*@media screen and (max-width: 1100px) {
     section {
         margin-left: 195px !important;
         overflow: auto;
         min-width: 0 !important;
-    }
+    }*/
     #population_grid_wraper {
         margin-left: 0;
         width: calc(100% + 40px);
