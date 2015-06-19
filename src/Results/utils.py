@@ -5,8 +5,8 @@ import zipfile
 from django.shortcuts import redirect
 import psutil
 
-from ADSMSettings.models import scenario_filename, SimulationProcessRecord, SmSession
-from ADSMSettings.utils import workspace_path, supplemental_folder_has_contents
+from ADSMSettings.models import SimulationProcessRecord, SmSession
+from ADSMSettings.utils import workspace_path, supplemental_folder_has_contents, scenario_filename
 
 
 def is_simulation_running():

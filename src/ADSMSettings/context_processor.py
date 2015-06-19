@@ -1,7 +1,7 @@
 import re
-from ADSMSettings.models import scenario_filename, SmSession
+from ADSMSettings.models import SmSession
 from ADSMSettings.models import unsaved_changes
-from ADSMSettings.utils import workspace_path, file_list
+from ADSMSettings.utils import workspace_path, file_list, scenario_filename
 from ScenarioCreator.context_processor import git_adsm_sha
 
 
