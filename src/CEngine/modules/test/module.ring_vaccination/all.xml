@@ -7386,6 +7386,105 @@
 
 <variable-test>
   <category>ring_vaccination</category>
+  <short-name>re-trigger 7 days after detection</short-name>
+
+  <description>
+    This test is one of a set to test re-triggering vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get
+    vaccinated.  Inside the first ring are 2 units of type A, and inside the
+    second ring are 2 units of type B.
+
+    In this test, vaccination is triggered either a) 3 days after detection in
+    any type, or b) 7 days after detection in type “B”. One “A” unit and one
+    “B” unit are detected early in the simulation, triggering vaccination to
+    begin 3 days later.  Vaccination is ended, then a “B” unit is detected 3
+    days later. The fact that vaccination does not start until 7 days after the
+    2nd “B” unit is detected shows that the time-since-detection trigger has
+    reset properly between starts of the vaccination program.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>19 June 2015</creation-date>
+  <model-version>3.3.0</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>retrigger_7daysincedet_typeB</parameter-file>
+
+  <parameter-description>
+    For production type A, the infectious subclinical period is 1 day, and the
+    latent period is 30 days. This ensures that only one “A” unit gets
+    detected.
+
+    For production type B, the infectious subclinical period is 1 day, and the
+    latent period is 8 days. This ensures that one “B” unit gets detected early
+    in the simulation, and the other several days later.
+
+    Diseased units will be detected (by self-reporting) on their first day
+    showing clinical signs.
+    
+    Vaccination begins when 3 days have passed since the first detection in
+    any type or 7 days have passed since the first detection in type B. Units
+    within 1.5 km of a detected unit will be vaccinated. Retrospective
+    vaccination is set at 7 days. There is capacity to vaccinate 1 unit per
+    day.
+
+    Vaccination is stopped after 3 days with no detections.
+
+    What should happen:
+     - Day 1: No units are clinical yet, no detections.
+     - Day 2: 1 “A” unit and 1 “B” unit will be clinical. They will be detected.
+     - Day 3: 1 day after 1st detection.
+     - Day 4. 2 days after 1st detection.
+     - Day 5. 3 days after 1st detection. On this day, and days 6-7, one “C”
+       will be vaccinated each day.
+     - Day 8: 3 days of the vaccination program have passed with no new
+       detections, so vaccination is stopped. No units will be vaccinated on
+       this day.
+     - Day 9: It is now 7 days since the detection of the “B” unit on day 2.
+       But the trigger has been reset post-ending of the vaccination program,
+       so that detection has been forgotten.
+       new detection counts as the first one.
+     - Day 10: The remaining “B” unit will be clinical. It will be detected.
+       This is the first detection post-ending of the vaccination program.
+     - Day 17: This is the 7th day after the detection of the “B” unit. On this
+       day, and days 18-19, one “D” unit will be vaccinated each day.
+     - Day 20: 3 days of the vaccination program have passed with no new
+       detections, so vaccination is stopped. No units will be vaccinated on
+       this day.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>vacnU</td>
+    </tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
   <short-name>re-trigger on  detection in 2 groups (A,C) (B,D) or 3 days after first detection</short-name>
 
   <description>
