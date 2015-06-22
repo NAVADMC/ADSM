@@ -7485,6 +7485,99 @@
 
 <variable-test>
   <category>ring_vaccination</category>
+  <short-name>re-trigger on EDR 1.5 measured over last 3 days divided by 3 days before that</short-name>
+
+  <description>
+    This test is one of a set to test re-triggering vaccination.  There are 2
+    rings of units of type C and D; these are the units that will get
+    vaccinated.  Inside the first ring are 2 units of type A, and inside the
+    second ring are 6 units of type B.
+
+    In this test, vaccination is triggered either a) 1 day after the first
+    detection, or b) by an EDR of 1.5 or higher, measured by detections of “B” 
+    units in the last 3 days divided by detections in the 3 days before that.
+    One “A” and one “B” unit are detected early in the simulation, triggering
+    vaccination to begin 1 day later.  Vaccination is ended, then 2 “B” units
+    are detected. The fact that vaccination does not start until additional “B” 
+    units are detected shows that the EDR trigger has reset properly between
+    starts of the vaccination program.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>22 June 2015</creation-date>
+  <model-version>3.3.0</model-version>
+
+  <population-file>20units_2rings</population-file>
+
+  <parameter-file>retrigger_1.5edr3days_in_typeB</parameter-file>
+
+  <parameter-description>
+    For production type A, the infectious subclinical period is 1 day, and the
+    latent period is 30 days.  This ensures that only one “A” unit gets
+    detected, early in the simulation.
+
+    For production type B, all of the units start subclinical, and the units’
+    days left in state are set so that there will be this number of detections
+    over the sequence of days: 0, 1, 0, 0, 0, 0, 2, 1, 0, 2.
+
+    Diseased units will be detected (by self-reporting) on their first day
+    showing clinical signs.
+    
+    Vaccination begins when either a) 1 day has passed since the first
+    detection, or b) the EDR is 1.5 or higher, measured by detections of “B” 
+    units in the last 3 days divided by detections in the 3 days before that.
+    Units within 1.5 km of a detected unit will be vaccinated. Retrospective
+    vaccination is set at 3 days. There is capacity to vaccinate 1 unit per
+    day.
+
+    Vaccination is stopped after 3 days with no detections.
+
+    What should happen:
+     - Day 1: No units are clinical yet, no detections.
+     - Day 2: 1 “A” unit and 1 “B” unit will be clinical. They will be
+       detected.
+     - Day 3: 1 day after 1st detection. On this day, and days 4-5, one “C”
+       unit will be vaccinated each day.
+     - Day 6: 3 days of the vaccination program have passed with no new
+       detections, so vaccination is stopped. No units will be vaccinated on
+       this day.
+     - Day 7: 2 “B” units will be clinical. They will be detected. Note that if
+       you counted the “B” unit detected back on day 2, the EDR would now be
+       2.0. But the EDR trigger has been reset post-ending of the vaccination
+       program, so these new detections count as the first ones.
+     - Day 8: 1 “B” unit will be clinical. It will be detected. EDR =
+       (1+2+0)/(0+0+0) = undefined.
+     - Day 9: No new detections. EDR = (0+1+2)/(0+0+0) = undefined.
+     - Day 10: 2 “B” units will be clinical. They will be detected. EDR =
+       (2+0+1)/(2+0+0) = 1.5. The vaccination program will be restarted.
+     - Day 11-13: One unit will be vaccinated each day. The simulation is
+       deliberately stopped at 13 days.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnUA</td>
+      <td>detnUB</td>
+      <td>vacnU</td>
+    </tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>2</td> <td>0</td></tr>
+    <tr><td>0</td> <td>1</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>2</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>1</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>ring_vaccination</category>
   <short-name>re-trigger on  detection in 2 groups (A,C) (B,D) or 3 days after first detection</short-name>
 
   <description>
