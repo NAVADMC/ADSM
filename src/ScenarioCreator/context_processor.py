@@ -9,7 +9,6 @@ from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Pop
 
 from ScenarioCreator.utils import whole_scenario_validation
 from Results.models import outputs_exist
-from git.git import git
 
 
 def simulation_ready_to_run(context):

@@ -12,7 +12,6 @@ from django.db import connections, close_old_connections
 from django.conf import settings
 
 from ADSMSettings.models import SmSession, scenario_filename
-from git.git import update_is_needed
 
 
 if os.name == "nt":
@@ -224,7 +223,7 @@ def clear_update_flag():
 
 def check_update():
     close_old_connections()
-    update_available = update_is_needed()
+    update_available = False  # TODO: Build in new check update method
     session = SmSession.objects.get()
     session.update_available = update_available
     session.save()
