@@ -45,6 +45,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'floppyforms',
     'crispy_forms',
+    'productionserver',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -99,7 +100,7 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
-USE_I18N = True
+USE_I18N = False
 
 USE_L10N = True
 
@@ -117,7 +118,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'templates'),
+
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -137,6 +138,10 @@ TEMPLATES = [
         },
     },
 ]
+if getattr(sys, 'frozen', False):
+    for app_name in INSTALLED_APPS:
+        if os.path.exists(os.path.join(BASE_DIR, 'templates', app_name)):
+            TEMPLATES[0]['DIRS'].extend([os.path.join(BASE_DIR, 'templates', app_name), ])
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
@@ -152,3 +157,9 @@ STATICFILES_DIRS = (
 )
 
 LOGIN_REDIRECT_URL = '/'
+
+LOCALE_PATHS = ()
+if getattr(sys, 'frozen', False):
+    for app_name in INSTALLED_APPS:
+        if os.path.exists(os.path.join(BASE_DIR, 'locale', app_name)):
+            LOCALE_PATHS += (os.path.join(BASE_DIR, 'locale', app_name), )
