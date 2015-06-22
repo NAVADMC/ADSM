@@ -398,6 +398,7 @@ ul {
 .layout-panel.TB_panel { /*needs to be more specific than the .layout-panel rule */
     position: fixed;
     right: 0;
+    top: 0;
     margin-right: 50px;
     width: calc(33.333vw - 75px);
     max-width: 460px;
