@@ -19,6 +19,7 @@ body {
     overflow-y: hidden;
 }
 
+
 h2, h2 a{
     font-size:15px;
     font-weight:600;
@@ -326,6 +327,7 @@ ul {
     position: fixed;
     top: 55px;
     right: 0px;
+    height: 100%;
     background-color: white;
 }
 .TB_btn {
@@ -1596,7 +1598,9 @@ select[multiple] {}
     outline: none !important;
     box-shadow: none;
 }
-input:focus {
+input:focus,
+select:focus,
+textarea:focus {
   outline: rgba(84, 201, 232, .7) solid 2px !important;
 }
 .checkboxinput:focus {
