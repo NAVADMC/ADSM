@@ -489,6 +489,7 @@ def open_population(request, target):
     #close extra database
     close_old_connections()
     connections[import_db].close()
+    connections.databases.pop(import_db)
     #output memory to activeSession
 
     session.reset_population_upload_status()
