@@ -173,7 +173,7 @@ class Unit(BaseModel):
         help_text='The latitude used to georeference this ' + wiki("Unit") + '.', )
     longitude = LongitudeField(
         help_text='The longitude used to georeference this ' + wiki("Unit") + '.', )
-    initial_state_choices = (('S', 'Susceptible'),
+    initial_state_choices = (('S', 'Susceptible'),  # order matters because this is read by population_parser.convert_numeric_status_codes
                ('L', 'Latent'),
                ('B', 'Infectious Subclinical'),
                ('C', 'Infectious Clinical'),
@@ -201,8 +201,10 @@ class Unit(BaseModel):
             elif key == 'initial_size':
                 kwargs[key] = int(kwargs[key])
             elif key == 'initial_state':
-                kwargs[key] = choice_char_from_value(kwargs[key], Unit._meta.get_field_by_name('initial_state')[0]._choices) or 'S'
+                if len(kwargs[key]) > 1:
+                    kwargs[key] = choice_char_from_value(kwargs[key], Unit._meta.get_field_by_name('initial_state')[0]._choices) or 'S'
         unit = cls(**kwargs)
+        unit.full_clean()
         return unit
 
     def __str__(self):
@@ -480,9 +482,11 @@ class Disease(InputSingleton):
     include_airborne_spread = models.BooleanField(default=True,
         help_text='Indicates if airborne spread is used in the model', )
     use_airborne_exponential_decay = models.BooleanField(default=False,
-        help_text='Indicates if the decrease in probability by ' + wiki('airborne transmission') + ' is simulated by the exponential (TRUE) or linear (FALSE) algorithm.', )
+        help_text = "Indicates if the decrease in probability by "
+                    + wiki("airborne transmission", "/Model-Specification#airborne-spread")
+                    + " is simulated by the exponential (TRUE) or linear (FALSE) algorithm.",)
     use_within_unit_prevalence = models.BooleanField(default=False,
-        help_text='Indicates if ' + wiki("within unit prevalence") + ' should be used in the model.', )
+        help_text='Indicates if ' + wiki("within unit prevalence", "/Model-Specification#prevalence") + ' should be used in the model.', )
     def __str__(self):
         return self.name
 

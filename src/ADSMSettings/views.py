@@ -5,11 +5,20 @@ from django.db import close_old_connections
 from django.http import JsonResponse
 from django.shortcuts import redirect, render, HttpResponse
 from django.utils.html import strip_tags
-from ADSMSettings.models import scenario_filename, SmSession, unsaved_changes
+from ADSMSettings.models import SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
-from ADSMSettings.utils import reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload
+from ADSMSettings.utils import reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup, scenario_filename
 from Results.models import outputs_exist
+
+
+def home(request):
+    return redirect('/LoadingScreen/?loading_url=/app/Startup/')
+
+
+def startup(request):
+    graceful_startup()
+    return redirect('/setup/Scenario/1/')
 
 
 def loading_screen(request):
@@ -19,7 +28,7 @@ def loading_screen(request):
     try:
         context = {'loading_url': request.GET['loading_url']}
     except:
-        context = {'loading_url': 'setup/Scenario/1/'}
+        context = {'loading_url': '/setup/Scenario/1/'}
     return render(request, "LoadingScreen.html", context)
 
 
@@ -37,15 +46,14 @@ def update_adsm_from_git(request):
 
 
 def file_dialog(request):
-    db_files = file_list(".sqlite3")
-    context = {'db_files': db_files,
+    context = {'db_files': (file_list(".sqlite3")),
                'title': 'Select a new Scenario to Open'}
     return render(request, 'ScenarioCreator/workspace.html', context)
 
 
 def run_importer(request):
-    param_path = handle_file_upload(request, 'parameters_xml', is_temp_file=True)  # we don't want param XMLs stored next to population XMLs
-    popul_path = handle_file_upload(request, 'population_xml')
+    param_path = handle_file_upload(request, 'parameters_xml', is_temp_file=True, overwrite_ok=True)  # we don't want param XMLs stored next to population XMLs
+    popul_path = handle_file_upload(request, 'population_xml', overwrite_ok=True)
     import_legacy_scenario(param_path, popul_path)
 
 
@@ -53,7 +61,7 @@ def import_legacy_scenario(param_path, popul_path):
     names_without_extensions = tuple(os.path.splitext(os.path.basename(x))[0] for x in [param_path, popul_path])  # stupid generators...
     new_scenario()  # I realized this was WAY simpler than creating a new database connection
     import_naadsm_xml(popul_path, param_path)  # puts all the data in activeSession
-    scenario_filename('%s with %s' % names_without_extensions)
+    scenario_filename('%s with %s' % names_without_extensions, check_duplicates=True)
     return save_scenario(None)  # This will overwrite a file of the same name without prompting
     # except BaseException as error:
     #     print("Import process crashed\n", error)
@@ -62,21 +70,22 @@ def import_legacy_scenario(param_path, popul_path):
         
     
 def import_naadsm_scenario(request):
-    if request.method == "POST":
+    if 'POST' in request.method:
         initialized_form = ImportForm(request.POST, request.FILES)
     else:  # GET page for the first time
         initialized_form = ImportForm()
     if initialized_form.is_valid():
         run_importer(request)
         return redirect('/')
-    context = {'form': initialized_form, 'title': "Import Legacy NAADSM Scenario in XML format"}
-    context['base_page'] = 'ScenarioCreator/crispy-model-form.html'
+    context = {'form': initialized_form, 
+               'title': "Import Legacy NAADSM Scenario in XML format", 
+               'base_page': 'ScenarioCreator/crispy-model-form.html'}
     return render(request, 'ScenarioCreator/navigationPane.html', context)  # render in validation error messages
 
 
 def upload_scenario(request):
     if '.sqlite' in request.FILES['file']._name:
-        handle_file_upload(request)
+        handle_file_upload(request)  #TODO: This can throw an error, but this method isn't used currently
         return redirect('/app/Workspace/')
     else:
         raise ValueError("You can only submit files with '.sqlite' in the file name.")  # ugly error should be caught by Javascript first
@@ -139,12 +148,15 @@ def delete_file(request, target):
     return HttpResponse()
 
 
-def copy_file(request, target):
-    copy_name = re.sub(r'(?P<name>.*)\.(?P<ext>.*)', r'\g<name> - Copy.\g<ext>', target)
-    print("Copying", target, "to", copy_name, ". This could take several minutes...")
-    shutil.copy(workspace_path(target), workspace_path(copy_name))
+def copy_file(request, target, destination):
+    if target.replace('.sqlite3', '') == scenario_filename():  # copying the active scenario
+        return save_scenario(request)
+    if not destination.endswith('.sqlite3'):
+        destination = destination + ".sqlite3"
+    print("Copying", target, "to", destination, ". This could take several minutes...")
+    shutil.copy(workspace_path(target), workspace_path(destination))
     print("Done copying", target)
-    return redirect('/app/Workspace/')
+    return redirect('/')
 
 
 def download_file(request):
@@ -157,10 +169,14 @@ def download_file(request):
     return response
 
 
-def new_scenario(request=None):
+def new_scenario(request=None, new_name=None):
     reset_db('scenario_db')
     reset_db('default')
     update_db_version()
+    if new_name:
+        try:
+            scenario_filename(new_name, check_duplicates=True)
+        except: pass # validation may kick it back in which case they'll need to rename it in a file browser
     return redirect('/setup/Scenario/1/')
 
 

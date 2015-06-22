@@ -72,7 +72,8 @@ class UnitFormAbbreviated(BaseForm):
     class Meta(object):
         model = Unit
         exclude = ['_population', 'days_in_initial_state', 'days_left_in_initial_state']
-        widgets = {'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'})}
+        widgets = {}
+        #'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'})
 
 
 class ProbabilityFunctionForm(BaseForm):

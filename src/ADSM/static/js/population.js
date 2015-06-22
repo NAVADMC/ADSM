@@ -29,7 +29,8 @@ var progressBar = (function(){
 
     return {
        'hide': function(e){
-            $('#load_population_widget').show().before('<div class="alert alert-warning"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error:</strong> ' + e.message + '</div>');
+            $('#load_population_widget').show().before(
+                '<div class="alert alert-warning"><a href="#" class="close" data-dismiss="alert">&times;</a><strong>Error:</strong> ' + e.message + '</div>');
             progress.remove();
             progressStatus.hide();
 
@@ -50,6 +51,30 @@ var progressBar = (function(){
     };
 })();
 
+function prompt_for_overwrite(submit_population_upload, form) {
+    var dialog = new BootstrapDialog.show({
+        title: 'Overwrite Confirmation',
+        type: BootstrapDialog.TYPE_WARNING,
+        message: 'There is already a file with this name in your workspace.  Do you want to override it with the new file?',
+        buttons: [
+            {
+                label: 'Cancel',
+                cssClass: 'btn',
+                action: function (dialog) {
+                    dialog.close();
+                }
+            },
+            {
+                label: 'Overwrite',
+                cssClass: 'btn-danger',
+                action: function (dialog) {
+                    submit_population_upload(form);
+                    dialog.close();
+                }
+            }
+        ]
+    });
+}
 $(function(){
     $('#submit-id-submit').attr('disabled', 'disabled');
 
@@ -74,14 +99,27 @@ $(function(){
 
     $(document).on('submit', '#pop-upload', function(e){
         e.preventDefault();
-        var formData = new FormData($(this)[0]);
+        var filename = $('#pop-upload').find('input').val().split('\\')[2]
+        var optionTexts = []
+        var form = this
+        $('#file_list').find('li').each(function() { optionTexts.push( $.trim($(this).text())) })
+        if($.inArray(filename, optionTexts) != -1) { //ask user if it's okay to overwrite
+             prompt_for_overwrite(submit_population_upload, form);
+        }
+        else { //verified it's not a duplicate
+            submit_population_upload(form)
+        }
+    });
+    
+    var submit_population_upload = function (form){
+        var formData = new FormData($(form)[0]);
         $.ajax({
-            url: $(this).attr('action'),
+            url: $(form).attr('action'),
             type: 'POST',
-            xhr: function() {
+            xhr: function () {
                 var myXhr = $.ajaxSettings.xhr();
-                if(myXhr.upload){
-                    myXhr.upload.addEventListener('progress',progressHandler, false);
+                if (myXhr.upload) {
+                    myXhr.upload.addEventListener('progress', progressHandler, false);
                 }
                 return myXhr;
             },
@@ -94,7 +132,8 @@ $(function(){
             processData: false
         });
         progressBar.show();
-    });
+    }
+    
     var progressHandler = function(progress) {
         var percent_uploaded = (progress.loaded / progress.total)*100;
         progressBar.setStatus('Loading file ' + Math.round(percent_uploaded) + '%', percent_uploaded*0.1);

@@ -5,6 +5,10 @@
     background-color:white;
 }*/
 
+.row {
+    width: 100%;
+}
+
 a:focus{
     outline-offset:0;
 }
@@ -98,9 +102,10 @@ header {
     z-index: 100;
     background-color: #606060;
     width: 100%;
-    height: 50px;
+    height: 70px;
     top: 0;
     min-width:1000px;
+    color: white;
 }
 header:after{
     content: "";
@@ -123,9 +128,14 @@ header .btn, #header .btn {
 header .buttonHolder {
     min-width: 256px;
 }
+
+
 header h1 {
     margin: 0 0px;
-    float: left;
+    font-size: 20pt;
+    font-weight: 400;
+    background:#606060;
+    color:white;
 }
 
 header div {  
@@ -134,30 +144,25 @@ header div {
     float: left;
 }
 
-.filename {
+header p {
+    float: none;
+}
+
+header .filename {
     float: left;
-    min-width: 540px;
+    /*min-width: 540px;*/
     padding: 5px 20px;
-    font-size: 20pt;
-    font-weight: 400;
-    background:#606060;
-    color:white;
 }
 
 .filename input {
     border: none;
-    width: 100%;
-    color: white;
-    background:#606060; 
 }
 
-header #admin_link {
-    position: absolute;
-
-    right: 0;
-    margin-right: 0px;
-    min-width: 230px;
-    padding-top:9px;
+.scenario-status p{
+    display:none
+}
+.scenario-status p.unsaved {
+    display:block;
 }
 
 header .buttonHolder{
@@ -185,14 +190,6 @@ header #file_actions .btn {
     width: 78px;
 }
 
-
-header #admin_link .btn{
-    background-color:transparent;
-    transition: all .2s ease;
-    padding: 4px 10px;
-    margin-left: 0px; 
-    height: 30px;
-}
 header .admin .btn{
     padding-top: 1px !important;
 }
@@ -206,11 +203,11 @@ header .buttonHolder .btn:first-child:after{
     top: 5px;
     right: -1px;
 }
-header #file_actions .btn:first-child:after {
+#file_actions .btn:first-child:after {
     top: 0px;
 }
 
-header #file_actions .btn:last-child {
+#file_actions .btn:last-child {
     height:30px;
     border:1px solid gray;
     background-color: #707070;
@@ -219,22 +216,14 @@ header #file_actions .btn:last-child {
 header .buttonHolder .btn:hover {
     color: rgba(255, 255, 255, 1);
 }
-header #file_actions a:hover .icon {
+#file_actions a:hover .icon {
     opacity: 1;
 }
 
-header #file_actions .btn:last-child:hover {
+ #file_actions .btn:last-child:hover {
     background-color: #a8a8a8;
 }
 
-header #admin_link .btn:focus {
-    outline: 1px solid rgba(255, 255, 255, .8) !important;
-    outline-offset: -1px;
-    color: white;
-    box-sizing: border-box;
-    padding: 4px 10px;
-    margin-left: 0;
-}
 .loading_button {
     background: url("../working.gif") no-repeat center;
     background-color: #808080 !important;
@@ -246,7 +235,7 @@ header #admin_link .btn:focus {
 
 body>nav {
     position: fixed;
-    top: 49px;
+    top: 69px;
     bottom: 0;
     left: 0;
     width: 175px;
@@ -325,7 +314,7 @@ ul {
 /*-------------------------------------------------------------*/
 #toolbar {
     position: fixed;
-    top: 55px;
+    top: 75px;
     right: 0px;
     height: 100%;
     background-color: white;
@@ -406,7 +395,7 @@ ul {
 /*-------------------------------------------------------------*/
 /*-----TOOLBAR panels-----*/
 /*-------------------------------------------------------------*/
-.TB_panel {
+.layout-panel.TB_panel { /*needs to be more specific than the .layout-panel rule */
     position: fixed;
     right: 0;
     margin-right: 50px;
@@ -429,7 +418,41 @@ ul {
 /*-------------------------------------------------------------*/
 /*-----file panel-----*/
 /*-------------------------------------------------------------*/
-#file_panel{}
+#file_panel, #file_panel #file_list a{
+    background-color: #606060;
+    color: rgb(236, 236, 236);
+    padding: 1px;
+}
+
+.current, .current .filename {
+    background-color: white;
+    color: black;
+    width: 100%;
+}
+
+.current .buttonHolder {
+  position: absolute;
+  right: 24px;
+  top: 40px;
+}
+
+#file_panel h2,
+#file_panel form{
+    padding-left: 10px;
+    padding-right: 5px;
+    margin: 0;
+    font-weight: 100;
+}
+
+#file_panel h2 {
+    color: rgb(216, 216, 216);
+    line-height: 19px;
+    border-bottom: 1px solid rgb(180, 180, 180);
+}
+
+/*#file_panel .buttonHolder {*/
+    /*float: right;*/
+/*}*/
 
 /*-------------------------------------------------------------*/
 /*-----settings panel-----*/
@@ -507,7 +530,7 @@ ul {
 #setupMenu-before {
     content:"";
     position: fixed;
-    top: 54px;
+    top: 75px;
     left: 0;
     display: block;
     width: 170px;
@@ -637,7 +660,6 @@ ul {
 #RunSimulationRes a {
     margin-right: 0;
 }
-/*----------------------need to remove the glypicon element and make a left facing arrow with hook for results------*/
 #RunSimulationRes a{
     color: rgba(255, 255, 255, .8);
 }
@@ -716,6 +738,44 @@ ul {
 #RunSimulationRes a:before {
     display:none;
 }
+#setupMenu .toggle.btn {
+    position: absolute;
+    top: 5px;
+    left: 120px;
+    height: 18px !important;
+    width: 30px !important;
+    min-height: 18px !important;
+    min-width: 30px !important;
+    border: 1px solid #ccc;
+    outline: none;
+}
+#setupMenu .toggle.btn span {
+    height: 16px;
+    background-color: #b2b2b2;
+    outline: none;
+    margin-top: -2px;
+    border-radius: 0;
+}
+.toggle-group label{
+    font-style: normal;
+    font-size: 11px;
+    text-transform: lowercase;
+}
+#setupMenu .toggle-off {
+    box-shadow: none;
+    color: #898989;
+    padding-left: 9px;
+}
+#setupMenu .toggle-off:hover {
+    outline: none;
+}
+#setupMenu .toggle-on {
+    padding-right: 10px;
+}
+#setupMenu .toggle-group {
+    top: -1px;
+    -webkit-transition: left .15s;
+}
 /*-------------------------------------------------------------*/
 /*-----blocking overlay-----*/
 /*-------------------------------------------------------------*/
@@ -746,7 +806,7 @@ ul {
 /*-------------------------------------------------------------*/
 .btn {
     font-style: italic;
-    margin: 3px 1px 0px 1px;
+    margin: 3px 6px 3px 1px;
     color: #ffffff;
     border-radius: 0;
     border: 0px;
@@ -934,7 +994,8 @@ select {
     margin-left: 15px;
 }
 .delete-button,
-.copy-button {
+.copy-button,
+.open-button {
     margin-top: 5px;
     width: 15px;
     height: 18px;
@@ -956,6 +1017,12 @@ select {
     background-image: url('../icons/copy_sprite.png');
     outline: none;
     background-color: transparent;
+}
+
+.open-button {
+    background-image: url('../icons/open.png');
+    background-size: 15px 18px;
+    /*background-position: 0 0;*/
 }
 
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/

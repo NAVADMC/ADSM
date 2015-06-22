@@ -4,11 +4,24 @@ $(function(){
     check_disabled_controls();
     
     $(document).on('click', 'form.ajax .btn-cancel', function(){
-        $(this).closest('form').closest('div').html('') //delete everything from the div containing the form
+        var container = $(this).closest('form').closest('div');
+        if(container.closest('.layout-panel').attr('id') == 'main-panel'){
+            window.location.reload()
+        }else{
+            container.html('') //delete everything from the div containing the form
+        }
     })
     
-    $(document).on('click', '#TB_population', function(){
-        $('#population_panel').toggleClass('TB_panel_closed')
+    $(document).on('click', '.TB_btn', function(){
+        var already_open = $(this).hasClass('active') //check before altering anything
+        $('.TB_btn.active').removeClass('active') //close anything that might be open
+        $('.TB_panel').addClass('TB_panel_closed')
+
+        if(!already_open){
+            $(this).addClass('active')
+            var target_str = $(this).attr('TB-target')
+            $(target_str).removeClass('TB_panel_closed')
+        }
     })
     
     $(document).on('click', 'a[load-target]', function(event){
@@ -28,15 +41,20 @@ $(function(){
         event.preventDefault();
         var $self = $(this)
         var formAction = $(this).attr('action');
+        var formData = new FormData($self[0])
         $.ajax({
             url: formAction,
             type: "POST",
-            data: $(this).serialize(),
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
             success: function(form_html) {
                 // Here we replace the form, for the
                 if($self.closest('#main-panel').length){ //in the main panel, just reload the page
-                    $('#main-panel').replaceWith(form_html)
+                    $('#main-panel').html($(form_html).find('#main_panel')[0])
                 }else{
+                    $('.scenario-status p').addClass('unsaved')
                     $self.replaceWith(form_html)
                     if(formAction.lastIndexOf('new/') != -1){ //new model created
                         var lastClickedSelect = get_parent_select($self);
@@ -74,8 +92,8 @@ $(function(){
                 });
             }
         });
-    }); 
-    
+    });
+
     $(document).on('saved', 'form:has(.unsaved)', function(){ //fixes 'Save' button with wrong color state
         $(this).find('.unsaved').removeClass('unsaved');
     })
@@ -205,6 +223,38 @@ $(function(){
         });
     });
 
+    $(document).on('click', '[data-copy-link]', function(){
+        var link = $(this).attr('data-copy-link')
+        var is_current_scenario = link == '/app/SaveScenario/'
+        var dialog = new BootstrapDialog.show({
+            title: 'Scenario Save As...',
+            type: BootstrapDialog.TYPE_PRIMARY,
+            message: 'Enter the name of the new scenario: <input type="text" id="new_name">',
+            buttons: [
+                {
+                    label: 'Cancel',
+                    cssClass: 'btn',
+                    action: function(dialog){
+                        dialog.close();
+                    }
+                },
+                {
+                    label: 'Save As',
+                    cssClass: 'btn-primary',
+                    action: function(dialog){
+                            dialog.close();
+                            if(is_current_scenario){
+                                $('.filename input').val($('#new_name').val())
+                                $('.filename').closest('form').submit()
+                            } else {
+                                window.location = link + $('#new_name').val();
+                            }
+                    }
+                }
+            ]
+        });
+    })
+
     $('#id_disable_all_controls').change(function(event){
         var isChecked = $(this).prop('checked');
         var new_link = window.location;
@@ -250,13 +300,20 @@ $(function(){
             return false;
         }
     });
-
 })
 
 //#####################################################################################//
 //#####################################################################################//
 
-function debounce(a,b,c){var d;return function(){var e=this,f=arguments;clearTimeout(d),d=setTimeout(function(){d=null,c||a.apply(e,f)},b),c&&!d&&a.apply(e,f)}};
+function debounce(a, b, c) {
+    var d;
+    return function () {
+        var e = this, f = arguments;
+        clearTimeout(d), d = setTimeout(function () {
+            d = null, c || a.apply(e, f)
+        }, b), c && !d && a.apply(e, f)
+    }
+};
 
 
 safe_save = function(url, data, new_link){
@@ -302,6 +359,7 @@ function open_panel_if_needed(){
      $('.productiontypelist, .grouplist').each(function(){
         $('#population_panel').removeClass('TB_panel_closed')
     })
+    check_if_TB_panel_form_mask_needed()
 }
 
 function populate_pdf_panel(select) {
@@ -380,9 +438,9 @@ var attach_visibility_controller = function (self){
 
 
 var check_file_saved = function(){
-    if( $('body header form div button').hasClass('unsaved'))
+    if( $('body header .unsaved').length)
     {
-        var filename = $('body header form .filename input').attr('value')
+        var filename = $('header .filename').text().trim()
         var dialog = new BootstrapDialog.show({
             title: 'Unsaved Scenario Confirmation',
             closable: false,
@@ -445,11 +503,19 @@ var modelModal = {
                 //contentType: false}
     ajax_submit: function(url, success_callback, fail_callback){
         var $form = $('.modal-body form')
-        return $.post( url, $form.serialize()).done(function (html, status, xhr){
-            if (contains_errors(html)) { //html dataType  == failure probably validation errors
-                fail_callback(html)
-            } else {
-                success_callback(html)
+        return $.ajax({
+            url: url,
+            type: "POST",
+            data: new FormData($form[0]),
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function(html) {
+                if (contains_errors(html)) { //html dataType  == failure probably validation errors
+                    fail_callback(html)
+                } else {
+                    success_callback(html)
+                }
             }
         }).always(function() {
             $('.blocking-overlay').hide();
@@ -537,5 +603,17 @@ function reload_model_list($form) {
     $('#left-panel').load(window.location + " #left-panel>*")
     if(action.indexOf('ProductionGroup') != -1 || action.indexOf('ProductionType') != -1){
         $('#population_panel').load("/setup/OutputSettings/1/ #population_panel>*")
+    }
+}
+
+function check_if_TB_panel_form_mask_needed(){  // I'm currently assuming that all forms are coming from the [load-target] attribute
+    var button = $('.TB_panel form .btn-cancel')  //cancellable form was the most specific thing I could think of
+    if(button.length && button.closest('form').length){
+        var $form = $(button.closest('form'))
+        var mask = $('<div class="modal-backdrop fade in"></div>');
+        $('#toolbar').after(mask)
+        $form.find('.btn-cancel').click(function(){mask.hide()})
+        $form.find('.btn-save').click(function(){mask.hide()})
+        $form.closest('.TB_panel').css('z-index', 1050)  // can't seem to bring out a smaller sub component with z-index
     }
 }

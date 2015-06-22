@@ -5,14 +5,13 @@ import re
 from glob import glob
 import platform
 from collections import defaultdict
-import threading
 
 from django.db import OperationalError
 from django.core.management import call_command
 from django.db import connections, close_old_connections
 from django.conf import settings
 
-from ADSMSettings.models import SmSession, scenario_filename
+from ADSMSettings.models import SmSession
 from git.git import update_is_needed
 
 
@@ -65,18 +64,21 @@ def file_list(extensions=[]):
     return map(lambda f: os.path.basename(f), db_files)  # remove directory and extension
 
 
-def handle_file_upload(request, field_name='file', is_temp_file=False):
+def handle_file_upload(request, field_name='file', is_temp_file=False, overwrite_ok=False):
     """Writes an uploaded file into the project workspace and returns the full path to the file."""
     uploaded_file = request.FILES[field_name]
     prefix = ''
     if is_temp_file:
         prefix = 'temp/'
-        os.makedirs(workspace_path(prefix), exist_ok=True)
-    filename = workspace_path(prefix + uploaded_file._name)
-    with open(filename, 'wb+') as destination:
-        for chunk in uploaded_file.chunks():
-            destination.write(chunk)
-    return filename
+    os.makedirs(workspace_path(prefix), exist_ok=True)
+    file_path = workspace_path(prefix + uploaded_file._name)
+    if os.path.exists(file_path) and not (is_temp_file or overwrite_ok):
+        raise FileExistsError("File with the same name is already in the workspace folder. Please rename or delete the old file.")
+    else:
+        with open(file_path, 'wb+') as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+    return file_path
 
 
 def prepare_supplemental_output_directory():
@@ -162,7 +164,7 @@ def reset_db(name, fail_ok=True):
     else:
         print(db_path(name), "does not exist")
     #creates a new blank file by migrate
-    call_command('migrate', database=name, interactive=False)
+    call_command('migrate', database=name, interactive=False, fake_initial=True)
     if name == 'default':  # create super user
         from django.contrib.auth.models import User
         u = User(username='ADSM', is_superuser=True, is_staff=True)
@@ -176,8 +178,8 @@ def update_db_version():
     print("Checking Scenario version")
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
     try:
-        call_command('migrate', database='scenario_db', interactive=False)
-        call_command('migrate', database='default', interactive=False)
+        call_command('migrate', database='scenario_db', interactive=False, fake_initial=True)
+        call_command('migrate', database='default', interactive=False, fake_initial=True)
     except:
         print("Error: Migration failed.")
     print('Done creating database')
@@ -226,3 +228,23 @@ def check_update():
     session = SmSession.objects.get()
     session.update_available = update_available
     session.save()
+
+
+def scenario_filename(new_value=None, check_duplicates=False):
+    session = SmSession.objects.get()  # This keeps track of the state for all views and is used by basic_context
+    if new_value:
+        new_value = new_value.replace('.sqlite3', '')
+        if re.search(r'[^\w\d\- \\/_\(\)\.,]', new_value):  # negative set, list of allowed characters
+            raise ValueError("Special characters are not allowed: " + new_value)
+        if check_duplicates:
+            counter = 1
+            while os.path.exists(workspace_path(new_value + '.sqlite3')):
+                if counter == 1:
+                    new_value = new_value + " (" + str(counter) + ")"
+                else:
+                    new_value = new_value[:-4] + " (" + str(counter) + ")"
+                counter += 1
+
+        session.scenario_filename = new_value
+        session.save()
+    return session.scenario_filename

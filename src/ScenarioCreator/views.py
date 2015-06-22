@@ -43,10 +43,6 @@ def add_breadcrumb_context(context, model_name, primary_key=None):
         context['title'] = 'Edit the ' + spaces_for_camel_case(model_name)
 
 
-def home(request):
-    return redirect('/setup/Scenario/1/')
-
-
 def production_type_list_json(request):
     msg = list(ProductionType.objects.values_list('name', 'id'))
     return JsonResponse(msg, safe=False)  # necessary to serialize a list object
@@ -56,7 +52,9 @@ def disable_all_controls_json(request):
     if 'POST' in request.method:
         new_value = request.POST['use_controls']
         set_to = new_value == 'false'  #logical inversion because of use_controls vs disable_controls
-        ControlMasterPlan.objects.all().update(disable_all_controls=set_to)
+        controls = ControlMasterPlan.objects.get()
+        controls.disable_all_controls = set_to
+        controls.save()
         return JsonResponse({'status':'success'})
     else:
         return JsonResponse({'disable_all_controls': ControlMasterPlan.objects.get().disable_all_controls})
@@ -203,7 +201,7 @@ def deepcopy_points(request, primary_key, created_instance):
 
 
 def initialize_points_from_csv(request):
-    file_path = handle_file_upload(request)
+    file_path = handle_file_upload(request, is_temp_file=True, overwrite_ok=True)
     with open(file_path) as csvfile:
         dialect = csv.Sniffer().sniff(csvfile.read(1024))  # is this necessary?
         csvfile.seek(0)
@@ -215,19 +213,22 @@ def initialize_points_from_csv(request):
             header = ['x', 'y']
         reader = csv.DictReader(lowercase_header(csvfile), fieldnames=header, dialect=dialect)
         entries = [line for line in reader]  # ordered list
+        try:
+            (float(entries[0]['x']), float(entries[0]['y']))  # the header sneaks in when there's a mix of float and int
+        except ValueError:
+            entries = entries[1:]  # clip the header
+        
         initial_values = {}
         for index, point in enumerate(entries):
             initial_values['relationalpoint_set-%i-id' % index] = ''
             initial_values['relationalpoint_set-%i-relational_function' % index] = ''
-            initial_values['relationalpoint_set-%i-x' % index] = point['x']
-            initial_values['relationalpoint_set-%i-y' % index] = point['y']
+            initial_values['relationalpoint_set-%i-x' % index] = point['x'].strip()
+            initial_values['relationalpoint_set-%i-y' % index] = point['y'].strip()
+            initial_values['relationalpoint_set-%i-DELETE' % index] = ''  # these could be set to delete by the js
         initial_values['relationalpoint_set-TOTAL_FORMS'] = str(len(entries))
         initial_values['relationalpoint_set-INITIAL_FORMS'] = '0'
         initial_values['relationalpoint_set-MAX_NUM_FORMS'] = '1000'
         request.POST.update(initial_values)
-    try:
-        os.remove(file_path)  # we don't want to keep these files around in the workspace
-    except: pass  # possible that file was never created
     return request
 
 
@@ -310,18 +311,18 @@ def initialize_from_existing_model(primary_key, request):
 
 '''New / Edit / Copy / Delete / List that are called from model generated URLs'''
 def new_entry(request, second_try=False):
-    model_name, form = get_model_name_and_form(request)
-    model_name, model = get_model_name_and_model(request)
-    if model_name == 'RelationalFunction':
-        return relational_function(request)
-    if model_name in singletons and model.objects.count():
-        return edit_entry(request, 1)
-    initialized_form = form(request.POST or None)
-    context = {'form': initialized_form, 
-               'title': "Create a new " + spaces_for_camel_case(model_name), 
-               'action': request.path}
-    add_breadcrumb_context(context, model_name)
     try:
+        model_name, form = get_model_name_and_form(request)
+        model_name, model = get_model_name_and_model(request)
+        if model_name == 'RelationalFunction':
+            return relational_function(request)
+        if model_name in singletons and model.objects.count():
+            return edit_entry(request, 1)
+        initialized_form = form(request.POST or None)
+        context = {'form': initialized_form,
+                   'title': "Create a new " + spaces_for_camel_case(model_name),
+                   'action': request.path}
+        add_breadcrumb_context(context, model_name)
         return new_form(request, initialized_form, context)
     except OperationalError:
         if not second_try:
@@ -464,13 +465,22 @@ def upload_population(request):
         return JsonResponse(json_response)
 
     session.set_population_upload_status("Processing file")
-    file_path = workspace_path(request.POST.get('filename')) if 'filename' in request.POST else handle_file_upload(request)
+    if 'filename' in request.POST:
+        file_path = workspace_path(request.POST.get('filename')) 
+    else:
+        try:
+            file_path = handle_file_upload(request, overwrite_ok=True)
+        except FileExistsError:
+            return JsonResponse({"status": "failed", 
+                                 "message": "Cannot import file because a file with the same name already exists in the list below."}) 
+
     try:
         model = Population(source_file=file_path)
         model.save()
-    except (EOFError, ParseError) as error:
+    except (EOFError, ParseError, BaseException) as error:
         session.set_population_upload_status(status='Failed: %s' % error)
-        return JsonResponse({"status": "failed", "message": str(error)})  # make sure to cast errors to string first
+        message = "This is not a valid Population file: " if isinstance(error , ParseError) else ""
+        return JsonResponse({"status": "failed", "message": message + str(error)})  # make sure to cast errors to string first
     # wait for Population parsing (up to 5 minutes)
     session.reset_population_upload_status()
     return JsonResponse({"status": "complete", "redirect": "/setup/Populations/"})
@@ -508,7 +518,10 @@ def population(request):
     FarmSet = modelformset_factory(Unit, extra=0, form=UnitFormAbbreviated, can_delete=False)
     if save_formset_succeeded(FarmSet, Unit, context, request):
         return redirect(request.path)
-    if Population.objects.filter(id=1).exists():
+    if Population.objects.filter(id=1, ).exists():
+        if not Unit.objects.count(): # #571 no units were imported: error, blank files
+            Population.objects.all().delete()
+            return population(request)  # delete blank and try again
         sort_type = request.GET.get('sort_by', 'initial_state')
         query_filter = Q()
         params = filtering_params(request)
