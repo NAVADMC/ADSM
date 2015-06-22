@@ -53,7 +53,7 @@ def file_dialog(request):
 
 def run_importer(request):
     param_path = handle_file_upload(request, 'parameters_xml', is_temp_file=True, overwrite_ok=True)  # we don't want param XMLs stored next to population XMLs
-    popul_path = handle_file_upload(request, 'population_xml', overwrite_ok=True)
+    popul_path = handle_file_upload(request, 'population_xml', is_temp_file=True, overwrite_ok=True)
     import_legacy_scenario(param_path, popul_path)
 
 
