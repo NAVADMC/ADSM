@@ -29,8 +29,7 @@ if __name__ == "__main__":
 
     from django.core import management
 
-    from ADSMSettings.models import scenario_filename
-    from ADSMSettings.utils import db_path, workspace_path
+    from ADSMSettings.utils import db_path, workspace_path, scenario_filename
     from ADSMSettings.views import new_scenario, save_scenario
     from ADSMSettings.xml2sqlite import import_naadsm_xml
     from ScenarioCreator.models import DirectSpread
@@ -48,7 +47,7 @@ if __name__ == "__main__":
         scenario_name = os.path.basename(scenario_path)
         new_scenario()
         import_naadsm_xml(popul_path, param_path, saveIterationOutputsForUnits=False)
-        scenario_filename(scenario_name)
+        scenario_filename(scenario_name, check_duplicates=True)
         save_scenario()
         count_model_entries()
 

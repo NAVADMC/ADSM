@@ -27,7 +27,7 @@ def git_adsm_sha():
     try:
         version = subprocess.check_output(git + 'rev-parse HEAD', shell=True, stderr=subprocess.STDOUT).strip()[:7]
     except:
-        version = 'no git'
+        version = 'no version information available'
     return version
 
 

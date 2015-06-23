@@ -19,8 +19,8 @@
         <h3>Available Population Files:</h3>
         <ul id="file_list">
             {% for file in xml_files %}
-                <li><a href="/setup/UploadPopulation/" class="ajax-post" data-filename="{{ file }}">{{ file }}</a>
-                    <a href="#" class="delete-button ajax-post" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
+                <li><a href="/setup/OpenPopulation/{{ file }}" class="ajax-post">{{ file }}</a>
+                    <a href="#" class="delete-button ajax-post" data-delete-link="/app/DeleteFile/{{ file }}"></a>
                     <a href="/app/Download/?target={{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
                     </li>
             {% endfor %}

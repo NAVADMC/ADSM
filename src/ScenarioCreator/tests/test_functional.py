@@ -292,7 +292,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
     def test_delete_population(self):
         population = Population.objects.create(source_file="ScenarioCreator/tests/population_fixtures/Population_Test_UTF8.xml")
 
-        self.click_navbar_element('Population')
+        self.click_navbar_element('Population', 2)
 
         # javascript is attaching to this event
         self.selenium.find_element_by_css_selector('[data-delete-link]').click()
@@ -629,7 +629,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             self.assertIn(controls, actual_menu)
 
     def test_save_scenario_failure(self):
-        filename_field = self.selenium.find_element_by_css_selector('header form .filename input')
+        filename_field = self.selenium.find_element_by_css_selector('#file_panel .filename input')
         try:
             filename_field.send_keys('./\\ 123.1&% AZ')
             self.selenium.find_element_by_css_selector('#save_scenario').click()
@@ -653,7 +653,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         save_button = self.selenium.find_element_by_css_selector('header form button[type="submit"]')
         self.assertIn('unsaved', save_button.get_attribute('class'))
 
-        filename_field = self.selenium.find_element_by_css_selector('header form .filename input')
+        filename_field = self.selenium.find_element_by_css_selector('#file_panel .filename input')
         try:
             filename_field.send_keys('123.1 AZ')
             filename_field.submit()

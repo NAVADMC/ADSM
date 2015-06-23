@@ -11,7 +11,7 @@ from django.core.management import call_command
 from django.db import connections, close_old_connections
 from django.conf import settings
 
-from ADSMSettings.models import SmSession, scenario_filename
+from ADSMSettings.models import SmSession
 
 
 if os.name == "nt":
@@ -227,3 +227,23 @@ def check_update():
     session = SmSession.objects.get()
     session.update_available = update_available
     session.save()
+
+
+def scenario_filename(new_value=None, check_duplicates=False):
+    session = SmSession.objects.get()  # This keeps track of the state for all views and is used by basic_context
+    if new_value:
+        new_value = new_value.replace('.sqlite3', '')
+        if re.search(r'[^\w\d\- \\/_\(\)\.,]', new_value):  # negative set, list of allowed characters
+            raise ValueError("Special characters are not allowed: " + new_value)
+        if check_duplicates:
+            counter = 1
+            while os.path.exists(workspace_path(new_value + '.sqlite3')):
+                if counter == 1:
+                    new_value = new_value + " (" + str(counter) + ")"
+                else:
+                    new_value = new_value[:-4] + " (" + str(counter) + ")"
+                counter += 1
+
+        session.scenario_filename = new_value
+        session.save()
+    return session.scenario_filename
