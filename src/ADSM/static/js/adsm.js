@@ -35,7 +35,6 @@ $(function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });
 
-
     $(document).on('submit', '.ajax', function(event) {
         event.preventDefault();
         var $self = $(this)
@@ -49,7 +48,7 @@ $(function(){
             contentType: false,
             processData: false,
             success: function(form_html) {
-                $('.scenario-status p').addClass('unsaved')
+                $('.scenario-status').addClass('unsaved')
                 // Here we replace the form, for the
                 if($self.closest('#main-panel').length){ //in the main panel, just reload the page
                     $('#main-panel').html($(form_html).find('#main_panel')[0])
@@ -418,9 +417,9 @@ var attach_visibility_controller = function (self){
 
 
 var check_file_saved = function(){
-    if( $('body header .unsaved').length)
+    if( $('.scenario-status.unsaved').length)
     {
-        var filename = $('header .filename').text().trim()
+        var filename = $('.filename').text().trim()
         var dialog = new BootstrapDialog.show({
             title: 'Unsaved Scenario Confirmation',
             closable: false,

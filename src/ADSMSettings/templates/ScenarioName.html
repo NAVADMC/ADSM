@@ -23,7 +23,8 @@
                 <strong>Success!</strong> {{ success_message }}
             </div>
         {% endif %}
-        {% if unsaved_changes %}
+        <div class="scenario-status{% if unsaved_changes %} unsaved{% endif %}">
             <p>The file contains unsaved changes.  <input id="save_scenario" type="submit" value="Save" class="action_link"> changes?</p>
-        {% endif %}
+            <p id="unsaved-header">changes pending...</p> <!--It is necessary for styling and immediate response time for this element to be part of the same div-->
+        </div>
     </form>

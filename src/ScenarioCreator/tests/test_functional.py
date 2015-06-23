@@ -631,6 +631,8 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             self.assertIn(controls, actual_menu)
 
     def test_save_scenario_failure(self):
+        self.cause_unsaved_edit()
+
         self.query('#TB_file').click()
         filename_field = self.query('#file_panel .filename input')
         try:
@@ -647,13 +649,15 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             except:
                 pass
 
-    def test_save_scenario_success(self):
-        scenario_desc = self.selenium.find_element_by_id('id_description')
-        scenario_desc.send_keys('Test Description')
-        self.selenium.find_element_by_id('submit-id-submit').click()
+    def cause_unsaved_edit(self):
+        self.query('#id_description').send_keys('--edited--')
+        self.query('#submit-id-submit').clic()
         time.sleep(1)
 
-        save_button = self.query('header .scenario-status p')
+    def test_save_scenario_success(self):
+        self.cause_unsaved_edit()
+
+        save_button = self.query('.scenario-status')
         self.assertIn('unsaved', save_button.get_attribute('class'))
 
         self.query('#TB_file').click()
@@ -663,7 +667,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             filename_field.submit()
             time.sleep(3)
 
-            save_button = self.query('header .scenario-status p')
+            save_button = self.query('.scenario-status')
             self.assertNotIn('unsaved', save_button.get_attribute('class'))
         finally:
             try:

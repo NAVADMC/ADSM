@@ -159,11 +159,18 @@ header .filename {
     border: none;
 }
 
-.scenario-status p{
+.scenario-status {
     display:none
 }
-.scenario-status p.unsaved {
+.scenario-status.unsaved {
     display:block;
+}
+#unsaved-header {
+    color: white;
+    position: fixed;
+    top: 40px;
+    left: 83%;
+    z-index: 90;
 }
 
 header .buttonHolder{
@@ -350,6 +357,7 @@ ul {
     position: fixed;
     right: 0;
     top:75px;
+    z-index: 110; /*Over the header*/
     margin-top: 0;
     margin-right: 50px;
     max-width: 460px;
@@ -1279,7 +1287,8 @@ input[type=file], button {
     section h1:first-of-type {
         margin-left: 0;
     }
-}
+/*} media query commented out*/
+
 @media screen and (max-width: 960px) {
     #population_grid_wraper form:first-of-type {
         float: left !important;
