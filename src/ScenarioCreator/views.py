@@ -457,48 +457,15 @@ def model_list(request):
 # Utility Views was moved to the ADSMSettings/connection_handler.py
 
 def open_population(request, target):
-    from django.db import connections, close_old_connections
     from ADSMSettings.models import SmSession
     session = SmSession.objects.get()
     session.set_population_upload_status("Processing file")
 
-    file_path = workspace_path(target)
-    print(file_path)
-    assert os.path.exists(file_path)
-    #connect file_path
-    import_db = 'import_db'
-    connections.databases[import_db] = {
-        'NAME': file_path,
-        'ENGINE': 'django.db.backends.sqlite3',
-        'OPTIONS': {
-            'timeout': 300,
-        }
-    }
-
-    Population.objects.all().delete()
-    ProductionType.objects.all().delete()
-    print("pt count", ProductionType.objects.count())
-
-    # copy all population objects into memory
-    head = Population.objects.using(import_db).get()
-    head.source_file = target
-    head.save(using='scenario_db')  # 98 all Production Types and Units are saved in the relational backtrace
-    ProductionType.objects.bulk_create(ProductionType.objects.using(import_db).all())
-    Unit.objects.bulk_create(Unit.objects.using(import_db).all())
-
-    #close extra database
-    close_old_connections()
-    connections[import_db].close()
-    connections.databases.pop(import_db)
-    #output memory to activeSession
-
-    session.reset_population_upload_status()
-    return JsonResponse({"status": "complete", "redirect": "/setup/Populations/"})
+    return parse_population(workspace_path(target), session)
 
 
 def upload_population(request):
     from ADSMSettings.models import SmSession
-    from xml.etree.ElementTree import ParseError
     session = SmSession.objects.get()
     if 'GET' in request.method:
         json_response = {"status": session.population_upload_status, "percent": session.population_upload_percent*100} 
@@ -512,19 +479,24 @@ def upload_population(request):
             file_path = handle_file_upload(request, is_temp_file=True, overwrite_ok=True)
         except FileExistsError:
             return JsonResponse({"status": "failed", 
-                                 "message": "Cannot import file because a file with the same name already exists in the list below."}) 
+                                 "message": "Cannot import file because a file with the same name already exists in the list below."})
 
+    return parse_population(file_path, session)
+
+
+def parse_population(file_path, session):
+    from xml.etree.ElementTree import ParseError
     try:
         model = Population(source_file=file_path)
         model.save()
     except (EOFError, ParseError, BaseException) as error:
         session.set_population_upload_status(status='Failed: %s' % error)
-        message = "This is not a valid Population file: " if isinstance(error , ParseError) else ""
+        message = "This is not a valid Population file: " if isinstance(error, ParseError) else ""
         return JsonResponse({"status": "failed", "message": message + str(error)})  # make sure to cast errors to string first
     # wait for Population parsing (up to 5 minutes)
     session.reset_population_upload_status()
     return JsonResponse({"status": "complete", "redirect": "/setup/Populations/"})
-   
+
 
 def filtering_params(request):
     """Collects the list of parameters to filter by.  Because of the way this is setup:
