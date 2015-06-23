@@ -651,7 +651,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
     def cause_unsaved_edit(self):
         self.query('#id_description').send_keys('--edited--')
-        self.query('#submit-id-submit').clic()
+        self.query('#submit-id-submit').click()
         time.sleep(1)
 
     def test_save_scenario_success(self):
