@@ -49,11 +49,11 @@ $(function(){
             contentType: false,
             processData: false,
             success: function(form_html) {
+                $('.scenario-status p').addClass('unsaved')
                 // Here we replace the form, for the
                 if($self.closest('#main-panel').length){ //in the main panel, just reload the page
                     $('#main-panel').html($(form_html).find('#main_panel')[0])
                 }else{
-                    $('.scenario-status p').addClass('unsaved')
                     $self.replaceWith(form_html)
                     if(formAction.lastIndexOf('new/') != -1){ //new model created
                         var lastClickedSelect = get_parent_select($self);

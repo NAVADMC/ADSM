@@ -273,10 +273,12 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.click_navbar_element('Population')
 
         self.selenium.find_element_by_link_text('SampleScenario.sqlite3').click()
-        time.sleep(5) # may need to be adjusted for slow computers or if the file grows
-
-        section = self.query('section')
-        self.assertIn('Population File:', section.text)
+        for i in range(5):  # a slow population load
+            time.sleep(5) # may need to be adjusted for slow computers or if the file grows
+            try:
+                self.assertIn('Population File:', self.query('section').text)
+                break
+            except: pass  # keep trying
 
     def test_upload_blank_population_file(self):
         self.click_navbar_element('Population')
@@ -288,7 +290,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.assertIn('Load a Population', section.text)
 
         alert = self.query('.alert')
-        self.assertIn('Error: File Read returned a blank string.', alert.text)
+        self.assertIn('Error: No Production Types found in the target scenario.', alert.text)
 
     def test_delete_population(self):
         population = Population.objects.create(source_file="ScenarioCreator/tests/population_fixtures/Population_Test_UTF8.xml")
@@ -661,7 +663,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             filename_field.submit()
             time.sleep(3)
 
-            save_button = self.query('header form button[type="submit"]')
+            save_button = self.query('header .scenario-status p')
             self.assertNotIn('unsaved', save_button.get_attribute('class'))
         finally:
             try:
