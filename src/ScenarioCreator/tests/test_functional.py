@@ -205,6 +205,9 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             max_distance=3)
         zone = Zone.objects.create(name="Medium", radius=10)
 
+    def query(self, selector):
+        return self.selenium.find_element_by_css_selector(selector)
+
     def select_option(self, element_id, visible_text):
         target = self.selenium.find_element_by_id(element_id)
         Select(target).select_by_visible_text(visible_text)
@@ -267,26 +270,24 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.assertIn("Disease latent period", center_panel.text)
 
     def test_upload_population_file(self):
-        self.selenium.find_element_by_tag_name('nav').find_element_by_link_text('Population').click()
-        time.sleep(1)
+        self.click_navbar_element('Population')
 
-        self.selenium.find_element_by_link_text('Population_Grid.xml').click()
-        time.sleep(3) # may need to be adjusted for slow computers or if the file grows
+        self.selenium.find_element_by_link_text('SampleScenario.sqlite3').click()
+        time.sleep(5) # may need to be adjusted for slow computers or if the file grows
 
-        section = self.selenium.find_element_by_tag_name('section')
+        section = self.query('section')
         self.assertIn('Population File:', section.text)
 
     def test_upload_blank_population_file(self):
-        self.selenium.find_element_by_tag_name('nav').find_element_by_link_text('Population').click()
-        time.sleep(1)
+        self.click_navbar_element('Population')
 
-        self.selenium.find_element_by_link_text('Blank.xml').click()
+        self.selenium.find_element_by_link_text('blank.sqlite3').click()
         time.sleep(5) # may need to be adjusted for slow computers or if the file grows
 
-        section = self.selenium.find_element_by_tag_name('section')
+        section = self.query('section')
         self.assertIn('Load a Population', section.text)
 
-        alert = self.selenium.find_element_by_class_name('alert')
+        alert = self.query('.alert')
         self.assertIn('Error: File Read returned a blank string.', alert.text)
 
     def test_delete_population(self):
@@ -295,7 +296,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.click_navbar_element('Population', 2)
 
         # javascript is attaching to this event
-        self.selenium.find_element_by_css_selector('[data-delete-link]').click()
+        self.query('[data-delete-link]').click()
         time.sleep(2)
 
         modal = self.selenium.find_element_by_class_name('bootstrap-dialog')
@@ -310,17 +311,16 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         time.sleep(2)
 
-        section = self.selenium.find_element_by_tag_name('section')
+        section = self.query('section')
         self.assertIn('Load a Population', section.text)
 
     def old_test_assign_disease_spread_layout(self):
         self.setup_scenario()
 
-        self.selenium.find_element_by_tag_name('nav') \
-            .find_element_by_link_text('Assign Disease Spread').click()
+        self.query('nav').find_element_by_link_text('Assign Disease Spread').click()
         time.sleep(2)
 
-        m2m_widget = self.selenium.find_element_by_css_selector('.m2mtable > table')
+        m2m_widget = self.query('.m2mtable > table')
 
         # check that the buttons are present
         buttons = m2m_widget.find_elements_by_tag_name('button')
@@ -507,7 +507,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         time.sleep(1)
 
-        modal = self.selenium.find_element_by_css_selector('div.modal')
+        modal = self.query('div.modal')
 
         self.assertIn("Import Points from File", modal.text)
 
@@ -515,7 +515,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.submit_relational_form_with_file(modal)
         self.selenium.find_element_by_id('right-panel').find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(2)
-        modal = self.selenium.find_element_by_css_selector('div.modal')
+        modal = self.query('div.modal')
         self.assertEqual("123.1", modal.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
 
 
@@ -526,10 +526,10 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.select_option('id_form-0-effect', 'Add...')
         self.select_option('id_zone_indirect_movement', 'Add...')
         
-        right_panel = self.selenium.find_element_by_css_selector('#right-panel')
+        right_panel = self.query('#right-panel')
 
         self.submit_relational_form_with_file(right_panel)
-        right_panel = self.selenium.find_element_by_css_selector('#right-panel')
+        right_panel = self.query('#right-panel')
         self.assertEqual("123.1", right_panel.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
 
 
@@ -565,7 +565,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.client.get('/app/OpenTestScenario/ScenarioCreator/tests/population_fixtures/Roundtrip.sqlite3/')
         delete_all_outputs()
 
-        self.click_navbar_element("On\nOff\nControls") 
+        self.click_navbar_element("Controls") 
 
         parent_of(self.selenium.find_element_by_id("id_disable_all_controls")).click()
         time.sleep(1)
@@ -601,7 +601,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         delete_all_outputs()
 
         ControlMasterPlan.objects.get_or_create(disable_all_controls=True)
-        self.click_navbar_element("On\nOff\nControls")
+        self.click_navbar_element("Controls")
         control_items = [
             "Vaccination Triggers",
             "Control Protocol",
@@ -629,13 +629,14 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             self.assertIn(controls, actual_menu)
 
     def test_save_scenario_failure(self):
-        filename_field = self.selenium.find_element_by_css_selector('#file_panel .filename input')
+        self.query('#TB_file').click()
+        filename_field = self.query('#file_panel .filename input')
         try:
             filename_field.send_keys('./\\ 123.1&% AZ')
-            self.selenium.find_element_by_css_selector('#save_scenario').click()
+            self.query('#save_scenario').click()
             time.sleep(1)
 
-            alert = self.selenium.find_element_by_css_selector('.alert-danger')  # this works fine in the actual program.
+            alert = self.query('.alert-danger')  # this works fine in the actual program.
             
             self.assertIn("Error", alert.text)
         finally:
@@ -650,16 +651,17 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.selenium.find_element_by_id('submit-id-submit').click()
         time.sleep(1)
 
-        save_button = self.selenium.find_element_by_css_selector('header form button[type="submit"]')
+        save_button = self.query('header .scenario-status p')
         self.assertIn('unsaved', save_button.get_attribute('class'))
 
-        filename_field = self.selenium.find_element_by_css_selector('#file_panel .filename input')
+        self.query('#TB_file').click()
+        filename_field = self.query('#file_panel .filename input')
         try:
             filename_field.send_keys('123.1 AZ')
             filename_field.submit()
             time.sleep(3)
 
-            save_button = self.selenium.find_element_by_css_selector('header form button[type="submit"]')
+            save_button = self.query('header form button[type="submit"]')
             self.assertNotIn('unsaved', save_button.get_attribute('class'))
         finally:
             try:
