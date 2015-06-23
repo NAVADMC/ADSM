@@ -1,6 +1,7 @@
 import sys
 import os
 import pip
+import shutil
 
 from cx_Freeze import setup, Executable
 from importlib import import_module
@@ -64,11 +65,14 @@ print("You should only run this build script if you are a CLEAN VirtualEnv!\n"
 if not query_yes_no("Are you in a CLEAN Python Environment?", default='no'):
     sys.exit()
 
-# if not os.path.exists(os.path.join(settings.BASE_DIR, 'static')):
-#     os.makedirs(os.path.join(settings.BASE_DIR, 'static'))
-# management.call_command('collectstatic', interactive=False, clear=True)
+if not os.path.exists(os.path.join(settings.BASE_DIR, 'static')):
+    os.makedirs(os.path.join(settings.BASE_DIR, 'static'))
+management.call_command('collectstatic', interactive=False, clear=True)
+
+shutil.rmtree(os.path.join(settings.BASE_DIR, 'build'), ignore_errors=True)
 
 build_exe_options = {
+    'build_exe': 'build',
     'optimize': 2,
     'excludes': [
         'development_scripts',
@@ -87,6 +91,8 @@ build_exe_options = {
     'include_files': [
         ('Sample Scenarios', 'Sample Scenarios'),
         ('static', 'static'),
+        ('bin', 'bin'),
+        ('Viewer', 'Viewer'),
     ],
     'include_msvcr': True
 }
@@ -114,7 +120,7 @@ for package in build_exe_options['packages']:
         if getattr(package, '__include_files__', False):
             build_exe_options['include_files'].extend(package.__include_files__)
     except Exception as e:
-        print("Error bringing in dependent files!", str(e))
+        print("Error bringing in dependent files!", str(e), "This is probably okay.")
         continue
 
 base = None
@@ -127,3 +133,10 @@ setup(name='ADSM',
       options={'build_exe': build_exe_options},
       executables=[Executable('ADSM.py', base=base), ]
       )
+
+# TODO: This should be the end of the build method
+files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, 'build')) if os.path.isfile(os.path.join(settings.BASE_DIR, 'build', file)))
+os.makedirs(os.path.join(settings.BASE_DIR, 'build', 'bin', 'env'))
+for file in files:
+    if file not in ['ADSM.exe', 'library.zip']:
+        shutil.move(os.path.join(settings.BASE_DIR, 'build', file), os.path.join(settings.BASE_DIR, 'build', 'bin', 'env', file))
