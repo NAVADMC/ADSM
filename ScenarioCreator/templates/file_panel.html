@@ -6,9 +6,9 @@
     <h2>Available Scenarios</h2>
     <ul id="file_list">
         {% for file in db_files %}
-            <li><a href="/LoadingScreen/?loading_url=/app/OpenScenario/{{ file }}/">{{ file }}</a>
+            <li><a class="open_scenario" href="/LoadingScreen/?loading_url=/app/OpenScenario/{{ file }}/">{{ file }}</a>
                 <div class="buttonHolder pull-right">
-                    <a href="/LoadingScreen/?loading_url=/app/OpenScenario/{{ file }}/"  class="open-button pull-right" title="Open Scenario"></a>
+                    <a href="/LoadingScreen/?loading_url=/app/OpenScenario/{{ file }}/"  class="open_scenario open-button pull-right" title="Open Scenario"></a>
                     <a href="#" class="copy-button pull-right" title="duplicate" data-copy-link="/app/Copy/{{ file }}/"></a>
                     <a href="#" class="delete-button ajax-post pull-right" title="delete" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
                     {#<a href="/app/Download/target={{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>#}

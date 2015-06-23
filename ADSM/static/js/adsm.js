@@ -1,8 +1,7 @@
-
 $(function(){
     open_panel_if_needed();
     check_disabled_controls();
-    
+
     $(document).on('click', 'form.ajax .btn-cancel', function(){
         var container = $(this).closest('form').closest('div');
         if(container.closest('.layout-panel').attr('id') == 'main-panel'){
@@ -98,7 +97,7 @@ $(function(){
         $(this).find('.unsaved').removeClass('unsaved');
     })
 
-    $(document).on('click', '#open_scenario, #new_scenario', function(event){
+    $(document).on('click', '.open_scenario', function(event){ // #new_scenario is handled by [data-copy-link]
         var dialog = check_file_saved();
         if(dialog){
             event.preventDefault();
@@ -225,34 +224,15 @@ $(function(){
 
     $(document).on('click', '[data-copy-link]', function(){
         var link = $(this).attr('data-copy-link')
-        var is_current_scenario = link == '/app/SaveScenario/'
-        var dialog = new BootstrapDialog.show({
-            title: 'Scenario Save As...',
-            type: BootstrapDialog.TYPE_PRIMARY,
-            message: 'Enter the name of the new scenario: <input type="text" id="new_name">',
-            buttons: [
-                {
-                    label: 'Cancel',
-                    cssClass: 'btn',
-                    action: function(dialog){
-                        dialog.close();
-                    }
-                },
-                {
-                    label: 'Save As',
-                    cssClass: 'btn-primary',
-                    action: function(dialog){
-                            dialog.close();
-                            if(is_current_scenario){
-                                $('.filename input').val($('#new_name').val())
-                                $('.filename').closest('form').submit()
-                            } else {
-                                window.location = link + $('#new_name').val();
-                            }
-                    }
-                }
-            ]
-        });
+        var dialog = check_file_saved();
+        if(dialog){
+            event.preventDefault();
+            dialog.$modal.on('hidden.bs.modal', function() {
+                prompt_for_new_file_name(link);
+            })
+        }else{
+            prompt_for_new_file_name(link);
+        }
     })
 
     $('#id_disable_all_controls').change(function(event){
@@ -458,7 +438,14 @@ var check_file_saved = function(){
                     label: 'Save',
                     cssClass: 'btn-primary btn-save',
                     action: function(dialog){
-                        $.get($('header form').attr('action'), $('header form').serialize(), function(){dialog.close()});
+                        var form = $('.filename').closest('form');
+                        $.get(form.attr('action'), $(form).serialize(),
+                            function(){
+                                dialog.close()
+                            }
+                        ).always(function() {
+                            $('.blocking-overlay').hide();
+                        })
                     }
                 }
             ]
@@ -617,3 +604,35 @@ function check_if_TB_panel_form_mask_needed(){  // I'm currently assuming that a
         $form.closest('.TB_panel').css('z-index', 1050)  // can't seem to bring out a smaller sub component with z-index
     }
 }
+
+function prompt_for_new_file_name(link) {
+    var is_current_scenario = link == '/app/SaveScenario/'
+    var dialog = new BootstrapDialog.show({
+        title: 'Scenario Save As...',
+        type: BootstrapDialog.TYPE_PRIMARY,
+        message: 'Enter the name of the new scenario: <input type="text" id="new_name">',
+        buttons: [
+            {
+                label: 'Cancel',
+                cssClass: 'btn',
+                action: function (dialog) {
+                    dialog.close();
+                }
+            },
+            {
+                label: 'Save As',
+                cssClass: 'btn-primary',
+                action: function (dialog) {
+                    dialog.close();
+                    if (is_current_scenario) {
+                        $('.filename input').val($('#new_name').val())
+                        $('.filename').closest('form').submit()
+                    } else {
+                        window.location = link + $('#new_name').val();
+                    }
+                }
+            }
+        ]
+    });
+}
+
