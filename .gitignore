@@ -1,4 +1,4 @@
-src/ADSM/production_settings.py
+ADSM/production_settings.py
 /logs/
 
 *.user
