@@ -269,6 +269,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         self.assertIn("Disease latent period", center_panel.text)
 
+    @skip("https://github.com/NAVADMC/ADSM/issues/605")
     def test_upload_population_file(self):
         self.click_navbar_element('Population')
 
@@ -280,6 +281,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
                 break
             except: pass  # keep trying
 
+    @skip("https://github.com/NAVADMC/ADSM/issues/605")
     def test_upload_blank_population_file(self):
         self.click_navbar_element('Population')
 
