@@ -471,6 +471,22 @@ ul {
     height: 12px;
     font-size: 12px;
 }
+
+.function_dropdown {
+    position: absolute;
+    height: auto;
+    padding-right: 20px;
+    background-color: white;
+    border: solid 1px black;
+    right: 0px;
+    top: 38px;
+    color: black;
+}
+
+.function_dropdown a:hover {
+    color: #0000ee;
+    /*text-decoration: underline;*/
+}
 /*-------------------------------------------------------------*/
 /*-----navigation menu-----*/
 /*-------------------------------------------------------------*/
