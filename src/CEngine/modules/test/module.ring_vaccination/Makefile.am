@@ -86,6 +86,8 @@ EXTRA_DIST = radius_0.xml radius_0_w_vars.xml radius_0point5.xml radius_1.xml \
  vacc_4detect_retro3_8units_2rows.sqlite3 \
  retrigger_2detect_16units_2rings.sqlite3 \
  retrigger_2detect6days_16units_2rings.sqlite3 \
+ retrigger_7daysincedet_typeB_16units_2rings.sqlite3 \
+ retrigger_1.5edr3days_in_typeB_20units_2rings.sqlite3 \
  retrigger_2groupsAC_BD_3daysincedet_16units_2rings.sqlite3 \
  retrigger_destwait2_nonewdetect_16units_2rings.sqlite3 \
  retrigger_destwait2_newdetect1_16units_2rings.sqlite3 \

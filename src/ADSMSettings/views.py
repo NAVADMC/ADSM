@@ -5,10 +5,10 @@ from django.db import close_old_connections
 from django.http import JsonResponse
 from django.shortcuts import redirect, render, HttpResponse
 from django.utils.html import strip_tags
-from ADSMSettings.models import scenario_filename, SmSession, unsaved_changes
+from ADSMSettings.models import SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
-from ADSMSettings.utils import reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup
+from ADSMSettings.utils import reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup, scenario_filename
 from Results.models import outputs_exist
 
 
@@ -53,7 +53,7 @@ def file_dialog(request):
 
 def run_importer(request):
     param_path = handle_file_upload(request, 'parameters_xml', is_temp_file=True, overwrite_ok=True)  # we don't want param XMLs stored next to population XMLs
-    popul_path = handle_file_upload(request, 'population_xml', overwrite_ok=True)
+    popul_path = handle_file_upload(request, 'population_xml', is_temp_file=True, overwrite_ok=True)
     import_legacy_scenario(param_path, popul_path)
 
 
@@ -61,7 +61,7 @@ def import_legacy_scenario(param_path, popul_path):
     names_without_extensions = tuple(os.path.splitext(os.path.basename(x))[0] for x in [param_path, popul_path])  # stupid generators...
     new_scenario()  # I realized this was WAY simpler than creating a new database connection
     import_naadsm_xml(popul_path, param_path)  # puts all the data in activeSession
-    scenario_filename('%s with %s' % names_without_extensions)
+    scenario_filename('%s with %s' % names_without_extensions, check_duplicates=True)
     return save_scenario(None)  # This will overwrite a file of the same name without prompting
     # except BaseException as error:
     #     print("Import process crashed\n", error)
@@ -175,7 +175,7 @@ def new_scenario(request=None, new_name=None):
     update_db_version()
     if new_name:
         try:
-            scenario_filename(new_name)
+            scenario_filename(new_name, check_duplicates=True)
         except: pass # validation may kick it back in which case they'll need to rename it in a file browser
     return redirect('/setup/Scenario/1/')
 
