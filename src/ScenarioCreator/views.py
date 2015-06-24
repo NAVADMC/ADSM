@@ -471,9 +471,16 @@ def model_list(request):
 
 # Utility Views was moved to the ADSMSettings/connection_handler.py
 
+def open_population(request, target):
+    from ADSMSettings.models import SmSession
+    session = SmSession.objects.get()
+    session.set_population_upload_status("Processing file")
+
+    return parse_population(workspace_path(target), session)
+
+
 def upload_population(request):
     from ADSMSettings.models import SmSession
-    from xml.etree.ElementTree import ParseError
     session = SmSession.objects.get()
     if 'GET' in request.method:
         json_response = {"status": session.population_upload_status, "percent": session.population_upload_percent*100} 
@@ -484,22 +491,27 @@ def upload_population(request):
         file_path = workspace_path(request.POST.get('filename')) 
     else:
         try:
-            file_path = handle_file_upload(request, overwrite_ok=True)
+            file_path = handle_file_upload(request, is_temp_file=True, overwrite_ok=True)
         except FileExistsError:
             return JsonResponse({"status": "failed", 
-                                 "message": "Cannot import file because a file with the same name already exists in the list below."}) 
+                                 "message": "Cannot import file because a file with the same name already exists in the list below."})
 
+    return parse_population(file_path, session)
+
+
+def parse_population(file_path, session):
+    from xml.etree.ElementTree import ParseError
     try:
         model = Population(source_file=file_path)
         model.save()
     except (EOFError, ParseError, BaseException) as error:
         session.set_population_upload_status(status='Failed: %s' % error)
-        message = "This is not a valid Population file: " if isinstance(error , ParseError) else ""
+        message = "This is not a valid Population file: " if isinstance(error, ParseError) else ""
         return JsonResponse({"status": "failed", "message": message + str(error)})  # make sure to cast errors to string first
     # wait for Population parsing (up to 5 minutes)
     session.reset_population_upload_status()
     return JsonResponse({"status": "complete", "redirect": "/setup/Populations/"})
-   
+
 
 def filtering_params(request):
     """Collects the list of parameters to filter by.  Because of the way this is setup:
@@ -548,7 +560,7 @@ def population(request):
         context['deletable'] = '/setup/Population/1/delete/'
         context['population_file'] = os.path.basename(Population.objects.get().source_file)
     else:
-        context['xml_files'] = file_list([".xml", ".csv"])
+        context['xml_files'] = file_list([".sqlite3"])
     return render(request, 'ScenarioCreator/Population.html', context)
 
 

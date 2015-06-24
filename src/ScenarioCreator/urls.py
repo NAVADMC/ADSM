@@ -39,6 +39,7 @@ urlpatterns = generate_urls_from_models(os.path.join(settings.BASE_DIR, 'Scenari
                                          "url('^Populations/$', 'ScenarioCreator.views.population')",
                                          "url('^Population/new/$', 'ScenarioCreator.views.population')",  # force redirect for special singleton
                                          "url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population')",
+                                         "url('^OpenPopulation/(?P<target>.+)$', 'ScenarioCreator.views.open_population')",
                                          "url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario')",
                                          "url('^ProductionTypeList.json/$', 'ScenarioCreator.views.production_type_list_json')",
                                          "url('^DisableAllControls.json/$', 'ScenarioCreator.views.disable_all_controls_json')",

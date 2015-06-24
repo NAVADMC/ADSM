@@ -78,12 +78,12 @@ DATABASES.update({
     'default': {
         'NAME': os.path.join(DB_BASE_DIR, 'settings.sqlite3'),
         'ENGINE': 'django.db.backends.sqlite3',
-        'TEST_NAME': os.path.join(DB_BASE_DIR, 'test_settings.sqlite3'),
+        'TEST': {'NAME': os.path.join(DB_BASE_DIR, 'test_settings.sqlite3')},
     },
     'scenario_db': {
         'NAME': os.path.join(DB_BASE_DIR, 'activeSession.sqlite3'),
         'ENGINE': 'django.db.backends.sqlite3',
-        'TEST_NAME': os.path.join(DB_BASE_DIR, 'test_activeSession.sqlite3'),
+        'TEST': {'NAME': os.path.join(DB_BASE_DIR, 'test_activeSession.sqlite3')},
         'OPTIONS': {
             'timeout': 300,
         }

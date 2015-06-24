@@ -18,8 +18,11 @@ CREATE_AT_A_TIME = 500 # for bulk object creation
 
 def create_no_duplicates(ModelClass, suggested_name, **kwargs):
     instance, created = ModelClass.objects.get_or_create(**kwargs)
-    if created and suggested_name is not None:  # TODO: use Django _meta to check for a field called "name"
-        instance.name = suggested_name
+    if suggested_name is not None:  # TODO: use Django _meta to check for a field called "name"
+        if created:
+            instance.name = suggested_name
+        else:
+            instance.name += ',' + suggested_name
         instance.save()
     return instance, created
 

@@ -25,7 +25,7 @@ class PopulationParserTestCase(TestCase):
 
     def test_parser_load_utf8(self):
         expected_results = {
-            'user_notes': '1',
+            'user_notes': 'UnitID=1',
             'initial_size': '100',
             'latitude': '50',
             'longitude': '-8',
@@ -41,7 +41,7 @@ class PopulationParserTestCase(TestCase):
 
     def test_parser_load_utf16(self):
         expected_results = {
-            'user_notes': '\u5f71\u97ff\u3092\u53d7\u3051\u3084\u3059\u3044',
+            'user_notes': 'UnitID=\u5f71\u97ff\u3092\u53d7\u3051\u3084\u3059\u3044',
             'initial_size': '84',
             'latitude': '52.9672',
             'longitude': '-8.201',
@@ -58,7 +58,7 @@ class PopulationParserTestCase(TestCase):
     def test_parser_multiple_herds(self):
         expected_results = [
             {
-                'user_notes': '1',
+                'user_notes': 'UnitID=1',
                 'initial_size': '84',
                 'latitude': '52.9672',
                 'longitude': '-8.201',
@@ -66,7 +66,7 @@ class PopulationParserTestCase(TestCase):
                 'initial_state': 'Susceptible',
             },
             {
-                'user_notes': '2',
+                'user_notes': 'UnitID=2',
                 'initial_size': '64',
                 'latitude': '52.9672',
                 'longitude': '-8.21',
