@@ -1,5 +1,5 @@
 CherryPy==3.6.0
-Django==1.8.2
+git+https://github.com/BryanHurst/django.git@stable/1.8.2-patched
 Jinja2==2.7.3
 MarkupSafe==0.23
 django-crispy-forms==1.4.0
@@ -11,7 +11,7 @@ python-dateutil==2.3
 pytz==2014.10
 selenium==2.44.0
 six==1.8.0
-git+git://github.com/BryanHurst/django-productionserver.git@1.0.1R3
+git+https://github.com/BryanHurst/django-productionserver.git@1.0.1R3
 
 numpy==1.9.1
 matplotlib==1.4.2
@@ -20,4 +20,4 @@ pyproj==1.9.4
 psutil==2.2.0
 
 pywin32==219
-cx-freeze==4.3.4
+hg+https://bitbucket.org/BryanHurst/cx_freeze
