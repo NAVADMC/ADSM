@@ -68,6 +68,8 @@ if not query_yes_no("Are you in a CLEAN Python Environment?", default='no'):
 if not os.path.exists(os.path.join(settings.BASE_DIR, 'static')):
     os.makedirs(os.path.join(settings.BASE_DIR, 'static'))
 management.call_command('collectstatic', interactive=False, clear=True)
+if not os.path.exists(os.path.join(settings.BASE_DIR, 'media')):
+    os.makedirs(os.path.join(settings.BASE_DIR, 'media'))
 
 shutil.rmtree(os.path.join(settings.BASE_DIR, 'build'), ignore_errors=True)
 
@@ -89,10 +91,11 @@ build_exe_options = {
     'replace_paths': [('*', '')],
     'compressed': False,
     'include_files': [
-        ('Sample Scenarios', 'Sample Scenarios'),
         ('static', 'static'),
+        ('media', 'media'),
         ('bin', 'bin'),
         ('Viewer', 'Viewer'),
+        ('Sample Scenarios', 'Sample Scenarios'),
     ],
     'include_msvcr': True
 }
