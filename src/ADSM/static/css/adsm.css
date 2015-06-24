@@ -102,7 +102,7 @@ header {
     z-index: 100;
     background-color: #606060;
     width: 100%;
-    height: 70px;
+    height: 55px;
     top: 0;
     min-width:1000px;
     color: white;
@@ -147,19 +147,38 @@ header div {
 header p {
     float: none;
 }
-
+header .header_logo{
+    height: 23px;
+    display: block;
+    background-image: url("https://github.com/NAVADMC/ADSM/blob/gh-pages/images/adsm_logo.png?raw=true");
+    margin-top: 15px;
+    background-position: 20px;
+    background-repeat: no-repeat;
+}
+.header_filename {
+    padding-left: 0;
+}
 header .filename {
     float: left;
     /*min-width: 540px;*/
-    padding: 5px 20px;
+    padding-top: 11px;
 }
 
 .filename input {
     border: none;
 }
-
+.scenario-status h2{
+    line-height: 21px;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    visibility: hidden;
+    margin-top: 1px;
+}
 .scenario-status p{
-    display:none
+    display:none;
+    font-size: 12px;
+    font-style: italic;
+    font-weight: 300;
 }
 .scenario-status p.unsaved {
     display:block;
@@ -235,7 +254,7 @@ header .buttonHolder .btn:hover {
 
 body>nav {
     position: fixed;
-    top: 69px;
+    top: 55px;
     bottom: 0;
     left: 0;
     width: 175px;
