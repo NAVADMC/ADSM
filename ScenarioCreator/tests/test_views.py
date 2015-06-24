@@ -65,6 +65,17 @@ class PopulationTestCase(TestCase):
         # data = json.loads(r.content.decode())
         self.assertJSONEqual(r.content.decode(), expected_results)
 
+
+    def test_parser_load_invalid_csv(self):
+        expected_results = {
+            'status': 'failed',
+            'message': 'Error: '
+        }
+        with open(POPULATION_FIXTURES + 'ADSM Simple Units. with errors.latitude field.csv', mode='rb') as fp:
+            r = self.client.post('/setup/UploadPopulation/', {'file': fp})
+            response = r.content.decode()
+            self.assertJSONEqual(response, expected_results)
+
 class RelationalFunctionTestCase(TestCase):
     multi_db = True
 
