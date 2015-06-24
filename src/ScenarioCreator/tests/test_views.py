@@ -72,7 +72,7 @@ class RelationalFunctionTestCase(TestCase):
         r = self.client.get('/setup/Function/')
 
         self.assertEqual(r.status_code, 200)
-        self.assertIn('Create Functions', r.content.decode())
+        self.assertIn('Relational Function', r.content.decode())
 
     def test_get(self):
         function = RelationalFunction.objects.create(name="Test Function")

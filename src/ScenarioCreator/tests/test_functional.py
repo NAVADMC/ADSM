@@ -534,7 +534,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         self.submit_relational_form_with_file(right_panel)
         right_panel = self.query('#right-panel')
-        self.assertEqual("123.1", right_panel.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
+        self.assertEqual("123.1", self.selenium.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
 
 
     def submit_relational_form_with_file(self, container):

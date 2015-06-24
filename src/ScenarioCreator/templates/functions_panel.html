@@ -1,15 +1,20 @@
     <a href="" class="action_link">Assign</a>
-    <select name="Relational" id="">
-        {% for entry in models.0.entries %}
-            <option value=""><a href="/setup/RelationalFunction/{{ entry.pk }}/" load-target="{{ load_target }}">{{ entry }}</a></option>
-        {% endfor %}
-    </select>
-    <select name="Probability" id="">
-        {% for entry in models.1.entries %}
-            <option value=""><a href="/setup/ProbabilityFunction/{{ entry.pk }}/" load-target="{{ load_target }}">{{ entry }}</a></option>
-        {% endfor %}
-
-    </select>
+    <span class="pull-right" data-toggle="collapse" data-target="#probability-options">Probability <i class="glyphicon glyphicon-triangle-bottom"></i></span>
+    <span class="pull-right" data-toggle="collapse" data-target="#relational-options">Relational <i class="glyphicon glyphicon-triangle-bottom"></i></span>
+    <div id="relational-options" class="collapse">
+        <ul>
+            {% for entry in models.0.entries %}
+                <li><a href="/setup/RelationalFunction/{{ entry.pk }}/" load-target="{{ load_target }}">{{ entry }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div id="probability-options" class="collapse">
+        <ul>
+            {% for entry in models.1.entries %}
+                <li><a href="/setup/ProbabilityFunction/{{ entry.pk }}/" load-target="{{ load_target }}">{{ entry }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
 
     <div id="current-function">
     {% if form  %}
