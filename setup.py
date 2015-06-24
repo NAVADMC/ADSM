@@ -157,7 +157,8 @@ cmdclass = {"build_exe": BuildADSM, }
 setup(name='ADSM',
       version='3.3.33',
       description='Test ADSM Application',
-      options={'build_exe': build_exe_options},
+      options={'build_exe': build_exe_options,
+               'install_exe': {'build_dir': build_exe_options['build_exe']}},
       executables=[Executable('ADSM.py', base=base), ],
       cmdclass=cmdclass,
       )
