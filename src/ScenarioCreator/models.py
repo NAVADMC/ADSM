@@ -174,6 +174,7 @@ class Population(InputSingleton):
             import_db = 'import_db'
             connections.databases[import_db] = {
                 'NAME': self.source_file,
+                'TEST':{'NAME': self.source_file},
                 'ENGINE': 'django.db.backends.sqlite3',
                 'OPTIONS': {
                     'timeout': 300,

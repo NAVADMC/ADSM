@@ -140,7 +140,7 @@ class RelationalFunctionTestCase(TestCase):
         new_function = qs.first()
 
         html_response = r.content.decode()
-        print(html_response)
+        # print(html_response)
         self.assertIn('/setup/RelationalFunction/%d/' % new_function.pk, html_response)
 
     def test_copy_with_points(self):
