@@ -1,0 +1,12 @@
+{% extends 'ScenarioCreator/navigationPane.html' %}
+
+{% block main_layout %}
+    <section id="main-panel" class="layout-panel">
+        {% block content %}
+
+        {% endblock %}
+        {% if base_page %}
+            {% include base_page %}
+        {% endif %}
+    </section>
+{% endblock %}

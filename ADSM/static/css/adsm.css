@@ -1247,12 +1247,12 @@ input[type=file], button {
         width: 200px;
     }
 }
-/*@media screen and (max-width: 1100px) {
+@media screen and (max-width: 1100px) {
     section {
         margin-left: 195px !important;
         overflow: auto;
         min-width: 0 !important;
-    }*/
+    }
     #population_grid_wraper {
         margin-left: 0;
         width: calc(100% + 40px);
@@ -1287,7 +1287,7 @@ input[type=file], button {
     section h1:first-of-type {
         margin-left: 0;
     }
-/*} media query commented out*/
+}
 
 @media screen and (max-width: 960px) {
     #population_grid_wraper form:first-of-type {
