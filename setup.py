@@ -88,6 +88,23 @@ def get_local_packages():
     return get_packages_in_path(settings.BASE_DIR)
 
 
+def remove_empty_folders(path):
+    if not os.path.isdir(path):
+        return
+
+    files = os.listdir(path)
+    if len(files):
+        for f in files:
+            fullpath = os.path.join(path, f)
+            if os.path.isdir(fullpath):
+                remove_empty_folders(fullpath)
+
+    files = os.listdir(path)
+    if len(files) == 0:
+        print("Removing empty folder:", path)
+        os.rmdir(path)
+
+
 class BuildADSM(build_exe):
     def run(self):
         print("\nYou should only run this build script if you are a CLEAN VirtualEnv!\n"
@@ -106,7 +123,7 @@ class BuildADSM(build_exe):
         management.call_command('makeresultsurls')
         management.call_command('makescenariocreatorurls')
 
-        shutil.rmtree(os.path.join(settings.BASE_DIR, 'build'), ignore_errors=True)
+        shutil.rmtree(os.path.join(settings.BASE_DIR, self.build_exe), ignore_errors=True)
 
         # Grab all the packages that we should include (local and those installed in the virtualenv)
         self.packages.extend(get_installed_packages())
@@ -139,13 +156,13 @@ class BuildADSM(build_exe):
 
         build_exe.run(self)
 
-        files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, 'build'))
-                 if os.path.isfile(os.path.join(settings.BASE_DIR, 'build', file)))
-        os.makedirs(os.path.join(settings.BASE_DIR, 'build', 'bin', 'env'))
+        files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, self.build_exe))
+                 if os.path.isfile(os.path.join(settings.BASE_DIR, self.build_exe, file)))
+        os.makedirs(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
         for file in files:
             if file not in ['ADSM.exe', 'library.zip']:
-                shutil.move(os.path.join(settings.BASE_DIR, 'build', file),
-                            os.path.join(settings.BASE_DIR, 'build', 'bin', 'env', file))
+                shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, file),
+                            os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file))
 
 
 base = None
@@ -162,3 +179,5 @@ setup(name='ADSM',
       executables=[Executable('ADSM.py', base=base), ],
       cmdclass=cmdclass,
       )
+
+remove_empty_folders(os.path.join(settings.BASE_DIR, build_exe_options['build_exe']))
