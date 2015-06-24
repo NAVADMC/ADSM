@@ -4,7 +4,8 @@
 {% load db_status_tags %}
 {% load humanize %}
 
-{% block content %}
+{% block main_layout %}
+<section id="main-panel" class="layout-panel  col-md-8 center-block">
     <script type="text/javascript" src="{{ STATIC_URL }}js/population.js"></script>
 
 {% if not Population %}
@@ -51,4 +52,5 @@
         {% include "ScenarioCreator/PopulationFilters.html" %}
     </div>
 {% endif %}
+</section>
 {% endblock %}

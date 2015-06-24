@@ -1319,12 +1319,12 @@ input[type=file], button {
         width: 200px;
     }
 }
-/*@media screen and (max-width: 1100px) {
+@media screen and (max-width: 1100px) {
     section {
         margin-left: 195px !important;
         overflow: auto;
         min-width: 0 !important;
-    }*/
+    }
     #population_grid_wraper {
         margin-left: 0;
         width: calc(100% + 40px);
