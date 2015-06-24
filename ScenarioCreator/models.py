@@ -28,6 +28,7 @@ Changes made in ScenarioCreator/models.py propagate to the script output
 Limit foreignkey choices with a dictionary filter on field values:
                      limit_choices_to={'is_staff': True}
 """
+import os
 
 import re
 import time
@@ -124,8 +125,11 @@ class Population(InputSingleton):
 
     def save(self, *args, **kwargs):
         super(Population, self).save(*args, **kwargs)
-        if self.source_file and not self.source_file.endswith('.sqlite3'):
-            self.import_population()  # Population must be saved to db so that it can be foreignkeyed
+        if self.source_file:
+            if self.source_file.endswith('.sqlite3'):
+                self.import_population_from_sqlite()
+            else:
+                self.import_population()  # Population must be saved to db so that it can be foreignkeyed
 
     def delete(self, using=None):
         if Unit.objects.count():
@@ -159,6 +163,40 @@ class Population(InputSingleton):
         Unit.objects.bulk_create(unit_objects)
         execution_time = (time.clock() - start_time)
         print("Done creating", '{:,}'.format(len(data)), "Units took %i seconds" % execution_time)
+
+    def import_population_from_sqlite(self):
+        from django.db import connections, close_old_connections
+        try:
+            if not os.path.exists(self.source_file):
+                raise EOFError("File does not exist in the Workspace folder")
+
+            # connect file_path
+            import_db = 'import_db'
+            connections.databases[import_db] = {
+                'NAME': self.source_file,
+                'TEST':{'NAME': self.source_file},
+                'ENGINE': 'django.db.backends.sqlite3',
+                'OPTIONS': {
+                    'timeout': 300,
+                }
+            }
+            # clear any old objects
+            # Population.objects.all().delete()
+            ProductionType.objects.all().delete()
+
+            # copy all population objects into memory
+            if not ProductionType.objects.using(import_db).count():
+                raise EOFError('No Production Types found in the target scenario.')
+            ProductionType.objects.bulk_create(ProductionType.objects.using(import_db).all())
+            Unit.objects.bulk_create(Unit.objects.using(import_db).all())
+
+            # close extra database
+            close_old_connections()
+            connections[import_db].close()
+            connections.databases.pop(import_db)
+        except BaseException as error:  # ensure that Population is never left in a bad state
+            self.delete()
+            raise error
 
 
 class Unit(BaseModel):
