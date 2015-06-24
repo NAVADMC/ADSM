@@ -102,6 +102,10 @@ class BuildADSM(build_exe):
         if not os.path.exists(os.path.join(settings.BASE_DIR, 'media')):
             os.makedirs(os.path.join(settings.BASE_DIR, 'media'))
 
+        management.call_command('migratescenarios', skip_workspace=True)
+        management.call_command('makeresultsurls')
+        management.call_command('makescenariocreatorurls')
+
         shutil.rmtree(os.path.join(settings.BASE_DIR, 'build'), ignore_errors=True)
 
         # Grab all the packages that we should include (local and those installed in the virtualenv)
