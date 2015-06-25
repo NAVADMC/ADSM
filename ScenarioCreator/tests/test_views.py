@@ -66,15 +66,25 @@ class PopulationTestCase(TestCase):
         self.assertJSONEqual(r.content.decode(), expected_results)
 
 
-    def test_parser_load_invalid_csv(self):
+    def test_parser_load_invalid_latitude_csv(self):
         expected_results = {
             'status': 'failed',
-            'message': 'Error: '
+            'message': "{'latitude': ['Ensure this value is less than or equal to 90.0.']}"
         }
         with open(POPULATION_FIXTURES + 'ADSM Simple Units. with errors.latitude field.csv', mode='rb') as fp:
             r = self.client.post('/setup/UploadPopulation/', {'file': fp})
-            response = r.content.decode()
-            self.assertJSONEqual(response, expected_results)
+            self.assertJSONEqual(r.content.decode(), expected_results)
+
+    def test_parser_load_invalid_status_csv(self):
+        expected_results = {
+            'status': 'failed',
+            'message': "['CGATCG is not a valid state']"
+        }
+        with open(POPULATION_FIXTURES + 'ADSM Simple Units. with errors.status field.csv', mode='rb') as fp:
+            r = self.client.post('/setup/UploadPopulation/', {'file': fp})
+            self.assertJSONEqual(r.content.decode(), expected_results)
+
+
 
 class RelationalFunctionTestCase(TestCase):
     multi_db = True
