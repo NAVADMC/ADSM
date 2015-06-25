@@ -69,6 +69,24 @@ a:hover {
 a.wiki, a.wiki:visited {
     color: #B95E07;
 }
+select {
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    border-radius: 0;
+    -webkit-appearance: none;
+    height: 20px;
+    border: 1px solid #ccc;
+    border-radius: 0;
+    background-image: url('https://github.com/NAVADMC/ADSM/blob/gh-pages/images/disclosure_arrow.png?raw=true;');
+    background-repeat: no-repeat;
+    background-position: calc(100% - 3px);
+    padding-right: 20px;
+    padding-left: 3px;
+    background-color: #fff;
+}
+label {
+    line-height: 1;
+}
 
 .help-block {  
     font-weight: 400;
@@ -304,13 +322,21 @@ section#left-panel h1:first-of-type,
 #main-panel h1:first-of-type {
     margin-top: 2px;
 }
-#center-panel input {
+#center-panel input,
+#center-panel select {
     background-color: rgba(244, 230, 0, .2);
     display: block;
     border: none;
     outline: none;
     box-shadow: inset 0px 0px 6px 2px rgba(0, 0, 0, .1);
     padding-left: 5px;
+    -webkit-appearance: none;
+    height: 20px;
+    border-radius: 0;
+    margin-left: 0;
+}
+#center-panel .glyphicon-pencil {
+    display: none;
 }
 #center-panel .fragment {
     margin-left: 25px;
@@ -1235,6 +1261,7 @@ input[type=file], button {
     border: none;
     margin: 0px;
     width: 100%;
+    background-image: none;
 }
 
 #farm_list select {
