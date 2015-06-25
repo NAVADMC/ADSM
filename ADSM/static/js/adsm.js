@@ -3,19 +3,11 @@ $(function(){
     check_disabled_controls();
 
     $(document).on('click', 'form.ajax .btn-cancel', function(){
-        var container = $(this).closest('form').closest('div');
-        if(container.closest('.layout-panel').attr('id') == 'main-panel'){
+        var $container = $(this).closest('form').closest('div');
+        if($container.closest('.layout-panel').attr('id') == 'main-panel'){
             window.location.reload()
         }else{
-            if(container.parent().attr('id') == 'current-function'){
-                //load list of functions instead of blank
-                $.get('/setup/Function/', function(newForm){
-                    var $newForm = $($.parseHTML(newForm));
-                    container.closest('.layout-panel').html($newForm)
-                })
-            }else{
-                container.html('') //delete everything from the div containing the form
-            }
+            clear_form_populate_panel($container);
         }
     })
     
@@ -131,7 +123,7 @@ $(function(){
     $(document).on('change focus', '[data-new-item-url]', function(event){
         //this needs to ignore the event if it's in the right panel, since that will open a modal
         //#422 "Edits" in the far right will open a modal, since we've run out of space
-        if($(this).val() == 'data-add-new' || $(this).closest('.layout-panel').attr('id') != 'right-panel'){
+        if($(this).val() == 'data-add-new' || $(this).closest('.layout-panel').attr('id') != 'functions_panel'){
             populate_pdf_panel(this);
         }
     });
@@ -213,7 +205,7 @@ $(function(){
                                 window.location = link;
                             } else {//neither tag
                                 $.post(link).done(function () {
-                                    $containing_panel.html('')
+                                    clear_form_populate_panel($containing_panel)
                                     var newLink = '/setup/' + link.split('/')[2] + '/new/' //[2] model name
                                     var pk = link.split('/')[3];
                                     // remove option pointing to delete model
@@ -353,11 +345,11 @@ function populate_pdf_panel(select) {
     var $input = $(select)
     if($input.hasClass('grouplist') || $input.hasClass('productiontypelist'))  //grouplist uses the population_panel instead
         return;
-    var load_target = '#right-panel'
+    var load_target = '#functions_panel'
     var position = $input.closest('.layout-panel').attr('id');
-    if(position == 'left-panel'){ //use the center-panel if this is from left
-        load_target = '#center-panel'
-    }else if(position == 'right-panel'){ // we've run out of room and must use a modal
+    //if(position == 'left-panel'){ //use the center-panel if this is from left
+    //    load_target = '#center-panel'
+    if(position == 'functions_panel'){ // we've run out of room and must use a modal
         modelModal.show($input);
         return
     }
@@ -647,3 +639,18 @@ function prompt_for_new_file_name(link) {
     });
 }
 
+function clear_form_populate_panel($container_panel) {
+    if($container_panel.hasClass('layout-panel') == false //not a layout-panel
+            && $container_panel.closest('.layout-panel').attr('id') == 'functions_panel') { //inside function panel
+        $container_panel = $container_panel.closest('.layout-panel') //upgrade to function panel
+    }
+    if ($container_panel.attr('id') == 'functions_panel') {
+        //load list of functions instead of blank
+        $.get('/setup/Function/', function (newForm) {
+            var $newForm = $($.parseHTML(newForm));
+            $container_panel.html($newForm)
+        })
+    } else { //will still clear Create Group form inside of population_panel without destroying the whole panel
+        $container_panel.html('') //delete everything from the div containing the form
+    }
+}
