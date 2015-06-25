@@ -42,7 +42,6 @@ h3, h4 {
 
 section h1 {
     font-size: 18px;
-    margin-left: -15px;
     font-weight:600;
 }
 
@@ -72,7 +71,7 @@ a.wiki, a.wiki:visited {
 }
 
 .help-block {  
-    font-weight: bold;
+    font-weight: 400;
     display: block;
     height: auto;
     overflow: hidden; /* check boxes are bold from mixins.less and I think it looks better with definitions*/
@@ -154,6 +153,7 @@ header .header_logo{
     margin-top: 15px;
     background-position: 20px;
     background-repeat: no-repeat;
+    min-width: 190px;
 }
 .header_filename {
     padding-left: 0;
@@ -275,9 +275,9 @@ body>nav {
 }
 
 .layout-panel {
-    margin-top: 60px;
+    margin-top: 65px;
     display: block;
-    height: calc(100vh - 65px);
+    height: calc(100vh - 75px);
     overflow-y: auto;
     overflow-x: visible;
     padding: 0;
@@ -411,6 +411,16 @@ ul {
 #TB_functions {
     background-image: url("../icons/TB_function_btn.png");
 }
+#tb_mask {
+    position: absolute;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    display: block;
+    background-color: rgba(0, 0, 0, .7);
+    visibility: hidden;
+
+}
 /*-------------------------------------------------------------*/
 /*-----TOOLBAR panels-----*/
 /*-------------------------------------------------------------*/
@@ -428,12 +438,13 @@ ul {
     background-color: white;
     transition: margin-right .2s ease;
     overflow: auto;
+    z-index: 15;
 }
 .TB_panel.TB_panel_closed {
     margin-right: -33.3333vw;
 }
 .TB_panel_over { /*--floats panel over content for static page layouts--*/
-    -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2), -5px 5px 5px -5px rgba(0, 0, 0, .3);
+    -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2), -5px 0px 3px -1px rgba(0, 0, 0, .15) !important;
 }
 /*-------------------------------------------------------------*/
 /*-----file panel-----*/
@@ -543,14 +554,14 @@ ul {
     padding-left: 0;
     margin-bottom: 54px;
     margin-top:5px;
-    max-height: calc(100vh - 120px);
+    max-height: calc(100vh - 126px);
     overflow-y: auto;
     direction: rtl;
 }
 #setupMenu-before {
     content:"";
     position: fixed;
-    top: 75px;
+    top: 60px;
     left: 0;
     display: block;
     width: 170px;
@@ -781,6 +792,9 @@ ul {
     font-size: 11px;
     text-transform: lowercase;
 }
+.toggle-group .btn{
+    min-width: 0px;
+}
 #setupMenu .toggle-off {
     box-shadow: none;
     color: #898989;
@@ -847,6 +861,7 @@ ul {
     color: #606060;
     outline: 1px solid #606060;
     outline-offset: -1px;
+    min-width: 80px;
 }
 .btn-default:hover, .btn-default:focus {
     background: #ebebeb;
@@ -857,6 +872,7 @@ ul {
 .btn-unsaved {
     background-color: #3577b1;
     transition: all .2s ease;
+    min-width: 80px;
 }
 
 .btn-primary:hover,
@@ -1084,6 +1100,11 @@ input[type=file], button {
 /*-------------------------------------------------------------*/
 /*-----population.html-----*/
 /*-------------------------------------------------------------*/
+#population_main_panel {
+    margin-top: 0;
+    height: 100vh;
+    pointer-events: none;
+}
 #replace_population {
     padding-top: 3px;
     padding-left: 10px;
@@ -1096,14 +1117,15 @@ input[type=file], button {
     border-collapse: collapse;
 }
 #population_grid_wraper{
-    margin-left: calc(16.666vw - 280px); /*--remove and add col-xs-9 to html--*/
-    width: calc(74.997vw + 40px);
+    margin-left: 190px;
+    width: calc(100vw - 250px);
     padding: 10px;
     background: white;
     position: relative;
     display: block;
     border-radius: 2px;
     overflow-y:auto;
+    pointer-events: all;
 }
 
 #population_map_container {
@@ -1122,10 +1144,8 @@ input[type=file], button {
     right: 20px;
     top: 0;
 }
-#clear_filters {
-    position: absolute;
-    left: 20px;
-    top: 0;
+#clear_fitlers {
+    margin-top: -10px;
 }
 #farm_list_container{
     float: right;
@@ -1176,7 +1196,7 @@ input[type=file], button {
 
 #farm_list tbody{
     display: inline-block;
-    height: calc(100vh - 250px);
+    height: calc(100vh - 170px);
     overflow-y: auto;
     width: 100%;
     position: relative;
@@ -1320,24 +1340,19 @@ input[type=file], button {
     }
 }
 @media screen and (max-width: 1100px) {
-    section {
-        margin-left: 195px !important;
-        overflow: auto;
-        min-width: 0 !important;
-    }
     #population_grid_wraper {
-        margin-left: 0;
-        width: calc(100% + 40px);
-        overflow-x: hidden;
+        padding-bottom: 15px;
     }
     #population_grid_wraper form:first-of-type{
         float: left !important;
         padding-right: 0;
+        margin-top: 303px;
     }
     #population_filters {
         position: absolute;
-        top: 275px;
         width: 270px;
+        top: 0;
+        left: 0;
     }
     #farm_filter:before {
         width: 100%;
@@ -1345,40 +1360,22 @@ input[type=file], button {
     #population_map_container {
         position: absolute;
         width: 270px;
+        left: 285px;
     }
-    #unit_map {
-        width: 260px;
+     #unit_map {
+        width: 285px;
     }
     #farm_list_container {
         float: left;
-        margin-left: 280px;
-        width: calc(100vw - 530px);
-        border-right: 1px solid #ebebeb;
         padding-right: 0;
-    }
-    section h1:first-of-type {
-        margin-left: 0;
-    }
-}
-@media screen and (max-width: 960px) {
-    #population_grid_wraper form:first-of-type {
-        float: left !important;
-        margin-top: 303px;
-        width: calc(100% - 90px);
-    }
-    #farm_list_container {
         position: relative;
         width: 100%;
         margin-left: 0;
     }
-    #population_map_container {
-        left: 285px;
+    section h1:first-of-type {
+        margin-left: 0;
     }
-    #population_filters {
-        top: 0;
-        left: 0;
-    }
-    #refresh_map {
+     #refresh_map {
         right: -297px;
         top: 285px;
     }
@@ -1388,8 +1385,8 @@ input[type=file], button {
     #population_filters span {
         top: 4px;
     }
-    #unit_map {
-        width: 285px;
+    #population_grid_wraper .help-block {
+        float:left;
     }
 }   
 
@@ -1413,42 +1410,52 @@ input[type=file], button {
 }
 #edit_population {
     position: absolute;
-    top: calc(100vh - 204px);
+    top: calc(100vh - 124px);
     right: 25px;
     transition: opacity .2s ease
 }
 #population_grid_wraper .buttonHolder {
+    float: right;
+    clear: both;
+    padding-right: 20px;
+    padding-top: 10px;
+}
+#population_grid_wraper .buttonHolder {
     position: fixed;
-    top: calc(75vh + 64px);
-    left: calc(91.664vw - 175px);
+    top: calc(100vh - 56px);
+    right: 64px;
     padding: 0 !important;
     float: none;
     clear: none;
 }
 
-@media screen and (max-width: 1348px) {
+@media screen and (max-width: 1100px) {
     #population_grid_wraper .buttonHolder {
-        right: 7.5vw;
-        left: auto;
+        position: relative;
+        float: right;
+        top: 0;
+        right: 0;
+        clear: none;
+        padding-top: 7px !important;
+    }
+    #population_grid_wraper .buttonHolder .btn:nth-child(2){
+        margin-right: 0;
     }
     #edit_population {
         right: 10px;
+        top: calc(100vh + 179px);
     }
 }
 @media screen and (max-width: 1140px) {
     #farm_list .help-block {
         font-size: 11px;
         margin-top:10px;
+        top: 0;
     }
 }
 @media screen and (max-width: 960px) {
     #farm_list .help-block {
         width: 200px;
-    }
-        #edit_population {
-        left: 10px;
-        right: auto;
-        top: 285px;
     }
 }
 
@@ -1485,12 +1492,7 @@ th:hover .sortControls{
 .sortControls .glyphicon-arrow-down {
     top: 2px;
 }
-#population_grid_wraper .buttonHolder {
-    float: right;
-    clear: both;
-    padding-right: 20px;
-    padding-top: 10px;
-}
+
 
 /********/
 

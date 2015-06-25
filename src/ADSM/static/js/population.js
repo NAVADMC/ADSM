@@ -256,10 +256,12 @@ $(document).on('click', '#refresh_map', function(){
 
 $(document).on('click', '#edit_population', function(){
     $('#population_grid_wraper .buttonHolder').removeAttr('hidden')
-    $('#population_grid_wraper').css('height', '75vh')
+    $('#population_grid_wraper').css('height', 'calc(100vh - 75px')
     $('#edit-mask').css('visibility', 'visible')
-    $('#farm_list tbody').css('height', 'calc(75vh - 90px')
+    $('#farm_list tbody').css('height', 'calc(100vh - 166px)')
     $('#edit_population').css('display', 'none')
     $('#farm_list select, #farm_list input').addClass('editable')
     $('#population_grid_wraper :input').addClass('editable')
+    $('#tb_mask').css('visibility', 'visible')
+    $('#population_main_panel').css('pointer-events','all')
 })
