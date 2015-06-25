@@ -601,10 +601,9 @@ function check_if_TB_panel_form_mask_needed(){  // I'm currently assuming that a
     var button = $('.TB_panel form .btn-cancel')  //cancellable form was the most specific thing I could think of
     if(button.length && button.closest('form').length){
         var $form = $(button.closest('form'))
-        var mask = $('<div class="modal-backdrop fade in"></div>');
-        $('#toolbar').after(mask)
-        $form.find('.btn-cancel').click(function(){mask.hide()})
-        $form.find('.btn-save').click(function(){mask.hide()})
+        $('.panel-backdrop').show()
+        $form.find('.btn-cancel').click(function(){$('.panel-backdrop').hide()})
+        $form.find('.btn-save').click(function(){$('.panel-backdrop').hide()})
         $form.closest('.TB_panel').css('z-index', 1050)  // can't seem to bring out a smaller sub component with z-index
     }
 }
