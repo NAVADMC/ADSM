@@ -125,8 +125,8 @@ class LegacyImporterTestCase(TestCase):
 
     @skip("This test isn't working because of a test-specific database connection problem")
     def test_import_sample_scenario(self):
-        popul_path = r'"C:\Users\Josiah\Documents\ADSM\src\ScenarioCreator\tests\population_fixtures\export_pop.xml"'
-        param_path = r'"C:\Users\Josiah\Documents\ADSM\src\ScenarioCreator\tests\population_fixtures\Sample_export.xml"'
+        popul_path = r'"C:\Users\Josiah\Documents\ADSM\ScenarioCreator\tests\population_fixtures\export_pop.xml"'
+        param_path = r'"C:\Users\Josiah\Documents\ADSM\ScenarioCreator\tests\population_fixtures\Sample_export.xml"'
         import_legacy_scenario(param_path, popul_path)
         
         print("DirectSpread.objects.count()", DirectSpread.objects.count())
