@@ -1695,7 +1695,83 @@ textarea:focus {
 .checkboxinput:focus {
     outline: none !important;
 }
-/*.action_link:focus {
-    outline: 1px solid #62d7fd !important;
-}*/
+
+@media screen and (max-width: 1200px) {
+/*------------- navigation ----------------*/
+    body>nav,
+    #setupMenu a,
+    #setupMenu a.active,
+    #setupMenu h2,
+    #setupMenu h3,
+    #setupMenu h4 {
+        width: 140px;
+    }
+    #setupMenu a {
+        padding-left: 15px;
+        font-size: 12px;
+        font-weight: 400;
+    }
+    #setupMenu a.active {
+        padding-left: 10px;
+    }
+    #setupMenu h3 a,  #setupMenu h4 a {
+        padding-left: 22px;
+    }
+    #setupMenu h3 a.active,  #setupMenu h4 a.active {
+        padding-left: 17px;
+    }
+    #setupMenu .toggle.btn {
+        left: 89px;
+    }
+    #setupMenu-before,
+    #setupMenu-after {
+        width: 135px;
+    }
+    h2#RunSimulationIn,
+    h2#RunSimulationRes {
+        width: 135px;
+    }
+    #RunSimulationIn a,
+    #RunSimulationRes a {
+        font-size: 14px;
+        padding-left: 15px;
+    }
+    #RunSimulationIn a:after {
+        top: 19px;
+        border-top: 6px solid transparent;
+        border-bottom: 6px solid transparent;
+        border-left: 9px solid #606060;
+    }
+    #RunSimulationRes a:after {
+        top: 19px;
+        border-top: 6px solid transparent;
+        border-bottom: 6px solid transparent;
+        border-right: 9px solid rgba(255, 255, 255, .8);
+    }
+    /*------------- toobar ----------------*/
+    .TB_btn, .TB_btn .active, .TB_btn:focus {
+        width: 35px;
+        height: 35px;
+        background-size: cover;
+    }
+    .TB_btn.active:before {
+        display: none;
+    }
+    .TB_btn.active:after {
+        top: 6px;
+        height: 20px;
+    }
+    .TB_btn.active:hover::after {
+        border-left: 7px solid #cdc7c0;
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+    }
+    .layout-panel.TB_panel {
+        margin-right: 35px;
+        width: calc(33.333vw - 50px);
+    }
+    .layout-panel.TB_panel.TB_panel_closed {
+        margin-right: -33.3333vw;
+    }
+}
 
