@@ -443,7 +443,8 @@ ul {
 .TB_panel.TB_panel_closed {
     margin-right: -33.3333vw;
 }
-.TB_panel_over { /*--floats panel over content for static page layouts--*/
+#main-panel ~ .TB_panel,
+#population_main_panel ~ .TB_panel { /*--floats panel over content for static page layouts--*/
     -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2), -5px 0px 3px -1px rgba(0, 0, 0, .15) !important;
 }
 /*-------------------------------------------------------------*/
