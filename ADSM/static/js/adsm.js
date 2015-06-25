@@ -456,9 +456,9 @@ var check_file_saved = function(){
 
 two_state_button = function(){
     if(typeof outputs_exist === 'undefined' || outputs_exist == false) {
-        return 'class="btn btn-primary btn-save">Save changes'
+        return 'class="btn btn-primary btn-save">Apply changes'
     } else {
-        return 'class="btn btn-danger btn-save">Delete Results and Save Changes'
+        return 'class="btn btn-danger btn-save">Delete Results and Apply Changes'
     }
 }
 
