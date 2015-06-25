@@ -254,7 +254,7 @@ def relational_function(request, primary_key=None, doCopy=False):
         else:
             created_instance = context['form'].save()
             context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
-        context['func_action'] = '/setup/RelationalFunction/%i/' % created_instance.id
+        context['action'] = '/setup/RelationalFunction/%i/' % created_instance.id
 
         if context['formset'].is_valid():
             context['formset'].save()

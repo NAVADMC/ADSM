@@ -4,10 +4,10 @@
 {% load db_status_tags %}
 
 {% block content %}
-<form id="relational-form" class="ajax"  method="post" action="{{ func_action }}" enctype="multipart/form-data">
+<form id="relational-form" class="ajax"  method="post" action="{{ action }}" enctype="multipart/form-data">
 
     <img src="http://placehold.it/350x150">
-{#    <img src="{{func_action}}/graph.png">#}
+{#    <img src="{{action}}/graph.png">#}
 {#    <h2 id="title">{{ title }}</h2>#}
     {% crispy form %}
     <label for="file">Or Import Points from File... &nbsp</label>    

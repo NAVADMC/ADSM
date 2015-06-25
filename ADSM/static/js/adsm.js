@@ -464,8 +464,7 @@ two_state_button = function(){
 
 
 function contains_errors(html) {
-    return $(html).find('span.error-inline').length  //TODO: more specific class
-    
+    return $(html).find('span.error-inline').length
 }
 
 function add_model_option_to_selects(html, selectInput) {
@@ -482,6 +481,12 @@ function add_model_option_to_selects(html, selectInput) {
     if(selectInput != null){
         selectInput.val(pk); // select option for select that was originally clicked
     }
+    //add functions to their panel lists
+    var $new_link = $('.function_dropdown [href="' + model_link + '"]')
+    var $back_link = $new_link.clone()
+    $back_link.attr('href', $back_link.attr('href').replace('new', pk))
+    $back_link.text(title)
+    $new_link.parent().after($('<li>' + $back_link.prop('outerHTML') + '</li>')); // Add new link with all properties
 }
 
 var modelModal = {
