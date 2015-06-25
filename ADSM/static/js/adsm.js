@@ -7,7 +7,15 @@ $(function(){
         if(container.closest('.layout-panel').attr('id') == 'main-panel'){
             window.location.reload()
         }else{
-            container.html('') //delete everything from the div containing the form
+            if(container.parent().attr('id') == 'current-function'){
+                //load list of functions instead of blank
+                $.get('/setup/Function/', function(newForm){
+                    var $newForm = $($.parseHTML(newForm));
+                    container.closest('.layout-panel').html($newForm)
+                })
+            }else{
+                container.html('') //delete everything from the div containing the form
+            }
         }
     })
     
