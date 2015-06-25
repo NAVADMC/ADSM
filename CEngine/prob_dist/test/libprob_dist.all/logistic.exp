@@ -1,0 +1,144 @@
+set timeout 10
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+#
+# Test that the parameters are set correctly when a logistic distribution is
+# created.
+#
+set test "create"
+set true_location 0.0
+set true_scale 1.0
+send "logistic ($true_location,$true_scale)\n"
+expect {
+	-re "<logistic probability distribution\[\\n\\r\]+ location=($floatpat) scale=($floatpat)>.*$prompt$" {
+		set location $expect_out(1,string)
+		if { [fcmp $location $true_location $epsilon] != 0 } {
+			fail "$test location should be $true_location, not $location"
+		} else {
+			set scale $expect_out(2,string)
+			if { [fcmp $scale $true_scale $epsilon] != 0 } {
+				fail "$test scale should be $true_scale, not $scale"
+			} else {
+				pass "$test"
+			}
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.  "Correct" values hand-calculated
+# using formulas in "A Compendium of Common Probability Distributions".
+#
+set xvalues {-6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6}
+set answers {0.00246651 0.00664806 0.0176627 0.0451767 0.104994 0.196612 0.25 0.196612 0.104994 0.0451767 0.0176627 0.00664806 0.00246651}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.  "Correct" values
+# hand-calculated using formulas in "A Compendium of Common Probability
+# Distributions".
+#
+set xvalues {-6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6}
+set answers {0.00247262 0.00669285 0.0179862 0.0474259 0.119203 0.268941 0.5 0.731059 0.880797 0.952574 0.982014 0.993307 0.997527}
+cdf_test $xvalues $answers "cdf"
+
+
+
+#
+# Test random number generation.
+#
+set true_answer {0.00422023 0.0112934 0.0294397 0.0717770 0.149738 0.231059 0.231059 0.149738 0.0717770 0.0294397 0.0112934 0.00422023}
+random_number_test $true_answer -6
+
+
+
+#
+# Create another logistic distribution with different parameters.
+#
+set test "create2"
+set true_location 3.0
+set true_scale 0.6
+send "logistic ($true_location,$true_scale)\n"
+expect {
+	-re "<logistic probability distribution\[\\n\\r\]+ location=($floatpat) scale=($floatpat)>.*$prompt$" {
+		set location $expect_out(1,string)
+		if { [fcmp $location $true_location $epsilon] != 0 } {
+			fail "$test location should be $true_location, not $location"
+		} else {
+			set scale $expect_out(2,string)
+			if { [fcmp $scale $true_scale $epsilon] != 0 } {
+				fail "$test scale should be $true_scale, not $scale"
+			} else {
+				pass "$test"
+			}
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.  "Correct" values hand-calculated
+# using formulas in "A Compendium of Common Probability Distributions".
+#
+set xvalues {-1 0 1 2 3 4 5 6 7}
+set answers {0.00211567 0.0110801 0.0554312 0.222716 0.416667 0.222716 0.0554312 0.0110801 0.00211567}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.  "Correct" values
+# hand-calculated using formulas in "A Compendium of Common Probability
+# Distributions".
+#
+set xvalues {-1 0 1 2 3 4 5 6 7}
+set answers {0.00127102 0.00669285 0.0344452 0.158869 0.5 0.841131 0.965555 0.993307 0.998729}
+cdf_test $xvalues $answers "cdf"
+
+
+
+#
+# Test random number generation.
+#
+set true_answer {0.00542183 0.0277523 0.124424 0.341131 0.341131 0.124424 0.0277523 0.00542183}
+random_number_test $true_answer -1
+
+
+
+#
+# Test statistics.
+#
+#set min
+#set max
+#set mean 
+#set variance
+#statistics_test $min $max $mean $variance
+sample_statistics_test
+
+
+

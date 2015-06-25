@@ -1,0 +1,85 @@
+set timeout 10
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+#
+# Test that the parameters are set correctly when a uniform distribution is
+# created.
+#
+set test "create"
+send "gaussian (0,2.5)\n"
+expect {
+	-re "<Gaussian probability distribution\[\\n\\r\]+ mean=($floatpat), std dev=($floatpat)>.*$prompt$" {
+		set mean $expect_out(1,string)
+		if { [fcmp $mean 0 $epsilon] != 0 } {
+			fail "$test mean should be 0, not $mean"
+		} else {
+			set stddev $expect_out(2,string)
+			if { [fcmp $stddev 2.5 $epsilon] != 0 } {
+				fail "$test standard deviation should be 2.5, not $stddev"
+			} else {
+				pass "$test"
+			}
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.
+#
+set xvalues {-15 -2.5 -1 -0.25 0 2.5 10}
+set answers {2.430353e-9 0.096788 0.147308 0.158781 0.159577 0.096788 5.353209e-05}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.
+#
+set xvalues {-7.5 -2.5 -1 -0.25 0 2.5 10}
+set answers {0.00135490 0.158649 0.344587 0.460162 0.5 0.841351 0.999968}
+cdf_test $xvalues $answers
+
+
+
+#
+# Test random number generation.
+#
+set true_answer {0.0320 0.0603 0.0968 0.1327 0.1554 0.1554 0.1327 0.0968 0.0603 0.0320}
+random_number_test $true_answer -5
+
+
+
+#
+# Test statistics.
+#
+#set min
+#set max
+#set mean 
+#set variance
+#statistics_test $min $max $mean $variance
+sample_statistics_test
+
+
+

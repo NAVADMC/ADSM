@@ -1,7 +1,0 @@
-# Various packages' .m4 files are in /usr/share/aclocal.
-#aclocal -I /usr/share/aclocal/ -I .
-# On Mac OS X with DarwinPorts:
-aclocal -I /opt/local/share/aclocal/ -I .
-autoheader
-automake --add-missing --copy
-autoconf

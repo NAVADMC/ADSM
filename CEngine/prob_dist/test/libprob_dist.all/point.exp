@@ -1,0 +1,122 @@
+set timeout 10
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+
+
+#
+# create_point_pdf -- create the point probability density function.
+#
+# Parameters:
+#   value
+#   test          a name to report in passes/fails.  Individual tests will be
+#                 named $test_at_x.  (default = "pdf")
+# Returns:
+#   nothing
+#
+proc create_point_pdf { value { test create } } {
+	global prompt
+	global floatpat
+	global epsilon
+
+	send "point ($value)\n"
+	expect {
+		-re "<point probability distribution\[\\n\\r\]+ value=($floatpat)>.*$prompt$" {
+			set point $expect_out(1,string)
+			if { [fcmp $point $value $epsilon] == 0 } {
+				pass "$test"
+			} else {
+				fail "$test value should be $value, not $point"
+			}
+		}
+	}
+}
+
+
+
+#
+# Test that the parameters are set correctly when a point distribution is
+# created.
+#
+create_point_pdf 1
+
+
+
+#
+# Test the probability density function.  Give values above, below, and at the
+# point.
+#
+set xvalues {-1 0.999 1 1.001 2}
+set answers {0 0 1 0 0}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function.  Give values above, below, and at
+# the point.
+#
+set xvalues {-1 0.999 1 1.001 2}
+set answers {0 0 1 1 1}
+cdf_test $xvalues $answers
+
+
+
+#
+# Test random number generation.
+#
+set true_answer { 0 0 0 0 1 0 0 0 0 }
+random_number_test $true_answer -3
+
+
+#
+# Test statistics.  Because this is a trivial distribution, test with
+# known values, as well as with a sampled test.
+#
+set min 1
+set max 1
+set mean 1
+set variance 0
+statistics_test $min $max $mean $variance
+sample_statistics_test
+
+
+
+#
+# Test a point distribution with a larger negative value.
+#
+create_point_pdf -42
+
+
+
+#
+# Test statistics.
+#
+#set min -42
+#set max -42
+#set mean -42
+#set variance 0
+#statistics_test $min $max $mean $variance
+sample_statistics_test
+
+
+

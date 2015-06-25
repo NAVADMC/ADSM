@@ -1,0 +1,92 @@
+set timeout 10
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+#
+# Test that the parameters are set correctly when a negative binomial
+# distribution is created.
+#
+set test "create"
+set true_s 3.0
+set true_p 0.6
+send "negbinomial ($true_s,$true_p)\n"
+expect {
+	-re "<negative binomial probability distribution\[\\n\\r\]+ s=($floatpat) p=($floatpat)>.*$prompt$" {
+		set s $expect_out(1,string)
+		if { [fcmp $s $true_s $epsilon] != 0 } {
+			fail "$test s should be $true_s, not $s"
+		} else {
+			set p $expect_out(2,string)
+			if { [fcmp $p $true_p $epsilon] != 0 } {
+				fail "$test p should be $true_p, not $p"
+			} else {
+				pass "$test"
+			}
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.  "Correct" values hand-calculated
+# using formulas in "A Concise Summary of @RISK Probability Distribution
+# Functions".
+#
+set xvalues {-1 0 1 2 3 4 5 6 7 8}
+set answers {0 0.216 0.2592 0.20736 0.13824 0.082944 0.046449 0.024773 0.012740 0.0063701 }
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.  "Correct" values
+# hand-calculated using formulas in "A Concise Summary of @RISK Probability
+# Distribution Functions".
+#
+set xvalues {-1 0 1 2 3 4 5 6 7 8}
+set answers {0 0.216 0.4752 0.68256 0.8208 0.903744 0.95019 0.974965 0.987705 0.994076 }
+cdf_test $xvalues $answers "cdf"
+
+
+
+#
+# Test random number generation.  This distribution has an infinite right tail
+# but the numbers below only go until the value drops below 1 in 10000.
+#
+set true_answer {0 0.216 0.2592 0.20736 0.13824 0.082944 0.046449 0.024773 0.012740 0.0063701 0.0031143 0.0014948 0.0007067 0.0003298 0.0001522 }
+random_number_test $true_answer -1
+
+
+
+#
+# Test statistics.
+#
+#set min
+#set max
+#set mean 
+#set variance
+#statistics_test $min $max $mean $variance
+sample_statistics_test
+
+
+

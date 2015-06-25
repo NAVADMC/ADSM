@@ -1,0 +1,2065 @@
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 units, just &gt; threshold for spread</short-name>
+  
+  <description>
+    Test a scenario where the source unit infects a neighbour unit.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 November 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>spread_1</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.808, and the maximum
+    distance of airborne spread is 25 km.  These parameters give a 0.505
+    probability of infection at 10 km.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 units, just &lt; threshold for spread</short-name>
+  
+  <description>
+    Test a scenario where the source unit cannot infect a neighbour unit.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 November 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>no_spread_1</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.792, and the maximum
+    distance of airborne spread is 25 km.  These parameters give a 0.495
+    probability of infection at 10 km.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 units, just &gt; threshold for spread, exponential</short-name>
+  
+  <description>
+    Test a scenario where the source unit infects a neighbour unit.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>30 May 2006</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>spread_1_exp</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.934.  This parameter gives
+    a 0.505 probability of infection at 10 km
+    (0.934&lt;sup&gt;10&lt;/sup&gt; = 0.505).
+
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 units, just &lt; threshold for spread, exponential</short-name>
+  
+  <description>
+    Test a scenario where the source unit cannot infect a neighbour unit.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>30 May 2006</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>no_spread_1_exp</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.932.  This parameter gives
+    a 0.495 probability of infection at 10 km
+    (0.932&lt;sup&gt;10&lt;/sup&gt; = 0.495).
+
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 units, just &gt; threshold for spread, exponential, units' locations in projected coordinates</short-name>
+  
+  <description>
+    Test a scenario where the source unit infects a neighbour unit.  This
+    scenario is identical to "2 units, just &gt; threshold for spread,
+    exponential" above but the units' locations are in projected coordinates
+    instead of latitude and longitude.  This scenario plus the next one will
+    show that the units still correctly register as 10 km apart.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>12 August 2006</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>2units_xy</population-file>
+
+  <parameter-file>spread_1_exp</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.934.  This parameter gives
+    a 0.505 probability of infection at 10 km
+    (0.934&lt;sup&gt;10&lt;/sup&gt; = 0.505).
+
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>L</td>  <td>S</td></tr>
+    <tr><td>C</td>  <td>S</td></tr>
+    <tr><td>C</td>  <td>L</td></tr>
+    <tr><td>N</td>  <td>C</td></tr>
+    <tr><td>N</td>  <td>C</td></tr>
+    <tr><td>N</td>  <td>N</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 units, just &lt; threshold for spread, exponential, units' locations in projected coordinates</short-name>
+  
+  <description>
+    Test a scenario where the source unit cannot infect a neighbour unit.  This
+    scenario is identical to "2 units, just &lt; threshold for spread,
+    exponential" above but the units' locations are in projected coordinates
+    instead of latitude and longitude.  This scenario plus the previous one
+    will show that the units still correctly register as 10 km apart.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>12 August 2009</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>2units_xy</population-file>
+
+  <parameter-file>no_spread_1_exp</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.932.  This parameter gives
+    a 0.495 probability of infection at 10 km
+    (0.932&lt;sup&gt;10&lt;/sup&gt; = 0.495).
+
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>L</td>  <td>S</td></tr>
+    <tr><td>C</td>  <td>S</td></tr>
+    <tr><td>C</td>  <td>S</td></tr>
+    <tr><td>N</td>  <td>S</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 units, airborne spread, 1 day delay</short-name>
+  
+  <description>
+    Test a scenario where the source unit infects a neighbour unit with a 1-day
+    airborne transport delay.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>31 January 2005</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>spread_delay_1</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 5 days.
+    
+    The probability of airborne spread at 1 km is 0.808, and the maximum
+    distance of airborne spread is 25 km.  These parameters give a 0.505
+    probability of infection at 10 km.  The airborne transport delay is 1 day.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <!-- Delayed exposure on day 7, then one last day where nothing happens. -->
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 units, airborne spread, 2 day delay</short-name>
+  
+  <description>
+    Test a scenario where the source unit infects a neighbour unit with a 2-day
+    airborne transport delay.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>31 January 2005</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>spread_delay_2</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 6 days.
+    
+    The probability of airborne spread at 1 km is 0.808, and the maximum
+    distance of airborne spread is 25 km.  These parameters give a 0.505
+    probability of infection at 10 km.  The airborne transport delay is 2 days.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>L S</td></tr>
+    <tr><td>C S</td></tr>
+    <tr><td>C S</td></tr>
+    <tr><td>N S</td></tr>
+    <tr><td>N L</td></tr>
+    <tr><td>N C</td></tr>
+    <tr><td>N C</td></tr>
+    <tr><td>N N</td></tr> <!-- Delayed exposure to unit 1, but it's immune -->
+    <tr><td>N N</td></tr> <!-- Delayed exposure to unit 1, but it's immune -->
+    <tr><td>S N</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 units, airborne spread, 3 day delay</short-name>
+  
+  <description>
+    Test a scenario where the source unit infects a neighbour unit with a 3-day
+    airborne transport delay.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>31 January 2005</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>spread_delay_3</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 8 days.
+    
+    The probability of airborne spread at 1 km is 0.808, and the maximum
+    distance of airborne spread is 25 km.  These parameters give a 0.505
+    probability of infection at 10 km.  The airborne transport delay is 3 days.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>L S</td></tr>
+    <tr><td>C S</td></tr>
+    <tr><td>C S</td></tr>
+    <tr><td>N S</td></tr>
+    <tr><td>N S</td></tr>
+    <tr><td>N L</td></tr>
+    <tr><td>N C</td></tr>
+    <tr><td>N C</td></tr>
+    <tr><td>N N</td></tr>
+    <tr><td>N N</td></tr> <!-- Delayed exposure to unit 1, but it's immune -->
+    <tr><td>N N</td></tr> <!-- Delayed exposure to unit 1, but it's immune -->
+    <tr><td>S N</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 units, airborne spread, 1 and 2 day delay</short-name>
+  
+  <description>
+    Test a scenario where the source unit infects one neighbour unit with a
+    1-day airborne transport delay and another neighbour unit with a 2-day
+    airborne transport delay.  This test failed in NAADSM version 3.2.5 and
+    was fixed in version 3.2.6.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>4 February 2010</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_sheep_infected</population-file>
+
+  <parameter-file>spread_delay_1_then_2</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, the infectious
+    clinical period lasts 2 days, and immunity lasts 5 days.
+    
+    The probability of airborne spread from a sheep unit to a cattle unit at 1
+    km is 0.808, and the maximum distance of airborne spread is 25 km.  These
+    parameters give a 0.505 probability of infection at 10 km.  The airborne
+    transport delay is 1 day.
+
+    The probability of airborne spread from a sheep unit to a pig unit at 1 km
+    is 0.82483, and the maximum distance of airborne spread is 50 km.  These
+    parameters give a 0.505 probability of infection at 20 km.  The airborne
+    transport delay is 2 days.
+
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>L</td>  <td>S</td>  <td>S</td></tr>
+    <tr><td>C</td>  <td>S</td>  <td>S</td></tr> <!-- exposures initiated -->
+    <tr><td>C</td>  <td>S</td>  <td>S</td></tr> <!-- exposure reaches unit 1 -->
+    <tr><td>N</td>  <td>L</td>  <td>S</td></tr> <!-- exposure reaches unit 2 -->
+    <tr><td>N</td>  <td>C</td>  <td>L</td></tr>
+    <tr><td>N</td>  <td>C</td>  <td>C</td></tr>
+    <tr><td>N</td>  <td>N</td>  <td>C</td></tr>
+    <tr><td>N</td>  <td>N</td>  <td>N</td></tr>
+  </output>
+</deterministic-test>
+
+<stochastic-test>
+  <category>airborne_spread</category>
+  <short-name>3 units (sizes SML)</short-name>
+  
+  <description>
+    Test the size factors.  Use 3 units (small, medium, and large)
+    arranged in a triangle with all sides 10 km.  The size factors (2
+    \htmlonly &amp;times; \endhtmlonly \latexonly $\times$ \endlatexonly area
+    under size distribution from 0 to unit size) will be 1/3, 1, and 1 2/3,
+    respectively.  The small unit is initially infected.
+
+    NB: This test case does not care about secondary spread from the large unit
+    to the medium unit or vice versa, so we end the test before that can
+    happen.
+  </description>
+  <!-- NB: The HTML entity &times; (multiplication sign) isn't part of XML, so
+    it must be written with the leading ampersand escaped. -->
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 November 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>3units</population-file>
+
+  <parameter-file>spread_2</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.9, and the maximum
+    distance of airborne spread is 50 km.  These parameters give a 0.41
+    probability of infection for a small unit and a large unit 10 km apart, and
+    a 0.24 probability of infection for a small unit and a medium unit 10
+    km apart.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <!-- Neither unit is infected. -->
+  <output probability="0.4468971">
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+
+  <!-- Only the medium unit is infected. -->
+  <output probability="0.1449396">
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Susceptible</td></tr>
+  </output>
+
+  <!-- Only the large unit is infected. -->
+  <output probability="0.3082049">
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Latent</td></tr>
+  </output>
+
+  <!-- Both units are infected. -->
+  <output probability="0.0999583">
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Latent</td></tr>
+  </output>
+</stochastic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>4 units in a line, just &lt; threshold to infect nearest</short-name>
+  
+  <description>
+    Test distance effects.  Use 4 units, all the same size, arranged in a line
+    with the successive units 1 km, 5 km, and 10 km from the initially infected
+    unit.
+    
+    In this test the probability of infection is just insufficient to spread to
+    the unit at 1 km distance.  The disease should not spread.
+
+    NB: This test case does not care about secondary spread, so we end the test
+    before that can happen.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 November 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>4units_line</population-file>
+
+  <parameter-file>distance_0</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.495, and the maximum
+    distance of airborne spread is 50 km.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>4 units in a line, just &gt; threshold to infect nearest</short-name>
+  
+  <description>
+    Run again, but with the probability of infection just sufficient to spread
+    to the unit at 1 km distance.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 November 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>4units_line</population-file>
+
+  <parameter-file>distance_1</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.505, and the maximum
+    distance of airborne spread is 50 km.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>4 units in a line, just &lt; threshold to infect 2nd nearest</short-name>
+  
+  <description>
+    Run again, but with the probability of infection just insufficient to
+    spread to the unit at 5 km distance.  The disease should spread to only the
+    nearest unit.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 November 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>4units_line</population-file>
+
+  <parameter-file>distance_2</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.539, and the maximum
+    distance of airborne spread is 50 km.  These parameters give a 0.495
+    probability of infection at 5 km.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>4 units in a line, just &gt; threshold to infect 2nd nearest</short-name>
+  
+  <description>
+    Run again, but with the probability of infection just sufficient to spread
+    to the unit at 5 km distance.  The disease should spread to only the
+    nearest two units.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 November 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>4units_line</population-file>
+
+  <parameter-file>distance_3</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.55, and the maximum
+    distance of airborne spread is 50 km.  These parameters give a 0.505
+    probability of infection at 5 km.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>4 units in a line, just &lt; threshold to infect farthest</short-name>
+  
+  <description>
+    Run again, but with the probability of infection just insufficient to
+    spread to the unit at 10 km distance.  The disease should spread to only
+    the nearest two units.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 November 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>4units_line</population-file>
+
+  <parameter-file>distance_4</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.606, and the maximum
+    distance of airborne spread is 50 km.  These parameters give a 0.495
+    probability of infection at 10 km.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>4 units in a line, just &gt; threshold to infect farthest</short-name>
+  
+  <description>
+    Run again, but with the probability of infection just sufficient to spread
+    to the unit at 10 km distance.  The disease should spread to all units.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 November 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>4units_line</population-file>
+
+  <parameter-file>distance_5</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.619, and the maximum
+    distance of airborne spread is 50 km.  These parameters give a 0.505
+    probability of infection at 10 km.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Latent</td>              <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+  </output>
+</deterministic-test>
+
+<!-- Wind direction -->
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>circle of units, no wind</short-name>
+  
+  <description>
+    Test direction effects.  Use a 1 km radius circle of units placed at the 12
+    o'clock, 1 o'clock, etc. positions around an initially infected unit in the
+    centre.
+    
+    In this test there is no wind, so no units will become infected.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 November 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>units_circle</population-file>
+
+  <parameter-file>direction_0</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.501, and the maximum
+    distance of airborne spread is 50 km.
+
+    Permitted wind directions start at
+    \htmlonly 0&amp;deg; and end at 0&amp;deg;. \endhtmlonly
+    \latexonly 0$^\circ$ and end at 0$^\circ$. \endlatexonly
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+  <!-- NB: The HTML entity &deg; (degree sign) isn't part of XML, so it must be
+    written with the leading ampersand escaped. -->
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>circle of units, north wind</short-name>
+  
+  <description>
+    Run again, but with north winds (from the north).  The disease should
+    spread to units 5, 6, and 7.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 November 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>units_circle</population-file>
+
+  <parameter-file>direction_n</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.501, and the maximum
+    distance of airborne spread is 50 km.
+    
+    Permitted wind directions start at
+    \htmlonly 135&amp;deg; and end at 225&amp;deg;. \endhtmlonly
+    \latexonly 135$^\circ$ and end at 225$^\circ$. \endlatexonly
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>              <td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>circle of units, south wind</short-name>
+  
+  <description>
+    Run again, but with south winds (from the south).  The disease should
+    spread to units 11, 12, and 1.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 November 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>units_circle</population-file>
+
+  <parameter-file>direction_s</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.501, and the maximum
+    distance of airborne spread is 50 km.
+    
+    Permitted wind directions start at
+    \htmlonly 315&amp;deg; and end at 45&amp;deg;. \endhtmlonly
+    \latexonly 315$^\circ$ and end at 45$^\circ$. \endlatexonly
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>              <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>circle of units, east wind</short-name>
+  
+  <description>
+    Run again, but with east winds (from the east).  The disease should spread
+    to units 8, 9, and 10.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 November 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>units_circle</population-file>
+
+  <parameter-file>direction_e</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.501, and the maximum
+    distance of airborne spread is 50 km.
+    
+    Permitted wind directions start at
+    \htmlonly 225&amp;deg; and end at 315&amp;deg;. \endhtmlonly
+    \latexonly 225$^\circ$ and end at 315$^\circ$. \endlatexonly
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>              <td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>circle of units, west wind</short-name>
+  
+  <description>
+    Run again, but with west winds (from the west).  The disease should spread
+    to units 2, 3, and 4.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 November 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>units_circle</population-file>
+
+  <parameter-file>direction_w</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.501, and the maximum
+    distance of airborne spread is 50 km.
+    
+    Permitted wind directions start at
+    \htmlonly 45&amp;deg; and end at 135&amp;deg;. \endhtmlonly
+    \latexonly 45$^\circ$ and end at 135$^\circ$. \endlatexonly
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Latent</td>              <td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>circle of units, all directions allowed</short-name>
+  
+  <description>
+    Run again, but with the parameters set to allow spread in any direction.
+    The disease should spread to all units.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>28 November 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>units_circle</population-file>
+
+  <parameter-file>direction_all</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.501, and the maximum
+    distance of airborne spread is 50 km.
+    
+    Permitted wind directions start at
+    \htmlonly 0&amp;deg; and end at 360&amp;deg;. \endhtmlonly
+    \latexonly 0$^\circ$ and end at 360$^\circ$. \endlatexonly
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Latent</td>              <td>Latent</td>              <td>Latent</td>              <td>Latent</td>              <td>Latent</td>              <td>Latent</td>              <td>Latent</td>              <td>Latent</td>              <td>Latent</td>              <td>Latent</td>              <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>circle of units, source on perimeter, all directions allowed</short-name>
+  
+  <description>
+    Run again, but with the unit at 11 o'clock as the source instead of the
+    unit in the centre.  The disease should spread to units 0, 9, 10, 12, and
+    1.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>22 January 2004</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>units_circle2</population-file>
+
+  <parameter-file>direction_all</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.501, and the maximum
+    distance of airborne spread is 50 km.
+    
+    Permitted wind directions start at
+    \htmlonly 0&amp;deg; and end at 360&amp;deg;. \endhtmlonly
+    \latexonly 0$^\circ$ and end at 360$^\circ$. \endlatexonly
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>Latent</td>              <td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>              <td>Latent</td>              <td>InfectiousClinical</td>  <td>Latent</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+  </output>
+</deterministic-test>
+
+<variable-test>
+  <category>airborne_spread</category>
+  <short-name>circle of units, north wind, check reporting variables</short-name>
+  
+  <description>
+    Check that the number of units infected is reported correctly.  In this
+    scenario, the same as "circle of units, north wind" above, the disease
+    should spread to units 5, 6, and 7.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>22 August 2004</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>units_circle</population-file>
+
+  <parameter-file>direction_n_w_vars</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.501, and the maximum
+    distance of airborne spread is 50 km.
+    
+    Permitted wind directions start at
+    \htmlonly 135&amp;deg; and end at 225&amp;deg;. \endhtmlonly
+    \latexonly 135$^\circ$ and end at 225$^\circ$. \endlatexonly
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>infnUIni</td>
+      <td>infnUAir</td>
+      <td>infnUBeefCattle</td>
+      <td>infnUIniBeefCattle</td>
+      <td>infnUAirBeefCattle</td>
+      <td>infnU</td>
+      <td>infcU</td>
+    </tr>
+    <!--   Ini        Air       Cattle   Ini/Cattle Air/Cattle   Total      Cumul  -->
+    <tr><td>1</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>0</td> <td>3</td> <td>3</td> <td>0</td> <td>3</td> <td>3</td> <td>3</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>3</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>3</td></tr>
+  </output>
+</variable-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>0 maximum spread</short-name>
+
+  <description>
+    Test a scenario where airborne spread is "turned off" by setting the
+    maximum distance of airborne spread to 0.  This seems like a sensible
+    parameter setting, but it creates a divide by zero in the formula.  See
+    whether the program handles it gracefully.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>4 December 2003</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>div_zero</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The probability of airborne spread at 1 km is 0.1, and the maximum distance
+    of airborne spread is 0 km.
+    
+    Permitted wind directions start at
+    \htmlonly 0&amp;deg; and end at 360&amp;deg;. \endhtmlonly
+    \latexonly 0$^\circ$ and end at 360$^\circ$. \endlatexonly
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 units at same location, one infected</short-name>
+  
+  <description>
+    Test a scenario with two target units at exactly the same location.  One of
+    the target units (unit 1, cattle) should get infected; the other (unit 2,
+    pigs) should not, even though it is at the same location.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>27 January 2004</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>3units_2_at_same_loc</population-file>
+
+  <parameter-file>spread_same_loc_1</parameter-file>
+
+  <parameter-description>
+    For cattle, the latent period lasts 1 day, infectiousness lasts 2 days,
+    clinical signs accompany infectiousness immediately, and immunity lasts 3
+    days.  For pigs, the latent period lasts 1 day, infectiousness without
+    clinical signs lasts 1 day, infectiousness with clinical signs lasts 1 day,
+    and immunity lasts 3 days.
+    
+    The probability of airborne spread from cattle to cattle at 1 km is
+    0.808, and the maximum distance of airborne spread is 25 km.  These
+    parameters give a 0.505 probability of infection at 10 km.  No parameters
+    are set for spread from cattle to pigs.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>Susceptible</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 units at same location, other infected</short-name>
+  
+  <description>
+    Test a scenario with two target units at exactly the same location.  One of
+    the target units (unit 2, pigs) should get infected; the other (unit 1,
+    cattle) should not, even though it is at the same location.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>27 January 2004</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>3units_2_at_same_loc</population-file>
+
+  <parameter-file>spread_same_loc_2</parameter-file>
+
+  <parameter-description>
+    For cattle, the latent period lasts 1 day, infectiousness lasts 2 days,
+    clinical signs accompany infectiousness immediately, and immunity lasts 3
+    days.  For pigs, the latent period lasts 1 day, infectiousness without
+    clinical signs lasts 1 day, infectiousness with clinical signs lasts 1 day,
+    and immunity lasts 3 days.
+    
+    The probability of airborne spread from cattle to pigs at 1 km is
+    0.808, and the maximum distance of airborne spread is 25 km.  These
+    parameters give a 0.505 probability of infection at 10 km.  No parameters
+    are set for spread from cattle to cattle.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>InfectiousSubclinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>NaturallyImmune</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 units at same location, both infected</short-name>
+  
+  <description>
+    Test a scenario with two target units at exactly the same location.  Both
+    of the target units (pigs and cattle) should get infected.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>29 January 2004</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>3units_2_at_same_loc</population-file>
+
+  <parameter-file>spread_same_loc_3</parameter-file>
+
+  <parameter-description>
+    For cattle, the latent period lasts 1 day, infectiousness lasts 2 days,
+    clinical signs accompany infectiousness immediately, and immunity lasts 3
+    days.  For pigs, the latent period lasts 1 day, infectiousness without
+    clinical signs lasts 1 day, infectiousness with clinical signs lasts 1 day,
+    and immunity lasts 3 days.
+    
+    The probability of airborne spread from cattle to pigs at 1 km is
+    0.808, and the maximum distance of airborne spread is 25 km.  These
+    parameters give a 0.505 probability of infection at 10 km.  The parameters
+    for spread from cattle to cattle are the same.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousSubclinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>no quarantine</short-name>
+
+  <description>
+    Test a scenario where there is no quarantine.  An infectious unit should
+    continue to infect neighbour units after detection.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>5 February 2004</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units_pigs_cattle_pigs_infected</population-file>
+
+  <parameter-file>no_quarantine</parameter-file>
+  
+  <parameter-description>
+    For pigs (unit 1), the latent period lasts 1 day, infectiousness without
+    clinical signs lasts 1 day, infectiousness with clinical signs lasts 6
+    days, and immunity lasts 2 days.  For cattle (unit 0), the latent period
+    lasts 1 day, infectiousness lasts 1 day, clinical signs accompany
+    infectiousness immediately, and immunity lasts 0 days.
+
+    These parameters cause the cattle to be infected, recover, and be
+    re-infected repeatedly.
+
+    The probability of airborne spread from pigs to cattle at 1 km is
+    0.808, and the maximum distance of airborne spread is 25 km.  These
+    parameters give a 0.505 probability of infection at 10 km when used with
+    fixed "random" numbers of 0.5.  No parameters are set for spread from
+    cattle to pigs.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Susceptible</td>         <td>Latent</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousSubclinical</td></tr>
+    <tr><td>Latent</td>              <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Latent</td>              <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Latent</td>              <td>NaturallyImmune</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>NaturallyImmune</td></tr>
+  </output>
+</deterministic-test>
+
+<variable-test>
+  <category>airborne_spread</category>
+  <short-name>no quarantine, check reporting variables</short-name>
+
+  <description>
+    Test that the number of infections is reported correctly when a unit is
+    infected repeatedly.  In this scenario, the same as "no quarantine" above,
+    an infectious unit repeatedly re-infects a neighbour unit.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>16 October 2004</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units_pigs_cattle_pigs_infected</population-file>
+
+  <parameter-file>no_quarantine_w_vars</parameter-file>
+  
+  <parameter-description>
+    For pigs (unit 1), the latent period lasts 1 day, infectiousness without
+    clinical signs lasts 1 day, infectiousness with clinical signs lasts 6
+    days, and immunity lasts 2 days.  For cattle (unit 0), the latent period
+    lasts 1 day, infectiousness lasts 1 day, clinical signs accompany
+    infectiousness immediately, and immunity lasts 0 days.
+
+    These parameters cause the cattle to be infected, recover, and be
+    re-infected repeatedly.
+
+    The probability of airborne spread from pigs to cattle at 1 km is
+    0.808, and the maximum distance of airborne spread is 25 km.  These
+    parameters give a 0.505 probability of infection at 10 km when used with
+    fixed "random" numbers of 0.5.  No parameters are set for spread from
+    cattle to pigs.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>infnUIni</td>
+      <td>infnUAir</td>
+      <td>infnUBeefCattle</td>
+      <td>infnUPigs</td>
+      <td>infnUIniBeefCattle</td>
+      <td>infnUIniPigs</td>
+      <td>infnUAirBeefCattle</td>
+      <td>infnUAirPigs</td>
+      <td>infnU</td>
+      <td>infcU</td>
+    </tr>
+    <!--   Ini        Air       Cattle      Pigs    Ini/Cattle  Ini/Pigs  Air/Cattle  Air/Pigs    Total      Cumul     -->
+    <tr><td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>0</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>2</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>2</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>2</td></tr>
+    <tr><td>0</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>3</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>3</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>3</td></tr>
+  </output>
+</variable-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>quarantine, fast detection</short-name>
+
+  <description>
+    Test a scenario where there is quarantine.  Quarantine does not affect
+    airborne spread, so an infectious unit should continue to infect neighbour
+    units after detection.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>5 February 2004</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units_pigs_cattle_pigs_infected</population-file>
+
+  <parameter-file>quarantine_fast</parameter-file>
+  
+  <parameter-description>
+    For pigs (unit 1), the latent period lasts 1 day, infectiousness without
+    clinical signs lasts 1 day, infectiousness with clinical signs lasts 6
+    days, and immunity lasts 2 days.  For cattle (unit 0), the latent period
+    lasts 1 day, infectiousness lasts 1 day, clinical signs accompany
+    infectiousness immediately, and immunity lasts 0 days.
+
+    These parameters cause the cattle to be infected, recover, and be
+    re-infected repeatedly.
+
+    The probability of airborne spread from pigs to cattle at 1 km is
+    0.808, and the maximum distance of airborne spread is 25 km.  These
+    parameters give a 0.505 probability of infection at 10 km when used with
+    fixed "random" numbers of 0.5.  No parameters are set for spread from
+    cattle to pigs.
+
+    The probability of detection vs. the number of days a pig unit has been
+    showing clinical signs is fixed at 1.  The probability of detection vs. the
+    number of days since a public announcement of an outbreak is also fixed at
+    1.  No parameters are set for detection of cattle units.
+    
+    The authorities require 4 days to set up a destruction program before
+    beginning.  The authorities can destroy an unlimited/very large number of
+    units each day.
+
+    There is no vaccination.
+  </parameter-description>
+
+  <output>
+    <tr><td>Susceptible</td>         <td>Latent</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousSubclinical</td></tr>
+    <tr><td>Latent</td>              <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Latent</td>              <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Latent</td>              <td>Destroyed</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Destroyed</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>quarantine, slow detection</short-name>
+
+  <description>
+    Test a scenario where there is quarantine.  Quarantine does not affect
+    airborne spread, so an infectious unit should continue to infect neighbour
+    units after detection.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>5 February 2004</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units_pigs_cattle_pigs_infected</population-file>
+
+  <parameter-file>quarantine_slow</parameter-file>
+
+  <parameter-description>
+    For pigs (unit 1), the latent period lasts 1 day, infectiousness without
+    clinical signs lasts 1 day, infectiousness with clinical signs lasts 6
+    days, and immunity lasts 2 days.  For cattle (unit 0), the latent period
+    lasts 1 day, infectiousness lasts 1 day, clinical signs accompany
+    infectiousness immediately, and immunity lasts 0 days.
+
+    These parameters cause the cattle to be infected, recover, and be
+    re-infected repeatedly.
+
+    The probability of airborne spread from pigs to cattle at 1 km is
+    0.808, and the maximum distance of airborne spread is 25 km.  These
+    parameters give a 0.505 probability of infection at 10 km when used with
+    fixed "random" numbers of 0.5.  No parameters are set for spread from
+    cattle to pigs.
+
+    The probability of detection is 0.4 when a pig unit first shows clinical
+    signs.  It remains at 0.4 for 1 day, then increases linearly to 0.6 for the
+    next day.  The probability of detection vs. the number of days since a
+    public announcement of an outbreak is fixed at 1.  No parameters are set
+    for detection of cattle units.
+    
+    The authorities require 2 days to set up a destruction program before
+    beginning.  The authorities can destroy an unlimited/very large number of
+    units each day.
+
+    There is no vaccination.
+  </parameter-description>
+
+  <output>
+    <tr><td>Susceptible</td>         <td>Latent</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousSubclinical</td></tr>
+    <tr><td>Latent</td>              <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Latent</td>              <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Latent</td>              <td>Destroyed</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Destroyed</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>infection from 2 sources, just 1st source</short-name>
+
+  <description>
+    Test a scenario where 2 infected units both infect the same target on the
+    same day.  This is a baseline where just the source below the target
+    infects.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>23 August 2004</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_pigs_sheep_infected</population-file>
+
+  <parameter-file>2sources_1target_1</parameter-file>
+
+  <parameter-description>
+    For sheep and cattle (units 0 and 1), the latent period lasts 1 day,
+    infectiousness lasts 1 day, clinical signs accompany infectiousness
+    immediately, and immunity lasts 2 days.  For pigs (unit 2), the latent
+    period lasts 1 day, then the unit immediately returns to Susceptible.
+
+    The probability of airborne spread from sheep to cattle at 1 km is
+    0.808, and the maximum distance of airborne spread is 25 km.  These
+    parameters give a 0.505 probability of infection at 10 km when used with
+    fixed "random" numbers of 0.5.  No parameters are set for spread between
+    any other combination of production types.
+
+    There is no detection, vaccination, or destruction.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (sheep) and 2 (pigs) will be Latent.
+     - On day 2 unit 0 will become infectious and will infect unit 1 (cattle)
+       via airborne spread.  Unit 2 will go back to Susceptible.
+     - On day 3 the newly-infected unit 1 will be Latent.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Latent</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Latent</td>       <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<variable-test>
+  <category>airborne_spread</category>
+  <short-name>infection from 2 sources, just 1st source, check reporting variables</short-name>
+
+  <description>
+    Test a scenario where 2 infected units both infect the same target on the
+    same day, and thus double-counting of a single infection might occur.  This
+    scenario, the same as "infection from 2 sources, just 1st source" above, is
+    a baseline where just the source below the target infects.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>23 August 2004</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_pigs_sheep_infected</population-file>
+
+  <parameter-file>2sources_1target_1_w_vars</parameter-file>
+
+  <parameter-description>
+    For sheep and cattle (units 0 and 1), the latent period lasts 1 day,
+    infectiousness lasts 1 day, clinical signs accompany infectiousness
+    immediately, and immunity lasts 2 days.  For pigs (unit 2), the latent
+    period lasts 1 day, then the unit immediately returns to Susceptible.
+
+    The probability of airborne spread from sheep to cattle at 1 km is
+    0.808, and the maximum distance of airborne spread is 25 km.  These
+    parameters give a 0.505 probability of infection at 10 km when used with
+    fixed "random" numbers of 0.5.  No parameters are set for spread between
+    any other combination of production types.
+
+    There is no detection, vaccination, or destruction.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (sheep) and 2 (pigs) will be Latent.
+     - On day 2 unit 0 will become infectious and will infect unit 1 (cattle)
+       via airborne spread.  Unit 2 will go back to Susceptible.
+     - On day 3 the newly-infected unit 1 will be Latent.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>infnU</td>
+    </tr>
+    <tr><td>0</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>0</td></tr>
+  </output>
+</variable-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>infection from 2 sources, just 2nd source</short-name>
+
+  <description>
+    Test a scenario where 2 infected units both infect the same target on the
+    same day.  This is a baseline where just the source above the target
+    infects.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>23 August 2004</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_pigs_sheep_infected</population-file>
+
+  <parameter-file>2sources_1target_2</parameter-file>
+
+  <parameter-description>
+    For cattle and pigs (units 1 and 2), the latent period lasts 1 day,
+    infectiousness lasts 1 day, clinical signs accompany infectiousness
+    immediately, and immunity lasts 2 days.  For sheep (unit 0), the latent
+    period lasts 1 day, then the unit immediately returns to Susceptible.
+
+    The probability of airborne spread from pigs to cattle at 1 km is
+    0.808, and the maximum distance of airborne spread is 25 km.  These
+    parameters give a 0.505 probability of infection at 10 km when used with
+    fixed "random" numbers of 0.5.  No parameters are set for spread between
+    any other combination of production types.
+
+    There is no detection, vaccination, or destruction.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (sheep) and 2 (pigs) will be Latent.
+     - On day 2 unit 2 will become infectious and will infect unit 1 (cattle)
+       via airborne spread.  Unit 0 will go back to Susceptible.
+     - On day 3 the newly-infected unit 1 will be Latent.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>       <td>Susceptible</td>  <td>Latent</td></tr>
+    <tr><td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>  <td>Latent</td>       <td>NaturallyImmune</td></tr>
+  </output>
+</deterministic-test>
+
+<variable-test>
+  <category>airborne_spread</category>
+  <short-name>infection from 2 sources, just 2nd source, check reporting variables</short-name>
+
+  <description>
+    Test a scenario where 2 infected units both infect the same target on the
+    same day, and thus double-counting of a single infection might occur.  This
+    scenario, the same as "infection from 2 sources, just 2nd source" above, is
+    a baseline where just the source above the target infects.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>23 August 2004</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_pigs_sheep_infected</population-file>
+
+  <parameter-file>2sources_1target_2_w_vars</parameter-file>
+
+  <parameter-description>
+    For cattle and pigs (units 1 and 2), the latent period lasts 1 day,
+    infectiousness lasts 1 day, clinical signs accompany infectiousness
+    immediately, and immunity lasts 2 days.  For sheep (unit 0), the latent
+    period lasts 1 day, then the unit immediately returns to Susceptible.
+
+    The probability of airborne spread from pigs to cattle at 1 km is
+    0.808, and the maximum distance of airborne spread is 25 km.  These
+    parameters give a 0.505 probability of infection at 10 km when used with
+    fixed "random" numbers of 0.5.  No parameters are set for spread between
+    any other combination of production types.
+
+    There is no detection, vaccination, or destruction.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (sheep) and 2 (pigs) will be Latent.
+     - On day 2 unit 2 will become infectious and will infect unit 1 (cattle)
+       via airborne spread.  Unit 0 will go back to Susceptible.
+     - On day 3 the newly-infected unit 1 will be Latent.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>infnU</td>
+    </tr>
+    <tr><td>0</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>0</td></tr>
+  </output>
+</variable-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>infection from 2 sources</short-name>
+
+  <description>
+    Test a scenario where 2 infected units both infect the same target on the
+    same day.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>23 August 2004</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_pigs_sheep_infected</population-file>
+
+  <parameter-file>2sources_1target_3</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 1 day, clinical signs accompany infectiousness immediately, and
+    immunity lasts 2 days.
+
+    The probability of airborne spread from sheep or pigs to cattle at 1 km is
+    0.808, and the maximum distance of airborne spread is 25 km.  These
+    parameters give a 0.505 probability of infection at 10 km when used with
+    fixed "random" numbers of 0.5.  No parameters are set for spread from sheep
+    to pigs, from pigs to sheep, or from cattle to any other type.
+
+    There is no detection, vaccination, or destruction.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (sheep) and 2 (pigs) will be Latent.
+     - On day 2 units 0 and 2 will become infectious and will both attempt to
+       infect unit 1 (cattle) via airborne spread.
+     - On day 3 the newly-infected unit 1 will be Latent.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Latent</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Latent</td>       <td>NaturallyImmune</td></tr>
+  </output>
+</deterministic-test>
+
+<variable-test>
+  <category>airborne_spread</category>
+  <short-name>infection from 2 sources, check reporting variables</short-name>
+
+  <description>
+    Test a scenario where 2 infected units both infect the same target on the
+    same day, and thus double-counting of a single infection might occur.  In
+    this scenario, the same as "infection from 2 sources" above, 2 infected
+    units both infect the same target on the same day.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>23 August 2004</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_pigs_sheep_infected</population-file>
+
+  <parameter-file>2sources_1target_3_w_vars</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 1 day, clinical signs accompany infectiousness immediately, and
+    immunity lasts 2 days.
+
+    The probability of airborne spread from sheep or pigs to cattle at 1 km is
+    0.808, and the maximum distance of airborne spread is 25 km.  These
+    parameters give a 0.505 probability of infection at 10 km when used with
+    fixed "random" numbers of 0.5.  No parameters are set for spread from sheep
+    to pigs, from pigs to sheep, or from cattle to any other type.
+
+    There is no detection, vaccination, or destruction.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 units 0 (sheep) and 2 (pigs) will be Latent.
+     - On day 2 units 0 and 2 will become infectious and will both attempt to
+       infect unit 1 (cattle) via airborne spread.
+     - On day 3 the newly-infected unit 1 will be Latent.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>infnU</td>
+    </tr>
+    <tr><td>0</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>0</td></tr>
+  </output>
+</variable-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 production type combinations, neither infects</short-name>
+
+  <description>
+    This is one of 4 scenarios that tests applying different parameters to
+    different production type combinations.  In this scenario, the probability
+    of spread is not high enough to infect either possible target.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>14 September 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_sheep_infected</population-file>
+
+  <parameter-file>2prod_types_to_neither</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 1 day, clinical signs accompany infectiousness immediately, and
+    immunity lasts 3 days.
+
+    The probability of airborne spread from sheep to cattle at 1 km is
+    0.6064, and the maximum distance of airborne spread is 50 km.  These
+    parameters give a 0.495 probability of infection at 10 km when used with
+    fixed "random" numbers of 0.5.  The probability of airborne spread from
+    sheep to pigs at 1 km is 0.8085, and the maximum distance of airborne
+    spread is 50 km.  These parameters give a 0.495 probability of infection at
+    20 km when used with fixed "random" numbers of 0.5.  No parameters are set
+    for spread from any other combination of production types.
+
+    There is no detection, vaccination, or destruction.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 unit 0 (sheep) will be Latent.
+     - On day 2 unit 0 will be infectious.  It will not be able to infect
+       either of the other 2 units via airborne spread.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 production type combinations, one infects</short-name>
+
+  <description>
+    This is one of 4 scenarios that tests applying different parameters to
+    different production type combinations.  In this scenario, the probability
+    of spread is high enough to infect one possible target but not the other.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>14 September 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_sheep_infected</population-file>
+
+  <parameter-file>2prod_types_to_cattle</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 1 day, clinical signs accompany infectiousness immediately, and
+    immunity lasts 3 days.
+
+    The probability of airborne spread from sheep to cattle at 1 km is
+    0.6186, and the maximum distance of airborne spread is 50 km.  These
+    parameters give a 0.505 probability of infection at 10 km when used with
+    fixed "random" numbers of 0.5.  The probability of airborne spread from
+    sheep to pigs at 1 km is 0.8085, and the maximum distance of airborne
+    spread is 50 km.  These parameters give a 0.495 probability of infection at
+    20 km when used with fixed "random" numbers of 0.5.  No parameters are set
+    for spread from any other combination of production types.
+
+    There is no detection, vaccination, or destruction.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 unit 0 (sheep) will be Latent.
+     - On day 2 unit 0 will be infectious.  It will infect unit 1 (cattle) via
+       airborne spread, but will not be able to infect unit 2.
+     - On day 3 unit 1 will be Latent.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 production type combinations, other infects</short-name>
+
+  <description>
+    This is one of 4 scenarios that tests applying different parameters to
+    different production type combinations.  In this scenario, the probability
+    of spread is high enough to infect one possible target but not the other.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>14 September 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_sheep_infected</population-file>
+
+  <parameter-file>2prod_types_to_pigs</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 1 day, clinical signs accompany infectiousness immediately, and
+    immunity lasts 3 days.
+
+    The probability of airborne spread from sheep to cattle at 1 km is
+    0.6064, and the maximum distance of airborne spread is 50 km.  These
+    parameters give a 0.495 probability of infection at 10 km when used with
+    fixed "random" numbers of 0.5.  The probability of airborne spread from
+    sheep to pigs at 1 km is 0.8248, and the maximum distance of airborne
+    spread is 50 km.  These parameters give a 0.505 probability of infection at
+    20 km when used with fixed "random" numbers of 0.5.  No parameters are set
+    for spread from any other combination of production types.
+
+    There is no detection, vaccination, or destruction.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 unit 0 (sheep) will be Latent.
+     - On day 2 unit 0 will be infectious.  It will infect unit 2 (pigs) via
+       airborne spread, but will not be able to infect unit 1.
+     - On day 3 unit 2 will be Latent.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>NaturallyImmune</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>2 production type combinations, both infect</short-name>
+
+  <description>
+    This is one of 4 scenarios that tests applying different parameters to
+    different production type combinations.  In this scenario, the probability
+    of spread is high enough to infect both possible targets.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>14 September 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_sheep_infected</population-file>
+
+  <parameter-file>2prod_types_to_both</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 1 day, clinical signs accompany infectiousness immediately, and
+    immunity lasts 3 days.
+
+    The probability of airborne spread from sheep to cattle at 1 km is
+    0.6186, and the maximum distance of airborne spread is 50 km.  These
+    parameters give a 0.505 probability of infection at 10 km when used with
+    fixed "random" numbers of 0.5.  The probability of airborne spread from
+    sheep to pigs at 1 km is 0.8248, and the maximum distance of airborne
+    spread is 50 km.  These parameters give a 0.505 probability of infection at
+    20 km when used with fixed "random" numbers of 0.5.  No parameters are set
+    for spread from any other combination of production types.
+
+    There is no detection, vaccination, or destruction.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 unit 0 (sheep) will be Latent.
+     - On day 2 unit 0 will be infectious.  It will infect unit 1 (cattle) and
+       unit 2 (pigs) via airborne spread.
+     - On day 3 units 1 and 2 will be Latent.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>prevalence default</short-name>
+
+  <description>
+    Test that prevalence influences the probability of airborne spread.  In
+    this baseline scenario, the default prevalence (1.0 for the entire duration
+    of the disease) is used.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>15 November 2005</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>4units_line</population-file>
+
+  <parameter-file>prev_default</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 3 days, infectiousness lasts 3 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+
+    The probability of airborne spread at 1 km is 0.9, and the maximum distance
+    of airborne spread is 25 km.  Permitted wind directions start at
+    \htmlonly 45&amp;deg; and end at 135&amp;deg; \endhtmlonly
+    \latexonly 45$^\circ$ and end at 135$^\circ$ \endlatexonly
+    (&lt;i&gt;i.e.&lt;/i&gt;, wind is from the west).
+    With prevalence at 1.0, these parameters give a &gt;0.5 probability of
+    spread at 1 km, 5 km, and 10 km.
+
+    There is no detection, vaccination, or destruction.
+
+    Recapping what should happen as a result of all this:
+     - On days 1-3 unit 0 will be Latent.
+     - On day 4 unit 0 will become infectious and will infect units 1, 2, and 3
+       via airborne spread.
+     - On day 5 units 1, 2, and 3 will be Latent.
+  </parameter-description>
+
+  <diagram>4units_line</diagram>
+  <diagram>air_prevalence</diagram>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Latent</td>              <td>Latent</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Latent</td>              <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Latent</td>              <td>Latent</td>              <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>airborne_spread</category>
+  <short-name>prevalence increasing</short-name>
+
+  <description>
+    Test that prevalence influences the probability of airborne spread.  In
+    this scenario, the prevalence increases so that the infection can spread
+    farther on each day.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>15 November 2005</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>4units_line</population-file>
+
+  <parameter-file>prev_incr</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 3 days, infectiousness lasts 3 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+
+    The probability of airborne spread at 1 km is 0.9, and the maximum distance
+    of airborne spread is 25 km.  Permitted wind directions start at
+    \htmlonly 45&amp;deg; and end at 135&amp;deg; \endhtmlonly
+    \latexonly 45$^\circ$ and end at 135$^\circ$ \endlatexonly
+    (&lt;i&gt;i.e.&lt;/i&gt;, wind is from the west).
+    The prevalence is high enough to infect a unit 1 km away on the first day
+    of the Infectious Clinical period, high enough to infect a unit 5 km away
+    on the second day, and high enough to infect a unit 10 km away on the
+    third day.
+
+    There is no detection, vaccination, or destruction.
+
+    Recapping what should happen as a result of all this:
+     - On days 1-3 unit 0 will be Latent.
+     - On day 4 unit 0 will become infectious.  The prevalence (0.6) will be
+       high enough that unit 1 will be infected by airborne spread.
+     - On day 5 unit 1 will be Latent.  Unit 0's prevalence (0.75) will be high
+       enough that unit 2 will be infected by airborne spread.
+     - On day 6 unit 2 will be Latent.  Unit 0's prevalence (1.0) will be high
+       enough that unit 3 will be infected by airborne spread.
+     - On day 7 unit 0's infectious period will be over.  Unit 3 will be
+       Latent.
+     - On day 8 and forward units 1, 2, and 3 will go through their infectious
+       stages, but there will be no opportunities for them to spread infection.
+  </parameter-description>
+
+  <diagram>4units_line</diagram>
+  <diagram>air_prevalence_incr</diagram>
+  <diagram>air_prevalence</diagram>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>         <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Latent</td>              <td>Latent</td>              <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>Latent</td>              <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Latent</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+  </output>
+</deterministic-test>

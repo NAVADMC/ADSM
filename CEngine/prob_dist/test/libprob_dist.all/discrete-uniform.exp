@@ -1,0 +1,111 @@
+set timeout 10
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+
+
+#
+# Test that the parameters are set correctly when a discrete uniform distribution is
+# created.
+#
+set test "create1"
+send "discrete-uniform (0,1)\n"
+expect {
+	-re "<discrete uniform probability distribution\[\\n\\r\]+ from ($intpat) to ($intpat)>.*$prompt$" {
+		set lower_bound $expect_out(1,string)
+		if { [fcmp $lower_bound 0 $epsilon] != 0 } {
+			fail "$test lower bound should be 0, not $lower_bound"
+		} else {
+			set upper_bound $expect_out(2,string)
+			if { [fcmp $upper_bound 1 $epsilon] != 0 } {
+				fail "$test upper bound should be 1, not $upper_bound"
+			} else {
+				pass "$test"
+			}
+		}
+	}
+}
+
+
+
+#
+# Test giving the lower and upper bounds out of order.  The function shouldn't
+# care.
+#
+set test "create_args_out_of_order"
+send "discrete-uniform (3,-1)\n"
+expect {
+	-re "<discrete uniform probability distribution\[\\n\\r\]+ from ($intpat) to ($intpat)>.*$prompt$" {
+		set lower_bound $expect_out(1,string)
+		if { [fcmp $lower_bound -1 $epsilon] != 0 } {
+			fail "$test lower bound should be -1, not $lower_bound"
+		} else {
+			set upper_bound $expect_out(2,string)
+			if { [fcmp $upper_bound 3 $epsilon] != 0 } {
+				fail "$test upper bound should be 3, not $upper_bound"
+			} else {
+				pass "$test"
+			}
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.  Give values
+# - outside the bounds
+# - exactly at the lower and upper bounds
+# - inside the bounds
+#
+set xvalues {-2 -1 0 1 2 3 4}
+set answers {0 0.2 0.2 0.2 0.2 0.2 0}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.
+#
+set xvalues {-2 -1 0 1 2 3 4}
+set answers {0 0.2 0.4 0.6 0.8 1 1}
+cdf_test $xvalues $answers
+
+
+
+#
+# Test random number generation.
+#
+set true_answer { 0 0 0 0.2 0.2 0.2 0.2 0.2 0 0 }
+random_number_test $true_answer -4
+
+
+
+#
+# Test statistics.
+#
+#set min
+#set max
+#set mean 
+#set variance
+#statistics_test $min $max $mean $variance
+sample_statistics_test

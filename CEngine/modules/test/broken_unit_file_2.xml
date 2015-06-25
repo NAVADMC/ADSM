@@ -1,0 +1,66 @@
+<herds>
+  <!-- This file contains herds with missing or invalid latitude values. -->
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude></latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>-100</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>100</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>at the equator</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>1.0e+9999</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+</herds>

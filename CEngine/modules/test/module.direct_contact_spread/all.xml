@@ -1,0 +1,2749 @@
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units, just &lt; threshold for shipment</short-name>
+
+  <description>
+    Test a scenario where the shipment rate is just too low for a source unit
+    to infect a neighbour unit through direct contact.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>29 January 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>no_spread_1</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 0 shipments each day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units, just &lt; threshold for shipment, check reporting variables</short-name>
+
+  <description>
+    Test that the number of exposures and infections are counted correctly.  In
+    this scenario, the same as "2 units, just &lt; threshold for shipment"
+    above, the shipment rate is just too low for a source unit to ship animals,
+    so there are no exposures or infections.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>29 January 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>no_spread_1_w_vars</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 0 shipments each day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>expnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUBeefCattle</td>
+      <td>infnUIniBeefCattle</td>
+      <td>infnUDirBeefCattle</td>
+      <td>infnU</td>
+    </tr>
+    <!--              Ini        Dir       Cattle   Ini/Cattle Dir/Cattle   Total     -->
+    <tr><td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units, just &gt; threshold for shipment</short-name>
+
+  <description>
+    Test a scenario where the shipment rate is just high enough for a source
+    unit to infect a neighbour unit through direct contact.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>27 January 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>spread_1</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units, just &gt; threshold for shipment, check reporting variables</short-name>
+
+  <description>
+    Test that the number of exposures and infections are counted correctly.  In
+    this scenario, the same as "2 units, just &gt; threshold for shipment"
+    above, the shipment rate is just high enough for a source unit to ship
+    animals, so on the first day there is 1 exposure resulting in 1 infection.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>29 January 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>spread_1_w_vars</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 unit 0 will ship to and infect unit 1, for a total of 1
+       exposure and 1 infection by direct contact.
+     - On day 2 unit 0 will be Infectious Clinical and unit 1 will be Latent.
+       They will ship to each other, for a total of 2 exposures but no new
+       infections.
+     - On day 3 both units will be Infectious Clinical.  They will ship to each
+       other, for a total of 2 exposures but no new infections.
+     - On day 4 unit 0 will be Naturally Immune while unit 1 is still
+       Infectious Clinical.  Unit 1 will ship to unit 0, for a total of 1
+       exposure but no new infections.
+     - On day 5 both units will be Naturally Immune.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>expnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUBeefCattle</td>
+      <td>infnUIniBeefCattle</td>
+      <td>infnUDirBeefCattle</td>
+      <td>infnU</td>
+    </tr>
+    <!--              Ini        Dir       Cattle   Ini/Cattle Dir/Cattle   Total     -->
+    <tr><td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>2</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>2</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units, just &lt; threshold for spread</short-name>
+
+  <description>
+    Test a scenario where the probability of infection given exposure is just
+    too low for a source unit to infect a neighbour unit through direct contact.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>29 January 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>no_spread_2</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 0.495.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units, just &lt; threshold for spread, check reporting variables</short-name>
+
+  <description>
+    Test that the number of exposures and infections are counted correctly.  In
+    this scenario, the same as "2 units, just &lt; threshold for spread" above,
+    there are shipments but the probability of infection given exposure is just
+    too low for a source unit to infect a neighbour unit through direct contact.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>29 January 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>no_spread_2_w_vars</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 0.495.
+    
+    There is no detection, vaccination, or destruction.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 unit 0 will ship to unit 1 but will not infect it, for a total
+       of 1 exposure and no infections.
+     - On day 2 unit 0, now Infectious Clinical, will ship to unit 1, but again
+       will not infect it.
+     - On day 3 the same thing will happen.
+     - On day 4 unit 0 will be Naturally Immune.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>expnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUBeefCattle</td>
+      <td>infnUIniBeefCattle</td>
+      <td>infnUDirBeefCattle</td>
+      <td>infnU</td>
+    </tr>
+    <!--              Ini        Dir       Cattle   Ini/Cattle Dir/Cattle   Total     -->
+    <tr><td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+   </output>
+</variable-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units, just &gt; threshold for spread</short-name>
+
+  <description>
+    Test a scenario where the probability of infection given exposure is just
+    high enough for a source unit to infect a neighbour unit through direct
+    contact.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>29 January 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>spread_5</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 0.505.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units, just &gt; threshold for spread, check reporting variables</short-name>
+
+  <description>
+    Test that the number of exposures and infections are counted correctly.  In
+    this scenario, the same as "2 units, just &gt; threshold for spread" above,
+    the probability of infection given exposure is just high enough for a
+    source unit to infect a neighbour unit through direct contact.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>29 January 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>spread_5_w_vars</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 0.505.
+    
+    There is no detection, vaccination, or destruction.
+
+    Recapping what should happen as a result of all this:
+     - On day 1 unit 0 will ship to and infect unit 1, for a total of 1
+       exposure and 1 infection.
+     - On day 2 unit 0 will be Infectious Clinical and unit 1 will be Latent.
+       They will ship to each other, for a total of 2 exposures but no new
+       infections.
+     - On day 3 both units will be Infectious Clinical.  They will ship to each
+       other, for a total of 2 exposures but no new infections.
+     - On day 4 unit 0 will be Naturally Immune while unit 1 is still
+       Infectious Clinical.  Unit 1 will ship to unit 0, for a total of 1
+       exposure but no new infections.
+     - On day 5 both units will be Naturally Immune.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>expnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUBeefCattle</td>
+      <td>infnUIniBeefCattle</td>
+      <td>infnUDirBeefCattle</td>
+      <td>infnU</td>
+    </tr>
+    <!--              Ini        Dir       Cattle   Ini/Cattle Dir/Cattle   Total     -->
+    <tr><td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>2</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>2</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units, direct contact spread, 1 day shipping delay</short-name>
+
+  <description>
+    Test a scenario where the source unit infects the neighbour unit through
+    direct contact with a 1-day shipping delay.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>7 April 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>spread_delay_1</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 10 km.  The shipping delay is 1 day.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+    <tr><td>Susceptible</td>         <td>NaturallyImmune</td></tr>
+<!--
+    Nothing to do, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units, direct contact spread, 2 day shipping delay</short-name>
+
+  <description>
+    Test a scenario where the source unit infects the neighbour unit through
+    direct contact with a 2-day shipping delay.
+
+    NB: This test case does not care about secondary spread, so we end the test
+    before that can happen.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>15 October 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>spread_delay_2</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 10 km.  The shipping delay is 2 days.
+
+    Latent units can be the source of an exposure.
+
+    The probability of infection given exposure is 1.
+
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units, direct contact spread, 3 day shipping delay</short-name>
+
+  <description>
+    Test a scenario where the source unit infects the neighbour unit through
+    direct contact with a 3-day shipping delay.
+
+    NB: This test case does not care about secondary spread, so we end the test
+    before that can happen.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>7 April 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>spread_delay_3</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 10 km.  The shipping delay is 3 days.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units, direct contact spread, 1 and 2 day delay</short-name>
+  
+  <description>
+    Test a scenario where the source unit infects one neighbour unit with a
+    1-day transport delay and another neighbour unit with a 2-day transport
+    delay.  This test failed in NAADSM version 3.2.5 and was fixed in version
+    3.2.6.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>7 February 2010</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_sheep_infected</population-file>
+
+  <parameter-file>spread_delay_1_then_2</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, the infectious
+    clinical period lasts 2 days, and immunity lasts 3 days.
+
+    The contact rate from sheep units to cattle units is fixed at 1 shipment
+    each day.  The distance of shipments is fixed at 10 km.  The shipping delay
+    is 1 day.  Latent units can be the source of an exposure.
+
+    The contact rate from sheep units to pig units is fixed at 1 shipment each
+    day.  The distance of shipments is fixed at 20 km.  The shipping delay is 2
+    days.  Latent units can be the source of an exposure.
+
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>L</td>  <td>S</td>  <td>S</td></tr> <!-- exposures initiated -->
+    <tr><td>C</td>  <td>S</td>  <td>S</td></tr> <!-- exposure reaches unit 1 -->
+    <tr><td>C</td>  <td>L</td>  <td>S</td></tr> <!-- exposure reaches unit 2 -->
+    <tr><td>N</td>  <td>C</td>  <td>L</td></tr> 
+    <tr><td>N</td>  <td>C</td>  <td>C</td></tr>
+    <tr><td>N</td>  <td>N</td>  <td>C</td></tr>
+    <tr><td>S</td>  <td>N</td>  <td>N</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units, direct contact spread once infectious</short-name>
+
+  <description>
+    Test a scenario where direct contact spread from latent units is turned
+    off, and the source unit infects the neighbour unit only once it turns
+    infectious.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>23 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>spread_3</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 10 km.
+    
+    Latent units cannot be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units, direct contact spread before clinical signs</short-name>
+
+  <description>
+    Test a scenario where a source unit that does not yet show clinical signs
+    infects the neighbour unit through direct contact.  The infection shouldn't
+    happen until the source unit goes infectious.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>23 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>spread_4</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness without clinical signs lasts
+    1 day, infectiousness with clinical signs lasts 1 day, and immunity lasts 3
+    days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 10 km.
+    
+    Latent units cannot be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>                 <td>Susceptible</td></tr>
+    <tr><td>InfectiousSubclinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>     <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>        <td>InfectiousSubclinical</td></tr>
+    <tr><td>NaturallyImmune</td>        <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>        <td>NaturallyImmune</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>4 units, &lt; distance to nearest</short-name>
+
+  <description>
+    Test choice of units by distance.  Choose a shipment distance less than the
+    distance to the nearest susceptible unit.
+
+    NB: This test case does not care about secondary spread, so we end the test
+    before that can happen.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>5 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>4units_line</population-file>
+
+  <parameter-file>spread_dist_1</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 0.5 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>       <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>4 units, just &lt; 1/2 way from nearest to 2nd nearest</short-name>
+
+  <description>
+    Run again, but choose a shipment distance just under the halfway point
+    between the nearest and 2nd nearest susceptible units.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>5 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>4units_line</population-file>
+
+  <parameter-file>spread_dist_2</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 2.95 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>       <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>4 units, just &gt; 1/2 way from nearest to 2nd nearest</short-name>
+
+  <description>
+    Run again, but choose a shipment distance just past the halfway point
+    between the nearest and 2nd nearest susceptible units.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>5 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>4units_line</population-file>
+
+  <parameter-file>spread_dist_3</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 3.05 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Latent</td>       <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>4 units, just &lt; 1/2 way from 2nd nearest to farthest</short-name>
+
+  <description>
+    Run again, but choose a shipment distance just under the halfway point
+    between the 2nd nearest and farthest susceptible units.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>5 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>4units_line</population-file>
+
+  <parameter-file>spread_dist_4</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 7.45 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Latent</td>       <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>4 units, just &gt; 1/2 way from 2nd nearest to farthest</short-name>
+
+  <description>
+    Run again, but choose a shipment distance just past the halfway point
+    between the 2nd nearest and farthest susceptible units.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>5 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>4units_line</population-file>
+
+  <parameter-file>spread_dist_5</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 7.55 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>4 units, &gt; distance to farthest</short-name>
+
+  <description>
+    Run again, but choose a shipment distance greater than the distance to the
+    farthest susceptible unit.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>5 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>4units_line</population-file>
+
+  <parameter-file>spread_dist_6</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 15 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units at same location, one infected</short-name>
+  
+  <description>
+    Test a scenario with two target units at exactly the same location.  One of
+    the target units (unit 1, cattle) should get infected; the other (unit 2,
+    pigs) should not, even though it is at the same location.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>27 January 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>3units_2_at_same_loc</population-file>
+
+  <parameter-file>spread_same_loc_1</parameter-file>
+
+  <parameter-description>
+    For cattle, the latent period lasts 1 day, infectiousness lasts 2 days,
+    clinical signs accompany infectiousness immediately, and immunity lasts 3
+    days.  For pigs, the latent period lasts 1 day, infectiousness without
+    clinical signs lasts 1 day, infectiousness with clinical signs lasts 1 day,
+    and immunity lasts 3 days.
+
+    The movement rate from cattle units to cattle units is fixed at 1 shipment
+    each day.  The distance of shipments is fixed at 10 km.  No parameters are
+    set for movement from cattle units to pig units.
+
+    Latent units can be the source of an exposure.
+
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>Susceptible</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units at same location, other infected</short-name>
+  
+  <description>
+    Test a scenario with two target units at exactly the same location.  One of
+    the target units (unit 2, pigs) should get infected; the other (unit 1,
+    cattle) should not, even though it is at the same location.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>27 January 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>3units_2_at_same_loc</population-file>
+
+  <parameter-file>spread_same_loc_2</parameter-file>
+
+  <parameter-description>
+    For cattle, the latent period lasts 1 day, infectiousness lasts 2 days,
+    clinical signs accompany infectiousness immediately, and immunity lasts 3
+    days.  For pigs, the latent period lasts 1 day, infectiousness without
+    clinical signs lasts 1 day, infectiousness with clinical signs lasts 1 day,
+    and immunity lasts 3 days.
+    
+    The movement rate from cattle units to cattle units is fixed at 1 shipment
+    each day.  The distance of shipments is fixed at 10 km.  No parameters are
+    set for movement from cattle units to cattle units.
+
+    Latent units can be the source of an exposure.
+
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Latent</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>InfectiousSubclinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>NaturallyImmune</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 units at same location, both infected</short-name>
+  
+  <description>
+    Test a scenario with two target units at exactly the same location.  Both
+    of the target units (pigs and cattle) should get infected.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>29 January 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>3units_2_at_same_loc</population-file>
+
+  <parameter-file>spread_same_loc_3</parameter-file>
+
+  <parameter-description>
+    For cattle, the latent period lasts 1 day, infectiousness lasts 2 days,
+    clinical signs accompany infectiousness immediately, and immunity lasts 3
+    days.  For pigs, the latent period lasts 1 day, infectiousness without
+    clinical signs lasts 1 day, infectiousness with clinical signs lasts 1 day,
+    and immunity lasts 3 days.
+
+    The movement rate from cattle units to cattle units is fixed at 1 shipment
+    each day.  The distance of shipments is fixed at 10 km.  The parameters for
+    movement from cattle units to cattle units are the same.
+
+    Latent units can be the source of an exposure.
+
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>         <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>              <td>Latent</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td>  <td>InfectiousSubclinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>no quarantine</short-name>
+
+  <description>
+    Test a scenario where there is no quarantine, so an infectious unit
+    continues to infect neighbour units after detection.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>5 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units_pigs_cattle_pigs_infected</population-file>
+
+  <parameter-file>no_quarantine</parameter-file>
+  
+  <parameter-description>
+    For pigs (unit 1), the latent period lasts 1 day, infectiousness without
+    clinical signs lasts 1 day, infectiousness with clinical signs lasts 6
+    days, and immunity lasts 2 days.  For cattle (unit 0), the latent period
+    lasts 1 day, infectiousness lasts 1 day, clinical signs accompany
+    infectiousness immediately, and immunity lasts 0 days.
+
+    These parameters cause the cattle to be infected, recover, and be
+    re-infected repeatedly.
+
+    The movement rate from pig units to cattle units is fixed at 1 shipment
+    each day.  The distance of shipments is fixed at 10 km.  No parameters are
+    set for movement from cattle units to pig units.
+
+    Latent units can be the source of an exposure.
+
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Susceptible</td>         <td>Latent</td></tr>
+    <tr><td>Latent</td>              <td>InfectiousSubclinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Latent</td>              <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Latent</td>              <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>NaturallyImmune</td></tr>
+    <tr><td>Susceptible</td>         <td>NaturallyImmune</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>quarantine, fast detection</short-name>
+
+  <description>
+    Test a scenario where there is quarantine, so an infectious unit cannot
+    infect neighbour units during the interval after detection but before
+    destruction.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>5 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units_pigs_cattle_pigs_infected</population-file>
+
+  <parameter-file>quarantine_fast</parameter-file>
+  
+  <parameter-description>
+    For pigs (unit 1), the latent period lasts 1 day, infectiousness without
+    clinical signs lasts 1 day, infectiousness with clinical signs lasts 6
+    days, and immunity lasts 2 days.  For cattle (unit 0), the latent period
+    lasts 1 day, infectiousness lasts 1 day, clinical signs accompany
+    infectiousness immediately, and immunity lasts 0 days.
+
+    These parameters cause the cattle to be infected, recover, and be
+    re-infected repeatedly.
+
+    The movement rate from pig units to cattle units is fixed at 1 shipment
+    each day.  The distance of shipments is fixed at 10 km.  No parameters are
+    set for movement from cattle units to pig units.
+
+    Latent units can be the source of an exposure.
+
+    The probability of infection given exposure is 1.
+
+    The probability of detection vs. the number of days pigs have been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.  No
+    parameters are set for detection of disease in cattle.
+    
+    The authorities require 5 days to set up a destruction program before
+    beginning.  There is no delay between deciding to destroy a unit and
+    carrying it out.  The authorities can destroy an unlimited/very large
+    number of units each day.
+
+    There is no vaccination.
+  </parameter-description>
+
+  <output>
+    <tr><td>Susceptible</td>         <td>Latent</td></tr>
+    <tr><td>Latent</td>              <td>InfectiousSubclinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>Destroyed</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>quarantine, slow detection</short-name>
+
+  <description>
+    Test a scenario where there is quarantine, so an infectious unit cannot
+    infect neighbour units during the interval after detection but before
+    destruction.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>5 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units_pigs_cattle_pigs_infected</population-file>
+
+  <parameter-file>quarantine_slow</parameter-file>
+  
+  <parameter-description>
+    For pigs (unit 1), the latent period lasts 1 day, infectiousness without
+    clinical signs lasts 1 day, infectiousness with clinical signs lasts 6
+    days, and immunity lasts 2 days.  For cattle (unit 0), the latent period
+    lasts 1 day, infectiousness lasts 1 day, clinical signs accompany
+    infectiousness immediately, and immunity lasts 0 days.
+
+    These parameters cause the cattle to be infected, recover, and be
+    re-infected repeatedly.
+
+    The movement rate from pig units to cattle units is fixed at 1 shipment
+    each day.  The distance of shipments is fixed at 10 km.  No parameters are
+    set for movement from cattle units to pig units.
+
+    Latent units can be the source of an exposure.
+
+    The probability of infection given exposure is 1.
+
+    The probability of detection is 0.4 when pigs first show clinical signs.
+    It remains at 0.4 for 1 day, then increases linearly to 0.6 for the next
+    day.  The probability of detection vs. the number of days since a public
+    announcement of an outbreak is fixed at 1.  No parameters are set for
+    detection of disease in cattle.
+    
+    The authorities require 3 days to set up a destruction program before
+    beginning.  There is no delay between deciding to destroy a unit and
+    carrying it out.  The authorities can destroy an unlimited/very large
+    number of units each day.
+
+    There is no vaccination.
+  </parameter-description>
+
+  <output>
+    <tr><td>Susceptible</td>         <td>Latent</td></tr>
+    <tr><td>Latent</td>              <td>InfectiousSubclinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Latent</td>              <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>InfectiousClinical</td></tr>
+    <tr><td>Susceptible</td>         <td>Destroyed</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<stochastic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 possible targets, same sizes</short-name>
+
+  <description>
+    Test the choice of a target for infection when two units are the same
+    distance from the source unit.  Here the targets are the same size, so they
+    should be chosen with equal probability.
+    
+    NB: This test case does not care about secondary spread, so we end the test
+    before that can happen.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>17 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2targets_same_dist_same_size</population-file>
+
+  <parameter-file>spread_2</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment per day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output probability="0.5">
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>       <td>Susceptible</td></tr>
+  </output>
+
+  <output probability="0.5">
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Latent</td></tr>
+  </output>
+</stochastic-test>
+
+<stochastic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 possible targets, same sizes, Poisson probabilities</short-name>
+
+  <description>
+    Test the choice of a target for infection when two units are the same
+    distance from the source unit.  Here the targets are the same size, so they
+    should be chosen with equal probability.
+
+    Possible outcomes include 0, 1, or both of the target units becoming
+    infected (4 permutations).
+
+    With the probability of infection given exposure set to 1, the probability
+    that no units become infected equals the probability that no shipments go
+    out.
+
+    The probability that only unit 1 becomes infected is the probability that
+    1 shipment goes out \em and it goes to unit 1, \em or 2 shipments go out
+    \em and both go to unit 1, \em or 3 shipments go out \em and all 3 go to
+    unit 1, and so on.  Or,
+
+    \htmlonly poisson(&lt;i&gt;m&lt;/i&gt;,1)&amp;times;(1/2) + poisson(&lt;i&gt;m&lt;/i&gt;,2)&amp;times;(1/2)&lt;sup&gt;2&lt;/sup&gt; + poisson(&lt;i&gt;m&lt;/i&gt;,3)&amp;times;(1/2)&lt;sup&gt;3&lt;/sup&gt; + ... \endhtmlonly
+    \latexonly poisson(m,1)$\times\frac{1}{2}$ + poisson(m,2)$\times\frac{1}{2}^2$ + poisson(m,3)$\times\frac{1}{2}^3$ \endlatexonly
+
+    where poisson(&lt;i&gt;m&lt;/i&gt;,&lt;i&gt;x&lt;/i&gt;) is the probability
+    that a Poisson distribution with mean \em m will generate the value
+    &lt;i&gt;x&lt;/i&gt;.
+
+    The Poisson probabilities become very small as \em x increases, so the
+    expected frequencies are approximated using the first 10 terms.
+
+    NB: This test case does not care about secondary spread, so we end the test
+    before that can happen.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>17 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2targets_same_dist_same_size</population-file>
+
+  <parameter-file>spread_2_poisson</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The mean movement rate is 1 shipment per day.  The distance of shipments is
+    fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <!-- probability that no units become infected = poisson(1,0) -->
+  <output probability="0.36787944">
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+
+  <!-- 1 unit becomes infected (next 2 outcomes) -->
+  <output probability="0.23865122">
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>       <td>Susceptible</td></tr>
+  </output>
+
+  <output probability="0.23865122">
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Latent</td></tr>
+  </output>
+
+  <!-- 2 units become infected -->
+  <output probability="0.15481812">
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>       <td>Latent</td></tr>
+  </output>
+</stochastic-test>
+
+<stochastic-test>
+  <category>direct_contact_spread</category>
+  <short-name>2 possible targets, different sizes</short-name>
+
+  <description>
+    Test the choice of a target for infection when two units are the same
+    distance from the source unit, but different sizes.  Unit 1 is twice the
+    size of unit 2, so the probability of choosing unit 1 as the destination
+    for any shipment should be twice the probability of choosing unit 2.
+
+    NB: This test case does not care about secondary spread, so we end the test
+    before that can happen.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>18 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2targets_same_dist_diff_size</population-file>
+
+  <parameter-file>spread_2</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment per day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <!-- unit 1 (the larger one) becomes infected -->
+  <output probability="0.66667">
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>       <td>Susceptible</td></tr>
+  </output>
+
+  <!-- unit 2 (the smaller one) becomes infected -->
+  <output probability="0.33333">
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Latent</td></tr>
+  </output>
+</stochastic-test>
+
+<stochastic-test>
+  <category>direct_contact_spread</category>
+  <short-name>3 possible targets, same sizes</short-name>
+
+  <description>
+    Test the choice of a target for infection when several units are the same
+    distance from the source unit.  Here the targets are all the same size, so
+    they should be chosen with equal probability.
+
+    This scenario also checks whether an approximate or exact comparison is
+    used to find targets that are the "same distance" from the source.  It is
+    likely that rounding errors will make the distance to unit 1 slightly
+    different from the distance to units 2 and 3.  So if only unit 1 receives
+    shipments, or if only units 2 and 3 receive shipments, the program is
+    probably using an exact comparison where an approximate comparison would be
+    more appropriate.
+
+    NB: This test case does not care about secondary spread, so we end the test
+    before that can happen.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>17 February 2004</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>3targets_same_dist_same_size</population-file>
+
+  <parameter-file>spread_2</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment per day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output probability="0.33333">
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td>       <td>Susceptible</td>  <td>Susceptible</td></tr>
+  </output>
+
+  <output probability="0.33333">
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Latent</td>       <td>Susceptible</td></tr>
+  </output>
+
+  <output probability="0.33333">
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td></tr>
+  </output>
+</stochastic-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>multiple exposure from 1 source, check reporting variables</short-name>
+
+  <description>
+    Test a scenario where a source unit makes 2 shipments to its neighbour.
+    Two exposures should be counted, but only one new infection.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>16 August 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>mult_exposure_1</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 2 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 2 shipments each day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>expnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUBeefCattle</td>
+      <td>infnUIniBeefCattle</td>
+      <td>infnUDirBeefCattle</td>
+      <td>infnU</td>
+    </tr>
+    <tr><td>2</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td> <td>1</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>multiple exposure from 2 sources, check reporting variables</short-name>
+
+  <description>
+    Test a scenario where two source units make shipments to a common
+    neighbour.  Two exposures should be counted, but only one new infection.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>16 August 2005</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_pigs_sheep_infected</population-file>
+
+  <parameter-file>mult_exposure_2</parameter-file>
+  
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    lasts 2 days, clinical signs accompany infectiousness immediately, and
+    immunity lasts 3 days.
+    
+    The movement rate from sheep units to cattle units and from pig units to
+    cattle units is fixed at 1 shipment each day.  The distance of shipments is
+    fixed at 10 km.  There are no shipments from sheep units to pig units or
+    vice versa, and there are no shipments from cattle units to any other type.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>expnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUBeefCattle</td>
+      <td>infnUSheep</td>
+      <td>infnUPigs</td>
+      <td>infnUIniBeefCattle</td>
+      <td>infnUIniSheep</td>
+      <td>infnUIniPigs</td>
+      <td>infnUDirBeefCattle</td>
+      <td>infnUDirSheep</td>
+      <td>infnUDirPigs</td>
+      <td>infnU</td>
+    </tr>
+    <!--              Ini        Dir       Cattle     Sheep       Pigs    Ini/Cattle Ini/Sheep   Ini/Pigs  Dir/Cattle Dir/Sheep   Dir/Pigs    Total     -->
+    <tr><td>2</td> <td>2</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>1</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+  </output>
+</variable-test>
+
+<stochastic-variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>multiple exposure from 2 sources, different causes, check reporting variables</short-name>
+
+  <description>
+    Test a scenario where a unit is recipient of both a direct and indirect
+    contacts on the same day.  Two exposures should be counted, but only one
+    new infection.  The cause of infection (direct or indirect contact) should
+    be chosen randomly.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>10 September 2007</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>3units_pigs_cattle_sheep_pigs_sheep_infected</population-file>
+
+  <parameter-file>mult_exposure_2b</parameter-file>
+  
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, infectiousness
+    with clinical signs lasts 2 days, and immunity lasts 3 days.
+    
+    The rate of direct contacts from sheep units to cattle units is fixed at 1
+    shipment each day, distance 10 km.  The rate of indirect contacts from pig
+    units to cattle units is fixed at 1 shipment each day, distance 10 km.
+    There are no other kinds of contacts.
+
+    In direct contact, latent units cannot be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output probability="0.5">
+    <tr>
+      <td>expnU</td>
+      <td>expnUDir</td>
+      <td>expnUInd</td>
+      <td>expnUBeefCattle</td>
+      <td>expnUSheep</td>
+      <td>expnUPigs</td>
+      <td>expnUDirBeefCattle</td>
+      <td>expnUDirSheep</td>
+      <td>expnUDirPigs</td>
+      <td>expnUIndBeefCattle</td>
+      <td>expnUIndSheep</td>
+      <td>expnUIndPigs</td>
+      <td>infnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUInd</td>
+      <td>infnUBeefCattle</td>
+      <td>infnUSheep</td>
+      <td>infnUPigs</td>
+      <td>infnUIniBeefCattle</td>
+      <td>infnUIniSheep</td>
+      <td>infnUIniPigs</td>
+      <td>infnUDirBeefCattle</td>
+      <td>infnUDirSheep</td>
+      <td>infnUDirPigs</td>
+      <td>infnUIndBeefCattle</td>
+      <td>infnUIndSheep</td>
+      <td>infnUIndPigs</td>
+    </tr>
+    <!--  Exposures                                                                                                                         |   Infections                                                                                                                                                                     -->
+    <!--  Total       Dir        Ind       Cattle     Sheep       Pigs    Dir/Cattle Dir/Sheep   Dir/Pigs  Ind/Cattle Ind/Sheep   Ind/Pigs  |   Total       Ini        Dir        Ind       Cattle     Sheep       Pigs    Ini/Cattle Ini/Sheep   Ini/Pigs  Dir/Cattle Dir/Sheep   Dir/Pigs  Ind/Cattle Ind/Sheep   Ind/Pigs   -->
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td>   <td>0</td> <td>2</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>2</td> <td>1</td> <td>1</td> <td>2</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td>   <td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+
+  <output probability="0.5">
+    <tr>
+      <td>expnU</td>
+      <td>expnUDir</td>
+      <td>expnUInd</td>
+      <td>expnUBeefCattle</td>
+      <td>expnUSheep</td>
+      <td>expnUPigs</td>
+      <td>expnUDirBeefCattle</td>
+      <td>expnUDirSheep</td>
+      <td>expnUDirPigs</td>
+      <td>expnUIndBeefCattle</td>
+      <td>expnUIndSheep</td>
+      <td>expnUIndPigs</td>
+      <td>infnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUInd</td>
+      <td>infnUBeefCattle</td>
+      <td>infnUSheep</td>
+      <td>infnUPigs</td>
+      <td>infnUIniBeefCattle</td>
+      <td>infnUIniSheep</td>
+      <td>infnUIniPigs</td>
+      <td>infnUDirBeefCattle</td>
+      <td>infnUDirSheep</td>
+      <td>infnUDirPigs</td>
+      <td>infnUIndBeefCattle</td>
+      <td>infnUIndSheep</td>
+      <td>infnUIndPigs</td>
+    </tr>
+    <!--  Exposures                                                                                                                         |   Infections                                                                                                                                                                     -->
+    <!--  Total       Dir        Ind       Cattle     Sheep       Pigs    Dir/Cattle Dir/Sheep   Dir/Pigs  Ind/Cattle Ind/Sheep   Ind/Pigs  |   Total       Ini        Dir        Ind       Cattle     Sheep       Pigs    Ini/Cattle Ini/Sheep   Ini/Pigs  Dir/Cattle Dir/Sheep   Dir/Pigs  Ind/Cattle Ind/Sheep   Ind/Pigs   -->
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td>   <td>0</td> <td>2</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>2</td> <td>1</td> <td>1</td> <td>2</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td>   <td>1</td> <td>0</td> <td>0</td> <td>1</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td></tr>
+  </output>
+</stochastic-variable-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>fixed movement rate 1</short-name>
+
+  <description>
+    Test that the fixed movement rate parameter produces a deterministic number
+    of shipments each day.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>6 November 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>fixed_rate_1</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 10 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment per day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units cannot be the source of an exposure.
+    
+    The probability of infection given exposure is 0.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>expnU</td>
+    </tr>
+    <tr><td>0</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>1</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>fixed movement rate 2</short-name>
+
+  <description>
+    Test that the fixed movement rate parameter produces a deterministic number
+    of shipments each day.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>6 November 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>fixed_rate_2</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 10 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 2 shipments per day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units cannot be the source of an exposure.
+    
+    The probability of infection given exposure is 0.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>expnU</td>
+    </tr>
+    <tr><td>0</td></tr>
+    <tr><td>2</td></tr>
+    <tr><td>2</td></tr>
+    <tr><td>2</td></tr>
+    <tr><td>2</td></tr>
+    <tr><td>2</td></tr>
+    <tr><td>2</td></tr>
+    <tr><td>2</td></tr>
+    <tr><td>2</td></tr>
+    <tr><td>2</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>fixed movement rate 0</short-name>
+
+  <description>
+    Test that the fixed movement rate parameter produces a deterministic number
+    of shipments each day.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>6 November 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>fixed_rate_0</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 10 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 0 shipments per day.
+
+    Latent units cannot be the source of an exposure.
+    
+    The probability of infection given exposure is 0.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>expnU</td>
+    </tr>
+    <tr><td>0</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>fixed movement rate 1/2</short-name>
+
+  <description>
+    Test that the fixed movement rate parameter produces a deterministic number
+    of shipments each day.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>6 November 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>fixed_rate_1_every_2</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 12 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment every 2 days.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units cannot be the source of an exposure.
+    
+    The probability of infection given exposure is 0.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>expnU</td>
+    </tr>
+    <tr><td>0</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>fixed movement rate 1/3</short-name>
+
+  <description>
+    Test that the fixed movement rate parameter produces a deterministic number
+    of shipments each day.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>6 November 2006</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>fixed_rate_1_every_3</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 12 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.
+    
+    The movement rate is fixed at 1 shipment every 3 days.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units cannot be the source of an exposure.
+    
+    The probability of infection given exposure is 0.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>expnU</td>
+    </tr>
+    <tr><td>0</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>0</td></tr>
+    <tr><td>1</td></tr>
+    <tr><td>0</td></tr>
+  </output>
+</variable-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>prevalence &gt; threshold for spread</short-name>
+
+  <description>
+    Test that prevalence affects the probability of transmission.  In this
+    scenario prevalence is just high enough for infection to happen.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>25 April 2005</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>prevalence_1</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 4 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.  The
+    prevalence is 0.505 throughout the course of the disease.
+
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+
+    The probability of infection given exposure is 1.
+
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>prevalence &lt; threshold for spread</short-name>
+
+  <description>
+    Test that prevalence affects the probability of transmission.  In this
+    scenario prevalence is just too low for infection to happen.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>25 April 2005</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>prevalence_0</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 4 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.  The
+    prevalence is 0.495 throughout the course of the disease.
+
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+
+    The probability of infection given exposure is 1.
+
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>prevalence &gt; threshold for spread on day 2</short-name>
+
+  <description>
+    Test that prevalence affects the probability of transmission.  In this
+    scenario prevalence is high enough for infection to happen on only one day.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>25 April 2005</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>prevalence_day2</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 4 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.  The
+    prevalence is 0.1 throughout the course of the disease except on day 2,
+    when it jumps to 1.0.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <diagram>prevalence_day2</diagram>
+  <diagram>2units</diagram>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+<!--
+    No infectious units, simulation stops.
+-->
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>prevalence &gt; threshold for spread on day 4</short-name>
+
+  <description>
+    Test that prevalence affects the probability of transmission.  In this
+    scenario prevalence is high enough for infection to happen on only one day.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>25 April 2005</creation-date>
+  <model-version>3.1</model-version>
+
+  <population-file>2units</population-file>
+
+  <parameter-file>prevalence_day4</parameter-file>
+  
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 4 days, clinical signs
+    accompany infectiousness immediately, and immunity lasts 3 days.  The
+    prevalence is 0.1 throughout the course of the disease except on day 4,
+    when it jumps to 1.0.
+    
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 10 km.
+
+    Latent units can be the source of an exposure.
+    
+    The probability of infection given exposure is 1.
+    
+    There is no detection, vaccination, or destruction.
+  </parameter-description>
+
+  <diagram>prevalence_day4</diagram>
+  <diagram>2units</diagram>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>best match &gt;2x desired distance, no R-tree</short-name>
+
+  <description>
+    This scenario and the next one test that contact spread works correctly in
+    the case where the best matching potential recipient unit is more than 2x
+    the desired distance away, and the R-tree index is used.
+
+    The units are set up so that the best-matching potential recipient, unit 5,
+    is outside the 2x circle &lt;i&gt;and&lt;/i&gt; outside the R-tree search
+    rectangle.  Another potential recipient, unit 6, a worse match, is also
+    outside the 2x circle but inside the R-tree search rectangle.  Unit 5, the
+    best match, should always be chosen. 
+
+    In this test, the diameter of the 2x circle (2 km) is &gt; 1/4 of the short
+    side of the study area (6 km), so the R-tree is not used.
+
+    Most of the tests in the test suite are "black box" tests: they test that
+    the program produces the expected output based on what the model
+    description document says, but they do not rely on any knowledge of how the
+    program works.  (You can't see inside the black box.)  This scenario is a
+    "white box" test in that it tests a particular detail of the
+    implementation, the R-tree index.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>13 June 2007</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>no_rtree_contact_spread</population-file>
+
+  <parameter-file>rtree_fallback</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 1 day,
+    and immunity lasts 3 days.
+
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 0.5 km.  Latent units cannot be the source of an
+    exposure.  The probability of infection given exposure is 1.
+    There is no detection, vaccination, or destruction.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will ship to and infect
+       unit 5.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>best match &gt;2x desired distance, R-tree</short-name>
+
+  <description>
+    This scenario and the previous one test that contact spread works correctly
+    in the case where the best matching potential recipient unit is more than
+    2x the desired distance away, and the R-tree index is used.
+
+    In this test, the diameter of the 2x circle (2 km) is &lt; 1/4 of the short
+    side of the study area (10 km), so the R-tree is used.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>13 June 2007</creation-date>
+  <model-version>3.0</model-version>
+
+  <population-file>rtree_contact_spread</population-file>
+
+  <parameter-file>rtree_fallback</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 1 day,
+    and immunity lasts 3 days.
+
+    The movement rate is fixed at 1 shipment each day.  The distance of
+    shipments is fixed at 0.5 km.  Latent units cannot be the source of an
+    exposure.  The probability of infection given exposure is 1.
+    There is no detection, vaccination, or destruction.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will ship to and infect
+       unit 5.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Latent</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>Susceptible</td>  <td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>direct_contact_spread</category>
+  <short-name>letters with accents, US-ASCII baseline</short-name>
+
+  <description>
+    This is one of a set of tests to check handling of letters with accents.
+    In this scenario, the input is in plain ASCII (no accents).
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>12 May 2008</creation-date>
+  <model-version>3.1.17</model-version>
+
+  <population-file>2units_ascii</population-file>
+
+  <parameter-file>spread_ascii</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 1 day,
+    and immunity lasts 3 days.
+
+    The movement rate from units of type "aeiou" to units of type "cCnN" is
+    fixed at 1 shipment each day.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will ship to and infect
+       unit 1.
+  </parameter-description>
+
+  <output>
+    <tr><td>Latent</td>              <td>Susceptible</td></tr>
+    <tr><td>InfectiousClinical</td>  <td>Susceptible</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>Latent</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>InfectiousClinical</td></tr>
+    <tr><td>NaturallyImmune</td>     <td>NaturallyImmune</td></tr>
+  </output>
+</deterministic-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>letters with accents, US-ASCII baseline, check reporting variables</short-name>
+
+  <description>
+    This is one of a set of tests to check handling of letters with accents.
+    In this scenario, the input is in plain ASCII (no accents).
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>12 May 2008</creation-date>
+  <model-version>3.1.17</model-version>
+
+  <population-file>2units_ascii</population-file>
+
+  <parameter-file>spread_ascii_w_vars</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 1 day,
+    and immunity lasts 3 days.
+
+    The movement rate from units of type "aeiou" to units of type "cCnN" is
+    fixed at 1 shipment each day.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will ship to and infect
+       unit 1.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>infnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUAeiou</td> <!-- note the conversion to CamelCase -->
+      <td>infnUCCnN</td>
+      <td>infnUIniAeiou</td>
+      <td>infnUIniCCnN</td>
+      <td>infnUDirAeiou</td>
+      <td>infnUDirCCnN</td>
+    </tr>
+    <!--  Total       Ini        Dir       aeiou      cCnN     Ini/aeiou   Ini/cCnN  Dir/aeiou   Dir/cCnN   -->
+    <tr><td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>letters with accents, ISO-8859-1</short-name>
+
+  <description>
+    This is one of a set of tests to check handling of letters with accents.
+    In this scenario, the input is in ISO-8859-1, also sometimes called
+    Latin-1, a common encoding that includes most characters used in Spanish
+    and French.
+
+    If you load the parameter or population file in a hex editor, you will notice
+    that each character occupies 1 byte.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>12 May 2008</creation-date>
+  <model-version>3.1.17</model-version>
+
+  <population-file>2units_iso88591</population-file>
+
+  <parameter-file>spread_iso88591_w_vars</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 1 day,
+    and immunity lasts 3 days.
+
+    The movement rate from units of type "ãêïòú" to units of type "çÇñÑ" is
+    fixed at 1 shipment each day.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will ship to and infect
+       unit 1.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>infnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUãêïòú</td>
+      <td>infnUçÇñÑ</td>
+      <td>infnUIniãêïòú</td>
+      <td>infnUIniçÇñÑ</td>
+      <td>infnUDirãêïòú</td>
+      <td>infnUDirçÇñÑ</td>
+    </tr>
+    <!--  Total       Ini        Dir       ãêïòú      çÇñÑ     Ini/ãêïòú   Ini/çÇñÑ  Dir/ãêïòú   Dir/çÇñÑ   -->
+    <tr><td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>letters with accents, UTF-8</short-name>
+
+  <description>
+    This is one of a set of tests to check handling of letters with accents.
+    In this scenario, the input is in UTF-8, an encoding for Unicode that is
+    backwards-compatible with ASCII.
+
+    If you load the parameter or population file in a hex editor, you will notice
+    that
+     - there is a Byte Order Mark or BOM at the beginning of the file, made of
+       the 3 bytes EF BB BF.
+     - letters without accents occupy 1 byte, and have the same code number as
+       in ASCII.
+     - letters with accents occupy 2 bytes.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>12 May 2008</creation-date>
+  <model-version>3.1.17</model-version>
+
+  <population-file>2units_utf8</population-file>
+
+  <parameter-file>spread_utf8_w_vars</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 1 day,
+    and immunity lasts 3 days.
+
+    The movement rate from units of type "ãêïòú" to units of type "çÇñÑ" is
+    fixed at 1 shipment each day.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will ship to and infect
+       unit 1.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>infnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUãêïòú</td>
+      <td>infnUçÇñÑ</td>
+      <td>infnUIniãêïòú</td>
+      <td>infnUIniçÇñÑ</td>
+      <td>infnUDirãêïòú</td>
+      <td>infnUDirçÇñÑ</td>
+    </tr>
+    <!--  Total       Ini        Dir       ãêïòú      çÇñÑ     Ini/ãêïòú   Ini/çÇñÑ  Dir/ãêïòú   Dir/çÇñÑ   -->
+    <tr><td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>letters with accents, UTF-8 no BOM</short-name>
+
+  <description>
+    This is one of a set of tests to check handling of letters with accents.
+    In this scenario, the input is in UTF-8, an encoding for Unicode that is
+    backwards-compatible with ASCII.
+
+    If you load the parameter or population file in a hex editor, you will notice
+    that
+     - there no Byte Order Mark at the beginning of the file.
+     - letters without accents occupy 1 byte, and have the same code number as
+       in ASCII.
+     - letters with accents occupy 2 bytes.
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>12 May 2008</creation-date>
+  <model-version>3.1.17</model-version>
+
+  <population-file>2units_utf8_no_bom</population-file>
+
+  <parameter-file>spread_utf8_no_bom_w_vars</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 1 day,
+    and immunity lasts 3 days.
+
+    The movement rate from units of type "ãêïòú" to units of type "çÇñÑ" is
+    fixed at 1 shipment each day.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will ship to and infect
+       unit 1.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>infnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUãêïòú</td>
+      <td>infnUçÇñÑ</td>
+      <td>infnUIniãêïòú</td>
+      <td>infnUIniçÇñÑ</td>
+      <td>infnUDirãêïòú</td>
+      <td>infnUDirçÇñÑ</td>
+    </tr>
+    <!--  Total       Ini        Dir       ãêïòú      çÇñÑ     Ini/ãêïòú   Ini/çÇñÑ  Dir/ãêïòú   Dir/çÇñÑ   -->
+    <tr><td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>letters with accents, UTF-16 big-endian</short-name>
+
+  <description>
+    This is one of a set of tests to check handling of letters with accents.
+    In this scenario, the input is in UTF-16, an encoding for Unicode that is
+    not backwards-compatible with ASCII.
+
+    If you load the parameter or population file in a hex editor, you will notice
+    that
+     - there is a Byte Order Mark or BOM at the beginning of the file, made of
+       the 2 bytes FE FF.
+     - all letters, with and without accents, occupy 2 bytes.
+     - letters without accents have 00 as the high byte, followed by the same
+       code number as in ASCII as the low byte.  (This is "big endian" because
+       the high byte comes first.)
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>12 May 2008</creation-date>
+  <model-version>3.1.17</model-version>
+
+  <population-file>2units_utf16_big_endian</population-file>
+
+  <parameter-file>spread_utf16_big_endian_w_vars</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 1 day,
+    and immunity lasts 3 days.
+
+    The movement rate from units of type "ãêïòú" to units of type "çÇñÑ" is
+    fixed at 1 shipment each day.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will ship to and infect
+       unit 1.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>infnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUãêïòú</td>
+      <td>infnUçÇñÑ</td>
+      <td>infnUIniãêïòú</td>
+      <td>infnUIniçÇñÑ</td>
+      <td>infnUDirãêïòú</td>
+      <td>infnUDirçÇñÑ</td>
+    </tr>
+    <!--  Total       Ini        Dir       ãêïòú      çÇñÑ     Ini/ãêïòú   Ini/çÇñÑ  Dir/ãêïòú   Dir/çÇñÑ   -->
+    <tr><td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>letters with accents, UTF-16 big-endian no BOM</short-name>
+
+  <description>
+    This is one of a set of tests to check handling of letters with accents.
+    In this scenario, the input is in UTF-16, an encoding for Unicode that is
+    not backwards-compatible with ASCII.
+
+    If you load the parameter or population file in a hex editor, you will notice
+    that
+     - there no Byte Order Mark at the beginning of the file.
+     - all letters, with and without accents, occupy 2 bytes.
+     - letters without accents have 00 as the high byte, followed by the same
+       code number as in ASCII as the low byte.  (This is "big endian" because
+       the high byte comes first.)
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>12 May 2008</creation-date>
+  <model-version>3.1.17</model-version>
+
+  <population-file>2units_utf16_big_endian_no_bom</population-file>
+
+  <parameter-file>spread_utf16_big_endian_no_bom_w_vars</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 1 day,
+    and immunity lasts 3 days.
+
+    The movement rate from units of type "ãêïòú" to units of type "çÇñÑ" is
+    fixed at 1 shipment each day.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will ship to and infect
+       unit 1.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>infnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUãêïòú</td>
+      <td>infnUçÇñÑ</td>
+      <td>infnUIniãêïòú</td>
+      <td>infnUIniçÇñÑ</td>
+      <td>infnUDirãêïòú</td>
+      <td>infnUDirçÇñÑ</td>
+    </tr>
+    <!--  Total       Ini        Dir       ãêïòú      çÇñÑ     Ini/ãêïòú   Ini/çÇñÑ  Dir/ãêïòú   Dir/çÇñÑ   -->
+    <tr><td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>letters with accents, UTF-16 little-endian</short-name>
+
+  <description>
+    This is one of a set of tests to check handling of letters with accents.
+    In this scenario, the input is in UTF-16, an encoding for Unicode that is
+    not backwards-compatible with ASCII.
+
+    If you load the parameter or population file in a hex editor, you will notice
+    that
+     - there is a Byte Order Mark or BOM at the beginning of the file, made of
+       the 2 bytes FF FE.
+     - all letters, with and without accents, occupy 2 bytes.
+     - letters without accents have the same code number as in ASCII as the
+       low byte, followed by 00 as the high byte.  (This is "little endian"
+       because the low byte comes first.)
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>12 May 2008</creation-date>
+  <model-version>3.1.17</model-version>
+
+  <population-file>2units_utf16_little_endian</population-file>
+
+  <parameter-file>spread_utf16_little_endian_w_vars</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 1 day,
+    and immunity lasts 3 days.
+
+    The movement rate from units of type "ãêïòú" to units of type "çÇñÑ" is
+    fixed at 1 shipment each day.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will ship to and infect
+       unit 1.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>infnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUãêïòú</td>
+      <td>infnUçÇñÑ</td>
+      <td>infnUIniãêïòú</td>
+      <td>infnUIniçÇñÑ</td>
+      <td>infnUDirãêïòú</td>
+      <td>infnUDirçÇñÑ</td>
+    </tr>
+    <!--  Total       Ini        Dir       ãêïòú      çÇñÑ     Ini/ãêïòú   Ini/çÇñÑ  Dir/ãêïòú   Dir/çÇñÑ   -->
+    <tr><td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>direct_contact_spread</category>
+  <short-name>letters with accents, UTF-16 little-endian no BOM</short-name>
+
+  <description>
+    This is one of a set of tests to check handling of letters with accents.
+    In this scenario, the input is in UTF-16, an encoding for Unicode that is
+    not backwards-compatible with ASCII.
+
+    If you load the parameter or population file in a hex editor, you will notice
+    that
+     - there no Byte Order Mark at the beginning of the file.
+     - all letters, with and without accents, occupy 2 bytes.
+     - letters without accents have the same code number as in ASCII as the
+       low byte, followed by 00 as the high byte.  (This is "little endian"
+       because the low byte comes first.)
+  </description>
+
+  <author>Neil Harvey &lt;nharve01@uoguelph.ca&gt;</author>
+  <creation-date>12 May 2008</creation-date>
+  <model-version>3.1.17</model-version>
+
+  <population-file>2units_utf16_little_endian_no_bom</population-file>
+
+  <parameter-file>spread_utf16_little_endian_no_bom_w_vars</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 1 day,
+    and immunity lasts 3 days.
+
+    The movement rate from units of type "ãêïòú" to units of type "çÇñÑ" is
+    fixed at 1 shipment each day.
+
+    What should happen:
+     - On day 1 the infected unit (unit 0) will be Latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will ship to and infect
+       unit 1.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>infnU</td>
+      <td>infnUIni</td>
+      <td>infnUDir</td>
+      <td>infnUãêïòú</td>
+      <td>infnUçÇñÑ</td>
+      <td>infnUIniãêïòú</td>
+      <td>infnUIniçÇñÑ</td>
+      <td>infnUDirãêïòú</td>
+      <td>infnUDirçÇñÑ</td>
+    </tr>
+    <!--  Total       Ini        Dir       ãêïòú      çÇñÑ     Ini/ãêïòú   Ini/çÇñÑ  Dir/ãêïòú   Dir/çÇñÑ   -->
+    <tr><td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <!-- Note that the "Ini" counts are separate, and most of the output
+      variables are reserved for infections that happen during the simulation. -->
+    <tr><td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>1</td> <td>0</td> <td>0</td> <td>0</td> <td>1</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+    <tr><td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td> <td>0</td></tr>
+  </output>
+</variable-test>

@@ -1,0 +1,88 @@
+#
+# Set up some global variables.  These variables could be set on the command
+# line, so we set them only if they don't already exist.
+#
+if ![info exists prompt] then {
+	set prompt "> "
+}
+
+
+
+#
+# Regular expression for matching the output.
+#
+set statepat "(?:Susc|Lat|Subc|Clin|NImm|VImm|Dest)"
+
+
+
+#
+# progression_test -- tests that the correct sequence of unit states is output.
+#
+# Parameters:
+#   answer   the correct sequence of states
+# Returns:
+#   an empty string if successful, an error message otherwise
+#
+proc progression_test { answer } {
+	global prompt
+	global statepat
+
+	set ndays [llength $answer]
+	for {set day 0} {$day < $ndays} {incr day} {
+		set true_state [lindex $answer $day]
+		send "step\n"
+		expect {
+			-re "($statepat).*$prompt$" {
+				set state $expect_out(1,string)
+				if { [string compare $state $true_state] != 0 } {
+					return "on day $day unit should be $true_state, not $state"
+				}
+			}
+		}
+	}
+
+	return ""
+}
+
+
+
+#
+# shell_load -- loads the program
+#
+proc shell_load { arg } {
+	#
+}
+
+
+
+#
+# shell_exit -- quit and cleanup
+#
+proc shell_exit {} {
+	#
+}
+
+
+
+proc shell_start {} {
+	global SHELL
+	global prompt
+	global floatpat
+	global epsilon
+	global spawn_id
+	global verbose
+	
+	if { $verbose > 1 } {
+		send_user "starting $SHELL\n"
+	}
+	spawn $SHELL
+	expect {
+		-re "No such file.*" { perror "Can't start $SHELL"; exit 1 }
+		-re "$prompt$" { }
+		timeout { perror "Failed to spawn $SHELL (timeout)"; exit 1 }
+	}
+}
+
+
+
+shell_start

@@ -1,0 +1,74 @@
+<herds>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.00898315</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.0179663</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.0269495</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.0359326</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.0449158</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.0538989</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.0628821</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.0718652</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+</herds>

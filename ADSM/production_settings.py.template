@@ -1,0 +1,65 @@
+import os
+import sys
+
+
+if getattr(sys, 'frozen', False):
+    BASE_DIR = os.path.dirname(sys.executable)
+    if BASE_DIR.endswith('bin'):
+        BASE_DIR = os.path.dirname(BASE_DIR)
+    BASE_DIR = os.path.join(BASE_DIR, 'src')
+else:
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+WORKSPACE_PATH = 'CHANGE_ME'
+
+DB_BASE_DIR = os.path.join(WORKSPACE_PATH, 'settings')
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'CHANGE_ME'
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = False
+TEMPLATE_DEBUG = DEBUG
+
+# If not a subdomain, you need the www version and bare version ['www.mydomain.com', 'mydomain.com']
+# If on a subdomain, you just need the one entry ['subdomain.mydomain.com', ]
+ALLOWED_HOSTS = ['CHANGE_ME', ]
+
+# Database
+# https://docs.djangoproject.com/en/1.7/ref/settings/#databases
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',  # I highly recommend using Postgres
+        'NAME': 'CHANGE_ME',  # Name of the database
+        'USER': 'CHANGE_ME',  # Database user
+        'PASSWORD': 'CHANGE_ME',  # User's password
+        'HOST': '',  # Leave blank for local
+        'PORT': '',  # Leave blank for default port
+    }
+}
+
+ADMINS = (
+    # ('Your Name', 'your_email@example.com'),
+)  # These get error emails
+
+MANAGERS = (
+    # ('Your Name', 'your_email@example.com'),
+)  # These guys get emails about broken links.
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'CHANGE_ME'  # Your SMTP server 'smtp.someserver.com'
+EMAIL_HOST_USER = 'CHANGE_ME'  # User required to log into the SMTP server
+EMAIL_HOST_PASSWORD = 'CHANGE_ME'  # User's password
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+DEFAULT_FROM_EMAIL = 'CHANGE_ME'  # Users get emails from this address 'info@mydomain.com'
+SERVER_EMAIL = 'CHANGE_ME'  # Admins and Managers get emails from this address about errors 'server@mydomain.com'
+
+os.environ['HTTPS'] = 'on'
+os.environ['wsgi.url_scheme'] = 'https'
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
