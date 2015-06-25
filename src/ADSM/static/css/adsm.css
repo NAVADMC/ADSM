@@ -1773,5 +1773,11 @@ textarea:focus {
     .layout-panel.TB_panel.TB_panel_closed {
         margin-right: -33.3333vw;
     }
+    /*-------------- header ----------*/
+    header .header_logo {
+        background-image:url('https://github.com/NAVADMC/ADSM/blob/gh-pages/images/adsm_logo_sm.png?raw=true');
+        background-position: 30px;
+        min-width: 0;
+    }
 }
 
