@@ -5,7 +5,7 @@ import sys
 if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(sys.executable)
 else:
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 DB_BASE_DIR = None
 if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.

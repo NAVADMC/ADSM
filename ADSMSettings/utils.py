@@ -104,7 +104,7 @@ def graceful_startup():
         os.makedirs(os.path.dirname(workspace_path()), exist_ok=True)
     
     print("Copying Sample Scenarios")
-    samples_dir = os.path.join(os.path.dirname(settings.BASE_DIR), "Sample Scenarios")
+    samples_dir = os.path.join(settings.BASE_DIR, "Sample Scenarios")
     for dirpath, dirnames, files in os.walk(samples_dir):
         [os.makedirs(workspace_path(sub), exist_ok=True) for sub in dirnames]
         subdir = str(dirpath).replace(samples_dir, '')
