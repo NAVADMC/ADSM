@@ -116,8 +116,8 @@ dist_noinst_DATA = state-transition.png \
   no_rtree_lat45_xy.png \
   rtree_lat45.png \
   rtree_lat45_xy.png \
-  no_rtree_lat-45.png \
-  rtree_lat-45.png \
+  no_rtree_lat_minus45.png \
+  rtree_lat_minus45.png \
   no_rtree_contact_spread.png \
   rtree_contact_spread.png \
   1000units_line.png \
