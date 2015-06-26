@@ -6,7 +6,6 @@ module.log
 module.sum
 dbg.log
 test/module.*/all.exp
-test/module.*/*.sqlite3
 
 #################
 # Executables generated for testing (always compiled without MPI)
