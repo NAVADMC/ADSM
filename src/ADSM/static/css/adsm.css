@@ -1189,7 +1189,13 @@ input[type=file], button {
 #population_main_panel {
     margin-top: 0;
     height: 100vh;
+    padding-top: 48px;
     pointer-events: none;
+}
+section#population_main_panel h1:first-of-type {
+    margin-bottom: 5px;
+    margin-left: 210px;
+    pointer-events: all;
 }
 #replace_population {
     padding-top: 3px;
@@ -1282,7 +1288,7 @@ input[type=file], button {
 
 #farm_list tbody{
     display: inline-block;
-    height: calc(100vh - 170px);
+    height: calc(100vh - 218px);
     overflow-y: auto;
     width: 100%;
     position: relative;
@@ -1499,7 +1505,7 @@ input[type=file], button {
 }
 #edit_population {
     position: absolute;
-    top: calc(100vh - 124px);
+    top: calc(100vh - 172px);
     right: 25px;
     transition: opacity .2s ease
 }
@@ -1511,7 +1517,7 @@ input[type=file], button {
 }
 #population_grid_wraper .buttonHolder {
     position: fixed;
-    top: calc(100vh - 56px);
+    top: calc(100vh - 72px);
     right: 64px;
     padding: 0 !important;
     float: none;
@@ -1519,6 +1525,10 @@ input[type=file], button {
 }
 
 @media screen and (max-width: 1100px) {
+    
+    section#population_main_panel h1:first-of-type {
+        margin-left: 204px;
+    }
     #population_grid_wraper .buttonHolder {
         position: relative;
         float: right;
@@ -1532,7 +1542,7 @@ input[type=file], button {
     }
     #edit_population {
         right: 10px;
-        top: calc(100vh + 179px);
+        top: calc(100vh + 131px);
     }
 }
 @media screen and (max-width: 1140px) {
