@@ -237,6 +237,9 @@ header .header_logo{
     background-repeat: no-repeat;
     min-width: 190px;
 }
+header .col-xs-8 {
+    height: 42px;
+}
 .header_filename {
     padding-left: 0;
 }
@@ -249,6 +252,12 @@ header .filename {
 .filename input {
     border: none;
 }
+.scenario-status {
+    display:none
+}
+.scenario-status.unsaved {
+    display:block;
+}
 .scenario-status h2{
     line-height: 21px;
     padding-bottom: 0;
@@ -257,20 +266,19 @@ header .filename {
     margin-top: 1px;
 }
 .scenario-status p{
-    display:none;
     font-size: 12px;
     font-style: italic;
     font-weight: 300;
 }
-.scenario-status.unsaved {
-    display:block;
+#file_panel {
+    z-index: 102;/*necessary for #unsaved-header*/
 }
 #unsaved-header {
     color: white;
     position: fixed;
-    top: 40px;
+    top: 25px;
     left: 83%;
-    z-index: 90;
+    z-index: 130;
 }
 
 header .buttonHolder{

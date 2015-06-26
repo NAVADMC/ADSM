@@ -234,7 +234,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.click_navbar_element('Disease Progression')
         self.selenium.find_element_by_id('left-panel').find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(3)
-        self.selenium.find_element_by_id('center-panel').find_element_by_class_name('glyphicon-pencil').click()
+        self.selenium.find_element_by_id('center-panel').find_element_by_css_selector('select').click()
         time.sleep(1)
 
         self.selenium.find_element_by_id('id_equation_type')  # just making sure it's there
@@ -267,7 +267,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         center_panel = self.selenium.find_element_by_id('center-panel')
 
-        self.assertIn("Disease latent period", center_panel.text)
+        self.assertIn("Latent period", center_panel.text)
 
     @skip("https://github.com/NAVADMC/ADSM/issues/605")
     def test_upload_population_file(self):
@@ -554,9 +554,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         target = self.selenium.find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(2)
 
-        center = self.selenium.find_element_by_id('center-panel')
-
-        center.find_element_by_class_name('glyphicon-pencil').click()
+        self.query('#center-panel').find_element_by_css_selector('select').click()
         time.sleep(2)
 
         right_panel = self.selenium.find_element_by_id('right-panel')
