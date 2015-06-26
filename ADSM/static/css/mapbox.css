@@ -1,0 +1,66 @@
+.mapwrapper {
+    margin: 10px 0px 10px 0px;
+    height: 800px;
+    width: 923px;
+}
+#viewport, #viewport2 {
+    height: 800px;
+    width: 923px;
+    cursor: zoom-in;
+    overflow: hidden;
+}
+#viewport:active, #viewport2:active {
+    cursor: move;
+}
+.mapwrapper {
+    position: relative;
+}
+.map-control {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    /*background: url(images/map-control.png) no-repeat;*/
+    height: 63px;
+    width: 100px;
+}
+.map-control a {
+    height: 18px;
+    width: 18px;
+    display: block;
+    text-indent: -999em;
+    position: absolute;
+    outline: none;
+}
+.map-control a:hover {
+    background: #535353;
+    opacity: .4;
+    filter: alpha(opacity=40);
+}
+.map-control a.left {
+    left: 39px;
+    top: 22px;
+}
+.map-control a.right {
+    left: 79px;
+    top: 22px;
+}
+.map-control a.up {
+    left: 59px;
+    top: 2px;
+}
+.map-control a.down {
+    left: 59px;
+    top: 42px;
+}
+.map-control a.zoom {
+    left: 2px;
+    top: 8px;
+    height: 21px;
+    width: 21px;
+}
+.map-control a.back {
+    left: 2px;
+    top: 31px;
+    height: 21px;
+    width: 21px;
+}

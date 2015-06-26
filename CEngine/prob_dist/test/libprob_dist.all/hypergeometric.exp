@@ -1,0 +1,92 @@
+set timeout 10
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+        -re "\[^\n\r\]*$prompt$" {
+                fail "$test (bad match)"
+                if { $verbose > 0 } {
+                        regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+                                                $expect_out(buffer) "" output
+                        send_user "\tUnmatched output: \"$output\"\n"
+                }
+        }
+        timeout {
+                fail "$test (timeout)"
+        }
+}
+
+
+
+#
+# Test that the parameters are set correctly when a hypergeometric distribution is
+# created.
+#
+set test "create"
+send "hypergeometric (3,5,4)\n"
+expect {
+        -re "<hypergeometric probability distribution\[\\n\\r\]+ n1=($intpat) n2=($intpat) t=($intpat)>.*$prompt$" {
+                set n1 $expect_out(1,string)
+                if { 3 != $n1 } {
+                        fail "$test n1 should be 3, not $n1"
+                } else {
+                        set n2 $expect_out(2,string)
+                        if { 5 != $n2 } {
+                                fail "$test n2 should be 5, not $n2"
+                        } else {
+                                set t $expect_out(3,string)
+                                if { 4 != $t } {
+                                        fail "$test t should be 4, not $t"
+                                } else {
+                                        pass "$test"
+				}
+			}
+                }
+        }
+}
+
+
+
+#
+# Test the probability density function.  Give values
+# - outside the bounds
+# - exactly at the lower and upper bounds
+# - inside the bounds
+#
+set xvalues {-2 -1 0 1 2 3 4 5}
+set answers {0 0 0.0714285714285714 0.428571428571429 0.428571428571429 0.0714285714285714 0 0}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.
+#
+set xvalues {-2 -1 0 1 2 3 4 5}
+set answers {0 0 0.0714285714285714 0.5 0.928571428571429 1 1 1}
+cdf_test $xvalues $answers
+
+
+
+#
+# Test random number generation.
+#
+set true_answer { 0 0.0714285714285714 0.428571428571429 0.428571428571429 0.0714285714285714 0 0 }
+random_number_test $true_answer -1
+
+
+
+#
+# Test statistics.
+#
+#set min
+#set max
+#set mean 
+#set variance
+#statistics_test $min $max $mean $variance
+sample_statistics_test

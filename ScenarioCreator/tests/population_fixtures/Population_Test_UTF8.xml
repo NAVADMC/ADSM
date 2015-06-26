@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<herds
+  xmlns:naadsm="http://www.naadsm.org/schema"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <herd>
+    <id>1</id>
+    <production-type>Free Range Cows</production-type>
+    <size>100</size>
+    <location>
+      <latitude>50</latitude>
+      <longitude>-8</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+
+  <herd>
+    <id>2</id>
+    <production-type>Free Range Cows</production-type>
+    <size>50</size>
+    <location>
+      <latitude>51</latitude>
+      <longitude>-8</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+
+  <herd>
+    <id>3</id>
+    <production-type>Dairy Cows</production-type>
+    <size>100</size>
+    <location>
+      <latitude>52</latitude>
+      <longitude>-8</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+
+  <herd>
+    <id>4</id>
+    <production-type>Dairy Cows</production-type>
+    <size>50</size>
+    <location>
+      <latitude>53</latitude>
+      <longitude>-8</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+
+  <herd>
+    <id>5</id>
+    <production-type>Angus Cattle</production-type>
+    <size>100</size>
+    <location>
+      <latitude>54</latitude>
+      <longitude>-8</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+
+  <herd>
+    <id>6</id>
+    <production-type>Angus Cattle</production-type>
+    <size>50</size>
+    <location>
+      <latitude>55</latitude>
+      <longitude>-8</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+
+  <herd>
+    <id>7</id>
+    <production-type>Blue Horn</production-type>
+    <size>100</size>
+    <location>
+      <latitude>56</latitude>
+      <longitude>-8</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+
+  <herd>
+    <id>8</id>
+    <production-type>Blue Horn</production-type>
+    <size>50</size>
+    <location>
+      <latitude>57</latitude>
+      <longitude>-8</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+</herds>

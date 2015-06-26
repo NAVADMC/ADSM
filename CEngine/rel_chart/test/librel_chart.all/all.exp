@@ -1,0 +1,287 @@
+set timeout 3
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+
+
+#
+# Turns the text representation of points into a Tcl list.  For example, the
+# text string
+#
+# (0,1), (2,3)
+#
+# will be returned as {0 1 2 3}.
+#
+proc tuples_string_to_list { s } {
+	regsub -all {[\(\) ]} $s "" s
+	return [split $s ","]
+}
+
+
+
+#
+# Returns the minimum and maximum y-values from a list formatted as {x0 y0 x1
+# y1 ... }
+#
+proc range { l } {
+	set min [lindex $l 1]
+	set max $min
+	for {set i 3} {$i < [llength $l]} {set i [expr $i + 2]} {
+		set y [lindex $l $i]
+		if { $y < $min } {
+			set min $y 
+		} elseif { $y > $max  } {
+			set max $y
+		}
+	}
+	return [list $min $max]
+}
+
+
+
+#
+# Returns an empty string if successful, an error string otherwise.
+#
+proc check_creation { params answer } {
+	global epsilon
+
+	set points [tuples_string_to_list $answer]
+	#
+	# Special case: a single-point relationship chart.
+	#
+	if { [llength $params] == 2 } {
+		set true_value [lindex $params 1]
+		set value [lindex $points 1]
+		if { [fcmp $true_value $value $epsilon] == 0 } {
+			return ""
+		} else {
+			return "value should be $true_value, not $value"
+		}
+	}
+
+	set error ""
+	for {set i 0} {$i < [llength $points]} {incr i} {
+		set true_value [lindex $params $i]
+		set value [lindex $points $i]
+		if { [fcmp $true_value $value $epsilon] != 0 } {
+			set bad_point [expr $i / 2]
+			set error "point $bad_point should be ([lindex $params [expr $bad_point * 2]],[lindex $params [expr $bad_point * 2 + 1]]), not ([lindex $points [expr $bad_point * 2]],[lindex $points [expr $bad_point * 2 + 1]])"
+			break
+		}
+	}	
+	return $error	
+}
+
+
+
+#
+# Test that the parameters are set correctly when a single-point relationship
+# chart is created.
+#
+set test "create_single_point"
+set params {0 1}
+set range [range $params]
+send "chart ([join $params ,])\n"
+expect {
+	-re "<relationship chart\[\\n\\r\]+ points={(.*)}>.*$prompt$" {
+		set error [check_creation $params $expect_out(1,string)]
+		if { [string compare $error ""] != 0 } {
+			fail "$test $error"
+		} else {
+			pass $test
+		}		
+	}
+}
+
+
+
+set xvalues { -500 -2 -1 0 1 2 500 }
+set yvalues { 1 1 1 1 1 1 1 }
+lookup_test $xvalues $yvalues
+range_test [lindex $range 0] [lindex $range 1]
+
+
+
+#
+# Test that the a relationship chart with 2 identical points is correctly
+# created as a single-point chart.
+#
+set test "create_single_point (2 identical)"
+set params {0 1 0 1}
+set range [range $params]
+send "chart ([join $params ,])\n"
+expect {
+	-re "<relationship chart\[\\n\\r\]+ points={(.*)}>.*$prompt$" {
+		set error [check_creation {0 1} $expect_out(1,string)]
+		if { [string compare $error ""] != 0 } {
+			fail "$test $error"
+		} else {
+			pass $test
+		}		
+	}
+}
+
+
+
+set xvalues { -500 -2 -1 0 1 2 500 }
+set yvalues { 1 1 1 1 1 1 1 }
+lookup_test $xvalues $yvalues
+range_test [lindex $range 0] [lindex $range 1]
+
+
+
+#
+# Test that the a relationship chart with 5 identical points is correctly
+# created as a single-point chart.
+#
+set test "create_single_point (5 identical)"
+set params {0 1 0 1 0 1 0 1 0 1}
+set range [range $params]
+send "chart ([join $params ,])\n"
+expect {
+	-re "<relationship chart\[\\n\\r\]+ points={(.*)}>.*$prompt$" {
+		set error [check_creation {0 1} $expect_out(1,string)]
+		if { [string compare $error ""] != 0 } {
+			fail "$test $error"
+		} else {
+			pass $test
+		}		
+	}
+}
+
+
+
+set xvalues { -500 -2 -1 0 1 2 500 }
+set yvalues { 1 1 1 1 1 1 1 }
+lookup_test $xvalues $yvalues
+range_test [lindex $range 0] [lindex $range 1]
+
+
+
+#
+# Test that the parameters are set correctly when a normal relationship chart
+# is created.
+#
+set test "create"
+set params {0 1 2 3}
+set range [range $params]
+send "chart ([join $params ,])\n"
+expect {
+	-re "<relationship chart\[\\n\\r\]+ points={(.*)}>.*$prompt$" {
+		set error [check_creation $params $expect_out(1,string)]
+		if { [string compare $error ""] != 0 } {
+			fail "$test $error"
+		} else {
+			pass $test
+		}		
+	}
+}
+
+
+
+set xvalues { -1 0 1 2 3 }
+set yvalues { 1 1 2 3 3 }
+lookup_test $xvalues $yvalues
+range_test [lindex $range 0] [lindex $range 1]
+
+
+
+#
+# Test that the parameters are set correctly when a normal relationship chart
+# is created with a duplicated point.
+#
+set test "create with duplicated point 1"
+set params {0 1 0 1 2 3}
+set range [range $params]
+send "chart ([join $params ,])\n"
+expect {
+	-re "<relationship chart\[\\n\\r\]+ points={(.*)}>.*$prompt$" {
+		set error [check_creation {0 1 2 3} $expect_out(1,string)]
+		if { [string compare $error ""] != 0 } {
+			fail "$test $error"
+		} else {
+			pass $test
+		}		
+	}
+}
+
+
+
+set xvalues { -1 0 1 2 3 }
+set yvalues { 1 1 2 3 3 }
+lookup_test $xvalues $yvalues
+range_test [lindex $range 0] [lindex $range 1]
+
+
+
+#
+# Test that the parameters are set correctly when a normal relationship chart
+# is created with a duplicated point.
+#
+set test "create with duplicated point 2"
+set params {0 1 2 3 2 3}
+set range [range $params]
+send "chart ([join $params ,])\n"
+expect {
+	-re "<relationship chart\[\\n\\r\]+ points={(.*)}>.*$prompt$" {
+		set error [check_creation {0 1 2 3} $expect_out(1,string)]
+		if { [string compare $error ""] != 0 } {
+			fail "$test $error"
+		} else {
+			pass $test
+		}		
+	}
+}
+
+
+
+set xvalues { -1 0 1 2 3 }
+set yvalues { 1 1 2 3 3 }
+lookup_test $xvalues $yvalues
+range_test [lindex $range 0] [lindex $range 1]
+
+
+
+#
+# Create a complicated relationship chart.
+#
+set test "create"
+set params {-1 1 0 2 1 2 1.5 1.5 2.5 -1.5 3 -2 4 0}
+set range [range $params]
+send "chart ([join $params ,])\n"
+expect {
+	-re "<relationship chart\[\\n\\r\]+ points={(.*)}>.*$prompt$" {
+		set error [check_creation $params $expect_out(1,string)]
+		if { [string compare $error ""] != 0 } {
+			fail "$test $error"
+		} else {
+			pass $test
+		}		
+	}
+}
+
+
+
+set xvalues { -2 -1 -0.25 0.33 2.75 3.5 4 5 }
+set yvalues { 1 1 1.75 2 -1.75 -1 0 0 }
+lookup_test $xvalues $yvalues
+range_test [lindex $range 0] [lindex $range 1]

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<herds>
+  <spatial_reference>
+    <PROJ4>+ellps=WGS84 +units=km +lon_0=0.0449157 +proj=cea</PROJ4>
+  </spatial_reference>
+  <herd>
+    <id>0</id>
+    <production-type>A</production-type>
+    <size>25</size>
+    <location>
+      <x>-3</x>
+      <y>0</y>
+    </location>
+    <status>L</status>
+  </herd>
+  <herd>
+    <id>1</id>
+    <production-type>B</production-type>
+    <size>25</size>
+    <location>
+      <x>-2</x>
+      <y>0</y>
+    </location>
+    <status>S</status>
+  </herd>
+  <herd>
+    <id>2</id>
+    <production-type>B</production-type>
+    <size>25</size>
+    <location>
+      <x>1</x>
+      <y>0</y>
+    </location>
+    <status>L</status>
+  </herd>
+  <herd>
+    <id>3</id>
+    <production-type>A</production-type>
+    <size>25</size>
+    <location>
+      <x>3</x>
+      <y>0</y>
+    </location>
+    <status>L</status>
+  </herd>
+</herds>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ADSM - Animal Disease Spread Model</title>
+    {#Javascript context variables#}
+    <script type="text/javascript">
+        {% for var_name, value in javascript_variables.items %}
+            var {{var_name}} = {{value}};
+        {% endfor %}
+    </script>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/adsm.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-toggle.min.css" />
+    <script src="{{ STATIC_URL }}js/jquery-2.1.3.min.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-toggle.min.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-dialog.js"></script>
+    <script src="{{ STATIC_URL }}js/adsm.js"></script>
+    <script src="{{ STATIC_URL }}js/population-panel.js"></script>
+    {% load db_status_tags %}
+</head>
+<body>
+<header>
+        <div class="row">
+            <div class="header_logo col-xs-2">                
+            </div>
+            <div class="col-xs-8">
+                <h1 class="filename">
+                    {{ filename }}
+                </h1>
+            </div>
+            <div class="col-xs-2 scenario-status">
+                <h2>Base Scenario</h2>
+            </div>
+        </div>
+</header>
+
+    {% block main %}
+
+    {% endblock %}
+
+<div class="blocking-overlay">
+    <div class="overlay-content">
+        <h2 class="message">Saving file...</h2>
+        <img src="{{ STATIC_URL }}working.gif">
+    </div>
+</div>
+    {% include "file_panel.html" %}
+    {% include "settings_panel.html" %}
+    {% include "population_panel.html" %}
+
+<div id="toolbar">
+    <a href="#" title="Project Panel" class="TB_btn" id="TB_file" TB-target="#file_panel"></a>
+    <a href="#" title="Settings Panel" class="TB_btn" id="TB_settings" TB-target="#settings_panel"></a>
+    <a href="#" title="Population Panel" class="TB_btn" id="TB_population" TB-target="#population_panel"></a>
+    <a href="#" title="Functions Panel" class="TB_btn" id="TB_functions" TB-target="#functions_panel"></a>
+    <div id="tb_mask"></div>
+</div>
+  
+</body>
+</html>

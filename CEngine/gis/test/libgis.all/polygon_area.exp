@@ -1,0 +1,239 @@
+set timeout 3
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+
+
+#
+# The following tests are of the basic polygon area calculation (we don't worry
+# about lat-lons and meridians converging).
+#
+
+#
+# Test with an empty polygon.
+#
+polygon_area_test { } 0 "empty polygon"
+
+
+
+#
+# Test with single-point polygons.
+#
+polygon_area_test { 0 0 } 0 "single-point polygon 1"
+polygon_area_test { 1 1 } 0 "single-point polygon 2"
+
+
+
+#
+# Test with two-point (line) polygons.
+#
+polygon_area_test { 0 0 0 1 } 0 "two-point (line) polygon 1"
+polygon_area_test { 2 2 1 1 } 0 "two-point (line) polygon 2"
+
+
+
+#
+# Test with some triangles.
+#
+
+#
+#   ^
+#   |
+# 2 +
+#   |
+#   |
+#   |
+# 1 *****
+#   *  *
+#   * *
+#   **
+#   *---+---+->
+#  0    1   2
+#
+polygon_area_test { 0 0 0 1 1 1 } 0.5 "triangle 1"
+
+#
+#   0    1   2   3
+#    *********---+->
+#    |*     *
+#    | *   *
+#    |  * *
+# -1 +   *
+#    |
+#    v
+#
+polygon_area_test { 0 0 2 0 1 -1 } 1.0 "triangle 2"
+
+#
+#   ^
+#   |
+# 3 +       *
+#   |      **
+#   |     * *
+#   |    * *
+# 2 +   *  *
+#   |  *  *
+#   | *   *
+#   |*    *
+# 1 *    *
+#   |*   *
+#   | * *
+#   |  **
+#   +---*---+->
+#  0    1   2
+#
+polygon_area_test { 0 1 2 3 1 0 } 2.0 "triangle 3"
+
+
+
+#
+# Test with some squares, rectangles, and other quadrilaterals.
+#
+
+#
+#   ^
+#   |
+# 1 *****
+#   *   *
+#   *   *
+#   *   *
+#   *****---+->
+#  0    1   2
+#
+polygon_area_test { 0 0 0 1 1 1 1 0 } 1.0 "square 1"
+
+#
+#           ^
+#           |
+#         1 +
+#           |
+#         *****
+#         * | *
+# <-+---+-*-+-*-+---+->
+#  -2  -1 * | * 1   2
+#         *****
+#           |
+#        -1 +
+#           |
+#           v
+#
+polygon_area_test { -0.5 0.5 0.5 0.5 0.5 -0.5 -0.5 -0.5 } 1.0 "square 2"
+
+#
+#           ^
+#           |
+#       *************
+#       *   |       *
+#       *   |       *
+#       *   |       *
+# <-+---*************---+->
+#  -2  -1   0   1   2   3
+#
+polygon_area_test { -1 0 -1 1 2 1 2 0 } 3.0 "rectangle 1"
+
+#
+#   ^
+#   |
+# 3 +             ***
+#   |         ****  *
+#   |      ***      *
+#   |  ****         *
+# 2 ***             *
+#   *               *
+#   *               *
+#   *               *
+# 1 *             ***
+#   *         ****
+#   *      ***
+#   *  ****
+#   ***-+---+---+---+---+->
+#  0    1   2   3   4   5
+#
+polygon_area_test { 0 0 0 2 4 3 4 1 } 8.0 "parallelogram 1"
+
+
+
+#
+# Test with larger shapes.
+#
+
+#
+#   ^
+#   |
+# 2 +   *****
+#   |  *     *
+#   | *       *
+#   |*         *
+# 1 *           *
+#   |*         *
+#   | *       *
+#   |  *     *
+#   +---*****---+->
+#  0    1   2   3
+#
+polygon_area_test { 0 1 1 2 2 2 3 1 2 0 1 0 } 4.0 "hexagon 1"
+
+
+
+#
+# Test with concave shapes.
+#
+
+#
+#   ^
+#   |
+# 2 +   *
+#   |  * *
+#   | *   *
+#   |*     *
+# 1 *   *   *
+#   *  * *  *
+#   * *   * *
+#   **     **
+#   *---+---*---+->
+#  0    1   2   3
+#
+polygon_area_test { 0 0 0 1 1 2 2 1 2 0 1 1 } 2.0 "concave 1"
+
+#
+#   ^
+#   |
+# 4 +
+#   |
+#   |
+#   |
+# 3 *****   *****
+#   *   *   *   *
+#   *   *   *   *
+#   *   *   *   *
+# 2 *   *****   *
+#   *           *
+#   *           *
+#   *           *
+# 1 *   *****   *
+#   *   *   *   *
+#   *   *   *   *
+#   *   *   *   *
+#   *****---*****---+->
+#  0    1   2   3   4
+#
+polygon_area_test { 0 0 0 3 1 3 1 2 2 2 2 3 3 3 3 0 2 0 2 1 1 1 1 0 } 7.0 "wanna buy an H"

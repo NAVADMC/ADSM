@@ -1,0 +1,11 @@
+{#{% extends 'ScenarioCreator/navigationPane.html' %}#}
+{% load floppyforms %}
+{% load crispy_forms_tags  %}
+{##}
+{#{% block content %}#}
+{#<h1 id="title">{{ title }}</h1>#}
+
+    {% crispy formset helper %}
+
+{#{% endblock %}#}
+

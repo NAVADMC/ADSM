@@ -1,0 +1,147 @@
+#
+# Set up some global variables.  These variables could be set on the command
+# line, so we set them only if they don't already exist.
+#
+if ![info exists prompt] then {
+	set prompt "> "
+}
+
+if ![info exists floatpat] then {
+	set floatpat "\[+-\]?\[0-9\]+(?:.\[0-9\]+)?(?:\[eE\]\[+-\]\[0-9\]+)?"
+}
+
+if ![info exists epsilon] then {
+	set epsilon 0.0001
+}
+
+
+
+#
+# fcmp -- compares two floating-point numbers.
+#
+# Parameters:
+#   a,b  the numbers to compare
+#   tol  the tolerance
+# Returns:
+#   0 if they are approximately equal; otherwise, returns -1 if a < b, +1 if
+#   a > b.
+#
+proc fcmp { a b tol } {
+	return [exec [file join test fcmp] $a $b $tol]
+}
+
+
+
+#
+# lookup_test -- tests the lookup function.
+#
+# Parameters:
+#   xvalues
+#   yvalues
+#   test          a name to report in passes/fails.  Individual tests will be
+#                 named $test_at_x.  (default = "lookup")
+# Returns:
+#   nothing
+#
+proc lookup_test { xvalues yvalues {test lookup} } {
+	global prompt
+	global floatpat
+	global epsilon
+
+	for {set i 0} {$i < [llength $xvalues]} {incr i} {
+		set x [lindex $xvalues $i]
+		set true_answer [lindex $yvalues $i]
+		set test_name $test
+		append test_name "_at_$x"
+		send "lookup ($x)\n"
+		expect {
+			-re "($floatpat)\[\\n\\r\]+$prompt$" {
+				set answer $expect_out(1,string)
+				if { [fcmp $answer $true_answer $epsilon] == 0 } {
+					pass $test_name
+				} else {
+					fail "$test_name lookup($x) = $true_answer, not $answer"
+				}			
+			}
+		}
+	}
+}
+
+
+
+#
+# range_test -- tests the range function.
+#
+# Parameters:
+#   true_min
+#   true_max
+#   test          a name to report in passes/fails (default = "range")
+# Returns:
+#   nothing
+#
+proc range_test { true_min true_max {test range} } {
+	global prompt
+	global floatpat
+	global epsilon
+
+	send "range\n"
+	expect {
+		-re "($floatpat) ($floatpat)\[\\n\\r\]+$prompt$" {
+			set min $expect_out(1,string)
+			if { [fcmp $min $true_min $epsilon] != 0 } {
+				fail "$test lowest y-value is $true_min, not $min"
+				return
+			}
+			set max $expect_out(2,string)
+			if { [fcmp $max $true_max $epsilon] != 0 } {
+				fail "$test highest y-value is $true_max, not $max"
+				return
+			}
+		}
+	}
+	
+	pass $test
+}
+
+
+
+#
+# shell_load -- loads the program
+#
+proc shell_load { arg } {
+	#
+}
+
+
+
+#
+# shell_exit -- quit and cleanup
+#
+proc shell_exit {} {
+	#
+}
+
+
+
+proc shell_start {} {
+	global SHELL
+	global prompt
+	global floatpat
+	global epsilon
+	global spawn_id
+	global verbose
+	
+	if { $verbose > 1 } {
+		send_user "starting $SHELL\n"
+	}
+	spawn $SHELL
+	expect {
+		-re "No such file.*" { perror "Can't start $SHELL"; exit 1 }
+		-re "$prompt$" { }
+		timeout { perror "Failed to spawn $SHELL (timeout)"; exit 1 }
+	}
+}
+
+
+
+shell_start

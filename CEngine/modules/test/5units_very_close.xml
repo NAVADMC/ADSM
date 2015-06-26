@@ -1,0 +1,54 @@
+<herds>
+  <herd>
+    <id>0</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <!-- Herd 1 is 1 km away from herd 0.  After that the distance increases by
+    9 m with each herd. -->
+  <herd>
+    <id>1</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.00898315</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>2</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.00906400</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>3</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.00914485</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>4</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0.00922570</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+</herds>

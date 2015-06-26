@@ -1,0 +1,120 @@
+<herds>
+  <!-- This file contains herds with missing or invalid status values. -->
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status></status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>-1</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>0</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>1</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>2</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>3</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>4</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>5</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>6</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>7</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Suseptable</status>
+  </herd>
+  <herd>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+</herds>

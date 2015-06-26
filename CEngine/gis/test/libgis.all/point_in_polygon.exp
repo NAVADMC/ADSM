@@ -1,0 +1,305 @@
+set timeout 3
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+
+
+#
+# Test with a triangle specified clockwise.
+#
+#   y
+#
+#   ^
+#   |
+# 3 +
+#   |
+#   |
+# 2 +
+#   |
+#   |
+# 1 +  *
+#   | *.*
+#   |*   *
+#   *******--+-> x
+#  0   1  2  3
+#
+set polygon { 0 0 1 1 2 0 }
+set point { 1 0.5 }
+set answer "inside"
+point_in_poly_test $polygon $point $answer "triangle specified clockwise, point inside"
+
+
+#
+# Test with a triangle specified counter-clockwise.
+#
+set polygon { 0 0 2 0 1 1 }
+set point { 1 0.5 }
+set answer "inside"
+point_in_poly_test $polygon $point $answer "triangle specified counter-clockwise"
+
+
+#
+# Test with the same triangle, but the point outside.
+#
+#   y
+#
+#   ^
+#   |
+# 3 +
+#   |
+#   |
+# 2 +
+#   |
+#   |
+# 1 .  *
+#   | * *
+#   |*   *
+#   *******--+-> x
+#  0   1  2  3
+#
+set polygon { 0 0 1 1 2 0 }
+set point { 0 1 }
+set answer "outside"
+point_in_poly_test $polygon $point $answer "same triangle, point outside"
+
+
+
+#
+# Test with a rectangle.
+#
+#   y
+#
+#   ^
+#   |
+# 3 +
+#   |
+#   |
+# 2 +
+#   |
+#   |
+# 1 *******
+#   *  .  *
+#   *     *
+#   *******--+-> x
+#  0   1  2  3
+#
+set polygon { 0 0 0 1 2 1 2 0 }
+set point { 1 0.5 }
+set answer "inside"
+point_in_poly_test $polygon $point $answer "rectangle"
+
+
+
+#
+# Test with the same rectangle, but the point outside.
+#
+#   y
+#
+#   ^
+#   |
+# 3 +
+#   |
+#   |
+# 2 +  .
+#   |
+#   |
+# 1 *******
+#   *     *
+#   *     *
+#   *******--+-> x
+#  0   1  2  3
+#
+set polygon { 0 0 0 1 2 1 2 0 }
+set point { 1 2 }
+set answer "outside"
+point_in_poly_test $polygon $point $answer "rectangle, point outside"
+
+
+
+#
+# Test with a hexagon.
+#
+#   y
+#
+#   ^
+#   |
+# 3 +
+#   |
+#   |
+# 2 +  ****
+#   | *    *
+#   |*      *
+# 1 *    .   *
+#   |*      *
+#   | *    *
+#   +--****--+-> x
+#  0   1  2  3
+#
+set polygon { 0 1 1 2 2 2 3 1 2 0 1 0 }
+set point { 1.5 1 }
+set answer "inside"
+point_in_poly_test $polygon $point $answer "hexagon"
+
+
+
+#
+# Test with the same hexagon, but the point outside.
+#
+#    y
+#
+#    ^
+#    |
+#  3 +
+#    |
+#    |
+#  2 +  ****
+#    | *    *
+#    |*      *
+#  1 *        *
+#    |*      *
+#    | *    *
+#  0 +--****--+-> x
+#    |  1  2  3
+#    |
+# -1 +    .
+#    |
+#    v
+#
+set polygon { 0 1 1 2 2 2 3 1 2 0 1 0 }
+set point { 1.5 -1 }
+set answer "outside"
+point_in_poly_test $polygon $point $answer "hexagon, point outside"
+
+
+
+#
+# Test with a concave quadrilateral.
+#
+#    y
+#
+#    ^
+#    |
+#  3 *
+#    **
+#    **
+#  2 * *
+#    * *
+#    *  *
+#  1 *  **
+#    * .  **   
+#    *      **
+#    **********-> x
+#   0   1  2  3
+#
+set polygon { 0 0 0 3 1 1 3 0 }
+set point { 0.5 0.5 }
+set answer "inside"
+point_in_poly_test $polygon $point $answer "concave quadrilateral"
+
+
+
+#
+# Test with the same quadrilateral, but a different inside point.
+#
+#    y
+#
+#    ^
+#    |
+#  3 *
+#    **
+#    **
+#  2 *.*
+#    * *
+#    *  *
+#  1 *  **
+#    *    **   
+#    *      **
+#    **********-> x
+#   0   1  2  3
+#
+set polygon { 0 0 0 3 1 1 3 0 }
+set point { 0.1 2 }
+set answer "inside"
+point_in_poly_test $polygon $point $answer "concave quadrilateral 2"
+
+
+
+#
+# Test with the same quadrilateral, with the point outside (but within the
+# convex hull).
+#
+#    y
+#
+#    ^
+#    |
+#  3 *
+#    **
+#    **
+#  2 * *
+#    * *  
+#    *  *.
+#  1 *  **
+#    *    **   
+#    *      **
+#    **********-> x
+#   0   1  2  3
+#
+set polygon { 0 0 0 3 1 1 3 0 }
+set point { 1.25 1.25 }
+set answer "outside"
+point_in_poly_test $polygon $point $answer "concave quadrilateral, point outside quadrilateral but inside convex hull"
+
+
+
+#
+# Same test, but with the quadrilateral given in counter-clockwise order.
+#
+set polygon { 0 0 3 0 1 1 0 3 }
+set point { 1.5 1.5 }
+set answer "outside"
+point_in_poly_test $polygon $point $answer "concave quadrilateral specified counter-clockwise, point outside quadrilateral but inside convex hull"
+
+
+
+#
+# Test with the same quadrilateral, with the point outside the convex hull.
+#
+#    y
+#
+#    ^
+#    |
+#  3 *        .
+#    **
+#    **
+#  2 * *
+#    * *   
+#    *  *
+#  1 *  **
+#    *    **   
+#    *      **
+#    **********-> x
+#   0   1  2  3
+#
+set polygon { 0 0 0 3 1 1 3 0 }
+set point { 3 3 }
+set answer "outside"
+point_in_poly_test $polygon $point $answer "concave quadrilateral, point outside convex hull"

@@ -1,0 +1,45 @@
+<herds>
+  <herd>
+    <id>0</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Latent</status>
+  </herd>
+  <herd>
+    <id>1</id>
+    <production-type>Beef Cattle</production-type>
+    <size>10</size>
+    <location>
+      <!-- 10 km north of source -->
+      <latitude>0.09044</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>2</id>
+    <production-type>Beef Cattle</production-type>
+    <size>10</size>
+    <location>
+      <!-- 10 km SW of source -->
+      <latitude>-0.063735</latitude>
+      <longitude>-0.063735</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+  <herd>
+    <id>3</id>
+    <production-type>Beef Cattle</production-type>
+    <size>10</size>
+    <location>
+      <!-- 10 km SE of source -->
+      <latitude>-0.063735</latitude>
+      <longitude>0.063735</longitude>
+    </location>
+    <status>Susceptible</status>
+  </herd>
+</herds>

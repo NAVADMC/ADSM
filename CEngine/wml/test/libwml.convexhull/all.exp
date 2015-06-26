@@ -1,0 +1,248 @@
+set timeout 3
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+
+
+#
+# Test with 1 point.
+#
+set points { 0 0 }
+set hull { 0 }
+hull_test $points $hull "1 point"
+
+
+
+#
+# Test with 2 points (horizontal line).
+#
+set points { 0 0 1 0 }
+set hull { 0 1 }
+hull_test $points $hull "2 points horizontal"
+
+
+
+#
+# Test with 2 points (horizontal line, given in opposite order).
+#
+set points { 1 0 0 0 }
+set hull { 0 1 }
+hull_test $points $hull "2 points horizontal, reversed order"
+
+
+
+#
+# Test with 2 points (vertical line).
+#
+set points { 0 0 0 1 }
+set hull { 0 1 }
+hull_test $points $hull "2 points vertical"
+
+
+
+#
+# Test with 3 points on a line.
+#
+set points { 0 0 0 1 0 2 }
+set hull { 0 2 }
+hull_test $points $hull "3 points on a line"
+
+
+
+#
+# Test with 3 points on a line, given out of order.
+#
+set points { 0 0 0 2 0 1 }
+set hull { 0 1 }
+hull_test $points $hull "3 points on a line, out of order"
+
+
+
+#
+# Test with 4 points on a line, given out of order.
+#
+set points { 0 1 0 3 0 0 0 2 }
+set hull { 2 1 }
+hull_test $points $hull "4 points on a line, out of order"
+
+
+
+#
+# Test with 3 points forming a triangle.
+#
+set points { 0 0 1 2 2 0 }
+set hull { 0 1 2 }
+hull_test $points $hull "triangle"
+
+
+
+#
+# Test with an extra point in the middle of the triangle.
+#
+set points { 0 0 1 2 2 0 1 1 }
+set hull { 0 1 2 }
+hull_test $points $hull "triangle with point in middle"
+
+
+
+#
+# Test with an extra point on one of the sides of the triangle.
+#
+set points { 0 0 1 2 2 0 0.5 1 }
+set hull { 0 1 2 }
+hull_test $points $hull "triangle with extra point on one side"
+
+
+
+#
+# Test with 4 points forming a square.
+#
+set points { 0 0 0 2 2 2 2 0 }
+set hull { 0 1 2 3 }
+hull_test $points $hull "square"
+
+
+
+#
+# Test with an extra point in the middle of the square.
+#
+set points { 1 1 0 0 0 2 2 2 2 0 }
+set hull { 1 2 3 4 }
+hull_test $points $hull "square with point in middle"
+
+
+
+#
+# Test with many points forming a hexagon.
+#
+set points { 1 2 2 2 3 2 0 1 1 1 2 1 3 1 4 1 1 0 2 0 3 0 }
+set hull { 0 2 7 10 8 3 }
+hull_test $points $hull "hexagon"
+
+
+
+#
+# Test with many points forming a hexagon, but start the "correct" answer from
+# a different point.  This test and the following are meant to trip up the test
+# script as much as the library function!
+#
+set points { 1 2 2 2 3 2 0 1 1 1 2 1 3 1 4 1 1 0 2 0 3 0 }
+set hull { 10 8 3 0 2 7 }
+hull_test $points $hull "hexagon, hull given from different starting point"
+
+
+
+#
+# Test with many points forming a hexagon, but give the "correct" answer in
+# counter-clockwise order.
+#
+set points { 1 2 2 2 3 2 0 1 1 1 2 1 3 1 4 1 1 0 2 0 3 0 }
+set hull { 7 2 0 3 8 10 }
+hull_test $points $hull "hexagon, hull given in reverse order"
+
+
+
+#
+# Test with a circle (approximated with 40 points).
+#
+set circle_nsides 40
+set radius 1
+set twopi 6.2831853
+set points { }
+set hull { }
+for {set i 0} {$i < $circle_nsides} {incr i} {
+	lappend points [expr $radius * cos ($twopi * $i / $circle_nsides)] [expr $radius * sin ($twopi * $i / $circle_nsides)]
+	lappend hull $i
+}
+hull_test $points $hull "circle"
+
+
+
+#
+# Test with two circles (each approximated with 40 points) side by side.  The
+# hull should be the left half of the left circle and the right half of the
+# right circle.
+#
+set points { }
+set hull { }
+set index 0
+# the left circle, drawn counter-clockwise starting at 3 o'clock
+for {set j 0} {$j < $circle_nsides} {incr j} {
+	lappend points [expr -1 + $radius * cos ($twopi * $j / $circle_nsides)] [expr $radius * sin ($twopi * $j / $circle_nsides)]
+	if { $j >= [expr $circle_nsides / 4] && $j <= [expr $circle_nsides * 3 / 4] } {
+		lappend hull $index
+	}
+	set index [expr $index + 1]
+}
+# the right circle, drawn counter-clockwise starting at 9 o'clock
+for {set j 0} {$j < $circle_nsides} {incr j} {
+	lappend points [expr 1 - $radius * cos ($twopi * $j / $circle_nsides)] [expr -$radius * sin ($twopi * $j / $circle_nsides)]
+	if { $j >= [expr $circle_nsides / 4] && $j <= [expr $circle_nsides * 3 / 4] } {
+		lappend hull $index
+	}
+	set index [expr $index + 1]
+}
+hull_test $points $hull "two circles"
+
+
+
+#
+# Test with four circles (each approximated with 20 points) side by side.  The
+# hull should be one-quarter of each.
+#
+set circle_nsides 20
+set points { }
+set hull { }
+set index 0
+# the top-left circle, drawn counter-clockwise starting at 3 o'clock
+for {set j 0} {$j < $circle_nsides} {incr j} {
+	lappend points [expr -1 + $radius * cos ($twopi * $j / $circle_nsides)] [expr 1 + $radius * sin ($twopi * $j / $circle_nsides)]
+	if { $j >= [expr $circle_nsides / 4] && $j <= [expr $circle_nsides / 2] } {
+		lappend hull $index
+	}
+	set index [expr $index + 1]
+}
+# the bottom-left circle, drawn counter-clockwise starting at 3 o'clock
+for {set j 0} {$j < $circle_nsides} {incr j} {
+	lappend points [expr -1 + $radius * cos ($twopi * $j / $circle_nsides)] [expr -1 + $radius * sin ($twopi * $j / $circle_nsides)]
+	if { $j >= [expr $circle_nsides / 2] && $j <= [expr $circle_nsides * 3 / 4] } {
+		lappend hull $index
+	}
+	set index [expr $index + 1]
+}
+# the bottom-right circle, drawn counter-clockwise starting at 9 o'clock
+for {set j 0} {$j < $circle_nsides} {incr j} {
+	lappend points [expr 1 - $radius * cos ($twopi * $j / $circle_nsides)] [expr -1 - $radius * sin ($twopi * $j / $circle_nsides)]
+	if { $j >= [expr $circle_nsides / 4] && $j <= [expr $circle_nsides / 2] } {
+		lappend hull $index
+	}
+	set index [expr $index + 1]
+}
+# the top-right circle, drawn counter-clockwise starting at 9 o'clock
+for {set j 0} {$j < $circle_nsides} {incr j} {
+	lappend points [expr 1 - $radius * cos ($twopi * $j / $circle_nsides)] [expr 1 - $radius * sin ($twopi * $j / $circle_nsides)]
+	if { $j >= [expr $circle_nsides / 2] && $j <= [expr $circle_nsides * 3 / 4] } {
+		lappend hull $index
+	}
+	set index [expr $index + 1]
+}
+hull_test $points $hull "four circles"

@@ -1,0 +1,13 @@
+<herds>
+  <herd>
+    <id>1</id>
+    <production-type>Beef Cattle</production-type>
+    <size>25</size>
+    <location>
+      <latitude>0</latitude>
+      <longitude>0</longitude>
+    </location>
+    <status>Latent</status>
+    <days-left-in-status>3</days-left-in-status>
+  </herd>
+</herds>

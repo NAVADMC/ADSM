@@ -1,0 +1,74 @@
+#
+# Set up some global variables.  These variables could be set on the command
+# line, so we set them only if they don't already exist.
+#
+if ![info exists prompt] then {
+  set prompt "> "
+}
+
+if ![info exists floatpat] then {
+  set floatpat "\[+-\]?\[0-9\]+(?:.\[0-9\]+)?(?:\[eE\]\[+-\]\[0-9\]+)?"
+}
+
+if ![info exists epsilon] then {
+  set epsilon 0.0005
+}
+
+
+
+#
+# fcmp -- compares two floating-point numbers.
+#
+# Parameters:
+#   a,b  the numbers to compare
+#   tol  the tolerance
+# Returns:
+#   0 if they are approximately equal; otherwise, returns -1 if a < b, +1 if
+#   a > b.
+#
+proc fcmp { a b tol } {
+  return [exec [file join test fcmp] $a $b $tol]
+}
+
+
+
+#
+# shell_load -- loads the program
+#
+proc shell_load { arg } {
+  #
+}
+
+
+
+#
+# shell_exit -- quit and cleanup
+#
+proc shell_exit {} {
+  #
+}
+
+
+
+proc shell_start {} {
+  global SHELL
+  global prompt
+  global floatpat
+  global epsilon
+  global spawn_id
+  global verbose
+  
+  if { $verbose > 1 } {
+    send_user "starting $SHELL\n"
+  }
+  spawn $SHELL
+  expect {
+    -re "No such file.*" { perror "Can't start $SHELL"; exit 1 }
+    -re "$prompt$" { }
+    timeout { perror "Failed to spawn $SHELL (timeout)"; exit 1 }
+  }
+}
+
+
+
+shell_start

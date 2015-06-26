@@ -1,0 +1,156 @@
+set timeout 10
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+#
+# Test that the parameters are set correctly when a loglogistic distribution is
+# created.
+#
+set test "create"
+set true_location 0.0
+set true_scale 1.0
+set true_shape 2.0
+send "loglogistic ($true_location,$true_scale,$true_shape)\n"
+expect {
+	-re "<loglogistic probability distribution\[\\n\\r\]+ location=($floatpat) scale=($floatpat) shape=($floatpat)>.*$prompt$" {
+		set location $expect_out(1,string)
+		if { [fcmp $location $true_location $epsilon] != 0 } {
+			fail "$test location should be $true_location, not $location"
+		} else {
+			set scale $expect_out(2,string)
+			if { [fcmp $scale $true_scale $epsilon] != 0 } {
+				fail "$test scale should be $true_scale, not $scale"
+			} else {
+				set shape $expect_out(3,string)
+				if { [fcmp $shape $true_shape $epsilon] != 0 } {
+					fail "$test shape should be $true_shape, not $shape"
+				} else {
+					pass "$test"
+				}
+			}
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.  "Correct" values hand-calculated
+# using formulas in "A Compendium of Common Probability Distributions".
+#
+set xvalues {-1 0 1 2 3 4 5 6 7 8}
+set answers {0 0 0.5 0.16 0.06 0.0276817 0.0147929 0.00876552 0.0056 0.00378698}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.  "Correct" values
+# hand-calculated using formulas in "A Compendium of Common Probability
+# Distributions".
+#
+set xvalues {-1 0 1 2 3 4 5 6 7 8}
+set answers {0 0 0.5 0.8 0.9 0.941176 0.961538 0.972973 0.98 0.984615}
+cdf_test $xvalues $answers "cdf"
+
+
+
+#
+# Test random number generation.
+#
+set true_answer {0 0.5 0.3 0.1 0.0411765 0.020362 0.0114345 0.00702703 0.00461538}
+random_number_test $true_answer -1
+
+
+
+#
+# Create another loglogistic distribution with different parameters.
+#
+set test "create2"
+set true_location 1.0
+set true_scale 2.0
+set true_shape 3.0
+send "loglogistic ($true_location,$true_scale,$true_shape)\n"
+expect {
+	-re "<loglogistic probability distribution\[\\n\\r\]+ location=($floatpat) scale=($floatpat) shape=($floatpat)>.*$prompt$" {
+		set location $expect_out(1,string)
+		if { [fcmp $location $true_location $epsilon] != 0 } {
+			fail "$test location should be $true_location, not $location"
+		} else {
+			set scale $expect_out(2,string)
+			if { [fcmp $scale $true_scale $epsilon] != 0 } {
+				fail "$test scale should be $true_scale, not $scale"
+			} else {
+				set shape $expect_out(3,string)
+				if { [fcmp $shape $true_shape $epsilon] != 0 } {
+					fail "$test shape should be $true_shape, not $shape"
+				} else {
+					pass "$test"
+				}
+			}
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.  "Correct" values hand-calculated
+# using formulas in "A Compendium of Common Probability Distributions".
+#
+set xvalues {-1 0 1 2 3 4 5 6 7 8}
+set answers {0 0 0 0.296296 0.375 0.176327 0.0740741 0.0339194 0.0172194 0.00954538}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.  "Correct" values
+# hand-calculated using formulas in "A Compendium of Common Probability
+# Distributions".
+#
+set xvalues {-1 0 1 2 3 4 5 6 7 8}
+set answers {0 0 0 0.111111 0.5 0.771429 0.888889 0.93985 0.964286 0.977208}
+cdf_test $xvalues $answers "cdf"
+
+
+
+#
+# Test random number generation.
+#
+set true_answer {0 0 0.111111 0.388889 0.271429 0.11746 0.0509607 0.0244361 0.0129223}
+random_number_test $true_answer -1
+
+
+
+#
+# Test statistics.
+#
+#set min
+#set max
+#set mean 
+#set variance
+#statistics_test $min $max $mean $variance
+sample_statistics_test
+
+
+

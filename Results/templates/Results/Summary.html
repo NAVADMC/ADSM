@@ -1,0 +1,10 @@
+<table>
+    <tbody>
+    {% for header, body in summary.items %}
+        <tr><th>{{ header }}</th></tr>
+        {% for field, number in body %}
+            <tr><td>{{ field }}</td><td>{{ number }}</td></tr>
+        {% endfor %}
+    {% endfor %}
+    </tbody>
+</table>

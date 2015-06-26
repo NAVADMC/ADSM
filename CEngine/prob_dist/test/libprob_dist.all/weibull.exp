@@ -1,0 +1,90 @@
+set timeout 10
+#
+# expectations that clean up in case of error. Note that `$test' is
+# a purely local variable.
+#
+# The first of these is used to match any bad responses, and resynchronise
+# things by finding a prompt. The second is a timeout error, and shouldn't
+# ever be triggered.
+#
+expect_after {
+	-re "\[^\n\r\]*$prompt$" {
+		fail "$test (bad match)"
+		if { $verbose > 0 } {
+			regexp ".*\r\n(\[^\r\n\]+)(\[\r\n\])+$prompt$" \
+						$expect_out(buffer) "" output
+			send_user "\tUnmatched output: \"$output\"\n"
+		}
+	}
+	timeout {
+		fail "$test (timeout)"
+	}
+}
+
+#
+# Test that the parameters are set correctly when a Weibull distribution is
+# created.
+#
+set test "create"
+set true_alpha 1.0
+set true_beta 2.0
+send "weibull ($true_alpha,$true_beta)\n"
+expect {
+	-re "<Weibull probability distribution\[\\n\\r\]+ alpha=($floatpat) beta=($floatpat)>.*$prompt$" {
+		set alpha $expect_out(1,string)
+		if { [fcmp $alpha $true_alpha $epsilon] != 0 } {
+			fail "$test alpha should be $true_alpha, not $alpha"
+		} else {
+			set beta $expect_out(2,string)
+			if { [fcmp $beta $true_beta $epsilon] != 0 } {
+				fail "$test beta should be $true_beta, not $beta"
+			} else {
+				pass "$test"
+			}
+		}
+	}
+}
+
+
+
+#
+# Test the probability density function.  "Correct" values hand-calculated
+# using formulas in "A Compendium of Common Probability Distributions".
+#
+set xvalues {0 1 2 3 4 5 6 7 8}
+set answers {0.5 0.303265 0.18394 0.111565 0.067668 0.041042 0.024894 0.015099 0.009158}
+pdf_test $xvalues $answers
+
+
+
+#
+# Test the cumulative distribution function and its inverse.  "Correct" values
+# hand-calculated using formulas in "A Compendium of Common Probability
+# Distributions".
+#
+set xvalues {-1 0 1 2 3 4 5 6 7 8}
+set answers {0 0 0.393469 0.632121 0.77687 0.864665 0.917915 0.950213 0.969803 0.981684}
+cdf_test $xvalues $answers "cdf"
+
+
+
+#
+# Test random number generation.
+#
+set true_answer {0 0.393469 0.238651 0.144749 0.087795 0.05325 0.032298 0.01959 0.011882}
+random_number_test $true_answer -1
+
+
+
+#
+# Test statistics.
+#
+#set min
+#set max
+#set mean
+#set variance
+#statistics_test $min $max $mean $variance
+sample_statistics_test
+
+
+

@@ -1,0 +1,568 @@
+<variable-test>
+  <category>economic</category>
+  <short-name>vaccinated, check cost, simple</short-name>
+
+  <description>
+    Check cost accounting for vaccinating units of animals over
+    several days.  This is the simple scenario where only the baseline
+    cost is used.
+  </description>
+
+  <author>Anthony &quot;Drew&quot; Schwickerath &lt;Drew.Schwickerath@ColoState.edu&gt;</author>
+  <creation-date>1 July 2009</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>5units_very_close</population-file>
+
+  <parameter-file>vaccinated_cost_1</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 3 days, clinical signs
+    accompany infectiousness immediately, and natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting a diseased unit vs. the number of days the
+    animals have been showing clinical signs is fixed at 1. The probability of
+    detecting a diseased unit vs. the number of days since a public
+    announcement of an outbreak is also fixed at 1.
+
+    A vaccination program begins at the first detection.  The authorities will
+    vaccinate units within 10 km of a detected unit.  The authorities have
+    resources to vaccinate one unit each day.  The vaccine produces immunity
+    immediately, and the immunity lasts 5 days.
+
+    Vaccination site setup costs $23 per unit.  Vaccination costs $29 per
+    animal for the first 1000 animals, and $29+$31 per animal after that.
+
+    There is no destruction.
+
+    What should happen:
+     - On day 1 unit 0 will be latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected, and
+       the remaining 4 units will be marked for vaccination because they are
+       within 10 km of a detected unit.
+     - On days 3-6 one unit is vaccinated each day.  The cost each day will be
+       $23+$29*25 = $748.  In total 100 animals will be vaccinated, so the
+       higher cost (for vaccinating >1000 animals) will never be incurred.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>vacnU</td>
+      <td>vaccA</td>
+      <!--
+      <td>vaccination-cost</td>
+      <td>total-cost</td>
+      -->
+      <td>vaccSubtotal</td>
+      <td>costsTotal</td>
+    </tr>
+    <tr><td>0</td>   <td>0</td> <!--   <td>0.00</td>   <td>0.00</td> -->    <td>0.00</td>    <td>0.00</td></tr>
+    <tr><td>0</td>   <td>0</td> <!--   <td>0.00</td>   <td>0.00</td> -->    <td>0.00</td>    <td>0.00</td></tr>
+    <tr><td>1</td>  <td>25</td> <!-- <td>748.00</td> <td>748.00</td> -->  <td>748.00</td>  <td>748.00</td></tr>
+    <tr><td>1</td>  <td>50</td> <!-- <td>748.00</td> <td>748.00</td> --> <td>1496.00</td> <td>1496.00</td></tr>
+    <tr><td>1</td>  <td>75</td> <!-- <td>748.00</td> <td>748.00</td> --> <td>2244.00</td> <td>2244.00</td></tr>
+    <tr><td>1</td> <td>100</td> <!-- <td>748.00</td> <td>748.00</td> --> <td>2992.00</td> <td>2992.00</td></tr>
+    <tr><td>0</td> <td>100</td> <!--   <td>0.00</td>   <td>0.00</td> --> <td>2992.00</td> <td>2992.00</td></tr>
+    <!-- Day 7, no more infected units or units to be vaccinated, simulation stops. -->
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>economic</category>
+  <short-name>vaccinated, check cost, over baseline</short-name>
+
+  <description>
+    Check cost accounting for vaccinating units of animals over
+    several days.  Each day 25 animals are vaccinated.  After the
+    first 65 animals are vaccinated, the remaining have an additional
+    cost.
+  </description>
+
+  <author>Anthony &quot;Drew&quot; Schwickerath &lt;Drew.Schwickerath@ColoState.edu&gt;</author>
+  <creation-date>1 July 2009</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>5units_very_close</population-file>
+
+  <parameter-file>vaccinated_cost_2</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 3 days, clinical signs
+    accompany infectiousness immediately, and natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting a diseased unit vs. the number of days the
+    animals have been showing clinical signs is fixed at 1. The probability of
+    detecting a diseased unit vs. the number of days since a public
+    announcement of an outbreak is also fixed at 1.
+
+    A vaccination program begins at the first detection.  The authorities will
+    vaccinate units within 10 km of a detected unit.  The authorities have
+    resources to vaccinate one unit each day.  The vaccine produces immunity
+    immediately, and the immunity lasts 5 days.
+
+    Vaccination site setup costs $23 per unit.  Vaccination costs $29 per
+    animal for the first 65 animals, and $29+$31 per animal after that.
+
+    There is no destruction.
+
+    What should happen:
+     - On day 1 unit 0 will be latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected, and
+       the remaining 4 units will be marked for vaccination because they are
+       within 10 km of a detected unit.
+     - On day 3 a unit is vaccinated.  Cost = $23+$29*25 = $748.
+     - On day 4 a unit is vaccinated.  Cost = $23+$29*25 = $748.
+     - On day 5 a unit is vaccinated.  The first 15 animals in this unit can be
+       vaccinated for the baseline cost.  The remaining 10 animals incur the
+       higher cost.  Cost = $23+$29*15+($29+$31)*10 = $1058.
+     - On day 6 the last unit is vaccinated.  All 25 animals in this unit incur
+       the higher cost.  Cost = $23+($29+$31)*25 = $1523.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>vacnU</td>
+      <td>vaccA</td>
+      <!--
+      <td>vaccination-cost</td>
+      <td>total-cost</td>
+      -->
+      <td>vaccSubtotal</td>
+      <td>costsTotal</td>
+    </tr>
+    <tr><td>0</td>   <td>0</td> <!--    <td>0.00</td>    <td>0.00</td> -->    <td>0.00</td>    <td>0.00</td></tr>
+    <tr><td>0</td>   <td>0</td> <!--    <td>0.00</td>    <td>0.00</td> -->    <td>0.00</td>    <td>0.00</td></tr>
+    <tr><td>1</td>  <td>25</td> <!--  <td>748.00</td>  <td>748.00</td> -->  <td>748.00</td>  <td>748.00</td></tr>
+    <tr><td>1</td>  <td>50</td> <!--  <td>748.00</td>  <td>748.00</td> --> <td>1496.00</td> <td>1496.00</td></tr>
+    <tr><td>1</td>  <td>75</td> <!-- <td>1058.00</td> <td>1058.00</td> --> <td>2554.00</td> <td>2554.00</td></tr>
+    <tr><td>1</td> <td>100</td> <!-- <td>1523.00</td> <td>1523.00</td> --> <td>4077.00</td> <td>4077.00</td></tr>
+    <tr><td>0</td> <td>100</td> <!--    <td>0.00</td>    <td>0.00</td> --> <td>4077.00</td> <td>4077.00</td></tr>
+    <!-- Day 7, no more infected units or units to be vaccinated, simulation stops. -->
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>economic</category>
+  <short-name>vaccinated, check cost, multiple types</short-name>
+
+  <description>
+    Check cost accounting for vaccinating units of animals over
+    several days.  Different production types have different costs
+    associated with them.
+  </description>
+
+  <author>Anthony &quot;Drew&quot; Schwickerath &lt;Drew.Schwickerath@ColoState.edu&gt;</author>
+  <creation-date>2 August 2009</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>9units</population-file>
+
+  <parameter-file>vaccinated_cost_3</parameter-file>
+
+  <parameter-description>
+    For production type A, the latent period lasts 1 day, the infectious
+    clinical period lasts 1 day, and immunity lasts 3 days.  The same is true
+    for production type C.  Production types D-G each have one additional day
+    on the latent period: 2 days for D, 3 days for E, etc.
+
+    Airborne spread can occur from units of type A to units of types C-G.
+    The probability of airborne spread at 1 km is 0.8723 and it drops off
+    exponentially.  This parameter gives a 0.505 probability of infection at 5
+    km (0.8723&lt;sup&gt;5&lt;/sup&gt; = 0.505).
+
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+
+    When a diseased unit is detected, all units of types C-G within 5 km will
+    be marked for vaccination.  Vaccination capacity does not come on-line
+    until after all units are detected in this scenario.
+
+    There is no destruction.
+
+    What should happen:
+     - On day 1 the infected units (0 and 1) will be Latent.
+     - On day 2 units 0 and 1 will be Infectious Clinical.  They will be
+       detected and both units will trigger vaccination rings.  Units 4-8 will
+       be marked for vaccination.
+     - On day 3, 1 unit (size 25) of type C is vaccinated.
+       Cost=(1*$11)+(25*$12)
+     - On day 4, 1 unit (size 25) of type D is vaccinated.
+       Cost=(1*$21)+(25*$22)
+     - On day 5, 1 unit (size 25) of type E is vaccinated.
+       Cost=(1*$31)+(25*$32)
+     - On day 6, 1 unit (size 25) of type F is vaccinated.
+       Cost=(1*$41)+(25*$42)
+     - On day 7, 1 unit (size 25) of type G is vaccinated.  Costs are the same as
+       for type D to verify that the production type mask is read/processed
+       correctly.
+       Cost=(1*$21)+(25*$22)
+     - On day 8, all queued units are already vaccinated, so there is nothing
+       left to do.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>vacnU</td>
+      <td>vaccA</td>
+      <!--
+      <td>vaccination-cost</td>
+      <td>total-cost</td>
+      -->
+      <td>vaccSubtotal</td>
+      <td>costsTotal</td>
+    </tr>
+    <tr><td>0</td>   <td>0</td> <!--    <td>0.00</td>    <td>0.00</td> -->    <td>0.00</td>    <td>0.00</td></tr>
+    <tr><td>0</td>   <td>0</td> <!--    <td>0.00</td>    <td>0.00</td> -->    <td>0.00</td>    <td>0.00</td></tr>
+    <tr><td>1</td>  <td>25</td> <!--  <td>311.00</td>  <td>311.00</td> -->  <td>311.00</td>  <td>311.00</td></tr>
+    <tr><td>1</td>  <td>50</td> <!--  <td>571.00</td>  <td>571.00</td> -->  <td>882.00</td>  <td>882.00</td></tr>
+    <tr><td>1</td>  <td>75</td> <!--  <td>831.00</td>  <td>831.00</td> --> <td>1713.00</td> <td>1713.00</td></tr>
+    <tr><td>1</td> <td>100</td> <!-- <td>1091.00</td> <td>1091.00</td> --> <td>2804.00</td> <td>2804.00</td></tr>
+    <tr><td>1</td> <td>125</td> <!--  <td>571.00</td>  <td>571.00</td> --> <td>3375.00</td> <td>3375.00</td></tr>
+    <tr><td>0</td> <td>125</td> <!--    <td>0.00</td>    <td>0.00</td> --> <td>3375.00</td> <td>3375.00</td></tr>
+  </output>
+</variable-test>
+
+
+<variable-test>
+  <category>economic</category>
+  <short-name>destroyed, check cost</short-name>
+
+  <description>
+    Check cost accounting for destroying units of animals over
+    several days.
+  </description>
+
+  <author>Anthony &quot;Drew&quot; Schwickerath &lt;Drew.Schwickerath@ColoState.edu&gt;</author>
+  <creation-date>1 July 2009</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>5units_very_close</population-file>
+
+  <parameter-file>destroyed_cost_1</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 3 days, clinical signs
+    accompany infectiousness immediately, and natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting a diseased unit vs. the number of days the
+    animals have been showing clinical signs is fixed at 1. The probability of
+    detecting a diseased unit vs. the number of days since a public
+    announcement of an outbreak is also fixed at 1.
+
+    A destruction program begins at the first detection.  The authorities will
+    destroy units within 10 km of a detected unit.  The authorities have
+    resources to destroy one unit each day.  The vaccine produces immunity
+    immediately, and the immunity lasts 5 days.
+
+    The costs for destruction are: appraisal $37 per unit, euthanasia $41 per
+    animal, disposal $47 per animal, indemnification $43 per animal, cleaning
+    and disinfection $53 per unit.
+
+    There is no vaccination.
+
+    What should happen:
+     - On day 1 unit 0 will be latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected and
+       destruction.  The remaining units will be marked for destruction
+       because they are within 10 km of a detected unit.
+     - On days 3-7 a unit is destroyed each day.  There are 25 animals in each
+       unit, so the cost each day will be $37+($41+$47+$43)*25+$53 = $3365.
+       The total for 5 units will be $3365*5 = $16825.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>desnU</td>
+      <!--
+      <td>appraisal-cost</td>
+      <td>cleaning-and-disinfecting-cost</td>
+      <td>euthanasia-cost</td>
+      <td>indemnification-cost</td>
+      <td>carcass-disposal-cost</td>
+      <td>total-cost</td>
+      -->
+      <td>destrAppraisal</td>
+      <td>destrCleaning</td>
+      <td>destrEuthanasia</td>
+      <td>destrIndemnification</td>
+      <td>destrDisposal</td>
+      <td>destrSubtotal</td>
+      <td>costsTotal</td>
+    </tr>
+    <tr><td>0</td> <!--  <td>0.00</td>  <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td> -->   <td>0.00</td>   <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td>     <td>0.00</td>     <td>0.00</td></tr>
+    <tr><td>0</td> <!--  <td>0.00</td>  <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td> -->   <td>0.00</td>   <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td>     <td>0.00</td>     <td>0.00</td></tr>
+    <tr><td>1</td> <!-- <td>37.00</td> <td>53.00</td> <td>1025.00</td> <td>1075.00</td> <td>1175.00</td> <td>3365.00</td> -->  <td>37.00</td>  <td>53.00</td> <td>1025.00</td> <td>1075.00</td> <td>1175.00</td>  <td>3365.00</td>  <td>3365.00</td></tr>
+    <tr><td>1</td> <!-- <td>37.00</td> <td>53.00</td> <td>1025.00</td> <td>1075.00</td> <td>1175.00</td> <td>3365.00</td> -->  <td>74.00</td> <td>106.00</td> <td>2050.00</td> <td>2150.00</td> <td>2350.00</td>  <td>6730.00</td>  <td>6730.00</td></tr>
+    <tr><td>1</td> <!-- <td>37.00</td> <td>53.00</td> <td>1025.00</td> <td>1075.00</td> <td>1175.00</td> <td>3365.00</td> --> <td>111.00</td> <td>159.00</td> <td>3075.00</td> <td>3225.00</td> <td>3525.00</td> <td>10095.00</td> <td>10095.00</td></tr>
+    <tr><td>1</td> <!-- <td>37.00</td> <td>53.00</td> <td>1025.00</td> <td>1075.00</td> <td>1175.00</td> <td>3365.00</td> --> <td>148.00</td> <td>212.00</td> <td>4100.00</td> <td>4300.00</td> <td>4700.00</td> <td>13460.00</td> <td>13460.00</td></tr>
+    <tr><td>1</td> <!-- <td>37.00</td> <td>53.00</td> <td>1025.00</td> <td>1075.00</td> <td>1175.00</td> <td>3365.00</td> --> <td>185.00</td> <td>265.00</td> <td>5125.00</td> <td>5375.00</td> <td>5875.00</td> <td>16825.00</td> <td>16825.00</td></tr>
+    <tr><td>0</td> <!--  <td>0.00</td>  <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td> --> <td>185.00</td> <td>265.00</td> <td>5125.00</td> <td>5375.00</td> <td>5875.00</td> <td>16825.00</td> <td>16825.00</td></tr>
+    <!-- Day 8, no more infected units or units to be destroyed, simulation stops. -->
+  </output>
+</variable-test>
+
+ 
+<variable-test>
+  <category>economic</category>
+  <short-name>destroyed, check cost, multiple types</short-name>
+
+  <description>
+    Check cost accounting for destroying units of animals over
+    several days.  Different production types have different costs
+    associated with them.
+  </description>
+
+  <author>Anthony &quot;Drew&quot; Schwickerath &lt;Drew.Schwickerath@ColoState.edu&gt;</author>
+  <creation-date>2 August 2009</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>9units</population-file>
+
+  <parameter-file>destroyed_cost_2</parameter-file>
+
+  <parameter-description>
+    For all production types, the latent period lasts 1 day, the infectious
+    clinical period lasts 1 day, and immunity lasts 3 days.
+
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+
+    When a diseased unit is detected, all units of types C-G within 5 km will
+    be marked for both vaccination and destruction.  (This might not be a
+    sensible strategy, but it is a useful setup for this test.)  The authorities
+    can destroy 1 unit per day.  Vaccination capacity does not come on-line
+    until after all units are destroyed in this scenario.
+
+    There is no spread.
+
+    What should happen:
+     - On day 1 the infected units (0 and 1) will be Latent.
+     - On day 2 units 0 and 1 will be Infectious Clinical.  They will be
+       detected and both units will trigger vaccination rings.  Units 4-8 will
+       be marked for both vaccination and destruction.
+     - On day 3, 1 unit (size 25) of type C is destroyed.
+       Cost=($14+$18)+[25*($15+$16+$17)]
+     - On day 4, 1 unit (size 25) of type D is destroyed.
+       Cost=($24+$28)+[25*($25+$26+$27)]
+     - On day 5, 1 unit (size 25) of type E is destroyed.
+       Cost=($34+$38)+[25*($35+$36+$37)]
+     - On day 6, 1 unit (size 25) of type F is destroyed.
+       Cost=($44+$48)+[25*($45+$46+$47)]
+     - On day 7, 1 unit (size 25) of type G is destroyed.  Costs are the same as
+       for type D to verify that the production type mask is read/processed
+       correctly.
+       Cost=($24+$28)+[25*($25+$26+$27)]
+     - On day 8, all queued units are already destroyed, so there is nothing
+       left to do.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>desnU</td>
+      <!--
+      <td>appraisal-cost</td>
+      <td>cleaning-and-disinfecting-cost</td>
+      <td>euthanasia-cost</td>
+      <td>indemnification-cost</td>
+      <td>carcass-disposal-cost</td>
+      <td>total-cost</td>
+      -->
+      <td>destrAppraisal</td>
+      <td>destrCleaning</td>
+      <td>destrEuthanasia</td>
+      <td>destrIndemnification</td>
+      <td>destrDisposal</td>
+      <td>destrSubtotal</td>
+      <td>costsTotal</td>
+    </tr>
+    <tr><td>0</td> <!--  <td>0.00</td>  <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td> -->   <td>0.00</td>   <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td>     <td>0.00</td>     <td>0.00</td></tr>
+    <tr><td>0</td> <!--  <td>0.00</td>  <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td> -->   <td>0.00</td>   <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td>     <td>0.00</td>     <td>0.00</td></tr>
+    <tr><td>1</td> <!-- <td>14.00</td> <td>18.00</td>  <td>375.00</td>  <td>400.00</td>  <td>425.00</td> <td>1232.00</td> -->  <td>14.00</td>  <td>18.00</td>  <td>375.00</td>  <td>400.00</td>  <td>425.00</td>  <td>1232.00</td>  <td>1232.00</td></tr>
+    <tr><td>1</td> <!-- <td>24.00</td> <td>28.00</td>  <td>625.00</td>  <td>650.00</td>  <td>675.00</td> <td>2002.00</td> -->  <td>38.00</td>  <td>46.00</td> <td>1000.00</td> <td>1050.00</td> <td>1100.00</td>  <td>3234.00</td>  <td>3234.00</td></tr>
+    <tr><td>1</td> <!-- <td>34.00</td> <td>38.00</td>  <td>875.00</td>  <td>900.00</td>  <td>925.00</td> <td>2772.00</td> -->  <td>72.00</td>  <td>84.00</td> <td>1875.00</td> <td>1950.00</td> <td>2025.00</td>  <td>6006.00</td>  <td>6006.00</td></tr>
+    <tr><td>1</td> <!-- <td>44.00</td> <td>48.00</td> <td>1125.00</td> <td>1150.00</td> <td>1175.00</td> <td>3542.00</td> --> <td>116.00</td> <td>132.00</td> <td>3000.00</td> <td>3100.00</td> <td>3200.00</td>  <td>9548.00</td>  <td>9548.00</td></tr>
+    <tr><td>1</td> <!-- <td>24.00</td> <td>28.00</td>  <td>625.00</td>  <td>650.00</td>  <td>675.00</td> <td>2002.00</td> --> <td>140.00</td> <td>160.00</td> <td>3625.00</td> <td>3750.00</td> <td>3875.00</td> <td>11550.00</td> <td>11550.00</td></tr>
+    <tr><td>0</td> <!--  <td>0.00</td>  <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td>    <td>0.00</td> --> <td>140.00</td> <td>160.00</td> <td>3625.00</td> <td>3750.00</td> <td>3875.00</td> <td>11550.00</td> <td>11550.00</td></tr>
+  </output>
+</variable-test>
+
+ 
+<variable-test>
+  <category>economic</category>
+  <short-name>destroyed, check surveillance cost</short-name>
+
+  <description>
+    Check cost accounting for zone surveillance of units as units are
+    being depopulated.
+  </description>
+
+  <author>Anthony &quot;Drew&quot; Schwickerath &lt;Drew.Schwickerath@ColoState.edu&gt;</author>
+  <creation-date>13 July 2009</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>5units_very_close</population-file>
+
+  <parameter-file>surveillance_cost_1</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, infectiousness lasts 3 days, clinical signs
+    accompany infectiousness immediately, and natural immunity lasts 3 days.
+
+    There is no spread.
+    
+    The probability of detecting a diseased unit vs. the number of days the
+    animals have been showing clinical signs is fixed at 1. The probability of
+    detecting a diseased unit vs. the number of days since a public
+    announcement of an outbreak is also fixed at 1.
+
+    A destruction program begins at the first detection.  The authorities will
+    destroy units within 10 km of a detected unit.  The authorities have
+    resources to destroy one unit each day.  The vaccine produces immunity
+    immediately, and the immunity lasts 5 days.
+
+    There are two zones, "High risk" and "Background".  When a diseased unit is
+    detected, a "High risk" zone 10 km in radius is established around it.
+    Surveillance costs $59 per animal per day inside the High risk zone.
+
+    There is no vaccination.
+
+    What should happen:
+     - On day 1 unit 0 will be latent.
+     - On day 2 unit 0 will be Infectious Clinical.  It will be detected and
+       destruction.  The remaining units will also be marked for destruction
+       because they are within 10 km of a detected unit.
+     - On day 3, because of the detection, there will be a 10 km radius "High
+       risk" zone in effect around unit 1.  All 5 units will be inside the
+       zone.  The 5 units, with 25 animals each, cost $59*25*5=$7375 for
+       surveillance.  One unit will be destroyed on this day.
+     - On day 4 the 4 remaining units cost $59*25*4=$5900 for surveillance.
+       One unit will be destroyed on this day.
+     - On day 5 the 3 remaining units cost $59*25*3=$4425 for surveillance.
+       One unit will be destroyed on this day.
+     - On day 6 the 2 remaining units cost $59*25*2=$2950 for surveillance.
+       One unit will be destroyed on this day.
+     - On day 7 the 1 remaining unit costs $59*25=$1475 for surveillance.
+       One unit will be destroyed on this day.  The total cost of surveillance
+       has been $22125.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>unitsInZoneBackground</td>
+      <td>unitsInZoneHighRisk</td>
+      <td>desnU</td>
+      <!--
+      <td>surveillance-cost</td>
+      <td>total-cost</td>
+      -->
+      <td>costSurveillance</td>
+      <td>costsTotal</td>
+    </tr>
+    <tr><td>5</td> <td>0</td> <td>0</td> <!--    <td>0.00</td>    <td>0.00</td> -->     <td>0.00</td>     <td>0.00</td></tr>
+    <tr><td>5</td> <td>0</td> <td>0</td> <!--    <td>0.00</td>    <td>0.00</td> -->     <td>0.00</td>     <td>0.00</td></tr>
+    <tr><td>0</td> <td>5</td> <td>1</td> <!-- <td>7375.00</td> <td>7375.00</td> -->  <td>7375.00</td>  <td>7375.00</td></tr>
+    <tr><td>0</td> <td>5</td> <td>1</td> <!-- <td>5900.00</td> <td>5900.00</td> --> <td>13275.00</td> <td>13275.00</td></tr>
+    <tr><td>0</td> <td>5</td> <td>1</td> <!-- <td>4425.00</td> <td>4425.00</td> --> <td>17700.00</td> <td>17700.00</td></tr>
+    <tr><td>0</td> <td>5</td> <td>1</td> <!-- <td>2950.00</td> <td>2950.00</td> --> <td>20650.00</td> <td>20650.00</td></tr>
+    <tr><td>0</td> <td>5</td> <td>1</td> <!-- <td>1475.00</td> <td>1475.00</td> --> <td>22125.00</td> <td>22125.00</td></tr>
+    <tr><td>0</td> <td>5</td> <td>0</td> <!--    <td>0.00</td>    <td>0.00</td> --> <td>22125.00</td> <td>22125.00</td></tr>
+    <!-- Day 8, no more infected units or units to be destroyed, simulation stops. -->
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>economic</category>
+  <short-name>check surveillance costs, 2 zones</short-name>
+
+  <description>
+    Test that the surveillance costs are calculated correctly.  In this
+    scenario, there are 16 units.  A small zone is established that covers
+    5 units, and another zone around that covers 4 units.
+  </description>
+
+  <author>Anthony &quot;Drew&quot; Schwickerath &lt;Drew.Schwickerath@ColoState.edu&gt;</author>
+  <creation-date>4 August 2009</creation-date>
+  <model-version>3.2</model-version>
+
+  <population-file>16units_square</population-file>
+
+  <parameter-file>surveillance_cost_2</parameter-file>
+
+  <parameter-description>
+    The latent period lasts 1 day, the infectious clinical period lasts 3 days,
+    and immunity lasts 3 days.
+
+    The probability of detection vs. the number of days a unit has been showing
+    clinical signs is fixed at 1.  The probability of detection vs. the number
+    of days since a public announcement of an outbreak is also fixed at 1.
+
+    There are three zones, "High risk" ($59/animal-day), "Low risk" ($7/animal-day)
+    and "Background" (unspecified and therefore $0/animal-day).  When a
+    diseased unit is is detected, a "High risk" zone 1.25 km in radius and a
+    "Low risk" zone 1.75 km in radius are established around it.
+
+    There is no spread, destruction or vaccination.
+
+    What should happen:
+     - On day 1 the infected unit (unit 6) will be Latent.
+       Because there are no zones yet, the count of units in the "Background"
+       zone should be 16, and with 25 animals in each unit, the number of
+       animal-days in the "Background" zone should be 16*25=400.
+       Cost=400*$0+0*$7+0*$59
+     - On day 2 unit 6 will be Infectious Clinical.  It will be detected.
+       There will still be just the "Background" zone, so the number of
+       animal-days should increase to 800.
+       Cost=400*$0+0*$7+0*$59
+     - On day 3 a 1.25 km "High risk" zone and a 1.75 km "Low risk" zone will
+       be in effect around unit 6.  5 units will be in the "High risk" zone,
+       another 4 will be in the "Low risk" zone, and 7 will be outside (see
+       diagram below).
+       The number of animal-days in the "Background" zone should be
+       800+7*25=975, the number in the "Low risk" zone should be 4*25=100, and
+       the number in the "High risk" zone should be 5*25=125.       
+       Cost=175*$0+100*$7+125*$59
+     - On day 4 the number of animal-days in the "Background" zone should
+       increase by 7*25 to 1150.  The number in the "Low risk" zone should
+       increase by 4*25 to 200.  The number in the "High risk" zone should
+       increase by 5*25 to 250.
+       Cost=175*$0+100*$7+125*$59
+     - On day 5 the infection will be over and unit 6 will be Immune.  Zones
+       are still in effect, so the number of animal-days in the "Background"
+       zone should increase by 7*25 to 1325, the number in the "Low risk" zone
+       should increase by 4*25 to 300, and the number in the "High risk" zone
+       should increase by 5*25 to 375.
+       Cost=175*$0+100*$7+125*$59
+  </parameter-description>
+
+  <diagram>16units_2_zones</diagram>
+
+  <output>
+    <tr>
+      <td>unitsInZoneBackground</td>
+      <td>unitsInZoneLowRisk</td>
+      <td>unitsInZoneHighRisk</td>
+      <td>animalDaysInZoneBackground</td>
+      <td>animalDaysInZoneLowRisk</td>
+      <td>animalDaysInZoneHighRisk</td>
+      <!--
+      <td>surveillance-cost</td>
+      <td>total-cost</td>
+      -->
+      <td>costSurveillance</td>
+      <td>costsTotal</td>
+    </tr>
+    <tr><td>16</td>  <td>0</td>  <td>0</td>   <td>400</td>    <td>0</td>    <td>0</td> <!--    <td>0.00</td>    <td>0.00</td> -->     <td>0.00</td>     <td>0.00</td></tr>
+    <tr><td>16</td>  <td>0</td>  <td>0</td>   <td>800</td>    <td>0</td>    <td>0</td> <!--    <td>0.00</td>    <td>0.00</td> -->     <td>0.00</td>     <td>0.00</td></tr>
+    <tr> <td>7</td>  <td>4</td>  <td>5</td>   <td>975</td>  <td>100</td>  <td>125</td> <!-- <td>8075.00</td> <td>8075.00</td> -->  <td>8075.00</td>  <td>8075.00</td></tr>
+    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>1150</td>  <td>200</td>  <td>250</td> <!-- <td>8075.00</td> <td>8075.00</td> --> <td>16150.00</td> <td>16150.00</td></tr>
+    <tr> <td>7</td>  <td>4</td>  <td>5</td>  <td>1325</td>  <td>300</td>  <td>375</td> <!-- <td>8075.00</td> <td>8075.00</td> --> <td>24225.00</td> <td>24225.00</td></tr>
+  </output>
+</variable-test>

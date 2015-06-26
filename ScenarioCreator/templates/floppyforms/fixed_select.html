@@ -1,0 +1,5 @@
+<label for="{{ name }}">{{ value_name }}</label>
+
+<input type="hidden" name="{{ name }}" value="{{ value }}"{% if multiple %} multiple="multiple"{% endif %}{% if required %} required{% endif %}{% include "floppyforms/attrs.html" %}>
+
+

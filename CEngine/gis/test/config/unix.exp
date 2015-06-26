@@ -1,0 +1,354 @@
+#
+# Set up some global variables.  These variables could be set on the command
+# line, so we set them only if they don't already exist.
+#
+if ![info exists prompt] then {
+	set prompt "> "
+}
+
+if ![info exists floatpat] then {
+	set floatpat "\[+-\]?\[0-9\]+(?:.\[0-9\]+)?(?:\[eE\]\[+-\]\[0-9\]+)?"
+}
+
+if ![info exists epsilon] then {
+	set epsilon 0.0001
+}
+
+set pi 3.14159265358979
+set earth_radius 6378.137
+set dd [expr 2 * $pi * $earth_radius / 360.0]
+set deg2rad [expr $pi / 180.0]
+
+
+
+#
+# fcmp -- compares two floating-point numbers.
+#
+# Parameters:
+#   a,b  the numbers to compare
+#   tol  the tolerance
+# Returns:
+#   0 if they are approximately equal; otherwise, returns -1 if a < b, +1 if
+#   a > b.
+#
+proc fcmp { a b tol } {
+	return [exec [file join test fcmp] $a $b $tol]
+}
+
+
+
+#
+# distance_test -- tests the distance on a km grid function.
+#
+# Parameters:
+#   x1          x-coordinate of point 1
+#   y1          y-coordinate of point 1
+#   x2          x-coordinate of point 2
+#   y2          y-coordinate of point 2
+#   distance    the distance in km between the points
+#   test        a name to report in passes/fails.  (default = "distance")
+# Returns:
+#   nothing
+#
+proc distance_test { x1 y1 x2 y2 distance {test "distance"} } {
+	global prompt
+	global floatpat
+	global epsilon
+
+	send "distance ($x1,$y1,$x2,$y2)\n"
+	expect {
+		-re "($floatpat)\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+			if { [fcmp $distance $answer $epsilon] == 0 } {
+				pass $test
+			} else {
+				fail "$test distance between ($x1,$y1) and ($x2,$y2) = $distance, not $answer"
+			}			
+		}
+	}
+}
+
+
+
+#
+# great_circle_distance_test -- tests the great circle distance function.
+#
+# Parameters:
+#   lat1          latitude of point 1, in degrees
+#   lon1          longitude of point 1, in degrees
+#   lat2          latitude of point 2, in degrees
+#   lon2          longitude of point 2, in degrees
+#   distance      the distance in km between the points
+#   test          a name to report in passes/fails.  (default = "great_circle_distance")
+# Returns:
+#   nothing
+#
+proc great_circle_distance_test { lat1 lon1 lat2 lon2 distance {test "great_circle_distance"} } {
+	global prompt
+	global floatpat
+	global epsilon
+
+	send "great circle distance ($lat1,$lon1,$lat2,$lon2)\n"
+	expect {
+		-re "($floatpat)\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+			if { [fcmp $distance $answer $epsilon] == 0 } {
+				pass $test
+			} else {
+				fail "$test distance between ($lat1,$lon1) and ($lat2,$lon2) = $distance, not $answer"
+			}			
+		}
+	}
+}
+
+
+
+#
+# heading_test -- tests the heading on a km grid function.
+#
+# Parameters:
+#   x1          x-coordinate of point 1
+#   y1          y-coordinate of point 1
+#   x2          x-coordinate of point 2
+#   y2          y-coordinate of point 2
+#   heading     the heading in degrees from point 1 to point 2, where
+#               0/360 = N, 90 = E, 180 = S, 270 = W.
+#   test        a name to report in passes/fails.  (default = "heading")
+# Returns:
+#   nothing
+#
+proc heading_test { x1 y1 x2 y2 heading {test "heading"} } {
+	global prompt
+	global floatpat
+	global epsilon
+
+	send "heading ($x1,$y1,$x2,$y2)\n"
+	expect {
+		-re "($floatpat)\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+
+			#
+			# Accept 360 for 0.
+			#
+			if { [fcmp $answer 360 $epsilon] == 0 } {
+				set answer 0
+			}
+ 
+			if { [fcmp $heading $answer $epsilon] == 0 } {
+				pass $test
+			} else {
+				fail "$test heading from ($x1,$y1) to ($x2,$y2) = $heading, not $answer"
+			}			
+		}
+	}
+}
+
+
+
+#
+# polygon_area_test -- tests the basic polygon area function.
+#
+# Parameters:
+#   points        points of the polygon, as { x0 y0 x1 y1 ... }
+#   area          the correct area of the polygon
+#   test          a name to report in passes/fails.  (default = "polygon_area")
+# Returns:
+#   nothing
+#
+proc polygon_area_test { points area {test "polygon_area"} } {
+	global prompt
+	global floatpat
+	global epsilon
+
+	send "area ([join $points ,])\n"
+	expect {
+		-re "($floatpat)\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+
+			if { [fcmp $area $answer $epsilon] == 0 } {
+				pass $test
+			} else {
+				fail "$test area of polygon = $area, not $answer"
+			}			
+		}
+	}
+}
+
+
+
+#
+# simple_polygon_area_test -- tests the polygon area function that uses a
+#   square-grid approximation (in which meridians do not converge).
+#
+# Parameters:
+#   points        points of the polygon, as { lat0 lon0 lat1 lon1 ... }
+#   area          the correct area of the polygon, in square km
+#   test          a name to report in passes/fails.  (default = "simple_polygon_area")
+# Returns:
+#   nothing
+#
+proc simple_polygon_area_test { points area {test "simple_polygon_area"} } {
+	global prompt
+	global floatpat
+	global epsilon
+
+	send "simple area ([join $points ,])\n"
+	expect {
+		-re "($floatpat)\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+
+			if { [fcmp $area $answer $epsilon] == 0 } {
+				pass $test
+			} else {
+				fail "$test area of polygon = $area sq km, not $answer"
+			}			
+		}
+	}
+}
+
+
+
+#
+# local_polygon_area_test -- tests the polygon area function that uses a
+#   local flat-Earth approximation (in which meridians converge).
+#
+# Parameters:
+#   points        points of the polygon, as { lat0 lon0 lat1 lon1 ... }
+#   area          the correct area of the polygon, in square km
+#   test          a name to report in passes/fails.  (default = "local_polygon_area")
+# Returns:
+#   nothing
+#
+proc local_polygon_area_test { points area {test "local_polygon_area"} } {
+	global prompt
+	global floatpat
+	global epsilon
+
+	send "local area ([join $points ,])\n"
+	expect {
+		-re "($floatpat)\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+
+			if { [fcmp $area $answer $epsilon] == 0 } {
+				pass $test
+			} else {
+				fail "$test area of polygon = $area sq km, not $answer"
+			}			
+		}
+	}
+}
+
+
+
+#
+# polygon_perimeter_test -- tests the polygon perimeter function.
+#
+# Parameters:
+#   points        points of the polygon, as { x0 y0 x1 y1 ... }
+#   perimeter     the correct perimeter of the polygon
+#   test          a name to report in passes/fails.  (default = "polygon_perimeter")
+# Returns:
+#   nothing
+#
+proc polygon_perimeter_test { points perimeter {test "polygon_perimeter"} } {
+	global prompt
+	global floatpat
+	global epsilon
+
+	send "perimeter ([join $points ,])\n"
+	expect {
+		-re "($floatpat)\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+
+			if { [fcmp $perimeter $answer $epsilon] == 0 } {
+				pass $test
+			} else {
+				fail "$test perimeter of polygon = $perimeter, not $answer"
+			}
+		}
+	}
+}
+
+
+
+#
+# point_in_poly_test -- tests the point-in-polygon function.
+#
+# Parameters:
+#   polygon       the polygon, as { x0 y0 x1 y1 ... }
+#   point         the point to check, as { x y }
+#   true_answer   the correct answer, "inside" or "outside"
+#   test          a name to report in passes/fails (default = "point_in_poly")
+# Returns:
+#   nothing
+#
+proc point_in_poly_test { polygon point true_answer {test "point_in_poly"} } {
+	global prompt
+	global rowpat
+
+	send "point in polygon ([join $point ,],[join $polygon ,])\n"
+	expect {
+		-re "(\[tf\])\[\\n\\r\]+$prompt$" {
+			set answer $expect_out(1,string)
+
+			#
+			# The shell returns 't' or 'f'; turn that into 'inside' or
+			# 'outside'.
+			if { [string compare $answer "t"] == 0 } {
+				set answer "inside"
+			} else {
+				set answer "outside"
+			}
+			
+			if { [string compare $answer $true_answer] != 0 } {
+				fail "$test: point is $true_answer the polygon, not $answer"
+				return			
+			}
+		}
+	}
+	
+	pass $test
+}
+
+
+
+#
+# shell_load -- loads the program
+#
+proc shell_load { arg } {
+	#
+}
+
+
+
+#
+# shell_exit -- quit and cleanup
+#
+proc shell_exit {} {
+	#
+}
+
+
+
+proc shell_start {} {
+	global SHELL
+	global prompt
+	global floatpat
+	global epsilon
+	global spawn_id
+	global verbose
+	
+	if { $verbose > 1 } {
+		send_user "starting $SHELL\n"
+	}
+	spawn $SHELL
+	expect {
+		-re "No such file.*" { perror "Can't start $SHELL"; exit 1 }
+		-re "$prompt$" { }
+		timeout { perror "Failed to spawn $SHELL (timeout)"; exit 1 }
+	}
+}
+
+
+
+shell_start
