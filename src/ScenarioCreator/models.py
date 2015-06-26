@@ -500,14 +500,19 @@ class DiseaseProgression(BaseModel):
         help_text="Examples: Severe Progression, FMD Long Incubation")
     _disease = models.ForeignKey('Disease')
     disease_latent_period = models.ForeignKey(ProbabilityFunction, related_name='+',
+        verbose_name='Latent period',
         help_text='Defines the ' + wiki('latent period',"latent-state") + ' for units of this ' + wiki("production type") + '.', )
     disease_subclinical_period = models.ForeignKey(ProbabilityFunction, related_name='+',
+        verbose_name='Subclinical period',
         help_text='Defines the ' + wiki("Subclinical", "subclinically-infectious") + ' period for units of this ' + wiki("production type") + '.', )
     disease_clinical_period = models.ForeignKey(ProbabilityFunction, related_name='+',
+        verbose_name='Clinical period',
         help_text='Defines the ' + wiki("clinical", "clinically-infectious") + ' period for units of this ' + wiki("production type") + '.', )
     disease_immune_period = models.ForeignKey(ProbabilityFunction, related_name='+',
+        verbose_name='Immune period',
         help_text='Defines the natural ' + wiki('immune') + ' period for units of this ' + wiki("production type") + '.', )
     disease_prevalence = models.ForeignKey(RelationalFunction, related_name='+',
+        verbose_name='Prevalence',
         blank=True, null=True,
         help_text='Defines the prevalance for units of this ' + wiki("production type") + '.', )
     def __str__(self):
