@@ -345,7 +345,7 @@ function populate_pdf_panel(select) {
     var $input = $(select)
     if($input.hasClass('grouplist') || $input.hasClass('productiontypelist'))  //grouplist uses the population_panel instead
         return;
-    var load_target = '#functions_panel'
+    var load_target = '#functions_panel #current-function'
     var position = $input.closest('.layout-panel').attr('id');
     //if(position == 'left-panel'){ //use the center-panel if this is from left
     //    load_target = '#center-panel'
@@ -357,6 +357,7 @@ function populate_pdf_panel(select) {
     if ($input.val() != 'data-add-new' && $input.val() != '')
         url = url.replace('new', $input.val());//will edit already existing model
     $(load_target).load(url)
+    $('#functions_panel').removeClass('TB_panel_closed')
     $input.closest('.layout-panel').find('select').removeClass('active')  // nix .active from the earlier select
     $input.addClass("active")  //@tjmahlin use .active to to style links between panels 
 }

@@ -1,5 +1,7 @@
-    <a href="" class="action_link">Assign</a>
+<div class="row">
+<div class="col-xs-12">
     <div class="buttonHolder">
+        <a href="" class="action_link"><i class="glyphicon glyphicon-arrow-left"></i> Assign</a>
         <span class="pull-right list-button" data-toggle="collapse" data-target="#probability-options">Probability <i class="glyphicon glyphicon-triangle-bottom"></i></span>
         <span class="pull-right list-button" data-toggle="collapse" data-target="#relational-options">Relational <i class="glyphicon glyphicon-triangle-bottom"></i></span>
     </div>
@@ -19,7 +21,10 @@
             {% endfor %}
         </ul>
     </div>
-
+</div>
+</div>
+<div class="row">
+<div class="col-xs-12">
     <div id="current-function">
     {% if form  %}
         {% include 'ScenarioCreator/RelationalFunction.html' %}
@@ -27,3 +32,5 @@
         {% include 'ScenarioCreator/ModelList.html' %}
     {% endif %}
     </div>
+</div>
+</div>

@@ -77,7 +77,7 @@ select {
     height: 20px;
     border: 1px solid #ccc;
     border-radius: 0;
-    background-image: url('https://github.com/NAVADMC/ADSM/blob/gh-pages/images/disclosure_arrow.png?raw=true;');
+    background-image: url('../select_disclosure.png');
     background-repeat: no-repeat;
     background-position: calc(100% - 3px);
     padding-right: 20px;
@@ -656,7 +656,9 @@ ul {
 /*-------------------------------------------------------------*/
 /*-----functions panel-----*/
 /*-------------------------------------------------------------*/
-#functions_panel {}
+#functions_panel {
+    /* padding-left: 32px; */
+}
 
 #functions_panel .glyphicon {
     color: black;
@@ -672,8 +674,9 @@ ul {
     background-color: white;
     border: solid 1px black;
     right: 0px;
-    top: 38px;
+    top: 36px;
     color: black;
+    z-index: 3;
 }
 
 .function_dropdown a:hover {
@@ -683,6 +686,10 @@ ul {
 
 .list-button:hover {
     cursor: pointer;
+}
+#functions_panel .buttonHolder:first-of-type {
+    margin-top: 15px;
+    margin-bottom: 4px;
 }
 /*-------------------------------------------------------------*/
 /*-----navigation menu-----*/
