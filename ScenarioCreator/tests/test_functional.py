@@ -234,7 +234,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.click_navbar_element('Disease Progression')
         self.query('#left-panel').find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(3)
-        self.query('#center-panel').find_element_by_class_name('glyphicon-pencil').click()
+        self.query('#center-panel').find_element_by_css_selector('select').click()
         time.sleep(1)
 
         self.query('#id_equation_type')  # just making sure it's there
@@ -267,7 +267,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         center_panel = self.query('#center-panel')
 
-        self.assertIn("Disease latent period", center_panel.text)
+        self.assertIn("Latent period", center_panel.text)
 
     @skip("https://github.com/NAVADMC/ADSM/issues/605")
     def test_upload_population_file(self):
@@ -554,9 +554,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         target = self.selenium.find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(2)
 
-        center = self.query('#center-panel')
-
-        center.find_element_by_class_name('glyphicon-pencil').click()
+        self.query('#center-panel').find_element_by_css_selector('select').click()
         time.sleep(2)
 
         right_panel = self.query('#functions_panel')
@@ -659,18 +657,18 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
     def test_save_scenario_success(self):
         self.cause_unsaved_edit()
 
-        save_button = self.query('.scenario-status')
-        self.assertIn('unsaved', save_button.get_attribute('class'))
+        status = self.query('.scenario-status')
+        self.assertIn('unsaved', status.get_attribute('class'))
 
         self.query('#TB_file').click()
         filename_field = self.query('#file_panel .filename input')
         try:
             filename_field.send_keys('123.1 AZ')
-            filename_field.submit()
+            # self.query('#save_scenario').click()
+            self.query('.current form.ajax').submit()
             time.sleep(3)
-
-            save_button = self.query('.scenario-status')
-            self.assertNotIn('unsaved', save_button.get_attribute('class'))
+            status = self.query('.scenario-status')
+            self.assertNotIn('unsaved', status.get_attribute('class'))
         finally:
             try:
                 os.remove(workspace_path('Untitled Scenario123.1 AZ.sqlite3'))

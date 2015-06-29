@@ -1,0 +1,5 @@
+#################
+# Test files generated from old XML
+#################
+*.sqlite3
+!movement_control_1_controls_disabled_2units_pigs_cattle_all_infected.sqlite3

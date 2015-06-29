@@ -9,8 +9,9 @@
         {% endfor %}
     </script>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/adsm.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-toggle.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/adsm.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/scrollbars.css" />
     <script src="{{ STATIC_URL }}js/jquery-2.1.3.min.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-toggle.min.js"></script>
@@ -22,17 +23,12 @@
 <body>
 <header>
         <div class="row">
-            <div class="col-md-2">
-                <h1>ADSM</h1>
-                <p>Animal Disease Spread Model</p>
+            <div class="header_logo col-xs-2">                
             </div>
-            <div class="col-md-8">
+            <div class="col-xs-8">
                 <h1 class="filename">
                     {{ filename }}
                 </h1>
-            </div>
-            <div class="col-md-2">
-                <h2>Base Scenario</h2>
             </div>
         </div>
 </header>
@@ -63,6 +59,7 @@
     <a href="#" title="Settings Panel" class="TB_btn" id="TB_settings" TB-target="#settings_panel"></a>
     <a href="#" title="Population Panel" class="TB_btn" id="TB_population" TB-target="#population_panel"></a>
     <a href="#" title="Functions Panel" class="TB_btn" id="TB_functions" TB-target="#functions_panel"></a>
+    <div id="tb_mask"></div>
 </div>
 
 <div class="panel-backdrop">

@@ -5,11 +5,10 @@
 {% load humanize %}
 
 {% block main_layout %}
-<section id="main-panel" class="layout-panel  col-md-8 center-block">
-
     <script type="text/javascript" src="{{ STATIC_URL }}js/population.js"></script>
 
 {% if not Population %}
+<section id="main-panel" class="layout-panel col-xs-8 center-block">
     <h1 id="title">Load a Population</h1>
     <div id="load_population_widget">
         <form id="pop-upload" method="post" action="/setup/UploadPopulation/" enctype="multipart/form-data">
@@ -30,7 +29,8 @@
     </div>
 
 {% else %}
-    <h1><strong>Population File:</strong> {{ population_file }} ({{ Farms|intcomma }} units) 
+<section id="population_main_panel" class="layout-panel" >
+    <h1><strong>Population File:</strong> {{ population_file }} ({{ Farms|intcomma }} units)
         <a href="#" data-delete-link="{{deletable}}" id="replace_population" class="action_link direct_link btn btn-danger">Replace Population</a>
     </h1>
     <div id="edit-mask"></div>

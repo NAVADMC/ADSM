@@ -13,17 +13,16 @@ a:focus{
     outline-offset:0;
 }
 
-.layout-panel a.active, .layout-panel select.active {
-    border: solid red 1px;
-}
-
 body {
     font-family: 'Source Sans Pro', sans-serif;
     font-size: 10pt;
     font-weight: 400;
     box-sizing:border-box;
     padding-bottom: 50px;
+    height: 100%;
+    overflow-y: hidden;
 }
+
 
 h2, h2 a{
     font-size:15px;
@@ -43,7 +42,6 @@ h3, h4 {
 
 section h1 {
     font-size: 18px;
-    margin-left: -15px;
     font-weight:600;
 }
 
@@ -71,9 +69,91 @@ a:hover {
 a.wiki, a.wiki:visited {
     color: #B95E07;
 }
+select {
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    border-radius: 0;
+    -webkit-appearance: none;
+    height: 20px;
+    border: 1px solid #ccc;
+    border-radius: 0;
+    background-image: url('https://github.com/NAVADMC/ADSM/blob/gh-pages/images/disclosure_arrow.png?raw=true;');
+    background-repeat: no-repeat;
+    background-position: calc(100% - 3px);
+    padding-right: 20px;
+    padding-left: 5px;
+    background-color: #fff;
+}
+select:required, input:required, textarea:required {
+    background-color: rgba(244, 230, 0, .2);
+    display: block;
+    border: none;
+    outline: none;
+    box-shadow: inset 0px 0px 6px 2px rgba(0, 0, 0, .1);
+    padding-left: 5px;
+    -webkit-appearance: none;
+    height: 20px;
+    border-radius: 0;
+    margin-left: 0;
+}
 
+label {
+    line-height: 1;
+}
+select:hover, input:hover, textarea:hover {
+    outline: inset 1px rgba(84, 201, 232, .5);
+    border: 1px solid transparent;
+    outline-offset: -1px;
+    padding-left: 4px;
+}
+select:hover {
+    padding-left: 5px;
+}
+select:required:hover{
+    padding-left: 4px;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: rgba(84, 201, 232, .7) solid 2px !important;
+}
+input[type="number"], input[type="text"] {
+    height:20px;
+    padding: 0 0 0 5px;
+}
+input[type="number"]:hover {
+    padding: 1px 0 0 6px;
+}
+input[type="text"]:hover {
+    padding-left: 6px;
+}
+input[type="text"]:required:hover{
+    padding-left: 4px;
+}
+input .checkboxinput:focus {
+    outline: none !important;
+}
+input[type="file"] {
+    border:1px solid transparent;
+}
+input[type="file"]:hover {
+    padding: 0;
+}
+input[type="file"]:focus {
+    border: 1px solid transparent;
+    outline: none !important;
+}
+textarea {
+    padding: 5px 10px;
+}
+textarea:hover {
+    padding-left: 10px;
+}
+input[type="checkbox"] {
+    margin-top: 1px;
+}
 .help-block {  
-    font-weight: bold;
+    font-weight: 400;
     display: block;
     height: auto;
     overflow: hidden; /* check boxes are bold from mixins.less and I think it looks better with definitions*/
@@ -103,7 +183,7 @@ header {
     z-index: 100;
     background-color: #606060;
     width: 100%;
-    height: 70px;
+    height: 55px;
     top: 0;
     min-width:1000px;
     color: white;
@@ -148,29 +228,57 @@ header div {
 header p {
     float: none;
 }
-
+header .header_logo{
+    height: 23px;
+    display: block;
+    background-image: url("https://github.com/NAVADMC/ADSM/blob/gh-pages/images/adsm_logo.png?raw=true");
+    margin-top: 15px;
+    background-position: 20px;
+    background-repeat: no-repeat;
+    min-width: 190px;
+}
+header .col-xs-8 {
+    height: 42px;
+}
+.header_filename {
+    padding-left: 0;
+}
 header .filename {
     float: left;
     /*min-width: 540px;*/
-    padding: 5px 20px;
+    padding-top: 11px;
 }
 
 .filename input {
     border: none;
 }
-
 .scenario-status {
     display:none
 }
 .scenario-status.unsaved {
     display:block;
 }
+.scenario-status h2{
+    line-height: 21px;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    visibility: hidden;
+    margin-top: 1px;
+}
+.scenario-status p{
+    font-size: 12px;
+    font-style: italic;
+    font-weight: 300;
+}
+#file_panel {
+    z-index: 102;/*necessary for #unsaved-header*/
+}
 #unsaved-header {
     color: white;
     position: fixed;
-    top: 40px;
+    top: 25px;
     left: 83%;
-    z-index: 90;
+    z-index: 130;
 }
 
 header .buttonHolder{
@@ -243,7 +351,7 @@ header .buttonHolder .btn:hover {
 
 body>nav {
     position: fixed;
-    top: 69px;
+    top: 55px;
     bottom: 0;
     left: 0;
     width: 175px;
@@ -256,19 +364,80 @@ body>nav {
     /*min-width:600px;*/
 /*    padding-left: calc((100% - 1280px) / 2);*/
 /*}*/
-
+/*-------------------------------------------------------------*/
+/*-----3-column layout-----*/
+/*-------------------------------------------------------------*/
 #main-panel {
     float:none;
 }
 
 .layout-panel {
-    margin-top: 75px;
+    margin-top: 65px;
+    display: block;
+    height: calc(100vh - 75px);
+    overflow-y: auto;
+    overflow-x: visible;
+    padding: 0;
+    position: relative;
+}
+#center-panel,
+#center-panel .fragment,
+#right-panel,
+#right-panel .fragment,
+#functions_panel,
+#functions_panel .fragment {
+    overflow-x: hidden; /*no scrollbars*/
 }
 
+.layout-panel .fragment{
+    height: 100%;
+    position: relative;
+    display: block;
+    overflow: auto;
+    padding-bottom: 10px;
+}
+.layout-panel .fragment input.textinput,
+.layout-panel .fragment input.textInput
+.layout-panel .fragment select,
+.layout-panel select.productiontypelist {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 400px;
+}
+#left-panel .fragment h1:first-of-type,
+section#left-panel h1:first-of-type,
+#main-panel h1:first-of-type {
+    margin-top: 2px;
+}
+#center-panel input,
+#center-panel select {
+    background-position: calc(100% - 5px);
+    width: 100%;
+}
+#center-panel input[type="checkbox"]{
+    width: 15px;
+}
+#center-panel .glyphicon-pencil {
+    display: none;
+}
+#center-panel .fragment {
+    margin-left: 25px;
+    box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
+    padding: 0 20px 10px 20px;
+    border: 1px solid #cec7c0
+}
+#center-panel .fragment form {
+    margin-top: 10px;
+}
+#center-panel textarea {
+    width: 100%;
+}
 ul {
     padding-left: 5px; /*prevent style inheritance from above*/
     list-style: none;
 }
+
 /*-------------------------------------------------------------*/
 /*-----TOOLBAR-----*/
 /*-------------------------------------------------------------*/
@@ -276,6 +445,7 @@ ul {
     position: fixed;
     top: 75px;
     right: 0px;
+    height: 100%;
     background-color: white;
 }
 .TB_btn {
@@ -351,31 +521,41 @@ ul {
 #TB_functions {
     background-image: url("../icons/TB_function_btn.png");
 }
+#tb_mask {
+    position: absolute;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    display: block;
+    background-color: rgba(0, 0, 0, .7);
+    visibility: hidden;
+
+}
 /*-------------------------------------------------------------*/
 /*-----TOOLBAR panels-----*/
 /*-------------------------------------------------------------*/
 .layout-panel.TB_panel { /*needs to be more specific than the .layout-panel rule */
     position: fixed;
     right: 0;
-    top:75px;
-    z-index: 110; /*Over the header*/
-    margin-top: 0;
+    top: 0;
     margin-right: 50px;
+    width: calc(33.333vw - 75px);
     max-width: 460px;
-    min-height: 200px;
     overflow-y: auto;
     -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
     border: 1px solid #cec7c0;
     padding: 0 15px 15px 15px; 
-    max-height: calc(100vh - 120px);
     background-color: white;
     transition: margin-right .2s ease;
+    overflow: auto;
+    z-index: 15;
 }
 .TB_panel.TB_panel_closed {
-    margin-right: calc(0px - 33.33vw);
+    margin-right: -33.3333vw;
 }
-.TB_panel_over { /*--floats panel over content for static page layouts--*/
-    -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2), -5px 5px 5px -5px rgba(0, 0, 0, .3);
+#main-panel ~ .TB_panel,
+#population_main_panel ~ .TB_panel { /*--floats panel over content for static page layouts--*/
+    -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2), -5px 0px 3px -1px rgba(0, 0, 0, .15) !important;
 }
 /*-------------------------------------------------------------*/
 /*-----file panel-----*/
@@ -427,6 +607,11 @@ ul {
 #population_panel h2 {
     margin-top: 12px;
 }
+#population_panel h2:nth-of-type(2) {
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+    margin-top: 20px;
+}
 #population_panel ul {
     list-style-type: none;
     padding-left: 0;
@@ -459,6 +644,14 @@ ul {
     text-overflow: ellipsis;
     color: #606060;
     text-decoration: none;
+}
+#population_panel input {
+    background-color: rgba(244, 230, 0, .2);
+    display: block;
+    border: none;
+    outline: none;
+    box-shadow: inset 0px 0px 6px 2px rgba(0, 0, 0, .1);
+    padding-left: 5px;
 }
 /*-------------------------------------------------------------*/
 /*-----functions panel-----*/
@@ -499,14 +692,14 @@ ul {
     padding-left: 0;
     margin-bottom: 54px;
     margin-top:5px;
-    max-height: calc(100vh - 120px);
+    max-height: calc(100vh - 126px);
     overflow-y: auto;
     direction: rtl;
 }
 #setupMenu-before {
     content:"";
     position: fixed;
-    top: 75px;
+    top: 60px;
     left: 0;
     display: block;
     width: 170px;
@@ -737,6 +930,9 @@ ul {
     font-size: 11px;
     text-transform: lowercase;
 }
+.toggle-group .btn{
+    min-width: 0px;
+}
 #setupMenu .toggle-off {
     box-shadow: none;
     color: #898989;
@@ -810,6 +1006,7 @@ ul {
     color: #606060;
     outline: 1px solid #606060;
     outline-offset: -1px;
+    min-width: 80px;
 }
 .btn-default:hover, .btn-default:focus {
     background: #ebebeb;
@@ -820,6 +1017,7 @@ ul {
 .btn-unsaved {
     background-color: #3577b1;
     transition: all .2s ease;
+    min-width: 80px;
 }
 
 .btn-primary:hover,
@@ -858,7 +1056,7 @@ textarea {
 }
 
 #id_description {
-    width: 602px; 
+    width: 100%; 
     height: 200px;
 }
 
@@ -1027,9 +1225,9 @@ input[type=file], button {
     display: inline;
 }
 
-#div_id_name div input {
+/*#div_id_name div input {
     min-width: 400px;
-}
+}*/
 
 #file_list .addNew {
     border-bottom: none;
@@ -1047,6 +1245,17 @@ input[type=file], button {
 /*-------------------------------------------------------------*/
 /*-----population.html-----*/
 /*-------------------------------------------------------------*/
+#population_main_panel {
+    margin-top: 0;
+    height: 100vh;
+    padding-top: 48px;
+    pointer-events: none;
+}
+section#population_main_panel h1:first-of-type {
+    margin-bottom: 5px;
+    margin-left: 210px;
+    pointer-events: all;
+}
 #replace_population {
     padding-top: 3px;
     padding-left: 10px;
@@ -1059,14 +1268,15 @@ input[type=file], button {
     border-collapse: collapse;
 }
 #population_grid_wraper{
-    margin-left: calc(16.666vw - 280px); /*--remove and add col-xs-9 to html--*/
-    width: calc(74.997vw + 40px);
+    margin-left: 190px;
+    width: calc(100vw - 250px);
     padding: 10px;
     background: white;
     position: relative;
     display: block;
     border-radius: 2px;
     overflow-y:auto;
+    pointer-events: all;
 }
 
 #population_map_container {
@@ -1085,10 +1295,8 @@ input[type=file], button {
     right: 20px;
     top: 0;
 }
-#clear_filters {
-    position: absolute;
-    left: 20px;
-    top: 0;
+#clear_fitlers {
+    margin-top: -10px;
 }
 #farm_list_container{
     float: right;
@@ -1139,7 +1347,7 @@ input[type=file], button {
 
 #farm_list tbody{
     display: inline-block;
-    height: calc(100vh - 250px);
+    height: calc(100vh - 218px);
     overflow-y: auto;
     width: 100%;
     position: relative;
@@ -1177,6 +1385,7 @@ input[type=file], button {
     border: none;
     margin: 0px;
     width: 100%;
+    background-image: none;
 }
 
 #farm_list select {
@@ -1184,11 +1393,13 @@ input[type=file], button {
     background-color: transparent;
     padding-left: 10px;
     pointer-events: none;
+    box-shadow:none;
 }
 #farm_list input {
     background-color: transparent;
     padding-left: 10px;
     pointer-events: none;
+    box-shadow: none;
 }
 #farm_list select.editable {
     -webkit-appearance: menulist;
@@ -1283,24 +1494,19 @@ input[type=file], button {
     }
 }
 @media screen and (max-width: 1100px) {
-    section {
-        margin-left: 195px !important;
-        overflow: auto;
-        min-width: 0 !important;
-    }
     #population_grid_wraper {
-        margin-left: 0;
-        width: calc(100% + 40px);
-        overflow-x: hidden;
+        padding-bottom: 15px;
     }
     #population_grid_wraper form:first-of-type{
         float: left !important;
         padding-right: 0;
+        margin-top: 303px;
     }
     #population_filters {
         position: absolute;
-        top: 275px;
         width: 270px;
+        top: 0;
+        left: 0;
     }
     #farm_filter:before {
         width: 100%;
@@ -1308,41 +1514,22 @@ input[type=file], button {
     #population_map_container {
         position: absolute;
         width: 270px;
+        left: 285px;
     }
-    #unit_map {
-        width: 260px;
+     #unit_map {
+        width: 285px;
     }
     #farm_list_container {
         float: left;
-        margin-left: 280px;
-        width: calc(100vw - 530px);
-        border-right: 1px solid #ebebeb;
         padding-right: 0;
-    }
-    section h1:first-of-type {
-        margin-left: 0;
-    }
-}
-
-@media screen and (max-width: 960px) {
-    #population_grid_wraper form:first-of-type {
-        float: left !important;
-        margin-top: 303px;
-        width: calc(100% - 90px);
-    }
-    #farm_list_container {
         position: relative;
         width: 100%;
         margin-left: 0;
     }
-    #population_map_container {
-        left: 285px;
+    section h1:first-of-type {
+        margin-left: 0;
     }
-    #population_filters {
-        top: 0;
-        left: 0;
-    }
-    #refresh_map {
+     #refresh_map {
         right: -297px;
         top: 285px;
     }
@@ -1352,8 +1539,8 @@ input[type=file], button {
     #population_filters span {
         top: 4px;
     }
-    #unit_map {
-        width: 285px;
+    #population_grid_wraper .help-block {
+        float:left;
     }
 }   
 
@@ -1377,42 +1564,56 @@ input[type=file], button {
 }
 #edit_population {
     position: absolute;
-    top: calc(100vh - 204px);
+    top: calc(100vh - 172px);
     right: 25px;
     transition: opacity .2s ease
 }
 #population_grid_wraper .buttonHolder {
+    float: right;
+    clear: both;
+    padding-right: 20px;
+    padding-top: 10px;
+}
+#population_grid_wraper .buttonHolder {
     position: fixed;
-    top: calc(75vh + 64px);
-    left: calc(91.664vw - 175px);
+    top: calc(100vh - 72px);
+    right: 64px;
     padding: 0 !important;
     float: none;
     clear: none;
 }
 
-@media screen and (max-width: 1348px) {
+@media screen and (max-width: 1100px) {
+    
+    section#population_main_panel h1:first-of-type {
+        margin-left: 204px;
+    }
     #population_grid_wraper .buttonHolder {
-        right: 7.5vw;
-        left: auto;
+        position: relative;
+        float: right;
+        top: 0;
+        right: 0;
+        clear: none;
+        padding-top: 7px !important;
+    }
+    #population_grid_wraper .buttonHolder .btn:nth-child(2){
+        margin-right: 0;
     }
     #edit_population {
         right: 10px;
+        top: calc(100vh + 131px);
     }
 }
 @media screen and (max-width: 1140px) {
     #farm_list .help-block {
         font-size: 11px;
         margin-top:10px;
+        top: 0;
     }
 }
 @media screen and (max-width: 960px) {
     #farm_list .help-block {
         width: 200px;
-    }
-        #edit_population {
-        left: 10px;
-        right: auto;
-        top: 285px;
     }
 }
 
@@ -1449,12 +1650,7 @@ th:hover .sortControls{
 .sortControls .glyphicon-arrow-down {
     top: 2px;
 }
-#population_grid_wraper .buttonHolder {
-    float: right;
-    clear: both;
-    padding-right: 20px;
-    padding-top: 10px;
-}
+
 
 /********/
 
@@ -1581,8 +1777,8 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 .productiontypelist option[selected] , .grouplist option[selected]  {
     display: block;
     background-color: transparent !important;
-    height: 27px;
-    margin: 0 -10px;
+    height: 24px;
+    margin: 0 -10px 2px;
     padding: 4px 10px 0px 10px;
 }
 .productiontypelist option[selected]:hover, .grouplist option[selected]:hover  {
@@ -1607,6 +1803,23 @@ select[multiple] {}
     white-space: pre-wrap;
     font-style: italic;
     color: #808080;
+}
+#id_trigger_group:hover {
+    padding-top: 4px;
+    padding-bottom: 59px;
+}
+#id_trigger_group {
+    background-image: none;
+    padding-bottom: 60px;
+}
+#id_trigger_group select option:after {
+    content: "click to remove";
+    position:absolute;
+    right: 0;
+    font-size: 11px;
+    color: #898989;
+    font-style: italic;
+    font-weight: 300;
 }
 
 /*----------------------------------------------------*/
@@ -1649,7 +1862,90 @@ select[multiple] {}
     outline: none !important;
     box-shadow: none;
 }
-/*.action_link:focus {
-    outline: 1px solid #62d7fd !important;
-}*/
+
+
+@media screen and (max-width: 1200px) {
+/*------------- navigation ----------------*/
+    body>nav,
+    #setupMenu a,
+    #setupMenu a.active,
+    #setupMenu h2,
+    #setupMenu h3,
+    #setupMenu h4 {
+        width: 140px;
+    }
+    #setupMenu a {
+        padding-left: 15px;
+        font-size: 12px;
+        font-weight: 400;
+    }
+    #setupMenu a.active {
+        padding-left: 10px;
+    }
+    #setupMenu h3 a,  #setupMenu h4 a {
+        padding-left: 22px;
+    }
+    #setupMenu h3 a.active,  #setupMenu h4 a.active {
+        padding-left: 17px;
+    }
+    #setupMenu .toggle.btn {
+        left: 89px;
+    }
+    #setupMenu-before,
+    #setupMenu-after {
+        width: 135px;
+    }
+    h2#RunSimulationIn,
+    h2#RunSimulationRes {
+        width: 135px;
+    }
+    #RunSimulationIn a,
+    #RunSimulationRes a {
+        font-size: 14px;
+        padding-left: 15px;
+    }
+    #RunSimulationIn a:after {
+        top: 19px;
+        border-top: 6px solid transparent;
+        border-bottom: 6px solid transparent;
+        border-left: 9px solid #606060;
+    }
+    #RunSimulationRes a:after {
+        top: 19px;
+        border-top: 6px solid transparent;
+        border-bottom: 6px solid transparent;
+        border-right: 9px solid rgba(255, 255, 255, .8);
+    }
+    /*------------- toobar ----------------*/
+    .TB_btn, .TB_btn .active, .TB_btn:focus {
+        width: 35px;
+        height: 35px;
+        background-size: cover;
+    }
+    .TB_btn.active:before {
+        display: none;
+    }
+    .TB_btn.active:after {
+        top: 6px;
+        height: 20px;
+    }
+    .TB_btn.active:hover::after {
+        border-left: 7px solid #cdc7c0;
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+    }
+    .layout-panel.TB_panel {
+        margin-right: 35px;
+        width: calc(33.333vw - 50px);
+    }
+    .layout-panel.TB_panel.TB_panel_closed {
+        margin-right: -33.3333vw;
+    }
+    /*-------------- header ----------*/
+    header .header_logo {
+        background-image:url('https://github.com/NAVADMC/ADSM/blob/gh-pages/images/adsm_logo_sm.png?raw=true');
+        background-position: 30px;
+        min-width: 0;
+    }
+}
 
