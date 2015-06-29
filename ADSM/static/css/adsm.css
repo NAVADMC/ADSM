@@ -894,27 +894,32 @@ ul {
     height: 16px;
     background-color: #b2b2b2;
     outline: none;
-    margin-top: -2px;
     border-radius: 0;
+    right: -2px;
+    top: -2px;
 }
 .toggle-group label{
     font-style: normal;
     font-size: 11px;
     text-transform: lowercase;
+    margin-top: 0;
 }
-.toggle-group .btn{
+.toggle-group .btn, .toggle-group .btn:hover{
     min-width: 0px;
 }
 #setupMenu .toggle-off {
     box-shadow: none;
     color: #898989;
     padding-left: 9px;
+    background: transparent;
+    right: -3px;
 }
 #setupMenu .toggle-off:hover {
     outline: none;
 }
 #setupMenu .toggle-on {
     padding-right: 10px;
+    right: auto;
 }
 #setupMenu .toggle-group {
     top: -1px;
