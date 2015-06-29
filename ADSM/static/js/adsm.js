@@ -10,7 +10,11 @@ $(function(){
             clear_form_populate_panel($container);
         }
     })
-    
+
+    $(document).on('click', '#functions_panel span', function(event){
+        $('.function_dropdown').removeClass('in');
+    })
+
     $(document).on('click', '.TB_btn', function(){
         var already_open = $(this).hasClass('active') //check before altering anything
         $('.TB_btn.active').removeClass('active') //close anything that might be open

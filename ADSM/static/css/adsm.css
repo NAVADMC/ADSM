@@ -661,7 +661,7 @@ ul {
 }
 
 #functions_panel .glyphicon {
-    color: black;
+    /* color: black; */
     width: 12px;
     height: 12px;
     font-size: 12px;
