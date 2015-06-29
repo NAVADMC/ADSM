@@ -45,9 +45,13 @@ parser = argparse.ArgumentParser(prog='adsm.exe')
 # TODO: Tests don't run currently as the test runner won't find compiled tests.
 parser.add_argument('-t', '--test', dest='test', help='run the test suite', action='store_true')
 parser.add_argument('-s', '--skip_update', dest='skip_update', help='do not check for updates', action='store_true')
+parser.add_argument('-n', '--update_name', dest='update_name', help='Query for the name of this program as known to the update server', action='store_true')
 args = parser.parse_args()
 
-if args.test:
+if args.update_name:
+    print("ADSM")
+    sys.exit(0)
+elif args.test:
     print("Running tests...")
     management.call_command('test')
 else:
