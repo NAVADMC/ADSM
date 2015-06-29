@@ -164,7 +164,7 @@ class BuildADSM(build_exe):
                  if os.path.isfile(os.path.join(settings.BASE_DIR, self.build_exe, file)))
         os.makedirs(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
         for file in files:
-            if file not in ['ADSM.exe', 'library.zip']:
+            if file not in ['ADSM.exe', 'library.zip', 'python34.dll', 'MSVCR100.dll']:  # TODO: This line is ADSM specific
                 shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, file),
                             os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file))
 
