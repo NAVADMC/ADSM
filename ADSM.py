@@ -32,6 +32,12 @@ os.chdir(BASE_DIR)
 
 multiprocessing.freeze_support()
 
+# Update the updater
+if os.path.exists(os.path.join(BASE_DIR, 'npu.exe.updated')):
+    if os.path.exists(os.path.join(BASE_DIR, 'npu.exe')):
+        os.remove(os.path.join(BASE_DIR, 'npu.exe'))
+    os.rename(os.path.join(BASE_DIR, 'npu.exe.updated'), os.path.join(BASE_DIR, 'npu.exe'))
+
 print("Preparing Django environment...")
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
