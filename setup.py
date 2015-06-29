@@ -17,6 +17,7 @@ build_exe_options = {
     'build_exe': 'build',
     'optimize': 2,
     'excludes': [
+        # CHANGE ME for any python packages in your project that you want excluded
         'development_scripts',
     ],
     'includes': [
@@ -31,13 +32,16 @@ build_exe_options = {
     'replace_paths': [('*', '')],
     'compressed': False,
     'include_files': [
+        # Standard Django items to bring in
         ('static', 'static'),
         ('media', 'media'),
         ('bin', 'bin'),
-        ('Viewer', 'Viewer'),
+        ('Viewer', 'Viewer'),  # Newline's View application for Django Desktop Core
+
+        # CHANGE ME for any files/folders you want included with your project
         ('Sample Scenarios', 'Sample Scenarios'),
     ],
-    'include_msvcr': True
+    'include_msvcr': True  # CHANGE ME depending on if your project has licensing that is compatible with Microsoft's redistributable license
 }
 
 
@@ -180,4 +184,7 @@ setup(name='ADSM',
       cmdclass=cmdclass,
       )
 
+# Cleanup step after any sort of setup operation
+# TODO: See if this causes issues at the end of an 'install' command.
+# If so, override the msi build command and put this at the end of the normal build and the installer build
 remove_empty_folders(os.path.join(settings.BASE_DIR, build_exe_options['build_exe']))
