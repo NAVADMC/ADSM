@@ -384,7 +384,7 @@ body>nav {
     height: 100%;
     position: relative;
     display: block;
-    overflow: scroll;
+    overflow: auto;
     padding-bottom: 10px;
 }
 .layout-panel .fragment input.textinput,
