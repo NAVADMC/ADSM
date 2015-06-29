@@ -380,6 +380,15 @@ body>nav {
     padding: 0;
     position: relative;
 }
+#center-panel,
+#center-panel .fragment,
+#right-panel,
+#right-panel .fragment,
+#functions_panel,
+#functions_panel .fragment {
+    overflow-x: hidden; /*no scrollbars*/
+}
+
 .layout-panel .fragment{
     height: 100%;
     position: relative;

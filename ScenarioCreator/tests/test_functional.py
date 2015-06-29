@@ -657,18 +657,18 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
     def test_save_scenario_success(self):
         self.cause_unsaved_edit()
 
-        save_button = self.query('.scenario-status')
-        self.assertIn('unsaved', save_button.get_attribute('class'))
+        status = self.query('.scenario-status')
+        self.assertIn('unsaved', status.get_attribute('class'))
 
         self.query('#TB_file').click()
         filename_field = self.query('#file_panel .filename input')
         try:
             filename_field.send_keys('123.1 AZ')
-            filename_field.submit()
+            # self.query('#save_scenario').click()
+            self.query('.current form.ajax').submit()
             time.sleep(3)
-
-            save_button = self.query('.scenario-status')
-            self.assertNotIn('unsaved', save_button.get_attribute('class'))
+            status = self.query('.scenario-status')
+            self.assertNotIn('unsaved', status.get_attribute('class'))
         finally:
             try:
                 os.remove(workspace_path('Untitled Scenario123.1 AZ.sqlite3'))
