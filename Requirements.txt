@@ -19,5 +19,4 @@ pandas==0.15.2
 pyproj==1.9.4
 psutil==2.2.0
 
-pywin32==219
 hg+https://bitbucket.org/BryanHurst/cx_freeze

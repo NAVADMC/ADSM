@@ -182,7 +182,7 @@ setup(name='ADSM',
                'install_exe': {'build_dir': build_exe_options['build_exe']}},
       executables=[Executable('ADSM.py', base=base), ],
       cmdclass=cmdclass,
-      )
+      )  # TODO: install_requires should read in the requirements files per os
 
 # Cleanup step after any sort of setup operation
 # TODO: See if this causes issues at the end of an 'install' command.
