@@ -11,6 +11,33 @@ $(function(){
         }
     })
 
+    $(document).on('click', '#assign-function', function(){
+        var $form = $(this).closest('.layout-panel').find('form')
+        if($form.length){
+            $form = $form.first()
+            var action = $form.attr('action')
+            var model = action.split('/')[2]
+            var pk = action.split('/')[3] //the edit action URL has the pk in it
+            var parent_select = get_parent_select($form)
+            $(this).popover('destroy')
+            if(parent_select != null){
+                if(parent_select.attr('data-new-item-url').indexOf(model) != -1){ //correct model
+                    if(pk != 'new'){
+                        parent_select.val(pk)
+                    }
+                }else{
+                    $(this).popover({'content': "Cannot assign a probability function to a relational field, or vice versa",
+                                     'trigger': 'focus'}) //placement bottom would be nice, but it gets cut off by the panel
+                    $(this).popover('show')
+                }
+            }else{
+                $(this).popover({'content': "No active fields to assign",
+                                 'trigger': 'focus'})
+                $(this).popover('show')
+            }
+        }
+    })
+
     $(document).on('click', '#functions_panel span', function(event){
         $('.function_dropdown').removeClass('in');
     })
@@ -350,10 +377,14 @@ function populate_pdf_panel(select) {
     if($input.hasClass('grouplist') || $input.hasClass('productiontypelist'))  //grouplist uses the population_panel instead
         return;
     var load_target = '#functions_panel #current-function'
-    var position = $input.closest('.layout-panel').attr('id');
-    //if(position == 'left-panel'){ //use the center-panel if this is from left
-    //    load_target = '#center-panel'
-    if(position == 'functions_panel'){ // we've run out of room and must use a modal
+    var origin = $input.closest('.layout-panel').attr('id');
+    if(origin == 'left-panel') { //use the center-panel if this is from left
+        load_target = '#center-panel'
+    }
+    if(origin == 'center-panel'){
+        $('#functions_panel').removeClass('TB_panel_closed')
+    }
+    if(origin == 'functions_panel'){ // we've run out of room and must use a modal
         modelModal.show($input);
         return
     }
@@ -361,7 +392,6 @@ function populate_pdf_panel(select) {
     if ($input.val() != 'data-add-new' && $input.val() != '')
         url = url.replace('new', $input.val());//will edit already existing model
     $(load_target).load(url)
-    $('#functions_panel').removeClass('TB_panel_closed')
     $input.closest('.layout-panel').find('select').removeClass('active')  // nix .active from the earlier select
     $input.addClass("active")  //@tjmahlin use .active to to style links between panels 
 }

@@ -36,6 +36,13 @@
     {% block main %}
 
     {% endblock %}
+<div class="col-xs-4 TB_panel TB_panel_closed layout-panel" id="functions_panel">
+    <script>
+        $(function(){
+            $('#functions_panel').load('/setup/Function/');
+        });
+    </script>
+</div> <!--functions_panel needs to be immediately after center-panel in the DOM -->
 
 <div class="blocking-overlay">
     <div class="overlay-content">
@@ -46,13 +53,7 @@
     {% include "file_panel.html" %}
     {% include "settings_panel.html" %}
     {% include "population_panel.html" %}
-    <div class="col-xs-4 TB_panel TB_panel_closed layout-panel" id="functions_panel">
-        <script>
-            $(function(){
-                $('#functions_panel').load('/setup/Function/');
-            });
-        </script>
-    </div>
+
 
 <div id="toolbar">
     <a href="#" title="Project Panel" class="TB_btn" id="TB_file" TB-target="#file_panel"></a>
