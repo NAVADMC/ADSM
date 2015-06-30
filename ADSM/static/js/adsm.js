@@ -71,6 +71,10 @@ $(function(){
         var $self = $(this)
         var formAction = $(this).attr('action');
         var formData = new FormData($self[0])
+        var load_target = $self
+        if($self.parent().hasClass('fragment')){
+            load_target = $self.parent()
+        }
         $.ajax({
             url: formAction,
             type: "POST",
@@ -84,7 +88,7 @@ $(function(){
                 if($self.closest('#main-panel').length){ //in the main panel, just reload the page
                     $('#main-panel').html($(form_html).find('#main_panel')[0])
                 }else{
-                    $self.replaceWith(form_html)
+                    load_target.replaceWith(form_html)
                     if(formAction.lastIndexOf('new/') != -1){ //new model created
                         var lastClickedSelect = get_parent_select($self);
                         add_model_option_to_selects(form_html, lastClickedSelect)
