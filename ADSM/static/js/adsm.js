@@ -42,6 +42,14 @@ $(function(){
         $('.function_dropdown').removeClass('in');
     })
 
+    $(document).on('change', '#functions_panel input', function(event){
+        var $form = $(this).closest('form')
+        var load_target = $('#function-graph')
+        var formAction = load_target.attr('src');
+        var formData = new FormData($form[0])
+        ajax_submit_complex_form_and_replaceWith(formAction, formData, $form, load_target);
+    })
+
     $(document).on('click', '.TB_btn', function(){
         var already_open = $(this).hasClass('active') //check before altering anything
         $('.TB_btn.active').removeClass('active') //close anything that might be open
@@ -66,43 +74,17 @@ $(function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });
 
-    $(document).on('submit', '.ajax', function(event) {
-        event.preventDefault();
-        var $self = $(this)
-        var formAction = $(this).attr('action');
-        var formData = new FormData($self[0])
-        var load_target = $self
-        if($self.parent().hasClass('fragment')){
-            load_target = $self.parent()
-        }
-        $.ajax({
-            url: formAction,
-            type: "POST",
-            data: formData,
-            cache: false,
-            contentType: false,
-            processData: false,
-            success: function(form_html) {
-                $('.scenario-status').addClass('unsaved')
-                // Here we replace the form, for the
-                if($self.closest('#main-panel').length){ //in the main panel, just reload the page
-                    $('#main-panel').html($(form_html).find('#main_panel')[0])
-                }else{
-                    load_target.replaceWith(form_html)
-                    if(formAction.lastIndexOf('new/') != -1){ //new model created
-                        var lastClickedSelect = get_parent_select($self);
-                        add_model_option_to_selects(form_html, lastClickedSelect)
-                        reload_model_list($self);
-                    }
-                }
-            },
-            error: function () {
-                $self.find('.error-message').show()
-            }
-        }).always(function() {
-            $('.blocking-overlay').hide();
-        });
-    })
+$(document).on('submit', '.ajax', function(event) {
+    event.preventDefault();
+    var $self = $(this)
+    var formAction = $(this).attr('action');
+    var formData = new FormData($self[0])
+    var load_target = $self
+    if($self.parent().hasClass('fragment')){
+        load_target = $self.parent()
+    }
+    ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target);
+})
     
     $(document).on('click', '#update_adsm', function(event){
         $(this).removeClass('loading_button')
@@ -692,4 +674,35 @@ function clear_form_populate_panel($container_panel) {
     } else { //will still clear Create Group form inside of population_panel without destroying the whole panel
         $container_panel.html('') //delete everything from the div containing the form
     }
+}
+
+
+function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target) {
+    $.ajax({
+        url: formAction,
+        type: "POST",
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function (form_html) {
+            $('.scenario-status').addClass('unsaved')
+            // Here we replace the form, for the
+            if ($self.closest('#main-panel').length) { //in the main panel, just reload the page
+                $('#main-panel').html($(form_html).find('#main_panel')[0])
+            } else {
+                load_target.replaceWith(form_html)
+                if (formAction.lastIndexOf('new/') != -1) { //new model created
+                    var lastClickedSelect = get_parent_select($self);
+                    add_model_option_to_selects(form_html, lastClickedSelect)
+                    reload_model_list($self);
+                }
+            }
+        },
+        error: function () {
+            $self.find('.error-message').show()
+        }
+    }).always(function () {
+        $('.blocking-overlay').hide();
+    });
 }
