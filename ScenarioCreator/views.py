@@ -438,9 +438,23 @@ def list_per_model(model_class):
     return context
 
 
+def functions_panel(request, form=None):
+    """Panel on the right that lists both Relational and Probability Functions with a graphic depiction"""
+    context = {'models': [],
+               'load_target': '#current-function',
+               }
+    if form is not None:
+        context['form'] = form
+    for local_name, local_model in abstract_models['Function']:
+        context['models'].append(list_per_model(local_model))
+    return render(request, 'functions_panel.html', context)  # no 3 panel layout
+
+
 def model_list(request):
     model_name, model = get_model_name_and_model(request)
     model_name = promote_to_abstract_parent(model_name)
+    if model_name in 'Function RelationalFunction ProbabilityFunction'.split():
+        return functions_panel(request)
     if model_name == 'VaccinationTrigger':  # special case
         context = trigger_list(request)
     else:
@@ -452,6 +466,7 @@ def model_list(request):
                 context['models'].append(list_per_model(local_model))
         else:
             context['models'].append(list_per_model(model))
+    context['load_target'] = '#center-panel'
     return render(request, 'ScenarioCreator/3Panels.html', context)
 
 # Utility Views was moved to the ADSMSettings/connection_handler.py

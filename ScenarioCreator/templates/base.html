@@ -36,6 +36,13 @@
     {% block main %}
 
     {% endblock %}
+<div class="col-xs-4 TB_panel TB_panel_closed layout-panel" id="functions_panel">
+    <script>
+        $(function(){
+            $('#functions_panel').load('/setup/Function/');
+        });
+    </script>
+</div> <!--functions_panel needs to be immediately after center-panel in the DOM -->
 
 <div class="blocking-overlay">
     <div class="overlay-content">
@@ -47,6 +54,7 @@
     {% include "settings_panel.html" %}
     {% include "population_panel.html" %}
 
+
 <div id="toolbar">
     <a href="#" title="Project Panel" class="TB_btn" id="TB_file" TB-target="#file_panel"></a>
     <a href="#" title="Settings Panel" class="TB_btn" id="TB_settings" TB-target="#settings_panel"></a>
@@ -54,6 +62,8 @@
     <a href="#" title="Functions Panel" class="TB_btn" id="TB_functions" TB-target="#functions_panel"></a>
     <div id="tb_mask"></div>
 </div>
-  
+
+{#<div class="panel-backdrop"> </div> Disabled at the moment til we have view/edit distinction#}
+
 </body>
 </html>

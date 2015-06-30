@@ -232,23 +232,23 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         DiseaseProgressionAssignment.objects.create(production_type=cattle, progression=disease_progression)
 
         self.click_navbar_element('Disease Progression')
-        self.selenium.find_element_by_id('left-panel').find_element_by_class_name('glyphicon-pencil').click()
+        self.query('#left-panel').find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(3)
-        self.selenium.find_element_by_id('center-panel').find_element_by_css_selector('select').click()
+        self.query('#center-panel').find_element_by_css_selector('select').click()
         time.sleep(1)
 
-        self.selenium.find_element_by_id('id_equation_type')  # just making sure it's there
-        pdf_panel = self.selenium.find_element_by_id('right-panel')
+        self.query('#id_equation_type')  # just making sure it's there
+        pdf_panel = self.query('#functions_panel')
         pdf_panel.find_element_by_id('id_name').send_keys(' edited')
         time.sleep(1)
 
         pdf_panel.find_element_by_css_selector('.btn-save').click()
         time.sleep(1)  # there's a reload here
-        self.selenium.find_element_by_id('right-panel').find_element_by_css_selector('.btn-cancel').click()
+        self.query('#functions_panel').find_element_by_css_selector('.btn-cancel').click()
         time.sleep(1)
 
         with self.assertRaises(NoSuchElementException):
-            self.selenium.find_element_by_id('id_equation_type')  # make sure it's gone
+            self.query('#id_equation_type')  # make sure it's gone
 
         pdf_updated = ProbabilityFunction.objects.get(pk=lp_cattle.pk)
         self.assertEqual(pdf_updated.name, "Renaming Test - cattle edited")
@@ -258,14 +258,14 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         self.click_navbar_element("Disease Progression")
 
-        target = self.selenium.find_element_by_id('id_form-0-progression')
+        target = self.query('#id_form-0-progression')
         Select(target).select_by_visible_text(u'---------')
         time.sleep(1)
 
         self.selenium.find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(2)
 
-        center_panel = self.selenium.find_element_by_id('center-panel')
+        center_panel = self.query('#center-panel')
 
         self.assertIn("Latent period", center_panel.text)
 
@@ -517,7 +517,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         #check and see if you can build a Rel from file upload
         self.submit_relational_form_with_file(modal)
-        self.selenium.find_element_by_id('right-panel').find_element_by_class_name('glyphicon-pencil').click()
+        self.query('#functions_panel').find_element_by_class_name('glyphicon-pencil').click()
         time.sleep(2)
         modal = self.query('div.modal')
         self.assertEqual("123.1", modal.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
@@ -530,16 +530,16 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.select_option('id_form-0-effect', 'Add...')
         self.select_option('id_zone_indirect_movement', 'Add...')
         
-        right_panel = self.query('#right-panel')
+        right_panel = self.query('#functions_panel')
 
         self.submit_relational_form_with_file(right_panel)
-        right_panel = self.query('#right-panel')
-        self.assertEqual("123.1", right_panel.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
+        right_panel = self.query('#functions_panel')
+        self.assertEqual("123.1", self.query('#id_relationalpoint_set-3-x').get_attribute('value'))
 
 
     def submit_relational_form_with_file(self, container):
         container.find_element_by_id("file").send_keys(
-            os.path.join(settings.BASE_DIR, "ScenarioCreator\\tests\\population_fixtures\\points.csv"))  # this is sensitive to the starting directory
+            os.path.join(settings.BASE_DIR, "ScenarioCreator","tests","population_fixtures","points.csv"))  # this is sensitive to the starting directory
         container.find_element_by_id('id_name').send_keys('imported from file')
         container.find_element_by_class_name('btn-save').click()
         time.sleep(3)
@@ -557,7 +557,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.query('#center-panel').find_element_by_css_selector('select').click()
         time.sleep(2)
 
-        right_panel = self.selenium.find_element_by_id('right-panel')
+        right_panel = self.query('#functions_panel')
 
         mean_field = right_panel.find_element_by_id("div_id_mean")
 
