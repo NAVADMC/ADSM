@@ -47,6 +47,10 @@ class Command(BaseCommand):
                                                       "url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario')",
                                                       "url('^ProductionTypeList.json/$', 'ScenarioCreator.views.production_type_list_json')",
                                                       "url('^DisableAllControls.json/$', 'ScenarioCreator.views.disable_all_controls_json')",
+
+                                                      "url('^ProbabilityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph')",
+                                                      "url('^RelationalFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.relational_graph')",
+
                                                       ])
 
         urls_code = "\"\"\"URLs is entirely procedural based on the contents of models.py. This has the advantage that urls automatically update as the models change or are renamed.\"\"\"\n\n" \

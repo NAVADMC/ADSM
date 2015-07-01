@@ -1,78 +1,29 @@
-import math
 import matplotlib
-import numpy
-from ScenarioCreator.views import filtering_params
 
-matplotlib.use('Agg')  # Force matplotlib to not use any Xwindows backend.
-from matplotlib import rc
-rc("figure", facecolor="white")
+from math import sqrt
+from ScenarioCreator.views import filtering_params
+from function_graphs import HttpFigure, rstyle
+
 
 from time import time
 from matplotlib import gridspec
 from itertools import chain
-from django.http import HttpResponse
 from django.db.models import Max, Min, Q
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.colors import LogNorm, ListedColormap
+from matplotlib.colors import LogNorm
 from matplotlib.colorbar import ColorbarBase
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-from matplotlib import cm
 
 from ScenarioCreator.models import Zone, ProductionType, Unit
 from Results.summary import list_of_iterations
 from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType
 
 
-def HttpFigure(fig):
-    response = HttpResponse(content_type='image/png')
-    FigureCanvas(fig).print_png(response, bbox_inches='tight')
-    plt.close(fig)
-    return response
-
-
 # def matplotd3(request):
 #     fig, ax = plt.subplots()
 #     points = ax.plot([3, 1, 4, 1, 5], 'ks-', mec='w', mew=5, ms=20)
 #     return HttpResponse(mpld3.fig_to_html(fig))
-
-
-def rstyle(axis):
-    """Styles x,y axes to appear like ggplot2
-    Must be called after all plot and axis manipulation operations have been
-    carried out (needs to know final tick spacing) """
-    #Set the style of the major and minor grid lines, filled blocks
-    axis.grid(True, 'major', color='w', linestyle='-', linewidth=1.4)
-    axis.grid(True, 'minor', color='0.99', linestyle='-', linewidth=0.7)
-    # axis.patch.set_facecolor('0.90')  # uncomment to add a subtle grid
-    axis.set_axisbelow(True)
-
-    """This code is currently disabled because I don't want to add a pylab dependency"""
-    #Set minor tick spacing to 1/2 of the major ticks
-    # axis.yaxis.set_major_locator((plticker.MultipleLocator(base=3000.0)))
-    
-    #Remove axis border
-    for child in axis.get_children():
-        if isinstance(child, matplotlib.spines.Spine):
-            child.set_alpha(0)
-       
-    #Restyle the tick lines
-    for line in axis.get_xticklines() + axis.get_yticklines():
-        line.set_markersize(5)
-        line.set_color("gray")
-        line.set_markeredgewidth(1.4)
-    
-    #Remove the minor tick lines    
-    for line in (axis.xaxis.get_ticklines(minor=True) + 
-                 axis.yaxis.get_ticklines(minor=True)):
-        line.set_markersize(0)
-    
-    #Only show bottom left ticks, pointing out of axis
-    plt.rcParams['xtick.direction'] = 'out'
-    plt.rcParams['ytick.direction'] = 'out'
-    axis.xaxis.set_ticks_position('bottom')
-    axis.yaxis.set_ticks_position('left')
 
 
 def construct_title(field_name, iteration, model, zone=''):
@@ -108,7 +59,7 @@ def population_png(request, width_inches=8, height_inches=8):
     light_colors = ['#a6cee3', '#b2df8a', '#fb9a99', '#fdbf6f', '#cab2d6'] # , '#ffff99']
     fig = Figure(figsize=(width_inches, height_inches), frameon=True, tight_layout=True)  # Issue #168 aspect ratio doesn't adjust currently
     ax = fig.add_subplot(1, 1, 1, axisbg='#FFFFFF')
-    size = min(100, 3000 / math.sqrt(Unit.objects.count()))
+    size = min(100, 3000 / sqrt(Unit.objects.count()))
     for index, production_type in enumerate(ProductionType.objects.all()):
         if 'production_type__name' not in params or params['production_type__name'] == production_type.name:
             units = Unit.objects.filter(Q(production_type=production_type) & query_filter)
