@@ -24,6 +24,7 @@ $(function(){
                 if(parent_select.attr('data-new-item-url').indexOf(model) != -1){ //correct model
                     if(pk != 'new'){
                         parent_select.val(pk)
+                        parent_select.closest('.layout-panel').find('.btn-save').removeAttr('disabled')
                     }
                 }else{
                     $(this).popover({'content': "Cannot assign a probability function to a relational field, or vice versa",
@@ -386,7 +387,7 @@ function populate_pdf_panel(select) {
 function get_parent_select($self) {
     var parent = null
     var $inDomElement = $( '#'+ $self.find('input').last().attr('id') ) //grab the matching form from the DOM
-    var actives = $inDomElement.closest('.layout-panel').prev('.layout-panel').find('select.active')
+    var actives = $inDomElement.closest('.layout-panel').prevAll('.layout-panel').first().find('select.active')
     if(actives.length){
         parent = actives.first()
     }
