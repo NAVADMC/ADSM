@@ -678,6 +678,16 @@ function clear_form_populate_panel($container_panel) {
 }
 
 
+function reload_image(load_target) {
+    var target = load_target.find('form')
+    if(target.attr('id') == 'relational-form' || target.attr('id') == 'relational-form'){
+        var img = $('#function-graph'); //newly placed image
+        d = new Date();
+        var new_src = img.attr("src") + "?" + d.getTime();
+        img.attr("src", new_src);
+    }
+}
+
 function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target) {
     $.ajax({
         url: formAction,
@@ -698,6 +708,7 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
                     add_model_option_to_selects(form_html, lastClickedSelect)
                     reload_model_list($self);
                 }
+                reload_image(load_target)
             }
         },
         error: function () {
