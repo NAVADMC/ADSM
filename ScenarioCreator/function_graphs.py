@@ -1,6 +1,13 @@
 # import Results.graphing  #matplotlib instantiation
+from django.http import HttpResponse
 import matplotlib
-from Results.graphing import HttpFigure, rstyle
+
+matplotlib.use('Agg')  # Force matplotlib to not use any Xwindows backend.
+from matplotlib import rc
+rc("figure", facecolor="white")
+
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import matplotlib.pyplot as plt
 
 
@@ -14,7 +21,16 @@ def relational_graph_update(request, primary_key):
     context = ScenarioCreator.views.initialize_relational_form({}, primary_key, request)
     formset = ScenarioCreator.views.PointFormSet(request.POST or None, instance=context['model'])
     if formset.is_valid():
-        return line_graph('Days', [a['x'] for a in formset], [a['y'] for a in formset])
+        x, y = [], []
+        for a in formset:
+            if a['x'].data and a['y'].data:
+                x.append(float(a['x'].data))
+                y.append(float(a['y'].data))
+
+        #         http://stackoverflow.com/questions/8483348/django-return-image-data-from-a-view
+        # https://en.wikipedia.org/wiki/Data_URI_scheme
+        # http://stackoverflow.com/questions/10802312/display-png-image-as-response-to-jquery-ajax-request
+        return line_graph('Days', x, y)
     else:
         return existing_relational_graph(primary_key)
 
@@ -47,3 +63,47 @@ def line_graph(x_label, x_series, y_series):
     rstyle(time_graph)
 
     return HttpFigure(fig)
+
+
+def HttpFigure(fig):
+    response = HttpResponse(content_type='image/png')
+    FigureCanvas(fig).print_png(response, bbox_inches='tight')
+    plt.close(fig)
+    return response
+
+
+def rstyle(axis):
+    """Styles x,y axes to appear like ggplot2
+    Must be called after all plot and axis manipulation operations have been
+    carried out (needs to know final tick spacing) """
+    #Set the style of the major and minor grid lines, filled blocks
+    axis.grid(True, 'major', color='w', linestyle='-', linewidth=1.4)
+    axis.grid(True, 'minor', color='0.99', linestyle='-', linewidth=0.7)
+    # axis.patch.set_facecolor('0.90')  # uncomment to add a subtle grid
+    axis.set_axisbelow(True)
+
+    """This code is currently disabled because I don't want to add a pylab dependency"""
+    #Set minor tick spacing to 1/2 of the major ticks
+    # axis.yaxis.set_major_locator((plticker.MultipleLocator(base=3000.0)))
+
+    #Remove axis border
+    for child in axis.get_children():
+        if isinstance(child, matplotlib.spines.Spine):
+            child.set_alpha(0)
+
+    #Restyle the tick lines
+    for line in axis.get_xticklines() + axis.get_yticklines():
+        line.set_markersize(5)
+        line.set_color("gray")
+        line.set_markeredgewidth(1.4)
+
+    #Remove the minor tick lines
+    for line in (axis.xaxis.get_ticklines(minor=True) +
+                 axis.yaxis.get_ticklines(minor=True)):
+        line.set_markersize(0)
+
+    #Only show bottom left ticks, pointing out of axis
+    plt.rcParams['xtick.direction'] = 'out'
+    plt.rcParams['ytick.direction'] = 'out'
+    axis.xaxis.set_ticks_position('bottom')
+    axis.yaxis.set_ticks_position('left')
