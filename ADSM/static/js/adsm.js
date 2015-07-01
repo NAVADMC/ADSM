@@ -42,13 +42,13 @@ $(function(){
         $('.function_dropdown').removeClass('in');
     })
 
-    $(document).on('change', '#functions_panel input', function(event){
-        var $form = $(this).closest('form')
-        var load_target = $('#function-graph')
-        var formAction = load_target.attr('src');
-        var formData = new FormData($form[0])
-        ajax_submit_complex_form_and_replaceWith(formAction, formData, $form, load_target);
-    })
+    //$(document).on('change', '#functions_panel input', function(event){
+    //    var $form = $(this).closest('form')
+    //    var load_target = $('#function-graph')
+    //    var formAction = load_target.attr('src');
+    //    var formData = new FormData($form[0])
+    //    ajax_submit_complex_form_and_replaceWith(formAction, formData, $form, load_target);
+    //})
 
     $(document).on('click', '.TB_btn', function(){
         var already_open = $(this).hasClass('active') //check before altering anything
