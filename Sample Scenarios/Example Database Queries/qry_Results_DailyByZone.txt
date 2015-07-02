@@ -1,0 +1,29 @@
+-----------------------------------------------------------------------------------------------
+--	Sample Query: Results Daily by Zone
+--	Date:         3/19/2015
+--      By:           Schoenbaum, Missy
+--
+--      Notes: where clause 1=1 allows for easy editing of subsequent clauses
+--             where clause rowid < 100 allows for return of a subset of data, which is quicker when tuning
+--             -- allows for line to be commented  (omitted)
+--
+----------------------------------------------------------------------------------------
+SELECT -- *
+iteration,
+day,
+last_day,
+--zone_id,     -- not useful, use case on name instead
+z.name,      -- gives us zone name, don't need a case because zone name will notbe null
+zonearea,
+zoneperimeter,
+numSeparateAreas
+FROM  Results_dailybyzone r
+Join ScenarioCreator_zone z
+ on r.zone_id = z.id
+-- Example of WHERE clause
+WHERE 1=1
+AND r.ROWID < 100
+--AND last_day = 0 -- this makes LAST_DAY = False
+--AND last_day = 1  -- this makes LAST_DAY = True
+ORDER BY -- Allows organization of results
+1, 4, 2

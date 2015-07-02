@@ -1,0 +1,23 @@
+-----------------------------------------------------------------------------------------------
+--	Sample Query: Production Type with descriptive name
+--	Date:         3/19/2015
+--      By:           Schoenbaum, Missy
+--
+--      Notes: where clause 1=1 allows for easy editing of subsequent clauses
+--             where clause rowid < 100 allows for return of a subset of data, which is quicker when tuning
+--             -- allows for line to be commented  (omitted)
+----------------------------------------------------------------------------------------
+SELECT --*
+u.User_notes,
+pt.name,  -- this is the description name, not an identifier
+u.initial_state,
+u.initial_size,
+latitude,
+longitude
+FROM ScenarioCreator_unit u
+join ScenarioCreator_productiontype pt
+on u.production_type_id  = pt.id
+-- Example of WHERE clause
+WHERE 1=1
+AND u.ROWID < 100
+--AND u.initial_state = 'L' -- upper case surrounded by ' is required

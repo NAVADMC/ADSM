@@ -1,0 +1,276 @@
+-----------------------------------------------------------------------------------------------
+--	Sample Query: Results Daily by Production type BOTH UNIT AND ANIMAL
+--                    THIS MAKES A DATASET WITH MANY COLUMNS
+--	Date:         3/19/2015
+--      By:           Schoenbaum, Missy
+--
+--      Notes: where clause 1=1 allows for easy editing of subsequent clauses
+--             where clause rowid < 100 allows for return of a subset of data, which is quicker when tuning
+--             -- allows for line to be commented  (omitted)
+--      Naming Conventions are built with the following abbreviations - wiki provides more documentation
+--      U = Unit A - Animal c - cumulative n - new w - waiting
+--      tsd - traistion state daily
+--      exp - exposure, from a contact method Air - airborn, Dir - direct or Ind - Indirect
+--      adq - adequate exposure to cause infection from a contact method Air - airborn, Dir - direct or Ind - Indirect
+--      inf - infection, which from a contact method Air - airborn, Dir - direct or Ind - Indirect
+--      det - detection, from Clin - clinical exam or Test - testing
+--      tr  - tracing of Dir - direct contact or Ind - Indirect  p indicates all possible traces
+--      exm - exam based on Dir - direct contact or Ind - Indirect and also forward - fwd or backwards back
+--      des - possibily cause by a RING trigger
+--      vac - vaccination possibily cause by a RING trigger
+----------------------------------------------------------------------------------------
+SELECT --*
+--r.id,  -- unique record identifier, not particularly useful
+iteration,
+day,
+--production_type_id -- not useful, instead use case statement to pull in real name or assign name
+CASE WHEN name IS NULL  THEN "ALL" ELSE  name END as productiontype,
+last_day,
+-- Transition State Daily  Unit
+tsdUSusc,
+tsdULat,
+tsdUSubc,
+tsdUClin,
+tsdUNImm,
+tsdUVImm,
+tsdUDest,
+-- Animal Level
+tsdAClin,
+tsdADest,
+tsdALat,
+tsdANImm,
+tsdASubc,
+tsdASusc,
+tsdAVImm,
+-- Exposure by UNIT COUNTS
+expcU,    -- NAMING EXAMPLE  Exposure Cumulative by Unit
+expcUAir,
+expcUDir,
+expcUInd,
+expnU,    -- NAMING EXAMPLE  Exposure New by Unit
+expnUAir,
+expnUDir,
+expnUInd,
+-- Exposure by ANIMAL COUNTS
+expcA,     -- NAMING EXAMPLE  Exposure Cumulative by Animal
+expcAAir,
+expcADir,
+expcAInd,
+expnA,     -- NAMING EXAMPLE  Exposure New by Animal
+expnAAir,
+expnADir,
+expnAInd,
+-- Adequate Exposure for Infection
+-- At a UNIT LEVEL ONLY
+adqcU,
+adqcUAir,
+adqcUDir,
+adqcUInd,
+adqnU,
+adqnUAir,
+adqnUDir,
+adqnUInd,
+-- Infection by Unit
+infcU,
+infcUAir,
+infcUDir,
+infcUInd,
+infcUIni,
+infnU,
+infnUAir,
+infnUDir,
+infnUInd,
+infnUIni,
+-- Infection by Animal
+infcA,
+infcAAir,
+infcADir,
+infcAInd,
+infcAIni,
+infnA,
+infnAAir,
+infnADir,
+infnAInd,
+infnAIni,
+-- Detection by Unit
+detcU,
+detcUClin,
+detcUTest,
+detnU,
+detnUClin,
+detnUTest,
+-- Detection by Animal
+detcA,
+detcAClin,
+detcATest,
+detnA,
+detnAClin,
+detnATest,
+-- Detection First and Last
+firstDetection,
+firstDetectionClin,
+firstDetectionTest,
+lastDetection,
+lastDetectionClin,
+lastDetectionTest,
+-- Tracing  by unit
+trcU,
+trcUDir,  -- remember, these were actually traced at some percentage LESS THAN 100%
+trcUDirp,  -- the p indicates a count of all POSSIBLE units that could have been traced - 100%
+trcUInd,
+trcUIndp,
+trcUp,
+trnU,
+trnUDir,
+trnUDirp,
+trnUInd,
+trnUIndp,
+trnUp,
+-- Tracing   by animal
+trcA,
+trcADir,
+trcADirp,
+trcAInd,
+trcAIndp,
+trcAp,
+trnA,
+trnADir,
+trnADirp,
+trnAInd,
+trnAIndp,
+trnAp,
+-- Exams by Unit, recall tracing must be used to do a clinical exam
+exmcU,
+exmcUDet,
+exmcUDirBack,
+exmcUDirFwd,
+exmcUIndBack,
+exmcUIndFwd,
+exmcURing,
+exmnU,
+exmnUDet,
+exmnUDirBack,
+exmnUDirFwd,
+exmnUIndBack,
+exmnUIndFwd,
+exmnURing,
+-- Exams by Animal
+exmcA,
+exmcADet,
+exmcADirBack,
+exmcADirFwd,
+exmcAIndBack,
+exmcAIndFwd,
+exmcARing,
+exmnA,
+exmnADet,
+exmnADirBack,
+exmnADirFwd,
+exmnAIndBack,
+exmnAIndFwd,
+exmnARing,
+-- Testing by Unit recall tracing must be used to do testing
+tstcU,
+tstcUDirBack,
+tstcUDirFwd,
+tstcUFalseNeg,
+tstcUFalsePos,
+tstcUIndBack,
+tstcUIndFwd,
+tstcUTrueNeg,
+tstcUTruePos,
+tstnU,
+tstnUDirBack,
+tstnUDirFwd,
+tstnUFalseNeg,
+tstnUFalsePos,
+tstnUIndBack,
+tstnUIndFwd,
+tstnUTrueNeg,
+tstnUTruePos,
+-- Testing by Animal
+tstcA,
+tstcADirBack,
+tstcADirFwd,
+tstcAIndBack,
+tstcAIndFwd,
+-- Destruction
+firstDestruction,
+firstDestructionDet,
+firstDestructionDirBack,
+firstDestructionDirFwd,
+firstDestructionIndBack,
+firstDestructionIndFwd,
+firstDestructionRing,
+-- Destruction by unit
+descU,
+descUDet,
+descUDirBack,
+descUDirFwd,
+descUIndBack,
+descUIndFwd,
+descUIni,
+descURing,
+desnU,
+desnUDet,
+desnUDirBack,
+desnUDirFwd,
+desnUIndBack,
+desnUIndFwd,
+desnUIni,
+desnURing,
+deswU,
+-- Destruction by animal
+descA,
+descADet,
+descADirBack,
+descADirFwd,
+descAIndBack,
+descAIndFwd,
+descAIni,
+descARing,
+desnA,
+desnADet,
+desnADirBack,
+desnADirFwd,
+desnAIndBack,
+desnAIndFwd,
+desnAIni,
+desnARing,
+deswA,
+-- Vaccination
+firstVaccination,
+firstVaccinationRing,
+-- Vaccination by Unit
+vaccU,
+vaccUIni,
+vaccURing,
+vacnU,
+vacnUIni,
+vacnURing,
+vacwU,
+vacwUDaysInQueue,
+vacwUMax,
+vacwUMaxDay,
+vacwUTimeAvg,
+vacwUTimeMax,
+-- Vaccination by Animal
+vaccA,
+vaccAIni,
+vaccARing,
+vacnA,
+vacnAIni,
+vacnARing,
+vacwA,
+vacwADaysInQueue,
+vacwAMax,
+vacwAMaxDay,
+vacwATimeAvg,
+vacwATimeMax
+FROM  Results_dailybyproductiontype r
+Left join    -- left join here because the NULL production type indcates ALL, note case statement to manage this
+ScenarioCreator_productiontype pt
+ on r.production_type_id = pt.id
+ -- Example of WHERE clause
+WHERE 1=1
+AND r.ROWID < 100
