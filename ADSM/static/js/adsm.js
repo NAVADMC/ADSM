@@ -279,6 +279,10 @@ $(function(){
             return false;
         }
     });
+    $('.defined').on('click', function(){
+        $('.defined').removeClass('focused')
+        $(this).addClass('focused');
+    });
 })
 
 //#####################################################################################//

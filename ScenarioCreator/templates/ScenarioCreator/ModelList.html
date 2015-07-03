@@ -17,12 +17,15 @@
                 <ul id="file_list">
                     
                     {% for entry in model.entries %}
-                        <li><a href="/setup/{{model.class}}/{{entry.pk}}/" load-target="#center-panel">{{ entry }}</a>
-                            {% if not 'Function' in  model.name %}
-                                <a href="#" class="delete-button pull-right" title="delete" data-delete-link="/setup/{{model.class}}/{{entry.pk}}/delete/"></a>
-                            {% endif %}
-                            <a href="/setup/{{model.class}}/{{entry.pk}}/copy/" load-target="#center-panel" class="copy-button pull-right" title="duplicate"></a>
-                            </li>
+                        <li class="defined">
+                            <div class="defined_wrapper">
+                                <a class="defined_name" href="/setup/{{model.class}}/{{entry.pk}}/" load-target="#center-panel">{{ entry }}</a>
+                                {% if not 'Function' in  model.name %}
+                                    <a href="#" class="delete-button pull-right" title="delete" data-delete-link="/setup/{{model.class}}/{{entry.pk}}/delete/"></a>
+                                {% endif %}
+                                <a href="/setup/{{model.class}}/{{entry.pk}}/copy/" load-target="#center-panel" class="copy-button pull-right" title="duplicate"></a>
+                            </div>
+                        </li>
                     {% endfor %}
 
                     <li class="addNew"><a href="/setup/{{model.class}}/new/" load-target="#center-panel"><i> + New {{ model.name }}</i></a></li>
