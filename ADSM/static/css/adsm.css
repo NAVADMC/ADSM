@@ -1118,14 +1118,12 @@ select {
     font-size: 13px;
     line-height:27px;
     text-decoration: none;
-    border-bottom: 1px solid #ebebeb;
     padding-left: 5px;
 }
 
 #file_list {
     list-style: none;
-    margin-top: 5px;
-    margin-bottom: 27px;
+    margin-bottom: 15px;
     max-width: 600px;
     position: relative;
 }
@@ -1212,8 +1210,6 @@ input[type=file], button {
     opacity: 1;
 }
 #file_list .defined{
-    padding-left: 5px;
-    margin-left: -5px;
     border-radius: 2px;
     margin-bottom: 2px;
 }
@@ -1259,6 +1255,7 @@ input[type=file], button {
 }
 .defined_name {
     display: block;
+    padding-left: 5px;
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1707,16 +1704,39 @@ th:hover .sortControls{
 }
 
 .model-banner {
-    background-color: #808080;
-    padding:5px 10px;
+    padding:5px 10px 0;
     color: white;
     font-size: 15px;
     max-width: 600px;
     line-height: 24px;
+    color: #404040;
+    position:relative;
+}
+.accordion-toggle:after{
+    content:"";
+    border-top: 6px solid #404040;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    position: absolute;
+    left: 0;
+    top: 14px;
+}
+.accordion-toggle.collapsed:after {
+    content:"";
+    border-top: 5px solid transparent;
+    border-left: 6px solid #404040;
+    border-bottom: 5px solid transparent;
+    position: absolute;
+    left: 3px;
+    top: 11px;
 }
 
 .model-banner a{
-    color:white;
+    color:#404040;
+    font-weight: 600;
+    display:block;
+    width: 100%;
+    padding-left: 5px;
 }
 
 .model-banner a:hover,
@@ -1724,15 +1744,16 @@ th:hover .sortControls{
     text-decoration: none;
     border: none;
     outline: 0;
-    background: #808080;
+    background: transparent;
 }
-
-a.collapsed img {
-    -webkit-transform: scaleY(-1);
+#left-panel .panel-group:not(:first-of-type) {
+    border-top: 1px solid #ccc;
 }
-
-.icon-flipped {
-    -webkit-transform: scaleX(-1);
+/*#left-panel .panel-group:last-of-type {
+    border-bottom: 1px solid #ccc;
+}*/
+.panel-group {
+    margin-bottom: 0;
 }
 
 table tbody span {
