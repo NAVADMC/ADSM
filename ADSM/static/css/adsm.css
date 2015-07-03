@@ -1254,14 +1254,14 @@ input[type=file], button {
 }
 #file_list .defined_wrapper {
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     padding-right: 45px;
     position:relative;
 }
 .defined_name {
     display: block;
     width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .defined_name:hover {
     cursor: default;
