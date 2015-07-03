@@ -2,7 +2,7 @@ import matplotlib
 
 from math import sqrt
 from ScenarioCreator.views import filtering_params
-from function_graphs import HttpFigure, rstyle
+from ScenarioCreator.function_graphs import HttpFigure, rstyle
 
 
 from time import time
