@@ -621,10 +621,12 @@ function check_disabled_controls() {
 };
 
 function reload_model_list($form) {
-    var action = $form.attr('action');
     $('#left-panel').load(window.location + " #left-panel>*")
-    if(action.indexOf('ProductionGroup') != -1 || action.indexOf('ProductionType') != -1){
-        $('#population_panel').load("/setup/OutputSettings/1/ #population_panel>*")
+    if(typeof $form !== 'undefined'  && $form.length){
+        var action = $form[0]['action'] //.attr('action');
+        if(action.indexOf('ProductionGroup') != -1 || action.indexOf('ProductionType') != -1){
+            $('#population_panel').load("/setup/OutputSettings/1/ #population_panel>*")
+        }
     }
 }
 
@@ -705,18 +707,21 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
         cache: false,
         contentType: false,
         processData: false,
-        success: function (form_html, $self) {
+        success: function (form_html) {
             $('.scenario-status').addClass('unsaved')
             // Here we replace the form, for the
             if ($self.closest('#main-panel').length) { //in the main panel, just reload the page
                 $('#main-panel').html($(form_html).find('#main_panel')[0])
             } else {
-                load_target.replaceWith(form_html)
                 if (formAction.lastIndexOf('new/') != -1) { //new model created
-                    var lastClickedSelect = get_parent_select($self);
-                    add_model_option_to_selects(form_html, lastClickedSelect)
-                    reload_model_list($self);
+                    if($self.closest('.layout-panel').attr('id') == 'center-panel'){
+                        reload_model_list($self); //reload left
+                    }else{
+                        var lastClickedSelect = get_parent_select($self);
+                        add_model_option_to_selects(form_html, lastClickedSelect)
+                    }
                 }
+                load_target.replaceWith(form_html)
                 reload_image(load_target)
             }
         },
