@@ -9,20 +9,21 @@
         <div class="panel-group" id="accordion-{{forloop.counter}}">
             <div class="model-banner">
                 <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-{{forloop.counter}}" href="#sub-model{{forloop.counter}}">{{ model.name }}
-                <span class="pull-right">
-                    <img class="icon" src="{{ STATIC_URL }}icons/collapse.png" alt="collapse" />
-                </span></a>
+                </a>
             </div>
             <div id="sub-model{{forloop.counter}}" class="panel-collapse collapse in" style="height: auto;">
                 <ul id="file_list">
                     
                     {% for entry in model.entries %}
-                        <li><a href="/setup/{{model.class}}/{{entry.pk}}/" load-target="{{load_target}}">{{ entry }}</a>
-                            {% if not 'Function' in  model.name %}
-                                <a href="#" class="delete-button pull-right" title="delete" data-delete-link="/setup/{{model.class}}/{{entry.pk}}/delete/"></a>
-                            {% endif %}
-                            <a href="/setup/{{model.class}}/{{entry.pk}}/copy/" load-target="{{load_target}}" class="copy-button pull-right" title="duplicate"></a>
-                            </li>
+                        <li class="defined">
+                            <div class="defined_wrapper">
+                                <a class="defined_name" href="/setup/{{model.class}}/{{entry.pk}}/" load-target="{{load_target}}">{{ entry }}</a>
+                                {% if not 'Function' in  model.name %}
+                                    <a href="#" class="delete-button pull-right" title="delete" data-delete-link="/setup/{{model.class}}/{{entry.pk}}/delete/"></a>
+                                {% endif %}
+                                <a href="/setup/{{model.class}}/{{entry.pk}}/copy/" load-target="{{load_target}}" class="copy-button pull-right" title="duplicate"></a>
+                            </div>
+                        </li>
                     {% endfor %}
 
                     <li class="addNew"><a href="/setup/{{model.class}}/new/" load-target="{{load_target}}"><i> + New {{ model.name }}</i></a></li>

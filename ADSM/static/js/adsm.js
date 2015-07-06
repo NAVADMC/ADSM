@@ -297,6 +297,10 @@ $(document).on('submit', '.ajax', function(event) {
             return false;
         }
     });
+    $('.defined').on('click', function(){
+        $('.defined').removeClass('focused')
+        $(this).addClass('focused');
+    });
 })
 
 //#####################################################################################//
