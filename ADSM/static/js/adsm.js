@@ -228,7 +228,7 @@ $(document).on('submit', '.ajax', function(event) {
                                 window.location = link;
                             } else {//neither tag
                                 $.post(link).done(function () {
-                                    clear_form_populate_panel($containing_panel)
+                                    clear_form_populate_panel($containing_panel, link)
                                     var newLink = '/setup/' + link.split('/')[2] + '/new/' //[2] model name
                                     var pk = link.split('/')[3];
                                     // remove option pointing to delete model
@@ -672,19 +672,28 @@ function prompt_for_new_file_name(link) {
     });
 }
 
-function clear_form_populate_panel($container_panel) {
+function clear_form_populate_panel($container_panel, delete_link) {
     if($container_panel.hasClass('layout-panel') == false //not a layout-panel
-            && $container_panel.closest('.layout-panel').attr('id') == 'functions_panel') { //inside function panel
+            && $container_panel.closest('.layout-panel').attr('id') != 'population_panel') { //inside function panel or left-panel
         $container_panel = $container_panel.closest('.layout-panel') //upgrade to function panel
     }
-    if ($container_panel.attr('id') == 'functions_panel') {
+    var panel_id = $container_panel.attr('id');
+    if (panel_id == 'functions_panel') {
         //load list of functions instead of blank
         $.get('/setup/Function/', function (newForm) {
             var $newForm = $($.parseHTML(newForm));
             $container_panel.html($newForm)
         })
-    } else { //will still clear Create Group form inside of population_panel without destroying the whole panel
-        $container_panel.html('') //delete everything from the div containing the form
+    } else {
+        if(panel_id == 'left-panel') {
+            reload_model_list();
+            var primary_key = delete_link.split('/')[3];
+            if(typeof delete_link !== 'undefined' && $('#center-panel form').attr('action').indexOf(primary_key) != -1){
+                $('#center-panel').html('')
+            }
+        } else { //will still clear Create Group form inside of population_panel without destroying the whole panel
+            $container_panel.html('') //delete everything from the div containing the form
+        }
     }
 }
 
