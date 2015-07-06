@@ -359,6 +359,8 @@ def copy_entry(request, primary_key):
         return relational_function(request, primary_key, doCopy=True)
     try:
         initialized_form, model_name = initialize_from_existing_model(primary_key, request)
+        if 'name' in initialized_form:
+            initialized_form.initial['name'] += " - Copy"
     except ObjectDoesNotExist:
         return redirect('/setup/%s/new/' % model_name)
     context = {'form': initialized_form, 
