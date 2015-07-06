@@ -92,7 +92,7 @@ select:required, input:required, textarea:required {
     box-shadow: inset 0px 0px 6px 2px rgba(0, 0, 0, .1);
     padding-left: 5px;
     -webkit-appearance: none;
-    height: 63px;
+    /* height: 63px; */
     border-radius: 0;
     margin-left: 0;
 }
