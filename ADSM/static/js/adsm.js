@@ -66,6 +66,11 @@ $(function(){
     $(document).on('click', 'a[load-target]', function(event){
         event.preventDefault()
         var selector = $(this).attr('load-target')
+
+        //Wait until a problem comes up betwee 'active' and ':focus' to fix this
+        //$input.closest('.layout-panel').find('.defined').removeClass('focused')
+        //$(this).closest('.defined').addClass('focused');//?????????????????????????????????
+
         $(this).closest('.layout-panel').find('a').removeClass('active')  // nix .active from the earlier select
         $(this).addClass("active")  //@tjmahlin use .active to to style links between panels
         $(selector).load($(this).attr('href'), open_panel_if_needed)
@@ -384,7 +389,7 @@ function populate_pdf_panel(select) {
         url = url.replace('new', $input.val());//will edit already existing model
     $(load_target).load(url)
     $input.closest('.layout-panel').find('select').removeClass('active')  // nix .active from the earlier select
-    $input.addClass("active")  //@tjmahlin use .active to to style links between panels 
+    $input.addClass("active")  //@tjmahlin use .active to to style links between panels
 }
 
 
@@ -700,7 +705,7 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
         cache: false,
         contentType: false,
         processData: false,
-        success: function (form_html) {
+        success: function (form_html, $self) {
             $('.scenario-status').addClass('unsaved')
             // Here we replace the form, for the
             if ($self.closest('#main-panel').length) { //in the main panel, just reload the page
