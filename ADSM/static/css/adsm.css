@@ -419,11 +419,7 @@ section#left-panel h1:first-of-type,
     display: none;
 }
 #center-panel .fragment {
-    /*margin-left: 25px;*/
-    box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
-    padding: 0 20px 10px 20px;
-    border: 1px solid #cec7c0;
-    margin-right: 25px;
+    padding: 0 45px 10px 20px;
 }
 #center-panel .fragment form {
     margin-top: 10px;
@@ -434,6 +430,52 @@ section#left-panel h1:first-of-type,
 ul {
     padding-left: 5px; /*prevent style inheritance from above*/
 }
+
+/*---- 2nd-to-3rd-column linking ----*/
+
+#center-panel .control-group {
+    position:relative;
+}
+#center-panel .active {
+    border: 2px solid #cec7c0;
+}
+#center-panel .active_linking:after { /*--- right-linking line inside container --*/
+    content:"";
+    position: absolute;
+    right: -20px;
+    top: 29px;
+    display: block;
+    width: 20px;
+    height: 2px;
+    background-color: #cec7c0;
+}
+#center-panel .active_linking:before { /*-- link graphic between center and right columns --*/
+    content:"";
+    position: absolute;
+    right: -45px;
+    top: 20px;
+    display: block;
+    width: 25px;
+    height: 20px;
+    background-color: rgba(206, 199, 192, .5);
+    border-top: 1px solid #cec7c0;
+    border-bottom: 1px solid #cec7c0;
+    background-image: url('../icons/link_icon.png');
+    background-repeat: no-repeat;
+    background-position: 3px 5px;
+    
+}
+.reveal:before {
+    content: "";
+    position:absolute;
+    top: 0;
+    left: 0;
+    width: calc(100% - 25px);
+    height: 100%;
+    box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
+    border: 1px solid #cec7c0;
+}
+
 
 /*-------------------------------------------------------------*/
 /*-----TOOLBAR-----*/
@@ -2011,7 +2053,6 @@ select[multiple] {}
         min-width: 0;
     }
 }
-/*---- 1st column hover styling ----*/
 
 
 

@@ -29,6 +29,7 @@ $(function(){
         $(this).closest('.layout-panel').find('a').removeClass('active')  // nix .active from the earlier select
         $(this).addClass("active")  //@tjmahlin use .active to to style links between panels
         $(selector).load($(this).attr('href'), open_panel_if_needed)
+        $('#center-panel').addClass('reveal') //allows toggle of box shadow on :before pseudo element
     })
     
     $(document).on('click', '[data-click-toggle]', function(){
@@ -353,6 +354,7 @@ function populate_pdf_panel(select) {
     var position = $input.closest('.layout-panel').attr('id');
     if(position == 'left-panel'){ //use the center-panel if this is from left
         load_target = '#center-panel'
+        $('#center-panel').addClass('reveal') //allows toggle of box shadow on :before pseudo element
     }else if(position == 'right-panel'){ // we've run out of room and must use a modal
         modelModal.show($input);
         return
@@ -363,6 +365,8 @@ function populate_pdf_panel(select) {
     $(load_target).load(url)
     $input.closest('.layout-panel').find('select').removeClass('active')  // nix .active from the earlier select
     $input.addClass("active")  //@tjmahlin use .active to to style links between panels 
+    $input.closest('.layout-panel').find('.controls').removeClass('active_linking') //made by tjmahlin - remove .active_linking from earlier select parent
+    $input.parent('.controls').addClass("active_linking") //add .active_linking class to .active select parent in order to creat linking style between center and right column
 }
 
 
