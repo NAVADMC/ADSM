@@ -507,7 +507,7 @@ function add_model_option_to_selects(html, selectInput) {
     var pk = action.split('/')[3]; //the edit action URL has the pk in it
     var model_link = action.replace(pk, 'new'); //for targetting other selects
     var title = 'Newest Entry';
-    try { //TODO: there's a possibility of a form without a name field, in this case the python str() method is preferrable
+    try {
         title = $(html).find('input[type="text"]').first().val();
     } catch (e) { }
 

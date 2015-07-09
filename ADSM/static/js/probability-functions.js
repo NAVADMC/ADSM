@@ -25,4 +25,16 @@ $(document).ready( function(){
     });
     hide_unneeded_probability_fields();
 
+
+    $(document).on('click', '.edit-button', function(){
+        $('#functions_panel .buttonHolder').removeAttr('hidden')
+        //$('#population_grid_wraper').css('height', 'calc(100vh - 123px')
+        //$('#edit-mask').css('visibility', 'visible')
+        //$('#farm_list tbody').css('height', 'calc(100vh - 214px)')
+        $('.edit-button').css('display', 'none') //TODO: fold out transition
+        $('#functions_panel, #functions_panel input').addClass('editable')
+        $('#functions_panel :input').addClass('editable')
+        //$('#tb_mask').css('visibility', 'visible')
+        $('#functions_panel').css('pointer-events','all') //TODO: necessary?
+    })
 });

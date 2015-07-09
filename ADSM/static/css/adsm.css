@@ -726,9 +726,22 @@ ul {
 .list-button:hover {
     cursor: pointer;
 }
+
+#functions_panel input[type="checkbox"] {
+    display: none;
+}
+
+#functions_panel input[type="checkbox"].editable {
+    display: inline-block;
+}
 #functions_panel .buttonHolder:first-of-type {
     margin-top: 15px;
     margin-bottom: 4px;
+
+}
+#functions_panel .buttonHolder:last-of-type {
+    /* position: fixed; */
+    /* bottom: 10px; */
 }
 /*-------------------------------------------------------------*/
 /*-----navigation menu-----*/
@@ -1422,6 +1435,8 @@ section#population_main_panel h1:first-of-type {
 #clear_fitlers {
     margin-top: -10px;
 }
+
+/*************** Farm_list **********/
 #farm_list_container{
     float: right;
     width: 49.98vw;
@@ -1512,24 +1527,31 @@ section#population_main_panel h1:first-of-type {
     background-image: none;
 }
 
-#farm_list select {
+#farm_list select,
+#functions_panel select {
     -webkit-appearance: none;
     background-color: transparent;
     padding-left: 10px;
     pointer-events: none;
     box-shadow:none;
 }
-#farm_list input {
+#farm_list input,
+#functions_panel textarea,
+#functions_panel input{
     background-color: transparent;
     padding-left: 10px;
     pointer-events: none;
     box-shadow: none;
+    border: 0px;
 }
-#farm_list select.editable {
+#farm_list select.editable,
+#functions_panel select.editable{
     -webkit-appearance: menulist;
     pointer-events: all;
 }
-#farm_list input.editable {
+#farm_list input.editable,
+#functions_panel textarea.editable,
+#functions_panel input.editable {
     border: 1px solid #ccc;
     pointer-events: all;
 }
