@@ -64,7 +64,7 @@ class BaseForm(ModelForm):
     def __init__(self, *args, **kwargs):
         if not hasattr(self, 'helper'):  # so as not to override specific layouts
             self.helper = FormHelper()
-            fields_and_submit = list(self.base_fields.keys()) + [submit_button()]
+            fields_and_submit = list(self.base_fields.keys()) #+ [submit_button()]
             self.helper.layout = Layout(*fields_and_submit)
 
         super(BaseForm, self).__init__(*args, **kwargs)
@@ -364,7 +364,6 @@ class IndirectSpreadForm(BaseForm):
             'distance_distribution',
             'transport_delay',
             'movement_control',
-            submit_button()
         )
         super(IndirectSpreadForm, self).__init__(*args, **kwargs)
 
@@ -392,7 +391,6 @@ class DirectSpreadForm(BaseForm):
             'distance_distribution',
             'transport_delay',
             'movement_control',
-            submit_button()
         )
         super(DirectSpreadForm, self).__init__(*args, **kwargs)
         
@@ -420,7 +418,6 @@ class AirborneSpreadForm(BaseForm):
             'exposure_direction_start',
             'exposure_direction_end',
             'transport_delay',
-            submit_button()
         )
         super(AirborneSpreadForm, self).__init__(*args, **kwargs)
         
@@ -459,7 +456,6 @@ class OutputSettingsForm(BaseForm):
             'save_daily_events',
             'save_daily_exposures',
             'save_map_output',
-            submit_button()
         )
         super(OutputSettingsForm, self).__init__(*args, **kwargs)
 

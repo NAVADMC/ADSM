@@ -1,4 +1,14 @@
+{% if backlinks %}
+    <h3>Referenced by:</h3>
+    <ul>
+        {% for text, link in backlinks.items %}
+            <li><a load-target="#center-panel" href="{{ link }}">{{ text }}</a></li>
+        {% endfor %}
+    </ul>    
+{% endif %}
+
 <div class="buttonHolder">
+    <button type="button" class="btn btn-success edit-button">Edit</button>
     {% if outputs_exist %}
         <button type="submit" class="btn btn-danger btn-save" id="submit-id-submit">Delete Results and Apply changes</button>
     {% else %}

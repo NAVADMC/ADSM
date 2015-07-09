@@ -13,7 +13,7 @@
     <input type="file" id="file" name="file" accept=".csv">
 
     {% include "ScenarioCreator/RelationalEmbeddedFormset.html" %}
-    {% include "ScenarioCreator/EditButtons.html" %}
+    {% include "ScenarioCreator/ViewEditButtons.html" %}
     <script>
         $(document).on('submit', '#relational-form', function(){
             $('#formset tbody tr').each(function(){

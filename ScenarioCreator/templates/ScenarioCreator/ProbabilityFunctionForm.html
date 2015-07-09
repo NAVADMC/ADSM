@@ -4,15 +4,17 @@
 {% load db_status_tags %}
 
 {% block content %}
+    <script src="{{ STATIC_URL }}js/probability-functions.js"></script>
+
     {% if action %}
         <form class="ajax" action="{{ action }}">
             {% crispy form %}
-            {% include "ScenarioCreator/EditButtons.html" %}
+            {% include "ScenarioCreator/ViewEditButtons.html" %}
         </form>
     {% else %}
         <form>
             {% crispy form %}
-            {% include "ScenarioCreator/EditButtons.html" %}
+            {% include "ScenarioCreator/ViewEditButtons.html" %}
         </form>
     {% endif %}
 {% endblock %}
