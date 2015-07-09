@@ -375,8 +375,6 @@ body>nav {
 }
 #center-panel,
 #center-panel .fragment,
-#right-panel,
-#right-panel .fragment,
 #functions_panel,
 #functions_panel .fragment {
     overflow-x: hidden; /*no scrollbars*/
@@ -580,7 +578,7 @@ ul {
     top: 0;
     margin-right: 50px;
     width: calc(33.333vw - 75px);
-    max-width: 460px;
+    /* max-width: 460px; */
     overflow-y: auto;
     -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
     border: 1px solid #cec7c0;
