@@ -1,0 +1,37 @@
+-----------------------------------------------------------------------------------------------
+--	Sample Query: Results Daily Controls  - Costs Only
+--	Date:         3/19/2015
+--      By:           Schoenbaum, Missy
+--
+--      Notes: where clause 1=1 allows for easy editing of subsequent clauses
+--             where clause rowid < 100 allows for return of a subset of data, which is quicker when tuning
+--             -- allows for line to be commented  (omitted)
+--             Duration = -1 means no time was accumulated
+----------------------------------------------------------------------------------------
+SELECT  -- *
+iteration,
+day,
+last_day,
+-- Outbeak details
+diseaseDuration,
+outbreakDuration,
+-- Costs
+destrCleaning,
+destrIndemnification,
+destrSubtotal,
+vaccVaccination,
+vaccSetup,
+vaccSubtotal,
+costSurveillance,  -- this is for all zones and production types
+destrAppraisal,
+destrEuthanasia,
+destrDisposal,
+costsTotal
+FROM results_dailycontrols r
+-- Examples of where clause
+WHERE 1=1
+AND r.ROWID < 100
+--AND last_day = 0 -- this makes LAST_DAY = False
+--AND last_day = 1  -- this makes LAST_DAY = True
+ORDER BY -- Allows organization of results
+1, 2, 3

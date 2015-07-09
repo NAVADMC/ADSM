@@ -13,6 +13,8 @@ urlpatterns = patterns('', url('^AssignSpreads/$', 'ScenarioCreator.views.assign
          url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario'),
          url('^ProductionTypeList.json/$', 'ScenarioCreator.views.production_type_list_json'),
          url('^DisableAllControls.json/$', 'ScenarioCreator.views.disable_all_controls_json'),
+         url('^ProbabilityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph'),
+         url('^RelationalFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.relational_graph'),
          url('^BaseModel/$',                      'ScenarioCreator.views.model_list'),
          url('^BaseModel/new/$',                  'ScenarioCreator.views.new_entry'),
          url('^BaseModel/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),

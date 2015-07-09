@@ -91,7 +91,7 @@ def delete_repo(sender, instance, **kwargs):
 
 class BaseModel(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        ADSMSettings.models.unsaved_changes(True) 
+        ADSMSettings.models.unsaved_changes(True)
         delete_all_outputs()
         return super(BaseModel, self).save(force_insert, force_update, using, update_fields)
 

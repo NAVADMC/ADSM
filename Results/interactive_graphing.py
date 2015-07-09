@@ -23,7 +23,8 @@ from django.db.models import Max
 from Results.models import Unit
 from Results.utils import is_simulation_stopped
 from Results.summary import list_of_iterations
-from Results.graphing import rstyle, population_png
+from Results.graphing import population_png
+from ScenarioCreator.function_graphs import rstyle
 from ADSMSettings.utils import workspace_path, scenario_filename
 from ScenarioCreator.models import Zone
 

@@ -5,13 +5,14 @@
 
 {% block content %}
 <form id="relational-form" class="ajax"  method="post" action="{{ action }}" enctype="multipart/form-data">
-    
-{#    <h2 id="title">{{ title }}</h2>#}
+
+    <img id="function-graph" src="{{action}}graph.png" class="img-responsive">
+
     {% crispy form %}
     <label for="file">Or Import Points from File... &nbsp</label>    
     <input type="file" id="file" name="file" accept=".csv">
 
-    {% include "ScenarioCreator/EmbeddedFormset.html" %}
+    {% include "ScenarioCreator/RelationalEmbeddedFormset.html" %}
     {% include "ScenarioCreator/EditButtons.html" %}
     <script>
         $(document).on('submit', '#relational-form', function(){

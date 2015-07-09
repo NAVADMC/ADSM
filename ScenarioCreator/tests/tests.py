@@ -87,8 +87,9 @@ class ModelUtilsTest(TestCase):
         self.assertEqual(unit_count, Unit.objects.all().count())
 
     def test_population_link(self):
+        from ScenarioCreator.tests.test_parser import POPULATION_FIXTURES
         index = Unit.objects.count()
-        p = Population(source_file=workspace_path('Population_Grid.xml'))
+        p = Population(source_file=POPULATION_FIXTURES + 'Population_Grid.xml')
         p.save()
 
         new_unit = p.unit_set.first()

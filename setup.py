@@ -17,6 +17,7 @@ build_exe_options = {
     'build_exe': 'build',
     'optimize': 2,
     'excludes': [
+        # CHANGE ME for any python packages in your project that you want excluded
         'development_scripts',
     ],
     'includes': [
@@ -31,13 +32,16 @@ build_exe_options = {
     'replace_paths': [('*', '')],
     'compressed': False,
     'include_files': [
+        # Standard Django items to bring in
         ('static', 'static'),
         ('media', 'media'),
         ('bin', 'bin'),
-        ('Viewer', 'Viewer'),
+        ('Viewer', 'Viewer'),  # Newline's View application for Django Desktop Core
+
+        # CHANGE ME for any files/folders you want included with your project
         ('Sample Scenarios', 'Sample Scenarios'),
     ],
-    'include_msvcr': True
+    'include_msvcr': True  # CHANGE ME depending on if your project has licensing that is compatible with Microsoft's redistributable license
 }
 
 
@@ -160,7 +164,7 @@ class BuildADSM(build_exe):
                  if os.path.isfile(os.path.join(settings.BASE_DIR, self.build_exe, file)))
         os.makedirs(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
         for file in files:
-            if file not in ['ADSM.exe', 'library.zip']:
+            if file not in ['ADSM.exe', 'library.zip', 'python34.dll', 'MSVCR100.dll']:  # TODO: This line is ADSM specific
                 shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, file),
                             os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file))
 
@@ -178,6 +182,9 @@ setup(name='ADSM',
                'install_exe': {'build_dir': build_exe_options['build_exe']}},
       executables=[Executable('ADSM.py', base=base), ],
       cmdclass=cmdclass,
-      )
+      )  # TODO: install_requires should read in the requirements files per os
 
+# Cleanup step after any sort of setup operation
+# TODO: See if this causes issues at the end of an 'install' command.
+# If so, override the msi build command and put this at the end of the normal build and the installer build
 remove_empty_folders(os.path.join(settings.BASE_DIR, build_exe_options['build_exe']))

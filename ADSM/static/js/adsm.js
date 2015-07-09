@@ -3,14 +3,54 @@ $(function(){
     check_disabled_controls();
 
     $(document).on('click', 'form.ajax .btn-cancel', function(){
-        var container = $(this).closest('form').closest('div');
-        if(container.closest('.layout-panel').attr('id') == 'main-panel'){
+        var $container = $(this).closest('form').closest('div');
+        if($container.closest('.layout-panel').attr('id') == 'main-panel'){
             window.location.reload()
         }else{
-            container.html('') //delete everything from the div containing the form
+            clear_form_populate_panel($container);
         }
     })
-    
+
+    $(document).on('click', '#assign-function', function(){
+        var $form = $(this).closest('.layout-panel').find('form')
+        if($form.length){
+            $form = $form.first()
+            var action = $form.attr('action')
+            var model = action.split('/')[2]
+            var pk = action.split('/')[3] //the edit action URL has the pk in it
+            var parent_select = get_parent_select($form)
+            $(this).popover('destroy')
+            if(parent_select != null){
+                if(parent_select.attr('data-new-item-url').indexOf(model) != -1){ //correct model
+                    if(pk != 'new'){
+                        parent_select.val(pk)
+                        parent_select.closest('.layout-panel').find('.btn-save').removeAttr('disabled')
+                    }
+                }else{
+                    $(this).popover({'content': "Cannot assign a probability function to a relational field, or vice versa",
+                                     'trigger': 'focus'}) //placement bottom would be nice, but it gets cut off by the panel
+                    $(this).popover('show')
+                }
+            }else{
+                $(this).popover({'content': "No active fields to assign",
+                                 'trigger': 'focus'})
+                $(this).popover('show')
+            }
+        }
+    })
+
+    $(document).on('click', '#functions_panel span', function(event){
+        $('.function_dropdown').removeClass('in');
+    })
+
+    //$(document).on('change', '#functions_panel input', function(event){
+    //    var $form = $(this).closest('form')
+    //    var load_target = $('#function-graph')
+    //    var formAction = load_target.attr('src');
+    //    var formData = new FormData($form[0])
+    //    ajax_submit_complex_form_and_replaceWith(formAction, formData, $form, load_target);
+    //})
+
     $(document).on('click', '.TB_btn', function(){
         var already_open = $(this).hasClass('active') //check before altering anything
         $('.TB_btn.active').removeClass('active') //close anything that might be open
@@ -26,6 +66,11 @@ $(function(){
     $(document).on('click', 'a[load-target]', function(event){
         event.preventDefault()
         var selector = $(this).attr('load-target')
+
+        //Wait until a problem comes up betwee 'active' and ':focus' to fix this
+        //$input.closest('.layout-panel').find('.defined').removeClass('focused')
+        //$(this).closest('.defined').addClass('focused');//?????????????????????????????????
+
         $(this).closest('.layout-panel').find('a').removeClass('active')  // nix .active from the earlier select
         $(this).addClass("active")  //@tjmahlin use .active to to style links between panels
         $(selector).load($(this).attr('href'), open_panel_if_needed)
@@ -36,39 +81,17 @@ $(function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });
 
-    $(document).on('submit', '.ajax', function(event) {
-        event.preventDefault();
-        var $self = $(this)
-        var formAction = $(this).attr('action');
-        var formData = new FormData($self[0])
-        $.ajax({
-            url: formAction,
-            type: "POST",
-            data: formData,
-            cache: false,
-            contentType: false,
-            processData: false,
-            success: function(form_html) {
-                $('.scenario-status').addClass('unsaved')
-                // Here we replace the form, for the
-                if($self.closest('#main-panel').length){ //in the main panel, just reload the page
-                    $('#main-panel').html($(form_html).find('#main_panel')[0])
-                }else{
-                    $self.replaceWith(form_html)
-                    if(formAction.lastIndexOf('new/') != -1){ //new model created
-                        var lastClickedSelect = get_parent_select($self);
-                        add_model_option_to_selects(form_html, lastClickedSelect)
-                        reload_model_list($self);
-                    }
-                }
-            },
-            error: function () {
-                $self.find('.error-message').show()
-            }
-        }).always(function() {
-            $('.blocking-overlay').hide();
-        });
-    })
+$(document).on('submit', '.ajax', function(event) {
+    event.preventDefault();
+    var $self = $(this)
+    var formAction = $(this).attr('action');
+    var formData = new FormData($self[0])
+    var load_target = $self
+    if($self.parent().hasClass('fragment')){
+        load_target = $self.parent()
+    }
+    ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target);
+})
     
     $(document).on('click', '#update_adsm', function(event){
         $(this).removeClass('loading_button')
@@ -124,7 +147,7 @@ $(function(){
     $(document).on('change focus', '[data-new-item-url]', function(event){
         //this needs to ignore the event if it's in the right panel, since that will open a modal
         //#422 "Edits" in the far right will open a modal, since we've run out of space
-        if($(this).val() == 'data-add-new' || $(this).closest('.layout-panel').attr('id') != 'right-panel'){
+        if($(this).val() == 'data-add-new' || $(this).closest('.layout-panel').attr('id') != 'functions_panel'){
             populate_pdf_panel(this);
         }
     });
@@ -206,7 +229,7 @@ $(function(){
                                 window.location = link;
                             } else {//neither tag
                                 $.post(link).done(function () {
-                                    $containing_panel.html('')
+                                    clear_form_populate_panel($containing_panel, link)
                                     var newLink = '/setup/' + link.split('/')[2] + '/new/' //[2] model name
                                     var pk = link.split('/')[3];
                                     // remove option pointing to delete model
@@ -350,12 +373,16 @@ function populate_pdf_panel(select) {
     var $input = $(select)
     if($input.hasClass('grouplist') || $input.hasClass('productiontypelist'))  //grouplist uses the population_panel instead
         return;
-    var load_target = '#right-panel'
-    var position = $input.closest('.layout-panel').attr('id');
-    if(position == 'left-panel'){ //use the center-panel if this is from left
+    var load_target = '#functions_panel #current-function'
+    var origin = $input.closest('.layout-panel').attr('id');
+    if(origin == 'left-panel') { //use the center-panel if this is from left
         load_target = '#center-panel'
         $('#center-panel').addClass('reveal') //allows toggle of box shadow on :before pseudo element
-    }else if(position == 'right-panel'){ // we've run out of room and must use a modal
+    }
+    if(origin == 'center-panel'){
+        $('#functions_panel').removeClass('TB_panel_closed')
+    }
+    if(origin == 'functions_panel'){ // we've run out of room and must use a modal
         modelModal.show($input);
         return
     }
@@ -373,7 +400,7 @@ function populate_pdf_panel(select) {
 function get_parent_select($self) {
     var parent = null
     var $inDomElement = $( '#'+ $self.find('input').last().attr('id') ) //grab the matching form from the DOM
-    var actives = $inDomElement.closest('.layout-panel').prev('.layout-panel').find('select.active')
+    var actives = $inDomElement.closest('.layout-panel').prevAll('.layout-panel').first().find('select.active')
     if(actives.length){
         parent = actives.first()
     }
@@ -472,8 +499,7 @@ two_state_button = function(){
 
 
 function contains_errors(html) {
-    return $(html).find('span.error-inline').length  //TODO: more specific class
-    
+    return $(html).find('span.error-inline').length
 }
 
 function add_model_option_to_selects(html, selectInput) {
@@ -490,6 +516,12 @@ function add_model_option_to_selects(html, selectInput) {
     if(selectInput != null){
         selectInput.val(pk); // select option for select that was originally clicked
     }
+    //add functions to their panel lists
+    var $new_link = $('.function_dropdown [href="' + model_link + '"]')
+    var $back_link = $new_link.clone()
+    $back_link.attr('href', $back_link.attr('href').replace('new', pk))
+    $back_link.text(title)
+    $new_link.parent().after($('<li>' + $back_link.prop('outerHTML') + '</li>')); // Add new link with all properties
 }
 
 var modelModal = {
@@ -593,10 +625,12 @@ function check_disabled_controls() {
 };
 
 function reload_model_list($form) {
-    var action = $form.attr('action');
     $('#left-panel').load(window.location + " #left-panel>*")
-    if(action.indexOf('ProductionGroup') != -1 || action.indexOf('ProductionType') != -1){
-        $('#population_panel').load("/setup/OutputSettings/1/ #population_panel>*")
+    if(typeof $form !== 'undefined'  && $form.length){
+        var action = $form[0]['action'] //.attr('action');
+        if(action.indexOf('ProductionGroup') != -1 || action.indexOf('ProductionType') != -1){
+            $('#population_panel').load("/setup/OutputSettings/1/ #population_panel>*")
+        }
     }
 }
 
@@ -604,10 +638,9 @@ function check_if_TB_panel_form_mask_needed(){  // I'm currently assuming that a
     var button = $('.TB_panel form .btn-cancel')  //cancellable form was the most specific thing I could think of
     if(button.length && button.closest('form').length){
         var $form = $(button.closest('form'))
-        var mask = $('<div class="modal-backdrop fade in"></div>');
-        $('#toolbar').after(mask)
-        $form.find('.btn-cancel').click(function(){mask.hide()})
-        $form.find('.btn-save').click(function(){mask.hide()})
+        $('.panel-backdrop').show()
+        $form.find('.btn-cancel').click(function(){$('.panel-backdrop').hide()})
+        $form.find('.btn-save').click(function(){$('.panel-backdrop').hide()})
         $form.closest('.TB_panel').css('z-index', 1050)  // can't seem to bring out a smaller sub component with z-index
     }
 }
@@ -643,3 +676,72 @@ function prompt_for_new_file_name(link) {
     });
 }
 
+function clear_form_populate_panel($container_panel, delete_link) {
+    if($container_panel.hasClass('layout-panel') == false //not a layout-panel
+            && $container_panel.closest('.layout-panel').attr('id') != 'population_panel') { //inside function panel or left-panel
+        $container_panel = $container_panel.closest('.layout-panel') //upgrade to function panel
+    }
+    var panel_id = $container_panel.attr('id');
+    if (panel_id == 'functions_panel') {
+        //load list of functions instead of blank
+        $.get('/setup/Function/', function (newForm) {
+            var $newForm = $($.parseHTML(newForm));
+            $container_panel.html($newForm)
+        })
+    } else {
+        if(panel_id == 'left-panel') {
+            reload_model_list();
+            var primary_key = delete_link.split('/')[3];
+            if(typeof delete_link !== 'undefined' && $('#center-panel form').attr('action').indexOf(primary_key) != -1){
+                $('#center-panel').html('')
+            }
+        } else { //will still clear Create Group form inside of population_panel without destroying the whole panel
+            $container_panel.html('') //delete everything from the div containing the form
+        }
+    }
+}
+
+
+function reload_image(load_target) {
+    var target = load_target.find('form')
+    if(target.attr('id') == 'relational-form' || target.attr('id') == 'relational-form'){
+        var img = $('#function-graph'); //newly placed image
+        d = new Date();
+        var new_src = img.attr("src") + "?" + d.getTime();
+        img.attr("src", new_src);
+    }
+}
+
+function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target) {
+    $.ajax({
+        url: formAction,
+        type: "POST",
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function (form_html) {
+            $('.scenario-status').addClass('unsaved')
+            // Here we replace the form, for the
+            if ($self.closest('#main-panel').length) { //in the main panel, just reload the page
+                $('#main-panel').html($(form_html).find('#main_panel')[0])
+            } else {
+                if (formAction.lastIndexOf('new/') != -1) { //new model created
+                    if($self.closest('.layout-panel').attr('id') == 'center-panel'){
+                        reload_model_list($self); //reload left
+                    }else{
+                        var lastClickedSelect = get_parent_select($self);
+                        add_model_option_to_selects(form_html, lastClickedSelect)
+                    }
+                }
+                load_target.replaceWith(form_html)
+                reload_image(load_target)
+            }
+        },
+        error: function () {
+            $self.find('.error-message').show()
+        }
+    }).always(function () {
+        $('.blocking-overlay').hide();
+    });
+}

@@ -19,7 +19,7 @@ class PopulationParserTestCase(TestCase):
 
     def test_parser_load_blank_file(self):
         with self.assertRaises(EOFError) as e:
-            p = PopulationParser(workspace_path('Blank.xml'))
+            p = PopulationParser(POPULATION_FIXTURES + 'Blank.xml')
 
         self.assertEqual(str(e.exception), "File Read returned a blank string.")
 
