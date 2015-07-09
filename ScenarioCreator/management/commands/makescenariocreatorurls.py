@@ -50,6 +50,8 @@ class Command(BaseCommand):
 
                                                       "url('^ProbabilityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph')",
                                                       "url('^RelationalFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.relational_graph')",
+                                                      "url('^ProbabilityFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph')",
+                                                      "url('^RelationalFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph')",
 
                                                       ])
 

@@ -12,16 +12,22 @@ import matplotlib.pyplot as plt
 
 
 def probability_graph(request, primary_key):
-    pass
+    return empty_graph()
+
+
+def empty_graph(request):
+    return line_graph('Days', [],[])  # empty graph
+
 
 def relational_graph_update(request, primary_key):
     import ScenarioCreator.views
+
+    x, y = [], []
 
     print("Received a graph POST")
     context = ScenarioCreator.views.initialize_relational_form({}, primary_key, request)
     formset = ScenarioCreator.views.PointFormSet(request.POST or None, instance=context['model'])
     if formset.is_valid():
-        x, y = [], []
         for a in formset:
             if a['x'].data and a['y'].data:
                 x.append(float(a['x'].data))

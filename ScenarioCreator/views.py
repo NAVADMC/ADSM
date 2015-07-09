@@ -176,7 +176,7 @@ def collect_backlinks(model_instance):
 
 
 def initialize_relational_form(context, primary_key, request):
-    if not primary_key:
+    if not primary_key or primary_key == 'new':
         model = RelationalFunction()
         main_form = RelationalFunctionForm(request.POST or None)
     else:

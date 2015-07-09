@@ -15,6 +15,8 @@ urlpatterns = patterns('', url('^AssignSpreads/$', 'ScenarioCreator.views.assign
          url('^DisableAllControls.json/$', 'ScenarioCreator.views.disable_all_controls_json'),
          url('^ProbabilityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph'),
          url('^RelationalFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.relational_graph'),
+         url('^ProbabilityFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph'),
+         url('^RelationalFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph'),
          url('^BaseModel/$',                      'ScenarioCreator.views.model_list'),
          url('^BaseModel/new/$',                  'ScenarioCreator.views.new_entry'),
          url('^BaseModel/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
