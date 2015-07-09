@@ -464,7 +464,7 @@ ul {
     background-position: 3px 5px;
     
 }
-.reveal:before {
+.reveal:after {
     content: "";
     position:absolute;
     top: 0;
@@ -473,6 +473,7 @@ ul {
     height: 100%;
     box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
     border: 1px solid #cec7c0;
+    pointer-events: none;
 }
 
 
@@ -1201,6 +1202,7 @@ select {
     line-height:27px;
     text-decoration: none;
     padding-left: 5px;
+    position: relative;
 }
 
 #file_list {
@@ -1232,6 +1234,7 @@ select {
     margin-right: 10px;
     display:block;
     float:right;
+    opacity: 1;
 }
 
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
@@ -1349,14 +1352,14 @@ input[type=file], button {
     opacity: 1;
 }
 
-#file_list .delete-button {
+.defined_wrapper .delete-button {
     position: absolute;
     top: 0;
     right: 0;
     margin-right: 5px;
     opacity: .3;
 }
-#file_list .copy-button {
+.defined_wrapper .copy-button {
     position: absolute;
     top: 0;
     right: 20px;
@@ -2091,6 +2094,20 @@ select[multiple] {}
         background-image:url('https://github.com/NAVADMC/ADSM/blob/gh-pages/images/adsm_logo_sm.png?raw=true');
         background-position: 30px;
         min-width: 0;
+    }
+    /*----- link graphic styling -----*/
+    #center-panel .active_linking:before {
+        right: -38px;
+        top: 22px;
+        width: 20px;
+        height: 16px;
+        border-right: 1px solid #cdc7c0;
+        border-left: 1px solid #cdc7c0;
+        border-top: none;
+        border-bottom: none;
+        -webkit-transform: rotate(90deg);
+        background-size: 15px;
+        background-position: 2px 5px;
     }
 }
 
