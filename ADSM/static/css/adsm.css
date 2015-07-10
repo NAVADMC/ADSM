@@ -1238,8 +1238,8 @@ select {
     margin-top: 5px;
     margin-left: 15px;
 }
-.delete-button,
-.copy-button,
+.delete-icon,
+.copy-icon,
 .open-button {
     margin-top: 5px;
     width: 15px;
@@ -1251,14 +1251,14 @@ select {
 }
 
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
-.copy-button {
+.copy-icon {
     background-image: url('../icons/copy_sprite.png');
     background-position: 0 0;
 }
 
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
-.copy-button:hover,
-.copy-button:focus {
+.copy-icon:hover,
+.copy-icon:focus {
     background-position: 15px  0;
     background-image: url('../icons/copy_sprite.png');
     outline: none;
@@ -1272,13 +1272,13 @@ select {
 }
 
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
-.delete-button {
+.delete-icon {
     background-image: url('../icons/delete_sprite.png');
     background-repeat-y: no-repeat;
     background-position: 0 2px;
 }
-.delete-button:hover,
-.delete-button:focus {
+.delete-icon:hover,
+.delete-icon:focus {
     background-position: 15px 2px ;
     background-image: url('../icons/delete_sprite.png');
     background-repeat-y: no-repeat;
@@ -1365,14 +1365,14 @@ input[type=file], button {
     opacity: 1;
 }
 
-.defined_wrapper .delete-button {
+.defined_wrapper .delete-icon {
     position: absolute;
     top: 0;
     right: 0;
     margin-right: 5px;
     opacity: .3;
 }
-.defined_wrapper .copy-button {
+.defined_wrapper .copy-icon {
     position: absolute;
     top: 0;
     right: 20px;

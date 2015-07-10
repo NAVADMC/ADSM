@@ -7,17 +7,15 @@
     </ul>    
 {% endif %}
 
-<div class="buttonHolder">
+<div class="edit-button-holder">
     <button type="button" class="btn btn-success edit-button">Edit</button>
-    {% if outputs_exist %}
-        <button type="submit" class="btn btn-danger btn-save" id="submit-id-submit">Delete Results and Apply changes</button>
-    {% else %}
-        <button type="button" class="btn btn-default btn-cancel" id="id-cancel">Cancel</button>
-        <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled>Apply</button>
-    {% endif %}
+    <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled>Apply</button>
+    <a href="{{action}}copy/" load-target="#current-function" class="btn btn-info copy-button" title="duplicate">+Variant</a>
     {% if backlinks %}
-        <button type="submit" disabled class="btn btn-danger">Remove References before Deleting</button>
+        <button type="submit"  class="btn btn-danger delete-button" disabled>Delete Disabled</button>
     {% elif deletable %}
-        <a href="#" data-delete-link="{{deletable}}" class="btn btn-danger">Delete</a>
+        <a href="#"  class="btn btn-danger delete-button" data-delete-link="{{deletable}}">Delete</a>
     {% endif %}
+    <button type="button" class="btn btn-default btn-cancel" id="id-cancel">Cancel</button>
+
 </div>
