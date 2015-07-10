@@ -245,8 +245,7 @@ class ControlProtocolForm(BaseForm):
                     'vaccination_demand_threshold',
                     'cost_of_vaccination_additional_per_animal',
                     )
-            ),
-            submit_button()
+            )
         )
         super(ControlProtocolForm, self).__init__(*args, **kwargs)
         

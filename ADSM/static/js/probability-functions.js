@@ -28,10 +28,11 @@ $(document).ready( function(){
 
     $(document).on('click', '.edit-button', function(){
         $('#functions_panel .buttonHolder').removeAttr('hidden')
+        $('.edit-button-holder a, .edit-button-holder button').addClass('reveal')
         //$('#population_grid_wraper').css('height', 'calc(100vh - 123px')
         //$('#edit-mask').css('visibility', 'visible')
         //$('#farm_list tbody').css('height', 'calc(100vh - 214px)')
-        $('.edit-button').css('display', 'none') //TODO: fold out transition
+        //$('.edit-button').css('display', 'none') //TODO: fold out transition
         $('#functions_panel, #functions_panel input').addClass('editable')
         $('#functions_panel :input').addClass('editable')
         //$('#tb_mask').css('visibility', 'visible')

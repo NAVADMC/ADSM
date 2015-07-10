@@ -382,7 +382,7 @@ body>nav {
 
 .layout-panel .fragment{
     height: 100%;
-    position: relative;
+    /* position: relative; */
     display: block;
     overflow: auto;
     padding-bottom: 10px;
@@ -739,10 +739,46 @@ ul {
     margin-bottom: 4px;
 
 }
-#functions_panel .buttonHolder:last-of-type {
-    /* position: fixed; */
-    /* bottom: 10px; */
+/*---------------------Edit Button Holder-----------*/
+.panel-contents {
+    position:relative; /*needed by edit-button-holder*/
+    height: 100%;
 }
+#current-function {
+    overflow-y: auto;
+    max-height: 100%;
+}
+.edit-button-holder{
+    position: absolute;
+    bottom: 10px;
+    background-color: white;
+    z-index: 10;
+}
+/*.edit-button-holder .edit-button {*/
+    /*z-index: 20;*/
+/*}*/
+.edit-button-holder button,
+.edit-button-holder a {
+    position: absolute;
+    bottom: -10px;
+    right: -389px;
+    width: 115px;
+    transition: bottom .4s ease;
+}
+.edit-button-holder .btn-save.reveal {
+    bottom: calc(-10px + 32px * 1);
+}
+.edit-button-holder .copy-button.reveal {
+    bottom: calc(-10px + 32px * 2);
+}
+.edit-button-holder .delete-button.reveal {
+    bottom: calc(-10px + 32px * 3);
+}
+.edit-button-holder .btn-cancel.reveal {
+    bottom: calc(-10px + 32px * 4);
+}
+
+
 /*-------------------------------------------------------------*/
 /*-----navigation menu-----*/
 /*-------------------------------------------------------------*/
