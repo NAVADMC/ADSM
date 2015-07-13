@@ -15,6 +15,10 @@ from crispy_forms.helper import FormHelper
 import os
 
 
+class FloatInput(NumberInput):
+    template_name = 'floppyforms/number.html'
+
+
 class AddOrSelect(Select):
     template_name = 'floppyforms/model_select.html'
     # def get_context(self, name, value, attrs=None, choices=()):
@@ -328,7 +332,16 @@ class ControlProtocolForm(BaseForm):
                    'detection_probability_report_vs_first_detection': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'trace_result_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'vaccine_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'test_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'})}
+                   'test_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'destruction_ring_radius': FloatInput(),
+                   'vaccination_ring_radius': FloatInput(),
+                   'exam_direct_forward_success_multiplier': FloatInput(),
+                   'exam_indirect_forward_success_multiplier': FloatInput(),
+                   'exam_direct_back_success_multiplier': FloatInput(),
+                   'examine_indirect_back_success_multiplier': FloatInput(),
+                   'test_specificity': FloatInput(),
+                   'test_sensitivity': FloatInput(),
+                   }
 
 
 class DiseaseForm(BaseForm):
@@ -341,7 +354,7 @@ class DiseaseProgressionForm(BaseForm):
     class Meta(object):
         model = DiseaseProgression
         exclude = ['_disease']
-        widgets = {'_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
+        widgets = {
                    'disease_latent_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_subclinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'disease_clinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
@@ -371,8 +384,11 @@ class IndirectSpreadForm(BaseForm):
     class Meta(object):
         model = IndirectSpread
         exclude = ['_disease']
-        widgets = {'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
+        widgets = {'contact_rate': FloatInput(),
+                   'infection_probability': NumberInput(attrs={'data-visibility-context': 'use_within_unit_prevalence',
+                                                               'data-visibility-flipped': 'true',
+                                                               'step': 'any'}),
+                   'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
                                                          'data-visibility-controller': 'transport_delay',
@@ -399,11 +415,11 @@ class DirectSpreadForm(BaseForm):
     class Meta(object):
         model = DirectSpread
         exclude = ['_disease']
-        widgets = {'infection_probability': NumberInput(attrs={'data-visibility-context': 'use_within_unit_prevalence',
+        widgets = {'contact_rate': FloatInput(),
+                   'infection_probability': NumberInput(attrs={'data-visibility-context': 'use_within_unit_prevalence',
                                                                'data-visibility-flipped': 'true',
                                                                'step': 'any'}),
                    'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   '_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
                                                          'data-visibility-controller': 'transport_delay',
@@ -427,8 +443,9 @@ class AirborneSpreadForm(BaseForm):
     class Meta(object):
         model = AirborneSpread
         exclude = ['_disease']
-        widgets = {'_disease': AddOrSelect(attrs={'data-new-item-url': '/setup/Disease/new/'}),
-                   'max_distance': NumberInput(attrs={'data-visibility-context': 'use_airborne_exponential_decay',
+        widgets = {'contact_rate': FloatInput(),
+                   'spread_1km_probability': FloatInput(),
+                   'max_distance': FloatInput(attrs={'data-visibility-context': 'use_airborne_exponential_decay',
                                                       'data-visibility-flipped': 'true',
                                                       'step': 'any'}),  # only visible when exponential is false
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
@@ -502,13 +519,15 @@ class ZoneForm(BaseForm):
     class Meta(object):
         model = Zone
         exclude = []
+        widgets = {'radius': FloatInput(),}
 
 
 class ZoneEffectForm(BaseForm):
     class Meta(object):
         model = ZoneEffect
         exclude = []
-        widgets = {'zone_indirect_movement': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+        widgets = {'zone_detection_multiplier': FloatInput(),
+                   'zone_indirect_movement': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'zone_direct_movement': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
 
@@ -576,7 +595,8 @@ class DisseminationRateForm(BaseForm):
     class Meta(object):
         model = DisseminationRate
         fields = ['trigger_group', 'ratio', 'days', 'restart_only']
-        widgets = {'trigger_group': ProductionTypeList()}
+        widgets = {'trigger_group': ProductionTypeList(),
+                   'ratio': FloatInput()}
 
 
 class TimeFromFirstDetectionForm(BaseForm):
