@@ -5,7 +5,7 @@
 
 {% block content %}
     {% if action %}
-        <form class="ajax" action="{{ action }}">
+        <form class="ajax" action="{{ action }}" id="{{ action|action_id }}">
             {% crispy form %}
             {% include "ScenarioCreator/EditButtons.html" %}
         </form>

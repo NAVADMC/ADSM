@@ -2,8 +2,12 @@ $(function(){
     open_panel_if_needed();
     check_disabled_controls();
 
-    $(document).on('click', 'form.ajax .btn-cancel', function(){
-        var $container = $(this).closest('form').closest('div');
+    $(document).on('click', 'form.ajax .btn-cancel, .btn-cancel[form]', function(){
+        var form = $(this).closest('form');
+        var attachment = $(this).attr('form');
+        if(typeof attachment !== 'undefined')
+            form = $('#' + attachment)
+        var $container = form.closest('div');
         if($container.closest('.layout-panel').attr('id') == 'main-panel'){
             window.location.reload()
         }else{
@@ -134,11 +138,11 @@ $(document).on('submit', '.ajax', function(event) {
         $(this).closest('form').trigger('submit');
     });
 
-    $(document).on('click', '.btn-save', function() {
-        if ($(this).closest('form').find(':invalid').length == 0) {
-            $('.blocking-overlay').show().find('.message').text('Working...');
-        }
-    });
+    //$(document).on('click', '.btn-save', function() {
+    //    if ($(this).closest('form').find(':invalid').length == 0) {
+    //        $('.blocking-overlay').show().find('.message').text('Working...');
+    //    }
+    //});
 
     $(document).on('mousedown', '[data-new-item-url]', function(e){
             $(this).prop('last-selected', $(this).val()); // cache old selection
@@ -168,10 +172,11 @@ $(document).on('submit', '.ajax', function(event) {
     });
     
     
-    $('[data-visibility-controller]').each(function(){attach_visibility_controller(this)})
+    $('[data-visibility-controller]').livequery(function(){
+        attach_visibility_controller(this)})
     
     
-    $('[data-visibility-context]').each(function(){
+    $('[data-visibility-context]').livequery(function(){
         var context_var = window[$(this).attr('data-visibility-context')]
         if(typeof $(this).attr('data-visibility-flipped') !== 'undefined') {
             context_var = !context_var;
@@ -704,7 +709,7 @@ function clear_form_populate_panel($container_panel, delete_link) {
 
 function reload_image(load_target) {
     var target = load_target.find('form')
-    if(target.attr('id') == 'relational-form' || target.attr('id') == 'relational-form'){
+    if(target.hasClass('relational-form') || target.hasClass('probability-form')){
         var img = $('#function-graph'); //newly placed image
         d = new Date();
         var new_src = img.attr("src") + "?" + d.getTime();
@@ -713,6 +718,7 @@ function reload_image(load_target) {
 }
 
 function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target) {
+    $('.blocking-overlay').show();
     $.ajax({
         url: formAction,
         type: "POST",

@@ -1,3 +1,5 @@
+{% load db_status_tags %}
+
 {% if backlinks %}
     <h3>Referenced by:</h3>
     <ul>
@@ -9,14 +11,14 @@
 
 <div class="edit-button-holder">
 <!--Reverse z-index order -->
-    <button type="button" class="btn btn-default btn-cancel" id="id-cancel">Cancel</button>
+    <button type="button" class="btn btn-default btn-cancel" id="id-cancel" {% if action %}form="{{ action|action_id }}"{% endif %} >Cancel</button>
     {% if backlinks %}
-        <button type="submit"  class="btn btn-danger delete-button" disabled>Delete Disabled</button>
+        <button type="submit"  class="btn btn-danger delete-button" disabled {% if action %}form="{{ action|action_id }}"{% endif %} >Delete Disabled</button>
     {% elif deletable %}
-        <a href="#"  class="btn btn-danger delete-button" data-delete-link="{{deletable}}">Delete</a>
+        <a href="#"  class="btn btn-danger delete-button" data-delete-link="{{deletable}}" {% if action %}form="{{ action|action_id }}"{% endif %} >Delete</a>
     {% endif %}
-    <a href="{{action}}copy/" load-target="#current-function" class="btn btn-info copy-button" title="duplicate">+Variant</a>
-    <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled>Apply</button>
-    <button type="button" class="btn btn-success edit-button">Edit</button>
+    <a href="{{action}}copy/" load-target="#current-function" class="btn btn-info copy-button" title="duplicate" {% if action %}form="{{ action|action_id }}"{% endif %} >+Variant</a>
+    <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled {% if action %}form="{{ action|action_id }}"{% endif %} >Apply</button>
+    <button type="button" class="btn btn-success edit-button" {% if action %}form="{{ action|action_id }}"{% endif %} >Edit</button>
 
 </div>

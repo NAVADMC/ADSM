@@ -163,7 +163,8 @@ input[type="checkbox"] {
     height: 0;
 }
 
-.error-inline strong {  /* validation errors from the server */
+.error-inline strong,
+.help-inline {  /* validation errors from the server */
     background-color: #D13737;
     color: white;
 }

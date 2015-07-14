@@ -10,4 +10,6 @@ shell.output
 # Executables generated just for running tests
 #################
 shell
+shell.exe
 fcmp
+fcmp.exe

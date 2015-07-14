@@ -505,6 +505,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         
         self.select_option('id_form-0-progression', 'Add...')
         self.select_option('id_disease_latent_period','Add...')
+        self.query('#functions_panel .edit-button').click()
         self.select_option('id_equation_type','Histogram')
         time.sleep(1)
         self.select_option('id_graph','Add...')

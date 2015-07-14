@@ -117,8 +117,9 @@ class InputSingleton(BaseModel):
 
 
 class FloatField(models.FloatField):
-    template_name = 'floppyforms/input.html'  # critically important that floating point values have step="any" on the input
-    
+    pass
+    # template_name = 'floppyforms/number.html'  # critically important that floating point values have step="any" on the input
+
 
 class Population(InputSingleton):
     source_file = models.CharField(max_length=255, blank=True)  # source_file made generic CharField so Django doesn't try to copy and save the raw file
@@ -334,7 +335,7 @@ class RelationalPoint(BaseModel):
 class ControlMasterPlan(InputSingleton):
     name = models.CharField(default="Control Master Plan", max_length=255)
     disable_all_controls = models.BooleanField(default=False,
-        help_text='Disable all ' + wiki("Control activities", "control-measures") + 
+        help_text='Disable all ' + wiki("Control activities", "control-measures") +
                   ' for this simulation run.  Normally used temporarily to test uncontrolled disease spread.')
     destruction_program_delay = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
@@ -355,7 +356,7 @@ class ControlMasterPlan(InputSingleton):
     vaccination_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
         help_text='The primary priority criteria for order of vaccinations.',
         choices=priority_choices(), )
-    vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True, default=0, 
+    vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True, default=0,
         help_text='Once a vaccination program starts, this number determines how many days previous to the start of the vaccination program a detection will trigger vaccination.', )
     def __str__(self):
         return str(self.name)
@@ -586,8 +587,8 @@ class DiseaseSpread(BaseModel):
 
 class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indirect that were not in Airborne
     subclinical_animals_can_infect_others = models.BooleanField(default=False,
-        help_text='Indicates if ' + wiki("Subclinical", "subclinically-infectious") + 
-                  ' units of the source type can spread disease by ' + wiki("direct", "direct-contact") + ' or '+ 
+        help_text='Indicates if ' + wiki("Subclinical", "subclinically-infectious") +
+                  ' units of the source type can spread disease by ' + wiki("direct", "direct-contact") + ' or '+
                   wiki("indirect contact") + '. ', )
     contact_rate = FloatField(validators=[MinValueValidator(0.0)],
          # Important: Contact_rate help_text has been given special behavior vial two data-visibility-controller 's.
@@ -598,10 +599,10 @@ class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indire
     use_fixed_contact_rate = models.BooleanField(default=False,
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
     distance_distribution = models.ForeignKey(ProbabilityFunction, related_name='+',
-        help_text='Defines the shipment distances for ' + wiki("direct", "direct-contact") + ' or '+ 
+        help_text='Defines the shipment distances for ' + wiki("direct", "direct-contact") + ' or '+
                   wiki("indirect contact") + ' models.', )
     movement_control = models.ForeignKey(RelationalFunction, related_name='+',
-        help_text=wiki("Relational function","/Relational-functions") + ' used to define movement control effects for the indicated ' + 
+        help_text=wiki("Relational function","/Relational-functions") + ' used to define movement control effects for the indicated ' +
                   wiki("production types","production-type") + ' combinations.', )
     class Meta(object):
         abstract = True
@@ -611,8 +612,8 @@ class IndirectSpread(AbstractSpread):
     """This has to inherit from AbstractSpread or else Django treats DirectSpread and IndirectSpread as
     interchangable, which they are not."""
     infection_probability = PercentField(
-        help_text='The probability that a contact will result in disease transmission. Specified for ' + 
-                  wiki("direct", "direct-contact") + ' or '+ 
+        help_text='The probability that a contact will result in disease transmission. Specified for ' +
+                  wiki("direct", "direct-contact") + ' or '+
                   wiki("indirect contact") + ' models.', )
 
     def __str__(self):
@@ -623,12 +624,12 @@ class DirectSpread(AbstractSpread):
     """This has to inherit from AbstractSpread or else Django treats DirectSpread and IndirectSpread as
     interchangable, which they are not."""
     infection_probability = PercentField(blank=True, null=True,
-        help_text='The probability that a '+ wiki("contact will result in disease transmission", "effective-contact") + 
-                  '. Specified for ' + 
-                  wiki("direct", "direct-contact") + ' or '+ 
+        help_text='The probability that a '+ wiki("contact will result in disease transmission", "effective-contact") +
+                  '. Specified for ' +
+                  wiki("direct", "direct-contact") + ' or '+
                   wiki("indirect contact") + ' models.', )
     latent_animals_can_infect_others = models.BooleanField(default=False,
-        help_text='Indicates if '+wiki("latent", "latent-state")+' units of the source type can spread disease by ' + 
+        help_text='Indicates if '+wiki("latent", "latent-state")+' units of the source type can spread disease by ' +
                   wiki("direct contact") + '.', )
     def __str__(self):
         return "%s %i" % (self.name, self.id)
@@ -757,7 +758,7 @@ class ZoneEffect(BaseModel):
     zone_indirect_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Function the describes indirect movement rate.', )
     zone_detection_multiplier = FloatField(validators=[MinValueValidator(0.0)], default=1.0,
-        help_text='Multiplier for the probability of observing '+wiki("clinical signs", "clinically-infectious")+' in units of this ' + 
+        help_text='Multiplier for the probability of observing '+wiki("clinical signs", "clinically-infectious")+' in units of this ' +
                   wiki("production type") + ' in this '+wiki("Zone")+'.', )
     cost_of_surveillance_per_animal_day = MoneyField(default=0.0,
         help_text='Cost of surveillance per animal per day in this '+wiki("Zone")+'.', )
@@ -805,21 +806,21 @@ class VaccinationTrigger(BaseModel):
     restart_only = models.BooleanField(default=False, help_text="Allows you to setup less strict criteria for restarting a vaccination program after an outbreak.")
     class Meta(object):
         abstract = True
-      
+
 
 class FilteredVaccinationTrigger(VaccinationTrigger):
     trigger_group = models.ManyToManyField(ProductionType, )
     class Meta(object):
         abstract = True
-      
-        
+
+
 class DiseaseDetection(FilteredVaccinationTrigger):
     number_of_units = models.PositiveIntegerField()
     def __str__(self):
         bold_values = tuple(bold(str(x)) for x in [self.number_of_units, ', '.join(pt.name for pt in self.trigger_group.all())])
         s = format_html("{0} infected units detected in {1}", *bold_values)
         return s
-    
+
 
 class RateOfNewDetections(FilteredVaccinationTrigger):
     number_of_units = models.PositiveIntegerField(help_text='The threshold is specified by a number of units and a number of days, for example, "3 or more units detected within 5 days."')
