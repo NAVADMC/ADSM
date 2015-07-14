@@ -79,7 +79,6 @@ class PopulationForm(BaseForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.layout = Layout(
             'source_file',
-            submit_button()
         )
         super(PopulationForm, self).__init__(*args, **kwargs)
 
@@ -248,8 +247,7 @@ class ControlProtocolForm(BaseForm):
                     'vaccination_demand_threshold',
                     'cost_of_vaccination_additional_per_animal',
                     )
-            ),
-            submit_button()
+            )
         )
         super(ControlProtocolForm, self).__init__(*args, **kwargs)
         
@@ -617,7 +615,6 @@ class SpreadBetweenGroupsForm(BaseForm):
             'relevant_groups',
             HTML(r"<a href='/setup/ProductionGroup/new/' load-target='#group-creator'>+ define new group</a>"),
             'restart_only',
-            submit_button()
         )
         super(SpreadBetweenGroupsForm, self).__init__(*args, **kwargs)
     class Meta(object):
