@@ -134,11 +134,11 @@ $(document).on('submit', '.ajax', function(event) {
         $(this).closest('form').trigger('submit');
     });
 
-    $(document).on('click', '.btn-save', function() {
-        if ($(this).closest('form').find(':invalid').length == 0) {
-            $('.blocking-overlay').show().find('.message').text('Working...');
-        }
-    });
+    //$(document).on('click', '.btn-save', function() {
+    //    if ($(this).closest('form').find(':invalid').length == 0) {
+    //        $('.blocking-overlay').show().find('.message').text('Working...');
+    //    }
+    //});
 
     $(document).on('mousedown', '[data-new-item-url]', function(e){
             $(this).prop('last-selected', $(this).val()); // cache old selection
@@ -713,6 +713,7 @@ function reload_image(load_target) {
 }
 
 function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target) {
+    $('.blocking-overlay').show();
     $.ajax({
         url: formAction,
         type: "POST",

@@ -5,7 +5,6 @@ All forms now have their "submit" button restored and you can choose custom layo
 
 
 from floppyforms.__future__ import ModelForm
-from django.conf import settings
 from django.forms.models import inlineformset_factory
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
