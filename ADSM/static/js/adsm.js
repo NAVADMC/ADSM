@@ -168,10 +168,11 @@ $(document).on('submit', '.ajax', function(event) {
     });
     
     
-    $('[data-visibility-controller]').each(function(){attach_visibility_controller(this)})
+    $('[data-visibility-controller]').livequery(function(){
+        attach_visibility_controller(this)})
     
     
-    $('[data-visibility-context]').each(function(){
+    $('[data-visibility-context]').livequery(function(){
         var context_var = window[$(this).attr('data-visibility-context')]
         if(typeof $(this).attr('data-visibility-flipped') !== 'undefined') {
             context_var = !context_var;

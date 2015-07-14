@@ -408,14 +408,15 @@ class DirectSpreadForm(BaseForm):
             'movement_control',
         )
         super(DirectSpreadForm, self).__init__(*args, **kwargs)
-        
+        if not Disease.objects.get().use_within_unit_prevalence:
+            self.fields['infection_probability'].widget.attrs['required'] = 'required'  # actually only required when the field is visible, enforced by browser
+
     class Meta(object):
         model = DirectSpread
         exclude = ['_disease']
         widgets = {'contact_rate': FloatInput(),
                    'infection_probability': NumberInput(attrs={'data-visibility-context': 'use_within_unit_prevalence',
-                                                               'data-visibility-flipped': 'true',
-                                                               'step': 'any'}),
+                                                               'data-visibility-flipped': 'true', 'step': 'any'}),
                    'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
