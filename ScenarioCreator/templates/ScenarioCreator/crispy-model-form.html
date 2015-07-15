@@ -12,7 +12,7 @@
     {% else %}
         <form>
             {% crispy form %}
-            {% include "ScenarioCreator/EditButtons.html" %}
+            {# Can't include EditButtons because it requires action to work outside the form. Must be included in forms.py #}
         </form>
     {% endif %}
 {% endblock %}
