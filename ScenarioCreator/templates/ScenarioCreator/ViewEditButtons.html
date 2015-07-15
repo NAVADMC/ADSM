@@ -17,7 +17,7 @@
     {% elif deletable %}
         <a href="#"  class="btn btn-danger delete-button" data-delete-link="{{deletable}}" {% if action %}form="{{ action|action_id }}"{% endif %} >Delete</a>
     {% endif %}
-    <a href="{{action}}copy/" load-target="#current-function" class="btn btn-info copy-button" title="duplicate" {% if action %}form="{{ action|action_id }}"{% endif %} >+Variant</a>
+    <button type="button" class="btn btn-info copy-button" title="duplicate" {% if action %}form="{{ action|action_id }}"{% endif %} >+Variant</button>
     <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled {% if action %}form="{{ action|action_id }}"{% endif %} >Apply</button>
     <button type="button" class="btn btn-success edit-button" {% if action %}form="{{ action|action_id }}"{% endif %} >Edit</button>
 
