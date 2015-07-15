@@ -412,7 +412,7 @@ function populate_pdf_panel(select) {
         load_target = '#center-panel'
         $('#center-panel').addClass('reveal') //allows toggle of box shadow on :before pseudo element
     }
-    if(origin == 'center-panel'){
+    if(origin == 'center-panel' || origin == 'main-panel'){
         $('#functions_panel').removeClass('TB_panel_closed')
     }
     if(origin == 'functions_panel'){ // we've run out of room and must use a modal
