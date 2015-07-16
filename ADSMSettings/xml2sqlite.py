@@ -91,7 +91,7 @@ def getPdf( xml, nameGenerator ):
         args['mode'] = float( firstChild.find( './mode' ).text )
         args['max'] = float( firstChild.find( './max' ).text )
     elif pdfType == 'binomial':
-        args['n'] = float( firstChild.find( './n' ).text )
+        args['s'] = float( firstChild.find( './n' ).text )
         args['p'] = float( firstChild.find( './p' ).text )
     elif pdfType == 'discrete-uniform':
         args['equation_type'] = 'Discrete Uniform'
