@@ -94,7 +94,7 @@ $(document).on('submit', '.ajax', function(event) {
     if($self.parent().hasClass('fragment')){
         load_target = $self.parent()
     }
-    ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target);
+    ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, undefined);
 })
     
     $(document).on('click', '#update_adsm', function(event){
@@ -699,7 +699,11 @@ function prompt_for_new_file_name(link) {
                     dialog.close();
                     if (is_current_scenario) {
                         $('.filename input').val($('#new_name').val())
-                        $('.filename').closest('form').submit()
+                        var $self = $('.filename input').closest('form');
+                        //$self.submit()
+                        ajax_submit_complex_form_and_replaceWith(link, new FormData($self[0]), $self, $self, function () {
+                            $('h1.filename').text($('.filename input').val()) //match major title with form value
+                        });
                     } else {
                         window.location = link + $('#new_name').val();
                     }
@@ -745,7 +749,7 @@ function reload_image(load_target) {
     }
 }
 
-function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target) {
+function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, success_callback) {
     $('.blocking-overlay').show();
     $.ajax({
         url: formAction,
@@ -770,6 +774,9 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
                 }
                 load_target.replaceWith(form_html)
                 reload_image(load_target)
+            }
+            if(typeof success_callback !== 'undefined'){
+                success_callback()
             }
         },
         error: function () {
