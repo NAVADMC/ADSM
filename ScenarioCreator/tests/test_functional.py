@@ -236,6 +236,8 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         time.sleep(3)
         self.query('#center-panel').find_element_by_css_selector('select').click()
         time.sleep(1)
+        self.query('.edit-button').click()
+        self.query('.overwrite-button').click()
 
         self.query('#id_equation_type')  # just making sure it's there
         pdf_panel = self.query('#functions_panel')
@@ -506,6 +508,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.select_option('id_form-0-progression', 'Add...')
         self.select_option('id_disease_latent_period','Add...')
         self.query('#functions_panel .edit-button').click()
+        self.query('.overwrite-button').click()
         self.select_option('id_equation_type','Histogram')
         time.sleep(1)
         self.select_option('id_graph','Add...')
@@ -539,6 +542,9 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
 
     def submit_relational_form_with_file(self, container):
+        self.query('.edit-button').click()
+        self.query('.overwrite-button').click()
+
         container.find_element_by_id("file").send_keys(
             os.path.join(settings.BASE_DIR, "ScenarioCreator","tests","population_fixtures","points.csv"))  # this is sensitive to the starting directory
         container.find_element_by_id('id_name').send_keys('imported from file')
@@ -635,10 +641,12 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.cause_unsaved_edit()
 
         self.query('#TB_file').click()
-        filename_field = self.query('#file_panel .filename input')
+        self.query('#file_panel .copy-icon').click()
+        time.sleep(1)
+        filename_field = self.query('#new_name')
         try:
             filename_field.send_keys('./\\ 123.1&% AZ')
-            self.query('#save_scenario').click()
+            self.query('.modal.in .btn-primary').click()
             time.sleep(1)
 
             alert = self.query('.alert-danger')  # this works fine in the actual program.
@@ -662,11 +670,12 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.assertIn('unsaved', status.get_attribute('class'))
 
         self.query('#TB_file').click()
-        filename_field = self.query('#file_panel .filename input')
+        self.query('#file_panel .copy-icon').click()
+        time.sleep(1)
+        filename_field = self.query('#new_name')
         try:
             filename_field.send_keys('123.1 AZ')
-            # self.query('#save_scenario').click()
-            self.query('.current form.ajax').submit()
+            self.query('.modal.in .btn-primary').click()
             time.sleep(3)
             status = self.query('.scenario-status')
             self.assertNotIn('unsaved', status.get_attribute('class'))

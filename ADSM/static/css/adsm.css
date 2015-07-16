@@ -756,6 +756,7 @@ ul {
 }
 .edit-button-holder{
     position: absolute;
+    left: 87px;
     bottom: 10px;
     background-color: white;
     z-index: 10;
@@ -771,17 +772,14 @@ ul {
     width: 115px;
     transition: bottom .4s ease;
 }
-.edit-button-holder .btn-save.reveal {
+.edit-button-holder .overwrite-button.reveal {
     bottom: calc(-10px + 32px * 1);
 }
 .edit-button-holder .copy-button.reveal {
     bottom: calc(-10px + 32px * 2);
 }
-.edit-button-holder .delete-button.reveal {
-    bottom: calc(-10px + 32px * 3);
-}
 .edit-button-holder .btn-cancel.reveal {
-    bottom: calc(-10px + 32px * 4);
+    bottom: calc(-10px + 32px * 3);
 }
 
 

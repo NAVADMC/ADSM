@@ -9,16 +9,21 @@
     </ul>    
 {% endif %}
 
-<div class="edit-button-holder">
-<!--Reverse z-index order -->
+<div class="buttonHolder" hidden>
+    <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled {% if action %}form="{{ action|action_id }}"{% endif %} >Apply</button>
     <button type="button" class="btn btn-default btn-cancel" id="id-cancel" {% if action %}form="{{ action|action_id }}"{% endif %} >Cancel</button>
     {% if backlinks %}
-        <button type="submit"  class="btn btn-danger delete-button" disabled {% if action %}form="{{ action|action_id }}"{% endif %} >Delete Disabled</button>
+        <button type="button"  class="btn btn-danger delete-button" disabled {% if action %}form="{{ action|action_id }}"{% endif %} >Delete Disabled</button>
     {% elif deletable %}
         <a href="#"  class="btn btn-danger delete-button" data-delete-link="{{deletable}}" {% if action %}form="{{ action|action_id }}"{% endif %} >Delete</a>
     {% endif %}
+</div>
+
+<div class="edit-button-holder">
+<!--Reverse z-index order -->
+    <button type="button" class="btn btn-default btn-cancel" id="id-cancel" {% if action %}form="{{ action|action_id }}"{% endif %} >Cancel</button>
     <button type="button" class="btn btn-info copy-button" title="duplicate" {% if action %}form="{{ action|action_id }}"{% endif %} >+Variant</button>
-    <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled {% if action %}form="{{ action|action_id }}"{% endif %} >Apply</button>
+    <button type="button" class="btn btn-danger overwrite-button" id="submit-id-submit" {% if action %}form="{{ action|action_id }}"{% endif %} >Overwrite</button>
     <button type="button" class="btn btn-success edit-button" {% if action %}form="{{ action|action_id }}"{% endif %} >Edit</button>
 
 </div>

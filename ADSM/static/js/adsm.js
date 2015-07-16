@@ -1,3 +1,10 @@
+function make_function_panel_editable() {
+    $('#functions_panel .buttonHolder').removeAttr('hidden')
+    $('#functions_panel, #functions_panel input').addClass('editable')
+    $('#functions_panel :input').addClass('editable')
+    //$('#tb_mask').css('visibility', 'visible')
+    $('#functions_panel').css('pointer-events', 'all')
+}
 $(function(){
     open_panel_if_needed();
     check_disabled_controls();
@@ -319,24 +326,21 @@ $(document).on('submit', '.ajax', function(event) {
         hide_unneeded_probability_fields();
     });
 
-    $('.edit-button').livequery(function(){
-        $('.edit-button').on('click', function(){
-            $('#functions_panel .buttonHolder').removeAttr('hidden')
-            $('.edit-button-holder a, .edit-button-holder button').addClass('reveal')
-            //$('.edit-button').css('display', 'none') //TODO: fold out transition
-            $('#functions_panel, #functions_panel input').addClass('editable')
-            $('#functions_panel :input').addClass('editable')
-            //$('#tb_mask').css('visibility', 'visible')
-            $('#functions_panel').css('pointer-events','all') //TODO: necessary?
-        })
+    $(document).on('click', '.edit-button', function() {
+        $('.edit-button-holder a, .edit-button-holder button').addClass('reveal')
+    })
+
+    $(document).on('click', '.overwrite-button', function () {
+        make_function_panel_editable()
     })
 
     $('.edit-button-holder .copy-button').livequery(function() {
         $('.edit-button-holder .copy-button').on('click', function () {
+            make_function_panel_editable()
             var target = $('#' + $(this).attr('form'))
-            target.attr('action', target.attr('action') + 'copy/')
+            target.attr('action', target.attr('action').replace(/\d+/i, 'new')) //values already loaded, but this should go to /new/
             console.log(target.attr('action'))
-            var name_in = $('#id_name')
+            var name_in = $('#functions_panel #id_name')
             name_in.val(name_in.val() + ' - Copy')
         })
     })
@@ -548,6 +552,7 @@ function add_model_option_to_selects(html, selectInput) {
         .before($('<option value="' + pk + '">' + title + '</option>')); // Add option to all similar selects
     if(selectInput != null){
         selectInput.val(pk); // select option for select that was originally clicked
+        selectInput.closest('.layout-panel').find('.btn-save').removeAttr('disabled')
     }
     //add functions to their panel lists
     var $new_link = $('.function_dropdown [href="' + model_link + '"]')
