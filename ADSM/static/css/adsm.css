@@ -589,7 +589,7 @@ ul {
     overflow-y: auto;
     -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
     border: 1px solid #cec7c0;
-    padding: 0 15px 15px 15px; 
+    padding: 0 15px 0px 15px; 
     background-color: white;
     transition: margin-right .2s ease;
     overflow: auto;
@@ -703,6 +703,7 @@ ul {
 /*-------------------------------------------------------------*/
 #functions_panel {
     /* padding-left: 32px; */
+    overflow-y: hidden;
 }
 
 #functions_panel .glyphicon {
@@ -740,7 +741,7 @@ ul {
 #functions_panel input[type="checkbox"].editable {
     display: inline-block;
 }
-#functions_panel .buttonHolder:first-of-type {
+#functions_panel .function-header {
     margin-top: 15px;
     margin-bottom: 4px;
 
@@ -748,18 +749,27 @@ ul {
 /*---------------------Edit Button Holder-----------*/
 .panel-contents {
     position:relative; /*needed by edit-button-holder*/
-    height: 100%;
+    height: calc(100% - 95px); /*leave space for button-footer*/
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
 }
 #current-function {
     overflow-y: auto;
     max-height: 100%;
 }
-.edit-button-holder{
+
+.button-footer {
     position: absolute;
-    left: 87px;
-    bottom: 10px;
+    bottom: -92px;
     background-color: white;
     z-index: 10;
+    width: 100%;
+    height: 42px;
+}
+.edit-button-holder{
+    position: relative;
+    left: 0px;
+    bottom: -28px;
 }
 /*.edit-button-holder .edit-button {*/
     /*z-index: 20;*/
@@ -768,7 +778,7 @@ ul {
 .edit-button-holder a {
     position: absolute;
     bottom: -10px;
-    right: -389px;
+    right: 0px;
     width: 115px;
     transition: bottom .4s ease;
 }

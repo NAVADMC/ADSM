@@ -1,5 +1,7 @@
 function make_function_panel_editable() {
     $('.edit-button-holder a, .edit-button-holder button').removeClass('reveal') //collapse the edit buttons, possibly hide
+    $('.edit-button-holder').css('display', 'none')
+
     $('#functions_panel .buttonHolder').removeAttr('hidden')
     $('#functions_panel, #functions_panel input').addClass('editable')
     $('#functions_panel :input').addClass('editable')
