@@ -9,6 +9,7 @@ defined for the ADSM project for all object creation."""
 import xml.etree.ElementTree as ET
 import warnings
 from pyproj import Proj
+from math import exp, sqrt
 
 from ScenarioCreator.models import *
 from Results.models import *
@@ -139,8 +140,15 @@ def getPdf( xml, nameGenerator ):
         args['scale'] = float( firstChild.find( './scale' ).text )
         args['shape'] = float( firstChild.find( './shape' ).text )
     elif pdfType == 'lognormal':
-        args['mean'] = float( firstChild.find( './zeta' ).text )
-        args['std_dev'] = float( firstChild.find( './sigma' ).text )
+    	# Lognormal is represented in the XML as "zeta" and "sigma" as used in
+    	# the GNU Scientific Library docs. Convert to mean and standard
+    	# deviation.
+        zeta = float( firstChild.find( './zeta' ).text )
+        sigma = float( firstChild.find( './sigma' ).text )
+        sigma_sq = sigma*sigma
+        args['mean'] = exp( zeta + sigma_sq/2 )
+        variance = exp( 2*zeta + sigma_sq ) * (exp(sigma_sq) - 1)
+        args['std_dev'] = sqrt(variance)
     elif pdfType == 'negative-binomial':
         args['equation_type'] = 'Negative Binomial'
         args['s'] = float( firstChild.find( './s' ).text )
