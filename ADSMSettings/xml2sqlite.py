@@ -22,7 +22,8 @@ def create_no_duplicates(ModelClass, suggested_name, **kwargs):
         if created:
             instance.name = suggested_name
         else:
-            instance.name += ',' + suggested_name
+        	if instance.name != suggested_name:
+	            instance.name += ',' + suggested_name
         instance.save()
     return instance, created
 
