@@ -22,6 +22,7 @@
 #include "parameter.h"
 #include "sqlite3_exec_dict.h"
 #include <glib.h>
+#include <gsl/gsl_math.h>
 
 #if STDC_HEADERS
 #  include <stdlib.h>
@@ -425,15 +426,26 @@ PAR_get_PDF_callback (void *data, GHashTable *dict)
     }
   else if (strcmp (equation_type, "Lognormal") == 0)
     {
+      double mean, std_dev;
+      double mean_sq, std_dev_sq;
       double zeta, sigma;
 
       errno = 0;
-      zeta = strtod (g_hash_table_lookup (dict, "mean"), NULL);
+      mean = strtod (g_hash_table_lookup (dict, "mean"), NULL);
       g_assert (errno != ERANGE);
 
       errno = 0;
-      sigma = strtod (g_hash_table_lookup (dict, "std_dev"), NULL);
+      std_dev = strtod (g_hash_table_lookup (dict, "std_dev"), NULL);
       g_assert (errno != ERANGE);
+      
+      mean_sq = gsl_pow_2 (mean);
+      std_dev_sq = gsl_pow_2 (std_dev);
+      zeta = log( mean_sq / sqrt(std_dev_sq + mean_sq) );
+      sigma = sqrt( log( (std_dev_sq + mean_sq)/mean_sq ) );
+      #if DEBUG
+        g_debug ("lognormal mean=%g, std_dev=%g -> zeta=%g, sigma=%g",
+                 mean, std_dev, zeta, sigma);
+      #endif
 
       dist = PDF_new_lognormal_dist (zeta, sigma);
     }
