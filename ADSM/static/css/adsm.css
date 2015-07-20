@@ -744,7 +744,10 @@ ul {
 #functions_panel .function-header {
     margin-top: 15px;
     margin-bottom: 4px;
-
+}
+#formset, #formset tr {
+    table-layout:fixed;
+    max-width: 10%;
 }
 /*---------------------Edit Button Holder-----------*/
 .panel-contents {
