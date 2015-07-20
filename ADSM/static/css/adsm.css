@@ -606,6 +606,13 @@ ul {
     padding: 1px;
 }
 
+.ellipsis-title {
+    width: calc(100% - 82px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .current, .current .filename {
     background-color: white;
     color: black;
