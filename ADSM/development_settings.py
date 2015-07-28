@@ -7,6 +7,8 @@ if getattr(sys, 'frozen', False):
 else:
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+WORKSPACE_PATH = None  # To detect automatically, leave set to None
+
 DB_BASE_DIR = None
 if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.
     try:

@@ -32,6 +32,12 @@ if OVERRIDE_DEBUG:
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
 
+# Look for any settings to import from the installer
+if os.path.isfile(os.path.join(BASE_DIR, 'settings.ini')):
+    from importlib import machinery
+    install_settings = machinery.SourceFileLoader('install_settings', os.path.join(BASE_DIR, 'settings.ini')).load_module()
+    WORKSPACE_PATH = install_settings.WORKSPACE_PATH
+
 INSTALLED_APPS = (
     'ScenarioCreator',
     'Results',
