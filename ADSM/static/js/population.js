@@ -204,7 +204,12 @@ function update_population_filter_and_sort(sort_by) {
         var sorting = 'sort_by=' + sort_by;
     }
     var new_url = '?' + population_filter_string();//build URL
-    new_url = new_url + sorting;
+
+    var mask_visibility = $('#edit-mask').css('visibility');
+    console.log(mask_visibility)
+    var form_editable = mask_visibility == 'visible' ? '' : '&readonly=readonly'
+
+    new_url = new_url + sorting + form_editable;
     //get it with AJAX and insert new HTML with load()
     window.history.replaceState('', 'Population Filters', new_url);
     $('#farm_list').parent().load(new_url + ' #farm_list');

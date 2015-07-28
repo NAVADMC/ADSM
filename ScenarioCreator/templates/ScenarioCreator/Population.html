@@ -35,13 +35,8 @@
     </h1>
     <div id="edit-mask"></div>
     <div id="population_grid_wraper">
-        <form method="post" style="float:right;">
-            <div id="farm_list_container" class="col-xs-8">
-                <div id="farm_list">  {#So it can be targetted by CSS #}
-                    {% include "ScenarioCreator/PopulationFormset.html" %}
-                </div>
-            </div>
-        </form>
+        {% include "ScenarioCreator/PopulationFormset.html" %}
+
         <button id="edit_population" class="action_link btn btn-primary">Edit Population</button>
 
         <div id="population_map_container" class="col-xs-4">
