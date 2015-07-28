@@ -152,6 +152,42 @@ textarea:hover {
 input[type="checkbox"] {
     margin-top: 1px;
 }
+/*-------------------------------------------------------------*/
+/*-----readonly form styling-----*/
+/*-------------------------------------------------------------*/
+form.readonly input,
+form.readonly select{
+    border: none;
+    margin: 0px;
+    width: 100%;
+    background-image: none;
+}
+
+form.readonly select {
+    -webkit-appearance: none;
+    background-color: transparent;
+    padding-left: 10px;
+    pointer-events: none;
+    box-shadow:none;
+}
+form.readonly input {
+    background-color: transparent;
+    padding-left: 10px;
+    pointer-events: none;
+    box-shadow: none;
+}
+/*-------------------------------------------------------------*/
+/*-----editable form styling-----*/
+/*-------------------------------------------------------------*/
+form.editable select {
+    /*-webkit-appearance: menulist;*/
+    pointer-events: all;
+    margin-bottom: 0px;
+}
+form.editable input{
+    border: 1px solid #ccc;
+    pointer-events: all;
+}
 .help-block {  
     font-weight: 400;
     display: block;
@@ -752,10 +788,7 @@ ul {
     margin-top: 15px;
     margin-bottom: 4px;
 }
-#formset, #formset tr {
-    table-layout:fixed;
-    max-width: 10%;
-}
+
 /*---------------------Edit Button Holder-----------*/
 .panel-contents {
     position:relative; /*needed by edit-button-holder*/
@@ -1540,8 +1573,11 @@ section#population_main_panel h1:first-of-type {
     display: inline-block;
     position: relative;
 }
-#farm_list th, #farm_list td {
+#farm_list td {
     width: 17%;
+}
+#farm_list th { /**--- this accounts for the 6px scroll bar taking up width in the table body---**/
+    width: calc(17% - 1px);
 }
 
 #farm_list tbody{
@@ -1580,7 +1616,16 @@ section#population_main_panel h1:first-of-type {
 #farm_list td:nth-child(4), #farm_list td:first-child {
     padding-left: 0;
 }
-#farm_list input, #farm_list select{
+#farm_list select,
+#farm_list input {
+    padding-left: 10px;
+    background-color: transparent;
+    box-shadow: none;
+}
+#farm_list select:hover {
+    border: none;
+}
+/*#farm_list input, #farm_list select{
     border: none;
     margin: 0px;
     width: 100%;
@@ -1614,7 +1659,7 @@ section#population_main_panel h1:first-of-type {
 #functions_panel input.editable {
     border: 1px solid #ccc;
     pointer-events: all;
-}
+}*/
 /*-------------------------------------------------------------*/
 /*-----population filters-----*/
 /*-------------------------------------------------------------*/
