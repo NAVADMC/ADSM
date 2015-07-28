@@ -40,11 +40,15 @@ parser.add_argument('-u', '--update', dest='update', help='Launch the updater af
 args = parser.parse_args()
 
 
-def launch_external_program_and_exit(launch, code=0, close_self=True, cmd_args=None, launch_args=None):
+def launch_external_program_and_exit(launch, code=0, cmd_args=None, launch_args=None):
     if not launch_args:
         launch_args = {}
     if not cmd_args:
         cmd_args = []
+    launch = [launch, ]
+    if cmd_args:
+        for cmd_arg in cmd_args:
+            launch.append(cmd_arg)
     if sys.platform == 'win32':  # Yes, this is also x64.
         CREATE_NEW_PROCESS_GROUP = 0x00000200
         DETACHED_PROCESS = 0x00000008
@@ -52,9 +56,8 @@ def launch_external_program_and_exit(launch, code=0, close_self=True, cmd_args=N
     else:
         launch_args.update(preexec_fn=os.setsid)
         launch_args.update(start_new_session=True)
-    subprocess.Popen([launch, cmd_args], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **launch_args)
-    if close_self:
-        sys.exit(code)
+    subprocess.Popen(launch, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **launch_args)
+    sys.exit(code)
 
 
 print("Checking with the update service...")
