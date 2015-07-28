@@ -157,7 +157,7 @@ def assign_progressions(request):
 
 
 def collect_backlinks(model_instance):
-    from django.contrib.admin.util import NestedObjects
+    from django.contrib.admin.utils import NestedObjects
     collector = NestedObjects(using='scenario_db')  # or specific database
     collector.collect([model_instance])  # https://docs.djangoproject.com/en/1.7/releases/1.7/#remove-and-clear-methods-of-related-managers
     dependants = collector.nested()  # fun fact: spelling differs between America and Brittain
