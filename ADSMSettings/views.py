@@ -42,7 +42,7 @@ def update_adsm_from_git(request):
             session.update_on_startup = True
             session.save()
             npu = os.path.join(settings.BASE_DIR, 'npu.exe')  # TODO Windows specific
-            launch_external_program_and_exit(npu, close_self=False, launch_args={'silent':True})  # NPU will force close this
+            launch_external_program_and_exit(npu, close_self=False, cmd_args=['--silent'])  # NPU will force close this
             return HttpResponse("success")
         except:
             print ("Failed to set DB to update!")
