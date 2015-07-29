@@ -270,3 +270,16 @@ def launch_external_program_and_exit(launch, code=0, close_self=True, cmd_args=N
     subprocess.Popen(launch, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **launch_args)
     if close_self:
         sys.exit(code)
+
+
+def npu_update_info():
+    try:
+        npu = 'npu.exe'
+        npu_response = subprocess.check_output(npu + '--check_update --silent', shell=True, stderr=subprocess.STDOUT).strip()
+        print(os.getcwd(), npu_response)
+        version = npu_response[-1]
+        new_update = version == '1'
+        SmSession.objects.all().update(update_available=new_update)
+    except:
+        version = 'no version information available'
+    return version
