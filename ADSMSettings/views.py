@@ -3,7 +3,7 @@ import os
 import shutil
 from django.conf import settings
 from django.db import close_old_connections
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest
 from django.shortcuts import redirect, render, HttpResponse
 from django.utils.html import strip_tags
 from ADSMSettings.models import SmSession, unsaved_changes
@@ -200,3 +200,8 @@ def backend(request):
     login(request, user)
     return redirect('/admin/')
 
+
+def handler500(request):
+    print("Caught the error")
+    return render(request, '500.html', {})
+    #return render_to_response('../templates/error/500.html', {'exception': ex}, context_instance=RequestContext(request), status=404)

@@ -11,5 +11,6 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', 'ADSMSettings.views.home'),
     url('^LoadingScreen/$', 'ADSMSettings.views.loading_screen'),
-
     )
+
+handler500 = 'ADSMSettings.views.handler500'
