@@ -12,6 +12,7 @@ from django.db import connections, close_old_connections
 from django.conf import settings
 import sys
 import subprocess
+import time
 
 from ADSMSettings.models import SmSession
 
@@ -267,7 +268,7 @@ def launch_external_program_and_exit(launch, code=0, close_self=True, cmd_args=N
     else:
         launch_args.update(preexec_fn=os.setsid)
         launch_args.update(start_new_session=True)
-    subprocess.Popen(launch, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **launch_args)
+    subprocess.Popen(launch, stdin=subprocess.PIPE, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **launch_args)
     if close_self:
         sys.exit(code)
 
