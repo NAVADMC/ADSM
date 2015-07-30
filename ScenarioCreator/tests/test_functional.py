@@ -540,15 +540,16 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         
         right_panel = self.query('#functions_panel')
 
+        self.query('.edit-button').click()
+        time.sleep(1)
+        self.query('.overwrite-button').click()
+
         self.submit_relational_form_with_file(right_panel)
         right_panel = self.query('#functions_panel')
         self.assertEqual("123.1", self.query('#id_relationalpoint_set-3-x').get_attribute('value'))
 
 
     def submit_relational_form_with_file(self, container):
-        self.query('.edit-button').click()
-        time.sleep(1)
-        self.query('.overwrite-button').click()
 
         container.find_element_by_id("file").send_keys(
             os.path.join(settings.BASE_DIR, "ScenarioCreator","tests","population_fixtures","points.csv"))  # this is sensitive to the starting directory
@@ -643,17 +644,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             self.assertIn(controls, actual_menu)
 
     def test_save_scenario_failure(self):
-        self.cause_unsaved_edit()
-
-        self.query('#TB_file').click()
-        time.sleep(1)
-        self.query('.current .copy-icon').click()
-        try:
-            self.query('.btn-dont-save').click()
-            print("Clicked don't save")
-        except: pass
-        time.sleep(1)
-        filename_field = self.query('#new_name')
+        filename_field = self.save_scenario_as()
         try:
             filename_field.send_keys('./\\ 123.1&% AZ')
             self.query('.modal.in .btn-primary').click()
@@ -668,27 +659,24 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             except:
                 pass
 
+    def save_scenario_as(self):
+        self.cause_unsaved_edit()
+        self.query('#TB_file').click()
+        time.sleep(1)
+        self.query('.current .copy-icon').click()
+        time.sleep(1)
+        self.query('.btn-dont-save').click()
+        time.sleep(1)
+        filename_field = self.query('#new_name')
+        return filename_field
+
     def cause_unsaved_edit(self):
         self.query('#id_description').send_keys('--edited--')
         self.query('#submit-id-submit').click()
         time.sleep(1)
 
     def test_save_scenario_success(self):
-        self.cause_unsaved_edit()
-
-        status = self.query('.scenario-status')
-        self.assertIn('unsaved', status.get_attribute('class'))
-
-        self.query('#TB_file').click()
-        time.sleep(1)
-        self.query('.current .copy-icon').click()
-        try:
-            self.query('.btn-dont-save').click()
-            print("Clicked don't save")
-        except:
-            pass
-        time.sleep(1)
-        filename_field = self.query('#new_name')
+        filename_field = self.save_scenario_as()
         try:
             filename_field.send_keys('123.1 AZ')
             self.query('.modal.in .btn-primary').click()
