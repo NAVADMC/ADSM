@@ -56,7 +56,7 @@ def launch_external_program_and_exit(launch, code=0, cmd_args=None, launch_args=
     else:
         launch_args.update(preexec_fn=os.setsid)
         launch_args.update(start_new_session=True)
-    subprocess.Popen(launch, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **launch_args)
+    subprocess.Popen(launch, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **launch_args)
     sys.exit(code)
 
 
@@ -82,8 +82,6 @@ import django
 django.setup()
 from django.conf import settings
 from django.core import management
-
-# TODO: Check SmSession.objects.get().update_on_startup
 
 if args.test:
     print("Running tests...")
