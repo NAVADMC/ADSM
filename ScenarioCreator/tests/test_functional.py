@@ -237,6 +237,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.query('#center-panel').find_element_by_css_selector('select').click()
         time.sleep(1)
         self.query('.edit-button').click()
+        time.sleep(1)
         self.query('.overwrite-button').click()
 
         self.query('#id_equation_type')  # just making sure it's there
@@ -246,7 +247,9 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         pdf_panel.find_element_by_css_selector('.btn-save').click()
         time.sleep(1)  # there's a reload here
-        self.query('#functions_panel').find_element_by_css_selector('.btn-cancel').click()
+        self.query('#functions_panel .edit-button').click()
+        time.sleep(1)  # animate
+        self.query('#functions_panel .btn-cancel').click()
         time.sleep(1)
 
         with self.assertRaises(NoSuchElementException):
@@ -508,6 +511,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.select_option('id_form-0-progression', 'Add...')
         self.select_option('id_disease_latent_period','Add...')
         self.query('#functions_panel .edit-button').click()
+        time.sleep(1)
         self.query('.overwrite-button').click()
         self.select_option('id_equation_type','Histogram')
         time.sleep(1)
@@ -543,6 +547,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
     def submit_relational_form_with_file(self, container):
         self.query('.edit-button').click()
+        time.sleep(1)
         self.query('.overwrite-button').click()
 
         container.find_element_by_id("file").send_keys(
@@ -642,10 +647,11 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         self.query('#TB_file').click()
         time.sleep(1)
-        self.query('#file_panel .copy-icon').click()
-        button = self.query('.btn-dont-save')
-        if button:
-            button.click()
+        self.query('.current .copy-icon').click()
+        try:
+            self.query('.btn-dont-save').click()
+            print("Clicked don't save")
+        except: pass
         time.sleep(1)
         filename_field = self.query('#new_name')
         try:
@@ -674,7 +680,13 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.assertIn('unsaved', status.get_attribute('class'))
 
         self.query('#TB_file').click()
-        self.query('#file_panel .copy-icon').click()
+        time.sleep(1)
+        self.query('.current .copy-icon').click()
+        try:
+            self.query('.btn-dont-save').click()
+            print("Clicked don't save")
+        except:
+            pass
         time.sleep(1)
         filename_field = self.query('#new_name')
         try:
