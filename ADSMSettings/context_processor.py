@@ -9,13 +9,14 @@ from ADSM import __version__
 
 def adsm_context(request):
     context = {}
+    version = SmSession.objects.get().update_available
     if request.path and request.path != '/' and '/LoadingScreen/' not in request.path:
         context = {'filename': scenario_filename(),  # context in either mode
                    'unsaved_changes': unsaved_changes(),
                    'url': request.path,
                    'active_link': '/'.join(re.split('\W+', request.path)[2:]),
                    'dev_version': __version__,
-                   'update_version': SmSession.objects.get().update_available,
+                   'update_version': version if version and version != 'False' else '',
                    'workspace_path': workspace_path(),
                    'db_files': (file_list(".sqlite3")),
         }
