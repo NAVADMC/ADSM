@@ -5,13 +5,15 @@
 
     <hr/>
 
-    {% if update_available %}
+    {% if update_version %}
         A newer version of ADSM is available.
         <p><strong>{{update_version}}</strong></p>
 
-        <a href="#" class="btn btn-default" id="update_adsm">update ADSM</a>
-    {% else %}
-        <a href="#" class="btn btn-default" id="check_update">check for updates</a>
+        {% if 'Error' in update_available %}
+            <a href="#" class="btn btn-default" id="check_update">repair installation</a>
+        {% else %}
+            <a href="#" class="btn btn-default" id="update_adsm">update ADSM</a>
+        {% endif %}
 
     {% endif %}
         <hr/>
