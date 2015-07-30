@@ -262,7 +262,9 @@ def npu_update_info():
         process.kill()
 
         if output:
-            new_version = output.splitlines()[-1].decode()
+            new_version = output.splitlines()[-1].decode().strip()
+            if new_version == '0':
+                new_version = None
         else:
             new_version = None
     except:
