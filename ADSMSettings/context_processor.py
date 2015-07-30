@@ -9,8 +9,8 @@ from ADSM import __version__
 
 def adsm_context(request):
     context = {}
-    version = SmSession.objects.get().update_available
     if request.path and request.path != '/' and '/LoadingScreen/' not in request.path:
+        version = SmSession.objects.get().update_available
         context = {'filename': scenario_filename(),  # context in either mode
                    'unsaved_changes': unsaved_changes(),
                    'url': request.path,
