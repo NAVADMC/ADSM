@@ -1,13 +1,4 @@
-function make_function_panel_editable() {
-    $('.edit-button-holder a, .edit-button-holder button').removeClass('reveal') //collapse the edit buttons, possibly hide
-    $('.edit-button-holder').css('display', 'none')
 
-    $('#functions_panel .buttonHolder').removeAttr('hidden')
-    $('#functions_panel, #functions_panel input').addClass('editable')
-    $('#functions_panel :input').addClass('editable')
-    //$('#tb_mask').css('visibility', 'visible')
-    $('#functions_panel').css('pointer-events', 'all')
-}
 $(function(){
     open_panel_if_needed();
     check_disabled_controls();
@@ -52,6 +43,15 @@ $(function(){
             }
         }
     })
+
+    $('form[action="/setup/RelationalFunction/new/"]').livequery(function(){
+        make_function_panel_editable(); //new forms should come in editable
+    })
+
+    $('form[action="/setup/ProbabilityFunction/new/"]').livequery(function(){
+        make_function_panel_editable(); //new forms should come in editable
+    })
+
 
     $(document).on('click', '#functions_panel span', function(event){
         $('.function_dropdown').removeClass('in');
@@ -817,3 +817,15 @@ function hide_unneeded_probability_fields() {
         }
     });
 }
+
+function make_function_panel_editable() {
+    $('.edit-button-holder a, .edit-button-holder button').removeClass('reveal') //collapse the edit buttons, possibly hide
+    $('.edit-button-holder').css('display', 'none')
+
+    $('#functions_panel .buttonHolder').removeAttr('hidden')
+    $('#functions_panel, #functions_panel input').addClass('editable')
+    $('#functions_panel :input').addClass('editable')
+    //$('#tb_mask').css('visibility', 'visible')
+    $('#functions_panel').css('pointer-events', 'all')
+}
+
