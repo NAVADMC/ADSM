@@ -266,9 +266,9 @@ $(document).on('click', '#refresh_map', function(){
 $(document).on('click', '#edit_population', function(){
     $('#population_grid_wraper').css('height', 'calc(100vh - 123px')
     $('#edit-mask').css('display', 'block')
-    $('#farm_list tbody').css('height', 'calc(100vh - 214px)')
-    $('#farm_list select, #farm_list input').addClass('editable')
-    $('#population_grid_wraper :input').addClass('editable')
+    $('#farm_list').find('tbody').css('height', 'calc(100vh - 214px)')
+    //$('#farm_list select, #farm_list input').addClass('editable')
+    //$('#population_grid_wraper :input').addClass('editable')
     $('#tb_mask').css('visibility', 'visible')
     $('#population_main_panel').css('pointer-events','all')
     $('.readonly').removeClass('readonly')
