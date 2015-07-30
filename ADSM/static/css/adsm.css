@@ -252,6 +252,8 @@ header .filename {
 
 .filename input {
     border: none;
+    width: calc(100% - 75px);
+    pointer-events: none; /*not editable by user*/
 }
 .scenario-status {
     display:none
