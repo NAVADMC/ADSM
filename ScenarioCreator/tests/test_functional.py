@@ -641,7 +641,11 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.cause_unsaved_edit()
 
         self.query('#TB_file').click()
+        time.sleep(1)
         self.query('#file_panel .copy-icon').click()
+        button = self.query('.btn-dont-save')
+        if button:
+            button.click()
         time.sleep(1)
         filename_field = self.query('#new_name')
         try:

@@ -63,7 +63,7 @@ Using the pip in your new Virtual Environment (confirm Virtual Environment Activ
     pip install pytz==2014.10
     pip install selenium==2.44.0
     pip install six==1.8.0
-    pip install git+https://github.com/BryanHurst/django-productionserver.git@1.0.2  # Note, this currently throws permission errors but actually works. Fix in Pip dev version.
+    pip install git+https://github.com/BryanHurst/django-productionserver.git@v1.0.2r4  # Note, this currently throws permission errors but actually works. Fix in Pip dev version.
 
 
 **If you are on Linux or Mac**, then you can install the following:

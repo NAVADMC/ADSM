@@ -95,17 +95,22 @@ $(function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });
 
-$(document).on('submit', '.ajax', function(event) {
-    event.preventDefault();
-    var $self = $(this)
-    var formAction = $(this).attr('action');
-    var formData = new FormData($self[0])
-    var load_target = $self
-    if($self.parent().hasClass('fragment')){
-        load_target = $self.parent()
-    }
-    ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, undefined);
-})
+    $(document).on('submit', '.ajax', function(event) {
+        event.preventDefault();
+        var $self = $(this)
+        var formAction = $(this).attr('action');
+        var formData = new FormData($self[0])
+        var load_target = $self
+        if($self.parent().hasClass('fragment')){
+            load_target = $self.parent()
+        }
+        ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, undefined);
+    })
+    
+    $(document).on('click', '#check_update', function(event){
+        event.preventDefault();
+        $.get('/app/CheckUpdate/', function(result){});
+    });
     
     $(document).on('click', '#update_adsm', function(event){
         $(this).removeClass('loading_button')
@@ -503,7 +508,7 @@ var check_file_saved = function(){
             buttons: [
                 {
                     label: 'Don\'t Save',
-                    cssClass: 'btn',
+                    cssClass: 'btn btn-dont-save',
                     action: function(dialog){
                         dialog.close();
                     }

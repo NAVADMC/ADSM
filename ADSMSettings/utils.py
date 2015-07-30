@@ -10,6 +10,9 @@ from django.db import OperationalError
 from django.core.management import call_command
 from django.db import connections, close_old_connections
 from django.conf import settings
+import sys
+import subprocess
+import time
 
 from ADSMSettings.models import SmSession
 
@@ -247,3 +250,37 @@ def scenario_filename(new_value=None, check_duplicates=False):
         session.scenario_filename = new_value
         session.save()
     return session.scenario_filename
+
+
+def launch_external_program_and_exit(launch, code=0, close_self=True, cmd_args=None, launch_args=None):
+    if not launch_args:
+        launch_args = {}
+    if not cmd_args:
+        cmd_args = []
+    launch = [launch, ]
+    if cmd_args:
+        for cmd_arg in cmd_args:
+            launch.append(cmd_arg)
+    if sys.platform == 'win32':  # Yes, this is also x64.
+        CREATE_NEW_PROCESS_GROUP = 0x00000200
+        DETACHED_PROCESS = 0x00000008
+        launch_args.update(creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP)
+    else:
+        launch_args.update(preexec_fn=os.setsid)
+        launch_args.update(start_new_session=True)
+    subprocess.Popen(launch, stdin=subprocess.PIPE, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **launch_args)
+    if close_self:
+        sys.exit(code)
+
+
+def npu_update_info():
+    try:
+        npu = 'npu.exe'
+        npu_response = subprocess.check_output(npu + '--check_update --silent', shell=True, stderr=subprocess.STDOUT).strip()
+        print(os.getcwd(), npu_response)
+        version = npu_response[-1]
+        new_update = version == '1'
+        SmSession.objects.all().update(update_available=new_update)
+    except:
+        version = 'no version information available'
+    return version

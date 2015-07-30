@@ -1,14 +1,16 @@
 import re
 import os
 import shutil
+from django.conf import settings
 from django.db import close_old_connections
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest
 from django.shortcuts import redirect, render, HttpResponse
 from django.utils.html import strip_tags
 from ADSMSettings.models import SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
-from ADSMSettings.utils import reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup, scenario_filename
+from ADSMSettings.utils import reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup, scenario_filename, \
+    npu_update_info
 from Results.models import outputs_exist
 
 
@@ -32,13 +34,22 @@ def loading_screen(request):
     return render(request, "LoadingScreen.html", context)
 
 
+def check_for_update(request):
+    npu_update_info()
+    #TODO: this should do more, update version number, set DB flag
+    return HttpResponse("success")
+
+
 def update_adsm_from_git(request):
+    from ADSMSettings.utils import launch_external_program_and_exit
     """This sets the update_on_startup flag for the next program start."""
     if 'GET' in request.method:
         try:
             session = SmSession.objects.get()
             session.update_on_startup = True
             session.save()
+            npu = os.path.join(settings.BASE_DIR, 'npu.exe')  # TODO Windows specific
+            launch_external_program_and_exit(npu, close_self=False, )#cmd_args=['--silent'])  # NPU will force close this
             return HttpResponse("success")
         except:
             print ("Failed to set DB to update!")
@@ -152,7 +163,7 @@ def copy_file(request, target, destination):
     if target.replace('.sqlite3', '') == scenario_filename():  # copying the active scenario
         return save_scenario(request)
     if not destination.endswith('.sqlite3'):
-        destination = destination + ".sqlite3"
+        destination += ".sqlite3"
     print("Copying", target, "to", destination, ". This could take several minutes...")
     shutil.copy(workspace_path(target), workspace_path(destination))
     print("Done copying", target)
@@ -189,3 +200,8 @@ def backend(request):
     login(request, user)
     return redirect('/admin/')
 
+
+def handler500(request):
+    print("Caught the error")
+    return render(request, '500.html', {})
+    #return render_to_response('../templates/error/500.html', {'exception': ex}, context_instance=RequestContext(request), status=404)
