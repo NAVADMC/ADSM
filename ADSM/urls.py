@@ -14,3 +14,4 @@ urlpatterns = patterns('',
     )
 
 handler500 = 'ADSMSettings.views.handler500'
+handler404 = 'ADSMSettings.views.handler500'
