@@ -12,6 +12,8 @@ django.setup()
 from django.conf import settings
 from django.core import management
 
+from ADSM import __version__
+
 
 build_exe_options = {
     'build_exe': 'build',
@@ -177,7 +179,7 @@ if sys.platform == 'win32':
 cmdclass = {"build_exe": BuildADSM, }
 
 setup(name='ADSM',
-      version='3.3.33',
+      version=__version__,
       description='Test ADSM Application',
       options={'build_exe': build_exe_options,
                'install_exe': {'build_dir': build_exe_options['build_exe']}},

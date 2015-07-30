@@ -1,5 +1,7 @@
 from django.db import models
 
+from ADSM import __version__
+
 
 class SimulationProcessRecord(models.Model):
     is_parser = models.BooleanField(default=True)
@@ -34,12 +36,16 @@ class SingletonManager(models.Manager):
 class SmSession(models.Model):
     scenario_filename = models.CharField(max_length=255, default="Untitled Scenario", blank=True)
     unsaved_changes = models.BooleanField(default=False)
-    update_available = models.BooleanField(default=False, help_text='Is there are new version of ADSM available?')
-    update_on_startup = models.BooleanField(default=False, help_text='The user has requested to install the update.')
+    update_available = models.CharField(max_length=25, default=None, null=True, blank=True, help_text='Is there are new version of ADSM available?')
+    simulation_version = models.CharField(max_length=25, default=None, null=True, blank=True, help_text='ADSM Simulation version.')
     population_upload_status = models.CharField(default='', null=True, blank=True, max_length=255)
     population_upload_percent = models.FloatField(default=0)
     simulation_has_started = models.BooleanField(default=False)
     iteration_text = models.TextField(default='')
+
+    @property
+    def current_version(self):
+        return __version__
 
     def set_population_upload_status(self, status=None, percent=None):
         if status:

@@ -193,45 +193,6 @@ def supplemental_folder_has_contents(subfolder=''):
     return len(list(chain(*[glob(workspace_path(scenario_filename() + subfolder + "/*." + ext)) for ext in ['csv', 'shp', 'shx', 'dbf', 'zip']]))) > 0
 
 
-def update_requested():
-    try:
-        a_size = os.stat(connections.databases['scenario_db']['NAME']).st_size
-        s_size = os.stat(connections.databases['default']['NAME']).st_size
-        if a_size < 500 or s_size < 500:  # size in bytes
-            return False
-    except:
-        return False
-        
-    try:
-        session = SmSession.objects.get()
-        if session.update_on_startup:
-            return True
-    except:
-        pass
-    finally:
-        close_old_connections()
-
-    return False
-
-
-def clear_update_flag():
-    try:  #database may not exist
-        session = SmSession.objects.get()
-        session.update_on_startup = False
-        session.update_available = False
-        session.save()
-    except:
-        pass
-
-
-def check_update():
-    close_old_connections()
-    update_available = False  # TODO: Build in new check update method
-    session = SmSession.objects.get()
-    session.update_available = update_available
-    session.save()
-
-
 def scenario_filename(new_value=None, check_duplicates=False):
     session = SmSession.objects.get()  # This keeps track of the state for all views and is used by basic_context
     if new_value:
@@ -273,14 +234,60 @@ def launch_external_program_and_exit(launch, code=0, close_self=True, cmd_args=N
         sys.exit(code)
 
 
+def check_simulation_version():
+    close_old_connections()
+
+    try:
+        executable = adsm_executable_command()[0]
+        process = subprocess.Popen([executable, "--version"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output, error = process.communicate()
+        exit_code = process.wait(timeout=200)
+        process.kill()
+
+        if exit_code == 0:
+            version = output.splitlines()[-1].decode()
+        else:
+            version = None
+    except:
+        version = None
+
+    SmSession.objects.all().update(simulation_version=version)
+
+    return version
+
+
 def npu_update_info():
     try:
-        npu = 'npu.exe'
-        npu_response = subprocess.check_output(npu + '--check_update --silent', shell=True, stderr=subprocess.STDOUT).strip()
-        print(os.getcwd(), npu_response)
-        version = npu_response[-1]
-        new_update = version == '1'
-        SmSession.objects.all().update(update_available=new_update)
+        npu = os.path.join(settings.BASE_DIR, 'npu.exe')  # TODO: This is OS Specific
+        process = subprocess.Popen([npu, "--check_update"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output, error = process.communicate()
+        exit_code = process.wait(timeout=60000)
+        process.kill()
+
+        if output:
+            new_version = output.splitlines()[-1].decode()
+        else:
+            new_version = None
     except:
-        version = 'no version information available'
+        new_version = None
+
+    return new_version
+
+
+def clear_update_flag():
+    try:  #database may not exist
+        session = SmSession.objects.get()
+        session.update_available = False
+        session.save()
+    except:
+        pass
+
+
+def check_update():
+    close_old_connections()
+
+    version = npu_update_info()
+
+    SmSession.objects.all().update(update_available=version)
+
     return version
