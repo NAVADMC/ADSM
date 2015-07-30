@@ -617,7 +617,7 @@ class IndirectSpread(AbstractSpread):
                   wiki("indirect contact") + ' models.', )
 
     def __str__(self):
-        return "%s %i" % (self.name, self.id)
+        return "%s" % (self.name, )
 
 
 class DirectSpread(AbstractSpread):
@@ -632,7 +632,7 @@ class DirectSpread(AbstractSpread):
         help_text='Indicates if '+wiki("latent", "latent-state")+' units of the source type can spread disease by ' +
                   wiki("direct contact") + '.', )
     def __str__(self):
-        return "%s %i" % (self.name, self.id)
+        return "%s" % (self.name, )
 
 
 class AirborneSpread(DiseaseSpread):
@@ -645,7 +645,7 @@ class AirborneSpread(DiseaseSpread):
     exposure_direction_end = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=360,
         help_text='The end angle in degrees of the area at risk of ' + wiki("airborne spread", "airborne-transmission") + '.  0 is North.', )
     def __str__(self):
-        return "%s %i" % (self.name, self.id)
+        return "%s " % (self.name, )
 
 
 class Scenario(InputSingleton):

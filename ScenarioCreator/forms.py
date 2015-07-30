@@ -407,7 +407,7 @@ class DirectSpreadForm(BaseForm):
         )
         super(DirectSpreadForm, self).__init__(*args, **kwargs)
         if not Disease.objects.get().use_within_unit_prevalence:
-            self.fields['infection_probability'].widget.attrs['required'] = 'required'  # actually only required when the field is visible, enforced by browser
+            self.fields['infection_probability'].widget.attrs['required'] = 'required'  # only required when the field is visible, enforced by browser
 
     class Meta(object):
         model = DirectSpread

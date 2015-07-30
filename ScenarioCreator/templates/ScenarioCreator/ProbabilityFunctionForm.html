@@ -4,8 +4,6 @@
 {% load db_status_tags %}
 
 {% block content %}
-    <script src="{{ STATIC_URL }}js/probability-functions.js"></script>
-
     <form id="{{ action|action_id }}" class="ajax" action="{{ action }}">
         {% crispy form %}
         {% include "ScenarioCreator/ViewEditButtons.html" %}

@@ -5,6 +5,7 @@
             <li><a href="#">{{ pt.name }}</a><span>({{ pt.unit_count }} units)</span><span>{{pt.description}}</span></li>
         {% endfor %}
     </ul>
+    <a href="/setup/ProductionType/">+ define new production type</a>
     <h2><a href="/setup/ProductionGroup/">Production Type Groups</a></h2>
     <ul id="ProductionGroups">
         {% for group in ProductionGroups %}
