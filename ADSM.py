@@ -37,6 +37,7 @@ parser = argparse.ArgumentParser(prog='adsm.exe')
 parser.add_argument('-t', '--test', dest='test', help='run the test suite', action='store_true')
 parser.add_argument('-n', '--update_name', dest='update_name', help='Query for the name of this program as known to the update server', action='store_true')
 parser.add_argument('-u', '--update', dest='update', help='Launch the updater after checking for new versions of the update client', action='store_true')
+parser.add_argument('-v', '--version', dest='version', help='Get current version of program.', action='store_true')
 args = parser.parse_args()
 
 
@@ -73,6 +74,11 @@ if args.update:
 elif args.update_name:
     print("ADSM")
     sys.exit(0)
+elif args.version:
+    from ADSM import __version__
+    print(__version__)
+    sys.exit(0)
+
 
 print("Preparing Django environment...")
 
