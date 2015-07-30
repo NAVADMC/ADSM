@@ -34,12 +34,6 @@ def loading_screen(request):
     return render(request, "LoadingScreen.html", context)
 
 
-def check_for_update(request):
-    npu_update_info()
-    #TODO: this should do more, update version number, set DB flag
-    return HttpResponse("success")
-
-
 def update_adsm_from_git(request):
     from ADSMSettings.utils import launch_external_program_and_exit
     """This sets the update_on_startup flag for the next program start."""

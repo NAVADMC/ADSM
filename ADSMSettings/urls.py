@@ -6,7 +6,6 @@ admin.autodiscover()
 urlpatterns = patterns('',
     url('^Startup/$', 'ADSMSettings.views.startup'),
     url('^Update/$', 'ADSMSettings.views.update_adsm_from_git'),
-    url('^CheckUpdate/$', 'ADSMSettings.views.check_for_update'),
     url('^SaveScenario/$', 'ADSMSettings.views.save_scenario'),
     url('^NewScenario/(?P<new_name>.*)$', 'ADSMSettings.views.new_scenario'),
     url('^Workspace/$', 'ADSMSettings.views.file_dialog'),
