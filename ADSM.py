@@ -68,7 +68,7 @@ if os.path.exists(os.path.join(BASE_DIR, 'npu.exe.updated')):
     os.rename(os.path.join(BASE_DIR, 'npu.exe.updated'), os.path.join(BASE_DIR, 'npu.exe'))
 # Launch the update client
 if args.update:
-    launch_external_program_and_exit(launch=os.path.join(BASE_DIR, 'npu.exe'))
+    launch_external_program_and_exit(launch=os.path.join(BASE_DIR, 'npu.exe'), cmd_args=['--silent'])
 # Respond to an updater query
 elif args.update_name:
     print("ADSM")
@@ -83,11 +83,24 @@ django.setup()
 from django.conf import settings
 from django.core import management
 
+
+def check_for_updates():
+    from ADSMSettings.utils import clear_update_flag, check_simulation_version, check_update
+
+    clear_update_flag()
+    check_simulation_version()
+    check_update()
+    return
+
+
 if args.test:
     print("Running tests...")
     management.call_command('test')
 else:
-    browser = threading.Timer(.5, launch_viewer)
+    update_checker = threading.Timer(.1, check_for_updates)
+    update_checker.start()
+
+    browser = threading.Timer(1, launch_viewer)
     browser.start()
 
     print("Launching server...")

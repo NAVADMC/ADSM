@@ -135,9 +135,6 @@ def graceful_startup():
         reset_db('scenario_db')
     
     update_db_version()
-    session = SmSession.objects.get()
-    session.update_on_startup = False
-    session.save()
 
 
 def reset_db(name, fail_ok=True):
@@ -259,7 +256,7 @@ def check_simulation_version():
 def npu_update_info():
     try:
         npu = os.path.join(settings.BASE_DIR, 'npu.exe')  # TODO: This is OS Specific
-        process = subprocess.Popen([npu, "--check_update"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen([npu, "--check_update", "--silent"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, error = process.communicate()
         exit_code = process.wait(timeout=60000)
         process.kill()

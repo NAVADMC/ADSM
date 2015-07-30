@@ -45,9 +45,6 @@ def update_adsm_from_git(request):
     """This sets the update_on_startup flag for the next program start."""
     if 'GET' in request.method:
         try:
-            session = SmSession.objects.get()
-            session.update_on_startup = True
-            session.save()
             npu = os.path.join(settings.BASE_DIR, 'npu.exe')  # TODO Windows specific
             launch_external_program_and_exit(npu, close_self=False, )#cmd_args=['--silent'])  # NPU will force close this
             return HttpResponse("success")
