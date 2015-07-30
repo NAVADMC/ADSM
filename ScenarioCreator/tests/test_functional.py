@@ -635,10 +635,16 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.cause_unsaved_edit()
 
         self.query('#TB_file').click()
-        filename_field = self.query('#file_panel .filename input')
+        time.sleep(1)
+        self.query('#file_panel .copy-button').click()
+        button = self.query('.btn-dont-save')
+        if button:
+            button.click()
+        time.sleep(1)
+        filename_field = self.query('#new_name')
         try:
             filename_field.send_keys('./\\ 123.1&% AZ')
-            self.query('#save_scenario').click()
+            self.query('.modal.in .btn-primary').click()
             time.sleep(1)
 
             alert = self.query('.alert-danger')  # this works fine in the actual program.

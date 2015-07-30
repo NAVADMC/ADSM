@@ -163,7 +163,7 @@ def copy_file(request, target, destination):
     if target.replace('.sqlite3', '') == scenario_filename():  # copying the active scenario
         return save_scenario(request)
     if not destination.endswith('.sqlite3'):
-        destination = destination + ".sqlite3"
+        destination += ".sqlite3"
     print("Copying", target, "to", destination, ". This could take several minutes...")
     shutil.copy(workspace_path(target), workspace_path(destination))
     print("Done copying", target)

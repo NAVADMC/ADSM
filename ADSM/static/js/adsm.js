@@ -473,7 +473,7 @@ var check_file_saved = function(){
             buttons: [
                 {
                     label: 'Don\'t Save',
-                    cssClass: 'btn',
+                    cssClass: 'btn btn-dont-save',
                     action: function(dialog){
                         dialog.close();
                     }
