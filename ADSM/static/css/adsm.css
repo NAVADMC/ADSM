@@ -1631,14 +1631,11 @@ section#population_main_panel h1:first-of-type {
 #farm_list select:hover {
     border: none;
 }
-/*#farm_list input, #farm_list select{
-    border: none;
-    margin: 0px;
+#farm_list input, #farm_list select{
     width: 100%;
-    background-image: none;
 }
 
-#farm_list select,
+/**#farm_list select,
 #functions_panel select {
     -webkit-appearance: none;
     background-color: transparent;
