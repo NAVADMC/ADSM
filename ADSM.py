@@ -36,7 +36,6 @@ parser = argparse.ArgumentParser(prog='adsm.exe')
 # TODO: Tests don't run currently as the test runner won't find compiled tests.
 parser.add_argument('-t', '--test', dest='test', help='run the test suite', action='store_true')
 parser.add_argument('-n', '--update_name', dest='update_name', help='Query for the name of this program as known to the update server', action='store_true')
-parser.add_argument('-u', '--update', dest='update', help='Launch the updater after checking for new versions of the update client', action='store_true')
 parser.add_argument('-v', '--version', dest='version', help='Get current version of program.', action='store_true')
 args = parser.parse_args()
 
@@ -60,18 +59,8 @@ def launch_external_program_and_exit(launch, code=0, cmd_args=None, launch_args=
     subprocess.Popen(launch, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **launch_args)
     sys.exit(code)
 
-
-print("Checking with the update service...")
-# Update the updater
-if os.path.exists(os.path.join(BASE_DIR, 'npu.exe.updated')):
-    if os.path.exists(os.path.join(BASE_DIR, 'npu.exe')):
-        os.remove(os.path.join(BASE_DIR, 'npu.exe'))
-    os.rename(os.path.join(BASE_DIR, 'npu.exe.updated'), os.path.join(BASE_DIR, 'npu.exe'))
-# Launch the update client
-if args.update:
-    launch_external_program_and_exit(launch=os.path.join(BASE_DIR, 'npu.exe'), cmd_args=['--silent'])
 # Respond to an updater query
-elif args.update_name:
+if args.update_name:
     print("ADSM")
     sys.exit(0)
 elif args.version:
