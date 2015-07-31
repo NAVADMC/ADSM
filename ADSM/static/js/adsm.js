@@ -541,10 +541,12 @@ function add_model_option_to_selects(html, selectInput) {
     }
     //add functions to their panel lists
     var $new_link = $('.function_dropdown [href="' + model_link + '"]')
-    var $back_link = $new_link.clone()
-    $back_link.attr('href', $back_link.attr('href').replace('new', pk))
-    $back_link.text(title)
-    $new_link.parent().after($('<li>' + $back_link.prop('outerHTML') + '</li>')); // Add new link with all properties
+    if($new_link.length) {
+        var $back_link = $new_link.clone()
+        $back_link.attr('href', $back_link.attr('href').replace('new', pk))
+        $back_link.text(title)
+        $new_link.parent().after($('<li>' + $back_link.prop('outerHTML') + '</li>')); // Add new link with all properties
+    }
 }
 
 var modelModal = {
@@ -719,8 +721,11 @@ function clear_form_populate_panel($container_panel, delete_link) {
         if(panel_id == 'left-panel') {
             reload_model_list();
             var primary_key = delete_link.split('/')[3];
-            if(typeof delete_link !== 'undefined' && $('#center-panel form').attr('action').indexOf(primary_key) != -1){
-                $('#center-panel').html('')
+            var $center_form = $('#center-panel').find('form');
+            if( $center_form.length){
+                if(typeof delete_link !== 'undefined' && $center_form.attr('action').indexOf(primary_key) != -1){
+                    $('#center-panel').html('')
+                }
             }
         } else { //will still clear Create Group form inside of population_panel without destroying the whole panel
             $container_panel.html('') //delete everything from the div containing the form
@@ -755,7 +760,8 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
                 $('#main-panel').html($(form_html).find('#main_panel')[0])
             } else {
                 if (formAction.lastIndexOf('new/') != -1) { //new model created
-                    if($self.closest('.layout-panel').attr('id') == 'center-panel'){
+                    var parent_panel = $self.closest('.layout-panel').attr('id');
+                    if(parent_panel == 'center-panel' || parent_panel == 'population_panel'){
                         reload_model_list($self); //reload left
                     }else{
                         var lastClickedSelect = get_parent_select($self);
