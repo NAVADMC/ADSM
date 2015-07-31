@@ -648,7 +648,7 @@ ul {
 }
 
 .ellipsis-title {
-    width: calc(100% - 82px);
+    width: calc(100% - 85px);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1325,6 +1325,12 @@ select {
 
 #file_list a:hover {
     color: #7cb9ff;
+}
+
+.file-buttons {
+    position: absolute;
+    right: 5px;
+    top: 0;
 }
 
 #file_list .icon {
