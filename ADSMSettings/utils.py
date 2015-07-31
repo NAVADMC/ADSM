@@ -244,10 +244,13 @@ def check_simulation_version():
 
         if exit_code == 0:
             version = output.splitlines()[-1].decode()
+    except:
+        print("Unable to get Simulation Version!")
+        return None
+    try:
         SmSession.objects.all().update(simulation_version=version)
     except:
-        print("Database is not yet ready.")
-
+        print("Unable to store Simulation Version!")
 
     return version
 
@@ -264,18 +267,18 @@ def npu_update_info():
         if output:
             new_version = output.splitlines()[-1].decode().strip()
     except:
-        print("Update information not available right now.")
+        print("Unable to get ADSM Version!")
 
     return new_version
 
 
 def clear_update_flag():
-    try:  #database may not exist
+    try:  # database may not exist
         session = SmSession.objects.get()
         session.update_available = False
         session.save()
     except:
-        pass
+        print("Unable to clear Update Flags!")
 
 
 def check_update():
@@ -285,6 +288,6 @@ def check_update():
     try:
         SmSession.objects.all().update(update_available=version)
     except:
-        print("Couldn't update database at this time.  Version:", version)
+        print("Unable to store ADSM Version!")
 
     return version
