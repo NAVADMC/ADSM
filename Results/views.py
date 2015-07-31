@@ -126,9 +126,9 @@ headers = {'DailyByProductionType': [("Exposures", "exp", ['expnU', 'expcU']),
                                      ("Exams", "exm", ['exmnU', 'exmcU']),
                                      ("Lab Tests", "tst", ['tstnU', 'tstcU']),
                                      ("Tracing", "tr", ['trnU', 'trcU'])],
-           # 'DailyControls': [("Destruction", 'dest', ['destrSubtotal']),  # TODO: figure out why DailyControls subcategories are not displaying right
-           #                   ("Destruction Wait", 'desw', ['deswUTimeAvg']),
-           #                   ("Vaccination", 'vacc', ['vaccVaccination'])]
+           'DailyControls': [("Destruction", 'dest', ['destrSubtotal']),  # TODO: figure out why DailyControls subcategories are not displaying right
+                             ("Destruction Wait", 'desw', ['deswUTimeAvg']),
+                             ("Vaccination", 'vacc', ['vaccVaccination'])]
            }
 headers = defaultdict(lambda: [('', '', [])], headers)
 
