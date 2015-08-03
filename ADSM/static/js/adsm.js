@@ -689,14 +689,17 @@ function prompt_for_new_file_name(link) {
                 cssClass: 'btn-primary',
                 action: function (dialog) {
                     dialog.close();
+                    var $self = $('.filename input').closest('form');
                     if (is_current_scenario) {
                         $('.filename input').val($('#new_name').val())
-                        var $self = $('.filename input').closest('form');
                         //$self.submit()
                         ajax_submit_complex_form_and_replaceWith(link, new FormData($self[0]), $self, $self, function () {
                             $('h1.filename').text($('.filename input').val()) //match major title with form value
                         });
                     } else {
+                        //TODO: need FormData from form that is to be added in #NewScenario
+                        //ajax_submit_complex_form_and_replaceWith(link, new FormData($self[0]), $self, $self, undefined);
+
                         window.location = link + $('#new_name').val();
                     }
                 }
