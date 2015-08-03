@@ -7,6 +7,7 @@ This script avoids direct SQL manipulation and instead uses the models.py file
 defined for the ADSM project for all object creation."""
 
 import xml.etree.ElementTree as ET
+import xml.sax
 import warnings
 from pyproj import Proj
 from math import exp, sqrt
@@ -289,75 +290,107 @@ def getBool( xml ):
 
 
 
+class NAADSMPopulationFileHandler (xml.sax.handler.ContentHandler):
+    def __init__ (self, population):
+        self.population = population
+        self.bulkUnits = []
+
+        # Create a dictionary to remap long state names to one-letter codes.
+        self.stateCodes = {}
+        for code, fullName in Unit.initial_state_choices:
+            self.stateCodes[fullName] = code
+            self.stateCodes[fullName.replace( ' ', '' )] = code
+
+        # Will be used if the locations are given in projected coordinates.
+        self.projection = None
+
+    def startElement (self, name, attrs):
+        self.charData = u''
+        if name == 'herd':
+            # About to read a herd: reset all the optional fields
+            self.description = ''
+            self.daysInState = None
+            self.daysLeftInState = None
+
+    def characters (self, content):
+        self.charData += content
+
+    def endElement (self, name):
+        if name == 'production-type':
+            typeName = self.charData.strip()
+            self.productionType = ProductionType.objects.get_or_create( name=typeName )[0]
+
+        elif name == 'size':
+            self.size = int( self.charData )
+
+        elif name == 'latitude':
+            self.lat = float( self.charData )
+
+        elif name == 'longitude':
+            self.long = float( self.charData )
+
+        elif name == 'herd':
+            if self.projection is not None:
+                self.long, self.lat = self.projection( self.x, self.y, inverse=True )
+            self.bulkUnits.append( Unit(
+                _population = self.population,
+                production_type = self.productionType,
+                latitude = self.lat,
+                longitude = self.long,
+                initial_state = self.state,
+                days_in_initial_state = self.daysInState,
+                days_left_in_initial_state = self.daysLeftInState,
+                initial_size = self.size,
+                user_notes = self.description
+            ))
+            if len( self.bulkUnits ) >= CREATE_AT_A_TIME:
+                Unit.objects.bulk_create( self.bulkUnits )
+                self.bulkUnits = []
+            
+        elif name == 'status':
+            state = self.charData.strip()
+            if state not in self.stateCodes.values():
+                try:
+                    state = self.stateCodes[state]
+                except KeyError:
+                    state = Unit._meta.get_field('initial_state').get_default()
+            self.state = state
+
+        elif name == 'id':
+            self.description = 'id=' + self.charData.strip()
+
+        elif name == 'days-in-status':
+            self.daysInState = int( self.charData )
+
+        elif name == 'days-left-in-status':
+            self.daysLeftInState = int( self.charData )
+
+        elif name == 'x':
+            self.x = float( self.charData )
+
+        elif name == 'y':
+            self.y = float( self.charData )
+
+        elif name == 'PROJ4':
+            # The locations are given in projected coordinates. Create an
+            # object that can convert them to lat-long.
+            srs = self.charData.strip()
+            projection = Proj( srs, preserve_units=True )
+
+        elif name == 'herds':
+            # This marks the end of the file.
+            if self.bulkUnits:
+                Unit.objects.bulk_create( self.bulkUnits )
+
+
+
 def readPopulation( populationFileName ):
     print("Reading population file: ", populationFileName)
-    fp = open( populationFileName, 'rb' )
-    xml = ET.parse( fp ).getroot()
-    fp.close()
-
-    # Create a dictionary to remap long state names to one-letter codes.
-    stateCodes = {}
-    for code, fullName in Unit.initial_state_choices:
-        stateCodes[fullName] = code
-        stateCodes[fullName.replace( ' ', '' )] = code
-
-    # Are the locations given in projected coordinates? If so, create an object
-    # that can convert them to lat-long.
-    projection = None
-    srs = xml.find( './spatial_reference/PROJ4' )
-    if srs is not None:
-        projection = Proj( srs.text, preserve_units=True )
 
     population = Population()
     population.save()
-    bulkUnits = []
-    for el in xml.findall( './/herd' ):
-        description = el.find( './id' )
-        if description is None:
-            description = ''
-        else:
-            description = 'id=' + description.text
-        typeName = el.find( './production-type' ).text
-        productionType = ProductionType.objects.get_or_create( name=typeName )[0]
-        size = int( el.find( './size' ).text )
-        if not projection:
-            lat = float( el.find( './location/latitude' ).text )
-            long = float( el.find( './location/longitude' ).text )
-        else:
-            x = float( el.find( './location/x' ).text )
-            y = float( el.find( './location/y' ).text )
-            long, lat = projection( x, y, inverse=True )
 
-        state = el.find( './status' ).text
-        if state not in stateCodes.values():
-            try:
-                state = stateCodes[state]
-            except KeyError:
-                state = Unit._meta.get_field('initial_state').get_default()
-        daysInState = el.find( './days-in-status' )
-        if daysInState is not None:
-            daysInState = int( daysInState.text )
-        daysLeftInState = el.find( './days-left-in-status' )
-        if daysLeftInState is not None:
-            daysLeftInState = int( daysLeftInState.text )
-
-        bulkUnits.append( Unit(
-            _population = population,
-            production_type = productionType,
-            latitude = lat,
-            longitude = long,
-            initial_state = state,
-            days_in_initial_state = daysInState,
-            days_left_in_initial_state = daysLeftInState,
-            initial_size = size,
-            user_notes = description
-        ))
-        if len( bulkUnits ) >= CREATE_AT_A_TIME:
-            Unit.objects.bulk_create( bulkUnits )
-            bulkUnits = []
-    # end of loop over units in XML file
-    if bulkUnits:
-        Unit.objects.bulk_create( bulkUnits )
+    xml.sax.parse (populationFileName, NAADSMPopulationFileHandler(population))
 
     return # from readPopulation
 
