@@ -1,17 +1,6 @@
 import os
 import sys
-import subprocess
 import multiprocessing
-import argparse
-import threading
-import _thread
-
-
-def launch_viewer():
-    print("Launching browser...")
-    subprocess.call(os.path.join(BASE_DIR, 'Viewer', 'ADSM Viewer.exe'))
-    print("Closing application!")
-    _thread.interrupt_main()
 
 
 print("Setting up Python...")
@@ -32,6 +21,20 @@ os.chdir(BASE_DIR)
 
 multiprocessing.freeze_support()
 
+# ----------BEGIN MAIN PROGRAM----------
+import subprocess
+import argparse
+import threading
+import _thread
+import psutil
+
+
+def launch_viewer():
+    print("Launching browser...")
+    subprocess.call(os.path.join(BASE_DIR, 'Viewer', 'ADSM Viewer.exe'))
+    print("Closing application!")
+    _thread.interrupt_main()
+
 parser = argparse.ArgumentParser(prog='adsm.exe')
 # TODO: Tests don't run currently as the test runner won't find compiled tests.
 parser.add_argument('-t', '--test', dest='test', help='run the test suite', action='store_true')
@@ -48,6 +51,17 @@ elif args.version:
     print(__version__)
     sys.exit(0)
 
+# Check that another instance of the program isn't running
+for proc in psutil.process_iter():
+    try:
+        proc_name = proc.name().lower()
+    except psutil.AccessDenied as e:
+        continue
+    if 'ADSM Viewer.exe'.lower() in proc_name:  # TODO: This is Windows specific
+        print("There is already an instance of ADSM running!")
+        print("\nPress any key to exit...")
+        input()
+        sys.exit(1)
 
 print("Preparing Django environment...")
 
