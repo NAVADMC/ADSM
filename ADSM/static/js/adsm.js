@@ -757,7 +757,11 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
             $('.scenario-status').addClass('unsaved')
             // Here we replace the form, for the
             if ($self.closest('#main-panel').length) { //in the main panel, just reload the page
-                $('#main-panel').html($(form_html).find('#main_panel')[0])
+                if($(form_html).find('#main_panel').length ){
+                    $('#main-panel').html($(form_html).find('#main_panel')[0])
+                }else {
+                    document.write(form_html)
+                }
             } else {
                 if (formAction.lastIndexOf('new/') != -1) { //new model created
                     var parent_panel = $self.closest('.layout-panel').attr('id');

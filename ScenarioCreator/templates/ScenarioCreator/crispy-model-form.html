@@ -10,7 +10,7 @@
             {% include "ScenarioCreator/EditButtons.html" %}
         </form>
     {% else %}
-        <form>
+        <form class="ajax" >
             {% crispy form %}
             {# Can't include EditButtons because it requires action to work outside the form. Must be included in forms.py #}
         </form>

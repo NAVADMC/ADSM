@@ -78,7 +78,7 @@ def import_naadsm_scenario(request):
         initialized_form = ImportForm()
     if initialized_form.is_valid():
         run_importer(request)
-        return redirect('/')
+        return loading_screen(request)
     context = {'form': initialized_form, 
                'title': "Import Legacy NAADSM Scenario in XML format", 
                'base_page': 'ScenarioCreator/crispy-model-form.html'}
@@ -173,7 +173,7 @@ def download_file(request):
 
 def new_scenario(request=None, new_name=None):
     reset_db('scenario_db')
-    reset_db('default')
+    reset_db('default')  # TODO: just copy blank then update version
     update_db_version()
     if new_name:
         try:
