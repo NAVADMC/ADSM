@@ -104,7 +104,11 @@ $(function(){
         if($self.parent().hasClass('fragment')){
             load_target = $self.parent()
         }
-        ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, undefined);
+        if($self.parent().find('button[type=submit]').hasClass('btn-danger')) {//for deleting outputs on form submission
+            ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, function(){window.location.reload()});  //updates Navigation bar context
+        }else{
+            ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, undefined);
+        }
     })
 
     $(document).on('click', '#update_adsm', function(event){
@@ -191,13 +195,16 @@ $(function(){
 
     $(document).on('click', '[data-delete-link]', function(){
         var link = $(this).attr('data-delete-link')
-        var do_reload = $(this).hasClass('ajax-post')
+        var deleting_outputs = typeof outputs_exist !== 'undefined' && outputs_exist;
+        var do_reload = $(this).hasClass('ajax-post') || deleting_outputs
         var direct_link = $(this).hasClass('direct_link')
         var $containing_panel = $(this).closest('.layout-panel')
         var object_type = link.split('/')[2]
-        if (typeof object_type === 'undefined') {object_type = 'object'}
+        if (typeof object_type === 'undefined') {
+            object_type = 'object';
+        }
         var additional_msg = ''
-        if(typeof outputs_exist !== 'undefined' && outputs_exist){
+        if(deleting_outputs){
             additional_msg = ' and <strong><u>All Results</u></strong>' 
         }
         var dialog = new BootstrapDialog.show({
