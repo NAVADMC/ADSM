@@ -13,7 +13,7 @@ import os
 import sys
 
 
-PRODUCTION_SETTINGS = False  # When you want to enable the production settings, copy the template file and modify
+PRODUCTION_SETTINGS = True  # When you want to enable the production settings, copy the template file and modify
 OVERRIDE_DEBUG = False
 if PRODUCTION_SETTINGS:
     PRODUCTION_SETTINGS = True
