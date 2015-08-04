@@ -115,10 +115,10 @@ def open_test_scenario(request, target):
 def new_scenario(request=None, new_name=None):
     try:  # just copy blank then update version
         close_old_connections()
+        print("Copying from blank scenario template")
         source = os.path.join(settings.BASE_DIR, 'Sample Scenarios', 'blank.sqlite3')
         dest = os.path.join(settings.DB_BASE_DIR, 'activeSession.sqlite3')
         shutil.copy(source, dest)
-        print("Copying from blank scenario template")
         SmSession.objects.all().update(unsaved_changes=True)
     except BaseException as err:
         print("Copying from blank scenario template failed, resetting database")
@@ -129,7 +129,7 @@ def new_scenario(request=None, new_name=None):
     if new_name:
         try:
             scenario_filename(new_name, check_duplicates=True)
-        except: pass # validation may kick it back in which case they'll need to rename it in a file browser
+        except: pass  # validation may kick it back in which case they'll need to rename it in a file browser
     return redirect('/setup/Scenario/1/')
 
 
