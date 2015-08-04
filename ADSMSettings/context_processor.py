@@ -16,7 +16,7 @@ def adsm_context(request):
                    'url': request.path,
                    'active_link': '/'.join(re.split('\W+', request.path)[2:]),
                    'dev_version': __version__,
-                   'update_version': version if version and version != 'False' else '',
+                   'update_version': version if version and version != 'False' and version != '0' else '',
                    'workspace_path': workspace_path(),
                    'db_files': (file_list(".sqlite3")),
         }
