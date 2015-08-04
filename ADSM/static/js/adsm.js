@@ -763,7 +763,7 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
                 if($(form_html).find('#main_panel').length ){
                     $('#main-panel').html($(form_html).find('#main_panel')[0])
                 }else {
-                    document.write(form_html)
+                    $('body').html($(form_html).find('body')[0])
                 }
             } else {
                 if (formAction.lastIndexOf('new/') != -1) { //new model created
