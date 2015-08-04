@@ -12,7 +12,6 @@ from django.db import connections, close_old_connections
 from django.conf import settings
 import sys
 import subprocess
-import time
 
 from ADSMSettings.models import SmSession
 
@@ -100,13 +99,30 @@ def adsm_executable_command():
     return [system_executable, db_path('scenario_db')] + output_args
 
 
+def check_for_updates():
+    print("Checking for updates...")
+    clear_update_flag()
+    check_simulation_version()
+    version = check_update()
+    if version:
+        print("New version available:", version)
+    else:
+        print("No updates currently.")
+    return version
+
+
 def graceful_startup():
     """Checks something inside of each of the database files to see if it's valid.  If not, rebuild the database."""
+    print("Setting up application...")
+
     if not os.path.exists(workspace_path()):
         print("Creating User Directory...")
         os.makedirs(os.path.dirname(workspace_path()), exist_ok=True)
+    if not os.path.exists(settings.DB_BASE_DIR):
+        print("Creating DB Directory...")
+        os.makedirs(settings.DB_BASE_DIR, exist_ok=True)
     
-    print("Copying Sample Scenarios")
+    print("Copying Sample Scenarios...")
     samples_dir = os.path.join(settings.BASE_DIR, "Sample Scenarios")
     for dirpath, dirnames, files in os.walk(samples_dir):
         [os.makedirs(workspace_path(sub), exist_ok=True) for sub in dirnames]
@@ -114,7 +130,7 @@ def graceful_startup():
         if subdir.startswith(os.path.sep):
             subdir = subdir.replace(os.path.sep, '', 1)
         if subdir.strip():
-            if not os.path.join(workspace_path(), subdir):
+            if not os.path.exists(os.path.join(workspace_path(), subdir)):
                 os.makedirs(os.path.join(workspace_path(), subdir))
         for file in files:
             try:
@@ -122,6 +138,7 @@ def graceful_startup():
             except Exception as e:
                 print(e)
 
+    print("Checking database state...")
     try:
         x = SmSession.objects.get().scenario_filename  # this should be in the initial migration
         print(x)
@@ -133,8 +150,13 @@ def graceful_startup():
         ZoneEffect.objects.count()  # this should be in the initial migration
     except OperationalError:
         reset_db('scenario_db')
-    
+
     update_db_version()
+
+    if getattr(sys, 'frozen', False):
+        check_for_updates()
+
+    print("Done setting up application.")
 
 
 def reset_db(name, fail_ok=True):
@@ -174,14 +196,14 @@ def reset_db(name, fail_ok=True):
 def update_db_version():
     """It is critical to call migrate only with a database specified in order for the django_migration history
     to stay current with activeSession."""
-    print("Checking Scenario version")
+    print("Checking Database states...")
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
     try:
         call_command('migrate', database='scenario_db', interactive=False, fake_initial=True)
         call_command('migrate', database='default', interactive=False, fake_initial=True)
     except:
         print("Error: Migration failed.")
-    print('Done creating database')
+    print('Done migrating databases.')
 
 
 def supplemental_folder_has_contents(subfolder=''):
