@@ -9,7 +9,7 @@ from django.utils.html import strip_tags
 from ADSMSettings.models import SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
-from ADSMSettings.utils import reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup, scenario_filename
+from ADSMSettings.utils import update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup, scenario_filename, copy_blank_to_session
 from Results.models import outputs_exist
 
 
@@ -112,19 +112,9 @@ def open_test_scenario(request, target):
     return open_scenario(request, target, False)
 
 
-def new_scenario(request=None, new_name=None):
-    try:  # just copy blank then update version
-        close_old_connections()
-        print("Copying from blank scenario template")
-        source = os.path.join(settings.BASE_DIR, 'Sample Scenarios', 'blank.sqlite3')
-        dest = os.path.join(settings.DB_BASE_DIR, 'activeSession.sqlite3')
-        shutil.copy(source, dest)
-        SmSession.objects.all().update(unsaved_changes=True)
-    except BaseException as err:
-        print("Copying from blank scenario template failed, resetting database")
-        print(err)
-        reset_db('scenario_db')
-        reset_db('default')
+def new_scenario(new_name=None):
+    copy_blank_to_session()
+
     update_db_version()
     if new_name:
         try:

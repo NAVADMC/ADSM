@@ -111,6 +111,36 @@ def check_for_updates():
     return version
 
 
+def copy_db_template(template, destination):
+    try:
+        close_old_connections()
+        print("Copying %s database to %s..." % (template, destination))
+        source = os.path.join(settings.BASE_DIR, 'Database Templates', template)
+        shutil.copy(source, destination)
+    except:
+        print("Copying database failed!")
+        raise
+
+
+def copy_blank_to_session():
+    try:  # just copy blank then update version
+        copy_db_template('blank.sqlite3', os.path.join(settings.DB_BASE_DIR, 'activeSession.sqlite3'))
+        SmSession.objects.all().update(unsaved_changes=True)
+    except BaseException as err:
+        print("Copying from blank scenario template failed!\nResetting database.")
+        print(err)
+        reset_db('scenario_db')
+
+
+def copy_blank_to_settings():
+    try:
+        copy_db_template('settings.sqlite3', os.path.join(settings.DB_BASE_DIR, 'settings.sqlite3'))
+    except BaseException as e:
+        print("Copying from blank settings template failed!\nResetting database.")
+        print(e)
+        reset_db('default')
+
+
 def graceful_startup():
     """Checks something inside of each of the database files to see if it's valid.  If not, rebuild the database."""
     print("Setting up application...")
@@ -139,12 +169,16 @@ def graceful_startup():
                 print(e)
 
     print("Checking database state...")
+    if not os.path.isfile(os.path.join(settings.DB_BASE_DIR, 'settings.sqlite3')) or os.stat(os.path.join(settings.DB_BASE_DIR, 'settings.sqlite3')).st_size < 10000:
+        copy_blank_to_settings()
     try:
         x = SmSession.objects.get().scenario_filename  # this should be in the initial migration
         print(x)
     except OperationalError:
-        reset_db('default')
-        
+        reset_db('default')  # TODO: Create blank settings database and move both blanks into another folder
+
+    if not os.path.isfile(os.path.join(settings.DB_BASE_DIR, 'activeSession.sqlite3')) or os.stat(os.path.join(settings.DB_BASE_DIR, 'activeSession.sqlite3')).st_size < 10000:
+        copy_blank_to_session()
     try:
         from ScenarioCreator.models import ZoneEffect
         ZoneEffect.objects.count()  # this should be in the initial migration
@@ -155,6 +189,9 @@ def graceful_startup():
 
     if getattr(sys, 'frozen', False):
         check_for_updates()
+    else:
+        print("Skipping update check.")
+        clear_update_flag()
 
     print("Done setting up application.")
 
