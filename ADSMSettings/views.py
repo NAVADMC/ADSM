@@ -113,6 +113,17 @@ def open_test_scenario(request, target):
     return open_scenario(request, target, False)
 
 
+def new_scenario(request=None, new_name=None):
+    reset_db('scenario_db')
+    reset_db('default')  # TODO: just copy blank then update version
+    update_db_version()
+    if new_name:
+        try:
+            scenario_filename(new_name, check_duplicates=True)
+        except: pass # validation may kick it back in which case they'll need to rename it in a file browser
+    return redirect('/setup/Scenario/1/')
+
+
 def save_scenario(request=None):
     """Save to the existing session of a new file name if target is provided
     """
@@ -169,17 +180,6 @@ def download_file(request):
     response = HttpResponse(f, content_type="application/x-sqlite")  # TODO: generic content type
     response['Content-Disposition'] = 'attachment; filename="' + target
     return response
-
-
-def new_scenario(request=None, new_name=None):
-    reset_db('scenario_db')
-    reset_db('default')  # TODO: just copy blank then update version
-    update_db_version()
-    if new_name:
-        try:
-            scenario_filename(new_name, check_duplicates=True)
-        except: pass # validation may kick it back in which case they'll need to rename it in a file browser
-    return redirect('/setup/Scenario/1/')
 
 
 def backend(request):
