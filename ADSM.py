@@ -3,6 +3,7 @@ import sys
 import multiprocessing
 
 
+# TODO: Search for any and all .exe references in the whole program
 print("Setting up Python...")
 
 if getattr(sys, 'frozen', False):
@@ -11,7 +12,7 @@ if getattr(sys, 'frozen', False):
     os.environ["PATH"] += os.pathsep + os.path.join(BASE_DIR, 'bin', 'env')
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-print(BASE_DIR)
+print('Running in:', BASE_DIR)
 
 sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, 'bin'))
@@ -30,9 +31,9 @@ import psutil
 
 
 def launch_viewer():
-    print("Launching browser...")
-    subprocess.call(os.path.join(BASE_DIR, 'Viewer', 'ADSM Viewer.exe'))
-    print("Closing application!")
+    print("\nLaunching browser...")
+    subprocess.call(os.path.join(BASE_DIR, 'Viewer', 'ADSM Viewer.exe'))  # TODO: This is windows specific
+    print("\nClosing application!")
     _thread.interrupt_main()
 
 parser = argparse.ArgumentParser(prog='adsm.exe')
@@ -57,13 +58,13 @@ for proc in psutil.process_iter():
         proc_name = proc.name().lower()
     except psutil.AccessDenied as e:
         continue
-    if 'ADSM Viewer.exe'.lower() in proc_name:  # TODO: This is Windows specific
-        print("There is already an instance of ADSM running!")
+    if 'ADSM Viewer'.lower() in proc_name:
+        print("\nThere is already an instance of ADSM running!")
         print("\nPress any key to exit...")
         input()
         sys.exit(1)
 
-print("Preparing Django environment...")
+print("\nPreparing Django environment...")
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
 
@@ -73,25 +74,15 @@ from django.conf import settings
 from django.core import management
 
 
-def check_for_updates():
-    from ADSMSettings.utils import clear_update_flag, check_simulation_version, check_update
-
-    clear_update_flag()
-    check_simulation_version()
-    check_update()
-    return
-
-
 if args.test:
-    print("Running tests...")
+    print("\nRunning tests...")
     management.call_command('test')
 else:
-    update_checker = threading.Timer(.1, check_for_updates)
-    update_checker.start()
+    # NOTE: Normally you would need to check for updates. However, graceful startup is doing this for us.
 
     browser = threading.Timer(1, launch_viewer)
     browser.start()
 
-    print("Launching server...")
+    print("\nLaunching server...")
     management.call_command('runproductionserver', port=8000, app_port=8001)
     # management.call_command('runserver', use_reloader=False)
