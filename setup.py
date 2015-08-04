@@ -168,7 +168,7 @@ class BuildADSM(build_exe):
                  if os.path.isfile(os.path.join(settings.BASE_DIR, self.build_exe, file)))
         os.makedirs(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
         for file in files:
-            if file not in ['ADSM.exe', 'library.zip', 'python34.dll', 'MSVCR100.dll', 'npu.exe']:  # TODO: This line is ADSM specific
+            if file not in ['ADSM.exe', 'ADSM-Beta.exe', 'library.zip', 'python34.dll', 'MSVCR100.dll', 'npu.exe']:  # TODO: This line is ADSM specific
                 shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, file),
                             os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file))
 
@@ -179,12 +179,12 @@ if sys.platform == 'win32':
 
 cmdclass = {"build_exe": BuildADSM, }
 
-setup(name='ADSM',
+setup(name='ADSM-Beta',
       version=__version__,
-      description='Test ADSM Application',
+      description='ADSM Beta Application',
       options={'build_exe': build_exe_options,
                'install_exe': {'build_dir': build_exe_options['build_exe']}},
-      executables=[Executable('ADSM.py', base=base), ],
+      executables=[Executable('ADSM.py', base=base, targetName='ADSM-Beta.exe'), ],  # TODO: Icon goes in Executable
       cmdclass=cmdclass,
       )  # TODO: install_requires should read in the requirements files per os
 

@@ -36,7 +36,7 @@ def launch_viewer():
     print("\nClosing application!")
     _thread.interrupt_main()
 
-parser = argparse.ArgumentParser(prog='adsm.exe')
+parser = argparse.ArgumentParser(prog='ADSM-Beta.exe')
 # TODO: Tests don't run currently as the test runner won't find compiled tests.
 parser.add_argument('-t', '--test', dest='test', help='run the test suite', action='store_true')
 parser.add_argument('-n', '--update_name', dest='update_name', help='Query for the name of this program as known to the update server', action='store_true')
@@ -45,7 +45,7 @@ args = parser.parse_args()
 
 # Respond to an updater query
 if args.update_name:
-    print("ADSM")
+    print("ADSM-Beta")
     sys.exit(0)
 elif args.version:
     from ADSM import __version__
