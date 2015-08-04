@@ -179,12 +179,12 @@ if sys.platform == 'win32':
 
 cmdclass = {"build_exe": BuildADSM, }
 
-setup(name='ADSM Beta',
+setup(name='ADSM',
       version=__version__,
-      description='ADSM Beta Application',
+      description='ADSM Application',
       options={'build_exe': build_exe_options,
                'install_exe': {'build_dir': build_exe_options['build_exe']}},
-      executables=[Executable('ADSM.py', base=base, targetName='ADSM_Beta.exe'), ],  # TODO: Icon goes in Executable
+      executables=[Executable('ADSM.py', base=base, targetName='ADSM.exe'), ],  # TODO: Icon goes in Executable
       cmdclass=cmdclass,
       )  # TODO: install_requires should read in the requirements files per os
 

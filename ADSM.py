@@ -45,7 +45,7 @@ args = parser.parse_args()
 
 # Respond to an updater query
 if args.update_name:
-    print("ADSM_Beta")
+    print("ADSM")
     sys.exit(0)
 elif args.version:
     from ADSM import __version__
