@@ -104,7 +104,7 @@ def check_for_updates():
     clear_update_flag()
     check_simulation_version()
     version = check_update()
-    if version:
+    if version and version != 'False' and version != '0':
         print("New version available:", version)
     else:
         print("No updates currently.")
