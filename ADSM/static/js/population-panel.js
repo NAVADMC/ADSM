@@ -24,6 +24,8 @@ function select_production_type(text, selector) {
         }
     })
     check_empty_status($(selector).first().closest('.productiontypelist'));
+    $(selector).closest('.layout-panel').find('.btn-save').removeAttr('disabled')
+
 }
 
 //child has selected attr, then remove .empty  has .productiontypelist
@@ -34,9 +36,17 @@ $(document).on('load', '.productiontypelist, .grouplist', function(event){
     check_empty_status(this)
 })
 
+$(document).on('focus', '.productiontypelist', function(event){
+    production_type_list_last_clicked = '#' + $(this).attr('id')
+})
+
 $(document).on('click', '#population_panel #ProductionTypes a, .productiontypelist option', function(event){
     event.preventDefault()
-    select_production_type($(this).text(), '.productiontypelist option')
+    if($('.productiontypelist').length > 1 && typeof production_type_list_last_clicked !== 'undefined'){
+        select_production_type($(this).text(), production_type_list_last_clicked + ' option')
+    }else{
+        select_production_type($(this).text(), '.productiontypelist option')
+    }
 })
 
 $(document).on('click', '#population_panel #ProductionGroups a, .productiontypelist option', function(event){

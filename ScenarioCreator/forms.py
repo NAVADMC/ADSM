@@ -6,7 +6,7 @@ All forms now have their "submit" button restored and you can choose custom layo
 
 from floppyforms.__future__ import ModelForm
 from django.forms.models import inlineformset_factory
-from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
+from crispy_forms.bootstrap import TabHolder, Tab, AppendedText, AppendedPrependedText, PrependedAppendedText, PrependedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
 from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple, CheckboxInput
@@ -546,7 +546,7 @@ class ProductionTypeList(SelectMultiple):
 
     def get_context(self, name, value, attrs=None, choices=()):
         context = super(SelectMultiple, self).get_context(name, value, attrs)
-        context['help_text'] = mark_safe("To add production types to the trigger click on a Type or Group from the <em>Population Panel</em>") 
+        # context['help_text'] = mark_safe("To add production types to the trigger click on a Type or Group from the <em>Population Panel</em>")
         return context
 
 
@@ -630,6 +630,22 @@ class StopVaccinationForm(BaseForm):
         widgets = {'trigger_group': ProductionTypeList()}
 
 
-
+class VaccinationRingRuleForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_show_labels = False
+        self.helper.layout = Layout(
+            PrependedText('trigger_group', 'Once a vaccination program has been initiated by any start/restart trigger, then detection of disease in these production type(s) '),
+            PrependedText('target_group', 'will result in vaccination of units of these production type(s) '),
+            PrependedAppendedText('inner_radius','within a ring with an inner radius of ',' km (optional)'),
+            PrependedAppendedText('outer_radius','and outer radius of ',' km'),
+            submit_button()
+        )
+        super(VaccinationRingRuleForm, self).__init__(*args, **kwargs)
+    class Meta(object):
+        model = VaccinationRingRule
+        exclude = []
+        widgets = {'trigger_group': ProductionTypeList(),
+                   'target_group': ProductionTypeList()}
 
 
