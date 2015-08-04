@@ -639,7 +639,6 @@ class VaccinationRingRuleForm(BaseForm):
             PrependedText('target_group', 'will result in vaccination of units of these production type(s) '),
             PrependedAppendedText('inner_radius','within a ring with an inner radius of ',' km (optional)'),
             PrependedAppendedText('outer_radius','and outer radius of ',' km'),
-            submit_button()
         )
         super(VaccinationRingRuleForm, self).__init__(*args, **kwargs)
     class Meta(object):

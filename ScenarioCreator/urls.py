@@ -206,4 +206,9 @@ urlpatterns = patterns('', url('^AssignSpreads/$', 'ScenarioCreator.views.assign
          url('^StopVaccination/new/$',                  'ScenarioCreator.views.new_entry'),
          url('^StopVaccination/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
          url('^StopVaccination/(?P<primary_key>\d+)/copy/$', 'ScenarioCreator.views.copy_entry'),
-         url('^StopVaccination/(?P<primary_key>\d+)/delete/$', 'ScenarioCreator.views.delete_entry'))
+         url('^StopVaccination/(?P<primary_key>\d+)/delete/$', 'ScenarioCreator.views.delete_entry'),
+         url('^VaccinationRingRule/$',                      'ScenarioCreator.views.model_list'),
+         url('^VaccinationRingRule/new/$',                  'ScenarioCreator.views.new_entry'),
+         url('^VaccinationRingRule/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),
+         url('^VaccinationRingRule/(?P<primary_key>\d+)/copy/$', 'ScenarioCreator.views.copy_entry'),
+         url('^VaccinationRingRule/(?P<primary_key>\d+)/delete/$', 'ScenarioCreator.views.delete_entry'))
