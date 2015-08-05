@@ -1301,7 +1301,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             )
             trigger.save()
             for productionType in ProductionType.objects.all():
-	            trigger.trigger_group.add( productionType )
+                trigger.trigger_group.add( productionType )
             plan.vaccination_capacity = getRelChart( el.find( './vaccination-capacity' ), relChartNameSequence )
             order = el.find( './vaccination-priority-order' ).text.strip()
             # The XML did not put spaces after the commas, but the Django

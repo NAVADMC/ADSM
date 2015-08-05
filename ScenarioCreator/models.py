@@ -888,9 +888,9 @@ class VaccinationRingRule(BaseModel):
                                                     self.outer_radius,])
         if self.inner_radius:
             inner = bold(str(self.inner_radius))
-            return format_html('When a Unit of {1} is detected vaccinate {2} Units between {0} km to {3} km', inner, *bold_values)
+            return format_html('{1} detection triggers {2} vaccination between {0} km to {3} km', inner, *bold_values)
         else:
-            return format_html('When a Unit of {0} is detected vaccinate {1} Units within {2} km', *bold_values)
+            return format_html('{0} detection triggers {1} vaccination within {2} km', *bold_values)
 
 
 
