@@ -79,7 +79,8 @@ def import_naadsm_scenario(request):
         run_importer(request)
         return loading_screen(request)
     context = {'form': initialized_form, 
-               'title': "Import Legacy NAADSM Scenario in XML format", 
+               'title': "Import Legacy NAADSM Scenario in XML format",
+               'loading_message': "Please wait as we import your file...",
                'base_page': 'ScenarioCreator/crispy-model-form.html'}
     return render(request, 'ScenarioCreator/navigationPane.html', context)  # render in validation error messages
 
@@ -189,9 +190,3 @@ def backend(request):
     user.backend = 'django.contrib.auth.backends.ModelBackend'
     login(request, user)
     return redirect('/admin/')
-
-
-def handler500(request):
-    print("Caught the error")
-    return render(request, '500.html', {})
-    #return render_to_response('../templates/error/500.html', {'exception': ex}, context_instance=RequestContext(request), status=404)

@@ -28,11 +28,21 @@ import argparse
 import threading
 import _thread
 import psutil
+import shutil
 
 
 def launch_viewer():
     print("\nLaunching browser...")
-    subprocess.call(os.path.join(BASE_DIR, 'Viewer', 'ADSM Viewer.exe'))  # TODO: This is windows specific
+    if os.path.exists(os.path.join(BASE_DIR, 'Viewer', 'ADSM Viewer.exe')):
+        try:
+            os.remove(os.path.join(BASE_DIR, 'Viewer', 'ADSM Viewer.exe'))
+        except:
+            pass
+    shutil.copy(os.path.join(BASE_DIR, 'Viewer', 'Viewer.exe'), os.path.join(BASE_DIR, 'Viewer', 'ADSM Viewer.exe'))
+    if not os.path.exists(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer')):
+        os.makedirs(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer'), exist_ok=True)
+    log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', 'debug.log')
+    subprocess.call(os.path.join(BASE_DIR, 'Viewer', 'ADSM Viewer.exe --log-file="%s"' % log_path))  # TODO: This is windows specific
     print("\nClosing application!")
     _thread.interrupt_main()
 

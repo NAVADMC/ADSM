@@ -13,5 +13,7 @@ urlpatterns = patterns('',
     url('^LoadingScreen/$', 'ADSMSettings.views.loading_screen'),
     )
 
-handler500 = 'ADSMSettings.views.handler500'
-handler404 = 'ADSMSettings.views.handler500'
+handler400 = 'ADSM.debug_views.handler400'
+handler403 = 'ADSM.debug_views.handler403'
+handler404 = 'ADSM.debug_views.handler404'
+handler500 = 'ADSM.debug_views.handler500'
