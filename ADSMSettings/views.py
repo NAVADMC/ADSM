@@ -190,9 +190,3 @@ def backend(request):
     user.backend = 'django.contrib.auth.backends.ModelBackend'
     login(request, user)
     return redirect('/admin/')
-
-
-def handler500(request):
-    print("Caught the error")
-    return render(request, '500.html', {})
-    #return render_to_response('../templates/error/500.html', {'exception': ex}, context_instance=RequestContext(request), status=404)
