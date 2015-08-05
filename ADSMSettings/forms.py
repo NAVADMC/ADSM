@@ -10,6 +10,7 @@ class NonModelForm(Form):
     def __init__(self, *args, **kwargs):
         if not hasattr(self, 'helper'):  # so as not to override specific layouts
             self.helper = FormHelper()
+            self.helper.non_field_errors = "Parsing failed"
             fields_and_submit = list(self.base_fields.keys()) + [submit_button()]
             self.helper.layout = Layout(*fields_and_submit)
         super(NonModelForm, self).__init__(*args, **kwargs)
@@ -24,4 +25,9 @@ class ImportForm(NonModelForm):
                                help_text='The population XML to match the parameters file.  This population should contain Production Types ' +
                                              'that match the names in the scenario file.')
 
-        
+    def _post_clean(self):
+        super(ImportForm, self)._post_clean()
+        #self.helper.form_error_title =
+        setattr(self.helper, 'non_field_errors', "Parsing failed2")
+
+        pass
