@@ -79,7 +79,8 @@ def import_naadsm_scenario(request):
         run_importer(request)
         return loading_screen(request)
     context = {'form': initialized_form, 
-               'title': "Import Legacy NAADSM Scenario in XML format", 
+               'title': "Import Legacy NAADSM Scenario in XML format",
+               'loading_message': "Please wait as we import your file...",
                'base_page': 'ScenarioCreator/crispy-model-form.html'}
     return render(request, 'ScenarioCreator/navigationPane.html', context)  # render in validation error messages
 

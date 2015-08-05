@@ -5,12 +5,12 @@
 
 {% block content %}
     {% if action %}
-        <form class="ajax" action="{{ action }}" id="{{ action|action_id }}">
+        <form class="ajax" action="{{ action }}" id="{{ action|action_id }}" {% if loading_message %}data-loading-message="{{ loading_message }}"{% endif %}>
             {% crispy form %}
             {% include "ScenarioCreator/EditButtons.html" %}
         </form>
     {% else %}
-        <form class="ajax" >
+        <form class="ajax" {% if loading_message %}data-loading-message="{{ loading_message }}"{% endif %}>
             {% crispy form %}
             {# Can't include EditButtons because it requires action to work outside the form. Must be included in forms.py #}
         </form>
