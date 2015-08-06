@@ -51,8 +51,14 @@ InstallDir "$PROGRAMFILES\ADSM"
 
 !insertmacro MUI_PAGE_DIRECTORY
 
+Var WorkspacePath
+!define MUI_PAGE_HEADER_SUBTEXT "Choose the User Workspace folder for ADSM."
+!define MUI_DIRECTORYPAGE_TEXT_TOP "The installer will tell ADSM to use the following workspace folder. To use a different folder, click Browse and select another folder. Click Next to continue."
+!define MUI_DIRECTORYPAGE_VARIABLE $WorkspacePath
+!insertmacro MUI_PAGE_DIRECTORY
+
 !ifdef REG_START_MENU
-!define MUI_STARTMENUPAGE_DEFAULTFOLDER "ADSM"
+!define MUI_STARTMENUPAGE_DEFAULTFOLDER "${APP_NAME}"
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "${REG_ROOT}"
 !define MUI_STARTMENUPAGE_REGISTRY_KEY "${UNINSTALL_PATH}"
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "${REG_START_MENU}"
@@ -73,16 +79,18 @@ InstallDir "$PROGRAMFILES\ADSM"
 !insertmacro MUI_LANGUAGE "English"
 
 ##########
-!include nsDialogs.nsh
-Var WorkspacePath
+Function .onInit
+StrCpy $WorkspacePath "$DOCUMENTS\ADSM Workspace"
+FunctionEnd
+
+##########
+!include LogicLib.nsh
 
 Section -MainProgram
 ${INSTALL_TYPE}
 SetOverwrite ifnewer
 SetOutPath "$INSTDIR"
 File /r "build\*"
-nsDialogs::SelectFolderDialog "ADSM User Workspace Location" "$DOCUMENTS\ADSM Workspace"
-Pop $WorkspacePath
 FileOpen $0 $INSTDIR\settings.ini w
 FileWrite $0 "WORKSPACE_PATH = '$WorkspacePath'"
 FileClose $0
