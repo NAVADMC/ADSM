@@ -1,11 +1,13 @@
 import re
 import os
 import shutil
+import traceback
 from django.conf import settings
 from django.db import close_old_connections
 from django.http import JsonResponse, HttpRequest
 from django.shortcuts import redirect, render, HttpResponse
 from django.utils.html import strip_tags
+from django.utils.safestring import mark_safe
 from ADSMSettings.models import SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
@@ -75,13 +77,30 @@ def import_naadsm_scenario(request):
         initialized_form = ImportForm(request.POST, request.FILES)
     else:  # GET page for the first time
         initialized_form = ImportForm()
-    if initialized_form.is_valid():
-        run_importer(request)
-        return loading_screen(request)
-    context = {'form': initialized_form, 
+    context = {'form': initialized_form,
                'title': "Import Legacy NAADSM Scenario in XML format",
                'loading_message': "Please wait as we import your file...",
-               'base_page': 'ScenarioCreator/crispy-model-form.html'}
+               'error_title': "Import Error:",
+               'base_page': 'ScenarioCreator/crispy-model-form.html',
+               }
+
+    if initialized_form.is_valid():
+        try:
+            run_importer(request)
+            return loading_screen(request)
+        except Exception as e:
+            import sys
+            info = sys.exc_info()
+            # stacktrace = info[3]
+            # print(stacktrace)
+            # traceback.print_exc()
+
+            print(info)
+            print(str(info[2]))
+            context['form_errors'] = mark_safe(str(info[1]))
+            # go on to serve the form normally with Error messages attached
+    else:
+        context['form_errors'] = initialized_form.errors
     return render(request, 'ScenarioCreator/navigationPane.html', context)  # render in validation error messages
 
 

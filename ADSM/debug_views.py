@@ -53,8 +53,6 @@ class CustomExceptionReporter(ExceptionReporter):
         c = Context(self.get_traceback_data(), use_l10n=False)
         return t.render(c)
 
-
-# TODO: Customize this and hide the bad stuff, then also import the items from 500.html
 CUSTOM_TECHNICAL_500_TEMPLATE = ("""
 <!DOCTYPE html>
 <html lang="en">
@@ -150,6 +148,7 @@ CUSTOM_TECHNICAL_500_TEMPLATE = ("""
       hideAll(getElementsByClassName(document, 'ol', 'pre-context'));
       hideAll(getElementsByClassName(document, 'ol', 'post-context'));
       hideAll(getElementsByClassName(document, 'div', 'pastebin'));
+      hideAll(getElementsByClassName(document, 'div', 'technical-details'));
     }
     function toggle() {
       for (var i = 0; i < arguments.length; i++) {
@@ -180,12 +179,22 @@ CUSTOM_TECHNICAL_500_TEMPLATE = ("""
   {% endif %}
 </head>
 <body>
-<div id="summary">
+"""
+############################################## CUSTOM CONTENT
+"""
+  <h1> Oops... ADSM encountered an error!</h1>
+  <h2><a href="/">Return to Current Scenario.</a></h2>"""
+##############################################
+"""
   <h1>{% if exception_type %}{{ exception_type }}{% else %}Report{% endif %}"""
   """{% if request %} at {{ request.path_info|escape }}{% endif %}</h1>
   <pre class="exception_value">"""
  """{% if exception_value %}{{ exception_value|force_escape }}{% else %}No exception message supplied{% endif %}"""
 """</pre>
+<h2 onclick="toggle('technical-details')">Show Technical Details &#x25BC;</h2>
+
+<div id="technical-details" class="technical-details">
+<div id="summary">
   <table class="meta">
 {% if request %}
     <tr>
@@ -551,6 +560,7 @@ Exception Value: {{ exception_value|force_escape }}
     </p>
   </div>
 {% endif %}
+</div>
 </body>
 </html>
 """)

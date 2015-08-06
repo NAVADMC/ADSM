@@ -121,6 +121,7 @@ def all_empty_fields(model_class, excluded_fields):
 # this mapping is also embedded in navigationPanel.html
 headers = {'DailyByProductionType': [("Exposures", "exp", ['expnU', 'expcU']),
                                      ("Infections", "inf", ['infnU', 'infcU']),
+                                     ("Detections", "det", ['detnU', 'detcU']),
                                      ("Vaccinations", "vac", ['vacnU', 'vaccU']),
                                      ("Destruction", "des", ['desnU', 'descU']),
                                      ("Exams", "exm", ['exmnU', 'exmcU']),
