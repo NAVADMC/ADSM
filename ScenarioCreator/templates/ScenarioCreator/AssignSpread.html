@@ -21,14 +21,14 @@
         Or check your work by hand under "All Possible Interactions".</p>
     </div>
                 
-    <div class="col-md-9" id="assign_spread_wrapper">
+    <div id="assign_spread_wrapper">
         <div class="m2mtable"></div>
 
         <form method="post" action="">
             <p>{% include "ScenarioCreator/EditButtons.html" %}</p>
             <div id="include_spread_form">{{ include_spread_form.as_p }}</div>
 
-            <div class="panel panel-default">
+            <div id="all-interactions" class="panel panel-default">
                 <div class="panel-heading">
                     <h3>All Possible Interactions</h3>
                     Use this area to double check your work or submit individual changes.
