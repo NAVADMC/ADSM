@@ -84,6 +84,12 @@ from django.conf import settings
 from django.core import management
 
 
+if not os.access(settings.WORKSPACE_PATH, os.W_OK | os.X_OK) or not os.access(settings.DB_BASE_DIR, os.W_OK | os.X_OK):
+    print("Your user does not have proper file permissions in the ADSM Workspace Directory!\nPlease re-run ADSM with administrative privileges.")
+    print("\nPress any key to exit...")
+    input()
+    sys.exit(1)
+
 if args.test:
     print("\nRunning tests...")
     management.call_command('test')
