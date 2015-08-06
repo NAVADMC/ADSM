@@ -27,7 +27,10 @@ def handler404(request):
 
 def handler500(request):
     print("Caught a 500 error!")
-    return custom_technical_500_response(request, *sys.exc_info(), status_code=500)
+    try:
+        raise ValueError()
+    except:
+        return custom_technical_500_response(request, *sys.exc_info(), status_code=500)
 
 
 def custom_technical_500_response(request, exc_type, exc_value, tb, status_code=500):
@@ -150,6 +153,7 @@ CUSTOM_TECHNICAL_500_TEMPLATE = ("""
       hideAll(getElementsByClassName(document, 'ol', 'pre-context'));
       hideAll(getElementsByClassName(document, 'ol', 'post-context'));
       hideAll(getElementsByClassName(document, 'div', 'pastebin'));
+      hideAll(getElementsByClassName(document, 'div', 'technical-details'));
     }
     function toggle() {
       for (var i = 0; i < arguments.length; i++) {
@@ -180,13 +184,22 @@ CUSTOM_TECHNICAL_500_TEMPLATE = ("""
   {% endif %}
 </head>
 <body>
-<div id="summary">
-  Bryan's Debug page!
+"""
+############################################## CUSTOM CONTENT
+"""
+  <h1> Oops... ADSM encountered an error!</h1>
+  <h2><a href="/">Return to Current Scenario.</a></h2>"""
+##############################################
+"""
   <h1>{% if exception_type %}{{ exception_type }}{% else %}Report{% endif %}"""
   """{% if request %} at {{ request.path_info|escape }}{% endif %}</h1>
   <pre class="exception_value">"""
  """{% if exception_value %}{{ exception_value|force_escape }}{% else %}No exception message supplied{% endif %}"""
 """</pre>
+<h2 onclick="toggle('technical-details')">Show Technical Details &#x25BC;</h2>
+
+<div id="technical-details" class="technical-details">
+<div id="summary">
   <table class="meta">
 {% if request %}
     <tr>
@@ -552,6 +565,7 @@ Exception Value: {{ exception_value|force_escape }}
     </p>
   </div>
 {% endif %}
+</div>
 </body>
 </html>
 """)
