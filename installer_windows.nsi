@@ -73,11 +73,19 @@ InstallDir "$PROGRAMFILES\ADSM"
 !insertmacro MUI_LANGUAGE "English"
 
 ##########
+!include nsDialogs.nsh
+Var WorkspacePath
+
 Section -MainProgram
 ${INSTALL_TYPE}
 SetOverwrite ifnewer
 SetOutPath "$INSTDIR"
 File /r "build\*"
+nsDialogs::SelectFolderDialog "ADSM User Workspace Location" "$DOCUMENTS\ADSM Workspace"
+Pop $WorkspacePath
+FileOpen $0 $INSTDIR\settings.ini w
+FileWrite $0 "WORKSPACE_PATH = '$WorkspacePath'"
+FileClose $0
 SectionEnd
 
 ##########
@@ -121,38 +129,6 @@ WriteRegStr ${REG_ROOT} "${UNINSTALL_PATH}"  "Publisher" "${COMP_NAME}"
 WriteRegStr ${REG_ROOT} "${UNINSTALL_PATH}"  "URLInfoAbout" "${WEB_SITE}"
 !endif
 SectionEnd
-
-##########
-!include nsDialogs.nsh
-!include LogicLib.nsh
-
-Page custom WorkspacePath WorkspacePathLeave
-Var WSPDialog
-Var WSPLabel
-Var WSPText
-Var WSPUser
-
-Function WorkspacePath
-nsDialogs::Create 1018
-Pop $WSPDialog
-${If} $WSPDialog == error
-Abort
-${EndIf}
-${NSD_CreateLabel} 0 0 100% 12u "ADSM User Workspace Location:"
-Pop $WSPLabel
-${NSD_CreateText} 0 13u 100% -13u "$DOCUMENTS\ADSM Workspace"
-Pop $WSPText
-nsDialogs::Show
-FunctionEnd
-
-Function WorkspacePathLeave
-${NSD_GetText} $WSPText $WSPUser
-FileOpen $0 $INSTDIR\settings.ini w
-FileWrite $0 "WORKSPACE_PATH = '$WSPUser'"
-FileClose $0
-MessageBox MB_OK "Workspace set to: $WSPUser"
-
-FunctionEnd
 
 ##########
 Section Uninstall
