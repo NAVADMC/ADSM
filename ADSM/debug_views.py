@@ -181,6 +181,7 @@ CUSTOM_TECHNICAL_500_TEMPLATE = ("""
 </head>
 <body>
 <div id="summary">
+  Bryan's Debug page!
   <h1>{% if exception_type %}{{ exception_type }}{% else %}Report{% endif %}"""
   """{% if request %} at {{ request.path_info|escape }}{% endif %}</h1>
   <pre class="exception_value">"""

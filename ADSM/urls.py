@@ -16,4 +16,4 @@ urlpatterns = patterns('',
 handler400 = 'ADSM.debug_views.handler400'
 handler403 = 'ADSM.debug_views.handler403'
 handler404 = 'ADSM.debug_views.handler404'
-handler500 = 'ADSM.debug_views.handler500'
+handler500 = 'ADSM.debug_views.handler500'  # TODO: Get these to show up when in debug!
