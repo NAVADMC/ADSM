@@ -56,8 +56,6 @@ class CustomExceptionReporter(ExceptionReporter):
         c = Context(self.get_traceback_data(), use_l10n=False)
         return t.render(c)
 
-
-# TODO: Customize this and hide the bad stuff, then also import the items from 500.html
 CUSTOM_TECHNICAL_500_TEMPLATE = ("""
 <!DOCTYPE html>
 <html lang="en">
