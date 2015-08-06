@@ -27,10 +27,7 @@ def handler404(request):
 
 def handler500(request):
     print("Caught a 500 error!")
-    try:
-        raise ValueError()
-    except:
-        return custom_technical_500_response(request, *sys.exc_info(), status_code=500)
+    return custom_technical_500_response(request, *sys.exc_info(), status_code=500)
 
 
 def custom_technical_500_response(request, exc_type, exc_value, tb, status_code=500):
