@@ -181,7 +181,7 @@ class BuildADSM(build_exe):
 
 base = None
 if sys.platform == 'win32':
-    base = 'Win32GUI'  # TODO: Change to Win32GUI and so on for each OS
+    base = 'Console'  # TODO: Change to Win32GUI and so on for each OS
 # TODO: Make sure that not having a console causes any long hangs for user
 
 cmdclass = {"build_exe": BuildADSM, }
