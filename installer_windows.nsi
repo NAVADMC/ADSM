@@ -163,7 +163,7 @@ SetOutPath "$INSTDIR"
 ${StrRep} $CleanedWSP $WorkspacePath '\' '\\'
 File /r "build\*"
 FileOpen $0 $INSTDIR\settings.ini w
-FileWrite $0 "WORKSPACE_PATH = '$WorkspacePath'"
+FileWrite $0 "WORKSPACE_PATH = '$CleanedWSP'"
 FileClose $0
 SectionEnd
 
