@@ -3,12 +3,12 @@
 ##########
 !define APP_NAME "ADSM"
 !define COMP_NAME "Newline Technical Innovations"
-!define WEB_SITE "https://www.newline.us"
-!define VERSION "3.3.5.0"
+!define WEB_SITE "https://github.com/NAVADMC/ADSM/wiki"
+!define VERSION "3.3.5.5"
 !define COPYRIGHT ""
 !define DESCRIPTION "ADSM GUI Application"
 !define LICENSE_TXT "LICENSE"
-!define INSTALLER_NAME "dist\ADSM Installer.exe"
+!define INSTALLER_NAME "dist\ADSM_Installer.exe"
 !define MAIN_APP_EXE "ADSM.exe"
 !define INSTALL_TYPE "SetShellVarContext current"
 !define REG_ROOT "HKCU"
@@ -36,6 +36,75 @@ BrandingText "${APP_NAME}"
 XPStyle on
 InstallDirRegKey "${REG_ROOT}" "${REG_APP_PATH}" ""
 InstallDir "$PROGRAMFILES\ADSM"
+
+##########
+!define StrRep "!insertmacro StrRep"
+!macro StrRep output string old new
+Push `${string}`
+Push `${old}`
+Push `${new}`
+!ifdef __UNINSTALL__
+    Call un.StrRep
+!else
+    Call StrRep
+!endif
+Pop ${output}
+!macroend
+
+!macro Func_StrRep un
+Function ${un}StrRep
+Exch $R2 ;new
+Exch 1
+Exch $R1 ;old
+Exch 2
+Exch $R0 ;string
+Push $R3
+Push $R4
+Push $R5
+Push $R6
+Push $R7
+Push $R8
+Push $R9
+
+StrCpy $R3 0
+StrLen $R4 $R1
+StrLen $R6 $R0
+StrLen $R9 $R2
+loop:
+StrCpy $R5 $R0 $R4 $R3
+StrCmp $R5 $R1 found
+StrCmp $R3 $R6 done
+IntOp $R3 $R3 + 1 ;move offset by 1 to check the next character
+Goto loop
+found:
+StrCpy $R5 $R0 $R3
+IntOp $R8 $R3 + $R4
+StrCpy $R7 $R0 "" $R8
+StrCpy $R0 $R5$R2$R7
+StrLen $R6 $R0
+IntOp $R3 $R3 + $R9 ;move offset by length of the replacement string
+Goto loop
+done:
+
+Pop $R9
+Pop $R8
+Pop $R7
+Pop $R6
+Pop $R5
+Pop $R4
+Pop $R3
+Push $R0
+Push $R1
+Pop $R0
+Pop $R1
+Pop $R0
+Pop $R2
+Exch $R1
+FunctionEnd
+!macroend
+
+!insertmacro Func_StrRep ""
+!insertmacro Func_StrRep "un."
 
 ##########
 !include "MUI.nsh"
@@ -85,11 +154,13 @@ FunctionEnd
 
 ##########
 !include LogicLib.nsh
+Var CleanedWSP
 
 Section -MainProgram
 ${INSTALL_TYPE}
 SetOverwrite ifnewer
 SetOutPath "$INSTDIR"
+${StrRep} $CleanedWSP $WorkspacePath '\' '\\'
 File /r "build\*"
 FileOpen $0 $INSTDIR\settings.ini w
 FileWrite $0 "WORKSPACE_PATH = '$WorkspacePath'"
