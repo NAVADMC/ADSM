@@ -11,7 +11,8 @@ from django.utils.safestring import mark_safe
 from ADSMSettings.models import SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
-from ADSMSettings.utils import update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup, scenario_filename, copy_blank_to_session
+from ADSMSettings.utils import update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup, scenario_filename, \
+    copy_blank_to_session, create_super_user
 from Results.models import outputs_exist
 
 
@@ -212,6 +213,8 @@ def backend(request):
     from django.contrib.auth import login
     from django.contrib.auth.models import User
     user = User.objects.filter(is_staff=True).first()
+    if user is None:
+        user = create_super_user()
     print(user, user.username)
     user.backend = 'django.contrib.auth.backends.ModelBackend'
     login(request, user)

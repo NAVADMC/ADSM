@@ -224,10 +224,15 @@ def reset_db(name, fail_ok=True):
     #creates a new blank file by migrate
     call_command('migrate', database=name, interactive=False, fake_initial=True)
     if name == 'default':  # create super user
-        from django.contrib.auth.models import User
-        u = User(username='ADSM', is_superuser=True, is_staff=True)
-        u.set_password('ADSM')
-        u.save()
+        create_super_user()
+
+
+def create_super_user():
+    from django.contrib.auth.models import User
+    u = User(username='ADSM', is_superuser=True, is_staff=True)
+    u.set_password('ADSM')
+    u.save()
+    return u
 
 
 def update_db_version():
