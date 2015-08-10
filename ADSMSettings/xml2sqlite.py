@@ -11,10 +11,18 @@ import warnings
 from pyproj import Proj
 from math import exp, sqrt
 
+import ADSMSettings.models
 from ScenarioCreator.models import *
 from Results.models import *
 
+
+
 CREATE_AT_A_TIME = 500 # for bulk object creation
+
+
+def status(message):
+    ADSMSettings.models.SmSession.objects.all().update(population_upload_status=message)
+    print(message)
 
 
 def create_no_duplicates(ModelClass, suggested_name, **kwargs):
@@ -290,7 +298,7 @@ def getBool( xml ):
 
 
 def readPopulation( populationFileName ):
-    print("Reading population file: ", populationFileName)
+    status("Reading population file: " + populationFileName)
     fp = open( populationFileName, 'rb' )
     xml = ET.parse( fp ).getroot()
     fp.close()
@@ -371,7 +379,7 @@ def required_text(element, tag):
 
 
 def readParameters( parameterFileName, saveIterationOutputsForUnits ):
-    print("Reading parameters file:", parameterFileName)
+    status("Reading parameters file: " + parameterFileName)
     fp = open( parameterFileName, 'rb' )
     try:
         xml = ET.parse( fp ).getroot()
@@ -401,7 +409,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         fileAsString = fileAsString.replace( 'xmlns:', 'xmlns:xdf="http://xml.gsfc.nasa.gov/XDF" xmlns:', 1 )
         xml = ET.fromstring( fileAsString )
     fp.close()
-    print("Done reading parameters file.  Constructing New Scenario...")
+    status("Done reading parameters file.  Constructing New Scenario...")
 
     Scenario.objects.get_or_create(description = required_text(xml,  './description' ))
 
@@ -429,7 +437,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     # Make a set containing all production type names. Initialize with the
     # names already found in readPopulation, then add any new ones found in the
     # parameters file.
-    print("Checking for Additional Production Types")
+    status("Checking for Additional Production Types")
     productionTypeNames = set( [productionType.name for productionType in ProductionType.objects.all()] )
     for el in xml.findall( './/*[@production-type]' ):
         productionTypeNames.update( getProductionTypes( el, 'production-type', [] ) )
@@ -460,7 +468,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     # Create a sequence to be used to give names to unnamed relational charts.
     relChartNameSequence = sequence( 'Rel' )
 
-    print("Reading Disease Models")
+    status("Reading Disease Models")
     for el in xml.findall( './/disease-model' ):
         latentPeriod = getPdf( el.find( './latent-period' ), pdfNameSequence )
         subclinicalPeriod = getPdf( el.find( './infectious-subclinical-period' ), pdfNameSequence )
@@ -491,7 +499,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # end of loop over production types covered by this <disease-model> element
     # end of loop over <disease-model> elements
 
-    print("Building Airborne Spread")
+    status("Building Airborne Spread")
     for el in xml.findall( './/airborne-spread-model' ) + xml.findall( './/airborne-spread-exponential-model' ):
         if useAirborneExponentialDecay:
             maxDistance = 0
@@ -524,7 +532,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # end of loop over from-production-types covered by this <airborne-spread[-exponential]-model> element
     # end of loop over <airborne-spread[-exponential]-model> elements
 
-    print("Building Zones")
+    status("Building Zones")
     for el in xml.findall( './/zone-model' ):
         name = required_text(el, './name' )
         radius = float( required_text(el, './radius/value' ) )
@@ -532,7 +540,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             zone, created = create_no_duplicates(Zone, suggested_name=name, radius=radius )
     # end of loop over <zone-model> elements
 
-    print("Reading Contact Spread Models...")
+    status("Reading Contact Spread Models...")
     for el in xml.findall( './/contact-spread-model' ):
         if 'zone' in el.attrib:
             continue
@@ -604,7 +612,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # end of loop over from-production-types covered by this <contact-spread-model> element
     # end of loop over <contact-spread-model> elements without a "zone" attribute
 
-    print("Building Contact Spread Model")
+    status("Building Contact Spread Model")
     for el in xml.findall( './/contact-spread-model' ):
         if 'zone' not in el.attrib:
             continue
@@ -660,7 +668,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         plan = ControlMasterPlan()
         plan.save()
 
-    print("Building Detection Model")
+    status("Building Detection Model")
     for el in xml.findall( './/detection-model' ):
         # <detection-model> elements come in 2 forms. The first form, with a
         # production-type attribute, specifies the probability of observing
@@ -714,7 +722,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # end of loop over production-types covered by this <detection-model> element
     # end of loop over <detection-model> elements
 
-    print("Contact Recorder Model")
+    status("Contact Recorder Model")
     for el in xml.findall( './/contact-recorder-model' ):
         try:
             contactType = el.attrib['contact-type']
@@ -758,7 +766,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # end of loop over production types covered by this <contact-recorder-model> element
     # end of loop over <contact-recorder-model> elements
 
-    print("Reading Tracing")
+    status("Reading Tracing")
     for el in xml.findall( './/trace-model' ):
         try:
             contactType = el.attrib['contact-type']
@@ -863,7 +871,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # end of loop over production types covered by this <trace-exam-model> element
     # end of loop over <trace-exam-model> elements
 
-    print("Building Lab Tests")
+    status("Building Lab Tests")
     for el in xml.findall( './/test-model' ):
         sensitivity = float( required_text(el, './sensitivity' ) )
         specificity = float( required_text(el, './specificity' ) )
@@ -957,7 +965,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     # different elements. Keep a list that will help sort it out later.
     vaccinationProductionTypeOrder = []
 
-    print("Building Vaccination")
+    status("Building Vaccination")
     productionTypesWithVaccineEffectsDefined = set()
     for el in xml.findall( './/vaccine-model' ):
         delay = int( required_text(el, './delay/value' ) )
@@ -1061,7 +1069,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     destructionReasonOrder = []
     destructionProductionTypeOrder = []
 
-    print("Reading Destruction Models")
+    status("Reading Destruction Models")
     for el in xml.findall( './/trace-back-destruction-model' ):
         # This is an older module, superseded by the combination of contact-
         # recorder-model, trace-model, and trace-destruction-model.
@@ -1349,7 +1357,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # end of if useVaccination==True
     # end of loop over <resources-and-implementation-of-control-model> elements
 
-    print("Finalizing Economic Model")
+    status("Finalizing Economic Model")
     for el in xml.findall( './/economic-model' ):
         try:
             vaccinationFixed = float( el.find( './vaccination-fixed/value' ).text )

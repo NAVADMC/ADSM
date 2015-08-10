@@ -339,6 +339,15 @@ $(function(){
             name_in.val(name_in.val() + ' - Copy')
         })
     })
+
+    $('.blocking-overlay:visible').livequery( function() {
+        if(window.location.pathname.indexOf('app/ImportScenario') != -1){
+            console.log('start watcher')
+            if(typeof statusInterval === 'undefined'){
+                statusInterval = setInterval(statusChecker, 2000);
+            }
+        }
+    })
 })
 
 //#####################################################################################//
@@ -834,3 +843,12 @@ function make_function_panel_editable() {
     $('#functions_panel').css('pointer-events', 'all')
 }
 
+function statusChecker(){
+    if($('.blocking-overlay').is(':visible')){
+        $.get('/app/ImportStatus/', function(data){
+            $('.blocking-overlay').show().find('.message').text(data.status);
+        });
+    }else{
+        clearInterval(statusChecker);
+    }
+}
