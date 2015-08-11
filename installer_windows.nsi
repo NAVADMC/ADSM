@@ -122,7 +122,7 @@ FunctionEnd
 
 Var WorkspacePath
 !define MUI_PAGE_HEADER_SUBTEXT "Choose the User Workspace folder for ADSM."
-!define MUI_DIRECTORYPAGE_TEXT_TOP "The installer will tell ADSM to use the following workspace folder. To use a different folder, click Browse and select another folder. Click Next to continue."
+!define MUI_DIRECTORYPAGE_TEXT_TOP "The installer will tell ADSM to use the following workspace folder. To use a different folder, click Browse and select another folder. To allow MULTIPLE USERS, leave the field blank so ADSM will attempt to detect the appropriate workspace folder for each user (this MAY not work on systems where user files are stored on networked shares) Click Next to continue."
 !define MUI_DIRECTORYPAGE_VARIABLE $WorkspacePath
 !insertmacro MUI_PAGE_DIRECTORY
 
