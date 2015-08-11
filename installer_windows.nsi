@@ -35,7 +35,7 @@ OutFile "${INSTALLER_NAME}"
 BrandingText "${APP_NAME}"
 XPStyle on
 InstallDirRegKey "${REG_ROOT}" "${REG_APP_PATH}" ""
-InstallDir "$PROGRAMFILES\ADSM"
+InstallDir "$PROGRAMFILES64\ADSM"
 
 ##########
 !define StrRep "!insertmacro StrRep"
