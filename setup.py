@@ -40,6 +40,7 @@ build_exe_options = {
         ('bin', 'bin'),
         ('Viewer', 'Viewer'),  # Newline's View application for Django Desktop Core
         ('npu.exe', 'npu.exe'),  # Newline's Program Updater application  # TODO: This is windows specific
+        ('README', 'README'),
 
         # CHANGE ME for any files/folders you want included with your project
         ('Sample Scenarios', 'Sample Scenarios'),
@@ -47,6 +48,10 @@ build_exe_options = {
     ],
     'include_msvcr': True  # CHANGE ME depending on if your project has licensing that is compatible with Microsoft's redistributable license
 }
+files = (file for file in os.listdir(settings.BASE_DIR) if os.path.isfile(os.path.join(settings.BASE_DIR, file)))
+for file in files:
+    if [file for part in ['.exe', '.dll', '.url'] if part.lower().split(' ')[0] in file.lower()]:
+        build_exe_options['include_files'].append((file, file))
 
 
 def query_yes_no(question, default='yes'):
@@ -173,7 +178,7 @@ class BuildADSM(build_exe):
         files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, self.build_exe)) if os.path.isfile(os.path.join(settings.BASE_DIR, self.build_exe, file)))
         os.makedirs(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
         for file in files:
-            if [file for part in ['.exe', 'library.zip', '.dll', 'npu', '.url'] if part in file]:
+            if not [file for part in ['.exe', 'library.zip', 'python34.dll', 'MSVCR100.dll', 'npu', '.url'] if part.lower().split(' ')[0] in file.lower()]:  #NOTE: The split here could cause issues and is speculative
                 shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, file),
                             os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file))
         shutil.copy(os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', 'Viewer.exe'), os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', 'ADSM_Viewer.exe'))
