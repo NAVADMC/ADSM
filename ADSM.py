@@ -89,7 +89,7 @@ if args.test:
 else:
     # NOTE: Normally you would need to check for updates. However, graceful startup is doing this for us.
 
-    browser = threading.Timer(1, launch_viewer)
+    browser = threading.Timer(3, launch_viewer)
     browser.start()
 
     print("\nLaunching server...")
