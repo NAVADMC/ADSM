@@ -11,7 +11,8 @@ from django.utils.safestring import mark_safe
 from ADSMSettings.models import SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
-from ADSMSettings.utils import update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup, scenario_filename, copy_blank_to_session
+from ADSMSettings.utils import update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup, scenario_filename, \
+    copy_blank_to_session, create_super_user
 from Results.models import outputs_exist
 
 
@@ -52,6 +53,13 @@ def file_dialog(request):
     context = {'db_files': (file_list(".sqlite3")),
                'title': 'Select a new Scenario to Open'}
     return render(request, 'ScenarioCreator/workspace.html', context)
+
+
+def import_status(request):
+    from ADSMSettings.models import SmSession
+    session = SmSession.objects.get()
+    json_response = {"status": session.population_upload_status}
+    return JsonResponse(json_response)
 
 
 def run_importer(request):
@@ -205,6 +213,8 @@ def backend(request):
     from django.contrib.auth import login
     from django.contrib.auth.models import User
     user = User.objects.filter(is_staff=True).first()
+    if user is None:
+        user = create_super_user()
     print(user, user.username)
     user.backend = 'django.contrib.auth.backends.ModelBackend'
     login(request, user)
