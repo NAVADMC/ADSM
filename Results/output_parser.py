@@ -167,7 +167,7 @@ class DailyParser(object):
 
     @staticmethod
     def parse_unit_stats_string(cmd_string):
-        values = map(int, cmd_string.split(','))
+        values = list(map(int, cmd_string.split(',')))
         if len(values) == 5 and (values[1] or values[2] or values[3] or values[4]):
             unit = values[0]
             was_infected, was_zone_focus, was_vaccinated, was_destroyed = values[1], values[2], values[3], values[4]
