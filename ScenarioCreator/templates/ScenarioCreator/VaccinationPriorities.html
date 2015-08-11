@@ -1,0 +1,25 @@
+{% extends 'ScenarioCreator/Fragment.html' %}
+{% load floppyforms %}
+{% load crispy_forms_tags  %}
+{% load db_status_tags  %}
+
+{% block content %}
+
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery-ui.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery-ui.structure.min.css" />
+    <script src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+
+    <h1 id="title"> {{ title }}</h1>
+
+    <ul id="priorities" class="ui-sortable">
+        {% for item in ordering %}
+            <li class="ui-state-default ui-sortable-handle"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>{{item}}</li>
+        {% endfor %}
+    </ul>
+
+    <form hidden class="ajax" action="{{ action }}" id="{{ action|action_id }}">
+        {% crispy form %}
+    </form>
+
+
+{% endblock %}
