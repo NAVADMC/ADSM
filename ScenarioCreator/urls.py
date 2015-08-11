@@ -9,6 +9,7 @@ urlpatterns = patterns('', url('^AssignSpreads/$', 'ScenarioCreator.views.assign
          url('^Populations/$', 'ScenarioCreator.views.population'),
          url('^Population/new/$', 'ScenarioCreator.views.population'),
          url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population'),
+         url('^VaccinationPriorities/$', 'ScenarioCreator.views.vaccination_priorities'),
          url('^OpenPopulation/(?P<target>.+)$', 'ScenarioCreator.views.open_population'),
          url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario'),
          url('^ProductionTypeList.json/$', 'ScenarioCreator.views.production_type_list_json'),

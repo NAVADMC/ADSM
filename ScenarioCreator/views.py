@@ -581,3 +581,14 @@ def validate_scenario(request):
     context = {'dry_run_passed': simulation.returncode == 0 and not stderr,
                'sim_output': stdout.decode() + stderr.decode(),}
     return render(request, 'ScenarioCreator/Validation.html', context)
+
+
+def vaccination_priorities(request):
+    context = {
+        'base_page': 'ScenarioCreator/VaccinationPriorities.html',
+        'title': 'Vaccination Priorities',
+        'ordering': ['Production Type', 'Days Waiting', 'Reason', 'Direction', 'Size'],
+        'form': VaccinationPriorityForm()
+    }
+
+    return render(request, 'ScenarioCreator/3Panels.html', context)

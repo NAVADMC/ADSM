@@ -648,3 +648,7 @@ class VaccinationRingRuleForm(BaseForm):
                    'target_group': ProductionTypeList()}
 
 
+class VaccinationPriorityForm(BaseForm):
+    class Meta(object):
+        model = VaccinationPriority
+        exclude = []

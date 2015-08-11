@@ -8,12 +8,18 @@
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery-ui.min.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery-ui.structure.min.css" />
     <script src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+    <script>
+        $(function() {
+            $( "#priorities" ).sortable();
+            $( "#priorities" ).disableSelection();
+        });
+	</script>
 
     <h1 id="title"> {{ title }}</h1>
 
     <ul id="priorities" class="ui-sortable">
         {% for item in ordering %}
-            <li class="ui-state-default ui-sortable-handle"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>{{item}}</li>
+            <li class="ui-state-default ui-sortable-handle tab-list"><span class="pull-right completed"></span>{{item}}</li>
         {% endfor %}
     </ul>
 

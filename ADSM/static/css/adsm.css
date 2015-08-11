@@ -879,7 +879,7 @@ ul {
     border-top:1px solid #eeeeee;
 }
 
-#setupMenu h2, #setupMenu h3, #setupMenu h4 {
+.tab-list {
     margin-top: 0;
     margin-bottom: 0; /* These are meant to stack */
     overflow: hidden;
@@ -888,7 +888,8 @@ ul {
     /*width:170px;*/
 }
 
-#setupMenu a {
+.tab-list a,
+#priorities li {
     color: #606060;
     display:block;
     text-decoration: none;
@@ -902,7 +903,7 @@ ul {
     direction: ltr;
 }
 
-#setupMenu a:before {
+.tab-list a:before {
     content:"";
     display:block;
     width:100%;
@@ -913,11 +914,11 @@ ul {
     left:-5px;
 }
 
-#setupMenu a:hover{
+.tab-list:hover{
     background-color:#eeeeee;
 }
 
-#setupMenu a.active:hover{
+.tab-list.active:hover{
     background-color:#606060;
 }
 
@@ -925,7 +926,7 @@ ul {
     padding-left:30px;
 }
 
-#setupMenu a.active {
+.tab-list a.active {
     background-color: #606060;
     margin-left:0;
     color:white;
@@ -935,15 +936,13 @@ ul {
     margin-right: 0;
 }
 
-#setupMenu span {
+.tab-list span {
     width: 5px;
     height: 35px;
     -webkit-border-radius:0 2px 2px 0;
 }
 /*--------- right border on results nav menu -----*/
-#setupMenu h2:before,
-#setupMenu h3:before,
-#setupMenu h4:before {
+.tab-list:before {
     content: "";
     width: 5px;
     height: 37px;
@@ -957,14 +956,14 @@ ul {
     border-radius: 0 2px 2px 0;
 }
 
-#setupMenu .incomplete {
+.incomplete {
     font-weight: 600;
     font-style: italic;
     color: #999;
     background-color: #f6da40;
 }
 
-#setupMenu .completed, .completed {
+.completed {
     background-color: #68be5e;
 }
 

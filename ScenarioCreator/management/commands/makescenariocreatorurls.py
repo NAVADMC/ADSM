@@ -47,6 +47,7 @@ class Command(BaseCommand):
                                                       "url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario')",
                                                       "url('^ProductionTypeList.json/$', 'ScenarioCreator.views.production_type_list_json')",
                                                       "url('^DisableAllControls.json/$', 'ScenarioCreator.views.disable_all_controls_json')",
+                                                      "url('^VaccinationPriorities/$', 'ScenarioCreator.views.vaccination_priorities')",
 
                                                       "url('^ProbabilityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph')",
                                                       "url('^RelationalFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.relational_graph')",
