@@ -3,7 +3,8 @@
 ##########
 !define APP_NAME "ADSM"
 !define COMP_NAME "Newline Technical Innovations"
-!define WEB_SITE "https://github.com/NAVADMC/ADSM/wiki"
+!define WEB_SITE "https://www.newline.us"
+!define DOC_SITE "https://github.com/NAVADMC/ADSM/wiki"
 !define VERSION "3.3.5.5"
 !define COPYRIGHT ""
 !define DESCRIPTION "ADSM GUI Application"
@@ -180,8 +181,12 @@ CreateShortCut "$SMPROGRAMS\$SM_Folder\${APP_NAME}.lnk" "$INSTDIR\${MAIN_APP_EXE
 CreateShortCut "$SMPROGRAMS\$SM_Folder\Uninstall ${APP_NAME}.lnk" "$INSTDIR\uninstall.exe"
 
 !ifdef WEB_SITE
-WriteIniStr "$INSTDIR\${APP_NAME} website.url" "InternetShortcut" "URL" "${WEB_SITE}"
-CreateShortCut "$SMPROGRAMS\$SM_Folder\${APP_NAME} Website.lnk" "$INSTDIR\${APP_NAME} website.url"
+WriteIniStr "$INSTDIR\${COMP_NAME} Website.url" "InternetShortcut" "URL" "${WEB_SITE}"
+CreateShortCut "$SMPROGRAMS\$SM_Folder\${COMP_NAME} Website.lnk" "$INSTDIR\${COMP_NAME} Website.url"
+!endif
+!ifdef DOC_SITE
+WriteIniStr "$INSTDIR\${APP_NAME} Documentation.url" "InternetShortcut" "URL" "${DOC_SITE}"
+CreateShortCut "$SMPROGRAMS\$SM_Folder\${APP_NAME} Documentation.lnk" "$INSTDIR\${APP_NAME} Documentation.url"
 !endif
 !insertmacro MUI_STARTMENU_WRITE_END
 !endif
@@ -192,8 +197,12 @@ CreateShortCut "$SMPROGRAMS\ADSM\${APP_NAME}.lnk" "$INSTDIR\${MAIN_APP_EXE}"
 CreateShortCut "$SMPROGRAMS\ADSM\Uninstall ${APP_NAME}.lnk" "$INSTDIR\uninstall.exe"
 
 !ifdef WEB_SITE
-WriteIniStr "$INSTDIR\${APP_NAME} website.url" "InternetShortcut" "URL" "${WEB_SITE}"
-CreateShortCut "$SMPROGRAMS\ADSM\${APP_NAME} Website.lnk" "$INSTDIR\${APP_NAME} website.url"
+WriteIniStr "$INSTDIR\${COMP_NAME} Website.url" "InternetShortcut" "URL" "${WEB_SITE}"
+CreateShortCut "$SMPROGRAMS\ADSM\${COMP_NAME} Website.lnk" "$INSTDIR\${COMP_NAME} Website.url"
+!endif
+!ifdef DOC_SITE
+WriteIniStr "$INSTDIR\${APP_NAME} Documentation.url" "InternetShortcut" "URL" "${DOC_SITE}"
+CreateShortCut "$SMPROGRAMS\ADSM\${APP_NAME} Documentation.lnk" "$INSTDIR\${APP_NAME} Documentation.url"
 !endif
 !endif
 
@@ -207,6 +216,9 @@ WriteRegStr ${REG_ROOT} "${UNINSTALL_PATH}"  "Publisher" "${COMP_NAME}"
 !ifdef WEB_SITE
 WriteRegStr ${REG_ROOT} "${UNINSTALL_PATH}"  "URLInfoAbout" "${WEB_SITE}"
 !endif
+!ifdef DOC_SITE
+WriteRegStr ${REG_ROOT} "${UNINSTALL_PATH}"  "URLInfoDocumentation" "${DOC_SITE}"
+!endif
 SectionEnd
 
 ##########
@@ -214,7 +226,10 @@ Section Uninstall
 ${INSTALL_TYPE}
 Delete "$INSTDIR\uninstall.exe"
 !ifdef WEB_SITE
-Delete "$INSTDIR\${APP_NAME} website.url"
+Delete "$INSTDIR\${COMP_NAME} Website.url"
+!endif
+!ifdef DOC_SITE
+Delete "$INSTDIR\${APP_NAME} Documentation.url"
 !endif
 
 RMDir /r /REBOOTOK "$INSTDIR"
@@ -224,7 +239,10 @@ RMDir /r /REBOOTOK "$INSTDIR"
 Delete "$SMPROGRAMS\$SM_Folder\${APP_NAME}.lnk"
 Delete "$SMPROGRAMS\$SM_Folder\Uninstall ${APP_NAME}.lnk"
 !ifdef WEB_SITE
-Delete "$SMPROGRAMS\$SM_Folder\${APP_NAME} Website.lnk"
+Delete "$SMPROGRAMS\$SM_Folder\${COMP_NAME} Website.lnk"
+!endif
+!ifdef DOC_SITE
+Delete "$SMPROGRAMS\$SM_Folder\${APP_NAME} Documentation.lnk"
 !endif
 RmDir "$SMPROGRAMS\$SM_Folder"
 !endif
@@ -233,7 +251,10 @@ RmDir "$SMPROGRAMS\$SM_Folder"
 Delete "$SMPROGRAMS\ADSM\${APP_NAME}.lnk"
 Delete "$SMPROGRAMS\ADSM\Uninstall ${APP_NAME}.lnk"
 !ifdef WEB_SITE
-Delete "$SMPROGRAMS\ADSM\${APP_NAME} Website.lnk"
+Delete "$SMPROGRAMS\ADSM\${COMP_NAME} Website.lnk"
+!endif
+!ifdef DOC_SITE
+Delete "$SMPROGRAMS\ADSM\${APP_NAME} Documentation.lnk"
 !endif
 RmDir "$SMPROGRAMS\ADSM"
 !endif
