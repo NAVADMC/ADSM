@@ -76,27 +76,28 @@ def graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focu
 
 
 def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated, destroyed):
-    marker_size = 3.0
-    width = marker_size / kilometers_in_one_latitude_degree / 3
-    half = width * 1.5
+    #size = min(100, 3000 / sqrt(Unit.objects.count()))  # TODO: reconcile with ScenarioCreator Population Map marker size
+    marker_km = 1.0 / kilometers_in_one_latitude_degree
+    width = marker_km / 3
+    half = marker_km / 2.0
     for i in range(len(infected)):
         if infected[i] > 0:
             ax.add_patch(Rectangle(xy=(longitude[i] - half, latitude[i] - half),
                                    color = (0.89, 0.102, 0.11),
                                    width = width,
-                                   height= marker_size / kilometers_in_one_latitude_degree * (infected[i] / total_iterations),
+                                   height= marker_km * (infected[i] / total_iterations),
                                    zorder=2000))
         if vaccinated[i] > 0:
             ax.add_patch(Rectangle(xy=(longitude[i] - width *.5, latitude[i] - half),
                                    color=(0.2549, 0.6706, 0.3647),
                                    width= width,
-                                   height= marker_size / kilometers_in_one_latitude_degree * (vaccinated[i] / total_iterations),
+                                   height= marker_km * (vaccinated[i] / total_iterations),
                                    zorder=2000))
         if destroyed[i] > 0:
             ax.add_patch(Rectangle(xy=(longitude[i] + width * .5, latitude[i] - half),
                                    color=(0.3, 0.27, 0.27),
                                    width=width,
-                                   height= marker_size / kilometers_in_one_latitude_degree * (destroyed[i] / total_iterations),
+                                   height= marker_km * (destroyed[i] / total_iterations),
                                    zorder=2000))
         if infected[i] > 0 or vaccinated[i] > 0 or destroyed[i] > 0:
             ax.add_patch(Rectangle(xy=(longitude[i] - half, latitude[i] - half),

@@ -101,13 +101,16 @@ $(function(){
         var formAction = $(this).attr('action');
         var formData = new FormData($self[0])
         var load_target = $self
+        var loading_message = $self.attr('data-loading-message') || "Working..."
         if($self.parent().hasClass('fragment')){
             load_target = $self.parent()
         }
         if($self.parent().find('button[type=submit]').hasClass('btn-danger')) {//for deleting outputs on form submission
-            ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, function(){window.location.reload()});  //updates Navigation bar context
+            ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, function () {
+                window.location.reload()
+            }, loading_message);  //updates Navigation bar context
         }else{
-            ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, undefined);
+            ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, undefined, loading_message);
         }
     })
 
@@ -335,6 +338,15 @@ $(function(){
             var name_in = $('#functions_panel #id_name')
             name_in.val(name_in.val() + ' - Copy')
         })
+    })
+
+    $('.blocking-overlay:visible').livequery( function() {
+        if(window.location.pathname.indexOf('app/ImportScenario') != -1){
+            console.log('start watcher')
+            if(typeof statusInterval === 'undefined'){
+                statusInterval = setInterval(statusChecker, 2000);
+            }
+        }
     })
 })
 
@@ -702,7 +714,7 @@ function prompt_for_new_file_name(link) {
                         //$self.submit()
                         ajax_submit_complex_form_and_replaceWith(link, new FormData($self[0]), $self, $self, function () {
                             $('h1.filename').text($('.filename input').val()) //match major title with form value
-                        });
+                        }, undefined);
                     } else {
                         //TODO: need FormData from form that is to be added in #NewScenario
                         //ajax_submit_complex_form_and_replaceWith(link, new FormData($self[0]), $self, $self, undefined);
@@ -754,8 +766,11 @@ function reload_image(load_target) {
     }
 }
 
-function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, success_callback) {
-    $('.blocking-overlay').show();
+function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, success_callback, loading_message) {
+    var overlay = $('.blocking-overlay').show();
+    if(typeof loading_message !== 'undefined'){
+        overlay.find('.message').text(loading_message);
+    }
     $.ajax({
         url: formAction,
         type: "POST",
@@ -770,7 +785,9 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
                 if($(form_html).find('#main_panel').length ){
                     $('#main-panel').html($(form_html).find('#main_panel')[0])
                 }else {
-                    $('body').html($(form_html).find('body')[0])
+                    var matches = form_html.match(/(<body>[\S\s]*<\/body>)/i);//multiline match
+                    var content = $(matches[1]);
+                    $('body').html(content);
                 }
             } else {
                 if (formAction.lastIndexOf('new/') != -1) { //new model created
@@ -826,3 +843,12 @@ function make_function_panel_editable() {
     $('#functions_panel').css('pointer-events', 'all')
 }
 
+function statusChecker(){
+    if($('.blocking-overlay').is(':visible')){
+        $.get('/app/ImportStatus/', function(data){
+            $('.blocking-overlay').show().find('.message').text(data.status);
+        });
+    }else{
+        clearInterval(statusChecker);
+    }
+}

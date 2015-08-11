@@ -400,7 +400,9 @@ body>nav {
 /*-----3-column layout-----*/
 /*-------------------------------------------------------------*/
 #main-panel {
-    float:none;
+    /* float:none; */
+    margin-left: 238px;
+    width: calc(100vw - 324px);
 }
 
 .layout-panel {
@@ -2109,6 +2111,11 @@ select[multiple] {}
 .intro_text, .intro_text p {
     color: #606060;
 }
+.m2mtable select, #all-interactions select {
+    max-width: 260px;
+}
+#all-interactions {
+    width: calc(100% - 0px);}
 /*----------------------------------------------------*/
 /*----- global overrides -----*/
 /*----------------------------------------------------*/

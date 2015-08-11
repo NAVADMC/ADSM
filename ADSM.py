@@ -32,7 +32,10 @@ import psutil
 
 def launch_viewer():
     print("\nLaunching browser...")
-    subprocess.call(os.path.join(BASE_DIR, 'Viewer', 'ADSM Viewer.exe'))  # TODO: This is windows specific
+    if not os.path.exists(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer')):
+        os.makedirs(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer'), exist_ok=True)
+    log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', 'debug.log')
+    subprocess.call(os.path.join(BASE_DIR, 'Viewer', 'ADSM_Viewer.exe --log-file="%s"' % log_path))  # TODO: This is windows specific
     print("\nClosing application!")
     _thread.interrupt_main()
 
@@ -73,6 +76,12 @@ django.setup()
 from django.conf import settings
 from django.core import management
 
+
+if not os.access(settings.WORKSPACE_PATH, os.W_OK | os.X_OK) or not os.access(settings.DB_BASE_DIR, os.W_OK | os.X_OK):
+    print("Your user does not have proper file permissions in the ADSM Workspace Directory!\nPlease re-run ADSM with administrative privileges.")
+    print("\nPress any key to exit...")
+    input()
+    sys.exit(1)
 
 if args.test:
     print("\nRunning tests...")

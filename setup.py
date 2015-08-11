@@ -144,8 +144,14 @@ class BuildADSM(build_exe):
         for app_name in settings.INSTALLED_APPS:
             app = import_module(app_name)
             if os.path.exists(os.path.join(app.__path__[0], 'templates')):
-                self.include_files.extend([(os.path.join(app.__path__[0], 'templates'),
-                                                            os.path.join('templates', app.__name__)), ])
+                self.include_files.extend([(os.path.join(app.__path__[0], 'templates'), os.path.join('templates', app.__name__)), ])
+        for template_processor in settings.TEMPLATES:
+            if 'DIRS' in template_processor and template_processor['DIRS']:
+                for template_dir in template_processor['DIRS']:
+                    target = str(template_dir).replace(settings.BASE_DIR, '')
+                    if target.startswith(os.path.sep):
+                        target = str(target).replace(os.path.sep, '', 1)
+                    self.include_files.extend([(template_dir, target), ])
             # TODO: Do we need to grab translation files for apps not listed in settings.py?
             # TODO: Django still doesn't properly find translation for domain 'django' after collecting everything
             # if os.path.exists(os.path.join(app.__path__[0], 'locale')):
@@ -164,13 +170,13 @@ class BuildADSM(build_exe):
 
         build_exe.run(self)
 
-        files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, self.build_exe))
-                 if os.path.isfile(os.path.join(settings.BASE_DIR, self.build_exe, file)))
+        files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, self.build_exe)) if os.path.isfile(os.path.join(settings.BASE_DIR, self.build_exe, file)))
         os.makedirs(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
         for file in files:
             if file not in ['ADSM.exe', 'ADSM_Beta.exe', 'library.zip', 'python34.dll', 'MSVCR100.dll', 'npu.exe']:  # TODO: This line is ADSM specific
                 shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, file),
                             os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file))
+        shutil.copy(os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', 'Viewer.exe'), os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', 'ADSM_Viewer.exe'))
 
 
 base = None
