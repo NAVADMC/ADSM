@@ -40,7 +40,7 @@ build_exe_options = {
         ('bin', 'bin'),
         ('Viewer', 'Viewer'),  # Newline's View application for Django Desktop Core
         ('npu.exe', 'npu.exe'),  # Newline's Program Updater application  # TODO: This is windows specific
-        ('README', 'README'),
+        ('README.md', 'README.md'),
 
         # CHANGE ME for any files/folders you want included with your project
         ('Sample Scenarios', 'Sample Scenarios'),
