@@ -178,7 +178,7 @@ class BuildADSM(build_exe):
         files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, self.build_exe)) if os.path.isfile(os.path.join(settings.BASE_DIR, self.build_exe, file)))
         os.makedirs(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
         for file in files:
-            if not [file for part in ['.exe', 'library.zip', 'python34.dll', 'MSVCR100.dll', 'npu', '.url'] if part.lower().split(' ')[0] in file.lower()]:  #NOTE: The split here could cause issues and is speculative
+            if not [file for part in ['.exe', 'library.zip', 'README.md', 'python34.dll', 'MSVCR100.dll', 'npu', '.url'] if part.lower().split(' ')[0] in file.lower()]:  #NOTE: The split here could cause issues and is speculative
                 shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, file),
                             os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file))
         shutil.copy(os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', 'Viewer.exe'), os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', 'ADSM_Viewer.exe'))
