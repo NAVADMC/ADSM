@@ -139,13 +139,23 @@ class RelationalFunctionForm(BaseForm):
 class ControlMasterPlanForm(BaseForm):
     class Meta(object):
         model = ControlMasterPlan
-        exclude = ['disable_all_controls']
+        fields = 'name destruction_program_delay destruction_capacity destruction_priority_order destruction_reason_order'.split()
         widgets = {
                  # 'disable_all_controls': CheckboxInput(attrs={'hidden':'hidden'}),
                    'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'restart_vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    }
+
+
+class VaccinationMasterForm(BaseForm):
+    class Meta(object):
+        model = ControlMasterPlan
+        fields = 'vaccination_capacity restart_vaccination_capacity vaccination_priority_order vaccinate_retrospective_days'.split()
+        widgets = {
+            'vaccination_priority_order': Select(attrs={'hidden':'hidden'}),
+            'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+            'restart_vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+        }
+
 
 
 class ProtocolAssignmentForm(BaseForm):
@@ -647,8 +657,3 @@ class VaccinationRingRuleForm(BaseForm):
         widgets = {'trigger_group': ProductionTypeList(),
                    'target_group': ProductionTypeList()}
 
-
-class VaccinationPriorityForm(BaseForm):
-    class Meta(object):
-        model = VaccinationPriority
-        exclude = []

@@ -893,10 +893,4 @@ class VaccinationRingRule(BaseModel):
             return format_html('{0} detection triggers {1} vaccination within {2} km', *bold_values)
 
 
-class VaccinationPriority(InputSingleton):
-    top_level = models.TextField()
-    production_types = models.TextField()
-    reasons = models.TextField()
-
-
 

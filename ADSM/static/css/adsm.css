@@ -2147,6 +2147,10 @@ select[multiple] {}
     box-shadow: none;
 }
 
+.ui-sortable-handle:hover {
+    cursor: move;
+}
+
 
 @media screen and (max-width: 1200px) {
 /*------------- navigation ----------------*/
