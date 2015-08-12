@@ -28,6 +28,7 @@ import argparse
 import threading
 import _thread
 import psutil
+from django.utils.timezone import now
 
 
 def launch_viewer():
@@ -84,6 +85,10 @@ if not os.access(settings.WORKSPACE_PATH, os.W_OK | os.X_OK) or not os.access(se
     sys.exit(1)
 
 if not settings.DEBUG:
+    print("\nADSM is now running in the ADSM_Viewer. Please do not close this window while ADSM is running.")
+
+    if not os.path.exists(os.path.join(settings.WORKSPACE_PATH, 'settings', 'logs')):
+        os.makedirs(os.path.join(settings.WORKSPACE_PATH, 'settings', 'logs'))
     output_log = os.path.join(settings.WORKSPACE_PATH, 'settings', 'logs', 'output.log')
     error_log = os.path.join(settings.WORKSPACE_PATH, 'settings', 'logs', 'error.log')
 
@@ -91,6 +96,13 @@ if not settings.DEBUG:
         os.remove(output_log)
     if os.path.isfile(error_log) and os.stat(error_log).st_size > 10000000:
         os.remove(error_log)
+
+    with open(output_log, 'w') as log:
+        log.write("STARTING AT: %s" % now())
+        log.close()
+    with open(error_log, 'w') as log:
+        log.write("STARTING AT: %s" % now())
+        log.close()
 
     sys.stdout = open(output_log, 'w')
     sys.sterr = open(error_log, 'w')
