@@ -2152,6 +2152,7 @@ select[multiple] {}
 
 .ui-sortable { /*list ul element*/
     width: 200px;
+    background-color: white;
 }
 
 .ui-sortable-handle:hover {
@@ -2163,11 +2164,11 @@ select[multiple] {}
 }
 .sub-priorities {
     position: absolute;
+    top: 0;
     left: 200px;
     /*or float*/
     z-index: 200;
     display:none;
-    background-color: white;
 }
 
 .ui-sortable-handle.active .sub-priorities {
