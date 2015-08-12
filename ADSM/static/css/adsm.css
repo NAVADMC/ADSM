@@ -920,6 +920,7 @@ ul {
 
 .tab-list.active:hover{
     background-color:#606060;
+    color: white !important; /*ID selector was more specific*/
 }
 
 #setupMenu h3 a, #setupMenu h4 a {
@@ -2147,10 +2148,32 @@ select[multiple] {}
     box-shadow: none;
 }
 
+/**********Priority Widget***********************/
+
+.ui-sortable { /*list ul element*/
+    width: 200px;
+}
+
 .ui-sortable-handle:hover {
     cursor: move;
 }
+.ui-sortable-handle {
+    position: relative;
+    overflow: visible;
+    white-space: normal;
+}
+.sub-priorities {
+    position: absolute;
+    left: 200px;
+    /*or float*/
+    z-index: 200;
+    display:none;
+    background-color: white;
+}
 
+.ui-sortable-handle.active .sub-priorities {
+    display:block;
+}
 
 @media screen and (max-width: 1200px) {
 /*------------- navigation ----------------*/

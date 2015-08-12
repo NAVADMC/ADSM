@@ -1,3 +1,4 @@
+import json
 from django.db.models import Q
 
 from ScenarioCreator.models import ProductionType, DiseaseProgressionAssignment, DiseaseSpreadAssignment, Disease, Unit, DirectSpread

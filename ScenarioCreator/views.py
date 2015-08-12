@@ -584,12 +584,13 @@ def validate_scenario(request):
 
 
 def vaccination_priorities(request):
-    initialized_form = VaccinationMasterForm(request.POST or None, instance=ControlMasterPlan.objects.get())
+    instance = ControlMasterPlan.objects.get()
+    initialized_form = VaccinationMasterForm(request.POST or None, instance=instance)
     context = {
         'base_page': 'ScenarioCreator/VaccinationPriorities.html',
         'title': 'Vaccination Priorities',
-        'ordering': ['Production Type', 'Days Holding', 'Reason for Vaccination', 'Direction', 'Size'],
+        'ordering': json.loads(instance.vaccination_priority_order),
         'form': initialized_form
     }
 
-    return render(request, 'ScenarioCreator/3Panels.html', context)
+    return render(request, 'ScenarioCreator/navigationPane.html', context)
