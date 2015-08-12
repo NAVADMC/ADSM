@@ -11,7 +11,7 @@ python-dateutil==2.3
 pytz==2014.10
 selenium==2.44.0
 six==1.8.0
-git+https://github.com/BryanHurst/django-productionserver.git@v1.0.3
+git+https://github.com/BryanHurst/django-productionserver.git@v1.0.5r4
 
 numpy==1.9.1
 matplotlib==1.4.2
