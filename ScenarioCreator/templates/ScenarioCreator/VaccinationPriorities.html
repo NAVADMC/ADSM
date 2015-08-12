@@ -37,6 +37,9 @@
                 $('#priorities>.ui-sortable-handle').removeClass('active')
                 $(this).addClass('active')
             });
+            $(':input').hover(function(){
+                $('#priorities *').removeClass('active')
+            })
         });
 	</script>
 {% endblock %}

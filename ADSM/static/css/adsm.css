@@ -2155,10 +2155,9 @@ select[multiple] {}
 }
 
 .ui-sortable-handle:hover {
-    cursor: move;
+    cursor: ns-resize;
 }
 .ui-sortable-handle {
-    position: relative;
     overflow: visible;
     white-space: normal;
 }
