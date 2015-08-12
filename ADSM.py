@@ -117,5 +117,5 @@ else:
     browser.start()
 
     print("\nLaunching server...")
-    management.call_command('runproductionserver', port=8000, app_port=8001)
+    management.call_command('runproductionserver', port=8000, app_port=8001, silent=True)
     # management.call_command('runserver', use_reloader=False)
