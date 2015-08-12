@@ -84,8 +84,16 @@ if not os.access(settings.WORKSPACE_PATH, os.W_OK | os.X_OK) or not os.access(se
     sys.exit(1)
 
 if not settings.DEBUG:
-    sys.stdout = open(os.path.join(settings.WORKSPACE_PATH, 'settings', 'logs', 'output.log'), 'w')
-    sys.sterr = open(os.path.join(settings.WORKSPACE_PATH, 'settings', 'logs', 'error.log'), 'w')
+    output_log = os.path.join(settings.WORKSPACE_PATH, 'settings', 'logs', 'output.log')
+    error_log = os.path.join(settings.WORKSPACE_PATH, 'settings', 'logs', 'error.log')
+
+    if os.path.isfile(output_log) and os.stat(output_log).st_size > 10000000:
+        os.remove(output_log)
+    if os.path.isfile(error_log) and os.stat(error_log).st_size > 10000000:
+        os.remove(error_log)
+
+    sys.stdout = open(output_log, 'w')
+    sys.sterr = open(error_log, 'w')
 
 if args.test:
     print("\nRunning tests...")
