@@ -83,6 +83,10 @@ if not os.access(settings.WORKSPACE_PATH, os.W_OK | os.X_OK) or not os.access(se
     input()
     sys.exit(1)
 
+if not settings.DEBUG:
+    sys.stdout = open(os.path.join(settings.WORKSPACE_PATH, 'settings', 'logs', 'output.log'), 'w')
+    sys.sterr = open(os.path.join(settings.WORKSPACE_PATH, 'settings', 'logs', 'error.log'), 'w')
+
 if args.test:
     print("\nRunning tests...")
     management.call_command('test')
