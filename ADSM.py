@@ -85,6 +85,8 @@ if not os.access(settings.WORKSPACE_PATH, os.W_OK | os.X_OK) or not os.access(se
     sys.exit(1)
 
 if not settings.DEBUG:
+    print("\nADSM is now running in the ADSM_Viewer. Please do not close this window while ADSM is running.")
+
     if not os.path.exists(os.path.join(settings.WORKSPACE_PATH, 'settings', 'logs')):
         os.makedirs(os.path.join(settings.WORKSPACE_PATH, 'settings', 'logs'))
     output_log = os.path.join(settings.WORKSPACE_PATH, 'settings', 'logs', 'output.log')
