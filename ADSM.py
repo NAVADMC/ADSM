@@ -97,15 +97,15 @@ if not settings.DEBUG:
     if os.path.isfile(error_log) and os.stat(error_log).st_size > 10000000:
         os.remove(error_log)
 
-    with open(output_log, 'w') as log:
+    with open(output_log, 'a') as log:
         log.write("STARTING AT: %s" % now())
         log.close()
-    with open(error_log, 'w') as log:
+    with open(error_log, 'a') as log:
         log.write("STARTING AT: %s" % now())
         log.close()
 
-    sys.stdout = open(output_log, 'w')
-    sys.sterr = open(error_log, 'w')
+    sys.stdout = open(output_log, 'a')
+    sys.sterr = open(error_log, 'a')
 
 if args.test:
     print("\nRunning tests...")
