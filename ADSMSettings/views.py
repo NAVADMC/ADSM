@@ -140,7 +140,7 @@ def open_test_scenario(request, target):
     return open_scenario(request, target, False)
 
 
-def new_scenario(new_name=None):
+def new_scenario(request=None, new_name=None):
     copy_blank_to_session()
 
     update_db_version()
