@@ -5,7 +5,7 @@
 !define COMP_NAME "Newline Technical Innovations"
 !define WEB_SITE "https://www.newline.us"
 !define DOC_SITE "https://github.com/NAVADMC/ADSM/wiki"
-!define VERSION "3.3.5.8"
+!define VERSION "3.3.5.9"
 !define COPYRIGHT ""
 !define DESCRIPTION "ADSM GUI Application"
 !define LICENSE_TXT "LICENSE"
