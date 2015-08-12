@@ -412,22 +412,23 @@ function open_panel_if_needed(){
 
 function populate_pdf_panel(select) {
     var $input = $(select)
+    var url = $input.attr('data-new-item-url');
     if($input.hasClass('grouplist') || $input.hasClass('productiontypelist'))  //grouplist uses the population_panel instead
         return;
     var load_target = '#functions_panel #current-function'
     var origin = $input.closest('.layout-panel').attr('id');
-    if(origin == 'left-panel') { //use the center-panel if this is from left
+
+    if(origin == 'left-panel' && (url.indexOf('RelationalFunction') == -1 && url.indexOf('ProbabilityFunction') == -1)) { //use the center-panel if this is from left and not a function
         load_target = '#center-panel'
         $('#center-panel').addClass('reveal') //allows toggle of box shadow on :before pseudo element
     }
-    if(origin == 'center-panel' || origin == 'main-panel'){
+    if(load_target == '#functions_panel #current-function'){
         $('#functions_panel').removeClass('TB_panel_closed')
     }
     if(origin == 'functions_panel'){ // we've run out of room and must use a modal
         modelModal.show($input);
         return
     }
-    var url = $input.attr('data-new-item-url');
     if ($input.val() != 'data-add-new' && $input.val() != '')
         url = url.replace('new', $input.val());//will edit already existing model
     $(load_target).load(url)

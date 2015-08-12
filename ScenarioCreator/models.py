@@ -33,6 +33,7 @@ import os
 import re
 import time
 
+from collections import OrderedDict
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -353,11 +354,24 @@ class ControlMasterPlan(InputSingleton):
         help_text='Relational function used to define the daily vaccination capacity.', )
     restart_vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Define if the daily vaccination capacity will be different if started a second time.', )
-    vaccination_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
-        help_text='The primary priority criteria for order of vaccinations.',
-        choices=priority_choices(), )
+    vaccination_priority_order = models.TextField(default='{"Days Holding":["Oldest", "Newest"], "Production Type":["A", "C", "B"], "Reason":["Basic", "Trace fwd direct", "Trace fwd indirect", "Trace back direct", "Trace back indirect", "Ring"], "Direction":["Outside-in", "Inside-out"], "Size":["Largest", "Smallest"]}',
+        help_text='The priority criteria for order of vaccinations.',)
     vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True, default=0,
         help_text='Once a vaccination program starts, this number determines how many days previous to the start of the vaccination program a detection will trigger vaccination.', )
+
+    def add_missing_production_type_priorities(self):
+        missing = [name for name in ProductionType.objects.values_list('name', flat=True) if name not in self.vaccination_priority_order]
+        if missing:
+            data = json.loads(self.vaccination_priority_order, object_pairs_hook=OrderedDict)  # preserve priority ordering is important
+            data['Production Type'] += missing  # extend list at end
+            self.vaccination_priority_order = json.dumps(data)
+
+
+    def save(self, *args, **kwargs):
+        if self.vaccination_priority_order.startswith('{'):  # after the data migration
+            self.add_missing_production_type_priorities()
+        super(ControlMasterPlan, self).save(*args, **kwargs)
+
     def __str__(self):
         return str(self.name)
 

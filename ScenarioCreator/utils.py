@@ -43,3 +43,9 @@ def whole_scenario_validation():
             warnings.append("    " + entry.name)
 
     return warnings
+
+
+def get_priority_sublist(full_str, header_str):
+    data_dict = json.loads(full_str)
+    return data_dict[header_str]
+

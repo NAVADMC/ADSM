@@ -9,7 +9,7 @@ from django.forms.models import inlineformset_factory
 from crispy_forms.bootstrap import TabHolder, Tab, AppendedText, AppendedPrependedText, PrependedAppendedText, PrependedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
-from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple, CheckboxInput
+from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple, CheckboxInput, TextInput
 from crispy_forms.helper import FormHelper
 import os
 
@@ -151,7 +151,7 @@ class VaccinationMasterForm(BaseForm):
         model = ControlMasterPlan
         fields = 'vaccination_capacity restart_vaccination_capacity vaccination_priority_order vaccinate_retrospective_days'.split()
         widgets = {
-            'vaccination_priority_order': Select(attrs={'hidden':'hidden'}),
+            'vaccination_priority_order': TextInput(attrs={'hidden':'hidden'}),
             'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
             'restart_vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
         }

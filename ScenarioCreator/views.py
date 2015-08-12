@@ -588,7 +588,7 @@ def vaccination_priorities(request):
     context = {
         'base_page': 'ScenarioCreator/VaccinationPriorities.html',
         'title': 'Vaccination Priorities',
-        'ordering': ['Production Type', 'Days Waiting', 'Reason', 'Direction', 'Size'],
+        'ordering': ['Production Type', 'Days Holding', 'Reason for Vaccination', 'Direction', 'Size'],
         'form': initialized_form
     }
 
