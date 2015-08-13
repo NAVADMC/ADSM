@@ -1208,6 +1208,14 @@ select {
     opacity: .3;
     -webkit-animation: Placeholder-wash .98s infinite;
 }
+.placeholder#monitor {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid #ebebeb;
+    padding-bottom: 15px;
+}
 
 @-webkit-keyframes Placeholder-wash {
     0% {left: 119px;
@@ -1869,49 +1877,98 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     opacity: .5;
     pointer-events: none;
 }
-
+/*-------------------------------------------------------------*/
+/*----- simulation progress bar -----*/
+/*-------------------------------------------------------------*/
 #sim_progress_and_button {
     position: fixed;
-    bottom: 0 ;
-    display: table;
-    margin-left: 280px;
+    bottom: 10px;
+    display: block;
+    height: 51px;
+    width: 100%;
+    border-top: 2px solid #606060;
+    border-bottom: 2px solid #606060;
+    z-index: 1;
+    background-color: white;
+}
+#running_message {
+    float: left;
+    display: block;
+    width: 175px;
+    background-color: #606060;
+    height: 100%;
+    color: white;
+    font-size: 18px;
+    font-style: italic;
+    font-weight: 300;
+    line-height: 50px;
+    padding-left: 10px;
 }
 
 #sim_progress_and_button .btn, #sim_progress_and_button .progress {
-    display: table-cell;
-    vertical-align: middle;
-    /*top: 50%;*/
-    /*transform: translateY(-50%);*/
 }
 
 #sim_progress_and_button .btn {
-    /*display: inline-block;*/
     width: 80px;
-    /*line-height: 20px;*/
     padding: 0;
-    margin: 0 5px 0 0;
     background-color: #ba3e44;
     color: white;
     font-size: 15px ;
-    /*font-family: Source Sans Semibold, sans-serif;*/
+    line-height: 50px;
     font-style: italic;
+    height: 100%;
+    margin: 0;
+    float:left;
 }
 
 #sim_progress_and_button .progress {
-    /*display: inline-block;*/
-    width: 923px;
+    width: 60vw;
     margin: 0px;
+    float:left;
+    border-left: 2px solid #606060;
+    border-right: 2px solid #606060;
+    height: 100%;
+    border-radius: 0;
+    position: relative;
+}
+#sim_progress_and_button .progress:after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    box-shadow: inset 0 0 5px 0 rgba(0,0,0,.3);
+    position: absolute;
+}
+.simulation-progress {
+    background-color: #68be5e;
 }
 #iteration_text {
-    max-height: 20px;
+    height: 47px;
     overflow: auto;
-    width: 130px;
+    width: calc(40vw - 255px);
+    background: rgba(255, 255, 255, .9);
+    font-style: italic;
+    color: #606060;
+    line-height: 15px;
+    padding: 0 10px;
+}
+#iteration_text li {
+    margin-bottom: 3px;
 }
 
 .spacer {
     height: 100px;
 }
-
+@media screen and (max-width: 1200px) {
+    #running_message {
+        width: 140px;
+        font-size: 13px;
+        font-weight: 400;
+    }
+    #iteration_text {
+        width: calc(40vw - 220px);
+    }
+}
 
 /*-------------------------------------------------------------*/
 /*-----vaccination triggers-----*/
