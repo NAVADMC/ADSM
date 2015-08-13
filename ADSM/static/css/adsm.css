@@ -121,8 +121,14 @@ input[type="number"], input[type="text"] {
     height:20px;
     padding: 0 0 0 5px;
 }
+input[type="number"]{
+    max-width: 130px;
+}
 input[type="number"]:hover {
     padding: 1px 0 0 6px;
+}
+input[type="number"]:required:hover {
+    padding: 0 0 0 4px;
 }
 input[type="text"]:hover {
     padding-left: 6px;
@@ -145,6 +151,9 @@ input[type="file"]:focus {
 }
 textarea {
     padding: 5px 10px;
+    width: 100%;
+    height: 70px;
+    max-width: 500px;
 }
 textarea:hover {
     padding-left: 10px;
@@ -152,8 +161,11 @@ textarea:hover {
 input[type="checkbox"] {
     margin-top: 1px;
 }
+.checkbox {
+    margin-bottom: 18px;
+}
 .help-block {  
-    font-weight: 400;
+    font-weight: 200;
     display: block;
     height: auto;
     overflow: hidden; /* check boxes are bold from mixins.less and I think it looks better with definitions*/
@@ -394,7 +406,7 @@ body>nav {
     width: 100%;
     margin-left: 0;
     margin-right: 0;
-    max-width: 400px;
+    max-width: 500px;
 }
 #left-panel {
     width:calc(16.667vw + 25px);
@@ -639,6 +651,19 @@ ul {
 /*-----settings panel-----*/
 /*-------------------------------------------------------------*/
 #settings_panel{}
+#settings_panel hr{
+    margin: 15px 0 15px 0;
+}
+#settings_panel hr:last-of-type {
+    margin-top: 0;
+}
+#settings_panel input[type="checkbox"]{
+    margin-right: 5px;
+    margin-bottom: 15px;
+}
+#settings_panel .btn {
+
+}
 
 /*-------------------------------------------------------------*/
 /*-----population panel-----*/
@@ -1101,11 +1126,6 @@ section .btn-primary:focus,
     background-color:#e0383e;
 }
 
-textarea {
-    width: 400px;
-    height: 70px;
-}
-
 #id_description {
     width: 100%; 
     height: 200px;
@@ -1217,10 +1237,6 @@ select {
     text-decoration: none;
 }
 
-#file_list a:hover {
-    color: #7cb9ff;
-}
-
 #file_list .icon {
     margin-top: 5px;
     margin-left: 15px;
@@ -1281,19 +1297,7 @@ input[type=file], button {
     min-width: 400px;
 }*/
 
-#file_list .addNew {
-    border-bottom: none;
-}
 
-#file_list .addNew a{
-    color: #3577b1;
-    opacity: .8;
-    transition: opacity .2s ease;
-}
-
-#file_list .addNew a:hover {
-    opacity: 1;
-}
 #file_list .defined{
     border-radius: 2px;
     margin-bottom: 2px;
@@ -1979,12 +1983,18 @@ select[multiple] {}
 .intro_text, .intro_text p {
     color: #606060;
 }
+/*-------------------------------------------------------------*/
+/*-----output settings-----*/
+/*-------------------------------------------------------------*/
+.inline_h2 {
+    margin-bottom: 10px;
+}
 /*----------------------------------------------------*/
 /*----- global overrides -----*/
 /*----------------------------------------------------*/
-.action_link {
+.action_link, .addNew a {
     background: transparent;
-    color: #62d7fd;
+    color: #00bbef !important;
     border: none !important;
     outline: none !important;
     font-size: 13px;
@@ -2001,14 +2011,15 @@ select[multiple] {}
 .action_link:hover,
 .action_link:active,
 .action_link:focus,
-.action_link:visited  {
-    opacity: 1;
+.action_link:visited,
+.addNew a:hover  {
     background: transparent;
-    color: #62d7fd !important;
+    color: #00bbef !important;
     font-weight: 300;
     border: none !important;
     outline: none !important;
     box-shadow: none;
+    text-decoration: underline;
 }
 
 
