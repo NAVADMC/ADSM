@@ -16,6 +16,14 @@ from django.core import management
 from ADSM import __version__
 
 
+def is_exe(file_path):
+    access_mode = os.F_OK | os.X_OK
+    if os.path.isfile(file_path) and os.access(file_path, access_mode):
+        filemode = os.stat(file_path).st_mode
+        ret = bool(filemode & stat.S_IXUSR or filemode & stat.S_IXGRP or filemode & stat.S_IXOTH)
+        return ret
+
+
 build_exe_options = {
     'build_exe': 'build',
     'optimize': 2,
@@ -50,7 +58,7 @@ build_exe_options = {
 }
 files = (file for file in os.listdir(settings.BASE_DIR) if os.path.isfile(os.path.join(settings.BASE_DIR, file)))
 for file in files:
-    if [file for part in ['.exe', '.dll', '.url', 'npu'] if part.lower().split(' ')[0] in file.lower()]:  # TODO: Check if file is executable for linux, and add in so files
+    if [file for part in ['.so', '.dll', '.url', 'npu'] if part.lower().split(' ')[0] in file.lower()] or is_exe(os.path.join(settings.BASE_DIR, file)):
         build_exe_options['include_files'].append((file, file))
 
 
@@ -118,15 +126,7 @@ def remove_empty_folders(path):
         os.rmdir(path)
 
 
-def is_exe(file_path):
-    access_mode = os.F_OK | os.X_OK
-    if os.path.isfile(file_path) and os.access(file_path, access_mode):
-        filemode = os.stat(file_path).st_mode
-        ret = bool(filemode & stat.S_IXUSR or filemode & stat.S_IXGRP or filemode & stat.S_IXOTH)
-        return ret
-
-
-def parse_requirements_and_links(existing_requirements=None, existing_links=None):
+def parse_requirements_and_links(requirements_file, existing_requirements=None, existing_links=None):
     """
     Proper Git lines from Requirements.txt:
         git+https://git.myproject.org/MyProject.git
@@ -142,7 +142,7 @@ def parse_requirements_and_links(existing_requirements=None, existing_links=None
     if not existing_links:
         existing_links = []
 
-    with open(os.path.join(settings.BASE_DIR, 'Requirements.txt'), 'r') as requirements:
+    with open(requirements_file, 'r') as requirements:
         for line in requirements:
             line = line.strip()
 
@@ -251,8 +251,8 @@ class BuildADSM(build_exe):
         files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, self.build_exe)) if os.path.isfile(os.path.join(settings.BASE_DIR, self.build_exe, file)))
         os.makedirs(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
         for file in files:
-            # TODO: Check for executable files and so files for linux
-            if not [file for part in ['.exe', 'library.zip', 'README.md', 'python34.dll', 'MSVCR100.dll', 'npu', '.url'] if part.lower().split(' ')[0] in file.lower()]:  #NOTE: The split here could cause issues and is speculative
+            # TODO: Check for linux python.so files
+            if not [file for part in ['library.zip', 'README.md', 'python34.dll', 'MSVCR100.dll', 'npu', '.url'] if part.lower().split(' ')[0] in file.lower()] and not is_exe(os.path.join(settings.BASE_DIR, self.build_exe, file)):  #NOTE: The split here could cause issues and is speculative
                 shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, file),
                             os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file))
         viewer = None
@@ -266,19 +266,23 @@ class BuildADSM(build_exe):
 
 
 base = None
+extension = ''
+requirements, urls = parse_requirements_and_links(os.path.join(settings.BASE_DIR, 'Requirements.txt'))
 if sys.platform == 'win32':
+    base = 'Console'
+    extension = '.exe'
+    requirements, urls = parse_requirements_and_links(os.path.join(settings.BASE_DIR, 'Requirements-Windows.txt'), existing_requirements=requirements, existing_links=urls)
+else:
     base = 'Console'
 
 cmdclass = {"build_exe": BuildADSM, }
-
-requirements, urls = parse_requirements_and_links()
 
 setup(name='ADSM_Beta',
       version=__version__,
       description='ADSM Beta Application',
       options={'build_exe': build_exe_options,
                'install_exe': {'build_dir': build_exe_options['build_exe']}},
-      executables=[Executable('ADSM.py', base=base, icon='favicon.ico', targetName='ADSM_Beta.exe'), ],
+      executables=[Executable('ADSM.py', base=base, icon='favicon.ico', targetName='ADSM_Beta'+extension), ],
       cmdclass=cmdclass,
       install_requires=requirements,
       dependency_links=urls

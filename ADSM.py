@@ -31,12 +31,17 @@ import psutil
 from django.utils.timezone import now
 
 
+extension = ''
+if sys.platform == 'win32':
+    extension = '.exe'
+
+
 def launch_viewer():
     print("\nLaunching browser...")
     if not os.path.exists(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer')):
         os.makedirs(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer'), exist_ok=True)
     log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', 'debug.log')
-    subprocess.call(os.path.join(BASE_DIR, 'Viewer', 'ADSM_Viewer.exe --log-file="%s"' % log_path))  # TODO: This is windows specific
+    subprocess.call(os.path.join(BASE_DIR, 'Viewer', 'ADSM_Viewer%s --log-file="%s"' % (extension, log_path)))
     print("\nClosing application!")
     _thread.interrupt_main()
 
