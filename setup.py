@@ -118,6 +118,71 @@ def remove_empty_folders(path):
         os.rmdir(path)
 
 
+def parse_requirements_and_links(existing_requirements=None, existing_links=None):
+    """
+    Proper Git lines from Requirements.txt:
+        git+https://git.myproject.org/MyProject.git
+        git+https://git.myproject.org/MyProject.git@v1.0.1
+
+    Proper Mercurial lines from Requirements.txt:
+        hg+https://hg.myproject.org/MyProject/
+        hg+https://hg.myproject.org/MyProject/#egg=MyProject
+        hg+https://hg.myproject.org/MyProject/@v1.0.1#egg=MyProject
+    """
+    if not existing_requirements:
+        existing_requirements = []
+    if not existing_links:
+        existing_links = []
+
+    with open(os.path.join(settings.BASE_DIR, 'Requirements.txt'), 'r') as requirements:
+        for line in requirements:
+            line = line.strip()
+
+            version = None
+            package = None
+            link = None
+
+            if line.startswith('git+'):
+                parts = line.split('@')
+                if parts.__len__() > 1:
+                    version = parts[1]
+
+                url_parts = parts[0].split('/')
+                package = url_parts[-1].split('.git')[0] if '.git' in url_parts[-1] else None
+
+                if version:
+                    link = line + "#egg=" + package + "-" + version
+                    if package:
+                        package = package + '==' + version
+                else:
+                    link = line
+            elif line.startswith('hg+'):
+                line = line.split('#egg=')[0]
+
+                parts = line.split('@')
+                url_parts = parts[0].split('/')
+                package = url_parts[-1]
+                if parts.__len__() > 1:
+                    version = parts[1]
+
+                if version:
+                    link = line + '#egg=' + package + '-' + version
+                    if package:
+                        package = package + '==' + version
+                else:
+                    link = line
+            else:
+                if line:
+                    package = line
+
+            if package:
+                existing_requirements.append(package)
+                if link:
+                    existing_links.append(link)
+
+    return existing_requirements, existing_links
+
+
 class BuildADSM(build_exe):
     def run(self):
         print("\nYou should only run this build script if you are a CLEAN VirtualEnv!\n"
@@ -190,14 +255,18 @@ if sys.platform == 'win32':
 
 cmdclass = {"build_exe": BuildADSM, }
 
+requirements, urls = parse_requirements_and_links()
+
 setup(name='ADSM_Beta',
       version=__version__,
       description='ADSM Beta Application',
       options={'build_exe': build_exe_options,
                'install_exe': {'build_dir': build_exe_options['build_exe']}},
-      executables=[Executable('ADSM.py', base=base, targetName='ADSM_Beta.exe'), ],  # TODO: Icon goes in Executable
+      executables=[Executable('ADSM.py', base=base, icon='favicon.ico', targetName='ADSM_Beta.exe'), ],  # TODO: Icon goes in Executable
       cmdclass=cmdclass,
-      )  # TODO: install_requires should read in the requirements files per os
+      install_requires=requirements,
+      dependency_links=urls
+      )
 
 # Cleanup step after any sort of setup operation
 # TODO: See if this causes issues at the end of an 'install' command.
