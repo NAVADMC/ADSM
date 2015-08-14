@@ -1,5 +1,6 @@
 import sys
 import os
+import stat
 import pip
 import shutil
 
@@ -39,7 +40,6 @@ build_exe_options = {
         ('media', 'media'),
         ('bin', 'bin'),
         ('Viewer', 'Viewer'),  # Newline's View application for Django Desktop Core
-        ('npu.exe', 'npu.exe'),  # Newline's Program Updater application  # TODO: This is windows specific
         ('README.md', 'README.md'),
 
         # CHANGE ME for any files/folders you want included with your project
@@ -50,7 +50,7 @@ build_exe_options = {
 }
 files = (file for file in os.listdir(settings.BASE_DIR) if os.path.isfile(os.path.join(settings.BASE_DIR, file)))
 for file in files:
-    if [file for part in ['.exe', '.dll', '.url'] if part.lower().split(' ')[0] in file.lower()]:
+    if [file for part in ['.exe', '.dll', '.url', 'npu'] if part.lower().split(' ')[0] in file.lower()]:  # TODO: Check if file is executable for linux, and add in so files
         build_exe_options['include_files'].append((file, file))
 
 
@@ -116,6 +116,14 @@ def remove_empty_folders(path):
     if len(files) == 0:
         print("Removing empty folder:", path)
         os.rmdir(path)
+
+
+def is_exe(file_path):
+    access_mode = os.F_OK | os.X_OK
+    if os.path.isfile(file_path) and os.access(file_path, access_mode):
+        filemode = os.stat(file_path).st_mode
+        ret = bool(filemode & stat.S_IXUSR or filemode & stat.S_IXGRP or filemode & stat.S_IXOTH)
+        return ret
 
 
 def parse_requirements_and_links(existing_requirements=None, existing_links=None):
@@ -243,15 +251,23 @@ class BuildADSM(build_exe):
         files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, self.build_exe)) if os.path.isfile(os.path.join(settings.BASE_DIR, self.build_exe, file)))
         os.makedirs(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
         for file in files:
+            # TODO: Check for executable files and so files for linux
             if not [file for part in ['.exe', 'library.zip', 'README.md', 'python34.dll', 'MSVCR100.dll', 'npu', '.url'] if part.lower().split(' ')[0] in file.lower()]:  #NOTE: The split here could cause issues and is speculative
                 shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, file),
                             os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file))
-        shutil.copy(os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', 'Viewer.exe'), os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', 'ADSM_Viewer.exe'))
+        viewer = None
+        possible_viewer_files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, 'Viewer')) if os.path.isfile(os.path.join(settings.BASE_DIR, 'Viewer', file)))
+        for possible_viewer in possible_viewer_files:
+            if 'viewer' in possible_viewer.lower() and is_exe(os.path.join(settings.BASE_DIR, 'Viewer', possible_viewer)):
+                viewer = possible_viewer
+                break
+        if viewer:
+            shutil.copy(os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', viewer), os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', viewer.replace('Viewer', 'ADSM_Viewer')))
 
 
 base = None
 if sys.platform == 'win32':
-    base = 'Console'  # TODO: Change to Win32GUI and so on for each OS
+    base = 'Console'
 
 cmdclass = {"build_exe": BuildADSM, }
 
@@ -262,7 +278,7 @@ setup(name='ADSM_Beta',
       description='ADSM Beta Application',
       options={'build_exe': build_exe_options,
                'install_exe': {'build_dir': build_exe_options['build_exe']}},
-      executables=[Executable('ADSM.py', base=base, icon='favicon.ico', targetName='ADSM_Beta.exe'), ],  # TODO: Icon goes in Executable
+      executables=[Executable('ADSM.py', base=base, icon='favicon.ico', targetName='ADSM_Beta.exe'), ],
       cmdclass=cmdclass,
       install_requires=requirements,
       dependency_links=urls
