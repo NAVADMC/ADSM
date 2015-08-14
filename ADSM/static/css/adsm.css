@@ -444,10 +444,11 @@ ul {
 /*-------------------------------------------------------------*/
 /*-----center block-----*/
 /*-------------------------------------------------------------*/
-.center-block {
-    width: calc(100vw - 200px);
-    margin-left: 200px;
+.center-block { 
+    width: 100vw;
+    padding-left: 200px;
     padding-right: 60px;
+    z-index: 0;
 }
 
 /*---- 2nd-to-3rd-column linking ----*/
