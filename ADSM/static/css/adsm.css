@@ -441,6 +441,14 @@ ul {
     padding-left: 5px; /*prevent style inheritance from above*/
     list-style: none;
 }
+/*-------------------------------------------------------------*/
+/*-----center block-----*/
+/*-------------------------------------------------------------*/
+.center-block {
+    width: calc(100vw - 200px);
+    margin-left: 200px;
+    padding-right: 60px;
+}
 
 /*---- 2nd-to-3rd-column linking ----*/
 
@@ -1890,6 +1898,7 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     border-bottom: 2px solid #606060;
     z-index: 1;
     background-color: white;
+    visibility: hidden;
 }
 #running_message {
     float: left;
@@ -2046,6 +2055,94 @@ select[multiple] {}
 .inline_h2 {
     margin-bottom: 10px;
 }
+/*----------------------------------------------------*/
+/*----- map key -----*/
+/*----------------------------------------------------*/
+#legend {
+    display:block;
+    position: absolute;
+    bottom: 12px; 
+    left: 15px;
+    width: 160px;
+    height: 120px;
+    font-size: 10px;
+    color: #606060;
+    padding-left: 5px;
+    padding-top: 5px;
+    background-color: rgba(255, 255, 255, .3);
+    border-radius: 3px;
+}
+#legend-left, #legend-right {
+    width: 70px;
+    padding-right: 10px;
+    display:block;
+    float: left;
+    position: relative;
+    height: 100%;
+
+}
+#legend-left {
+    padding-right: 15px;
+    height: 76px;
+}
+.legend-label {
+    display:block;
+    height: 20px;
+}
+#legend-left .legend-label {
+    text-align: right;
+    padding-right: 7px;
+    line-height: 12px;
+}
+#legend-right .legend-label {
+    padding-top: 11px;
+}
+
+.legend-values {
+    position: absolute;
+    display:block;
+    width: 100%;
+    height: 100%;
+
+}
+#legend-left span:first-child {
+    position:absolute;
+    top: 0;
+}
+#legend-left span:last-child {
+    position:absolute;
+    bottom: 0;
+}
+#legend-left .legend-values:after {
+    content: "";
+    width: 15px;
+    height: 100%;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#0b326c), color-stop(16%,#0b326c), color-stop(17%,#335484), color-stop(33%,#335484), color-stop(34%,#59749a), color-stop(50%,#59749a), color-stop(51%,#7289aa), color-stop(66%,#7289aa), color-stop(67%,#c5cedc), color-stop(83%,#c5cedc), color-stop(84%,#ffffff), color-stop(100%,#ffffff)); 
+    position: absolute;
+    top: 0;
+    left: 33px;
+}
+#legend-right ul {
+    margin-left: 0;
+    padding-left: 0;
+} 
+#legend-right li {
+    display: block;
+    height: 20px;
+    border-left: 20px solid #68be5e;
+    margin-left: 0;
+    margin-bottom: 8px;
+    line-height: 20px;
+    padding-left: 5px;
+}
+#legend-right li:first-child {
+    border-color: #ba3e44;
+}
+#legend-right li:last-child {
+    border-color: #606060;
+}
+
+
 /*----------------------------------------------------*/
 /*----- global overrides -----*/
 /*----------------------------------------------------*/

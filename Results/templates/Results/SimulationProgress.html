@@ -20,12 +20,29 @@
                     <img src="/results/population_zoom.png" alt="" />
                     <div class="mapcontent"></div>
                 </div>
-            </div> 
+            </div>  
+            <div id="legend">
+                <div id="legend-left">
+                    <p class="legend-label">Zone Probability</p>
+                    <div class="legend-values">
+                        <span>100%</span>
+                        <span>>1%</span>
+                    </div>
+                </div>
+                <div id="legend-right">
+                    <p class="legend-label">Unit Outcome</p>
+                    <div class="legend-values">
+                        <ul>
+                            <li>Infected</li>
+                            <li>Vaccinated</li>
+                            <li>Destroyed</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
         </div> 
-        <div id="legend"><p>Red = Infected, Green = Vaccinated, Black = Destroyed.  
-        The height of each tiny bar graph is the percentage of iterations in which that unit was Infected, Vaccinated, or Destroyed.  
-        Zone probability shown from 100% (Dark Blue) to >1% (White).
-        Uninvolved Units are shown in grey, scaled by Unit size.</p></div>
+
         <script type="text/javascript"> 
             $(document).ready(function() { 
                 $("#viewport").mapbox({mousewheel: true}); 
