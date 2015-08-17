@@ -90,7 +90,9 @@ def getPdf( xml, nameGenerator ):
 
     args = {'equation_type': pdfType.capitalize(), }
 
-    if pdfType == 'beta':
+    if pdfType == 'bernoulli':
+        args['p'] = float( required_text(firstChild, './p' ) )
+    elif pdfType == 'beta':
         args['alpha'] = float( required_text(firstChild, './alpha' ) )
         args['alpha2'] = float( required_text(firstChild, './beta' ) )
         args['min'] = float( required_text(firstChild, './location' ) )
