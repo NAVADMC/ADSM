@@ -108,6 +108,14 @@ class ProbabilityFunctionForm(BaseForm):
         exclude = []
         widgets = {'graph': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
+    def clean(self):
+        cleaned_data = super(ProbabilityFunctionForm, self).clean()
+        for field in ProbabilityFunction._meta.fields:
+            mentioned = cleaned_data.get('equation_type') in field.help_text
+            empty = cleaned_data.get(field.name) is None
+            if mentioned and empty:
+                self.add_error(field.name, ValidationError("The field " + str(field.verbose_name) + " is required."))
+
 
 class RelationalPointForm(BaseForm):
     class Meta(object):

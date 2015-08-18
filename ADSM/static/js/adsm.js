@@ -823,7 +823,7 @@ function hide_unneeded_probability_fields() {
         var functions = help_text.toLowerCase().match(/(\w[\w\s]*)(?=[,\.])/g);
         if (functions.indexOf(equation_type.toLowerCase()) >= 0) {
             $(control_group).show();
-            $(control_group).find(':input').attr('required', 'required');
+            $(control_group).find(':input').attr('required', 'required'); //this code is mirrored in the django form validation
         }
         else {
             $(control_group).hide();
