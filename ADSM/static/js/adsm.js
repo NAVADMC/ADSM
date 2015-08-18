@@ -449,6 +449,30 @@ function get_parent_select($self) {
 }
 
 
+function update_visibility_from_controller(self, disabled_value, hide_target, required_value) {
+    if ($(self).val() == disabled_value) {
+        hide_target.hide()
+    } else {
+        if ($(this).attr('type') == 'checkbox') {
+            if ($(this).is(':checked') == (disabled_value === 'false')) {
+                hide_target.show()
+            } else {
+                hide_target.hide()
+            }
+        }
+        else {
+            if (typeof required_value !== 'undefined') { //required value is specified
+                if ($(this).val() == required_value || $(this).val() == '') {
+                    hide_target.show()
+                } else {
+                    hide_target.hide()
+                }
+            } else {
+                hide_target.show()
+            }
+        }
+    }
+}
 var attach_visibility_controller = function (self){
     var controller = '[name=' + $(self).attr('data-visibility-controller') + ']'
     var hide_target = $(self).parents('.control-group')
@@ -459,33 +483,16 @@ var attach_visibility_controller = function (self){
     var required_value = $(self).attr('data-required-value')
 
     $('body').on('change', controller, function(){
-        if($(self).val() == disabled_value){
-            hide_target.hide()
-        }else{
-            if($(this).attr('type') == 'checkbox') {
-                if( $(this).is(':checked') == (disabled_value === 'false')){
-                    hide_target.show()
-                }else {
-                    hide_target.hide()
-                }
-            }
-            else {
-                if (typeof required_value !== 'undefined'){ //required value is specified
-                    if($(this).val() == required_value || $(this).val() == ''){
-                        hide_target.show()
-                    }else{
-                        hide_target.hide()
-                    }
-                }else{
-                    hide_target.show()
-                }
-            }
-        }
+        update_visibility_from_controller.call(this, self, disabled_value, hide_target, required_value);
     })
+
+    //run once to initialize
+    var hider = this;
     $(controller).each(function(index, elem){ //each because radio buttons have multiple elem, same name
-        if($(elem).attr('type') != 'radio' || elem.hasAttribute('checked')){
+        var $elem = $(elem);
+        if($elem.attr('type') != 'radio' || elem.hasAttribute('checked')){
             //radio buttons are multiple elements with the same name, we only want to fire if its actually checked
-            $(elem).trigger('change');
+            update_visibility_from_controller.call(hider, self, disabled_value, hide_target, required_value);
         }
     });
     $(hide_target).css('margin-left', '26px');
