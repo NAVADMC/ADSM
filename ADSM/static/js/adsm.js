@@ -449,8 +449,8 @@ function get_parent_select($self) {
 }
 
 
-function update_visibility_from_controller(self, disabled_value, hide_target, required_value) {
-    if ($(self).val() == disabled_value) {
+function update_visibility_target_from_controller(disabled_value, hide_target, required_value) {
+    if ($(this).val() == disabled_value && typeof disabled_value !== 'undefined') {
         hide_target.hide()
     } else {
         if ($(this).attr('type') == 'checkbox') {
@@ -483,18 +483,16 @@ var attach_visibility_controller = function (self){
     var required_value = $(self).attr('data-required-value')
 
     $('body').on('change', controller, function(){
-        update_visibility_from_controller.call(this, self, disabled_value, hide_target, required_value);
+        update_visibility_target_from_controller.call(this, disabled_value, hide_target, required_value);
     })
 
     //run once to initialize
-    var hider = this;
-    $(controller).each(function(index, elem){ //each because radio buttons have multiple elem, same name
-        var $elem = $(elem);
-        if($elem.attr('type') != 'radio' || elem.hasAttribute('checked')){
-            //radio buttons are multiple elements with the same name, we only want to fire if its actually checked
-            update_visibility_from_controller.call(hider, self, disabled_value, hide_target, required_value);
-        }
-    });
+    var $elem = $(controller);
+    if($elem.attr('type') != 'radio' || $elem[0].hasAttribute('checked')){
+        //radio buttons are multiple elements with the same name, we only want to fire if its actually checked
+        update_visibility_target_from_controller.call($elem, disabled_value, hide_target, required_value);
+    }
+    
     $(hide_target).css('margin-left', '26px');
 }
 
