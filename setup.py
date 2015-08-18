@@ -274,6 +274,7 @@ if sys.platform == 'win32':
     requirements, urls = parse_requirements_and_links(os.path.join(settings.BASE_DIR, 'Requirements-Windows.txt'), existing_requirements=requirements, existing_links=urls)
 else:
     base = 'Console'
+    requirements, urls = parse_requirements_and_links(os.path.join(settings.BASE_DIR, 'Requirements-Nix.txt'), existing_requirements=requirements, existing_links=urls)
 
 cmdclass = {"build_exe": BuildADSM, }
 

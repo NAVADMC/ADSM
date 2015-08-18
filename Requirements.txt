@@ -12,11 +12,5 @@ pytz==2014.10
 selenium==2.44.0
 six==1.8.0
 git+https://github.com/BryanHurst/django-productionserver.git@v1.0.5r5
-
-numpy==1.9.1
-matplotlib==1.4.2
-pandas==0.15.2
-pyproj==1.9.4
-psutil==2.2.0
-
 hg+https://bitbucket.org/BryanHurst/cx_freeze
+git+https://github.com/pyinstaller/pyinstaller.git@python3
