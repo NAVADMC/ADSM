@@ -19,9 +19,15 @@ def whole_scenario_validation():
         warnings.append("Direct Spread is not enabled in this Simulation.")
     if not Unit.objects.filter(~Q(initial_state='S')).count():
         warnings.append("There are no infected units in the Population.  Please set at least one unit to 'Latent' in the Population screen.")
-    if Disease.objects.get().use_within_unit_prevalence and DirectSpread.objects.filter(infection_probability__isnull=True).count():
-        warnings.append("Direct Spread: Infection Probability is required if you are not using Disease Prevalence.  Please define in: ")
-        for entry in DirectSpread.objects.filter(infection_probability__isnull=True):
-            warnings.append("    " + entry.name)
+    if not Disease.objects.get().use_within_unit_prevalence:
+        if DirectSpread.objects.filter(infection_probability__isnull=True).count():
+            warnings.append("Direct Spread: Infection Probability is required if you are not using Disease Prevalence.  Please define in: ")
+            for entry in DirectSpread.objects.filter(infection_probability__isnull=True):
+                warnings.append(" - - - " + entry.name)
+    else:
+        if DiseaseProgression.objects.filter(disease_prevalence__isnull=True).count():
+            warnings.append("Disease Progression: Disease Prevalence must be defined for each progression model.  Please define in: ")
+            for entry in DiseaseProgression.objects.filter(disease_prevalence__isnull=True):
+                warnings.append(" - - - " + entry.name)
 
     return warnings
