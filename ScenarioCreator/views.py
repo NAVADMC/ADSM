@@ -197,6 +197,7 @@ def deepcopy_points(request, primary_key, created_instance):
         point.save()  # This assumes that things in the database are already valid, so doesn't call is_valid()
     queryset = RelationalPoint.objects.filter(relational_function_id=created_instance.id)
     formset = PointFormSet(queryset=queryset) # this queryset does not include anything the user typed in, during the copy operation
+    # formset = PointFormSet(request.POST or None, instance=created_instance)
     return formset
 
 
@@ -245,12 +246,20 @@ def relational_function(request, primary_key=None, doCopy=False):
     context['action'] = request.path
     if 'file' in request.FILES:  # data file is present
         request = initialize_points_from_csv(request)
-    context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
     if context['form'].is_valid():
         if doCopy:
             context['form'].instance.pk = None  # This will cause a new instance to be created
             created_instance = context['form'].save()
-            context['formset'] = deepcopy_points(request, primary_key, created_instance)
+            context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
+            # context['formset'].errors = []
+            for point in context['formset'].forms:
+                point.instance.pk = None
+                point.instance.relational_function = created_instance
+                # point.errors = []
+                # point.instance.relational_function_id = created_instance.pk
+            context['form'].full_clean()
+            context['formset'].full_clean()
+            context['formset'].save()
         else:
             created_instance = context['form'].save()
             context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
@@ -260,6 +269,8 @@ def relational_function(request, primary_key=None, doCopy=False):
             context['formset'].save()
         else:
             pass #Delete partial RelationalFunction???
+    else:
+        context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
 
     context['title'] = "Create a Relational Function"
     add_breadcrumb_context(context, "RelationalFunction")
