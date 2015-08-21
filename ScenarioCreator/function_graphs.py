@@ -8,7 +8,6 @@ rc("figure", facecolor="white")
 
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-import matplotlib.pyplot as plt
 import scipy.stats
 from math import sqrt, log, exp
 from django.db.models import IntegerField, FloatField
@@ -49,7 +48,7 @@ def existing_probability_graph(primary_key):
             "Logistic": [scipy.stats.logistic, {'loc': m.location, 'scale': m.scale}],
             "LogLogistic": [scipy.stats.fisk, {'c':m.shape, 'loc': m.location, 'scale': m.scale}],  # scipy/stats/_continuous_distns.py:683 http://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.fisk.html
             "Lognormal": [scipy.stats.lognorm, {'sigma': (sqrt(log((std_dev**2 + mean**2) / mean**2))), 
-                                                'scale': exp(log(mean**2 / sqrt(std_dev**2 + mean**2)))}],  # I think exp(log()) is redundant
+                                                'scale': mean**2 / sqrt(std_dev**2 + mean**2)}],  # I think exp(log()) is redundant
                                                 # Double check this, there's a lot of math
             "Negative Binomial": [scipy.stats.nbinom, {'n': m.s, 'p': m.p}],
             "Pareto": [scipy.stats.pareto, {'theta': m.theta, 'scale': m.a}],
