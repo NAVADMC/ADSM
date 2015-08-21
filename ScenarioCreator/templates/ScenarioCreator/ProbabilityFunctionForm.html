@@ -5,6 +5,8 @@
 
 {% block content %}
     <form id="{{ action|action_id }}" class="ajax" action="{{ action }}">
+        <img id="function-graph" src="{{action}}graph.png" class="img-responsive">
+
         {% crispy form %}
         {% include "ScenarioCreator/ViewEditButtons.html" %}
     </form>

@@ -9,10 +9,69 @@ rc("figure", facecolor="white")
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import matplotlib.pyplot as plt
-
+import scipy.stats
+from math import sqrt, log, exp
+from django.db.models import IntegerField, FloatField
 
 def probability_graph(request, primary_key):
-    return empty_graph()
+    if request.method == 'POST':
+        return empty_graph(request)  # TODO: update on the fly
+    return existing_probability_graph(primary_key)
+    # return empty_graph()
+
+
+def existing_probability_graph(primary_key):
+    import ScenarioCreator.models
+    m = ScenarioCreator.models.ProbabilityFunction.objects.get(id=primary_key)
+    #TODO: filler to avoid NaNs
+    for field in m._meta.fields:
+        if field is None and isinstance(field, (IntegerField, FloatField)):
+            field = 1  # don't save this
+
+    kind = m.equation_type
+    d = (m.min + 4 * m.mode + m.max) / 6
+    # log defaults to ln
+    eq = {  # Compiled from:  https://github.com/NAVADMC/ADSM/wiki/Probability-density-functions  Thanks Neil Harvey!
+            "Bernoulli": [scipy.stats.bernoulli, {'p': m.p}],
+            "Beta": [scipy.stats.beta, {'a': m.alpha, 'b': m.alpha2, 'loc': m.min, 'scale': m.max - m.min}],
+            "BetaPERT": [scipy.stats.beta,
+                         {'a': 6 * ((d - m.min) / (m.max - m.min)), 'b': 6 * ((m.max - d) / (m.max - m.min)), 'loc': m.min, 'scale': m.max - m.min}],
+            "Binomial": [scipy.stats.binom, {'s': m.s, 'loc': m.p}],
+            "Discrete Uniform": [scipy.stats.randint, {'a': m.min, 'b': m.max}],
+            "Exponential": [scipy.stats.expon, {'scale': m.mean}],
+            "Fixed Value": [],  # TODO: Not offered in SciPy? Use a narrow uniform instead
+            "Gamma": [scipy.stats.gamma, {'a': m.alpha, 'scale': m.beta, 'loc': 0}],
+            "Gaussian": [scipy.stats.norm, {'loc': m.mean, 'scale': m.std_dev}],
+            "Histogram": [],  # TODO: Not offered in SciPy? by hand
+            "Hypergeometric": [scipy.stats.hypergeom, {'M': m.m, 'n': m.d, 'N': m.n}],
+            # I don't know, but these seem to be the order of args in scipy/stats/_discrete_distns.py:306
+            "Inverse Gaussian": [],  # TODO: Shape/lambda parameter not supported in SciPy?
+            "Logistic": [scipy.stats.logistic, {'loc': m.location, 'scale': m.scale}],
+            "LogLogistic": [scipy.stats.fisk, {'c':m.shape, 'loc': m.location, 'scale': m.scale}],  # scipy/stats/_continuous_distns.py:683 http://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.fisk.html
+            "Lognormal": [scipy.stats.lognorm, {'sigma': (sqrt(log((std_dev**2 + mean**2) / mean**2))), 
+                                                'scale': exp(log(mean**2 / sqrt(std_dev**2 + mean**2)))}],  # I think exp(log()) is redundant
+                                                # Double check this, there's a lot of math
+            "Negative Binomial": [scipy.stats.nbinom, {'n': m.s, 'p': m.p}],
+            "Pareto": [scipy.stats.pareto, {'theta': m.theta, 'scale': m.a}],
+            "Pearson 5": [],  # TODO: Not offered in SciPy
+            "Piecewise": [],
+            "Poisson": [scipy.stats.poisson, {'k': m.mean}],
+            "Triangular": [scipy.stats.triang, {'loc':m.min, 'c':(m.mode-m.min)/(m.max-m.min), 'scale': m.max-m.min}],
+            "Uniform": [scipy.stats.uniform, {'loc': m.min, 'scale':m.max-m.min}],
+            "Weibull": [scipy.stats.weibull_min, {'x':m.alpha, 'scale': m.beta}],
+            }
+    function = eq[kind][0]
+    kwargs_dict = eq[kind][1]
+
+    return pdf_graph(m.x_axis_units, function, kwargs_dict)
+
+
+def pdf_graph(x_label, function, kwargs_dict):
+    x_axis = (0, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5)
+    dist = function(**kwargs_dict)
+    y_axis = [dist.pdf(x) for x in x_axis]
+
+    return line_graph(x_label, x_axis, y_axis)
 
 
 def empty_graph(request):

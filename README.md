@@ -65,6 +65,7 @@ Using the pip in your new Virtual Environment (confirm Virtual Environment Activ
     - matplotlib-1.4.2.win-amd64-py3.4.exe
     - pyproj-1.9.4dev.win-amd64-py3.4.exe
     - psutil-2.2.0-cp34-none-win_amd64.whl
+    - scipy-0.16.0-cp34-none-win_amd64.whl
   - Now, using the easy_install (for exe) or pip (for whl) in your new Virtual Environment (`/path/to/adsm_venv/Scripts/easy_install` or `/path/toadsm_venv/Scripts/pip`), install the following packages:
         
         easy_install numpy-MKL-1.9.1.win-amd64-py3.4.exe  
@@ -72,6 +73,7 @@ Using the pip in your new Virtual Environment (confirm Virtual Environment Activ
         easy_install matplotlib-1.4.2.win-amd64-py3.4.exe  
         easy_install pyproj-1.9.4dev.win-amd64-py3.4.exe  
         pip install psutil-2.2.0-cp34-none-win_amd64.whl
+        pip install scipy-0.16.0-cp34-none-win_amd64.whl
 
 ###Setup Pycharm IDE
 The main developers of ADSM developed in Pycharm 4, so here's the IDE specific instructions to get your dev server running from a fresh clone.
