@@ -262,9 +262,10 @@ def relational_function(request, primary_key=None, doCopy=False):
 
         if created_instance:
             for point in context['formset'].forms:
-                point.instance.pk = None
-                point.instance.relational_function = created_instance
-                point.instance.save()
+                if point.changed_data:
+                    point.instance.pk = None
+                    point.instance.relational_function = created_instance
+                    point.instance.save()
     else:
         context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
 
