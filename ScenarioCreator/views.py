@@ -247,28 +247,24 @@ def relational_function(request, primary_key=None, doCopy=False):
     if 'file' in request.FILES:  # data file is present
         request = initialize_points_from_csv(request)
     if context['form'].is_valid():
+        created_instance = None
         if doCopy:
             context['form'].instance.pk = None  # This will cause a new instance to be created
-            created_instance = context['form'].save()
+            created_instance = context['form'].instance
+            created_instance.save()
             context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
-            # context['formset'].errors = []
+        else:
+            created_instance = context['form'].instance
+            created_instance.save()
+            context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
+
+        context['action'] = '/setup/RelationalFunction/%i/' % created_instance.id
+
+        if created_instance:
             for point in context['formset'].forms:
                 point.instance.pk = None
                 point.instance.relational_function = created_instance
-                # point.errors = []
-                # point.instance.relational_function_id = created_instance.pk
-            context['form'].full_clean()
-            context['formset'].full_clean()
-            context['formset'].save()
-        else:
-            created_instance = context['form'].save()
-            context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
-        context['action'] = '/setup/RelationalFunction/%i/' % created_instance.id
-
-        if context['formset'].is_valid():
-            context['formset'].save()
-        else:
-            pass #Delete partial RelationalFunction???
+                point.instance.save()
     else:
         context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
 
