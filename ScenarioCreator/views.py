@@ -249,8 +249,8 @@ def relational_function(request, primary_key=None, doCopy=False):
     if context['form'].is_valid():
         created_instance = None
         if doCopy:
-            context['form'].instance.pk = None  # This will cause a new instance to be created
             created_instance = context['form'].instance
+            created_instance.pk = None  # This will cause a new instance to be created
             created_instance.save()
             context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
         else:
@@ -261,6 +261,8 @@ def relational_function(request, primary_key=None, doCopy=False):
         context['action'] = '/setup/RelationalFunction/%i/' % created_instance.id
 
         if created_instance:
+            if context['formset'].is_valid():  # We need to run this to ensure that the data in the formset is populated
+                pass
             for point in context['formset'].forms:
                 if point.changed_data:
                     point.instance.pk = None
