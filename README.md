@@ -25,7 +25,7 @@ ADSM has several external dependencies. Getting your environment setup with thes
 
 Operating system:  
 
-  - Windows, Debian or RedHat Linux or Mac OS X (no Viewer application or packaged release). 
+  - Windows, Debian or RedHat Linux, or Mac OS X (no Viewer application or packaged release). 
   
 Python 3.4.2 (x64): 
  
@@ -41,7 +41,7 @@ Create Virtual Environment:
 
   - Windows: `/path/to/py3.4/python -m venv /path/to/adsm_venv`
     - Activate with `/path/to/adsm_venv/Scripts/activate.bat`
-    - Install Git and Mercurial so they are properly on the command line
+    - Install Git and Mercurial so they are properly on the command line  #TODO: Get links for these
   - Linux: `python3 -m venv --without-pip /path/to/adsm_venv`  
     - Install Setuptools and Pip: `wget https://pypi.python.org/packages/source/s/setuptools/setuptools-3.4.4.tar.gz; tar -vzxf setuptools-3.4.4.tar.gz; rm setuptools-3.4.4.tar.gz; cd setuptools-3.4.4; python setup.py install; cd ..; rm -r setuptools-3.4.4; wget https://pypi.python.org/packages/source/p/pip/pip-1.5.6.tar.gz; tar -vzxf pip-1.5.6.tar.gz; rm pip-1.5.6.tar.gz; cd pip-1.5.6; python setup.py install; cd ..; rm -r pip-1.5.6`
     - Activate with `source /path/to/adsm_venv/bin/activate`
