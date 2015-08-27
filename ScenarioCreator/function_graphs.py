@@ -12,6 +12,26 @@ import scipy.stats
 from math import sqrt, log, exp
 from django.db.models import IntegerField, FloatField
 
+class inverse_gaussian:
+    dist = empty()
+    dist.pdf = 1 # to pass the check in pdf_graph()
+
+    def __init__(self, mean, shape):
+        self.mean = mean
+        self.shape = shape
+
+    def pdf(self, x_array):
+        y = []
+        for x in x_array:
+            if x > 0:
+                y.append( sqrt(self.shape / (2.0 * math.pi * x**3)) * exp(-1 * ((self.shape * (x - self.mean)**2) /
+                                                                                      (2.0 * ((self.mean)**2) * x))) )
+            else:
+                y.append(0.0)
+        return y
+
+
+
 def probability_graph(request, primary_key):
     if request.method == 'POST':
         return empty_graph(request)  # TODO: update on the fly
@@ -43,8 +63,7 @@ def existing_probability_graph(primary_key):
             "Gaussian": [scipy.stats.norm, {'loc': m.mean, 'scale': m.std_dev}],
             "Histogram": [],  # TODO: Not offered in SciPy? by hand
             "Hypergeometric": [scipy.stats.hypergeom, [m.m, m.d, m.n]],
-            # I don't know, but these seem to be the order of args in scipy/stats/_discrete_distns.py:306
-            "Inverse Gaussian": [],  # TODO: Shape/lambda parameter not supported in SciPy?
+            "Inverse Gaussian": [inverse_gaussian, [m.mean, m.shape]],
             "Logistic": [scipy.stats.logistic, {'loc': m.location, 'scale': m.scale}],
             "LogLogistic": [scipy.stats.fisk, {'c': m.shape, 'loc': m.location, 'scale': m.scale}],
             # scipy/stats/_continuous_distns.py:683 http://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.fisk.html
@@ -66,7 +85,7 @@ def existing_probability_graph(primary_key):
 
 
 def pdf_graph(x_label, function, kwargs_dict):
-    x = np.arange(0, 5, 0.1)
+    x = np.arange(0.0, 5, 0.1)
     if isinstance(kwargs_dict, dict):
         dist = function(**kwargs_dict)
     else:
