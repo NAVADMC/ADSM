@@ -2115,6 +2115,21 @@ select[multiple] {}
 }
 #all-interactions {
     width: calc(100% - 0px);}
+/*-------------------------------------------------------------*/
+/*-----left aligned scrollbars-----*/
+/*-------------------------------------------------------------*/
+#center-panel .fragment, #left-panel {
+    direction: rtl;
+}
+#center-panel .fragment form, #left-panel h1, #left-panel div {
+    direction: ltr;
+}
+::-webkit-scrollbar-thumb {
+    box-shadow: none !important;
+}
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.15) !important;
+}
 /*----------------------------------------------------*/
 /*----- global overrides -----*/
 /*----------------------------------------------------*/
