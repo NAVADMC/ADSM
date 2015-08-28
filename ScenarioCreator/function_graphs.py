@@ -8,14 +8,130 @@ rc("figure", facecolor="white")
 
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-import matplotlib.pyplot as plt
+import scipy.stats
+import numpy as np
+from math import sqrt, log, exp
+from django.db.models import IntegerField, FloatField
+
+class Empty:
+    pass
+
+class inverse_gaussian:
+    """Example of how to make a Scipy imposter class for pdf.
+    Scipy does not offer inverse gaussian functions with 'shape' parameters, so this is brought in from the C Engine."""
+    dist = Empty()
+    dist.pdf = 1 # to pass the check in pdf_graph()
+
+    def __init__(self, mean, shape):
+        self.mean = mean
+        self.shape = shape
+
+    def pdf(self, x_array):
+        y = []
+        for x in x_array:
+            if x > 0:
+                y.append( sqrt(self.shape / (2.0 * math.pi * x**3)) * exp(-1 * ((self.shape * (x - self.mean)**2) /
+                                                                                      (2.0 * ((self.mean)**2) * x))) )
+            else:
+                y.append(0.0)
+        return y
+
+
+def histogram_pdf(rel_primary_key):
+    """Example of bare pdf function that returns a graph without the need for an X range array."""
+    import ScenarioCreator.models
+
+    model_instance = ScenarioCreator.models.RelationalFunction.objects.get(id=rel_primary_key)
+    x_series = list(ScenarioCreator.models.RelationalPoint.objects.filter(relational_function=model_instance).order_by('x').values_list('x', flat=True))
+    y_series = list(ScenarioCreator.models.RelationalPoint.objects.filter(relational_function=model_instance).order_by('x').values_list('y', flat=True))
+    x_label = "Histogram"
+    # x_series = [0, 1, 3, 6, 7, 8, 11]
+    # y_series = [0, 2, 0, 5, 2, 1, 0]
+    x_hist = [0]
+    y_hist = [0]
+    points = list(zip(x_series, y_series))
+    for index in range(len(points) - 1):
+        x_hist += [points[index][0], points[index + 1][0]]
+        y_hist += [points[index][1], points[index + 0][1]]
+    x_hist += [x_series[-1], x_series[-1]+1, x_series[-1]+1]
+    y_hist += [y_series[-1], y_series[-1], 0]
+
+    return line_graph(x_label, x_hist, y_hist)
+
 
 
 def probability_graph(request, primary_key):
-    return empty_graph()
+    if request.method == 'POST':
+        return empty_graph(request)  # TODO: update on the fly
+    return existing_probability_graph(primary_key)
+    # return empty_graph()
 
 
-def empty_graph(request):
+def existing_probability_graph(primary_key):
+    import ScenarioCreator.models
+    m = ScenarioCreator.models.ProbabilityFunction.objects.get(id=primary_key)
+    #TODO: filler to avoid NaNs
+    for field in m._meta.fields:
+        if getattr(m, field.name) is None and isinstance(field, (IntegerField, FloatField)):
+            setattr(m, field.name, 1)  # don't save this
+
+    kind = m.equation_type
+    d = (m.min + 4 * m.mode + m.max) / 6
+    # log defaults to ln
+    eq = {  # Compiled from:  https://github.com/NAVADMC/ADSM/wiki/Probability-density-functions  Thanks Neil Harvey!
+            "Bernoulli": [scipy.stats.bernoulli, [m.p]],
+            "Beta": [scipy.stats.beta, {'a': m.alpha, 'b': m.alpha2, 'loc': m.min, 'scale': m.max - m.min}],
+            "BetaPERT": [scipy.stats.beta,
+                         {'a': 6 * ((d - m.min) / (m.max - m.min)), 'b': 6 * ((m.max - d) / (m.max - m.min)), 'loc': m.min, 'scale': m.max - m.min}],
+            "Binomial": [scipy.stats.binom, [m.s, m.p]],
+            "Discrete Uniform": [scipy.stats.randint, [m.min, m.max]],
+            "Exponential": [scipy.stats.expon, {'scale': m.mean}],
+            "Fixed Value": [scipy.stats.uniform, {'loc': m.mode, 'scale': 0.0001}],  # TODO: Not offered in SciPy? Use a narrow uniform instead
+            "Gamma": [scipy.stats.gamma, {'a': m.alpha, 'scale': m.beta, 'loc': 0}],
+            "Gaussian": [scipy.stats.norm, {'loc': m.mean, 'scale': m.std_dev}],
+            "Histogram": [histogram_pdf, [m.graph_id]],
+            "Hypergeometric": [scipy.stats.hypergeom, [m.m, m.d, m.n]],
+            "Inverse Gaussian": [inverse_gaussian, [m.mean, m.shape]],
+            "Logistic": [scipy.stats.logistic, {'loc': m.location, 'scale': m.scale}],
+            "LogLogistic": [scipy.stats.fisk, {'c': m.shape, 'loc': m.location, 'scale': m.scale}],
+            # scipy/stats/_continuous_distns.py:683 http://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.fisk.html
+            "Lognormal": [scipy.stats.lognorm, [(sqrt(log((m.std_dev ** 2 + m.mean ** 2) / m.mean ** 2))),
+                                                m.mean ** 2 / sqrt(m.std_dev ** 2 + m.mean ** 2)]],  # I think exp(log()) is redundant
+            "Negative Binomial": [scipy.stats.nbinom, {'n': m.s, 'p': m.p}],
+            "Pareto": [scipy.stats.pareto, [m.theta, m.a]],
+            "Pearson 5": [],  # TODO: Not offered in SciPy
+            "Piecewise": [existing_relational_graph, [m.graph_id]],
+            "Poisson": [scipy.stats.poisson, [m.mean]],
+            "Triangular": [scipy.stats.triang, {'loc': m.min, 'c': (m.mode - m.min) / (m.max - m.min), 'scale': m.max - m.min}],
+            "Uniform": [scipy.stats.uniform, {'loc': m.min, 'scale': m.max - m.min}],
+            "Weibull": [scipy.stats.weibull_min, [m.alpha, m.beta]],
+            }
+    function = eq[kind][0]
+    kwargs_dict = eq[kind][1]
+
+    return pdf_graph(m.x_axis_units, function, kwargs_dict)
+
+
+def pdf_graph(x_label, function, kwargs_dict):
+    if isinstance(kwargs_dict, dict):
+        dist = function(**kwargs_dict)
+    else:
+        dist = function(*kwargs_dict) # use positional arguments
+    if isinstance(dist, HttpResponse):  #some shortcut scipy and just return a graph response
+        return dist
+    x_max = 5
+    if hasattr(dist, 'ppf'):
+        x_max = dist.ppf(0.95) * 1.1
+    x = np.arange(0.0, x_max, x_max / 100)
+    if hasattr(dist.dist, 'pdf'):  # Scipy continuous functions
+        y_axis = dist.pdf(x)
+    else:  # scipy discrete functions
+        y_axis = dist.pmf(x)
+
+    return line_graph(x_label, x, y_axis)
+
+
+def empty_graph(request=None):
     return line_graph('Days', [],[])  # empty graph
 
 
@@ -42,13 +158,16 @@ def relational_graph_update(request, primary_key):
 
 
 def relational_graph(request, primary_key):
-    if request.method == 'POST':
+    if request is not None and request.method == 'POST':
         return relational_graph_update(request, primary_key)
     return existing_relational_graph(primary_key)
 
 
 def existing_relational_graph(primary_key):
     import ScenarioCreator.models
+
+    if primary_key is None:
+        return empty_graph()
 
     model_instance = ScenarioCreator.models.RelationalFunction.objects.get(id=primary_key)
     x_series = list(ScenarioCreator.models.RelationalPoint.objects.filter(relational_function=model_instance).order_by('x').values_list('x', flat=True))
