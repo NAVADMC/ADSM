@@ -18,7 +18,7 @@ from ADSM import __version__
 
 def is_exe(file_path):
     access_mode = os.F_OK | os.X_OK
-    if os.path.isfile(file_path) and os.access(file_path, access_mode):
+    if os.path.isfile(file_path) and not file_path.endswith('.bat') and not file_path.endswith('.sh') and os.access(file_path, access_mode):
         filemode = os.stat(file_path).st_mode
         ret = bool(filemode & stat.S_IXUSR or filemode & stat.S_IXGRP or filemode & stat.S_IXOTH)
         return ret
