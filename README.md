@@ -58,14 +58,14 @@ Using the pip in your new Virtual Environment (confirm Virtual Environment Activ
 
 **If you are on Windows** install the extra packages: `pip install -r Requirements-Windows.txt` 
 
-  - Download the following files for Windows from [PythonLibs](http://www.lfd.uci.edu/~gohlke/pythonlibs/).  The exact links vary so you will need to navigate
+  - Download the following files for Windows from [PythonLibs](http://www.lfd.uci.edu/~gohlke/pythonlibs/). Another possible location is [PNAWheels](https://nipy.bic.berkeley.edu/pna/wheels/)  The exact links vary so you will need to navigate
   there manually.  Put them into a directory that you can easily navigate to in a command prompt:
     - numpy-MKL-1.9.1.win-amd64-py3.4.exe
     - pandas-0.15.2.win-amd64-py3.4.exe
     - matplotlib-1.4.2.win-amd64-py3.4.exe
     - pyproj-1.9.4dev.win-amd64-py3.4.exe
     - psutil-2.2.0-cp34-none-win_amd64.whl
-    - scipy-0.16.0-cp34-none-win_amd64.whl
+    - https://nipy.bic.berkeley.edu/pna/wheels/scipy-0.15.1-cp34-none-win_amd64.whl
   - Now, using the easy_install (for exe) or pip (for whl) in your new Virtual Environment (`/path/to/adsm_venv/Scripts/easy_install` or `/path/toadsm_venv/Scripts/pip`), install the following packages:
         
         easy_install numpy-MKL-1.9.1.win-amd64-py3.4.exe  
@@ -73,7 +73,7 @@ Using the pip in your new Virtual Environment (confirm Virtual Environment Activ
         easy_install matplotlib-1.4.2.win-amd64-py3.4.exe  
         easy_install pyproj-1.9.4dev.win-amd64-py3.4.exe  
         pip install psutil-2.2.0-cp34-none-win_amd64.whl
-        pip install scipy-0.16.0-cp34-none-win_amd64.whl
+        pip install scipy-0.15.1-cp34-none-win_amd64.whl
 
 ###Setup Pycharm IDE
 The main developers of ADSM developed in Pycharm 4, so here's the IDE specific instructions to get your dev server running from a fresh clone.
