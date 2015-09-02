@@ -28,7 +28,7 @@
 #define local_free weekly_gis_writer_free
 #define handle_output_dir_event weekly_gis_writer_handle_output_dir_event
 #define handle_before_each_simulation_event weekly_gis_writer_handle_before_each_simulation_event
-#define handle_new_day_event weekly_gis_writer_handle_new_day_event
+#define handle_end_of_day_event weekly_gis_writer_handle_end_of_day_event
 
 #include "module.h"
 #include "module_util.h"
@@ -501,24 +501,27 @@ write_zones_shapefile (local_data_t *local_data,
 
 
 /**
- * Responds to an "new day" event by writing GIS files for the units states
- * and the zones.
+ * Responds to an "end of day" event by writing GIS files for the units states
+ * and the zones. The unit states and zone shapes will be the same as they were
+ * at start of day (unit states and zone shapes change only at Midnight) but
+ * an "end of day" event has an extra piece of data, "done", which lets us know
+ * this is the last day of the simulation.
  *
  * @param self this module.
- * @param event a new day event.
+ * @param event an end of day event.
  * @param units the list of units.
  * @param zones the list of zones. 
  */
 void
-handle_new_day_event (struct adsm_module_t_ * self,
-                      EVT_new_day_event_t *event,
-                      UNT_unit_list_t *units,
-                      ZON_zone_list_t *zones)
+handle_end_of_day_event (struct adsm_module_t_ * self,
+                         EVT_end_of_day_event_t *event,
+                         UNT_unit_list_t *units,
+                         ZON_zone_list_t *zones)
 {
   local_data_t *local_data;
 
   #if DEBUG
-    g_debug ("----- ENTER handle_new_day_event (%s)", MODEL_NAME);
+    g_debug ("----- ENTER handle_end_of_day_event (%s)", MODEL_NAME);
   #endif
 
   local_data = (local_data_t *) (self->model_data);
@@ -526,7 +529,7 @@ handle_new_day_event (struct adsm_module_t_ * self,
   if (event->day == 1)
     local_data->seen_day_1 += 1;
 
-  if ((local_data->seen_day_1 < 2) && (event->day % 7 == 1))
+  if ((local_data->seen_day_1 < 2) && (event->day % 7 == 1 || event->done))
     {
       write_units_shapefile (local_data, units, event->day);
       if (local_data->include_zones)
@@ -536,7 +539,7 @@ handle_new_day_event (struct adsm_module_t_ * self,
     }
     
   #if DEBUG
-    g_debug ("----- EXIT handle_new_day_event (%s)", MODEL_NAME);
+    g_debug ("----- EXIT handle_end_of_day_event (%s)", MODEL_NAME);
   #endif
   return;
 }
@@ -570,8 +573,8 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units,
     case EVT_BeforeEachSimulation:
       handle_before_each_simulation_event (self, &(event->u.before_each_simulation));
       break;
-    case EVT_NewDay:
-      handle_new_day_event (self, &(event->u.new_day), units, zones);
+    case EVT_EndOfDay:
+      handle_end_of_day_event (self, &(event->u.end_of_day), units, zones);
       break;
     default:
       g_error
@@ -657,7 +660,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   EVT_event_type_t events_listened_for[] = {
     EVT_OutputDirectory,
     EVT_BeforeEachSimulation,
-    EVT_NewDay,
+    EVT_EndOfDay,
     0
   };
 
