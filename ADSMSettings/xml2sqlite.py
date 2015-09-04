@@ -28,10 +28,13 @@ def status(message):
 def create_no_duplicates(ModelClass, suggested_name, **kwargs):
     instance, created = ModelClass.objects.get_or_create(**kwargs)
     if suggested_name is not None:  # TODO: use Django _meta to check for a field called "name"
+        # Remove comma from suggested_name because we use commas as a separator
+        suggested_name = suggested_name.replace(',','')
         if created:
             instance.name = suggested_name
         else:
-            if instance.name != suggested_name:
+            current_name_parts = set(instance.name.split(', '))
+            if suggested_name not in current_name_parts:
                 instance.name += ', ' + suggested_name
         instance.save()
     return instance, created
