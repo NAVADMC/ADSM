@@ -4,7 +4,7 @@ Jinja2==2.7.3
 MarkupSafe==0.23
 git+https://github.com/pyinstaller/pyinstaller.git@python3
 hg+https://bitbucket.org/BryanHurst/cx_freeze
-django-crispy-forms==1.5.0
+django-crispy-forms==1.5.1
 django-extras==0.3
 django-floppyforms==1.2.0
 git+https://github.com/BryanHurst/django-productionserver.git@v1.0.5r5
