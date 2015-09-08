@@ -1,5 +1,6 @@
 # import Results.graphing  #matplotlib instantiation
 from django.http import HttpResponse
+import math
 import matplotlib
 
 matplotlib.use('Agg')  # Force matplotlib to not use any Xwindows backend.
@@ -75,18 +76,25 @@ def existing_probability_graph(primary_key):
         if getattr(m, field.name) is None and isinstance(field, (IntegerField, FloatField)):
             setattr(m, field.name, 1)  # don't save this
 
-    kind = m.equation_type
-    d = (m.min + 4 * m.mode + m.max) / 6
     # log defaults to ln
+    d = (m.min + 4 * m.mode + m.max) / 6
+
+    #The following could cause a divide by zero error
+    max_min_denominator = m.max - m.min if m.max != m.min else .000001
+    a = 6 * ((d - m.min) / max_min_denominator)
+    b = 6 * ((m.max - d) / max_min_denominator)
+    logNormalNumerator = sqrt(log((m.std_dev ** 2 + m.mean ** 2) / m.mean ** 2))
+    logNormalDenominator = m.mean ** 2 / sqrt(m.std_dev ** 2 + m.mean ** 2)
+    c = (m.mode - m.min) / max_min_denominator
+
     eq = {  # Compiled from:  https://github.com/NAVADMC/ADSM/wiki/Probability-density-functions  Thanks Neil Harvey!
             "Bernoulli": [scipy.stats.bernoulli, [m.p]],
             "Beta": [scipy.stats.beta, {'a': m.alpha, 'b': m.alpha2, 'loc': m.min, 'scale': m.max - m.min}],
-            "BetaPERT": [scipy.stats.beta,
-                         {'a': 6 * ((d - m.min) / (m.max - m.min)), 'b': 6 * ((m.max - d) / (m.max - m.min)), 'loc': m.min, 'scale': m.max - m.min}],
+            "BetaPERT": [scipy.stats.beta, {'a': a, 'b': b, 'loc': m.min, 'scale': m.max - m.min}],
             "Binomial": [scipy.stats.binom, [m.s, m.p]],
             "Discrete Uniform": [scipy.stats.randint, [m.min, m.max]],
             "Exponential": [scipy.stats.expon, {'scale': m.mean}],
-            "Fixed Value": [scipy.stats.uniform, {'loc': m.mode, 'scale': 0.0001}],  # TODO: Not offered in SciPy? Use a narrow uniform instead
+            "Fixed Value": [scipy.stats.uniform, {'loc': m.mode, 'scale': 0.0001}],  # Use a narrow uniform instead
             "Gamma": [scipy.stats.gamma, {'a': m.alpha, 'scale': m.beta, 'loc': 0}],
             "Gaussian": [scipy.stats.norm, {'loc': m.mean, 'scale': m.std_dev}],
             "Histogram": [histogram_pdf, [m.graph_id]],
@@ -95,19 +103,18 @@ def existing_probability_graph(primary_key):
             "Logistic": [scipy.stats.logistic, {'loc': m.location, 'scale': m.scale}],
             "LogLogistic": [scipy.stats.fisk, {'c': m.shape, 'loc': m.location, 'scale': m.scale}],
             # scipy/stats/_continuous_distns.py:683 http://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.fisk.html
-            "Lognormal": [scipy.stats.lognorm, [(sqrt(log((m.std_dev ** 2 + m.mean ** 2) / m.mean ** 2))),
-                                                m.mean ** 2 / sqrt(m.std_dev ** 2 + m.mean ** 2)]],  # I think exp(log()) is redundant
+            "Lognormal": [scipy.stats.lognorm, [logNormalNumerator, logNormalDenominator]],  # I think exp(log()) is redundant
             "Negative Binomial": [scipy.stats.nbinom, {'n': m.s, 'p': m.p}],
             "Pareto": [scipy.stats.pareto, [m.theta, m.a]],
-            "Pearson 5": [],  # TODO: Not offered in SciPy
+            "Pearson 5": [scipy.stats.invgamma, {'a':m.alpha, 'scale':m.beta}],
             "Piecewise": [existing_relational_graph, [m.graph_id]],
             "Poisson": [scipy.stats.poisson, [m.mean]],
-            "Triangular": [scipy.stats.triang, {'loc': m.min, 'c': (m.mode - m.min) / (m.max - m.min), 'scale': m.max - m.min}],
+            "Triangular": [scipy.stats.triang, {'loc': m.min, 'c': c, 'scale': m.max - m.min}],
             "Uniform": [scipy.stats.uniform, {'loc': m.min, 'scale': m.max - m.min}],
             "Weibull": [scipy.stats.weibull_min, [m.alpha, m.beta]],
             }
-    function = eq[kind][0]
-    kwargs_dict = eq[kind][1]
+    function = eq[m.equation_type][0]
+    kwargs_dict = eq[m.equation_type][1]
 
     return pdf_graph(m.x_axis_units, function, kwargs_dict)
 
