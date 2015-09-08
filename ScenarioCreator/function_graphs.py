@@ -1,6 +1,5 @@
 # import Results.graphing  #matplotlib instantiation
 from django.http import HttpResponse
-import math
 import matplotlib
 
 matplotlib.use('Agg')  # Force matplotlib to not use any Xwindows backend.
@@ -11,7 +10,7 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import scipy.stats
 import numpy as np
-from math import sqrt, log, exp
+from math import sqrt, log, exp, pi
 from django.db.models import IntegerField, FloatField
 
 class Empty:
@@ -31,7 +30,7 @@ class inverse_gaussian:
         y = []
         for x in x_array:
             if x > 0:
-                y.append( sqrt(self.shape / (2.0 * math.pi * x**3)) * exp(-1 * ((self.shape * (x - self.mean)**2) /
+                y.append( sqrt(self.shape / (2.0 * pi * x**3)) * exp(-1 * ((self.shape * (x - self.mean)**2) /
                                                                                       (2.0 * ((self.mean)**2) * x))) )
             else:
                 y.append(0.0)
@@ -83,8 +82,8 @@ def existing_probability_graph(primary_key):
     max_min_denominator = m.max - m.min if m.max != m.min else .000001
     a = 6 * ((d - m.min) / max_min_denominator)
     b = 6 * ((m.max - d) / max_min_denominator)
-    logNormalNumerator = sqrt(log((m.std_dev ** 2 + m.mean ** 2) / m.mean ** 2))
-    logNormalDenominator = m.mean ** 2 / sqrt(m.std_dev ** 2 + m.mean ** 2)
+    x_lognorm = sqrt(log((m.std_dev ** 2 + m.mean ** 2) / m.mean ** 2))
+    s_lognorm = m.mean ** 2 / sqrt(m.std_dev ** 2 + m.mean ** 2)
     c = (m.mode - m.min) / max_min_denominator
 
     eq = {  # Compiled from:  https://github.com/NAVADMC/ADSM/wiki/Probability-density-functions  Thanks Neil Harvey!
@@ -103,7 +102,7 @@ def existing_probability_graph(primary_key):
             "Logistic": [scipy.stats.logistic, {'loc': m.location, 'scale': m.scale}],
             "LogLogistic": [scipy.stats.fisk, {'c': m.shape, 'loc': m.location, 'scale': m.scale}],
             # scipy/stats/_continuous_distns.py:683 http://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.fisk.html
-            "Lognormal": [scipy.stats.lognorm, [logNormalNumerator, logNormalDenominator]],  # I think exp(log()) is redundant
+            "Lognormal": [scipy.stats.lognorm, [x_lognorm, s_lognorm]],  # I think exp(log()) is redundant
             "Negative Binomial": [scipy.stats.nbinom, {'n': m.s, 'p': m.p}],
             "Pareto": [scipy.stats.pareto, [m.theta, m.a]],
             "Pearson 5": [scipy.stats.invgamma, {'a':m.alpha, 'scale':m.beta}],
