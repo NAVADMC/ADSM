@@ -46,19 +46,17 @@ def submit_button():
     </ul>
     {% endif %}
 
-    <div class="buttonHolder">
-        {% if outputs_exist %}
-            <button type="submit" class="btn btn-danger btn-save" formnovalidate id="submit-id-submit">Delete Results and Apply changes</button>
-        {% else %}
-            <button type="button" class="btn btn-default btn-cancel" id="id-cancel">Cancel</button>
-            <button type="submit" class="btn btn-primary btn-save" formnovalidate id="submit-id-submit" disabled>Apply</button>
-        {% endif %}
-        {% if backlinks %}
-            <button type="submit" disabled class="btn btn-danger">Remove References before Deleting</button>
-        {% elif deletable %}
-            <a href="#" data-delete-link="{{deletable}}" class="btn btn-danger">Delete</a>
-        {% endif %}
-    </div>
+    {% if outputs_exist %}
+        <button type="submit" class="btn btn-danger btn-save" formnovalidate id="submit-id-submit">Delete Results and Apply changes</button>
+    {% else %}
+        <button type="button" class="btn btn-default btn-cancel" id="id-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-save" formnovalidate id="submit-id-submit" disabled>Apply</button>
+    {% endif %}
+    {% if backlinks %}
+        <button type="submit" disabled class="btn btn-danger">Remove References before Deleting</button>
+    {% elif deletable %}
+        <a href="#" data-delete-link="{{deletable}}" class="btn btn-danger">Delete</a>
+    {% endif %}
     """
     return ButtonHolder(HTML(edit_buttons))
 
