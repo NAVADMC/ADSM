@@ -268,7 +268,11 @@ $(function(){
      $('#id_show_help_text').change(function(event){
         var isChecked = $(this)[0].checked;
          $.post('/app/ShowHelpText.json/', {show_help_text: isChecked}, function() {
-            window.location.reload();
+            if(isChecked){
+                $('body').removeClass('hide-help-text')
+            }else{
+                $('body').addClass('hide-help-text')
+            }
         });
     });
 
