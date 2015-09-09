@@ -445,10 +445,16 @@ ul {
 /*-----center block-----*/
 /*-------------------------------------------------------------*/
 .center-block { 
-    width: 100vw;
+    width: calc(100vw - 60px);
     padding-left: 200px;
-    padding-right: 60px;
+    margin-right:0;
+    margin-left: 0;
     z-index: 0;
+}
+@media screen and (max-width: 1200px) {
+    .center-block {
+        padding-left: 160px;
+    }
 }
 
 /*---- 2nd-to-3rd-column linking ----*/
@@ -775,6 +781,7 @@ ul {
     max-height: calc(100vh - 126px);
     overflow-y: auto;
     direction: rtl;
+    z-index: 1;
 }
 #setupMenu-before {
     content:"";
@@ -1100,7 +1107,7 @@ ul {
 
 .btn-primary,
 .btn-unsaved {
-    background-color: #3577b1;
+    background-color: #3577b1 !important;
     transition: all .2s ease;
     min-width: 80px;
 }
@@ -1899,7 +1906,6 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     border-bottom: 2px solid #606060;
     z-index: 1;
     background-color: white;
-    visibility: hidden;
 }
 #running_message {
     float: left;
@@ -2062,10 +2068,10 @@ select[multiple] {}
 #legend {
     display:block;
     position: absolute;
-    bottom: 12px; 
+    bottom: 13px; 
     left: 15px;
-    width: 160px;
-    height: 120px;
+    width: 146px;
+    height: 110px;
     font-size: 10px;
     color: #606060;
     padding-left: 5px;
@@ -2074,7 +2080,6 @@ select[multiple] {}
     border-radius: 3px;
 }
 #legend-left, #legend-right {
-    width: 70px;
     padding-right: 10px;
     display:block;
     float: left;
@@ -2084,7 +2089,8 @@ select[multiple] {}
 }
 #legend-left {
     padding-right: 15px;
-    height: 76px;
+    width: 60px;
+    height: 68px;
 }
 .legend-label {
     display:block;
@@ -2092,7 +2098,6 @@ select[multiple] {}
 }
 #legend-left .legend-label {
     text-align: right;
-    padding-right: 7px;
     line-height: 12px;
 }
 #legend-right .legend-label {
@@ -2123,6 +2128,9 @@ select[multiple] {}
     top: 0;
     left: 33px;
 }
+#legend-right {
+    width: 70px;
+}
 #legend-right ul {
     margin-left: 0;
     padding-left: 0;
@@ -2132,7 +2140,7 @@ select[multiple] {}
     height: 20px;
     border-left: 20px solid #68be5e;
     margin-left: 0;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     line-height: 20px;
     padding-left: 5px;
 }
@@ -2142,7 +2150,51 @@ select[multiple] {}
 #legend-right li:last-child {
     border-color: #606060;
 }
-
+@media screen and (max-height: 800px){
+    #legend {
+        transform: scale(.8);
+        bottom: -3px;
+        left: -3px;
+        background-color: rgba(255,255,255,.4);
+    }
+}
+/*----------------------------------------------------*/
+/*----- results home -----*/
+/*----------------------------------------------------*/
+#summaryData th:first-child {
+    width: 70%;
+}
+#summaryData td {
+    vertical-align: top;
+}
+#summaryData tr td:nth-child(2) {
+    padding-left: 10px;
+}
+#summaryData tr td{
+    border-bottom: 1px solid #ebebeb;
+}
+#summaryData th {
+    padding-bottom: 3px;
+    padding-top: 10px;
+}
+#summaryData tr:first-of-type th{
+    padding-top: 0;
+}
+#summaryData td {
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+@media screen and (max-width: 1200px){
+    #summaryData th {
+        font-size: 13px;
+        padding-bottom: 0;
+    }
+    #summaryData td {
+        font-size: 12px;
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+}
 
 /*----------------------------------------------------*/
 /*----- global overrides -----*/
@@ -2275,6 +2327,9 @@ select[multiple] {}
         background-size: 15px;
         background-position: 2px 5px;
     }
+}
+#sim_progress_and_button {
+    visibility: hidden;
 }
 
 
