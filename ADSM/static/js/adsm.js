@@ -801,7 +801,7 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
                 if($(form_html).find('#main_panel').length ){
                     $('#main-panel').html($(form_html).find('#main_panel')[0])
                 }else {
-                    var matches = form_html.match(/(<body>[\S\s]*<\/body>)/i);//multiline match
+                    var matches = form_html.match(/(<body.*>[\S\s]*<\/body>)/i);//multiline match
                     var content = $(matches[1]);
                     $('body').html(content);
                 }
