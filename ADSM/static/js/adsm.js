@@ -265,6 +265,13 @@ $(function(){
         }
     })
 
+     $('#id_show_help_text').change(function(event){
+        var isChecked = $(this)[0].checked;
+         $.post('/app/ShowHelpText.json/', {show_help_text: isChecked}, function() {
+            window.location.reload();
+        });
+    });
+
     $('#id_disable_all_controls').change(function(event){
         var isChecked = $(this).prop('checked');
         var new_link = window.location;

@@ -219,3 +219,13 @@ def backend(request):
     user.backend = 'django.contrib.auth.backends.ModelBackend'
     login(request, user)
     return redirect('/admin/')
+
+
+def show_help_text_json(request):
+    if 'POST' in request.method:
+        new_value = request.POST['show_help_text']
+        set_to = new_value == 'true'
+        SmSession.objects.all().update(show_help_text=set_to)
+        return JsonResponse({'status':'success'})
+    else:
+        return JsonResponse({'show_help_text': SmSession.objects.get().show_help_text})
