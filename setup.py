@@ -16,6 +16,12 @@ from django.core import management
 from ADSM import __version__
 
 
+if sys.platform == 'win32':
+    os_dir = 'windows'
+else:
+    os_dir = 'linux'
+
+
 def is_exe(file_path):
     access_mode = os.F_OK | os.X_OK
     if os.path.isfile(file_path) and not file_path.endswith('.bat') and not file_path.endswith('.sh') and os.access(file_path, access_mode):
@@ -47,7 +53,7 @@ build_exe_options = {
         ('static', 'static'),
         ('media', 'media'),
         ('bin', 'bin'),
-        ('Viewer', 'Viewer'),  # Newline's View application for Django Desktop Core
+        (os.path.join('Viewer', os_dir), os.path.join('Viewer', os_dir)),  # Newline's View application for Django Desktop Core
         ('README.md', 'README.md'),
 
         # CHANGE ME for any files/folders you want included with your project
@@ -256,13 +262,13 @@ class BuildADSM(build_exe):
                 shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, file),
                             os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file))
         viewer = None
-        possible_viewer_files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, 'Viewer')) if os.path.isfile(os.path.join(settings.BASE_DIR, 'Viewer', file)))
+        possible_viewer_files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, 'Viewer', os_dir)) if os.path.isfile(os.path.join(settings.BASE_DIR, 'Viewer', os_dir, file)))
         for possible_viewer in possible_viewer_files:
-            if 'viewer' in possible_viewer.lower() and is_exe(os.path.join(settings.BASE_DIR, 'Viewer', possible_viewer)):
+            if 'viewer' in possible_viewer.lower() and is_exe(os.path.join(settings.BASE_DIR, 'Viewer', os_dir, possible_viewer)):
                 viewer = possible_viewer
                 break
         if viewer:
-            shutil.copy(os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', viewer), os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', viewer.replace('Viewer', 'ADSM_Viewer')))
+            shutil.copy(os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', os_dir, viewer), os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', os_dir, viewer.replace('Viewer', 'ADSM_Viewer')))
 
 
 base = None
