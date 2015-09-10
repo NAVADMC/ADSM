@@ -137,9 +137,8 @@ else:
         server_status = management.call_command('runproductionserver', port=8000, app_port=8001, silent=True)
         if server_status != 0:
             raise RuntimeError("Error launching Django Production Server!")
-    except (KeyboardInterrupt, IOError, SystemExit) as e:
-        raise
     except:
-        print("It appears that the Django Production Server Application is either missing or not compatible with this system!\nWe will launch using the debug server instead.\nMake sure your settings are set to development settings and debug=True.\n")
-        management.call_command('runserver', addrport="127.0.0.1:8000", use_reloader=False)
+        if browser.is_alive():
+            print("It appears that the Django Production Server Application is either missing or not compatible with this system!\nWe will launch using the debug server instead.\nMake sure your settings are set to development settings and debug=True.\n")
+            management.call_command('runserver', addrport="127.0.0.1:8000", use_reloader=False)
     # management.call_command('runserver', use_reloader=False)
