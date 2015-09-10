@@ -41,6 +41,7 @@ dist_noinst_DATA = state-transition.png \
   negbinomial.png \
   pareto.png pareto_log.png \
   binomial.png \
+  bernoulli.png \
   discrete_uniform.png \
   hypergeometric.png \
   inverse_gaussian.png \
