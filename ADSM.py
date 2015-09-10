@@ -45,7 +45,7 @@ def launch_viewer():
     if not os.path.exists(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', os_dir)):
         os.makedirs(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', os_dir), exist_ok=True)
     log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', os_dir, 'debug.log')
-    subprocess.call(os.path.join(BASE_DIR, 'Viewer', os_dir, 'ADSM_Viewer%s --log-file="%s"' % (extension, log_path)))
+    subprocess.call(os.path.join(BASE_DIR, 'Viewer', os_dir, 'ADSM_Viewer%s --log-file="%s"' % (extension, log_path)), shell=True)
     print("\nClosing application!")
     _thread.interrupt_main()
 
