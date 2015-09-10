@@ -95,6 +95,15 @@ $(function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });
 
+    $(document).on('click', '#save_scenario', function(event){
+        event.preventDefault();
+        if($('.filename input').val() == 'Untitled Scenario'){
+            prompt_for_new_file_name('/app/SaveScenario/');
+        } else {
+            $('#save_scenario').closest('form').submit() //normal submission
+        }
+    })
+
     $(document).on('submit', '.ajax', function(event) {
         event.preventDefault();
         var $self = $(this)
