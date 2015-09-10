@@ -49,11 +49,12 @@ def launch_viewer():
         viewer_status = subprocess.call(os.path.join(BASE_DIR, 'Viewer', os_dir, 'ADSM_Viewer%s --log-file="%s"' % (extension, log_path)), shell=True)
         if viewer_status != 0:
             raise RuntimeError("Error launching Viewer!")
-        print("\nClosing application!")
-        _thread.interrupt_main()
     except:
         print("\nIt appears that the Viewer Application is either missing or not compatible with this system!\nYou can open a browser and navigate to http://127.0.0.1:8000")
-        print("\nPress Ctrl-c to close the application...")
+        print("\nPress any key to close the application...")
+        input()
+    print("\nClosing application!")
+    _thread.interrupt_main()
 
 parser = argparse.ArgumentParser(prog='ADSM-Beta.exe')
 # TODO: Tests don't run currently as the test runner won't find compiled tests.
