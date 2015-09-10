@@ -53,7 +53,6 @@ def launch_viewer():
         print("\nIt appears that the Viewer Application is either missing or not compatible with this system!\nYou can open a browser and navigate to http://127.0.0.1:8000")
         print("\nPress any key to close the application...")
         input()
-    quitting = True
     print("\nClosing application!")
     _thread.interrupt_main()
 
@@ -130,8 +129,6 @@ if args.test:
 else:
     # NOTE: Normally you would need to check for updates. However, graceful startup is doing this for us.
 
-    quitting = False
-
     browser = threading.Timer(1, launch_viewer)
     browser.start()
 
@@ -140,8 +137,9 @@ else:
         server_status = management.call_command('runproductionserver', port=8000, app_port=8001, silent=True)
         if server_status != 0:
             raise RuntimeError("Error launching Django Production Server!")
+    except (KeyboardInterrupt, IOError, SystemExit) as e:
+        raise
     except:
-        if not quitting:
-            print("It appears that the Django Production Server Application is either missing or not compatible with this system!\nWe will launch using the debug server instead.\nMake sure your settings are set to development settings and debug=True.\n")
-            management.call_command('runserver', addrport="127.0.0.1:8000", use_reloader=False)
+        print("It appears that the Django Production Server Application is either missing or not compatible with this system!\nWe will launch using the debug server instead.\nMake sure your settings are set to development settings and debug=True.\n")
+        management.call_command('runserver', addrport="127.0.0.1:8000", use_reloader=False)
     # management.call_command('runserver', use_reloader=False)
