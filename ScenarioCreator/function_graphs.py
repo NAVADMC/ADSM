@@ -82,9 +82,10 @@ def existing_probability_graph(primary_key):
     max_min_denominator = m.max - m.min if m.max != m.min else .000001
     a = 6 * ((d - m.min) / max_min_denominator)
     b = 6 * ((m.max - d) / max_min_denominator)
-    x_lognorm = sqrt(log((m.std_dev ** 2 + m.mean ** 2) / m.mean ** 2))
-    s_lognorm = m.mean ** 2 / sqrt(m.std_dev ** 2 + m.mean ** 2)
     c = (m.mode - m.min) / max_min_denominator
+    mean_safe = m.mean if m.mean != 0 else .000001
+    x_lognorm = sqrt(log((m.std_dev ** 2 + mean_safe ** 2) / mean_safe ** 2))
+    s_lognorm = mean_safe ** 2 / sqrt(m.std_dev ** 2 + mean_safe ** 2)
 
     eq = {  # Compiled from:  https://github.com/NAVADMC/ADSM/wiki/Probability-density-functions  Thanks Neil Harvey!
             "Bernoulli": [scipy.stats.bernoulli, [m.p]],

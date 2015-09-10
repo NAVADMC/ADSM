@@ -109,7 +109,8 @@ class ProbabilityFunctionForm(BaseForm):
     def clean(self):
         cleaned_data = super(ProbabilityFunctionForm, self).clean()
         for field in ProbabilityFunction._meta.fields:
-            mentioned = cleaned_data.get('equation_type') in field.help_text
+            used_in = re.split(r": |, |\.", field.help_text)  # It's important that "Gaussian" doesn't match "Inverse Gaussian"
+            mentioned = cleaned_data.get('equation_type') in used_in
             empty = cleaned_data.get(field.name) is None
             if mentioned and empty:
                 self.add_error(field.name, ValidationError("The field " + str(field.verbose_name) + " is required."))
