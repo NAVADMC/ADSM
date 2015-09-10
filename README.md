@@ -45,7 +45,7 @@ Create Virtual Environment:
   - Linux: `python3 -m venv --without-pip /path/to/adsm_venv`  
     - Install Setuptools and Pip: `wget https://pypi.python.org/packages/source/s/setuptools/setuptools-3.4.4.tar.gz; tar -vzxf setuptools-3.4.4.tar.gz; rm setuptools-3.4.4.tar.gz; cd setuptools-3.4.4; python setup.py install; cd ..; rm -r setuptools-3.4.4; wget https://pypi.python.org/packages/source/p/pip/pip-1.5.6.tar.gz; tar -vzxf pip-1.5.6.tar.gz; rm pip-1.5.6.tar.gz; cd pip-1.5.6; python setup.py install; cd ..; rm -r pip-1.5.6`
     - Activate with `source /path/to/adsm_venv/bin/activate`
-    - Install required dev files: `sudo apt-get install build-essential python3-dev git mercurial; sudo apt-get build-dep python3-matplotlib`
+    - Install required dev files: `sudo apt-get install build-essential python3-dev git mercurial; sudo apt-get build-dep python3-matplotlib python3-scipy`
     
 Please make sure that NO packages from your global install made it into your Virtual Environment. Use `pip freeze` to confirm nothing is installed.
 

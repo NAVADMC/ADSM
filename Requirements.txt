@@ -7,7 +7,7 @@ hg+https://bitbucket.org/BryanHurst/cx_freeze
 django-crispy-forms==1.5.0
 django-extras==0.3
 django-floppyforms==1.2.0
-git+https://github.com/BryanHurst/django-productionserver.git@v1.0.5r5
+git+https://github.com/BryanHurst/django-productionserver.git@v1.0.6
 futures==2.2.0
 pyparsing==2.0.3
 python-dateutil==2.3
