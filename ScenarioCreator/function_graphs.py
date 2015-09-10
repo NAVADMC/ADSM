@@ -110,7 +110,7 @@ def existing_probability_graph(primary_key):
             "Poisson": [scipy.stats.poisson, [m.mean]],
             "Triangular": [scipy.stats.triang, {'loc': m.min, 'c': c, 'scale': m.max - m.min}],
             "Uniform": [scipy.stats.uniform, {'loc': m.min, 'scale': m.max - m.min}],
-            "Weibull": [scipy.stats.weibull_min, [m.alpha, m.beta]],
+            "Weibull": [scipy.stats.weibull_min, [m.alpha, 0, m.beta]],
             }
     function = eq[m.equation_type][0]
     kwargs_dict = eq[m.equation_type][1]
