@@ -45,7 +45,12 @@ def launch_viewer():
     if not os.path.exists(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', os_dir)):
         os.makedirs(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', os_dir), exist_ok=True)
     log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', os_dir, 'debug.log')
-    subprocess.call(os.path.join(BASE_DIR, 'Viewer', os_dir, 'ADSM_Viewer%s --log-file="%s"' % (extension, log_path)), shell=True)
+    try:
+        subprocess.call(os.path.join(BASE_DIR, 'Viewer', os_dir, 'ADSM_Viewer%s --log-file="%s"' % (extension, log_path)), shell=True)
+    except:
+        print("\nIt appears that the Viewer Application is either missing or not compatible with this system!\nYou can open a browser and navigate to http://127.0.0.1:8000")
+        print("\nPress any key to close the application...")
+        input()
     print("\nClosing application!")
     _thread.interrupt_main()
 
@@ -126,5 +131,9 @@ else:
     browser.start()
 
     print("\nLaunching server...")
-    management.call_command('runproductionserver', port=8000, app_port=8001, silent=True)
+    try:
+        management.call_command('runproductionserver', port=8000, app_port=8001, silent=True)
+    except:
+        print("It appears that the Django Production Server Application is either missing or not compatible with this system!\nWe will launch using the debug server instead.\nMake sure your settings are set to development settings and debug=True.\n")
+        management.call_command('runserver', addrport="127.0.0.1:8000", use_reloader=False)
     # management.call_command('runserver', use_reloader=False)
