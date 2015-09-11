@@ -103,7 +103,7 @@ def existing_probability_graph(primary_key):
             "Logistic": [scipy.stats.logistic, {'loc': m.location, 'scale': m.scale}],
             "LogLogistic": [scipy.stats.fisk, {'c': m.shape, 'loc': m.location, 'scale': m.scale}],
             # scipy/stats/_continuous_distns.py:683 http://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.fisk.html
-            "Lognormal": [scipy.stats.lognorm, [x_lognorm, s_lognorm]],  # I think exp(log()) is redundant
+            "Lognormal": [scipy.stats.lognorm, [x_lognorm, 0, s_lognorm]],  # I think exp(log()) is redundant
             "Negative Binomial": [scipy.stats.nbinom, {'n': m.s, 'p': m.p}],
             "Pareto": [scipy.stats.pareto, [m.theta, m.a]],
             "Pearson 5": [scipy.stats.invgamma, {'a':m.alpha, 'scale':m.beta}],
