@@ -31,22 +31,13 @@ import psutil
 from django.utils.timezone import now
 
 
-extension = ''
-if sys.platform == 'win32':
-    os_dir = 'windows'
-    extension = '.exe'
-else:
-    os_dir = 'linux'
-    extension = ''
-
-
 def launch_viewer():
     print("\nLaunching browser...")
-    if not os.path.exists(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', os_dir)):
-        os.makedirs(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', os_dir), exist_ok=True)
-    log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', os_dir, 'debug.log')
+    if not os.path.exists(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR)):
+        os.makedirs(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR), exist_ok=True)
+    log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR, 'debug.log')
     try:
-        viewer_status = subprocess.call(os.path.join(BASE_DIR, 'Viewer', os_dir, 'ADSM_Viewer%s --log-file="%s"' % (extension, log_path)), shell=True)
+        viewer_status = subprocess.call(os.path.join(BASE_DIR, 'Viewer', settings.OS_DIR, 'ADSM_Viewer%s --log-file="%s"' % (settings.EXTENSION, log_path)), shell=True)
         if viewer_status != 0:
             raise RuntimeError("Error launching Viewer!")
     except:

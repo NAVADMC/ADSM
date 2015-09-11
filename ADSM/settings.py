@@ -57,6 +57,13 @@ if not os.path.exists(WORKSPACE_PATH):
 if not os.path.exists(DB_BASE_DIR):
     os.makedirs(DB_BASE_DIR, exist_ok=True)
 
+if sys.platform == 'win32':
+    OS_DIR = 'windows'
+    EXTENSION = '.exe'
+else:
+    OS_DIR = 'linux'
+    EXTENSION = ''
+
 INSTALLED_APPS = (
     'ScenarioCreator',
     'Results',
