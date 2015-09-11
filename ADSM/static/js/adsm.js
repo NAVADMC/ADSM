@@ -1,9 +1,14 @@
+
 $(function(){
     open_panel_if_needed();
     check_disabled_controls();
 
-    $(document).on('click', 'form.ajax .btn-cancel', function(){
-        var $container = $(this).closest('form').closest('div');
+    $(document).on('click', 'form.ajax .btn-cancel, .btn-cancel[form]', function(){
+        var form = $(this).closest('form');
+        var attachment = $(this).attr('form');
+        if(typeof attachment !== 'undefined')
+            form = $('#' + attachment)
+        var $container = form.closest('div');
         if($container.closest('.layout-panel').attr('id') == 'main-panel'){
             window.location.reload()
         }else{
@@ -38,6 +43,15 @@ $(function(){
             }
         }
     })
+
+    $('form[action="/setup/RelationalFunction/new/"]').livequery(function(){
+        make_function_panel_editable(); //new forms should come in editable
+    })
+
+    $('form[action="/setup/ProbabilityFunction/new/"]').livequery(function(){
+        make_function_panel_editable(); //new forms should come in editable
+    })
+
 
     $(document).on('click', '#functions_panel span', function(event){
         $('.function_dropdown').removeClass('in');
@@ -81,39 +95,37 @@ $(function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });
 
-$(document).on('submit', '.ajax', function(event) {
-    event.preventDefault();
-    var $self = $(this)
-    var formAction = $(this).attr('action');
-    var formData = new FormData($self[0])
-    var load_target = $self
-    if($self.parent().hasClass('fragment')){
-        load_target = $self.parent()
-    }
-    ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target);
-})
-    
-    $(document).on('click', '#update_adsm', function(event){
-        $(this).removeClass('loading_button')
+    $(document).on('click', '#save_scenario', function(event){
         event.preventDefault();
-        $.get('/app/Update/', function(result){
-            if( result == "success"){
-                var dialog = new BootstrapDialog.show({
-                    title: 'Update ADSM on Restart',
-                    type: BootstrapDialog.TYPE_INFO,
-                    message: 'ADSM is now set to update next time you start the application.',
-                    buttons: [
-                        {
-                            label: 'Ok',
-                            cssClass: 'btn-info',
-                            action: function(dialog){
-                                dialog.close();
-                            }
-                        }
-                    ]
-                });
-            }
-        });
+        if($('.filename input').val() == 'Untitled Scenario'){
+            prompt_for_new_file_name('/app/SaveScenario/');
+        } else {
+            $('#save_scenario').closest('form').submit() //normal submission
+        }
+    })
+
+    $(document).on('submit', '.ajax', function(event) {
+        event.preventDefault();
+        var $self = $(this)
+        var formAction = $(this).attr('action');
+        var formData = new FormData($self[0])
+        var load_target = $self
+        var loading_message = $self.attr('data-loading-message') || "Working..."
+        if($self.parent().hasClass('fragment')){
+            load_target = $self.parent()
+        }
+        if($self.parent().find('button[type=submit]').hasClass('btn-danger')) {//for deleting outputs on form submission
+            ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, function () {
+                window.location.reload()
+            }, loading_message);  //updates Navigation bar context
+        }else{
+            ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, undefined, loading_message);
+        }
+    })
+
+    $(document).on('click', '#update_adsm', function(event){
+        event.preventDefault();
+        $.get('/app/Update/', function(result){ });
     });
 
     $(document).on('saved', 'form:has(.unsaved)', function(){ //fixes 'Save' button with wrong color state
@@ -134,11 +146,11 @@ $(document).on('submit', '.ajax', function(event) {
         $(this).closest('form').trigger('submit');
     });
 
-    $(document).on('click', '.btn-save', function() {
-        if ($(this).closest('form').find(':invalid').length == 0) {
-            $('.blocking-overlay').show().find('.message').text('Working...');
-        }
-    });
+    //$(document).on('click', '.btn-save', function() {
+    //    if ($(this).closest('form').find(':invalid').length == 0) {
+    //        $('.blocking-overlay').show().find('.message').text('Working...');
+    //    }
+    //});
 
     $(document).on('mousedown', '[data-new-item-url]', function(e){
             $(this).prop('last-selected', $(this).val()); // cache old selection
@@ -168,10 +180,11 @@ $(document).on('submit', '.ajax', function(event) {
     });
     
     
-    $('[data-visibility-controller]').each(function(){attach_visibility_controller(this)})
+    $('[data-visibility-controller]').livequery(function(){
+        attach_visibility_controller(this)})
     
     
-    $('[data-visibility-context]').each(function(){
+    $('[data-visibility-context]').livequery(function(){
         var context_var = window[$(this).attr('data-visibility-context')]
         if(typeof $(this).attr('data-visibility-flipped') !== 'undefined') {
             context_var = !context_var;
@@ -194,13 +207,16 @@ $(document).on('submit', '.ajax', function(event) {
 
     $(document).on('click', '[data-delete-link]', function(){
         var link = $(this).attr('data-delete-link')
-        var do_reload = $(this).hasClass('ajax-post')
+        var deleting_outputs = typeof outputs_exist !== 'undefined' && outputs_exist;
+        var do_reload = $(this).hasClass('ajax-post') || deleting_outputs
         var direct_link = $(this).hasClass('direct_link')
         var $containing_panel = $(this).closest('.layout-panel')
         var object_type = link.split('/')[2]
-        if (typeof object_type === 'undefined') {object_type = 'object'}
+        if (typeof object_type === 'undefined') {
+            object_type = 'object';
+        }
         var additional_msg = ''
-        if(typeof outputs_exist !== 'undefined' && outputs_exist){
+        if(deleting_outputs){
             additional_msg = ' and <strong><u>All Results</u></strong>' 
         }
         var dialog = new BootstrapDialog.show({
@@ -258,6 +274,17 @@ $(document).on('submit', '.ajax', function(event) {
         }
     })
 
+     $('#id_show_help_text').change(function(event){
+        var isChecked = $(this)[0].checked;
+         $.post('/app/ShowHelpText.json/', {show_help_text: isChecked}, function() {
+            if(isChecked){
+                $('body').removeClass('hide-help-text')
+            }else{
+                $('body').addClass('hide-help-text')
+            }
+        });
+    });
+
     $('#id_disable_all_controls').change(function(event){
         var isChecked = $(this).prop('checked');
         var new_link = window.location;
@@ -307,6 +334,40 @@ $(document).on('submit', '.ajax', function(event) {
         $('.defined').removeClass('focused')
         $(this).addClass('focused');
     });
+
+    $('#id_equation_type').livequery(hide_unneeded_probability_fields)
+
+    $(document).on('change', '#id_equation_type', function(){
+        hide_unneeded_probability_fields();
+    });
+
+    $(document).on('click', '.edit-button', function() {
+        $('.edit-button-holder a, .edit-button-holder button').addClass('reveal')
+    })
+
+    $(document).on('click', '.overwrite-button', function () {
+        make_function_panel_editable()
+    })
+
+    $('.edit-button-holder .copy-button').livequery(function() {
+        $('.edit-button-holder .copy-button').on('click', function () {
+            make_function_panel_editable()
+            var target = $('#' + $(this).attr('form'))
+            target.attr('action', target.attr('action') + 'copy/') //values already loaded, but this should go to /new/
+            console.log(target.attr('action'))
+            var name_in = $('#functions_panel #id_name')
+            name_in.val(name_in.val() + ' - Copy')
+        })
+    })
+
+    $('.blocking-overlay:visible').livequery( function() {
+        if(window.location.pathname.indexOf('app/ImportScenario') != -1){
+            console.log('start watcher')
+            if(typeof statusInterval === 'undefined'){
+                statusInterval = setInterval(statusChecker, 2000);
+            }
+        }
+    })
 })
 
 //#####################################################################################//
@@ -379,7 +440,7 @@ function populate_pdf_panel(select) {
         load_target = '#center-panel'
         $('#center-panel').addClass('reveal') //allows toggle of box shadow on :before pseudo element
     }
-    if(origin == 'center-panel'){
+    if(origin == 'center-panel' || origin == 'main-panel'){
         $('#functions_panel').removeClass('TB_panel_closed')
     }
     if(origin == 'functions_panel'){ // we've run out of room and must use a modal
@@ -408,6 +469,30 @@ function get_parent_select($self) {
 }
 
 
+function update_visibility_target_from_controller(disabled_value, hide_target, required_value) {
+    if ($(this).val() == disabled_value && typeof disabled_value !== 'undefined') {
+        hide_target.hide()
+    } else {
+        if ($(this).attr('type') == 'checkbox') {
+            if ($(this).is(':checked') == (disabled_value === 'false')) {
+                hide_target.show()
+            } else {
+                hide_target.hide()
+            }
+        }
+        else {
+            if (typeof required_value !== 'undefined') { //required value is specified
+                if ($(this).val() == required_value || $(this).val() == '') {
+                    hide_target.show()
+                } else {
+                    hide_target.hide()
+                }
+            } else {
+                hide_target.show()
+            }
+        }
+    }
+}
 var attach_visibility_controller = function (self){
     var controller = '[name=' + $(self).attr('data-visibility-controller') + ']'
     var hide_target = $(self).parents('.control-group')
@@ -418,35 +503,16 @@ var attach_visibility_controller = function (self){
     var required_value = $(self).attr('data-required-value')
 
     $('body').on('change', controller, function(){
-        if($(self).val() == disabled_value){
-            hide_target.hide()
-        }else{
-            if($(this).attr('type') == 'checkbox') {
-                if( $(this).is(':checked') == (disabled_value === 'false')){
-                    hide_target.show()
-                }else {
-                    hide_target.hide()
-                }
-            }
-            else {
-                if (typeof required_value !== 'undefined'){ //required value is specified
-                    if($(this).val() == required_value || $(this).val() == ''){
-                        hide_target.show()
-                    }else{
-                        hide_target.hide()
-                    }
-                }else{
-                    hide_target.show()
-                }
-            }
-        }
+        update_visibility_target_from_controller.call(this, disabled_value, hide_target, required_value);
     })
-    $(controller).each(function(index, elem){ //each because radio buttons have multiple elem, same name
-        if($(elem).attr('type') != 'radio' || elem.hasAttribute('checked')){
-            //radio buttons are multiple elements with the same name, we only want to fire if its actually checked
-            $(elem).trigger('change');
-        }
-    });
+
+    //run once to initialize
+    var $elem = $(controller);
+    if($elem.attr('type') != 'radio' || $elem[0].hasAttribute('checked')){
+        //radio buttons are multiple elements with the same name, we only want to fire if its actually checked
+        update_visibility_target_from_controller.call($elem, disabled_value, hide_target, required_value);
+    }
+    
     $(hide_target).css('margin-left', '26px');
 }
 
@@ -463,7 +529,7 @@ var check_file_saved = function(){
             buttons: [
                 {
                     label: 'Don\'t Save',
-                    cssClass: 'btn',
+                    cssClass: 'btn btn-dont-save',
                     action: function(dialog){
                         dialog.close();
                     }
@@ -491,9 +557,9 @@ var check_file_saved = function(){
 
 two_state_button = function(){
     if(typeof outputs_exist === 'undefined' || outputs_exist == false) {
-        return 'class="btn btn-primary btn-save">Apply changes'
+        return 'class="btn btn-primary btn-save" formnovalidate >Apply changes'
     } else {
-        return 'class="btn btn-danger btn-save">Delete Results and Apply Changes'
+        return 'class="btn btn-danger btn-save" formnovalidate >Delete Results and Apply Changes'
     }
 }
 
@@ -507,7 +573,7 @@ function add_model_option_to_selects(html, selectInput) {
     var pk = action.split('/')[3]; //the edit action URL has the pk in it
     var model_link = action.replace(pk, 'new'); //for targetting other selects
     var title = 'Newest Entry';
-    try { //TODO: there's a possibility of a form without a name field, in this case the python str() method is preferrable
+    try {
         title = $(html).find('input[type="text"]').first().val();
     } catch (e) { }
 
@@ -515,13 +581,16 @@ function add_model_option_to_selects(html, selectInput) {
         .before($('<option value="' + pk + '">' + title + '</option>')); // Add option to all similar selects
     if(selectInput != null){
         selectInput.val(pk); // select option for select that was originally clicked
+        selectInput.closest('.layout-panel').find('.btn-save').removeAttr('disabled')
     }
     //add functions to their panel lists
     var $new_link = $('.function_dropdown [href="' + model_link + '"]')
-    var $back_link = $new_link.clone()
-    $back_link.attr('href', $back_link.attr('href').replace('new', pk))
-    $back_link.text(title)
-    $new_link.parent().after($('<li>' + $back_link.prop('outerHTML') + '</li>')); // Add new link with all properties
+    if($new_link.length) {
+        var $back_link = $new_link.clone()
+        $back_link.attr('href', $back_link.attr('href').replace('new', pk))
+        $back_link.text(title)
+        $new_link.parent().after($('<li>' + $back_link.prop('outerHTML') + '</li>')); // Add new link with all properties
+    }
 }
 
 var modelModal = {
@@ -664,10 +733,17 @@ function prompt_for_new_file_name(link) {
                 cssClass: 'btn-primary',
                 action: function (dialog) {
                     dialog.close();
+                    var $self = $('.filename input').closest('form');
                     if (is_current_scenario) {
                         $('.filename input').val($('#new_name').val())
-                        $('.filename').closest('form').submit()
+                        //$self.submit()
+                        ajax_submit_complex_form_and_replaceWith(link, new FormData($self[0]), $self, $self, function () {
+                            $('h1.filename').text($('.filename input').val()) //match major title with form value
+                        }, undefined);
                     } else {
+                        //TODO: need FormData from form that is to be added in #NewScenario
+                        //ajax_submit_complex_form_and_replaceWith(link, new FormData($self[0]), $self, $self, undefined);
+
                         window.location = link + $('#new_name').val();
                     }
                 }
@@ -692,8 +768,11 @@ function clear_form_populate_panel($container_panel, delete_link) {
         if(panel_id == 'left-panel') {
             reload_model_list();
             var primary_key = delete_link.split('/')[3];
-            if(typeof delete_link !== 'undefined' && $('#center-panel form').attr('action').indexOf(primary_key) != -1){
-                $('#center-panel').html('')
+            var $center_form = $('#center-panel').find('form');
+            if( $center_form.length){
+                if(typeof delete_link !== 'undefined' && $center_form.attr('action').indexOf(primary_key) != -1){
+                    $('#center-panel').html('')
+                }
             }
         } else { //will still clear Create Group form inside of population_panel without destroying the whole panel
             $container_panel.html('') //delete everything from the div containing the form
@@ -704,7 +783,7 @@ function clear_form_populate_panel($container_panel, delete_link) {
 
 function reload_image(load_target) {
     var target = load_target.find('form')
-    if(target.attr('id') == 'relational-form' || target.attr('id') == 'relational-form'){
+    if(target.hasClass('relational-form') || target.hasClass('probability-form')){
         var img = $('#function-graph'); //newly placed image
         d = new Date();
         var new_src = img.attr("src") + "?" + d.getTime();
@@ -712,7 +791,11 @@ function reload_image(load_target) {
     }
 }
 
-function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target) {
+function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, success_callback, loading_message) {
+    var overlay = $('.blocking-overlay').show();
+    if(typeof loading_message !== 'undefined'){
+        overlay.find('.message').text(loading_message);
+    }
     $.ajax({
         url: formAction,
         type: "POST",
@@ -724,10 +807,17 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
             $('.scenario-status').addClass('unsaved')
             // Here we replace the form, for the
             if ($self.closest('#main-panel').length) { //in the main panel, just reload the page
-                $('#main-panel').html($(form_html).find('#main_panel')[0])
+                if($(form_html).find('#main_panel').length ){
+                    $('#main-panel').html($(form_html).find('#main_panel')[0])
+                }else {
+                    var matches = form_html.match(/(<body.*>[\S\s]*<\/body>)/i);//multiline match
+                    var content = $(matches[1]);
+                    $('body').html(content);
+                }
             } else {
                 if (formAction.lastIndexOf('new/') != -1) { //new model created
-                    if($self.closest('.layout-panel').attr('id') == 'center-panel'){
+                    var parent_panel = $self.closest('.layout-panel').attr('id');
+                    if(parent_panel == 'center-panel' || parent_panel == 'population_panel'){
                         reload_model_list($self); //reload left
                     }else{
                         var lastClickedSelect = get_parent_select($self);
@@ -737,6 +827,9 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
                 load_target.replaceWith(form_html)
                 reload_image(load_target)
             }
+            if(typeof success_callback !== 'undefined'){
+                success_callback()
+            }
         },
         error: function () {
             $self.find('.error-message').show()
@@ -744,4 +837,43 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
     }).always(function () {
         $('.blocking-overlay').hide();
     });
+}
+
+function hide_unneeded_probability_fields() {
+    var $idEquationType = $('#id_equation_type');
+    var equation_type = $idEquationType.val()
+    var fields = $idEquationType.closest('.control-group').nextAll('.control-group');
+    fields.each(function (index, control_group) {
+        var help_text = $(control_group).find('.help-block').first().text();
+        var functions = help_text.toLowerCase().match(/(\w[\w\s]*)(?=[,\.])/g);
+        if (functions.indexOf(equation_type.toLowerCase()) >= 0) {
+            $(control_group).show();
+            $(control_group).find(':input').attr('required', 'required'); //this code is mirrored in the django form validation
+        }
+        else {
+            $(control_group).hide();
+            $(control_group).find(':input').removeAttr('required');
+        }
+    });
+}
+
+function make_function_panel_editable() {
+    $('.edit-button-holder a, .edit-button-holder button').removeClass('reveal') //collapse the edit buttons, possibly hide
+    $('.edit-button-holder').css('display', 'none')
+
+    $('#functions_panel .buttonHolder').removeAttr('hidden')
+    $('#functions_panel, #functions_panel input').addClass('editable')
+    $('#functions_panel :input').addClass('editable')
+    //$('#tb_mask').css('visibility', 'visible')
+    $('#functions_panel').css('pointer-events', 'all')
+}
+
+function statusChecker(){
+    if($('.blocking-overlay').is(':visible')){
+        $.get('/app/ImportStatus/', function(data){
+            $('.blocking-overlay').show().find('.message').text(data.status);
+        });
+    }else{
+        clearInterval(statusChecker);
+    }
 }

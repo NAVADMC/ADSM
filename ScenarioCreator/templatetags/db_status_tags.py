@@ -27,6 +27,11 @@ def parent_link(model_link):
 
 
 @register.filter()
+def action_id(action):
+    return action.replace('/', '-')
+
+
+@register.filter()
 def wiki(words, url=None):
     """Wiki Definition: Generates a Lexicon link from a set of words with optional url help (when the titles don't match).  
     The call to wiki links is in the help text which is defined in ScenarioCreator.models file."""

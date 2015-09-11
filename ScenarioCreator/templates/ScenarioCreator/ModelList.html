@@ -19,9 +19,9 @@
                             <div class="defined_wrapper">
                                 <a class="defined_name" href="/setup/{{model.class}}/{{entry.pk}}/" load-target="{{load_target}}">{{ entry }}</a>
                                 {% if not 'Function' in  model.name %}
-                                    <a href="#" class="delete-button pull-right" title="delete" data-delete-link="/setup/{{model.class}}/{{entry.pk}}/delete/"></a>
+                                    <a href="#" class="delete-icon pull-right" title="delete" data-delete-link="/setup/{{model.class}}/{{entry.pk}}/delete/"></a>
                                 {% endif %}
-                                <a href="/setup/{{model.class}}/{{entry.pk}}/copy/" load-target="{{load_target}}" class="copy-button pull-right" title="duplicate"></a>
+                                <a href="/setup/{{model.class}}/{{entry.pk}}/copy/" load-target="{{load_target}}" class="copy-icon pull-right" title="duplicate"></a>
                             </div>
                         </li>
                     {% endfor %}

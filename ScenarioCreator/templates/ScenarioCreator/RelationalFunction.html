@@ -4,7 +4,7 @@
 {% load db_status_tags %}
 
 {% block content %}
-<form id="relational-form" class="ajax"  method="post" action="{{ action }}" enctype="multipart/form-data">
+<form id="{{ action|action_id }}" class="ajax relational-form"  method="post" action="{{ action }}" enctype="multipart/form-data">
 
     <img id="function-graph" src="{{action}}graph.png" class="img-responsive">
 
@@ -13,9 +13,8 @@
     <input type="file" id="file" name="file" accept=".csv">
 
     {% include "ScenarioCreator/RelationalEmbeddedFormset.html" %}
-    {% include "ScenarioCreator/EditButtons.html" %}
     <script>
-        $(document).on('submit', '#relational-form', function(){
+        $(document).on('submit', '.relational-form', function(){
             $('#formset tbody tr').each(function(){
                 var x = $(this).find('td:first-child input:nth-child(3)').first().val()
                 var y = $(this).find('td:nth-child(2) input:first-child').first().val()
@@ -25,6 +24,8 @@
             })
         });
     </script>
+    {% include "ScenarioCreator/ViewEditButtons.html" %}
+
 </form>
 {#    {% crispy formset helper %}#}
 {% endblock %}

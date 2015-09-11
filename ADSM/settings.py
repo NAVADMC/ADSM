@@ -32,6 +32,38 @@ if OVERRIDE_DEBUG:
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
 
+# Look for any settings to import from the installer
+if os.path.isfile(os.path.join(BASE_DIR, 'settings.ini')):
+    from importlib import machinery
+    install_settings = machinery.SourceFileLoader('install_settings', os.path.join(BASE_DIR, 'settings.ini')).load_module()
+    WORKSPACE_PATH = install_settings.WORKSPACE_PATH
+if not WORKSPACE_PATH:
+    if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.
+        try:
+            import ctypes.wintypes
+            CSIDL_PERSONAL = 5
+            SHGFP_TYPE_CURRENT = 0
+            buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+            ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_PERSONAL, 0, SHGFP_TYPE_CURRENT, buf)
+            WORKSPACE_PATH = os.path.join(buf.value, "ADSM Workspace")
+        except:
+            WORKSPACE_PATH = None
+    if not WORKSPACE_PATH:
+        WORKSPACE_PATH = os.path.join(os.path.expanduser("~"), "Documents", "ADSM Workspace")
+if not DB_BASE_DIR:
+    DB_BASE_DIR = os.path.join(WORKSPACE_PATH, "settings")
+if not os.path.exists(WORKSPACE_PATH):
+    os.makedirs(WORKSPACE_PATH, exist_ok=True)
+if not os.path.exists(DB_BASE_DIR):
+    os.makedirs(DB_BASE_DIR, exist_ok=True)
+
+if sys.platform == 'win32':
+    OS_DIR = 'windows'
+    EXTENSION = '.exe'
+else:
+    OS_DIR = 'linux'
+    EXTENSION = ''
+
 INSTALLED_APPS = (
     'ScenarioCreator',
     'Results',
@@ -118,7 +150,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-
+            os.path.join(BASE_DIR, 'ADSM', 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {

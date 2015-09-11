@@ -25,7 +25,7 @@ ADSM has several external dependencies. Getting your environment setup with thes
 
 Operating system:  
 
-  - Windows, Debian Linux or Mac OS X. 
+  - Windows, Debian or RedHat Linux, or Mac OS X (no Viewer application or packaged release). 
   
 Python 3.4.2 (x64): 
  
@@ -41,55 +41,39 @@ Create Virtual Environment:
 
   - Windows: `/path/to/py3.4/python -m venv /path/to/adsm_venv`
     - Activate with `/path/to/adsm_venv/Scripts/activate.bat`
-  - Linux: `python3 -m venv /path/to/adsm_venv`
+    - Install Git and Mercurial so they are properly on the command line  #TODO: Get links for these
+  - Linux: `python3 -m venv --without-pip /path/to/adsm_venv`  
+    - Install Setuptools and Pip: `wget https://pypi.python.org/packages/source/s/setuptools/setuptools-3.4.4.tar.gz; tar -vzxf setuptools-3.4.4.tar.gz; rm setuptools-3.4.4.tar.gz; cd setuptools-3.4.4; python setup.py install; cd ..; rm -r setuptools-3.4.4; wget https://pypi.python.org/packages/source/p/pip/pip-1.5.6.tar.gz; tar -vzxf pip-1.5.6.tar.gz; rm pip-1.5.6.tar.gz; cd pip-1.5.6; python setup.py install; cd ..; rm -r pip-1.5.6`
     - Activate with `source /path/to/adsm_venv/bin/activate`
-    - Install required python dev files: `sudo apt-get install build-essential python3-dev; sudo apt-get build-dep python3-matplotlib`
+    - Install required dev files: `sudo apt-get install build-essential python3-dev git mercurial; sudo apt-get build-dep python3-matplotlib python3-scipy`
     
 Please make sure that NO packages from your global install made it into your Virtual Environment. Use `pip freeze` to confirm nothing is installed.
 
+Download the ADSM source: `git clone https://github.com/NAVADMC/ADSM.git /path/toADSM` (for read only) or `git clone git@github.com:NAVADMC/ADSM.git /path/to/ADSM` (for push access [must have dev access])
+
 Now that we have a Virtual Environment, we need to install all the Python Packages that ADSM uses.  
-Using the pip in your new Virtual Environment (confirm Virtual Environment Activation with `where pip` or `which pip`), install the following packages.
+Using the pip in your new Virtual Environment (confirm Virtual Environment Activation with `where pip` or `which pip`), install all the required packages in Requirements.txt `pip install -r Requirements.txt`
 
-    pip install CherryPy==3.6.0
-    pip install git+https://github.com/BryanHurst/django.git@stable/1.8.2-patched  # Note, this currently throws permission errors but actually works. Fix in Pip dev version.
-    pip install Jinja2==2.7.3
-    pip install MarkupSafe==0.23
-    pip install django-crispy-forms==1.4.0
-    pip install django-extras==0.3
-    pip install django-floppyforms==1.2.0
-    pip install futures==2.2.0
-    pip install pyparsing==2.0.3
-    pip install python-dateutil==2.3
-    pip install pytz==2014.10
-    pip install selenium==2.44.0
-    pip install six==1.8.0
-    pip install git+https://github.com/BryanHurst/django-productionserver.git@1.0.1R3  # Note, this currently throws permission errors but actually works. Fix in Pip dev version.
+**If you are on Linux or Mac** install the extra packages: `pip install -r Requirements-Nix.txt`
 
+**If you are on Windows** install the extra packages: `pip install -r Requirements-Windows.txt` 
 
-**If you are on Linux or Mac**, then you can install the following:
-
-    pip install numpy==1.9.1
-    pip install matplotlib==1.4.2
-    pip install pandas==0.15.2
-    pip install pyproj==1.9.4
-    pip install psutil==2.2.0
-
-**If you are on Windows**, these packages need a special installation: 
-
-  - Download the following files for Windows from [PythonLibs](http://www.lfd.uci.edu/~gohlke/pythonlibs/).  The exact links vary so you will need to navigate
+  - Download the following files for Windows from [PythonLibs](http://www.lfd.uci.edu/~gohlke/pythonlibs/). Another possible location is [PNAWheels](https://nipy.bic.berkeley.edu/pna/wheels/)  The exact links vary so you will need to navigate
   there manually.  Put them into a directory that you can easily navigate to in a command prompt:
-    - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/numpy-MKL-1.9.1.win-amd64-py3.4.exe
-    - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/pandas-0.15.2.win-amd64-py3.4.exe
-    - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/matplotlib-1.4.2.win-amd64-py3.4.exe
-    - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/pyproj-1.9.4dev.win-amd64-py3.4.exe
-    - http://www.lfd.uci.edu/~gohlke/pythonlibs/psutil-2.2.0-cp34-none-win_amd64.whl
-  - Now, using the easy_install (for exe) or pip (for whl) in your new Virtual Environment (`/path/to/adsm_venv/Scripts/easy_install`), install the following packages:
+    - numpy-MKL-1.9.1.win-amd64-py3.4.exe
+    - pandas-0.15.2.win-amd64-py3.4.exe
+    - matplotlib-1.4.2.win-amd64-py3.4.exe
+    - pyproj-1.9.4dev.win-amd64-py3.4.exe
+    - psutil-2.2.0-cp34-none-win_amd64.whl
+    - https://nipy.bic.berkeley.edu/pna/wheels/scipy-0.15.1-cp34-none-win_amd64.whl
+  - Now, using the easy_install (for exe) or pip (for whl) in your new Virtual Environment (`/path/to/adsm_venv/Scripts/easy_install` or `/path/toadsm_venv/Scripts/pip`), install the following packages:
         
         easy_install numpy-MKL-1.9.1.win-amd64-py3.4.exe  
         easy_install pandas-0.15.1.win-amd64-py3.4.exe  
         easy_install matplotlib-1.4.2.win-amd64-py3.4.exe  
         easy_install pyproj-1.9.4dev.win-amd64-py3.4.exe  
         pip install psutil-2.2.0-cp34-none-win_amd64.whl
+        pip install scipy-0.15.1-cp34-none-win_amd64.whl
 
 ###Setup Pycharm IDE
 The main developers of ADSM developed in Pycharm 4, so here's the IDE specific instructions to get your dev server running from a fresh clone.

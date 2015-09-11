@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.db.models import get_models, get_app
+from django.apps import apps
 from ScenarioCreator.models import RelationalFunction, RelationalPoint
 
 
@@ -12,8 +12,8 @@ class FunctionAdmin(admin.ModelAdmin):
     fields = ['name', 'x_axis_units', 'y_axis_units', 'notes']
     inlines = [PointInline]
 
-
-for myModel in get_models(get_app("ScenarioCreator")):
+myapp = apps.get_app_config('ScenarioCreator')
+for myModel in myapp.models.values():
     if myModel != RelationalFunction:
         admin.site.register(myModel)
 

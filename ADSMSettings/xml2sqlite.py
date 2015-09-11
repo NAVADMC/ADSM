@@ -9,20 +9,33 @@ defined for the ADSM project for all object creation."""
 import xml.etree.ElementTree as ET
 import warnings
 from pyproj import Proj
+from math import exp, sqrt
 
+import ADSMSettings.models
 from ScenarioCreator.models import *
 from Results.models import *
 
+
+
 CREATE_AT_A_TIME = 500 # for bulk object creation
+
+
+def status(message):
+    ADSMSettings.models.SmSession.objects.all().update(population_upload_status=message)
+    print(message)
 
 
 def create_no_duplicates(ModelClass, suggested_name, **kwargs):
     instance, created = ModelClass.objects.get_or_create(**kwargs)
     if suggested_name is not None:  # TODO: use Django _meta to check for a field called "name"
+        # Remove comma from suggested_name because we use commas as a separator
+        suggested_name = suggested_name.replace(',','')
         if created:
             instance.name = suggested_name
         else:
-            instance.name += ',' + suggested_name
+            current_name_parts = set(instance.name.split(', '))
+            if suggested_name not in current_name_parts:
+                instance.name += ', ' + suggested_name
         instance.save()
     return instance, created
 
@@ -80,31 +93,33 @@ def getPdf( xml, nameGenerator ):
 
     args = {'equation_type': pdfType.capitalize(), }
 
-    if pdfType == 'beta':
-        args['alpha'] = float( firstChild.find( './alpha' ).text )
-        args['alpha2'] = float( firstChild.find( './beta' ).text )
-        args['min'] = float( firstChild.find( './location' ).text )
-        args['max'] = float( firstChild.find( './scale' ).text )
+    if pdfType == 'bernoulli':
+        args['p'] = float( required_text(firstChild, './p' ) )
+    elif pdfType == 'beta':
+        args['alpha'] = float( required_text(firstChild, './alpha' ) )
+        args['alpha2'] = float( required_text(firstChild, './beta' ) )
+        args['min'] = float( required_text(firstChild, './location' ) )
+        args['max'] = float( required_text(firstChild, './scale' ) )
     elif pdfType == 'beta-pert':
         args['equation_type'] = 'BetaPERT'
-        args['min'] = float( firstChild.find( './min' ).text )
-        args['mode'] = float( firstChild.find( './mode' ).text )
-        args['max'] = float( firstChild.find( './max' ).text )
+        args['min'] = float( required_text(firstChild, './min' ) )
+        args['mode'] = float( required_text(firstChild, './mode' ) )
+        args['max'] = float( required_text(firstChild, './max' ) )
     elif pdfType == 'binomial':
-        args['n'] = float( firstChild.find( './n' ).text )
-        args['p'] = float( firstChild.find( './p' ).text )
+        args['s'] = float( required_text(firstChild, './n' ) )
+        args['p'] = float( required_text(firstChild, './p' ) )
     elif pdfType == 'discrete-uniform':
         args['equation_type'] = 'Discrete Uniform'
-        args['min'] = float( firstChild.find( './min' ).text )
-        args['max'] = float( firstChild.find( './max' ).text )
+        args['min'] = float( required_text(firstChild, './min' ) )
+        args['max'] = float( required_text(firstChild, './max' ) )
     elif pdfType == 'exponential':
-        args['mean'] = float( firstChild.find( './mean' ).text )
+        args['mean'] = float( required_text(firstChild, './mean' ) )
     elif pdfType == 'gamma':
-        args['alpha'] = float( firstChild.find( './alpha' ).text )
-        args['beta'] = float( firstChild.find( './beta' ).text )
+        args['alpha'] = float( required_text(firstChild, './alpha' ) )
+        args['beta'] = float( required_text(firstChild, './beta' ) )
     elif pdfType == 'gaussian':
-        args['mean'] = float( firstChild.find( './mean' ).text )
-        args['std_dev'] = float( firstChild.find( './stddev' ).text )
+        args['mean'] = float( required_text(firstChild, './mean' ) )
+        args['std_dev'] = float( required_text(firstChild, './stddev' ) )
     elif pdfType == 'histogram':
         graph = RelationalFunction( name=name + ' histogram data' )
         graph.save()
@@ -122,35 +137,42 @@ def getPdf( xml, nameGenerator ):
         point.save()
         args['graph'] = graph
     elif pdfType == 'hypergeometric':
-        args['n'] = float( firstChild.find( './n' ).text )
-        args['d'] = float( firstChild.find( './d' ).text )
-        args['m'] = float( firstChild.find( './m' ).text )
+        args['n'] = float( required_text(firstChild, './n' ) )
+        args['d'] = float( required_text(firstChild, './d' ) )
+        args['m'] = float( required_text(firstChild, './m' ) )
     elif pdfType == 'inverse-gaussian':
         args['equation_type'] = 'Inverse Gaussian'
-        args['mean'] = float( firstChild.find( './mu' ).text )
-        args['shape'] = float( firstChild.find( './lambda' ).text )
+        args['mean'] = float( required_text(firstChild, './mu' ) )
+        args['shape'] = float( required_text(firstChild, './lambda' ) )
     elif pdfType == 'logistic':
-        args['location'] = float( firstChild.find( './location' ).text )
-        args['scale'] = float( firstChild.find( './scale' ).text )
+        args['location'] = float( required_text(firstChild, './location' ) )
+        args['scale'] = float( required_text(firstChild, './scale' ) )
     elif pdfType == 'loglogistic':
         args['equation_type'] = 'LogLogistic'
-        args['location'] = float( firstChild.find( './location' ).text )
-        args['scale'] = float( firstChild.find( './scale' ).text )
-        args['shape'] = float( firstChild.find( './shape' ).text )
+        args['location'] = float( required_text(firstChild, './location' ) )
+        args['scale'] = float( required_text(firstChild, './scale' ) )
+        args['shape'] = float( required_text(firstChild, './shape' ) )
     elif pdfType == 'lognormal':
-        args['mean'] = float( firstChild.find( './zeta' ).text )
-        args['std_dev'] = float( firstChild.find( './sigma' ).text )
+        # Lognormal is represented in the XML as "zeta" and "sigma" as used in
+    	# the GNU Scientific Library docs. Convert to mean and standard
+    	# deviation.
+        zeta = float( required_text(firstChild, './zeta' ) )
+        sigma = float( required_text(firstChild, './sigma' ) )
+        sigma_sq = sigma*sigma
+        args['mean'] = exp( zeta + sigma_sq/2 )
+        variance = exp( 2*zeta + sigma_sq ) * (exp(sigma_sq) - 1)
+        args['std_dev'] = sqrt(variance)
     elif pdfType == 'negative-binomial':
         args['equation_type'] = 'Negative Binomial'
-        args['s'] = float( firstChild.find( './s' ).text )
-        args['p'] = float( firstChild.find( './p' ).text )
+        args['s'] = float( required_text(firstChild, './s' ) )
+        args['p'] = float( required_text(firstChild, './p' ) )
     elif pdfType == 'pareto':
-        args['theta'] = float( firstChild.find( './theta' ).text )
-        args['a'] = float( firstChild.find( './a' ).text )
+        args['theta'] = float( required_text(firstChild, './theta' ) )
+        args['a'] = float( required_text(firstChild, './a' ) )
     elif pdfType == 'pearson5':
         args['equation_type'] = 'Pearson 5'
-        args['alpha'] = float( firstChild.find( './alpha' ).text )
-        args['beta'] = float( firstChild.find( './beta' ).text )
+        args['alpha'] = float( required_text(firstChild, './alpha' ) )
+        args['beta'] = float( required_text(firstChild, './beta' ) )
     elif pdfType == 'piecewise':
         graph = RelationalFunction( name=name + ' piecewise data' )
         graph.save()
@@ -161,8 +183,8 @@ def getPdf( xml, nameGenerator ):
         newStyle = firstChild.find( './/x' ) is not None
         if newStyle:
             for value in firstChild.findall( './value' ):
-                x = float( value.find( './x' ).text )
-                p = float( value.find( './p' ).text )
+                x = float( required_text(value, './x' ) )
+                p = float( required_text(value, './p' ) )
                 point = RelationalPoint( relational_function = graph, x = x, y = p )
                 point.save()
             # end of loop over <value> elements
@@ -183,17 +205,17 @@ def getPdf( xml, nameGenerator ):
         args['equation_type'] = 'Fixed Value'
         args['mode'] = float( firstChild.text )
     elif pdfType == 'poisson':
-        args['mean'] = float( firstChild.find( './mean' ).text )
+        args['mean'] = float( required_text(firstChild, './mean' ) )
     elif pdfType == 'triangular':
-        args['min'] = float( firstChild.find( './a' ).text )
-        args['mode'] = float( firstChild.find( './c' ).text )
-        args['max'] = float( firstChild.find( './b' ).text )
+        args['min'] = float( required_text(firstChild, './a' ) )
+        args['mode'] = float( required_text(firstChild, './c' ) )
+        args['max'] = float( required_text(firstChild, './b' ) )
     elif pdfType == 'uniform':
-        args['min'] = float( firstChild.find( './a' ).text )
-        args['max'] = float( firstChild.find( './b' ).text )
+        args['min'] = float( required_text(firstChild, './a' ) )
+        args['max'] = float( required_text(firstChild, './b' ) )
     elif pdfType == 'weibull':
-        args['alpha'] = float( firstChild.find( './alpha' ).text )
-        args['beta'] = float( firstChild.find( './beta' ).text )
+        args['alpha'] = float( required_text(firstChild, './alpha' ) )
+        args['beta'] = float( required_text(firstChild, './beta' ) )
     else:
         raise NotImplementedError( pdfType )
 
@@ -219,8 +241,8 @@ def getRelChart( xml, nameGenerator ):
             for xyPair in firstChild.findall( './value' ):
                 point = RelationalPoint(
                     relational_function = relChart,
-                    x = float( xyPair.find( './x' ).text ),
-                    y = float( xyPair.find( './y' ).text )
+                    x = float( required_text(xyPair, './x' ) ),
+                    y = float( required_text(xyPair, './y' ) )
                 )
                 point.save()
             # end of loop over points
@@ -233,8 +255,8 @@ def getRelChart( xml, nameGenerator ):
             same = True
             i = 0
             for xyPair in firstChild.findall( './value' ):
-                x = float( xyPair.find( './x' ).text )
-                y = float( xyPair.find( './y' ).text )
+                x = float( required_text(xyPair, './x' ) )
+                y = float( required_text(xyPair, './y' ) )
                 if x != points[i].x or y != points[i].y:
                     same = False
                     break
@@ -248,8 +270,8 @@ def getRelChart( xml, nameGenerator ):
                 for xyPair in firstChild.findall( './value' ):
                     point = RelationalPoint(
                         relational_function = relChart,
-                        x = float( xyPair.find( './x' ).text ),
-                        y = float( xyPair.find( './y' ).text )
+                        x = float( required_text(xyPair, './x' ) ),
+                        y = float( required_text(xyPair, './y' ) )
                     )
                     point.save()
                 # end of loop over points
@@ -281,7 +303,7 @@ def getBool( xml ):
 
 
 def readPopulation( populationFileName ):
-    print("Reading population file: ", populationFileName)
+    status("Reading population file: " + populationFileName)
     fp = open( populationFileName, 'rb' )
     xml = ET.parse( fp ).getroot()
     fp.close()
@@ -308,18 +330,18 @@ def readPopulation( populationFileName ):
             description = ''
         else:
             description = 'id=' + description.text
-        typeName = el.find( './production-type' ).text
+        typeName = required_text(el, './production-type' )
         productionType = ProductionType.objects.get_or_create( name=typeName )[0]
-        size = int( el.find( './size' ).text )
+        size = int( required_text(el, './size' ) )
         if not projection:
-            lat = float( el.find( './location/latitude' ).text )
-            long = float( el.find( './location/longitude' ).text )
+            lat = float( required_text(el, './location/latitude' ) )
+            long = float( required_text(el, './location/longitude' ) )
         else:
-            x = float( el.find( './location/x' ).text )
-            y = float( el.find( './location/y' ).text )
+            x = float( required_text(el, './location/x' ) )
+            y = float( required_text(el, './location/y' ) )
             long, lat = projection( x, y, inverse=True )
 
-        state = el.find( './status' ).text
+        state = required_text(el, './status' )
         if state not in stateCodes.values():
             try:
                 state = stateCodes[state]
@@ -353,8 +375,16 @@ def readPopulation( populationFileName ):
     return # from readPopulation
 
 
+def required_text(element, tag):
+    try:
+        child = element.find(tag)
+        return child.text
+    except (AttributeError, Exception) as e:
+        raise AttributeError("Missing required value " + str(tag) + " in " + str(element).replace('<',''))
+
+
 def readParameters( parameterFileName, saveIterationOutputsForUnits ):
-    print("Reading parameters file:", parameterFileName)
+    status("Reading parameters file: " + parameterFileName)
     fp = open( parameterFileName, 'rb' )
     try:
         xml = ET.parse( fp ).getroot()
@@ -384,9 +414,9 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         fileAsString = fileAsString.replace( 'xmlns:', 'xmlns:xdf="http://xml.gsfc.nasa.gov/XDF" xmlns:', 1 )
         xml = ET.fromstring( fileAsString )
     fp.close()
-    print("Done reading parameters file.  Constructing New Scenario...")
+    status("Done reading parameters file.  Constructing New Scenario...")
 
-    Scenario.objects.get_or_create(description = xml.find( './description' ).text)
+    Scenario.objects.get_or_create(description = required_text(xml,  './description' ))
 
     if xml.find( './exit-condition/first-detection' ) is not None:
         earlyExitCondition = 'first-detection'
@@ -395,8 +425,8 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     else:
         earlyExitCondition = ''
     outputSettings = OutputSettings(
-        iterations = int( xml.find( './num-runs' ).text ),
-        days = int( xml.find( './num-days' ).text ),
+        iterations = int( required_text(xml, './num-runs' ) ),
+        days = int( required_text(xml, './num-days' ) ),
         stop_criteria = earlyExitCondition,
         save_daily_unit_states = (xml.find( './/state-table-writer' ) is not None),
         save_daily_events = (xml.find( './/apparent-events-table-writer' ) is not None),
@@ -412,6 +442,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     # Make a set containing all production type names. Initialize with the
     # names already found in readPopulation, then add any new ones found in the
     # parameters file.
+    status("Checking for Additional Production Types")
     productionTypeNames = set( [productionType.name for productionType in ProductionType.objects.all()] )
     for el in xml.findall( './/*[@production-type]' ):
         productionTypeNames.update( getProductionTypes( el, 'production-type', [] ) )
@@ -442,6 +473,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     # Create a sequence to be used to give names to unnamed relational charts.
     relChartNameSequence = sequence( 'Rel' )
 
+    status("Reading Disease Models")
     for el in xml.findall( './/disease-model' ):
         latentPeriod = getPdf( el.find( './latent-period' ), pdfNameSequence )
         subclinicalPeriod = getPdf( el.find( './infectious-subclinical-period' ), pdfNameSequence )
@@ -472,11 +504,12 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # end of loop over production types covered by this <disease-model> element
     # end of loop over <disease-model> elements
 
+    status("Building Airborne Spread")
     for el in xml.findall( './/airborne-spread-model' ) + xml.findall( './/airborne-spread-exponential-model' ):
         if useAirborneExponentialDecay:
             maxDistance = 0
         else:
-            maxDistance = float( el.find( './max-spread/value' ).text )
+            maxDistance = float( required_text(el, './max-spread/value' ) )
         if el.find( './delay' ) is not None:
             delay = getPdf( el.find( './delay' ), pdfNameSequence )
         else:
@@ -487,9 +520,9 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 airborneSpread, created = create_no_duplicates(AirborneSpread, 'Airborne %s -> %s' % (fromTypeName, toTypeName),
                   _disease = disease,
                   max_distance = maxDistance,
-                  spread_1km_probability = float( el.find( './prob-spread-1km' ).text ),
-                  exposure_direction_start = float( el.find( './wind-direction-start/value' ).text ),
-                  exposure_direction_end = float( el.find( './wind-direction-end/value' ).text ),
+                  spread_1km_probability = float( required_text(el, './prob-spread-1km' ) ),
+                  exposure_direction_start = float( required_text(el, './wind-direction-start/value' ) ),
+                  exposure_direction_end = float( required_text(el, './wind-direction-end/value' ) ),
                   transport_delay = delay
                 )
                 airborneSpread.save()
@@ -504,28 +537,30 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # end of loop over from-production-types covered by this <airborne-spread[-exponential]-model> element
     # end of loop over <airborne-spread[-exponential]-model> elements
 
+    status("Building Zones")
     for el in xml.findall( './/zone-model' ):
-        name = el.find( './name' ).text
-        radius = float( el.find( './radius/value' ).text )
+        name = required_text(el, './name' )
+        radius = float( required_text(el, './radius/value' ) )
         if radius > 0:
             zone, created = create_no_duplicates(Zone, suggested_name=name, radius=radius )
     # end of loop over <zone-model> elements
 
+    status("Reading Contact Spread Models...")
     for el in xml.findall( './/contact-spread-model' ):
         if 'zone' in el.attrib:
             continue
         fixedRate = (el.find( './fixed-movement-rate' ) is not None)
         if fixedRate:
-            contactRate = float( el.find( './fixed-movement-rate/value' ).text )
+            contactRate = float( required_text(el, './fixed-movement-rate/value' ) )
         else:
-            contactRate = float( el.find( './movement-rate/value' ).text )
+            contactRate = float( required_text(el, './movement-rate/value' ) )
         distance = getPdf( el.find( './distance' ), pdfNameSequence )
         if el.find( './delay' ) is not None:
             delay = getPdf( el.find( './delay' ), pdfNameSequence )
         else:
             delay = None
         if el.find( './prob-infect' ) is not None:
-            probInfect = float( el.find( './prob-infect' ).text )
+            probInfect = float( required_text(el, './prob-infect' ) )
         else:
             probInfect = 0
         try:
@@ -582,6 +617,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # end of loop over from-production-types covered by this <contact-spread-model> element
     # end of loop over <contact-spread-model> elements without a "zone" attribute
 
+    status("Building Contact Spread Model")
     for el in xml.findall( './/contact-spread-model' ):
         if 'zone' not in el.attrib:
             continue
@@ -637,7 +673,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         plan = ControlMasterPlan()
         plan.save()
 
-
+    status("Building Detection Model")
     for el in xml.findall( './/detection-model' ):
         # <detection-model> elements come in 2 forms. The first form, with a
         # production-type attribute, specifies the probability of observing
@@ -646,7 +682,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # attribute, specifies a multiplier to use on the probability of
         # observing clinical signs when inside a zone.
         if 'zone' in el.attrib:
-            multiplier = float( el.find( './zone-prob-multiplier' ).text )
+            multiplier = float( required_text(el, './zone-prob-multiplier' ) )
         else:
             observing = getRelChart( el.find( './prob-report-vs-time-clinical' ), relChartNameSequence )
             reporting = getRelChart( el.find( './prob-report-vs-time-since-outbreak' ), relChartNameSequence )
@@ -691,6 +727,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # end of loop over production-types covered by this <detection-model> element
     # end of loop over <detection-model> elements
 
+    status("Contact Recorder Model")
     for el in xml.findall( './/contact-recorder-model' ):
         try:
             contactType = el.attrib['contact-type']
@@ -702,7 +739,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             assert (direction == 'in' or direction == 'out')
         except KeyError:
             direction = 'both'
-        traceSuccess = float( el.find( './trace-success' ).text )
+        traceSuccess = float( required_text(el, './trace-success' ) )
         if el.find( './trace-delay' ) is not None:
             traceDelay = getPdf( el.find( './trace-delay' ), pdfNameSequence )
         else:
@@ -734,6 +771,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # end of loop over production types covered by this <contact-recorder-model> element
     # end of loop over <contact-recorder-model> elements
 
+    status("Reading Tracing")
     for el in xml.findall( './/trace-model' ):
         try:
             contactType = el.attrib['contact-type']
@@ -745,7 +783,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             assert (direction == 'in' or direction == 'out')
         except KeyError:
             direction = 'both'
-        tracePeriod = int( el.find( './trace-period/value' ).text )
+        tracePeriod = int( required_text(el, './trace-period/value' ) )
 
         typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
         for typeName in typeNames:
@@ -792,7 +830,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             assert (direction == 'in' or direction == 'out')
         except KeyError:
             direction = 'both'
-        detectionMultiplier = float( el.find( './detection-multiplier' ).text )
+        detectionMultiplier = float( required_text(el, './detection-multiplier' ) )
         try:
             testIfNoSigns = getBool( el.find( './test-if-no-signs' ) )
         except AttributeError:
@@ -838,9 +876,10 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # end of loop over production types covered by this <trace-exam-model> element
     # end of loop over <trace-exam-model> elements
 
+    status("Building Lab Tests")
     for el in xml.findall( './/test-model' ):
-        sensitivity = float( el.find( './sensitivity' ).text )
-        specificity = float( el.find( './specificity' ).text )
+        sensitivity = float( required_text(el, './sensitivity' ) )
+        specificity = float( required_text(el, './specificity' ) )
         delay = getPdf( el.find( './delay' ), pdfNameSequence )
         typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
         for typeName in typeNames:
@@ -931,9 +970,10 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     # different elements. Keep a list that will help sort it out later.
     vaccinationProductionTypeOrder = []
 
+    status("Building Vaccination")
     productionTypesWithVaccineEffectsDefined = set()
     for el in xml.findall( './/vaccine-model' ):
-        delay = int( el.find( './delay/value' ).text )
+        delay = int( required_text(el, './delay/value' ) )
         immunityPeriod = getPdf( el.find( './immunity-period' ), pdfNameSequence )
 
         typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
@@ -971,7 +1011,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             fromTypeNames = getProductionTypes( el, 'from-production-type', productionTypeNames )
             toTypeNames = getProductionTypes( el, 'to-production-type', productionTypeNames )
 
-        radius = float( el.find( './radius/value' ).text )
+        radius = float( required_text(el, './radius/value' ) )
         for fromTypeName in fromTypeNames:
             # If a ControlProtocol object has already been assigned to this
             # production type, retrieve it; otherwise, create a new one.
@@ -993,8 +1033,8 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             protocol.save()
         # end of loop over from-production-types covered by this <ring-vaccination-model> element
 
-        priority = int( el.find( './priority' ).text )
-        minTimeBetweenVaccinations = int( el.find( './min-time-between-vaccinations/value' ).text )
+        priority = int( required_text(el, './priority' ) )
+        minTimeBetweenVaccinations = int( required_text(el, './min-time-between-vaccinations/value' ) )
         try:
             vaccinateDetectedUnits = getBool( el.find( './vaccinate-detected-units' ) )
         except AttributeError:
@@ -1034,6 +1074,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     destructionReasonOrder = []
     destructionProductionTypeOrder = []
 
+    status("Reading Destruction Models")
     for el in xml.findall( './/trace-back-destruction-model' ):
         # This is an older module, superseded by the combination of contact-
         # recorder-model, trace-model, and trace-destruction-model.
@@ -1041,8 +1082,8 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # Enable trace forward/out from all production types.
         contactType = el.attrib['contact-type']
         assert (contactType == 'direct' or contactType == 'indirect')
-        tracePeriod = int( el.find( './trace-period/value' ).text )
-        traceSuccess = float( el.find( './trace-success' ).text )
+        tracePeriod = int( required_text(el, './trace-period/value' ) )
+        traceSuccess = float( required_text(el, './trace-success' ) )
         for typeName in productionTypeNames:
             # If a ControlProtocol object has already been assigned to this
             # production type, retrieve it; otherwise, create a new one.
@@ -1073,7 +1114,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
         # Enable destruction of specific production types when identified by
         # trace.
-        priority = int( el.find( './priority' ).text )
+        priority = int( required_text(el, './priority' ) )
         try:
             quarantineOnly = getBool( el.find( './quarantine-only' ) )
         except AttributeError:
@@ -1110,7 +1151,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     # end of loop over <trace-back-destruction-model> elements
 
     for el in xml.findall( './/basic-destruction-model' ):
-        priority = int( el.find( './priority' ).text )
+        priority = int( required_text(el, './priority' ) )
 
         typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
         for typeName in typeNames:
@@ -1147,7 +1188,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             assert (direction == 'in' or direction == 'out')
         except KeyError:
             direction = 'both'
-        priority = int( el.find( './priority' ).text )
+        priority = int( required_text(el, './priority' ) )
 
         typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
         for typeName in typeNames:
@@ -1195,7 +1236,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             fromTypeNames = getProductionTypes( el, 'from-production-type', productionTypeNames )
             toTypeNames = getProductionTypes( el, 'to-production-type', productionTypeNames )
 
-        radius = float( el.find( './radius/value' ).text )
+        radius = float( required_text(el, './radius/value' ) )
         for fromTypeName in fromTypeNames:
             # If a ControlProtocol object has already been assigned to this
             # production type, retrieve it; otherwise, create a new one.
@@ -1217,7 +1258,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             protocol.save()
         # end of loop over from-production-types covered by this <ring-destruction-model> element
 
-        priority = int( el.find( './priority' ).text )
+        priority = int( required_text(el, './priority' ) )
         for toTypeName in toTypeNames:
             # If a ControlProtocol object has already been assigned to this
             # production type, retrieve it; otherwise, create a new one.
@@ -1243,10 +1284,10 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
     for el in xml.findall( './/resources-and-implementation-of-controls-model' ):
         if useDestruction:
-            plan.destruction_program_delay = int( el.find( './destruction-program-delay/value' ).text )
+            plan.destruction_program_delay = int( required_text(el, './destruction-program-delay/value' ) )
             plan.destruction_capacity = getRelChart( el.find( './destruction-capacity' ), relChartNameSequence )
             try:
-                order = el.find( './destruction-priority-order' ).text.strip()
+                order = required_text(el, './destruction-priority-order' ).strip()
             except AttributeError:
                 order = 'reason,production type,time waiting' # the old default
             # The XML did not put spaces after the commas, but the Django
@@ -1292,9 +1333,9 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             )
             trigger.save()
             for productionType in ProductionType.objects.all():
-	            trigger.trigger_group.add( productionType )
+                trigger.trigger_group.add( productionType )
             plan.vaccination_capacity = getRelChart( el.find( './vaccination-capacity' ), relChartNameSequence )
-            order = el.find( './vaccination-priority-order' ).text.strip()
+            order = required_text(el, './vaccination-priority-order' ).strip()
             # The XML did not put spaces after the commas, but the Django
             # model does.
             order = ', '.join( order.split( ',' ) )
@@ -1321,6 +1362,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # end of if useVaccination==True
     # end of loop over <resources-and-implementation-of-control-model> elements
 
+    status("Finalizing Economic Model")
     for el in xml.findall( './/economic-model' ):
         try:
             vaccinationFixed = float( el.find( './vaccination-fixed/value' ).text )
@@ -1434,5 +1476,12 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 def import_naadsm_xml(populationFileName, parameterFileName, saveIterationOutputsForUnits=True):
     """ Load activeSession with the contents of 2 XML files.  This can be saved normally after the scenario_db is populated.
     Database routing is done through the normal ScenarioCreator/router.py"""
-    readPopulation(populationFileName)
-    readParameters(parameterFileName, saveIterationOutputsForUnits)
+    try:
+        readPopulation(populationFileName)
+    except Exception as e:
+        raise ValueError("<p><strong>Bad Population file:</strong> " + str(e) + ".</p>\n <p>Please export a new <strong>Population</strong> XML file from NAADSM 3.2.19</p>")
+    try:
+        readParameters(parameterFileName, saveIterationOutputsForUnits)
+    except Exception as e:
+        raise ValueError("<p><strong>Bad Parameters file:</strong> " + str(e) + ".</p>\n <p>Please export a new <strong>Parameters</strong> XML file from NAADSM 3.2.19</p>")
+

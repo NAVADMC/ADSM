@@ -153,6 +153,10 @@ $(function(){
         console.log('error', e);
         progressBar.stopProgressChecker();
     };
+
+    $('#farm_list').livequery(function() {
+        check_edit_population_state();
+    });
 });
 
 
@@ -204,7 +208,12 @@ function update_population_filter_and_sort(sort_by) {
         var sorting = 'sort_by=' + sort_by;
     }
     var new_url = '?' + population_filter_string();//build URL
-    new_url = new_url + sorting;
+
+    var mask_visible = $('#edit-mask').is(':visible');
+    console.log(mask_visible)
+    var form_editable = mask_visible ? '' : '&readonly=readonly'
+
+    new_url = new_url + sorting + form_editable;
     //get it with AJAX and insert new HTML with load()
     window.history.replaceState('', 'Population Filters', new_url);
     $('#farm_list').parent().load(new_url + ' #farm_list');
@@ -255,13 +264,26 @@ $(document).on('click', '#refresh_map', function(){
 });
 
 $(document).on('click', '#edit_population', function(){
-    $('#population_grid_wraper .buttonHolder').removeAttr('hidden')
     $('#population_grid_wraper').css('height', 'calc(100vh - 123px')
-    $('#edit-mask').css('visibility', 'visible')
-    $('#farm_list tbody').css('height', 'calc(100vh - 214px)')
-    $('#edit_population').css('display', 'none')
-    $('#farm_list select, #farm_list input').addClass('editable')
-    $('#population_grid_wraper :input').addClass('editable')
+    $('#edit-mask').css('display', 'block')
+    $('#farm_list').find('tbody').css('height', 'calc(100vh - 214px)')
+    //$('#farm_list select, #farm_list input').addClass('editable')
+    //$('#population_grid_wraper :input').addClass('editable')
     $('#tb_mask').css('visibility', 'visible')
     $('#population_main_panel').css('pointer-events','all')
+    $('.readonly').removeClass('readonly')
+    check_edit_population_state()
 })
+
+function check_edit_population_state(){
+    var mask_visibility = $('#edit-mask').is(':visible');
+    console.log(mask_visibility)
+    if(mask_visibility) {
+        $('.population-buttons').removeAttr('hidden')
+        $('#edit_population').css('display', 'none')
+    } else {
+        $('.population-buttons').attr('hidden','hidden')
+        $('form.editable').addClass('readonly')
+        $('form.editable').removeClass('editable')
+    }
+}

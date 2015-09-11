@@ -10,6 +10,8 @@ from django.db import OperationalError
 from django.core.management import call_command
 from django.db import connections, close_old_connections
 from django.conf import settings
+import sys
+import subprocess
 
 from ADSMSettings.models import SmSession
 
@@ -97,13 +99,60 @@ def adsm_executable_command():
     return [system_executable, db_path('scenario_db')] + output_args
 
 
+def check_for_updates():
+    print("Checking for updates...")
+    clear_update_flag()
+    check_simulation_version()
+    version = check_update()
+    if version and version != 'False' and version != '0':
+        print("New version available:", version)
+    else:
+        print("No updates currently.")
+    return version
+
+
+def copy_db_template(template, destination):
+    try:
+        close_old_connections()
+        print("Copying %s database to %s..." % (template, destination))
+        source = os.path.join(settings.BASE_DIR, 'Database Templates', template)
+        shutil.copy(source, destination)
+    except:
+        print("Copying database failed!")
+        raise
+
+
+def copy_blank_to_session():
+    try:  # just copy blank then update version
+        copy_db_template('blank.sqlite3', os.path.join(settings.DB_BASE_DIR, 'activeSession.sqlite3'))
+        SmSession.objects.all().update(unsaved_changes=True)
+    except BaseException as err:
+        print("Copying from blank scenario template failed!\nResetting database.")
+        print(err)
+        reset_db('scenario_db')
+
+
+def copy_blank_to_settings():
+    try:
+        copy_db_template('settings.sqlite3', os.path.join(settings.DB_BASE_DIR, 'settings.sqlite3'))
+    except BaseException as e:
+        print("Copying from blank settings template failed!\nResetting database.")
+        print(e)
+        reset_db('default')
+
+
 def graceful_startup():
     """Checks something inside of each of the database files to see if it's valid.  If not, rebuild the database."""
+    print("Setting up application...")
+
     if not os.path.exists(workspace_path()):
         print("Creating User Directory...")
         os.makedirs(os.path.dirname(workspace_path()), exist_ok=True)
+    if not os.path.exists(settings.DB_BASE_DIR):
+        print("Creating DB Directory...")
+        os.makedirs(settings.DB_BASE_DIR, exist_ok=True)
     
-    print("Copying Sample Scenarios")
+    print("Copying Sample Scenarios...")
     samples_dir = os.path.join(settings.BASE_DIR, "Sample Scenarios")
     for dirpath, dirnames, files in os.walk(samples_dir):
         [os.makedirs(workspace_path(sub), exist_ok=True) for sub in dirnames]
@@ -111,7 +160,7 @@ def graceful_startup():
         if subdir.startswith(os.path.sep):
             subdir = subdir.replace(os.path.sep, '', 1)
         if subdir.strip():
-            if not os.path.join(workspace_path(), subdir):
+            if not os.path.exists(os.path.join(workspace_path(), subdir)):
                 os.makedirs(os.path.join(workspace_path(), subdir))
         for file in files:
             try:
@@ -119,22 +168,32 @@ def graceful_startup():
             except Exception as e:
                 print(e)
 
+    print("Checking database state...")
+    if not os.path.isfile(os.path.join(settings.DB_BASE_DIR, 'settings.sqlite3')) or os.stat(os.path.join(settings.DB_BASE_DIR, 'settings.sqlite3')).st_size < 10000:
+        copy_blank_to_settings()
     try:
         x = SmSession.objects.get().scenario_filename  # this should be in the initial migration
         print(x)
     except OperationalError:
         reset_db('default')
-        
+
+    if not os.path.isfile(os.path.join(settings.DB_BASE_DIR, 'activeSession.sqlite3')) or os.stat(os.path.join(settings.DB_BASE_DIR, 'activeSession.sqlite3')).st_size < 10000:
+        copy_blank_to_session()
     try:
         from ScenarioCreator.models import ZoneEffect
         ZoneEffect.objects.count()  # this should be in the initial migration
     except OperationalError:
         reset_db('scenario_db')
-    
+
     update_db_version()
-    session = SmSession.objects.get()
-    session.update_on_startup = False
-    session.save()
+
+    if getattr(sys, 'frozen', False):
+        check_for_updates()
+    else:
+        print("Skipping update check.")
+        clear_update_flag()
+
+    print("Done setting up application.")
 
 
 def reset_db(name, fail_ok=True):
@@ -165,68 +224,34 @@ def reset_db(name, fail_ok=True):
     #creates a new blank file by migrate
     call_command('migrate', database=name, interactive=False, fake_initial=True)
     if name == 'default':  # create super user
-        from django.contrib.auth.models import User
-        u = User(username='ADSM', is_superuser=True, is_staff=True)
-        u.set_password('ADSM')
-        u.save()
+        create_super_user()
+
+
+def create_super_user():
+    from django.contrib.auth.models import User
+    u = User(username='ADSM', is_superuser=True, is_staff=True)
+    u.set_password('ADSM')
+    u.save()
+    return u
 
 
 def update_db_version():
     """It is critical to call migrate only with a database specified in order for the django_migration history
     to stay current with activeSession."""
-    print("Checking Scenario version")
+    print("Checking Database states...")
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
     try:
         call_command('migrate', database='scenario_db', interactive=False, fake_initial=True)
         call_command('migrate', database='default', interactive=False, fake_initial=True)
     except:
         print("Error: Migration failed.")
-    print('Done creating database')
+    print('Done migrating databases.')
 
 
 def supplemental_folder_has_contents(subfolder=''):
     """Doesn't currently include Map subdirectory.  Instead it checks for the map zip file.  TODO: This could be a page load slow down given that
     we're checking the file system every page."""
     return len(list(chain(*[glob(workspace_path(scenario_filename() + subfolder + "/*." + ext)) for ext in ['csv', 'shp', 'shx', 'dbf', 'zip']]))) > 0
-
-
-def update_requested():
-    try:
-        a_size = os.stat(connections.databases['scenario_db']['NAME']).st_size
-        s_size = os.stat(connections.databases['default']['NAME']).st_size
-        if a_size < 500 or s_size < 500:  # size in bytes
-            return False
-    except:
-        return False
-        
-    try:
-        session = SmSession.objects.get()
-        if session.update_on_startup:
-            return True
-    except:
-        pass
-    finally:
-        close_old_connections()
-
-    return False
-
-
-def clear_update_flag():
-    try:  #database may not exist
-        session = SmSession.objects.get()
-        session.update_on_startup = False
-        session.update_available = False
-        session.save()
-    except:
-        pass
-
-
-def check_update():
-    close_old_connections()
-    update_available = False  # TODO: Build in new check update method
-    session = SmSession.objects.get()
-    session.update_available = update_available
-    session.save()
 
 
 def scenario_filename(new_value=None, check_duplicates=False):
@@ -247,3 +272,86 @@ def scenario_filename(new_value=None, check_duplicates=False):
         session.scenario_filename = new_value
         session.save()
     return session.scenario_filename
+
+
+def launch_external_program_and_exit(launch, code=0, close_self=True, cmd_args=None, launch_args=None):
+    if not launch_args:
+        launch_args = {}
+    if not cmd_args:
+        cmd_args = []
+    launch = [launch, ]
+    if cmd_args:
+        for cmd_arg in cmd_args:
+            launch.append(cmd_arg)
+    if sys.platform == 'win32':  # Yes, this is also x64.
+        CREATE_NEW_PROCESS_GROUP = 0x00000200
+        DETACHED_PROCESS = 0x00000008
+        launch_args.update(creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP)
+    else:
+        launch_args.update(preexec_fn=os.setsid)
+        launch_args.update(start_new_session=True)
+    subprocess.Popen(launch, stdin=subprocess.PIPE, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **launch_args)
+    if close_self:
+        sys.exit(code)
+
+
+def check_simulation_version():
+    """Will return None if the database is not usable"""
+    close_old_connections()
+    version = None
+    try:
+        executable = adsm_executable_command()[0]
+        process = subprocess.Popen([executable, "--version"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output, error = process.communicate()
+        exit_code = process.wait(timeout=200)
+        process.kill()
+
+        if exit_code == 0:
+            version = output.splitlines()[-1].decode()
+    except:
+        print("Unable to get Simulation Version!")
+        return None
+    try:
+        SmSession.objects.all().update(simulation_version=version)
+    except:
+        print("Unable to store Simulation Version!")
+
+    return version
+
+
+def npu_update_info():
+    new_version = None
+    try:
+        npu = os.path.join(settings.BASE_DIR, 'npu'+settings.EXTENSION)
+        process = subprocess.Popen([npu, "--check_update", "--silent"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output, error = process.communicate()
+        exit_code = process.wait(timeout=60000)
+        process.kill()
+
+        if output:
+            new_version = output.splitlines()[-1].decode().strip()
+    except:
+        print("Unable to get ADSM Version!")
+
+    return new_version
+
+
+def clear_update_flag():
+    try:  # database may not exist
+        session = SmSession.objects.get()
+        session.update_available = False
+        session.save()
+    except:
+        print("Unable to clear Update Flags!")
+
+
+def check_update():
+    close_old_connections()
+
+    version = npu_update_info()
+    try:
+        SmSession.objects.all().update(update_available=version)
+    except:
+        print("Unable to store ADSM Version!")
+
+    return version

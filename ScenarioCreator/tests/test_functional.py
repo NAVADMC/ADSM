@@ -236,6 +236,9 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         time.sleep(3)
         self.query('#center-panel').find_element_by_css_selector('select').click()
         time.sleep(1)
+        self.query('.edit-button').click()
+        time.sleep(1)
+        self.query('.overwrite-button').click()
 
         self.query('#id_equation_type')  # just making sure it's there
         pdf_panel = self.query('#functions_panel')
@@ -244,7 +247,9 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         pdf_panel.find_element_by_css_selector('.btn-save').click()
         time.sleep(1)  # there's a reload here
-        self.query('#functions_panel').find_element_by_css_selector('.btn-cancel').click()
+        self.query('#functions_panel .edit-button').click()
+        time.sleep(1)  # animate
+        self.query('#functions_panel .btn-cancel').click()
         time.sleep(1)
 
         with self.assertRaises(NoSuchElementException):
@@ -505,6 +510,9 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         
         self.select_option('id_form-0-progression', 'Add...')
         self.select_option('id_disease_latent_period','Add...')
+        self.query('#functions_panel .edit-button').click()
+        time.sleep(1)
+        self.query('.overwrite-button').click()
         self.select_option('id_equation_type','Histogram')
         time.sleep(1)
         self.select_option('id_graph','Add...')
@@ -531,6 +539,10 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.select_option('id_zone_indirect_movement', 'Add...')
         
         right_panel = self.query('#functions_panel')
+
+        self.query('.edit-button').click()
+        time.sleep(1)
+        self.query('.overwrite-button').click()
 
         self.submit_relational_form_with_file(right_panel)
         right_panel = self.query('#functions_panel')
@@ -631,13 +643,10 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             self.assertIn(controls, actual_menu)
 
     def test_save_scenario_failure(self):
-        self.cause_unsaved_edit()
-
-        self.query('#TB_file').click()
-        filename_field = self.query('#file_panel .filename input')
+        filename_field = self.save_scenario_as()
         try:
             filename_field.send_keys('./\\ 123.1&% AZ')
-            self.query('#save_scenario').click()
+            self.query('.modal.in .btn-primary').click()
             time.sleep(1)
 
             alert = self.query('.alert-danger')  # this works fine in the actual program.
@@ -649,23 +658,27 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             except:
                 pass
 
+    def save_scenario_as(self):
+        self.cause_unsaved_edit()
+        self.query('#TB_file').click()
+        time.sleep(1)
+        self.query('.current .copy-icon').click()
+        time.sleep(1)
+        self.query('.btn-dont-save').click()
+        time.sleep(1)
+        filename_field = self.query('#new_name')
+        return filename_field
+
     def cause_unsaved_edit(self):
         self.query('#id_description').send_keys('--edited--')
         self.query('#submit-id-submit').click()
         time.sleep(1)
 
     def test_save_scenario_success(self):
-        self.cause_unsaved_edit()
-
-        status = self.query('.scenario-status')
-        self.assertIn('unsaved', status.get_attribute('class'))
-
-        self.query('#TB_file').click()
-        filename_field = self.query('#file_panel .filename input')
+        filename_field = self.save_scenario_as()
         try:
             filename_field.send_keys('123.1 AZ')
-            # self.query('#save_scenario').click()
-            self.query('.current form.ajax').submit()
+            self.query('.modal.in .btn-primary').click()
             time.sleep(3)
             status = self.query('.scenario-status')
             self.assertNotIn('unsaved', status.get_attribute('class'))

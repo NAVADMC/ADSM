@@ -1,14 +1,18 @@
 import re
 import os
 import shutil
+import traceback
+from django.conf import settings
 from django.db import close_old_connections
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest
 from django.shortcuts import redirect, render, HttpResponse
 from django.utils.html import strip_tags
+from django.utils.safestring import mark_safe
 from ADSMSettings.models import SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
-from ADSMSettings.utils import reset_db, update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup, scenario_filename
+from ADSMSettings.utils import update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup, scenario_filename, \
+    copy_blank_to_session, create_super_user
 from Results.models import outputs_exist
 
 
@@ -33,12 +37,12 @@ def loading_screen(request):
 
 
 def update_adsm_from_git(request):
+    from ADSMSettings.utils import launch_external_program_and_exit
     """This sets the update_on_startup flag for the next program start."""
     if 'GET' in request.method:
         try:
-            session = SmSession.objects.get()
-            session.update_on_startup = True
-            session.save()
+            npu = os.path.join(settings.BASE_DIR, 'npu'+settings.EXTENSION)
+            launch_external_program_and_exit(npu, close_self=False, )#cmd_args=['--silent'])  # NPU will force close this
             return HttpResponse("success")
         except:
             print ("Failed to set DB to update!")
@@ -49,6 +53,13 @@ def file_dialog(request):
     context = {'db_files': (file_list(".sqlite3")),
                'title': 'Select a new Scenario to Open'}
     return render(request, 'ScenarioCreator/workspace.html', context)
+
+
+def import_status(request):
+    from ADSMSettings.models import SmSession
+    session = SmSession.objects.get()
+    json_response = {"status": session.population_upload_status}
+    return JsonResponse(json_response)
 
 
 def run_importer(request):
@@ -74,12 +85,30 @@ def import_naadsm_scenario(request):
         initialized_form = ImportForm(request.POST, request.FILES)
     else:  # GET page for the first time
         initialized_form = ImportForm()
+    context = {'form': initialized_form,
+               'title': "Import Legacy NAADSM Scenario in XML format",
+               'loading_message': "Please wait as we import your file...",
+               'error_title': "Import Error:",
+               'base_page': 'ScenarioCreator/crispy-model-form.html',
+               }
+
     if initialized_form.is_valid():
-        run_importer(request)
-        return redirect('/')
-    context = {'form': initialized_form, 
-               'title': "Import Legacy NAADSM Scenario in XML format", 
-               'base_page': 'ScenarioCreator/crispy-model-form.html'}
+        try:
+            run_importer(request)
+            return loading_screen(request)
+        except Exception as e:
+            import sys
+            info = sys.exc_info()
+            # stacktrace = info[3]
+            # print(stacktrace)
+            # traceback.print_exc()
+
+            print(info)
+            print(str(info[2]))
+            context['form_errors'] = mark_safe(str(info[1]))
+            # go on to serve the form normally with Error messages attached
+    else:
+        context['form_errors'] = initialized_form.errors
     return render(request, 'ScenarioCreator/navigationPane.html', context)  # render in validation error messages
 
 
@@ -109,6 +138,17 @@ def open_scenario(request, target, wrap_target=True):
 
 def open_test_scenario(request, target):
     return open_scenario(request, target, False)
+
+
+def new_scenario(request=None, new_name=None):
+    copy_blank_to_session()
+
+    update_db_version()
+    if new_name:
+        try:
+            scenario_filename(new_name, check_duplicates=True)
+        except: pass  # validation may kick it back in which case they'll need to rename it in a file browser
+    return redirect('/setup/Scenario/1/')
 
 
 def save_scenario(request=None):
@@ -152,7 +192,7 @@ def copy_file(request, target, destination):
     if target.replace('.sqlite3', '') == scenario_filename():  # copying the active scenario
         return save_scenario(request)
     if not destination.endswith('.sqlite3'):
-        destination = destination + ".sqlite3"
+        destination += ".sqlite3"
     print("Copying", target, "to", destination, ". This could take several minutes...")
     shutil.copy(workspace_path(target), workspace_path(destination))
     print("Done copying", target)
@@ -169,23 +209,23 @@ def download_file(request):
     return response
 
 
-def new_scenario(request=None, new_name=None):
-    reset_db('scenario_db')
-    reset_db('default')
-    update_db_version()
-    if new_name:
-        try:
-            scenario_filename(new_name, check_duplicates=True)
-        except: pass # validation may kick it back in which case they'll need to rename it in a file browser
-    return redirect('/setup/Scenario/1/')
-
-
 def backend(request):
     from django.contrib.auth import login
     from django.contrib.auth.models import User
     user = User.objects.filter(is_staff=True).first()
+    if user is None:
+        user = create_super_user()
     print(user, user.username)
     user.backend = 'django.contrib.auth.backends.ModelBackend'
     login(request, user)
     return redirect('/admin/')
 
+
+def show_help_text_json(request):
+    if 'POST' in request.method:
+        new_value = request.POST['show_help_text']
+        set_to = new_value == 'true'
+        SmSession.objects.all().update(show_help_text=set_to)
+        return JsonResponse({'status':'success'})
+    else:
+        return JsonResponse({'show_help_text': SmSession.objects.get().show_help_text})

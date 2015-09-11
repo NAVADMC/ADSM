@@ -1,12 +1,9 @@
-import subprocess
-
 from django.db.models import F, Count
 
-from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Population, Unit, Disease, DiseaseProgression, \
+from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Unit, Disease, DiseaseProgression, \
     DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
-    ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment, VaccinationTrigger, SpreadBetweenGroups, \
+    ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment, SpreadBetweenGroups, \
     DestructionWaitTime, TimeFromFirstDetection, DisseminationRate, RateOfNewDetections, DiseaseDetection, ProductionGroup
-
 from ScenarioCreator.utils import whole_scenario_validation
 from Results.models import outputs_exist
 
@@ -21,14 +18,6 @@ def js(var):
         return 'true'
     else:
         return 'false'
-
-
-def git_adsm_sha():
-    try:
-        version = subprocess.check_output(git + 'rev-parse HEAD', shell=True, stderr=subprocess.STDOUT).strip()[:7]
-    except:
-        version = 'no version information available'
-    return version
 
 
 def singular(name):
@@ -74,7 +63,6 @@ def basic_context(request):
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
                'outputs_exist': outputs_exist(),
                'whole_scenario_warnings': whole_scenario_validation(),
-               'dev_version': git_adsm_sha(),
                })
 
         validation_models = {'Scenario': 'Scenario/1/', 

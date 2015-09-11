@@ -121,14 +121,15 @@ def all_empty_fields(model_class, excluded_fields):
 # this mapping is also embedded in navigationPanel.html
 headers = {'DailyByProductionType': [("Exposures", "exp", ['expnU', 'expcU']),
                                      ("Infections", "inf", ['infnU', 'infcU']),
+                                     ("Detections", "det", ['detnU', 'detcU']),
                                      ("Vaccinations", "vac", ['vacnU', 'vaccU']),
                                      ("Destruction", "des", ['desnU', 'descU']),
                                      ("Exams", "exm", ['exmnU', 'exmcU']),
                                      ("Lab Tests", "tst", ['tstnU', 'tstcU']),
                                      ("Tracing", "tr", ['trnU', 'trcU'])],
-           # 'DailyControls': [("Destruction", 'dest', ['destrSubtotal']),  # TODO: figure out why DailyControls subcategories are not displaying right
-           #                   ("Destruction Wait", 'desw', ['deswUTimeAvg']),
-           #                   ("Vaccination", 'vacc', ['vaccVaccination'])]
+           #'DailyControls': [("Destruction", 'dest', ['destrSubtotal']),  # TODO: figure out why DailyControls subcategories are not displaying right
+           #                  ("Destruction Wait", 'desw', ['deswUTimeAvg']),
+           #                  ("Vaccination", 'vacc', ['vaccVaccination'])]
            }
 headers = defaultdict(lambda: [('', '', [])], headers)
 

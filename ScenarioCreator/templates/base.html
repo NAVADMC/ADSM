@@ -13,6 +13,7 @@
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/adsm.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/scrollbars.css" />
     <script src="{{ STATIC_URL }}js/jquery-2.1.3.min.js"></script>
+    <script src="{{ STATIC_URL }}js/liveQuery-min.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-toggle.min.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-dialog.js"></script>
@@ -20,7 +21,7 @@
     <script src="{{ STATIC_URL }}js/population-panel.js"></script>
     {% load db_status_tags %}
 </head>
-<body>
+<body {% if not show_help_text %}class="hide-help-text"{% endif %}>
 <header>
         <div class="row">
             <div class="header_logo col-xs-2">                

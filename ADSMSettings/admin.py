@@ -1,6 +1,7 @@
+from django.apps import apps
 from django.contrib import admin
-from django.db.models import get_models, get_app
 
 # Register your models here.
-for myModel in get_models(get_app("ADSMSettings")):
+myapp = apps.get_app_config('ADSMSettings')
+for myModel in myapp.models.values():
     admin.site.register(myModel)

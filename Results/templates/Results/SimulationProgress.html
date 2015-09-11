@@ -42,6 +42,11 @@
             </div>
         </div>
         </div> 
+{#        <div id="legend"><p>Red = Infected, Green = Vaccinated, Black = Destroyed.#}
+{#        Affected Units are 1km squares, regardless of size.#}
+{#        The height of each tiny bar graph is the percentage of iterations in which that unit was Infected, Vaccinated, or Destroyed.  #}
+{#        Zone probability shown from 100% (Dark Blue) to >1% (White).#}
+{#        Uninvolved Units are shown in grey, scaled by Unit size.</p></div>#}
 
         <script type="text/javascript"> 
             $(document).ready(function() { 
@@ -74,7 +79,7 @@
                 <ul id="file_list">
                     {% for file in supplemental_files %}
                         <li>{{ file }}
-                            <a href="#" class="delete-button" data-delete-link="{{ file }}"><img src="{{ STATIC_URL }}icons/delete.png" alt="Delete" class="icon pull-right"></a>
+                            <a href="#" class="delete-icon" data-delete-link="{{ file }}"><img src="{{ STATIC_URL }}icons/delete.png" alt="Delete" class="icon pull-right"></a>
                             <a href="/app/Download/?target={{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
                             </li>
                     {% endfor %}

@@ -164,6 +164,42 @@ input[type="checkbox"] {
 .checkbox {
     margin-bottom: 18px;
 }
+/*-------------------------------------------------------------*/
+/*-----readonly form styling-----*/
+/*-------------------------------------------------------------*/
+form.readonly input,
+form.readonly select{
+    border: none;
+    margin: 0px;
+    width: 100%;
+    background-image: none;
+}
+
+form.readonly select {
+    -webkit-appearance: none;
+    background-color: transparent;
+    padding-left: 10px;
+    pointer-events: none;
+    box-shadow:none;
+}
+form.readonly input {
+    background-color: transparent;
+    padding-left: 10px;
+    pointer-events: none;
+    box-shadow: none;
+}
+/*-------------------------------------------------------------*/
+/*-----editable form styling-----*/
+/*-------------------------------------------------------------*/
+form.editable select {
+    /*-webkit-appearance: menulist;*/
+    pointer-events: all;
+    margin-bottom: 0px;
+}
+form.editable input{
+    border: 1px solid #ccc;
+    pointer-events: all;
+}
 .help-block {  
     font-weight: 200;
     display: block;
@@ -171,11 +207,16 @@ input[type="checkbox"] {
     overflow: hidden; /* check boxes are bold from mixins.less and I think it looks better with definitions*/
 }
 
+.hide-help-text .help-block {
+    display: none;
+}
+
 .hide-help {
     height: 0;
 }
 
-.error-inline strong {  /* validation errors from the server */
+.error-inline strong,
+.help-inline {  /* validation errors from the server */
     background-color: #D13737;
     color: white;
 }
@@ -263,6 +304,8 @@ header .filename {
 
 .filename input {
     border: none;
+    width: calc(100% - 75px);
+    pointer-events: none; /*not editable by user*/
 }
 .scenario-status {
     display:none
@@ -373,7 +416,9 @@ body>nav {
 /*-----3-column layout-----*/
 /*-------------------------------------------------------------*/
 #main-panel {
-    float:none;
+    /* float:none; */
+    margin-left: 238px;
+    width: calc(100vw - 324px);
 }
 
 .layout-panel {
@@ -394,7 +439,7 @@ body>nav {
 
 .layout-panel .fragment{
     height: 100%;
-    position: relative;
+    /* position: relative; */
     display: block;
     overflow: auto;
     padding-bottom: 10px;
@@ -496,13 +541,16 @@ ul {
     position:absolute;
     top: 0;
     left: 0;
-    width: calc(100% - 25px);
+    width: calc(100% - 0px);
     height: 100%;
     box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
     border: 1px solid #cec7c0;
     pointer-events: none;
 }
 
+.reveal.layout-panel:after {
+    width: calc(100% - 25px);
+}
 
 /*-------------------------------------------------------------*/
 /*-----TOOLBAR-----*/
@@ -610,7 +658,7 @@ ul {
     overflow-y: auto;
     -webkit-box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
     border: 1px solid #cec7c0;
-    padding: 0 15px 15px 15px; 
+    padding: 0 15px 0px 15px; 
     background-color: white;
     transition: margin-right .2s ease;
     overflow: auto;
@@ -630,6 +678,13 @@ ul {
     background-color: #606060;
     color: rgb(236, 236, 236);
     padding: 1px;
+}
+
+.ellipsis-title {
+    width: calc(100% - 85px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .current, .current .filename {
@@ -737,6 +792,7 @@ ul {
 /*-------------------------------------------------------------*/
 #functions_panel {
     /* padding-left: 32px; */
+    overflow-y: hidden;
 }
 
 #functions_panel .glyphicon {
@@ -766,10 +822,66 @@ ul {
 .list-button:hover {
     cursor: pointer;
 }
-#functions_panel .buttonHolder:first-of-type {
+
+#functions_panel input[type="checkbox"] {
+    display: none;
+}
+
+#functions_panel input[type="checkbox"].editable {
+    display: inline-block;
+}
+#functions_panel .function-header {
     margin-top: 15px;
     margin-bottom: 4px;
 }
+
+/*---------------------Edit Button Holder-----------*/
+.panel-contents {
+    position:relative; /*needed by edit-button-holder*/
+    height: calc(100% - 95px); /*leave space for button-footer*/
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+}
+#current-function {
+    overflow-y: auto;
+    max-height: 100%;
+}
+
+.button-footer {
+    position: absolute;
+    bottom: -92px;
+    background-color: white;
+    z-index: 10;
+    width: 100%;
+    height: 42px;
+}
+.edit-button-holder{
+    position: relative;
+    left: 0px;
+    bottom: -28px;
+}
+/*.edit-button-holder .edit-button {*/
+    /*z-index: 20;*/
+/*}*/
+.edit-button-holder button,
+.edit-button-holder a {
+    position: absolute;
+    bottom: -10px;
+    right: 0px;
+    width: 115px;
+    transition: bottom .4s ease;
+}
+.edit-button-holder .overwrite-button.reveal {
+    bottom: calc(-10px + 32px * 1);
+}
+.edit-button-holder .copy-button.reveal {
+    bottom: calc(-10px + 32px * 2);
+}
+.edit-button-holder .btn-cancel.reveal {
+    bottom: calc(-10px + 32px * 3);
+}
+
+
 /*-------------------------------------------------------------*/
 /*-----navigation menu-----*/
 /*-------------------------------------------------------------*/
@@ -1261,12 +1373,18 @@ select {
     text-decoration: none;
 }
 
+.file-buttons {
+    position: absolute;
+    right: 5px;
+    top: 0;
+}
+
 #file_list .icon {
     margin-top: 5px;
     margin-left: 15px;
 }
-.delete-button,
-.copy-button,
+.delete-icon,
+.copy-icon,
 .open-button {
     margin-top: 5px;
     width: 15px;
@@ -1278,14 +1396,14 @@ select {
 }
 
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
-.copy-button {
+.copy-icon {
     background-image: url('../icons/copy_sprite.png');
     background-position: 0 0;
 }
 
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
-.copy-button:hover,
-.copy-button:focus {
+.copy-icon:hover,
+.copy-icon:focus {
     background-position: 15px  0;
     background-image: url('../icons/copy_sprite.png');
     outline: none;
@@ -1299,13 +1417,13 @@ select {
 }
 
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
-.delete-button {
+.delete-icon {
     background-image: url('../icons/delete_sprite.png');
     background-repeat-y: no-repeat;
     background-position: 0 2px;
 }
-.delete-button:hover,
-.delete-button:focus {
+.delete-icon:hover,
+.delete-icon:focus {
     background-position: 15px 2px ;
     background-image: url('../icons/delete_sprite.png');
     background-repeat-y: no-repeat;
@@ -1380,14 +1498,14 @@ input[type=file], button {
     opacity: 1;
 }
 
-.defined_wrapper .delete-button {
+.defined_wrapper .delete-icon {
     position: absolute;
     top: 0;
     right: 0;
     margin-right: 5px;
     opacity: .3;
 }
-.defined_wrapper .copy-button {
+.defined_wrapper .copy-icon {
     position: absolute;
     top: 0;
     right: 20px;
@@ -1450,6 +1568,8 @@ section#population_main_panel h1:first-of-type {
 #clear_fitlers {
     margin-top: -10px;
 }
+
+/*************** Farm_list **********/
 #farm_list_container{
     float: right;
     width: 49.98vw;
@@ -1493,8 +1613,11 @@ section#population_main_panel h1:first-of-type {
     display: inline-block;
     position: relative;
 }
-#farm_list th, #farm_list td {
+#farm_list td {
     width: 17%;
+}
+#farm_list th { /**--- this accounts for the 6px scroll bar taking up width in the table body---**/
+    width: calc(17% - 1px);
 }
 
 #farm_list tbody{
@@ -1533,34 +1656,47 @@ section#population_main_panel h1:first-of-type {
 #farm_list td:nth-child(4), #farm_list td:first-child {
     padding-left: 0;
 }
-#farm_list input, #farm_list select{
+#farm_list select,
+#farm_list input {
+    padding-left: 10px;
+    background-color: transparent;
+    box-shadow: none;
+}
+#farm_list select:hover {
     border: none;
-    margin: 0px;
+}
+#farm_list input, #farm_list select{
     width: 100%;
-    background-image: none;
 }
 
-#farm_list select {
+/**#farm_list select,
+#functions_panel select {
     -webkit-appearance: none;
     background-color: transparent;
     padding-left: 10px;
     pointer-events: none;
     box-shadow:none;
 }
-#farm_list input {
+#farm_list input,
+#functions_panel textarea,
+#functions_panel input{
     background-color: transparent;
     padding-left: 10px;
     pointer-events: none;
     box-shadow: none;
+    border: 0px;
 }
-#farm_list select.editable {
+#farm_list select.editable,
+#functions_panel select.editable{
     -webkit-appearance: menulist;
     pointer-events: all;
 }
-#farm_list input.editable {
+#farm_list input.editable,
+#functions_panel textarea.editable,
+#functions_panel input.editable {
     border: 1px solid #ccc;
     pointer-events: all;
-}
+}*/
 /*-------------------------------------------------------------*/
 /*-----population filters-----*/
 /*-------------------------------------------------------------*/
@@ -1704,11 +1840,10 @@ section#population_main_panel h1:first-of-type {
     position: absolute;
     top: 0;
     left: 0;
-    display: block;
+    display: none;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, .7);
-    visibility: hidden;
     transition: all .3s ease;
 }
 #farm_list .help-block {
@@ -2055,6 +2190,26 @@ select[multiple] {}
 }
 .intro_text, .intro_text p {
     color: #606060;
+}
+.m2mtable select, #all-interactions select {
+    max-width: 260px;
+}
+#all-interactions {
+    width: calc(100% - 0px);}
+/*-------------------------------------------------------------*/
+/*-----left aligned scrollbars-----*/
+/*-------------------------------------------------------------*/
+#center-panel .fragment, #left-panel {
+    direction: rtl;
+}
+#center-panel .fragment form, #left-panel h1, #left-panel div {
+    direction: ltr;
+}
+::-webkit-scrollbar-thumb {
+    box-shadow: none !important;
+}
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.15) !important;
 }
 /*-------------------------------------------------------------*/
 /*-----output settings-----*/

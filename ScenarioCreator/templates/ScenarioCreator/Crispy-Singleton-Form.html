@@ -2,13 +2,16 @@
 {% extends 'ScenarioCreator/Fragment.html' %}
 {% load floppyforms %}
 {% load crispy_forms_tags  %}
+{% load db_status_tags  %}
 
 {% block content %}
 
     <h1 id="title"> {{ title }}</h1>
     
-    <form class="ajax" action="{{ action }}">
+    <form class="ajax" action="{{ action }}" id="{{ action|action_id }}">
         {% crispy form %}
+        {% include "ScenarioCreator/EditButtons.html" %}
+
     </form>
 
 

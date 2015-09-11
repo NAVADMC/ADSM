@@ -363,8 +363,6 @@ class DailyControls(OutputBaseModel):
     destrOccurred = models.IntegerField(blank=True, null=True, verbose_name='Destruction Occurred')
     firstDetUInf = models.IntegerField(blank=True, null=True, verbose_name=printable_name('Units Infected at First Detection'))
     firstDetAInf = models.IntegerField(blank=True, null=True, verbose_name=printable_name('Animals Infected at First Detection'))
-    ratio = models.IntegerField(blank=True, null=True, verbose_name=printable_name('ratio'))
-    averagePrevalence = models.IntegerField(blank=True, null=True, verbose_name=printable_name('averagePrevalence'))
     detcUq = models.IntegerField(blank=True, null=True, verbose_name=printable_name('detcUq'))
     vaccTriggered = models.IntegerField(blank=True, null=True, verbose_name="First Vaccination Trigger Activated")
 

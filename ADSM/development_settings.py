@@ -7,21 +7,9 @@ if getattr(sys, 'frozen', False):
 else:
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-DB_BASE_DIR = None
-if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.
-    try:
-        import ctypes.wintypes
-        CSIDL_PERSONAL = 5
-        SHGFP_TYPE_CURRENT = 0
-        buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-        ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_PERSONAL, 0, SHGFP_TYPE_CURRENT, buf)
-        DB_BASE_DIR = os.path.join(buf.value, "ADSM Workspace", "settings")
-    except:
-        DB_BASE_DIR = None
-if not DB_BASE_DIR:
-    DB_BASE_DIR = os.path.join(os.path.expanduser("~"), "Documents", "ADSM Workspace", "settings")
-if not os.path.exists(DB_BASE_DIR):
-    os.makedirs(DB_BASE_DIR, exist_ok=True)
+WORKSPACE_PATH = None  # To detect automatically, leave set to None
+
+DB_BASE_DIR = None  # To have as 'settings' folder in WORKSPACE_PATH leave set to None
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'zkvb3#=7zub^kw-@hmf2v4rgsn%5q$!^0i4v#l)$_umn=_lx&3'

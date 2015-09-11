@@ -4,20 +4,22 @@
 {% load db_status_tags %}
 
 {% block content %}
-    {% if model_name == "ProbabilityFunction" %}
-        <script src="{{ STATIC_URL }}js/probability-functions.js"></script>
-    {% endif %}
-
-{#    <h1 id="title">#}
-{#    {% if model_link %}#}
-{#        <a href="{{ model_link|parent_link }}">List {{ pretty_name }}s</a> &nbsp;> &nbsp;#}
-{#    {% endif %}#}
-{#    {{ title }}</h1>#}
     {% if action %}
-        <form class="ajax" action="{{ action }}">
+        <form class="ajax" action="{{ action }}" id="{{ action|action_id }}" {% if loading_message %}data-loading-message="{{ loading_message }}"{% endif %}>
             {% crispy form %}
+            {% if form_errors %}
+                <div id='form-errors'>{{ form_errors }}</div>
+            {% endif %}
+            {% include "ScenarioCreator/EditButtons.html" %}
         </form>
     {% else %}
+        <form class="ajax" {% if loading_message %}data-loading-message="{{ loading_message }}"{% endif %}>
             {% crispy form %}
+            {% if form_errors %}
+                <h2>{{ error_title }}</h2>
+                <div id='form-errors'>{{ form_errors }}</div>
+            {% endif %}
+            {# Can't include EditButtons because it requires action to work outside the form. Must be included in forms.py #}
+        </form>
     {% endif %}
 {% endblock %}

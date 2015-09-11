@@ -1,8 +1,10 @@
 <select name="{{ name }}"{% if multiple %} multiple="multiple"{% endif %}{% if required %} required{% endif %}{% include "floppyforms/attrs.html" %}>{% for group_name, group_choices in optgroups %}{% if group_name %}
-	<optgroup label="{{ group_name }}">{% endif %}{% for option in group_choices %}
+	<optgroup label="{{ group_name }}">{% endif %}
+    <option value="">---------</option>
+    <option value="data-add-new">Add...</option>
+{% for option in group_choices %}
 	<option value="{{ option.0 }}"{% if option.0 in value %} selected="selected"{% endif %}>{{ option.1 }}</option>{% endfor %}{% if group_name %}
 	</optgroup>{% endif %}{% endfor %}
-	<option value="data-add-new">Add...</option>
 </select>
 <a href="#"><i class="glyphicon glyphicon-pencil icon"></i></a>
 {# <button type="button" class="btn btn-add" rel="#{{ attrs.id }}"><img src="/static/icons/icon_19516/icon_19516.png" alt="" width="16" height="16"/></button> #}

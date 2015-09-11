@@ -157,7 +157,7 @@ def assign_progressions(request):
 
 
 def collect_backlinks(model_instance):
-    from django.contrib.admin.util import NestedObjects
+    from django.contrib.admin.utils import NestedObjects
     collector = NestedObjects(using='scenario_db')  # or specific database
     collector.collect([model_instance])  # https://docs.djangoproject.com/en/1.7/releases/1.7/#remove-and-clear-methods-of-related-managers
     dependants = collector.nested()  # fun fact: spelling differs between America and Brittain
@@ -176,7 +176,7 @@ def collect_backlinks(model_instance):
 
 
 def initialize_relational_form(context, primary_key, request):
-    if not primary_key:
+    if not primary_key or primary_key == 'new':
         model = RelationalFunction()
         main_form = RelationalFunctionForm(request.POST or None)
     else:
@@ -197,6 +197,7 @@ def deepcopy_points(request, primary_key, created_instance):
         point.save()  # This assumes that things in the database are already valid, so doesn't call is_valid()
     queryset = RelationalPoint.objects.filter(relational_function_id=created_instance.id)
     formset = PointFormSet(queryset=queryset) # this queryset does not include anything the user typed in, during the copy operation
+    # formset = PointFormSet(request.POST or None, instance=created_instance)
     return formset
 
 
@@ -245,21 +246,30 @@ def relational_function(request, primary_key=None, doCopy=False):
     context['action'] = request.path
     if 'file' in request.FILES:  # data file is present
         request = initialize_points_from_csv(request)
-    context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
     if context['form'].is_valid():
+        created_instance = None
         if doCopy:
-            context['form'].instance.pk = None  # This will cause a new instance to be created
-            created_instance = context['form'].save()
-            context['formset'] = deepcopy_points(request, primary_key, created_instance)
-        else:
-            created_instance = context['form'].save()
+            created_instance = context['form'].instance
+            created_instance.pk = None  # This will cause a new instance to be created
+            created_instance.save()
             context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
+        else:
+            created_instance = context['form'].instance
+            created_instance.save()
+            context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
+
         context['action'] = '/setup/RelationalFunction/%i/' % created_instance.id
 
-        if context['formset'].is_valid():
-            context['formset'].save()
-        else:
-            pass #Delete partial RelationalFunction???
+        if created_instance:
+            if context['formset'].is_valid():  # We need to run this to ensure that the data in the formset is populated
+                pass
+            for point in context['formset'].forms:
+                if point.changed_data:
+                    point.instance.pk = None
+                    point.instance.relational_function = created_instance
+                    point.instance.save()
+    else:
+        context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
 
     context['title'] = "Create a Relational Function"
     add_breadcrumb_context(context, "RelationalFunction")
@@ -285,6 +295,8 @@ def new_form(request, initialized_form, context):
     if model_name in singletons:  # they could have their own special page: e.g. Population
         context['base_page'] = 'ScenarioCreator/Crispy-Singleton-Form.html' # #422 Singleton models now load in a fragment to be refreshed the same way that other forms are loaded dynamically
         return render(request, 'ScenarioCreator/navigationPane.html', context)
+    if model_name == 'ProbabilityFunction':
+        return render(request, 'ScenarioCreator/ProbabilityFunctionForm.html', context)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages
 
 
@@ -560,6 +572,7 @@ def population(request):
         context['formset'] = initialized_formset
         context['filter_info'] = filter_info(request, params)
         context['deletable'] = '/setup/Population/1/delete/'
+        context['editable'] = request.GET.get('readonly', 'editable')
         context['population_file'] = os.path.basename(Population.objects.get().source_file)
     else:
         context['xml_files'] = file_list([".sqlite3"])

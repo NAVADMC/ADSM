@@ -10,3 +10,4 @@ shell.output
 # Executable generated just for running tests
 #################
 shell
+shell.exe
