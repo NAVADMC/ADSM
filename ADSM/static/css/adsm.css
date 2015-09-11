@@ -507,9 +507,15 @@ ul {
 #center-panel .control-group {
     position:relative;
 }
-#center-panel .active {
+#center-panel .active:not(.tab-pane) {
     border: 2px solid #cec7c0;
 }
+
+.nav > li > a {
+    padding: 10px 10px;
+    border: 1px solid #E7E7E7;
+}
+
 #center-panel .active_linking:after { /*--- right-linking line inside container --*/
     content:"";
     position: absolute;
