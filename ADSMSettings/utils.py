@@ -322,7 +322,7 @@ def check_simulation_version():
 def npu_update_info():
     new_version = None
     try:
-        npu = os.path.join(settings.BASE_DIR, 'npu.exe')  # TODO: This is OS Specific
+        npu = os.path.join(settings.BASE_DIR, 'npu'+settings.EXTENSION)
         process = subprocess.Popen([npu, "--check_update", "--silent"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, error = process.communicate()
         exit_code = process.wait(timeout=60000)
