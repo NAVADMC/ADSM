@@ -353,7 +353,7 @@ $(function(){
         $('.edit-button-holder .copy-button').on('click', function () {
             make_function_panel_editable()
             var target = $('#' + $(this).attr('form'))
-            target.attr('action', target.attr('action').replace(/\d+/i, 'new')) //values already loaded, but this should go to /new/
+            target.attr('action', target.attr('action') + 'copy/') //values already loaded, but this should go to /new/
             console.log(target.attr('action'))
             var name_in = $('#functions_panel #id_name')
             name_in.val(name_in.val() + ' - Copy')
