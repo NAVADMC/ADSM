@@ -266,11 +266,9 @@ class BuildADSM(build_exe):
 
 
 base = None
-extension = ''
 requirements, urls = parse_requirements_and_links(os.path.join(settings.BASE_DIR, 'Requirements.txt'))
 if sys.platform == 'win32':
     base = 'Console'
-    extension = '.exe'
     requirements, urls = parse_requirements_and_links(os.path.join(settings.BASE_DIR, 'Requirements-Windows.txt'), existing_requirements=requirements, existing_links=urls)
 else:
     base = 'Console'
@@ -283,7 +281,7 @@ setup(name='ADSM_Beta',
       description='ADSM Beta Application',
       options={'build_exe': build_exe_options,
                'install_exe': {'build_dir': build_exe_options['build_exe']}},
-      executables=[Executable('ADSM.py', base=base, icon='favicon.ico', targetName='ADSM_Beta'+extension), ],
+      executables=[Executable('ADSM.py', base=base, icon='favicon.ico', targetName='ADSM_Beta'+settings.EXTENSION), ],
       cmdclass=cmdclass,
       install_requires=requirements,
       dependency_links=urls
