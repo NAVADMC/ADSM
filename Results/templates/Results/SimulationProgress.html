@@ -60,14 +60,14 @@
     {% endif %}
     
     
-    <p>Simulation Version: {{ version_number }}</p>
 
     {% if not is_simulation_stopped %}
         <a href="/results/">Recalculate Summary Statistics</a>
     {% endif %}
     
     <div id="summaryData">
-    {% include "Results/Summary.html" %}
+        <p>Simulation Version: {{ version_number }}</p>
+        {% include "Results/Summary.html" %}
     </div>
 
     {% if supplemental_files %}
