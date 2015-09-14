@@ -7,6 +7,7 @@ def camel_case_spaces(name_with_spaces):
     r = re.sub(r' +(\w)', lambda match: match.group(1).upper(), name_with_spaces).strip()  # upper case first letter of any word
     if r:
         r = r[0].upper() + r[1:]  # upper case first letter
+    r = r.replace(' ', '')
     return r
 
 

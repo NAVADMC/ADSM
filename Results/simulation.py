@@ -47,6 +47,7 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones, test
     # profiler.enable()
     
     simulation = subprocess.Popen(adsm_cmd,
+                                  shell=True,
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
                                   bufsize=1)
