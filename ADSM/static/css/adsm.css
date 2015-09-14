@@ -2040,9 +2040,10 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 #sim_progress_and_button {
     position: fixed;
     bottom: 10px;
+    margin-left: 212px;
     display: block;
     height: 51px;
-    width: 100%;
+    width: calc(100% - 212px);
     border-top: 2px solid #606060;
     border-bottom: 2px solid #606060;
     z-index: 1;
@@ -2079,7 +2080,7 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 }
 
 #sim_progress_and_button .progress {
-    width: 60vw;
+    width: 60%;
     margin: 0px;
     float:left;
     border-left: 2px solid #606060;
@@ -2102,7 +2103,7 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 #iteration_text {
     height: 47px;
     overflow: auto;
-    width: calc(40vw - 255px);
+    /* width: 30%; */
     background: rgba(255, 255, 255, .9);
     font-style: italic;
     color: #606060;
@@ -2361,7 +2362,7 @@ select[multiple] {}
 /*----- global overrides -----*/
 /*----------------------------------------------------*/
 .action_link, .addNew a {
-    background: transparent;
+    background: transparent !important;
     color: #00bbef !important;
     border: none !important;
     outline: none !important;
@@ -2489,10 +2490,15 @@ select[multiple] {}
         background-position: 2px 5px;
     }
 }
-#sim_progress_and_button {
-    visibility: hidden;
+/*#sim_progress_and_button {*/
+    /*visibility: hidden;*/
+/*}*/
+
+#summaryData {
+    margin-left:20px;
+    float: left;
+    width: 25vw;
+    padding-bottom: 80px;
 }
-
-
 
 
