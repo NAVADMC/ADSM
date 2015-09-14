@@ -218,6 +218,9 @@ def single_iteration_line_graph(iteration, field_name, model_name, model, time_s
 
     if iteration is None:
         time_graph.legend().remove()
+    else:
+        time_graph.legend(loc=(-.55,-.14), fontsize=10)
+
     
     # Manually scale zone graphs based on the Max for any zone (universal value)
     if "Zone" in model_name:
@@ -257,17 +260,9 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     
     explanation, title = construct_title(field_name, iteration, model, zone)
 
-    fig = plt.figure(figsize=(7, 4), dpi=100, tight_layout=True, facecolor='w')
-    matplotlib.rcParams.update({'font.size': 10})
-    gs = gridspec.GridSpec(1, 3, width_ratios=[.2, 6, 1])
-    time_graph = fig.add_subplot(gs[1], title=title)
-    time_graph.set_xlabel('Days')
-    boxplot_graph = fig.add_subplot(gs[2], sharey=time_graph, )  # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
-    # boxplot_graph.locator_params(nbins=4)  # limiting the number of y-axis ticks was causing an intermittent crash.  try/except this if you want it
-    plt.setp(boxplot_graph.get_yticklabels(), visible=False)
-    for axis in [time_graph, boxplot_graph]:
-        rstyle(axis)
-    time_graph.grid(False)
+    use_legend = bool(iteration)
+
+    boxplot_graph, fig, gs, time_graph = create_figure_with_boxplot(title, use_legend)
 
     boxplot_raw = collect_boxplot_data(time_series, explanation)  # This has already been padded
     boxplot_data = pd.DataFrame(pd.Series(boxplot_raw), columns=['Last Day'] if field_is_cumulative(explanation) else ['Distribution'])
@@ -280,4 +275,21 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
         return single_iteration_line_graph(iteration, field_name, model_name, model, time_series, columns, time_graph, boxplot_graph, fig)
 
     return TwoD_histogram(fig, gs, time_graph, time_series)
+
+
+def create_figure_with_boxplot(title, use_legend):
+    fig = plt.figure(figsize=(7 + 3 * use_legend, 4), dpi=100, tight_layout=True, facecolor='w')
+    matplotlib.rcParams.update({'font.size': 10})
+    gs = gridspec.GridSpec(1, 3, width_ratios=[3 if use_legend else .2, 6, 1])
+    # gs = gridspec.GridSpec(1, 3, width_ratios=[.2, 6, 1])
+    time_graph = fig.add_subplot(gs[1], title=title)
+    time_graph.set_xlabel('Days')
+    boxplot_graph = fig.add_subplot(gs[2],
+                                    sharey=time_graph, )  # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
+    # boxplot_graph.locator_params(nbins=4)  # limiting the number of y-axis ticks was causing an intermittent crash.  try/except this if you want it
+    plt.setp(boxplot_graph.get_yticklabels(), visible=False)
+    for axis in [time_graph, boxplot_graph]:
+        rstyle(axis)
+    time_graph.grid(False)
+    return boxplot_graph, fig, gs, time_graph
 

@@ -16,13 +16,13 @@
             defaultX: null, // default positioning on X-axis
             defaultY: null, // default positioning on Y-axis
             zoomToCursor: true, // if true, position on the map where the cursor is set will stay the same relative distance from the edge when zooming
-            doubleClickZoom: false, // if true, double clicking zooms to mouse position
+            doubleClickZoom: true, // if true, double clicking zooms to mouse position
             clickZoom: false, // if true, clicking zooms to mouse position
             doubleClickZoomOut: false, // if true, double clicking zooms out to mouse position
             clickZoomOut: false, // if true, clicking zooms out to mouse position
             doubleClickMove: false, // if true, double clicking moves the map to the cursor position
             clickMove: false, // if true, clicking moves the map to the cursor position
-            doubleClickDistance: 1, // number of positions (determined by layerSplit) to move on a double-click zoom event
+            doubleClickDistance: 3, // number of positions (determined by layerSplit) to move on a double-click zoom event
             clickDistance: 1, // number of positions (determined by layerSplit) to move on a click zoom event
             callBefore: function(layer, xcoord, ycoord, viewport) {}, // this callback happens before dragging of map starts
             callAfter: function(layer, xcoord, ycoord, viewport) {}, // this callback happens at end of drag after map is released "mouseup"

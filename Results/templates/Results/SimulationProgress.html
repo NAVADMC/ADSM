@@ -20,33 +20,54 @@
                     <img src="/results/population_zoom.png" alt="" />
                     <div class="mapcontent"></div>
                 </div>
-            </div> 
+            </div>  
+            <div id="legend">
+                <div id="legend-left">
+                    <p class="legend-label">Zone Probability</p>
+                    <div class="legend-values">
+                        <span>100%</span>
+                        <span>>1%</span>
+                    </div>
+                </div>
+                <div id="legend-right">
+                    <p class="legend-label">Unit Outcome</p>
+                    <div class="legend-values">
+                        <ul>
+                            <li>Infected</li>
+                            <li>Vaccinated</li>
+                            <li>Destroyed</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
         </div> 
-        <div id="legend"><p>Red = Infected, Green = Vaccinated, Black = Destroyed.
-        Affected Units are 1km squares, regardless of size.
-        The height of each tiny bar graph is the percentage of iterations in which that unit was Infected, Vaccinated, or Destroyed.  
-        Zone probability shown from 100% (Dark Blue) to >1% (White).
-        Uninvolved Units are shown in grey, scaled by Unit size.</p></div>
+{#        <div id="legend"><p>Red = Infected, Green = Vaccinated, Black = Destroyed.#}
+{#        Affected Units are 1km squares, regardless of size.#}
+{#        The height of each tiny bar graph is the percentage of iterations in which that unit was Infected, Vaccinated, or Destroyed.  #}
+{#        Zone probability shown from 100% (Dark Blue) to >1% (White).#}
+{#        Uninvolved Units are shown in grey, scaled by Unit size.</p></div>#}
+
         <script type="text/javascript"> 
             $(document).ready(function() { 
                 $("#viewport").mapbox({mousewheel: true}); 
             }); 
         </script> 
     {% else %}  {# map placeholder #}
-        <div class="placeholder">
+        <div class="placeholder" id="monitor">
             <p>Running Simulation...</p><img src="{{ STATIC_URL }}working.gif" alt="working"/>
         </div>
     {% endif %}
     
     
-    <p>Simulation Version: {{ version_number }}</p>
 
     {% if not is_simulation_stopped %}
         <a href="/results/">Recalculate Summary Statistics</a>
     {% endif %}
     
     <div id="summaryData">
-    {% include "Results/Summary.html" %}
+        <p>Simulation Version: {{ version_number }}</p>
+        {% include "Results/Summary.html" %}
     </div>
 
     {% if supplemental_files %}

@@ -161,8 +161,8 @@ class DailyParser(object):
                     version.versionMajor = sparse_values['versionMajor']
                     version.versionMinor = sparse_values['versionMinor']
                     version.versionRelease = sparse_values['versionRelease']
+                    version.id = 1
                     results.extend([version])
-                    create_version_entry = False  # only run once
                 results.extend(self.populate_db_from_daily_report(sparse_values, last_line))
         return results
 
