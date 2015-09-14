@@ -304,7 +304,10 @@ def check_simulation_version():
         process = subprocess.Popen([executable, "--version"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, error = process.communicate()
         exit_code = process.wait(timeout=200)
-        process.kill()
+        try:
+            process.kill()
+        except:
+            pass
 
         if exit_code == 0:
             version = output.splitlines()[-1].decode()
@@ -326,7 +329,10 @@ def npu_update_info():
         process = subprocess.Popen([npu, "--check_update", "--silent"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, error = process.communicate()
         exit_code = process.wait(timeout=60000)
-        process.kill()
+        try:
+            process.kill()
+        except:
+            pass
 
         if output:
             new_version = output.splitlines()[-1].decode().strip()
