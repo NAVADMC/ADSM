@@ -41,7 +41,7 @@ def update_adsm_from_git(request):
     """This sets the update_on_startup flag for the next program start."""
     if 'GET' in request.method:
         try:
-            npu = os.path.join(settings.BASE_DIR, 'npu.exe')  # TODO Windows specific
+            npu = os.path.join(settings.BASE_DIR, 'npu'+settings.EXTENSION)
             launch_external_program_and_exit(npu, close_self=False, )#cmd_args=['--silent'])  # NPU will force close this
             return HttpResponse("success")
         except:
@@ -140,7 +140,7 @@ def open_test_scenario(request, target):
     return open_scenario(request, target, False)
 
 
-def new_scenario(new_name=None):
+def new_scenario(request=None, new_name=None):
     copy_blank_to_session()
 
     update_db_version()
@@ -219,3 +219,13 @@ def backend(request):
     user.backend = 'django.contrib.auth.backends.ModelBackend'
     login(request, user)
     return redirect('/admin/')
+
+
+def show_help_text_json(request):
+    if 'POST' in request.method:
+        new_value = request.POST['show_help_text']
+        set_to = new_value == 'true'
+        SmSession.objects.all().update(show_help_text=set_to)
+        return JsonResponse({'status':'success'})
+    else:
+        return JsonResponse({'show_help_text': SmSession.objects.get().show_help_text})

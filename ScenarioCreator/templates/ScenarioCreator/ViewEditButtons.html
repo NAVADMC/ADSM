@@ -10,7 +10,7 @@
 {% endif %}
 <div class="button-footer">
     <div class="buttonHolder" hidden>
-        <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled {% if action %}form="{{ action|action_id }}"{% endif %} >Apply</button>
+        <button type="submit" class="btn btn-primary btn-save" formnovalidate id="submit-id-submit" disabled {% if action %}form="{{ action|action_id }}"{% endif %} >Apply</button>
         <button type="button" class="btn btn-default btn-cancel" id="id-cancel" {% if action %}form="{{ action|action_id }}"{% endif %} >Cancel</button>
         {% if backlinks %}
             <button type="button"  class="btn btn-danger delete-button" disabled {% if action %}form="{{ action|action_id }}"{% endif %} >Delete Disabled</button>

@@ -175,7 +175,7 @@ def graceful_startup():
         x = SmSession.objects.get().scenario_filename  # this should be in the initial migration
         print(x)
     except OperationalError:
-        reset_db('default')  # TODO: Create blank settings database and move both blanks into another folder
+        reset_db('default')
 
     if not os.path.isfile(os.path.join(settings.DB_BASE_DIR, 'activeSession.sqlite3')) or os.stat(os.path.join(settings.DB_BASE_DIR, 'activeSession.sqlite3')).st_size < 10000:
         copy_blank_to_session()
@@ -322,7 +322,7 @@ def check_simulation_version():
 def npu_update_info():
     new_version = None
     try:
-        npu = os.path.join(settings.BASE_DIR, 'npu.exe')  # TODO: This is OS Specific
+        npu = os.path.join(settings.BASE_DIR, 'npu'+settings.EXTENSION)
         process = subprocess.Popen([npu, "--check_update", "--silent"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, error = process.communicate()
         exit_code = process.wait(timeout=60000)

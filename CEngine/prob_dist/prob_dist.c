@@ -3075,7 +3075,10 @@ PDF_pareto_dist_to_string (PDF_pareto_dist_t * dist)
 }
 
 
-/** Creates a new Bernoulli distribution.
+/** Creates a new Bernoulli distribution with parameters as illustrated
+ * below.
+ *
+ * @image html bernoulli.png
  *
  * @param p the probability of success of a single trial
  * @return a pointer to a newly created PDF_dist_t structure.

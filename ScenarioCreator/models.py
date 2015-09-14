@@ -270,7 +270,13 @@ class Function(BaseModel):
 class ProbabilityFunction(Function):
     """ There are a large number of fields in this model because different equation_type use different
         parameters.  Parameters are all listed as optional because they are frequently unused.  A second
-        layer of validation will be necessary for required parameters per equation_type."""
+        layer of validation will be necessary for required parameters per equation_type.
+
+        IMPORTANT: Be careful about editing the help text here since it is used to enforce required
+        fields in ProbabilityFunctionForm.clean().  Use this to check your work:
+
+        for field in ProbabilityFunction._meta.fields:
+            print(re.split(r": |, |\.", field.help_text))"""
     equation_type = models.CharField(max_length=255,
         help_text='For probability density functions identifies the type of function.',
         default="Triangular",

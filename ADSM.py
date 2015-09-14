@@ -33,10 +33,17 @@ from django.utils.timezone import now
 
 def launch_viewer():
     print("\nLaunching browser...")
-    if not os.path.exists(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer')):
-        os.makedirs(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer'), exist_ok=True)
-    log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', 'debug.log')
-    subprocess.call(os.path.join(BASE_DIR, 'Viewer', 'ADSM_Viewer.exe --log-file="%s"' % log_path))  # TODO: This is windows specific
+    if not os.path.exists(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR)):
+        os.makedirs(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR), exist_ok=True)
+    log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR, 'debug.log')
+    try:
+        viewer_status = subprocess.call(os.path.join(BASE_DIR, 'Viewer', settings.OS_DIR, 'ADSM_Viewer%s --log-file="%s"' % (settings.EXTENSION, log_path)), shell=True)
+        if viewer_status != 0:
+            raise RuntimeError("Error launching Viewer!")
+    except:
+        print("\nIt appears that the Viewer Application is either missing or not compatible with this system!\nYou can open a browser and navigate to http://127.0.0.1:8000")
+        print("\nPress any key to close the application...")
+        input()
     print("\nClosing application!")
     _thread.interrupt_main()
 
@@ -117,5 +124,12 @@ else:
     browser.start()
 
     print("\nLaunching server...")
-    management.call_command('runproductionserver', port=8000, app_port=8001, silent=True)
+    try:
+        server_status = management.call_command('runproductionserver', port=8000, app_port=8001, silent=True)
+        if server_status != 0:
+            raise RuntimeError("Error launching Django Production Server!")
+    except:
+        if browser.is_alive():
+            print("It appears that the Django Production Server Application is either missing or not compatible with this system!\nWe will launch using the debug server instead.\nMake sure your settings are set to development settings and debug=True.\n")
+            management.call_command('runserver', addrport="127.0.0.1:8000", use_reloader=False)
     # management.call_command('runserver', use_reloader=False)
