@@ -7,14 +7,16 @@ __author__ = 'Josiah'
 
 def whole_scenario_validation():
     warnings = []
+    total_types = ProductionType.objects.all().count()
+    empty_assignments = DiseaseSpreadAssignment.objects.filter(direct_contact_spread__isnull=True, indirect_contact_spread__isnull=True,
+                                                               airborne_spread__isnull=True)
     for pt in ProductionType.objects.all():
         if not DiseaseProgressionAssignment.objects.filter(production_type=pt, progression__isnull=False).count():
             warnings.append(pt.name + " has no Disease Progression assigned and so is a non-participant in the simulation.")
-        if not DiseaseSpreadAssignment.objects.filter(source_production_type=pt,
-                                                      destination_production_type=pt,
-                                                      direct_contact_spread__isnull=False).count():
-            warnings.append(
-                pt.name + " cannot spread disease from one animal to another, because Direct Spread %s -> %s has not been assigned." % (pt.name, pt.name))
+        if empty_assignments.filter(source_production_type=pt).count() == total_types and \
+                        empty_assignments.filter(destination_production_type=pt).count() == total_types:
+            warnings.append(pt.name + " is not involved in any type of disease spread. This Type is a non-participant in the simulation.")
+
     if not Disease.objects.get().include_direct_contact_spread:
         warnings.append("Direct Spread is not enabled in this Simulation.")
     if not Unit.objects.filter(~Q(initial_state='S')).count():
