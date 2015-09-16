@@ -1,16 +1,22 @@
 .mapwrapper {
-    margin: 10px 0px 10px 0px;
-    height: 800px;
-    width: 923px;
+    height: calc(70vw * .866);
+    width: 70vw;
+    max-height: 75vh;
 }
 #viewport, #viewport2 {
-    height: 800px;
-    width: 923px;
-    cursor: zoom-in;
+    height: 100% !important;
+    width: 100% !important;
+    cursor: -webkit-grab;
     overflow: hidden;
 }
 #viewport:active, #viewport2:active {
-    cursor: move;
+    cursor: -webkit-grabbing;
+}
+#viewport div:first-child {
+    width: 100% !important;
+    height: 100% !important;
+    background-size: contain !important;
+    background-position: 0,0 !important;
 }
 .mapwrapper {
     position: relative;
@@ -64,3 +70,11 @@
     height: 21px;
     width: 21px;
 }
+/*---alternate styling---*/
+.mapwrapper {
+    height: calc(50vw * .866);
+    width: 50vw;
+    max-height: 5000px;
+    float:left;
+}
+

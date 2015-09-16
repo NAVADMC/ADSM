@@ -215,8 +215,7 @@ class BuildADSM(build_exe):
         self.packages.extend(get_installed_packages())
         self.packages.extend(get_local_packages())
         # Cleanup packages to account for any excludes
-        self.packages = [package for package in self.packages
-                                         if package not in self.excludes]
+        self.packages = [package for package in self.packages if package not in self.excludes]
 
         # Grab any templates or translation files for installed apps and copy those
         for app_name in settings.INSTALLED_APPS:
@@ -229,7 +228,7 @@ class BuildADSM(build_exe):
                     target = str(template_dir).replace(settings.BASE_DIR, '')
                     if target.startswith(os.path.sep):
                         target = str(target).replace(os.path.sep, '', 1)
-                    self.include_files.extend([(template_dir, target), ])
+                    self.include_files.extend([(template_dir, os.path.join('templates', target)), ])
             # TODO: Do we need to grab translation files for apps not listed in settings.py?
             # TODO: Django still doesn't properly find translation for domain 'django' after collecting everything
             # if os.path.exists(os.path.join(app.__path__[0], 'locale')):
