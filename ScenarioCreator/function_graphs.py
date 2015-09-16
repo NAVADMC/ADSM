@@ -119,6 +119,15 @@ def existing_probability_graph(primary_key):
     return pdf_graph(m.x_axis_units, function, kwargs_dict)
 
 
+def discrete_graph(x_label, x_values, y_values):
+    fig = new_graph(x_label)
+
+    plt.plot(x_values, y_values, 'bo', ms=4, label='discrete pmf')
+    plt.vlines(x_values, 0, y_values, colors='k', lw=3, alpha=0.5)
+
+    return HttpFigure(fig)
+
+
 def pdf_graph(x_label, function, kwargs_dict):
     if isinstance(kwargs_dict, dict):
         dist = function(**kwargs_dict)
@@ -126,16 +135,19 @@ def pdf_graph(x_label, function, kwargs_dict):
         dist = function(*kwargs_dict) # use positional arguments
     if isinstance(dist, HttpResponse):  #some shortcut scipy and just return a graph response
         return dist
-    x_max = 5
+
+    step = .1 if hasattr(dist.dist, 'pdf') else 1
     if hasattr(dist, 'ppf'):
-        x_max = dist.ppf(0.95) * 1.1
-    x = np.arange(0.0, x_max, x_max / 100)
+        x = np.arange(dist.ppf(0.01),
+                      dist.ppf(0.99) + 2, step)
+    else:
+        x = np.arange(0, 30, 30 / 100)  # used, at minimum, but inverse_gaussian
     if hasattr(dist.dist, 'pdf'):  # Scipy continuous functions
         y_axis = dist.pdf(x)
+        return line_graph(x_label, x, y_axis)
     else:  # scipy discrete functions
-        y_axis = dist.pmf(x)
+        return discrete_graph(x_label, x, dist.pmf(x))
 
-    return line_graph(x_label, x, y_axis)
 
 
 def empty_graph(request=None):
@@ -184,17 +196,22 @@ def existing_relational_graph(primary_key):
 
 
 def line_graph(x_label, x_series, y_series):
+    fig = new_graph(x_label)
+
+    plt.plot(x_series, y_series, color='black')
+
+    return HttpFigure(fig)
+
+
+def new_graph(x_label):
     fig = plt.figure(figsize=(3.5, 2), dpi=100, tight_layout=True, facecolor='w')
     matplotlib.rcParams.update({'font.size': 10})
     time_graph = plt.subplot(111)  # title=model_instance.name)
     time_graph.set_xlabel(x_label)
     time_graph.grid(False)
-
-    # plt.plot(old_x, old_y, color='lightgrey')  # for comparison
-    plt.plot(x_series, y_series, color='black')
-    rstyle(time_graph)
-
-    return HttpFigure(fig)
+    rstyle(time_graph)  # plt.plot(old_x, old_y, color='lightgrey')  # for comparison
+    time_graph.set_ylim(0,1.2)
+    return fig
 
 
 def HttpFigure(fig):
