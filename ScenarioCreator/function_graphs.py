@@ -210,6 +210,7 @@ def new_graph(x_label):
     time_graph.set_xlabel(x_label)
     time_graph.grid(False)
     rstyle(time_graph)  # plt.plot(old_x, old_y, color='lightgrey')  # for comparison
+    time_graph.set_ylim(0,1.2)
     return fig
 
 
