@@ -127,7 +127,7 @@ def existing_probability_graph(primary_key):
 
 def discrete_graph(x_label, x_values, y_values):
     fig = new_graph(x_label)
-
+    plt.gca().set_ylim(0, 1.2)  # always absolute
     plt.plot(x_values, y_values, 'bo', ms=4, label='discrete pmf')
     plt.vlines(x_values, 0, y_values, colors='k', lw=3, alpha=0.5)
 
@@ -146,7 +146,10 @@ def pdf_graph(x_label, function, kwargs_dict):
         x = np.arange(dist.ppf(0.01),
                       dist.ppf(0.95), .1)
         y_axis = dist.pdf(x)
-        return line_graph(x_label, x, y_axis)
+        fig = line_graph(x_label, x, y_axis)
+        x1, x2, y1, y2 = plt.axis()
+        plt.axis((x1, x2, 0, min(1.2, y2)))  # cap y_max but allow down-scaling
+        return fig
     else:  # scipy discrete functions
         x = np.arange(dist.ppf(0.01),
               dist.ppf(0.99) + 2, 1)
@@ -155,7 +158,7 @@ def pdf_graph(x_label, function, kwargs_dict):
 
 
 def empty_graph(request=None):
-    return line_graph('Days', [],[])  # empty graph
+    return line_graph('Days', [], [])  # empty graph
 
 
 def relational_graph_update(request, primary_key):
@@ -214,7 +217,7 @@ def new_graph(x_label):
     time_graph.set_xlabel(x_label)
     time_graph.grid(False)
     rstyle(time_graph)  # plt.plot(old_x, old_y, color='lightgrey')  # for comparison
-    time_graph.set_ylim(0,1.2)
+
     return fig
 
 
