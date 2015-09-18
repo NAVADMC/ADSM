@@ -1,6 +1,6 @@
 /**
  * Writes out ArcView shapefiles giving weekly snapshots of the unit states and
- * the zones for the first Monte Carlo iteration.
+ * the zones.
  *
  * Unit state files are the same as the base file name but with _dayxxxx
  * appended. Zone files are the same as the base file name but with
@@ -49,9 +49,6 @@ typedef struct
     .shp at the end. */
   projPJ projection; /**< The map projection used to convert between lat-long
     and x-y coordinates. */
-  guint seen_day_1; /**< A count of how many times a New Day event with day
-    number 1 has been seen. Useful for ignoring everything past the first
-    Monte Carlo iteration. */
   guint max_state_name_length; /**< The length of the longest disease state
     name. Used to set the width of the state field in the ArcView attribute
     (.dbf) file.*/
@@ -526,10 +523,7 @@ handle_end_of_day_event (struct adsm_module_t_ * self,
 
   local_data = (local_data_t *) (self->model_data);
 
-  if (event->day == 1)
-    local_data->seen_day_1 += 1;
-
-  if ((local_data->seen_day_1 < 2) && (event->day % 7 == 1 || event->done))
+  if (event->day % 7 == 1 || event->done)
     {
       write_units_shapefile (local_data, units, event->day);
       if (local_data->include_zones)
@@ -685,7 +679,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->projection = projection;
-  local_data->seen_day_1 = 0;
   local_data->max_state_name_length = max_state_name_length();
   local_data->max_prod_type_length = max_prod_type_length (units->production_type_names);
   local_data->max_unit_id_length = max_unit_id_length (units);
