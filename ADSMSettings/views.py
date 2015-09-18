@@ -227,5 +227,5 @@ def show_help_text_json(request):
         set_to = new_value == 'true'
         SmSession.objects.all().update(show_help_text=set_to)
         return JsonResponse({'status':'success'})
-    else:
+    else:  # GET
         return JsonResponse({'show_help_text': SmSession.objects.get().show_help_text})
