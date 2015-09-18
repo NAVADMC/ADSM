@@ -32,7 +32,7 @@ Python 3.4.2 (x64):
   - Windows: https://www.python.org/ftp/python/3.4.2/python-3.4.2.amd64.msi
   - Linux: https://www.python.org/ftp/python/3.4.2/Python-3.4.2.tgz (Please find instructions for compiling on your platform. Note: Ubuntu now ships with python3. We will give instructions assuming this version.)
     - Note that Linux Python3 ships with broken pip and setup tools. Run this command to fix the issue `curl https://bootstrap.pypa.io/get-pip.py | python3`
-  - Mac: https://www.python.org/ftp/python/3.4.2/python-3.4.2-macosx10.6.pkg
+    - Note that if you plan to build a distributable for ADSM, you will need to compile your own python as documented below
 
 Once Python is installed, you will need to create a Virtual Environment for the ADSM Project.  
 This is important, especially if you plan on compiling a distributable version, as we will package the Virtual Environment to send off with the deployable. So make sure that your Virtual Environment is dedicated to this project and clean of unneeded package installations.
@@ -98,15 +98,23 @@ If you plan on compiling a distributable version of the project, then use the fo
 
 Linux:  
  
-  - Requires ldd and objdump installed (probably already on your system)  
-  - `pip install hg+https://bitbucket.org/BryanHurst/cx_freeze`
+  - Requires ldd and objdump installed (probably already on your system)
+  - You need a custom compiled version of Python3.4 (will use instead of venv)
+        
+        sudo apt-get install zlib1g-dev libbz2-dev libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev libgdbm-dev liblzma-dev tk8.5-dev
+        wget https://www.python.org/ftp/python/3.4.3/Python-3.4.3.tgz
+        tar zxvf Python-3.4.3.tgz
+        rm Python-3.4.3.tgz
+        cd Python-3.4.3/
+        ./configure --prefix=/path/to/projects/adsm_python --exec_prefix=/path/to/projects/adsm_python
+        make
+        make altinstall
+        
+  - Using the new python, install all the requirements `/path/to/projects/adsm_python/bin/pip install -r /path/to/adsm/Requirements.txt && /path/to/projects/adsm_python/bin/pip install -r /path/to/adsm/Requirements-Nix.txt`     
+  - `/path/to/projects/adsm_python/bin/pip install hg+https://bitbucket.org/BryanHurst/cx_freeze`
     - If the above install fails, then there is a problem with your python shared libraries, I have a clone of the cx_freeze repo with a temp fix
-      - CD to a directory where you want to download it, then `git clone git@git.newline.us:BryanHurst/cx_freeze.git; cd cx_freeze; python setup.py install`
- 
-Mac:  
- 
-  - Install Xcode  
-  - `pip install hg+https://bitbucket.org/BryanHurst/cx_freeze`
+      - CD to a directory where you want to download it, then `git clone git@git.newline.us:BryanHurst/cx_freeze.git; cd cx_freeze; /path/to/projects/adsm_python/bin/python setup.py install`
+  - If you need to update the NPU, `/path/to/projects/adsm_python/bin/pip install git+https://github.com/pyinstaller/pyinstaller.git@python3`
  
 Windows:  
 
@@ -128,12 +136,8 @@ Windows:
 Linux:  
 
   - http://chromedriver.storage.googleapis.com/2.12/chromedriver_linux64.zip
-  
-Mac:  
 
-  - http://chromedriver.storage.googleapis.com/2.12/chromedriver_mac32.zip
-
-Unzip the file and place it in the Scripts folder of your new Virtual Environment (/path/to/adsm_venv/Scripts/)
+Unzip the file and place it in the Scripts or bin folder of your new Virtual Environment (/path/to/adsm_venv/Scripts/ || /path/to/adsm_vent/bin/)
 
 
 Development and Production Branches
