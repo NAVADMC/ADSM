@@ -302,8 +302,12 @@ def check_simulation_version():
     try:
         executable = adsm_executable_command()[0]
         process = subprocess.Popen([executable, "--version"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output, error = process.communicate()
-        exit_code = process.wait(timeout=200)
+        try:
+            output, error = process.communicate(timeout=200)
+            exit_code = process.returncode
+        except:
+            exit_code = 1
+            output = None
         try:
             process.kill()
         except:
@@ -327,8 +331,12 @@ def npu_update_info():
     try:
         npu = os.path.join(settings.BASE_DIR, 'npu'+settings.EXTENSION)
         process = subprocess.Popen([npu, "--check_update", "--silent"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output, error = process.communicate()
-        exit_code = process.wait(timeout=60000)
+        try:
+            output, error = process.communicate(timeout=60000)
+            exit_code = process.returncode
+        except:
+            exit_code = 1
+            output = None
         try:
             process.kill()
         except:
