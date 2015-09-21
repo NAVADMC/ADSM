@@ -95,6 +95,15 @@ $(function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
     });
 
+    $(document).on('click', '#save_scenario', function(event){
+        event.preventDefault();
+        if($('.filename input').val() == 'Untitled Scenario'){
+            prompt_for_new_file_name('/app/SaveScenario/');
+        } else {
+            $('#save_scenario').closest('form').submit() //normal submission
+        }
+    })
+
     $(document).on('submit', '.ajax', function(event) {
         event.preventDefault();
         var $self = $(this)
@@ -265,6 +274,17 @@ $(function(){
         }
     })
 
+     $('#id_show_help_text').change(function(event){
+        var isChecked = $(this)[0].checked;
+         $.post('/app/ShowHelpText.json/', {show_help_text: isChecked}, function() {
+            if(isChecked){
+                $('body').removeClass('hide-help-text')
+            }else{
+                $('body').addClass('hide-help-text')
+            }
+        });
+    });
+
     $('#id_disable_all_controls').change(function(event){
         var isChecked = $(this).prop('checked');
         var new_link = window.location;
@@ -333,7 +353,7 @@ $(function(){
         $('.edit-button-holder .copy-button').on('click', function () {
             make_function_panel_editable()
             var target = $('#' + $(this).attr('form'))
-            target.attr('action', target.attr('action').replace(/\d+/i, 'new')) //values already loaded, but this should go to /new/
+            target.attr('action', target.attr('action') + 'copy/') //values already loaded, but this should go to /new/
             console.log(target.attr('action'))
             var name_in = $('#functions_panel #id_name')
             name_in.val(name_in.val() + ' - Copy')
@@ -450,6 +470,30 @@ function get_parent_select($self) {
 }
 
 
+function update_visibility_target_from_controller(disabled_value, hide_target, required_value) {
+    if ($(this).val() == disabled_value && typeof disabled_value !== 'undefined') {
+        hide_target.hide()
+    } else {
+        if ($(this).attr('type') == 'checkbox') {
+            if ($(this).is(':checked') == (disabled_value === 'false')) {
+                hide_target.show()
+            } else {
+                hide_target.hide()
+            }
+        }
+        else {
+            if (typeof required_value !== 'undefined') { //required value is specified
+                if ($(this).val() == required_value || $(this).val() == '') {
+                    hide_target.show()
+                } else {
+                    hide_target.hide()
+                }
+            } else {
+                hide_target.show()
+            }
+        }
+    }
+}
 var attach_visibility_controller = function (self){
     var controller = '[name=' + $(self).attr('data-visibility-controller') + ']'
     var hide_target = $(self).parents('.control-group')
@@ -460,35 +504,16 @@ var attach_visibility_controller = function (self){
     var required_value = $(self).attr('data-required-value')
 
     $('body').on('change', controller, function(){
-        if($(self).val() == disabled_value){
-            hide_target.hide()
-        }else{
-            if($(this).attr('type') == 'checkbox') {
-                if( $(this).is(':checked') == (disabled_value === 'false')){
-                    hide_target.show()
-                }else {
-                    hide_target.hide()
-                }
-            }
-            else {
-                if (typeof required_value !== 'undefined'){ //required value is specified
-                    if($(this).val() == required_value || $(this).val() == ''){
-                        hide_target.show()
-                    }else{
-                        hide_target.hide()
-                    }
-                }else{
-                    hide_target.show()
-                }
-            }
-        }
+        update_visibility_target_from_controller.call(this, disabled_value, hide_target, required_value);
     })
-    $(controller).each(function(index, elem){ //each because radio buttons have multiple elem, same name
-        if($(elem).attr('type') != 'radio' || elem.hasAttribute('checked')){
-            //radio buttons are multiple elements with the same name, we only want to fire if its actually checked
-            $(elem).trigger('change');
-        }
-    });
+
+    //run once to initialize
+    var $elem = $(controller);
+    if($elem.attr('type') != 'radio' || $elem[0].hasAttribute('checked')){
+        //radio buttons are multiple elements with the same name, we only want to fire if its actually checked
+        update_visibility_target_from_controller.call($elem, disabled_value, hide_target, required_value);
+    }
+    
     $(hide_target).css('margin-left', '26px');
 }
 
@@ -533,9 +558,9 @@ var check_file_saved = function(){
 
 two_state_button = function(){
     if(typeof outputs_exist === 'undefined' || outputs_exist == false) {
-        return 'class="btn btn-primary btn-save">Apply changes'
+        return 'class="btn btn-primary btn-save" formnovalidate >Apply changes'
     } else {
-        return 'class="btn btn-danger btn-save">Delete Results and Apply Changes'
+        return 'class="btn btn-danger btn-save" formnovalidate >Delete Results and Apply Changes'
     }
 }
 
@@ -786,7 +811,7 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
                 if($(form_html).find('#main_panel').length ){
                     $('#main-panel').html($(form_html).find('#main_panel')[0])
                 }else {
-                    var matches = form_html.match(/(<body>[\S\s]*<\/body>)/i);//multiline match
+                    var matches = form_html.match(/(<body.*>[\S\s]*<\/body>)/i);//multiline match
                     var content = $(matches[1]);
                     $('body').html(content);
                 }
@@ -824,7 +849,7 @@ function hide_unneeded_probability_fields() {
         var functions = help_text.toLowerCase().match(/(\w[\w\s]*)(?=[,\.])/g);
         if (functions.indexOf(equation_type.toLowerCase()) >= 0) {
             $(control_group).show();
-            $(control_group).find(':input').attr('required', 'required');
+            $(control_group).find(':input').attr('required', 'required'); //this code is mirrored in the django form validation
         }
         else {
             $(control_group).hide();

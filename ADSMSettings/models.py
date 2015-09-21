@@ -42,6 +42,7 @@ class SmSession(models.Model):
     population_upload_percent = models.FloatField(default=0)
     simulation_has_started = models.BooleanField(default=False)
     iteration_text = models.TextField(default='')
+    show_help_text = models.BooleanField(default=True)
 
     @property
     def current_version(self):

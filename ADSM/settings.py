@@ -49,13 +49,20 @@ if not WORKSPACE_PATH:
         except:
             WORKSPACE_PATH = None
     if not WORKSPACE_PATH:
-        WORKSPACE_PATH = os.path.join(os.path.expanduser("~"), "Documents")
+        WORKSPACE_PATH = os.path.join(os.path.expanduser("~"), "Documents", "ADSM Workspace")
 if not DB_BASE_DIR:
     DB_BASE_DIR = os.path.join(WORKSPACE_PATH, "settings")
 if not os.path.exists(WORKSPACE_PATH):
     os.makedirs(WORKSPACE_PATH, exist_ok=True)
 if not os.path.exists(DB_BASE_DIR):
     os.makedirs(DB_BASE_DIR, exist_ok=True)
+
+if sys.platform == 'win32':
+    OS_DIR = 'windows'
+    EXTENSION = '.exe'
+else:
+    OS_DIR = 'linux'
+    EXTENSION = ''
 
 INSTALLED_APPS = (
     'ScenarioCreator',

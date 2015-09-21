@@ -28,12 +28,16 @@ def status(message):
 def create_no_duplicates(ModelClass, suggested_name, **kwargs):
     instance, created = ModelClass.objects.get_or_create(**kwargs)
     if suggested_name is not None:  # TODO: use Django _meta to check for a field called "name"
+        # Remove comma from suggested_name because we use commas as a separator
+        suggested_name = suggested_name.replace(',','')
         if created:
             instance.name = suggested_name
+            instance.save()
         else:
-            if instance.name != suggested_name:
+            current_name_parts = set(instance.name.split(', '))
+            if suggested_name not in current_name_parts:
                 instance.name += ', ' + suggested_name
-        instance.save()
+                instance.save()
     return instance, created
 
 
@@ -90,7 +94,9 @@ def getPdf( xml, nameGenerator ):
 
     args = {'equation_type': pdfType.capitalize(), }
 
-    if pdfType == 'beta':
+    if pdfType == 'bernoulli':
+        args['p'] = float( required_text(firstChild, './p' ) )
+    elif pdfType == 'beta':
         args['alpha'] = float( required_text(firstChild, './alpha' ) )
         args['alpha2'] = float( required_text(firstChild, './beta' ) )
         args['min'] = float( required_text(firstChild, './location' ) )
@@ -540,7 +546,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             zone, created = create_no_duplicates(Zone, suggested_name=name, radius=radius )
     # end of loop over <zone-model> elements
 
-    status("Reading Contact Spread Models...")
+    status("Building Contact Spread Models")
     for el in xml.findall( './/contact-spread-model' ):
         if 'zone' in el.attrib:
             continue
@@ -597,7 +603,6 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     disease.include_indirect_contact_spread = True
                 else:
                     assert False
-                disease.save()
 
                 pairing, created = DiseaseSpreadAssignment.objects.get_or_create(
                     source_production_type = ProductionType.objects.get( name=fromTypeName ),
@@ -611,8 +616,9 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             # end of loop over to-production-types covered by this <contact-spread-model> element
         # end of loop over from-production-types covered by this <contact-spread-model> element
     # end of loop over <contact-spread-model> elements without a "zone" attribute
+    disease.save()
 
-    status("Building Contact Spread Model")
+    status("Building In-Zone Movement Controls")
     for el in xml.findall( './/contact-spread-model' ):
         if 'zone' not in el.attrib:
             continue

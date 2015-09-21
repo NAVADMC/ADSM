@@ -18,9 +18,9 @@
         No updates are available.
     {% endif %}
     <hr/>
-    {#    <input type="checkbox" checked>Automatically Check for Updates<br>#}
-    <input type="checkbox" checked>Show inline help text and hints<br>
+    <input id="id_show_help_text" type="checkbox"
+           {% if show_help_text %}checked{% endif %}>Show inline help text and hints<br>
     <hr/>
-    <a href="/app/Backend/" class="btn btn-default" style="display:inline;">Advanced Panel</a>
+    <a href="/app/Backend/" class="btn btn-default action_link" style="display:inline;">Advanced Panel</a>
 
 </div>

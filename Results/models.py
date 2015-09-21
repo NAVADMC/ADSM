@@ -389,12 +389,15 @@ class ResultsVersion(OutputBaseModel):
     versionMinor = models.CharField(max_length=255, null=True, blank=True)
     versionRelease = models.CharField(max_length=255, null=True, blank=True)
     
-    ## Singleton code
-    objects = SingletonManager()
-    
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.id=1
         return super(ResultsVersion, self).save(force_insert, force_update, using, update_fields)
+
+    def __str__(self):
+        if all(x is not None for x in [self.versionMajor, self.versionMinor, self.versionRelease]):
+            return '.'.join([self.versionMajor, self.versionMinor, self.versionRelease])
+        else:
+            return 'No simulation version stored in this result set'
 
 
 def outputs_exist():

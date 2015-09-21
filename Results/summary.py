@@ -6,7 +6,7 @@ from django.db.models import Q
 
 
 def list_of_iterations():
-    return list(DailyControls.objects.values_list('iteration', flat=True).distinct())
+    return sorted(list(DailyControls.objects.values_list('iteration', flat=True).distinct()))
 
 
 def median_value(queryset, term):

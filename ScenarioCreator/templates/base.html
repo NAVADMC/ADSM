@@ -21,7 +21,7 @@
     <script src="{{ STATIC_URL }}js/population-panel.js"></script>
     {% load db_status_tags %}
 </head>
-<body>
+<body {% if not show_help_text %}class="hide-help-text"{% endif %}>
 <header>
         <div class="row">
             <div class="header_logo col-xs-2">                

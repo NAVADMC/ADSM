@@ -45,10 +45,11 @@ def basic_context(request):
                                and DiseaseProgressionAssignment.objects.filter(progression__isnull=False).count() == pt_count,
                'DirectSpreads': DirectSpread.objects.count(),
                'AssignSpreads': pt_count and
-                                DiseaseSpreadAssignment.objects.filter(
-                                    source_production_type=F('destination_production_type'),
-                                    direct_contact_spread__isnull=False
-                                ).count() >= pt_count,
+                                DiseaseSpreadAssignment.objects.filter(  #completely empty assignments
+                                    direct_contact_spread__isnull=True,
+                                    indirect_contact_spread__isnull=True,
+                                    airborne_spread__isnull=True
+                                ).count() < pt_count ** 2,  # all possible assignments == pt_count^2
                'ControlMasterPlan': ControlMasterPlan.objects.count(),
                'VaccinationTrigger': any([m.objects.count() for m in 
                                           [DiseaseDetection,RateOfNewDetections,DisseminationRate,TimeFromFirstDetection,DestructionWaitTime,SpreadBetweenGroups]]),
