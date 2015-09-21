@@ -546,7 +546,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             zone, created = create_no_duplicates(Zone, suggested_name=name, radius=radius )
     # end of loop over <zone-model> elements
 
-    status("Reading Contact Spread Models...")
+    status("Building Contact Spread Models")
     for el in xml.findall( './/contact-spread-model' ):
         if 'zone' in el.attrib:
             continue
@@ -618,7 +618,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     # end of loop over <contact-spread-model> elements without a "zone" attribute
     disease.save()
 
-    status("Building Contact Spread Model")
+    status("Building In-Zone Movement Controls")
     for el in xml.findall( './/contact-spread-model' ):
         if 'zone' not in el.attrib:
             continue
