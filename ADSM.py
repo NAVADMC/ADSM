@@ -37,8 +37,8 @@ def launch_viewer():
         os.makedirs(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR), exist_ok=True)
     log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR, 'debug.log')
     try:
-        viewer_status = subprocess.call('"'+os.path.join(BASE_DIR, 'Viewer', settings.OS_DIR, 'ADSM_Viewer%s" --log-file="%s"' % (settings.EXTENSION, log_path)), shell=True)
-        if viewer_status != 0:
+        viewer_status = subprocess.call('"'+os.path.join(BASE_DIR, 'Viewer', settings.OS_DIR, 'ADSM_Viewer%s" --log-file="%s" --no-sandbox' % (settings.EXTENSION, log_path)), shell=True)
+        if viewer_status != 0 and viewer_status != 9:  # The 9 is to ignore X Window System error BadDrawable when closing. TODO: Debug viewer
             raise RuntimeError("Error launching Viewer!")
     except:
         print("\nIt appears that the Viewer Application is either missing or not compatible with this system!\nYou can open a browser and navigate to http://127.0.0.1:8000")

@@ -28,6 +28,7 @@ build_exe_options = {
     'build_exe': 'build',
     'optimize': 2,
     'excludes': [
+        'PyInstaller',
         # CHANGE ME for any python packages in your project that you want excluded
         'development_scripts',
     ],
@@ -41,7 +42,6 @@ build_exe_options = {
         'shutil',
     ],
     'replace_paths': [('*', '')],
-    'compressed': False,
     'include_files': [
         # Standard Django items to bring in
         ('static', 'static'),
@@ -191,6 +191,8 @@ def parse_requirements_and_links(requirements_file, existing_requirements=None, 
     return existing_requirements, existing_links
 
 
+# TODO: This build doesn't quite work in Linux. The files don't end up in the proper location.
+# Currently you must manually move files around after the build finishes to get it to work in Linux.
 class BuildADSM(build_exe):
     def run(self):
         print("\nYou should only run this build script if you are a CLEAN VirtualEnv!\n"
