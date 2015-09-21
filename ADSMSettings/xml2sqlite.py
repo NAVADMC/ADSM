@@ -32,11 +32,12 @@ def create_no_duplicates(ModelClass, suggested_name, **kwargs):
         suggested_name = suggested_name.replace(',','')
         if created:
             instance.name = suggested_name
+            instance.save()
         else:
             current_name_parts = set(instance.name.split(', '))
             if suggested_name not in current_name_parts:
                 instance.name += ', ' + suggested_name
-        instance.save()
+                instance.save()
     return instance, created
 
 
