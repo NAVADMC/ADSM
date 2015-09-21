@@ -602,7 +602,6 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     disease.include_indirect_contact_spread = True
                 else:
                     assert False
-                disease.save()
 
                 pairing, created = DiseaseSpreadAssignment.objects.get_or_create(
                     source_production_type = ProductionType.objects.get( name=fromTypeName ),
@@ -616,6 +615,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             # end of loop over to-production-types covered by this <contact-spread-model> element
         # end of loop over from-production-types covered by this <contact-spread-model> element
     # end of loop over <contact-spread-model> elements without a "zone" attribute
+    disease.save()
 
     status("Building Contact Spread Model")
     for el in xml.findall( './/contact-spread-model' ):
