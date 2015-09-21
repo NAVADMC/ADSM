@@ -109,6 +109,22 @@ Linux:
         ./configure --prefix=/path/to/projects/adsm_python --exec_prefix=/path/to/projects/adsm_python
         make
         make altinstall
+        /path/to/projects/adsm_python/bin/pip uninstall setuptools
+        /path/to/projects/adsm_python/bin/pip uninstall pip
+        wget https://pypi.python.org/packages/source/s/setuptools/setuptools-3.4.4.tar.gz
+	    tar -vzxf setuptools-3.4.4.tar.gz
+	    rm setuptools-3.4.4.tar.gz
+	    cd setuptools-3.4.4
+        /path/to/projects/adsm_python/bin/python setup.py install
+        cd ..
+        rm -r setuptools-3.4.4/
+        wget https://pypi.python.org/packages/source/p/pip/pip-1.5.6.tar.gz
+	    tar -vzxf pip-1.5.6.tar.gz
+	    rm pip-1.5.6.tar.gz
+	    cd pip-1.5.6
+	    /path/to/projects/adsm_python/bin/python setup.py install
+	    cd ..
+	    rm -r pip-1.5.6
         
   - Using the new python, install all the requirements `/path/to/projects/adsm_python/bin/pip install -r /path/to/adsm/Requirements.txt && /path/to/projects/adsm_python/bin/pip install -r /path/to/adsm/Requirements-Nix.txt`     
   - `/path/to/projects/adsm_python/bin/pip install hg+https://bitbucket.org/BryanHurst/cx_freeze`
