@@ -12,6 +12,7 @@ import os
 import glob
 import io
 import xml.etree.ElementTree as ET
+import subprocess
 
 
 
@@ -58,11 +59,10 @@ def main():
 				if os.path.isfile( dbFilePath ):
 					os.remove( dbFilePath )
 
-				cmd = 'python3.4 xml2sqlite.py ' \
-				  + populationFilePath + ' ' + parameterFilePath \
-				  + ' ' + dbFilePath
-				print( cmd )
-				os.system( cmd )
+				cmd = ['python3.4', 'xml2sqlite.py', populationFilePath,
+				  parameterFilePath, dbFilePath ]
+				print( ' '.join(cmd) )
+				subprocess.check_call(cmd)
 			# end of case where XML files need to be converted to SQLite
 		# end of loop over tests in the test description file
 	# end of loop over directories containing tests
