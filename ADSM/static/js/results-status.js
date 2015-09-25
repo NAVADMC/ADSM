@@ -40,8 +40,7 @@ var results_status  = (function(pollTime){
 
         start_poll = function() { pollInterval = setInterval(update_results_status, pollTime); update_results_status(); },
         stop_poll = function() {
-            console.log("Stopping polling")
-            clearInterval(pollInterval); 
+            clearInterval(pollInterval);
         };
 
 
