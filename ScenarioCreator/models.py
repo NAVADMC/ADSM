@@ -438,8 +438,6 @@ class ControlProtocol(BaseModel):
         help_text='Indicates if units of this type identified by '+wiki("trace back")+' of '+wiki("indirect contact")+'s will be subject to preemptive destruction.', )
     destruction_priority = models.PositiveIntegerField(default=5, blank=True, null=True,
         help_text='The destruction priority of this ' + wiki("production type") + ' relative to other production types.  A lower number indicates a higher priority.', )
-    use_vaccination = models.BooleanField(default=False,
-        help_text='Indicates if units of this ' + wiki("production type") + ' will be subject to vaccination.', )
     vaccinate_detected_units = models.BooleanField(default=False,
         help_text='Indicates if detection in units of this ' + wiki("production type") + ' will trigger vaccination.', )
     days_to_immunity = models.PositiveIntegerField(blank=True, null=True,
@@ -448,10 +446,6 @@ class ControlProtocol(BaseModel):
         help_text='The minimum time in days between vaccination for units of this ' + wiki("production type") + '.', )
     vaccine_immune_period = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Defines the '+ wiki("vaccine immune") + ' period for units of this ' + wiki("production type") + '.', )
-    trigger_vaccination_ring = models.BooleanField(default=False,
-        help_text='Indicates if detection of a unit of this type will trigger a vaccination ring.', )
-    vaccination_ring_radius = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='Radius in kilometers of the vaccination ring.', )
     vaccination_priority = models.PositiveIntegerField(default=5, blank=True, null=True,
         help_text='The vaccination priority of this production type relative to other production types.  A lower number indicates a higher priority.', )
     vaccination_demand_threshold = models.PositiveIntegerField(blank=True, null=True,
