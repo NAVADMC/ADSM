@@ -1002,6 +1002,10 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     # end of loop over <vaccine-model> elements
 
     productionTypesThatAreVaccinated = set()
+    # Create a dictionary where key=radius and value=set of ProductionTypes
+    # that trigger a ring with that radius. This will tell us how many
+    # VaccinationRingRule objects are needed.
+    rings_needed = {}
     for el in xml.findall( './/ring-vaccination-model' ):
         # Older XML files allowed just a "production-type" attribute and an
         # implied "from-any" functionality.
@@ -1013,26 +1017,10 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             toTypeNames = getProductionTypes( el, 'to-production-type', productionTypeNames )
 
         radius = float( required_text(el, './radius/value' ) )
-        for fromTypeName in fromTypeNames:
-            # If a ControlProtocol object has already been assigned to this
-            # production type, retrieve it; otherwise, create a new one.
-            try:
-                assignment = ProtocolAssignment.objects.get( production_type__name=fromTypeName )
-                protocol = assignment.control_protocol
-            except ProtocolAssignment.DoesNotExist:
-                protocol = ControlProtocol(
-                    use_detection = False
-                )
-                protocol.save()
-                assignment = ProtocolAssignment(
-                    production_type = ProductionType.objects.get( name=fromTypeName ),
-                    control_protocol = protocol
-                )
-                assignment.save()
-            protocol.trigger_vaccination_ring = True
-            protocol.vaccination_ring_radius = radius
-            protocol.save()
-        # end of loop over from-production-types covered by this <ring-vaccination-model> element
+        try:
+            rings_needed[radius].update(fromTypeNames)
+        except KeyError:
+            rings_needed[radius] = set(fromTypeNames)
 
         priority = int( required_text(el, './priority' ) )
         minTimeBetweenVaccinations = int( required_text(el, './min-time-between-vaccinations/value' ) )
@@ -1056,7 +1044,6 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     control_protocol = protocol
                 )
                 assignment.save()
-            protocol.use_vaccination = True
             protocol.minimum_time_between_vaccinations = minTimeBetweenVaccinations
             protocol.vaccinate_detected_units = vaccinateDetectedUnits
             protocol.save()
@@ -1064,6 +1051,14 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             productionTypesThatAreVaccinated.add( toTypeName )
         # end of loop over to-production-types covered by this <ring-vaccination-model> element
     # end of loop over <ring-vaccination-model> elements
+
+    # Create the VaccinationRingRules
+    for radius, trigger_production_types in rings_needed.items():
+        rule = VaccinationRingRule(outer_radius=radius)
+        rule.save()
+        rule.trigger_group.add(*ProductionType.objects.filter(name__in=trigger_production_types))
+        rule.target_group.add(*ProductionType.objects.filter(name__in=productionTypesThatAreVaccinated))
+    # end of loop to create rules
 
     if len( productionTypesThatAreVaccinated - productionTypesWithVaccineEffectsDefined ) > 0:
         raise Exception( 'some production types that are vaccinated do not have vaccine effects defined' )
