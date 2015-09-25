@@ -210,7 +210,6 @@ function update_population_filter_and_sort(sort_by) {
     var new_url = '?' + population_filter_string();//build URL
 
     var mask_visible = $('#edit-mask').is(':visible');
-    console.log(mask_visible)
     var form_editable = mask_visible ? '' : '&readonly=readonly'
 
     new_url = new_url + sorting + form_editable;
@@ -277,7 +276,6 @@ $(document).on('click', '#edit_population', function(){
 
 function check_edit_population_state(){
     var mask_visibility = $('#edit-mask').is(':visible');
-    console.log(mask_visibility)
     if(mask_visibility) {
         $('.population-buttons').removeAttr('hidden')
         $('#edit_population').css('display', 'none')

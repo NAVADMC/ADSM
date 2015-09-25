@@ -260,7 +260,6 @@ many_to_many_widget = (function(form_state){
                     * everything between previous click and index of current shift+click */
                     var rows = $('tbody tr:nth-child(n+'+start_row+'):nth-child(-n+'+end_row+') th:nth-child('+col_index+') span');
                     rows.addClass('selected');
-                    console.log(col_index, start_row, end_row, rows);
                 }
              }
             prev_click = this;
@@ -277,7 +276,6 @@ many_to_many_widget = (function(form_state){
         
         $(document).on('click', 'button.bulk-apply', function(){
             var select_el = $(this).closest('td').find('select');
-            console.log(select_el);
             many_to_many_widget.bulk_apply($(select_el));
             $(this).attr('disabled', 'disabled')
         })

@@ -250,7 +250,6 @@ $(function(){
                                     var pk = link.split('/')[3];
                                     // remove option pointing to delete model
                                     $('select[data-new-item-url="' + newLink + '"] [value="' + pk + '"]').remove()
-                                    console.log('select[data-new-item-url="' + newLink + '"]', $('select[data-new-item-url="' + newLink + '"]'))
                                     dialog.close();
                                 });
                             }
@@ -293,7 +292,6 @@ $(function(){
             $.each(['Vaccination', 'Protocol', 'Zone'], function(index, value){
                 if(label.indexOf(value) != -1){
                     new_link = '/setup/ControlMasterPlan/1/'
-                    console.log(new_link)
                 }
             })
         }
@@ -325,7 +323,6 @@ $(function(){
         var file_extension = valid_extensions[$(this).find('input[type=file]').attr('accept')]
         if( typeof file_extension !== 'undefined' && filename.indexOf(file_extension) == -1) {
             alert("Uploaded files must have "+file_extension+" in the name: " + filename)
-            console.log(file_extension);
             event.preventDefault();
             return false;
         }
@@ -354,7 +351,6 @@ $(function(){
             make_function_panel_editable()
             var target = $('#' + $(this).attr('form'))
             target.attr('action', target.attr('action') + 'copy/') //values already loaded, but this should go to /new/
-            console.log(target.attr('action'))
             var name_in = $('#functions_panel #id_name')
             name_in.val(name_in.val() + ' - Copy')
         })
@@ -362,7 +358,6 @@ $(function(){
 
     $('.blocking-overlay:visible').livequery( function() {
         if(window.location.pathname.indexOf('app/ImportScenario') != -1){
-            console.log('start watcher')
             if(typeof statusInterval === 'undefined'){
                 statusInterval = setInterval(statusChecker, 2000);
             }
@@ -620,7 +615,6 @@ var modelModal = {
 
     ajax_success: function(modal, selectInput){
         return function(html) {
-            //console.log('ajax_success', modal, selectInput, html.slice(0,100));
             add_model_option_to_selects(html, selectInput);
             modal.modal('hide');
         };
