@@ -370,9 +370,6 @@ typedef struct
   int vaccination_reason_priority;
   GHashTable *detected_today; /**< Records the units detected today.  Useful
     for cancelling vaccination of detected units. */
-
-  sqlite3 *db; /* Temporarily stash a pointer to the parameters database here
-    so that it will be available to the set_params function. */
 }
 local_data_t;
 
@@ -1736,10 +1733,21 @@ local_free (struct adsm_module_t_ *self)
 
 
 
+typedef struct
+{
+  adsm_module_t *self;
+  sqlite3 *db;
+  GError **error;
+}
+set_params_args_t;
+
+
+
 /**
  * Adds a set of parameters to a resources and implementation of controls model.
  *
- * @param data this module ("self"), but cast to a void *.
+ * @param data a set_params_args_t structure, containing this module ("self")
+ *   and a GError pointer to fill in if errors occur.
  * @param dict the SQL query result as a GHashTable in which key = colname,
  *   value = value, both in (char *) format.
  * @return 0
@@ -1747,7 +1755,9 @@ local_free (struct adsm_module_t_ *self)
 static int
 set_params (void *data, GHashTable *dict)
 {
+  set_params_args_t *args;
   adsm_module_t *self;
+  GError **error;
   local_data_t *local_data;
   sqlite3 *params;
   char *tmp_text;
@@ -1758,9 +1768,11 @@ set_params (void *data, GHashTable *dict)
     g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
   #endif
 
-  self = (adsm_module_t *)data;
+  args = data;
+  self = args->self;
   local_data = (local_data_t *) (self->model_data);
-  params = local_data->db;
+  params = args->db;
+  error = args->error;
 
   g_assert (g_hash_table_size (dict) == 7);
 
@@ -1840,9 +1852,10 @@ set_params (void *data, GHashTable *dict)
     }
   else
     {
-      g_warning
-        ("%s: assuming destruction priority order reason > production type > time waiting",
-         MODEL_NAME);
+      g_set_error (error, ADSM_MODULE_ERROR, 0,
+                   "\"%s\" is not a valid destruction priority order: "
+                   "must be some ordering of reason, time waiting, production type",
+                   tmp_text);
       local_data->destruction_reason_priority = 1;
       local_data->destruction_prod_type_priority = 2;
       local_data->destruction_time_waiting_priority = 3;
@@ -1915,9 +1928,10 @@ set_params (void *data, GHashTable *dict)
     }
   else
     {
-      g_warning
-        ("%s: assuming vaccination priority order reason > production type > time waiting",
-         MODEL_NAME);
+      g_set_error (error, ADSM_MODULE_ERROR, 0,
+                   "\"%s\" is not a valid vaccination priority order: "
+                   "must be some ordering of reason, time waiting, production type",
+                   tmp_text);
       local_data->vaccination_reason_priority = 1;
       local_data->vaccination_prod_type_priority = 2;
       local_data->vaccination_time_waiting_priority = 3;
@@ -1964,6 +1978,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_RequestToTerminateVaccination,
     0
   };
+  set_params_args_t set_params_args;
   char *sqlerr;
 
 #if DEBUG
@@ -2010,18 +2025,19 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->detected_today = g_hash_table_new (g_direct_hash, g_direct_equal);
 
   /* Call the set_params function to read the parameters. */
-  local_data->db = params,
+  set_params_args.self = self;
+  set_params_args.db = params;
+  set_params_args.error = error;
   sqlite3_exec_dict (params,
                      "SELECT destruction_program_delay,destruction_capacity_id,destruction_priority_order,"
                      "vaccination_capacity_id,restart_vaccination_capacity_id,vaccination_priority_order,"
                      "vaccinate_retrospective_days "
                      "FROM ScenarioCreator_controlmasterplan",
-                     set_params, self, &sqlerr);
+                     set_params, &set_params_args, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);
     }
-  local_data->db = NULL;
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);
