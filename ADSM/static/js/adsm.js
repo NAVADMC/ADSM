@@ -810,7 +810,8 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
                     $('body').html(content);
                 }
             } else {
-                if (formAction.lastIndexOf('new/') != -1) { //new model created
+                if (formAction.lastIndexOf('new/') != -1 ||  //new model created
+                    formAction.lastIndexOf('copy/') != -1) { //new model created
                     var parent_panel = $self.closest('.layout-panel').attr('id');
                     if(parent_panel == 'center-panel' || parent_panel == 'population_panel'){
                         reload_model_list($self); //reload left
