@@ -1763,6 +1763,8 @@ set_params (void *data, GHashTable *dict)
   char *tmp_text;
   guint rel_id;
   double dummy;
+  gchar **tokens, **iter;
+  guint ntokens;
 
   #if DEBUG
     g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
@@ -1813,53 +1815,39 @@ set_params (void *data, GHashTable *dict)
       #endif
     }
 
+  /* The destruction priority order is given in a comma-separated string in the
+   * column "destruction_priority_order". */
   tmp_text = g_hash_table_lookup (dict, "destruction_priority_order");
-  if (strcasecmp (tmp_text, "production type, reason, time waiting") == 0)
+  tokens = g_strsplit (tmp_text, ",", 0);
+  /* Go through the comma-separated tokens and see if they match what is
+   * expected. */ 
+  local_data->destruction_prod_type_priority = 0;
+  local_data->destruction_reason_priority = 0;
+  local_data->destruction_time_waiting_priority = 0;
+  for (iter = tokens, ntokens = 0; *iter != NULL; iter++)
     {
-      local_data->destruction_prod_type_priority = 1;
-      local_data->destruction_reason_priority = 2;
-      local_data->destruction_time_waiting_priority = 3;
+      ntokens++;
+      g_strstrip (*iter);
+      if (g_ascii_strcasecmp(*iter, "production type") == 0)
+        local_data->destruction_prod_type_priority = ntokens;
+      else if (g_ascii_strcasecmp(*iter, "reason") == 0)
+        local_data->destruction_reason_priority = ntokens;
+      else if (g_ascii_strcasecmp(*iter, "time waiting") == 0)
+        local_data->destruction_time_waiting_priority = ntokens;
     }
-  else if (strcasecmp (tmp_text, "production type, time waiting, reason") == 0)
-    {
-      local_data->destruction_prod_type_priority = 1;
-      local_data->destruction_reason_priority = 3;
-      local_data->destruction_time_waiting_priority = 2;
-    }
-  else if (strcasecmp (tmp_text, "reason, production type, time waiting") == 0)
-    {
-      local_data->destruction_prod_type_priority = 2;
-      local_data->destruction_reason_priority = 1;
-      local_data->destruction_time_waiting_priority = 3;
-    }
-  else if (strcasecmp (tmp_text, "reason, time waiting, production type") == 0)
-    {
-      local_data->destruction_prod_type_priority = 3;
-      local_data->destruction_reason_priority = 1;
-      local_data->destruction_time_waiting_priority = 2;
-    }
-  else if (strcasecmp (tmp_text, "time waiting, reason, production type") == 0)
-    {
-      local_data->destruction_prod_type_priority = 3;
-      local_data->destruction_reason_priority = 2;
-      local_data->destruction_time_waiting_priority = 1;
-    }
-  else if (strcasecmp (tmp_text, "time waiting, production type, reason") == 0)
-    {
-      local_data->destruction_prod_type_priority = 2;
-      local_data->destruction_reason_priority = 3;
-      local_data->destruction_time_waiting_priority = 1;
-    }
-  else
+  /* At the end of that loop, we should have counted 3 tokens, and filled in a
+   * nonzero value for each of the destruction_XXX_priority variables. */
+  if (!(ntokens == 3
+        && local_data->destruction_prod_type_priority > 0
+        && local_data->destruction_reason_priority > 0
+        && local_data->destruction_time_waiting_priority > 0))
     {
       g_set_error (error, ADSM_MODULE_ERROR, 0,
                    "\"%s\" is not a valid destruction priority order: "
                    "must be some ordering of reason, time waiting, production type",
                    tmp_text);
-      local_data->destruction_reason_priority = 1;
-      local_data->destruction_prod_type_priority = 2;
-      local_data->destruction_time_waiting_priority = 3;
     }
+  g_strfreev (tokens);
 
   tmp_text = g_hash_table_lookup (dict, "vaccination_capacity_id");
   if (tmp_text != NULL)
@@ -1889,53 +1877,39 @@ set_params (void *data, GHashTable *dict)
       local_data->vaccination_capacity_on_restart = REL_clone_chart (local_data->vaccination_capacity);
     }
 
+  /* The vaccination priority order is given in a comma-separated string in the
+   * column "vaccination_priority_order". */
   tmp_text = g_hash_table_lookup (dict, "vaccination_priority_order");
-  if (strcasecmp (tmp_text, "production type, reason, time waiting") == 0)
+  tokens = g_strsplit (tmp_text, ",", 0);
+  /* Go through the comma-separated tokens and see if they match what is
+   * expected. */ 
+  local_data->vaccination_prod_type_priority = 0;
+  local_data->vaccination_reason_priority = 0;
+  local_data->vaccination_time_waiting_priority = 0;
+  for (iter = tokens, ntokens = 0; *iter != NULL; iter++)
     {
-      local_data->vaccination_prod_type_priority = 1;
-      local_data->vaccination_reason_priority = 2;
-      local_data->vaccination_time_waiting_priority = 3;
+      ntokens++;
+      g_strstrip (*iter);
+      if (g_ascii_strcasecmp(*iter, "production type") == 0)
+        local_data->vaccination_prod_type_priority = ntokens;
+      else if (g_ascii_strcasecmp(*iter, "reason") == 0)
+        local_data->vaccination_reason_priority = ntokens;
+      else if (g_ascii_strcasecmp(*iter, "time waiting") == 0)
+        local_data->vaccination_time_waiting_priority = ntokens;
     }
-  else if (strcasecmp (tmp_text, "production type, time waiting, reason") == 0)
-    {
-      local_data->vaccination_prod_type_priority = 1;
-      local_data->vaccination_reason_priority = 3;
-      local_data->vaccination_time_waiting_priority = 2;
-    }
-  else if (strcasecmp (tmp_text, "reason, production type, time waiting") == 0)
-    {
-      local_data->vaccination_prod_type_priority = 2;
-      local_data->vaccination_reason_priority = 1;
-      local_data->vaccination_time_waiting_priority = 3;
-     }
-  else if (strcasecmp (tmp_text, "reason, time waiting, production type") == 0)
-    {
-      local_data->vaccination_prod_type_priority = 3;
-      local_data->vaccination_reason_priority = 1;
-      local_data->vaccination_time_waiting_priority = 2;
-    }
-  else if (strcasecmp (tmp_text, "time waiting, reason, production type") == 0)
-    {
-      local_data->vaccination_prod_type_priority = 3;
-      local_data->vaccination_reason_priority = 2;
-      local_data->vaccination_time_waiting_priority = 1;
-    }
-  else if (strcasecmp (tmp_text, "time waiting, production type, reason") == 0)
-    {
-      local_data->vaccination_prod_type_priority = 2;
-      local_data->vaccination_reason_priority = 3;
-      local_data->vaccination_time_waiting_priority = 1;
-    }
-  else
+  /* At the end of that loop, we should have counted 3 tokens, and filled in a
+   * nonzero value for each of the vaccination_XXX_priority variables. */
+  if (!(ntokens == 3
+        && local_data->vaccination_prod_type_priority > 0
+        && local_data->vaccination_reason_priority > 0
+        && local_data->vaccination_time_waiting_priority > 0))
     {
       g_set_error (error, ADSM_MODULE_ERROR, 0,
                    "\"%s\" is not a valid vaccination priority order: "
                    "must be some ordering of reason, time waiting, production type",
                    tmp_text);
-      local_data->vaccination_reason_priority = 1;
-      local_data->vaccination_prod_type_priority = 2;
-      local_data->vaccination_time_waiting_priority = 3;
     }
+  g_strfreev (tokens);
 
   tmp_text = g_hash_table_lookup (dict, "vaccinate_retrospective_days");
   if (tmp_text != NULL)
