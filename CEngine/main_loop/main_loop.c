@@ -415,6 +415,31 @@
  *     </td>
  *   </tr>
  * </table>
+ *
+ * <table>
+ *   <tr>
+ *     <td><b>Component:</b></td> <td>JSON-GLib</td>
+ *   </tr>
+ *   <tr>
+ *     <td><b>Used for:</b></td> <td>storing vaccination priority order</td>
+ *   </tr>
+ *   <tr>
+ *     <td><b>Author:</b></td> <td>OpenedHand LTD</td>
+ *   </tr>
+ *   <tr>
+ *     <td><b>License:</b></td>
+ *     <td>
+ *       GNU Library General Public License (GNU LGPL)
+ *       [<a href="http://www.gnu.org/copyleft/lgpl.html">read text</a>]
+ *     </td>
+ *   </tr>
+ *   <tr>
+ *     <td><b>Website:</b></td>
+ *     <td>
+ *       <a href="https://developer.gnome.org/json-glib/stable/">https://developer.gnome.org/json-glib/stable/</a>
+ *     </td>
+ *   </tr>
+ * </table>
  */
 
 #if HAVE_CONFIG_H

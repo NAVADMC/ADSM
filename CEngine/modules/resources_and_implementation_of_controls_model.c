@@ -241,6 +241,7 @@
 #include "module_util.h"
 #include "sqlite3_exec_dict.h"
 #include <limits.h>
+#include <json-glib/json-glib.h>
 
 #if STDC_HEADERS
 #  include <string.h>
@@ -1877,39 +1878,57 @@ set_params (void *data, GHashTable *dict)
       local_data->vaccination_capacity_on_restart = REL_clone_chart (local_data->vaccination_capacity);
     }
 
-  /* The vaccination priority order is given in a comma-separated string in the
-   * column "vaccination_priority_order". */
+  /* The vaccination priority order is given in JSON format in the column
+   * "vaccination_priority_order". */
   tmp_text = g_hash_table_lookup (dict, "vaccination_priority_order");
-  tokens = g_strsplit (tmp_text, ",", 0);
-  /* Go through the comma-separated tokens and see if they match what is
-   * expected. */ 
-  local_data->vaccination_prod_type_priority = 0;
-  local_data->vaccination_reason_priority = 0;
-  local_data->vaccination_time_waiting_priority = 0;
-  for (iter = tokens, ntokens = 0; *iter != NULL; iter++)
-    {
-      ntokens++;
-      g_strstrip (*iter);
-      if (g_ascii_strcasecmp(*iter, "production type") == 0)
-        local_data->vaccination_prod_type_priority = ntokens;
-      else if (g_ascii_strcasecmp(*iter, "reason") == 0)
-        local_data->vaccination_reason_priority = ntokens;
-      else if (g_ascii_strcasecmp(*iter, "time waiting") == 0)
-        local_data->vaccination_time_waiting_priority = ntokens;
-    }
-  /* At the end of that loop, we should have counted 3 tokens, and filled in a
-   * nonzero value for each of the vaccination_XXX_priority variables. */
-  if (!(ntokens == 3
-        && local_data->vaccination_prod_type_priority > 0
-        && local_data->vaccination_reason_priority > 0
-        && local_data->vaccination_time_waiting_priority > 0))
-    {
-      g_set_error (error, ADSM_MODULE_ERROR, 0,
-                   "\"%s\" is not a valid vaccination priority order: "
-                   "must be some ordering of reason, time waiting, production type",
-                   tmp_text);
-    }
-  g_strfreev (tokens);
+  {
+    JsonParser *json_parser;
+    
+    local_data->vaccination_prod_type_priority = 0;
+    local_data->vaccination_reason_priority = 0;
+    local_data->vaccination_time_waiting_priority = 0;
+
+    json_parser = json_parser_new();
+    if (json_parser_load_from_data (json_parser, tmp_text, -1, error))
+      {
+        JsonNode *node;
+
+        node = json_parser_get_root(json_parser);
+        if (JSON_NODE_HOLDS_OBJECT(node))
+          {
+            GList *members, *iter;
+            guint priority = 1;
+
+            members = json_object_get_members(json_node_get_object(node));
+            for (iter = members; iter != NULL; iter = g_list_next(iter))
+              {
+                const gchar *member;
+                member = iter->data;
+
+                if (g_ascii_strcasecmp (member, "production type") == 0)
+                  local_data->vaccination_prod_type_priority = priority++;
+                else if (g_ascii_strcasecmp (member, "reason") == 0)
+                  local_data->vaccination_reason_priority = priority++;
+                else if (g_ascii_strcasecmp (member, "days holding") == 0)
+                  local_data->vaccination_time_waiting_priority = priority++;
+              }
+            g_list_free(members);
+          }
+
+        /* At the end we should have filled in a nonzero value for each of the
+         * vaccination_XXX_priority variables. */
+        if (!(local_data->vaccination_prod_type_priority > 0
+              && local_data->vaccination_reason_priority > 0
+              && local_data->vaccination_time_waiting_priority > 0))
+          {
+            g_set_error (error, ADSM_MODULE_ERROR, 0,
+                         "\"%s\" is not a valid vaccination priority order",
+                         tmp_text);
+          }
+        
+      } /* end of if JSON parse was successful */
+    g_object_unref(json_parser);
+  }
 
   tmp_text = g_hash_table_lookup (dict, "vaccinate_retrospective_days");
   if (tmp_text != NULL)

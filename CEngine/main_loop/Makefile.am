@@ -17,7 +17,7 @@ AM_CPPFLAGS = -I$(top_srcdir) \
 if USE_SC_GUILIB
   AM_CPPFLAGS +=  -I$(top_srcdir)/sc_guilib 
 endif
-AM_CPPFLAGS += @GLIB_CFLAGS@ @GSL_CFLAGS@ 
+AM_CPPFLAGS += @GLIB_CFLAGS@ @GSL_CFLAGS@ @JSON_GLIB_CFLAGS@
 
 include_HEADERS = adsm.h
 lib_LIBRARIES = libadsm.a
@@ -101,4 +101,4 @@ endif
 
 bin_PROGRAMS = adsm
 adsm_SOURCES = cli.c
-adsm_LDADD = libadsm.a @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@
+adsm_LDADD = libadsm.a @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@ @JSON_GLIB_LIBS@

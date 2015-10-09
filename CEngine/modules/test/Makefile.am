@@ -30,7 +30,7 @@ AM_CPPFLAGS = -I$(top_srcdir) \
 if USE_SC_GUILIB
   AM_CPPFLAGS +=  -I$(top_srcdir)/sc_guilib
 endif
-AM_CPPFLAGS += @GLIB_CFLAGS@ @GSL_CFLAGS@
+AM_CPPFLAGS += @GLIB_CFLAGS@ @GSL_CFLAGS@ @JSON_GLIB_CFLAGS@
 
 # Create a program just like the real simulator for running small tests.
 
@@ -112,7 +112,7 @@ if USE_SC_GUILIB
     $(top_srcdir)/sc_guilib/sc_database.c
 endif
 miniadsm_CPPFLAGS = $(AM_CPPFLAGS)
-miniadsm_LDADD = @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@
+miniadsm_LDADD = @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@ @JSON_GLIB_LIBS@
 
 shell_SOURCES = shell.c $(top_builddir)/replace/replace.c
 shell_LDADD = @GLIB_LIBS@

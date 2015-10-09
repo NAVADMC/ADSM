@@ -93,6 +93,15 @@ else
   fi
 fi
 
+if test "X${have_pkgconfig}" = Xyes
+then
+  PKG_CHECK_MODULES([JSON_GLIB], [json-glib-1.0 >= 1.0], ,AC_MSG_ERROR(cannot continue without JSON-GLIB))
+  AC_SUBST(JSON_GLIB_CFLAGS)
+  AC_SUBST(JSON_GLIB_LIBS)
+else
+  AC_CHECK_LIB(json-glib-1.0,json_object_new,,AC_MSG_ERROR(cannot continue without JSON-GLIB))
+fi
+
 AM_PATH_GSL(1.4,[have_gsl=true],AC_MSG_ERROR(cannot continue without GSL))
 AC_SUBST(GSL_CFLAGS)
 AC_SUBST(GSL_LIBS)
