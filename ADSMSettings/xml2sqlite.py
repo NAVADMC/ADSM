@@ -10,6 +10,8 @@ import xml.etree.ElementTree as ET
 import warnings
 from pyproj import Proj
 from math import exp, sqrt
+from collections import OrderedDict
+import json
 
 import ADSMSettings.models
 from ScenarioCreator.models import *
@@ -1331,11 +1333,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             for productionType in ProductionType.objects.all():
                 trigger.trigger_group.add( productionType )
             plan.vaccination_capacity = getRelChart( el.find( './vaccination-capacity' ), relChartNameSequence )
-            order = required_text(el, './vaccination-priority-order' ).strip()
-            # The XML did not put spaces after the commas, but the Django
-            # model does.
-            order = ', '.join( order.split( ',' ) )
-            plan.vaccination_priority_order = order
+            order = required_text(el, './vaccination-priority-order' ).strip().lower().split(',')
 
             # Create a new version of vaccinationProductionTypeOrder where a)
             # only the minimum priority number attached to each production type
@@ -1346,13 +1344,18 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 newVaccinationProductionTypeOrder.append( (minPriority, typeName) )
             newVaccinationProductionTypeOrder.sort()
             newVaccinationProductionTypeOrder = [item[1] for item in newVaccinationProductionTypeOrder]
-            priority = 1
-            for typeName in newVaccinationProductionTypeOrder:
-                assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
-                protocol = assignment.control_protocol
-                protocol.vaccination_priority = priority
-                protocol.save()
-                priority += 1
+
+            tmp = OrderedDict()
+            for criterion in order:
+                if criterion == 'production type':
+                    tmp['Production Type'] = newVaccinationProductionTypeOrder
+                elif criterion == 'reason':
+                    tmp['Reason'] = ['Ring']
+                elif criterion == 'time waiting':
+                    tmp['Days Holding'] = ['Oldest', 'Newest']
+            tmp['Size'] = ['Largest', 'Smallest']
+            tmp['Direction'] = ['Outside-in', 'Inside-out']
+            plan.vaccination_priority_order = json.dumps(tmp)
 
             plan.save()
         # end of if useVaccination==True
