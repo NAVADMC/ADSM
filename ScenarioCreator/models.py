@@ -446,8 +446,6 @@ class ControlProtocol(BaseModel):
         help_text='The minimum time in days between vaccination for units of this ' + wiki("production type") + '.', )
     vaccine_immune_period = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Defines the '+ wiki("vaccine immune") + ' period for units of this ' + wiki("production type") + '.', )
-    vaccination_priority = models.PositiveIntegerField(default=5, blank=True, null=True,
-        help_text='The vaccination priority of this production type relative to other production types.  A lower number indicates a higher priority.', )
     vaccination_demand_threshold = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of animals of this type that can be vaccinated before the cost of vaccination increases.', )
     cost_of_vaccination_additional_per_animal = MoneyField(default=0.0,
