@@ -1097,7 +1097,7 @@ handle_detection_event (struct adsm_module_t_ *self,
       local_data->destruction_program_begin_day =
         event->day + local_data->destruction_program_delay + 1;
 #if DEBUG
-      g_debug ("destruction program delayed %hu days (will begin on day %hu)",
+      g_debug ("destruction program delayed %i days (will begin on day %i)",
                local_data->destruction_program_delay, local_data->destruction_program_begin_day);
 #endif
     }
@@ -1399,7 +1399,6 @@ handle_request_for_vaccination_event (struct adsm_module_t_ *self,
   local_data_t *local_data;
   EVT_request_for_vaccination_event_t *event;
   UNT_unit_t *unit;
-  unsigned int i;
   GQueue *q;
   GQueue *locations_in_queue;
   EVT_event_t *event_copy;
@@ -1423,7 +1422,6 @@ handle_request_for_vaccination_event (struct adsm_module_t_ *self,
     {
       /* There may be more than one request to vaccinate the same unit.  We
        * keep all of them. */
-      i = unit->index;
 #if DEBUG
       g_debug ("authorities commit to vaccinate unit \"%s\"", unit->official_id);
 #endif
