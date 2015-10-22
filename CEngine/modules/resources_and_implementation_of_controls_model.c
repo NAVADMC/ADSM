@@ -239,6 +239,7 @@
 
 #include "module.h"
 #include "module_util.h"
+#include "scorecard.h"
 #include "sqlite3_exec_dict.h"
 #include <limits.h>
 #include <json-glib/json-glib.h>
@@ -373,6 +374,9 @@ typedef struct
   int first_detection_day; /** The day of the first detection.  Only defined if
     outbreak_known is TRUE. */
 
+  GHashTable *scorecard_for_unit; /**< Keys are units (UNT_unit_t *), data is
+    scorecards (USC_scorecard_t *). */
+
   /* Parameters concerning destruction. */
   int destruction_program_delay; /**< The number of days between
     recognizing and outbreak and beginning a destruction program. */
@@ -440,26 +444,22 @@ typedef struct
   gboolean no_more_vaccinations; /**< A flag indicating that on this day and
     forward, there is no capacity to do vaccinations.  Useful for deciding
     whether a simulation can exit early even if there vaccinations queued up. */
-  GHashTable *vaccination_status; /**< A hash table keyed by pointers to units.
-    If a unit is not awaiting vaccination, it will not be present in the table.
-    If a unit is awaiting vaccination, its associated data item will be a
-    GQueue storing pointers to nodes in pending_vaccinations.  (A unit can be
-    in pending_vaccinations more than once.) */
   unsigned int nvaccinated_today; /**< The number of units the
     authorities have vaccinated on a given day. */
-  GPtrArray *pending_vaccinations; /**< Prioritized lists of units to be
-    vaccinated.  Each item is a pointer to a GQueue, and each item in the
-    GQueue is a RequestForVaccination event. */
   int *day_last_vaccinated; /**< Records the day when each unit
    was last vaccinated.  Also prevents double-counting units against the
    vaccination capacity. */
 
   /* Parameters used to prioritize vaccination. */
   GSList *vaccination_prioritizers; /**< Each item is a (naadsm_prioritizer_t *). */
+  GHashTable *vaccination_set; /**< A hash table storing the set of units
+    currently awaiting vaccination. Keys are units (UNT_unit_t *), associated
+    values are scorecards. */
+  GPtrArray *scorecards_sorted; /**< An array containing the scorecards of
+    herds currently awaiting vaccination. The array is maintained in sorted
+    order, with the highest-priority herds at the end. */
+
   int *min_next_vaccination_day;
-  int vaccination_prod_type_priority;
-  int vaccination_time_waiting_priority;
-  int vaccination_reason_priority;
   GHashTable *detected_today; /**< Records the units detected today.  Useful
     for cancelling vaccination of detected units. */
 }
@@ -468,62 +468,104 @@ local_data_t;
 
 
 /**
+ * Retrieves the scorecard for a unit. Returns NULL if there is currently no
+ * scorecard for the unit.
+ */
+static USC_scorecard_t *
+get_scorecard_for_unit (struct adsm_module_t_ *self, UNT_unit_t * unit)
+{
+  local_data_t *local_data;
+  local_data = (local_data_t *) (self->model_data);
+  return (USC_scorecard_t *) g_hash_table_lookup (local_data->scorecard_for_unit, unit);
+}
+
+
+
+/**
+ * Retrieves the scorecard for a unit, creating one if it doesn't already
+ * exist.
+ */
+static USC_scorecard_t *
+get_or_make_scorecard_for_unit (struct adsm_module_t_ *self, UNT_unit_t * unit)
+{
+  local_data_t *local_data;
+  gpointer p;
+  USC_scorecard_t *scorecard;
+
+  local_data = (local_data_t *) (self->model_data);
+  p = g_hash_table_lookup (local_data->scorecard_for_unit, unit);
+  if (p == NULL)
+    {
+      scorecard = USC_new_scorecard (unit);
+      g_hash_table_insert (local_data->scorecard_for_unit, unit, scorecard);
+    }
+  else
+    scorecard = (USC_scorecard_t *) p;
+
+  return scorecard;
+}
+
+
+
+/**
  * Cancels vaccinations for a unit.
  *
+ * @param self this module.
  * @param unit a unit.
  * @param day the current simulation day.
- * @param vaccination_status from local_data.
- * @param pending_vaccinations from local_data.
  * @param older_than only delete vaccination requests older than this number of
  *   days. This is how "retrospective" vaccination is accomplished. If 0, all
  *   vaccination requests are deleted.
  * @param queue for any new events the function creates.
  */
 void
-cancel_vaccination (UNT_unit_t * unit, int day,
-                    GHashTable * vaccination_status, GPtrArray * pending_vaccinations,
+cancel_vaccination (struct adsm_module_t_ *self,
+                    UNT_unit_t * unit, int day,
                     int older_than,
                     EVT_event_queue_t * queue)
 {
-  GQueue *locations_in_queue;
-  GList *link;
+  local_data_t *local_data;
+  USC_scorecard_t *scorecard;
   EVT_event_t *request;
   EVT_request_for_vaccination_event_t *details;
-  GQueue *q;
   EVT_event_t *cancellation_event;
   
 #if DEBUG
   g_debug ("----- ENTER cancel_vaccination (%s)", MODEL_NAME);
 #endif
-    
+
+  local_data = (local_data_t *) (self->model_data);
+
   /* If the unit is on the vaccination waiting list, remove the vaccination requests. */
-  locations_in_queue = (GQueue *) g_hash_table_lookup (vaccination_status, unit);
-  if (locations_in_queue != NULL)
+  scorecard = get_scorecard_for_unit (self, unit);
+  if (scorecard != NULL && scorecard->is_awaiting_vaccination)
     {
-      /* Delete from the head of the queue (that's where the oldest requests are).  Stop
-       * when the queue is empty, or when we encounter a request that is too new
-       * according to the older_than parameter. */
-      while (!g_queue_is_empty (locations_in_queue))
+      while (TRUE)
         {
-          link = (GList *) g_queue_peek_head (locations_in_queue);
-          request = (EVT_event_t *) (link->data);
+          request = USC_scorecard_vaccination_request_peek_oldest (scorecard);
+          if (request == NULL)
+            break; /* no more vaccination requests to process */
           details = &(request->u.request_for_vaccination);
-          if ((day - details->day_commitment_made) <= older_than)
-            break;
-          g_queue_pop_head (locations_in_queue);
-          /* Delete both the RequestForVaccination structure and the GQueue link
-           * that holds it. */
+          /* Stop the loop if we have reached the most recent vaccination
+           * requests, the ones newer than the argument "older_than". The
+           * day>0 condition is needed here because this function is called
+           * when resetting this module, when day=0, and we want the loop to
+           * remove all the vaccination requests in that case. */
+          if (day > 0 && (day - details->day_commitment_made) <= older_than)
+            break; /* no more in the right date range to process */
+          USC_scorecard_vaccination_request_pop_oldest (scorecard);
+
+          /* Now the vaccination request is removed from the scorecard.  Send out
+           * a cancellation message, then free the request object. */
           cancellation_event = EVT_new_vaccination_canceled_event (unit, day, details->day_commitment_made);
-
-          q = (GQueue *) g_ptr_array_index (pending_vaccinations, details->priority - 1);
           EVT_free_event (request);
-          g_queue_delete_link (q, link);
-
           if (queue != NULL)
             EVT_event_enqueue (queue, cancellation_event);
         }
-      if (g_queue_is_empty (locations_in_queue))
-        g_hash_table_remove (vaccination_status, unit);
+      if (request == NULL) /* means that list of vaccination requests was found to be empty above */
+        {
+          g_hash_table_remove (local_data->vaccination_set, unit);
+        }
     }
 
 #if DEBUG
@@ -561,9 +603,7 @@ destroy (struct adsm_module_t_ *self, UNT_unit_t * unit,
   local_data->ndestroyed_today++;
 
   /* Take the unit off the vaccination waiting list, if needed. */
-  cancel_vaccination (unit, day, local_data->vaccination_status,
-                      local_data->pending_vaccinations, /* older_than = */ 0,
-                      queue);
+  cancel_vaccination (self, unit, day, /* older_than = */ 0, queue);
 
 #if DEBUG
   g_debug ("----- EXIT destroy (%s)", MODEL_NAME);
@@ -745,13 +785,73 @@ destroy_by_priority (struct adsm_module_t_ *self, int day,
 
 
 
+static void
+clean_up_scorecard_list (GHashTable *vaccination_set, GPtrArray *scorecards_sorted)
+{
+  gboolean writing;
+  guint length, read_index, write_index;
+  USC_scorecard_t *scorecard;
+
+  #if DEBUG
+    g_debug ("----- ENTER clean_up_scorecard_list");
+  #endif
+
+  read_index = write_index = 0;
+  writing = FALSE;
+  length = scorecards_sorted->len;
+  while (read_index < length)
+    {
+      scorecard = (USC_scorecard_t *) g_ptr_array_index (scorecards_sorted, read_index);
+      if (scorecard->is_awaiting_vaccination)
+        {
+          if (writing)
+            {
+              g_ptr_array_index (scorecards_sorted, write_index) = scorecard;
+              write_index++;
+            }
+        }
+      else
+        {
+          #if DEBUG
+            g_debug ("removing unit \"%s\"", scorecard->unit->official_id);
+          #endif
+          g_hash_table_remove (vaccination_set, scorecard->unit);
+          /* We have found at least 1 scorecard to remove, so set the "writing"
+           * flag to TRUE. */
+          if (!writing)
+            {
+              writing = TRUE;
+              write_index = read_index;
+            }
+        }
+      read_index++;
+    }
+  if (writing)
+    g_ptr_array_set_size (scorecards_sorted, write_index);
+
+  g_assert (g_hash_table_size (vaccination_set) == scorecards_sorted->len);
+
+  #if DEBUG
+    g_debug ("removed %i scorecards", length - scorecards_sorted->len);
+  #endif
+
+  #if DEBUG
+    g_debug ("----- EXIT clean_up_scorecard_list");
+  #endif
+
+  return;
+}
+
+
+
 void
 vaccinate (struct adsm_module_t_ *self, UNT_unit_t * unit,
            int day, ADSM_control_reason reason, int day_commitment_made,
-           int min_days_before_next, EVT_event_queue_t * queue)
+           EVT_event_queue_t * queue)
 {
   local_data_t *local_data;
   unsigned int last_vaccination, days_since_last_vaccination;
+  int min_days_before_next = 0;
 
 #if DEBUG
   g_debug ("----- ENTER vaccinate (%s)", MODEL_NAME);
@@ -800,22 +900,13 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
   local_data_t *local_data;
   REL_chart_t *capacity_chart;
   unsigned int vaccination_capacity;
-  EVT_event_t *pending_vaccination;
-  EVT_request_for_vaccination_event_t *details;
-  unsigned int npriorities;
-  unsigned int priority;
-  int request_day, oldest_request_day;
-  int oldest_request_index;
-  GQueue *q;
-  GQueue *locations_in_queue;
-  GList *link_to_delete;
+  guint nscorecards;
+  guint i;
+  USC_scorecard_t *scorecard;
 
 #if DEBUG
   g_debug ("----- ENTER vaccinate_by_priority (%s)", MODEL_NAME);
 #endif
-
-  /* Eliminate compiler warnings about uninitialized values */
-  oldest_request_day = INT_MAX;
 
   local_data = (local_data_t *) (self->model_data);
 
@@ -841,145 +932,56 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
 #endif
     }
 
-  /* We use the vaccination lists in different ways according to the user-
-   * specified priority scheme.
-   *
-   * If time waiting has first priority,
-   */
-  if (local_data->vaccination_time_waiting_priority == 1)
+  clean_up_scorecard_list (local_data->vaccination_set, local_data->scorecards_sorted);
+  nscorecards = g_hash_table_size (local_data->vaccination_set);
+  if (vaccination_capacity > 0 && nscorecards > 0)
     {
-      npriorities = local_data->pending_vaccinations->len;
-      while (local_data->nvaccinated_today < vaccination_capacity)
+      /* Sort the list of scorecards into priority order. */
+      g_assert (local_data->scorecards_sorted->len == nscorecards);
+      #if DEBUG
+        g_debug ("%u units on vaccination list", nscorecards);
+      #endif
+      #if DEBUG
+        g_debug ("sorting the list");
+      #endif
+      qsort_r (local_data->scorecards_sorted->pdata, nscorecards, sizeof (USC_scorecard_t *),
+               (void *) (local_data->vaccination_prioritizers),
+               prioritizer_chain_compare);
+      #if DEBUG
+        g_debug ("done sorting the list");
+      #endif
+
+      /* The scorecards of herds awaiting vaccination are now sorted into
+       * priority order, with the highest-priority ones at the end.  Now do
+       * the vaccinations. */
+      i = 0; /* Index _backwards_ into priority list (we process from the end). */
+      while (local_data->nvaccinated_today < vaccination_capacity
+             && i < nscorecards)
         {
-          /* Find the unit that has been waiting the longest.  Favour units
-           * higher up in the lists. */
-          oldest_request_index = -1;
-          for (priority = 0; priority < npriorities; priority++)
+          UNT_unit_t *unit;
+          EVT_event_t *request;
+          EVT_request_for_vaccination_event_t *details;
+
+          scorecard = g_ptr_array_index (local_data->scorecards_sorted, nscorecards - 1 - i);
+          unit = scorecard->unit;
+
+          request = USC_scorecard_vaccination_request_pop_oldest (scorecard);
+          g_assert (request != NULL);
+          details = &(request->u.request_for_vaccination);
+          vaccinate (self, details->unit, day, details->reason,
+                     details->day_commitment_made, queue);
+
+          /* If this scorecard contains no more requests for vaccination,
+           * then we can remove it from the vaccination set. */
+          if (USC_scorecard_vaccination_request_peek_oldest (scorecard) == NULL)
             {
-              q = (GQueue *) g_ptr_array_index (local_data->pending_vaccinations, priority);
-              if (g_queue_is_empty (q))
-                continue;
-
-              pending_vaccination = (EVT_event_t *) g_queue_peek_head (q);
-
-              /* When we put the vaccination on the waiting list, we stored the
-               * day it was requested. */
-              request_day = pending_vaccination->u.request_for_vaccination.day;
-              if (oldest_request_index == -1 || request_day < oldest_request_day)
-                {
-                  oldest_request_index = priority;
-                  oldest_request_day = request_day;
-                }
-            }
-          /* If we couldn't find any request that can be carried out today,
-           * stop the loop. */
-          if (oldest_request_index < 0)
-            break;
-
-          q = (GQueue *) g_ptr_array_index (local_data->pending_vaccinations, oldest_request_index);
-          link_to_delete = g_queue_peek_head_link (q);
-          pending_vaccination = (EVT_event_t *) g_queue_pop_head (q);
-          details = &(pending_vaccination->u.request_for_vaccination);
-
-          vaccinate (self, details->unit, day, details->reason, details->day_commitment_made,
-                     details->min_days_before_next, queue);
-          locations_in_queue = (GQueue *) g_hash_table_lookup (local_data->vaccination_status, details->unit);
-          g_queue_remove (locations_in_queue, link_to_delete);
-          if (g_queue_is_empty (locations_in_queue))
-            g_hash_table_remove (local_data->vaccination_status, details->unit);
-          EVT_free_event (pending_vaccination);
-        }
-    }                           /* end case where time waiting has 1st priority. */
-
-  else if (local_data->vaccination_time_waiting_priority == 2)
-    {
-      int start, end, step;
-
-      npriorities = local_data->pending_vaccinations->len;
-      if (local_data->vaccination_prod_type_priority == 1)
-        step = ADSM_NCONTROL_REASONS;
-      else
-        step = local_data->nprod_types;
-      start = 0;
-      end = MIN (start + step, npriorities);
-
-      while (local_data->nvaccinated_today < vaccination_capacity)
-        {
-          /* Find the unit that has been waiting the longest.  Favour units
-           * higher up in the lists. */
-          oldest_request_index = -1;
-          for (priority = start; priority < end; priority++)
-            {
-              q = (GQueue *) g_ptr_array_index (local_data->pending_vaccinations, priority);
-              if (g_queue_is_empty (q))
-                continue;
-
-              pending_vaccination = (EVT_event_t *) g_queue_peek_head (q);
-
-              /* When we put the vaccination on the waiting list, we stored the
-               * day it was requested. */
-              request_day = pending_vaccination->u.request_for_vaccination.day;
-              if (oldest_request_index == -1 || request_day < oldest_request_day)
-                {
-                  oldest_request_index = priority;
-                  oldest_request_day = request_day;
-                }
-            }
-          /* If we couldn't find any request that can be carried out today,
-           * advance to the next block of lists. */
-          if (oldest_request_index < 0)
-            {
-              start += step;
-              if (start >= npriorities)
-                break;
-              end = MIN (start + step, npriorities);
-              continue;
+              g_hash_table_remove (local_data->vaccination_set, unit);
             }
 
-          q = (GQueue *) g_ptr_array_index (local_data->pending_vaccinations, oldest_request_index);
-          link_to_delete = g_queue_peek_head_link (q);
-          pending_vaccination = (EVT_event_t *) g_queue_pop_head (q);
-          details = &(pending_vaccination->u.request_for_vaccination);
+          i += 1;      
+        } /* end of loop to do vaccinations */
 
-          vaccinate (self, details->unit, day, details->reason, details->day_commitment_made,
-                     details->min_days_before_next, queue);
-          locations_in_queue = g_hash_table_lookup (local_data->vaccination_status, details->unit);
-          g_queue_remove (locations_in_queue, link_to_delete);
-          if (g_queue_is_empty (locations_in_queue))
-            g_hash_table_remove (local_data->vaccination_status, details->unit);
-          EVT_free_event (pending_vaccination);
-        }
-    }                           /* end case where time waiting has 2nd priority. */
-
-  else
-    {
-      npriorities = local_data->pending_vaccinations->len;
-      for (priority = 0;
-           priority < npriorities && local_data->nvaccinated_today < vaccination_capacity;
-           priority++)
-        {
-          q = (GQueue *) g_ptr_array_index (local_data->pending_vaccinations, priority);
-#if DEBUG
-          if (!g_queue_is_empty (q))
-            g_debug ("vaccinating priority %i units", priority + 1);
-#endif
-          while (!g_queue_is_empty (q)
-                 && local_data->nvaccinated_today < vaccination_capacity)
-            {
-              link_to_delete = g_queue_peek_head_link (q);
-              pending_vaccination = (EVT_event_t *) g_queue_pop_head (q);
-              details = &(pending_vaccination->u.request_for_vaccination);
-
-              vaccinate (self, details->unit, day, details->reason, details->day_commitment_made,
-                         details->min_days_before_next, queue);
-              locations_in_queue = g_hash_table_lookup (local_data->vaccination_status, details->unit);
-              g_queue_remove (locations_in_queue, link_to_delete);
-              if (g_queue_is_empty (locations_in_queue))
-                g_hash_table_remove (local_data->vaccination_status, details->unit);
-              EVT_free_event (pending_vaccination);
-            }
-        }
-    }                           /* end case where time waiting has 3rd priority. */
+    } /* end of if vaccination capacity > 0 */
 
 #if DEBUG
   g_debug ("----- EXIT vaccinate_by_priority (%s)", MODEL_NAME);
@@ -995,10 +997,11 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
  * the event queue.)
  */
 static void
-clear_all_pending_vaccinations (local_data_t *local_data,
+clear_all_pending_vaccinations (struct adsm_module_t_ *self,
                                 int day,
                                 EVT_event_queue_t *queue)
 {
+  local_data_t *local_data;
   GList *units_awaiting_vaccination, *iter;
   UNT_unit_t *unit;
 
@@ -1006,19 +1009,25 @@ clear_all_pending_vaccinations (local_data_t *local_data,
     g_debug ("----- ENTER clear_all_pending_vaccinations (%s)", MODEL_NAME);
   #endif
 
-  /* Units that are awaiting vaccination are present as keys in local_data->
-   * vaccination_status.  Get a list of those units and call cancel_vaccination
-   * on each of them.  (Can't use g_hash_table_foreach in this case because
-   * cancel_vaccination modifies the hash table.) */
-  units_awaiting_vaccination = g_hash_table_get_keys (local_data->vaccination_status);   
+  local_data = (local_data_t *) (self->model_data);
+
+  /* Units that are awaiting vaccination are present as keys in
+   * local_data->vaccination_set.  Get a list of those units and call
+   * cancel_vaccination on each of them.  (Can't use g_hash_table_foreach in
+   * this case because cancel_vaccination modifies the hash table.) */
+  units_awaiting_vaccination = g_hash_table_get_keys (local_data->vaccination_set);
+  #if DEBUG
+    g_debug ("%u units in vaccination_set", g_list_length (units_awaiting_vaccination));
+  #endif
   for (iter = g_list_first (units_awaiting_vaccination) ;
        iter != NULL ;
        iter = g_list_next (iter))
     {
       unit = (UNT_unit_t *)(iter->data);
-      cancel_vaccination (unit, day,
-                          local_data->vaccination_status,
-                          local_data->pending_vaccinations,
+      #if DEBUG
+        g_debug ("unit \"%s\"", unit->official_id);
+      #endif
+      cancel_vaccination (self, unit, day,
                           local_data->vaccination_retrospective_days,
                           queue);
     }
@@ -1074,7 +1083,7 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   local_data->vaccination_initiated_day = -1;
   local_data->vaccination_terminated_day = -1;
   /* Empty the prioritized pending vaccinations lists. */
-  clear_all_pending_vaccinations (local_data, /* day = */ 0, /* event queue = */ NULL);
+  clear_all_pending_vaccinations (self, /* day = */ 0, /* event queue = */ NULL);
   local_data->nvaccinated_today = 0;
 
   for (i = 0; i < local_data->nunits; i++)
@@ -1135,7 +1144,7 @@ handle_new_day_event (struct adsm_module_t_ *self,
       #if DEBUG
         g_debug ("vaccination program not initiated yet, deleting yesterday's requests to vaccinate");
       #endif
-      clear_all_pending_vaccinations (local_data, event->day, queue);
+      clear_all_pending_vaccinations (self, event->day, queue);
     }
   else
     {
@@ -1165,8 +1174,7 @@ handle_detection_event (struct adsm_module_t_ *self,
 {
   local_data_t *local_data;
   UNT_unit_t *unit;
-  GQueue *locations_in_queue;
-  GList *link;
+  USC_scorecard_t *scorecard;
   EVT_event_t *request;
   EVT_request_for_vaccination_event_t *details;
 
@@ -1207,35 +1215,26 @@ handle_detection_event (struct adsm_module_t_ *self,
   /* If the unit is awaiting vaccination, and the request(s) can be canceled by
    * detection, remove the unit from the waiting list. */
   unit = event->unit;
-  locations_in_queue = (GQueue *) g_hash_table_lookup (local_data->vaccination_status, unit);
-  if (locations_in_queue != NULL)
+  scorecard = get_scorecard_for_unit (self, unit);
+  if (scorecard != NULL)
     {
-      /* Because a unit can be in the vaccination queue more than once, we get
-       * back a list of places this unit occurs in the queue.  Check just the
-       * first entry to see if the vaccination(s) can be canceled. */
-#if DEBUG
-      g_debug ("XXX unit \"%s\" in vaccination queue %u times", unit->official_id,
-               g_queue_get_length(locations_in_queue));
-      g_assert (g_queue_get_length(locations_in_queue) > 0);
-#endif
-      link = (GList *) g_queue_peek_head (locations_in_queue);
-      request = (EVT_event_t *) (link->data);
-      details = &(request->u.request_for_vaccination);
-      if (details->cancel_on_detection)
+      /* Only need to check one entry in the scorecard's records of vaccination
+       * requests to see if vaccination(s) can be canceled. */
+      request = USC_scorecard_vaccination_request_peek_oldest (scorecard);
+      if (request != NULL)
         {
-          cancel_vaccination (unit, event->day,
-                              local_data->vaccination_status,
-                              local_data->pending_vaccinations,
-                              /* older_than = */ 0,
-                              queue);
+          #if DEBUG
+            g_debug ("unit \"%s\" in vaccination queue", unit->official_id);
+          #endif
+          details = &(request->u.request_for_vaccination);
+          if (TRUE /* FIXME: details->cancel_on_detection */)
+            {
+              cancel_vaccination (self, unit, event->day,
+                                  /* older_than = */ 0,
+                                  queue);
+            }
         }
     }
-#if DEBUG
-  else
-    {
-      g_debug ("XXX unit \"%s\": locations_in_queue was NULL", unit->official_id);
-    }
-#endif
 
   /* Store today's detections, because some vaccinations may be canceled by
    * detections. */
@@ -1491,9 +1490,7 @@ handle_request_for_vaccination_event (struct adsm_module_t_ *self,
   local_data_t *local_data;
   EVT_request_for_vaccination_event_t *event;
   UNT_unit_t *unit;
-  GQueue *q;
-  GQueue *locations_in_queue;
-  EVT_event_t *event_copy;
+  USC_scorecard_t *scorecard;
   
 #if DEBUG
   g_debug ("----- ENTER handle_request_for_vaccination_event (%s)", MODEL_NAME);
@@ -1518,24 +1515,19 @@ handle_request_for_vaccination_event (struct adsm_module_t_ *self,
       g_debug ("authorities commit to vaccinate unit \"%s\"", unit->official_id);
 #endif
       EVT_event_enqueue (queue, EVT_new_commitment_to_vaccinate_event (unit, event->day));
-      /* If the list of pending vaccination queues is not long enough (that is,
-       * this event has a lower priority than any we've seen before), extend
-       * the list of pending vaccination queues. */
-      while (local_data->pending_vaccinations->len < event->priority)
-        g_ptr_array_add (local_data->pending_vaccinations, g_queue_new ());
+      event->day_commitment_made = event->day;
 
-      q = (GQueue *) g_ptr_array_index (local_data->pending_vaccinations, event->priority - 1);
-      event_copy = EVT_clone_event (e);
-      event_copy->u.request_for_vaccination.day_commitment_made = event->day;
-      g_queue_push_tail (q, event_copy);
-      /* Store a pointer to the GQueue link that contains this request. */
-      locations_in_queue = (GQueue *) g_hash_table_lookup (local_data->vaccination_status, unit);
-      if (locations_in_queue == NULL)
+      /* The unit to be vaccinated goes into the set to be prioritized for
+       * vaccination. */
+      scorecard = get_or_make_scorecard_for_unit (self, unit);
+      USC_scorecard_register_vaccination_request (scorecard, e);
+
+      /* Is this unit new to the vaccination set? */
+      if (g_hash_table_lookup (local_data->vaccination_set, unit) == NULL)
         {
-          locations_in_queue = g_queue_new ();
-          g_hash_table_insert (local_data->vaccination_status, unit, locations_in_queue);
+          g_hash_table_insert (local_data->vaccination_set, unit, scorecard);
+          g_ptr_array_add (local_data->scorecards_sorted, scorecard);
         }
-      g_queue_push_tail (locations_in_queue, g_queue_peek_tail_link (q));
     }
 
 end:
@@ -1689,6 +1681,7 @@ has_pending_actions (struct adsm_module_t_ * self)
   unsigned int npriorities;
   GQueue *q;
   int i;
+  gboolean has_actions = FALSE;
 
   local_data = (local_data_t *) (self->model_data);
 
@@ -1696,17 +1689,10 @@ has_pending_actions (struct adsm_module_t_ * self)
    * program has been initiated and if there is or will be capacity to
    * vaccinate. */
   if (local_data->vaccination_active
-      && !local_data->no_more_vaccinations)
+      && !local_data->no_more_vaccinations
+      && g_hash_table_size (local_data->vaccination_set) > 0)
     {
-      npriorities = local_data->pending_vaccinations->len;
-      for (i = 0; i < npriorities; i++)
-        {
-          q = (GQueue *) g_ptr_array_index (local_data->pending_vaccinations, i);
-          if (!g_queue_is_empty (q))
-            {
-              return TRUE;
-            }
-        }
+      has_actions = TRUE;
     }
 
   if (!local_data->no_more_destructions)
@@ -1717,12 +1703,13 @@ has_pending_actions (struct adsm_module_t_ * self)
           q = (GQueue *) g_ptr_array_index (local_data->pending_destructions, i);
           if (!g_queue_is_empty (q))
             {
-              return TRUE;
+              has_actions = TRUE;
+              break;
             }
         }
     }
 
-  return FALSE;
+  return has_actions;
 }
 
 
@@ -1801,18 +1788,16 @@ local_free (struct adsm_module_t_ *self)
   g_slist_free_full (local_data->vaccination_prioritizers, free_prioritizer);
   REL_free_chart (local_data->vaccination_capacity);
   REL_free_chart (local_data->vaccination_capacity_on_restart);
-  clear_all_pending_vaccinations (local_data, /* day = */ 0, /* event queue = */ NULL);
-  g_hash_table_destroy (local_data->vaccination_status);
-  npriorities = local_data->pending_vaccinations->len;
-  for (i = 0; i < npriorities; i++)
-    {
-      q = (GQueue *) g_ptr_array_index (local_data->pending_vaccinations, i);
-      g_queue_free (q);
-    }
-  g_ptr_array_free (local_data->pending_vaccinations, TRUE);
+  clear_all_pending_vaccinations (self, /* day = */ 0, /* event queue = */ NULL);
+  g_hash_table_destroy (local_data->vaccination_set);
+  g_ptr_array_free (local_data->scorecards_sorted, TRUE);
   g_hash_table_destroy (local_data->detected_today);
   g_free (local_data->day_last_vaccinated);
   g_free (local_data->min_next_vaccination_day);
+  /* clear_all_pending_vaccinations calls get_scorecard_for_unit, so the
+   * unit-to-scorecard map cannot be deleted until after
+   * clear_all_pending_vaccinations. */   
+  g_hash_table_destroy (local_data->scorecard_for_unit);
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
   g_free (self);
@@ -1974,10 +1959,6 @@ set_params (void *data, GHashTable *dict)
   tmp_text = g_hash_table_lookup (dict, "vaccination_priority_order");
   {
     JsonParser *json_parser;
-    
-    local_data->vaccination_prod_type_priority = 0;
-    local_data->vaccination_reason_priority = 0;
-    local_data->vaccination_time_waiting_priority = 0;
 
     json_parser = json_parser_new();
     if (json_parser_load_from_data (json_parser, tmp_text, -1, error))
@@ -2006,17 +1987,6 @@ set_params (void *data, GHashTable *dict)
                   local_data->vaccination_time_waiting_priority = priority++;
               }
             g_list_free(members);
-          }
-
-        /* At the end we should have filled in a nonzero value for each of the
-         * vaccination_XXX_priority variables. */
-        if (!(local_data->vaccination_prod_type_priority > 0
-              && local_data->vaccination_reason_priority > 0
-              && local_data->vaccination_time_waiting_priority > 0))
-          {
-            g_set_error (error, ADSM_MODULE_ERROR, 0,
-                         "\"%s\" is not a valid vaccination priority order",
-                         tmp_text);
           }
         
         /* The list of prioritizers is a singly-linked list and it was built by
@@ -2097,6 +2067,11 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->outbreak_known = FALSE;
   local_data->destruction_program_begin_day = 0;
 
+  local_data->scorecard_for_unit =
+    g_hash_table_new_full (g_direct_hash, g_direct_equal,
+                           /* key_destroy_func = */ NULL, /* do not destroy units */
+                           /* value_destroy_func = */ USC_free_scorecard_as_GDestroyNotify);
+
   /* No units have been destroyed or slated for destruction yet. */
   local_data->destruction_status = g_new0 (GList *, local_data->nunits);
   local_data->ndestroyed_today = 0;
@@ -2105,9 +2080,9 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->destroyed_today = g_hash_table_new (g_direct_hash, g_direct_equal);
 
   /* No units have been vaccinated or slated for vaccination yet. */
-  local_data->vaccination_status = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_queue_free_as_GDestroyNotify);
+  local_data->vaccination_set = g_hash_table_new (g_direct_hash, g_direct_equal);
+  local_data->scorecards_sorted = g_ptr_array_new ();
   local_data->nvaccinated_today = 0;
-  local_data->pending_vaccinations = g_ptr_array_new ();
   local_data->day_last_vaccinated = g_new0 (int, local_data->nunits);
   local_data->min_next_vaccination_day = g_new0 (int, local_data->nunits);
   local_data->no_more_vaccinations = FALSE;
