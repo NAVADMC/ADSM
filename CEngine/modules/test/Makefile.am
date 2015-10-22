@@ -45,6 +45,7 @@ miniadsm_SOURCES = $(top_srcdir)/main_loop/cli.c $(top_srcdir)/main_loop/main_lo
   $(top_srcdir)/replace/replace.c $(top_srcdir)/replace/replace.h \
   $(top_srcdir)/general/general.c $(top_srcdir)/general/general.h \
   $(top_srcdir)/unit/unit.c $(top_srcdir)/unit/unit.h \
+  $(top_srcdir)/unit/scorecard.c $(top_srcdir)/unit/scorecard.h \
   $(top_srcdir)/event/event.c $(top_srcdir)/event/event.h \
   $(top_srcdir)/prob_dist/prob_dist.c $(top_srcdir)/prob_dist/prob_dist.h \
   $(top_srcdir)/rel_chart/rel_chart.c $(top_srcdir)/rel_chart/rel_chart.h \

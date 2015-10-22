@@ -271,6 +271,94 @@ double round (double x);
 
 
 #define DESTROYED 0
+/******************************************************************************
+ * Prioritizers.
+ *****************************************************************************/
+
+/* Forward declaration for the prioritizer object defined below. */
+struct adsm_prioritizer_t_;
+
+/* Type of a function that compares two unit scorecards for priority. */
+typedef int (*adsm_prioritizer_compare_t) (struct adsm_prioritizer_t_ *,
+                                           USC_scorecard_t *,
+                                           USC_scorecard_t *);
+
+/* Type of a function that returns a string representation of a prioritizer object. */
+typedef char *(*adsm_prioritizer_to_string_t) (struct adsm_prioritizer_t_ *);
+
+/* Type of a function that frees a prioritizer object. */
+typedef void (*adsm_prioritizer_free_t) (struct adsm_prioritizer_t_ *);
+
+/**
+ * A prioritizer object.  It knows how to sort two units into priority order
+ * according to some stored criterion.
+ */
+typedef struct adsm_prioritizer_t_
+{
+  gpointer private; /* Specialized information for the particular type of prioritizer */
+  adsm_prioritizer_compare_t compare;
+  adsm_prioritizer_to_string_t to_string;
+  adsm_prioritizer_free_t free;
+}
+adsm_prioritizer_t;
+
+
+
+/*****************************************************************************/
+
+/**
+ * This function, typed as a GDestroyNotify function, frees a prioritizer.
+ */
+static void
+free_prioritizer (gpointer data)
+{
+  adsm_prioritizer_t *self;
+  self = (adsm_prioritizer_t *) data;
+  if (self != NULL)
+    self->free (self);
+  return;
+}
+
+/**
+ * This function, typed as required for qsort_r(), sorts an array of scorecards
+ * using a chain of prioritizers.
+ *
+ * @param thunk the chain (GSList *) of prioritizers
+ * @param c1 the first scorecard to be compared
+ * @param c2 the second scorecard to be compared
+ * @return -1 if c1 has a higher priority than c2, +1 if c2 has a higher
+ *   priority than c1, and 0 if their priorities are equal.
+ */
+int
+prioritizer_chain_compare (void *thunk, const void *c1, const void *c2)
+{
+  GSList *prioritizer_chain, *iter;
+  adsm_prioritizer_t *prioritizer;
+  USC_scorecard_t *scorecard1, *scorecard2;
+  int result = 0;
+
+  #if DEBUG && 0
+    g_debug ("----- ENTER prioritizer_chain_compare");
+  #endif  
+  prioritizer_chain = (GSList *) thunk;
+  scorecard1 = *((USC_scorecard_t **) c1);
+  scorecard2 = *((USC_scorecard_t **) c2);
+  for (iter = prioritizer_chain; iter != NULL; iter = g_slist_next(iter))
+    {
+      prioritizer = (adsm_prioritizer_t *) (iter->data);
+      #if DEBUG && 0
+        g_debug ("getting prioritizer from chain");
+      #endif
+      result = prioritizer->compare (prioritizer, scorecard1, scorecard2);
+      #if DEBUG && 0
+        g_debug ("result = %i", result);
+      #endif
+      if (result != 0)
+        break;
+      /* Otherwise continue down the chain */
+    }
+  return result;
+}
 
 
 
@@ -365,6 +453,9 @@ typedef struct
   int *day_last_vaccinated; /**< Records the day when each unit
    was last vaccinated.  Also prevents double-counting units against the
    vaccination capacity. */
+
+  /* Parameters used to prioritize vaccination. */
+  GSList *vaccination_prioritizers; /**< Each item is a (naadsm_prioritizer_t *). */
   int *min_next_vaccination_day;
   int vaccination_prod_type_priority;
   int vaccination_time_waiting_priority;
@@ -1707,6 +1798,7 @@ local_free (struct adsm_module_t_ *self)
   g_ptr_array_free (local_data->pending_destructions, TRUE);
   g_hash_table_destroy (local_data->destroyed_today);
 
+  g_slist_free_full (local_data->vaccination_prioritizers, free_prioritizer);
   REL_free_chart (local_data->vaccination_capacity);
   REL_free_chart (local_data->vaccination_capacity_on_restart);
   clear_all_pending_vaccinations (local_data, /* day = */ 0, /* event queue = */ NULL);
@@ -1878,6 +1970,7 @@ set_params (void *data, GHashTable *dict)
 
   /* The vaccination priority order is given in JSON format in the column
    * "vaccination_priority_order". */
+  local_data->vaccination_prioritizers = NULL;
   tmp_text = g_hash_table_lookup (dict, "vaccination_priority_order");
   {
     JsonParser *json_parser;
@@ -1898,11 +1991,13 @@ set_params (void *data, GHashTable *dict)
             guint priority = 1;
 
             members = json_object_get_members(json_node_get_object(node));
+            adsm_prioritizer_t *prioritizer;
             for (iter = members; iter != NULL; iter = g_list_next(iter))
               {
                 const gchar *member;
                 member = iter->data;
 
+                prioritizer = NULL;
                 if (g_ascii_strcasecmp (member, "production type") == 0)
                   local_data->vaccination_prod_type_priority = priority++;
                 else if (g_ascii_strcasecmp (member, "reason") == 0)
@@ -1924,6 +2019,9 @@ set_params (void *data, GHashTable *dict)
                          tmp_text);
           }
         
+        /* The list of prioritizers is a singly-linked list and it was built by
+         * prepends, so now it must be reversed. */
+        local_data->vaccination_prioritizers = g_slist_reverse (local_data->vaccination_prioritizers);
       } /* end of if JSON parse was successful */
     g_object_unref(json_parser);
   }
