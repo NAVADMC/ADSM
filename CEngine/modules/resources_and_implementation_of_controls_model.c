@@ -305,6 +305,118 @@ adsm_prioritizer_t;
 
 
 
+/* Prototypes for functions that create different types of prioritizer objects. */
+static adsm_prioritizer_t *new_production_type_prioritizer (GPtrArray *, gchar **);
+
+
+
+/** Implementation for by-production-type prioritizer. ***********************/
+
+/**
+ * Compares two herd scorecards by production type and returns their priority
+ * order.
+ */
+static int
+adsm_production_type_prioritizer_compare (adsm_prioritizer_t *self,
+                                          USC_scorecard_t *scorecard1,
+                                          USC_scorecard_t *scorecard2)
+{
+  guint *priority;
+  guint priority1, priority2;
+  
+  priority = (guint *) (self->private);
+  priority1 = priority[scorecard1->unit->production_type];
+  priority2 = priority[scorecard2->unit->production_type];
+  #if DEBUG && 0
+    g_debug ("comparing unit \"%s\" and \"%s\" by prodtype",
+             scorecard1->unit->official_id,
+             scorecard2->unit->official_id);
+  #endif
+  return (priority2 - priority1);
+}
+
+/**
+ * Frees any prioritizer that has a single memory block allocated for its
+ * private data (no other dynamically allocated pieces).
+ */
+static void
+adsm_free_prioritizer (adsm_prioritizer_t *self)
+{
+  if (self != NULL)
+    {
+      g_free (self->private);
+      g_free (self);
+    }
+  return;  
+}
+
+/**
+ * Creates a new by-production-type prioritizer.
+ *
+ * @param production_type_names a list of all production type names in the
+ *   population. Each item in the array is a (char *).
+ * @param prodtypes a list of production type names (char *) in priority order,
+ *   highest priority first. This is a null-terminated array of the form
+ *   returned by g_strsplit(). If this list omits any of the production types,
+ *   those production types will go at the end of the list, all with the same
+ *   priority. This list can be freed after using it in this function call.
+ * @return a prioritizer object.
+ */
+static adsm_prioritizer_t *
+new_production_type_prioritizer (GPtrArray *production_type_names,
+                                 char **prodtypes)
+{
+  adsm_prioritizer_t *self;
+  guint *priority;
+  guint i, j, n;
+  char *prodtype;
+
+  #if DEBUG
+    g_debug ("----- ENTER new_production_type_prioritizer");
+  #endif
+
+  self = g_new (adsm_prioritizer_t, 1);
+  self->compare = adsm_production_type_prioritizer_compare;
+  self->to_string = NULL;
+  self->free = adsm_free_prioritizer;
+  /* The private data in this type of prioritizer object is an array.  It is
+   * indexed by production type number, and the value found in the array is
+   * the numeric priority of that production type (lower number = higher
+   * priority). */
+  n = production_type_names->len;
+  priority = g_new (guint, n);
+  /* Initialize the array with low-priority numbers. These will provide a
+   * default for production types not found in the "prodtypes" list. */
+  for (i = 0; i < n; i++)
+    {
+      priority[i] = n;
+    }
+  i = 0; /* "i" will hold the priority number in this loop */
+  for (i = 0; prodtypes[i] != NULL; i++)
+    {
+      prodtype = prodtypes[i];
+      /* Find the number for this production type name. */
+      for (j = 0; j < n; j++)
+        {
+          if (strcasecmp (prodtype, g_ptr_array_index (production_type_names, j)) == 0)
+            break;
+        }
+      if (j == n)
+        {
+          g_error ("\"%s\" is not a production type", prodtype);
+        }
+      #if DEBUG
+        g_debug ("production type \"%s\" has priority %u", prodtype, i);
+      #endif
+      priority[j] = i;
+    }
+  self->private = (gpointer) priority;
+  #if DEBUG
+    g_debug ("----- EXIT new_production_type_prioritizer");
+  #endif
+  return self;
+}
+
 /*****************************************************************************/
 
 /**
@@ -1812,6 +1924,7 @@ local_free (struct adsm_module_t_ *self)
 typedef struct
 {
   adsm_module_t *self;
+  UNT_unit_list_t *units;
   sqlite3 *db;
   GError **error;
 }
@@ -1835,6 +1948,7 @@ set_params (void *data, GHashTable *dict)
   adsm_module_t *self;
   GError **error;
   local_data_t *local_data;
+  UNT_unit_list_t *units;
   sqlite3 *params;
   char *tmp_text;
   guint rel_id;
@@ -1849,6 +1963,7 @@ set_params (void *data, GHashTable *dict)
   args = data;
   self = args->self;
   local_data = (local_data_t *) (self->model_data);
+  units = args->units;
   params = args->db;
   error = args->error;
 
@@ -1969,26 +2084,49 @@ set_params (void *data, GHashTable *dict)
         if (JSON_NODE_HOLDS_OBJECT(node))
           {
             GList *members, *iter;
-            guint priority = 1;
-
-            members = json_object_get_members(json_node_get_object(node));
             adsm_prioritizer_t *prioritizer;
+            JsonObject *json_object = json_node_get_object(node);
+            members = json_object_get_members(json_object);
             for (iter = members; iter != NULL; iter = g_list_next(iter))
               {
                 const gchar *member;
-                member = iter->data;
 
+                member = iter->data;
                 prioritizer = NULL;
                 if (g_ascii_strcasecmp (member, "production type") == 0)
-                  local_data->vaccination_prod_type_priority = priority++;
+                  {
+                    gchar **tokens;
+                    guint n, i;
+                    JsonArray *production_types = json_object_get_array_member(json_object, member);
+                    n = json_array_get_length(production_types);
+                    tokens = g_new0(gchar *, n+1);
+                    for (i = 0; i < n; i++)
+                      {
+                        tokens[i] = (gchar *)json_array_get_string_element(production_types, i);
+                      }
+                    /* Final one is already NULL because we used g_new0 */
+                    prioritizer = new_production_type_prioritizer (units->production_type_names,
+                                                                   tokens);
+                    g_free(tokens); /* Don't try to free the individual tokens,
+                      they're owned by the JSON object */
+                  }
                 else if (g_ascii_strcasecmp (member, "reason") == 0)
-                  local_data->vaccination_reason_priority = priority++;
+                  {
+                  }
                 else if (g_ascii_strcasecmp (member, "days holding") == 0)
-                  local_data->vaccination_time_waiting_priority = priority++;
-              }
+                  {
+                  }
+                if (prioritizer != NULL)
+                  {
+                    local_data->vaccination_prioritizers =
+                      g_slist_prepend (local_data->vaccination_prioritizers, prioritizer);
+                    #if DEBUG
+                      g_debug ("now %u prioritizers in chain", g_slist_length (local_data->vaccination_prioritizers));
+                    #endif
+                  }
+              } /* end of loop over top-level members in JSON structure */
             g_list_free(members);
-          }
-        
+          } /* end of check for JSON "object" type at top level */
         /* The list of prioritizers is a singly-linked list and it was built by
          * prepends, so now it must be reversed. */
         local_data->vaccination_prioritizers = g_slist_reverse (local_data->vaccination_prioritizers);
@@ -2090,6 +2228,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* Call the set_params function to read the parameters. */
   set_params_args.self = self;
+  set_params_args.units = units;
   set_params_args.db = params;
   set_params_args.error = error;
   sqlite3_exec_dict (params,
