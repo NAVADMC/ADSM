@@ -1696,6 +1696,7 @@ EVT_clone_event (EVT_event_t * event)
                                                        e->reason, e->priority,
                                                        e->cancel_on_detection,
                                                        e->min_days_before_next);
+        clone->u.request_for_vaccination.day_commitment_made = e->day_commitment_made;
         break;
       }
     case EVT_Vaccination:

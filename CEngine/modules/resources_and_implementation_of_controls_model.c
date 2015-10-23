@@ -307,6 +307,7 @@ adsm_prioritizer_t;
 
 /* Prototypes for functions that create different types of prioritizer objects. */
 static adsm_prioritizer_t *new_production_type_prioritizer (GPtrArray *, gchar **);
+static adsm_prioritizer_t *new_time_waiting_prioritizer (gboolean oldest_first);
 
 
 
@@ -413,6 +414,77 @@ new_production_type_prioritizer (GPtrArray *production_type_names,
   self->private = (gpointer) priority;
   #if DEBUG
     g_debug ("----- EXIT new_production_type_prioritizer");
+  #endif
+  return self;
+}
+
+/** Implementation for by-time-waiting prioritizer. **************************/
+
+/**
+ * Compares two herd scorecards by time waiting and returns their priority
+ * order.
+ */
+static int
+adsm_time_waiting_prioritizer_compare (adsm_prioritizer_t *self,
+                                       USC_scorecard_t *scorecard1,
+                                       USC_scorecard_t *scorecard2)
+{
+  gboolean oldest_first;
+  EVT_event_t *request1, *request2;
+  int day1, day2;
+  
+  oldest_first = *((gboolean *) (self->private));
+  if (oldest_first)
+    {
+      request1 = USC_scorecard_vaccination_request_peek_oldest (scorecard1);
+      request2 = USC_scorecard_vaccination_request_peek_oldest (scorecard2);
+    }
+  else
+    {
+      request1 = USC_scorecard_vaccination_request_peek_newest (scorecard1);
+      request2 = USC_scorecard_vaccination_request_peek_newest (scorecard2);
+    }
+  g_assert (request1 != NULL);
+  g_assert (request2 != NULL);
+  day1 = request1->u.request_for_vaccination.day_commitment_made;
+  day2 = request2->u.request_for_vaccination.day_commitment_made;
+  #if DEBUG && 0
+    g_debug ("comparing time waiting (%s first) for unit \"%s\" (%i) and \"%s\" (%i)",
+             oldest_first ? "oldest" : "newest",
+             scorecard1->unit->official_id, day1,
+             scorecard2->unit->official_id, day2);
+  #endif
+  return (day2 - day1) * (oldest_first ? 1 : -1);
+}
+
+/**
+ * Creates a new by-time-waiting prioritizer.
+ *
+ * @param oldest_first TRUE if older requests for vaccination have higher
+ *   priority, FALSE if newer requests have higher priority.
+ * @return a prioritizer object.
+ */
+static adsm_prioritizer_t *
+new_time_waiting_prioritizer (gboolean oldest_first_flag)
+{
+  adsm_prioritizer_t *self;
+  gboolean *oldest_first;
+
+  #if DEBUG
+    g_debug ("----- ENTER new_time_waiting_type_prioritizer");
+  #endif
+
+  self = g_new (adsm_prioritizer_t, 1);
+  self->compare = adsm_time_waiting_prioritizer_compare;
+  self->to_string = NULL;
+  self->free = adsm_free_prioritizer;
+  /* The private data in this type of prioritizer object is a gboolean, saying
+   * whether older requests have higher priority. */
+  oldest_first = g_new (gboolean, 1);
+  *oldest_first = oldest_first_flag;
+  self->private = (gpointer) oldest_first;
+  #if DEBUG
+    g_debug ("----- EXIT new_time_waiting_prioritizer");
   #endif
   return self;
 }
@@ -2115,6 +2187,10 @@ set_params (void *data, GHashTable *dict)
                   }
                 else if (g_ascii_strcasecmp (member, "days holding") == 0)
                   {
+                    JsonArray *json_array = json_object_get_array_member(json_object, member);
+                    const gchar *first_item = json_array_get_string_element(json_array, 0);
+                    gboolean oldest_first = (g_ascii_strcasecmp (first_item, "oldest") == 0);
+                    prioritizer = new_time_waiting_prioritizer (oldest_first);
                   }
                 if (prioritizer != NULL)
                   {
