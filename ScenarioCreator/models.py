@@ -499,7 +499,7 @@ class ControlProtocol(BaseModel):
     cost_of_vaccination_baseline_per_animal = MoneyField(default=0.0,
         help_text='The baseline cost of vaccination for each vaccinated animal of this type. This cost applies to all vaccinations before the threshold is met. ', )
     def __str__(self):
-        return "Protocol: %s" % (self.name, )
+        return self.name
 
 
 class ProtocolAssignment(BaseModel):

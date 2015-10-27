@@ -178,7 +178,7 @@ class ControlProtocolForm(BaseForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.layout = Layout(
             'name',
-            HTML('<script src="{{ STATIC_URL }}js/control-protocol.js"></script>'),
+            # HTML('<script src="{{ STATIC_URL }}js/control-protocol.js"></script>'),
             TabHolder(
                 Tab('Detection',
                     'use_detection',
@@ -261,6 +261,7 @@ class ControlProtocolForm(BaseForm):
     def clean(self):
         cleaned_data = super(ControlProtocolForm, self).clean()
         #TODO: remove this duplication (above) by building both behaviors off the same list
+        #TODO: this list is duplicated a third time in views.protocols_json
         sections = {'use_detection': ['detection_probability_for_observed_time_in_clinical',
                                       'detection_probability_report_vs_first_detection',
                                       'detection_is_a_zone_trigger',

@@ -123,7 +123,8 @@ def save_formset_succeeded(MyFormSet, TargetModel, context, request):
         return False
 
 
-def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request, template='ScenarioCreator/3Panels.html'):
+def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request, template='ScenarioCreator/3Panels.html',
+                                           html='ScenarioCreator/AssignmentList.html'):
     """FormSet is pre-populated with existing assignments and it detects and fills in missing
     assignments with a blank form with production type filled in."""
     if save_formset_succeeded(MyFormSet, TargetModel, context, request):
@@ -134,7 +135,7 @@ def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, miss
             index += TargetModel.objects.count()
             forms[index].fields['production_type'].initial = pt.id
         context['formset'] = forms
-        context['base_page'] = 'ScenarioCreator/AssignmentList.html'
+        context['base_page'] = html
         return render(request, template, context)
 
 
@@ -142,7 +143,9 @@ def assign_protocols(request):
     missing = ProductionType.objects.filter(protocolassignment__isnull=True)
     ProtocolSet = modelformset_factory(ProtocolAssignment, extra=len(missing), form=ProtocolAssignmentForm)
     context = {'title': 'Assign a Control Protocol to each Production Type'}
-    return populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request, template='ScenarioCreator/navigationPane.html')
+    return populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request,
+                                                  template='ScenarioCreator/navigationPane.html',
+                                                  html='ScenarioCreator/FormSet.html')
 
 
 def assign_progressions(request):
@@ -154,6 +157,23 @@ def assign_progressions(request):
                                           form=DiseaseProgressionAssignmentForm)
     context = {'title': 'Disease Progressions'}
     return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request)
+
+
+def protocols_json(request):
+    data = []
+    for protocol in ControlProtocol.objects.all():
+        entry = {'name': str(protocol.name),
+                 'tabs': [
+                     {'name':'Detection', 'enabled':str(protocol.use_detection), 'field':'use_detection', 'valid':True},
+                     {'name':'Tracing', 'enabled':str(protocol.use_tracing), 'field':'use_tracing', 'valid':True},
+                     {'name':'Testing', 'enabled':str(protocol.use_testing), 'field':'use_testing', 'valid':True},
+                     {'name':'Exams', 'enabled':str(protocol.use_exams), 'field':'use_exams', 'valid':True},
+                     {'name':'Destruction', 'enabled':str(protocol.use_destruction), 'field':'use_destruction', 'valid':True},
+                     {'name':'Vaccination', 'enabled':str(protocol.use_vaccination), 'field':'use_vaccination', 'valid':True},
+                     {'name':'Cost Accounting', 'enabled':str(protocol.use_cost_accounting), 'field':'use_cost_accounting', 'valid':True},
+                     ]}
+        data.append(entry)
+    return JsonResponse(data, safe=False)
 
 
 def collect_backlinks(model_instance):
