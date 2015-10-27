@@ -134,7 +134,7 @@ def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, miss
             index += TargetModel.objects.count()
             forms[index].fields['production_type'].initial = pt.id
         context['formset'] = forms
-        context['base_page'] = 'ScenarioCreator/FormSet.html'
+        context['base_page'] = 'ScenarioCreator/AssignmentList.html'
         return render(request, template, context)
 
 
