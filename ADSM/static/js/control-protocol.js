@@ -3,25 +3,26 @@ $(function(){
 
     var build_protocols_list = function(){
         $.get('/setup/Protocols.json', function(json){
+            var $accordion = $('<div class="panel-group" id="accordion">');
             json.forEach(function(entry, index){
                 index += 2; // leave a space at the beginning for parent submodel
-                var id = 'accordion-'+index;
-                var $accordion =
-                $('<div class="panel-group" id="accordion-'+index+'">\
-                    <div class="model-banner">\
-                        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-'+index+
+                var $header =
+                    $('<div class="model-banner">\
+                        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion'+
                         '" href="#sub-model'+index+'">'+ entry.name +'</a>\
-                    </div>\
-                   </div>');
-                var $sub_headings = $('<div id="sub-model' + index + '" class="panel-collapse collapse in" style="height: auto;">');
+                       </div>');
+
+                var $sub_headings = $('<div id="sub-model' + index + '" class="panel-collapse collapse" style="height: auto;">');
                 entry['tabs'].forEach(function(tab, tab_index){
                     $sub_headings.append($('<label class="checkbox"><input type="checkbox" name="use_detection" checked="" id="id_'+
                         tab['field'] + '" class="checkboxinput">' +
                         tab['name'] + '</label>'));
                 });
-                $accordion.append($sub_headings);
-                $('#sub-model1').append($accordion);
+                $accordion.append($header);
+                $accordion.append($sub_headings);//siblings
             });
+            console.log()
+            $('#left-panel').append($accordion);
         });
     };
     build_protocols_list();
