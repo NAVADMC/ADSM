@@ -902,7 +902,6 @@ EVT_event_t *
 EVT_new_request_for_vaccination_event (UNT_unit_t * unit,
                                        int day,
                                        ADSM_control_reason reason,
-                                       int priority,
                                        gboolean cancel_on_detection,
                                        int min_days_before_next)
 {
@@ -913,7 +912,6 @@ EVT_new_request_for_vaccination_event (UNT_unit_t * unit,
   event->u.request_for_vaccination.unit = unit;
   event->u.request_for_vaccination.day = day;
   event->u.request_for_vaccination.reason = reason;
-  event->u.request_for_vaccination.priority = priority;
   event->u.request_for_vaccination.cancel_on_detection = cancel_on_detection;
   event->u.request_for_vaccination.min_days_before_next = min_days_before_next;
   event->u.request_for_vaccination.day_commitment_made = 0; /* default */
@@ -934,8 +932,8 @@ char *EVT_request_for_vaccination_event_to_string (EVT_request_for_vaccination_e
   char *chararray;
 
   s = g_string_new (NULL);
-  g_string_sprintf (s, "<Request for vaccination event unit=\"%s\" day=%i priority=%i cancel on detection=%s>",
-                    event->unit->official_id, event->day, event->priority,
+  g_string_sprintf (s, "<Request for vaccination event unit=\"%s\" day=%i cancel on detection=%s>",
+                    event->unit->official_id, event->day,
                     event->cancel_on_detection ? "yes" : "no");
   /* don't return the wrapper object */
   chararray = s->str;
@@ -1693,7 +1691,7 @@ EVT_clone_event (EVT_event_t * event)
         EVT_request_for_vaccination_event_t *e;
         e = &(event->u.request_for_vaccination);
         clone = EVT_new_request_for_vaccination_event (e->unit, e->day,
-                                                       e->reason, e->priority,
+                                                       e->reason,
                                                        e->cancel_on_detection,
                                                        e->min_days_before_next);
         clone->u.request_for_vaccination.day_commitment_made = e->day_commitment_made;

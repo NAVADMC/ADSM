@@ -337,7 +337,6 @@ typedef struct
 {
   UNT_unit_t *unit;
   int day;
-  int priority;
   ADSM_control_reason reason; /**< why vaccination was requested */
   gboolean cancel_on_detection; /**< whether to cancel the vaccination if the
     unit is detected as diseased */
@@ -657,7 +656,6 @@ EVT_event_t *EVT_new_vaccination_initiated_event (int day,
 EVT_event_t *EVT_new_request_for_vaccination_event (UNT_unit_t *,
                                                     int day,
                                                     ADSM_control_reason,
-                                                    int priority,
                                                     gboolean cancel_on_detection,
                                                     int min_days_before_next);
 EVT_event_t *EVT_new_commitment_to_vaccinate_event (UNT_unit_t *, int day);
