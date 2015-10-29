@@ -644,6 +644,12 @@ typedef struct
   GPtrArray *scorecards_sorted; /**< An array containing the scorecards of
     herds currently awaiting vaccination. The array is maintained in sorted
     order, with the highest-priority herds at the end. */
+  GHashTable *removed_from_vaccination_set_today; /**< A hash table storing
+    units that have been removed from the hash table vaccination_set but have
+    not yet been removed from the list scorecards_sorted.  Keeping this
+    information around enables us to use a fast once-a-day sweep to remove
+    scorecards from the sorted list (the function clean_up_scorecard_list)
+    while still keeping the list in sorted order. */
 
   guint *min_time_between_vaccinations; /**< An array with one entry per
     production type */
@@ -753,6 +759,7 @@ cancel_vaccination (struct adsm_module_t_ *self,
       if (request == NULL) /* means that list of vaccination requests was found to be empty above */
         {
           g_hash_table_remove (local_data->vaccination_set, unit);
+          g_hash_table_insert (local_data->removed_from_vaccination_set_today, unit, GINT_TO_POINTER(1));
         }
     }
 
@@ -1120,6 +1127,7 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
     }
 
   clean_up_scorecard_list (local_data->vaccination_set, local_data->scorecards_sorted);
+  g_hash_table_remove_all (local_data->removed_from_vaccination_set_today);
   nscorecards = g_hash_table_size (local_data->vaccination_set);
   if (vaccination_capacity > 0 && nscorecards > 0)
     {
@@ -1163,6 +1171,7 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
           if (USC_scorecard_vaccination_request_peek_oldest (scorecard) == NULL)
             {
               g_hash_table_remove (local_data->vaccination_set, unit);
+              g_hash_table_insert (local_data->removed_from_vaccination_set_today, unit, GINT_TO_POINTER(1));
             }
 
           i += 1;      
@@ -1271,6 +1280,8 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   local_data->vaccination_terminated_day = -1;
   /* Empty the prioritized pending vaccinations lists. */
   clear_all_pending_vaccinations (self, /* day = */ 0, /* event queue = */ NULL);
+  g_ptr_array_set_size (local_data->scorecards_sorted, 0);
+  g_hash_table_remove_all (local_data->removed_from_vaccination_set_today);
   local_data->nvaccinated_today = 0;
 
   for (i = 0; i < local_data->nunits; i++)
@@ -1711,7 +1722,18 @@ handle_request_for_vaccination_event (struct adsm_module_t_ *self,
       if (g_hash_table_lookup (local_data->vaccination_set, unit) == NULL)
         {
           g_hash_table_insert (local_data->vaccination_set, unit, scorecard);
-          g_ptr_array_add (local_data->scorecards_sorted, scorecard);
+          /* Add the unit's scorecard to the list scorecards_sorted. One
+           * exception: if this unit was removed from the vaccination set today
+           * (we're re-adding it), then the unit's scorecard will still be in
+           * scorecards_sorted. */
+          if (g_hash_table_lookup (local_data->removed_from_vaccination_set_today, unit) != NULL)
+            {
+              g_assert (g_hash_table_remove (local_data->removed_from_vaccination_set_today, unit) == TRUE);
+            }
+          else
+            {
+              g_ptr_array_add (local_data->scorecards_sorted, scorecard);
+            }
         }
     }
 
@@ -1975,6 +1997,7 @@ local_free (struct adsm_module_t_ *self)
   REL_free_chart (local_data->vaccination_capacity_on_restart);
   clear_all_pending_vaccinations (self, /* day = */ 0, /* event queue = */ NULL);
   g_hash_table_destroy (local_data->vaccination_set);
+  g_hash_table_destroy (local_data->removed_from_vaccination_set_today);
   g_ptr_array_free (local_data->scorecards_sorted, TRUE);
   g_hash_table_destroy (local_data->detected_today);
   g_free (local_data->cancel_vaccination_on_detection);
@@ -2365,6 +2388,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
 
   /* No units have been vaccinated or slated for vaccination yet. */
   local_data->vaccination_set = g_hash_table_new (g_direct_hash, g_direct_equal);
+  local_data->removed_from_vaccination_set_today = g_hash_table_new (g_direct_hash, g_direct_equal);
   local_data->scorecards_sorted = g_ptr_array_new ();
   local_data->nvaccinated_today = 0;
   local_data->cancel_vaccination_on_detection = g_new0 (gboolean, local_data->nprod_types);
