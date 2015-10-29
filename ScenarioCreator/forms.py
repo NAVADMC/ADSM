@@ -398,9 +398,7 @@ class IndirectSpreadForm(BaseForm):
         model = IndirectSpread
         exclude = ['_disease']
         widgets = {'contact_rate': FloatInput(),
-                   'infection_probability': NumberInput(attrs={'data-visibility-context': 'use_within_unit_prevalence',
-                                                               'data-visibility-flipped': 'true',
-                                                               'step': 'any'}),
+                   'infection_probability': FloatInput(),  # visibility settings acts differently from DirectSpread.infection_probability
                    'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',

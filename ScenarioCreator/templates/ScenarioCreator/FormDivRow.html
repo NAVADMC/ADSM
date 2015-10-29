@@ -1,0 +1,9 @@
+{% load floppyforms%}
+
+<div class="full-width production-type-assignment">
+    {% form form using %}{# needed to push the context for the formconfig #}
+        {% for field in form.visible_fields %}
+            <div class="full-width">{% block widget %}{% formfield field %}{% endblock %}</div>
+        {% endfor %}
+    {% endform %}
+</div>

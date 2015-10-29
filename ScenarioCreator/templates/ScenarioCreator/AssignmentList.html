@@ -1,0 +1,16 @@
+{% extends 'ScenarioCreator/Fragment.html' %}
+{% load floppyforms %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <h1 id="title">{{ title }}</h1>
+
+<form method="post" action="">
+    {{ formset.management_form }}
+        {% for form in formset %}
+            {{form.id}}
+            {% form form using 'ScenarioCreator/FormDivRow.html' %}
+        {% endfor %}
+    {% include "ScenarioCreator/EditButtons.html" %}
+</form>
+
+{% endblock %}
