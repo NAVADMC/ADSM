@@ -643,6 +643,8 @@ typedef struct
     herds currently awaiting vaccination. The array is maintained in sorted
     order, with the highest-priority herds at the end. */
 
+  guint *min_time_between_vaccinations; /**< An array with one entry per
+    production type */
   int *min_next_vaccination_day;
   GHashTable *detected_today; /**< Records the units detected today.  Useful
     for cancelling vaccination of detected units. */
@@ -1035,7 +1037,6 @@ vaccinate (struct adsm_module_t_ *self, UNT_unit_t * unit,
 {
   local_data_t *local_data;
   unsigned int last_vaccination, days_since_last_vaccination;
-  int min_days_before_next = 0;
 
 #if DEBUG
   g_debug ("----- ENTER vaccinate (%s)", MODEL_NAME);
@@ -1066,7 +1067,7 @@ vaccinate (struct adsm_module_t_ *self, UNT_unit_t * unit,
 #endif
   EVT_event_enqueue (queue, EVT_new_vaccination_event (unit, day, reason, day_commitment_made));
   local_data->nvaccinated_today++;
-  local_data->min_next_vaccination_day[unit->index] = day + min_days_before_next;
+  local_data->min_next_vaccination_day[unit->index] = day + local_data->min_time_between_vaccinations[unit->production_type];
 
 end:
 #if DEBUG
@@ -1977,6 +1978,7 @@ local_free (struct adsm_module_t_ *self)
   g_ptr_array_free (local_data->scorecards_sorted, TRUE);
   g_hash_table_destroy (local_data->detected_today);
   g_free (local_data->day_last_vaccinated);
+  g_free (local_data->min_time_between_vaccinations);
   g_free (local_data->min_next_vaccination_day);
   /* clear_all_pending_vaccinations calls get_scorecard_for_unit, so the
    * unit-to-scorecard map cannot be deleted until after
@@ -2005,7 +2007,8 @@ set_params_args_t;
 
 
 /**
- * Adds a set of parameters to a resources and implementation of controls model.
+ * Reads the global parameters for a resources and implementation of controls
+ * model.
  *
  * @param data a set_params_args_t structure, containing this module ("self")
  *   and a GError pointer to fill in if errors occur.
@@ -2014,7 +2017,7 @@ set_params_args_t;
  * @return 0
  */
 static int
-set_params (void *data, GHashTable *dict)
+set_global_params (void *data, GHashTable *dict)
 {
   set_params_args_t *args;
   adsm_module_t *self;
@@ -2029,7 +2032,7 @@ set_params (void *data, GHashTable *dict)
   guint ntokens;
 
   #if DEBUG
-    g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
+    g_debug ("----- ENTER set_global_params (%s)", MODEL_NAME);
   #endif
 
   args = data;
@@ -2223,8 +2226,66 @@ set_params (void *data, GHashTable *dict)
     }
 
   #if DEBUG
-    g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
+    g_debug ("----- EXIT set_global_params (%s)", MODEL_NAME);
   #endif
+
+  return 0;
+}
+
+
+
+/**
+ * Adds production type specific parameters to a resources and implementation
+ * of controls model.
+ *
+ * @param data a set_params_args_t structure, containing this module ("self")
+ *   and a GError pointer to fill in if errors occur.
+ * @param dict the SQL query result as a GHashTable in which key = colname,
+ *   value = value, both in (char *) format.
+ * @return 0
+ */
+static int
+set_prodtype_params (void *data, GHashTable *dict)
+{
+  set_params_args_t *args;
+  adsm_module_t *self;
+  GError **error;
+  local_data_t *local_data;
+  UNT_unit_list_t *units;
+  sqlite3 *params;
+  guint production_type;
+  char *tmp_text;
+
+#if DEBUG
+  g_debug ("----- ENTER set_prodtype_params (%s)", MODEL_NAME);
+#endif
+
+  args = data;
+  self = args->self;
+  local_data = (local_data_t *) (self->model_data);
+  units = args->units;
+  params = args->db;
+  error = args->error;
+
+  g_assert (g_hash_table_size (dict) == 2);
+
+  /* Find out which production type these parameters apply to. */
+  production_type =
+    adsm_read_prodtype (g_hash_table_lookup (dict, "prodtype"),
+                        units->production_type_names);
+
+  /* Read the parameters. */
+  tmp_text = g_hash_table_lookup (dict, "minimum_time_between_vaccinations");
+  if (tmp_text != NULL)
+    {
+      errno = 0;
+      local_data->min_time_between_vaccinations[production_type] = (guint) strtol (tmp_text, NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);
+    }
+
+#if DEBUG
+  g_debug ("----- EXIT set_prodtype_params (%s)", MODEL_NAME);
+#endif
 
   return 0;
 }
@@ -2298,11 +2359,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->scorecards_sorted = g_ptr_array_new ();
   local_data->nvaccinated_today = 0;
   local_data->day_last_vaccinated = g_new0 (int, local_data->nunits);
+  local_data->min_time_between_vaccinations = g_new0 (guint, local_data->nprod_types);
   local_data->min_next_vaccination_day = g_new0 (int, local_data->nunits);
   local_data->no_more_vaccinations = FALSE;
   local_data->detected_today = g_hash_table_new (g_direct_hash, g_direct_equal);
 
-  /* Call the set_params function to read the parameters. */
+  /* Call the set_global_params function to read the global parameters. */
   set_params_args.self = self;
   set_params_args.units = units;
   set_params_args.db = params;
@@ -2312,7 +2374,21 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
                      "vaccination_capacity_id,restart_vaccination_capacity_id,vaccination_priority_order,"
                      "vaccinate_retrospective_days "
                      "FROM ScenarioCreator_controlmasterplan",
-                     set_params, &set_params_args, &sqlerr);
+                     set_global_params, &set_params_args, &sqlerr);
+  if (sqlerr)
+    {
+      g_error ("%s", sqlerr);
+    }
+
+  /* Call the set_prodtype_params function to read the production type specific
+   * parameters. */
+  sqlite3_exec_dict (params,
+                     "SELECT prodtype.name AS prodtype,minimum_time_between_vaccinations "
+                     "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref "
+                     "WHERE prodtype.id=xref.production_type_id "
+                     "AND xref.control_protocol_id=protocol.id "
+                     "AND minimum_time_between_vaccinations IS NOT NULL",
+                     set_prodtype_params, &set_params_args, &sqlerr);
   if (sqlerr)
     {
       g_error ("%s", sqlerr);

@@ -902,8 +902,7 @@ EVT_event_t *
 EVT_new_request_for_vaccination_event (UNT_unit_t * unit,
                                        int day,
                                        ADSM_control_reason reason,
-                                       gboolean cancel_on_detection,
-                                       int min_days_before_next)
+                                       gboolean cancel_on_detection)
 {
   EVT_event_t *event;
 
@@ -913,7 +912,6 @@ EVT_new_request_for_vaccination_event (UNT_unit_t * unit,
   event->u.request_for_vaccination.day = day;
   event->u.request_for_vaccination.reason = reason;
   event->u.request_for_vaccination.cancel_on_detection = cancel_on_detection;
-  event->u.request_for_vaccination.min_days_before_next = min_days_before_next;
   event->u.request_for_vaccination.day_commitment_made = 0; /* default */
   return event;
 }
@@ -1692,8 +1690,7 @@ EVT_clone_event (EVT_event_t * event)
         e = &(event->u.request_for_vaccination);
         clone = EVT_new_request_for_vaccination_event (e->unit, e->day,
                                                        e->reason,
-                                                       e->cancel_on_detection,
-                                                       e->min_days_before_next);
+                                                       e->cancel_on_detection);
         clone->u.request_for_vaccination.day_commitment_made = e->day_commitment_made;
         break;
       }

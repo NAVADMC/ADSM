@@ -340,7 +340,6 @@ typedef struct
   ADSM_control_reason reason; /**< why vaccination was requested */
   gboolean cancel_on_detection; /**< whether to cancel the vaccination if the
     unit is detected as diseased */
-  int min_days_before_next;
   int day_commitment_made; /**< the day on which a commitment to fulfil this
     request was made. */
 }
@@ -656,8 +655,7 @@ EVT_event_t *EVT_new_vaccination_initiated_event (int day,
 EVT_event_t *EVT_new_request_for_vaccination_event (UNT_unit_t *,
                                                     int day,
                                                     ADSM_control_reason,
-                                                    gboolean cancel_on_detection,
-                                                    int min_days_before_next);
+                                                    gboolean cancel_on_detection);
 EVT_event_t *EVT_new_commitment_to_vaccinate_event (UNT_unit_t *, int day);
 EVT_event_t *EVT_new_vaccination_canceled_event (UNT_unit_t *, int day,
                                                  int day_commitment_made);
