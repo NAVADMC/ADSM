@@ -630,6 +630,8 @@ typedef struct
     whether a simulation can exit early even if there vaccinations queued up. */
   unsigned int nvaccinated_today; /**< The number of units the
     authorities have vaccinated on a given day. */
+  gboolean *cancel_vaccination_on_detection; /**< An array with one entry per
+    production type */
   int *day_last_vaccinated; /**< Records the day when each unit
    was last vaccinated.  Also prevents double-counting units against the
    vaccination capacity. */
@@ -1361,7 +1363,6 @@ handle_detection_event (struct adsm_module_t_ *self,
   UNT_unit_t *unit;
   USC_scorecard_t *scorecard;
   EVT_event_t *request;
-  EVT_request_for_vaccination_event_t *details;
 
 #if DEBUG
   g_debug ("----- ENTER handle_detection_event (%s)", MODEL_NAME);
@@ -1411,8 +1412,7 @@ handle_detection_event (struct adsm_module_t_ *self,
           #if DEBUG
             g_debug ("unit \"%s\" in vaccination queue", unit->official_id);
           #endif
-          details = &(request->u.request_for_vaccination);
-          if (TRUE /* FIXME: details->cancel_on_detection */)
+          if (local_data->cancel_vaccination_on_detection[unit->production_type])
             {
               cancel_vaccination (self, unit, event->day,
                                   /* older_than = */ 0,
@@ -1687,7 +1687,7 @@ handle_request_for_vaccination_event (struct adsm_module_t_ *self,
   /* If this unit has been destroyed today, or this unit has been detected
    * and we do not want to vaccinate detected units, then ignore the request. */
   unit = event->unit;
-  if ((event->cancel_on_detection == TRUE
+  if ((local_data->cancel_vaccination_on_detection[unit->production_type]
        && g_hash_table_lookup (local_data->detected_today, unit) != NULL)
       || g_hash_table_lookup (local_data->destroyed_today, unit) != NULL)
     goto end;
@@ -1977,6 +1977,7 @@ local_free (struct adsm_module_t_ *self)
   g_hash_table_destroy (local_data->vaccination_set);
   g_ptr_array_free (local_data->scorecards_sorted, TRUE);
   g_hash_table_destroy (local_data->detected_today);
+  g_free (local_data->cancel_vaccination_on_detection);
   g_free (local_data->day_last_vaccinated);
   g_free (local_data->min_time_between_vaccinations);
   g_free (local_data->min_next_vaccination_day);
@@ -2255,6 +2256,7 @@ set_prodtype_params (void *data, GHashTable *dict)
   sqlite3 *params;
   guint production_type;
   char *tmp_text;
+  long int tmp;
 
 #if DEBUG
   g_debug ("----- ENTER set_prodtype_params (%s)", MODEL_NAME);
@@ -2267,7 +2269,7 @@ set_prodtype_params (void *data, GHashTable *dict)
   params = args->db;
   error = args->error;
 
-  g_assert (g_hash_table_size (dict) == 2);
+  g_assert (g_hash_table_size (dict) == 3);
 
   /* Find out which production type these parameters apply to. */
   production_type =
@@ -2275,7 +2277,14 @@ set_prodtype_params (void *data, GHashTable *dict)
                         units->production_type_names);
 
   /* Read the parameters. */
-  tmp_text = g_hash_table_lookup (dict, "minimum_time_between_vaccinations");
+  tmp_text = g_hash_table_lookup (dict, "vaccinate_detected_units");  /* database field cannot be null */
+  errno = 0;
+  tmp = strtol (tmp_text, NULL, /* base */ 10);
+  g_assert (errno != ERANGE && errno != EINVAL);
+  g_assert (tmp == 0 || tmp == 1);
+  local_data->cancel_vaccination_on_detection[production_type] = (tmp == 0);
+
+  tmp_text = g_hash_table_lookup (dict, "minimum_time_between_vaccinations"); /* database field can be null */
   if (tmp_text != NULL)
     {
       errno = 0;
@@ -2358,6 +2367,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->vaccination_set = g_hash_table_new (g_direct_hash, g_direct_equal);
   local_data->scorecards_sorted = g_ptr_array_new ();
   local_data->nvaccinated_today = 0;
+  local_data->cancel_vaccination_on_detection = g_new0 (gboolean, local_data->nprod_types);
   local_data->day_last_vaccinated = g_new0 (int, local_data->nunits);
   local_data->min_time_between_vaccinations = g_new0 (guint, local_data->nprod_types);
   local_data->min_next_vaccination_day = g_new0 (int, local_data->nunits);
@@ -2383,11 +2393,10 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   /* Call the set_prodtype_params function to read the production type specific
    * parameters. */
   sqlite3_exec_dict (params,
-                     "SELECT prodtype.name AS prodtype,minimum_time_between_vaccinations "
+                     "SELECT prodtype.name AS prodtype,vaccinate_detected_units,minimum_time_between_vaccinations "
                      "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_controlprotocol protocol,ScenarioCreator_protocolassignment xref "
                      "WHERE prodtype.id=xref.production_type_id "
-                     "AND xref.control_protocol_id=protocol.id "
-                     "AND minimum_time_between_vaccinations IS NOT NULL",
+                     "AND xref.control_protocol_id=protocol.id",
                      set_prodtype_params, &set_params_args, &sqlerr);
   if (sqlerr)
     {
