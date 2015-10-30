@@ -214,6 +214,9 @@ void
 USC_scorecard_reset (USC_scorecard_t *self)
 {
   USC_scorecard_clear_vaccination_requests (self);
+
+  self->is_detected_as_diseased = FALSE;
+  self->day_detected_as_diseased = -1;
 }
 
 
@@ -242,6 +245,23 @@ USC_scorecard_register_vaccination_request (USC_scorecard_t *self,
   self->is_awaiting_vaccination = TRUE;
 
   return;
+}
+
+
+
+gboolean
+USC_record_detection_as_diseased (USC_scorecard_t *self, int day)
+{
+  gboolean result = FALSE;
+
+  if (!self->is_detected_as_diseased)
+    {
+      self->is_detected_as_diseased = TRUE;
+      self->day_detected_as_diseased = day;
+      result = TRUE;
+    }
+
+  return result;
 }
 
 /* end of file scorecard.c */

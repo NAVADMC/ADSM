@@ -654,8 +654,6 @@ typedef struct
   guint *min_time_between_vaccinations; /**< An array with one entry per
     production type */
   int *min_next_vaccination_day;
-  GHashTable *detected_today; /**< Records the units detected today.  Useful
-    for cancelling vaccination of detected units. */
 }
 local_data_t;
 
@@ -1284,13 +1282,16 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   g_hash_table_remove_all (local_data->removed_from_vaccination_set_today);
   local_data->nvaccinated_today = 0;
 
+  /* Note that clearing out scorecard_for_unit has to be done after calling
+   * clear_all_pending_vaccinations. */
+  g_hash_table_remove_all (local_data->scorecard_for_unit);
+
   for (i = 0; i < local_data->nunits; i++)
     {
       local_data->day_last_vaccinated[i] = 0;
       local_data->min_next_vaccination_day[i] = 0;
     }
   local_data->no_more_vaccinations = FALSE;
-  g_hash_table_remove_all (local_data->detected_today);
 
   #if DEBUG
     g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -1324,7 +1325,6 @@ handle_new_day_event (struct adsm_module_t_ *self,
 
   local_data = (local_data_t *) (self->model_data);
 
-  g_hash_table_remove_all (local_data->detected_today);
   g_hash_table_remove_all (local_data->destroyed_today);
 
   /* Destroy any waiting units, as many as possible before destruction capacity
@@ -1409,32 +1409,27 @@ handle_detection_event (struct adsm_module_t_ *self,
       local_data->first_detection_day_for_vaccination = event->day;
     }
 
-  /* If the unit is awaiting vaccination, and the request(s) can be canceled by
-   * detection, remove the unit from the waiting list. */
   unit = event->unit;
-  scorecard = get_scorecard_for_unit (self, unit);
-  if (scorecard != NULL)
+  scorecard = get_or_make_scorecard_for_unit (self, unit);
+  USC_record_detection_as_diseased (scorecard, event->day);
+
+  /* If the unit is awaiting vaccination, and the request(s) can be canceled by
+   * detection, remove the unit from the waiting list.
+   * We only need to check one entry in the scorecard's records of vaccination
+   * requests to see if vaccination(s) can be canceled. */
+  request = USC_scorecard_vaccination_request_peek_oldest (scorecard);
+  if (request != NULL)
     {
-      /* Only need to check one entry in the scorecard's records of vaccination
-       * requests to see if vaccination(s) can be canceled. */
-      request = USC_scorecard_vaccination_request_peek_oldest (scorecard);
-      if (request != NULL)
+      #if DEBUG
+        g_debug ("unit \"%s\" in vaccination queue", unit->official_id);
+      #endif
+      if (local_data->cancel_vaccination_on_detection[unit->production_type])
         {
-          #if DEBUG
-            g_debug ("unit \"%s\" in vaccination queue", unit->official_id);
-          #endif
-          if (local_data->cancel_vaccination_on_detection[unit->production_type])
-            {
-              cancel_vaccination (self, unit, event->day,
-                                  /* older_than = */ 0,
-                                  queue);
-            }
+          cancel_vaccination (self, unit, event->day,
+                              /* older_than = */ 0,
+                              queue);
         }
     }
-
-  /* Store today's detections, because some vaccinations may be canceled by
-   * detections. */
-  g_hash_table_insert (local_data->detected_today, unit, unit);
 
 #if DEBUG
   g_debug ("----- EXIT handle_detection_event (%s)", MODEL_NAME);
@@ -1698,9 +1693,12 @@ handle_request_for_vaccination_event (struct adsm_module_t_ *self,
   /* If this unit has been destroyed today, or this unit has been detected
    * and we do not want to vaccinate detected units, then ignore the request. */
   unit = event->unit;
-  if ((local_data->cancel_vaccination_on_detection[unit->production_type]
-       && g_hash_table_lookup (local_data->detected_today, unit) != NULL)
-      || g_hash_table_lookup (local_data->destroyed_today, unit) != NULL)
+  if (g_hash_table_lookup (local_data->destroyed_today, unit) != NULL)
+    goto end;
+  scorecard = get_scorecard_for_unit (self, unit);
+  if (scorecard != NULL
+      && local_data->cancel_vaccination_on_detection[unit->production_type]
+      && scorecard->is_detected_as_diseased)
     goto end;
 
   if (TRUE)
@@ -1999,7 +1997,6 @@ local_free (struct adsm_module_t_ *self)
   g_hash_table_destroy (local_data->vaccination_set);
   g_hash_table_destroy (local_data->removed_from_vaccination_set_today);
   g_ptr_array_free (local_data->scorecards_sorted, TRUE);
-  g_hash_table_destroy (local_data->detected_today);
   g_free (local_data->cancel_vaccination_on_detection);
   g_free (local_data->day_last_vaccinated);
   g_free (local_data->min_time_between_vaccinations);
@@ -2396,7 +2393,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->min_time_between_vaccinations = g_new0 (guint, local_data->nprod_types);
   local_data->min_next_vaccination_day = g_new0 (int, local_data->nunits);
   local_data->no_more_vaccinations = FALSE;
-  local_data->detected_today = g_hash_table_new (g_direct_hash, g_direct_equal);
 
   /* Call the set_global_params function to read the global parameters. */
   set_params_args.self = self;

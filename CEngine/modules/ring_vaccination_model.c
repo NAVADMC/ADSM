@@ -29,7 +29,6 @@
 #define run ring_vaccination_model_run
 #define to_string ring_vaccination_model_to_string
 #define local_free ring_vaccination_model_free
-#define handle_before_each_simulation_event ring_vaccination_model_handle_before_each_simulation_event
 #define handle_new_day_event ring_vaccination_model_handle_new_day_event
 #define handle_detection_event ring_vaccination_model_handle_detection_event
 #define check_and_choose ring_vaccination_model_check_and_choose
@@ -83,8 +82,6 @@ typedef struct
   double radius; /**< The radius of ring created around a unit of this
     production type. If negative, no ring is created around units of this
     production type. */
-  GHashTable *detected_units; /**< A list of detected units.  The pointer to
-    the UNT_unit_t structure is the key. */
   GHashTable *requested_today; /**< A list of units for which this module made
     requests for vaccination today.  A unit can be in queue for vaccination
     more than once at a given time, but two requests for the same unit, for the
@@ -94,33 +91,6 @@ typedef struct
     so that it will be available to the set_params function. */
 }
 local_data_t;
-
-
-
-/**
- * Before each simulation, this module deletes any records of detected units
- * left over from a previous iteration.
- *
- * @param self the model.
- */
-void
-handle_before_each_simulation_event (struct adsm_module_t_ *self)
-{
-  local_data_t *local_data;
-
-  #if DEBUG
-    g_debug ("----- ENTER handle_before_each_simulation_event (%s)", MODEL_NAME);
-  #endif
-
-  local_data = (local_data_t *) (self->model_data);
-  g_hash_table_remove_all (local_data->detected_units);
-
-  #if DEBUG
-    g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
-  #endif
-
-  return;
-}
 
 
 
@@ -193,17 +163,6 @@ check_and_choose (int id, gpointer arg)
   /* Is unit 2 a production type that gets vaccinated? */
   if (local_data->target_production_type[unit2->production_type] == FALSE)
     goto end;
-
-  /* Do we want to exclude units that are known to be infected?
-  if (param_block->vaccinate_detected_units == FALSE)
-    {
-      -* We know unit2 is infected if it's the one that triggered this
-       * vaccination ring, or if it has been detected. *-
-      if (unit1 == unit2
-          || g_hash_table_lookup (local_data->detected_units, unit2) != NULL)
-        goto end;
-    }
-  */
 
   /* Avoid making the same request twice on a single day. */
   if (g_hash_table_lookup (local_data->requested_today, unit2) != NULL)
@@ -279,7 +238,6 @@ handle_detection_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
     
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
-  g_hash_table_insert (local_data->detected_units, (gpointer)unit, (gpointer)unit);
 
   if (local_data->trigger_production_type[unit->production_type] == TRUE)
     ring_vaccinate (self, units, unit, event->day, queue);
@@ -311,9 +269,6 @@ run (struct adsm_module_t_ *self, UNT_unit_list_t * units, ZON_zone_list_t * zon
 
   switch (event->type)
     {
-    case EVT_BeforeEachSimulation:
-      handle_before_each_simulation_event (self);
-      break;
     case EVT_NewDay:
       handle_new_day_event (self);
       break;
@@ -402,7 +357,6 @@ local_free (struct adsm_module_t_ *self)
 
   g_free (local_data->trigger_production_type);
   g_free (local_data->target_production_type);
-  g_hash_table_destroy (local_data->detected_units);
   g_hash_table_destroy (local_data->requested_today);
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
@@ -538,7 +492,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   adsm_module_t *self;
   local_data_t *local_data;
   EVT_event_type_t events_listened_for[] = {
-    EVT_BeforeEachSimulation,
     EVT_NewDay,
     EVT_Detection,
     0
@@ -568,9 +521,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->free = local_free;
 
   local_data->production_types = units->production_type_names;
-
-  /* Initialize a list of detected units. */
-  local_data->detected_units = g_hash_table_new (g_direct_hash, g_direct_equal);
 
   /* Initialize a list of units for avoiding making two requests for the same
    * unit on the same day. */

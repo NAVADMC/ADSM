@@ -40,6 +40,9 @@ typedef struct
   UNT_unit_t *unit;
   gboolean is_awaiting_vaccination;
   GQueue *vaccination_requests; /**< New requests are added to the tail */
+
+  gboolean is_detected_as_diseased;
+  int day_detected_as_diseased;
 }
 USC_scorecard_t;
 
@@ -63,5 +66,7 @@ EVT_event_t *USC_scorecard_vaccination_request_peek_newest (USC_scorecard_t *);
 void USC_scorecard_clear_vaccination_requests (USC_scorecard_t *);
 
 void USC_scorecard_reset (USC_scorecard_t *);
+
+gboolean USC_record_detection_as_diseased (USC_scorecard_t *, int day);
 
 #endif /* !SCORECARD_H */
