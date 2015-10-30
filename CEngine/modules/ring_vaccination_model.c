@@ -486,7 +486,7 @@ set_params (void *data, GHashTable *dict)
 
   /* Fill in the production types that trigger this ring rule. */
   nprod_types = local_data->production_types->len;
-  local_data->trigger_production_type = g_new(gboolean, nprod_types);
+  local_data->trigger_production_type = g_new0(gboolean, nprod_types);
   ring_rule_id = strtol(g_hash_table_lookup (dict, "id"), NULL, /* base */ 10);
   sql = g_strdup_printf ("SELECT prodtype.name AS prodtype "
                          "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_vaccinationringrule_trigger_group grp "
@@ -504,7 +504,7 @@ set_params (void *data, GHashTable *dict)
   g_free (sql);
 
   /* Fill in the production types that get vaccinated by this ring rule. */
-  local_data->target_production_type = g_new(gboolean, nprod_types);
+  local_data->target_production_type = g_new0(gboolean, nprod_types);
   sql = g_strdup_printf ("SELECT prodtype.name AS prodtype "
                          "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_vaccinationringrule_target_group grp "
                          "WHERE grp.vaccinationringrule_id=%u "
