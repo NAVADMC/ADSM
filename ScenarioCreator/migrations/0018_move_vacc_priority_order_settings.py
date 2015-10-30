@@ -51,6 +51,7 @@ def move_to_new_vaccination_priority_order(apps, schema_editor):
             tmp['Size'] = ['Largest', 'Smallest']
             tmp['Direction'] = ['Outside-in', 'Inside-out']
             plan.vaccination_priority_order = json.dumps(tmp)
+            plan.save()
     except OperationalError:  #This data migration also gets run on settings.sqlite3 and it should just pass.
         pass
         
