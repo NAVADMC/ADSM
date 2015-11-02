@@ -1395,7 +1395,7 @@ select {
 .copy-icon,
 .open-button {
     margin-top: 5px;
-    width: 15px;
+    width: 15px !important; /*It isn't a valid animation without this width*/
     height: 18px;
     margin-right: 10px;
     display:block;

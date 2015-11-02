@@ -14,19 +14,28 @@ $(function(){
             json.forEach(function(entry, index){
                 index += 2; // leave a space at the beginning for parent submodel
                 var $header =
-                    $('<div class="model-banner">\
+                    $('<div class="model-banner defined_wrapper">\
                         <a class="accordion-toggle" role="button" data-toggle="collapse" data-parent="#accordion'+
                         '" href="#sub-model'+index+'">'+ entry.name +'</a>\
+                        <a href="#" class="delete-icon pull-right" title="delete" data-delete-link="/setup/ControlProtocol/2/delete/"></a>\
+                        <a href="/setup/ControlProtocol/' + entry.pk + '/copy/" load-target="#center-panel" class="copy-icon pull-right" title="duplicate"></a>\
                        </div>');
 
-                var $sub_headings = $('<div id="sub-model' + index + '" class="panel-collapse collapse" role="tabpanel">');
+                var $container = $('<div id="sub-model' + index + '" class="panel-collapse collapse" role="tabpanel">');
+                var $sub_headings = $('<ul id="file_list">');
                 entry['tabs'].forEach(function(tab, tab_index){
-                    $sub_headings.append($('<label class="checkbox"><input type="checkbox" name="use_detection" checked="" id="id_'+
-                        tab['field'] + '" class="checkboxinput">' +
-                        tab['name'] + '</label>'));
+                    $sub_headings.append(
+                        $('<li class="defined"> ' +
+                            '<div class="defined_wrapper">' +
+                                '<label class="defined_name checkbox"><input type="checkbox" name="use_detection" checked="" id="id_'+
+                                tab['field'] + '" class="checkboxinput">' +
+                                tab['name'] + '</label>' +
+                            '</div>' +
+                        '</li>'));
                 });
+                $container.append($sub_headings);
                 $accordion.append($header);
-                $accordion.append($sub_headings);//siblings
+                $accordion.append($container);//siblings
                 console.log("Adding one protocol: " + index);
             });
             console.log("Adding one panel group to the DOM ");
