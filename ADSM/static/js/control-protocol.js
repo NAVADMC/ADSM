@@ -2,17 +2,24 @@
 $(function(){
 
     var build_protocols_list = function(){
-        $.get('/setup/Protocols.json', function(json){
-            var $accordion = $('<div class="panel-group" id="accordion">');
+        $.ajax({
+        url: '/setup/Protocols.json',
+        data: {},
+        dataType: 'json',
+        success: function(json){
+            if($('#accordion').length){//only add it once (was happening twice because of the 301 response
+                return;
+            }
+            var $accordion = $('<div class="panel-group" id="accordion" role="tablist">');
             json.forEach(function(entry, index){
                 index += 2; // leave a space at the beginning for parent submodel
                 var $header =
                     $('<div class="model-banner">\
-                        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion'+
+                        <a class="accordion-toggle" role="button" data-toggle="collapse" data-parent="#accordion'+
                         '" href="#sub-model'+index+'">'+ entry.name +'</a>\
                        </div>');
 
-                var $sub_headings = $('<div id="sub-model' + index + '" class="panel-collapse collapse" style="height: auto;">');
+                var $sub_headings = $('<div id="sub-model' + index + '" class="panel-collapse collapse" role="tabpanel">');
                 entry['tabs'].forEach(function(tab, tab_index){
                     $sub_headings.append($('<label class="checkbox"><input type="checkbox" name="use_detection" checked="" id="id_'+
                         tab['field'] + '" class="checkboxinput">' +
@@ -20,10 +27,12 @@ $(function(){
                 });
                 $accordion.append($header);
                 $accordion.append($sub_headings);//siblings
+                console.log("Adding one protocol: " + index);
             });
-            console.log()
-            $('#left-panel').append($accordion);
-        });
+            console.log("Adding one panel group to the DOM ");
+                $('#left-panel').append($accordion);
+            //$('.collapse').collapse(); //enable bootstrap javascript
+        }});
     };
     build_protocols_list();
 

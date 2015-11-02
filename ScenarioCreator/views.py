@@ -163,6 +163,7 @@ def protocols_json(request):
     data = []
     for protocol in ControlProtocol.objects.all():
         entry = {'name': str(protocol.name),
+                 'pk': protocol.id,
                  'tabs': [
                      {'name':'Detection', 'enabled':str(protocol.use_detection), 'field':'use_detection', 'valid':True},
                      {'name':'Tracing', 'enabled':str(protocol.use_tracing), 'field':'use_tracing', 'valid':True},
