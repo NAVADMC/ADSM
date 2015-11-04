@@ -1,9 +1,18 @@
 switchTabs = function(element){
-    $('.tab-pane').removeClass('active');
-    var target = $('.tab-pane a').filter(function(){ return $(this).text().toLowerCase() === $(element).text().toLowerCase();});
-    var id = target.attr('href');
-    $(id).addClass('active');
-    console.log("Found", target);
+    //first, verify we're talking about the same protcol
+    var current = $('#center-panel form').attr('action');
+    var parent_title_link = $(element).parents('.model-banner').find('[load-target="#center-panel"]').first();
+    var should_be = parent_title_link.attr('href');
+    if(current != should_be){
+        parent_title_link.click();//activate the correct protocol rather than navigating
+        //timing reliability is tricky so I'm going to leave this for a second click from the user
+    }else{
+        //select the tab
+        $('.tab-pane').removeClass('active');
+        var target = $('.tab-pane a').filter(function(){ return $(this).text().toLowerCase() === $(element).text().toLowerCase();});
+        var id = target.attr('href');
+        $(id).addClass('active');
+    }
 };
 
 $(function(){
@@ -43,8 +52,8 @@ $(function(){
                         '</li>'));
                 });
                 $container.append($sub_headings);
+                $header.append($container);//children
                 $accordion.append($header);
-                $accordion.append($container);//siblings
                 console.log("Adding one protocol: " + index);
             });
             console.log("Adding one panel group to the DOM ");

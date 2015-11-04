@@ -100,8 +100,8 @@ $(function(){
     $(document).on('submit', '#pop-upload', function(e){
         e.preventDefault();
         var filename = $('#pop-upload').find('input').val().split('\\')[2]
-        var optionTexts = []
-        var form = this
+        var optionTexts = [];
+        var form = this;
         $('#load_population_widget').find('.file_list').find('li').each(function() { optionTexts.push( $.trim($(this).text())) })
         if($.inArray(filename, optionTexts) != -1) { //ask user if it's okay to overwrite
              prompt_for_overwrite(submit_population_upload, form);
