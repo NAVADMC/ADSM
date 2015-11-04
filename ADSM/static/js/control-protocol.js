@@ -30,7 +30,7 @@ $(function(){
                     ' </div>');
 
                 var $container = $('<div id="sub-model' + index + '" class="panel-collapse collapse" role="tabpanel">');
-                var $sub_headings = $('<ul id="file_list" class="compact">');
+                var $sub_headings = $('<ul class="file_list compact">');
                 entry['tabs'].forEach(function(tab, tab_index){
                     $sub_headings.append(
                         $('<li class="defined"> ' +
