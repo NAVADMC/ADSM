@@ -880,12 +880,15 @@ ul {
     transition: bottom .4s ease;
 }
 .edit-button-holder .overwrite-button.reveal {
+    /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 1);
 }
 .edit-button-holder .copy-button.reveal {
+    /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 2);
 }
 .edit-button-holder .btn-cancel.reveal {
+    /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 3);
 }
 
@@ -1369,6 +1372,10 @@ select {
     position: relative;
 }
 
+#file_list.compact li {
+    line-height: 18px;
+}
+
 #file_list {
     list-style: none;
     margin-bottom: 15px;
@@ -1412,8 +1419,8 @@ select {
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
 .copy-icon:hover,
 .copy-icon:focus {
-    background-position: 15px  0;
-    background-image: url('../icons/copy_sprite.png');
+    background-position: 15px  0 !important;
+    background-image: url('../icons/copy_sprite.png') !important; /*It's not an icon without this background*/
     outline: none;
     background-color: transparent;
 }
@@ -1432,8 +1439,8 @@ select {
 }
 .delete-icon:hover,
 .delete-icon:focus {
-    background-position: 15px 2px ;
-    background-image: url('../icons/delete_sprite.png');
+    background-position: 15px 2px !important;
+    background-image: url('../icons/delete_sprite.png') !important; /*It's not an icon without this background*/
     background-repeat-y: no-repeat;
     outline: none;
     background-color: transparent;
@@ -1493,7 +1500,7 @@ input[type=file], button {
     position:relative;
 }
 .defined_name {
-    display: block;
+    display: inline-block;
     padding-left: 5px;
     width: 100%;
     overflow: hidden;
@@ -1520,6 +1527,14 @@ input[type=file], button {
     margin-right: 5px;
     opacity: .3;
 }
+
+.fat_checkbox,
+.defined_wrapper input[type="checkbox"].fat_checkbox {/*A little ridiculous overriding bootstrap*/
+    display: inline-block;
+    margin-left: 1px;
+    margin-right: 9px;
+}
+
 /*-------------------------------------------------------------*/
 /*-----population.html-----*/
 /*-------------------------------------------------------------*/
@@ -2168,7 +2183,7 @@ select[multiple] {}
     padding: 5px 10px;
 }
 .productiontypelist:after {
-    content:"To add production types to the trigger click on a Type or Group f"
+    content:"To add production types to the trigger click on a Type in the Population Panel";
     white-space: pre-wrap;
     font-style: italic;
     color: #808080;

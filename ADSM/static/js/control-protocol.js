@@ -1,3 +1,10 @@
+switchTabs = function(element){
+    $('.tab-pane').removeClass('active');
+    var target = $('.tab-pane a').filter(function(){ return $(this).text().toLowerCase() === $(element).text().toLowerCase();});
+    var id = target.attr('href');
+    $(id).addClass('active');
+    console.log("Found", target);
+};
 
 $(function(){
 
@@ -14,22 +21,24 @@ $(function(){
             json.forEach(function(entry, index){
                 index += 2; // leave a space at the beginning for parent submodel
                 var $header =
-                    $('<div class="model-banner defined_wrapper">\
-                        <a class="accordion-toggle" role="button" data-toggle="collapse" data-parent="#accordion'+
-                        '" href="#sub-model'+index+'">'+ entry.name +'</a>\
-                        <a href="#" class="delete-icon pull-right" title="delete" data-delete-link="/setup/ControlProtocol/2/delete/"></a>\
-                        <a href="/setup/ControlProtocol/' + entry.pk + '/copy/" load-target="#center-panel" class="copy-icon pull-right" title="duplicate"></a>\
-                       </div>');
+                    $('<div class="model-banner defined_wrapper"> ' +
+                        '<a class="accordion-toggle" role="button" data-toggle="collapse" data-parent="#accordion" href="#sub-model'+index+'">' +
+                        '<a href="/setup/ControlProtocol/' + entry.pk + '/" load-target="#center-panel" >' + //nested for collapse/expand vs load panel functions
+                        entry.name +'</a></a>' +
+                        '<a href="#" class="delete-icon pull-right" title="delete" data-delete-link="/setup/ControlProtocol/2/delete/"></a> ' +
+                        '<a href="/setup/ControlProtocol/' + entry.pk + '/copy/" load-target="#center-panel" class="copy-icon pull-right" title="duplicate"></a>' +
+                    ' </div>');
 
                 var $container = $('<div id="sub-model' + index + '" class="panel-collapse collapse" role="tabpanel">');
-                var $sub_headings = $('<ul id="file_list">');
+                var $sub_headings = $('<ul id="file_list" class="compact">');
                 entry['tabs'].forEach(function(tab, tab_index){
                     $sub_headings.append(
                         $('<li class="defined"> ' +
                             '<div class="defined_wrapper">' +
-                                '<label class="defined_name checkbox"><input type="checkbox" name="use_detection" checked="" id="id_'+
-                                tab['field'] + '" class="checkboxinput">' +
-                                tab['name'] + '</label>' +
+                                '<input type="checkbox" name="use_detection" checked="" id="id_'+
+                                tab['field'] + '" class="checkboxinput fat_checkbox">' +
+                                '<div class="defined_name" onClick="switchTabs(this);">'+
+                                tab['name'] + '</div>' +
                             '</div>' +
                         '</li>'));
                 });
