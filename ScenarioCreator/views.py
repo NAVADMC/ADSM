@@ -485,7 +485,11 @@ def functions_panel(request, form=None):
     return render(request, 'functions_panel.html', context)  # no 3 panel layout
 
 
-def model_list(request):
+def control_protocol_list(request):
+    return model_list(request, 'ScenarioCreator/ControlProtocolList.html')
+
+
+def model_list(request, base_page='ScenarioCreator/ModelList.html'):
     model_name, model = get_model_name_and_model(request)
     model_name = promote_to_abstract_parent(model_name)
     if model_name in 'Function RelationalFunction ProbabilityFunction'.split():
@@ -494,7 +498,7 @@ def model_list(request):
         context = trigger_list(request)
     else:
         context = {'title': "Create " + spaces_for_camel_case(model_name) + "s",
-                   'base_page': 'ScenarioCreator/ModelList.html',
+                   'base_page': base_page,
                    'models': []}
         if model_name in abstract_models.keys():
             for local_name, local_model in abstract_models[model_name]:

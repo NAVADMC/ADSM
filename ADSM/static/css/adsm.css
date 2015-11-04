@@ -1535,6 +1535,9 @@ input[type=file], button {
     margin-right: 9px;
 }
 
+.nav-tabs { /*Hides the crispy forms tabs from the TabHolder*/
+    display: none;
+}
 /*-------------------------------------------------------------*/
 /*-----population.html-----*/
 /*-------------------------------------------------------------*/

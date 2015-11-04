@@ -1,0 +1,11 @@
+
+{% block content %}
+    <h1>{{ title }}</h1>
+
+    <div id="protocol_list">
+        <div class="addNew"><a href="/setup/ControlProtocol/new/" load-target="#center-panel"><i> + New Control Protocol</i></a></div>
+
+    </div>
+
+    <script src="{{ STATIC_URL }}js/control-protocol.js"></script>
+{% endblock %}

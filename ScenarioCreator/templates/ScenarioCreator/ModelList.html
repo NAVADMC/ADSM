@@ -12,7 +12,7 @@
                 </a>
             </div>
             <div id="sub-model{{forloop.counter}}" class="panel-collapse collapse in" style="height: auto;">
-                <ul class="file_list">
+                <ul class="file_list compact">
                     
                     {% for entry in model.entries %}
                         <li class="defined">
@@ -35,5 +35,4 @@
 
     <p class="help-text">{{ help_text }}</p>
 
-    <script src="{{ STATIC_URL }}js/control-protocol.js"></script>
 {% endblock %}

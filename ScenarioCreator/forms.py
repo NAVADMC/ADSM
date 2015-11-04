@@ -253,7 +253,7 @@ class ControlProtocolForm(BaseForm):
                     'cost_of_vaccination_baseline_per_animal',
                     'vaccination_demand_threshold',
                     'cost_of_vaccination_additional_per_animal',
-                    )
+                    ),
             )
         )
         super(ControlProtocolForm, self).__init__(*args, **kwargs)
@@ -346,6 +346,13 @@ class ControlProtocolForm(BaseForm):
                    'examine_indirect_back_success_multiplier': FloatInput(),
                    'test_specificity': FloatInput(),
                    'test_sensitivity': FloatInput(),
+                   'use_detection': HiddenInput(),
+                   'use_tracing': HiddenInput(),
+                   'use_testing': HiddenInput(),
+                   'use_exams': HiddenInput(),
+                   'use_destruction': HiddenInput(),
+                   'use_vaccination': HiddenInput(),
+                   'use_cost_accounting': HiddenInput(),
                    }
 
 

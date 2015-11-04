@@ -7,6 +7,7 @@ urlpatterns = patterns('', url('^AssignSpreads/$', 'ScenarioCreator.views.assign
          url('^AssignProgressions/$', 'ScenarioCreator.views.assign_progressions'),
          url('^AssignZoneEffects/$', 'ScenarioCreator.views.zone_effects'),
          url('^Protocols.json/$', 'ScenarioCreator.views.protocols_json'),
+         url('^ControlProtocol/$', 'ScenarioCreator.views.control_protocol_list'),
          url('^Populations/$', 'ScenarioCreator.views.population'),
          url('^Population/new/$', 'ScenarioCreator.views.population'),
          url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population'),

@@ -54,10 +54,9 @@ $(function(){
                 $container.append($sub_headings);
                 $header.append($container);//children
                 $accordion.append($header);
-                console.log("Adding one protocol: " + index);
             });
             console.log("Adding one panel group to the DOM ");
-                $('#left-panel').append($accordion);
+                $('#protocol_list').append($accordion);
             //$('.collapse').collapse(); //enable bootstrap javascript
         }});
     };
