@@ -1,10 +1,18 @@
-switchTabs = function(element){
-    //first, verify we're talking about the same protcol
+function get_parent_title(element) {
+    return $(element).parents('.model-banner').find('[load-target="#center-panel"]').first();
+}
+current_is_active = function (element) {
     var current = $('#center-panel form').attr('action');
-    var parent_title_link = $(element).parents('.model-banner').find('[load-target="#center-panel"]').first();
+    var parent_title_link = get_parent_title(element);
     var should_be = parent_title_link.attr('href');
-    if(current != should_be){
-        parent_title_link.click();//activate the correct protocol rather than navigating
+    return current == should_be;
+};
+
+switch_tabs = function(element){
+    //first, verify we're talking about the same protcol
+
+    if(!current_is_active(element)){
+        get_parent_title(element).click();//activate the correct protocol rather than navigating
         //timing reliability is tricky so I'm going to leave this for a second click from the user
     }else{
         //select the tab
@@ -44,9 +52,11 @@ switchTabs = function(element){
                     $sub_headings.append(
                         $('<li class="defined"> ' +
                             '<div class="defined_wrapper">' +
-                                '<input type="checkbox" name="use_detection" '+ (tab['enabled'] ? "checked" : "") +' data-proxy="#id_'+
-                                tab['field'] + '" class="checkboxinput fat_checkbox">' +
-                                '<div class="defined_name" onClick="switchTabs(this);">'+
+                                '<input type="checkbox" name="'+ tab['field'] + '" ' + //used in endpoint url
+                                (tab['enabled'] ? "checked" : "") +  //initial checked state
+                                ' data-proxy="#id_'+ tab['field'] +
+                                '" class="checkboxinput fat_checkbox">' +
+                                '<div class="defined_name" onClick="switch_tabs(this);">'+
                                 tab['name'] + '</div>' +
                             '</div>' +
                         '</li>'));
@@ -73,10 +83,18 @@ switchTabs = function(element){
 
     var check_enabled_tabs = function(use_check){
         //handle proxy before computing
-        if(typeof use_check !== 'undefined' && $(use_check).attr('data-proxy')){
-            $($(use_check).attr('data-proxy')).prop('checked', $(use_check).prop('checked'));
-            use_check = $($(use_check).attr('data-proxy'));
-        }else{
+        if(typeof use_check !== 'undefined' &&
+                $(use_check).attr('data-proxy')){ // this check box is in the model list, not in a form
+            var value = $(use_check).prop('checked');
+            var url = get_parent_title(use_check).attr('href') + $(use_check).attr('name') + '/'; // use_detection
+            $.post(url, {'value': value});
+
+            if(current_is_active(use_check)) { // this is relevant to the currently active form and not some other one
+                $($(use_check).attr('data-proxy')).prop('checked', $(use_check).prop('checked'));
+                use_check = $($(use_check).attr('data-proxy'));
+            }
+        }
+        if(typeof use_check === 'undefined'){
             use_check = $('.tab-pane.active').find(':checkbox').first();
         }
 

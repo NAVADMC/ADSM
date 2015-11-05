@@ -41,6 +41,7 @@ class Command(BaseCommand):
              "url('^AssignZoneEffects/$', 'ScenarioCreator.views.zone_effects')",
              "url('^Protocols.json/$', 'ScenarioCreator.views.protocols_json')",
              "url('^ControlProtocol/$', 'ScenarioCreator.views.control_protocol_list')",
+             "url('^ControlProtocol/(?P<primary_key>\d+)/(?P<field>use_\w+)/', 'ScenarioCreator.views.update_protocol_enabled')",
 
              "url('^Populations/$', 'ScenarioCreator.views.population')",
              "url('^Population/new/$', 'ScenarioCreator.views.population')",  # force redirect for special singleton

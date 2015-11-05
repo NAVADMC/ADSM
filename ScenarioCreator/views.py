@@ -177,6 +177,12 @@ def protocols_json(request):
     return JsonResponse(data, safe=False)
 
 
+def update_protocol_enabled(request, primary_key, field):
+    #data = json.loads(request.POST.content.decode())
+    value = request.POST.get('value') == 'true'  #False otherwise
+    ControlProtocol.objects.filter(id=int(primary_key)).update(**{field: value})  # specifically the value of field, not the word 'field'
+    return JsonResponse({})
+
 def collect_backlinks(model_instance):
     from django.contrib.admin.utils import NestedObjects
     collector = NestedObjects(using='scenario_db')  # or specific database
