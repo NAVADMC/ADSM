@@ -7962,3 +7962,155 @@
     <tr><td>N VVVV VVVV VVVV VVVV VVVV VVVV N</td></tr>
   </output>
 </deterministic-test>
+
+<deterministic-test>
+  <category>control_measures</category>
+  <short-name>vaccination priority time old-new &gt; production type A-F</short-name>
+
+  <description>
+    This is one of a set of tests to exercise the vaccination priority system
+    after the changes in version 3.3. Units are arranged as shown in the
+    diagram below. In this test, the “G” and “H” units both trigger vaccination
+    rings.  Vaccination is prioritized by time waiting, oldest to newest, then
+    by production type, in alphabetical order.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>30 April 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>24units_ring_plus2infected</population-file>
+
+  <parameter-file>vacc_priority_1ring_oldnew_prodtypeA-F</parameter-file>
+
+  <parameter-description>
+    Units of type “G” are latent for 2 days, clinical for 1 day, then immune.
+    Units of type “H” are latent for 1 day, clinical for 1 day, then immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  The
+    vaccination ring created around a detected “H” unit is larger than the ring
+    created around a detected “G” units, as shown in the diagram.  There is
+    capacity to vaccinate 4 units per day starting on day 4 of the simulation,
+    then it rises to 6 units per day starting on day 7 of the simulation.
+
+    What should happen:
+     - On day 1 units G and H will be Latent.
+     - On day 2 unit H will be Infectious Clinical. It will be detected and a
+       vaccination program will be initiated. The north half of the population
+       will be queued for vaccination, as shown in the diagram.
+     - On day 3, there is no capacity to vaccinate yet. Unit G will be
+       Infectious Clinical. It will be detected. The rest of the population
+       will be queued for vaccination.
+     - On day 4, vaccination capacity comes on-line with capacity to vaccinate
+       4 units.  The northern half of the population has been waiting the
+       longest.  Within that half, we prioritize by production type in
+       alphabetical order, so the “A” units will be vaccinated. (Their state
+       will show as Vaccine Immune on day 5.)
+     - On day 5, the northern 2 “B” units and the northern 2 “E” units will be
+       vaccinated.
+     - On day 6, the “F” units will be vaccinated.
+     - On day 7, the northern half of the population, which had the oldest
+       vaccination requests, has all been vaccinated, so we move on to the
+       southern half of the population. There is capacity to vaccinate 6 units,
+       so going by production type, the remaining “B” units and all of the “C”
+       units will be vaccinated.
+     - On day 8, the “D” units and the remaining “E” units will be vaccinated.
+     - On day 9, nothing new happens: all of the units that need to be
+       vaccinated have been vaccinated.  This will be the last simulation day.
+  </parameter-description>
+
+  <diagram>vaccpriority_2rings</diagram>
+
+  <output>
+    <!--    G  A    B    C    D    E    F   H       -->
+    <tr><td>L SSSS SSSS SSSS SSSS SSSS SSSS L</td></tr>
+    <tr><td>L SSSS SSSS SSSS SSSS SSSS SSSS C</td></tr>
+    <tr><td>C SSSS SSSS SSSS SSSS SSSS SSSS N</td></tr>
+    <tr><td>N SSSS SSSS SSSS SSSS SSSS SSSS N</td></tr>
+    <tr><td>N VVVV SSSS SSSS SSSS SSSS SSSS N</td></tr>
+    <tr><td>N VVVV VVSS SSSS SSSS SSVV SSSS N</td></tr>
+    <tr><td>N VVVV VVSS SSSS SSSS SSVV VVVV N</td></tr>
+    <tr><td>N VVVV VVVV VVVV SSSS SSVV VVVV N</td></tr>
+    <tr><td>N VVVV VVVV VVVV VVVV VVVV VVVV N</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>control_measures</category>
+  <short-name>vaccination priority time new-old &gt; production type A-F</short-name>
+
+  <description>
+    This is one of a set of tests to exercise the vaccination priority system
+    after the changes in version 3.3. Units are arranged as shown in the
+    diagram below. In this test, the “G” and “H” units both trigger vaccination
+    rings.  Vaccination is prioritized by time waiting, newest to oldest, then
+    by production type, in alphabetical order.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>2 May 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>24units_ring_plus2infected</population-file>
+
+  <parameter-file>vacc_priority_1ring_newold_prodtypeA-F</parameter-file>
+
+  <parameter-description>
+    Units of type “G” are latent for 1 day, clinical for 1 day, then immune.
+    Units of type “H” are latent for 2 days, clinical for 1 day, then immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  The
+    vaccination ring created around a detected “H” unit is larger than the ring
+    created around a detected “G” units, as shown in the diagram.  There is
+    capacity to vaccinate 4 units per day starting on day 4 of the simulation,
+    then it rises to 6 units per day starting on day 7 of the simulation.
+
+    What should happen:
+     - On day 1 units G and H will be Latent.
+     - On day 2 unit G will be Infectious Clinical. It will be detected and a
+       vaccination program will be initiated. The whole population will be
+       queued for vaccination, as shown in the diagram.
+     - On day 3, there is no capacity to vaccinate yet. Unit H will be
+       Infectious Clinical. It will be detected. The north half of the
+       population will get new requests for vaccination.
+     - On day 4, vaccination capacity comes on-line with capacity to vaccinate
+       4 units.  The northern half of the population has the newest requests.
+       Within that half, we prioritize by production type in alphabetical
+       order, so the “A” units will be vaccinated. (Their state will show as
+       Vaccine Immune on day 5.)
+     - On day 5, the northern 2 “B” units and the northern 2 “E” units will be
+       vaccinated.
+     - On day 6, the “F” units will be vaccinated.
+     - On day 7, the northern half of the population, which had the newest
+       vaccination requests, has all been vaccinated, so we move on to the
+       southern half of the population. There is capacity to vaccinate 6 units,
+       so going by production type, the remaining “B” units and all of the “C”
+       units will be vaccinated.
+     - On day 8, the “D” units and the remaining “E” units will be vaccinated.
+     - On day 9, nothing new happens: all of the units that need to be
+       vaccinated have been vaccinated.  This will be the last simulation day.
+  </parameter-description>
+
+  <diagram>vaccpriority_2rings</diagram>
+
+  <output>
+    <!--    G  A    B    C    D    E    F   H       -->
+    <tr><td>L SSSS SSSS SSSS SSSS SSSS SSSS L</td></tr>
+    <tr><td>C SSSS SSSS SSSS SSSS SSSS SSSS L</td></tr>
+    <tr><td>N SSSS SSSS SSSS SSSS SSSS SSSS C</td></tr>
+    <tr><td>N SSSS SSSS SSSS SSSS SSSS SSSS N</td></tr>
+    <tr><td>N VVVV SSSS SSSS SSSS SSSS SSSS N</td></tr>
+    <tr><td>N VVVV VVSS SSSS SSSS SSVV SSSS N</td></tr>
+    <tr><td>N VVVV VVSS SSSS SSSS SSVV VVVV N</td></tr>
+    <tr><td>N VVVV VVVV VVVV SSSS SSVV VVVV N</td></tr>
+    <tr><td>N VVVV VVVV VVVV VVVV VVVV VVVV N</td></tr>
+  </output>
+</deterministic-test>
