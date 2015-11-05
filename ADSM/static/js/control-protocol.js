@@ -44,7 +44,7 @@ $(function(){
                     $sub_headings.append(
                         $('<li class="defined"> ' +
                             '<div class="defined_wrapper">' +
-                                '<input type="checkbox" name="use_detection" checked="" id="id_'+
+                                '<input type="checkbox" name="use_detection" '+ (tab['enabled'] ? "checked" : "") +' id="id_'+
                                 tab['field'] + '" class="checkboxinput fat_checkbox">' +
                                 '<div class="defined_name" onClick="switchTabs(this);">'+
                                 tab['name'] + '</div>' +
@@ -80,8 +80,10 @@ $(function(){
                });
             }
         })
-    }
-    
-    $(':checkbox').change(check_enabled_tabs);
+    };
+
+    $(':checkbox').livequery(function(){ //when new checkboxes crop up they will have an event handler assigned to them
+        $(this).change(check_enabled_tabs)
+    });
     check_enabled_tabs(); //run once at the beginning
-})
+});

@@ -181,8 +181,9 @@ $(function(){
     
     
     $('[data-visibility-controller]').livequery(function(){
-        attach_visibility_controller(this)})
-    
+        attach_visibility_controller(this)
+    })
+
     
     $('[data-visibility-context]').livequery(function(){
         var context_var = window[$(this).attr('data-visibility-context')]
