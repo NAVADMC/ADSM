@@ -74,4 +74,9 @@ EXTRA_DIST = delay_0.xml delay_1.xml delay_3.xml \
  priority_prodtype_reason_time_firstdestr.xml \
  vacc_priority_time_prodtype_firstvacc.xml \
  trace_enable_only_direct_in.xml trace_enable_only_indirect_in.xml \
- trace_in_out_which_first.xml
+ trace_in_out_which_first.xml \
+ vacc_priority_1ring_prodtypeA-F_24units_ring_plus2infected.sqlite3 \
+ vacc_priority_1ring_prodtypeA-F_largest_24units_ring_plus2infected.sqlite3 \
+ vacc_priority_1ring_prodtypeF-A_smallest_24units_ring_plus2infected.sqlite3 \
+ vacc_priority_1ring_newold_prodtypeA-F_24units_ring_plus2infected.sqlite3 \
+ vacc_priority_1ring_oldnew_prodtypeA-F_24units_ring_plus2infected.sqlite3
