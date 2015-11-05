@@ -62,9 +62,10 @@ switchTabs = function(element){
     };
 
     var hide_hidden_labels = function(){
-        $(':checkbox').each(function(use_check){
+        $(':checkbox').each(function(index, use_check){
             if($(use_check).attr('hidden')){
-                $(use_check).closest('.controls').hide();
+                var container = $(use_check).closest('.control-group');
+                container.hide();
             }
         });
     };
