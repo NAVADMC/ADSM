@@ -13,9 +13,9 @@ switchTabs = function(element){
         var id = target.attr('href');
         $(id).addClass('active');
     }
+    check_enabled_tabs();
 };
 
-$(function(){
 
     var build_protocols_list = function(){
         $.ajax({
@@ -44,7 +44,7 @@ $(function(){
                     $sub_headings.append(
                         $('<li class="defined"> ' +
                             '<div class="defined_wrapper">' +
-                                '<input type="checkbox" name="use_detection" '+ (tab['enabled'] ? "checked" : "") +' id="id_'+
+                                '<input type="checkbox" name="use_detection" '+ (tab['enabled'] ? "checked" : "") +' data-proxy="#id_'+
                                 tab['field'] + '" class="checkboxinput fat_checkbox">' +
                                 '<div class="defined_name" onClick="switchTabs(this);">'+
                                 tab['name'] + '</div>' +
@@ -60,30 +60,50 @@ $(function(){
             //$('.collapse').collapse(); //enable bootstrap javascript
         }});
     };
-    build_protocols_list();
 
-    var check_enabled_tabs = function(){
-        $('.tab-pane').each(function(){
-            var use_check = $(this).find(':checkbox').first();
-            if(use_check.length > 0 && use_check[0].id.indexOf('use_') != -1) { // one of the use_detection, use_tracing, etc check boxes
-                $(this).children('div').each(function (index, value) {
-                    if( $(this).find('#' + use_check[0].id).length == 0) {//not my direct parent
-                        if ( !use_check.is(':checked')) {
-                            $(value).attr('disabled', 'disabled');
-//                            $(value).find(':input').attr('disabled', true); 
-                             // important not to disable inputs so that default, required values are still sent
-                        } else {
-                            $(value).removeAttr('disabled');
-                            $(value).find(':input').removeAttr('disabled');
-                        }
-                    }
-               });
+    var hide_hidden_labels = function(){
+        $(':checkbox').each(function(use_check){
+            if($(use_check).attr('hidden')){
+                $(use_check).closest('.controls').hide();
             }
-        })
+        });
     };
 
+
+    var check_enabled_tabs = function(use_check){
+        //handle proxy before computing
+        if(typeof use_check !== 'undefined' && $(use_check).attr('data-proxy')){
+            $($(use_check).attr('data-proxy')).prop('checked', $(use_check).prop('checked'));
+            use_check = $($(use_check).attr('data-proxy'));
+        }else{
+            use_check = $('.tab-pane.active').find(':checkbox').first();
+        }
+
+        //do visibility
+        if(use_check.length > 0 && use_check[0].id.indexOf('use_') != -1) { // one of the use_detection, use_tracing, etc check boxes
+            use_check.closest('.tab-pane').children('div').each(function (index, element) {
+                if( $(element).find('#' + use_check[0].id).length == 0) {//not my direct parent
+                    if ( !use_check.is(':checked')) {
+                        $(element).attr('disabled', 'disabled');
+//                            $(element).find(':input').attr('disabled', true);
+                         // important not to disable inputs so that default, required values are still sent
+                    } else {
+                        $(element).removeAttr('disabled');
+                        $(element).find(':input').removeAttr('disabled');
+                    }
+                }
+           });
+        }
+    };
+
+$(function(){
+    build_protocols_list();
+
     $(':checkbox').livequery(function(){ //when new checkboxes crop up they will have an event handler assigned to them
-        $(this).change(check_enabled_tabs)
+        $(this).change(function(){
+            check_enabled_tabs(this)
+        });
     });
+    $('form').livequery(hide_hidden_labels);
     check_enabled_tabs(); //run once at the beginning
 });

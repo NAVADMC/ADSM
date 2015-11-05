@@ -17,6 +17,9 @@ import os
 class FloatInput(NumberInput):
     template_name = 'floppyforms/number.html'
 
+class HiddenCheckbox(CheckboxInput):
+    template_name = 'floppyforms/HiddenCheckbox.html'
+
 
 class AddOrSelect(Select):
     template_name = 'floppyforms/model_select.html'
@@ -346,13 +349,13 @@ class ControlProtocolForm(BaseForm):
                    'examine_indirect_back_success_multiplier': FloatInput(),
                    'test_specificity': FloatInput(),
                    'test_sensitivity': FloatInput(),
-                   'use_detection': HiddenInput(),
-                   'use_tracing': HiddenInput(),
-                   'use_testing': HiddenInput(),
-                   'use_exams': HiddenInput(),
-                   'use_destruction': HiddenInput(),
-                   'use_vaccination': HiddenInput(),
-                   'use_cost_accounting': HiddenInput(),
+                   'use_detection': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_tracing': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_testing': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_exams': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_destruction': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_vaccination': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_cost_accounting': HiddenCheckbox(attrs={'hidden':'hidden'}),
                    }
 
 
