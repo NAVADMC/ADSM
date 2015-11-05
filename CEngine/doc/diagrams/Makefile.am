@@ -189,6 +189,7 @@ dist_noinst_DATA = state-transition.png \
   4units_line_5_zones_not_merged_2.png \
   4units_line_5_zones_merged_2.png \
   4units_line_5_zones_merged_3.png \
+  vaccpriority_1ring.png \
   clock_24_hour.png
 
 state_transition_png_SOURCES = state-transition.dia
@@ -461,5 +462,7 @@ prevalence_day4_png_SOURCES = prevalence_day4.gnuplot
 3units_cycle_png_SOURCES = 3units_cycle.gnuplot
 
 direct_indirect_in_out_png_SOURCES = direct_indirect_in_out.gnuplot
+
+vaccpriority_1ring_png_SOURCES = vaccpriority_1ring.gnuplot
 
 clock_24_hour_png_SOURCES = clock_24_hour.dia

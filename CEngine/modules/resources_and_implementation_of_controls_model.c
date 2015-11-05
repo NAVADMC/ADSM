@@ -308,6 +308,7 @@ adsm_prioritizer_t;
 /* Prototypes for functions that create different types of prioritizer objects. */
 static adsm_prioritizer_t *new_production_type_prioritizer (GPtrArray *, gchar **);
 static adsm_prioritizer_t *new_time_waiting_prioritizer (gboolean oldest_first);
+static adsm_prioritizer_t *new_size_prioritizer (gboolean largest_first);
 
 
 
@@ -485,6 +486,63 @@ new_time_waiting_prioritizer (gboolean oldest_first_flag)
   self->private = (gpointer) oldest_first;
   #if DEBUG
     g_debug ("----- EXIT new_time_waiting_prioritizer");
+  #endif
+  return self;
+}
+
+/** Implementation for by-size prioritizer. *****************************/
+
+/**
+ * Compares two scorecards by unit size and returns their priority order.
+ */
+static int
+adsm_size_prioritizer_compare (adsm_prioritizer_t *self,
+                               USC_scorecard_t *scorecard1,
+                               USC_scorecard_t *scorecard2)
+{
+  gboolean largest_first;
+  unsigned int size1, size2;
+  
+  largest_first = *((gboolean *) (self->private));
+  size1 = scorecard1->unit->size;
+  size2 = scorecard2->unit->size;
+  #if DEBUG
+    g_debug ("comparing size (%s first) for unit \"%s\" (%u) and \"%s\" (%u)",
+             largest_first ? "largest" : "smallest",
+             scorecard1->unit->official_id, size1,
+             scorecard2->unit->official_id, size2);
+  #endif
+  return (size1 - size2) * (largest_first ? 1 : -1);
+}
+
+/**
+ * Creates a new by-size prioritizer.
+ *
+ * @param largest_first TRUE if larger units have higher priority, FALSE if
+ *   smaller units have higher priority.
+ * @return a prioritizer object.
+ */
+static adsm_prioritizer_t *
+new_size_prioritizer (gboolean largest_first_flag)
+{
+  adsm_prioritizer_t *self;
+  gboolean *largest_first;
+
+  #if DEBUG
+    g_debug ("----- ENTER new_size_prioritizer");
+  #endif
+
+  self = g_new (adsm_prioritizer_t, 1);
+  self->compare = adsm_size_prioritizer_compare;
+  self->to_string = NULL;
+  self->free = adsm_free_prioritizer;
+  /* The private data in this type of prioritizer object is a gboolean, saying
+   * whether larger units have higher priority. */
+  largest_first = g_new (gboolean, 1);
+  *largest_first = largest_first_flag;
+  self->private = (gpointer) largest_first;
+  #if DEBUG
+    g_debug ("----- EXIT new_size_prioritizer");
   #endif
   return self;
 }
@@ -2215,6 +2273,13 @@ set_global_params (void *data, GHashTable *dict)
                     const gchar *first_item = json_array_get_string_element(json_array, 0);
                     gboolean oldest_first = (g_ascii_strcasecmp (first_item, "oldest") == 0);
                     prioritizer = new_time_waiting_prioritizer (oldest_first);
+                  }
+                else if (g_ascii_strcasecmp (member, "size") == 0)
+                  {
+                    JsonArray *json_array = json_object_get_array_member(json_object, member);
+                    const gchar *first_item = json_array_get_string_element(json_array, 0);
+                    gboolean largest_first = (g_ascii_strcasecmp (first_item, "largest") == 0);
+                    prioritizer = new_size_prioritizer (largest_first);
                   }
                 if (prioritizer != NULL)
                   {

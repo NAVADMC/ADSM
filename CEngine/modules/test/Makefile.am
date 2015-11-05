@@ -182,4 +182,5 @@ EXTRA_DIST = config/unix.exp 1unit.xml 2units.xml \
   2units_xy.xml 4units_line_xy.xml no_rtree_lat45_xy.xml rtree_lat45_xy.xml \
   3units_1_start_vimmune.xml \
   3units_1_start_destroyed.xml \
+  24units_ring_plus2infected.xml \
   $(testsuite_c_SOURCES)
