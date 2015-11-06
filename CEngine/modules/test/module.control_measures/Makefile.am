@@ -81,4 +81,8 @@ EXTRA_DIST = delay_0.xml delay_1.xml delay_3.xml \
  vacc_priority_1ring_outin_24units_ring_plus2infected.sqlite3 \
  vacc_priority_1ring_inout_24units_ring_plus2infected.sqlite3 \
  vacc_priority_1ring_newold_prodtypeA-F_24units_ring_plus2infected.sqlite3 \
- vacc_priority_1ring_oldnew_prodtypeA-F_24units_ring_plus2infected.sqlite3
+ vacc_priority_1ring_oldnew_prodtypeA-F_24units_ring_plus2infected.sqlite3 \
+ vacc_priority_2rings_same_size_outin_10units_2cols.sqlite3 \
+ vacc_priority_2rings_same_size_inout_10units_2cols.sqlite3 \
+ vacc_priority_2rings_size_5_3_outin_10units_2cols.sqlite3 \
+ vacc_priority_2rings_size_5_3_inout_10units_2cols.sqlite3

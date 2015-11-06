@@ -191,6 +191,8 @@ dist_noinst_DATA = state-transition.png \
   4units_line_5_zones_merged_3.png \
   vaccpriority_1ring.png \
   vaccpriority_2rings.png \
+  vaccpriority_2cols_rings_same_size.png \
+  vaccpriority_2cols_rings_size_5_3.png \
   clock_24_hour.png
 
 state_transition_png_SOURCES = state-transition.dia
@@ -467,5 +469,9 @@ direct_indirect_in_out_png_SOURCES = direct_indirect_in_out.gnuplot
 vaccpriority_1ring_png_SOURCES = vaccpriority_1ring.gnuplot
 
 vaccpriority_2rings_png_SOURCES = vaccpriority_2rings.gnuplot
+
+vaccpriority_2cols_rings_same_size_png_SOURCES = vaccpriority_2cols_rings_same_size.gnuplot
+
+vaccpriority_2cols_rings_size_5_3_png_SOURCES = vaccpriority_2cols_rings_size_5_3.gnuplot
 
 clock_24_hour_png_SOURCES = clock_24_hour.dia
