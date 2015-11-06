@@ -336,10 +336,14 @@ EVT_vaccination_initiated_event_t;
 typedef struct
 {
   UNT_unit_t *unit;
+  UNT_unit_t *focus_unit; /**< The unit at the center of the ring */
   int day;
   ADSM_control_reason reason; /**< why vaccination was requested */
   int day_commitment_made; /**< the day on which a commitment to fulfil this
     request was made. */
+  double supp_radius; /**< the radius of the suppressive circle around the
+    focus unit, or -1 if no suppressive vaccination is done around the focus
+    unit **/
 }
 EVT_request_for_vaccination_event_t;
 
@@ -651,8 +655,10 @@ EVT_event_t *EVT_new_request_to_initiate_vaccination_event (int day,
 EVT_event_t *EVT_new_vaccination_initiated_event (int day,
                                                   guint trigger_id);
 EVT_event_t *EVT_new_request_for_vaccination_event (UNT_unit_t *,
+                                                    UNT_unit_t *focus_unit,
                                                     int day,
-                                                    ADSM_control_reason);
+                                                    ADSM_control_reason,
+                                                    double supp_radius);
 EVT_event_t *EVT_new_commitment_to_vaccinate_event (UNT_unit_t *, int day);
 EVT_event_t *EVT_new_vaccination_canceled_event (UNT_unit_t *, int day,
                                                  int day_commitment_made);

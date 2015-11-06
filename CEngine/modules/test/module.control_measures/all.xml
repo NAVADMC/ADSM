@@ -7965,6 +7965,122 @@
 
 <deterministic-test>
   <category>control_measures</category>
+  <short-name>vaccination priority outside-in</short-name>
+
+  <description>
+    This is one of a set of tests to exercise the vaccination priority system
+    after the changes in version 3.3. Units are arranged as shown in the
+    diagram below. In this test, the “G” unit triggers vaccination.
+    Vaccination is prioritized by outside-in order, and there is sufficient
+    capacity to vaccinate 12 units per day. Vaccination of the 12 outside units
+    should happen first, followed by vaccination of the 12 inside units the
+    next day.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>30 April 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>24units_ring_plus2infected</population-file>
+
+  <parameter-file>vacc_priority_1ring_outin</parameter-file>
+
+  <parameter-description>
+    Units of type “G” are latent for 1 day, clinical for 1 day, then immune.
+    Units of type “H” are latent for 1 day, then go straight to immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  There is
+    capacity to vaccinate 12 units per day.
+
+    What should happen:
+     - On day 1 units G and H will be Latent.
+     - On day 2 unit G will be Infectious Clinical. It will be detected and a
+       vaccination program will be initiated. Unit H goes directly to immune so
+       that it will not be involved in this simulation.
+     - On day 3, the outside units will be vaccinated. They are the odd-numbered
+       ones (A1, A3, B1, B3, etc.) Their state will show as Vaccine Immune on
+       day 4.
+     - On day 4, the inside, even-numbered, units will be vaccinated.
+     - On day 5, nothing new happens: all of the units that need to be
+       vaccinated have been vaccinated.  This will be the last simulation day.
+  </parameter-description>
+
+  <diagram>vaccpriority_1ring</diagram>
+
+  <output>
+    <!--    G  A    B    C    D    E    F   H       -->
+    <tr><td>L SSSS SSSS SSSS SSSS SSSS SSSS L</td></tr>
+    <tr><td>C SSSS SSSS SSSS SSSS SSSS SSSS N</td></tr>
+    <tr><td>N SSSS SSSS SSSS SSSS SSSS SSSS N</td></tr>
+    <tr><td>N VSVS VSVS VSVS VSVS VSVS VSVS N</td></tr>
+    <tr><td>N VVVV VVVV VVVV VVVV VVVV VVVV N</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>control_measures</category>
+  <short-name>vaccination priority inside-out</short-name>
+
+  <description>
+    This is one of a set of tests to exercise the vaccination priority system
+    after the changes in version 3.3. Units are arranged as shown in the
+    diagram below. In this test, the “G” unit triggers vaccination.
+    Vaccination is prioritized by inside-out order, and there is sufficient
+    capacity to vaccinate 12 units per day. Vaccination of the 12 inside units
+    should happen first, followed by vaccination of the 12 outside units the
+    next day.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>30 April 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>24units_ring_plus2infected</population-file>
+
+  <parameter-file>vacc_priority_1ring_inout</parameter-file>
+
+  <parameter-description>
+    Units of type “G” are latent for 1 day, clinical for 1 day, then immune.
+    Units of type “H” are latent for 1 day, then go straight to immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  There is
+    capacity to vaccinate 12 units per day.
+
+    What should happen:
+     - On day 1 units G and H will be Latent.
+     - On day 2 unit G will be Infectious Clinical. It will be detected and a
+       vaccination program will be initiated. Unit H goes directly to immune so
+       that it will not be involved in this simulation.
+     - On day 3, the inside units will be vaccinated. They are the even-numbered
+       ones (A2, A4, B2, B4, etc.) Their state will show as Vaccine Immune on
+       day 4.
+     - On day 4, the outside, odd-numbered, units will be vaccinated.
+     - On day 5, nothing new happens: all of the units that need to be
+       vaccinated have been vaccinated.  This will be the last simulation day.
+  </parameter-description>
+
+  <diagram>vaccpriority_1ring</diagram>
+
+  <output>
+    <!--    G  A    B    C    D    E    F   H       -->
+    <tr><td>L SSSS SSSS SSSS SSSS SSSS SSSS L</td></tr>
+    <tr><td>C SSSS SSSS SSSS SSSS SSSS SSSS N</td></tr>
+    <tr><td>N SSSS SSSS SSSS SSSS SSSS SSSS N</td></tr>
+    <tr><td>N SVSV SVSV SVSV SVSV SVSV SVSV N</td></tr>
+    <tr><td>N VVVV VVVV VVVV VVVV VVVV VVVV N</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>control_measures</category>
   <short-name>vaccination priority time old-new &gt; production type A-F</short-name>
 
   <description>

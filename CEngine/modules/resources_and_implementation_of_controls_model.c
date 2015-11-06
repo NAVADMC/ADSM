@@ -269,6 +269,7 @@ double round (double x);
 /** This must match an element name in the DTD. */
 #define MODEL_NAME "resources-and-implementation-of-controls-model"
 
+#define EPSILON 0.01 /* for distance comparisons = 10 m */
 
 
 /******************************************************************************
@@ -308,6 +309,7 @@ adsm_prioritizer_t;
 static adsm_prioritizer_t *new_production_type_prioritizer (GPtrArray *, gchar **);
 static adsm_prioritizer_t *new_time_waiting_prioritizer (gboolean oldest_first);
 static adsm_prioritizer_t *new_size_prioritizer (gboolean largest_first);
+static adsm_prioritizer_t *new_direction_prioritizer (gboolean outside_in);
 
 
 
@@ -546,6 +548,83 @@ new_size_prioritizer (gboolean largest_first_flag)
   return self;
 }
 
+/** Implementation for by-direction prioritizer. *****************************/
+
+/**
+ * Compares two scorecards by distance from vaccination ring center and
+ * returns their priority order.
+ */
+static int
+adsm_direction_prioritizer_compare (adsm_prioritizer_t *self,
+                                    USC_scorecard_t *scorecard1,
+                                    USC_scorecard_t *scorecard2)
+{
+  gboolean outside_in;
+  double distance1, distance2, diff;
+  int result;
+  
+  outside_in = *((gboolean *) (self->private));
+  if (outside_in)
+    {
+      distance1 = scorecard1->distance_from_vacc_ring_outside;
+      distance2 = scorecard2->distance_from_vacc_ring_outside;
+      #if DEBUG && 0
+        g_debug ("comparing distance (outside-in) for unit \"%s\" (%.2f from edge) and \"%s\" (%.2f from edge)",
+                 scorecard1->unit->official_id, distance1,
+                 scorecard2->unit->official_id, distance2);
+      #endif
+    }
+  else
+    {
+      distance1 = scorecard1->distance_from_vacc_ring_inside;
+      distance2 = scorecard2->distance_from_vacc_ring_inside;
+      #if DEBUG && 0
+        g_debug ("comparing distance (inside-out) for unit \"%s\" (%.2f from edge) and \"%s\" (%.2f from edge)",
+                 scorecard1->unit->official_id, distance1,
+                 scorecard2->unit->official_id, distance2);
+      #endif
+    }
+  diff = distance2 - distance1;
+  if (fabs(diff) < EPSILON)
+    result = 0;
+  else if (diff > 0)
+    result = 1;
+  else
+    result = -1;
+  return result;
+}
+
+/**
+ * Creates a new by-direction prioritizer.
+ *
+ * @param outside_in TRUE for outside-in order, FALSE for inside-out order.
+ * @return a prioritizer object.
+ */
+static adsm_prioritizer_t *
+new_direction_prioritizer (gboolean outside_in_flag)
+{
+  adsm_prioritizer_t *self;
+  gboolean *outside_in;
+
+  #if DEBUG
+    g_debug ("----- ENTER new_direction_prioritizer");
+  #endif
+
+  self = g_new (adsm_prioritizer_t, 1);
+  self->compare = adsm_direction_prioritizer_compare;
+  self->to_string = NULL;
+  self->free = adsm_free_prioritizer;
+  /* The private data in this type of prioritizer object is a gboolean, saying
+   * whether units to the outside of the ring have higher priority. */
+  outside_in = g_new (gboolean, 1);
+  *outside_in = outside_in_flag;
+  self->private = (gpointer) outside_in;
+  #if DEBUG
+    g_debug ("----- EXIT new_direction_prioritizer");
+  #endif
+  return self;
+}
+
 /*****************************************************************************/
 
 /**
@@ -695,6 +774,13 @@ typedef struct
 
   /* Parameters used to prioritize vaccination. */
   GSList *vaccination_prioritizers; /**< Each item is a (naadsm_prioritizer_t *). */
+  GPtrArray *active_vaccination_rings; /**< A list of active vaccination rings
+    (USC_vaccination_ring_t *). */
+  GHashTable *round_robin_buckets; /**< A set of "buckets" used to sort
+    scorecards into vaccination rings during round-robin scheduling. The keys
+    are units (UNT_unit_t *) -- the same ones found in active_vaccination_rings --
+    and the associated values are GQueues of scorecards. Within each GQueue,
+    the highest-priority scorecards are at the top. */
   GHashTable *vaccination_set; /**< A hash table storing the set of units
     currently awaiting vaccination. Keys are units (UNT_unit_t *), associated
     values are scorecards. */
@@ -1349,6 +1435,11 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
       local_data->min_next_vaccination_day[i] = 0;
     }
   local_data->no_more_vaccinations = FALSE;
+  /* The active_vaccination_rings GPtrArray has a free function defined, so
+   * the USC_vaccination_ring_t objects it stores will be properly disposed of
+   * when the array is truncated to zero size. */
+  g_ptr_array_set_size (local_data->active_vaccination_rings, 0);
+  g_hash_table_remove_all (local_data->round_robin_buckets);
 
   #if DEBUG
     g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -1723,6 +1814,52 @@ handle_request_to_initiate_vaccination_event (struct adsm_module_t_ *self,
 
 
 /**
+ * Wraps the function USC_scorecard_register_vaccination_ring as a GFunc so
+ * that it can be used with g_ptr_array_foreach.
+ *
+ * @param data a ring (USC_vaccination_ring_t *), cast to a gpointer.
+ * @param user_data a scorecard (USC_scorecard_t *), cast to a gpointer.
+ */
+void
+USC_scorecard_register_vaccination_ring_as_GFunc (gpointer data,
+                                                  gpointer user_data)
+{
+  USC_vaccination_ring_t *ring;
+  USC_scorecard_t *scorecard;
+
+  ring = (USC_vaccination_ring_t *) data;
+  scorecard = (USC_scorecard_t *) user_data;
+  USC_scorecard_register_vaccination_ring (scorecard, ring);
+  return;
+}
+
+
+
+/**
+ * Wraps the function USC_scorecard_register_vaccination_ring as a GHFunc so
+ * that it can be used with g_hash_table_foreach.
+ *
+ * @param key a unit (UNT_unit_t *), cast to a gpointer. This is ignored.
+ * @param value the unit's scorecard (USC_scorecard_t *), cast to a gpointer.
+ * @param user_data a ring (USC_vaccination_ring_t *), cast to a gpointer.
+ */
+void
+USC_scorecard_register_vaccination_ring_as_GHFunc (gpointer key,
+                                                   gpointer value,
+                                                   gpointer user_data)
+{
+  USC_scorecard_t *scorecard;
+  USC_vaccination_ring_t *ring;
+  
+  scorecard = (USC_scorecard_t *) value;
+  ring = (USC_vaccination_ring_t *) user_data;
+  USC_scorecard_register_vaccination_ring (scorecard, ring);
+  return;
+}
+
+
+
+/**
  * Responds to a request for vaccination event by committing to do the
  * vaccination.
  *
@@ -1739,6 +1876,7 @@ handle_request_for_vaccination_event (struct adsm_module_t_ *self,
   EVT_request_for_vaccination_event_t *event;
   UNT_unit_t *unit;
   USC_scorecard_t *scorecard;
+  GQueue *bucket;
   
 #if DEBUG
   g_debug ("----- ENTER handle_request_for_vaccination_event (%s)", MODEL_NAME);
@@ -1773,7 +1911,9 @@ handle_request_for_vaccination_event (struct adsm_module_t_ *self,
       scorecard = get_or_make_scorecard_for_unit (self, unit);
       USC_scorecard_register_vaccination_request (scorecard, e);
 
-      /* Is this unit new to the vaccination set? */
+      /* Is this unit new to the vaccination set? If so it has to be checked
+       * against all active vaccination rings to determine its outside-in/
+       * inside-out distance. */
       if (g_hash_table_lookup (local_data->vaccination_set, unit) == NULL)
         {
           g_hash_table_insert (local_data->vaccination_set, unit, scorecard);
@@ -1790,6 +1930,48 @@ handle_request_for_vaccination_event (struct adsm_module_t_ *self,
               g_ptr_array_add (local_data->scorecards_sorted, scorecard);
             }
         }
+        g_ptr_array_foreach (local_data->active_vaccination_rings,
+                             USC_scorecard_register_vaccination_ring_as_GFunc,
+                             scorecard);
+
+    }
+
+  /* The request is registered on the unit's scorecard, which may change the
+   * ring the unit belongs to (w.r.t. round-robin prioritization). */
+
+  /* The focus unit (the unit at the center of the vaccination ring or circle)
+   * is used to track active vaccination rings.  Does this focus unit
+   * represent a new active vaccination ring?  If so:
+   * - a new ring is added to the data structure active_vaccination_rings
+   * - a new bucket is added to the data structure for doing round-robin
+   *   priority
+   * - all scorecards of units awaiting vaccination are checked to see if this
+   *   new ring alters their outside-in/inside-out distance. */
+  bucket = (GQueue *)
+    g_hash_table_lookup (local_data->round_robin_buckets, event->focus_unit);
+  if (bucket == NULL)
+    {
+      USC_vaccination_ring_t *ring;
+
+      #if DEBUG
+        g_debug ("Ring around unit \"%s\" is a new ring", event->focus_unit->official_id);
+      #endif
+      /* Record the ring details (unit at center, inner and outer radius) in
+       * in the active_vaccination_rings array. */
+      ring = g_new (USC_vaccination_ring_t, 1);
+      ring->unit_at_center = event->focus_unit;
+      ring->supp_radius = event->supp_radius;
+      g_ptr_array_add (local_data->active_vaccination_rings, ring);
+
+      /* Add a new bucket to the round robin buckets. */
+      bucket = g_queue_new();
+      g_hash_table_insert (local_data->round_robin_buckets, event->focus_unit, bucket);
+
+      /* Check the units awaiting vaccination to see if their outside-in/
+       * inside-out distance changes. */
+      g_hash_table_foreach (local_data->vaccination_set,
+                            USC_scorecard_register_vaccination_ring_as_GHFunc,
+                            ring);
     }
 
 end:
@@ -2058,6 +2240,11 @@ local_free (struct adsm_module_t_ *self)
   g_free (local_data->day_last_vaccinated);
   g_free (local_data->min_time_between_vaccinations);
   g_free (local_data->min_next_vaccination_day);
+  /* The active_vaccination_rings GPtrArray has a free function defined, so
+   * the USC_vaccination_ring_t objects it stores will be properly disposed of
+   * when the array is freed. */
+  g_ptr_array_free (local_data->active_vaccination_rings, TRUE);
+  g_hash_table_destroy (local_data->round_robin_buckets);
   /* clear_all_pending_vaccinations calls get_scorecard_for_unit, so the
    * unit-to-scorecard map cannot be deleted until after
    * clear_all_pending_vaccinations. */   
@@ -2280,6 +2467,13 @@ set_global_params (void *data, GHashTable *dict)
                     gboolean largest_first = (g_ascii_strcasecmp (first_item, "largest") == 0);
                     prioritizer = new_size_prioritizer (largest_first);
                   }
+                else if (g_ascii_strcasecmp (member, "direction") == 0)
+                  {
+                    JsonArray *json_array = json_object_get_array_member(json_object, member);
+                    const gchar *first_item = json_array_get_string_element(json_array, 0);
+                    gboolean outside_in = (g_ascii_strcasecmp (first_item, "outside-in") == 0);
+                    prioritizer = new_direction_prioritizer (outside_in);
+                  }
                 if (prioritizer != NULL)
                   {
                     local_data->vaccination_prioritizers =
@@ -2457,6 +2651,11 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   local_data->min_time_between_vaccinations = g_new0 (guint, local_data->nprod_types);
   local_data->min_next_vaccination_day = g_new0 (int, local_data->nunits);
   local_data->no_more_vaccinations = FALSE;
+  local_data->active_vaccination_rings = g_ptr_array_new_with_free_func (g_free);
+  local_data->round_robin_buckets = 
+    g_hash_table_new_full (g_direct_hash, g_direct_equal,
+                           /* key_destroy_func = */ NULL,
+                           /* value_destroy_func = */ g_queue_free_as_GDestroyNotify);
 
   /* Call the set_global_params function to read the global parameters. */
   set_params_args.self = self;

@@ -125,6 +125,11 @@ USC_scorecard_clear_vaccination_requests (USC_scorecard_t *self)
   while (!g_queue_is_empty (self->vaccination_requests))
     EVT_free_event ((EVT_event_t *) g_queue_pop_head (self->vaccination_requests));
   self->is_awaiting_vaccination = FALSE;
+  self->is_in_suppressive_ring = FALSE;
+  self->unit_at_vacc_ring_center = NULL;
+  self->distance_from_vacc_ring_center = -1;
+  self->distance_from_vacc_ring_inside = -1;
+  self->distance_from_vacc_ring_outside = -1;
   return;
 }
 
@@ -243,6 +248,292 @@ USC_scorecard_register_vaccination_request (USC_scorecard_t *self,
              self->unit->official_id, g_queue_get_length (self->vaccination_requests));
   #endif
   self->is_awaiting_vaccination = TRUE;
+  self->is_in_suppressive_ring = (self->is_in_suppressive_ring || 
+    event_details->supp_radius > 0);
+
+  return;
+}
+
+
+
+/**
+ * Checks whether a new vaccination ring changes the outside-in or inside-out
+ * priority order.
+ *
+ * @param self this scorecard
+ * @param ring the new vaccination ring.
+ */
+void
+USC_scorecard_register_vaccination_ring (USC_scorecard_t *self,
+                                         USC_vaccination_ring_t *ring)
+{
+  double distance;
+  double ring_radius;
+  #if DEBUG
+    GString *s;
+  #endif
+
+  #if DEBUG
+    g_debug ("scorecard for unit \"%s\" register ring", self->unit->official_id);
+  #endif
+
+  /* For the purpose of round-robin prioritization, a unit is set to "belong"
+   * to one particular vaccination ring, defined by the ring in which the unit
+   * is closest to the center. */
+  #if DEBUG
+    s = g_string_new (NULL);
+    if (self->distance_from_vacc_ring_center < 0)
+      g_string_append_printf (s, "unit \"%s\" does not currently belong to a ring (distance=%g)",
+                              self->unit->official_id,
+                              self->distance_from_vacc_ring_center);
+    else
+      g_string_append_printf (s, "unit \"%s\" currently belongs to ring around unit \"%s\" (distance=%g)",
+                              self->unit->official_id,
+                              self->unit_at_vacc_ring_center->official_id,
+                              self->distance_from_vacc_ring_center);
+  #endif
+  distance = GIS_distance (self->unit->x, self->unit->y,
+                           ring->unit_at_center->x, ring->unit_at_center->y);
+  ring_radius = MAX (ring->supp_radius, ring->prot_outer_radius);
+  if (distance <= ring_radius + EPSILON
+      && (self->distance_from_vacc_ring_center < 0
+          || self->distance_from_vacc_ring_center > distance))
+    {
+      self->unit_at_vacc_ring_center = ring->unit_at_center;
+      self->distance_from_vacc_ring_center = distance;
+      #if DEBUG
+        g_string_append_printf (s, ", new distance %g puts unit in ring around unit \"%s\"",
+                                distance,
+                                self->unit_at_vacc_ring_center->official_id);
+      #endif
+    }
+  else
+    {
+      #if DEBUG
+        g_string_append_printf (s, ", new distance %g does not change ring membership",
+                                distance);
+      #endif
+      ;
+    }
+  #if DEBUG
+    g_debug ("%s (for round-robin)", s->str);
+    g_string_free (s, TRUE);
+  #endif
+
+  /* For the purpose of outside-in or inside-out priority order, a unit is
+   * assigned the lowest priority it would get from any ring that it is in.
+   * Each time a new vaccination ring is created, it may change the prioity
+   * order for this unit. */
+
+  /* 5 combinations to take care of:
+   * 1. unit already in suppressive ring, new ring does not have a suppressive part
+   * 2. unit already in suppressive ring, new ring has a suppressive part
+   * - unit not already in suppressive ring, new ring is suppressive-only
+   * - unit not already in suppressive ring, new ring is protective-only
+   * - unit not already in suppressive ring, new ring has both suppressive and protective parts */
+  if (self->is_in_suppressive_ring)
+    {
+      #if DEBUG
+        g_debug ("unit \"%s\" is in 1+ suppressive rings already", self->unit->official_id);
+      #endif
+      if (ring->supp_radius < 0)
+        {
+          /* Combination 1: unit already in suppressive ring, new ring does not
+           * have a suppressive part. */
+          g_debug ("this ring is protective only, cannot affect outside-in order for suppressive");
+        }
+      else
+        {
+          /* Combination 2: unit already in suppressive ring, new ring has a
+           * suppressive part. */
+          #if DEBUG
+            g_debug ("checking against ring (%.2f) around unit \"%s\", distance from center=%.2f",
+                     ring->supp_radius,
+                     ring->unit_at_center->official_id, distance);
+          #endif
+          if (distance > (ring->supp_radius + EPSILON))
+            {
+              ; /* do nothing */
+            }
+          else
+            {
+              /* Take the largest possible distance from a ring's outer edge, that
+               * is, the lowest priority this unit could have according to any ring
+               * it is in.  Note that this "if" condition also takes care of the
+               * case when this is the first vaccination ring we have looked at,
+               * since distance_from_vacc_ring_outside is initialized to a negative
+               * value and thus any positive distance will be greater than the old
+               * stored value.
+               *
+               * Take the smallest possible distance from a ring's inner edge,
+               * that is, the highest priority this unit could have according to
+               * any ring it is in.
+               *
+               * Note that we also override any settings to DBL_MAX, which indicated
+               * this unit was previously inside the hole of a protective ring. */
+               double distance_from_outside, distance_from_inside;
+               #if DEBUG
+                 double old_distance_from_outside, old_distance_from_inside;
+                 GString *s;
+               #endif
+               distance_from_outside = ring->supp_radius - distance;
+               #if DEBUG
+                 s = g_string_new (NULL);
+                 g_string_append_printf (s, "distance from outside=%g", distance_from_outside);
+                 old_distance_from_outside = self->distance_from_vacc_ring_outside;
+               #endif
+               if (self->distance_from_vacc_ring_outside == DBL_MAX
+                   || distance_from_outside > self->distance_from_vacc_ring_outside)
+                 {
+                   self->distance_from_vacc_ring_outside = distance_from_outside;
+                   #if DEBUG
+                     g_string_append_printf (s, ", overrides old distance %g", old_distance_from_outside);
+                   #endif
+                 }
+               else
+                 {
+                   #if DEBUG
+                     g_string_append_printf (s, ", does not override old distance %g", old_distance_from_outside);
+                   #endif
+                   ;
+                 }
+               #if DEBUG
+                 g_debug ("%s", s->str);
+                 g_string_truncate (s, 0);
+               #endif
+
+               distance_from_inside = distance;
+               #if DEBUG
+                 g_string_append_printf (s, "distance from inside=%g", distance_from_inside);
+                 old_distance_from_inside = self->distance_from_vacc_ring_inside;
+               #endif
+               if (self->distance_from_vacc_ring_inside == DBL_MAX
+                   || self->distance_from_vacc_ring_inside < 0
+                   || distance_from_inside < self->distance_from_vacc_ring_inside)
+                 {
+                   self->distance_from_vacc_ring_inside = distance_from_inside;
+                   #if DEBUG
+                     g_string_append_printf (s, ", overrides old distance %g", old_distance_from_inside);
+                   #endif
+                 }
+               else
+                 {
+                   #if DEBUG
+                     g_string_append_printf (s, ", does not override old distance %g", old_distance_from_inside);
+                   #endif
+                   ;
+                 }
+               #if DEBUG
+                 g_debug ("%s", s->str);
+                 g_string_free (s, TRUE);
+               #endif
+            }
+        }
+    } /* end of case where unit was in 1+ suppressive rings already */
+
+  else
+    {
+      #if DEBUG
+        g_debug ("unit \"%s\" is in only protective ring(s)", self->unit->official_id);
+      #endif
+      /* First check whether distance from the outside edge is already set to
+       * DBL_MAX. That indicates the unit is in a do-not-vaccinate situation
+       * (inside the hole of another protective ring). */
+      if (self->distance_from_vacc_ring_outside >= DBL_MAX)
+        {
+          #if DEBUG
+            g_debug ("unit \"%s\" is already inside the hole of a protective ring", self->unit->official_id);
+          #endif
+          ;
+        }
+      else
+        {
+          #if DEBUG
+            g_debug ("checking against ring (%.2f,%.2f) around unit \"%s\", distance from center=%.2f",
+                     ring->prot_inner_radius, ring->prot_outer_radius,
+                     ring->unit_at_center->official_id, distance);
+          #endif
+          if (distance > (ring->prot_outer_radius + EPSILON))
+            {
+              ; /* do nothing */
+            }
+          else if (distance < (ring->prot_inner_radius - EPSILON))
+            {
+              /* The unit is inside the hole of a protective vaccination ring. Mark
+               * it as the largest possible distance from the edge, DBL_MAX,
+               * meaning do not vaccinate. */
+              self->distance_from_vacc_ring_outside = DBL_MAX;
+              self->distance_from_vacc_ring_inside = DBL_MAX;
+              #if DEBUG
+                g_debug ("unit \"%s\" is inside the hole of this protective ring", self->unit->official_id);
+              #endif
+            }
+          else
+            {
+              /* Take the largest possible distance from a ring's outer edge, that
+               * is, the lowest priority this unit could have according to any ring
+               * it is in.  Note that this "if" condition also takes care of the
+               * case when this is the first vaccination ring we have looked at,
+               * since distance_from_vacc_ring_outside is initialized to a negative
+               * value and thus any positive distance will be greater than the old
+               * stored value. Same for the distance from the ring's inner edge.*/
+               double distance_from_outside, distance_from_inside;
+               #if DEBUG
+                 double old_distance_from_outside, old_distance_from_inside;
+                 GString *s;
+               #endif
+               distance_from_outside = ring->prot_outer_radius - distance;
+               #if DEBUG
+                 s = g_string_new (NULL);
+                 g_string_append_printf (s, "distance from outside=%g", distance_from_outside);
+                 old_distance_from_outside = self->distance_from_vacc_ring_outside;
+               #endif
+               if (distance_from_outside > self->distance_from_vacc_ring_outside)
+                 {
+                   self->distance_from_vacc_ring_outside = distance_from_outside;
+                   #if DEBUG
+                     g_string_append_printf (s, ", overrides old distance %g", old_distance_from_outside);
+                   #endif
+                 }
+               else
+                 {
+                   #if DEBUG
+                     g_string_append_printf (s, ", does not override old distance %g", old_distance_from_outside);
+                   #endif
+                   ;
+                 }
+               #if DEBUG
+                 g_debug ("%s", s->str);
+                 g_string_truncate (s, 0);
+               #endif
+
+               distance_from_inside = distance - ring->prot_inner_radius;
+               #if DEBUG
+                 g_string_append_printf (s, "distance from inside=%g", distance_from_inside);
+                 old_distance_from_inside = self->distance_from_vacc_ring_inside;
+               #endif
+               if (self->distance_from_vacc_ring_inside < 0
+                   || distance_from_inside < self->distance_from_vacc_ring_inside)
+                 {
+                   self->distance_from_vacc_ring_inside = distance_from_inside;
+                   #if DEBUG
+                     g_string_append_printf (s, ", overrides old distance %g", old_distance_from_inside);
+                   #endif
+                 }
+               else
+                 {
+                   #if DEBUG
+                     g_string_append_printf (s, ", does not override old distance %g", old_distance_from_inside);
+                   #endif
+                   ;
+                 }
+               #if DEBUG
+                 g_debug ("%s", s->str);
+                 g_string_free (s, TRUE);
+               #endif
+            }
+        }
+    } /* end of case where the unit only in protective ring(s) */
 
   return;
 }

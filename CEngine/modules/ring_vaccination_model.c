@@ -143,7 +143,6 @@ check_and_choose (int id, gpointer arg)
 {
   callback_t *callback_data;
   UNT_unit_t *unit2;
-  UNT_unit_t *unit1;
   local_data_t *local_data;
 
 #if DEBUG
@@ -158,7 +157,6 @@ check_and_choose (int id, gpointer arg)
     goto end;
 
   local_data = callback_data->local_data;
-  unit1 = callback_data->unit1;
 
   /* Is unit 2 a production type that gets vaccinated? */
   if (local_data->target_production_type[unit2->production_type] == FALSE)
@@ -173,8 +171,10 @@ check_and_choose (int id, gpointer arg)
 #endif
   EVT_event_enqueue (callback_data->queue,
                      EVT_new_request_for_vaccination_event (unit2,
+                                                            callback_data->unit1,
                                                             callback_data->day,
-                                                            ADSM_ControlRing));
+                                                            ADSM_ControlRing,
+                                                            local_data->radius));
   g_hash_table_insert (local_data->requested_today, unit2, unit2);
 
 end:

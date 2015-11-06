@@ -900,16 +900,20 @@ char *EVT_vaccination_initiated_event_to_string (EVT_vaccination_initiated_event
  */
 EVT_event_t *
 EVT_new_request_for_vaccination_event (UNT_unit_t * unit,
+                                       UNT_unit_t * focus_unit,
                                        int day,
-                                       ADSM_control_reason reason)
+                                       ADSM_control_reason reason,
+                                       double supp_radius)
 {
   EVT_event_t *event;
 
   event = g_new (EVT_event_t, 1);
   event->type = EVT_RequestForVaccination;
   event->u.request_for_vaccination.unit = unit;
+  event->u.request_for_vaccination.focus_unit = focus_unit;
   event->u.request_for_vaccination.day = day;
   event->u.request_for_vaccination.reason = reason;
+  event->u.request_for_vaccination.supp_radius = supp_radius;
   event->u.request_for_vaccination.day_commitment_made = 0; /* default */
   return event;
 }
@@ -1685,8 +1689,9 @@ EVT_clone_event (EVT_event_t * event)
       {
         EVT_request_for_vaccination_event_t *e;
         e = &(event->u.request_for_vaccination);
-        clone = EVT_new_request_for_vaccination_event (e->unit, e->day,
-                                                       e->reason);
+        clone = EVT_new_request_for_vaccination_event (e->unit, e->focus_unit,
+                                                       e->day, e->reason,
+                                                       e->supp_radius);
         clone->u.request_for_vaccination.day_commitment_made = e->day_commitment_made;
         break;
       }
