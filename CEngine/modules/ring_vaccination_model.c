@@ -79,9 +79,12 @@ typedef struct
     get vaccinated. */
   GPtrArray *production_types; /**< Production type names. Each item in the
     array is a (char *). */
-  double radius; /**< The radius of ring created around a unit of this
-    production type. If negative, no ring is created around units of this
-    production type. */
+  double supp_radius; /**< Radius of suppressive ring. -1 if no suppressive
+    ring is defined. */
+  double prot_inner_radius; /**< Inner radius of protective ring. -1 if no
+    protective ring is defined. */
+  double prot_outer_radius; /**< Outer radius of protective ring. -1 if no
+    protective ring is defined. */
   GHashTable *requested_today; /**< A list of units for which this module made
     requests for vaccination today.  A unit can be in queue for vaccination
     more than once at a given time, but two requests for the same unit, for the
@@ -143,7 +146,9 @@ check_and_choose (int id, gpointer arg)
 {
   callback_t *callback_data;
   UNT_unit_t *unit2;
+  UNT_unit_t *unit1;
   local_data_t *local_data;
+  double distance;
 
 #if DEBUG
   g_debug ("----- ENTER check_and_choose (%s)", MODEL_NAME);
@@ -166,16 +171,43 @@ check_and_choose (int id, gpointer arg)
   if (g_hash_table_lookup (local_data->requested_today, unit2) != NULL)
     goto end;
 
-#if DEBUG
-  g_debug ("unit \"%s\" within radius, ordering unit vaccinated", unit2->official_id);
-#endif
-  EVT_event_enqueue (callback_data->queue,
-                     EVT_new_request_for_vaccination_event (unit2,
-                                                            callback_data->unit1,
-                                                            callback_data->day,
-                                                            ADSM_ControlRing,
-                                                            local_data->radius));
-  g_hash_table_insert (local_data->requested_today, unit2, unit2);
+  unit1 = callback_data->unit1;
+  distance = GIS_distance (unit1->x, unit1->y, unit2->x, unit2->y);
+
+  if (local_data->supp_radius >= 0)
+    {
+      #if DEBUG
+        g_debug ("unit %s within suppressive circle, ordering unit vaccinated", unit2->official_id);
+      #endif
+      EVT_event_enqueue (callback_data->queue,
+                         EVT_new_request_for_vaccination_event (unit2,
+                                                                unit1, /* unit at center of ring */
+                                                                callback_data->day,
+                                                                ADSM_ControlRing,
+                                                                distance,
+                                                                local_data->supp_radius,
+                                                                local_data->prot_inner_radius,
+                                                                local_data->prot_outer_radius));
+      g_hash_table_insert (local_data->requested_today, unit2, unit2);  
+    }
+  else if (local_data->prot_inner_radius >= 0
+           && distance >= local_data->prot_inner_radius - EPSILON
+           && distance <= local_data->prot_outer_radius + EPSILON)
+    {
+      #if DEBUG
+        g_debug ("unit %s within protective ring, ordering unit vaccinated", unit2->official_id);
+      #endif
+      EVT_event_enqueue (callback_data->queue,
+                         EVT_new_request_for_vaccination_event (unit2,
+                                                                unit1, /* unit at center of ring */
+                                                                callback_data->day,
+                                                                ADSM_ControlRing,
+                                                                distance,
+                                                                local_data->supp_radius,
+                                                                local_data->prot_inner_radius,
+                                                                local_data->prot_outer_radius));
+      g_hash_table_insert (local_data->requested_today, unit2, unit2);
+    }
 
 end:
 #if DEBUG
@@ -192,6 +224,7 @@ ring_vaccinate (struct adsm_module_t_ *self, UNT_unit_list_t * units, UNT_unit_t
 {
   local_data_t *local_data;
   callback_t callback_data;
+  double max_radius;
 
 #if DEBUG
   g_debug ("----- ENTER ring_vaccinate (%s)", MODEL_NAME);
@@ -206,8 +239,10 @@ ring_vaccinate (struct adsm_module_t_ *self, UNT_unit_list_t * units, UNT_unit_t
   callback_data.queue = queue;
 
   /* Find the distances to other units. */
+  max_radius = MAX (local_data->supp_radius,
+                    local_data->prot_outer_radius);
   spatial_search_circle_by_id (units->spatial_index, unit->index,
-                               local_data->radius + EPSILON,
+                               max_radius + EPSILON,
                                check_and_choose, &callback_data);
 
 #if DEBUG
@@ -329,7 +364,13 @@ to_string (struct adsm_module_t_ *self)
           first = FALSE;
         }
     }
-  g_string_append_printf (s, " within %.1f km", local_data->radius);
+  if (local_data->supp_radius > 0)
+    g_string_append_printf (s, " within %g km suppressive circle",
+                            local_data->supp_radius);
+  if (local_data->prot_inner_radius > 0)
+    g_string_append_printf (s, " within %g-%g km protective ring",
+                            local_data->prot_inner_radius,
+                            local_data->prot_outer_radius);
       
   g_string_append_c (s, '>');
 
@@ -414,6 +455,8 @@ set_params (void *data, GHashTable *dict)
   adsm_module_t *self;
   local_data_t *local_data;
   sqlite3 *params;
+  double outer_radius;
+  char *tmp_text;
   guint nprod_types;
   guint ring_rule_id;
   set_prodtype_args_t args;
@@ -430,12 +473,29 @@ set_params (void *data, GHashTable *dict)
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
-  local_data->radius = strtod(g_hash_table_lookup (dict, "outer_radius"), NULL);
+  /* If there is just an outer radius, this is a suppressive circle, otherwise
+   * this is a protective ring. */
+  outer_radius = strtod(g_hash_table_lookup (dict, "outer_radius"), NULL);
   /* Radius must be positive. */
-  if (local_data->radius < 0)
+  if (outer_radius < 0)
     {
       g_warning ("%s: radius cannot be negative, setting to 0", MODEL_NAME);
-      local_data->radius = 0;
+      outer_radius = 0;
+    }
+
+  tmp_text = g_hash_table_lookup (dict, "inner_radius");
+  if (tmp_text == NULL)
+    {
+      /* Suppressive circle */
+      local_data->supp_radius = outer_radius;
+      local_data->prot_inner_radius = local_data->prot_outer_radius = -1;
+    }
+  else
+    {
+      /* Protective ring */
+      local_data->prot_outer_radius = outer_radius;
+      local_data->prot_inner_radius = strtod(tmp_text, NULL);
+      local_data->supp_radius = -1;
     }
 
   /* Fill in the production types that trigger this ring rule. */

@@ -341,9 +341,16 @@ typedef struct
   ADSM_control_reason reason; /**< why vaccination was requested */
   int day_commitment_made; /**< the day on which a commitment to fulfil this
     request was made. */
+  double distance_from_ring_center;
   double supp_radius; /**< the radius of the suppressive circle around the
     focus unit, or -1 if no suppressive vaccination is done around the focus
     unit **/
+  double prot_inner_radius; /**< the inner radius of the protective ring around
+    the focus herd, or -1 if no protective vaccination is done around the focus
+    herd **/
+  double prot_outer_radius; /**< the outer radius of the protective ring around
+    the focus herd, or -1 if no protective vaccination is done around the focus
+    herd **/
 }
 EVT_request_for_vaccination_event_t;
 
@@ -658,7 +665,10 @@ EVT_event_t *EVT_new_request_for_vaccination_event (UNT_unit_t *,
                                                     UNT_unit_t *focus_unit,
                                                     int day,
                                                     ADSM_control_reason,
-                                                    double supp_radius);
+                                                    double distance_from_ring_center,
+                                                    double supp_radius,
+                                                    double prot_inner_radius,
+                                                    double prot_outer_radius);
 EVT_event_t *EVT_new_commitment_to_vaccinate_event (UNT_unit_t *, int day);
 EVT_event_t *EVT_new_vaccination_canceled_event (UNT_unit_t *, int day,
                                                  int day_commitment_made);

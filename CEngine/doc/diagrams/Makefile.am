@@ -193,6 +193,7 @@ dist_noinst_DATA = state-transition.png \
   vaccpriority_2rings.png \
   vaccpriority_2cols_rings_same_size.png \
   vaccpriority_2cols_rings_size_5_3.png \
+  vaccpriority_2cols_rings_size_2-5_1-3.png \
   clock_24_hour.png
 
 state_transition_png_SOURCES = state-transition.dia
@@ -473,5 +474,7 @@ vaccpriority_2rings_png_SOURCES = vaccpriority_2rings.gnuplot
 vaccpriority_2cols_rings_same_size_png_SOURCES = vaccpriority_2cols_rings_same_size.gnuplot
 
 vaccpriority_2cols_rings_size_5_3_png_SOURCES = vaccpriority_2cols_rings_size_5_3.gnuplot
+
+vaccpriority_2cols_rings_size_2_5_1_3_png_SOURCES = vaccpriority_2cols_rings_size_2-5_1-3.gnuplot
 
 clock_24_hour_png_SOURCES = clock_24_hour.dia

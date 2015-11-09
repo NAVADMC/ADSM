@@ -903,7 +903,10 @@ EVT_new_request_for_vaccination_event (UNT_unit_t * unit,
                                        UNT_unit_t * focus_unit,
                                        int day,
                                        ADSM_control_reason reason,
-                                       double supp_radius)
+                                       double distance_from_ring_center,
+                                       double supp_radius,
+                                       double prot_inner_radius,
+                                       double prot_outer_radius)
 {
   EVT_event_t *event;
 
@@ -913,7 +916,10 @@ EVT_new_request_for_vaccination_event (UNT_unit_t * unit,
   event->u.request_for_vaccination.focus_unit = focus_unit;
   event->u.request_for_vaccination.day = day;
   event->u.request_for_vaccination.reason = reason;
+  event->u.request_for_vaccination.distance_from_ring_center = distance_from_ring_center;
   event->u.request_for_vaccination.supp_radius = supp_radius;
+  event->u.request_for_vaccination.prot_inner_radius = prot_inner_radius;
+  event->u.request_for_vaccination.prot_outer_radius = prot_outer_radius;
   event->u.request_for_vaccination.day_commitment_made = 0; /* default */
   return event;
 }
@@ -1691,7 +1697,10 @@ EVT_clone_event (EVT_event_t * event)
         e = &(event->u.request_for_vaccination);
         clone = EVT_new_request_for_vaccination_event (e->unit, e->focus_unit,
                                                        e->day, e->reason,
-                                                       e->supp_radius);
+                                                       e->distance_from_ring_center,
+                                                       e->supp_radius,
+                                                       e->prot_inner_radius,
+                                                       e->prot_outer_radius);
         clone->u.request_for_vaccination.day_commitment_made = e->day_commitment_made;
         break;
       }

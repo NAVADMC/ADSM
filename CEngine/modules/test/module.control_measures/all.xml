@@ -8471,3 +8471,127 @@
     <tr><td>N VVVV N VVSS</td></tr>
   </output>
 </deterministic-test>
+
+<deterministic-test>
+  <category>control_measures</category>
+  <short-name>2 vaccination rings, different sizes and widths, outside-in</short-name>
+
+  <description>
+    This is one of a set of tests to exercise the vaccination priority system
+    after the changes in version 3.3. Units are arranged as shown in the
+    diagram below. In this test, the “A” and “F” units both trigger vaccination
+    rings but of different sizes and widths.  Vaccination is prioritized by
+    outside-in order.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>6 May 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>10units_2cols</population-file>
+
+  <parameter-file>vacc_priority_2rings_size_2-5_1-3_outin</parameter-file>
+
+  <parameter-description>
+    Units of type “A” and “F” are latent for 1 day, clinical for 1 day, then
+    immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A
+    vaccination ring with inner radius 2 km and outer radius 5 km is created
+    around a detected “A” unit. A vaccination ring with inner radius 1 km and
+    outer radius 3 km is created around a detected “F” unit.  There is capacity
+    to vaccinate 2 units per day.
+
+    What should happen:
+     - On day 1 units A and F will be Latent.
+     - On day 2 units A and F will be Infectious Clinical. They will be
+       detected and a vaccination program will be initiated. Units C-E and
+       G-H will be queued for vaccination, as shown in the diagram.
+     - On day 3, there is capacity to vaccinate 2 units. Units E and H are at
+       the outside of the rings, so they will be vaccinated. (Their state will
+       show as Vaccine Immune on day 5.)
+     - On day 4, moving inward into the rings, units D and G will be
+       vaccinated.
+     - On day 5, the remaining unit C will be vaccinated.
+     - On day 6, nothing new happens: all of the units that need to be
+       vaccinated have been vaccinated.  This will be the last simulation day.
+  </parameter-description>
+
+  <diagram>vaccpriority_2cols_rings_size_2-5_1-3</diagram>
+
+  <output>
+    <!--    A B-E  F G-K        -->
+    <tr><td>L SSSS L SSSS</td></tr>
+    <tr><td>C SSSS C SSSS</td></tr>
+    <tr><td>N SSSS N SSSS</td></tr>
+    <tr><td>N SSSV N SVSS</td></tr>
+    <tr><td>N SSVV N VVSS</td></tr>
+    <tr><td>N SVVV N VVSS</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>control_measures</category>
+  <short-name>2 vaccination rings, different sizes and widths, inside-out</short-name>
+
+  <description>
+    This is one of a set of tests to exercise the vaccination priority system
+    after the changes in version 3.3. Units are arranged as shown in the
+    diagram below. In this test, the “A” and “F” units both trigger vaccination
+    rings but of different sizes and widths.  Vaccination is prioritized by
+    inside-out order.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>6 May 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>10units_2cols</population-file>
+
+  <parameter-file>vacc_priority_2rings_size_2-5_1-3_inout</parameter-file>
+
+  <parameter-description>
+    Units of type “A” and “F” are latent for 1 day, clinical for 1 day, then
+    immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A
+    vaccination ring with inner radius 2 km and outer radius 5 km is created
+    around a detected “A” unit. A vaccination ring with inner radius 1 km and
+    outer radius 3 km is created around a detected “F” unit.  There is capacity
+    to vaccinate 2 units per day.
+
+    What should happen:
+     - On day 1 units A and F will be Latent.
+     - On day 2 units A and F will be Infectious Clinical. They will be
+       detected and a vaccination program will be initiated. Units C-E and
+       G-H will be queued for vaccination, as shown in the diagram.
+     - On day 3, there is capacity to vaccinate 2 units. Units C and G are at
+       the inside of the rings, so they will be vaccinated. (Their state will
+       show as Vaccine Immune on day 5.)
+     - On day 4, moving outward toward the edge of the rings, units D and H
+       will be vaccinated.
+     - On day 5, the remaining unit E will be vaccinated.
+     - On day 6, nothing new happens: all of the units that need to be
+       vaccinated have been vaccinated.  This will be the last simulation day.
+  </parameter-description>
+
+  <diagram>vaccpriority_2cols_rings_size_2-5_1-3</diagram>
+
+  <output>
+    <!--    A B-E  F G-K        -->
+    <tr><td>L SSSS L SSSS</td></tr>
+    <tr><td>C SSSS C SSSS</td></tr>
+    <tr><td>N SSSS N SSSS</td></tr>
+    <tr><td>N SVSS N VSSS</td></tr>
+    <tr><td>N SVVS N VVSS</td></tr>
+    <tr><td>N SVVV N VVSS</td></tr>
+  </output>
+</deterministic-test>
