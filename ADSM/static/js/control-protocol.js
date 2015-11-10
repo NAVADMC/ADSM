@@ -1,6 +1,7 @@
-function get_parent_title(element) {
+get_parent_title = function(element) {
     return $(element).parents('.model-banner').find('[load-target="#center-panel"]').first();
-}
+};
+
 current_is_active = function (element) {
     var current = $('#center-panel form').attr('action');
     var parent_title_link = get_parent_title(element);
@@ -8,20 +9,25 @@ current_is_active = function (element) {
     return current == should_be;
 };
 
+function active_tab(element) {
+//select the tab
+    $('.tab-pane').removeClass('active');
+    var target = $('.tab-pane a').filter(function () {
+        return $(this).text().toLowerCase() === $(element).text().toLowerCase();
+    });
+    var id = target.attr('href');
+    $(id).addClass('active');
+    check_enabled_tabs();
+}
+
 switch_tabs = function(element){
     //first, verify we're talking about the same protcol
-
     if(!current_is_active(element)){
-        get_parent_title(element).click();//activate the correct protocol rather than navigating
-        //timing reliability is tricky so I'm going to leave this for a second click from the user
+        //activate the correct protocol rather than navigating
+        load_target_link.call(get_parent_title(element), function(){active_tab(element)});
     }else{
-        //select the tab
-        $('.tab-pane').removeClass('active');
-        var target = $('.tab-pane a').filter(function(){ return $(this).text().toLowerCase() === $(element).text().toLowerCase();});
-        var id = target.attr('href');
-        $(id).addClass('active');
+        active_tab(element);
     }
-    check_enabled_tabs();
 };
 
 

@@ -78,18 +78,9 @@ $(function(){
     })
     
     $(document).on('click', 'a[load-target]', function(event){
-        event.preventDefault()
-        var selector = $(this).attr('load-target')
-
-        //Wait until a problem comes up betwee 'active' and ':focus' to fix this
-        //$input.closest('.layout-panel').find('.defined').removeClass('focused')
-        //$(this).closest('.defined').addClass('focused');//?????????????????????????????????
-
-        $(this).closest('.layout-panel').find('a').removeClass('active')  // nix .active from the earlier select
-        $(this).addClass("active")  //@tjmahlin use .active to to style links between panels
-        $(selector).load($(this).attr('href'), open_panel_if_needed)
-        $('#center-panel').addClass('reveal') //allows toggle of box shadow on :before pseudo element
-    })
+        event.preventDefault();
+        load_target_link.call(this);
+    });
     
     $(document).on('click', '[data-click-toggle]', function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
@@ -418,6 +409,26 @@ safe_save = function(url, data, new_link){
         });
     }
 }
+
+function load_target_link(callback){
+        var selector = $(this).attr('load-target')
+
+        //Wait until a problem comes up betwee 'active' and ':focus' to fix this
+        //$input.closest('.layout-panel').find('.defined').removeClass('focused')
+        //$(this).closest('.defined').addClass('focused');//?????????????????????????????????
+
+        $(this).closest('.layout-panel').find('a').removeClass('active')  // nix .active from the earlier select
+        $(this).addClass("active")  //@tjmahlin use .active to to style links between panels
+        var element = this;
+        $(selector).load($(this).attr('href'), function(){
+            open_panel_if_needed();
+            if(typeof callback === 'function'){
+                callback(element);
+            }
+        });
+        $('#center-panel').addClass('reveal'); //allows toggle of box shadow on :before pseudo element
+        
+    }
 
 function open_panel_if_needed(){
      $('.productiontypelist, .grouplist').each(function(){
