@@ -122,7 +122,6 @@ switch_tabs = function(element){
     };
 
 $(function(){
-    build_protocols_list();
 
     $(':checkbox').livequery(function(){ //when new checkboxes crop up they will have an event handler assigned to them
         $(this).change(function(){
@@ -130,5 +129,4 @@ $(function(){
         });
     });
     $('form').livequery(hide_hidden_labels);
-    check_enabled_tabs(); //run once at the beginning
 });
