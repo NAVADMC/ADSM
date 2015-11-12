@@ -1961,6 +1961,8 @@ handle_request_for_vaccination_event (struct adsm_module_t_ *self,
       ring = g_new (USC_vaccination_ring_t, 1);
       ring->unit_at_center = event->focus_unit;
       ring->supp_radius = event->supp_radius;
+      ring->prot_inner_radius = event->prot_inner_radius;
+      ring->prot_outer_radius = event->prot_outer_radius;
       g_ptr_array_add (local_data->active_vaccination_rings, ring);
 
       /* Add a new bucket to the round robin buckets. */
