@@ -183,7 +183,7 @@ check_and_choose (int id, gpointer arg)
                          EVT_new_request_for_vaccination_event (unit2,
                                                                 unit1, /* unit at center of ring */
                                                                 callback_data->day,
-                                                                ADSM_ControlRing,
+                                                                ADSM_ControlSuppressiveRing,
                                                                 distance,
                                                                 local_data->supp_radius,
                                                                 local_data->prot_inner_radius,
@@ -201,7 +201,7 @@ check_and_choose (int id, gpointer arg)
                          EVT_new_request_for_vaccination_event (unit2,
                                                                 unit1, /* unit at center of ring */
                                                                 callback_data->day,
-                                                                ADSM_ControlRing,
+                                                                ADSM_ControlProtectiveRing,
                                                                 distance,
                                                                 local_data->supp_radius,
                                                                 local_data->prot_inner_radius,

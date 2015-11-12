@@ -238,10 +238,18 @@ void
 USC_scorecard_register_vaccination_request (USC_scorecard_t *self,
                                             EVT_event_t *event)
 {
+  EVT_event_t *clone;
   EVT_request_for_vaccination_event_t *event_details; 
 
   g_assert (event->type == EVT_RequestForVaccination);
-  g_queue_push_tail (self->vaccination_requests, EVT_clone_event (event));
+  /* The reason for vaccination will come in as "suppressive ring" or
+   * "protective ring". For the copy of the request for vaccination that we
+   * store in the scorecard, just set it to "ring". This is so that we don't
+   * need to worry about the distinction between the two types of rings in the
+   * output variables yet. */
+  clone = EVT_clone_event (event);
+  clone->u.request_for_vaccination.reason = ADSM_ControlRing;
+  g_queue_push_tail (self->vaccination_requests, clone);
   event_details = &(event->u.request_for_vaccination);
   #if DEBUG
     g_debug ("scorecard for unit \"%s\" register request: now %u vaccination requests in scorecard",
@@ -249,7 +257,7 @@ USC_scorecard_register_vaccination_request (USC_scorecard_t *self,
   #endif
   self->is_awaiting_vaccination = TRUE;
   self->is_in_suppressive_ring = (self->is_in_suppressive_ring || 
-    event_details->supp_radius > 0);
+    event_details->reason == ADSM_ControlSuppressiveRing);
 
   return;
 }

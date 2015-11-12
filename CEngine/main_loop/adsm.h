@@ -105,6 +105,8 @@ typedef enum {
   ADSM_ControlTraceBackIndirect,
   ADSM_ControlDetection,
   ADSM_ControlInitialState,
+  ADSM_ControlSuppressiveRing,
+  ADSM_ControlProtectiveRing,
   ADSM_NCONTROL_REASONS
 } ADSM_control_reason;
 extern const char *ADSM_control_reason_name[];

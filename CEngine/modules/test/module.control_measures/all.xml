@@ -8661,3 +8661,68 @@
     <tr><td>VV S VVVNVVV S VV SS</td></tr>
   </output>
 </deterministic-test>
+
+<deterministic-test>
+  <category>control_measures</category>
+  <short-name>protective and suppressive rings, outside-in</short-name>
+
+  <description>
+    This is one of a series of tests of situations where a suppressive circle
+    and a protective ring are created around a focus.  In this test, priority
+    is outside-in.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>17 July 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>15units_line</population-file>
+
+  <parameter-file>vacc_priority_2rings_supp_prot_outin</parameter-file>
+
+  <parameter-description>
+    Diseased units of production type “A” are latent for 1 day, clinical for 1
+    day, then immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A suppressive
+    vaccination ring of radius 3 1/3 km and a protective vaccination ring with
+    inner radius 4.5 km and outer radius 6.5 km is created around a detected
+    unit of production type “A”.
+    
+    There is capacity to vaccinate 4 units per day. Vaccination is prioritized
+    by outside-in order.
+
+    What should happen:
+     - On day 1 unit 7 will be Latent.
+     - On day 2 unit 7 will be Infectious Clinical. It will be detected, a
+       vaccination program will be initiated, and suppressive and protective
+       vaccination rings will be set up as shown in the diagram below.
+     - On day 3 and each following day, there is capacity to vaccinate 4 units.
+       The 4 units that are the closest to the outer edge of their rings are
+       units 4 and 10 (at 0.33 km in from the outer edge of the suppressive
+       circle) and units 1 and 13 (at 0.5 km in from the outer edge of the
+       protective ring).  These units will be vaccinated.  (Their state will
+       show as Vaccine Immune on day 4.)
+     - On day 4, continuing inwards, units 5, 9, 2, and 12 will be vaccinated.
+     - On day 5, the remaining units in the suppressive circle (units 6 and 8)
+       will be vaccinated.
+     - On day 6, there is nothing new to do.  This will be the last simulation
+       day.
+  </parameter-description>
+
+  <diagram>15units_1ring_s_p</diagram>
+
+  <output>
+    <!--            *                  -->
+    <tr><td>SS S SSSLSSS S SS SS</td></tr>
+    <tr><td>SS S SSSCSSS S SS SS</td></tr>
+    <tr><td>SS S SSSNSSS S SS SS</td></tr>
+    <tr><td>VS S VSSNSSV S SV SS</td></tr>
+    <tr><td>VV S VVSNSVV S VV SS</td></tr>
+    <tr><td>VV S VVVNVVV S VV SS</td></tr>
+  </output>
+</deterministic-test>
