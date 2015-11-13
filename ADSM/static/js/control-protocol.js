@@ -76,7 +76,9 @@ ensure_expanded = function(element){
                                 ' data-proxy="#id_'+ tab['field'] +
                                 '" class="checkboxinput fat_checkbox">' +
                                 '<div class="defined_name" onClick="switch_tabs(this);">'+
-                                tab['name'] + '</div>' +
+                                tab['name'] +
+                                '<a href="#" title="Incomplete" class="warning-icon pull-right"></a>' +
+                                '</div>' +
                             '</div>' +
                         '</li>'));
                 });

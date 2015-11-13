@@ -1431,6 +1431,19 @@ select {
     /*background-position: 0 0;*/
 }
 
+.warning-icon {
+    background-image: url('../icons/warning-triangle.png') !important;/*It's not an icon without this background*/
+    background-size: 17px 15px;
+    margin-top: 3px;
+    margin-bottom: 0px;
+    width: 17px !important;
+    height: 15px;
+    margin-right: 10px;
+    display:block;
+    float:right;
+    opacity: 1;
+}
+
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
 .delete-icon {
     background-image: url('../icons/delete_sprite.png');
