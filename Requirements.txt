@@ -14,3 +14,4 @@ requests==2.7.0
 selenium==2.44.0
 six==1.8.0
 django-pipeline==1.5.4
+git+https://github.com/BryanHurst/django-pipeline-browserify.git
