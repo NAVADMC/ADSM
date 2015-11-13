@@ -71,8 +71,7 @@ switch_tabs = function(element){
                 $header.append($container);//children
                 $accordion.append($header);
             });
-            console.log("Adding one panel group to the DOM ");
-                $('#protocol_list').append($accordion);
+            $('#protocol_list').append($accordion);
             //$('.collapse').collapse(); //enable bootstrap javascript
         }});
     };
