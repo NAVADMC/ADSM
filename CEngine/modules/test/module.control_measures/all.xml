@@ -8726,3 +8726,120 @@
     <tr><td>VV S VVVNVVV S VV SS</td></tr>
   </output>
 </deterministic-test>
+
+<deterministic-test>
+  <category>control_measures</category>
+  <short-name>overlapping suppressive rings, inside-out</short-name>
+
+  <description>
+    In this test, two suppressive circles overlap, and priority is inside-out.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <author>Tim Boyer &lt;boye0087@umn.edu&gt;</author>
+  <creation-date>30 September 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>24units_2rings_plus2infected</population-file>
+
+  <parameter-file>vacc_priority_2circles_overlap_inout</parameter-file>
+
+  <parameter-description>
+    Diseased units are latent for 1 day, clinical for 1 day, then immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A suppressive
+    vaccination circle of radius 1 km is created around a detected unit.
+    
+    There is capacity to vaccinate 12 units on the first day of the vaccination
+    program, then 4 units on the second day, then 12 units on each day after
+    that. Vaccination is prioritized by inside-out order.
+
+    What should happen:
+     - On day 1 units “A” and “B” will be Latent.
+     - On day 2 units “A” and “B” will be Infectious Clinical. They will be
+       detected, a vaccination program will be initiated, and all 24 units
+       around “A” and “B” will be queued for vaccination.
+     - On day 3, there is capacity to vaccinate 12 units. The 6 units that are
+       closest to “A” (7-12) and the 6 units that are closest to “B” (19-24)
+       will be vaccinated. (Their state will show as Vaccine Immune on day 4.)
+     - On day 4, there is capacity to vaccinate 4 units. Continuing outwards,
+       units 2, 3, 17, and 18 will be vaccinated.
+     - On day 5, there is capacity to vaccinate 12 units. The remaining units
+       will be vaccinated.
+     - On day 6, there is nothing new to do.  This will be the last simulation
+       day.
+  </parameter-description>
+
+  <output>
+    <!--    A 1-6    7-12   B 13-18  19-24        -->
+    <tr><td>L SSSSSS SSSSSS L SSSSSS SSSSSS</td></tr>
+    <tr><td>C SSSSSS SSSSSS C SSSSSS SSSSSS</td></tr>
+    <tr><td>N SSSSSS SSSSSS N SSSSSS SSSSSS</td></tr>
+    <tr><td>N SSSSSS VVVVVV N SSSSSS VVVVVV</td></tr>
+    <tr><td>N SVVSSS VVVVVV N SSSSVV VVVVVV</td></tr>
+    <tr><td>N VVVVVV VVVVVV N VVVVVV VVVVVV</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>control_measures</category>
+  <short-name>overlapping protective rings, inside-out</short-name>
+
+  <description>
+    In this test, two protective rings overlap, and priority is inside-out.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <author>Tim Boyer &lt;boye0087@umn.edu&gt;</author>
+  <creation-date>21 October 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>24units_2rings_plus2infected</population-file>
+
+  <parameter-file>vacc_priority_2rings_overlap_inout</parameter-file>
+
+  <parameter-description>
+    Diseased units are latent for 1 day, clinical for 1 day, then immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A protective
+    vaccination ring with inner radius 0.525 km and outer radius 1 km is
+    created around a detected unit.
+    
+    There is capacity to vaccinate 4 units on the first day of the vaccination
+    program, then 8 units on the second day, then 8 units on each day after
+    that. Vaccination is prioritized by inside-out order.
+
+    What should happen:
+     - On day 1 units “A” and “B” will be Latent.
+     - On day 2 units “A” and “B” will be Infectious Clinical. They will be
+       detected, a vaccination program will be initiated, and all 24 units
+       around “A” and “B” will be queued for vaccination.
+     - On day 3, there is capacity to vaccinate 4 units. The 6 units that are
+       closest to “A” (7-12) and the 6 units that are closest to “B” (19-24)
+       will not be vaccinated because they are inside the holes in the
+       protective rings. The next units in inside-out order are 2, 3, 17, and
+       18. They will be vaccinated. (Their state will show as Vaccine Immune on
+       day 4.)
+     - On day 4, there is capacity to vaccinate 8 units. Continuing outwards,
+       units 1, 4, 5, 6, 13, 14, 15, and 16 will be vaccinated.
+     - On day 5, there is nothing new to do.  This will be the last simulation
+       day.
+  </parameter-description>
+
+  <output>
+    <!--    A 1-6    7-12   B 13-18  19-24        -->
+    <tr><td>L SSSSSS SSSSSS L SSSSSS SSSSSS</td></tr>
+    <tr><td>C SSSSSS SSSSSS C SSSSSS SSSSSS</td></tr>
+    <tr><td>N SSSSSS SSSSSS N SSSSSS SSSSSS</td></tr>
+    <tr><td>N SVVSSS SSSSSS N SSSSVV SSSSSS</td></tr>
+    <tr><td>N VVVVVV SSSSSS N VVVVVV SSSSSS</td></tr>
+  </output>
+</deterministic-test>

@@ -184,4 +184,5 @@ EXTRA_DIST = config/unix.exp 1unit.xml 2units.xml \
   3units_1_start_vimmune.xml \
   3units_1_start_destroyed.xml \
   24units_ring_plus2infected.xml \
+  24units_2rings_plus2infected.xml \
   $(testsuite_c_SOURCES)
