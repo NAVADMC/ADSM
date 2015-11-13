@@ -839,7 +839,7 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
                         }
                     }else{
                         var lastClickedSelect = get_parent_select($self);
-                        add_model_option_to_selects(form_html, lastClickedSelect)
+                        add_model_option_to_selects(form_html, lastClickedSelect);
                     }
                 }
                 load_target.replaceWith(form_html);

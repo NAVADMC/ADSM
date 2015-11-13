@@ -10,7 +10,11 @@ current_is_active = function (element) {
 };
 
 function active_tab(element) {
-//select the tab
+    //highlight the label: Style Highlighting for the active tab (makes it easier to see which one should be enable/disabled)
+    $(element).closest('.panel-group').find('.defined').removeClass('focused');
+    $(element).closest('.defined').addClass('focused');
+
+    //select the tab
     $('.tab-pane').removeClass('active');
     var target = $('.tab-pane a').filter(function () {
         return $(this).text().toLowerCase() === $(element).text().toLowerCase();
