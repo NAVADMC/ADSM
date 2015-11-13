@@ -34,6 +34,15 @@ switch_tabs = function(element){
     }
 };
 
+/** Drops down the accordion with tabs whenever the title link is clicked.
+ * This ensures that the user can immediately flip through the tabs of whatever the activated
+ * control protocol happens to be.
+ */
+ensure_expanded = function(element){
+    var id = $(element).prev('.accordion-toggle').attr('href');
+    $(id).collapse('show');
+};
+
 
     var build_protocols_list = function(){
         $.ajax({
@@ -50,7 +59,7 @@ switch_tabs = function(element){
                 var $header =
                     $('<div class="model-banner defined_wrapper"> ' +
                         '<a class="accordion-toggle" role="button" data-toggle="collapse" data-parent="#accordion" href="#sub-model'+index+'">' +
-                        '<a href="/setup/ControlProtocol/' + entry.pk + '/" load-target="#center-panel" >' + //nested for collapse/expand vs load panel functions
+                        '<a href="/setup/ControlProtocol/' + entry.pk + '/" load-target="#center-panel" onClick="ensure_expanded(this);">' + //nested for collapse/expand vs load panel functions
                         entry.name +'</a></a>' +
                         '<a href="#" class="delete-icon pull-right" title="delete" data-delete-link="/setup/ControlProtocol/2/delete/"></a> ' +
                         '<a href="/setup/ControlProtocol/' + entry.pk + '/copy/" load-target="#center-panel" class="copy-icon pull-right" title="duplicate"></a>' +
