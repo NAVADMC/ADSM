@@ -215,7 +215,7 @@ PIPELINE_CSS = {
     },
 }
 PIPELINE_JS = {
-    'adsm_js': {
+    'adsm_react_js': {
         'source_filenames': (
             'js/bower_components/jquery/dist/%s' % ('jquery.js' if DEBUG else 'jquery.min.js'),
             'js/bower_components/react/%s' % ('react-with-addons.js' if DEBUG else 'react-with-addons.min.js'),
