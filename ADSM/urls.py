@@ -1,6 +1,8 @@
 from django.conf.urls import patterns, include, url
-
+from django.views.generic import TemplateView
 from django.contrib import admin
+
+
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -12,6 +14,7 @@ urlpatterns = patterns('',
     url(r'^$', 'ADSMSettings.views.home'),
     url('^LoadingScreen/$', 'ADSMSettings.views.loading_screen'),
     url('^500/$', 'ADSM.debug_views.handler500'),
+    url(r'react/$', TemplateView.as_view(template_name='react.html'))
     )
 
 handler400 = 'ADSM.debug_views.handler400'

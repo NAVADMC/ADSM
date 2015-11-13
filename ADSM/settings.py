@@ -60,9 +60,11 @@ if not os.path.exists(DB_BASE_DIR):
 if sys.platform == 'win32':
     OS_DIR = 'windows'
     EXTENSION = '.exe'
+    SCRIPT = '.cmd'
 else:
     OS_DIR = 'linux'
     EXTENSION = ''
+    SCRIPT = ''
 
 INSTALLED_APPS = (
     'ScenarioCreator',
@@ -78,6 +80,7 @@ INSTALLED_APPS = (
     'floppyforms',
     'crispy_forms',
     'productionserver',
+    'pipeline',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -183,10 +186,44 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'pipeline.finders.PipelineFinder',
 )
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'ADSM', 'static'),
 )
+
+# Compile Chain
+PIPELINE_BROWSERIFY_BINARY = os.path.join(BASE_DIR, 'node_modules', '.bin', 'browserify' + SCRIPT)
+PIPELINE_COMPILERS = (
+    'pipeline_browserify.compiler.BrowserifyCompiler',
+)
+PIPELINE_CSSMIN_BINARY = os.path.join(BASE_DIR, 'node_modules', '.bin', 'cssmin' + SCRIPT)
+PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.cssmin.CSSMinCompressor'
+PIPELINE_UGLIFYJS_BINARY = os.path.join(BASE_DIR, 'node_modules', '.bin', 'uglifyjs' + SCRIPT)
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.uglifyjs.UglifyJSCompressor'
+PIPELINE_BROWSERIFY_ARGUMENTS = '-t reactify'
+if DEBUG:
+    PIPELINE_BROWSERIFY_ARGUMENTS += ' -d'
+PIPELINE_CSS = {
+    'adsm_css': {
+        'source_filenames': (
+            'css/bootstrap.min.css',
+            'css/adsm.css',  # TODO: Write a script to insert ALL css static files from ALL included apps here
+        ),
+        'output_filename': 'css/adsm_css.css',
+    },
+}
+PIPELINE_JS = {
+    'adsm_js': {
+        'source_filenames': (
+            'js/bower_components/jquery/dist/%s' % ('jquery.js' if DEBUG else 'jquery.min.js'),
+            'js/bower_components/react/%s' % ('react-with-addons.js' if DEBUG else 'react-with-addons.min.js'),
+            'js/bower_components/react-dom/%s' % ('react-dom.js' if DEBUG else 'react-dom.min.js'),
+            'js/adsm.react.browserify.js',  # TODO: Write a script to insert ALL js static files from ALL included apps here
+        ),
+        'output_filename': 'js/adsm_react_js.js',
+    },
+}
 
 LOGIN_REDIRECT_URL = '/'
 
