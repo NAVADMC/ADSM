@@ -25,7 +25,6 @@
 
 /* To avoid name clashes when multiple modules have the same interface. */
 #define new ring_vaccination_model_new
-#define factory ring_vaccination_model_factory
 #define run ring_vaccination_model_run
 #define to_string ring_vaccination_model_to_string
 #define local_free ring_vaccination_model_free
@@ -72,19 +71,40 @@ double round (double x);
 
 typedef struct
 {
-  guint ring_rule_id;
-  gboolean *trigger_production_type; /**< Which production types trigger
-    creation of a ring. */
-  gboolean *target_production_type; /**< Which production types inside the ring
-    get vaccinated. */
-  GPtrArray *production_types; /**< Production type names. Each item in the
-    array is a (char *). */
   double supp_radius; /**< Radius of suppressive ring. -1 if no suppressive
     ring is defined. */
   double prot_inner_radius; /**< Inner radius of protective ring. -1 if no
     protective ring is defined. */
   double prot_outer_radius; /**< Outer radius of protective ring. -1 if no
     protective ring is defined. */
+}
+param_block_t;
+
+
+
+typedef struct
+{
+  GPtrArray *production_types; /**< Production type names. Each item in the
+    array is a (char *). */
+  param_block_t ***param_block; /**< Blocks of parameters.
+    Use an expression of the form
+    param_block[from_production_type][to_production_type]
+    to get a pointer to a particular param_block. */
+  double *max_supp_radius; /**< One value for each production type, giving the
+    largest suppressive vaccination circle that can be triggered by a unit of
+    that production type. Useful for doing outside-in vaccination order.
+    max_supp_radius is initialized to -1, an invalid value, and will stay -1
+    if no suppressive vaccination circles are defined. */
+  double *min_prot_inner_radius; /**< One value for each production type,
+    giving the smallest inner radius of any protective vaccination ring that can
+    be triggered by a unit of that production type. Useful for doing inside-out
+    vaccination ourder. min_prot_inner_radius is initialized to -1, an invalid
+    value, and will stay -1 if no protective vaccination rings are defined. */
+  double *max_prot_outer_radius; /**< One value for each production type,
+    giving the largest outer radius of any protective vaccination ring that can
+    be triggered by a unit of that production type. Useful for doing outside-in
+    vaccination order. max_prot_outer_radius is initialized to -1, an invalid
+    value, and will stay -1 if no protective vaccination rings are defined. */
   GHashTable *requested_today; /**< A list of units for which this module made
     requests for vaccination today.  A unit can be in queue for vaccination
     more than once at a given time, but two requests for the same unit, for the
@@ -148,6 +168,7 @@ check_and_choose (int id, gpointer arg)
   UNT_unit_t *unit2;
   UNT_unit_t *unit1;
   local_data_t *local_data;
+  param_block_t *param_block;
   double distance;
 
 #if DEBUG
@@ -164,17 +185,25 @@ check_and_choose (int id, gpointer arg)
   local_data = callback_data->local_data;
 
   /* Is unit 2 a production type that gets vaccinated? */
-  if (local_data->target_production_type[unit2->production_type] == FALSE)
+  unit1 = callback_data->unit1;
+  param_block = local_data->param_block[unit1->production_type][unit2->production_type];
+  if (param_block == NULL)
     goto end;
 
   /* Avoid making the same request twice on a single day. */
   if (g_hash_table_lookup (local_data->requested_today, unit2) != NULL)
     goto end;
 
-  unit1 = callback_data->unit1;
+  /* The spatial search returns all the units within the largest possible
+   * vaccination ring around a unit of unit1's production type. However, the
+   * settings for which units of unit2's production type get vaccinated may be
+   * more restrictive. */
   distance = GIS_distance (unit1->x, unit1->y, unit2->x, unit2->y);
 
-  if (local_data->supp_radius >= 0)
+  /* Check distance against the suppressive circle radius.  If suppressive
+   * vaccination is not in effect, supp_radius will be -1 and the check
+   * distance < supp_radius will fail. */
+  if (distance <= param_block->supp_radius + EPSILON)
     {
       #if DEBUG
         g_debug ("unit %s within suppressive circle, ordering unit vaccinated", unit2->official_id);
@@ -185,14 +214,14 @@ check_and_choose (int id, gpointer arg)
                                                                 callback_data->day,
                                                                 ADSM_ControlSuppressiveRing,
                                                                 distance,
-                                                                local_data->supp_radius,
-                                                                local_data->prot_inner_radius,
-                                                                local_data->prot_outer_radius));
+                                                                local_data->max_supp_radius[unit1->production_type],
+                                                                local_data->min_prot_inner_radius[unit1->production_type],
+                                                                local_data->max_prot_outer_radius[unit1->production_type]));
       g_hash_table_insert (local_data->requested_today, unit2, unit2);  
     }
-  else if (local_data->prot_inner_radius >= 0
-           && distance >= local_data->prot_inner_radius - EPSILON
-           && distance <= local_data->prot_outer_radius + EPSILON)
+  else if (param_block->prot_inner_radius >= 0
+           && distance >= param_block->prot_inner_radius - EPSILON
+           && distance <= param_block->prot_outer_radius + EPSILON)
     {
       #if DEBUG
         g_debug ("unit %s within protective ring, ordering unit vaccinated", unit2->official_id);
@@ -203,9 +232,9 @@ check_and_choose (int id, gpointer arg)
                                                                 callback_data->day,
                                                                 ADSM_ControlProtectiveRing,
                                                                 distance,
-                                                                local_data->supp_radius,
-                                                                local_data->prot_inner_radius,
-                                                                local_data->prot_outer_radius));
+                                                                local_data->max_supp_radius[unit1->production_type],
+                                                                local_data->min_prot_inner_radius[unit1->production_type],
+                                                                local_data->max_prot_outer_radius[unit1->production_type]));
       g_hash_table_insert (local_data->requested_today, unit2, unit2);
     }
 
@@ -239,8 +268,8 @@ ring_vaccinate (struct adsm_module_t_ *self, UNT_unit_list_t * units, UNT_unit_t
   callback_data.queue = queue;
 
   /* Find the distances to other units. */
-  max_radius = MAX (local_data->supp_radius,
-                    local_data->prot_outer_radius);
+  max_radius = MAX (local_data->max_supp_radius[unit->production_type],
+                    local_data->max_prot_outer_radius[unit->production_type]);
   spatial_search_circle_by_id (units->spatial_index, unit->index,
                                max_radius + EPSILON,
                                check_and_choose, &callback_data);
@@ -274,7 +303,7 @@ handle_detection_event (struct adsm_module_t_ *self, UNT_unit_list_t * units,
   local_data = (local_data_t *) (self->model_data);
   unit = event->unit;
 
-  if (local_data->trigger_production_type[unit->production_type] == TRUE)
+  if (local_data->param_block[unit->production_type] != NULL)
     ring_vaccinate (self, units, unit, event->day, queue);
 
 #if DEBUG
@@ -334,44 +363,47 @@ to_string (struct adsm_module_t_ *self)
 {
   GString *s;
   local_data_t *local_data;
-  unsigned int nprod_types, i;
-  gboolean first;
+  unsigned int nprod_types, i, j;
+  param_block_t *param_block;
 
   local_data = (local_data_t *) (self->model_data);
   s = g_string_new (NULL);
   g_string_printf (s, "<%s", MODEL_NAME);
 
-  g_string_append_printf (s, " detection of");
+  /* Add the parameter block for each to-from combination of production
+   * types, and show the max and min radius for each from-production-type. */
   nprod_types = local_data->production_types->len;
-  first = TRUE;
   for (i = 0; i < nprod_types; i++)
     {
-      if (local_data->trigger_production_type[i] == TRUE)
+      char *from_prodtype;
+      if (local_data->param_block[i] == NULL)
+        continue;
+
+      from_prodtype = (char *) g_ptr_array_index (local_data->production_types, i);
+      g_string_append_printf (s, "\n  for %s", from_prodtype);
+      g_string_append_printf (s, "\n    size limits=%g (supp),%g-%g (prot)",
+                              local_data->max_supp_radius[i],
+                              local_data->min_prot_inner_radius[i],
+                              local_data->max_prot_outer_radius[i]);
+
+      for (j = 0; j < nprod_types; j++)
         {
-          g_string_append_printf(s, first ? " %s" : ",%s",
-                                 (char *) g_ptr_array_index (local_data->production_types, i));
-          first = FALSE;
-        }
-    }
-  g_string_append_printf (s, " causes vaccination of");
-  first = TRUE;
-  for (i = 0; i < nprod_types; i++)
-    {
-      if (local_data->target_production_type[i] == TRUE)
-        {
-          g_string_append_printf(s, first ? " %s" : ",%s",
-                                 (char *) g_ptr_array_index (local_data->production_types, i));
-          first = FALSE;
-        }
-    }
-  if (local_data->supp_radius > 0)
-    g_string_append_printf (s, " within %g km suppressive circle",
-                            local_data->supp_radius);
-  if (local_data->prot_inner_radius > 0)
-    g_string_append_printf (s, " within %g-%g km protective ring",
-                            local_data->prot_inner_radius,
-                            local_data->prot_outer_radius);
-      
+          if (local_data->param_block[i][j] == NULL)
+            continue;
+
+          param_block = local_data->param_block[i][j];
+          g_string_append_printf (s, "\n    for %s -> %s",
+                                  from_prodtype,
+                                  (char *) g_ptr_array_index (local_data->production_types, j));
+          if (param_block->supp_radius > 0)
+            g_string_append_printf (s, "\n      suppressive radius=%g",
+                                    param_block->supp_radius);
+          if (param_block->prot_inner_radius > 0)
+            g_string_append_printf (s, "\n      protective radius=%g-%g",
+                                    param_block->prot_inner_radius,
+                                    param_block->prot_outer_radius);
+        } /* end of loop over to-production-types */
+    } /* end of loop over from-production-types */
   g_string_append_c (s, '>');
 
   /* don't return the wrapper object */
@@ -389,6 +421,7 @@ void
 local_free (struct adsm_module_t_ *self)
 {
   local_data_t *local_data;
+  unsigned int nprod_types, i, j;
 
 #if DEBUG
   g_debug ("----- ENTER free (%s)", MODEL_NAME);
@@ -396,8 +429,22 @@ local_free (struct adsm_module_t_ *self)
 
   local_data = (local_data_t *) (self->model_data);
 
-  g_free (local_data->trigger_production_type);
-  g_free (local_data->target_production_type);
+  /* Free each of the parameter blocks. */
+  nprod_types = local_data->production_types->len;
+  for (i = 0; i < nprod_types; i++)
+    if (local_data->param_block[i] != NULL)
+      {
+        for (j = 0; j < nprod_types; j++)
+          g_free (local_data->param_block[i][j]); /* g_free is safe on NULLs */
+        /* Free this row of the 2D array. */
+        g_free (local_data->param_block[i]);
+      }
+  /* Free the array of pointers to rows. */
+  g_free (local_data->param_block);
+
+  g_free (local_data->max_supp_radius);
+  g_free (local_data->min_prot_inner_radius);
+  g_free (local_data->max_prot_outer_radius);
   g_hash_table_destroy (local_data->requested_today);
   g_free (local_data);
   g_ptr_array_free (self->outputs, TRUE);
@@ -455,13 +502,16 @@ set_params (void *data, GHashTable *dict)
   adsm_module_t *self;
   local_data_t *local_data;
   sqlite3 *params;
-  double outer_radius;
-  char *tmp_text;
-  guint nprod_types;
   guint ring_rule_id;
+  char *tmp_text;
+  gboolean is_suppressive;
+  double supp_radius, prot_outer_radius, prot_inner_radius;
+  gboolean *trigger_production_type, *target_production_type;
+  guint nprod_types, i, j;
   set_prodtype_args_t args;
   gchar *sql;
   char *sqlerr;
+  param_block_t *param_block;
 
 #if DEBUG
   g_debug ("----- ENTER set_params (%s)", MODEL_NAME);
@@ -473,41 +523,39 @@ set_params (void *data, GHashTable *dict)
   local_data = (local_data_t *) (self->model_data);
   params = local_data->db;
 
+  ring_rule_id = strtol(g_hash_table_lookup (dict, "id"), NULL, /* base */ 10);
+  #if DEBUG
+    g_debug ("creating ring rule with ID %u", ring_rule_id);
+  #endif
+
   /* If there is just an outer radius, this is a suppressive circle, otherwise
    * this is a protective ring. */
-  outer_radius = strtod(g_hash_table_lookup (dict, "outer_radius"), NULL);
-  /* Radius must be positive. */
-  if (outer_radius < 0)
-    {
-      g_warning ("%s: radius cannot be negative, setting to 0", MODEL_NAME);
-      outer_radius = 0;
-    }
-
   tmp_text = g_hash_table_lookup (dict, "inner_radius");
   if (tmp_text == NULL)
     {
       /* Suppressive circle */
-      local_data->supp_radius = outer_radius;
-      local_data->prot_inner_radius = local_data->prot_outer_radius = -1;
+      is_suppressive = TRUE;
+      supp_radius = strtod(g_hash_table_lookup (dict, "outer_radius"), NULL);
+      prot_inner_radius = prot_outer_radius = -1;
     }
   else
     {
       /* Protective ring */
-      local_data->prot_outer_radius = outer_radius;
-      local_data->prot_inner_radius = strtod(tmp_text, NULL);
-      local_data->supp_radius = -1;
+      is_suppressive = FALSE;
+      prot_outer_radius = strtod(g_hash_table_lookup (dict, "outer_radius"), NULL);
+      prot_inner_radius = strtod(tmp_text, NULL);
+      supp_radius = -1;
     }
 
   /* Fill in the production types that trigger this ring rule. */
   nprod_types = local_data->production_types->len;
-  local_data->trigger_production_type = g_new0(gboolean, nprod_types);
-  ring_rule_id = strtol(g_hash_table_lookup (dict, "id"), NULL, /* base */ 10);
+  trigger_production_type = g_new0(gboolean, nprod_types);
   sql = g_strdup_printf ("SELECT prodtype.name AS prodtype "
                          "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_vaccinationringrule_trigger_group grp "
                          "WHERE grp.vaccinationringrule_id=%u "
                          "AND prodtype.id=grp.productiontype_id",
                          ring_rule_id);
-  args.flags = local_data->trigger_production_type;
+  args.flags = trigger_production_type;
   args.production_types = local_data->production_types;
   sqlite3_exec_dict (params, sql,
                      set_prodtype, &args, &sqlerr);
@@ -518,13 +566,13 @@ set_params (void *data, GHashTable *dict)
   g_free (sql);
 
   /* Fill in the production types that get vaccinated by this ring rule. */
-  local_data->target_production_type = g_new0(gboolean, nprod_types);
+  target_production_type = g_new0(gboolean, nprod_types);
   sql = g_strdup_printf ("SELECT prodtype.name AS prodtype "
                          "FROM ScenarioCreator_productiontype prodtype,ScenarioCreator_vaccinationringrule_target_group grp "
                          "WHERE grp.vaccinationringrule_id=%u "
                          "AND prodtype.id=grp.productiontype_id",
                          ring_rule_id);
-  args.flags = local_data->target_production_type;
+  args.flags = target_production_type;
   sqlite3_exec_dict (params, sql,
                      set_prodtype, &args, &sqlerr);
   if (sqlerr)
@@ -532,6 +580,98 @@ set_params (void *data, GHashTable *dict)
       g_error ("%s", sqlerr);
     }
   g_free (sql);
+
+  nprod_types = local_data->production_types->len;
+  for (i = 0; i < nprod_types; i++)
+    if (trigger_production_type[i] == TRUE)
+      {
+        /* If necessary, create a row in the 2D array for this trigger
+         * production type. */
+        if (local_data->param_block[i] == NULL)
+          local_data->param_block[i] = g_new0 (param_block_t *, nprod_types);
+
+        for (j = 0; j < nprod_types; j++)
+          if (target_production_type[j] == TRUE)
+            {
+              /* Create a parameter block for this to-from production type
+               * combination, or overwrite the existing one. */
+              param_block = local_data->param_block[i][j];
+              if (param_block == NULL)
+                {
+                  param_block = g_new (param_block_t, 1);
+                  local_data->param_block[i][j] = param_block;
+                  #if DEBUG
+                    g_debug ("setting parameters for %s -> %s",
+                             (char *) g_ptr_array_index (local_data->production_types, i),
+                             (char *) g_ptr_array_index (local_data->production_types, j));
+                  #endif
+                  param_block->supp_radius = supp_radius;
+                  param_block->prot_inner_radius = prot_inner_radius;
+                  param_block->prot_outer_radius = prot_outer_radius;
+                }
+              else
+                {
+                  /* It's OK if one ring rule provides the suppressive circle
+                   * parameters and another provides the protective ring
+                   * parameters.  But warn if there is any overwriting. */
+                  if (is_suppressive)
+                    {
+                      if (param_block->supp_radius >= 0
+                          && param_block->supp_radius != supp_radius)
+                        {
+                          g_warning ("Both %g and %g given as suppressive circle radius for vaccination of %s units around detected %s units. Using the larger value.",
+                                     param_block->supp_radius, supp_radius,
+                                     (char *) g_ptr_array_index (local_data->production_types, j),
+                                     (char *) g_ptr_array_index (local_data->production_types, i));
+                          param_block->supp_radius = MAX(param_block->supp_radius, supp_radius);
+                        }
+                      else
+                        param_block->supp_radius = supp_radius;
+                    }
+                  else
+                    {
+                      if (param_block->prot_inner_radius >= 0
+                          && (param_block->prot_inner_radius != prot_inner_radius
+                              || param_block->prot_outer_radius != prot_outer_radius))
+                        {
+                          g_warning ("Both %g-%g and %g-%g given as protective ring radius for vaccination of %s units around detected %s units. Using the widest ring.",
+                                     param_block->prot_inner_radius, param_block->prot_outer_radius,
+                                     prot_inner_radius, prot_outer_radius,
+                                     (char *) g_ptr_array_index (local_data->production_types, j),
+                                     (char *) g_ptr_array_index (local_data->production_types, i));
+                          param_block->prot_inner_radius = MIN(param_block->prot_inner_radius, prot_inner_radius);
+                          param_block->prot_outer_radius = MAX(param_block->prot_outer_radius, prot_outer_radius);
+                        }
+                      else
+                        {
+                          param_block->prot_inner_radius = prot_inner_radius;
+                          param_block->prot_outer_radius = prot_outer_radius;
+                        }
+                    }
+                }
+
+              /* Keep track of the size limits of the suppressive circles and
+               * protective rings for each production type. */
+              if (is_suppressive)
+                {
+                  if (param_block->supp_radius > local_data->max_supp_radius[i])
+                    local_data->max_supp_radius[i] = param_block->supp_radius;
+                }
+              else
+                {
+                  if (param_block->prot_outer_radius > local_data->max_prot_outer_radius[i])
+                    local_data->max_prot_outer_radius[i] = param_block->prot_outer_radius;
+
+                  if ((param_block->prot_inner_radius != 0)
+                      && (local_data->min_prot_inner_radius[i] < 0 /* min value not yet initialized */
+                          || (param_block->prot_inner_radius < local_data->min_prot_inner_radius[i])))
+                    local_data->min_prot_inner_radius[i] = param_block->prot_inner_radius;
+                }
+            }
+      }
+
+  g_free (trigger_production_type);
+  g_free (target_production_type);
 
 #if DEBUG
   g_debug ("----- EXIT set_params (%s)", MODEL_NAME);
@@ -547,7 +687,7 @@ set_params (void *data, GHashTable *dict)
  */
 adsm_module_t *
 new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
-     ZON_zone_list_t * zones, gpointer user_data, GError **error)
+     ZON_zone_list_t * zones, GError **error)
 {
   adsm_module_t *self;
   local_data_t *local_data;
@@ -556,7 +696,7 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
     EVT_Detection,
     0
   };
-  guint ring_rule_id;
+  guint nprod_types, i;
   char *sql;
   char *sqlerr;
 
@@ -580,18 +720,33 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
   self->fprintf = adsm_model_fprintf;
   self->free = local_free;
 
+  /* local_data->param_block is a 2D array of parameter blocks, each block
+   * holding the parameters for one to-from combination of production types.
+   * Initially, all row pointers are NULL.  Rows will be created as needed in
+   * the set_params function. */
   local_data->production_types = units->production_type_names;
+  nprod_types = local_data->production_types->len;
+  local_data->param_block = g_new0 (param_block_t **, nprod_types);
 
   /* Initialize a list of units for avoiding making two requests for the same
    * unit on the same day. */
   local_data->requested_today = g_hash_table_new (g_direct_hash, g_direct_equal);
 
-  /* Call the set_params function to read ring rule's details. */
-  ring_rule_id = GPOINTER_TO_UINT(user_data);
-  local_data->ring_rule_id = ring_rule_id;
-  sql = g_strdup_printf ("SELECT id,inner_radius,outer_radius "
-                         "FROM ScenarioCreator_vaccinationringrule "
-                         "WHERE id=%u", ring_rule_id);
+  /* Initialize arrays to hold the size limits of the suppressive circles and
+   * protective rings that can be triggered around each production type. */
+  local_data->max_supp_radius = g_new (double, nprod_types);
+  local_data->min_prot_inner_radius = g_new (double, nprod_types);
+  local_data->max_prot_outer_radius = g_new (double, nprod_types);
+  /* Initialize to invalid negative values. */
+  for (i = 0; i < nprod_types; i++)
+    {
+      local_data->max_supp_radius[i] = -1;
+      local_data->min_prot_inner_radius[i] = -1;
+      local_data->max_prot_outer_radius[i] = -1;
+    }
+
+  /* Call the set_params function to read ring rules' details. */
+  sql = "SELECT id,inner_radius,outer_radius FROM ScenarioCreator_vaccinationringrule";
   local_data->db = params;
   sqlite3_exec_dict (params, sql, set_params, self, &sqlerr);
   if (sqlerr)
@@ -599,105 +754,12 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       g_error ("%s", sqlerr);
     }
   local_data->db = NULL;
-  g_free (sql);
 
 #if DEBUG
   g_debug ("----- EXIT new (%s)", MODEL_NAME);
 #endif
 
   return self;
-}
-
-
-
-/**
- * A type to hold arguments to create_ring_rule().
- */
-typedef struct
-{
-  sqlite3 *params;
-  UNT_unit_list_t *units;
-  projPJ projection;
-  ZON_zone_list_t * zones;
-  GError **error;
-  GSList *ring_rules;  
-}
-create_ring_rule_args_t;
-
-
-
-/**
- * The function receives a ring rule ID and calls "new" to instantiate that
- * ring rule.
- */
-static int
-create_ring_rule (void *data, GHashTable *dict)
-{
-  create_ring_rule_args_t *args;
-  guint ring_rule_id;
-  adsm_module_t *module;
-
-  args = data;
-  
-  /* We receive the ring rule ID as a name (string). */
-  ring_rule_id = strtol(g_hash_table_lookup (dict, "id"), NULL, /* base */ 10);
-  #if DEBUG
-    g_debug ("creating ring rule with ID %u", ring_rule_id);
-  #endif
-
-  /* Call the "new" function to instantiate a module for the ring rule with
-   * that ID. */
-  module =
-    ring_vaccination_model_new (args->params, args->units,
-      args->projection, args->zones, GUINT_TO_POINTER(ring_rule_id), args->error);
-
-  /* Add the new module to the list returned by the factory. */
-  args->ring_rules = g_slist_prepend (args->ring_rules, module);
-
-  return 0;
-}
-
-
-
-/**
- * Returns one or more new ring vaccination rules.
- */
-GSList *
-factory (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
-         ZON_zone_list_t * zones, GError **error)
-{
-  GSList *modules;
-  create_ring_rule_args_t args;
-  char *sqlerr;
-
-  #if DEBUG
-    g_debug ("----- ENTER factory (%s)", MODEL_NAME);
-  #endif
-
-  /* Call the set_params function to read the individual triggers. Because
-   * sqlite3_exec_dict callback functions have only 1 parameter available for
-   * user data, we pack all the arguments set_params will need into a structure
-   * to pass. */
-  args.params = params;
-  args.units = units;
-  args.projection = projection;
-  args.zones = zones;
-  args.error = error;
-  args.ring_rules = NULL;
-  sqlite3_exec_dict (params,
-                     "SELECT id FROM ScenarioCreator_vaccinationringrule",
-                     create_ring_rule, &args, &sqlerr);
-  if (sqlerr)
-    {
-      g_error ("%s", sqlerr);
-    }
-  modules = args.ring_rules;
-
-  #if DEBUG
-    g_debug ("----- EXIT factory (%s)", MODEL_NAME);
-  #endif
-
-  return modules;
 }
 
 /* end of file ring_vaccination_model.c */

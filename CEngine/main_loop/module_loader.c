@@ -257,7 +257,7 @@ adsm_load_modules (sqlite3 *scenario_db, UNT_unit_list_t * units,
   if (include_vaccination)
     {
       g_ptr_array_add (instantiation_fns, vaccine_model_new);
-      g_ptr_array_add (factory_fns, ring_vaccination_model_factory);
+      g_ptr_array_add (instantiation_fns, ring_vaccination_model_new);
       g_ptr_array_add (factory_fns, number_of_detections_vaccination_trigger_factory);
       g_ptr_array_add (factory_fns, detection_rate_vaccination_trigger_factory);
       g_ptr_array_add (factory_fns, estimated_dissemination_rate_vaccination_trigger_factory);
