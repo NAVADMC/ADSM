@@ -114,6 +114,7 @@ dist_noinst_DATA = state-transition.png \
   16units_square.png \
   16units_2rings.png \
   20units_2rings.png \
+  21units_3rings_overlap.png \
   24units_2rings_plus2infected.png \
   no_rtree_lat0.png \
   rtree_lat0.png \
@@ -200,6 +201,7 @@ dist_noinst_DATA = state-transition.png \
   vaccpriority_2cols_rings_size_2-5_1-3.png \
   14units_2rings_overlap_thin_rings.png \
   15units_1ring_s_p.png \
+  21units_3rings_overlap_thin_rings.png \
   clock_24_hour.png
 
 state_transition_png_SOURCES = state-transition.dia
@@ -363,6 +365,8 @@ units_circle2_png_SOURCES = $(top_srcdir)/models/test/units_circle2.xml
 
 20units_2rings_png_SOURCES = $(top_srcdir)/models/test/20units_2rings.xml
 
+21units_3rings_overlap_png_SOURCES = $(top_srcdir)/models/test/21units_3rings_overlap.xml
+
 24units_2rings_plus2infected_png_SOURCES = $(top_srcdir)/models/test/24units_2rings_plus2infected.xml
 
 no_rtree_lat0_png_SOURCES = $(top_srcdir)/models/test/no_rtree_lat0.xml
@@ -494,5 +498,7 @@ vaccpriority_2cols_rings_size_2_5_1_3_png_SOURCES = vaccpriority_2cols_rings_siz
 14units_2rings_overlap_thin_rings_png_SOURCES = 14units_2rings_overlap_thin_rings.gnuplot
 
 15units_1ring_s_p_png_SOURCES = 15units_1ring_s_p.gnuplot
+
+21units_3rings_overlap_thin_rings_png_SOURCES = 21units_3rings_overlap_thin_rings.gnuplot
 
 clock_24_hour_png_SOURCES = clock_24_hour.dia

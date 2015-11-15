@@ -1228,6 +1228,46 @@ end:
 
 
 
+/**
+ * Counts how many units in vaccination_set are assigned to each ring in
+ * active_vaccination_rings.  This is part of the process of expiring finished
+ * rings.  Typed as a GHFunc so that it can be used with the foreach function
+ * of a GHashTable.
+ *
+ * @param key a unit (UNT_unit_t *), cast to a gpointer. Not used.
+ * @param value a scorecard (USC_scorecard_t *), cast to a gpointer
+ * @param user_data a GHashTable where key = unit at center of vaccination ring
+ *   and value = count of units currently assigned to the ring (as
+ *   GUINT_TO_POINTER)
+ */
+void
+count_units_in_active_vaccination_rings (gpointer key,
+                                         gpointer value,
+                                         gpointer user_data)
+{
+  USC_scorecard_t *scorecard;
+  GHashTable *ring_count;
+  guint count;
+
+  scorecard = value;
+  ring_count = user_data;
+  if (g_hash_table_contains (ring_count, scorecard->unit_at_vacc_ring_center))
+    {
+      count = 1 +
+        GPOINTER_TO_UINT (g_hash_table_lookup (ring_count,
+                                               scorecard->unit_at_vacc_ring_center));
+    }
+  else
+    {
+      count = 1;
+    }
+  g_hash_table_insert (ring_count, scorecard->unit_at_vacc_ring_center,
+                       GUINT_TO_POINTER (count));
+  return;  
+}
+
+
+
 void
 vaccinate_by_priority (struct adsm_module_t_ *self, int day,
                        EVT_event_queue_t * queue)
@@ -1329,6 +1369,56 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
 
           i += 1;      
         } /* end of loop to do vaccinations */
+
+      /* Now expire any rings in active_vaccination_rings that no longer
+       * contain any units. */
+      if (local_data->active_vaccination_rings->len > 0)
+        {
+          GHashTable *ring_count; /**< Key = unit at center, value = count of
+            units as GUINT_TO_POINTER. */
+          #if DEBUG
+            g_debug ("looking for expired vaccination rings");
+          #endif
+          ring_count = g_hash_table_new (g_direct_hash, g_direct_equal);
+          g_hash_table_foreach (local_data->vaccination_set,
+                                count_units_in_active_vaccination_rings,
+                                ring_count);
+          /* Step backwards over the active_vaccination_rings array, deleting any
+           * expired ones. */
+          i = local_data->active_vaccination_rings->len - 1;
+          while (TRUE)
+            {
+              USC_vaccination_ring_t *ring;
+              ring = g_ptr_array_index (local_data->active_vaccination_rings, i);
+              if (!g_hash_table_contains (ring_count, ring->unit_at_center))
+                {
+                  /* This ring has expired. */
+                  #if DEBUG
+                    g_debug ("vaccination ring around unit \"%s\" has expired, removing",
+                             ring->unit_at_center->official_id);
+                  #endif
+                  g_ptr_array_remove_index (local_data->active_vaccination_rings, i);
+                  /* This g_ptr_array has a destroy function defined, so the
+                   * USC_vaccination_ring_t object will be properly freed by
+                   * the remove_index function. */
+                }
+              else
+                {
+                  #if DEBUG
+                    g_debug ("vaccination ring around unit \"%s\" still contains %u units",
+                             ring->unit_at_center->official_id,
+                             GPOINTER_TO_UINT (g_hash_table_lookup (ring_count,
+                                                                    ring->unit_at_center)));
+                  #endif
+                  ;
+                }
+              if (i == 0)
+                break;
+              else
+                i--;
+            }
+          g_hash_table_destroy (ring_count);
+        } /* end of deleting expired vaccination rings */
 
     } /* end of if vaccination capacity > 0 */
 

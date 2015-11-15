@@ -8527,3 +8527,78 @@
     <tr><td>N N VSSVVV VVVVSS</td></tr>
   </output>
 </deterministic-test>
+
+<deterministic-test>
+  <category>ring_vaccination</category>
+  <short-name>protective rings punch holes 3 with ring expiry</short-name>
+
+  <description>
+    This is one of a set of tests to check that protective vaccination rings
+    punch holes in each other. In this test, one ring is partially complete
+    when a new, overlapping ring appears.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>22 May 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>21units_3rings_overlap</population-file>
+
+  <parameter-file>prot_ring_punch_holes_3_expiry</parameter-file>
+
+  <parameter-description>
+    Units of type “B” are latent for 1 day, clinical for 1 day, then immune.
+    Units of type “A” are latent for 3 days, clinical for 1 day, then immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A
+    vaccination ring with inner radius 7/8 km and outer radius 1 1/8 km is
+    created around a detected unit.  There is capacity to vaccinate 100 units
+    per day. Vaccination is prioritized by time waiting (oldest requests first),
+    then by size (largest first).
+
+    What should happen:
+     - On day 1 units A, B, and C will be Latent.
+     - On day 2 unit B will be Infectious Clinical. It will be detected, a
+       vaccination program will be initiated, and all of the units in the middle
+       ring will be queued for vaccination.
+     - Starting on day 3, two units can be vaccinated each day. Going by unit
+       size, units 7 and 8 will be vaccinated (their state will show as Vaccine
+       Immune on day 4).
+     - On day 4, vaccination of the right ring will continue with units 9 and 10.
+       Unit A will be Infectious Clinical. It will be detected and the units
+       in the left ring will be queued for vaccination.
+     - On day 5, vaccination will continue with units 1 and 4 (skipping over
+       units 11, 12, 2, and 3, which are in the hole punched out of the middle
+       ring).  Unit C will be Infectious Clinical. It will be detected and
+       the units in the right ring will be queued for vaccination.
+     - On day 6, vaccination of the left ring will complete with units 5 and 6.
+     - On days 7-9, the right ring will be vaccinated, going two units at a time
+       in largest-to-smallest order.  Units 17 and 18 will *not* be skipped
+       because the middle ring was already complete (expired) when the right
+       ring was created.
+     - On day 9, vaccination of the left ring will continue with unit 5.
+     - On day 10, vaccination of the left ring will continue with unit 6.
+     - On day 11, nothing new happens: all the units that need to be vaccinated
+       have been. This will be the last simulation day.
+  </parameter-description>
+
+  <diagram>21units_3rings_overlap_thin_rings</diagram>
+
+  <output>
+    <!--    A B C 1-6    7-12   13-18        -->
+    <tr><td>L L L SSSSSS SSSSSS SSSSSS</td></tr>
+    <tr><td>L C L SSSSSS SSSSSS SSSSSS</td></tr>
+    <tr><td>L N L SSSSSS SSSSSS SSSSSS</td></tr>
+    <tr><td>C N L SSSSSS VVSSSS SSSSSS</td></tr>
+    <tr><td>N N C SSSSSS VVVVSS SSSSSS</td></tr>
+    <tr><td>N N N VSSVSS VVVVSS SSSSSS</td></tr>
+    <tr><td>N N N VSSVVV VVVVSS SSSSSS</td></tr>
+    <tr><td>N N N VSSVVV VVVVSS VVSSSS</td></tr>
+    <tr><td>N N N VSSVVV VVVVSS VVVVSS</td></tr>
+    <tr><td>N N N VSSVVV VVVVSS VVVVVV</td></tr>
+  </output>
+</deterministic-test>
