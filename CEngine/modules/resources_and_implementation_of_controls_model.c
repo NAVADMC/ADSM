@@ -1300,19 +1300,31 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
 
           scorecard = g_ptr_array_index (local_data->scorecards_sorted, nscorecards - 1 - i);
           unit = scorecard->unit;
-
-          request = USC_scorecard_vaccination_request_pop_oldest (scorecard);
-          g_assert (request != NULL);
-          details = &(request->u.request_for_vaccination);
-          vaccinate (self, details->unit, day, details->reason,
-                     details->day_commitment_made, queue);
-
-          /* If this scorecard contains no more requests for vaccination,
-           * then we can remove it from the vaccination set. */
-          if (USC_scorecard_vaccination_request_peek_oldest (scorecard) == NULL)
+          if (scorecard->distance_from_vacc_ring_outside < DBL_MAX)
             {
-              g_hash_table_remove (local_data->vaccination_set, unit);
-              g_hash_table_insert (local_data->removed_from_vaccination_set_today, unit, GINT_TO_POINTER(1));
+              request = USC_scorecard_vaccination_request_pop_oldest (scorecard);
+              g_assert (request != NULL);
+              details = &(request->u.request_for_vaccination);
+              vaccinate (self, details->unit, day, details->reason,
+                         details->day_commitment_made, queue);
+
+              /* If this scorecard contains no more requests for vaccination,
+               * then we can remove it from the vaccination set. */
+              if (USC_scorecard_vaccination_request_peek_oldest (scorecard) == NULL)
+                {
+                  g_hash_table_remove (local_data->vaccination_set, unit);
+                  g_hash_table_insert (local_data->removed_from_vaccination_set_today, unit, GINT_TO_POINTER(1));
+                }
+            }
+          else
+            {
+              /* This unit was found to be inside the hole in a vaccination
+               * ring. Remove it from the vaccination set. */
+              #if DEBUG
+                g_debug ("unit \"%s\" found to be inside the hole in a vaccination ring",
+                         unit->official_id);
+              #endif
+              cancel_vaccination (self, unit, day, /* older_than = */ 0, queue);
             }
 
           i += 1;      

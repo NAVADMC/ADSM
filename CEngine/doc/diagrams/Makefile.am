@@ -106,6 +106,8 @@ dist_noinst_DATA = state-transition.png \
   8units_2rows_4.png \
   9units.png \
   9units_2_zone_holes.png \
+  10units_2cols.png \
+  14units_2rings_overlap.png \
   15units_line.png \
   units_circle.png \
   units_circle2.png \
@@ -196,6 +198,7 @@ dist_noinst_DATA = state-transition.png \
   vaccpriority_2cols_rings_same_size.png \
   vaccpriority_2cols_rings_size_5_3.png \
   vaccpriority_2cols_rings_size_2-5_1-3.png \
+  14units_2rings_overlap_thin_rings.png \
   15units_1ring_s_p.png \
   clock_24_hour.png
 
@@ -344,6 +347,10 @@ priority_queues_png_SOURCES = priority_queues.dia
 
 9units_png_SOURCES = $(top_srcdir)/models/test/9units.xml
 
+10units_2cols_png_SOURCES = $(top_srcdir)/models/test/10units_2cols.xml
+
+14units_2rings_overlap_png_SOURCES = $(top_srcdir)/models/test/14units_2rings_overlap.xml
+
 15units_line_png_SOURCES = $(top_srcdir)/models/test/15units_line.xml
 
 units_circle_png_SOURCES = $(top_srcdir)/models/test/units_circle.xml
@@ -483,6 +490,8 @@ vaccpriority_2cols_rings_same_size_png_SOURCES = vaccpriority_2cols_rings_same_s
 vaccpriority_2cols_rings_size_5_3_png_SOURCES = vaccpriority_2cols_rings_size_5_3.gnuplot
 
 vaccpriority_2cols_rings_size_2_5_1_3_png_SOURCES = vaccpriority_2cols_rings_size_2-5_1-3.gnuplot
+
+14units_2rings_overlap_thin_rings_png_SOURCES = 14units_2rings_overlap_thin_rings.gnuplot
 
 15units_1ring_s_p_png_SOURCES = 15units_1ring_s_p.gnuplot
 
