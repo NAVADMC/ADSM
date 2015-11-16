@@ -109,6 +109,7 @@ dist_noinst_DATA = state-transition.png \
   10units_2cols.png \
   14units_2rings_overlap.png \
   15units_line.png \
+  15units_2rings.png \
   units_circle.png \
   units_circle2.png \
   16units_square.png \
@@ -355,6 +356,8 @@ priority_queues_png_SOURCES = priority_queues.dia
 14units_2rings_overlap_png_SOURCES = $(top_srcdir)/models/test/14units_2rings_overlap.xml
 
 15units_line_png_SOURCES = $(top_srcdir)/models/test/15units_line.xml
+
+15units_2rings_png_SOURCES = $(top_srcdir)/models/test/15units_2rings.xml
 
 units_circle_png_SOURCES = $(top_srcdir)/models/test/units_circle.xml
 

@@ -8596,6 +8596,201 @@
   </output>
 </deterministic-test>
 
+<variable-test>
+  <category>control_measures</category>
+  <short-name>2 vaccination circles, round-robin, priority production type C-D, 2 units/day</short-name>
+
+  <description>
+    This is one of a set of tests to exercise the vaccination priority system
+    after the changes in version 3.3. There are 2 rings of units of type C and
+    D; these are the units that will get vaccinated.  Inside the first ring are
+    2 units of type A, and inside the second ring are 2 units of type B.
+
+    In this test, 2 vaccination circles are created on the same day.
+    Round-robin priority is turned on, then production type C has priority over
+    type D.  2 units can be vaccinated each day.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>8 May 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>vacc_priority_2rings_roundrobin_prodtypeC-D</parameter-file>
+
+  <parameter-description>
+    For production types A and B, the infectious subclinical period is 1 day,
+    and the latent period is 30 days.  This ensures that just 1 A unit and 1 B
+    unit will be detected during this simulation, on day 2.
+    
+    Vaccination begins after 1 detection.  There is capacity to vaccinate 2
+    units per day.
+
+    What should happen:
+     - Day 1: Units 2 and 3 will be subclinical.
+     - Day 2: Units 2 and 3 will be clinical.  They will be detected and this
+       will initiate a vaccination program.
+     - Days 3-8: On each day, there is capacity to vaccinate 2 units. Since
+       round-robin priority is on, 1 unit from each ring will be vaccinated
+       each day.
+     - Day 9: Vaccination is complete. This will be the last simulation day.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnU</td>
+      <td>vacnUC</td>
+      <td>vacnUD</td>
+    </tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
+    <tr><td>2</td>  <td>0</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>control_measures</category>
+  <short-name>2 vaccination circles, round-robin, priority production type C-D, 1 unit/day</short-name>
+
+  <description>
+    This is one of a set of tests to exercise the vaccination priority system
+    after the changes in version 3.3. There are 2 rings of units of type C and
+    D; these are the units that will get vaccinated.  Inside the first ring are
+    2 units of type A, and inside the second ring are 2 units of type B.
+
+    In this test, 2 vaccination circles are created on the same day.
+    Round-robin priority is turned on, then production type C has priority over
+    type D.  1 unit can be vaccinated each day.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>14 May 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>16units_2rings</population-file>
+
+  <parameter-file>vacc_priority_2rings_roundrobin_prodtypeC-D_1perday</parameter-file>
+
+  <parameter-description>
+    For production types A and B, the infectious subclinical period is 1 day,
+    and the latent period is 30 days.  This ensures that just 1 A unit and 1 B
+    unit will be detected during this simulation, on day 2.
+    
+    Vaccination begins after 1 detection.  There is capacity to vaccinate 1
+    unit per day.
+
+    What should happen:
+     - Day 1: Units 2 and 3 will be subclinical.
+     - Day 2: Units 2 and 3 will be clinical.  They will be detected and this
+       will initiate a vaccination program.
+     - Days 3-14: On each day, there is capacity to vaccinate 1 units. Since
+       round-robin priority is on, we should see units from alternating rings
+       being picked. For the first day of vaccination, day 3, round-robin
+       should pick the ring containing the C units to begin, since they have
+       priority over D units.
+     - Day 15: Vaccination is complete. This will be the last simulation day.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnU</td>
+      <td>vacnUC</td>
+      <td>vacnUD</td>
+    </tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
+    <tr><td>2</td>  <td>0</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
+  </output>
+</variable-test>
+
+<variable-test>
+  <category>control_measures</category>
+  <short-name>2 vaccination circles, round-robin, priority production type D-C, 1 unit/day, 1 ring smaller</short-name>
+
+  <description>
+    This is one of a set of tests to exercise the vaccination priority system
+    after the changes in version 3.3. There are 2 rings of units of type C and
+    D; these are the units that will get vaccinated.  Inside the first ring are
+    2 units of type A, and inside the second (smaller) ring are 2 units of type
+    B.
+
+    In this test, 2 vaccination circles are created on the same day.
+    Round-robin priority is turned on, then production type D has priority over
+    type C.  1 unit can be vaccinated each day.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>14 May 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>15units_2rings</population-file>
+
+  <parameter-file>vacc_priority_2rings_roundrobin_prodtypeD-C_1perday</parameter-file>
+
+  <parameter-description>
+    For production types A and B, the infectious subclinical period is 1 day,
+    and the latent period is 30 days.  This ensures that just 1 A unit and 1 B
+    unit will be detected during this simulation, on day 2.
+    
+    Vaccination begins after 1 detection.  There is capacity to vaccinate 1
+    unit per day.
+
+    What should happen:
+     - Day 1: Units 2 and 3 will be subclinical.
+     - Day 2: Units 2 and 3 will be clinical.  They will be detected and this
+       will initiate a vaccination program.
+     - Days 3-12: On each day, there is capacity to vaccinate 1 units. Since
+       round-robin priority is on, we should see units from alternating rings
+       being picked. For the first day of vaccination, day 3, round-robin
+       should pick the ring containing the D units to begin, since they have
+       priority over C units.
+     - Day 13: In alternating rings order, a D unit would be vaccinated today,
+       but we have run out of D units.  So a C unit will be vaccinated.
+     - Day 14: Vaccination is complete. This will be the last simulation day.
+  </parameter-description>
+
+  <output>
+    <tr>
+      <td>detnU</td>
+      <td>vacnUC</td>
+      <td>vacnUD</td>
+    </tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
+    <tr><td>2</td>  <td>0</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>1</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>1</td>  <td>0</td></tr>
+    <tr><td>0</td>  <td>0</td>  <td>0</td></tr>
+  </output>
+</variable-test>
+
 <deterministic-test>
   <category>control_measures</category>
   <short-name>protective and suppressive rings, size L-S</short-name>

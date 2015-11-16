@@ -774,8 +774,13 @@ typedef struct
 
   /* Parameters used to prioritize vaccination. */
   GSList *vaccination_prioritizers; /**< Each item is a (naadsm_prioritizer_t *). */
+  gboolean round_robin; /**< Whether to divide resources between active foci. */
+  gboolean first_round_robin; /**< TRUE when a vaccination program starts or
+    re-starts. */
   GPtrArray *active_vaccination_rings; /**< A list of active vaccination rings
     (USC_vaccination_ring_t *). */
+  guint current_vaccination_ring; /**< An index into active_vaccination_rings.
+    It loops around that list to implement round-robin priority. */
   GHashTable *round_robin_buckets; /**< A set of "buckets" used to sort
     scorecards into vaccination rings during round-robin scheduling. The keys
     are units (UNT_unit_t *) -- the same ones found in active_vaccination_rings --
@@ -1229,6 +1234,56 @@ end:
 
 
 /**
+ * The function g_queue_clear, but matching the GHFunc prototype. Used in the
+ * function empty_round_robin_buckets to empty the buckets of scorecards.
+ */
+static void
+g_queue_clear_as_GHFunc (gpointer key, gpointer value, gpointer user_data)
+{
+  g_queue_clear ((GQueue *)value);
+}
+
+
+
+/**
+ * Removes all items from the GQueues (but does not free the GQueues themselves)
+ * in the buckets of scorecards used for round-robin priority.
+ */
+static void
+empty_round_robin_buckets (GHashTable *round_robin_buckets)
+{
+  g_hash_table_foreach (round_robin_buckets, g_queue_clear_as_GHFunc, NULL);
+  return;
+}
+
+
+
+/**
+ * Looks through a list of USC_vaccination_ring_t objects and returns the index
+ * of the one that is centered on the given unit.
+ *
+ * @param rings a GPtrArray containing USC_vaccination_ring_t pointers.
+ * @param unit the unit to look for
+ * @return the index at which the ring centered on the given unit is found.
+ *   If no such ring is found, this will equal rings->len (an illegal location).
+ */
+static guint
+find_vaccination_ring_with_unit (GPtrArray *rings, UNT_unit_t *unit)
+{
+  USC_vaccination_ring_t *ring;
+  guint loc;
+  for (loc = 0; loc < rings->len; loc ++)
+    {
+      ring = (USC_vaccination_ring_t *) g_ptr_array_index (rings, loc);
+      if (ring->unit_at_center == unit)
+        break;
+    }
+  return loc;
+}
+
+
+
+/**
  * Counts how many units in vaccination_set are assigned to each ring in
  * active_vaccination_rings.  This is part of the process of expiring finished
  * rings.  Typed as a GHFunc so that it can be used with the foreach function
@@ -1329,46 +1384,226 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
 
       /* The scorecards of herds awaiting vaccination are now sorted into
        * priority order, with the highest-priority ones at the end.  Now do
-       * the vaccinations. */
+       * the vaccinations.  There are 2 cases below, the simple case where we
+       * process the list from highest-priority to lowest-priority, and the
+       * more complicated round-robin case where we share resources between
+       * active vaccination rings. */
       i = 0; /* Index _backwards_ into priority list (we process from the end). */
-      while (local_data->nvaccinated_today < vaccination_capacity
-             && i < nscorecards)
+      if (local_data->round_robin == FALSE)
         {
-          UNT_unit_t *unit;
-          EVT_event_t *request;
-          EVT_request_for_vaccination_event_t *details;
-
-          scorecard = g_ptr_array_index (local_data->scorecards_sorted, nscorecards - 1 - i);
-          unit = scorecard->unit;
-          if (scorecard->distance_from_vacc_ring_outside < DBL_MAX)
+          while (local_data->nvaccinated_today < vaccination_capacity
+             && i < nscorecards)
             {
-              request = USC_scorecard_vaccination_request_pop_oldest (scorecard);
-              g_assert (request != NULL);
-              details = &(request->u.request_for_vaccination);
-              vaccinate (self, details->unit, day, details->reason,
-                         details->day_commitment_made, queue);
+              UNT_unit_t *unit;
+              EVT_event_t *request;
+              EVT_request_for_vaccination_event_t *details;
 
-              /* If this scorecard contains no more requests for vaccination,
-               * then we can remove it from the vaccination set. */
-              if (USC_scorecard_vaccination_request_peek_oldest (scorecard) == NULL)
+              scorecard = g_ptr_array_index (local_data->scorecards_sorted, nscorecards - 1 - i);
+              unit = scorecard->unit;
+              if (scorecard->distance_from_vacc_ring_outside < DBL_MAX)
                 {
-                  g_hash_table_remove (local_data->vaccination_set, unit);
-                  g_hash_table_insert (local_data->removed_from_vaccination_set_today, unit, GINT_TO_POINTER(1));
-                }
-            }
-          else
-            {
-              /* This unit was found to be inside the hole in a vaccination
-               * ring. Remove it from the vaccination set. */
-              #if DEBUG
-                g_debug ("unit \"%s\" found to be inside the hole in a vaccination ring",
-                         unit->official_id);
-              #endif
-              cancel_vaccination (self, unit, day, /* older_than = */ 0, queue);
-            }
+                  request = USC_scorecard_vaccination_request_pop_oldest (scorecard);
+                  g_assert (request != NULL);
+                  details = &(request->u.request_for_vaccination);
+                  vaccinate (self, details->unit, day, details->reason,
+                             details->day_commitment_made, queue);
 
-          i += 1;      
-        } /* end of loop to do vaccinations */
+                  /* If this scorecard contains no more requests for vaccination,
+                   * then we can remove it from the vaccination set. */
+                  if (USC_scorecard_vaccination_request_peek_oldest (scorecard) == NULL)
+                    {
+                      g_hash_table_remove (local_data->vaccination_set, unit);
+                      g_hash_table_insert (local_data->removed_from_vaccination_set_today, unit, GINT_TO_POINTER(1));
+                    }
+                }
+              else
+                {
+                  /* This unit was found to be inside the hole in a vaccination
+                   * ring. Remove it from the vaccination set. */
+                  #if DEBUG
+                    g_debug ("unit \"%s\" found to be inside the hole in a vaccination ring",
+                             unit->official_id);
+                  #endif
+                  cancel_vaccination (self, unit, day, /* older_than = */ 0, queue);
+                }
+
+              i += 1;      
+            } /* end of loop to do vaccinations */
+        } /* end of case with no round-robin */
+      else
+        {
+          UNT_unit_t *desired_focus;
+          guint bucket_count = 0;
+    
+          /* Round-robin priority */
+          empty_round_robin_buckets (local_data->round_robin_buckets);
+          bucket_count = 0;
+          /* Initialize which ring we want a unit from. If we only just
+           * started (or re-started) the vaccination program, pick the ring
+           * containing the highest-priority unit to begin. */
+          if (local_data->first_round_robin)
+            {
+              if (i < nscorecards)
+                {
+                  g_assert (local_data->active_vaccination_rings->len > 0);
+                  scorecard = g_ptr_array_index (local_data->scorecards_sorted, nscorecards - 1 - i);
+                  local_data->current_vaccination_ring = 
+                    find_vaccination_ring_with_unit (local_data->active_vaccination_rings, scorecard->unit_at_vacc_ring_center);
+                  g_assert (local_data->current_vaccination_ring < local_data->active_vaccination_rings->len);
+                }
+              else
+                local_data->current_vaccination_ring = 0;
+              local_data->first_round_robin = FALSE;
+            }
+          desired_focus = ((USC_vaccination_ring_t *)
+            g_ptr_array_index (local_data->active_vaccination_rings,
+                               local_data->current_vaccination_ring))->unit_at_center;
+          #if DEBUG
+            g_debug ("want a unit in ring around unit \"%s\" (focus %u)",
+                     desired_focus->official_id,
+                     local_data->current_vaccination_ring);
+          #endif
+          while (local_data->nvaccinated_today < vaccination_capacity
+                 && (i < nscorecards || bucket_count > 0))
+            {
+              gboolean found;
+              GQueue *bucket;
+              UNT_unit_t *unit;
+              EVT_event_t *request;
+              EVT_request_for_vaccination_event_t *details;
+
+              found = FALSE;
+              /* Do we have a scorecard waiting in the bucket for that ring? */
+              bucket =
+                (GQueue *) g_hash_table_lookup (local_data->round_robin_buckets,
+                                                desired_focus);
+              if (bucket != NULL)
+                {
+                  scorecard = g_queue_pop_head (bucket);
+                  if (scorecard != NULL)
+                    {
+                      /* Yes - hold on to that scorecard, we will use it below */
+                      bucket_count--;
+                      found = TRUE;
+                      #if DEBUG
+                        g_debug ("took one from the bucket for unit \"%s\" (bucket count now %u)",
+                                 desired_focus->official_id,
+                                 bucket_count);
+                      #endif
+                    }
+                }
+                    
+              /* If not, is the scorecard at position i in the priority list in
+               * the desired ring? */
+              if (!found)
+                {
+                  if (i < nscorecards)
+                    {
+                      scorecard = g_ptr_array_index (local_data->scorecards_sorted, nscorecards - 1 - i);
+                      if (scorecard->unit_at_vacc_ring_center == desired_focus)
+                        {
+                          /* Yes - hold on to that scorecard, we will use it below */
+                          found = TRUE;
+                          #if DEBUG
+                            g_debug ("found one at position %u from end", i);
+                          #endif
+                          i++;
+                        }
+                    }
+                }
+
+              /* If one of those 2 lookups worked, process that scorecard. */
+              if (found)
+                {
+                  unit = scorecard->unit;
+                  if (scorecard->distance_from_vacc_ring_outside < DBL_MAX)
+                    {
+                      request = USC_scorecard_vaccination_request_pop_oldest (scorecard);
+                      g_assert (request != NULL);
+                      details = &(request->u.request_for_vaccination);
+                      vaccinate (self, details->unit, day, details->reason,
+                                 details->day_commitment_made, queue);
+
+                      /* If this scorecard contains no more requests for vaccination,
+                       * then we can remove it from the vaccination set. */
+                      if (USC_scorecard_vaccination_request_peek_oldest (scorecard) == NULL)
+                        {
+                          g_hash_table_remove (local_data->vaccination_set, unit);
+                          g_hash_table_insert (local_data->removed_from_vaccination_set_today, unit, GINT_TO_POINTER(1));
+                        }
+                      /* Advance which ring we want a unit from. */
+                      local_data->current_vaccination_ring =
+                        (local_data->current_vaccination_ring + 1) % (local_data->active_vaccination_rings->len);
+                      desired_focus = ((USC_vaccination_ring_t *)
+                        g_ptr_array_index (local_data->active_vaccination_rings,
+                                           local_data->current_vaccination_ring))->unit_at_center;
+                      #if DEBUG
+                        g_debug ("want a unit in ring around unit \"%s\" (focus %u)",
+                                 desired_focus->official_id,
+                                 local_data->current_vaccination_ring);
+                      #endif
+                    }
+                  else
+                    {
+                      /* This unit was found to be inside the hole in a vaccination
+                       * ring. Remove it from the vaccination set. */
+                      #if DEBUG
+                        g_debug ("unit \"%s\" found to be inside the hole in a vaccination ring",
+                                 unit->official_id);
+                      #endif
+                      cancel_vaccination (self, unit, day, /* older_than = */ 0, queue);
+                    }
+                }
+              else
+                {
+                  /* If neither of the lookups worked, then there are 2 choices:
+                   * 1 - If we haven't gone all the way down the priority list
+                   *     yet, then we put the scorecard at the current position
+                   *     into the bucket for the ring it belongs to, and keep
+                   *     going down the priority list, looking for a scorecard
+                   *     in the desired ring.
+                   * 2 - If we *have* gone all the way down the priority list,
+                   *     then the only scorecards remaining to look at are the
+                   *     ones in the buckets, and we have clearly run out of
+                   *     scorecards in the desired ring, because we checked
+                   *     that bucket just a moment ago. So we advance to the
+                   *     next ring in round-robin sequence.
+                   */
+                  if (i < nscorecards)
+                    {
+                      scorecard = g_ptr_array_index (local_data->scorecards_sorted, nscorecards - 1 - i);
+                      bucket = (GQueue *)
+                        g_hash_table_lookup (local_data->round_robin_buckets,
+                                             scorecard->unit_at_vacc_ring_center);
+                      g_assert (bucket != NULL);
+                      g_queue_push_tail (bucket, scorecard);
+                      bucket_count++;
+                      #if DEBUG
+                        g_debug ("scorecard at position %u from end is in ring around \"%s\", putting scorecard in bucket (bucket count now %u)",
+                                 i, scorecard->unit_at_vacc_ring_center->official_id,
+                                 bucket_count);
+                      #endif
+                      i++;
+                    }
+                  else
+                    {
+                      UNT_unit_t *old_desired_focus;
+                      /* Advance which ring we want a unit from. */
+                      old_desired_focus = desired_focus;
+                      local_data->current_vaccination_ring =
+                        (local_data->current_vaccination_ring + 1) % (local_data->active_vaccination_rings->len);
+                      desired_focus = ((USC_vaccination_ring_t *)
+                        g_ptr_array_index (local_data->active_vaccination_rings,
+                                           local_data->current_vaccination_ring))->unit_at_center;
+                      #if DEBUG
+                        g_debug ("no units left around unit \"%s\", now want a unit in ring around unit \"%s\"",
+                                 old_desired_focus->official_id,
+                                 desired_focus->official_id);
+                      #endif
+                    }   
+                }
+            } /* end of while loop over all capacity or all waiting units */
+        } /* end of case with round-robin */        
 
       /* Now expire any rings in active_vaccination_rings that no longer
        * contain any units. */
@@ -1905,6 +2140,10 @@ handle_request_to_initiate_vaccination_event (struct adsm_module_t_ *self,
           #endif
         }
       local_data->no_more_vaccinations = FALSE;
+
+      /* Set a flag that is used with round-robin priority order, to let the
+       * system know that it needs to pick a ring to start in. */
+      local_data->first_round_robin = TRUE;
     }
   #if DEBUG
     g_debug ("----- EXIT handle_request_to_initiate_vaccination_event (%s)", MODEL_NAME);
@@ -2515,6 +2754,7 @@ set_global_params (void *data, GHashTable *dict)
   /* The vaccination priority order is given in JSON format in the column
    * "vaccination_priority_order". */
   local_data->vaccination_prioritizers = NULL;
+  local_data->round_robin = TRUE;
   tmp_text = g_hash_table_lookup (dict, "vaccination_priority_order");
   {
     JsonParser *json_parser;

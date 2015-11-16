@@ -259,6 +259,16 @@ USC_scorecard_register_vaccination_request (USC_scorecard_t *self,
   self->is_in_suppressive_ring = (self->is_in_suppressive_ring || 
     event_details->reason == ADSM_ControlSuppressiveRing);
 
+  /* For the purpose of round-robin prioritization, a unit is set to "belong"
+   * to one particular vaccination ring, defined by the ring in which the unit
+   * is closest to the center. We don't check that here though, that is handled
+   * in the USC_scorecard_register_vaccination_ring function.*/
+
+  /* For the purpose of outside-in or inside-out priority order, a unit is
+   * assigned the lowest priority it would get from any ring that it is in.
+   * We don't check that here though, that is handled in the
+   * USC_scorecard_register_vaccination_ring function. */
+
   return;
 }
 
