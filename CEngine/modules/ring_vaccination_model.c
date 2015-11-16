@@ -169,6 +169,8 @@ check_and_choose (int id, gpointer arg)
   UNT_unit_t *unit1;
   local_data_t *local_data;
   param_block_t *param_block;
+  gboolean earlier_request_exists;
+  gboolean earlier_request_was_suppressive;
   double distance;
 
 #if DEBUG
@@ -190,8 +192,16 @@ check_and_choose (int id, gpointer arg)
   if (param_block == NULL)
     goto end;
 
-  /* Avoid making the same request twice on a single day. */
-  if (g_hash_table_lookup (local_data->requested_today, unit2) != NULL)
+  /* Avoid making the same request twice on a single day. Exception: allow a
+   * second request if the new one is a suppressive circle and no previous
+   * vaccination requests for this unit were suppressive circles. This
+   * exception is made because being part of a suppressive circle is sort of an
+   * "upgrade" in status: it means the unit cannot have its vaccination
+   * canceled by the hole-punching effect of protective rings. */
+  earlier_request_exists = g_hash_table_contains (local_data->requested_today, unit2);
+  earlier_request_was_suppressive = (earlier_request_exists &&
+    (gboolean) GPOINTER_TO_INT (g_hash_table_lookup (local_data->requested_today, unit2)));  
+  if (earlier_request_was_suppressive)
     goto end;
 
   /* The spatial search returns all the units within the largest possible
@@ -217,7 +227,7 @@ check_and_choose (int id, gpointer arg)
                                                                 local_data->max_supp_radius[unit1->production_type],
                                                                 local_data->min_prot_inner_radius[unit1->production_type],
                                                                 local_data->max_prot_outer_radius[unit1->production_type]));
-      g_hash_table_insert (local_data->requested_today, unit2, unit2);  
+      g_hash_table_insert (local_data->requested_today, unit2, GINT_TO_POINTER(TRUE));  
     }
   else if (param_block->prot_inner_radius >= 0
            && distance >= param_block->prot_inner_radius - EPSILON
@@ -226,16 +236,24 @@ check_and_choose (int id, gpointer arg)
       #if DEBUG
         g_debug ("unit %s within protective ring, ordering unit vaccinated", unit2->official_id);
       #endif
-      EVT_event_enqueue (callback_data->queue,
-                         EVT_new_request_for_vaccination_event (unit2,
-                                                                unit1, /* unit at center of ring */
-                                                                callback_data->day,
-                                                                ADSM_ControlProtectiveRing,
-                                                                distance,
-                                                                local_data->max_supp_radius[unit1->production_type],
-                                                                local_data->min_prot_inner_radius[unit1->production_type],
-                                                                local_data->max_prot_outer_radius[unit1->production_type]));
-      g_hash_table_insert (local_data->requested_today, unit2, unit2);
+      /* If we reached this place in the code, then there were no earlier
+       * requests on this day to vaccinate unit2, OR all of the earlier
+       * requests were for protective rings. If there were earlier requests for
+       * protective rings, then we do not need to issue another
+       * RequestForVaccination. */
+      if (earlier_request_exists == FALSE)
+        {
+          EVT_event_enqueue (callback_data->queue,
+                             EVT_new_request_for_vaccination_event (unit2,
+                                                                    unit1, /* unit at center of ring */
+                                                                    callback_data->day,
+                                                                    ADSM_ControlProtectiveRing,
+                                                                    distance,
+                                                                    local_data->max_supp_radius[unit1->production_type],
+                                                                    local_data->min_prot_inner_radius[unit1->production_type],
+                                                                    local_data->max_prot_outer_radius[unit1->production_type]));
+          g_hash_table_insert (local_data->requested_today, unit2, GINT_TO_POINTER(FALSE));
+        }
     }
 
 end:

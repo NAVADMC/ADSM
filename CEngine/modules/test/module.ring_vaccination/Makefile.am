@@ -101,4 +101,6 @@ EXTRA_DIST = radius_0.xml radius_0_w_vars.xml radius_0point5.xml radius_1.xml \
  ring3-4_ring1-2_10units_2cols.sqlite3 \
  prot_ring_punch_holes_1_14units_2rings_overlap.sqlite3 \
  prot_ring_punch_holes_2_14units_2rings_overlap.sqlite3 \
- prot_ring_punch_holes_3_expiry_21units_3rings_overlap.sqlite3
+ prot_ring_punch_holes_3_expiry_21units_3rings_overlap.sqlite3 \
+ prot_and_supp_rings_15units_line.sqlite3 \
+ prot_ring_not_punch_holes_in_supp_ring_15units_line.sqlite3

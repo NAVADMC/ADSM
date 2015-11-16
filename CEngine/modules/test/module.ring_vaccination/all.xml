@@ -8602,3 +8602,134 @@
     <tr><td>N N N VSSVVV VVVVSS VVVVVV</td></tr>
   </output>
 </deterministic-test>
+
+<deterministic-test>
+  <category>ring_vaccination</category>
+  <short-name>protective and suppressive rings</short-name>
+
+  <description>
+    This test checks that both protective and suppressive vaccination rings can
+    be created around a detection.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>9 July 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>15units_line</population-file>
+
+  <parameter-file>prot_and_supp_rings</parameter-file>
+
+  <parameter-description>
+    Diseased units of production type “A” are latent for 1 day, clinical for 1
+    day, then immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A suppressive
+    vaccination ring of radius 3 1/3 km and a protective vaccination ring with
+    inner radius 4.5 km and outer radius 6.5 km is created around a detected
+    unit of production type “A”.
+    
+    There is capacity to vaccinate 100 units per day.
+
+    What should happen:
+     - On day 1 unit 7 will be Latent.
+     - On day 2 unit 7 will be Infectious Clinical. It will be detected, a
+       vaccination program will be initiated, and suppressive and protective
+       vaccination rings will be set up as shown in the diagram below.
+     - On day 3 units 1, 2, 12, and 13 will be vaccinated because they are in
+       the protective ring.  Units 4, 5, 6, 8, 9, and 10 will be vaccinated
+       because they are in the suppressive ring.  (Their states will appear as
+       Vaccine Immune on day 4.)
+     - On day 4, there is nothing new to do.  This will be the last simulation
+       day.
+  </parameter-description>
+
+  <diagram>15units_1ring_s_p</diagram>
+
+  <output>
+    <!--            *     *            -->
+    <tr><td>SS S SSSLSSS SSS S S</td></tr>
+    <tr><td>SS S SSSCSSS SSS S S</td></tr>
+    <tr><td>SS S SSSNSSS SSS S S</td></tr>
+    <tr><td>VV S VVVNVVV SVV S S</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_vaccination</category>
+  <short-name>protective rings do not punch holes in suppressive rings</short-name>
+
+  <description>
+    This test checks that protective vaccination rings do not punch holes in
+    suppressive vaccination rings.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>8 July 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>15units_line</population-file>
+
+  <parameter-file>prot_ring_not_punch_holes_in_supp_ring</parameter-file>
+
+  <parameter-description>
+    Diseased units are latent for 1 day, clinical for 1 day, then immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A suppressive
+    vaccination ring of radius 3 1/3 km and a protective vaccination ring with
+    inner radius 4.5 km and outer radius 6.5 km is created around a detected
+    unit of production type “A”.  A suppressive vaccination ring of radius 1
+    1/3 km and a protective vaccination ring with inner radius 2.5 km and outer
+    radius 3.5 km is created around a detected unit of type “B”.
+    
+    There is capacity to vaccinate 100 units per day. Vaccination is
+    prioritized by time waiting (oldest requests first).
+
+    What should happen:
+     - On day 1 units 7 and 12 will be Latent.
+     - On day 2 units 7 and 12 will be Infectious Clinical. They will be
+       detected, a vaccination program will be initiated, and suppressive and
+       protective vaccination rings will be set up as shown in the diagrams
+       below.
+     - Looking at each unit and what should happen to it:
+     - Units 1 and 2 are in the protective ring around unit 7: they will be
+       vaccinated.
+     - Unit 3 is in the gap between the protective and suppressive rings around
+       unit 7: it will not be vaccinated.
+     - Units 4, 5, 6, and 8 are in the suppressive ring around unit 7: they
+       will be vaccinated.
+     - Unit 9 is in the suppressive ring around unit 7 and the protective ring
+       around unit 12: it will be vaccinated.
+     - Unit 10 is in the gap between the protective and suppressive rings
+       around unit 12, but it is also in the suppressive ring around unit 7: it
+       will be vaccinated.
+     - Unit 11 is in the gap between the protective and suppressive rings
+       around unit 7, but it is also in the suppressive ring around unit 12: it
+       will be vaccinated.
+     - Unit 13 is in the suppressive ring around unit 12 and the protective
+       ring around unit 7: it will be vaccinated.
+     - Unit 14 is in the gap between the protective and suppressive rings
+       around unit 12: it will not be vaccinated.
+     - Unit 15 is in the protective ring around unit 12: it will be vaccinated.
+     - On day 4, the units noted above will show as Vaccine Immune.  This will
+       be the last simulation day.
+  </parameter-description>
+
+  <diagram>15units_2rings_s_p_overlap</diagram>
+
+  <output>
+    <!--            *     *            -->
+    <tr><td>SS S SSSLSSS SLS S S</td></tr>
+    <tr><td>SS S SSSCSSS SCS S S</td></tr>
+    <tr><td>SS S SSSNSSS SNS S S</td></tr>
+    <tr><td>VV S VVVNVVV VNV S V</td></tr>
+  </output>
+</deterministic-test>

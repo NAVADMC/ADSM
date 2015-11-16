@@ -201,6 +201,7 @@ dist_noinst_DATA = state-transition.png \
   vaccpriority_2cols_rings_size_2-5_1-3.png \
   14units_2rings_overlap_thin_rings.png \
   15units_1ring_s_p.png \
+  15units_2rings_s_p_overlap.png \
   21units_3rings_overlap_thin_rings.png \
   clock_24_hour.png
 
@@ -498,6 +499,8 @@ vaccpriority_2cols_rings_size_2_5_1_3_png_SOURCES = vaccpriority_2cols_rings_siz
 14units_2rings_overlap_thin_rings_png_SOURCES = 14units_2rings_overlap_thin_rings.gnuplot
 
 15units_1ring_s_p_png_SOURCES = 15units_1ring_s_p.gnuplot
+
+15units_2rings_s_p_overlap_png_SOURCES = 15units_2rings_s_p_overlap.gnuplot
 
 21units_3rings_overlap_thin_rings_png_SOURCES = 21units_3rings_overlap_thin_rings.gnuplot
 
