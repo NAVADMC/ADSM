@@ -3,8 +3,6 @@ git+https://github.com/BryanHurst/django-productionserver.git@v1.0.6
 CherryPy==3.6.0
 Jinja2==2.7.3
 MarkupSafe==0.23
-PyInstaller==3.0dev-5e6651e
-cx-freeze==4.3.4
 django-crispy-forms==1.5.0
 django-extras==0.3
 django-floppyforms==1.2.0
