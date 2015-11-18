@@ -1,0 +1,27 @@
+{
+  "name": "adsm",
+  "version": "6.1.0",
+  "description": "",
+  "main": "webpack.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NAVADMC/ADSM.git"
+  },
+  "author": "Newline Technical Innovations",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/NAVADMC/ADSM/issues"
+  },
+  "homepage": "https://github.com/NAVADMC/ADSM#readme",
+  "devDependencies": {
+    "babel": "^6.1.18",
+    "babel-core": "^6.1.21",
+    "babel-loader": "^6.2.0",
+    "react": "^0.14.2",
+    "webpack": "^1.12.6",
+    "webpack-bundle-tracker": "0.0.8"
+  }
+}

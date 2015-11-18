@@ -80,6 +80,7 @@ INSTALLED_APPS = (
     'floppyforms',
     'crispy_forms',
     'productionserver',
+    'webpack_loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -189,6 +190,13 @@ STATICFILES_FINDERS = (
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'ADSM', 'static'),
 )
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles/',
+        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
+    }
+}
 
 LOGIN_REDIRECT_URL = '/'
 
