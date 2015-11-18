@@ -177,6 +177,8 @@ if getattr(sys, 'frozen', False):
     for app_name in INSTALLED_APPS:
         if os.path.exists(os.path.join(BASE_DIR, 'templates', app_name)):
             TEMPLATES[0]['DIRS'].extend([os.path.join(BASE_DIR, 'templates', app_name), ])
+    if os.path.exists(os.path.join(BASE_DIR, 'templates', 'ADSM', 'templates')):  # TODO: Figure out how to find name of base app (doesn't work nicely when frozen)
+        TEMPLATES[0]['DIRS'].extend([os.path.join(BASE_DIR, 'templates', 'ADSM', 'templates'), ])
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
