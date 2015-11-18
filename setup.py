@@ -3,6 +3,7 @@ import os
 import stat
 import pip
 import shutil
+import subprocess
 
 from cx_Freeze import setup, Executable, build_exe
 from importlib import import_module
@@ -203,6 +204,15 @@ class BuildADSM(build_exe):
 
         if not os.path.exists(os.path.join(settings.BASE_DIR, 'static')):
             os.makedirs(os.path.join(settings.BASE_DIR, 'static'))
+
+        print("Preparing to pack client files...")
+        webpack_command_path = os.path.join('.', 'node_modules', '.bin', 'webpack')
+        webpack_command = webpack_command_path + ' --config webpack.config.js'
+        webpack = subprocess.Popen(webpack_command, cwd=os.path.join(settings.BASE_DIR), shell=True)
+        print("Packing client files...")
+        outs, errs = webpack.communicate()  # TODO: Possible error checking
+        print("Done packing.")
+
         management.call_command('collectstatic', interactive=False, clear=True)
         if not os.path.exists(os.path.join(settings.BASE_DIR, 'media')):
             os.makedirs(os.path.join(settings.BASE_DIR, 'media'))
