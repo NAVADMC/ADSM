@@ -77,7 +77,8 @@ ensure_expanded = function(element){
                                 '" class="checkboxinput fat_checkbox">' +
                                 '<div class="defined_name" onClick="switch_tabs(this);">'+
                                     tab['name'] +
-                                    '<a href="#" title="incomplete" class="warning-icon pull-right '+ (tab['valid'] ? 'hidden' : '') +'"></a>' +
+                                //only include an element if it's not valid.  only show that element if it's invalid and enabled
+                                (tab['valid'] ? '' : '<a href="#" title="incomplete" class="warning-icon pull-right '+ (tab['enabled'] ? '' : 'hidden' ) +'"></a>') +
                                 '</div>' +
                             '</div>' +
                         '</li>'));
@@ -106,6 +107,11 @@ ensure_expanded = function(element){
         if(typeof use_check !== 'undefined' &&
                 $(use_check).attr('data-proxy')){ // this check box is in the model list, not in a form
             var value = $(use_check).prop('checked');
+            if(value){
+                $(use_check).closest('.defined_wrapper').find('.warning-icon').removeClass('hidden');
+            }else{
+                $(use_check).closest('.defined_wrapper').find('.warning-icon').addClass('hidden');
+            }
             var url = get_parent_title(use_check).attr('href') + $(use_check).attr('name') + '/'; // use_detection
             $.post(url, {'value': value});
 

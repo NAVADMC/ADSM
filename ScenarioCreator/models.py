@@ -562,24 +562,26 @@ class ControlProtocol(BaseModel):
     def __str__(self):
         return self.name
 
-    def tab_is_valid(self, use_tab_name, fields=None, cleaned_data=None):
+    def tab_is_valid(self, use_tab_name, fields=None):
         if fields is None:
             fields = protocol_substructure[use_tab_name]
-        if cleaned_data is None:
-            cleaned_data = super(ControlProtocol, self).clean()
-        everything_okay = True
-        if cleaned_data.get(use_tab_name):
-            for field in fields:
-                if cleaned_data.get(field) is None:
-                    self.add_error(field, ValidationError(field + " must not be blank!"))
-                    everything_okay = False
-
-        return everything_okay
+        for field in fields:
+            if self.__getattribute__(field) is None:
+                return False
+        return True
 
     def clean(self):
         for trigger_switch, fields in protocol_substructure.items():
-            self.tab_is_valid(trigger_switch, fields)
+            if self.__getattribute__(trigger_switch):
+                if not self.tab_is_valid(trigger_switch, fields):
+                    raise ValidationError(trigger_switch + " is enabled but the section is not filled in completely.")
 
+    def is_valid(self):
+        try:
+            self.clean()
+            return True
+        except BaseException:
+            return False
 
 
 class ProtocolAssignment(BaseModel):
