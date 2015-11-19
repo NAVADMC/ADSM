@@ -3,6 +3,7 @@ import os
 import stat
 import pip
 import shutil
+import subprocess
 
 from cx_Freeze import setup, Executable, build_exe
 from importlib import import_module
@@ -58,7 +59,7 @@ build_exe_options = {
 }
 files = (file for file in os.listdir(settings.BASE_DIR) if os.path.isfile(os.path.join(settings.BASE_DIR, file)))
 for file in files:
-    if [file for part in ['.so', '.dll', '.url', 'npu'] if part.lower().split(' ')[0] in file.lower()] or is_exe(os.path.join(settings.BASE_DIR, file)):
+    if [file for part in ['.so', '.dll', '.url', 'npu', 'webpack-stats.json'] if part.lower().split(' ')[0] in file.lower()] or is_exe(os.path.join(settings.BASE_DIR, file)):
         build_exe_options['include_files'].append((file, file))
 
 
@@ -203,6 +204,15 @@ class BuildADSM(build_exe):
 
         if not os.path.exists(os.path.join(settings.BASE_DIR, 'static')):
             os.makedirs(os.path.join(settings.BASE_DIR, 'static'))
+
+        print("Preparing to pack client files...")
+        webpack_command_path = os.path.join('.', 'node_modules', '.bin', 'webpack')
+        webpack_command = webpack_command_path + ' --config webpack.config.js'
+        webpack = subprocess.Popen(webpack_command, cwd=os.path.join(settings.BASE_DIR), shell=True)
+        print("Packing client files...")
+        outs, errs = webpack.communicate()  # TODO: Possible error checking
+        print("Done packing.")
+
         management.call_command('collectstatic', interactive=False, clear=True)
         if not os.path.exists(os.path.join(settings.BASE_DIR, 'media')):
             os.makedirs(os.path.join(settings.BASE_DIR, 'media'))
@@ -253,7 +263,7 @@ class BuildADSM(build_exe):
         os.makedirs(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
         for file in files:
             # TODO: Check for linux python.so files
-            if not [file for part in ['library.zip', 'README.md', 'python34.dll', 'MSVCR100.dll', 'npu', '.url'] if part.lower().split(' ')[0] in file.lower()] and not is_exe(os.path.join(settings.BASE_DIR, self.build_exe, file)):  #NOTE: The split here could cause issues and is speculative
+            if not [file for part in ['library.zip', 'README.md', 'python34.dll', 'MSVCR100.dll', 'npu', '.url', 'webpack-stats.json'] if part.lower().split(' ')[0] in file.lower()] and not is_exe(os.path.join(settings.BASE_DIR, self.build_exe, file)):  #NOTE: The split here could cause issues and is speculative
                 shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, file),
                             os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file))
         viewer = None

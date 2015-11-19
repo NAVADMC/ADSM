@@ -74,6 +74,26 @@ Using the pip in your new Virtual Environment (confirm Virtual Environment Activ
         easy_install pyproj-1.9.4dev.win-amd64-py3.4.exe  
         pip install psutil-2.2.0-cp34-none-win_amd64.whl
         pip install scipy-0.15.1-cp34-none-win_amd64.whl
+        
+###React Setup
+Install Node (please x64 version)
+npm install -g bower
+cd BASE_DIR (Not an actual command. Go into the root of the project)
+npm install --save browserify@12.0.1
+npm install --save cssmin@0.4.3
+npm install --save jquery@2.1.4
+npm install --save react@0.14.2
+npm install --save react-dom@0.14.2
+npm install --save reactify@1.1.1
+npm install --save uglify-js@2.5.0
+
+# DO NOT DO THIS AS IT IS IN THE REPO
+cd ADSM
+cd static
+cd js
+bower install --save jquery#2.1.4
+bower install --save react#0.14.2
+bower install --save react-dom#0.1.0  # TODO: WARNING: This is not the same version as the npm installed version!!!
 
 ###Setup Pycharm IDE
 The main developers of ADSM developed in Pycharm 4, so here's the IDE specific instructions to get your dev server running from a fresh clone.
