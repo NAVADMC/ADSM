@@ -713,7 +713,7 @@ function check_disabled_controls() {
     }//else do nothing
 };
 
-function reload_model_list($form) {
+function reload_model_list($form) { //TODO: change this to expect a fragment
     $('#left-panel').load(window.location + " #left-panel>*, script");
     if(typeof $form !== 'undefined'  && $form.length){
         var action = $form[0]['action']; //.attr('action');
