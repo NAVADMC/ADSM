@@ -4,10 +4,12 @@ CherryPy==3.6.0
 Jinja2==2.7.3
 MarkupSafe==0.23
 django-crispy-forms==1.5.0
+django-debug-toolbar==1.4
 django-extras==0.3
 django-floppyforms==1.2.0
 django-webpack-loader==0.2.2
 futures==2.2.0
+Pympler==0.4.2
 pyparsing==2.0.3
 python-dateutil==2.3
 pytz==2014.10
