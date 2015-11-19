@@ -8733,3 +8733,70 @@
     <tr><td>VV S VVVNVVV VNV S V</td></tr>
   </output>
 </deterministic-test>
+
+<deterministic-test>
+  <category>ring_vaccination</category>
+  <short-name>vaccinated and re-added same day</short-name>
+
+  <description>
+    Test to verify a bug fix. In this test, a unit is vaccinated on the same
+    day that it is marked for vaccination as part of a newly created ring.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>5 May 2014</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>14units_2rings_overlap</population-file>
+
+  <parameter-file>vacc_readded_same_day</parameter-file>
+
+  <parameter-description>
+    Units of type “A” are latent for 1 day, clinical for 1 day, then immune.
+    Units of type “B” are latent for 4 days, clinical for 1 day, then immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A
+    vaccination ring with inner radius 7/8 km and outer radius 1 1/8 km is
+    created around a detected “A” unit.  A vaccination ring with inner radius
+    1/2 km and outer radius 1 1/8 km is created around a detected “B” unit.
+    Round-robin priority is turned on, then vaccination is prioritized by size,
+    with smaller units being vaccinated first.  There is capacity to vaccinate
+    2 units per day.  The minimum time between re-vaccinations is 31 days.
+
+    What should happen:
+     - On day 1 units A and B will be Latent.
+     - On day 2 unit A will be Infectious Clinical. It will be detected and a
+       vaccination program will be initiated.
+     - On day 3, the two smallest units, 5 and 6, should be vaccinated. (Their
+       state will show as Vaccine Immune on day 4.)
+     - On day 4, units 3 and 4 should be vaccinated.
+     - On day 5, units 2 and 1 should be vaccinated, completing the vaccination
+       ring around unit A. Also on this day, unit B will be Infectious Clinical.
+       It will be detected and a vaccination ring will be created.
+     - Over the next several days, units 12 and 11 should be vaccinated, then
+       10 and 9, then 8 and 7.  Units 2 and 3 will not be re-vaccinated because
+       of the minimum time between re-vaccinations.  If the bug is present,
+       however, then the program will crash when it considers unit 2 for
+       vaccination (that is the unit that was re-added to the vaccination queue
+       the same day it was vaccinated).
+  </parameter-description>
+
+  <diagram>14units_2rings_overlap_1thin_1thick</diagram>
+
+  <output>
+    <!--    A B 1-6    7-12         -->
+    <tr><td>L L SSSSSS SSSSSS</td></tr>
+    <tr><td>C L SSSSSS SSSSSS</td></tr>
+    <tr><td>N L SSSSSS SSSSSS</td></tr>
+    <tr><td>N L SSSSVV SSSSSS</td></tr>
+    <tr><td>N C SSVVVV SSSSSS</td></tr>
+    <tr><td>N N VVVVVV SSSSSS</td></tr>
+    <tr><td>N N VVVVVV SSSSVV</td></tr>
+    <tr><td>N N VVVVVV SSVVVV</td></tr>
+    <tr><td>N N VVVVVV VVVVVV</td></tr>
+  </output>
+</deterministic-test>

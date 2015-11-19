@@ -91,7 +91,9 @@ EXTRA_DIST = delay_0.xml delay_1.xml delay_3.xml \
  vacc_priority_2rings_roundrobin_prodtypeC-D_16units_2rings.sqlite3 \
  vacc_priority_2rings_roundrobin_prodtypeC-D_1perday_16units_2rings.sqlite3 \
  vacc_priority_2rings_roundrobin_prodtypeD-C_1perday_15units_2rings.sqlite3 \
+ vacc_priority_2rings_size_2-5_1-3later_rr_10units_2cols.sqlite3 \
  vacc_priority_2rings_supp_prot_largest_15units_line.sqlite3 \
  vacc_priority_2rings_supp_prot_outin_15units_line.sqlite3 \
  vacc_priority_2circles_overlap_inout_24units_2rings_plus2infected.sqlite3 \
- vacc_priority_2rings_overlap_inout_24units_2rings_plus2infected.sqlite3
+ vacc_priority_2rings_overlap_inout_24units_2rings_plus2infected.sqlite3 \
+ vacc_priority_2circles_diff_sizes_rr_largest_12units_2rings_largesmall_plus2infected.sqlite3

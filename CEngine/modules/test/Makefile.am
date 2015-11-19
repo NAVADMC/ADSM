@@ -163,6 +163,7 @@ EXTRA_DIST = config/unix.exp 1unit.xml 2units.xml \
   8units_2rows.xml 8units_2rows_2.xml 8units_2rows_3.xml 8units_2rows_4.xml \
   9units.xml \
   9units_hexagon.xml \
+  12units_2rings_largesmall_plus2infected.xml \
   14units_2rings_overlap.xml \
   15units_line.xml 15units_2rings.xml \
   units_circle.xml units_circle2.xml 16units_square.xml 16units_2rings.xml \
