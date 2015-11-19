@@ -230,8 +230,10 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.redirects.RedirectsPanel',
     'pympler.panels.MemoryPanel',
     'debug_toolbar.panels.profiling.ProfilingPanel',
+    'ddt_request_history.panels.request_history.RequestHistoryPanel',
 ]
 
 DEBUG_TOOLBAR_CONFIG = {
     'JQUERY_URL': '',
+    'SHOW_TOOLBAR_CALLBACK': 'ddt_request_history.panels.request_history.allow_ajax',
 }

@@ -1,5 +1,6 @@
 git+https://github.com/BryanHurst/django.git@stable/1.8.2-patched
 git+https://github.com/BryanHurst/django-productionserver.git@v1.0.6
+git+https://github.com/djsutho/django-debug-toolbar-request-history.git
 CherryPy==3.6.0
 Jinja2==2.7.3
 MarkupSafe==0.23
