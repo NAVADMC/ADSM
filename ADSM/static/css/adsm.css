@@ -2032,6 +2032,7 @@ th:hover .sortControls{
     border: none;
     outline: 0;
     background: transparent;
+    background-repeat-y: no-repeat;
 }
 #left-panel .panel-group:not(:first-of-type) {
     border-top: 1px solid #ccc;
