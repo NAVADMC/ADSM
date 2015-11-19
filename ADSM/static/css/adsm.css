@@ -682,7 +682,7 @@ ul {
 /*-------------------------------------------------------------*/
 /*-----file panel-----*/
 /*-------------------------------------------------------------*/
-#file_panel, #file_panel #file_list a{
+#file_panel, #file_panel .file_list a{
     background-color: #606060;
     color: rgb(236, 236, 236);
     padding: 1px;
@@ -880,12 +880,15 @@ ul {
     transition: bottom .4s ease;
 }
 .edit-button-holder .overwrite-button.reveal {
+    /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 1);
 }
 .edit-button-holder .copy-button.reveal {
+    /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 2);
 }
 .edit-button-holder .btn-cancel.reveal {
+    /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 3);
 }
 
@@ -1361,7 +1364,7 @@ select {
 }
 /**********************/
 
-#file_list li {
+.file_list li {
     font-size: 13px;
     line-height:27px;
     text-decoration: none;
@@ -1369,14 +1372,18 @@ select {
     position: relative;
 }
 
-#file_list {
+.file_list.compact li {
+    line-height: 18px;
+}
+
+.file_list {
     list-style: none;
     margin-bottom: 15px;
     max-width: 600px;
     position: relative;
 }
 
-#file_list a {
+.file_list a {
     color: #404040;
     text-decoration: none;
 }
@@ -1387,7 +1394,7 @@ select {
     top: 0;
 }
 
-#file_list .icon {
+.file_list .icon {
     margin-top: 5px;
     margin-left: 15px;
 }
@@ -1395,7 +1402,7 @@ select {
 .copy-icon,
 .open-button {
     margin-top: 5px;
-    width: 15px;
+    width: 15px !important; /*It isn't a valid animation without this width*/
     height: 18px;
     margin-right: 10px;
     display:block;
@@ -1412,8 +1419,8 @@ select {
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
 .copy-icon:hover,
 .copy-icon:focus {
-    background-position: 15px  0;
-    background-image: url('../icons/copy_sprite.png');
+    background-position: 15px  0 !important;
+    background-image: url('../icons/copy_sprite.png') !important; /*It's not an icon without this background*/
     outline: none;
     background-color: transparent;
 }
@@ -1424,6 +1431,19 @@ select {
     /*background-position: 0 0;*/
 }
 
+.warning-icon {
+    background-image: url('../icons/warning-triangle.png') !important;/*It's not an icon without this background*/
+    background-size: 17px 15px;
+    margin-top: 3px;
+    margin-bottom: 0px;
+    width: 17px !important;
+    height: 15px;
+    margin-right: 10px;
+    display:block;
+    float:right;
+    opacity: 1;
+}
+
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
 .delete-icon {
     background-image: url('../icons/delete_sprite.png');
@@ -1432,8 +1452,8 @@ select {
 }
 .delete-icon:hover,
 .delete-icon:focus {
-    background-position: 15px 2px ;
-    background-image: url('../icons/delete_sprite.png');
+    background-position: 15px 2px !important;
+    background-image: url('../icons/delete_sprite.png') !important; /*It's not an icon without this background*/
     background-repeat-y: no-repeat;
     outline: none;
     background-color: transparent;
@@ -1448,23 +1468,23 @@ input[type=file], button {
 }*/
 
 
-#file_list .defined{
+.file_list .defined{
     border-radius: 2px;
     margin-bottom: 2px;
 }
-#file_list .defined:hover {
+.file_list .defined:hover {
     background: rgba(206, 199, 192, .25);
 }
-#file_list li.focused {
+.file_list li.focused {
     background: rgba(206,199,192,.5);
     box-shadow: inset 0 0 0 1px #cec7c0;
     border-bottom: 1px solid transparent;
     position:relative;
 }
-#file_list li.focused:hover {
+.file_list li.focused:hover {
     background: rgba(206,199,192,.5);
 }
-#file_list .defined.focused:after {
+.file_list .defined.focused:after {
     content:"";
     width: 25px;
     height: 2px;
@@ -1474,26 +1494,26 @@ input[type=file], button {
     display: block;
     background-color: #cec7c0;
 }
-#file_list li.focused a{
+.file_list li.focused a{
     opacity: 1;
     color: black;
 }
-#file_list .defined a.defined_name:hover {
+.file_list .defined a.defined_name:hover {
     color: black;
 }
-#file_list .defined a.defined_name:focus,
-#file_list .defined a.defined_name:active {
+.file_list .defined a.defined_name:focus,
+.file_list .defined a.defined_name:active {
     background: transparent !important;
     border:none !important;
     outline:none !important;
 }
-#file_list .defined_wrapper {
+.file_list .defined_wrapper {
     white-space: nowrap;
     padding-right: 45px;
     position:relative;
 }
 .defined_name {
-    display: block;
+    display: inline-block;
     padding-left: 5px;
     width: 100%;
     overflow: hidden;
@@ -1502,7 +1522,7 @@ input[type=file], button {
 .defined_name:hover {
     cursor: default;
 }
-#file_list li:hover a{
+.file_list li:hover a{
     opacity: 1;
 }
 
@@ -1511,14 +1531,25 @@ input[type=file], button {
     top: 0;
     right: 0;
     margin-right: 5px;
-    opacity: .3;
+    opacity: .6;
 }
 .defined_wrapper .copy-icon {
     position: absolute;
     top: 0;
     right: 20px;
     margin-right: 5px;
-    opacity: .3;
+    opacity: 0.6;
+}
+
+.fat_checkbox,
+.defined_wrapper input[type="checkbox"].fat_checkbox {/*A little ridiculous overriding bootstrap*/
+    display: inline-block;
+    margin-left: 1px;
+    margin-right: 9px;
+}
+
+.nav-tabs { /*Hides the crispy forms tabs from the TabHolder*/
+    display: none;
 }
 /*-------------------------------------------------------------*/
 /*-----population.html-----*/
@@ -1991,7 +2022,7 @@ th:hover .sortControls{
     color:#404040;
     font-weight: 600;
     display:block;
-    width: 100%;
+    width: calc(100% - 30px);
     padding-left: 5px;
 }
 
@@ -2168,7 +2199,7 @@ select[multiple] {}
     padding: 5px 10px;
 }
 .productiontypelist:after {
-    content:"To add production types to the trigger click on a Type or Group f"
+    content:"To add production types to the trigger click on a Type in the Population Panel";
     white-space: pre-wrap;
     font-style: italic;
     color: #808080;

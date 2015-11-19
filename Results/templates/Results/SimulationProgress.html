@@ -76,7 +76,7 @@
                 <h3 class="panel-title">Supplemental Output Files</h3>
             </div>
             <div class="panel-body">
-                <ul id="file_list">
+                <ul class="file_list">
                     {% for file in supplemental_files %}
                         <li>{{ file }}
                             <a href="#" class="delete-icon" data-delete-link="{{ file }}"><img src="{{ STATIC_URL }}icons/delete.png" alt="Delete" class="icon pull-right"></a>

@@ -35,25 +35,27 @@ class Command(BaseCommand):
             os.remove(urls_path)
 
         urlpatterns = self.generate_urls_from_models(os.path.join(settings.BASE_DIR, 'ScenarioCreator', 'models.py'),
-                                                     ["url('^AssignSpreads/$', 'ScenarioCreator.views.assign_disease_spread')",
-                                                      "url('^AssignProtocols/$', 'ScenarioCreator.views.assign_protocols')",
-                                                      "url('^AssignProgressions/$', 'ScenarioCreator.views.assign_progressions')",
-                                                      "url('^AssignZoneEffects/$', 'ScenarioCreator.views.zone_effects')",
+            ["url('^AssignSpreads/$', 'ScenarioCreator.views.assign_disease_spread')",
+             "url('^AssignProtocols/$', 'ScenarioCreator.views.assign_protocols')",
+             "url('^AssignProgressions/$', 'ScenarioCreator.views.assign_progressions')",
+             "url('^AssignZoneEffects/$', 'ScenarioCreator.views.zone_effects')",
+             "url('^Protocols.json/$', 'ScenarioCreator.views.protocols_json')",
+             "url('^ControlProtocol/$', 'ScenarioCreator.views.control_protocol_list')",
+             "url('^ControlProtocol/(?P<primary_key>\d+)/(?P<field>use_\w+)/', 'ScenarioCreator.views.update_protocol_enabled')",
 
-                                                      "url('^Populations/$', 'ScenarioCreator.views.population')",
-                                                      "url('^Population/new/$', 'ScenarioCreator.views.population')",  # force redirect for special singleton
-                                                      "url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population')",
-                                                      "url('^OpenPopulation/(?P<target>.+)$', 'ScenarioCreator.views.open_population')",
-                                                      "url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario')",
-                                                      "url('^ProductionTypeList.json/$', 'ScenarioCreator.views.production_type_list_json')",
-                                                      "url('^DisableAllControls.json/$', 'ScenarioCreator.views.disable_all_controls_json')",
+             "url('^Populations/$', 'ScenarioCreator.views.population')",
+             "url('^Population/new/$', 'ScenarioCreator.views.population')",  # force redirect for special singleton
+             "url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population')",
+             "url('^OpenPopulation/(?P<target>.+)$', 'ScenarioCreator.views.open_population')",
+             "url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario')",
+             "url('^ProductionTypeList.json/$', 'ScenarioCreator.views.production_type_list_json')",
+             "url('^DisableAllControls.json/$', 'ScenarioCreator.views.disable_all_controls_json')",
 
-                                                      "url('^ProbabilityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph')",
-                                                      "url('^RelationalFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.relational_graph')",
-                                                      "url('^ProbabilityFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph')",
-                                                      "url('^RelationalFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph')",
-
-                                                      ])
+             "url('^ProbabilityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph')",
+             "url('^RelationalFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.relational_graph')",
+             "url('^ProbabilityFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph')",
+             "url('^RelationalFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph')",
+            ])
 
         urls_code = "\"\"\"URLs is entirely procedural based on the contents of models.py. This has the advantage that urls automatically update as the models change or are renamed.\"\"\"\n\n" \
                     "from django.conf.urls import patterns, url\n\n" \
