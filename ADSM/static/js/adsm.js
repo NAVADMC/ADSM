@@ -108,8 +108,7 @@ $(function(){
         var success_callback = null;
         if(window.location.pathname.indexOf('setup/ControlProtocol/') != -1) {
             success_callback = function(){
-                $('#protocol_list #accordion').remove();
-                build_protocols_list(); // build from js rather than reload HTML
+                rebuild_protocols_list();
             }
         }
         if($self.parent().find('button[type=submit]').hasClass('btn-danger')) {// MOST IMPORTANT: for deleting outputs on form submission
@@ -208,6 +207,7 @@ $(function(){
         var deleting_outputs = typeof outputs_exist !== 'undefined' && outputs_exist;
         var do_reload = $(this).hasClass('ajax-post') || deleting_outputs
         var direct_link = $(this).hasClass('direct_link')
+        var rebuild = $(this).hasClass('rebuild-list');
         var $containing_panel = $(this).closest('.layout-panel')
         var object_type = link.split('/')[2]
         if (typeof object_type === 'undefined') {
@@ -238,9 +238,17 @@ $(function(){
                                 window.location.reload()
                             });
                         } else {
+                            if(rebuild){
+                                $.post(link).done(function() {
+                                    dialog.close();
+                                    rebuild_protocols_list();
+                                });
+                                return;
+                            }
                             if(direct_link){
                                 dialog.close();
                                 window.location = link;
+                                return;
                             } else {//neither tag
                                 $.post(link).done(function () {
                                     clear_form_populate_panel($containing_panel, link)
@@ -832,8 +840,7 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
                     var parent_panel = $self.closest('.layout-panel').attr('id');
                     if((parent_panel == 'center-panel' || parent_panel == 'population_panel') ){
                         if(window.location.pathname.indexOf('setup/ControlProtocol/') != -1) {
-                            $('#protocol_list #accordion').remove();
-                            build_protocols_list(); // build from js rather than reload HTML
+                            rebuild_protocols_list();
                         }else {  // don't do this on ControlProtocol pages
                             reload_model_list($self); //reload left
                         }
@@ -894,4 +901,9 @@ function statusChecker(){
     }else{
         clearInterval(statusChecker);
     }
+}
+
+function rebuild_protocols_list() {
+    $('#protocol_list #accordion').remove();
+    build_protocols_list(); // build from js rather than reload HTML
 }
