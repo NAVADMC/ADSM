@@ -18,7 +18,7 @@
         </form>
 
         <h3>Available Population Files:</h3>
-        <ul id="file_list">
+        <ul class="file_list">
             {% for file in xml_files %}
                 <li><a href="/setup/OpenPopulation/{{ file }}" class="ajax-post">{{ file }}</a>
                     <a href="#" class="delete-icon ajax-post" data-delete-link="/app/DeleteFile/{{ file }}"></a>

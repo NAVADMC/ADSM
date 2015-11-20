@@ -123,7 +123,8 @@ def save_formset_succeeded(MyFormSet, TargetModel, context, request):
         return False
 
 
-def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request, template='ScenarioCreator/3Panels.html'):
+def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request, template='ScenarioCreator/3Panels.html',
+                                           html='ScenarioCreator/AssignmentList.html'):
     """FormSet is pre-populated with existing assignments and it detects and fills in missing
     assignments with a blank form with production type filled in."""
     if save_formset_succeeded(MyFormSet, TargetModel, context, request):
@@ -134,7 +135,7 @@ def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, miss
             index += TargetModel.objects.count()
             forms[index].fields['production_type'].initial = pt.id
         context['formset'] = forms
-        context['base_page'] = 'ScenarioCreator/AssignmentList.html'
+        context['base_page'] = html
         return render(request, template, context)
 
 
@@ -142,7 +143,9 @@ def assign_protocols(request):
     missing = ProductionType.objects.filter(protocolassignment__isnull=True)
     ProtocolSet = modelformset_factory(ProtocolAssignment, extra=len(missing), form=ProtocolAssignmentForm)
     context = {'title': 'Assign a Control Protocol to each Production Type'}
-    return populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request, template='ScenarioCreator/navigationPane.html')
+    return populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request,
+                                                  template='ScenarioCreator/navigationPane.html',
+                                                  html='ScenarioCreator/FormSet.html')
 
 
 def assign_progressions(request):
@@ -155,6 +158,33 @@ def assign_progressions(request):
     context = {'title': 'Disease Progressions'}
     return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request)
 
+
+def protocols_json(request):
+    data = []
+    for protocol in ControlProtocol.objects.all():
+        entry = {'name': str(protocol.name),
+                 'pk': protocol.id,
+                 'tabs': [
+                     {'name':'Detection', 'enabled':bool(protocol.use_detection), 'field':'use_detection', 'valid': protocol.tab_is_valid('use_detection')},
+                     {'name':'Tracing', 'enabled':bool(protocol.use_tracing), 'field':'use_tracing', 'valid': protocol.tab_is_valid('use_tracing')},
+                     {'name':'Testing', 'enabled':bool(protocol.use_testing), 'field':'use_testing', 'valid': protocol.tab_is_valid('use_testing')},
+                     {'name':'Exams', 'enabled':bool(protocol.use_exams), 'field':'use_exams', 'valid': protocol.tab_is_valid('use_exams')},
+                     {'name':'Destruction', 'enabled':bool(protocol.use_destruction), 'field':'use_destruction', 'valid': protocol.tab_is_valid(
+                         'use_destruction')},
+                     {'name':'Vaccination', 'enabled':bool(protocol.use_vaccination), 'field':'use_vaccination', 'valid': protocol.tab_is_valid(
+                         'use_vaccination')},
+                     {'name':'Cost Accounting', 'enabled':bool(protocol.use_cost_accounting), 'field':'use_cost_accounting', 'valid': protocol.tab_is_valid(
+                         'use_cost_accounting')},
+                     ]}
+        data.append(entry)
+    return JsonResponse(data, safe=False)
+
+
+def update_protocol_enabled(request, primary_key, field):
+    #data = json.loads(request.POST.content.decode())
+    value = request.POST.get('value') == 'true'  #False otherwise
+    ControlProtocol.objects.filter(id=int(primary_key)).update(**{field: value})  # specifically the value of field, not the word 'field'
+    return JsonResponse({})
 
 def collect_backlinks(model_instance):
     from django.contrib.admin.utils import NestedObjects
@@ -464,7 +494,11 @@ def functions_panel(request, form=None):
     return render(request, 'functions_panel.html', context)  # no 3 panel layout
 
 
-def model_list(request):
+def control_protocol_list(request):
+    return model_list(request, 'ScenarioCreator/ControlProtocolList.html')
+
+
+def model_list(request, base_page='ScenarioCreator/ModelList.html'):
     model_name, model = get_model_name_and_model(request)
     model_name = promote_to_abstract_parent(model_name)
     if model_name in 'Function RelationalFunction ProbabilityFunction'.split():
@@ -473,7 +507,7 @@ def model_list(request):
         context = trigger_list(request)
     else:
         context = {'title': "Create " + spaces_for_camel_case(model_name) + "s",
-                   'base_page': 'ScenarioCreator/ModelList.html',
+                   'base_page': base_page,
                    'models': []}
         if model_name in abstract_models.keys():
             for local_name, local_model in abstract_models[model_name]:

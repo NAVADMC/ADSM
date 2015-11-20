@@ -66,6 +66,8 @@ else:
     EXTENSION = ''
     SCRIPT = ''
 
+INTERNAL_IPS = ('127.0.0.1', '::1')
+
 INSTALLED_APPS = (
     'ScenarioCreator',
     'Results',
@@ -81,9 +83,12 @@ INSTALLED_APPS = (
     'crispy_forms',
     'productionserver',
     'webpack_loader',
+    'debug_toolbar',
+    'pympler',
 )
 
 MIDDLEWARE_CLASSES = (
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
@@ -207,3 +212,28 @@ if getattr(sys, 'frozen', False):
     for app_name in INSTALLED_APPS:
         if os.path.exists(os.path.join(BASE_DIR, 'locale', app_name)):
             LOCALE_PATHS += (os.path.join(BASE_DIR, 'locale', app_name), )
+
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
+
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.versions.VersionsPanel',
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    'debug_toolbar.panels.cache.CachePanel',
+    'debug_toolbar.panels.signals.SignalsPanel',
+    'debug_toolbar.panels.logging.LoggingPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
+    'pympler.panels.MemoryPanel',
+    'debug_toolbar.panels.profiling.ProfilingPanel',
+    'ddt_request_history.panels.request_history.RequestHistoryPanel',
+]
+
+DEBUG_TOOLBAR_CONFIG = {
+    'JQUERY_URL': '',
+    'SHOW_TOOLBAR_CALLBACK': 'ddt_request_history.panels.request_history.allow_ajax',
+}

@@ -1,6 +1,7 @@
 from django.db.models import Q
 
-from ScenarioCreator.models import ProductionType, DiseaseProgressionAssignment, DiseaseSpreadAssignment, Disease, Unit, DirectSpread, DiseaseProgression
+from ScenarioCreator.models import ProductionType, DiseaseProgressionAssignment, DiseaseSpreadAssignment, Disease, Unit, DirectSpread, DiseaseProgression, \
+    ControlProtocol
 
 __author__ = 'Josiah'
 
@@ -31,5 +32,10 @@ def whole_scenario_validation():
             warnings.append("Disease Progression: Disease Prevalence must be defined for each progression model.  Please define in: ")
             for entry in DiseaseProgression.objects.filter(disease_prevalence__isnull=True):
                 warnings.append(" - - - " + entry.name)
+
+    #Check that an invalid tab wasn't activated
+    for protocol in ControlProtocol.objects.all():
+        if not protocol.is_valid():
+            warnings.append(protocol.name + " Protocol has a section enabled but not completely filled in.  Either disable the section or fill in the details of the invalid section.")
 
     return warnings

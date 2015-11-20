@@ -78,18 +78,9 @@ $(function(){
     })
     
     $(document).on('click', 'a[load-target]', function(event){
-        event.preventDefault()
-        var selector = $(this).attr('load-target')
-
-        //Wait until a problem comes up betwee 'active' and ':focus' to fix this
-        //$input.closest('.layout-panel').find('.defined').removeClass('focused')
-        //$(this).closest('.defined').addClass('focused');//?????????????????????????????????
-
-        $(this).closest('.layout-panel').find('a').removeClass('active')  // nix .active from the earlier select
-        $(this).addClass("active")  //@tjmahlin use .active to to style links between panels
-        $(selector).load($(this).attr('href'), open_panel_if_needed)
-        $('#center-panel').addClass('reveal') //allows toggle of box shadow on :before pseudo element
-    })
+        event.preventDefault();
+        load_target_link.call(this);
+    });
     
     $(document).on('click', '[data-click-toggle]', function(){
         $(this).toggleClass($(this).attr('data-click-toggle'));
@@ -114,13 +105,18 @@ $(function(){
         if($self.parent().hasClass('fragment')){
             load_target = $self.parent()
         }
-        if($self.parent().find('button[type=submit]').hasClass('btn-danger')) {//for deleting outputs on form submission
-            ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, function () {
-                window.location.reload()
-            }, loading_message);  //updates Navigation bar context
-        }else{
-            ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, undefined, loading_message);
+        var success_callback = null;
+        if(window.location.pathname.indexOf('setup/ControlProtocol/') != -1) {
+            success_callback = function(){
+                rebuild_protocols_list();
+            }
         }
+        if($self.parent().find('button[type=submit]').hasClass('btn-danger')) {// MOST IMPORTANT: for deleting outputs on form submission
+            success_callback = function () {
+                window.location.reload()
+            };  //updates Navigation bar context
+        }
+        ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, loading_message, success_callback);
     })
 
     $(document).on('click', '#update_adsm', function(event){
@@ -181,8 +177,9 @@ $(function(){
     
     
     $('[data-visibility-controller]').livequery(function(){
-        attach_visibility_controller(this)})
-    
+        attach_visibility_controller(this)
+    })
+
     
     $('[data-visibility-context]').livequery(function(){
         var context_var = window[$(this).attr('data-visibility-context')]
@@ -210,6 +207,7 @@ $(function(){
         var deleting_outputs = typeof outputs_exist !== 'undefined' && outputs_exist;
         var do_reload = $(this).hasClass('ajax-post') || deleting_outputs
         var direct_link = $(this).hasClass('direct_link')
+        var rebuild = $(this).hasClass('rebuild-list');
         var $containing_panel = $(this).closest('.layout-panel')
         var object_type = link.split('/')[2]
         if (typeof object_type === 'undefined') {
@@ -240,9 +238,17 @@ $(function(){
                                 window.location.reload()
                             });
                         } else {
+                            if(rebuild){
+                                $.post(link).done(function() {
+                                    dialog.close();
+                                    rebuild_protocols_list();
+                                });
+                                return;
+                            }
                             if(direct_link){
                                 dialog.close();
                                 window.location = link;
+                                return;
                             } else {//neither tag
                                 $.post(link).done(function () {
                                     clear_form_populate_panel($containing_panel, link)
@@ -417,6 +423,26 @@ safe_save = function(url, data, new_link){
         });
     }
 }
+
+function load_target_link(callback){
+        var selector = $(this).attr('load-target')
+
+        //Wait until a problem comes up betwee 'active' and ':focus' to fix this
+        //$input.closest('.layout-panel').find('.defined').removeClass('focused')
+        //$(this).closest('.defined').addClass('focused');//?????????????????????????????????
+
+        $(this).closest('.layout-panel').find('a').removeClass('active')  // nix .active from the earlier select
+        $(this).addClass("active")  //@tjmahlin use .active to to style links between panels
+        var element = this;
+        $(selector).load($(this).attr('href'), function(){
+            open_panel_if_needed();
+            if(typeof callback === 'function'){
+                callback(element);
+            }
+        });
+        $('#center-panel').addClass('reveal'); //allows toggle of box shadow on :before pseudo element
+        
+    }
 
 function open_panel_if_needed(){
      $('.productiontypelist, .grouplist').each(function(){
@@ -689,9 +715,9 @@ function check_disabled_controls() {
 };
 
 function reload_model_list($form) {
-    $('#left-panel').load(window.location + " #left-panel>*")
+    $('#left-panel').load(window.location + " #left-panel>*, script");
     if(typeof $form !== 'undefined'  && $form.length){
-        var action = $form[0]['action'] //.attr('action');
+        var action = $form[0]['action']; //.attr('action');
         if(action.indexOf('ProductionGroup') != -1 || action.indexOf('ProductionType') != -1){
             $('#population_panel').load("/setup/OutputSettings/1/ #population_panel>*")
         }
@@ -732,9 +758,9 @@ function prompt_for_new_file_name(link) {
                     if (is_current_scenario) {
                         $('.filename input').val($('#new_name').val())
                         //$self.submit()
-                        ajax_submit_complex_form_and_replaceWith(link, new FormData($self[0]), $self, $self, function () {
+                        ajax_submit_complex_form_and_replaceWith(link, new FormData($self[0]), $self, $self, undefined, function () {
                             $('h1.filename').text($('.filename input').val()) //match major title with form value
-                        }, undefined);
+                        });
                     } else {
                         //TODO: need FormData from form that is to be added in #NewScenario
                         //ajax_submit_complex_form_and_replaceWith(link, new FormData($self[0]), $self, $self, undefined);
@@ -786,7 +812,7 @@ function reload_image(load_target) {
     }
 }
 
-function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, success_callback, loading_message) {
+function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, loading_message, success_callback) {
     var overlay = $('.blocking-overlay').show();
     if(typeof loading_message !== 'undefined'){
         overlay.find('.message').text(loading_message);
@@ -813,17 +839,21 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
                 if (formAction.lastIndexOf('new/') != -1 ||  //new model created
                     formAction.lastIndexOf('copy/') != -1) { //new model created
                     var parent_panel = $self.closest('.layout-panel').attr('id');
-                    if(parent_panel == 'center-panel' || parent_panel == 'population_panel'){
-                        reload_model_list($self); //reload left
+                    if((parent_panel == 'center-panel' || parent_panel == 'population_panel') ){
+                        if(window.location.pathname.indexOf('setup/ControlProtocol/') != -1) {
+                            rebuild_protocols_list();
+                        }else {  // don't do this on ControlProtocol pages
+                            reload_model_list($self); //reload left
+                        }
                     }else{
                         var lastClickedSelect = get_parent_select($self);
-                        add_model_option_to_selects(form_html, lastClickedSelect)
+                        add_model_option_to_selects(form_html, lastClickedSelect);
                     }
                 }
-                load_target.replaceWith(form_html)
+                load_target.replaceWith(form_html);
                 reload_image(load_target)
             }
-            if(typeof success_callback !== 'undefined'){
+            if(typeof success_callback === 'function'){
                 success_callback()
             }
         },
@@ -872,4 +902,9 @@ function statusChecker(){
     }else{
         clearInterval(statusChecker);
     }
+}
+
+function rebuild_protocols_list() {
+    $('#protocol_list #accordion').remove();
+    build_protocols_list(); // build from js rather than reload HTML
 }

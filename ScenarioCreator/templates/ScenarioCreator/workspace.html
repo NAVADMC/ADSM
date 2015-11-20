@@ -15,7 +15,7 @@
     <a href="/app/ImportScenario/" class="btn btn-default">Import NAADSM Legacy Scenario</a>
 
     <h3>Available Scenarios:</h3>
-    <ul id="file_list">
+    <ul class="file_list">
         {% for file in db_files %}
             <li><a href="/LoadingScreen/?loading_url=/app/OpenScenario/{{ file }}/">{{ file }}</a>
                 <a href="#" class="delete-icon ajax-post pull-right" title="delete" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
