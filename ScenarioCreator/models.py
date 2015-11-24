@@ -680,9 +680,9 @@ class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indire
                   wiki("indirect contact") + '. ', )
     contact_rate = FloatField(validators=[MinValueValidator(0.0)],
          # Important: Contact_rate help_text has been given special behavior vial two data-visibility-controller 's.
-        help_text=mark_safe("""<div class="help-block" data-visibility-controller="use_fixed_contact_rate" data-disabled-value="true">
+        help_text=mark_safe("""<div class="help-block" data-visibility-controller="use_fixed_contact_rate" data-disabled-value="false">
                                     Fixed baseline contact rate (in outgoing contacts/unit/day) for <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#direct-contact" class="wiki">direct</a> or <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#indirect-contact" class="wiki">indirect contact</a> models.</div>
-                                <div class="help-block" data-visibility-controller="use_fixed_contact_rate" data-disabled-value="false">
+                                <div class="help-block" data-visibility-controller="use_fixed_contact_rate" data-disabled-value="true">
                                     Mean baseline contact rate (in outgoing contacts/unit/day) for <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#direct-contact" class="wiki">direct</a> or <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#indirect-contact" class="wiki">indirect contact</a> models.</div>"""))
     use_fixed_contact_rate = models.BooleanField(default=False,
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
