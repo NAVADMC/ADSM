@@ -8,7 +8,7 @@ from Results.utils import is_simulation_running, is_simulation_stopped
 def results_context(request):
     context = {}
     
-    if not request.is_ajax() and ('results/' in request.path or 'setup/' in request.path):  # results specific context
+    if 'results/' in request.path or 'setup/' in request.path:  # results specific context
         session = SmSession.objects.get()
         context.update({'simulation_has_started': session.simulation_has_started,
                         'outputs_exist': outputs_exist(),

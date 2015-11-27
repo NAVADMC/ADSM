@@ -9,7 +9,7 @@ from ADSM import __version__
 
 def adsm_context(request):
     context = {}
-    if not request.is_ajax() and request.path and request.path != '/' and '/LoadingScreen/' not in request.path:
+    if request.path and request.path != '/' and '/LoadingScreen/' not in request.path:
         session = SmSession.objects.get()
         version = session.update_available
         context = {'filename': scenario_filename(),  # context in either mode
