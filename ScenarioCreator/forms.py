@@ -170,7 +170,7 @@ class DiseaseProgressionAssignmentForm(BaseForm):
         model = DiseaseProgressionAssignment
         exclude = []
         widgets = {'production_type': FixedSelect(),
-                   'progression': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseProgression/new/'})}
+                   } #progression should NOT be an AddOrSelect
 
 
 class ControlProtocolForm(BaseForm):
@@ -476,7 +476,7 @@ class ZoneEffectAssignmentForm(BaseForm):
         exclude = ['zone', 'production_type']
         widgets = {'zone': HiddenInput(),
                    'production_type': HiddenInput(),
-                   'effect': AddOrSelect(attrs={'data-new-item-url': '/setup/ZoneEffect/new/'})}
+                   }  # 'effect' should NOT be an AddOrSelect
 
 
 ## V3.3 Vaccination Triggers ##

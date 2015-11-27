@@ -27,7 +27,7 @@ def singular(name):
 
 
 def basic_context(request):
-    context = {}
+    context = {'request': request}
 
     if 'setup/' in request.path:  # inputs specific context not filled from ajax requests
         pt_count = ProductionType.objects.count()
@@ -56,9 +56,8 @@ def basic_context(request):
                'Protocols': ControlProtocol.objects.count(),
                'ProtocolAssignments': ProtocolAssignment.objects.count(),
                'Zones': Zone.objects.count(),
-               'ZoneEffects': ZoneEffect.objects.count() 
-                              and ZoneEffectAssignment.objects.filter(effect__isnull=False).count() >= Zone.objects.count() 
-                              and Zone.objects.count(),
+               'ZoneEffects': ZoneEffect.objects.count(),
+               'ZoneEffectAssignments': ZoneEffectAssignment.objects.filter(effect__isnull=False).count() >= Zone.objects.count() and Zone.objects.count(),
                'ProbabilityFunctions': ProbabilityFunction.objects.count(),
                'RelationalFunctions': RelationalFunction.objects.count(),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
@@ -79,7 +78,8 @@ def basic_context(request):
                              'Protocols': 'ControlProtocol/', 
                              'ProtocolAssignments': 'AssignProtocols/', 
                              'Zones': 'Zone/', 
-                             'ZoneEffects': 'AssignZoneEffects/'}
+                             'ZoneEffects': 'ZoneEffect/',
+                             'ZoneEffectAssignments': 'AssignZoneEffects/'}
         context['missing_values'] = {singular(name): validation_models[name] for name in validation_models if not context[name]}
         context['Simulation_ready'] = simulation_ready_to_run(context)
         disease = Disease.objects.get()
