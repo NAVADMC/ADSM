@@ -82,7 +82,7 @@ INSTALLED_APPS = (
     'floppyforms',
     'crispy_forms',
     'productionserver',
-    # 'webpack_loader',
+    'webpack_loader',
     # 'debug_toolbar',
     # 'pympler',
 )
