@@ -106,8 +106,8 @@ def zone_effects(request):
         context['formset_headings'] = Zone.objects.order_by('id')
         context['formset_grouped'] = {k: sorted(v, key=lambda x: x.instance.zone.id) 
                                         for k,v in forms_grouped_by_pt}
-        context['base_page'] = 'ScenarioCreator/FormSet2D.html'
-        return render(request, 'ScenarioCreator/3Panels.html', context)
+
+        return render(request, 'ScenarioCreator/FormSet2D.html', context)
 
 
 def save_formset_succeeded(MyFormSet, TargetModel, context, request):
@@ -155,8 +155,9 @@ def assign_progressions(request):
     ProgressionSet = modelformset_factory(DiseaseProgressionAssignment,
                                           extra=len(missing),
                                           form=DiseaseProgressionAssignmentForm)
-    context = {'title': 'Disease Progressions'}
-    return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request)
+    context = {'title': 'Assign Disease Progressions'}
+    return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request,
+                                                  template='ScenarioCreator/navigationPane.html') # main-panel
 
 
 def protocols_json(request):
