@@ -4,7 +4,7 @@ from math import sqrt
 from ScenarioCreator.views import filtering_params
 from ScenarioCreator.function_graphs import HttpFigure, rstyle
 
-
+import random
 from time import time
 from matplotlib import gridspec
 from itertools import chain
@@ -55,16 +55,25 @@ def population_png(request, width_inches=8, height_inches=8):
     
     start_time = time()
     #dark_and_light = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928', ]
-    dark_colors = ['#1f78b4', '#33a02c','#e31a1c', '#ff7f00','#6a3d9a', '#b15928']
+    # dark_colors = ['#1f78b4', '#33a02c','#e31a1c', '#ff7f00','#6a3d9a', '#b15928']
     light_colors = ['#a6cee3', '#b2df8a', '#fb9a99', '#fdbf6f', '#cab2d6'] # , '#ffff99']
     fig = Figure(figsize=(width_inches, height_inches), frameon=True, tight_layout=True)  # Issue #168 aspect ratio doesn't adjust currently
     ax = fig.add_subplot(1, 1, 1, axisbg='#FFFFFF')
-    size = min(100, 3000 / sqrt(Unit.objects.count()))
+    unit_count = Unit.objects.count()
+    size = min(100, 3000 / sqrt(unit_count))
+
+    sample_size = 900  # IMPORTANT: number of ids filtered cannot exceed 1,000 in SQL
+    sample = Q()
+    if unit_count > sample_size:
+        minimum_id = Unit.objects.all().aggregate(Min('id'))['id__min']
+        winning_numbers = [random.randint(minimum_id, minimum_id + unit_count - 1) for rnd in range(sample_size) ]
+        sample = Q(id__in=winning_numbers)
+
     for index, production_type in enumerate(ProductionType.objects.all()):
         if 'production_type__name' not in params or params['production_type__name'] == production_type.name:
-            units = Unit.objects.filter(Q(production_type=production_type) & query_filter)
-            if units.count(): # there needs to be at least some matching units
-                longitude, latitude = zip(*[(u.latitude, u.longitude) for u in units])
+            units = Unit.objects.filter(Q(production_type=production_type) & query_filter & sample).values('latitude', 'longitude')
+            if units.count():  # there needs to be at least some matching units
+                longitude, latitude = zip(*[(u['latitude'], u['longitude']) for u in units])
                 ax.scatter(latitude,
                            longitude,
                            marker='s',
