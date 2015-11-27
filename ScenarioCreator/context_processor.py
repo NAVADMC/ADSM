@@ -27,7 +27,7 @@ def singular(name):
 
 
 def basic_context(request):
-    context = {}
+    context = {'request': request}
 
     if not request.is_ajax() and 'setup/' in request.path:  # inputs specific context not filled from ajax requests
         pt_count = ProductionType.objects.count()
