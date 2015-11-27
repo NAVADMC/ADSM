@@ -444,9 +444,11 @@ function load_target_link(callback){
         
     }
 
-function open_panel_if_needed(){
-     $('.productiontypelist, .grouplist').each(function(){
-        $('#population_panel').removeClass('TB_panel_closed')
+function open_panel_if_needed() {
+    $('.productiontypelist, .grouplist').each(function () {
+        var pop = $('#population_panel');
+        pop.removeClass('TB_panel_closed')
+        pop.addClass('add-pt')
     })
     check_if_TB_panel_form_mask_needed()
 }

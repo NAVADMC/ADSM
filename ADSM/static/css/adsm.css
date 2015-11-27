@@ -323,7 +323,7 @@ header .filename {
     margin-top: 1px;
 }
 .scenario-status p{
-    font-size: 12px;
+    font-size: 18px;
     font-style: italic;
     font-weight: 300;
 }
@@ -766,9 +766,8 @@ ul {
 }
 #population_panel ul li:hover {
     background-color: #ebebeb;
-    cursor: url("../icons/add_cursor.png"), auto;
 }
-#population_panel ul li:hover, #population_panel ul li a:hover {
+#population_panel.add-pt ul li:hover, #population_panel.add-pt ul li a:hover {
     cursor: url("../icons/add_cursor.png"), auto;
 }
 #population_panel a:focus {
