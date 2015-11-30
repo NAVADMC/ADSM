@@ -323,6 +323,7 @@ class IndirectSpreadForm(BaseForm):
             'movement_control',
         )
         super(IndirectSpreadForm, self).__init__(*args, **kwargs)
+        self.fields['subclinical_animals_can_infect_others'].label = 'Subclinical units can infect others'
 
     class Meta(object):
         model = IndirectSpread
@@ -351,6 +352,8 @@ class DirectSpreadForm(BaseForm):
             'movement_control',
         )
         super(DirectSpreadForm, self).__init__(*args, **kwargs)
+        self.fields['latent_animals_can_infect_others'].label = 'Latent units can infect others'
+        self.fields['subclinical_animals_can_infect_others'].label = 'Subclinical units can infect others'
         if not Disease.objects.get().use_within_unit_prevalence:
             self.fields['infection_probability'].widget.attrs['required'] = 'required'  # only required when the field is visible, enforced by browser
 
