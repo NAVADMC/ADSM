@@ -676,14 +676,13 @@ class DiseaseSpread(BaseModel):
 class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indirect that were not in Airborne
     subclinical_animals_can_infect_others = models.BooleanField(default=False,
         help_text='Indicates if ' + wiki("Subclinical", "subclinically-infectious") +
-                  ' units of the source type can spread disease by ' + wiki("direct", "direct-contact") + ' or '+
-                  wiki("indirect contact") + '. ', )
+                  ' units of the source type can spread disease. ', )
     contact_rate = FloatField(validators=[MinValueValidator(0.0)],
          # Important: Contact_rate help_text has been given special behavior vial two data-visibility-controller 's.
         help_text=mark_safe("""<div class="help-block" data-visibility-controller="use_fixed_contact_rate" data-disabled-value="false">
-                                    Fixed baseline contact rate (in outgoing contacts/unit/day) for <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#direct-contact" class="wiki">direct</a> or <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#indirect-contact" class="wiki">indirect contact</a> models.</div>
+                                    Fixed baseline contact rate (in outgoing contacts/unit/day).</div>
                                 <div class="help-block" data-visibility-controller="use_fixed_contact_rate" data-disabled-value="true">
-                                    Mean baseline contact rate (in outgoing contacts/unit/day) for <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#direct-contact" class="wiki">direct</a> or <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#indirect-contact" class="wiki">indirect contact</a> models.</div>"""))
+                                    Mean baseline contact rate (in outgoing contacts/unit/day).</div>"""))
     use_fixed_contact_rate = models.BooleanField(default=False,
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
     distance_distribution = models.ForeignKey(ProbabilityFunction, related_name='+',
@@ -700,9 +699,7 @@ class IndirectSpread(AbstractSpread):
     """This has to inherit from AbstractSpread or else Django treats DirectSpread and IndirectSpread as
     interchangable, which they are not."""
     infection_probability = PercentField(
-        help_text='The probability that a contact will result in disease transmission. Specified for ' +
-                  wiki("direct", "direct-contact") + ' or '+
-                  wiki("indirect contact") + ' models.', )
+        help_text='The probability that a contact will result in disease transmission.', )
 
     def __str__(self):
         return "%s" % (self.name, )
@@ -717,8 +714,7 @@ class DirectSpread(AbstractSpread):
                   wiki("direct", "direct-contact") + ' or '+
                   wiki("indirect contact") + ' models.', )
     latent_animals_can_infect_others = models.BooleanField(default=False,
-        help_text='Indicates if '+wiki("latent", "latent-state")+' units of the source type can spread disease by ' +
-                  wiki("direct contact") + '.', )
+        help_text='Indicates if '+wiki("latent", "latent-state")+' units of the source type can spread disease.', )
     def __str__(self):
         return "%s" % (self.name, )
 
