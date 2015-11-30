@@ -147,6 +147,26 @@ class RelationalFunctionForm(BaseForm):
 
 
 class ControlMasterPlanForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            'name',
+            HTML(r"<h2>Global Destruction settings</h2>"),
+            HTML(r"<p>Parameters are not used if Destruction is turned off in the control protocol</p>"),
+            'destruction_program_delay',
+            'destruction_capacity',
+            'destruction_priority_order',
+            'destruction_reason_order',
+            HTML(r"<h2>Global Vaccination settings</h2>"),
+            HTML(r"<p>Parameters are not used if Vaccination is turned off in the control protocol</p>"),
+            'vaccination_capacity',
+            'restart_vaccination_capacity',
+            'vaccination_priority_order',
+            'vaccinate_retrospective_days',
+        )
+        super(ControlMasterPlanForm, self).__init__(*args, **kwargs)
+
+
     class Meta(object):
         model = ControlMasterPlan
         exclude = ['disable_all_controls']
