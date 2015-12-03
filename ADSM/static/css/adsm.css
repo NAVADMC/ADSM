@@ -1598,6 +1598,9 @@ section#population_main_panel h1:first-of-type {
     margin-left: -15px;
     margin-top: -6px;
 }
+.map-fine-print {
+    font-size: 12px;
+}
 #refresh_map {
     position: absolute;
     right: 20px;
