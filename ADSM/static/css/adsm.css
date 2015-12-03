@@ -419,8 +419,8 @@ body>nav {
 /*-------------------------------------------------------------*/
 #main-panel {
     /* float:none; */
-    margin-left: 238px;
-    width: calc(100vw - 324px);
+    /*margin-left: 185px;*/
+    width: calc(100vw - 160px);
 }
 
 .layout-panel {
@@ -498,11 +498,7 @@ ul {
     margin-left: 0;
     z-index: 0;
 }
-@media screen and (max-width: 1200px) {
-    .center-block {
-        padding-left: 160px;
-    }
-}
+
 
 /*---- 2nd-to-3rd-column linking ----*/
 

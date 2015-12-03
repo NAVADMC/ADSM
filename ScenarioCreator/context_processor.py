@@ -40,9 +40,8 @@ def basic_context(request):
                'ProductionGroups': ProductionGroup.objects.all(),
                'Farms': Unit.objects.count(),
                'Disease': Disease.objects.all().exclude(name='').count(),
-               'Progressions': DiseaseProgression.objects.count() 
-                               and pt_count 
-                               and DiseaseProgressionAssignment.objects.filter(progression__isnull=False).count() == pt_count,
+               'Progressions': DiseaseProgression.objects.count() and pt_count,
+               'ProgressionAssignment': pt_count and DiseaseProgressionAssignment.objects.filter(progression__isnull=False).count() == pt_count,
                'DirectSpreads': DirectSpread.objects.count(),
                'AssignSpreads': pt_count and
                                 DiseaseSpreadAssignment.objects.filter(  #completely empty assignments
