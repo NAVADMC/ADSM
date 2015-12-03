@@ -420,7 +420,7 @@ body>nav {
 #main-panel {
     /* float:none; */
     /*margin-left: 185px;*/
-    width: calc(100vw - 160px);
+    /*width: calc(100vw - 160px);*/
 }
 
 .layout-panel {
@@ -2556,7 +2556,6 @@ select[multiple] {}
 
 .has-spinner.btn-mini.active .spinner {
     width: 30px;
-    height: 30px;
 }
 
 /*** Icon Spin taken from font-awesome.css  "Font Awesome by Dave Gandy - http://fortawesome.github.com/Font-Awesome" ***/

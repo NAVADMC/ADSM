@@ -3,6 +3,8 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
+<div class="container" style=" width: 100%; ">
+<div class="row">
     {% if is_simulation_stopped %}
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/mapbox.css" />
         <script type="text/javascript" src="{{ STATIC_URL }}js/summary_csv.js"></script>
@@ -42,7 +44,6 @@
                 </div>
             </div>
         </div>
-        </div> 
 {#        <div id="legend"><p>Red = Infected, Green = Vaccinated, Black = Destroyed.#}
 {#        Affected Units are 1km squares, regardless of size.#}
 {#        The height of each tiny bar graph is the percentage of iterations in which that unit was Infected, Vaccinated, or Destroyed.  #}
@@ -66,11 +67,12 @@
         <a href="/results/">Recalculate Summary Statistics</a>
     {% endif %}
     
-    <div id="summaryData">
-        <p>Simulation Version: {{ version_number }}</p>
-        {% include "Results/Summary.html" %}
+        <div id="summaryData">
+            <p>Simulation Version: {{ version_number }}</p>
+            {% include "Results/Summary.html" %}
+        </div>
     </div>
-
+    <div class="row">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">Supplemental Output Files</h3>
@@ -97,6 +99,7 @@
                 </ul>
             </div>
         </div>
+    </div>
     <div class="spacer"></div>
-    
+</div>
 {% endblock %}
