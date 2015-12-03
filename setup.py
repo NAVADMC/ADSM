@@ -287,12 +287,12 @@ else:
 
 cmdclass = {"build_exe": BuildADSM, }
 
-setup(name='ADSM_Beta',
+setup(name='ADSM_Vaccination_Rings',
       version=__version__,
-      description='ADSM Beta Application',
+      description='ADSM Vaccination Rings Application',
       options={'build_exe': build_exe_options,
                'install_exe': {'build_dir': build_exe_options['build_exe']}},
-      executables=[Executable('ADSM.py', base=base, icon='favicon.ico', targetName='ADSM_Beta'+settings.EXTENSION), ],
+      executables=[Executable('ADSM.py', base=base, icon='favicon.ico', targetName='ADSM_Vaccination_Rings'+settings.EXTENSION), ],
       cmdclass=cmdclass,
       install_requires=requirements,
       dependency_links=urls
