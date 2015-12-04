@@ -3,7 +3,7 @@ from itertools import chain
 import os
 from glob import glob
 
-from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseBadRequest
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseBadRequest, HttpResponseNotFound
 from django.forms.models import modelformset_factory
 from django.shortcuts import render, redirect
 from django.db.models import Max
@@ -217,9 +217,11 @@ def summary_csv(request):
         elif DailyControls.objects.all().count() <= 0 or SmSession.objects.get().simulation_has_started:
             return HttpResponseBadRequest()
         elif not os.path.isfile(workspace_path(scenario_filename() + '/summary.csv')):
-            # TODO: spin off process to start creating the CSV file
-            return HttpResponseAccepted()
+            return HttpResponseNotFound()
         else:
             return HttpResponse()
+    if request.method == "POST":
+        # TODO: spin off process to start creating the CSV file
+        return HttpResponseAccepted()
     else:
-        return HttpResponseNotAllowed(permitted_methods=['GET'])
+        return HttpResponseNotAllowed(permitted_methods=['GET', 'POST'])
