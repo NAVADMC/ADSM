@@ -18,6 +18,7 @@ from Results.simulation import Simulation
 from Results.utils import delete_supplemental_folder, map_zip_file, delete_all_outputs, is_simulation_stopped
 import Results.output_parser
 from Results.summary import list_of_iterations, iterations_complete
+from Results.utils import SummaryCSVGenerator
 
 
 def back_to_inputs(request):
@@ -221,7 +222,8 @@ def summary_csv(request):
         else:
             return HttpResponse()
     if request.method == "POST":
-        # TODO: spin off process to start creating the CSV file
+        csv_generator = SummaryCSVGenerator()
+        csv_generator.start()  # starts a new thread
         return HttpResponseAccepted()
     else:
         return HttpResponseNotAllowed(permitted_methods=['GET', 'POST'])
