@@ -206,3 +206,6 @@ def filtered_list(request, prefix):
     model_name, model = get_model_name_and_model(request)
     return result_table(request, model_name, model, globals()[model_name + 'Form'], True, prefix)
 
+
+def summary_csv(request):
+    pass
