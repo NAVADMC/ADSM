@@ -3,7 +3,7 @@ from itertools import chain
 import os
 from glob import glob
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 from django.forms.models import modelformset_factory
 from django.shortcuts import render, redirect
 from django.db.models import Max
@@ -208,4 +208,21 @@ def filtered_list(request, prefix):
 
 
 def summary_csv(request):
-    pass
+    class HttpResponseAccepted(HttpResponse):
+        status_code = 202
+
+    if request.method == "GET":
+        if SmSession.objects.get().calculating_summary_csv:
+            return HttpResponseAccepted()
+        # TODO: Check if the simulation hasn't been run yet and return 400 BadRequest
+        elif not os.path.isfile(workspace_path(scenario_filename() + '/summary.csv')):
+            # TODO: spin off process to start creating the CSV file
+            return HttpResponseAccepted()
+        else:
+            file_path = workspace_path(scenario_filename() + '/summary.csv')
+            f = open(file_path, "rb")
+            response = HttpResponse(f, content_type="text/csv")
+            response['Content-Disposition'] = 'attachment; filename="' + 'summary.csv'
+            return response
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['GET'])
