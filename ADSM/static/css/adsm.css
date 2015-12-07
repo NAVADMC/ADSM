@@ -1443,11 +1443,11 @@ select {
 .delete-icon {
     background-image: url('../icons/delete_sprite.png');
     background-repeat-y: no-repeat;
-    background-position: 0 2px;
+    background-position: 0 0;
 }
 .delete-icon:hover,
 .delete-icon:focus {
-    background-position: 15px 2px !important;
+    background-position: 15px 0 !important;
     background-image: url('../icons/delete_sprite.png') !important; /*It's not an icon without this background*/
     background-repeat-y: no-repeat;
     outline: none;

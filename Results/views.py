@@ -43,9 +43,10 @@ def results_home(request):
     path_ex = workspace_path(scenario_filename() +"/*.csv")
     start = workspace_path()
     context = {'supplemental_files': [os.path.relpath(file_path, start=start) for file_path in glob(path_ex)]}
-    summary_path = scenario_filename() + "/" + SUMMARY_FILE_NAME
+    summary_path = os.path.join(scenario_filename(), SUMMARY_FILE_NAME)
     try:
         context['supplemental_files'].remove(summary_path)
+    #             context['supplemental_files'] = [file for file in context['supplemental_files'] if not file.endswith(SUMMARY_FILE_NAME)] # filter out summary.csv
     except ValueError: pass
     context['summary_file_name'] = summary_path
 

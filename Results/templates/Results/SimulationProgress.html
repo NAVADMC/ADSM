@@ -84,14 +84,15 @@
                             <span class="spinner"><i class="icon-spin glyphicon glyphicon-refresh"></i></span>
                             Calculate Summary CSV
                         </button>
-                        <div class="summary-download hidden">Summary.csv
-                            <a href="/app/Download/?target="{{ summary_file_name }}><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
+                        <div class="summary-download hidden"><a href="/app/Download/?target={{ summary_file_name }}">{{ summary_file_name }}</a>
+                            <a href="#" class="icon delete-icon" data-delete-link="{{ summary_file_name }}"></a>
+                            <a href="/app/Download/?target={{ summary_file_name }}"><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
                         </div>
                     </li>
 
                     {% for file in supplemental_files %}
-                        <li>{{ file }}
-                            <a href="#" class="delete-icon" data-delete-link="{{ file }}"><img src="{{ STATIC_URL }}icons/delete.png" alt="Delete" class="icon pull-right"></a>
+                        <li><a href="/app/Download/?target={{ file }}" >{{ file }}</a>
+                            <a href="#" class="icon delete-icon" data-delete-link="{{ file }}"></a>
                             <a href="/app/Download/?target={{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
                             </li>
                     {% endfor %}
