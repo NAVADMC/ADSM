@@ -7,14 +7,11 @@ from ADSMSettings.utils import workspace_path, scenario_filename
 
 
 def create_csv_file(location, headers, data):
-    csvfile = open(location, 'wb')
-    writer = csv.writer(csvfile)
+    with open(location, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=headers)
 
-    writer.writerow(headers)
-
-    [writer.writerow(x) for x in data]
-
-    csvfile.close()
+        writer.writeheader()
+        [writer.writerow(x) for x in data]
 
 
 class SummaryCSVGenerator(multiprocessing.Process):
@@ -33,7 +30,7 @@ class SummaryCSVGenerator(multiprocessing.Process):
                 settings.DATABASES[database]['NAME'] = settings.DATABASES[database]['TEST']['NAME'] if 'TEST' in settings.DATABASES[database] else settings.DATABASES[database]['TEST_NAME']
 
         location = workspace_path(scenario_filename() + '/summary.csv')  # Note: scenario_filename uses the database
-        headers, data = "test1, test2", ["1blah1, 1blah2", "2blah1, 2blah2"]  # TODO: Use class method to get these
+        headers, data = ["test1", "test2"], [{'test1': "1blah1", 'test2': "1blah2"}, {'test1': "2blah1", 'test2': "2blah2"}]  # TODO: Use class method to get these
 
         create_csv_file(location, headers, data)
 

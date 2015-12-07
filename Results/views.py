@@ -213,6 +213,7 @@ def summary_csv(request):
         status_code = 202
 
     if request.method == "GET":
+        print("IN GET")
         if SmSession.objects.get().calculating_summary_csv:
             return HttpResponseAccepted()
         elif not DailyControls.objects.all().count() or is_simulation_running():
@@ -222,6 +223,7 @@ def summary_csv(request):
         else:
             return HttpResponse()
     if request.method == "POST":
+        print("IN POST")
         csv_generator = SummaryCSVGenerator()
         csv_generator.start()  # starts a new thread
         return HttpResponseAccepted()
