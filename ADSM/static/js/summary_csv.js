@@ -8,9 +8,10 @@ $(function(){
     var pollingTask;
 
     function check_summary_status(){
-        $.get(endpoint).done(function(response){
-            switch(response.status){
+        $.get(endpoint, function(data, textStatus, xhr){
+            switch(xhr.status){
                 case 200: {  // if file is ready
+                    $summaryCsv.find('button').removeClass('active')
                     $summaryCsv.find('button').addClass('hidden')
                     $summaryCsv.find('.download-link').removeClass('hidden')
                     stop_poll()
@@ -22,6 +23,7 @@ $(function(){
                 }
                 case 400:
                     console.log("There aren't results to compute on.")
+                    $summaryCsv.find('button').addClass('hidden')
                     return
                 case 404: //results haven't been started computing yet
                     //display the button for user to press
