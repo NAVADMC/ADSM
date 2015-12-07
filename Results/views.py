@@ -18,7 +18,7 @@ from Results.simulation import Simulation
 from Results.utils import delete_supplemental_folder, map_zip_file, delete_all_outputs, is_simulation_stopped
 import Results.output_parser
 from Results.summary import list_of_iterations, iterations_complete
-from Results.utils import SummaryCSVGenerator
+from Results.csv_generator import SummaryCSVGenerator
 
 
 def back_to_inputs(request):

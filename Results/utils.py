@@ -2,10 +2,8 @@ import os
 import shutil
 import zipfile
 import psutil
-import multiprocessing
 
 from django.shortcuts import redirect
-from django.conf import settings
 
 from ADSMSettings.models import SimulationProcessRecord, SmSession
 from ADSMSettings.utils import workspace_path, supplemental_folder_has_contents, scenario_filename
@@ -85,21 +83,3 @@ def delete_all_outputs():
     for model in [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]:
         model.objects.all().delete()
     SmSession.objects.all().update(iteration_text = '', simulation_has_started=False)  # This is also reset from open_scenario
-
-
-class SummaryCSVGenerator(multiprocessing.Process):
-    import django
-    django.setup()
-
-    testing = False
-
-    def __init__(self, testing=False, **kwargs):
-        super(SummaryCSVGenerator, self).__init__(**kwargs)
-        self.testing = testing
-
-    def run(self):
-        if self.testing:
-            for database in settings.DATABASES:
-                settings.DATABASES[database]['NAME'] = settings.DATABASES[database]['TEST']['NAME'] if 'TEST' in settings.DATABASES[database] else settings.DATABASES[database]['TEST_NAME']
-
-        # TODO: Generate the Statistics Summary Report CSV File
