@@ -39,9 +39,16 @@ def simulation_status(request):
 
 
 def results_home(request):
+    from Results.csv_generator import SUMMARY_FILE_NAME
     path_ex = workspace_path(scenario_filename() +"/*.csv")
     start = workspace_path()
     context = {'supplemental_files': [os.path.relpath(file_path, start=start) for file_path in glob(path_ex)]}
+    summary_path = scenario_filename() + "/" + SUMMARY_FILE_NAME
+    try:
+        context['supplemental_files'].remove(summary_path)
+    except ValueError: pass
+    context['summary_file_name'] = summary_path
+
     if os.path.exists(map_zip_file()):
         context['supplemental_files'].append(os.path.relpath(map_zip_file(), start=start))
     # TODO: value dict file sizes

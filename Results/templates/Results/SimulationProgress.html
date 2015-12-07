@@ -84,9 +84,8 @@
                             <span class="spinner"><i class="icon-spin glyphicon glyphicon-refresh"></i></span>
                             Calculate Summary CSV
                         </button>
-
-                        <div class="download-link hidden">Summary.csv
-                            <a href="/app/Download/?target=Summary.csv" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
+                        <div class="summary-download hidden">Summary.csv
+                            <a href="/app/Download/?target="{{ summary_file_name }}><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
                         </div>
                     </li>
 

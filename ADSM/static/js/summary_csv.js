@@ -13,7 +13,7 @@ $(function(){
                 case 200: {  // if file is ready
                     $summaryCsv.find('button').removeClass('active')
                     $summaryCsv.find('button').addClass('hidden')
-                    $summaryCsv.find('.download-link').removeClass('hidden')
+                    $summaryCsv.find('.summary-download').removeClass('hidden')
                     stop_poll()
                     return
                 }
