@@ -1,5 +1,6 @@
 """URLs is entirely procedural based on the contents of models.py. This has the advantage that urls automatically update as the models change or are renamed."""
 
+
 """NEVER MODIFY THIS FILE
 Instead, modify the 'makeresultsurls' management command."""
 
