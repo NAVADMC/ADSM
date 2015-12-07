@@ -15,7 +15,7 @@ from ScenarioCreator.models import OutputSettings
 from Results.graphing import construct_title
 from Results.forms import *  # necessary
 from Results.simulation import Simulation
-from Results.utils import delete_supplemental_folder, map_zip_file, delete_all_outputs, is_simulation_stopped
+from Results.utils import delete_supplemental_folder, map_zip_file, delete_all_outputs, is_simulation_stopped, is_simulation_running
 import Results.output_parser
 from Results.summary import list_of_iterations, iterations_complete
 from Results.csv_generator import SummaryCSVGenerator
@@ -215,7 +215,7 @@ def summary_csv(request):
     if request.method == "GET":
         if SmSession.objects.get().calculating_summary_csv:
             return HttpResponseAccepted()
-        elif DailyControls.objects.all().count() <= 0 or SmSession.objects.get().simulation_has_started:
+        elif not DailyControls.objects.all().count() or is_simulation_running():
             return HttpResponseBadRequest()
         elif not os.path.isfile(workspace_path(scenario_filename() + '/summary.csv')):
             return HttpResponseNotFound()
