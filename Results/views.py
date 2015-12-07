@@ -18,7 +18,7 @@ from Results.simulation import Simulation
 from Results.utils import delete_supplemental_folder, map_zip_file, delete_all_outputs, is_simulation_stopped, is_simulation_running
 import Results.output_parser
 from Results.summary import list_of_iterations, iterations_complete
-from Results.csv_generator import SummaryCSVGenerator
+from Results.csv_generator import SummaryCSVGenerator, SUMMARY_FILE_NAME
 
 
 def back_to_inputs(request):
@@ -213,17 +213,15 @@ def summary_csv(request):
         status_code = 202
 
     if request.method == "GET":
-        print("IN GET")
         if SmSession.objects.get().calculating_summary_csv:
             return HttpResponseAccepted()
         elif not DailyControls.objects.all().count() or is_simulation_running():
             return HttpResponseBadRequest()
-        elif not os.path.isfile(workspace_path(scenario_filename() + '/summary.csv')):
+        elif not os.path.isfile(workspace_path(scenario_filename() + '/' + SUMMARY_FILE_NAME)):
             return HttpResponseNotFound()
         else:
             return HttpResponse()
     if request.method == "POST":
-        print("IN POST")
         csv_generator = SummaryCSVGenerator()
         csv_generator.start()  # starts a new thread
         return HttpResponseAccepted()
