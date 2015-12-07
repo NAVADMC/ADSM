@@ -1,6 +1,20 @@
 import multiprocessing
+import csv
 
 from django.conf import settings
+
+from ADSMSettings.utils import workspace_path, scenario_filename
+
+
+def create_csv_file(location, headers, data):
+    csvfile = open(location, 'wb')
+    writer = csv.writer(csvfile)
+
+    writer.writerow(headers)
+
+    [writer.writerow(x) for x in data]
+
+    csvfile.close()
 
 
 class SummaryCSVGenerator(multiprocessing.Process):
@@ -18,7 +32,10 @@ class SummaryCSVGenerator(multiprocessing.Process):
             for database in settings.DATABASES:
                 settings.DATABASES[database]['NAME'] = settings.DATABASES[database]['TEST']['NAME'] if 'TEST' in settings.DATABASES[database] else settings.DATABASES[database]['TEST_NAME']
 
-        # TODO: Generate the Statistics Summary Report CSV File
+        location = workspace_path(scenario_filename() + '/summary.csv')  # Note: scenario_filename uses the database
+        headers, data = "test1, test2", ["1blah1, 1blah2", "2blah1, 2blah2"]  # TODO: Use class method to get these
+
+        create_csv_file(location, headers, data)
 
     def get_summary_data_table(self):
         """Generates a python data structure with all the information for the CSV file.  Structured in a list[row][column] 2D array that mimics the spreadsheet
