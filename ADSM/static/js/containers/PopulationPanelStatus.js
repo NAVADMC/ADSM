@@ -6,7 +6,6 @@ import { get_population_status } from '../actions/actions';
 import {store} from '../GlobalStore'
 
 
-
 export class PopulationPanelStatus extends Component {
     componentDidMount(){
         this.props.dispatch(get_population_status())
@@ -29,17 +28,17 @@ export class PopulationPanelStatus extends Component {
     }
 }
 
-//
-//PopulationPanelStatus.propTypes = {
-//    population: PropTypes.arrayOf(PropTypes.shape({
-//        name: PropTypes.string.isRequired,
-//        unit_count: PropTypes.number.isRequired,
-//        progression: PropTypes.bool.isRequired,
-//        spread: PropTypes.bool.isRequired,
-//        control: PropTypes.bool.isRequired,
-//        zone: PropTypes.bool.isRequired
-//    }))
-//};
+
+PopulationPanelStatus.propTypes = {
+    population: PropTypes.arrayOf(PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        unit_count: PropTypes.number.isRequired,
+        progression: PropTypes.bool.isRequired,
+        spread: PropTypes.bool.isRequired,
+        control: PropTypes.bool.isRequired,
+        zone: PropTypes.bool.isRequired
+    }))
+};
 
 
 function select(state) {

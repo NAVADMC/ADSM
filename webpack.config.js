@@ -3,7 +3,7 @@ var webpack = require('webpack');
 var BundleTracker = require('webpack-bundle-tracker');
 var CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
 
-    module.exports = {
+module.exports = {
     context: __dirname,
 
     entry: {
@@ -24,6 +24,8 @@ var CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
     module: {
         loaders: [
             { test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel-loader', query: {presets:['es2015', 'react']}}, // to transform JSX into JS
+            { test: /\.css$/, loader: "style-loader!css-loader" },
+            { test: /\.json$/, loader: "json-loader" }
         ]
     },
 
