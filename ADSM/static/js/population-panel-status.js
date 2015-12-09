@@ -2,20 +2,21 @@
 
 import $ from 'jquery';
 import React, { Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
+import ReactDOM from 'react-dom';
+import { connect, Provider } from 'react-redux';
+import {store, dispatch} from './GlobalStore'
 import { get_population_status } from './actions/actions';
 
 
 export class PopulationPanelStatus extends Component {
     componentDidMount(){
-        this.props.dispatch(get_population_status())
+        dispatch(get_population_status())
     }
 
     render() {
-        var content = this.state.clicked ? "Clicked" :"React test!";
         return (
             <div className="page">
-                <h1 onClick={this.onClick}>{content}</h1>
+                <h1>"Hello"</h1>
             </div>
         );
     }
@@ -45,7 +46,9 @@ function select(state) {
 export default connect(select)(PopulationPanelStatus)
 
 
-React.render(
-    React.createElement(PopulationPanelStatus, null),
+ReactDOM.render(
+    <Provider store={store}>
+        <PopulationPanelStatus />
+    </Provider>,
     document.getElementById('population_panel_status')
 );
