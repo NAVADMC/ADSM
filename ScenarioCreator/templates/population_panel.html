@@ -1,3 +1,4 @@
+{% load render_bundle from webpack_loader %}
 <div class="TB_panel TB_panel_closed layout-panel" id="population_panel">
     <h2><a href="/setup/ProductionType/">Population Production Types</a></h2> {# population panel headers links as a fall-back for copy/delete operations #}
     <ul id="ProductionTypes">
@@ -17,4 +18,7 @@
     </ul>
     <div id="group-creator"></div> {#load target#} 
     <a href='/setup/ProductionGroup/new' load-target='#group-creator'>+ define new group</a>
+
+    {% render_bundle 'commons.js' %}
+    {% render_bundle 'adsmReact' %}
 </div>
