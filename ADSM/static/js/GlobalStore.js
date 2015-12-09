@@ -14,6 +14,6 @@ const finalCreateStore = compose(
     persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/))
 )(createStore);
 
-export const store = finalCreateStore(reducer)
+export const store = finalCreateStore(reducer);
 
-export var dispatch = store.dispatch
+export var dispatch = store.dispatch;
