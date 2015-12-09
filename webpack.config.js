@@ -7,7 +7,7 @@ var CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
     context: __dirname,
 
     entry: {
-        population_panel: './ADSM/static/js/population_panel',
+        population_panel_status: './ADSM/static/js/population-panel-status',
     },
 
     output: {

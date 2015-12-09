@@ -19,6 +19,8 @@
     <div id="group-creator"></div> {#load target#} 
     <a href='/setup/ProductionGroup/new' load-target='#group-creator'>+ define new group</a>
 
-    {% render_bundle 'commons.js' %}
-    {% render_bundle 'adsmReact' %}
+    <div id="population_panel_status">
+        {% render_bundle 'commons.js' %}
+        {% render_bundle 'population_panel_status' %}
+    </div>
 </div>

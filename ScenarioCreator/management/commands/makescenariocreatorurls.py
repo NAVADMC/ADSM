@@ -49,6 +49,7 @@ class Command(BaseCommand):
              "url('^OpenPopulation/(?P<target>.+)$', 'ScenarioCreator.views.open_population')",
              "url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario')",
              "url('^ProductionTypeList.json/$', 'ScenarioCreator.views.production_type_list_json')",
+             "url('^PopulationPanelStatus.json/$', 'ScenarioCreator.views.population_panel_status_json')",
              "url('^DisableAllControls.json/$', 'ScenarioCreator.views.disable_all_controls_json')",
 
              "url('^ProbabilityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph')",
