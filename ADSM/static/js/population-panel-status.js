@@ -3,9 +3,14 @@
 import $ from 'jquery';
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import { get_population_status } from './actions/actions';
 
 
 export class PopulationPanelStatus extends Component {
+    componentDidMount(){
+        this.props.dispatch(get_population_status())
+    }
+
     render() {
         var content = this.state.clicked ? "Clicked" :"React test!";
         return (
