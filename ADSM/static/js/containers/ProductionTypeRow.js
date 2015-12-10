@@ -7,14 +7,15 @@ import { connect } from 'react-redux'
 export default class ProductionTypeRow extends Component {
     render() {
         var { name, unit_count, progression, spread, control, zone } = this.props;
+        var units = "("+unit_count +" units)"
         return(
             <li>
                 <a href="#">{ name }</a>
-                <span>({ unit_count } units)</span>
-                <span className={progression ? 'green-dot on' : 'green-dot'} />
-                <span className={spread ? 'green-dot on' : 'green-dot'} />
-                <span className={control ? 'green-dot on' : 'green-dot'} />
-                <span className={zone ? 'green-dot on' : 'green-dot'} />
+                <span>{units}</span>
+                <div className={progression ? 'green-dot filled' : 'green-dot'} />
+                <div className={spread ?      'green-dot filled' : 'green-dot'} />
+                <div className={control ?     'green-dot filled' : 'green-dot'} />
+                <div className={zone ?        'green-dot filled' : 'green-dot'} />
             </li>
         )
     }

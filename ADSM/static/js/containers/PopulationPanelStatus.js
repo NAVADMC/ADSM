@@ -37,7 +37,7 @@ PopulationPanelStatus.propTypes = {
         spread: PropTypes.bool.isRequired,
         control: PropTypes.bool.isRequired,
         zone: PropTypes.bool.isRequired
-    }))
+    })).isRequired
 };
 
 
