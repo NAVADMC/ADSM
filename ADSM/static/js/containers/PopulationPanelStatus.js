@@ -19,7 +19,9 @@ export class PopulationPanelStatus extends Component {
         return (
             <div>
                 <h2>
-                    <a href="/setup/ProductionType/">Population Production Types</a>
+                    <div className="population-super-column">
+                        <a href="/setup/ProductionType/">Population Production Types</a>
+                    </div>
                     <div className="productiontypes-header progression-icon" ></div>
                     <div className="productiontypes-header spread-icon" ></div>
                     <div className="productiontypes-header control-icon" ></div>

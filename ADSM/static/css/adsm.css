@@ -771,8 +771,8 @@ ul {
     border: none;
     outline: 0;
 }
-#population_panel ul li a, #population_panel ul li span:first-of-type {
-    width: 25%;
+.population-super-column {
+    width: 50%;
     min-width: 95px;
     display: inline-block;
     padding-right: 10px;
@@ -780,8 +780,12 @@ ul {
     white-space: nowrap;
     text-overflow: ellipsis;
     color: #606060;
-    text-decoration: none;
 }
+.population-super-column a {
+    text-decoration: none;
+    color: #606060;
+}
+
 #population_panel input {
     background-color: rgba(244, 230, 0, .2);
     display: block;
@@ -1492,11 +1496,13 @@ select {
 .spread-icon {
     background-size: contain;
     background-repeat: no-repeat;
+    background-position-x: 2px;
     background-image: url('../icons/spread-icon.png')
 }
 .control-icon {
     background-size: contain;
     background-repeat: no-repeat;
+    background-position-x: 4px;
     background-image: url('../icons/control-icon.png')
 }
 .zone-icon {
