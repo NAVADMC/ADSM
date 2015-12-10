@@ -1454,6 +1454,13 @@ select {
     background-color: transparent;
 }
 
+.productiontypes-header {
+    height: 18px;
+    width: 20px;
+    margin-left: 10px;
+    display:  inline-block;
+}
+
 .green-dot {
 	display: inline-block;
 	border: 2px solid rgba(102, 102, 102, 0.39);
@@ -1477,7 +1484,32 @@ select {
 	background-color: #66bc5d;
 }
 
+.progression-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-image: url('../icons/progression-icon.png')
+}
+.spread-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-image: url('../icons/spread-icon.png')
+}
+.control-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-image: url('../icons/control-icon.png')
+}
+.zone-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-image: url('../icons/zone-icon.png')
+}
 
+
+
+
+
+/**********************/
 input[type=file], button {
     display: inline;
 }
