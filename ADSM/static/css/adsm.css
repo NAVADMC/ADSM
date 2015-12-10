@@ -772,20 +772,28 @@ ul {
     outline: 0;
 }
 .population-super-column {
-    width: 50%;
-    min-width: 95px;
+    width: calc(100% - 130px);
+    /* min-width: 95px; */
     display: inline-block;
     padding-right: 10px;
     overflow:hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     color: #606060;
+    text-align: right;
 }
 .population-super-column a {
     text-decoration: none;
     color: #606060;
+    /* width: 179px; *//*Leave room for .unit-count min-width below*/
+    /*This line is commented out because it was pushing the unit count out of the column*/
 }
-
+.unit-count {
+    width: 80px;
+    margin-left: 20px;
+    float: none;
+    display: inline-block;
+}
 #population_panel input {
     background-color: rgba(244, 230, 0, .2);
     display: block;

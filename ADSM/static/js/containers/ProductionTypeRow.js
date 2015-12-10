@@ -13,7 +13,7 @@ export default class ProductionTypeRow extends Component {
             <li>
                 <div className="population-super-column">
                     <a href="#">{ name }</a>
-                    <span className="pull-right">{units}</span>
+                    <div className="unit-count">{units}</div>
                 </div>
                 <div title="Progression" className="productiontypes-header"><div className={progression ? css + ' filled' : css} /></div>
                 <div title="Spread"      className="productiontypes-header"><div className={spread ?      css + ' filled' : css} /></div>
