@@ -55,9 +55,9 @@ def population_panel_status_json(request):
         response.append({'name': pt.name,
                          'unit_count': Unit.objects.filter(production_type=pt).count(),
                          'spread': bool(DiseaseSpreadAssignment.objects.filter(destination_production_type=pt)
-                                        .filter(Q(direct_contact_spread__isnull=True,) |
-                                                Q(indirect_contact_spread__isnull=True) |
-                                                Q(airborne_spread__isnull=True)).count()),
+                                        .filter(Q(direct_contact_spread__isnull=False,) |
+                                                Q(indirect_contact_spread__isnull=False) |
+                                                Q(airborne_spread__isnull=False)).count()),
                          'control': bool(ProtocolAssignment.objects.filter(control_protocol__isnull=False, production_type=pt).count()),
                          'progression': bool(DiseaseProgressionAssignment.objects.filter(progression__isnull=False, production_type=pt).count()),
                          'zone': bool(ZoneEffectAssignment.objects.filter(effect__isnull=False, production_type=pt).count())
