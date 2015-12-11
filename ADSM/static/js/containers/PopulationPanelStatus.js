@@ -41,10 +41,10 @@ PopulationPanelStatus.propTypes = {
     population: PropTypes.arrayOf(PropTypes.shape({
         name: PropTypes.string.isRequired,
         unit_count: PropTypes.number.isRequired,
-        progression: PropTypes.bool.isRequired,
-        spread: PropTypes.bool.isRequired,
-        control: PropTypes.bool.isRequired,
-        zone: PropTypes.bool.isRequired
+        progression: PropTypes.string,
+        spread: PropTypes.number.isRequired,
+        control: PropTypes.string,
+        zone: PropTypes.string
     })).isRequired
 };
 
