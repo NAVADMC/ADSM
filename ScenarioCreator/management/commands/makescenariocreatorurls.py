@@ -49,6 +49,7 @@ class Command(BaseCommand):
              "url('^OpenPopulation/(?P<target>.+)$', 'ScenarioCreator.views.open_population')",
              "url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario')",
              "url('^ProductionTypeList.json/$', 'ScenarioCreator.views.production_type_list_json')",
+             "url('^PopulationPanelStatus.json/$', 'ScenarioCreator.views.population_panel_status_json')",
              "url('^DisableAllControls.json/$', 'ScenarioCreator.views.disable_all_controls_json')",
              "url('^VaccinationPriorities/$', 'ScenarioCreator.views.vaccination_priorities')",
 
@@ -58,7 +59,8 @@ class Command(BaseCommand):
              "url('^RelationalFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph')",
             ])
 
-        urls_code = "\"\"\"URLs is entirely procedural based on the contents of models.py. This has the advantage that urls automatically update as the models change or are renamed.\"\"\"\n\n" \
+        urls_code = "\"\"\"URLs is entirely procedural based on the contents of models.py. This has the advantage that urls automatically update as the models change or are renamed.\"\"\"\n\n\n" \
+                    "\"\"\"NEVER MODIFY THIS FILE\nInstead, modify the 'makescenariocreatorurls' management command.\"\"\"\n\n" \
                     "from django.conf.urls import patterns, url\n\n" \
                     "urlpatterns = " + urlpatterns
 

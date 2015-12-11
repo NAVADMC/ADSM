@@ -1,5 +1,9 @@
 """URLs is entirely procedural based on the contents of models.py. This has the advantage that urls automatically update as the models change or are renamed."""
 
+
+"""NEVER MODIFY THIS FILE
+Instead, modify the 'makescenariocreatorurls' management command."""
+
 from django.conf.urls import patterns, url
 
 urlpatterns = patterns('', url('^AssignSpreads/$', 'ScenarioCreator.views.assign_disease_spread'),
@@ -15,6 +19,7 @@ urlpatterns = patterns('', url('^AssignSpreads/$', 'ScenarioCreator.views.assign
          url('^OpenPopulation/(?P<target>.+)$', 'ScenarioCreator.views.open_population'),
          url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario'),
          url('^ProductionTypeList.json/$', 'ScenarioCreator.views.production_type_list_json'),
+         url('^PopulationPanelStatus.json/$', 'ScenarioCreator.views.population_panel_status_json'),
          url('^DisableAllControls.json/$', 'ScenarioCreator.views.disable_all_controls_json'),
          url('^VaccinationPriorities/$', 'ScenarioCreator.views.vaccination_priorities'),
          url('^ProbabilityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph'),

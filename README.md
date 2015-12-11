@@ -265,3 +265,12 @@ Build steps:
 
 When you push the OS branch, that compiled version is now live and will be pulled down by all clients.
   
+# Credits
+* Project Owner - Missy Schoenbaum
+* ADSM Technical Lead - Josiah Seaman
+* Simulation Creator / Maintainer - Neil Harvey
+* Dev Ops - Bryan Hurst
+* Project Management - Alex Pyle & Kurt Tometich
+
+## Noun Project icons:
+* "Spread" - Stephanie Wauters

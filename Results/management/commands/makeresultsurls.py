@@ -44,9 +44,11 @@ class Command(BaseCommand):
                                                       "url('^Inputs/$', 'Results.views.back_to_inputs')",
                                                       "url('^simulation_status.json$', 'Results.views.simulation_status')",
                                                       "url('^abort_simulation$', 'Results.utils.abort_simulation')",
+                                                      "url('^SummaryCSV/$', 'Results.views.summary_csv')",
                                                       ])
 
-        urls_code = "\"\"\"URLs is entirely procedural based on the contents of models.py. This has the advantage that urls automatically update as the models change or are renamed.\"\"\"\n\n" \
+        urls_code = "\"\"\"URLs is entirely procedural based on the contents of models.py. This has the advantage that urls automatically update as the models change or are renamed.\"\"\"\n\n\n" \
+                    "\"\"\"NEVER MODIFY THIS FILE\nInstead, modify the 'makeresultsurls' management command.\"\"\"\n\n" \
                     "from django.conf.urls import patterns, url\n\n" \
                     "urlpatterns = " + urlpatterns
 

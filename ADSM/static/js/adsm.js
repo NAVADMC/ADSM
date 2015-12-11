@@ -444,9 +444,11 @@ function load_target_link(callback){
         
     }
 
-function open_panel_if_needed(){
-     $('.productiontypelist, .grouplist').each(function(){
-        $('#population_panel').removeClass('TB_panel_closed')
+function open_panel_if_needed() {
+    $('.productiontypelist, .grouplist').each(function () {
+        var pop = $('#population_panel');
+        pop.removeClass('TB_panel_closed')
+        pop.addClass('add-pt')
     })
     check_if_TB_panel_form_mask_needed()
 }
@@ -714,7 +716,7 @@ function check_disabled_controls() {
     }//else do nothing
 };
 
-function reload_model_list($form) {
+function reload_model_list($form) { //TODO: change this to expect a fragment
     $('#left-panel').load(window.location + " #left-panel>*, script");
     if(typeof $form !== 'undefined'  && $form.length){
         var action = $form[0]['action']; //.attr('action');
@@ -836,19 +838,16 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
                     $('body').html(content);
                 }
             } else {
-                if (formAction.lastIndexOf('new/') != -1 ||  //new model created
-                    formAction.lastIndexOf('copy/') != -1) { //new model created
-                    var parent_panel = $self.closest('.layout-panel').attr('id');
-                    if((parent_panel == 'center-panel' || parent_panel == 'population_panel') ){
-                        if(window.location.pathname.indexOf('setup/ControlProtocol/') != -1) {
-                            rebuild_protocols_list();
-                        }else {  // don't do this on ControlProtocol pages
-                            reload_model_list($self); //reload left
-                        }
-                    }else{
-                        var lastClickedSelect = get_parent_select($self);
-                        add_model_option_to_selects(form_html, lastClickedSelect);
+                var parent_panel = $self.closest('.layout-panel').attr('id');
+                if((parent_panel == 'center-panel' || parent_panel == 'population_panel') ){
+                    if(window.location.pathname.indexOf('setup/ControlProtocol/') != -1) {
+                        rebuild_protocols_list();
+                    }else {  // don't do this on ControlProtocol pages
+                        reload_model_list($self); //reload left
                     }
+                }else{
+                    var lastClickedSelect = get_parent_select($self);
+                    add_model_option_to_selects(form_html, lastClickedSelect);
                 }
                 load_target.replaceWith(form_html);
                 reload_image(load_target)

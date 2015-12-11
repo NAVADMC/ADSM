@@ -48,10 +48,36 @@ def production_type_list_json(request):
     return JsonResponse(msg, safe=False)  # necessary to serialize a list object
 
 
+def jsonify(string_list):
+    """Returns the name of the specific assignment or None"""
+    if string_list:
+        return string_list[0]
+    else:
+        return None
+
+
+def population_panel_status_json(request):
+    response = []
+
+    for pt in ProductionType.objects.all():
+        response.append({'name': pt.name,
+                         'unit_count': Unit.objects.filter(production_type=pt).count(),
+                         'spread': DiseaseSpreadAssignment.objects.filter(destination_production_type=pt).filter(
+                             Q(direct_contact_spread__isnull=False,) |
+                             Q(indirect_contact_spread__isnull=False) |
+                             Q(airborne_spread__isnull=False)).count(),
+                         'control': jsonify(ProtocolAssignment.objects.filter(control_protocol__isnull=False, production_type=pt).values_list('control_protocol__name', flat=True)),
+                         'progression': jsonify(DiseaseProgressionAssignment.objects.filter(progression__isnull=False, production_type=pt).values_list('progression__name', flat=True)),
+                         'zone': jsonify(ZoneEffectAssignment.objects.filter(effect__isnull=False, production_type=pt).values_list('zone__name', flat=True)),
+                         })
+
+    return JsonResponse(response, safe=False)
+
+
 def disable_all_controls_json(request):
     if 'POST' in request.method:
         new_value = request.POST['use_controls']
-        set_to = new_value == 'false'  #logical inversion because of use_controls vs disable_controls
+        set_to = new_value == 'false'  # logical inversion because of use_controls vs disable_controls
         controls = ControlMasterPlan.objects.get()
         controls.disable_all_controls = set_to
         controls.save()
@@ -106,8 +132,8 @@ def zone_effects(request):
         context['formset_headings'] = Zone.objects.order_by('id')
         context['formset_grouped'] = {k: sorted(v, key=lambda x: x.instance.zone.id) 
                                         for k,v in forms_grouped_by_pt}
-        context['base_page'] = 'ScenarioCreator/FormSet2D.html'
-        return render(request, 'ScenarioCreator/3Panels.html', context)
+
+        return render(request, 'ScenarioCreator/FormSet2D.html', context)
 
 
 def save_formset_succeeded(MyFormSet, TargetModel, context, request):
@@ -155,8 +181,9 @@ def assign_progressions(request):
     ProgressionSet = modelformset_factory(DiseaseProgressionAssignment,
                                           extra=len(missing),
                                           form=DiseaseProgressionAssignmentForm)
-    context = {'title': 'Disease Progressions'}
-    return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request)
+    context = {'title': 'Assign Disease Progressions'}
+    return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request,
+                                                  template='ScenarioCreator/navigationPane.html') # main-panel
 
 
 def protocols_json(request):

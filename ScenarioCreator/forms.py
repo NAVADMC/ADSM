@@ -147,6 +147,26 @@ class RelationalFunctionForm(BaseForm):
 
 
 class ControlMasterPlanForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            'name',
+            HTML(r"<h2>Global Destruction settings</h2>"),
+            HTML(r"<p>Parameters are not used if Destruction is turned off in the control protocol</p>"),
+            'destruction_program_delay',
+            'destruction_capacity',
+            'destruction_priority_order',
+            'destruction_reason_order',
+            HTML(r"<h2>Global Vaccination settings</h2>"),
+            HTML(r"<p>Parameters are not used if Vaccination is turned off in the control protocol</p>"),
+            'vaccination_capacity',
+            'restart_vaccination_capacity',
+            'vaccination_priority_order',
+            'vaccinate_retrospective_days',
+        )
+        super(ControlMasterPlanForm, self).__init__(*args, **kwargs)
+
+
     class Meta(object):
         model = ControlMasterPlan
         fields = 'name destruction_program_delay destruction_capacity destruction_priority_order destruction_reason_order'.split()
@@ -180,7 +200,7 @@ class DiseaseProgressionAssignmentForm(BaseForm):
         model = DiseaseProgressionAssignment
         exclude = []
         widgets = {'production_type': FixedSelect(),
-                   'progression': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseProgression/new/'})}
+                   } #progression should NOT be an AddOrSelect
 
 
 class ControlProtocolForm(BaseForm):
@@ -333,6 +353,7 @@ class IndirectSpreadForm(BaseForm):
             'movement_control',
         )
         super(IndirectSpreadForm, self).__init__(*args, **kwargs)
+        self.fields['subclinical_animals_can_infect_others'].label = 'Subclinical units can infect others'
 
     class Meta(object):
         model = IndirectSpread
@@ -361,6 +382,8 @@ class DirectSpreadForm(BaseForm):
             'movement_control',
         )
         super(DirectSpreadForm, self).__init__(*args, **kwargs)
+        self.fields['latent_animals_can_infect_others'].label = 'Latent units can infect others'
+        self.fields['subclinical_animals_can_infect_others'].label = 'Subclinical units can infect others'
         if not Disease.objects.get().use_within_unit_prevalence:
             self.fields['infection_probability'].widget.attrs['required'] = 'required'  # only required when the field is visible, enforced by browser
 
@@ -486,7 +509,7 @@ class ZoneEffectAssignmentForm(BaseForm):
         exclude = ['zone', 'production_type']
         widgets = {'zone': HiddenInput(),
                    'production_type': HiddenInput(),
-                   'effect': AddOrSelect(attrs={'data-new-item-url': '/setup/ZoneEffect/new/'})}
+                   }  # 'effect' should NOT be an AddOrSelect
 
 
 ## V3.3 Vaccination Triggers ##

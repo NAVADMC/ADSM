@@ -43,6 +43,8 @@ class SmSession(models.Model):
     simulation_has_started = models.BooleanField(default=False)
     iteration_text = models.TextField(default='')
     show_help_text = models.BooleanField(default=True)
+    calculating_summary_csv = models.BooleanField(default=False)
+
 
     @property
     def current_version(self):

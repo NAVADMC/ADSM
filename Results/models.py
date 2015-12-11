@@ -15,7 +15,6 @@ import re
 from ast import literal_eval
 from django.db import models
 
-from ADSMSettings.models import SingletonManager
 from ScenarioCreator.models import ProductionType, Zone, Unit
 from Results.output_grammar import explain
 
