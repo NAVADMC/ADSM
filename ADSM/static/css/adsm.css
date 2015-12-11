@@ -782,11 +782,8 @@ ul {
     color: #606060;
     text-align: right;
 }
-.population-super-column a {
-    text-decoration: none;
-    color: #606060;
-    /* width: 179px; *//*Leave room for .unit-count min-width below*/
-    /*This line is commented out because it was pushing the unit count out of the column*/
+.population-super-column * {
+    display: inline-block;
 }
 .unit-count {
     width: 80px;

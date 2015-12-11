@@ -12,7 +12,7 @@ export default class ProductionTypeRow extends Component {
         return(
             <li>
                 <div className="population-super-column">
-                    <a href="#">{ name }</a>
+                    <div href="#">{ name }</div>
                     <div className="unit-count">{units}</div>
                 </div>
                 <div title={progression}         className="productiontypes-header"><div className={progression ? css + ' filled' : css} /></div>
