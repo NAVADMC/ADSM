@@ -646,6 +646,7 @@ set_params (void *data, GHashTable *dict)
   sqlite3 *params;
   guint production_type;
   param_block_t *p;
+  char *tmp_text;
   guint pdf_id;
 
   #if DEBUG
@@ -672,10 +673,18 @@ set_params (void *data, GHashTable *dict)
   local_data->param_block[production_type] = p;
 
   /* Read the parameters. */
-  errno = 0;
-  pdf_id = strtol (g_hash_table_lookup (dict, "test_delay_id"), NULL, /* base */ 10);
-  g_assert (errno != ERANGE && errno != EINVAL);  
-  p->delay = PAR_get_PDF (params, pdf_id);
+  tmp_text = g_hash_table_lookup (dict, "test_delay_id");
+  if (tmp_text != NULL)
+    {
+      errno = 0;
+      pdf_id = strtol (tmp_text, NULL, /* base */ 10);
+      g_assert (errno != ERANGE && errno != EINVAL);  
+      p->delay = PAR_get_PDF (params, pdf_id);
+    }
+  else
+    {
+      p->delay = PDF_new_point_dist (0);
+    }
 
   errno = 0;
   p->sensitivity = strtod (g_hash_table_lookup (dict, "test_sensitivity"), NULL);
