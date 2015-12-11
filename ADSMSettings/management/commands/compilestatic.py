@@ -8,7 +8,7 @@ from optparse import make_option
 
 
 class Command(BaseCommand):
-    args = "[--option=value, use `devserver help` for help]"
+    args = "[--option=value, use `compilestatic help` for help]"
 
     options = None
 
@@ -17,7 +17,7 @@ class Command(BaseCommand):
                     action='store_true',
                     dest='dev',
                     default=False,
-                    help='Run development settings',
+                    help='Compile with development settings',
                     ),
     )
 
@@ -29,7 +29,9 @@ class Command(BaseCommand):
         else:
             config_file = 'webpack.config.js'
 
+        os.chdir(settings.BASE_DIR)
+
         command_path = os.path.join('.', 'node_modules', '.bin', 'webpack')
-        command = command_path + ' --config %s --watch' % config_file
+        command = command_path + ' --config %s' % config_file
         webpack = subprocess.Popen(command, cwd=os.path.join(settings.BASE_DIR), shell=True)
-        call_command('runserver')
+        call_command('collectstatic')

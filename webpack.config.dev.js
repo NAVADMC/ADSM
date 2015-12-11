@@ -6,7 +6,7 @@ var CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
 module.exports = {
     context: __dirname,
 
-    devtool: 'source-map',
+    devtool: 'cheap-module-eval-source-map',
 
     entry: {
         population_panel_status: './ADSM/static/js/population-panel-status'
@@ -19,17 +19,6 @@ module.exports = {
     },
 
     plugins: [
-        new webpack.optimize.OccurenceOrderPlugin(),
-        new webpack.DefinePlugin({
-            'process.env': {
-                'NODE_ENV': JSON.stringify('production')
-            }
-        }),
-        new webpack.optimize.UglifyJsPlugin({
-            compressor: {
-                warnings: false
-            }
-        }),
         new BundleTracker({filename: './webpack-stats.json'}),
         new CommonsChunkPlugin("commons.js")
     ],
