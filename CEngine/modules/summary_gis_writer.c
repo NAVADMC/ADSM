@@ -43,7 +43,7 @@
 
 
 
-#define DEFAULT_GRID_SIZE 10 /* km */
+#define DEFAULT_GRID_SIZE 10.0 /* km */
 
 
 
