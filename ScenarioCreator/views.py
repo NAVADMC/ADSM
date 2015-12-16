@@ -184,7 +184,7 @@ def assign_progressions(request):
                                           form=DiseaseProgressionAssignmentForm)
     context = {'title': 'Assign Disease Progressions'}
     return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request,
-                                                  template='ScenarioCreator/MainPanel.html')  # main-panel
+                                                  template='ScenarioCreator/MainPanel.html')
 
 
 def protocols_json(request):
