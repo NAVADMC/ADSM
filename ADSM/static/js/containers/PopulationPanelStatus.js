@@ -31,6 +31,9 @@ export class PopulationPanelStatus extends Component {
                 <ul id="ProductionTypes">
                     {rows}
                 </ul>
+                <div className="population-super-column text-center">
+                    <a href="/setup/ProductionType/">+ define new production type</a>
+                </div>
             </div>
         );
     }

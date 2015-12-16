@@ -1487,6 +1487,7 @@ select {
 	-o-transition: background-color .5s ease-in-out;
 	-ms-transition: background-color .5s ease-in-out;
 	transition: background-color .5s ease-in-out;
+	padding-left: 0px;
 }
 
 .green-dot.filled {
@@ -1496,23 +1497,25 @@ select {
 .progression-icon {
     background-size: contain;
     background-repeat: no-repeat;
+    background-position-x: -2px;
     background-image: url('../icons/progression-icon.png')
 }
 .spread-icon {
     background-size: contain;
     background-repeat: no-repeat;
-    background-position-x: 2px;
+    background-position-x: 0px;
     background-image: url('../icons/spread-icon.png')
 }
 .control-icon {
     background-size: contain;
     background-repeat: no-repeat;
-    background-position-x: 4px;
+    background-position-x: -1px;
     background-image: url('../icons/control-icon.png')
 }
 .zone-icon {
     background-size: contain;
     background-repeat: no-repeat;
+    background-position-x: -2px;
     background-image: url('../icons/zone-icon.png')
 }
 
