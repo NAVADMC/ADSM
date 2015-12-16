@@ -1,0 +1,12 @@
+{% block main_layout %}
+    <div id="layout-container"> {# Necessary for $(form_html).find('#main_panel') #}
+        <section id="main-panel" class="layout-panel col-xs-8 center-block">
+            {% block content %}
+
+            {% endblock %}
+            {% if base_page %}
+                {% include base_page %}
+            {% endif %}
+        </section>
+    </div>
+{% endblock %}

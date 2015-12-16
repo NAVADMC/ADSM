@@ -176,7 +176,9 @@ def save_scenario(request=None):
             return render(request, 'ScenarioName.html', {"failure_message": save_error})
 
     if request is not None and request.is_ajax():
-        return render(request, 'ScenarioName.html', {"success_message": "File saved to " + target})
+        return render(request, 'ScenarioName.html', {"success_message": "File saved to " + target,
+                                                     "filename": scenario_filename(),
+                                                     'unsaved_changes': unsaved_changes()})
     else:
         return redirect('/setup/Scenario/1/')
 

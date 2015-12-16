@@ -350,8 +350,11 @@ def new_form(request, initialized_form, context):
     model_name, model = get_model_name_and_model(request)
     context['model_name'] = model_name
     if model_name in singletons:  # they could have their own special page: e.g. Population
-        context['base_page'] = 'ScenarioCreator/Crispy-Singleton-Form.html' # #422 Singleton models now load in a fragment to be refreshed the same way that other forms are loaded dynamically
-        return render(request, 'ScenarioCreator/navigationPane.html', context)
+        context['base_page'] = 'ScenarioCreator/Crispy-Singleton-Form.html'
+        if request.is_ajax(): # #422 Singleton models now load in a fragment to be refreshed the same way that other forms are loaded dynamically
+            return render(request, 'ScenarioCreator/MainPanel.html', context)
+        else:  # loaded from a top level URL
+            return render(request, 'ScenarioCreator/navigationPane.html', context)
     if model_name == 'ProbabilityFunction':
         return render(request, 'ScenarioCreator/ProbabilityFunctionForm.html', context)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages

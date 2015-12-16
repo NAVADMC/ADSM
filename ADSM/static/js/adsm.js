@@ -593,6 +593,9 @@ function contains_errors(html) {
 
 function add_model_option_to_selects(html, selectInput) {
     var action = $(html).find('form').first().attr('action');
+    if(!action) { //sometimes this gets called for things that aren't a model option
+        return;
+    }
     var pk = action.split('/')[3]; //the edit action URL has the pk in it
     var model_link = action.replace(pk, 'new'); //for targetting other selects
     var title = 'Newest Entry';
@@ -829,12 +832,14 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
             $('.scenario-status').addClass('unsaved')
             // Here we replace the form, for the
             if ($self.closest('#main-panel').length) { //in the main panel, just reload the page
-                if($(form_html).find('#main_panel').length ){
-                    $('#main-panel').html($(form_html).find('#main_panel')[0])
+                if($(form_html).find('#main-panel').length ){
+                    $('#main-panel').replaceWith($(form_html).find('#main-panel')[0])
                 }else {
                     var matches = form_html.match(/(<body.*>[\S\s]*<\/body>)/i);//multiline match
-                    var content = $(matches[1]);
-                    $('body').html(content);
+                    if(matches){
+                        var content = $(matches[1]);
+                        $('body').html(content);
+                    }
                 }
             } else {
                 var parent_panel = $self.closest('.layout-panel').attr('id');
