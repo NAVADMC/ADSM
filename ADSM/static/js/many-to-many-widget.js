@@ -144,7 +144,7 @@ many_to_many_widget = (function(form_state){
             var bulk_select = $(this).find('select').clone()
             bulk_select.attr('id', bulk_select.attr('id').replace(form_prefix, 'bulk-')).val("");
             bulk_select.find('option[value="data-add-new"]').remove()
-            var button = $('<button class="bulk-apply" disabled="disabled">Apply</button>')
+            var button = $('<button class="bulk-apply" disabled="disabled">Set</button>')
             my_table.find('thead tr:nth-child(2)').append($('<td>').append(bulk_select).append(button)); //sensitive selector
         });
     }

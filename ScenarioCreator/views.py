@@ -16,6 +16,7 @@ from ScenarioCreator.population_parser import lowercase_header
 
 
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
+from ScenarioCreator.utils import whole_scenario_validation
 
 singletons = ['Scenario', 'Population', 'Disease', 'ControlMasterPlan', 'OutputSettings']
 abstract_models = {
@@ -654,5 +655,6 @@ def validate_scenario(request):
     simulation.wait()  # simulation will process db then exit
     print("C Engine Exit Code:", simulation.returncode)
     context = {'dry_run_passed': simulation.returncode == 0 and not stderr,
-               'sim_output': stdout.decode() + stderr.decode(),}
+               'sim_output': stdout.decode() + stderr.decode(),
+               'whole_scenario_warnings': whole_scenario_validation()}
     return render(request, 'ScenarioCreator/Validation.html', context)
