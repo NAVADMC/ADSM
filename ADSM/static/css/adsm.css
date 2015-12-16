@@ -2412,7 +2412,7 @@ select[multiple] {}
     border-color: #ba3e44;
 }
 #legend-right li:last-child {
-    border-color: #606060;
+    border-color: rgb(234, 125, 48);
 }
 @media screen and (max-height: 800px){
     #legend {
