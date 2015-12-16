@@ -63,10 +63,11 @@
     </nav>
     <span id="setupMenu-after"></span>
 
+
     {% block main_layout %}
         {% include 'ScenarioCreator/MainPanel.html' %}
     {% endblock %}
-    
+
     {% if outputs_exist %}
         {% include "Results/SimulationProgressBar.html" %}
     {% endif %}

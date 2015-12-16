@@ -170,7 +170,7 @@ def assign_protocols(request):
     ProtocolSet = modelformset_factory(ProtocolAssignment, extra=len(missing), form=ProtocolAssignmentForm)
     context = {'title': 'Assign a Control Protocol to each Production Type'}
     return populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request,
-                                                  template='ScenarioCreator/navigationPane.html',
+                                                  template='ScenarioCreator/MainPanel.html',
                                                   html='ScenarioCreator/FormSet.html')
 
 
@@ -183,7 +183,7 @@ def assign_progressions(request):
                                           form=DiseaseProgressionAssignmentForm)
     context = {'title': 'Assign Disease Progressions'}
     return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request,
-                                                  template='ScenarioCreator/navigationPane.html') # main-panel
+                                                  template='ScenarioCreator/MainPanel.html')  # main-panel
 
 
 def protocols_json(request):
@@ -351,10 +351,9 @@ def new_form(request, initialized_form, context):
     context['model_name'] = model_name
     if model_name in singletons:  # they could have their own special page: e.g. Population
         context['base_page'] = 'ScenarioCreator/Crispy-Singleton-Form.html'
-        if request.is_ajax(): # #422 Singleton models now load in a fragment to be refreshed the same way that other forms are loaded dynamically
-            return render(request, 'ScenarioCreator/MainPanel.html', context)
-        else:  # loaded from a top level URL
-            return render(request, 'ScenarioCreator/navigationPane.html', context)
+        # #422 Singleton models now load in a fragment to be refreshed the same way that other forms
+        #  are loaded dynamically
+        return render(request, 'ScenarioCreator/MainPanel.html', context)
     if model_name == 'ProbabilityFunction':
         return render(request, 'ScenarioCreator/ProbabilityFunctionForm.html', context)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages
@@ -638,6 +637,8 @@ def population(request):
         context['deletable'] = '/setup/Population/1/delete/'
         context['editable'] = request.GET.get('readonly', 'editable')
         context['population_file'] = os.path.basename(Population.objects.get().source_file)
+        context['Population'] = Unit.objects.count()
+        context['Farms'] = Unit.objects.count()
     else:
         context['xml_files'] = file_list([".sqlite3"])
     return render(request, 'ScenarioCreator/Population.html', context)
