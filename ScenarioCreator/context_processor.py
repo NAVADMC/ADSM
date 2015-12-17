@@ -22,6 +22,8 @@ def singular(name):
 
 def basic_context(request):
     context = {'request': request}
+    if request.path and request.path != '/' and '/LoadingScreen/' not in request.path:  # #635 this needs to run even in AJAX
+        context['outputs_exist'] = outputs_exist()  # I don't want this triggering on LoadingScreen
 
     if not request.is_ajax() and 'setup/' in request.path:  # inputs specific context not filled from ajax requests
         pt_count = ProductionType.objects.count()
@@ -54,7 +56,6 @@ def basic_context(request):
                'ProbabilityFunctions': ProbabilityFunction.objects.count(),
                'RelationalFunctions': RelationalFunction.objects.count(),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
-               'outputs_exist': outputs_exist(),
                })
 
         validation_models = {'Scenario': 'Scenario/1/', 
@@ -82,7 +83,6 @@ def basic_context(request):
                                            'include_airborne_spread':         js(disease.include_airborne_spread),
                                            'outputs_exist':                   js(outputs_exist()),
                                            'controls_enabled':                js(context['controls_enabled']),
-        }
-        
+                                           }
         
     return context
