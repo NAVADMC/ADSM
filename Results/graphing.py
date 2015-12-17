@@ -256,15 +256,15 @@ def TwoD_histogram(fig, gs, time_graph, time_series):
     days = list(range(1, len(time_series[0]) + 1))  # Start with day index
     x = days * len(time_series)  # repeat day series for each set of data (1 per iteration)
     y = list(chain(*time_series))
-    hot = plt.get_cmap('hot')
+    inferno = plt.get_cmap('inferno')
     norm = LogNorm()
     time_graph.hist2d(x, y,
                       bins=[len(days), max(5, min(max(*y), 300))],
                       # 300 should really be the number of pixels in the draw area (I don't know how to fetch that)
                       norm=norm,
-                      cmap=hot)
+                      cmap=inferno)
     color_bar = fig.add_subplot(gs[0], )
-    ColorbarBase(cmap=hot, ax=color_bar, norm=norm)
+    ColorbarBase(cmap=inferno, ax=color_bar, norm=norm)
     return HttpFigure(fig)
 
 
@@ -299,11 +299,13 @@ def create_figure_with_boxplot(title, use_legend):
     matplotlib.rcParams.update({'font.size': 10})
     gs = gridspec.GridSpec(1, 3, width_ratios=[3 if use_legend else .2, 6, 1])
     # gs = gridspec.GridSpec(1, 3, width_ratios=[.2, 6, 1])
-    time_graph = fig.add_subplot(gs[1], title=title)
+    time_graph = fig.add_subplot(gs[1], title=title, axisbg='#EEEEEE')
     time_graph.set_xlabel('Days')
     boxplot_graph = fig.add_subplot(gs[2],
-                                    sharey=time_graph, )  # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
-    # boxplot_graph.locator_params(nbins=4)  # limiting the number of y-axis ticks was causing an intermittent crash.  try/except this if you want it
+                                    sharey=time_graph, axisbg='#EEEEEE')
+    # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
+    # boxplot_graph.locator_params(nbins=4)  # limiting the number of y-axis ticks was causing an intermittent crash.
+    # try/except this if you want it
     plt.setp(boxplot_graph.get_yticklabels(), visible=False)
     for axis in [time_graph, boxplot_graph]:
         rstyle(axis)
