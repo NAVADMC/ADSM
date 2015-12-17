@@ -656,5 +656,6 @@ def validate_scenario(request):
     print("C Engine Exit Code:", simulation.returncode)
     context = {'dry_run_passed': simulation.returncode == 0 and not stderr,
                'sim_output': stdout.decode() + stderr.decode(),
-               'whole_scenario_warnings': whole_scenario_validation()}
-    return render(request, 'ScenarioCreator/Validation.html', context)
+               'whole_scenario_warnings': whole_scenario_validation(),
+               'base_page': 'ScenarioCreator/Validation.html'}
+    return render(request, 'ScenarioCreator/MainPanel.html', context)
