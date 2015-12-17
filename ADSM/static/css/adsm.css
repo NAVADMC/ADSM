@@ -418,9 +418,11 @@ body>nav {
 /*-----3-column layout-----*/
 /*-------------------------------------------------------------*/
 #main-panel {
-    /* float:none; */
-    /*margin-left: 185px;*/
-    /*width: calc(100vw - 160px);*/
+    width: calc(100vw - 200px - 50px);
+    padding-left: 0;
+    margin-right: 0;
+    margin-left: 200px;
+    z-index: 0;
 }
 
 .layout-panel {
@@ -456,8 +458,9 @@ body>nav {
     max-width: 500px;
 }
 #left-panel {
-    width:calc(16.667vw + 25px);
+    width: calc(33.333vw - 200px + 25px);
     padding-right: 25px;
+    margin-left:  200px;
 }
 #left-panel .fragment h1:first-of-type,
 section#left-panel h1:first-of-type,
@@ -487,16 +490,6 @@ section#left-panel h1:first-of-type,
 ul {
     padding-left: 5px; /*prevent style inheritance from above*/
     list-style: none;
-}
-/*-------------------------------------------------------------*/
-/*-----center block-----*/
-/*-------------------------------------------------------------*/
-.center-block {
-    width: calc(100vw - 60px);
-    padding-left: 200px;
-    margin-right:0;
-    margin-left: 0;
-    z-index: 0;
 }
 
 
@@ -2509,6 +2502,13 @@ select[multiple] {}
     #setupMenu h3,
     #setupMenu h4 {
         width: 140px;
+    }
+
+    #left-panel, #main-panel {
+        margin-left: 165px;
+    }
+    #left-panel {
+        width: calc(33.333vw - 165px + 25px);
     }
     #setupMenu a {
         padding-left: 15px;
