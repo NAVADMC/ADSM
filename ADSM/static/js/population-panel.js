@@ -34,12 +34,20 @@ $(document).on('load', '.productiontypelist, .grouplist', function(event){
     check_empty_status(this)
 })
 
-$(document).on('click', '#population_panel #ProductionTypes a, .productiontypelist option', function(event){
+$(document).on('click', '#ProductionTypes li, .productiontypelist option', function(event){
     event.preventDefault()
-    select_production_type($(this).text(), '.productiontypelist option')
+    var text = $(this).text();
+    if(this.tagName == 'LI'){  // I want the click target to be the whole row, but the name is defined in pt-name
+        text = $(this).find('.pt-name').text();
+    }
+    select_production_type(text, '.productiontypelist option')
 })
 
-$(document).on('click', '#population_panel #ProductionGroups a, .productiontypelist option', function(event){
+$(document).on('click', '#ProductionGroups li, .productiontypelist option', function(event){
     event.preventDefault()
-    select_production_type($(this).text(), '.grouplist option')
+    var text = $(this).text();
+    if(this.tagName == 'LI'){  // I want the click target to be the whole row, but the name is defined in pt-name
+        text = $(this).find('.pt-name').text();
+    }
+    select_production_type(text, '.grouplist option')
 })

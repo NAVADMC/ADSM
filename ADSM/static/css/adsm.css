@@ -766,6 +766,9 @@ ul {
 #population_panel.add-pt ul li:hover, #population_panel.add-pt ul li a:hover {
     cursor: url("../icons/add_cursor.png"), auto;
 }
+.productiontypelist option {
+    cursor: url("../icons/remove_cursor.png"), auto;
+}
 #population_panel a:focus {
     background-color: transparent;
     border: none;
