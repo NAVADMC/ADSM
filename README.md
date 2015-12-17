@@ -204,11 +204,13 @@ When releasing a Production compile:
   - Run the nsi script and upload the output to the release
   
 # Credits
-* Project Owner - Missy Schoenbaum
+* Project Owner - Missy Schoenbaum, USDA:APHIS:VS:CEAH Modeling Team
 * ADSM Technical Lead - Josiah Seaman
 * Simulation Creator / Maintainer - Neil Harvey
 * Dev Ops - Bryan Hurst
-* Project Management - Alex Pyle & Kurt Tometich
+* Project Management - Alex Pyle & Kurt Tometich, USDA Office of the CIO
+* USDA Subject Matter Experts - Kelly Patyk, Amy Delgado, Columb Rigney, Kim Forde-Folle, Ann Seitzinger
+* University of Minnesota Center for Food Protection Subject Matter Expert Tim Boyer
 
 ## Noun Project icons:
 * "Spread" - Stephanie Wauters
