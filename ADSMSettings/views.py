@@ -109,7 +109,7 @@ def import_naadsm_scenario(request):
             # go on to serve the form normally with Error messages attached
     else:
         context['form_errors'] = initialized_form.errors
-    return render(request, 'ScenarioCreator/navigationPane.html', context)  # render in validation error messages
+    return render(request, 'ScenarioCreator/MainPanel.html', context)  # render in validation error messages
 
 
 def upload_scenario(request):
