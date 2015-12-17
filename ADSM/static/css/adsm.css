@@ -431,7 +431,7 @@ body>nav {
     height: calc(100vh - 75px);
     overflow-y: auto;
     overflow-x: visible;
-    padding: 0;
+    padding: 0 0 61px 0; /*Fix for #693 and progress bar blocking people's view*/
     position: relative;
 }
 #center-panel,
