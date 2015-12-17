@@ -79,7 +79,6 @@ typedef struct
   RPT_reporting_t  **cumul_nunits_detected_by_means;
   RPT_reporting_t  **cumul_nunits_detected_by_prodtype;
   RPT_reporting_t ***cumul_nunits_detected_by_means_and_prodtype;
-  RPT_reporting_t   *cumul_nunits_detected_uniq;
   RPT_reporting_t   *cumul_nanimals_detected;
   RPT_reporting_t  **cumul_nanimals_detected_by_means;
   RPT_reporting_t  **cumul_nanimals_detected_by_prodtype;
@@ -90,9 +89,6 @@ typedef struct
     to zero them all at once. */
   GPtrArray *null_outputs; /**< Outputs that start out null, in a list to make
     it easy set them null all at once. */
-  GHashTable *detected; /**< A table for tracking detections of unique units.
-    If a unit has been detected, it will be in the.  The key is the unit
-    (UNT_unit_t *), and the associated value is irrelevant. */
   GHashTable *detected_today; /**< A table for tracking multiple detections of
     a unit on one day.  If a unit has been detected today, it will be in the
     table.  The key is the unit (UNT_unit_t *), and the associated value is a
@@ -123,7 +119,6 @@ handle_before_each_simulation_event (struct adsm_module_t_ *self)
   local_data = (local_data_t *) (self->model_data);
   g_ptr_array_foreach (local_data->cumul_outputs, RPT_reporting_zero_as_GFunc, NULL);
   g_ptr_array_foreach (local_data->null_outputs, RPT_reporting_set_null_as_GFunc, NULL);
-  g_hash_table_remove_all (local_data->detected);
 
   #if DEBUG
     g_debug ("----- EXIT handle_before_each_simulation_event (%s)", MODEL_NAME);
@@ -375,15 +370,6 @@ handle_detection_event (struct adsm_module_t_ *self, EVT_detection_event_t * eve
       previous_detection->count += 1;
     } /* end of case where the unit has been detected already today */
 
-  /* Handle counts of unique detected units. */
-  p = g_hash_table_lookup (local_data->detected, unit);
-  if (p == NULL)
-    {
-      /* This unit has not been detected before in this simulation. */
-      g_hash_table_insert (local_data->detected, unit, GINT_TO_POINTER(1));
-      RPT_reporting_add_integer (local_data->cumul_nunits_detected_uniq, 1);
-    }
-
 #if DEBUG
   g_debug ("----- EXIT handle_detection_event (%s)", MODEL_NAME);
 #endif
@@ -459,7 +445,6 @@ local_free (struct adsm_module_t_ *self)
   g_ptr_array_free (local_data->daily_outputs, /* free_seg = */ TRUE);
   g_ptr_array_free (local_data->cumul_outputs, /* free_seg = */ TRUE);
   g_ptr_array_free (local_data->null_outputs, /* free_seg = */ TRUE);
-  g_hash_table_destroy (local_data->detected);
   g_hash_table_destroy (local_data->detected_today);
   nprodtypes = local_data->production_types->len;
   for (means = 0; means < ADSM_NDETECTION_REASONS; means++)
@@ -616,11 +601,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
         RPT_GPtrArray, local_data->production_types, nprodtypes,
         self->outputs, local_data->cumul_outputs },
 
-      { &local_data->cumul_nunits_detected_uniq, "detcUq", RPT_integer,
-        RPT_NoSubcategory, NULL, 0,
-        RPT_NoSubcategory, NULL, 0,
-        self->outputs, local_data->cumul_outputs },
-
       { &local_data->nanimals_detected, "detnA", RPT_real,
         RPT_NoSubcategory, NULL, 0,
         RPT_NoSubcategory, NULL, 0,
@@ -683,9 +663,6 @@ new (sqlite3 * params, UNT_unit_list_t * units, projPJ projection,
       g_ptr_array_remove_fast (self->outputs, local_data->nanimals_detected_by_means_and_prodtype[ADSM_DetectionReasonUnspecified][prodtype] );
       g_ptr_array_remove_fast (self->outputs, local_data->cumul_nanimals_detected_by_means_and_prodtype[ADSM_DetectionReasonUnspecified][prodtype] );
     }
-
-  /* Initialize a table to track detections of unique units. */
-  local_data->detected = g_hash_table_new (g_direct_hash, g_direct_equal);
 
   /* Initialize a table to track multiple detections of a unit on one day. */
   local_data->detected_today = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_free);
