@@ -9,7 +9,7 @@
     <h2><a href="/setup/ProductionGroup/">Production Type Groups</a></h2>
     <ul id="ProductionGroups">
         {% for group in ProductionGroups %}
-            <li><a href="#">{{ group.name }}</a><span>
+            <li><a class="pt-group-name">{{ group.name }}</a><span>
                 {% for member in group.group.all %}
                     {{ member.name }},&nbsp;
                 {% endfor %}</span></li>

@@ -8,46 +8,40 @@ function toggle(element, attribute){
     }
 }
 
-function check_empty_status(self) {
-    var $self = $(self)
-    if($self.find('option[selected]').length == 0) { //empty
-        $self.addClass('empty')
-    } else {
-        $self.removeClass('empty')
-    }
+function toggle_added_state(text) {
+    $('#ProductionTypes li').filter(function () {
+        return $(this).find('.pt-name').text() == text;  // must be an exact match NOT :contains()
+    }).toggleClass('pt-added');  // for styling rows that have already been added
 }
 
-function select_production_type(text, selector) { 
-    $(selector).each(function() {
-        if ($(this).text() == text) {
-            toggle(this, 'selected')
-        }
-    })
-    check_empty_status($(selector).first().closest('.productiontypelist'));
+function select_production_type(text) {
+    var selectors = ['.productiontypelist option', '.grouplist option'];
+    $.each(selectors, function(index, selector){
+        $(selector).each(function() {
+            if ($(this).text() == text) {
+                toggle(this, 'selected')
+            }
+        })
+    });
+    toggle_added_state(text);
 }
 
 //child has selected attr, then remove .empty  has .productiontypelist
 //on load have .empty
 //editing existing 
 
-$(document).on('load', '.productiontypelist, .grouplist', function(event){
-    check_empty_status(this)
-})
-
-$(document).on('click', '#ProductionTypes li, .productiontypelist option', function(event){
+$(document).on('click', '#ProductionTypes li, #ProductionGroups li, .productiontypelist option', function(event){
     event.preventDefault()
     var text = $(this).text();
     if(this.tagName == 'LI'){  // I want the click target to be the whole row, but the name is defined in pt-name
-        text = $(this).find('.pt-name').text();
+        text = $(this).find('.pt-name, .pt-group-name').text();
     }
-    select_production_type(text, '.productiontypelist option')
+    select_production_type(text)
 })
 
-$(document).on('click', '#ProductionGroups li, .productiontypelist option', function(event){
-    event.preventDefault()
-    var text = $(this).text();
-    if(this.tagName == 'LI'){  // I want the click target to be the whole row, but the name is defined in pt-name
-        text = $(this).find('.pt-name').text();
-    }
-    select_production_type(text, '.grouplist option')
+$('.productiontypelist, .grouplist').livequery(function(){
+    $('#ProductionTypes li').removeClass('pt-added')  // clears old data
+    $(this).find('option[selected]').each(function(index, element){
+        toggle_added_state($(element).text())
+    })
 })

@@ -760,7 +760,7 @@ ul {
     overflow:hidden;
     padding: 4px 0 0 10px;
 }
-#population_panel ul li:hover {
+#population_panel li:hover {
     background-color: #ebebeb;
 }
 #population_panel.add-pt ul li:hover, #population_panel.add-pt ul li a:hover {
@@ -768,6 +768,10 @@ ul {
 }
 .productiontypelist option {
     cursor: url("../icons/remove_cursor.png"), auto;
+}
+.pt-added {
+    color: darkgray;
+    cursor: url("../icons/remove_cursor.png"), auto !important;
 }
 #population_panel a:focus {
     background-color: transparent;
@@ -782,7 +786,6 @@ ul {
     overflow:hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    color: #606060;
     text-align: right;
 }
 .population-super-column * {
