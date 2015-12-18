@@ -211,6 +211,7 @@ When releasing a Production compile:
 * Project Management - Alex Pyle & Kurt Tometich, USDA Office of the CIO
 * USDA Subject Matter Experts - Kelly Patyk, Amy Delgado, Columb Rigney, Kim Forde-Folle, Ann Seitzinger
 * University of Minnesota Center for Food Protection Subject Matter Expert Tim Boyer
+* Custom compiling Python libraries - Christoph Gohlke,  University of California, Irvine
 
 ## Noun Project icons:
 * "Spread" - Stephanie Wauters
