@@ -1728,7 +1728,7 @@ section#population_main_panel h1:first-of-type {
 
 #farm_list tbody{
     display: inline-block;
-    height: calc(100vh - 218px);
+    height: calc(100vh - 232px);
     overflow-y: auto;
     width: 100%;
     position: relative;
@@ -1854,10 +1854,10 @@ section#population_main_panel h1:first-of-type {
 }
 #farm_filter select {
     margin: 0;
-    width: 98px;
+    width: 129px;
 }
 #farm_filter input {
-    width: 60px;
+    width: 87px;
     height: 21px;
 }
 #farm_filter #production_type__name td:nth-child(2),
@@ -1957,7 +1957,7 @@ section#population_main_panel h1:first-of-type {
 }
 #edit_population {
     position: absolute;
-    top: calc(100vh - 172px);
+    top: calc(100vh - 187px);
     right: 25px;
     transition: opacity .2s ease
 }
