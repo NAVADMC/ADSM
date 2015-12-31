@@ -113,8 +113,9 @@ def assign_disease_spread(request):
         initialized_formset = SpreadSet(queryset=DiseaseSpreadAssignment.objects.all())
     context = {'formset': initialized_formset,
                'include_spread_form': include_spread_form,
-               'title': 'How does Disease spread from one Production Type to another?'}
-    return render(request, 'ScenarioCreator/AssignSpread.html', context)
+               'title': 'How does Disease spread from one Production Type to another?',
+               'base_page': 'ScenarioCreator/AssignSpread.html'}
+    return render(request, 'ScenarioCreator/MainPanel.html', context)
 
 
 def zone_effects(request):
@@ -133,8 +134,9 @@ def zone_effects(request):
         context['formset_headings'] = Zone.objects.order_by('id')
         context['formset_grouped'] = {k: sorted(v, key=lambda x: x.instance.zone.id) 
                                         for k,v in forms_grouped_by_pt}
+        context['base_page'] = 'ScenarioCreator/FormSet2D.html'
 
-        return render(request, 'ScenarioCreator/FormSet2D.html', context)
+        return render(request, 'ScenarioCreator/MainPanel.html', context)
 
 
 def save_formset_succeeded(MyFormSet, TargetModel, context, request):
