@@ -14,7 +14,35 @@ export function population(population=[], action){
     }
 }
 
+export function disease_spread(disease_spread={}, action){
+    switch(action.type ){
+        case ActionTypes.RECEIVE_DISEASE_SPREAD: {
+            return action.response  // clobbers the entire data structure
+        }
+
+        default:
+            return disease_spread
+    }
+}
+
+export function spread_inputs(spread_inputs=[], action){
+    switch(action.type ){
+        case ActionTypes.ADD_COMBINATION_INPUT: {
+            var tmp = [
+                ...spread_inputs,
+                action.new_input
+            ];
+            return tmp
+        }
+
+        default:
+            return spread_inputs
+    }
+}
+
 
 export default combineReducers({
-    population
+    population,
+    disease_spread,
+    spread_inputs
 })
