@@ -9,7 +9,8 @@ module.exports = {
     devtool: 'cheap-module-eval-source-map',
 
     entry: {
-        population_panel_status: './ADSM/static/js/population-panel-status'
+        population_panel_status: './ADSM/static/js/population-panel-status',
+        assign_spread_widget:  './ADSM/static/js/assign_spread_widget'
     },
 
     output: {
@@ -19,6 +20,11 @@ module.exports = {
     },
 
     plugins: [
+        new webpack.DefinePlugin({
+            'process.env': {
+                'NODE_ENV': JSON.stringify('development')
+            }
+        }),
         new BundleTracker({filename: './webpack-stats.json'}),
         new CommonsChunkPlugin("commons.js")
     ],

@@ -9,7 +9,8 @@ module.exports = {
     devtool: 'source-map',
 
     entry: {
-        population_panel_status: './ADSM/static/js/population-panel-status'
+        population_panel_status: './ADSM/static/js/population-panel-status',
+        assign_spread_widget:  './ADSM/static/js/assign_spread_widget'
     },
 
     output: {

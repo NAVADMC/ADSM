@@ -11,7 +11,20 @@
                 <div id='form-errors'>{{ form_errors }}</div>
             {% endif %}
             {% include "ScenarioCreator/EditButtons.html" %}
+            <h1>{{ request.get_full_path }}</h1>
         </form>
+
+        {# Code that is only relevant to Disease Spread but it here because of generic form use #}
+        {% if 'DirectSpread' in request.get_full_path or 'IndirectSpread' in request.get_full_path or 'AirborneSpread' in request.get_full_path%}
+            <hr/>
+            <h2>Production Type Combinations</h2>
+            <div id="spread-widget">
+                {% load render_bundle from webpack_loader %}
+                {% render_bundle 'commons.js' %}
+                {% render_bundle 'assign_spread_widget' %}
+            </div>
+
+        {% endif %}
     {% else %}
         <form class="ajax" {% if loading_message %}data-loading-message="{{ loading_message }}"{% endif %}>
             {% crispy form %}
