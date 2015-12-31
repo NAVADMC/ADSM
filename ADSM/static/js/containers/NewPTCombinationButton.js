@@ -10,7 +10,8 @@ import {ActionTypes} from '../actions/ActionTypes'
 
 export default class NewPTCombinationButton extends Component {
 
-    onClick(){
+    onClick(event){
+        event.preventDefault()
         dispatch({
             type: ActionTypes.ADD_COMBINATION_INPUT,
             spread_type: this.props.spread_type,

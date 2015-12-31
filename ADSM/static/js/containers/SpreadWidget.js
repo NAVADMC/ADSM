@@ -18,9 +18,8 @@ export class SpreadWidget extends Component {
         if (process.env.NODE_ENV === 'development') {
             debug_panel = <DebugPanel top right bottom><DevTools store={store} monitor={DiffMonitor} visibleOnLoad={true} /></DebugPanel>
         }
-        var inputs = []
-        this.props.spread_inputs.map(function(input, index){
-            return <p key={index}>{Object.toString(input)}</p>
+        var inputs = this.props.spread_inputs.map(function(input, index){
+            return (<p key={index}>{JSON.stringify(input)}</p>);
         });
         return (
             <div className="spread-widget-contents">
