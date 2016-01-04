@@ -13,8 +13,6 @@ import ConnectedSpreadWidget from './containers/SpreadWidget'
 
 
 ReactDOM.render(
-    <Provider store={store}>
-        <ConnectedSpreadWidget />
-    </Provider>,
+        <ConnectedSpreadWidget store={store}/>,
     document.getElementById('spread-widget')
 );

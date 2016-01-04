@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux';
 import {store} from './GlobalStore'
 import ConnectedPopulation from './containers/PopulationPanelStatus'
+import ConnectedSpreadWidget from './containers/SpreadWidget'
 
 
 ReactDOM.render(
@@ -13,3 +14,10 @@ ReactDOM.render(
     </Provider>,
     document.getElementById('population_panel_status')
 );
+
+$('#spread-widget').livequery(function() { //will add react elements whenever a DOM node is added
+    ReactDOM.render(
+        <ConnectedSpreadWidget store={store}/>,
+        document.getElementById('spread-widget')
+    );
+})
