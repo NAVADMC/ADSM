@@ -62,6 +62,7 @@ def population_panel_status_json(request):
 
     for pt in ProductionType.objects.all():
         response.append({'name': pt.name,
+                         'pk': pt.id,
                          'unit_count': Unit.objects.filter(production_type=pt).count(),
                          'spread': DiseaseSpreadAssignment.objects.filter(destination_production_type=pt).filter(
                              Q(direct_contact_spread__isnull=False,) |
@@ -75,6 +76,53 @@ def population_panel_status_json(request):
     return JsonResponse(response, safe=False)
 
 
+def spread_options_json(request):  # list of DiseaseSpreads by Type
+    options = {
+        'DirectSpread': {d.id: {'name': d.name, 'pk': d.id} for d in DirectSpread.objects.all()},
+        'IndirectSpread': {d.id: {'name': d.name, 'pk': d.id} for d in IndirectSpread.objects.all()},
+        'AirborneSpread': {d.id: {'name': d.name, 'pk': d.id} for d in AirborneSpread.objects.all()}
+    }
+    return JsonResponse(options)
+
+
+def spread_inputs_json(request):
+    options = {}
+    options['DirectSpread'] = {}
+    for index, spread in enumerate(DirectSpread.objects.all()):
+        inputs = []
+        for source in ProductionType.objects.all():
+            query = DiseaseSpreadAssignment.objects.filter(source_production_type=source, direct_contact_spread=spread)
+            if query.exists():
+                one_source = {'source': source.name, 'destinations': []}
+                for pair in query:
+                    one_source['destinations'].append({'name': pair.destination_production_type.name,
+                                                       'pk': pair.destination_production_type.name})
+                inputs.append(one_source)
+
+        options['DirectSpread'][spread.id] = inputs
+    options['IndirectSpread'] = {}
+    options['AirborneSpread'] = {}
+    return JsonResponse(options)
+
+
+def disease_spread_assignments_json(request):
+    source_rows = {}
+    for source in ProductionType.objects.all().order_by('name'):
+        one_row = {'name': source.name, 'pk': source.id, 'destinations': {}}
+        for destination in ProductionType.objects.all().order_by('name'):
+            assignment = {'name': destination.name, 'pk': destination.id, 'DirectSpread': None, 'IndirectSpread': None,
+                          'AirborneSpread': None}
+            query = DiseaseSpreadAssignment.objects.filter(source_production_type=source,
+                                                           destination_production_type=destination)
+            if query.exists():
+                assignment['DirectSpread'] = query.first().direct_contact_spread_id
+                assignment['IndirectSpread'] = query.first().indirect_contact_spread_id
+                assignment['AirborneSpread'] = query.first().airborne_spread_id
+            one_row['destinations'][destination.name] = assignment
+        source_rows[source.name] = one_row
+    return JsonResponse(source_rows, safe=False)
+
+
 def disable_all_controls_json(request):
     if 'POST' in request.method:
         new_value = request.POST['use_controls']
@@ -82,7 +130,7 @@ def disable_all_controls_json(request):
         controls = ControlMasterPlan.objects.get()
         controls.disable_all_controls = set_to
         controls.save()
-        return JsonResponse({'status':'success'})
+        return JsonResponse({'status': 'success'})
     else:
         return JsonResponse({'disable_all_controls': ControlMasterPlan.objects.get().disable_all_controls})
     

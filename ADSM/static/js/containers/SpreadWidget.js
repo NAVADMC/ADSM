@@ -6,14 +6,16 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import {store} from '../GlobalStore'
 import NewPTCombinationButton from './NewPTCombinationButton'
+import SpreadAssigner from './SpreadAssigner'
 
 
 
 export class SpreadWidget extends Component {
 
     render() {
+        var row = '' // row of disease_spread.  filter out rows that never mention this particular DiseaseSpread
         var inputs = this.props.spread_inputs.map(function(input, index){
-            return (<p key={index}>{JSON.stringify(input)}</p>);
+            return (<SpreadAssigner source_info={row} input={input} key={index} />);
         });
         var spread_type = $('#center-panel form').first().attr('action').split('/')[2]
         return (
@@ -55,7 +57,8 @@ SpreadWidget.propTypes = {
 function select(state) {
     return {
         disease_spread: state.disease_spread,
-        spread_inputs: state.spread_inputs
+        spread_inputs: state.spread_inputs,
+        population: state.population
     }
 }
 
