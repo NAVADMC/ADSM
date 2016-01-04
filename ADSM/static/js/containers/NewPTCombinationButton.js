@@ -33,6 +33,6 @@ export default class NewPTCombinationButton extends Component {
 }
 
 NewPTCombinationButton.propTypes = {
-    disease_spread: PropTypes.string.isRequired,
+    spread_type: PropTypes.string.isRequired,
     spread_inputs: PropTypes.array.isRequired
 };

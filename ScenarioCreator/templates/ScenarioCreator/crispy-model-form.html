@@ -15,8 +15,6 @@
 
         {# Code that is only relevant to Disease Spread but it here because of generic form use #}
         {% if 'DirectSpread' in request.get_full_path or 'IndirectSpread' in request.get_full_path or 'AirborneSpread' in request.get_full_path%}
-            <hr/>
-            <h1>Production Type Combinations</h1>
             <div id="spread-widget">
                 {#React is waiting to put an element under this ID#}
             </div>

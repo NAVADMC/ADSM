@@ -5,8 +5,6 @@ import $ from 'jquery';
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import {store} from '../GlobalStore'
-import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
-import DiffMonitor from 'redux-devtools-diff-monitor';
 import NewPTCombinationButton from './NewPTCombinationButton'
 
 
@@ -14,20 +12,16 @@ import NewPTCombinationButton from './NewPTCombinationButton'
 export class SpreadWidget extends Component {
 
     render() {
-        var debug_panel = ''
-        if (process.env.NODE_ENV === 'development') {
-            debug_panel = <DebugPanel top right bottom><DevTools store={store} monitor={DiffMonitor} visibleOnLoad={true} /></DebugPanel>
-        }
         var inputs = this.props.spread_inputs.map(function(input, index){
             return (<p key={index}>{JSON.stringify(input)}</p>);
         });
+        var spread_type = $('#center-panel form').first().attr('action').split('/')[2]
         return (
             <div className="spread-widget-contents">
-                <h1>React Wins!</h1>
-                <p>{window.location.pathname}</p>
+                <hr/>
+                <h1>Production Type Combinations</h1>
                 {inputs}
-                <NewPTCombinationButton spread_inputs={this.props.spread_inputs}/>
-                { debug_panel }
+                <NewPTCombinationButton spread_inputs={this.props.spread_inputs} spread_type={spread_type}/>
             </div>
 
         );
