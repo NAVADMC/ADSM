@@ -6,8 +6,7 @@ import React, { Component, PropTypes } from 'react';
 export default class SpreadAssigner extends Component {
 
     render(){
-        var destinations = this.props.input_state.destinations
-        var { source, population, input_state } = this.props
+        var { population, input_state } = this.props
         var options = population.map(function(option, index){
             return <option value={option.pk} key={'s'+index}>{option.name}</option>;
         })
@@ -16,18 +15,18 @@ export default class SpreadAssigner extends Component {
         })
         return (
             <div>
-                <label for="source" class="control-label requiredField">
-				    Source Production Type<span class="asteriskField">*</span>
+                <label htmlFor="source" className="control-label requiredField">
+				    Source Production Type<span className="asteriskField">*</span>
                 </label>
-                <select name="source" required defaultValue={source}>
+                <select name="source" required defaultValue={input_state.source}>
                     <option value="">------</option>
                     {options}
                 </select>
 
-                <label for="destinations" class="control-label requiredField">
-				    Destinations<span class="asteriskField">*</span>
+                <label htmlFor="destinations" className="control-label requiredField">
+				    Destinations<span className="asteriskField">*</span>
                 </label>
-                <select name="destinations" multiple="multiple" required defaultValue={destinations} className="productiontypelist">
+                <select name="destinations" multiple="multiple" required defaultValue={input_state.destinations} className="productiontypelist">
                     {destination_options}
                 </select>
             </div>

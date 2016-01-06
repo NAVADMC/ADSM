@@ -26,3 +26,26 @@ export function get_population_status() {
         )
     }
 }
+
+/** Could possibly be combined with get_population_status
+ */
+export function refresh_spread_inputs_from_server(){
+    return function(dispatch){
+        var url = '/setup/SpreadInputs.json/';
+
+        var jsPromise = Promise.resolve($.ajax({
+            url: url,
+            dataType: 'json',
+            type: 'GET'
+        }));
+
+        jsPromise.then(
+            function(json) {  // success
+                dispatch({type: ActionTypes.RECEIVE_SPREAD_INPUTS, response: json})
+            },
+            function(error) {  // failure
+                    console.error(url, error);
+            }
+        )
+    }
+}

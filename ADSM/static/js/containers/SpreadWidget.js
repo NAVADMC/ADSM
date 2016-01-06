@@ -4,6 +4,7 @@
 import $ from 'jquery';
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import {refresh_spread_inputs_from_server} from '../actions/actions'
 import {store} from '../GlobalStore'
 import NewPTCombinationButton from './NewPTCombinationButton'
 import SpreadAssigner from './SpreadAssigner'
@@ -11,6 +12,10 @@ import SpreadAssigner from './SpreadAssigner'
 
 
 export class SpreadWidget extends Component {
+
+    componentDidMount(){
+        this.props.dispatch(refresh_spread_inputs_from_server())
+    }
 
     render() {
         var url = $('#center-panel form').first().attr('action').split('/');
@@ -44,7 +49,7 @@ export class SpreadWidget extends Component {
 var list_of_source_destination_pks =
     PropTypes.arrayOf(
         PropTypes.shape(
-            {source: PropTypes.string, destination: PropTypes.array})
+            {source: PropTypes.any/*number or ''*/, destination: PropTypes.array})
     );
 
 

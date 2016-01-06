@@ -45,6 +45,9 @@ export function spread_inputs(spread_inputs=STARTING_INPUTS, action){
             modified_list[action.spread_type][action.spread_pk] = new_inputs
             return modified_list
         }
+        case ActionTypes.RECEIVE_SPREAD_INPUTS: {
+            return action.response  //clobbers data that disagrees with server
+        }
 
         default:
             return spread_inputs
