@@ -25,7 +25,12 @@ export function disease_spread(disease_spread={}, action){
     }
 }
 
-export function spread_inputs(spread_inputs=[], action){
+var STARTING_INPUTS = {
+    DirectSpread: {},
+    IndirectSpread: {},
+    AirborneSpread: {}
+}
+export function spread_inputs(spread_inputs=STARTING_INPUTS, action){
     switch(action.type ){
         case ActionTypes.ADD_COMBINATION_INPUT: {
             var tmp = [

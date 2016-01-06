@@ -15,6 +15,7 @@ export default class NewPTCombinationButton extends Component {
         dispatch({
             type: ActionTypes.ADD_COMBINATION_INPUT,
             spread_type: this.props.spread_type,
+            spread_pk: this.props.spread_pk,
             new_input: {
                 source:'source here',//TODO: check for duplicated "source" selections
                 destinations: ['d1', 'd2']
@@ -34,5 +35,5 @@ export default class NewPTCombinationButton extends Component {
 
 NewPTCombinationButton.propTypes = {
     spread_type: PropTypes.string.isRequired,
-    spread_inputs: PropTypes.array.isRequired
+    spread_pk: PropTypes.string.isRequired
 };
