@@ -93,10 +93,8 @@ def spread_inputs_json(request):
         for source in ProductionType.objects.all():
             query = DiseaseSpreadAssignment.objects.filter(source_production_type=source, direct_contact_spread=spread)
             if query.exists():
-                one_source = {'source': source.name, 'destinations': []}
-                for pair in query:
-                    one_source['destinations'].append({'name': pair.destination_production_type.name,
-                                                       'pk': pair.destination_production_type.name})
+                one_source = {'source': source.id,
+                              'destinations': [pair.destination_production_type.id for pair in query]}
                 inputs.append(one_source)
 
         options['DirectSpread'][spread.id] = inputs

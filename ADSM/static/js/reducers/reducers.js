@@ -33,11 +33,17 @@ var STARTING_INPUTS = {
 export function spread_inputs(spread_inputs=STARTING_INPUTS, action){
     switch(action.type ){
         case ActionTypes.ADD_COMBINATION_INPUT: {
-            var tmp = [
-                ...spread_inputs,
-                action.new_input
+            var prev_inputs = spread_inputs[action.spread_type][action.spread_pk] || []
+            var new_inputs = [
+                ...prev_inputs,
+                {//new_input:
+                    source:'',//TODO: check for duplicated "source" selections
+                    destinations: []
+                }
             ];
-            return tmp
+            var modified_list = Object.assign({}, spread_inputs)
+            modified_list[action.spread_type][action.spread_pk] = new_inputs
+            return modified_list
         }
 
         default:

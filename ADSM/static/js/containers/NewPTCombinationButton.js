@@ -15,13 +15,9 @@ export default class NewPTCombinationButton extends Component {
         dispatch({
             type: ActionTypes.ADD_COMBINATION_INPUT,
             spread_type: this.props.spread_type,
-            spread_pk: this.props.spread_pk,
-            new_input: {
-                source:'source here',//TODO: check for duplicated "source" selections
-                destinations: ['d1', 'd2']
-            }
+            spread_pk: this.props.spread_pk
         })
-        //TODO: where do the options come from?  Maybe a dummy input used as a template?  Maybe
+        open_population_panel(); //from adsm.js
     }
 
     render() {

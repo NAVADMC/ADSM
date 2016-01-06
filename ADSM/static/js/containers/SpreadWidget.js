@@ -16,12 +16,11 @@ export class SpreadWidget extends Component {
         var url = $('#center-panel form').first().attr('action').split('/');
         var spread_type = url[2]
         var pk = url[3]
-        var {spread_inputs} = this.props
-        var row = '' // row of disease_spread.  filter out rows that never mention this particular DiseaseSpread
+        var {spread_inputs, population} = this.props
         var inputs = []
         if(pk in spread_inputs[spread_type]) {
-            inputs = spread_inputs[spread_type][pk].map(function(input, index){
-                return (<SpreadAssigner source_info={row} input={input} key={index} />);
+            inputs = spread_inputs[spread_type][pk].map(function(input_state, index){
+                return (<SpreadAssigner population={population} input_state={input_state} key={index} />);
             });
         }
         return (
@@ -42,11 +41,12 @@ export class SpreadWidget extends Component {
 * in them.  The Array is indexed by the Production Type name, rather than a numerical index, so we use Objects
 * (python dictionaries) instead of Array[].  Rows are source production types and Columns are destination Production
 * Types.  */
-var list_of_source_destination_objects =
+var list_of_source_destination_pks =
     PropTypes.arrayOf(
         PropTypes.shape(
             {source: PropTypes.string, destination: PropTypes.array})
     );
+
 
 SpreadWidget.propTypes = {
     disease_spread: PropTypes.objectOf(
@@ -64,12 +64,9 @@ SpreadWidget.propTypes = {
         })
     ).isRequired,
     spread_inputs: PropTypes.shape({
-        DirectSpread: PropTypes.objectOf( //"2" : [{},{}]
-            list_of_source_destination_objects).isRequired,
-        IndirectSpread: PropTypes.objectOf( //"2" : [{},{}]
-            list_of_source_destination_objects).isRequired,
-        AirborneSpread: PropTypes.objectOf( //"2" : [{},{}]
-            list_of_source_destination_objects).isRequired
+        DirectSpread: PropTypes.objectOf(list_of_source_destination_pks).isRequired,
+        IndirectSpread: PropTypes.objectOf(list_of_source_destination_pks).isRequired,
+        AirborneSpread: PropTypes.objectOf(list_of_source_destination_pks).isRequired
 }).isRequired
 };
 
