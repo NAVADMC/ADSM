@@ -1582,6 +1582,8 @@ input[type=file], button {
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* line-height: 20px; */
+    padding-top: 4px;
 }
 .defined_name:hover {
     cursor: default;

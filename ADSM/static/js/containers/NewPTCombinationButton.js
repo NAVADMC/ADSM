@@ -23,7 +23,7 @@ export default class NewPTCombinationButton extends Component {
     render() {
         return(
             <li className="addNew">
-                <a className="action_link" onClick={this.onClick.bind(this)}><i> + Create New Combination</i></a>
+                <a className="action_link" onClick={this.onClick.bind(this)} href="#"><i> + Create New Combination</i></a>
             </li>
         )
     }

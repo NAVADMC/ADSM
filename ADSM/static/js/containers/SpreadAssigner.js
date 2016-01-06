@@ -14,14 +14,20 @@ export default class SpreadAssigner extends Component {
         var destination_options = population.map(function(option, index){
             return <option value={option.pk} key={'d'+index}>{option.name}</option>;
         })
-        return(
+        return (
             <div>
-                <select name="source" required="" defaultValue={source}>
+                <label for="source" class="control-label requiredField">
+				    Source Production Type<span class="asteriskField">*</span>
+                </label>
+                <select name="source" required defaultValue={source}>
                     <option value="">------</option>
                     {options}
                 </select>
 
-                <select name="destinations" multiple="multiple" required="" defaultValue={destinations} className="productiontypelist">
+                <label for="destinations" class="control-label requiredField">
+				    Destinations<span class="asteriskField">*</span>
+                </label>
+                <select name="destinations" multiple="multiple" required defaultValue={destinations} className="productiontypelist">
                     {destination_options}
                 </select>
             </div>
