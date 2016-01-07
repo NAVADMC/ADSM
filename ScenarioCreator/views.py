@@ -86,20 +86,23 @@ def spread_options_json(request):  # list of DiseaseSpreads by Type
 
 
 def spread_inputs_json(request):
+    spread_types = {'DirectSpread': (DirectSpread, 'direct_contact_spread'),
+                    'IndirectSpread': (IndirectSpread, 'indirect_contact_spread'),
+                    'AirborneSpread': (AirborneSpread, 'airborne_spread')}
     options = {}
-    options['DirectSpread'] = {}
-    for index, spread in enumerate(DirectSpread.objects.all()):
-        inputs = []
-        for source in ProductionType.objects.all():
-            query = DiseaseSpreadAssignment.objects.filter(source_production_type=source, direct_contact_spread=spread)
-            if query.exists():
-                one_source = {'source': source.id,
-                              'destinations': [pair.destination_production_type.id for pair in query]}
-                inputs.append(one_source)
+    for class_name, meta in spread_types.items():
+        model, field_name = meta
+        options[class_name] = {}
+        for spread in model.objects.all():
+            inputs = []
+            for source in ProductionType.objects.all():
+                query = DiseaseSpreadAssignment.objects.filter(**{'source_production_type': source, field_name: spread})
+                if query.exists():
+                    one_source = {'source': source.id,
+                                  'destinations': [pair.destination_production_type.id for pair in query]}
+                    inputs.append(one_source)
 
-        options['DirectSpread'][spread.id] = inputs
-    options['IndirectSpread'] = {}
-    options['AirborneSpread'] = {}
+            options[class_name][spread.id] = inputs
     return JsonResponse(options)
 
 
