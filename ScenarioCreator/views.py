@@ -29,6 +29,9 @@ abstract_models = {
          ('AirborneSpread', AirborneSpread)],
 }
 
+spread_types = {'DirectSpread': (DirectSpread, 'direct_contact_spread'),
+                'IndirectSpread': (IndirectSpread, 'indirect_contact_spread'),
+                'AirborneSpread': (AirborneSpread, 'airborne_spread')}
 
 def spaces_for_camel_case(text):
     return re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
@@ -86,9 +89,6 @@ def spread_options_json(request):  # list of DiseaseSpreads by Type
 
 
 def spread_inputs_json(request):
-    spread_types = {'DirectSpread': (DirectSpread, 'direct_contact_spread'),
-                    'IndirectSpread': (IndirectSpread, 'indirect_contact_spread'),
-                    'AirborneSpread': (AirborneSpread, 'airborne_spread')}
     options = {}
     for class_name, meta in spread_types.items():
         model, field_name = meta
@@ -104,6 +104,18 @@ def spread_inputs_json(request):
 
             options[class_name][spread.id] = inputs
     return JsonResponse(options)
+
+
+def modify_spread_assignments(request):
+    if 'POST' in request.method:
+        data = request.POST.dict()
+        for destination_pk in data['destinations[]']:
+            assignment = DiseaseSpreadAssignment.objects.filter(**{'source_production_type_id': int(data['source']),
+                                                                   'destination_production_type_id': int(destination_pk)})
+            parameter_class, field = spread_types[data['spread_type']]
+            assignment.update(**{field: parameter_class.objects.get(id=int(data['pk']))})  # saves immediately
+
+    return spread_inputs_json(request)
 
 
 def disease_spread_assignments_json(request):

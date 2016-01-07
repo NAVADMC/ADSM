@@ -8,12 +8,16 @@ import {select_value_changed} from '../actions/actions'
 export default class SpreadAssigner extends Component {
 
     onChangeSource(event) {
+        var {spread_type, pk, input_state} = this.props
         var new_value = event.target.value;
-        dispatch(select_value_changed(this.props.spread_type, this.props.pk, 'source', new_value))
+        new_value = Object.assign({}, input_state, {source: new_value})  //wrap in the old values
+        dispatch(select_value_changed(spread_type, pk, 'source', new_value, input_state))
     }
     onChangeDestinations(event) {
+        var {spread_type, pk, input_state} = this.props
         var new_value = event.target.value;
-        dispatch(select_value_changed(this.props.spread_type, this.props.pk, 'destinations', new_value))
+        new_value = Object.assign({}, input_state, {destinations: new_value})  //wrap in the old values
+        dispatch(select_value_changed(spread_type, pk, 'destinations', new_value, input_state))
     }
 
     render(){

@@ -50,13 +50,65 @@ export function refresh_spread_inputs_from_server(){
     }
 }
 
-export function select_value_changed(spread_type, pk, field_name, new_value){
+function exclude(container, exclusion){
+    return container.filter(function(x) {
+        return exclusion.indexOf(x) < 0
+    })
+}
+
+
+export function select_value_changed(spread_type, pk, field_name, new_value, old_value){
     return function(dispatch){
         dispatch({type: ActionTypes.SELECT_VALUE_CHANGED,
-        spread_type,
-        pk,
-        field_name,
-        new_value})
+            spread_type,
+            pk,
+            field_name,
+            new_value,
+            old_value
+        })
+        if(field_name == 'source'){
+            var delete_old = Promise.resolve($.ajax({
+                url: '/setup/ModifySpreadAssignments/',
+                dataType: 'json',
+                type: 'DELETE',
+                data: {spread_type, pk,
+                    source: old_value.source,
+                    destinations: old_value.destinations}
+            }));
+            var create_new = Promise.resolve($.ajax({
+                url: '/setup/ModifySpreadAssignments/',
+                dataType: 'json',
+                type: 'POST',
+                data: {spread_type: spread_type,
+                    pk: pk,
+                    source: new_value.source,
+                    destinations: new_value.destinations}
+            }));
+        }
+        if(field_name == 'destinations'){
+            var deletions = exclude(old_value.destinations, new_value.destinations)
+            if(deletions.length > 0){
+                $.ajax({
+                    url: '/setup/ModifySpreadAssignments/',
+                    dataType: 'json',
+                    type: 'DELETE',
+                    data: {spread_type, pk,
+                        source: old_value.source,//presumably old and new 'source' values are the same here
+                        destinations: deletions}
+                });
+            }
+            var additions = exclude(new_value.destinations, old_value.destinations)
+            if(additions.length > 0){
+                $.ajax({
+                    url: '/setup/ModifySpreadAssignments/',
+                    dataType: 'json',
+                    type: 'POST',
+                    data: {spread_type, pk,
+                        source: new_value.source,//presumably old and new 'source' values are the same here
+                        destinations: additions}
+                });
+            }
+        }
     }
 
 }
