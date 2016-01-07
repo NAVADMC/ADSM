@@ -18,6 +18,7 @@ from matplotlib.figure import Figure
 from ScenarioCreator.models import Zone, ProductionType, Unit
 from Results.summary import list_of_iterations
 from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType
+from Results.inferno import inferno
 
 
 # def matplotd3(request):
@@ -256,7 +257,6 @@ def TwoD_histogram(fig, gs, time_graph, time_series):
     days = list(range(1, len(time_series[0]) + 1))  # Start with day index
     x = days * len(time_series)  # repeat day series for each set of data (1 per iteration)
     y = list(chain(*time_series))
-    inferno = plt.get_cmap('inferno')
     norm = LogNorm()
     time_graph.hist2d(x, y,
                       bins=[len(days), max(5, min(max(*y), 300))],
