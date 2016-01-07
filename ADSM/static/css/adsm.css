@@ -2316,7 +2316,8 @@ select[multiple] {}
 /*-----left aligned scrollbars-----*/
 /*-------------------------------------------------------------*/
 #center-panel>.fragment, #left-panel {
-    direction: rtl; /*TODO this really really needs to change because it affects decedents*/
+    direction: rtl; /*TODO this really really needs to change because it affects decedents. The desire here was to
+    put the scrollbars on the left hand side, which should really be done with a scrollbar meta property.*/
 }
 #center-panel .fragment form,
 #center-panel .fragment div,
