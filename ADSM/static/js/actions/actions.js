@@ -49,3 +49,14 @@ export function refresh_spread_inputs_from_server(){
         )
     }
 }
+
+export function select_value_changed(spread_type, pk, field_name, new_value){
+    return function(dispatch){
+        dispatch({type: ActionTypes.SELECT_VALUE_CHANGED,
+        spread_type,
+        pk,
+        field_name,
+        new_value})
+    }
+
+}

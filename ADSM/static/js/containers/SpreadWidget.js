@@ -25,7 +25,11 @@ export class SpreadWidget extends Component {
         var inputs = []
         if(pk in spread_inputs[spread_type]) {
             inputs = spread_inputs[spread_type][pk].map(function(input_state, index){
-                return (<SpreadAssigner population={population} input_state={input_state} key={index} />);
+                return (<SpreadAssigner population={population}
+                                        input_state={input_state}
+                                        spread_type={spread_type}
+                                        pk={pk}
+                                        key={index} />);
             });
         }
         return (
