@@ -334,8 +334,14 @@ header .filename {
     color: white;
     position: fixed;
     top: 25px;
-    left: 83%;
+    left: 73%;
     z-index: 130;
+    /* font-size: 18px !important; */
+}
+
+input#save_scenario {
+    font-size: 18px;
+    color: #9BD9D6;
 }
 
 header .buttonHolder{
