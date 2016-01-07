@@ -334,7 +334,7 @@ header .filename {
     color: white;
     position: fixed;
     top: 25px;
-    left: 73%;
+    right: 3%;
     z-index: 130;
     /* font-size: 18px !important; */
 }
@@ -1588,6 +1588,8 @@ input[type=file], button {
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* line-height: 20px; */
+    padding-top: 4px;
 }
 .defined_name:hover {
     cursor: default;
@@ -2313,10 +2315,13 @@ select[multiple] {}
 /*-------------------------------------------------------------*/
 /*-----left aligned scrollbars-----*/
 /*-------------------------------------------------------------*/
-#center-panel .fragment, #left-panel {
-    direction: rtl;
+#center-panel>.fragment, #left-panel {
+    direction: rtl; /*TODO this really really needs to change because it affects decedents*/
 }
-#center-panel .fragment form, #left-panel h1, #left-panel div {
+#center-panel .fragment form,
+#center-panel .fragment div,
+#left-panel h1,
+#left-panel div {
     direction: ltr;
 }
 ::-webkit-scrollbar-thumb {
