@@ -107,14 +107,23 @@ def spread_inputs_json(request):
 
 
 def modify_spread_assignments(request):
-    if 'POST' in request.method:
-        data = request.POST.dict()
-        for destination_pk in data['destinations[]']:
-            assignment = DiseaseSpreadAssignment.objects.filter(**{'source_production_type_id': int(data['source']),
-                                                                   'destination_production_type_id': int(destination_pk)})
-            parameter_class, field = spread_types[data['spread_type']]
-            assignment.update(**{field: parameter_class.objects.get(id=int(data['pk']))})  # saves immediately
+    data = request.POST.dict()
+    if data['source']:  # when a user selects ----- there's no PK at all
+        if 'POST' == data['action']:
+            if 'destinations[]' in data.keys():
+                for destination_pk in data['destinations[]']:
+                    assignment = DiseaseSpreadAssignment.objects.filter(**{'source_production_type_id': int(data['source']),
+                                                                           'destination_production_type_id': int(destination_pk)})
+                    parameter_class, field = spread_types[data['spread_type']]
+                    assignment.update(**{field: parameter_class.objects.get(id=int(data['pk']))})  # saves immediately
 
+        if 'DELETE' == data['action']:  # Django doesn't allow you to parametrize DELETE http_method
+            if 'destinations[]' in data.keys():
+                for destination_pk in data['destinations[]']:
+                    assignment = DiseaseSpreadAssignment.objects.filter(**{'source_production_type_id': int(data['source']),
+                                                                           'destination_production_type_id': int(destination_pk)})
+                    parameter_class, field = spread_types[data['spread_type']]
+                    assignment.update(**{field: None})  # saves immediately
     return spread_inputs_json(request)
 
 

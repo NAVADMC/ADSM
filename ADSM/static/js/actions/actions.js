@@ -70,20 +70,25 @@ export function select_value_changed(spread_type, pk, field_name, new_value, old
             var delete_old = Promise.resolve($.ajax({
                 url: '/setup/ModifySpreadAssignments/',
                 dataType: 'json',
-                type: 'DELETE',
-                data: {spread_type, pk,
+                type: 'POST',
+                data: {action: 'DELETE', spread_type, pk,
                     source: old_value.source,
                     destinations: old_value.destinations}
             }));
+            //delete_old.then( // we really only need to update the state once, which is done on create_new
+            //    function(json){/* success*/dispatch({type: ActionTypes.RECEIVE_SPREAD_INPUTS, response: json}) }
+            //)
             var create_new = Promise.resolve($.ajax({
                 url: '/setup/ModifySpreadAssignments/',
                 dataType: 'json',
                 type: 'POST',
-                data: {spread_type: spread_type,
-                    pk: pk,
+                data: {action: 'POST', spread_type, pk,
                     source: new_value.source,
                     destinations: new_value.destinations}
             }));
+            create_new.then(
+                function(json){/* success*/dispatch({type: ActionTypes.RECEIVE_SPREAD_INPUTS, response: json}) }
+            )
         }
         if(field_name == 'destinations'){
             var deletions = exclude(old_value.destinations, new_value.destinations)
@@ -91,8 +96,8 @@ export function select_value_changed(spread_type, pk, field_name, new_value, old
                 $.ajax({
                     url: '/setup/ModifySpreadAssignments/',
                     dataType: 'json',
-                    type: 'DELETE',
-                    data: {spread_type, pk,
+                    type: 'POST',
+                    data: {action: 'DELETE', spread_type, pk,
                         source: old_value.source,//presumably old and new 'source' values are the same here
                         destinations: deletions}
                 });
@@ -103,7 +108,7 @@ export function select_value_changed(spread_type, pk, field_name, new_value, old
                     url: '/setup/ModifySpreadAssignments/',
                     dataType: 'json',
                     type: 'POST',
-                    data: {spread_type, pk,
+                    data: {action: 'POST', spread_type, pk,
                         source: new_value.source,//presumably old and new 'source' values are the same here
                         destinations: additions}
                 });
