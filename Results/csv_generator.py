@@ -91,8 +91,9 @@ class SummaryCSVGenerator(multiprocessing.Process):
 
         return row
 
-    
+
 def std_dev(field, query):
+    """This is the __Population__ Standard Deviation formula translated into RAW SQL statement, specifically SQLite version."""
     table_name = query.model._meta.db_table
     sql_statement = "SELECT AVG(({table}.{col} - sub.a) * ({table}.{col} - sub.a)) as var from {table}, (SELECT AVG({col}) AS a FROM {table}) AS sub;".format(table=table_name, col=field)
 
