@@ -41,11 +41,14 @@ Create Virtual Environment:
 
   - Windows: `/path/to/py3.4/python -m venv /path/to/adsm_venv`
     - Activate with `/path/to/adsm_venv/Scripts/activate.bat`
-    - Install Git and Mercurial so they are properly on the command line  #TODO: Get links for these
+    - Install Git so it is properly on the command line
+    - install Visual Studio 2010: http://download.cnet.com/Microsoft-Visual-Studio-2010-Professional/3000-2212_4-10618634.html (Note: Installing the trial is fine as all we need is the compiler. Where VS the GUI App may stop working after 30 days, the CLI compiler should continue to be valid)
+    - modify file `\path\to\py3.4\Lib\distutils\msvc9compiler.py` (Note: This is not in your venv, but your base python 3.4 install)
+      - after `ld_args.append('/MANIFESTFILE:' + temp_manifest)` add `ld_args.append('/MANIFEST')` at the same indentation level
   - Linux: `python3 -m venv --without-pip /path/to/adsm_venv`  
     - Install Setuptools and Pip: `wget https://pypi.python.org/packages/source/s/setuptools/setuptools-3.4.4.tar.gz; tar -vzxf setuptools-3.4.4.tar.gz; rm setuptools-3.4.4.tar.gz; cd setuptools-3.4.4; python setup.py install; cd ..; rm -r setuptools-3.4.4; wget https://pypi.python.org/packages/source/p/pip/pip-1.5.6.tar.gz; tar -vzxf pip-1.5.6.tar.gz; rm pip-1.5.6.tar.gz; cd pip-1.5.6; python setup.py install; cd ..; rm -r pip-1.5.6`
     - Activate with `source /path/to/adsm_venv/bin/activate`
-    - Install required dev files: `sudo apt-get install build-essential python3-dev git mercurial; sudo apt-get build-dep python3-matplotlib python3-scipy`
+    - Install required dev files: `sudo apt-get install build-essential python3-dev git; sudo apt-get build-dep python3-matplotlib python3-scipy`
     
 Please make sure that NO packages from your global install made it into your Virtual Environment. Use `pip freeze` to confirm nothing is installed.
 
@@ -54,23 +57,20 @@ Download the ADSM source: `git clone https://github.com/NAVADMC/ADSM.git /path/t
 Now that we have a Virtual Environment, we need to install all the Python Packages that ADSM uses.  
 Using the pip in your new Virtual Environment (confirm Virtual Environment Activation with `where pip` or `which pip`), install all the required packages in Requirements.txt `pip install -r Requirements.txt`
 
-**If you are on Linux or Mac** install the extra packages: `pip install -r Requirements-Nix.txt`
+**If you are on Linux or Mac:** 
 
-**If you are on Windows** install the extra packages: `pip install -r Requirements-Windows.txt` 
+  - install the extra packages: `pip install -r Requirements-Nix.txt`
 
-  - Download the following files for Windows from [PythonLibs](http://www.lfd.uci.edu/~gohlke/pythonlibs/). Another possible location is [PNAWheels](https://nipy.bic.berkeley.edu/pna/wheels/)  The exact links vary so you will need to navigate
-  there manually.  Put them into a directory that you can easily navigate to in a command prompt:
-    - numpy-MKL-1.9.1.win-amd64-py3.4.exe
-    - https://nipy.bic.berkeley.edu/pna/wheels/pandas-0.15.2-cp34-none-win_amd64.whl
-    - matplotlib-1.4.2.win-amd64-py3.4.exe
-    - pyproj-1.9.4dev.win-amd64-py3.4.exe
-    - psutil-2.2.0-cp34-none-win_amd64.whl
-    - https://nipy.bic.berkeley.edu/pna/wheels/scipy-0.15.1-cp34-none-win_amd64.whl
-  - Now, using the easy_install (for exe) or pip (for whl) in your new Virtual Environment (`/path/to/adsm_venv/Scripts/easy_install` or `/path/toadsm_venv/Scripts/pip`), install the following packages:
-        
-        easy_install *.exe 
-        pip install *.whl
-        
+**If you are on Windows:** 
+
+  - install the extra packages: `pip install -r Requirements-Windows.txt`
+  - install numpy: `pip install setup\numpy-1.9.3+mkl-cp34-none-win_amd64.whl`
+  - install matplotlib: `pip install setup\matplotlib-1.4.3-cp34-none-win_amd64.whl`
+  - install pandas: `pip install setup\pandas-0.15.2-cp34-none-win_amd64.whl`
+  - install scipy: `pip install setup\scipy-0.15.1-cp34-none-win_amd64.whl`
+  - install pyproj: `pip install setup\pyproj-1.9.4-cp34-none-win_amd64.whl`
+  - install psutil: `pip install setup\psutil-2.2.1-cp34-none-win_amd64.whl`
+                
 ###React Setup
 Install Node (please x64 version)
 cd BASE_DIR (Not an actual command. Go into the root of the project)
@@ -100,6 +100,7 @@ If you plan on compiling a distributable version of the project, then use the fo
 Linux:  
  
   - Requires ldd and objdump installed (probably already on your system)
+  - Install Mercurial `sudo apt-get install mercurial`
   - You need a custom compiled version of Python3.4 (will use instead of venv)
         
         sudo apt-get install zlib1g-dev libbz2-dev libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev libgdbm-dev liblzma-dev tk8.5-dev
@@ -130,23 +131,19 @@ Linux:
   - Using the new python, install all the requirements `/path/to/projects/adsm_python/bin/pip install -r /path/to/adsm/Requirements.txt && /path/to/projects/adsm_python/bin/pip install -r /path/to/adsm/Requirements-Nix.txt`     
   - `/path/to/projects/adsm_python/bin/pip install hg+https://bitbucket.org/BryanHurst/cx_freeze`
     - If the above install fails, then there is a problem with your python shared libraries, I have a clone of the cx_freeze repo with a temp fix
-      - CD to a directory where you want to download it, then `git clone git@git.newline.us:BryanHurst/cx_freeze.git; cd cx_freeze; /path/to/projects/adsm_python/bin/python setup.py install`
+      - CD to a directory where you want to download it, then `hg clone hg+https://bitbucket.org/BryanHurst/cx_freeze; cd cx_freeze; /path/to/projects/adsm_python/bin/python setup.py install`
   - If you need to update the NPU, `/path/to/projects/adsm_python/bin/pip install git+https://github.com/pyinstaller/pyinstaller.git@python3`
  
 Windows:  
 
-  - Download the following two files:
-    - http://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/pywin32-219.win-amd64-py3.4.exe/download  
-    - http://www.lfd.uci.edu/~gohlke/pythonlibs/2or7r828/cx_Freeze-4.3.3.win-amd64-py3.4.exe
-  - Now, using the easy_install in your new Virtual Environment (/path/to/adsm_venv/Scripts/easy_install), install the packages:
+  - Install Mercurial so it is properly on your path
+  - Using the easy_install in your new Virtual Environment (/path/to/adsm_venv/Scripts/easy_install), install PyWin32:
         
-        easy_install pywin32-219.win-amd64-py3.4.exe
-        easy_install cx_Freeze-4.3.3.win-amd64-py3.4.exe  # TODO: NOTE: This is outdated and will be revisited later
+        `easy_install setup\pywin32-219.win-amd64-py3.4.exe`
         
-  - Update cx_freeze:
-    - Go to https://bitbucket.org/BryanHurst/cx_freeze/
-    - Find all commits made after forking (generally commits made by Bryan) and note the files that have been changed
-    - Copy these modified files into your installed cx_freeze folder in `/path/to/adsm_venv/Lib/site-packages/cx_Freeze-4.3.4-py3.4-win-amd64.egg/cx_Freeze
+  - Using /path/to/adsm_venv/Scripts/pip install cx_freeze:
+  
+        `pip install hg+https://bitbucket.org/BryanHurst/cx_freeze`
 
 ###Selenium Tests
 To run the Selenium Tests, you will need Chrome or Chromium installed on your system plus the ChromeDriver v2.12.

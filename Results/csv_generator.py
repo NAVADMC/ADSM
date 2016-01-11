@@ -2,7 +2,10 @@ import multiprocessing
 import csv
 
 from django.conf import settings
+from django.db import connections
 from django.db.models import Avg, Min, Max
+from math import sqrt
+
 from ADSMSettings.utils import workspace_path, scenario_filename
 from Results.output_grammar import explain
 
@@ -70,7 +73,7 @@ class SummaryCSVGenerator(multiprocessing.Process):
         resolvers = {'Field Name': lambda field, query: field_name,
                      'Explanation': lambda field, query: explain(field_name),
                      'Mean': lambda field, query: query.aggregate(Avg(field)).popitem()[1],  # grabs value
-                     'StdDev': lambda field, query: 1.0,
+                     'StdDev': std_dev,
                      'Low': lambda field, query: query.aggregate(Min(field)).popitem()[1],  # grabs value
                      'High': lambda field, query: query.aggregate(Max(field)).popitem()[1],  # grabs value
                      'p5': lambda field, query:  django_percentile(field, query, 5, count),
@@ -87,6 +90,18 @@ class SummaryCSVGenerator(multiprocessing.Process):
                 raise NotImplemented("The column name " + column + " does not have a function associated with it.")
 
         return row
+
+
+def std_dev(field, query):
+    """This is the __Population__ Standard Deviation formula translated into RAW SQL statement, specifically SQLite version."""
+    table_name = query.model._meta.db_table
+    sql_statement = "SELECT AVG(({table}.{col} - sub.a) * ({table}.{col} - sub.a)) as var from {table}, (SELECT AVG({col}) AS a FROM {table}) AS sub;".format(table=table_name, col=field)
+
+    cursor = connections['scenario_db'].cursor()
+    cursor.execute(sql_statement)
+    row = cursor.fetchone()
+    answer = sqrt(float(row[0]))
+    return answer
 
 
 

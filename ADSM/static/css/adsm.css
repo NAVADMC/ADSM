@@ -334,7 +334,7 @@ header .filename {
     color: white;
     position: fixed;
     top: 25px;
-    left: 73%;
+    right: 3%;
     z-index: 130;
     /* font-size: 18px !important; */
 }
