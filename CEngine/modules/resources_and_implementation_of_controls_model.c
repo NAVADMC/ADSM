@@ -338,6 +338,12 @@ adsm_production_type_prioritizer_compare (adsm_prioritizer_t *self,
   return (priority2 - priority1);
 }
 
+static char*
+adsm_production_type_prioritizer_to_string (adsm_prioritizer_t *self)
+{
+  return g_strdup("<prioritizer by production type>");
+}
+
 /**
  * Frees any prioritizer that has a single memory block allocated for its
  * private data (no other dynamically allocated pieces).
@@ -380,7 +386,7 @@ new_production_type_prioritizer (GPtrArray *production_type_names,
 
   self = g_new (adsm_prioritizer_t, 1);
   self->compare = adsm_production_type_prioritizer_compare;
-  self->to_string = NULL;
+  self->to_string = adsm_production_type_prioritizer_to_string;
   self->free = adsm_free_prioritizer;
   /* The private data in this type of prioritizer object is an array.  It is
    * indexed by production type number, and the value found in the array is
@@ -459,6 +465,12 @@ adsm_time_waiting_prioritizer_compare (adsm_prioritizer_t *self,
   return (day2 - day1) * (oldest_first ? 1 : -1);
 }
 
+static char*
+adsm_time_waiting_prioritizer_to_string (adsm_prioritizer_t *self)
+{
+  return g_strdup("<prioritizer by time waiting>");
+}
+
 /**
  * Creates a new by-time-waiting prioritizer.
  *
@@ -478,7 +490,7 @@ new_time_waiting_prioritizer (gboolean oldest_first_flag)
 
   self = g_new (adsm_prioritizer_t, 1);
   self->compare = adsm_time_waiting_prioritizer_compare;
-  self->to_string = NULL;
+  self->to_string = adsm_time_waiting_prioritizer_to_string;
   self->free = adsm_free_prioritizer;
   /* The private data in this type of prioritizer object is a gboolean, saying
    * whether older requests have higher priority. */
@@ -516,6 +528,12 @@ adsm_size_prioritizer_compare (adsm_prioritizer_t *self,
   return (size1 - size2) * (largest_first ? 1 : -1);
 }
 
+static char*
+adsm_size_prioritizer_to_string (adsm_prioritizer_t *self)
+{
+  return g_strdup("<prioritizer by size>");
+}
+
 /**
  * Creates a new by-size prioritizer.
  *
@@ -535,7 +553,7 @@ new_size_prioritizer (gboolean largest_first_flag)
 
   self = g_new (adsm_prioritizer_t, 1);
   self->compare = adsm_size_prioritizer_compare;
-  self->to_string = NULL;
+  self->to_string = adsm_size_prioritizer_to_string;
   self->free = adsm_free_prioritizer;
   /* The private data in this type of prioritizer object is a gboolean, saying
    * whether larger units have higher priority. */
@@ -594,6 +612,12 @@ adsm_direction_prioritizer_compare (adsm_prioritizer_t *self,
   return result;
 }
 
+static char*
+adsm_direction_prioritizer_to_string (adsm_prioritizer_t *self)
+{
+  return g_strdup("<prioritizer by direction>");
+}
+
 /**
  * Creates a new by-direction prioritizer.
  *
@@ -612,7 +636,7 @@ new_direction_prioritizer (gboolean outside_in_flag)
 
   self = g_new (adsm_prioritizer_t, 1);
   self->compare = adsm_direction_prioritizer_compare;
-  self->to_string = NULL;
+  self->to_string = adsm_direction_prioritizer_to_string;
   self->free = adsm_free_prioritizer;
   /* The private data in this type of prioritizer object is a gboolean, saying
    * whether units to the outside of the ring have higher priority. */
@@ -2511,6 +2535,7 @@ char *
 to_string (struct adsm_module_t_ *self)
 {
   GString *s;
+  GString *prioritizer_list;
   char *substring;
   local_data_t *local_data;
 
@@ -2532,6 +2557,24 @@ to_string (struct adsm_module_t_ *self)
   g_string_sprintfa (s, "\n  vaccination-capacity-on-restart=%s", substring);
   g_free (substring);
 
+  prioritizer_list = g_string_new("[");
+  {
+    GSList *iter;
+    adsm_prioritizer_t *prioritizer;
+    gboolean first = TRUE;
+    for (iter = local_data->vaccination_prioritizers; iter != NULL; iter = g_slist_next(iter))
+      {
+        prioritizer = iter->data;
+        substring = prioritizer->to_string(prioritizer);
+        g_string_append_printf (prioritizer_list, first ? "%s" : ",%s", substring);
+        first = FALSE;
+        g_free(substring);
+      }
+  }
+  g_string_append_c(prioritizer_list, ']');
+  g_string_append_printf (s, "\n  vaccination priorities=%s", prioritizer_list->str);
+  g_string_free(prioritizer_list, TRUE);
+  
   g_string_append_c (s, '>');
 
   /* don't return the wrapper object */
