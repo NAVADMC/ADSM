@@ -18,6 +18,13 @@ export default class SpreadAssigner extends Component {
         var new_value = event.target.value;
         new_value = Object.assign({}, input_state, {destinations: new_value})  //wrap in the old values
         dispatch(select_value_changed(spread_type, pk, 'destinations', new_value, input_state))
+
+        /*var select = React.findDOMNode(this.refs.selectRef);
+         var values = [].filter.call(select.options, function (o) {
+            return o.selected;
+         }).map(function (o) {
+            return o.value;
+         });*/
     }
 
     render(){
@@ -44,7 +51,7 @@ export default class SpreadAssigner extends Component {
                 <select name="destinations" multiple="multiple" required
                         value={input_state.destinations}
                         onChange={this.onChangeDestinations.bind(this)}
-                        className="productiontypelist">
+                        style={ {height: 19 * options.length + 10 + 'px'} }>
                     {destination_options}
                 </select>
             </div>
