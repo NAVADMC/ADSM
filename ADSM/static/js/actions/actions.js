@@ -67,13 +67,16 @@ export function select_value_changed(spread_type, pk, field_name, new_value, old
             old_value
         })
         if(field_name == 'source'){
+            //deleting old values is STILL necessary, even when new_value.source is not null or 0
             var delete_old = Promise.resolve($.ajax({
                 url: '/setup/ModifySpreadAssignments/',
                 dataType: 'json',
                 type: 'POST',
-                data: {action: 'DELETE', spread_type, pk,
+                data: {
+                    action: 'DELETE', spread_type, pk,
                     source: old_value.source,
-                    destinations: old_value.destinations}
+                    destinations: old_value.destinations
+                }
             }));
             //delete_old.then( // we really only need to update the state once, which is done on create_new
             //    function(json){/* success*/dispatch({type: ActionTypes.RECEIVE_SPREAD_INPUTS, response: json}) }
