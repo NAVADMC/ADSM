@@ -4,6 +4,7 @@
 import React, { Component, PropTypes } from 'react';
 import {dispatch} from '../GlobalStore'
 import {select_value_changed} from '../actions/actions'
+import {SelectBox} from './SelectBox' //TODO use This instead, remove collapsible element and title bar element
 
 export default class SpreadAssigner extends Component {
 
@@ -15,7 +16,11 @@ export default class SpreadAssigner extends Component {
     }
     onChangeDestinations(event) {
         var {spread_type, pk, input_state} = this.props
-        var new_value = event.target.value;
+        //TODO: check if number is already in the list and remove it if it is
+        var new_value = [...(input_state.destinations), event.target.value / 1];
+        if(event.target.value === ""){   //TODO: when does this happen?
+        	new_value = input_state.destinations.slice(1)
+        }
         new_value = Object.assign({}, input_state, {destinations: new_value})  //wrap in the old values
         dispatch(select_value_changed(spread_type, pk, 'destinations', new_value, input_state))
 
