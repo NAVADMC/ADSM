@@ -665,8 +665,8 @@ free_prioritizer (gpointer data)
 }
 
 /**
- * This function, typed as required for qsort_r(), sorts an array of scorecards
- * using a chain of prioritizers.
+ * This function, typed as required for g_ptr_array_sort_with_data(), sorts
+ * an array of scorecards using a chain of prioritizers.
  *
  * @param thunk the chain (GSList *) of prioritizers
  * @param c1 the first scorecard to be compared
@@ -674,20 +674,20 @@ free_prioritizer (gpointer data)
  * @return -1 if c1 has a higher priority than c2, +1 if c2 has a higher
  *   priority than c1, and 0 if their priorities are equal.
  */
-int
-prioritizer_chain_compare (void *thunk, const void *c1, const void *c2)
+gint
+prioritizer_chain_compare (gconstpointer a, gconstpointer b, gpointer user_data)
 {
   GSList *prioritizer_chain, *iter;
   adsm_prioritizer_t *prioritizer;
   USC_scorecard_t *scorecard1, *scorecard2;
-  int result = 0;
+  gint result = 0;
 
   #if DEBUG && 0
     g_debug ("----- ENTER prioritizer_chain_compare");
   #endif  
-  prioritizer_chain = (GSList *) thunk;
-  scorecard1 = *((USC_scorecard_t **) c1);
-  scorecard2 = *((USC_scorecard_t **) c2);
+  prioritizer_chain = (GSList *) user_data;
+  scorecard1 = *((USC_scorecard_t **) a);
+  scorecard2 = *((USC_scorecard_t **) b);
   for (iter = prioritizer_chain; iter != NULL; iter = g_slist_next(iter))
     {
       prioritizer = (adsm_prioritizer_t *) (iter->data);
@@ -1399,9 +1399,9 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
       #if DEBUG
         g_debug ("sorting the list");
       #endif
-      qsort_r (local_data->scorecards_sorted->pdata, nscorecards, sizeof (USC_scorecard_t *),
-               (void *) (local_data->vaccination_prioritizers),
-               prioritizer_chain_compare);
+      g_ptr_array_sort_with_data (local_data->scorecards_sorted,
+                                  prioritizer_chain_compare,
+                                  (gpointer) (local_data->vaccination_prioritizers));
       #if DEBUG
         g_debug ("done sorting the list");
       #endif
