@@ -30,10 +30,10 @@ export class PopulationPanelStatus extends Component {
                     <div className="population-super-column text-center">
                         <a href="/setup/ProductionType/">Population Production Types</a>
                     </div>
-                    <div className="productiontypes-header progression-icon" ></div>
-                    <div className="productiontypes-header spread-icon" ></div>
-                    <div className="productiontypes-header control-icon" ></div>
-                    <div className="productiontypes-header zone-icon" ></div>
+                    <div className="productiontypes-header progression-icon" title="Disease Progression" ></div>
+                    <div className="productiontypes-header spread-icon" title="Disease Spread" ></div>
+                    <div className="productiontypes-header control-icon" title="Controls" ></div>
+                    <div className="productiontypes-header zone-icon" title="Zones" ></div>
                 </h2>
 
                 <ul id="ProductionTypes">
