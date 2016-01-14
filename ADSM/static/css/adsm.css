@@ -165,6 +165,7 @@ input[type="checkbox"] {
 }
 .checkbox {
     margin-bottom: 18px;
+    margin-left: 20px;
 }
 /*-------------------------------------------------------------*/
 /*-----readonly form styling-----*/
