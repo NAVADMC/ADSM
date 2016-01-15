@@ -4,7 +4,9 @@
 import React, { Component, PropTypes } from 'react';
 import {dispatch} from '../GlobalStore'
 import {select_value_changed} from '../actions/actions'
-import {SelectBox} from './SelectBox' //TODO use This instead, remove collapsible element and title bar element
+//import {SelectBox} from './SelectBox' //TODO use This instead, remove collapsible element and title bar element
+import SelectBox from 'react-select-box'
+
 
 export default class SpreadAssigner extends Component {
 
@@ -33,7 +35,7 @@ export default class SpreadAssigner extends Component {
     }
 
     render(){
-        var { population, input_state } = this.props
+        var { population, spread_type, pk, input_state } = this.props
         var options = population.map(function(option, index){
             return <option value={option.pk} key={'s'+index}>{option.name}</option>;
         })
@@ -45,7 +47,11 @@ export default class SpreadAssigner extends Component {
                 <label htmlFor="source" className="control-label requiredField">
 				    Source Production Type<span className="asteriskField">*</span>
                 </label>
-                <select name="source" required value={input_state.source} onChange={this.onChangeSource.bind(this)}>
+                <select name="source"
+                        required
+                        value={input_state.source}
+                        onChange={this.onChangeSource.bind(this)}
+                        key="source">
                     <option value="">------</option>
                     {options}
                 </select>
@@ -53,12 +59,17 @@ export default class SpreadAssigner extends Component {
                 <label htmlFor="destinations" className="control-label requiredField">
 				    Destinations<span className="asteriskField">*</span>
                 </label>
-                <select name="destinations" multiple="multiple" required
-                        value={input_state.destinations}
-                        onChange={this.onChangeDestinations.bind(this)}
-                        style={ {height: 19 * options.length + 10 + 'px'} }>
+                <SelectBox name="destinations" multiple="multiple" required
+                           spread_type={spread_type}
+                           pk={pk}
+                           multiple={true}
+                           value={input_state.destinations}
+                           population={population}
+                           onChange={this.onChangeDestinations.bind(this)}
+                           key="destinations">
                     {destination_options}
-                </select>
+                </SelectBox>
+
             </div>
         )
     }

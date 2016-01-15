@@ -32,6 +32,7 @@
     "react-dynamic-forms": "^0.13.3",
     "react-markdown": "^1.1.1",
     "react-redux": "^4.0.0",
+    "react-select-box": "^3.0.1",
     "redux": "^3.0.4",
     "redux-devtools": "^2.1.5",
     "redux-devtools-diff-monitor": "^3.0.0",

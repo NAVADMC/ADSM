@@ -223,6 +223,10 @@ export var SelectBox = React.createClass({
     },
 
     options: function () {
+        /*
+        var destination_options = population.map(function(option, index){
+            return <option value={option.pk} key={'d'+index}>{option.name}</option>;
+        })*/
         var options = []
         React.Children.forEach(this.props.children, function (option) {
             options.push({
