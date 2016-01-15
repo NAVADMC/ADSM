@@ -48,7 +48,11 @@ export function spread_inputs(spread_inputs=STARTING_INPUTS, action){
         case ActionTypes.RECEIVE_SPREAD_INPUTS: {
             return action.response  //clobbers data that disagrees with server
         }
-
+        case ActionTypes.SET_SOURCE_ON_NEW_SPREAD: {
+            var modified_list = Object.assign({}, spread_inputs)
+            modified_list[action.spread_type][action.spread_pk][action.input_index] = action.new_input
+            return modified_list
+        }
         default:
             return spread_inputs
     }

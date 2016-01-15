@@ -29,6 +29,7 @@ export class SpreadWidget extends Component {
                                         input_state={input_state}
                                         spread_type={spread_type}
                                         pk={pk}
+                                        index={index}
                                         key={index} />);
             });
         }

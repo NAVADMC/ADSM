@@ -11,16 +11,17 @@ import SelectBox from 'react-select-box'
 export default class SpreadAssigner extends Component {
 
     onChangeSource(event) {
-        var {spread_type, pk, input_state} = this.props
+        var {spread_type, pk, input_state, index} = this.props
         var new_value = event.target.value;
         new_value = Object.assign({}, input_state, {source: new_value})  //wrap in the old values
-        dispatch(select_value_changed(spread_type, pk, 'source', new_value, input_state))
+        dispatch(select_value_changed(spread_type, pk, index, 'source', new_value, input_state))
     }
+
     onChangeDestinations(new_destinations) {
-        var {spread_type, pk, input_state} = this.props
+        var {spread_type, pk, input_state, index} = this.props
         //TODO: check if number is already in the list and remove it if it is
         var new_value = Object.assign({}, input_state, {destinations: new_destinations})  //wrap in the old values
-        dispatch(select_value_changed(spread_type, pk, 'destinations', new_value, input_state))
+        dispatch(select_value_changed(spread_type, pk, index, 'destinations', new_value, input_state))
     }
 
     render(){
