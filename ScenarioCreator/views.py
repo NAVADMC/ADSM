@@ -29,6 +29,9 @@ abstract_models = {
          ('AirborneSpread', AirborneSpread)],
 }
 
+spread_types = {'DirectSpread': (DirectSpread, 'direct_contact_spread'),
+                'IndirectSpread': (IndirectSpread, 'indirect_contact_spread'),
+                'AirborneSpread': (AirborneSpread, 'airborne_spread')}
 
 def spaces_for_camel_case(text):
     return re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
@@ -62,6 +65,7 @@ def population_panel_status_json(request):
 
     for pt in ProductionType.objects.all():
         response.append({'name': pt.name,
+                         'pk': pt.id,
                          'unit_count': Unit.objects.filter(production_type=pt).count(),
                          'spread': DiseaseSpreadAssignment.objects.filter(destination_production_type=pt).filter(
                              Q(direct_contact_spread__isnull=False,) |
@@ -75,6 +79,80 @@ def population_panel_status_json(request):
     return JsonResponse(response, safe=False)
 
 
+def spread_options_json(request):  # list of DiseaseSpreads by Type
+    options = {
+        'DirectSpread': {d.id: {'name': d.name, 'pk': d.id} for d in DirectSpread.objects.all()},
+        'IndirectSpread': {d.id: {'name': d.name, 'pk': d.id} for d in IndirectSpread.objects.all()},
+        'AirborneSpread': {d.id: {'name': d.name, 'pk': d.id} for d in AirborneSpread.objects.all()}
+    }
+    return JsonResponse(options)
+
+
+def spread_inputs_json(request):
+    options = {}
+    for class_name, meta in spread_types.items():
+        model, field_name = meta
+        options[class_name] = {}
+        for spread in model.objects.all():
+            inputs = []
+            for source in ProductionType.objects.all():
+                query = DiseaseSpreadAssignment.objects.filter(**{'source_production_type': source, field_name: spread})
+                if query.exists():
+                    one_source = {'source': source.id,
+                                  'destinations': [pair.destination_production_type.id for pair in query]}
+                    inputs.append(one_source)
+
+            options[class_name][spread.id] = inputs
+    return JsonResponse(options)
+
+
+def modify_spread_assignments(request):
+    destinations = [int(x) for x in request.POST.getlist('destinations[]')]
+    if 'destinations[]' in request.POST.keys() and request.POST['source']:  # when a user selects ----- there's no PK at all
+        data = request.POST.dict()
+        if 'POST' == data['action']:
+            for destination_pk in destinations:
+                assignment = DiseaseSpreadAssignment.objects.filter(**{'source_production_type_id': int(data['source']),
+                                                                       'destination_production_type_id': int(destination_pk)})
+                parameter_class, field = spread_types[data['spread_type']]
+                assignment.update(**{field: parameter_class.objects.get(id=int(data['pk']))})  # saves immediately
+                # Debug output:
+                source = ProductionType.objects.get(id= int(data['source'])).name
+                destination = ProductionType.objects.get(id=int(destination_pk)).name
+                print("ADD", field, "SOURCE:", source, "DESTINATION:", destination)
+
+        if 'DELETE' == data['action']:  # Django doesn't allow you to parametrize DELETE http_method
+            for destination_pk in destinations:
+                assignment = DiseaseSpreadAssignment.objects.filter(**{'source_production_type_id': int(data['source']),
+                                                                       'destination_production_type_id': int(destination_pk)})
+                parameter_class, field = spread_types[data['spread_type']]
+                assignment.update(**{field: None})  # saves immediately
+                # Debug output:
+                source = ProductionType.objects.get(id= int(data['source'])).name
+                destination = ProductionType.objects.get(id=int(destination_pk)).name
+                print("DEL", field, "SOURCE:", source, "DESTINATION:", destination)
+
+    return spread_inputs_json(request)
+
+
+def disease_spread_assignments_json(request):
+    source_rows = {}
+    for source in ProductionType.objects.all().order_by('name'):
+        one_row = {'name': source.name, 'pk': source.id, 'destinations': {}}
+        for destination in ProductionType.objects.all().order_by('name'):
+            assignment = {'name': destination.name, 'pk': destination.id, 'DirectSpread': None, 'IndirectSpread': None,
+                          'AirborneSpread': None}
+            query = DiseaseSpreadAssignment.objects.filter(source_production_type=source,
+                                                           destination_production_type=destination)
+            if query.exists():
+                assignment['DirectSpread'] = query.first().direct_contact_spread_id
+                assignment['IndirectSpread'] = query.first().indirect_contact_spread_id
+                assignment['AirborneSpread'] = query.first().airborne_spread_id
+            one_row['destinations'][destination.name] = assignment
+        source_rows[source.name] = one_row
+    return JsonResponse(source_rows, safe=False)
+
+
 def disable_all_controls_json(request):
     if 'POST' in request.method:
         new_value = request.POST['use_controls']
@@ -82,7 +160,7 @@ def disable_all_controls_json(request):
         controls = ControlMasterPlan.objects.get()
         controls.disable_all_controls = set_to
         controls.save()
-        return JsonResponse({'status':'success'})
+        return JsonResponse({'status': 'success'})
     else:
         return JsonResponse({'disable_all_controls': ControlMasterPlan.objects.get().disable_all_controls})
     

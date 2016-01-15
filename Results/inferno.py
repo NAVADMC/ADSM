@@ -262,3 +262,4 @@ _inferno_data = [[0.001462, 0.000466, 0.013866],
                  [0.988362, 0.998364, 0.644924]]
 
 inferno = ListedColormap(_inferno_data, name='inferno')
+inferno_r = ListedColormap(list(reversed(_inferno_data)), name='inferno_r')

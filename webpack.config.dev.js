@@ -9,7 +9,7 @@ module.exports = {
     devtool: 'cheap-module-eval-source-map',
 
     entry: {
-        population_panel_status: './ADSM/static/js/population-panel-status'
+        react_entry_point: './ADSM/static/js/react_entry_point',
     },
 
     output: {
@@ -19,6 +19,11 @@ module.exports = {
     },
 
     plugins: [
+        new webpack.DefinePlugin({
+            'process.env': {
+                'NODE_ENV': JSON.stringify('development')
+            }
+        }),
         new BundleTracker({filename: './webpack-stats.json'}),
         new CommonsChunkPlugin("commons.js")
     ],

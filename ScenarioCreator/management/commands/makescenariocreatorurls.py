@@ -56,6 +56,11 @@ class Command(BaseCommand):
              "url('^RelationalFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.relational_graph')",
              "url('^ProbabilityFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph')",
              "url('^RelationalFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph')",
+
+             "url('^SpreadOptions.json/$', 'ScenarioCreator.views.spread_options_json')",
+             "url('^SpreadInputs.json/$', 'ScenarioCreator.views.spread_inputs_json')",
+             "url('^DiseaseSpreadAssignments.json/$', 'ScenarioCreator.views.disease_spread_assignments_json')",
+             "url('^ModifySpreadAssignments/$', 'ScenarioCreator.views.modify_spread_assignments')",
             ])
 
         urls_code = "\"\"\"URLs is entirely procedural based on the contents of models.py. This has the advantage that urls automatically update as the models change or are renamed.\"\"\"\n\n\n" \

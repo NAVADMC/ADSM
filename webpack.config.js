@@ -9,7 +9,7 @@ module.exports = {
     devtool: 'source-map',
 
     entry: {
-        population_panel_status: './ADSM/static/js/population-panel-status'
+        react_entry_point: './ADSM/static/js/react_entry_point',
     },
 
     output: {

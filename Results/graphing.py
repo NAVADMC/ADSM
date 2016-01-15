@@ -18,7 +18,7 @@ from matplotlib.figure import Figure
 from ScenarioCreator.models import Zone, ProductionType, Unit
 from Results.summary import list_of_iterations
 from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType
-from Results.inferno import inferno
+from Results.inferno import inferno_r
 
 
 # def matplotd3(request):
@@ -262,9 +262,9 @@ def TwoD_histogram(fig, gs, time_graph, time_series):
                       bins=[len(days), max(5, min(max(*y), 300))],
                       # 300 should really be the number of pixels in the draw area (I don't know how to fetch that)
                       norm=norm,
-                      cmap=inferno)
+                      cmap=inferno_r)
     color_bar = fig.add_subplot(gs[0], )
-    ColorbarBase(cmap=inferno, ax=color_bar, norm=norm)
+    ColorbarBase(cmap=inferno_r, ax=color_bar, norm=norm)
     return HttpFigure(fig)
 
 
