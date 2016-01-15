@@ -102,6 +102,7 @@ export function select_value_changed(spread_type, pk, input_index, field_name, n
         }
         if(field_name == 'destinations'){
             var deletions = exclude(old_value.destinations, new_value.destinations)
+            var additions = exclude(new_value.destinations, old_value.destinations)
             if(deletions.length > 0){
                 Promise.resolve($.ajax({
                     url: '/setup/ModifySpreadAssignments/',
@@ -111,12 +112,14 @@ export function select_value_changed(spread_type, pk, input_index, field_name, n
                         source: old_value.source,//presumably old and new 'source' values are the same here
                         destinations: deletions}
                 }))
-                //    .then(
-                //    function(json){/* success*/dispatch({type: ActionTypes.RECEIVE_SPREAD_INPUTS, response: json}) }
-                //)
+                    .then(
+                    function(json){/* success*/
+                        if(additions.length == 0){//make sure that the values get updated if there's no additions
+                            dispatch({type: ActionTypes.RECEIVE_SPREAD_INPUTS, response: json})
+                        }}
+                )
             }
-            var additions = exclude(new_value.destinations, old_value.destinations)
-            //if(additions.length > 0){ //We just need to do this all the time to make sure that the values get updated
+            if(additions.length > 0){
                 Promise.resolve($.ajax({
                     url: '/setup/ModifySpreadAssignments/',
                     dataType: 'json',
@@ -127,7 +130,7 @@ export function select_value_changed(spread_type, pk, input_index, field_name, n
                 })).then(
                     function(json){/* success*/dispatch({type: ActionTypes.RECEIVE_SPREAD_INPUTS, response: json}) }
                 )
-            //}
+            }
         }
     }
 
