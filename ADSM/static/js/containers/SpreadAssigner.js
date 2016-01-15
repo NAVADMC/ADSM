@@ -16,22 +16,11 @@ export default class SpreadAssigner extends Component {
         new_value = Object.assign({}, input_state, {source: new_value})  //wrap in the old values
         dispatch(select_value_changed(spread_type, pk, 'source', new_value, input_state))
     }
-    onChangeDestinations(event) {
+    onChangeDestinations(new_destinations) {
         var {spread_type, pk, input_state} = this.props
         //TODO: check if number is already in the list and remove it if it is
-        var new_value = [...(input_state.destinations), event.target.value / 1];
-        if(event.target.value === ""){   //TODO: when does this happen?
-        	new_value = input_state.destinations.slice(1)
-        }
-        new_value = Object.assign({}, input_state, {destinations: new_value})  //wrap in the old values
+        var new_value = Object.assign({}, input_state, {destinations: new_destinations})  //wrap in the old values
         dispatch(select_value_changed(spread_type, pk, 'destinations', new_value, input_state))
-
-        /*var select = React.findDOMNode(this.refs.selectRef);
-         var values = [].filter.call(select.options, function (o) {
-            return o.selected;
-         }).map(function (o) {
-            return o.value;
-         });*/
     }
 
     render(){
