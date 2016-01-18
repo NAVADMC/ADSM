@@ -401,11 +401,21 @@ def relational_function(request, primary_key=None, doCopy=False):
         if created_instance:
             if context['formset'].is_valid():  # We need to run this to ensure that the data in the formset is populated
                 pass
-            for point in context['formset'].forms:
-                if point.changed_data:
-                    point.instance.pk = None
-                    point.instance.relational_function = created_instance
-                    point.instance.save()
+            if doCopy:
+                # If the user clicked the +f() Variant button, then all of the rows that have data filled in will count
+                # as changed. The points started as exact copies of the points from another relational function, so we
+                # need to (1) erase their primary keys so they count as new objects, and (2) make this new relational
+                # function their parent.
+                for point in context['formset'].forms:
+                    if point.changed_data:
+                        point.instance.pk = None
+                        point.instance.relational_function = created_instance
+                        point.instance.save()
+            else:
+                # If the user clicked the Overwrite button, all we want is a save() on any points that have changed.
+                for point in context['formset'].forms:
+                    if point.changed_data:
+                        point.instance.save()
     else:
         context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
 
