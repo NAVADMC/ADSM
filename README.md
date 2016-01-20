@@ -25,7 +25,7 @@ ADSM has several external dependencies. Getting your environment setup with thes
 
 Operating system:  
 
-  - Windows, Debian Linux, or Mac OS X (no Viewer application or packaged release). 
+  - Windows (automated compile), Debian Linux (manual intervention compile), or Mac OS X (no Viewer application or packaged release). 
   
 Python 3.4.2 (x64): 
  
@@ -64,35 +64,18 @@ Using the pip in your new Virtual Environment (confirm Virtual Environment Activ
 **If you are on Windows:** 
 
   - install the extra packages: `pip install -r Requirements-Windows.txt`
-  - install numpy: `pip install setup\numpy-1.9.3+mkl-cp34-none-win_amd64.whl`
-  - install matplotlib: `pip install setup\matplotlib-1.4.3-cp34-none-win_amd64.whl`
-  - install pandas: `pip install setup\pandas-0.15.2-cp34-none-win_amd64.whl`
-  - install scipy: `pip install setup\scipy-0.15.1-cp34-none-win_amd64.whl`
-  - install pyproj: `pip install setup\pyproj-1.9.4-cp34-none-win_amd64.whl`
-  - install psutil: `pip install setup\psutil-2.2.1-cp34-none-win_amd64.whl`
+  - Download all the Wheel (*.whl) files located here: https://newline.us/ADSM/setup/
+  - install numpy: `pip install numpy-1.9.3+mkl-cp34-none-win_amd64.whl`
+  - install matplotlib: `pip install matplotlib-1.4.3-cp34-none-win_amd64.whl`
+  - install pandas: `pip install pandas-0.15.2-cp34-none-win_amd64.whl`
+  - install scipy: `pip install scipy-0.15.1-cp34-none-win_amd64.whl`
+  - install pyproj: `pip install pyproj-1.9.4-cp34-none-win_amd64.whl`
+  - install psutil: `pip install psutil-2.2.1-cp34-none-win_amd64.whl`
                 
 ###React Setup
 Install Node (please x64 version)
 cd BASE_DIR (Not an actual command. Go into the root of the project)
 npm install
-
-###Setup Pycharm IDE
-The main developers of ADSM developed in Pycharm 4, so here's the IDE specific instructions to get your dev server running from a fresh clone.
-* Launch Pycharm > Checkout from VCS > GitHub > Paste "git@github.com:NAVADMC/ADSM.git" into source (SSH method).
-* Open up File > Settings.  Search "Django".  Languages and Frameworks > Django > 
-    * root = C:\Users\Josiah\Documents\ADSM\
-    * settings = ADSM/settings.py
-    * Apply
-* Search "Project".  Project: ADSM > Interpreter = path to your virtual environment folder.  Apply
-* Project: ADSM > Project Structure. Tag every 'templates' folder as Templates.
-    * ADSMSettings/templtates
-    * Results/templtates
-    * ScenarioCreator/templtates 
-* Apply. Exit Settings.  Edit Run Configurations
-    * '+' new run configuration > Django server
-    * Name it ADSM
-    * both checkboxes checked for including in PYTHONPATH
-    * no other settings required
 
 ###Compile chain (optional)
 If you plan on compiling a distributable version of the project, then use the following instructions.
@@ -137,9 +120,10 @@ Linux:
 Windows:  
 
   - Install Mercurial so it is properly on your path
+  - Download PyWin32 from: http://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/pywin32-219.win-amd64-py3.4.exe/download
   - Using the easy_install in your new Virtual Environment (/path/to/adsm_venv/Scripts/easy_install), install PyWin32:
         
-        `easy_install setup\pywin32-219.win-amd64-py3.4.exe`
+        `easy_install pywin32-219.win-amd64-py3.4.exe`
         
   - Using /path/to/adsm_venv/Scripts/pip install cx_freeze:
   
@@ -163,7 +147,7 @@ Development and Production Branches
 -----------
 List of Relevant Branches: master, Stable
 
-Development should be done in feature branches and merged into master. Master is the general development branch.
+Development should be done in feature branches and merged into master. Master is the general development branch, and where Beta releases come from.
 
 Stable is the branch we merge master into when we are ready to do a production release.  
 **Stable branch is what will be tagged in the GitHub Releases.**    
@@ -171,8 +155,6 @@ Master is tagged in GitHub as pre-release.
 
 Updating the adsm_simulation Executable
 ----------
-Please never merge master into a staging branch just to compile the adsm_simulation executable.
-If you need a one off compile of the adsm_simulation.exe, setup your own temporary branch or other compile directory.
 
     cd ADSM
     git pull
@@ -182,6 +164,8 @@ If you need a one off compile of the adsm_simulation.exe, setup your own tempora
     make
 
 `make` will will fail on a `dia: command not found` error when it gets to the ADSM/CEngine/doc/diagrams directory.  That’s OK: at this point, the executable is built, and you are done.
+
+Copy the executable into the `bin` folder and commit it after testing.
 
 Updating the Distributable
 ----------
