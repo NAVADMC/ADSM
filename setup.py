@@ -259,6 +259,7 @@ class BuildADSM(build_exe):
 
         build_exe.run(self)
 
+        # Cleanup the build dir by moving binary dependencies into bin/env
         files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, self.build_exe)) if os.path.isfile(os.path.join(settings.BASE_DIR, self.build_exe, file)))
         os.makedirs(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
         for file in files:
@@ -266,6 +267,8 @@ class BuildADSM(build_exe):
             if not [file for part in ['library.zip', 'README.md', 'python34.dll', 'MSVCR100.dll', 'npu', '.url', 'webpack-stats.json'] if part.lower().split(' ')[0] in file.lower()] and not is_exe(os.path.join(settings.BASE_DIR, self.build_exe, file)):  #NOTE: The split here could cause issues and is speculative
                 shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, file),
                             os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file))
+
+        # Find the Viewer application and make sure it is packaged
         viewer = None
         possible_viewer_files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, 'Viewer', settings.OS_DIR)) if os.path.isfile(os.path.join(settings.BASE_DIR, 'Viewer', settings.OS_DIR, file)))
         for possible_viewer in possible_viewer_files:
@@ -274,6 +277,18 @@ class BuildADSM(build_exe):
                 break
         if viewer:
             shutil.copy(os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', settings.OS_DIR, viewer), os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', settings.OS_DIR, viewer.replace('Viewer', 'ADSM_Viewer')))
+
+        # Look for any DLLs that the included packages may have and copy them into bin/env as well
+        for package in self.packages:
+            try:
+                package = import_module(package)
+                location = os.path.dirname(package.__file__)
+                for root, dirnames, filenames in os.walk(location):
+                    for filename in filenames:
+                        if filename.lower().endswith('.dll') or filename.lower().endswith('.so'):
+                            shutil.copy(os.path.join(root, filename), os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', filename))
+            except:
+                continue
 
 
 base = None
