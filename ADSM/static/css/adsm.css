@@ -2130,11 +2130,6 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     cursor: pointer;
 }
 
-.relevant .selected, .highlight { /*column is relevant and user has selected the row for many-to many-widget.js*/
-    font-weight: 600;
-    background-color: #d7f5ff;
-}
-
 /*Disabled control fields: include text labels*/
 [disabled] {
     opacity: .5;
@@ -2308,11 +2303,7 @@ select[multiple] {}
 .intro_text, .intro_text p {
     color: #606060;
 }
-.m2mtable select, #all-interactions select {
-    max-width: 260px;
-}
-#all-interactions {
-    width: calc(100% - 0px);}
+
 /*-------------------------------------------------------------*/
 /*-----left aligned scrollbars-----*/
 /*-------------------------------------------------------------*/

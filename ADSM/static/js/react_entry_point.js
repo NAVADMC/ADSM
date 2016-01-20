@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import {store} from './GlobalStore'
 import ConnectedPopulation from './containers/PopulationPanelStatus'
 import ConnectedSpreadWidget from './containers/SpreadWidget'
-
+import ConnectedSpreadGrid from './containers/SpreadGrid'
 
 ReactDOM.render(
     <Provider store={store}>
@@ -24,7 +24,7 @@ $('#spread-widget').livequery(function() { //will add react elements whenever a 
 
 $('#spread-grid').livequery(function() { //will add react elements whenever a DOM node is added
     ReactDOM.render(
-        <ConnectedSpreadWidget store={store}/>,
-        document.getElementById('spread-widget')
+        <ConnectedSpreadGrid store={store}/>,
+        document.getElementById('spread-grid')
     );
 })

@@ -45,35 +45,14 @@ export class SpreadWidget extends Component {
     }
 }
 
-
-/*disease_spread is the main data structure that drives everything.
-* It is a 2D array of cells that each contain {IndirectSpread:pk, DirectSpread: pk, AirborneSpread:pk}
-* in them.  The Array is indexed by the Production Type name, rather than a numerical index, so we use Objects
-* (python dictionaries) instead of Array[].  Rows are source production types and Columns are destination Production
-* Types.  */
 var list_of_source_destination_pks =
     PropTypes.arrayOf(
         PropTypes.shape(
             {source: PropTypes.any/*number or ''*/, destination: PropTypes.array})
     );
 
-
 SpreadWidget.propTypes = {
-    disease_spread: PropTypes.objectOf(
-        //sheep: {pk: 3, desinations: {...}
-        PropTypes.shape({
-            pk: PropTypes.number.isRequired,
-            destinations: PropTypes.objectOf(
-                //cow: {"IndirectSpread": 2, "DirectSpread": 5, AirborneSpread: null }
-                PropTypes.shape({
-                    IndirectSpread: PropTypes.number,  //not required, may be null
-                    DirectSpread: PropTypes.number,
-                    AirborneSpread: PropTypes.number
-                })
-            ).isRequired
-        })
-    ).isRequired,
-    spread_inputs: PropTypes.shape({
+        spread_inputs: PropTypes.shape({
         DirectSpread: PropTypes.objectOf(list_of_source_destination_pks).isRequired,
         IndirectSpread: PropTypes.objectOf(list_of_source_destination_pks).isRequired,
         AirborneSpread: PropTypes.objectOf(list_of_source_destination_pks).isRequired
@@ -83,7 +62,6 @@ SpreadWidget.propTypes = {
 
 function select(state) {
     return {
-        disease_spread: state.disease_spread,
         spread_inputs: state.spread_inputs,
         population: state.population
     }
