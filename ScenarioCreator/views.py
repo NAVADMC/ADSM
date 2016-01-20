@@ -177,22 +177,7 @@ def initialize_spread_assignments():
 def assign_disease_spread(request):
     initialize_spread_assignments()
 
-    SpreadSet = modelformset_factory(DiseaseSpreadAssignment, extra=0, form=DiseaseSpreadAssignmentForm)
-    include_spread_form = DiseaseIncludeSpreadForm(request.POST or None, instance=Disease.objects.get())
-    try:
-        initialized_formset = SpreadSet(request.POST, request.FILES, queryset=DiseaseSpreadAssignment.objects.all())
-        if initialized_formset.is_valid():
-            instances = initialized_formset.save()
-            if include_spread_form.is_valid():
-                include_spread_form.save()
-            return redirect(request.path)
-
-    except ValidationError:
-        initialized_formset = SpreadSet(queryset=DiseaseSpreadAssignment.objects.all())
-    context = {'formset': initialized_formset,
-               'include_spread_form': include_spread_form,
-               'title': 'How does Disease spread from one Production Type to another?',
-               'base_page': 'ScenarioCreator/AssignSpread.html'}
+    context = {'base_page': 'ScenarioCreator/AssignSpread.html'}
     return render(request, 'ScenarioCreator/MainPanel.html', context)
 
 

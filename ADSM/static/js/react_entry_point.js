@@ -21,3 +21,10 @@ $('#spread-widget').livequery(function() { //will add react elements whenever a 
         document.getElementById('spread-widget')
     );
 })
+
+$('#spread-grid').livequery(function() { //will add react elements whenever a DOM node is added
+    ReactDOM.render(
+        <ConnectedSpreadWidget store={store}/>,
+        document.getElementById('spread-widget')
+    );
+})
