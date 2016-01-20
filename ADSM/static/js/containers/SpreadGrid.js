@@ -17,9 +17,36 @@ export class SpreadGrid extends Component {
     }
 
     render() {
+        var {disease_spread} = this.props
         return (
             <div className="spread-grid-contents">
                 <h1>Visualization of Disease Spread</h1>
+                <table className="spread-grid-table">
+                    <thead><tr><th></th>
+                        {$.map(disease_spread, function(row, source){
+                            return <th>{source}</th>
+                        })}
+                    </tr></thead>
+                    <tbody>
+                        {$.map(disease_spread, function(row, source){
+                            return <tr>
+                                <th>{source}</th>
+                                {$.map(row.destinations, function(cell, destination){
+                                    return <td>
+                                        <div className="spread-cell">
+                                            <span className={"DirectSpread" + (cell.DirectSpread? " assigned": "")}
+                                                  title={cell.DirectSpread}> </span>
+                                            <span className={"IndirectSpread" + (cell.IndirectSpread? " assigned": "")}
+                                                  title={cell.IndirectSpread}> </span>
+                                            <span className={"AirborneSpread" + (cell.AirborneSpread? " assigned": "")}
+                                                  title={cell.AirborneSpread}> </span>
+                                        </div>
+                                    </td>
+                                })}
+                            </tr>
+                        })}
+                    </tbody>
+                </table>
             </div>
 
         );

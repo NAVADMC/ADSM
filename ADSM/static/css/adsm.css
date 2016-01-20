@@ -2303,6 +2303,38 @@ select[multiple] {}
 .intro_text, .intro_text p {
     color: #606060;
 }
+.spread-grid-table span {
+    width: 75px;
+    height: 16px;
+    /* margin: 5px 0; */
+    /* background-color: #BDBDBD; */
+}
+
+span.IndirectSpread {
+    margin: 5px 0;
+}
+
+.DirectSpread.assigned {
+    background-color: rgb(161, 134, 87);
+}
+
+.IndirectSpread.assigned {
+    background-color: rgb(146, 203, 170);
+}
+
+.AirborneSpread.assigned {
+    background-color: rgb(52, 192, 209);
+}
+
+.spread-cell {
+    border: solid 1px #B6B6B6;
+    margin: 0px;
+}
+
+.spread-grid-table td {
+    padding: 3px;
+}
+
 
 /*-------------------------------------------------------------*/
 /*-----left aligned scrollbars-----*/
