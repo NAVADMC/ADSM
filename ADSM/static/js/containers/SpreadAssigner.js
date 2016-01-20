@@ -49,7 +49,7 @@ export default class SpreadAssigner extends Component {
                 <label htmlFor="destinations" className="control-label requiredField">
 				    Destinations<span className="asteriskField">*</span>
                 </label>
-                <SelectBox name="destinations" multiple="multiple" required
+                <SelectBox name="destinations" required
                            spread_type={spread_type}
                            pk={pk}
                            multiple={true}
