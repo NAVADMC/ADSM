@@ -36,20 +36,23 @@ export class SpreadGrid extends Component {
 
     render() {
         var {disease_spread, spread_options} = this.props
+        var order = Object.keys(disease_spread).sort()
         return (
             <div className="spread-grid-contents">
                 <h1>Visualization of Disease Spread</h1>
                 <table className="spread-grid-table">
                     <thead><tr><th></th>
-                        {$.map(disease_spread, function(row, source){
-                            return <th>{source}</th>
+                        {$.map(order, function(source, index){
+                            return <th className="spread-destinations">{source}</th>
                         })}
                     </tr></thead>
                     <tbody>
-                        {$.map(disease_spread, function(row, source){
+                        {$.map(order, function(source, index){
+                            var row = disease_spread[source]
                             return <tr>
                                 <th>{source}</th>
-                                {$.map(row.destinations, function(cell, destination){
+                                {$.map(order, function(destination){
+                                    var cell = row.destinations[destination]
                                     return <td>
                                         <div className="spread-cell">
                                             <SpreadLight type="DirectSpread" cell={cell} spread_options={spread_options}/>
