@@ -40,6 +40,14 @@ export function refresh_disease_spread(){
     }
 }
 
+export function refresh_spread_options(){
+    return function(dispatch){
+        refresh_from_server(dispatch, '/setup/SpreadOptions.json/', ActionTypes.RECEIVE_SPREAD_OPTIONS);
+    }
+}
+
+
+
 
 function exclude(container, exclusion){
     return container.filter(function(x) {

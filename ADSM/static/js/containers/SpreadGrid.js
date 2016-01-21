@@ -5,19 +5,37 @@
 import $ from 'jquery';
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import {refresh_disease_spread} from '../actions/actions'
+import {refresh_disease_spread, refresh_spread_options} from '../actions/actions'
 import {store} from '../GlobalStore'
 
+
+class SpreadLight extends Component {
+    render(){
+        var {cell, spread_options, type} = this.props;
+        var title = cell[type]
+        if(typeof spread_options !== 'undefined' && cell[type]){
+            console.log("spread_options[type]", spread_options[type])
+            console.log("cell[type]", cell[type])
+            console.log("''+cell[type]", ""+cell[type])
+            console.log("spread_options[type][''+cell[type]]", spread_options[type][""+cell[type]])
+            title = spread_options[type][''+cell[type]].name
+        }
+        return <span className={type + (cell[type]? " assigned": "")}
+                     title={title}> </span>
+
+    }
+}
 
 
 export class SpreadGrid extends Component {
 
     componentDidMount(){
         this.props.dispatch(refresh_disease_spread())
+        this.props.dispatch(refresh_spread_options())
     }
 
     render() {
-        var {disease_spread} = this.props
+        var {disease_spread, spread_options} = this.props
         return (
             <div className="spread-grid-contents">
                 <h1>Visualization of Disease Spread</h1>
@@ -34,12 +52,9 @@ export class SpreadGrid extends Component {
                                 {$.map(row.destinations, function(cell, destination){
                                     return <td>
                                         <div className="spread-cell">
-                                            <span className={"DirectSpread" + (cell.DirectSpread? " assigned": "")}
-                                                  title={cell.DirectSpread}> </span>
-                                            <span className={"IndirectSpread" + (cell.IndirectSpread? " assigned": "")}
-                                                  title={cell.IndirectSpread}> </span>
-                                            <span className={"AirborneSpread" + (cell.AirborneSpread? " assigned": "")}
-                                                  title={cell.AirborneSpread}> </span>
+                                            <SpreadLight type="DirectSpread" cell={cell} spread_options={spread_options}/>
+                                            <SpreadLight type="IndirectSpread" cell={cell} spread_options={spread_options}/>
+                                            <SpreadLight type="AirborneSpread" cell={cell} spread_options={spread_options}/>
                                         </div>
                                     </td>
                                 })}
@@ -80,7 +95,7 @@ SpreadGrid.propTypes = {
 function select(state) {
     return {
         disease_spread: state.disease_spread,
-        population: state.population
+        spread_options: state.spread_options
     }
 }
 

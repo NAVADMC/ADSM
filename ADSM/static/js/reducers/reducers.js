@@ -25,6 +25,19 @@ export function disease_spread(disease_spread={}, action){
     }
 }
 
+
+
+export function spread_options(disease_spread={}, action){
+    switch(action.type ){
+        case ActionTypes.RECEIVE_SPREAD_OPTIONS: {
+            return action.response  // clobbers the entire data structure
+        }
+
+        default:
+            return disease_spread
+    }
+}
+
 var STARTING_INPUTS = {
     DirectSpread: {},
     IndirectSpread: {},
@@ -62,5 +75,6 @@ export function spread_inputs(spread_inputs=STARTING_INPUTS, action){
 export default combineReducers({
     population,
     disease_spread,
-    spread_inputs
+    spread_inputs,
+    spread_options
 })
