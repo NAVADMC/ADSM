@@ -20,8 +20,11 @@ class SpreadLight extends Component {
             console.log("spread_options[type][''+cell[type]]", spread_options[type][""+cell[type]])
             title = spread_options[type][''+cell[type]].name
         }
-        return <span className={type + (cell[type]? " assigned": "")}
+        var pk = cell[type] ? cell[type] : 'new'  //#704 Each cell links to the Spread Model that it represents.
+        return <a href={'/setup/DiseaseSpread/?next=/setup/' + type + '/' + pk + '/'}>
+            <span className={type + (cell[type]? " assigned": "")}
                      title={title}> </span>
+        </a>
 
     }
 }
