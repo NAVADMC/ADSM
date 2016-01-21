@@ -7,6 +7,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import {refresh_disease_spread, refresh_spread_options} from '../actions/actions'
 import {store} from '../GlobalStore'
+import {RadioGroup} from './RadioButtons'
 
 
 class SpreadLight extends Component {
@@ -25,10 +26,51 @@ class SpreadLight extends Component {
             <span className={type + (cell[type]? " assigned": "")}
                      title={title}> </span>
         </a>
-
     }
 }
 
+class SpreadDisplaySelector extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {selectedType: 'All'};
+    }
+    selectType(type){
+        this.setState({selectedType: type});
+    }
+
+    render(){
+         return <div className="spread-display-selector">
+                    <div style={ {color: 'darkgrey', padding: '5px'} }>Show |</div>
+                    <RadioGroup
+                        name="display-type"
+                        selectedValue={this.state.selectedType}
+                        onChange={this.selectType.bind(this)}>
+                        {Radio => (
+                            <div>
+                                <div style={ {color: 'rgb(161, 134, 87)'} }>
+                                    <Radio value="DirectSpread" />DIRECT
+                                </div>
+                                <div style={ {color: 'rgb(146, 203, 170)'} }>
+                                    <Radio value="IndirectSpread" />INDIRECT
+                                </div>
+                                <div style={ {color: 'rgb(52, 192, 209)'} }>
+                                    <Radio value="AirborneSpread" />AIRBORNE
+                                </div>
+                                <div style={ {color: 'black'}             }>
+                                    <Radio value="All" />ALL
+                                </div>
+                            </div>
+                        )}
+                    </RadioGroup>
+                </div>
+    }
+}
+/**
+ <div style={ {color: 'rgb(161, 134, 87)'} }><div className="green-dot"></div>DIRECT</div>
+ <div style={ {color: 'rgb(146, 203, 170)'} }><div className="green-dot"></div>INDIRECT</div>
+ <div style={ {color: 'rgb(52, 192, 209)'} }><div className="green-dot"></div>AIRBORNE</div>
+ <div style={ {color: 'black'}             }><div className="green-dot"></div>ALL</div>
+ */
 
 export class SpreadGrid extends Component {
 
@@ -42,7 +84,6 @@ export class SpreadGrid extends Component {
         var order = Object.keys(disease_spread).sort()
         return (
             <div className="spread-grid-contents">
-                <h1>Visualization of Disease Spread</h1>
                 <table className="spread-grid-table">
                     <thead><tr><th></th>
                         {$.map(order, function(source, index){
@@ -68,6 +109,7 @@ export class SpreadGrid extends Component {
                         })}
                     </tbody>
                 </table>
+                <SpreadDisplaySelector />
             </div>
 
         );

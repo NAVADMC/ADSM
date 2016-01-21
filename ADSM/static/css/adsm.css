@@ -2352,6 +2352,19 @@ span.IndirectSpread {
 .spread-source {
     text-align: right;
 }
+
+.spread-display-selector * {
+    display: inline-block;
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+.spread-display-selector input {
+    width: 26px;
+    height: 17px;
+    margin-top: 16px;
+    background: white;
+}
 /*-------------------------------------------------------------*/
 /*-----left aligned scrollbars-----*/
 /*-------------------------------------------------------------*/
