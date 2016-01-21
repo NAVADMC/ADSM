@@ -140,6 +140,10 @@ Linux:
 
   - http://chromedriver.storage.googleapis.com/2.12/chromedriver_linux64.zip
 
+Mac:
+
+  - http://chromedriver.storage.googleapis.com/2.12/chromedriver_mac32.zip
+
 Unzip the file and place it in the Scripts or bin folder of your new Virtual Environment (/path/to/adsm_venv/Scripts/ || /path/to/adsm_vent/bin/)
 
 
