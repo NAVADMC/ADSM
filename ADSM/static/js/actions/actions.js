@@ -4,58 +4,56 @@ import { store } from '../GlobalStore'
 import {ActionTypes} from './ActionTypes'
 
 
+/** Boiler plate for initializing from the server:
+ * get_population_status, refresh_spread_inputs_from_server, refresh_spread_inputs_from_server, refresh_disease_spread
+ */
+function refresh_from_server(dispatch, url, actionType){
+    Promise.resolve($.ajax({
+        url: url,
+        dataType: 'json',
+        type: 'GET'
+    })).then(
+        function(json) {  // success
+            dispatch({type: actionType, response: json})
+        },
+        function(error) {  // failure
+                console.error(url, error);
+        }
+    )
+}
+
 export function get_population_status() {
     return function(dispatch){
-        dispatch({type: ActionTypes.GET_POPULATION_STATUS});
-
-        var url = '/setup/PopulationPanelStatus.json/';
-
-        var jsPromise = Promise.resolve($.ajax({
-            url: url,
-            dataType: 'json',
-            type: 'GET'
-        }));
-
-        jsPromise.then(
-            function(json) {  // success
-                dispatch({type: ActionTypes.RECEIVE_POPULATION_STATUS, population: json})
-            },
-            function(error) {  // failure
-                    console.error(url, error);
-            }
-        )
+        refresh_from_server(dispatch, '/setup/PopulationPanelStatus.json/', ActionTypes.RECEIVE_POPULATION_STATUS);
     }
 }
 
-/** Could possibly be combined with get_population_status
- */
 export function refresh_spread_inputs_from_server(){
     return function(dispatch){
-        var url = '/setup/SpreadInputs.json/';
-
-        var jsPromise = Promise.resolve($.ajax({
-            url: url,
-            dataType: 'json',
-            type: 'GET'
-        }));
-
-        jsPromise.then(
-            function(json) {  // success
-                dispatch({type: ActionTypes.RECEIVE_SPREAD_INPUTS, response: json})
-            },
-            function(error) {  // failure
-                    console.error(url, error);
-            }
-        )
+        refresh_from_server(dispatch, '/setup/SpreadInputs.json/', ActionTypes.RECEIVE_SPREAD_INPUTS);
     }
 }
+
+export function refresh_disease_spread(){
+    return function(dispatch){
+        refresh_from_server(dispatch, '/setup/DiseaseSpreadAssignments.json/', ActionTypes.RECEIVE_DISEASE_SPREAD);
+    }
+}
+
+export function refresh_spread_options(){
+    return function(dispatch){
+        refresh_from_server(dispatch, '/setup/SpreadOptions.json/', ActionTypes.RECEIVE_SPREAD_OPTIONS);
+    }
+}
+
+
+
 
 function exclude(container, exclusion){
     return container.filter(function(x) {
         return exclusion.indexOf(x) < 0
     })
 }
-
 
 export function select_value_changed(spread_type, pk, input_index, field_name, new_value, old_value){
     return function(dispatch){
@@ -133,5 +131,5 @@ export function select_value_changed(spread_type, pk, input_index, field_name, n
             }
         }
     }
-
 }
+

@@ -2130,11 +2130,6 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     cursor: pointer;
 }
 
-.relevant .selected, .highlight { /*column is relevant and user has selected the row for many-to many-widget.js*/
-    font-weight: 600;
-    background-color: #d7f5ff;
-}
-
 /*Disabled control fields: include text labels*/
 [disabled] {
     opacity: .5;
@@ -2308,11 +2303,39 @@ select[multiple] {}
 .intro_text, .intro_text p {
     color: #606060;
 }
-.m2mtable select, #all-interactions select {
-    max-width: 260px;
+.spread-grid-table span {
+    width: 75px;
+    height: 16px;
+    /* margin: 5px 0; */
+    /* background-color: #BDBDBD; */
 }
-#all-interactions {
-    width: calc(100% - 0px);}
+
+span.IndirectSpread {
+    margin: 5px 0;
+}
+
+.DirectSpread.assigned {
+    background-color: rgb(161, 134, 87);
+}
+
+.IndirectSpread.assigned {
+    background-color: rgb(146, 203, 170);
+}
+
+.AirborneSpread.assigned {
+    background-color: rgb(52, 192, 209);
+}
+
+.spread-cell {
+    border: solid 1px #B6B6B6;
+    margin: 0px;
+}
+
+.spread-grid-table td {
+    padding: 3px;
+}
+
+
 /*-------------------------------------------------------------*/
 /*-----left aligned scrollbars-----*/
 /*-------------------------------------------------------------*/

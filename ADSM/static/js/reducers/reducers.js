@@ -6,7 +6,7 @@ import $ from 'jquery'
 export function population(population=[], action){
     switch(action.type ){
         case ActionTypes.RECEIVE_POPULATION_STATUS: {
-            return action.population
+            return action.response
         }
 
         default:
@@ -17,6 +17,19 @@ export function population(population=[], action){
 export function disease_spread(disease_spread={}, action){
     switch(action.type ){
         case ActionTypes.RECEIVE_DISEASE_SPREAD: {
+            return action.response  // clobbers the entire data structure
+        }
+
+        default:
+            return disease_spread
+    }
+}
+
+
+
+export function spread_options(disease_spread={}, action){
+    switch(action.type ){
+        case ActionTypes.RECEIVE_SPREAD_OPTIONS: {
             return action.response  // clobbers the entire data structure
         }
 
@@ -62,5 +75,6 @@ export function spread_inputs(spread_inputs=STARTING_INPUTS, action){
 export default combineReducers({
     population,
     disease_spread,
-    spread_inputs
+    spread_inputs,
+    spread_options
 })
