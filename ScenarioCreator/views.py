@@ -620,6 +620,7 @@ def model_list(request, base_page='ScenarioCreator/ModelList.html'):
         else:
             context['models'].append(list_per_model(model))
     context['load_target'] = '#center-panel'
+    context['load_next'] = request.GET.get('next', '')  # #704 Ability to load the center panel URL with a ?next=/setup/DirectSpread/1/ argument
     return render(request, 'ScenarioCreator/3Panels.html', context)
 
 # Utility Views was moved to the ADSMSettings/connection_handler.py

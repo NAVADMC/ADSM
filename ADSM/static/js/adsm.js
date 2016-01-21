@@ -427,7 +427,7 @@ safe_save = function(url, data, new_link){
 function load_target_link(callback){
         var selector = $(this).attr('load-target')
 
-        //Wait until a problem comes up betwee 'active' and ':focus' to fix this
+        //Wait until a problem comes up between 'active' and ':focus' to fix this
         //$input.closest('.layout-panel').find('.defined').removeClass('focused')
         //$(this).closest('.defined').addClass('focused');//?????????????????????????????????
 

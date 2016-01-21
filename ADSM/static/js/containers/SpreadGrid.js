@@ -50,7 +50,7 @@ export class SpreadGrid extends Component {
                         {$.map(order, function(source, index){
                             var row = disease_spread[source]
                             return <tr>
-                                <th>{source}</th>
+                                <th className="spread-source">{source}</th>
                                 {$.map(order, function(destination){
                                     var cell = row.destinations[destination]
                                     return <td>

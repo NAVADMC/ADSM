@@ -2348,6 +2348,10 @@ span.IndirectSpread {
     padding-left: 25px;
     padding-top: 23px;
 }
+
+.spread-source {
+    text-align: right;
+}
 /*-------------------------------------------------------------*/
 /*-----left aligned scrollbars-----*/
 /*-------------------------------------------------------------*/
