@@ -7,6 +7,15 @@
         {% endblock %}
         {% include base_page %}
     </section>
-    <section id="center-panel" class="layout-panel col-xs-4"></section>
+    <section id="center-panel" class="layout-panel col-xs-4">
+        {% if load_next %} {# #704 Ability to load the center panel URL with a ?next=/setup/DirectSpread/1/ argument #}
+            <script type="text/javascript">
+                $(function(){
+                    $('#center-panel').load( "{{ load_next }}" );
+                    $('#center-panel').addClass('reveal'); //allows toggle of box shadow on :before pseudo element
+                })
+            </script>
+        {% endif %}
+    </section>
 {#    <section id="right-panel" class="layout-panel col-xs-3"></section>#}
 {% endblock %}

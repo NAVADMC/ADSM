@@ -2297,6 +2297,9 @@ select[multiple] {}
 /*----------------------------------------------------*/
 /*----- Assign Disease Spread -----*/
 /*----------------------------------------------------*/
+.spread-grid-table {
+    margin-top: 87px;
+}
 .intro_text, #assign_spread_wrapper{
     padding: 0;
 }
@@ -2304,14 +2307,14 @@ select[multiple] {}
     color: #606060;
 }
 .spread-grid-table span {
-    width: 75px;
-    height: 16px;
+    width: 67px;
+    height: 18px;
     /* margin: 5px 0; */
     /* background-color: #BDBDBD; */
 }
 
 span.IndirectSpread {
-    margin: 5px 0;
+    margin: 3px 0;
 }
 
 .DirectSpread.assigned {
@@ -2335,7 +2338,33 @@ span.IndirectSpread {
     padding: 3px;
 }
 
+.spread-destinations {
+    white-space: nowrap;
+    /* overflow: hidden; */
+    /* text-overflow: ellipsis; */
+    max-width: 75px;/* Safari */
+    -webkit-transform: rotate(-56deg);/* Firefox */
+    -moz-transform: rotate(-45deg);
+    padding-left: 25px;
+    padding-top: 23px;
+}
 
+.spread-source {
+    text-align: right;
+}
+
+.spread-display-selector * {
+    display: inline-block;
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+.spread-display-selector input {
+    width: 26px;
+    height: 17px;
+    margin-top: 16px;
+    background: white;
+}
 /*-------------------------------------------------------------*/
 /*-----left aligned scrollbars-----*/
 /*-------------------------------------------------------------*/
