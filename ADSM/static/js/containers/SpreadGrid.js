@@ -12,39 +12,34 @@ import {RadioGroup} from './RadioButtons'
 
 class SpreadLight extends Component {
     render(){
-        var {cell, spread_options, type} = this.props;
+        var {cell, spread_options, type, being_displayed} = this.props;
         var title = cell[type]
         if(typeof spread_options !== 'undefined' && cell[type]){
-            console.log("spread_options[type]", spread_options[type])
-            console.log("cell[type]", cell[type])
-            console.log("''+cell[type]", ""+cell[type])
-            console.log("spread_options[type][''+cell[type]]", spread_options[type][""+cell[type]])
             title = spread_options[type][''+cell[type]].name
         }
         var pk = cell[type] ? cell[type] : 'new'  //#704 Each cell links to the Spread Model that it represents.
+        var style = {}
+        if(being_displayed != 'All'){
+            style = {display: "none"}
+        }
+        if(being_displayed == type){  // overrides none with a full height box
+            style = {height: '60px', margin: '0'}
+        }
         return <a href={'/setup/DiseaseSpread/?next=/setup/' + type + '/' + pk + '/'}>
-            <span className={type + (cell[type]? " assigned": "")}
+            <span className={type + (cell[type]? " assigned": "")} style={style}
                      title={title}> </span>
         </a>
     }
 }
 
 class SpreadDisplaySelector extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {selectedType: 'All'};
-    }
-    selectType(type){
-        this.setState({selectedType: type});
-    }
-
     render(){
          return <div className="spread-display-selector">
                     <div style={ {color: 'darkgrey', padding: '5px'} }>Show |</div>
                     <RadioGroup
                         name="display-type"
-                        selectedValue={this.state.selectedType}
-                        onChange={this.selectType.bind(this)}>
+                        selectedValue={this.props.being_displayed}
+                        onChange={this.props.change_type}>
                         {Radio => (
                             <div>
                                 <div style={ {color: 'rgb(161, 134, 87)'} }>
@@ -65,22 +60,26 @@ class SpreadDisplaySelector extends Component {
                 </div>
     }
 }
-/**
- <div style={ {color: 'rgb(161, 134, 87)'} }><div className="green-dot"></div>DIRECT</div>
- <div style={ {color: 'rgb(146, 203, 170)'} }><div className="green-dot"></div>INDIRECT</div>
- <div style={ {color: 'rgb(52, 192, 209)'} }><div className="green-dot"></div>AIRBORNE</div>
- <div style={ {color: 'black'}             }><div className="green-dot"></div>ALL</div>
- */
+
 
 export class SpreadGrid extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {being_displayed: 'All'};
+    }
+    change_type(type){
+        this.setState({being_displayed: type});
+    }
 
     componentDidMount(){
         this.props.dispatch(refresh_disease_spread())
         this.props.dispatch(refresh_spread_options())
     }
 
+
     render() {
         var {disease_spread, spread_options} = this.props
+        var being_displayed = this.state.being_displayed
         var order = Object.keys(disease_spread).sort()
         return (
             <div className="spread-grid-contents">
@@ -99,9 +98,9 @@ export class SpreadGrid extends Component {
                                     var cell = row.destinations[destination]
                                     return <td>
                                         <div className="spread-cell">
-                                            <SpreadLight type="DirectSpread" cell={cell} spread_options={spread_options}/>
-                                            <SpreadLight type="IndirectSpread" cell={cell} spread_options={spread_options}/>
-                                            <SpreadLight type="AirborneSpread" cell={cell} spread_options={spread_options}/>
+                                            <SpreadLight type="DirectSpread" cell={cell} spread_options={spread_options} being_displayed={being_displayed}/>
+                                            <SpreadLight type="IndirectSpread" cell={cell} spread_options={spread_options} being_displayed={being_displayed}/>
+                                            <SpreadLight type="AirborneSpread" cell={cell} spread_options={spread_options} being_displayed={being_displayed}/>
                                         </div>
                                     </td>
                                 })}
@@ -109,7 +108,7 @@ export class SpreadGrid extends Component {
                         })}
                     </tbody>
                 </table>
-                <SpreadDisplaySelector />
+                <SpreadDisplaySelector change_type={this.change_type.bind(this)} being_displayed={being_displayed}/>
             </div>
 
         );

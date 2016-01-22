@@ -2308,13 +2308,13 @@ select[multiple] {}
 }
 .spread-grid-table span {
     width: 67px;
-    height: 20px;
+    height: 18px;
     /* margin: 5px 0; */
     /* background-color: #BDBDBD; */
 }
 
 span.IndirectSpread {
-    /* margin: 5px 0; */
+    margin: 3px 0;
 }
 
 .DirectSpread.assigned {
