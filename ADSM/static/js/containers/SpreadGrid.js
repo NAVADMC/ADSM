@@ -14,7 +14,7 @@ class SpreadLight extends Component {
     render(){
         var {cell, spread_options, type, being_displayed} = this.props;
         var title = cell[type]
-        if(typeof spread_options !== 'undefined' && cell[type]){
+        if(typeof spread_options[type] !== 'undefined' && cell[type]){
             title = spread_options[type][''+cell[type]].name
         }
         var pk = cell[type] ? cell[type] : 'new'  //#704 Each cell links to the Spread Model that it represents.
