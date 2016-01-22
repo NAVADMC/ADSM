@@ -285,7 +285,7 @@ class BuildADSM(build_exe):
                 location = os.path.dirname(package.__file__)
                 for root, dirnames, filenames in os.walk(location):
                     for filename in filenames:
-                        if filename.lower().endswith('.dll') or filename.lower().endswith('.so'):
+                        if filename.lower().split('.')[-1] in 'dll so'.split():
                             shutil.copy(os.path.join(root, filename), os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', filename))
             except:
                 continue

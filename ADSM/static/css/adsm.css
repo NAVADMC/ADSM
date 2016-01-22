@@ -2300,7 +2300,7 @@ select[multiple] {}
 .spread-grid-table {
     margin-top: 87px;
 }
-.intro_text, #assign_spread_wrapper{
+.intro_text {
     padding: 0;
 }
 .intro_text, .intro_text p {

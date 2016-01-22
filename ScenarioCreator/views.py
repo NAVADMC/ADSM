@@ -207,7 +207,6 @@ def save_formset_succeeded(MyFormSet, TargetModel, context, request):
         initialized_formset = MyFormSet(request.POST, request.FILES, queryset=TargetModel.objects.all())
         if initialized_formset.is_valid():
             instances = initialized_formset.save()
-            print(instances)
             context['formset'] = initialized_formset
             return True
         return False
@@ -284,7 +283,7 @@ def collect_backlinks(model_instance):
     collector = NestedObjects(using='scenario_db')  # or specific database
     collector.collect([model_instance])  # https://docs.djangoproject.com/en/1.7/releases/1.7/#remove-and-clear-methods-of-related-managers
     dependants = collector.nested()  # fun fact: spelling differs between America and Brittain
-    print("Found related models:", dependants)
+    #print("Found related models:", dependants)
     links = {}
     if len(dependants[1:]):
         for direct_reference in dependants[1:][0]:  # only iterates over the top level
@@ -294,7 +293,7 @@ def collect_backlinks(model_instance):
                     links[str(direct_reference)] = '/setup/%s/%i/' % (name, direct_reference.pk)
                 except:
                     links['%s:%i' % (name, direct_reference.pk)] = '/setup/%s/%i/' % (name, direct_reference.pk)
-    print(links)
+    #print(links)
     return links
 
 
