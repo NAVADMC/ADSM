@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Created by josiah on 12/31/2015.
  */
@@ -23,7 +25,7 @@ export class SpreadWidget extends Component {
         var pk = url[3]
         var {spread_inputs, population} = this.props
         var inputs = []
-        if(pk in spread_inputs[spread_type]) {
+        if(pk in spread_inputs[spread_type] && typeof population !== 'undefined') {
             inputs = spread_inputs[spread_type][pk].map(function(input_state, index){
                 return (<SpreadAssigner population={population}
                                         input_state={input_state}
@@ -52,7 +54,7 @@ var list_of_source_destination_pks =
     );
 
 SpreadWidget.propTypes = {
-        spread_inputs: PropTypes.shape({
+    spread_inputs: PropTypes.shape({
         DirectSpread: PropTypes.objectOf(list_of_source_destination_pks).isRequired,
         IndirectSpread: PropTypes.objectOf(list_of_source_destination_pks).isRequired,
         AirborneSpread: PropTypes.objectOf(list_of_source_destination_pks).isRequired
