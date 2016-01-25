@@ -653,12 +653,11 @@ var modelModal = {
     },
 
     populate_modal_body: function($newForm, modal) {
-        var $form = $newForm.find('form').first();
-        $form.find('.buttonHolder').remove();
-        modal.find('.modal-body').html($form);
+        //$form.find('.buttonHolder').remove();
         modal.find('.modal-title').html($newForm.find('#title').html());
+        modal.find('.modal-body').html($newForm.find('form').first());
+        //modal.find('.modal-footer').html($newForm.find(".buttonHolder"))
         $('body').append(modal);
-        return $form;
     },
 
     validation_error: function(modal) {
@@ -693,7 +692,7 @@ var modelModal = {
         },
     
     template: $('<div class="modal fade">\
-                  <div class="modal-dialog">\
+                  <div class="modal-dialog layout-panel">\
                     <div class="modal-content">\
                       <div class="modal-header">\
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\
@@ -900,11 +899,15 @@ function make_function_panel_editable() {
     $('.edit-button-holder a, .edit-button-holder button').removeClass('reveal') //collapse the edit buttons, possibly hide
     $('.edit-button-holder').css('display', 'none')
 
-    $('#functions_panel .buttonHolder').removeAttr('hidden')
-    $('#functions_panel, #functions_panel input').addClass('editable')
-    $('#functions_panel :input').addClass('editable')
+    var base = $('#functions_panel');
+    var $modal = $('.modal-body');
+    if($modal.length > 0) base = $modal
+    base.find('.buttonHolder').removeAttr('hidden')
+    base.addClass('editable')
+    base.find('input').addClass('editable')
+    base.find(':input').addClass('editable')
     //$('#tb_mask').css('visibility', 'visible')
-    $('#functions_panel').css('pointer-events', 'all')
+    base.css('pointer-events', 'all')
 }
 
 function statusChecker(){
