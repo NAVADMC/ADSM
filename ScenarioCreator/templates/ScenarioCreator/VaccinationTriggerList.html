@@ -27,9 +27,11 @@
                             </li>
                         {% endfor %}
                     {% endfor %}
-                    {% for model in category.models %}
-                        <li class="addNew"><a href="/setup/{{model.class}}/new/" load-target="#center-panel"><i> + New {{ model.name }}</i></a></li>
-                    {% endfor %}
+                    {% if category.name != 'Restart Triggers' %}
+                        {% for model in category.models %}
+                            <li class="addNew"><a href="/setup/{{model.class}}/new/" load-target="#center-panel"><i> + New {{ model.name }}</i></a></li>
+                        {% endfor %}
+                    {% endif %}
                 </ul>
             </div>
         </div>
