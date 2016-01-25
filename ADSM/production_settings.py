@@ -40,8 +40,8 @@ MANAGERS = (
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-DEFAULT_FROM_EMAIL = 'noreply@development.server'  # Users get emails from this address 'info@mydomain.com'
-SERVER_EMAIL = 'server@development.server'  # Admins and Managers get emails from this address about errors 'server@mydomain.com'
+DEFAULT_FROM_EMAIL = 'adsm-client@newline.us'  # Users get emails from this address 'info@mydomain.com'
+SERVER_EMAIL = 'adsm-client@newline.us'  # Admins and Managers get emails from this address about errors 'server@mydomain.com'
 
 os.environ['HTTPS'] = 'off'
 os.environ['wsgi.url_scheme'] = 'http'
