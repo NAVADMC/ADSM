@@ -155,9 +155,7 @@ $(function(){
     $(document).on('change focus', '[data-new-item-url]', function(event){
         //this needs to ignore the event if it's in the right panel, since that will open a modal
         //#422 "Edits" in the far right will open a modal, since we've run out of space
-        if($(this).val() == 'data-add-new' || $(this).closest('.layout-panel').attr('id') != 'functions_panel'){
-            populate_pdf_panel(this);
-        }
+        populate_pdf_panel(this);
     });
     
     $(document).on('click', '[data-new-item-url] + a i', function(event) {
