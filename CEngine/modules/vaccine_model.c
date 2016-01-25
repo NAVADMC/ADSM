@@ -173,7 +173,7 @@ handle_vaccination_event (struct adsm_module_t_ *self,
       else
         delay = param_block->delay;
       #if DEBUG
-        g_debug ("vaccine will take %hu days to take effect", delay);
+        g_debug ("vaccine will take %i days to take effect", delay);
       #endif
 
       if (event->override_initial_state == VaccineImmune && event->override_days_left_in_state > 0)
@@ -191,7 +191,7 @@ handle_vaccination_event (struct adsm_module_t_ *self,
             }
         }
       #if DEBUG
-        g_debug ("vaccine immunity will last %hu days", immunity_period);
+        g_debug ("vaccine immunity will last %i days", immunity_period);
       #endif
 
       UNT_vaccinate (event->unit, delay, immunity_period);

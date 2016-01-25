@@ -367,6 +367,67 @@ class ControlMasterPlan(InputSingleton):
     def __str__(self):
         return str(self.name)
 
+protocol_substructure = {'use_detection': ['detection_probability_for_observed_time_in_clinical',
+                                           'detection_probability_report_vs_first_detection',
+                                           'detection_is_a_zone_trigger',
+                                           ],
+                         'use_tracing': ['trace_direct_forward',
+                                         'trace_direct_back',
+                                         'direct_trace_success_rate',
+                                         'direct_trace_period',
+                                         'trace_indirect_forward',
+                                         'trace_indirect_back',
+                                         'indirect_trace_success',
+                                         'indirect_trace_period',
+                                         'trace_result_delay',
+                                         'direct_trace_is_a_zone_trigger',
+                                         'indirect_trace_is_a_zone_trigger',
+                                         ],
+                         'use_testing': ['test_direct_forward_traces',
+                                         'test_indirect_forward_traces',
+                                         'test_direct_back_traces',
+                                         'test_indirect_back_traces',
+                                         'test_specificity',
+                                         'test_sensitivity',
+                                         'test_delay',
+                                         ],
+                         'use_exams': ['examine_direct_forward_traces',
+                                       'exam_direct_forward_success_multiplier',
+                                       'examine_indirect_forward_traces',
+                                       'exam_indirect_forward_success_multiplier',
+                                       'examine_direct_back_traces',
+                                       'exam_direct_back_success_multiplier',
+                                       'examine_indirect_back_traces',
+                                       'examine_indirect_back_success_multiplier',
+                                       ],
+                         'use_destruction': ['destruction_is_a_ring_trigger',
+                                             'destruction_ring_radius',
+                                             'destruction_is_a_ring_target',
+                                             'destroy_direct_forward_traces',
+                                             'destroy_indirect_forward_traces',
+                                             'destroy_direct_back_traces',
+                                             'destroy_indirect_back_traces',
+                                             'destruction_priority',
+                                             ],
+                         'use_vaccination': ['vaccinate_detected_units',
+                                             'minimum_time_between_vaccinations',
+                                             'days_to_immunity',
+                                             'vaccine_immune_period',
+                                             'trigger_vaccination_ring',
+                                             'vaccination_ring_radius',
+                                             'vaccination_priority',
+                                             ],
+                         'use_cost_accounting': ['cost_of_destruction_appraisal_per_unit',
+                                                 'cost_of_destruction_cleaning_per_unit',
+                                                 'cost_of_euthanasia_per_animal',
+                                                 'cost_of_indemnification_per_animal',
+                                                 'cost_of_carcass_disposal_per_animal',
+                                                 'cost_of_vaccination_setup_per_unit',
+                                                 'cost_of_vaccination_baseline_per_animal',
+                                                 'vaccination_demand_threshold',
+                                                 'cost_of_vaccination_additional_per_animal',
+                                                 ],
+                         }
 
 class ControlProtocol(BaseModel):
     name = models.CharField(max_length=255,
@@ -499,7 +560,28 @@ class ControlProtocol(BaseModel):
     cost_of_vaccination_baseline_per_animal = MoneyField(default=0.0,
         help_text='The baseline cost of vaccination for each vaccinated animal of this type. This cost applies to all vaccinations before the threshold is met. ', )
     def __str__(self):
-        return "Protocol: %s" % (self.name, )
+        return self.name
+
+    def tab_is_valid(self, use_tab_name, fields=None):
+        if fields is None:
+            fields = protocol_substructure[use_tab_name]
+        for field in fields:
+            if self.__getattribute__(field) is None:
+                return False
+        return True
+
+    def clean(self):
+        for trigger_switch, fields in protocol_substructure.items():
+            if self.__getattribute__(trigger_switch):
+                if not self.tab_is_valid(trigger_switch, fields):
+                    raise ValidationError(trigger_switch + " is enabled but the section is not filled in completely.")
+
+    def is_valid(self):
+        try:
+            self.clean()
+            return True
+        except BaseException:
+            return False
 
 
 class ProtocolAssignment(BaseModel):
@@ -532,7 +614,7 @@ class Disease(InputSingleton):
     use_airborne_exponential_decay = models.BooleanField(default=False,
         help_text = "Indicates if the decrease in probability by "
                     + wiki("airborne transmission", "/Model-Specification#airborne-spread")
-                    + " is simulated by the exponential (TRUE) or linear (FALSE) algorithm.",)
+                    + " is simulated by the exponential or linear algorithm.",)
     use_within_unit_prevalence = models.BooleanField(default=False,
         help_text='Indicates if ' + wiki("within unit prevalence", "/Model-Specification#prevalence") + ' should be used in the model.', )
     def __str__(self):
@@ -594,14 +676,13 @@ class DiseaseSpread(BaseModel):
 class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indirect that were not in Airborne
     subclinical_animals_can_infect_others = models.BooleanField(default=False,
         help_text='Indicates if ' + wiki("Subclinical", "subclinically-infectious") +
-                  ' units of the source type can spread disease by ' + wiki("direct", "direct-contact") + ' or '+
-                  wiki("indirect contact") + '. ', )
+                  ' units of the source type can spread disease. ', )
     contact_rate = FloatField(validators=[MinValueValidator(0.0)],
          # Important: Contact_rate help_text has been given special behavior vial two data-visibility-controller 's.
-        help_text=mark_safe("""<div class="help-block" data-visibility-controller="use_fixed_contact_rate" data-disabled-value="true">
-                                    Fixed baseline contact rate (in outgoing contacts/unit/day) for <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#direct-contact" class="wiki">direct</a> or <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#indirect-contact" class="wiki">indirect contact</a> models.</div>
-                                <div class="help-block" data-visibility-controller="use_fixed_contact_rate" data-disabled-value="false">
-                                    Mean baseline contact rate (in outgoing contacts/unit/day) for <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#direct-contact" class="wiki">direct</a> or <a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#indirect-contact" class="wiki">indirect contact</a> models.</div>"""))
+        help_text=mark_safe("""<div class="help-block" data-visibility-controller="use_fixed_contact_rate" data-disabled-value="false">
+                                    Fixed baseline contact rate (in outgoing contacts/unit/day).</div>
+                                <div class="help-block" data-visibility-controller="use_fixed_contact_rate" data-disabled-value="true">
+                                    Mean baseline contact rate (in outgoing contacts/unit/day).</div>"""))
     use_fixed_contact_rate = models.BooleanField(default=False,
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
     distance_distribution = models.ForeignKey(ProbabilityFunction, related_name='+',
@@ -618,9 +699,7 @@ class IndirectSpread(AbstractSpread):
     """This has to inherit from AbstractSpread or else Django treats DirectSpread and IndirectSpread as
     interchangable, which they are not."""
     infection_probability = PercentField(
-        help_text='The probability that a contact will result in disease transmission. Specified for ' +
-                  wiki("direct", "direct-contact") + ' or '+
-                  wiki("indirect contact") + ' models.', )
+        help_text='The probability that a contact will result in disease transmission.', )
 
     def __str__(self):
         return "%s" % (self.name, )
@@ -635,8 +714,7 @@ class DirectSpread(AbstractSpread):
                   wiki("direct", "direct-contact") + ' or '+
                   wiki("indirect contact") + ' models.', )
     latent_animals_can_infect_others = models.BooleanField(default=False,
-        help_text='Indicates if '+wiki("latent", "latent-state")+' units of the source type can spread disease by ' +
-                  wiki("direct contact") + '.', )
+        help_text='Indicates if '+wiki("latent", "latent-state")+' units of the source type can spread disease.', )
     def __str__(self):
         return "%s" % (self.name, )
 

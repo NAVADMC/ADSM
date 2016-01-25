@@ -17,6 +17,9 @@ import os
 class FloatInput(NumberInput):
     template_name = 'floppyforms/number.html'
 
+class HiddenCheckbox(CheckboxInput):
+    template_name = 'floppyforms/HiddenCheckbox.html'
+
 
 class AddOrSelect(Select):
     template_name = 'floppyforms/model_select.html'
@@ -144,6 +147,26 @@ class RelationalFunctionForm(BaseForm):
 
 
 class ControlMasterPlanForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            'name',
+            HTML(r"<h2>Global Destruction settings</h2>"),
+            HTML(r"<p>Parameters are not used if Destruction is turned off in the control protocol</p>"),
+            'destruction_program_delay',
+            'destruction_capacity',
+            'destruction_priority_order',
+            'destruction_reason_order',
+            HTML(r"<h2>Global Vaccination settings</h2>"),
+            HTML(r"<p>Parameters are not used if Vaccination is turned off in the control protocol</p>"),
+            'vaccination_capacity',
+            'restart_vaccination_capacity',
+            'vaccination_priority_order',
+            'vaccinate_retrospective_days',
+        )
+        super(ControlMasterPlanForm, self).__init__(*args, **kwargs)
+
+
     class Meta(object):
         model = ControlMasterPlan
         exclude = ['disable_all_controls']
@@ -167,7 +190,7 @@ class DiseaseProgressionAssignmentForm(BaseForm):
         model = DiseaseProgressionAssignment
         exclude = []
         widgets = {'production_type': FixedSelect(),
-                   'progression': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseProgression/new/'})}
+                   } #progression should NOT be an AddOrSelect
 
 
 class ControlProtocolForm(BaseForm):
@@ -178,7 +201,7 @@ class ControlProtocolForm(BaseForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.layout = Layout(
             'name',
-            HTML('<script src="{{ STATIC_URL }}js/control-protocol.js"></script>'),
+            # HTML('<script src="{{ STATIC_URL }}js/control-protocol.js"></script>'),
             TabHolder(
                 Tab('Detection',
                     'use_detection',
@@ -253,82 +276,12 @@ class ControlProtocolForm(BaseForm):
                     'cost_of_vaccination_baseline_per_animal',
                     'vaccination_demand_threshold',
                     'cost_of_vaccination_additional_per_animal',
-                    )
+                    ),
             )
         )
         super(ControlProtocolForm, self).__init__(*args, **kwargs)
-        
-    def clean(self):
-        cleaned_data = super(ControlProtocolForm, self).clean()
-        #TODO: remove this duplication (above) by building both behaviors off the same list
-        sections = {'use_detection': ['detection_probability_for_observed_time_in_clinical',
-                                      'detection_probability_report_vs_first_detection',
-                                      'detection_is_a_zone_trigger',
-                                      ],
-                    'use_tracing': ['trace_direct_forward',
-                                    'trace_direct_back',
-                                    'direct_trace_success_rate',
-                                    'direct_trace_period',
-                                    'trace_indirect_forward',
-                                    'trace_indirect_back',
-                                    'indirect_trace_success',
-                                    'indirect_trace_period',
-                                    'trace_result_delay',
-                                    'direct_trace_is_a_zone_trigger',
-                                    'indirect_trace_is_a_zone_trigger',
-                                    ],
-                    'use_testing': ['test_direct_forward_traces',
-                                    'test_indirect_forward_traces',
-                                    'test_direct_back_traces',
-                                    'test_indirect_back_traces',
-                                    'test_specificity',
-                                    'test_sensitivity',
-                                    'test_delay',
-                                    ],
-                    'use_exams': ['examine_direct_forward_traces',
-                                  'exam_direct_forward_success_multiplier',
-                                  'examine_indirect_forward_traces',
-                                  'exam_indirect_forward_success_multiplier',
-                                  'examine_direct_back_traces',
-                                  'exam_direct_back_success_multiplier',
-                                  'examine_indirect_back_traces',
-                                  'examine_indirect_back_success_multiplier',
-                                  ],
-                    'use_destruction': ['destruction_is_a_ring_trigger',
-                                        'destruction_ring_radius',
-                                        'destruction_is_a_ring_target',
-                                        'destroy_direct_forward_traces',
-                                        'destroy_indirect_forward_traces',
-                                        'destroy_direct_back_traces',
-                                        'destroy_indirect_back_traces',
-                                        'destruction_priority',
-                                        ],
-                    'use_vaccination': ['vaccinate_detected_units',
-                                        'minimum_time_between_vaccinations',
-                                        'days_to_immunity',
-                                        'vaccine_immune_period',
-                                        'trigger_vaccination_ring',
-                                        'vaccination_ring_radius',
-                                        'vaccination_priority',
-                                        ],
-                    'use_cost_accounting': ['cost_of_destruction_appraisal_per_unit',
-                                            'cost_of_destruction_cleaning_per_unit',
-                                            'cost_of_euthanasia_per_animal',
-                                            'cost_of_indemnification_per_animal',
-                                            'cost_of_carcass_disposal_per_animal',
-                                            'cost_of_vaccination_setup_per_unit',
-                                            'cost_of_vaccination_baseline_per_animal',
-                                            'vaccination_demand_threshold',
-                                            'cost_of_vaccination_additional_per_animal',
-                                            ],
-                    'use_': [],
-                    }
-        for trigger_switch, fields in sections.items():
-            if cleaned_data.get(trigger_switch):
-                for field in fields:
-                    if cleaned_data.get(field) is None:
-                        self.add_error(field, ValidationError(field + " must not be blank!"))
-        
+
+
     class Meta(object):
         model = ControlProtocol
         exclude = []
@@ -345,6 +298,13 @@ class ControlProtocolForm(BaseForm):
                    'examine_indirect_back_success_multiplier': FloatInput(),
                    'test_specificity': FloatInput(),
                    'test_sensitivity': FloatInput(),
+                   'use_detection': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_tracing': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_testing': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_exams': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_destruction': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_vaccination': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_cost_accounting': HiddenCheckbox(attrs={'hidden':'hidden'}),
                    }
 
 
@@ -383,14 +343,13 @@ class IndirectSpreadForm(BaseForm):
             'movement_control',
         )
         super(IndirectSpreadForm, self).__init__(*args, **kwargs)
+        self.fields['subclinical_animals_can_infect_others'].label = 'Subclinical units can infect others'
 
     class Meta(object):
         model = IndirectSpread
         exclude = ['_disease']
         widgets = {'contact_rate': FloatInput(),
-                   'infection_probability': NumberInput(attrs={'data-visibility-context': 'use_within_unit_prevalence',
-                                                               'data-visibility-flipped': 'true',
-                                                               'step': 'any'}),
+                   'infection_probability': FloatInput(),  # visibility settings acts differently from DirectSpread.infection_probability
                    'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
@@ -413,6 +372,8 @@ class DirectSpreadForm(BaseForm):
             'movement_control',
         )
         super(DirectSpreadForm, self).__init__(*args, **kwargs)
+        self.fields['latent_animals_can_infect_others'].label = 'Latent units can infect others'
+        self.fields['subclinical_animals_can_infect_others'].label = 'Subclinical units can infect others'
         if not Disease.objects.get().use_within_unit_prevalence:
             self.fields['infection_probability'].widget.attrs['required'] = 'required'  # only required when the field is visible, enforced by browser
 
@@ -538,7 +499,7 @@ class ZoneEffectAssignmentForm(BaseForm):
         exclude = ['zone', 'production_type']
         widgets = {'zone': HiddenInput(),
                    'production_type': HiddenInput(),
-                   'effect': AddOrSelect(attrs={'data-new-item-url': '/setup/ZoneEffect/new/'})}
+                   }  # 'effect' should NOT be an AddOrSelect
 
 
 ## V3.3 Vaccination Triggers ##
@@ -553,7 +514,7 @@ class ProductionTypeList(SelectMultiple):
 
     def get_context(self, name, value, attrs=None, choices=()):
         context = super(SelectMultiple, self).get_context(name, value, attrs)
-        context['help_text'] = mark_safe("To add production types to the trigger click on a Type or Group from the <em>Population Panel</em>") 
+        context['help_text'] = mark_safe("To remove production types, click on them below:")
         return context
 
 

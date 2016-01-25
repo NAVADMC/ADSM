@@ -36,6 +36,9 @@ class inverse_gaussian:
                 y.append(0.0)
         return y
 
+    def ppf(self, x_val):
+        return x_val * 5.1  # basically 0 to 5 range hard coded
+
 
 def histogram_pdf(rel_primary_key):
     """Example of bare pdf function that returns a graph without the need for an X range array."""
@@ -58,6 +61,9 @@ def histogram_pdf(rel_primary_key):
 
     return line_graph(x_label, x_hist, y_hist)
 
+
+def fixed_value(value):
+    return discrete_graph('Fixed Value', [value], [1.0])
 
 
 def probability_graph(request, primary_key):
@@ -94,7 +100,7 @@ def existing_probability_graph(primary_key):
             "Binomial": [scipy.stats.binom, [m.s, m.p]],
             "Discrete Uniform": [scipy.stats.randint, [m.min, m.max]],
             "Exponential": [scipy.stats.expon, {'scale': m.mean}],
-            "Fixed Value": [scipy.stats.uniform, {'loc': m.mode, 'scale': 0.0001}],  # Use a narrow uniform instead
+            "Fixed Value": [fixed_value, [m.mode]],  # custom
             "Gamma": [scipy.stats.gamma, {'a': m.alpha, 'scale': m.beta, 'loc': 0}],
             "Gaussian": [scipy.stats.norm, {'loc': m.mean, 'scale': m.std_dev}],
             "Histogram": [histogram_pdf, [m.graph_id]],
@@ -121,7 +127,7 @@ def existing_probability_graph(primary_key):
 
 def discrete_graph(x_label, x_values, y_values):
     fig = new_graph(x_label)
-
+    plt.gca().set_ylim(0, 1.2)  # always absolute
     plt.plot(x_values, y_values, 'bo', ms=4, label='discrete pmf')
     plt.vlines(x_values, 0, y_values, colors='k', lw=3, alpha=0.5)
 
@@ -136,22 +142,23 @@ def pdf_graph(x_label, function, kwargs_dict):
     if isinstance(dist, HttpResponse):  #some shortcut scipy and just return a graph response
         return dist
 
-    step = .1 if hasattr(dist.dist, 'pdf') else 1
-    if hasattr(dist, 'ppf'):
-        x = np.arange(dist.ppf(0.01),
-                      dist.ppf(0.99) + 2, step)
-    else:
-        x = np.arange(0, 30, 30 / 100)  # used, at minimum, but inverse_gaussian
     if hasattr(dist.dist, 'pdf'):  # Scipy continuous functions
+        x = np.arange(dist.ppf(0.01),
+                      dist.ppf(0.95), .1)
         y_axis = dist.pdf(x)
-        return line_graph(x_label, x, y_axis)
+        fig = line_graph(x_label, x, y_axis)
+        x1, x2, y1, y2 = plt.axis()
+        plt.axis((x1, x2, 0, min(1.2, y2)))  # cap y_max but allow down-scaling
+        return fig
     else:  # scipy discrete functions
+        x = np.arange(dist.ppf(0.01),
+              dist.ppf(0.99) + 2, 1)
         return discrete_graph(x_label, x, dist.pmf(x))
 
 
 
 def empty_graph(request=None):
-    return line_graph('Days', [],[])  # empty graph
+    return line_graph('Days', [], [])  # empty graph
 
 
 def relational_graph_update(request, primary_key):
@@ -210,7 +217,7 @@ def new_graph(x_label):
     time_graph.set_xlabel(x_label)
     time_graph.grid(False)
     rstyle(time_graph)  # plt.plot(old_x, old_y, color='lightgrey')  # for comparison
-    time_graph.set_ylim(0,1.2)
+
     return fig
 
 

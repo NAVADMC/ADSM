@@ -1,8 +1,3 @@
-from collections import defaultdict
-import copy
-from itertools import product
-import Results.models
-
 
 explanations = {'A': 'Animals',
             'U': 'Units',
@@ -99,6 +94,8 @@ def push_explanation(field_name, start, explanation=None):
 def explain(field_name):
     """Recursively breaks a field name down into parts and explains each piece.  """
     start = sorted([k for k in grammars.keys() if field_name.startswith(k)], key=len)
+    if not start:
+        return field_name
     start = start[-1]  # last one is the longest
     grammar = grammars[start]
     field_name, explanation = push_explanation(field_name, start)

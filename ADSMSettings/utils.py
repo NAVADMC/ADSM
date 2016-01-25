@@ -283,6 +283,7 @@ def launch_external_program_and_exit(launch, code=0, close_self=True, cmd_args=N
     if cmd_args:
         for cmd_arg in cmd_args:
             launch.append(cmd_arg)
+    launch = ' '.join(launch)
     if sys.platform == 'win32':  # Yes, this is also x64.
         CREATE_NEW_PROCESS_GROUP = 0x00000200
         DETACHED_PROCESS = 0x00000008
@@ -301,9 +302,13 @@ def check_simulation_version():
     version = None
     try:
         executable = adsm_executable_command()[0]
-        process = subprocess.Popen([executable, "--version"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output, error = process.communicate()
-        exit_code = process.wait(timeout=200)
+        process = subprocess.Popen(executable + " --version --silent", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            output, error = process.communicate(timeout=200)
+            exit_code = process.returncode
+        except:
+            exit_code = 1
+            output = None
         try:
             process.kill()
         except:
@@ -326,9 +331,13 @@ def npu_update_info():
     new_version = None
     try:
         npu = os.path.join(settings.BASE_DIR, 'npu'+settings.EXTENSION)
-        process = subprocess.Popen([npu, "--check_update", "--silent"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output, error = process.communicate()
-        exit_code = process.wait(timeout=60000)
+        process = subprocess.Popen(npu + " --check_update --silent", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            output, error = process.communicate(timeout=60000)
+            exit_code = process.returncode
+        except:
+            exit_code = 1
+            output = None
         try:
             process.kill()
         except:

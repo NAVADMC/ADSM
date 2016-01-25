@@ -109,7 +109,7 @@ def import_naadsm_scenario(request):
             # go on to serve the form normally with Error messages attached
     else:
         context['form_errors'] = initialized_form.errors
-    return render(request, 'ScenarioCreator/navigationPane.html', context)  # render in validation error messages
+    return render(request, 'ScenarioCreator/MainPanel.html', context)  # render in validation error messages
 
 
 def upload_scenario(request):
@@ -176,7 +176,9 @@ def save_scenario(request=None):
             return render(request, 'ScenarioName.html', {"failure_message": save_error})
 
     if request is not None and request.is_ajax():
-        return render(request, 'ScenarioName.html', {"success_message": "File saved to " + target})
+        return render(request, 'ScenarioName.html', {"success_message": "File saved to " + target,
+                                                     "filename": scenario_filename(),
+                                                     'unsaved_changes': unsaved_changes()})
     else:
         return redirect('/setup/Scenario/1/')
 
@@ -227,5 +229,5 @@ def show_help_text_json(request):
         set_to = new_value == 'true'
         SmSession.objects.all().update(show_help_text=set_to)
         return JsonResponse({'status':'success'})
-    else:
+    else:  # GET
         return JsonResponse({'show_help_text': SmSession.objects.get().show_help_text})

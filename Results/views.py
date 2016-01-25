@@ -3,7 +3,7 @@ from itertools import chain
 import os
 from glob import glob
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseBadRequest, HttpResponseNotFound
 from django.forms.models import modelformset_factory
 from django.shortcuts import render, redirect
 from django.db.models import Max
@@ -15,9 +15,10 @@ from ScenarioCreator.models import OutputSettings
 from Results.graphing import construct_title
 from Results.forms import *  # necessary
 from Results.simulation import Simulation
-from Results.utils import delete_supplemental_folder, map_zip_file, delete_all_outputs, is_simulation_stopped
+from Results.utils import delete_supplemental_folder, map_zip_file, delete_all_outputs, is_simulation_stopped, is_simulation_running
 import Results.output_parser
 from Results.summary import list_of_iterations, iterations_complete
+from Results.csv_generator import SummaryCSVGenerator, SUMMARY_FILE_NAME
 
 
 def back_to_inputs(request):
@@ -38,9 +39,17 @@ def simulation_status(request):
 
 
 def results_home(request):
+    from Results.csv_generator import SUMMARY_FILE_NAME
     path_ex = workspace_path(scenario_filename() +"/*.csv")
     start = workspace_path()
     context = {'supplemental_files': [os.path.relpath(file_path, start=start) for file_path in glob(path_ex)]}
+    summary_path = os.path.join(scenario_filename(), SUMMARY_FILE_NAME)
+    try:
+        context['supplemental_files'].remove(summary_path)
+    #             context['supplemental_files'] = [file for file in context['supplemental_files'] if not file.endswith(SUMMARY_FILE_NAME)] # filter out summary.csv
+    except ValueError: pass
+    context['summary_file_name'] = summary_path
+
     if os.path.exists(map_zip_file()):
         context['supplemental_files'].append(os.path.relpath(map_zip_file(), start=start))
     # TODO: value dict file sizes
@@ -206,3 +215,23 @@ def filtered_list(request, prefix):
     model_name, model = get_model_name_and_model(request)
     return result_table(request, model_name, model, globals()[model_name + 'Form'], True, prefix)
 
+
+def summary_csv(request):
+    class HttpResponseAccepted(HttpResponse):
+        status_code = 202
+
+    if request.method == "GET":
+        if SmSession.objects.get().calculating_summary_csv:
+            return HttpResponseAccepted()
+        elif not DailyControls.objects.all().count() or is_simulation_running():
+            return HttpResponseBadRequest()
+        elif not os.path.isfile(workspace_path(scenario_filename() + '/' + SUMMARY_FILE_NAME)):
+            return HttpResponseNotFound()
+        else:
+            return HttpResponse()
+    if request.method == "POST":
+        csv_generator = SummaryCSVGenerator()
+        csv_generator.start()  # starts a new thread
+        return HttpResponseAccepted()
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['GET', 'POST'])

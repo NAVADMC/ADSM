@@ -1,0 +1,9 @@
+{% extends request.is_ajax|yesno:"ScenarioCreator/AjaxBase.html,ScenarioCreator/navigationPane.html" %}
+
+{% block layout_container %}
+<div id="layout-container"> {# Necessary for $(form_html).find('#layout-container') #}
+    {% block main_layout %}
+
+    {% endblock %}
+</div>
+{% endblock %}

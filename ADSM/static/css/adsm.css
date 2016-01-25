@@ -5,7 +5,8 @@
     background-color:white;
 }*/
 
-.row {
+.row,
+.full-width {
     width: 100%;
 }
 
@@ -83,6 +84,7 @@ select {
     padding-right: 20px;
     padding-left: 5px;
     background-color: #fff;
+    max-width:  100%;
 }
 select:required, input:required, textarea:required {
     background-color: rgba(244, 230, 0, .2);
@@ -163,6 +165,7 @@ input[type="checkbox"] {
 }
 .checkbox {
     margin-bottom: 18px;
+    margin-left: 20px;
 }
 /*-------------------------------------------------------------*/
 /*-----readonly form styling-----*/
@@ -321,7 +324,7 @@ header .filename {
     margin-top: 1px;
 }
 .scenario-status p{
-    font-size: 12px;
+    font-size: 18px;
     font-style: italic;
     font-weight: 300;
 }
@@ -332,8 +335,14 @@ header .filename {
     color: white;
     position: fixed;
     top: 25px;
-    left: 83%;
+    right: 3%;
     z-index: 130;
+    /* font-size: 18px !important; */
+}
+
+input#save_scenario {
+    font-size: 18px;
+    color: #9BD9D6;
 }
 
 header .buttonHolder{
@@ -416,9 +425,11 @@ body>nav {
 /*-----3-column layout-----*/
 /*-------------------------------------------------------------*/
 #main-panel {
-    /* float:none; */
-    margin-left: 238px;
-    width: calc(100vw - 324px);
+    width: calc(100vw - 200px - 50px);
+    padding-left: 0;
+    margin-right: 0;
+    margin-left: 200px;
+    z-index: 0;
 }
 
 .layout-panel {
@@ -427,7 +438,7 @@ body>nav {
     height: calc(100vh - 75px);
     overflow-y: auto;
     overflow-x: visible;
-    padding: 0;
+    padding: 0 0 61px 0; /*Fix for #693 and progress bar blocking people's view*/
     position: relative;
 }
 #center-panel,
@@ -454,8 +465,9 @@ body>nav {
     max-width: 500px;
 }
 #left-panel {
-    width:calc(16.667vw + 25px);
+    width: calc(33.333vw - 200px + 25px);
     padding-right: 25px;
+    margin-left:  200px;
 }
 #left-panel .fragment h1:first-of-type,
 section#left-panel h1:first-of-type,
@@ -486,21 +498,7 @@ ul {
     padding-left: 5px; /*prevent style inheritance from above*/
     list-style: none;
 }
-/*-------------------------------------------------------------*/
-/*-----center block-----*/
-/*-------------------------------------------------------------*/
-.center-block { 
-    width: calc(100vw - 60px);
-    padding-left: 200px;
-    margin-right:0;
-    margin-left: 0;
-    z-index: 0;
-}
-@media screen and (max-width: 1200px) {
-    .center-block {
-        padding-left: 160px;
-    }
-}
+
 
 /*---- 2nd-to-3rd-column linking ----*/
 
@@ -680,7 +678,7 @@ ul {
 /*-------------------------------------------------------------*/
 /*-----file panel-----*/
 /*-------------------------------------------------------------*/
-#file_panel, #file_panel #file_list a{
+#file_panel, #file_panel .file_list a{
     background-color: #606060;
     color: rgb(236, 236, 236);
     padding: 1px;
@@ -762,28 +760,42 @@ ul {
     overflow:hidden;
     padding: 4px 0 0 10px;
 }
-#population_panel ul li:hover {
+#population_panel li:hover {
     background-color: #ebebeb;
+}
+#population_panel.add-pt ul li:hover, #population_panel.add-pt ul li a:hover {
     cursor: url("../icons/add_cursor.png"), auto;
 }
-#population_panel ul li:hover, #population_panel ul li a:hover {
-    cursor: url("../icons/add_cursor.png"), auto;
+.productiontypelist option {
+    cursor: url("../icons/remove_cursor.png"), auto;
+}
+.pt-added {
+    color: darkgray;
+    cursor: url("../icons/remove_cursor.png"), auto !important;
 }
 #population_panel a:focus {
     background-color: transparent;
     border: none;
     outline: 0;
 }
-#population_panel ul li a, #population_panel ul li span:first-of-type {
-    width: 25%;
-    min-width: 95px;
+.population-super-column {
+    width: calc(100% - 130px);
+    /* min-width: 95px; */
     display: inline-block;
     padding-right: 10px;
     overflow:hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    color: #606060;
-    text-decoration: none;
+    text-align: right;
+}
+.population-super-column * {
+    display: inline-block;
+}
+.unit-count {
+    width: 80px;
+    margin-left: 20px;
+    float: none;
+    display: inline-block;
 }
 #population_panel input {
     background-color: rgba(244, 230, 0, .2);
@@ -878,12 +890,15 @@ ul {
     transition: bottom .4s ease;
 }
 .edit-button-holder .overwrite-button.reveal {
+    /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 1);
 }
 .edit-button-holder .copy-button.reveal {
+    /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 2);
 }
 .edit-button-holder .btn-cancel.reveal {
+    /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 3);
 }
 
@@ -1359,7 +1374,7 @@ select {
 }
 /**********************/
 
-#file_list li {
+.file_list li {
     font-size: 13px;
     line-height:27px;
     text-decoration: none;
@@ -1367,14 +1382,18 @@ select {
     position: relative;
 }
 
-#file_list {
+.file_list.compact li {
+    line-height: 18px;
+}
+
+.file_list {
     list-style: none;
     margin-bottom: 15px;
     max-width: 600px;
     position: relative;
 }
 
-#file_list a {
+.file_list a {
     color: #404040;
     text-decoration: none;
 }
@@ -1385,7 +1404,7 @@ select {
     top: 0;
 }
 
-#file_list .icon {
+.file_list .icon {
     margin-top: 5px;
     margin-left: 15px;
 }
@@ -1393,7 +1412,7 @@ select {
 .copy-icon,
 .open-button {
     margin-top: 5px;
-    width: 15px;
+    width: 15px !important; /*It isn't a valid animation without this width*/
     height: 18px;
     margin-right: 10px;
     display:block;
@@ -1410,8 +1429,8 @@ select {
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
 .copy-icon:hover,
 .copy-icon:focus {
-    background-position: 15px  0;
-    background-image: url('../icons/copy_sprite.png');
+    background-position: 15px  0 !important;
+    background-image: url('../icons/copy_sprite.png') !important; /*It's not an icon without this background*/
     outline: none;
     background-color: transparent;
 }
@@ -1422,21 +1441,95 @@ select {
     /*background-position: 0 0;*/
 }
 
+.warning-icon {
+    background-image: url('../icons/warning-triangle.png') !important;/*It's not an icon without this background*/
+    background-size: 17px 15px;
+    margin-top: 3px;
+    margin-bottom: 0px;
+    width: 17px !important;
+    height: 15px;
+    margin-right: 10px;
+    display: inline-block;
+    /*float:right;*/
+    opacity: 1;
+}
+
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
 .delete-icon {
     background-image: url('../icons/delete_sprite.png');
     background-repeat-y: no-repeat;
-    background-position: 0 2px;
+    background-position: 0 0;
 }
 .delete-icon:hover,
 .delete-icon:focus {
-    background-position: 15px 2px ;
-    background-image: url('../icons/delete_sprite.png');
+    background-position: 15px 0 !important;
+    background-image: url('../icons/delete_sprite.png') !important; /*It's not an icon without this background*/
     background-repeat-y: no-repeat;
     outline: none;
     background-color: transparent;
 }
 
+.productiontypes-header {
+    height: 18px;
+    width: 20px;
+    margin-left: 10px;
+    display:  inline-block;
+}
+
+.green-dot {
+	display: inline-block;
+	border: 2px solid rgba(102, 102, 102, 0.39);
+	border-radius: 50%;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
+	filter: alpha(opacity=60);
+	opacity: 1;
+	-webkit-box-shadow: 0 0 1px 0px rgb( 255, 255, 255);
+	box-shadow: 0 0 1px 0px rgb( 255, 255, 255);
+	width: 12px;
+	height: 12px;
+	z-index: 86;
+	-webkit-transition: background-color .5s ease-in-out;
+	-moz-transition: background-color .5s ease-in-out;
+	-o-transition: background-color .5s ease-in-out;
+	-ms-transition: background-color .5s ease-in-out;
+	transition: background-color .5s ease-in-out;
+	padding-left: 0px;
+}
+
+.green-dot.filled {
+	background-color: #66bc5d;
+}
+
+.progression-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position-x: -2px;
+    background-image: url('../icons/progression-icon.png')
+}
+.spread-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position-x: 0px;
+    background-image: url('../icons/spread-icon.png')
+}
+.control-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position-x: -1px;
+    background-image: url('../icons/control-icon.png')
+}
+.zone-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position-x: -2px;
+    background-image: url('../icons/zone-icon.png')
+}
+
+
+
+
+
+/**********************/
 input[type=file], button {
     display: inline;
 }
@@ -1446,23 +1539,23 @@ input[type=file], button {
 }*/
 
 
-#file_list .defined{
+.file_list .defined{
     border-radius: 2px;
     margin-bottom: 2px;
 }
-#file_list .defined:hover {
+.file_list .defined:hover {
     background: rgba(206, 199, 192, .25);
 }
-#file_list li.focused {
+.file_list li.focused {
     background: rgba(206,199,192,.5);
     box-shadow: inset 0 0 0 1px #cec7c0;
     border-bottom: 1px solid transparent;
     position:relative;
 }
-#file_list li.focused:hover {
+.file_list li.focused:hover {
     background: rgba(206,199,192,.5);
 }
-#file_list .defined.focused:after {
+.file_list .defined.focused:after {
     content:"";
     width: 25px;
     height: 2px;
@@ -1472,35 +1565,37 @@ input[type=file], button {
     display: block;
     background-color: #cec7c0;
 }
-#file_list li.focused a{
+.file_list li.focused a{
     opacity: 1;
     color: black;
 }
-#file_list .defined a.defined_name:hover {
+.file_list .defined a.defined_name:hover {
     color: black;
 }
-#file_list .defined a.defined_name:focus,
-#file_list .defined a.defined_name:active {
+.file_list .defined a.defined_name:focus,
+.file_list .defined a.defined_name:active {
     background: transparent !important;
     border:none !important;
     outline:none !important;
 }
-#file_list .defined_wrapper {
+.file_list .defined_wrapper {
     white-space: nowrap;
     padding-right: 45px;
     position:relative;
 }
 .defined_name {
-    display: block;
+    display: inline-block;
     padding-left: 5px;
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* line-height: 20px; */
+    padding-top: 4px;
 }
 .defined_name:hover {
     cursor: default;
 }
-#file_list li:hover a{
+.file_list li:hover a{
     opacity: 1;
 }
 
@@ -1509,14 +1604,25 @@ input[type=file], button {
     top: 0;
     right: 0;
     margin-right: 5px;
-    opacity: .3;
+    opacity: .6;
 }
 .defined_wrapper .copy-icon {
     position: absolute;
     top: 0;
     right: 20px;
     margin-right: 5px;
-    opacity: .3;
+    opacity: 0.6;
+}
+
+.fat_checkbox,
+.defined_wrapper input[type="checkbox"].fat_checkbox {/*A little ridiculous overriding bootstrap*/
+    display: inline-block;
+    margin-left: 1px;
+    margin-right: 9px;
+}
+
+.nav-tabs { /*Hides the crispy forms tabs from the TabHolder*/
+    display: none;
 }
 /*-------------------------------------------------------------*/
 /*-----population.html-----*/
@@ -1565,6 +1671,9 @@ section#population_main_panel h1:first-of-type {
     float: left;
     margin-left: -15px;
     margin-top: -6px;
+}
+.map-fine-print {
+    font-size: 12px;
 }
 #refresh_map {
     position: absolute;
@@ -1628,7 +1737,7 @@ section#population_main_panel h1:first-of-type {
 
 #farm_list tbody{
     display: inline-block;
-    height: calc(100vh - 218px);
+    height: calc(100vh - 232px);
     overflow-y: auto;
     width: 100%;
     position: relative;
@@ -1754,10 +1863,10 @@ section#population_main_panel h1:first-of-type {
 }
 #farm_filter select {
     margin: 0;
-    width: 98px;
+    width: 129px;
 }
 #farm_filter input {
-    width: 60px;
+    width: 87px;
     height: 21px;
 }
 #farm_filter #production_type__name td:nth-child(2),
@@ -1857,7 +1966,7 @@ section#population_main_panel h1:first-of-type {
 }
 #edit_population {
     position: absolute;
-    top: calc(100vh - 172px);
+    top: calc(100vh - 187px);
     right: 25px;
     transition: opacity .2s ease
 }
@@ -1989,7 +2098,7 @@ th:hover .sortControls{
     color:#404040;
     font-weight: 600;
     display:block;
-    width: 100%;
+    width: calc(100% - 30px);
     padding-left: 5px;
 }
 
@@ -1999,6 +2108,7 @@ th:hover .sortControls{
     border: none;
     outline: 0;
     background: transparent;
+    background-repeat-y: no-repeat;
 }
 #left-panel .panel-group:not(:first-of-type) {
     border-top: 1px solid #ccc;
@@ -2018,11 +2128,6 @@ table tbody span {
 
 table tbody span:hover { /*necessary in addtion to disableSelection() to preserve cursor appearance*/
     cursor: pointer;
-}
-
-.relevant .selected, .highlight { /*column is relevant and user has selected the row for many-to many-widget.js*/
-    font-weight: 600;
-    background-color: #d7f5ff;
 }
 
 /*Disabled control fields: include text labels*/
@@ -2166,7 +2271,7 @@ select[multiple] {}
     padding: 5px 10px;
 }
 .productiontypelist:after {
-    content:"To add production types to the trigger click on a Type or Group f"
+    content:"To add production types to the trigger click on a Type in the Population Panel";
     white-space: pre-wrap;
     font-style: italic;
     color: #808080;
@@ -2192,24 +2297,85 @@ select[multiple] {}
 /*----------------------------------------------------*/
 /*----- Assign Disease Spread -----*/
 /*----------------------------------------------------*/
-.intro_text, #assign_spread_wrapper{
+.spread-grid-table {
+    margin-top: 87px;
+}
+.intro_text {
     padding: 0;
 }
 .intro_text, .intro_text p {
     color: #606060;
 }
-.m2mtable select, #all-interactions select {
-    max-width: 260px;
+.spread-grid-table span {
+    width: 67px;
+    height: 18px;
+    /* margin: 5px 0; */
+    /* background-color: #BDBDBD; */
 }
-#all-interactions {
-    width: calc(100% - 0px);}
+
+span.IndirectSpread {
+    margin: 3px 0;
+}
+
+.DirectSpread.assigned {
+    background-color: rgb(161, 134, 87);
+}
+
+.IndirectSpread.assigned {
+    background-color: rgb(146, 203, 170);
+}
+
+.AirborneSpread.assigned {
+    background-color: rgb(52, 192, 209);
+}
+
+.spread-cell {
+    border: solid 1px #B6B6B6;
+    margin: 0px;
+}
+
+.spread-grid-table td {
+    padding: 3px;
+}
+
+.spread-destinations {
+    white-space: nowrap;
+    /* overflow: hidden; */
+    /* text-overflow: ellipsis; */
+    max-width: 75px;/* Safari */
+    -webkit-transform: rotate(-56deg);/* Firefox */
+    -moz-transform: rotate(-45deg);
+    padding-left: 25px;
+    padding-top: 23px;
+}
+
+.spread-source {
+    text-align: right;
+}
+
+.spread-display-selector * {
+    display: inline-block;
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+.spread-display-selector input {
+    width: 26px;
+    height: 17px;
+    margin-top: 16px;
+    background: white;
+}
 /*-------------------------------------------------------------*/
 /*-----left aligned scrollbars-----*/
 /*-------------------------------------------------------------*/
-#center-panel .fragment, #left-panel {
-    direction: rtl;
+#center-panel>.fragment, #left-panel {
+    direction: rtl; /*TODO this really really needs to change because it affects decedents. The desire here was to
+    put the scrollbars on the left hand side, which should really be done with a scrollbar meta property.*/
 }
-#center-panel .fragment form, #left-panel h1, #left-panel div {
+#center-panel .fragment form,
+#center-panel .fragment div,
+#left-panel h1,
+#left-panel div {
     direction: ltr;
 }
 ::-webkit-scrollbar-thumb {
@@ -2310,7 +2476,7 @@ select[multiple] {}
     border-color: #ba3e44;
 }
 #legend-right li:last-child {
-    border-color: #606060;
+    border-color: rgb(234, 125, 48);
 }
 @media screen and (max-height: 800px){
     #legend {
@@ -2401,6 +2567,13 @@ select[multiple] {}
     #setupMenu h3,
     #setupMenu h4 {
         width: 140px;
+    }
+
+    #left-panel, #main-panel {
+        margin-left: 165px;
+    }
+    #left-panel {
+        width: calc(33.333vw - 165px + 25px);
     }
     #setupMenu a {
         padding-left: 15px;
@@ -2501,4 +2674,90 @@ select[multiple] {}
     padding-bottom: 80px;
 }
 
+/*//credit: http://jsfiddle.net/AndrewDryga/zcX4h/1/*/
+.spinner {
+  display: inline-block;
+  opacity: 0;
+  width: 0;
 
+  -webkit-transition: opacity 0.25s, width 0.25s;
+  -moz-transition: opacity 0.25s, width 0.25s;
+  -o-transition: opacity 0.25s, width 0.25s;
+  transition: opacity 0.25s, width 0.25s;
+}
+
+.has-spinner.active {
+  cursor:progress;
+}
+
+.has-spinner.active .spinner {
+  opacity: 1;
+  width: auto; /* This doesn't work, just fix for unkown width elements */
+}
+
+.has-spinner.btn-mini.active .spinner {
+    width: 30px;
+}
+
+/*** Icon Spin taken from font-awesome.css  "Font Awesome by Dave Gandy - http://fortawesome.github.com/Font-Awesome" ***/
+.icon-spin {
+    display: inline-block;
+    -moz-animation: spin 2s infinite linear;
+    -o-animation: spin 2s infinite linear;
+    -webkit-animation: spin 2s infinite linear;
+    animation: spin 2s infinite linear
+}
+
+@-moz-keyframes spin {
+    0% {
+        -moz-transform: rotate(0deg)
+    }
+    100% {
+        -moz-transform: rotate(359deg)
+    }
+}
+
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg)
+    }
+    100% {
+        -webkit-transform: rotate(359deg)
+    }
+}
+
+@-o-keyframes spin {
+    0% {
+        -o-transform: rotate(0deg)
+    }
+    100% {
+        -o-transform: rotate(359deg)
+    }
+}
+
+@-ms-keyframes spin {
+    0% {
+        -ms-transform: rotate(0deg)
+    }
+    100% {
+        -ms-transform: rotate(359deg)
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg)
+    }
+    100% {
+        transform: rotate(359deg)
+    }
+}
+
+@-moz-document url-prefix() {
+    .icon-spin {
+        height: .9em
+    }
+    .btn .icon-spin {
+        height: auto
+    }
+}

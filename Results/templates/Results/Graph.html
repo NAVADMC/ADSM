@@ -3,9 +3,17 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
+
     <h1 id="title">{{ title }}</h1>
 
     {% for img_link in image_links %}
         <img src="{{ img_link }}" alt="Graph of {{ title }}"/>
     {% endfor %}
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+    <p></p>
+    <button onclick="goBack()" class="btn btn-primary">Go Back</button>
 {% endblock %}

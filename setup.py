@@ -3,6 +3,7 @@ import os
 import stat
 import pip
 import shutil
+import subprocess
 
 from cx_Freeze import setup, Executable, build_exe
 from importlib import import_module
@@ -28,6 +29,7 @@ build_exe_options = {
     'build_exe': 'build',
     'optimize': 2,
     'excludes': [
+        'PyInstaller',
         # CHANGE ME for any python packages in your project that you want excluded
         'development_scripts',
     ],
@@ -41,7 +43,6 @@ build_exe_options = {
         'shutil',
     ],
     'replace_paths': [('*', '')],
-    'compressed': False,
     'include_files': [
         # Standard Django items to bring in
         ('static', 'static'),
@@ -58,7 +59,7 @@ build_exe_options = {
 }
 files = (file for file in os.listdir(settings.BASE_DIR) if os.path.isfile(os.path.join(settings.BASE_DIR, file)))
 for file in files:
-    if [file for part in ['.so', '.dll', '.url', 'npu'] if part.lower().split(' ')[0] in file.lower()] or is_exe(os.path.join(settings.BASE_DIR, file)):
+    if [file for part in ['.so', '.dll', '.url', 'npu', 'webpack-stats.json'] if part.lower().split(' ')[0] in file.lower()] or is_exe(os.path.join(settings.BASE_DIR, file)):
         build_exe_options['include_files'].append((file, file))
 
 
@@ -191,6 +192,8 @@ def parse_requirements_and_links(requirements_file, existing_requirements=None, 
     return existing_requirements, existing_links
 
 
+# TODO: This build doesn't quite work in Linux. The files don't end up in the proper location.
+# Currently you must manually move files around after the build finishes to get it to work in Linux.
 class BuildADSM(build_exe):
     def run(self):
         print("\nYou should only run this build script if you are a CLEAN VirtualEnv!\n"
@@ -201,6 +204,15 @@ class BuildADSM(build_exe):
 
         if not os.path.exists(os.path.join(settings.BASE_DIR, 'static')):
             os.makedirs(os.path.join(settings.BASE_DIR, 'static'))
+
+        print("Preparing to pack client files...")
+        webpack_command_path = os.path.join('.', 'node_modules', '.bin', 'webpack')
+        webpack_command = webpack_command_path + ' --config webpack.config.js'
+        webpack = subprocess.Popen(webpack_command, cwd=os.path.join(settings.BASE_DIR), shell=True)
+        print("Packing client files...")
+        outs, errs = webpack.communicate()  # TODO: Possible error checking
+        print("Done packing.")
+
         management.call_command('collectstatic', interactive=False, clear=True)
         if not os.path.exists(os.path.join(settings.BASE_DIR, 'media')):
             os.makedirs(os.path.join(settings.BASE_DIR, 'media'))
@@ -247,13 +259,16 @@ class BuildADSM(build_exe):
 
         build_exe.run(self)
 
+        # Cleanup the build dir by moving binary dependencies into bin/env
         files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, self.build_exe)) if os.path.isfile(os.path.join(settings.BASE_DIR, self.build_exe, file)))
         os.makedirs(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
         for file in files:
             # TODO: Check for linux python.so files
-            if not [file for part in ['library.zip', 'README.md', 'python34.dll', 'MSVCR100.dll', 'npu', '.url'] if part.lower().split(' ')[0] in file.lower()] and not is_exe(os.path.join(settings.BASE_DIR, self.build_exe, file)):  #NOTE: The split here could cause issues and is speculative
+            if not [file for part in ['library.zip', 'README.md', 'python34.dll', 'MSVCR100.dll', 'npu', '.url', 'webpack-stats.json'] if part.lower().split(' ')[0] in file.lower()] and not is_exe(os.path.join(settings.BASE_DIR, self.build_exe, file)):  #NOTE: The split here could cause issues and is speculative
                 shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, file),
                             os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file))
+
+        # Find the Viewer application and make sure it is packaged
         viewer = None
         possible_viewer_files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, 'Viewer', settings.OS_DIR)) if os.path.isfile(os.path.join(settings.BASE_DIR, 'Viewer', settings.OS_DIR, file)))
         for possible_viewer in possible_viewer_files:
@@ -262,6 +277,18 @@ class BuildADSM(build_exe):
                 break
         if viewer:
             shutil.copy(os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', settings.OS_DIR, viewer), os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', settings.OS_DIR, viewer.replace('Viewer', 'ADSM_Viewer')))
+
+        # Look for any DLLs that the included packages may have and copy them into bin/env as well
+        for package in self.packages:
+            try:
+                package = import_module(package)
+                location = os.path.dirname(package.__file__)
+                for root, dirnames, filenames in os.walk(location):
+                    for filename in filenames:
+                        if filename.lower().split('.')[-1] in 'dll so'.split():
+                            shutil.copy(os.path.join(root, filename), os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', filename))
+            except:
+                continue
 
 
 base = None

@@ -30,13 +30,41 @@ def create_no_duplicates(ModelClass, suggested_name, **kwargs):
     if suggested_name is not None:  # TODO: use Django _meta to check for a field called "name"
         # Remove comma from suggested_name because we use commas as a separator
         suggested_name = suggested_name.replace(',','')
+        # Limit the length of the name.
+        name_length_limit = 255
+        continuation = '...'
         if created:
-            instance.name = suggested_name
+            if len(suggested_name) <= name_length_limit:
+                instance.name = suggested_name
+            else:
+                instance.name = suggested_name[:name_length_limit-len(continuation)] + continuation
+            instance.save()
         else:
-            current_name_parts = set(instance.name.split(', '))
-            if suggested_name not in current_name_parts:
-                instance.name += ', ' + suggested_name
-        instance.save()
+            # When multiple elements in the original XML produce are combined
+            # into just one entity in the database, take the suggested names
+            # for those elements and combine them into a comma-separated list.
+
+            # If the name already ends with the continuation string, then it's
+            # already long enough.
+            if not instance.name.endswith(continuation):
+                current_name_parts = set(instance.name.split(', '))
+                # If the suggested name is already in the comma-separated list,
+                # then we don't need to do anything.
+                if suggested_name not in current_name_parts:
+                    name_parts = instance.name.split(', ') + [suggested_name]
+                    truncated = False
+                    while True:
+                        if truncated:
+                            instance.name = ', '.join(name_parts + [continuation])
+                        else:
+                            instance.name = ', '.join(name_parts)
+                        if len(instance.name) > name_length_limit:
+                            del(name_parts[-1]) # remove the last name_part
+                            truncated = True
+                        else:
+                            break
+                    # end of loop to truncate name to desired length
+                    instance.save()
     return instance, created
 
 
@@ -545,7 +573,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             zone, created = create_no_duplicates(Zone, suggested_name=name, radius=radius )
     # end of loop over <zone-model> elements
 
-    status("Reading Contact Spread Models...")
+    status("Building Contact Spread Models")
     for el in xml.findall( './/contact-spread-model' ):
         if 'zone' in el.attrib:
             continue
@@ -602,7 +630,6 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     disease.include_indirect_contact_spread = True
                 else:
                     assert False
-                disease.save()
 
                 pairing, created = DiseaseSpreadAssignment.objects.get_or_create(
                     source_production_type = ProductionType.objects.get( name=fromTypeName ),
@@ -616,8 +643,9 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             # end of loop over to-production-types covered by this <contact-spread-model> element
         # end of loop over from-production-types covered by this <contact-spread-model> element
     # end of loop over <contact-spread-model> elements without a "zone" attribute
+    disease.save()
 
-    status("Building Contact Spread Model")
+    status("Building In-Zone Movement Controls")
     for el in xml.findall( './/contact-spread-model' ):
         if 'zone' not in el.attrib:
             continue
