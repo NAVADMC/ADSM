@@ -214,6 +214,10 @@ form.editable input{
     display: none;
 }
 
+.probability-form .help-block { /*Fixes #663 by hiding all help blocks under probability functions*/
+    display: none;
+}
+
 .hide-help {
     height: 0;
 }
