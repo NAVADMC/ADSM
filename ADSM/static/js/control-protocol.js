@@ -104,16 +104,28 @@ var hide_hidden_labels = function(){
 
 var check_enabled_tabs = function(use_check){
     //handle proxy before computing
-    if(typeof use_check !== 'undefined' &&
-        $(use_check).attr('data-proxy')){ // this check box is in the model list, not in a form
+    // this check box is in the model list, not in a form
+    if(typeof use_check !== 'undefined' && $(use_check).attr('data-proxy')){
+        var name = $(use_check).attr('name');
         var value = $(use_check).prop('checked');
         if(value){
-            $(use_check).closest('.defined_wrapper').find('.warning-icon').removeClass('hidden');
+            $(use_check).closest('.defined_wrapper').find('.warning-icon').removeClass('hidden');//if checked, unhide
         }else{
-            $(use_check).closest('.defined_wrapper').find('.warning-icon').addClass('hidden');
+            $(use_check).closest('.defined_wrapper').find('.warning-icon').addClass('hidden');//if unchecked, then hide
+
+            //special rules for dependent relationships: these changes cause additional check_enabled_tabs() to be called
+            var dependents = {use_tracing:"use_exams use_testing".split(' '),
+                use_detection:"use_tracing use_exams use_testing use_destruction use_vaccination use_cost_accounting".split(' ')}
+            if(name in dependents){
+                var header_list = $(use_check).closest('ul')
+                $.map(dependents[name], function(child, index){
+                    header_list.find('[name="' + child + '"]').prop('checked', false)
+                });
+            }
         }
-        var url = get_parent_title(use_check).attr('href') + $(use_check).attr('name') + '/'; // use_detection
+        var url = get_parent_title(use_check).attr('href') + name + '/'; // use_detection
         $.post(url, {'value': value});
+
 
         if(current_is_active(use_check)) { // this is relevant to the currently active form and not some other one
             $($(use_check).attr('data-proxy')).prop('checked', $(use_check).prop('checked'));
