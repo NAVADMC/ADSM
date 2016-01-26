@@ -109,16 +109,28 @@ var check_enabled_tabs = function(use_check){
     if(typeof $use_check !== 'undefined' && $use_check.attr('data-proxy')){
         var name = $use_check.attr('name');
         var value = $use_check.prop('checked');
+        //special rules for dependent relationships: these changes cause additional check_enabled_tabs() to be called
+        var dependents = {use_tracing:"use_exams use_testing".split(' '),
+            use_detection:"use_tracing use_exams use_testing use_destruction use_vaccination use_cost_accounting".split(' ')}
+        var header_list = $use_check.closest('ul')
         if(value){
             $use_check.closest('.defined_wrapper').find('.warning-icon').removeClass('hidden');//if checked, unhide
+
+            //enable what you depend on
+            $.map(dependents, function(value, key){
+                if(value.indexOf(name) != -1){ //I'm a dependent
+                    var $required = header_list.find('[name="' + key + '"]');
+                    if($required.prop('checked') == false){
+                        $required.prop('checked', true)
+                        $required.change() // causes server update
+                    }
+                }
+            })
         }else{
             $use_check.closest('.defined_wrapper').find('.warning-icon').addClass('hidden');//if unchecked, then hide
 
-            //special rules for dependent relationships: these changes cause additional check_enabled_tabs() to be called
-            var dependents = {use_tracing:"use_exams use_testing".split(' '),
-                use_detection:"use_tracing use_exams use_testing use_destruction use_vaccination use_cost_accounting".split(' ')}
+            //disable dependents
             if(name in dependents){
-                var header_list = $use_check.closest('ul')
                 $.map(dependents[name], function(child, index){
                     var el = header_list.find('[name="' + child + '"]');
                     el.prop('checked', false)
