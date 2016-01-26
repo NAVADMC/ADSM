@@ -292,6 +292,20 @@ class BuildADSM(build_exe):
             except:
                 continue
 
+        # Cleanup the webpack-stats file so it doesn't have full path info
+        if os.path.exists(os.path.join(settings.BASE_DIR, self.build_exe, 'webpack-stats.json')):
+            f = open(os.path.join(settings.BASE_DIR, self.build_exe, 'webpack-stats.json'), 'r')
+            filedata = f.read()
+            f.close()
+
+            newdata = filedata.replace('\\\\', '\\')  # A slash dance is required for string matching vs file writing
+            newdata = newdata.replace(settings.BASE_DIR, '.')
+            newdata = newdata.replace('\\', '\\\\')
+
+            f = open(os.path.join(settings.BASE_DIR, self.build_exe, 'webpack-stats.json'), 'w')
+            f.write(newdata)
+            f.close()
+
 
 base = None
 requirements, urls = parse_requirements_and_links(os.path.join(settings.BASE_DIR, 'Requirements.txt'))
