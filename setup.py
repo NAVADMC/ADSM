@@ -261,7 +261,18 @@ class BuildADSM(build_exe):
 
         build_exe.run(self)
 
-        # Cleanup the build dir by moving binary dependencies into bin/env
+        # Cleanup the build dir
+        if sys.platform != 'win32':  # If we are on a unix type system
+            lib_files = os.listdir(os.path.join(settings.BASE_DIR, self.build_exe, 'lib'))
+            for file in lib_files:
+                if "python" not in str(file).lower():
+                    shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, 'lib', file), os.path.join(settings.BASE_DIR, self.build_exe, file))
+            if os.path.exists(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env')):
+                env_files = os.listdir(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
+                for file in env_files:
+                    shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file), os.path.join(settings.BASE_DIR, self.build_exe, file))  
+
+        # move binary dependencies into bin/env
         files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, self.build_exe)) if os.path.isfile(os.path.join(settings.BASE_DIR, self.build_exe, file)))
         os.makedirs(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
         for file in files:
