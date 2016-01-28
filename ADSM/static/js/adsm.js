@@ -723,8 +723,9 @@ function reload_model_list($form) { //TODO: change this to expect a fragment
     $('#left-panel').load(window.location + " #left-panel>*, script");
     if(typeof $form !== 'undefined'  && $form.length){
         var action = $form[0]['action']; //.attr('action');
-        if(action.indexOf('ProductionGroup') != -1 || action.indexOf('ProductionType') != -1){
-            $('#population_panel').load("/setup/OutputSettings/1/ #population_panel>*")
+        if(action.indexOf('ProductionGroup') != -1){
+            $('#production_group_container').load("/setup/PopulationPanel/ #production_group_container>*")  //new address for ajax loading
+            //#707 Fix by loading only the production group section dynamically
         }
     }
 }

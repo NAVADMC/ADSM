@@ -17,6 +17,7 @@ urlpatterns = patterns('', url('^AssignSpreads/$', 'ScenarioCreator.views.assign
          url('^Population/new/$', 'ScenarioCreator.views.population'),
          url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population'),
          url('^OpenPopulation/(?P<target>.+)$', 'ScenarioCreator.views.open_population'),
+         url('^PopulationPanel/$', 'ScenarioCreator.views.population_panel_only'),
          url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario'),
          url('^ProductionTypeList.json/$', 'ScenarioCreator.views.production_type_list_json'),
          url('^PopulationPanelStatus.json/$', 'ScenarioCreator.views.population_panel_status_json'),

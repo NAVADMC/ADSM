@@ -47,6 +47,15 @@ def add_breadcrumb_context(context, model_name, primary_key=None):
         context['title'] = 'Edit the ' + spaces_for_camel_case(model_name)
 
 
+def population_panel_only(request):
+    """#707 Fix by loading the production group section dynamically
+    When creating new Production Type Groups, the population panel needs to be loaded asynchronously, but
+    the contents depends on the context processor, which is normally only run on non-ajax requests.  This function
+    collects the context in Ajax calls"""
+    context = {'ProductionGroups': ProductionGroup.objects.all()}
+    return render(request, 'population_panel.html', context)
+
+
 def production_type_list_json(request):
     msg = list(ProductionType.objects.values_list('name', 'id'))
     return JsonResponse(msg, safe=False)  # necessary to serialize a list object
