@@ -243,7 +243,7 @@ class FunctionalTests(StaticLiveServerTestCase):
         self.setup_scenario()
         self.click_navbar_element("Zone Effects", 2)
         
-        self.find('.addNew').click()
+        self.find('.addNew a').click()
         time.sleep(1)
         self.select_option('id_zone_indirect_movement', 'Add...')
         
