@@ -9,6 +9,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions
 
 from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
     ProbabilityFunction, RelationalFunction, RelationalPoint, Population, \
@@ -112,8 +114,10 @@ class FunctionalTests(StaticLiveServerTestCase):
     def find(self, selector):
         return self.selenium.find_element_by_css_selector(selector)
 
-    def select_option(self, element_id, visible_text):
-        target = self.selenium.find_element_by_id(element_id)
+    def select_option(self, element_id, visible_text, timeout=10):
+        target = WebDriverWait(self.selenium, timeout).until(
+            expected_conditions.presence_of_element_located((By.ID, element_id))
+        )
         Select(target).select_by_visible_text(visible_text)
         time.sleep(2)  # wait for panel loading
 
@@ -244,7 +248,9 @@ class FunctionalTests(StaticLiveServerTestCase):
         self.click_navbar_element("Zone Effects", 2)
         
         self.find('.addNew a').click()
-        time.sleep(1)
+        WebDriverWait(self.selenium, timeout=10).until(
+            expected_conditions.presence_of_element_located((By.ID, '-setup-ZoneEffect-new-'))
+        )
         self.select_option('id_zone_indirect_movement', 'Add...')
         
         right_panel = self.find('#functions_panel')
