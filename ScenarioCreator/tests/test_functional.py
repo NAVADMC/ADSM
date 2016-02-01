@@ -157,7 +157,7 @@ class FunctionalTests(StaticLiveServerTestCase):
         time.sleep(1)  # there's a reload here
         self.find('#functions_panel .edit-button').click()
         time.sleep(1)  # animate
-        self.find('#functions_panel .btn-cancel').click()
+        self.find('#functions_panel .edit-button-holder .btn-cancel').click()
         time.sleep(1)
 
         with self.assertRaises(NoSuchElementException):
