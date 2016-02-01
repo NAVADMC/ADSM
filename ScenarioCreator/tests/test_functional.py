@@ -220,9 +220,18 @@ class FunctionalTests(StaticLiveServerTestCase):
     def test_deepest_modal_edit_and_file_upload(self):
         self.setup_scenario()
         self.click_navbar_element("Disease Progression")
-        
-        self.select_option('id_form-0-progression', 'Add...')
-        self.select_option('id_disease_latent_period','Add...')
+
+        self.selenium.find_element_by_partial_link_text("Cattle Reaction").click()
+        # The panel that comes up has id="-setup-DiseaseProgression-1-" when this test is run in isolation, but
+        # id="-setup-DiseaseProgression-2-" when the whole series of tests is run. Weird, but we get around it by
+        # doing a partial id match using XPath.
+        WebDriverWait(self.selenium, timeout=10).until(
+            expected_conditions.presence_of_element_located((By.XPATH, "//*[starts-with(@id, '-setup-DiseaseProgression-')]"))
+        )
+        self.select_option('id_disease_latent_period','Subclinical period - cattle')
+        WebDriverWait(self.selenium, timeout=10).until(
+            expected_conditions.visibility_of_element_located((By.ID, 'functions_panel'))
+        )
         self.find('#functions_panel .edit-button').click()
         time.sleep(1)
         self.find('.overwrite-button').click()
