@@ -232,12 +232,19 @@ class FunctionalTests(StaticLiveServerTestCase):
 
         time.sleep(1)
 
-        modal = self.find('div.modal')
+        relational_form = self.find('#-setup-RelationalFunction-new-')
 
-        self.assertIn("Import Points from File", modal.text)
+        self.assertIn("Import Points from File", relational_form.text)
 
         #check and see if you can build a Rel from file upload
-        self.submit_relational_form_with_file(modal)
+        relational_form.find_element_by_id("file").send_keys(
+            os.path.join(settings.BASE_DIR, "ScenarioCreator","tests","population_fixtures","points.csv"))  # this is sensitive to the starting directory
+        relational_form.find_element_by_id('id_name').send_keys('imported from file')
+        # Do a "submit" instead of clicking the Apply button. On shorter screens, the Apply button may not be visible,
+        # causing the click to fail, and none of the suggested solutions I found for scrolling the button into view
+        # worked.
+        relational_form.submit()
+        time.sleep(3)
         self.select_option('id_graph', 'Add...')
         modal = self.find('div.modal')
         self.assertEqual("123.1", modal.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
