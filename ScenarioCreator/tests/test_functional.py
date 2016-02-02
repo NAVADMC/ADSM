@@ -140,7 +140,7 @@ class FunctionalTests(StaticLiveServerTestCase):
         DiseaseProgressionAssignment.objects.create(production_type=cattle, progression=disease_progression)
 
         self.click_navbar_element('Disease Progression')
-        self.find('.defined_name').click()
+        self.selenium.find_element_by_partial_link_text('Rename Test').click()
         time.sleep(3)
         self.find('#center-panel').find_element_by_css_selector('select').click()
         time.sleep(1)
