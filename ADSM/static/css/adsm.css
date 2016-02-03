@@ -214,6 +214,10 @@ form.editable input{
     display: none;
 }
 
+.probability-form .help-block { /*Fixes #663 by hiding all help blocks under probability functions*/
+    display: none;
+}
+
 .hide-help {
     height: 0;
 }
@@ -873,6 +877,12 @@ ul {
     width: 100%;
     height: 42px;
 }
+
+.modal-body .button-footer {
+    bottom: -50px;
+    right: 0;
+}
+
 .edit-button-holder{
     position: relative;
     left: 0px;

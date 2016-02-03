@@ -187,7 +187,10 @@ def getPdf( xml, nameGenerator ):
         zeta = float( required_text(firstChild, './zeta' ) )
         sigma = float( required_text(firstChild, './sigma' ) )
         sigma_sq = sigma*sigma
-        args['mean'] = exp( zeta + sigma_sq/2 )
+        try:
+	        args['mean'] = exp( zeta + sigma_sq/2 )
+        except OverflowError:
+            raise OverflowError('mean of lognormal with zeta=%g, sigma=%g' % (zeta,sigma))
         variance = exp( 2*zeta + sigma_sq ) * (exp(sigma_sq) - 1)
         args['std_dev'] = sqrt(variance)
     elif pdfType == 'negative-binomial':

@@ -49,6 +49,7 @@ build_exe_options = {
         ('media', 'media'),
         ('bin', 'bin'),
         (os.path.join('Viewer', settings.OS_DIR), os.path.join('Viewer', settings.OS_DIR)),  # Newline's View application for Django Desktop Core
+        ('npu.exe' if sys.platform == 'win32' else 'npu', 'npu.exe' if sys.platform == 'win32' else 'npu'),  # Newline's Updater application for Django Desktop Core
         ('README.md', 'README.md'),
 
         # CHANGE ME for any files/folders you want included with your project
@@ -59,7 +60,8 @@ build_exe_options = {
 }
 files = (file for file in os.listdir(settings.BASE_DIR) if os.path.isfile(os.path.join(settings.BASE_DIR, file)))
 for file in files:
-    if [file for part in ['.so', '.dll', '.url', 'npu', 'webpack-stats.json'] if part.lower().split(' ')[0] in file.lower()] or is_exe(os.path.join(settings.BASE_DIR, file)):
+    # We need to check for the npu here instead of just including it as it would come up as an exe in the is_exe check
+    if [file for part in ['.so', '.dll', '.url', 'webpack-stats.json'] if part.lower().split(' ')[0] in file.lower()] or is_exe(os.path.join(settings.BASE_DIR, file)) and 'npu' not in file:
         build_exe_options['include_files'].append((file, file))
 
 
@@ -259,7 +261,18 @@ class BuildADSM(build_exe):
 
         build_exe.run(self)
 
-        # Cleanup the build dir by moving binary dependencies into bin/env
+        # Cleanup the build dir
+        if sys.platform != 'win32':  # If we are on a unix type system
+            lib_files = os.listdir(os.path.join(settings.BASE_DIR, self.build_exe, 'lib'))
+            for file in lib_files:
+                if "python" not in str(file).lower():
+                    shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, 'lib', file), os.path.join(settings.BASE_DIR, self.build_exe, file))
+            if os.path.exists(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env')):
+                env_files = os.listdir(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
+                for file in env_files:
+                    shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file), os.path.join(settings.BASE_DIR, self.build_exe, file))  
+
+        # move binary dependencies into bin/env
         files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, self.build_exe)) if os.path.isfile(os.path.join(settings.BASE_DIR, self.build_exe, file)))
         os.makedirs(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
         for file in files:
@@ -289,6 +302,20 @@ class BuildADSM(build_exe):
                             shutil.copy(os.path.join(root, filename), os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', filename))
             except:
                 continue
+
+        # Cleanup the webpack-stats file so it doesn't have full path info
+        if os.path.exists(os.path.join(settings.BASE_DIR, self.build_exe, 'webpack-stats.json')):
+            f = open(os.path.join(settings.BASE_DIR, self.build_exe, 'webpack-stats.json'), 'r')
+            filedata = f.read()
+            f.close()
+
+            newdata = filedata.replace('\\\\', '\\')  # A slash dance is required for string matching vs file writing
+            newdata = newdata.replace(settings.BASE_DIR, '.')
+            newdata = newdata.replace('\\', '\\\\')
+
+            f = open(os.path.join(settings.BASE_DIR, self.build_exe, 'webpack-stats.json'), 'w')
+            f.write(newdata)
+            f.close()
 
 
 base = None

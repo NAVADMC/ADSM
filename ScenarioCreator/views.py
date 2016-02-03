@@ -47,6 +47,15 @@ def add_breadcrumb_context(context, model_name, primary_key=None):
         context['title'] = 'Edit the ' + spaces_for_camel_case(model_name)
 
 
+def population_panel_only(request):
+    """#707 Fix by loading the production group section dynamically
+    When creating new Production Type Groups, the population panel needs to be loaded asynchronously, but
+    the contents depends on the context processor, which is normally only run on non-ajax requests.  This function
+    collects the context in Ajax calls"""
+    context = {'ProductionGroups': ProductionGroup.objects.all()}
+    return render(request, 'population_panel.html', context)
+
+
 def production_type_list_json(request):
     msg = list(ProductionType.objects.values_list('name', 'id'))
     return JsonResponse(msg, safe=False)  # necessary to serialize a list object
@@ -273,12 +282,18 @@ def protocols_json(request):
 
 
 def update_protocol_enabled(request, primary_key, field):
+    """Does nothing but save the `field` value to the database.  Ex: use_detection use_tracing use_destruction
+    use_vaccination use_exams use_testing use_cost_accounting"""
     #data = json.loads(request.POST.content.decode())
     value = request.POST.get('value') == 'true'  #False otherwise
     ControlProtocol.objects.filter(id=int(primary_key)).update(**{field: value})  # specifically the value of field, not the word 'field'
     return JsonResponse({})
 
 def collect_backlinks(model_instance):
+    """:param model_instance: Django Model Instance
+    :return: A dict of Models that reference the current
+    Useful for determining if an instance can be deleted.  Includes hyperlinks to the related models
+    """
     from django.contrib.admin.utils import NestedObjects
     collector = NestedObjects(using='scenario_db')  # or specific database
     collector.collect([model_instance])  # https://docs.djangoproject.com/en/1.7/releases/1.7/#remove-and-clear-methods-of-related-managers
@@ -324,6 +339,10 @@ def deepcopy_points(request, primary_key, created_instance):
 
 
 def initialize_points_from_csv(request):
+    """ Uses a file upload to create a series of points and add them to the request
+    :param request: request that contains the file upload
+    :return: request with initial_values set
+    """
     file_path = handle_file_upload(request, is_temp_file=True, overwrite_ok=True)
     with open(file_path) as csvfile:
         dialect = csv.Sniffer().sniff(csvfile.read(1024))  # is this necessary?
@@ -363,7 +382,10 @@ def relational_function(request, primary_key=None, doCopy=False):
 
     It is possible to integrate this code back into the standard new / edit / copy views by checking for
     context['formset'].  The extra logic for formsets could be kicked in only when one or more formsets are present. At
-    the moment integration looks like a bad idea because it would mangle the happy path for the sake of one edge case."""
+    the moment integration looks like a bad idea because it would mangle the happy path for the sake of one edge case.
+    :param request:
+    :param primary_key: None or a number if editing
+    :param doCopy: copying will clear old primary keys so django will create new entries"""
     context = initialize_relational_form({}, primary_key, request)
     context['action'] = request.path
     if 'file' in request.FILES:  # data file is present
@@ -563,7 +585,7 @@ def trigger_list(request):
                               {'name':'Stop Triggers',
                                'models':[list_per_model(x) for x in layout['Stop Triggers']]
                               },
-                              {'name':'Restart Triggers',
+                              {'name':'Restart Triggers',  # This exact name is used in the template VaccinationTriggerList.html
                                'models':[filtered_list_per_model(x, True) for x in layout['Restart Triggers']]
                               }
                           ]

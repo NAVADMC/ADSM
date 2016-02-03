@@ -9,6 +9,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions
 
 from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
     ProbabilityFunction, RelationalFunction, RelationalPoint, Population, \
@@ -104,11 +106,18 @@ class FunctionalTests(StaticLiveServerTestCase):
             max_distance=3)
         zone = Zone.objects.create(name="Medium", radius=10)
 
-    def query(self, selector):
+    def click_navbar_element(self, name, sleep=1):
+        target = self.selenium.find_element_by_tag_name('nav')
+        target.find_element_by_link_text(name).click()
+        time.sleep(sleep)
+
+    def find(self, selector):
         return self.selenium.find_element_by_css_selector(selector)
 
-    def select_option(self, element_id, visible_text):
-        target = self.selenium.find_element_by_id(element_id)
+    def select_option(self, element_id, visible_text, timeout=10):
+        target = WebDriverWait(self.selenium, timeout).until(
+            expected_conditions.presence_of_element_located((By.ID, element_id))
+        )
         Select(target).select_by_visible_text(visible_text)
         time.sleep(2)  # wait for panel loading
 
@@ -131,47 +140,32 @@ class FunctionalTests(StaticLiveServerTestCase):
         DiseaseProgressionAssignment.objects.create(production_type=cattle, progression=disease_progression)
 
         self.click_navbar_element('Disease Progression')
-        self.query('#left-panel').find_element_by_class_name('glyphicon-pencil').click()
+        self.selenium.find_element_by_partial_link_text('Rename Test').click()
         time.sleep(3)
-        self.query('#center-panel').find_element_by_css_selector('select').click()
+        self.find('#center-panel').find_element_by_css_selector('select').click()
         time.sleep(1)
-        self.query('.edit-button').click()
+        self.find('.edit-button').click()
         time.sleep(1)
-        self.query('.overwrite-button').click()
+        self.find('.overwrite-button').click()
 
-        self.query('#id_equation_type')  # just making sure it's there
-        pdf_panel = self.query('#functions_panel')
+        self.find('#id_equation_type')  # just making sure it's there
+        pdf_panel = self.find('#functions_panel')
         pdf_panel.find_element_by_id('id_name').send_keys(' edited')
         time.sleep(1)
 
         pdf_panel.find_element_by_css_selector('.btn-save').click()
         time.sleep(1)  # there's a reload here
-        self.query('#functions_panel .edit-button').click()
+        self.find('#functions_panel .edit-button').click()
         time.sleep(1)  # animate
-        self.query('#functions_panel .btn-cancel').click()
+        self.find('#functions_panel .edit-button-holder .btn-cancel').click()
         time.sleep(1)
 
         with self.assertRaises(NoSuchElementException):
-            self.query('#id_equation_type')  # make sure it's gone
+            self.find('#id_equation_type')  # make sure it's gone
 
         pdf_updated = ProbabilityFunction.objects.get(pk=lp_cattle.pk)
         self.assertEqual(pdf_updated.name, "Renaming Test - cattle edited")
 
-    def test_launch_add_new_modal_when_nothing_selected(self):
-        self.setup_scenario()
-
-        self.click_navbar_element("Disease Progression")
-
-        target = self.query('#id_form-0-progression')
-        Select(target).select_by_visible_text(u'---------')
-        time.sleep(1)
-
-        self.selenium.find_element_by_class_name('glyphicon-pencil').click()
-        time.sleep(2)
-
-        center_panel = self.query('#center-panel')
-
-        self.assertIn("Latent period", center_panel.text)
 
     @skip("https://github.com/NAVADMC/ADSM/issues/605")
     def test_upload_population_file(self):
@@ -181,7 +175,7 @@ class FunctionalTests(StaticLiveServerTestCase):
         for i in range(5):  # a slow population load
             time.sleep(5) # may need to be adjusted for slow computers or if the file grows
             try:
-                self.assertIn('Population File:', self.query('section').text)
+                self.assertIn('Population File:', self.find('section').text)
                 break
             except: pass  # keep trying
 
@@ -192,10 +186,10 @@ class FunctionalTests(StaticLiveServerTestCase):
         self.selenium.find_element_by_link_text('blank.sqlite3').click()
         time.sleep(5) # may need to be adjusted for slow computers or if the file grows
 
-        section = self.query('section')
+        section = self.find('section')
         self.assertIn('Load a Population', section.text)
 
-        alert = self.query('.alert')
+        alert = self.find('.alert')
         self.assertIn('Error: No Production Types found in the target scenario.', alert.text)
 
     def test_delete_population(self):
@@ -204,7 +198,7 @@ class FunctionalTests(StaticLiveServerTestCase):
         self.click_navbar_element('Population', 2)
 
         # javascript is attaching to this event
-        self.query('[data-delete-link]').click()
+        self.find('[data-delete-link]').click()
         time.sleep(2)
 
         modal = self.selenium.find_element_by_class_name('bootstrap-dialog')
@@ -219,34 +213,49 @@ class FunctionalTests(StaticLiveServerTestCase):
 
         time.sleep(2)
 
-        section = self.query('section')
+        section = self.find('section')
         self.assertIn('Load a Population', section.text)
 
 
     def test_deepest_modal_edit_and_file_upload(self):
         self.setup_scenario()
         self.click_navbar_element("Disease Progression")
-        
-        self.select_option('id_form-0-progression', 'Add...')
-        self.select_option('id_disease_latent_period','Add...')
-        self.query('#functions_panel .edit-button').click()
+
+        self.selenium.find_element_by_partial_link_text("Cattle Reaction").click()
+        # The panel that comes up has id="-setup-DiseaseProgression-1-" when this test is run in isolation, but
+        # id="-setup-DiseaseProgression-2-" when the whole series of tests is run. Weird, but we get around it by
+        # doing a partial id match using XPath.
+        WebDriverWait(self.selenium, timeout=10).until(
+            expected_conditions.presence_of_element_located((By.XPATH, "//*[starts-with(@id, '-setup-DiseaseProgression-')]"))
+        )
+        self.select_option('id_disease_latent_period','Subclinical period - cattle')
+        WebDriverWait(self.selenium, timeout=10).until(
+            expected_conditions.visibility_of_element_located((By.ID, 'functions_panel'))
+        )
+        self.find('#functions_panel .edit-button').click()
         time.sleep(1)
-        self.query('.overwrite-button').click()
+        self.find('.overwrite-button').click()
         self.select_option('id_equation_type','Histogram')
         time.sleep(1)
         self.select_option('id_graph','Add...')
 
         time.sleep(1)
 
-        modal = self.query('div.modal')
+        relational_form = self.find('#-setup-RelationalFunction-new-')
 
-        self.assertIn("Import Points from File", modal.text)
+        self.assertIn("Import Points from File", relational_form.text)
 
         #check and see if you can build a Rel from file upload
-        self.submit_relational_form_with_file(modal)
-        self.query('#functions_panel').find_element_by_class_name('glyphicon-pencil').click()
-        time.sleep(2)
-        modal = self.query('div.modal')
+        relational_form.find_element_by_id("file").send_keys(
+            os.path.join(settings.BASE_DIR, "ScenarioCreator","tests","population_fixtures","points.csv"))  # this is sensitive to the starting directory
+        relational_form.find_element_by_id('id_name').send_keys('imported from file')
+        # Do a "submit" instead of clicking the Apply button. On shorter screens, the Apply button may not be visible,
+        # causing the click to fail, and none of the suggested solutions I found for scrolling the button into view
+        # worked.
+        relational_form.submit()
+        time.sleep(3)
+        self.select_option('id_graph', 'Add...')
+        modal = self.find('div.modal')
         self.assertEqual("123.1", modal.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
 
 
@@ -254,18 +263,22 @@ class FunctionalTests(StaticLiveServerTestCase):
         self.setup_scenario()
         self.click_navbar_element("Zone Effects", 2)
         
-        self.select_option('id_form-0-effect', 'Add...')
+        self.find('.addNew a').click()
+        WebDriverWait(self.selenium, timeout=10).until(
+            expected_conditions.presence_of_element_located((By.ID, '-setup-ZoneEffect-new-'))
+        )
         self.select_option('id_zone_indirect_movement', 'Add...')
         
-        right_panel = self.query('#functions_panel')
+        right_panel = self.find('#functions_panel')
 
-        self.query('.edit-button').click()
-        time.sleep(1)
-        self.query('.overwrite-button').click()
+        #EDIT click not needed because this is a new form
+        # self.find('.edit-button').click()
+        # time.sleep(1)
+        # self.find('.overwrite-button').click()
 
         self.submit_relational_form_with_file(right_panel)
-        right_panel = self.query('#functions_panel')
-        self.assertEqual("123.1", self.query('#id_relationalpoint_set-3-x').get_attribute('value'))
+        right_panel = self.find('#functions_panel')
+        self.assertEqual("123.1", self.find('#id_relationalpoint_set-3-x').get_attribute('value'))
 
 
     def submit_relational_form_with_file(self, container):
@@ -282,15 +295,15 @@ class FunctionalTests(StaticLiveServerTestCase):
         self.setup_scenario()
         self.click_navbar_element("Disease Progression")
 
-        target = self.selenium.find_element_by_class_name('glyphicon-pencil').click()
+        target = self.find('.defined_name').click()
         time.sleep(2)
 
-        self.query('#center-panel').find_element_by_css_selector('select').click()
+        self.find('#center-panel').find_element_by_css_selector('select').click()
         time.sleep(2)
 
-        right_panel = self.query('#functions_panel')
+        right_panel = self.find('#functions_panel')
 
-        mean_field = right_panel.find_element_by_id("div_id_mean")
+        mean_field = right_panel.find_element_by_css_selector("#div_id_mean")
 
         self.assertIn("none", mean_field.value_of_css_property("display"))
 
@@ -312,7 +325,8 @@ class FunctionalTests(StaticLiveServerTestCase):
             else:
                 self.assertEqual(element.get_attribute("disabled"), "true")
 
-        setup_menu = self.selenium.find_element_by_id("setupMenu")
+        time.sleep(1)
+        setup_menu = self.find("#setupMenu")
 
         hidden_menu_items = [
             "Control Protocol",
@@ -365,10 +379,10 @@ class FunctionalTests(StaticLiveServerTestCase):
         filename_field = self.save_scenario_as()
         try:
             filename_field.send_keys('./\\ 123.1&% AZ')
-            self.query('.modal.in .btn-primary').click()
+            self.find('.modal.in .btn-primary').click()
             time.sleep(1)
 
-            alert = self.query('.alert-danger')  # this works fine in the actual program.
+            alert = self.find('.alert-danger')  # this works fine in the actual program.
             
             self.assertIn("Error", alert.text)
         finally:
@@ -379,27 +393,27 @@ class FunctionalTests(StaticLiveServerTestCase):
 
     def save_scenario_as(self):
         self.cause_unsaved_edit()
-        self.query('#TB_file').click()
+        self.find('#TB_file').click()
         time.sleep(1)
-        self.query('.current .copy-icon').click()
+        self.find('.current .copy-icon').click()
         time.sleep(1)
-        self.query('.btn-dont-save').click()
+        self.find('.btn-dont-save').click()
         time.sleep(1)
-        filename_field = self.query('#new_name')
+        filename_field = self.find('#new_name')
         return filename_field
 
     def cause_unsaved_edit(self):
-        self.query('#id_description').send_keys('--edited--')
-        self.query('#submit-id-submit').click()
+        self.find('#id_description').send_keys('--edited--')
+        self.find('#submit-id-submit').click()
         time.sleep(1)
 
     def test_save_scenario_success(self):
         filename_field = self.save_scenario_as()
         try:
             filename_field.send_keys('123.1 AZ')
-            self.query('.modal.in .btn-primary').click()
+            self.find('.modal.in .btn-primary').click()
             time.sleep(3)
-            status = self.query('.scenario-status')
+            status = self.find('.scenario-status')
             self.assertNotIn('unsaved', status.get_attribute('class'))
         finally:
             try:

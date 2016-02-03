@@ -104,31 +104,58 @@ var hide_hidden_labels = function(){
 
 var check_enabled_tabs = function(use_check){
     //handle proxy before computing
-    if(typeof use_check !== 'undefined' &&
-        $(use_check).attr('data-proxy')){ // this check box is in the model list, not in a form
-        var value = $(use_check).prop('checked');
+    // this check box is in the model list, not in a form
+    var $use_check = $(use_check);
+    if(typeof $use_check !== 'undefined' && $use_check.attr('data-proxy')){
+        var name = $use_check.attr('name');
+        var value = $use_check.prop('checked');
+        //special rules for dependent relationships: these changes cause additional check_enabled_tabs() to be called
+        var dependents = {use_tracing:"use_exams use_testing".split(' '),
+            use_detection:"use_tracing use_exams use_testing use_destruction use_vaccination use_cost_accounting".split(' ')}
+        var header_list = $use_check.closest('ul')
         if(value){
-            $(use_check).closest('.defined_wrapper').find('.warning-icon').removeClass('hidden');
+            $use_check.closest('.defined_wrapper').find('.warning-icon').removeClass('hidden');//if checked, unhide
+
+            //enable what you depend on
+            $.map(dependents, function(value, key){
+                if(value.indexOf(name) != -1){ //I'm a dependent
+                    var $required = header_list.find('[name="' + key + '"]');
+                    if($required.prop('checked') == false){
+                        $required.prop('checked', true)
+                        $required.change() // causes server update
+                    }
+                }
+            })
         }else{
-            $(use_check).closest('.defined_wrapper').find('.warning-icon').addClass('hidden');
+            $use_check.closest('.defined_wrapper').find('.warning-icon').addClass('hidden');//if unchecked, then hide
+
+            //disable dependents
+            if(name in dependents){
+                $.map(dependents[name], function(child, index){
+                    var el = header_list.find('[name="' + child + '"]');
+                    el.prop('checked', false)
+                    el.change()
+                });
+            }
         }
-        var url = get_parent_title(use_check).attr('href') + $(use_check).attr('name') + '/'; // use_detection
+        var url = get_parent_title($use_check).attr('href') + name + '/'; // use_detection
         $.post(url, {'value': value});
 
-        if(current_is_active(use_check)) { // this is relevant to the currently active form and not some other one
-            $($(use_check).attr('data-proxy')).prop('checked', $(use_check).prop('checked'));
-            use_check = $($(use_check).attr('data-proxy'));
+
+        if(current_is_active($use_check)) { // this is relevant to the currently active form and not some other one
+            $($use_check.attr('data-proxy')).prop('checked', $use_check.prop('checked'));
+            $use_check = $($use_check.attr('data-proxy'));
         }
     }
     if(typeof use_check === 'undefined'){
-        use_check = $('.tab-pane.active').find(':checkbox').first();
+        $use_check = $('.tab-pane.active').find(':checkbox').first();
     }
 
     //do visibility
-    if(use_check.length > 0 && use_check[0].id.indexOf('use_') != -1) { // one of the use_detection, use_tracing, etc check boxes
-        use_check.closest('.tab-pane').children('div').each(function (index, element) {
-            if( $(element).find('#' + use_check[0].id).length == 0) {//not my direct parent
-                if ( !use_check.is(':checked')) {
+    if($use_check.length > 0 && $use_check[0].id.indexOf('use_') != -1) { // one of the use_detection, use_tracing, etc check boxes
+        $use_check.closest('.tab-pane').children('div').each(function (index, element) {
+            if( $(element).find('#' + $use_check[0].id).length == 0) {//not my direct parent
+                if ( !$use_check.is(':checked')) {
                     $(element).attr('disabled', 'disabled');
 //                            $(element).find(':input').attr('disabled', true);
                     // important not to disable inputs so that default, required values are still sent
