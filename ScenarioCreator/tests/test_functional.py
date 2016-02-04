@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support import expected_conditions as EC
 
 from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
     ProbabilityFunction, RelationalFunction, RelationalPoint, Population, \
@@ -116,7 +116,7 @@ class FunctionalTests(StaticLiveServerTestCase):
 
     def select_option(self, element_id, visible_text, timeout=10):
         target = WebDriverWait(self.selenium, timeout).until(
-            expected_conditions.presence_of_element_located((By.ID, element_id))
+            EC.presence_of_element_located((By.ID, element_id))
         )
         Select(target).select_by_visible_text(visible_text)
         time.sleep(2)  # wait for panel loading
@@ -226,11 +226,11 @@ class FunctionalTests(StaticLiveServerTestCase):
         # id="-setup-DiseaseProgression-2-" when the whole series of tests is run. Weird, but we get around it by
         # doing a partial id match using XPath.
         WebDriverWait(self.selenium, timeout=10).until(
-            expected_conditions.presence_of_element_located((By.XPATH, "//*[starts-with(@id, '-setup-DiseaseProgression-')]"))
+            EC.presence_of_element_located((By.XPATH, "//*[starts-with(@id, '-setup-DiseaseProgression-')]"))
         )
         self.select_option('id_disease_latent_period','Subclinical period - cattle')
         WebDriverWait(self.selenium, timeout=10).until(
-            expected_conditions.visibility_of_element_located((By.ID, 'functions_panel'))
+            EC.visibility_of_element_located((By.ID, 'functions_panel'))
         )
         self.find('#functions_panel .edit-button').click()
         time.sleep(1)
@@ -265,7 +265,7 @@ class FunctionalTests(StaticLiveServerTestCase):
         
         self.find('.addNew a').click()
         WebDriverWait(self.selenium, timeout=10).until(
-            expected_conditions.presence_of_element_located((By.ID, '-setup-ZoneEffect-new-'))
+            EC.presence_of_element_located((By.ID, '-setup-ZoneEffect-new-'))
         )
         self.select_option('id_zone_indirect_movement', 'Add...')
         
