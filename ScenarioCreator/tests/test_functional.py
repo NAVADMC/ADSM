@@ -11,6 +11,8 @@ from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 
 from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
     ProbabilityFunction, RelationalFunction, RelationalPoint, Population, \
@@ -24,8 +26,49 @@ def parent_of(webElement):
     return webElement.find_element_by_xpath('..')
     
 
+class FunctionsPanel(object):
+    """This class wraps the "#functions_panel" WebElement and adds some convenience methods. Kind of like Selenium's
+    Select class that wraps drop-downs and adds convenience methods for selecting options."""
+    def __init__(self, web_element, timeout=0):
+        self.functions_panel = web_element
+        # The parent of the WebElement object will be the WebDriver
+        self.driver = web_element.parent
+        self.timeout = timeout
+
+    def set_relational_function_points(self, points):
+        WebDriverWait(self.functions_panel, timeout=self.timeout).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, 'edit-button'))
+        ).click()
+        WebDriverWait(self.functions_panel, timeout=self.timeout).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, 'overwrite-button'))
+        ).click()
+
+        # Type in the points by tabbing between the fields like a user would do. We actually start on the first y-point
+        # and tab backwards to get to the first x-point. That puts focus on the first x-point *and* selects whatever is
+        # currently filled in there, so that when we start typing, we'll overwrite it.
+        first_y_value = self.functions_panel.find_element_by_xpath(".//input[starts-with(@name,'relationalpoint') and contains(@name,'-y')]")
+        actions = ActionChains(self.driver)
+        actions.move_to_element(first_y_value).click().key_down(Keys.SHIFT).send_keys(Keys.TAB).key_up(Keys.SHIFT).perform()
+        first_point = True
+        for x,y in points:
+            if first_point:
+                first_point = False
+            else:
+                # 2 tabs to go from Y -> Delete checkbox -> X on next row.
+                actions.send_keys(Keys.TAB).send_keys(Keys.TAB).perform()
+            actions.send_keys(str(x)).send_keys(Keys.TAB).send_keys(str(y)).perform()
+        actions.send_keys(Keys.ENTER).perform() # just like clicking the Apply button
+
+        # The blocking overlay will be up while the apply is perfomed
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.invisibility_of_element_located((By.CLASS_NAME, 'blocking-overlay'))
+        )
+
+        return
+
 class FunctionalTests(StaticLiveServerTestCase):
     multi_db = True
+    default_timeout = 10 # seconds
 
     @classmethod
     def setUpClass(cls):
@@ -107,7 +150,9 @@ class FunctionalTests(StaticLiveServerTestCase):
         zone = Zone.objects.create(name="Medium", radius=10)
 
     def click_navbar_element(self, name, sleep=1):
-        target = self.selenium.find_element_by_tag_name('nav')
+        target = WebDriverWait(self.selenium, self.default_timeout).until(
+            EC.visibility_of_element_located((By.TAG_NAME, 'nav'))
+        )
         target.find_element_by_link_text(name).click()
         time.sleep(sleep)
 
@@ -421,3 +466,60 @@ class FunctionalTests(StaticLiveServerTestCase):
             except:
                 pass
 
+    def use_within_unit_prevalence(self, enable_prevalence, timeout=None):
+        """Enables or disables use of within-unit prevalence."""
+        if timeout is None:
+            timeout = self.default_timeout
+
+        self.click_navbar_element('Disease')
+        # Wait for the checkbox to appear
+        checkbox = WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.NAME, 'use_within_unit_prevalence'))
+        )
+        # If enable_prevalence==True and the checkbox is not checked, click it to check.
+        # If enable_prevalence==False and the checkbox is checked, click it to un-check.
+        if enable_prevalence != checkbox.is_selected():
+            checkbox.click()
+
+        # Save the changes we just made.
+        self.find('.btn-save').click()
+        return
+
+    def setup_prevalence_chart(self, disease_progression_name, points, timeout=None):
+        """Sets up the prevalence chart for the given Disease Progression."""
+        if timeout is None:
+            timeout = self.default_timeout
+
+        self.click_navbar_element('Disease Progression')
+        # Once the Disease Progression choices come up, click the desired one
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.LINK_TEXT, disease_progression_name))
+        ).click()
+
+        # Once the latent period, etc. choices come up, click to bring up the prevalence chart
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.ID, 'id_disease_prevalence'))
+        ).click()
+
+        # Once the prevalence chart comes up, overwrite the old points with the new ones.
+        FunctionsPanel(
+            WebDriverWait(self.selenium, timeout=timeout).until(
+                EC.visibility_of_element_located((By.ID, 'functions_panel'))
+            ),
+            timeout=timeout
+        ).set_relational_function_points(points)
+
+        return
+
+    def test_overwrite_points_in_relational_function(self):
+        self.setup_scenario()
+
+        self.use_within_unit_prevalence(True)
+        # Pick the first DiseaseProgression
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.5), (2,1.0), (3,0.5), (4,0)]
+        self.setup_prevalence_chart(disease_progression.name, points)
+
+        # Verify that the prevalence chart now has 5 points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        assert len(current_prevalence_points) == len(points)
