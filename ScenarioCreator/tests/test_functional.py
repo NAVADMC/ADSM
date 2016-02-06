@@ -39,6 +39,10 @@ class FunctionsPanel(object):
         WebDriverWait(self.functions_panel, timeout=self.timeout).until(
             EC.visibility_of_element_located((By.CLASS_NAME, 'edit-button'))
         ).click()
+        # You can get an "Other element would receive the click" exception if you try to click the Overwrite button
+        # while the buttons are still animating into place. The animation takes 0.4 seconds (search for
+        # .edit-button-holder in adsm.css).
+        time.sleep(0.4)
         WebDriverWait(self.functions_panel, timeout=self.timeout).until(
             EC.visibility_of_element_located((By.CLASS_NAME, 'overwrite-button'))
         ).click()
