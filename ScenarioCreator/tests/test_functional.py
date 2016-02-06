@@ -592,3 +592,35 @@ class FunctionalTests(StaticLiveServerTestCase):
         # Check that the changed value is what we set it to
         changed_point = current_prevalence_points[2]
         assert abs(changed_point.y - 0.8) < self.tolerance
+
+    def test_change_one_point_in_relational_function_without_closing_functions_panel(self):
+        """Like the test above, but don't leave the functions panel. Instead simulate a user who fills in a relational
+        function, clicks Apply, then notices a mistake in one point and fixes it.
+        https://github.com/NAVADMC/ADSM/issues/678."""
+        self.setup_scenario()
+
+        # Set up a prevalence chart, just like in the test above
+        self.use_within_unit_prevalence(True)
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        self.setup_prevalence_chart(disease_progression.name, points)
+
+        # The functions panel should still be open
+        functions_panel = FunctionsPanel(self.find('#functions_panel'))
+        # Reduce the peak from 0.9 to 0.8
+        peak_idx = 2
+        new_peak = 0.8
+        functions_panel.change_point(peak_idx, (None, new_peak))
+
+        # Verify that the chart still has the same number of points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        self.assertEqual(
+            len(current_prevalence_points), len(points),
+            'there are %i points (should be %i)' % (len(current_prevalence_points), len(points))
+        )
+        # Check that the changed value is what we set it to
+        changed_point = current_prevalence_points[peak_idx]
+        self.assertTrue(
+            abs(changed_point.y - new_peak) < self.tolerance,
+            'the y-value of point #%i is %g (should be %g)' % (peak_idx+1, changed_point.y, new_peak)
+        )
