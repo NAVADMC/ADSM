@@ -29,13 +29,15 @@ def parent_of(webElement):
 class FunctionsPanel(object):
     """This class wraps the "#functions_panel" WebElement and adds some convenience methods. Kind of like Selenium's
     Select class that wraps drop-downs and adds convenience methods for selecting options."""
-    def __init__(self, web_element, timeout=0):
+    def __init__(self, web_element, timeout=10):
         self.functions_panel = web_element
         # The parent of the WebElement object will be the WebDriver
         self.driver = web_element.parent
+        self.actions = ActionChains(self.driver)
         self.timeout = timeout
 
-    def set_relational_function_points(self, points):
+    def _edit_with_overwrite(self):
+        """Click the appropriate buttons to edit with overwrite."""
         WebDriverWait(self.functions_panel, timeout=self.timeout).until(
             EC.visibility_of_element_located((By.CLASS_NAME, 'edit-button'))
         ).click()
@@ -47,28 +49,49 @@ class FunctionsPanel(object):
             EC.visibility_of_element_located((By.CLASS_NAME, 'overwrite-button'))
         ).click()
 
-        # Type in the points by tabbing between the fields like a user would do. We actually start on the first y-point
-        # and tab backwards to get to the first x-point. That puts focus on the first x-point *and* selects whatever is
-        # currently filled in there, so that when we start typing, we'll overwrite it.
-        first_y_value = self.functions_panel.find_element_by_xpath(".//input[starts-with(@name,'relationalpoint') and contains(@name,'-y')]")
-        actions = ActionChains(self.driver)
-        actions.move_to_element(first_y_value).click().key_down(Keys.SHIFT).send_keys(Keys.TAB).key_up(Keys.SHIFT).perform()
+    def _move_to_row(self, row):
+        """Puts the focus on the x-point in the given row."""
+        # We actually start on the y-point in that row, and tab backwards to get to the first x-point. That puts focus
+        # on the x-point *and* selects whatever is currently filled in there, so that when we start typing, we'll
+        # overwrite it.
+        y_values = self.functions_panel.find_elements_by_xpath(".//input[starts-with(@name,'relationalpoint') and contains(@name,'-y')]")
+        self.actions.move_to_element(y_values[row]).click().key_down(Keys.SHIFT).send_keys(Keys.TAB).key_up(Keys.SHIFT).perform()
+
+    def set_points(self, points):
+        self._edit_with_overwrite()
+
+        # Type in the points by tabbing between the fields like a user would do.
+        self._move_to_row(0)
         first_point = True
         for x,y in points:
             if first_point:
                 first_point = False
             else:
                 # 2 tabs to go from Y -> Delete checkbox -> X on next row.
-                actions.send_keys(Keys.TAB).send_keys(Keys.TAB).perform()
-            actions.send_keys(str(x)).send_keys(Keys.TAB).send_keys(str(y)).perform()
-        actions.send_keys(Keys.ENTER).perform() # just like clicking the Apply button
+                self.actions.send_keys(Keys.TAB).send_keys(Keys.TAB).perform()
+            self.actions.send_keys(str(x)).send_keys(Keys.TAB).send_keys(str(y)).perform()
+        self.actions.send_keys(Keys.ENTER).perform() # just like clicking the Apply button
 
         # The blocking overlay will be up while the apply is perfomed
         WebDriverWait(self.driver, self.timeout).until(
             EC.invisibility_of_element_located((By.CLASS_NAME, 'blocking-overlay'))
         )
 
-        return
+    def change_point(self, point_idx, new_point):
+        self._edit_with_overwrite()
+
+        self._move_to_row(point_idx)
+        x, y = new_point
+        if x is not None:
+            self.actions.send_keys(str(x)).perform()
+        if y is not None:
+            self.actions.send_keys(Keys.TAB).send_keys(str(y)).perform()
+        self.actions.send_keys(Keys.ENTER).perform() # just like clicking the Apply button
+
+        # The blocking overlay will be up while the apply is perfomed
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.invisibility_of_element_located((By.CLASS_NAME, 'blocking-overlay'))
+        )
 
 class FunctionalTests(StaticLiveServerTestCase):
     multi_db = True
