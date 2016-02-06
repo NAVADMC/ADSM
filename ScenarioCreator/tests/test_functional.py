@@ -96,6 +96,7 @@ class FunctionsPanel(object):
 class FunctionalTests(StaticLiveServerTestCase):
     multi_db = True
     default_timeout = 10 # seconds
+    tolerance = 1E-6 # small tolerance for floating-point comparison error
 
     @classmethod
     def setUpClass(cls):
@@ -532,21 +533,62 @@ class FunctionalTests(StaticLiveServerTestCase):
         FunctionsPanel(
             WebDriverWait(self.selenium, timeout=timeout).until(
                 EC.visibility_of_element_located((By.ID, 'functions_panel'))
-            ),
-            timeout=timeout
-        ).set_relational_function_points(points)
+            )
+        ).set_points(points)
 
         return
 
     def test_overwrite_points_in_relational_function(self):
+        """This test checks that the correct number of points are present after overwriting a relational function. See
+        the comment "When I went back, I have many rows that must have been saving as I was tinkering around with
+        things" in https://github.com/NAVADMC/ADSM/issues/678."""
         self.setup_scenario()
 
         self.use_within_unit_prevalence(True)
         # Pick the first DiseaseProgression
         disease_progression = DiseaseProgression.objects.all().first()
-        points = [(0,0), (1,0.5), (2,1.0), (3,0.5), (4,0)]
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
         self.setup_prevalence_chart(disease_progression.name, points)
 
-        # Verify that the prevalence chart now has 5 points
+        # Verify that the prevalence chart now has the correct number of points
         current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
         assert len(current_prevalence_points) == len(points)
+
+    def test_change_one_point_in_relational_function(self):
+        """This test checks that the correct number of points are present after editing one point in a relational
+         function and that the changed point has the correct value. See https://github.com/NAVADMC/ADSM/issues/678."""
+        timeout = self.default_timeout
+        self.setup_scenario()
+
+        # Set up a prevalence chart, just like in the test above
+        self.use_within_unit_prevalence(True)
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        self.setup_prevalence_chart(disease_progression.name, points)
+
+        # Exit the relational function dialog, then navigate back to it
+        self.click_navbar_element('Scenario Description')
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.ID, 'id_description'))
+        )
+        self.click_navbar_element('Disease Progression')
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.LINK_TEXT, disease_progression.name))
+        ).click()
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.ID, 'id_disease_prevalence'))
+        ).click()
+
+        # Now reduce the peak from 0.9 to 0.8
+        FunctionsPanel(
+            WebDriverWait(self.selenium, timeout=timeout).until(
+                EC.visibility_of_element_located((By.ID, 'functions_panel'))
+            )
+        ).change_point(2,(None,0.8))
+
+        # Verify that the chart still has the same number of points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        assert len(current_prevalence_points) == len(points)
+        # Check that the changed value is what we set it to
+        changed_point = current_prevalence_points[2]
+        assert abs(changed_point.y - 0.8) < self.tolerance
