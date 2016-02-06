@@ -93,6 +93,19 @@ class FunctionsPanel(object):
             EC.invisibility_of_element_located((By.CLASS_NAME, 'blocking-overlay'))
         )
 
+    def delete_point(self, point_idx):
+        self._edit_with_overwrite()
+
+        self._move_to_row(point_idx)
+        # Tab twice to get to Delete checkbox, then hit space to check.
+        self.actions.send_keys(Keys.TAB).send_keys(Keys.TAB).send_keys(Keys.SPACE).perform()
+        self.actions.send_keys(Keys.ENTER).perform() # just like clicking the Apply button
+
+        # The blocking overlay will be up while the apply is perfomed
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.invisibility_of_element_located((By.CLASS_NAME, 'blocking-overlay'))
+        )
+
 class FunctionalTests(StaticLiveServerTestCase):
     multi_db = True
     default_timeout = 10 # seconds
@@ -623,4 +636,48 @@ class FunctionalTests(StaticLiveServerTestCase):
         self.assertTrue(
             abs(changed_point.y - new_peak) < self.tolerance,
             'the y-value of point #%i is %g (should be %g)' % (peak_idx+1, changed_point.y, new_peak)
+        )
+
+    def test_delete_one_point_in_relational_function(self):
+        """This test checks that the correct number of points are present after deleting one point in a relational
+         function and that the correct point was deleted. See https://github.com/NAVADMC/ADSM/issues/678."""
+        timeout = self.default_timeout
+        self.setup_scenario()
+
+        # Set up a prevalence chart, just like in the test above
+        self.use_within_unit_prevalence(True)
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        self.setup_prevalence_chart(disease_progression.name, points)
+
+        # Exit the relational function dialog, then navigate back to it
+        self.click_navbar_element('Scenario Description')
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.ID, 'id_description'))
+        )
+        self.click_navbar_element('Disease Progression')
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.LINK_TEXT, disease_progression.name))
+        ).click()
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.ID, 'id_disease_prevalence'))
+        ).click()
+
+        # Now delete the point with x-value 4
+        FunctionsPanel(
+            WebDriverWait(self.selenium, timeout=timeout).until(
+                EC.visibility_of_element_located((By.ID, 'functions_panel'))
+            )
+        ).delete_point(3)
+
+        # Verify that the chart has one fewer points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        self.assertEqual(
+            len(current_prevalence_points), len(points)-1,
+            'there are %i points (should be %i after deletion)' % (len(current_prevalence_points), len(points)-1)
+        )
+        # Check that there is no point with x-value 4
+        self.assertFalse(
+            any([abs(point.x - 4) < self.tolerance for point in current_prevalence_points]),
+            'there is still a point with x-value==4 after deletion'
         )
