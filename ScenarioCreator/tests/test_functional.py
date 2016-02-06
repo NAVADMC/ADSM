@@ -565,7 +565,10 @@ class FunctionalTests(StaticLiveServerTestCase):
 
         # Verify that the prevalence chart now has the correct number of points
         current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
-        assert len(current_prevalence_points) == len(points)
+        self.assertEqual(
+            len(current_prevalence_points), len(points),
+            'there are %i points (should be %i)' % (len(current_prevalence_points), len(points))
+        )
 
     def test_change_one_point_in_relational_function(self):
         """This test checks that the correct number of points are present after editing one point in a relational
@@ -593,18 +596,26 @@ class FunctionalTests(StaticLiveServerTestCase):
         ).click()
 
         # Now reduce the peak from 0.9 to 0.8
+        peak_idx = 2
+        new_peak = 0.8
         FunctionsPanel(
             WebDriverWait(self.selenium, timeout=timeout).until(
                 EC.visibility_of_element_located((By.ID, 'functions_panel'))
             )
-        ).change_point(2,(None,0.8))
+        ).change_point(peak_idx, (None, new_peak))
 
         # Verify that the chart still has the same number of points
         current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
-        assert len(current_prevalence_points) == len(points)
+        self.assertEqual(
+            len(current_prevalence_points), len(points),
+            'there are %i points (should be %i)' % (len(current_prevalence_points), len(points))
+        )
         # Check that the changed value is what we set it to
-        changed_point = current_prevalence_points[2]
-        assert abs(changed_point.y - 0.8) < self.tolerance
+        changed_point = current_prevalence_points[peak_idx]
+        self.assertTrue(
+            abs(changed_point.y - new_peak) < self.tolerance,
+            'the y-value of point #%i is %g (should be %g)' % (peak_idx+1, changed_point.y, new_peak)
+        )
 
     def test_change_one_point_in_relational_function_without_closing_functions_panel(self):
         """Like the test above, but don't leave the functions panel. Instead simulate a user who fills in a relational
