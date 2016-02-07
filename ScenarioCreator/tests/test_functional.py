@@ -57,6 +57,14 @@ class FunctionsPanel(object):
         y_values = self.functions_panel.find_elements_by_xpath(".//input[starts-with(@name,'relationalpoint') and contains(@name,'-y')]")
         self.actions.move_to_element(y_values[row]).click().key_down(Keys.SHIFT).send_keys(Keys.TAB).key_up(Keys.SHIFT).perform()
 
+    def _save_changes(self):
+        self.functions_panel.find_element_by_class_name('btn-save').click()
+
+        # The blocking overlay will be up while the apply is perfomed
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.invisibility_of_element_located((By.CLASS_NAME, 'blocking-overlay'))
+        )
+
     def set_points(self, points):
         self._edit_with_overwrite()
 
@@ -70,12 +78,8 @@ class FunctionsPanel(object):
                 # 2 tabs to go from Y -> Delete checkbox -> X on next row.
                 self.actions.send_keys(Keys.TAB).send_keys(Keys.TAB).perform()
             self.actions.send_keys(str(x)).send_keys(Keys.TAB).send_keys(str(y)).perform()
-        self.actions.send_keys(Keys.ENTER).perform() # just like clicking the Apply button
 
-        # The blocking overlay will be up while the apply is perfomed
-        WebDriverWait(self.driver, self.timeout).until(
-            EC.invisibility_of_element_located((By.CLASS_NAME, 'blocking-overlay'))
-        )
+        self._save_changes()
 
     def change_point(self, point_idx, new_point):
         self._edit_with_overwrite()
@@ -86,12 +90,8 @@ class FunctionsPanel(object):
             self.actions.send_keys(str(x)).perform()
         if y is not None:
             self.actions.send_keys(Keys.TAB).send_keys(str(y)).perform()
-        self.actions.send_keys(Keys.ENTER).perform() # just like clicking the Apply button
 
-        # The blocking overlay will be up while the apply is perfomed
-        WebDriverWait(self.driver, self.timeout).until(
-            EC.invisibility_of_element_located((By.CLASS_NAME, 'blocking-overlay'))
-        )
+        self._save_changes()
 
     def delete_point(self, point_idx):
         self._edit_with_overwrite()
@@ -99,12 +99,8 @@ class FunctionsPanel(object):
         self._move_to_row(point_idx)
         # Tab twice to get to Delete checkbox, then hit space to check.
         self.actions.send_keys(Keys.TAB).send_keys(Keys.TAB).send_keys(Keys.SPACE).perform()
-        self.actions.send_keys(Keys.ENTER).perform() # just like clicking the Apply button
 
-        # The blocking overlay will be up while the apply is perfomed
-        WebDriverWait(self.driver, self.timeout).until(
-            EC.invisibility_of_element_located((By.CLASS_NAME, 'blocking-overlay'))
-        )
+        self._save_changes()
 
 class FunctionalTests(StaticLiveServerTestCase):
     multi_db = True
