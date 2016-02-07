@@ -418,10 +418,14 @@ def relational_function(request, primary_key=None, doCopy=False):
                         point.instance.relational_function = created_instance
                         point.instance.save()
             else:
-                # If the user clicked the Overwrite button, all we want is a save() on any points that have changed.
+                # If the user clicked the Overwrite button, all we want is a delete() on any points for which the
+                # Delete checkbox was checked, and a save() on any points that have changed.
                 for point in context['formset'].forms:
                     if point.changed_data:
-                        point.instance.save()
+                        if point.cleaned_data['DELETE']:
+                            point.instance.delete()
+                        else:
+                            point.instance.save()
     else:
         context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
 
