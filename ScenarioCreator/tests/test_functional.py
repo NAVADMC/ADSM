@@ -35,6 +35,7 @@ class FunctionsPanel(object):
         self.driver = web_element.parent
         self.actions = ActionChains(self.driver)
         self.timeout = timeout
+        self.hit_enter = False # if True, hits Enter key to save changes; if False, clicks Apply button
 
     def _edit_with_overwrite(self):
         """Click the appropriate buttons to edit with overwrite."""
@@ -58,12 +59,18 @@ class FunctionsPanel(object):
         self.actions.move_to_element(y_values[row]).click().key_down(Keys.SHIFT).send_keys(Keys.TAB).key_up(Keys.SHIFT).perform()
 
     def _save_changes(self):
-        self.functions_panel.find_element_by_class_name('btn-save').click()
+        if self.hit_enter:
+            self.actions.send_keys(Keys.ENTER).perform() # should be just like clicking the Apply button
+        else:
+            self.functions_panel.find_element_by_class_name('btn-save').click()
 
         # The blocking overlay will be up while the apply is perfomed
         WebDriverWait(self.driver, self.timeout).until(
             EC.invisibility_of_element_located((By.CLASS_NAME, 'blocking-overlay'))
         )
+
+    def set_hit_enter(self, hit_enter):
+        self.hit_enter = hit_enter
 
     def set_points(self, points):
         self._edit_with_overwrite()
@@ -713,6 +720,43 @@ class FunctionalTests(StaticLiveServerTestCase):
         functions_panel.select_relational_function(prevalence_name)
 
         # Now delete the point with x-value 4
+        functions_panel.delete_point(3)
+
+        # Verify that the chart has one fewer points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        self.assertEqual(
+            len(current_prevalence_points), len(points)-1,
+            'there are %i points (should be %i after deleting one)' % (len(current_prevalence_points), len(points)-1)
+        )
+        # Check that there is no point with x-value 4
+        self.assertFalse(
+            any([abs(point.x - 4) < self.tolerance for point in current_prevalence_points]),
+            'there is still a point with x-value==4 after deletion'
+        )
+
+    def test_delete_one_point_in_relational_function_with_manual_refresh_before_delete_hit_enter(self):
+        """This test checks that the correct number of points are present after deleting one point in a relational
+        function and that the correct point was deleted. This test differs from the one above in that it hits the Enter
+        key instead of clicking the Apply button to save changes."""
+        timeout = self.default_timeout
+        self.setup_scenario()
+
+        # Set up a prevalence chart, just like in the test above
+        self.use_within_unit_prevalence(True)
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        prevalence_name = self.setup_prevalence_chart(disease_progression.name, points)
+
+        # Force a reload of the points data
+        functions_panel = FunctionsPanel(
+            WebDriverWait(self.selenium, timeout=timeout).until(
+                EC.visibility_of_element_located((By.ID, 'functions_panel'))
+            )
+        )
+        functions_panel.select_relational_function(prevalence_name)
+
+        # Now delete the point with x-value 4
+        functions_panel.set_hit_enter(True)
         functions_panel.delete_point(3)
 
         # Verify that the chart has one fewer points
