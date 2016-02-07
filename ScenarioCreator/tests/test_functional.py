@@ -102,6 +102,18 @@ class FunctionsPanel(object):
 
         self._save_changes()
 
+    def select_relational_function(self, function_name):
+        # Click the Relational button at the top of the functions panel
+        self.functions_panel.find_element_by_xpath(".//*[contains(@class,'list-button') and @data-target='#relational-options']").click()
+        # The list animates open. Wait for the item we want to be clickable.
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.element_to_be_clickable((By.XPATH, "//*[@id='relational-options']//a[contains(text(),'" + function_name + "')]"))
+        ).click()
+        # Wait for list to collapse
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.invisibility_of_element_located((By.ID, 'relational-options'))
+        )
+
 class FunctionalTests(StaticLiveServerTestCase):
     multi_db = True
     default_timeout = 10 # seconds
@@ -523,7 +535,8 @@ class FunctionalTests(StaticLiveServerTestCase):
         return
 
     def setup_prevalence_chart(self, disease_progression_name, points, timeout=None):
-        """Sets up the prevalence chart for the given Disease Progression."""
+        """Sets up the prevalence chart for the given Disease Progression. Returns the name of the relational function
+        that contains the prevalence chart."""
         if timeout is None:
             timeout = self.default_timeout
 
@@ -533,10 +546,12 @@ class FunctionalTests(StaticLiveServerTestCase):
             EC.visibility_of_element_located((By.LINK_TEXT, disease_progression_name))
         ).click()
 
-        # Once the latent period, etc. choices come up, click to bring up the prevalence chart
-        WebDriverWait(self.selenium, timeout=timeout).until(
+        # Once the latent period, etc. options come up, click to bring up the prevalence chart
+        prevalence_options = WebDriverWait(self.selenium, timeout=timeout).until(
             EC.visibility_of_element_located((By.ID, 'id_disease_prevalence'))
-        ).click()
+        )
+        prevalence_name = Select(prevalence_options).first_selected_option.text # remember its name
+        prevalence_options.click()
 
         # Once the prevalence chart comes up, overwrite the old points with the new ones.
         FunctionsPanel(
@@ -545,7 +560,7 @@ class FunctionalTests(StaticLiveServerTestCase):
             )
         ).set_points(points)
 
-        return
+        return prevalence_name
 
     def test_overwrite_points_in_relational_function(self):
         """This test checks that the correct number of points are present after overwriting a relational function. See
@@ -657,19 +672,6 @@ class FunctionalTests(StaticLiveServerTestCase):
         points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
         self.setup_prevalence_chart(disease_progression.name, points)
 
-        # Exit the relational function dialog, then navigate back to it
-        self.click_navbar_element('Scenario Description')
-        WebDriverWait(self.selenium, timeout=timeout).until(
-            EC.visibility_of_element_located((By.ID, 'id_description'))
-        )
-        self.click_navbar_element('Disease Progression')
-        WebDriverWait(self.selenium, timeout=timeout).until(
-            EC.visibility_of_element_located((By.LINK_TEXT, disease_progression.name))
-        ).click()
-        WebDriverWait(self.selenium, timeout=timeout).until(
-            EC.visibility_of_element_located((By.ID, 'id_disease_prevalence'))
-        ).click()
-
         # Now delete the point with x-value 4
         FunctionsPanel(
             WebDriverWait(self.selenium, timeout=timeout).until(
@@ -682,6 +684,42 @@ class FunctionalTests(StaticLiveServerTestCase):
         self.assertEqual(
             len(current_prevalence_points), len(points)-1,
             'there are %i points (should be %i after deletion)' % (len(current_prevalence_points), len(points)-1)
+        )
+        # Check that there is no point with x-value 4
+        self.assertFalse(
+            any([abs(point.x - 4) < self.tolerance for point in current_prevalence_points]),
+            'there is still a point with x-value==4 after deletion'
+        )
+
+    def test_delete_one_point_in_relational_function_with_manual_refresh_before_delete(self):
+        """This test checks that the correct number of points are present after deleting one point in a relational
+        function and that the correct point was deleted. This test differs from the one above in that it manually
+        refreshes the points data before doing the delete. See https://github.com/NAVADMC/ADSM/issues/678."""
+        timeout = self.default_timeout
+        self.setup_scenario()
+
+        # Set up a prevalence chart, just like in the test above
+        self.use_within_unit_prevalence(True)
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        prevalence_name = self.setup_prevalence_chart(disease_progression.name, points)
+
+        # Force a reload of the points data
+        functions_panel = FunctionsPanel(
+            WebDriverWait(self.selenium, timeout=timeout).until(
+                EC.visibility_of_element_located((By.ID, 'functions_panel'))
+            )
+        )
+        functions_panel.select_relational_function(prevalence_name)
+
+        # Now delete the point with x-value 4
+        functions_panel.delete_point(3)
+
+        # Verify that the chart has one fewer points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        self.assertEqual(
+            len(current_prevalence_points), len(points)-1,
+            'there are %i points (should be %i after deleting one)' % (len(current_prevalence_points), len(points)-1)
         )
         # Check that there is no point with x-value 4
         self.assertFalse(
