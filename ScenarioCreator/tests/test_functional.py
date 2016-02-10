@@ -66,7 +66,7 @@ class FunctionsPanel(object):
 
         # The blocking overlay will be up while the apply is perfomed
         WebDriverWait(self.driver, self.timeout).until(
-            EC.invisibility_of_element_located((By.CLASS_NAME, 'blocking-overlay'))
+            EC.element_to_be_clickable((By.CSS_SELECTOR, '#functions_panel .edit-button'))
         )
 
     def set_hit_enter(self, hit_enter):
