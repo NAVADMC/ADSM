@@ -9,7 +9,7 @@ import django.core.validators
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ScenarioCreator', '0014_auto_20150918_1043'),
+        ('ScenarioCreator', '0015_auto_20151204_1311'),
     ]
 
     operations = [

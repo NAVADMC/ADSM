@@ -62,7 +62,7 @@ def backwards(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ScenarioCreator', '0017_remove_old_vacc_ring_settings'),
+        ('ScenarioCreator', '0018_remove_old_vacc_ring_settings'),
     ]
 
     operations = [
