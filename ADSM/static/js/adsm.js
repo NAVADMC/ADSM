@@ -3,6 +3,16 @@ $(function(){
     open_panel_if_needed();
     check_disabled_controls();
 
+    // All of the actions to handle forms are tied to Click events on Apply
+    // buttons. However, the browser will also try to submit forms if you hit
+    // the Enter key, which bypasses the actions the Click event. This
+    // instruction disables the Enter key inside forms.
+    $(document).on('keypress', 'form.ajax', function(event){
+        if (event.charCode == 13) {
+        	event.preventDefault();
+        }
+    })
+
     $(document).on('click', 'form.ajax .btn-cancel, .btn-cancel[form]', function(){
         var form = $(this).closest('form');
         var attachment = $(this).attr('form');
