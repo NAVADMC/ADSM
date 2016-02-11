@@ -320,8 +320,8 @@ class DailyByZone(OutputBaseModel):
     zone = models.ForeignKey(Zone, blank=True, null=True, verbose_name=printable_name('zone'),
         help_text='The identifier of the zone that these outputs apply to.', )
 
-    zoneArea            = models.FloatField(blank=True, null=True, verbose_name=printable_name('zoneArea'))
-    zonePerimeter       = models.FloatField(blank=True, null=True, verbose_name=printable_name('zonePerimeter'))
+    zoneArea          = models.FloatField(blank=True, null=True, verbose_name=printable_name('zoneArea'))
+    zonePerimeter     = models.FloatField(blank=True, null=True, verbose_name=printable_name('zonePerimeter'))
     numSeparateAreas  = models.IntegerField(blank=True, null=True, verbose_name=printable_name('number of separate areas'))
 
 

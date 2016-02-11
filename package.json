@@ -1,6 +1,6 @@
 {
   "name": "adsm",
-  "version": "6.4.0",
+  "version": "7.0.0",
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
@@ -20,6 +20,7 @@
     "babel": "^6.3.13",
     "babel-core": "^6.3.15",
     "babel-loader": "^6.2.0",
+    "babel-polyfill": "^6.3.14",
     "babel-preset-es2015": "^6.3.13",
     "babel-preset-react": "^6.3.13",
     "css-loader": "^0.23.0",
@@ -32,6 +33,7 @@
     "react-dynamic-forms": "^0.13.3",
     "react-markdown": "^1.1.1",
     "react-redux": "^4.0.0",
+    "react-select-box": "^3.0.1",
     "redux": "^3.0.4",
     "redux-devtools": "^2.1.5",
     "redux-devtools-diff-monitor": "^3.0.0",

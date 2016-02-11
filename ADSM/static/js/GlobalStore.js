@@ -7,12 +7,18 @@ import thunkMiddleware from 'redux-thunk'
 import reducer  from './reducers/reducers'
 import { devTools, persistState } from 'redux-devtools'
 
-
-const finalCreateStore = compose(
-    applyMiddleware(thunkMiddleware),
-    devTools(),
-    persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/))
-)(createStore);
+var finalCreateStore = null
+if (process.env.NODE_ENV === 'development') {
+    finalCreateStore = compose(
+        applyMiddleware(thunkMiddleware),
+        devTools()
+    )(createStore);
+}
+else {
+    finalCreateStore = compose(
+        applyMiddleware(thunkMiddleware)
+    )(createStore);
+}
 
 export const store = finalCreateStore(reducer);
 

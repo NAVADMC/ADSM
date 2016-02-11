@@ -219,7 +219,7 @@ handle_exposure_event (struct adsm_module_t_ *self, EVT_event_t * e)
               || local_data->trace_success[event->contact_type][event->exposed_unit->production_type] >= 0)
             {
               #if DEBUG
-                g_debug ("recording exposure from unit \"%s\" -> unit \"%s\" on day %hu",
+                g_debug ("recording exposure from unit \"%s\" -> unit \"%s\" on day %i",
                          event->exposing_unit->official_id, event->exposed_unit->official_id, event->day);
               #endif
           
@@ -339,7 +339,7 @@ handle_attempt_to_trace_event (struct adsm_module_t_ *self,
                                                          record->contact_type,
                                                          direction, day, day, FALSE));
           #if DEBUG
-            g_debug ("%s misses contact from unit \"%s\" -> unit \"%s\" on day %hu (%i days ago)",
+            g_debug ("%s misses contact from unit \"%s\" -> unit \"%s\" on day %i (%i days ago)",
                      ADSM_trace_direction_name[direction],
                      record->exposing_unit->official_id,
                      record->exposed_unit->official_id, record->day, days_ago);
@@ -363,7 +363,7 @@ handle_attempt_to_trace_event (struct adsm_module_t_ *self,
                                            record->contact_type,
                                            direction, day, day, TRUE);
       #if DEBUG
-        g_debug ("%s finds contact from unit \"%s\" -> unit \"%s\" on day %hu (%i days ago)",
+        g_debug ("%s finds contact from unit \"%s\" -> unit \"%s\" on day %i (%i days ago)",
                  ADSM_trace_direction_name[direction],
                  record->exposing_unit->official_id,
                  record->exposed_unit->official_id, record->day, days_ago);

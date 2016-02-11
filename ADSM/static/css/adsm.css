@@ -165,6 +165,7 @@ input[type="checkbox"] {
 }
 .checkbox {
     margin-bottom: 18px;
+    margin-left: 20px;
 }
 /*-------------------------------------------------------------*/
 /*-----readonly form styling-----*/
@@ -210,6 +211,10 @@ form.editable input{
 }
 
 .hide-help-text .help-block {
+    display: none;
+}
+
+.probability-form .help-block { /*Fixes #663 by hiding all help blocks under probability functions*/
     display: none;
 }
 
@@ -334,8 +339,14 @@ header .filename {
     color: white;
     position: fixed;
     top: 25px;
-    left: 83%;
+    right: 3%;
     z-index: 130;
+    /* font-size: 18px !important; */
+}
+
+input#save_scenario {
+    font-size: 18px;
+    color: #9BD9D6;
 }
 
 header .buttonHolder{
@@ -418,9 +429,11 @@ body>nav {
 /*-----3-column layout-----*/
 /*-------------------------------------------------------------*/
 #main-panel {
-    /* float:none; */
-    /*margin-left: 185px;*/
-    /*width: calc(100vw - 160px);*/
+    width: calc(100vw - 200px - 50px);
+    padding-left: 0;
+    margin-right: 0;
+    margin-left: 200px;
+    z-index: 0;
 }
 
 .layout-panel {
@@ -429,7 +442,7 @@ body>nav {
     height: calc(100vh - 75px);
     overflow-y: auto;
     overflow-x: visible;
-    padding: 0;
+    padding: 0 0 61px 0; /*Fix for #693 and progress bar blocking people's view*/
     position: relative;
 }
 #center-panel,
@@ -456,8 +469,9 @@ body>nav {
     max-width: 500px;
 }
 #left-panel {
-    width:calc(16.667vw + 25px);
+    width: calc(33.333vw - 200px + 25px);
     padding-right: 25px;
+    margin-left:  200px;
 }
 #left-panel .fragment h1:first-of-type,
 section#left-panel h1:first-of-type,
@@ -487,16 +501,6 @@ section#left-panel h1:first-of-type,
 ul {
     padding-left: 5px; /*prevent style inheritance from above*/
     list-style: none;
-}
-/*-------------------------------------------------------------*/
-/*-----center block-----*/
-/*-------------------------------------------------------------*/
-.center-block {
-    width: calc(100vw - 60px);
-    padding-left: 200px;
-    margin-right:0;
-    margin-left: 0;
-    z-index: 0;
 }
 
 
@@ -760,11 +764,18 @@ ul {
     overflow:hidden;
     padding: 4px 0 0 10px;
 }
-#population_panel ul li:hover {
+#population_panel li:hover {
     background-color: #ebebeb;
 }
 #population_panel.add-pt ul li:hover, #population_panel.add-pt ul li a:hover {
     cursor: url("../icons/add_cursor.png"), auto;
+}
+.productiontypelist option {
+    cursor: url("../icons/remove_cursor.png"), auto;
+}
+.pt-added {
+    color: darkgray;
+    cursor: url("../icons/remove_cursor.png"), auto !important;
 }
 #population_panel a:focus {
     background-color: transparent;
@@ -779,7 +790,6 @@ ul {
     overflow:hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    color: #606060;
     text-align: right;
 }
 .population-super-column * {
@@ -867,6 +877,12 @@ ul {
     width: 100%;
     height: 42px;
 }
+
+.modal-body .button-footer {
+    bottom: -50px;
+    right: 0;
+}
+
 .edit-button-holder{
     position: relative;
     left: 0px;
@@ -1486,6 +1502,7 @@ select {
 	-o-transition: background-color .5s ease-in-out;
 	-ms-transition: background-color .5s ease-in-out;
 	transition: background-color .5s ease-in-out;
+	padding-left: 0px;
 }
 
 .green-dot.filled {
@@ -1495,23 +1512,25 @@ select {
 .progression-icon {
     background-size: contain;
     background-repeat: no-repeat;
+    background-position-x: -2px;
     background-image: url('../icons/progression-icon.png')
 }
 .spread-icon {
     background-size: contain;
     background-repeat: no-repeat;
-    background-position-x: 2px;
+    background-position-x: 0px;
     background-image: url('../icons/spread-icon.png')
 }
 .control-icon {
     background-size: contain;
     background-repeat: no-repeat;
-    background-position-x: 4px;
+    background-position-x: -1px;
     background-image: url('../icons/control-icon.png')
 }
 .zone-icon {
     background-size: contain;
     background-repeat: no-repeat;
+    background-position-x: -2px;
     background-image: url('../icons/zone-icon.png')
 }
 
@@ -1579,6 +1598,8 @@ input[type=file], button {
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* line-height: 20px; */
+    padding-top: 4px;
 }
 .defined_name:hover {
     cursor: default;
@@ -1725,7 +1746,7 @@ section#population_main_panel h1:first-of-type {
 
 #farm_list tbody{
     display: inline-block;
-    height: calc(100vh - 218px);
+    height: calc(100vh - 232px);
     overflow-y: auto;
     width: 100%;
     position: relative;
@@ -1851,10 +1872,10 @@ section#population_main_panel h1:first-of-type {
 }
 #farm_filter select {
     margin: 0;
-    width: 98px;
+    width: 129px;
 }
 #farm_filter input {
-    width: 60px;
+    width: 87px;
     height: 21px;
 }
 #farm_filter #production_type__name td:nth-child(2),
@@ -1954,7 +1975,7 @@ section#population_main_panel h1:first-of-type {
 }
 #edit_population {
     position: absolute;
-    top: calc(100vh - 172px);
+    top: calc(100vh - 187px);
     right: 25px;
     transition: opacity .2s ease
 }
@@ -2116,11 +2137,6 @@ table tbody span {
 
 table tbody span:hover { /*necessary in addtion to disableSelection() to preserve cursor appearance*/
     cursor: pointer;
-}
-
-.relevant .selected, .highlight { /*column is relevant and user has selected the row for many-to many-widget.js*/
-    font-weight: 600;
-    background-color: #d7f5ff;
 }
 
 /*Disabled control fields: include text labels*/
@@ -2291,24 +2307,85 @@ select[multiple] {}
 /*----------------------------------------------------*/
 /*----- Assign Disease Spread -----*/
 /*----------------------------------------------------*/
-.intro_text, #assign_spread_wrapper{
+.spread-grid-table {
+    margin-top: 87px;
+}
+.intro_text {
     padding: 0;
 }
 .intro_text, .intro_text p {
     color: #606060;
 }
-.m2mtable select, #all-interactions select {
-    max-width: 260px;
+.spread-grid-table span {
+    width: 67px;
+    height: 18px;
+    /* margin: 5px 0; */
+    /* background-color: #BDBDBD; */
 }
-#all-interactions {
-    width: calc(100% - 0px);}
+
+span.IndirectSpread {
+    margin: 3px 0;
+}
+
+.DirectSpread.assigned {
+    background-color: rgb(161, 134, 87);
+}
+
+.IndirectSpread.assigned {
+    background-color: rgb(146, 203, 170);
+}
+
+.AirborneSpread.assigned {
+    background-color: rgb(52, 192, 209);
+}
+
+.spread-cell {
+    border: solid 1px #B6B6B6;
+    margin: 0px;
+}
+
+.spread-grid-table td {
+    padding: 3px;
+}
+
+.spread-destinations {
+    white-space: nowrap;
+    /* overflow: hidden; */
+    /* text-overflow: ellipsis; */
+    max-width: 75px;/* Safari */
+    -webkit-transform: rotate(-56deg);/* Firefox */
+    -moz-transform: rotate(-45deg);
+    padding-left: 25px;
+    padding-top: 23px;
+}
+
+.spread-source {
+    text-align: right;
+}
+
+.spread-display-selector * {
+    display: inline-block;
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+.spread-display-selector input {
+    width: 26px;
+    height: 17px;
+    margin-top: 16px;
+    background: white;
+}
 /*-------------------------------------------------------------*/
 /*-----left aligned scrollbars-----*/
 /*-------------------------------------------------------------*/
-#center-panel .fragment, #left-panel {
-    direction: rtl;
+#center-panel>.fragment, #left-panel {
+    direction: rtl; /*TODO this really really needs to change because it affects decedents. The desire here was to
+    put the scrollbars on the left hand side, which should really be done with a scrollbar meta property.*/
 }
-#center-panel .fragment form, #left-panel h1, #left-panel div {
+#center-panel .fragment form,
+#center-panel .fragment div,
+#left-panel h1,
+#left-panel div {
     direction: ltr;
 }
 ::-webkit-scrollbar-thumb {
@@ -2409,7 +2486,7 @@ select[multiple] {}
     border-color: #ba3e44;
 }
 #legend-right li:last-child {
-    border-color: #606060;
+    border-color: rgb(234, 125, 48);
 }
 @media screen and (max-height: 800px){
     #legend {
@@ -2504,6 +2581,13 @@ select[multiple] {}
     #setupMenu h3,
     #setupMenu h4 {
         width: 140px;
+    }
+
+    #left-panel, #main-panel {
+        margin-left: 165px;
+    }
+    #left-panel {
+        width: calc(33.333vw - 165px + 25px);
     }
     #setupMenu a {
         padding-left: 15px;

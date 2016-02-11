@@ -9,6 +9,10 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 
 from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
     ProbabilityFunction, RelationalFunction, RelationalPoint, Population, \
@@ -21,110 +25,106 @@ from Results.utils import delete_all_outputs
 def parent_of(webElement):
     return webElement.find_element_by_xpath('..')
     
-    
-class M2mDSL(object):
-    """
-        DSL to improve m2m widget tests readability
-    """
-    def click_navbar_element(self, name, sleep=1):
-        target = self.selenium.find_element_by_tag_name('nav')
-        target.find_element_by_link_text(name).click()
-        time.sleep(sleep)
 
-    def click_production_type(self, name, type_of_type='source'):
-        row_selector = '.m2mtable > table > tbody > tr'
-        source_type_selector = 'th:first-of-type span'
-        destination_type_selector = 'th:nth-of-type(2) span'
+class FunctionsPanel(object):
+    """This class wraps the "#functions_panel" WebElement and adds some convenience methods. Kind of like Selenium's
+    Select class that wraps drop-downs and adds convenience methods for selecting options."""
+    def __init__(self, web_element, timeout=10):
+        self.functions_panel = web_element
+        # The parent of the WebElement object will be the WebDriver
+        self.driver = web_element.parent
+        self.actions = ActionChains(self.driver)
+        self.timeout = timeout
+        self.hit_enter = False # if True, hits Enter key to save changes; if False, clicks Apply button
 
-        rows = self.selenium.find_elements_by_css_selector(row_selector)
-        for row in rows:
-            if type_of_type == 'source':
-                target = row.find_element_by_css_selector(source_type_selector)
-            elif type_of_type == 'destination':
-                target = row.find_element_by_css_selector(destination_type_selector)
-            if target.text == name:
-                target.click()
+    def _edit_with_overwrite(self):
+        """Click the appropriate buttons to edit with overwrite."""
+        WebDriverWait(self.functions_panel, timeout=self.timeout).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, 'edit-button'))
+        ).click()
+        # You can get an "Other element would receive the click" exception if you try to click the Overwrite button
+        # while the buttons are still animating into place. The animation takes 0.4 seconds (search for
+        # .edit-button-holder in adsm.css).
+        time.sleep(0.4)
+        WebDriverWait(self.functions_panel, timeout=self.timeout).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, 'overwrite-button'))
+        ).click()
 
-    def click_button(self, name, type_of_type='source', sleep=1):
-        row_selector = '.m2mtable > table > thead > tr:nth-of-type(2)'
-        source_selector = 'td:first-of-type button'
-        destination_selector = 'td:nth-of-type(2) button'
+    def _move_to_row(self, row):
+        """Puts the focus on the x-point in the given row."""
+        # We actually start on the y-point in that row, and tab backwards to get to the first x-point. That puts focus
+        # on the x-point *and* selects whatever is currently filled in there, so that when we start typing, we'll
+        # overwrite it.
+        y_values = self.functions_panel.find_elements_by_xpath(".//input[starts-with(@name,'relationalpoint') and contains(@name,'-y')]")
+        self.actions.move_to_element(y_values[row]).click().key_down(Keys.SHIFT).send_keys(Keys.TAB).key_up(Keys.SHIFT).perform()
 
-        row = self.selenium.find_element_by_css_selector(row_selector)
-        if type_of_type == 'source':
-            buttons = row.find_elements_by_css_selector(source_selector)
-        elif type_of_type == 'destination':
-            buttons = row.find_elements_by_css_selector(destination_selector)
-        for button in buttons:
-            if button.text == name:
-                button.click()
-                time.sleep(sleep)
-                break
+    def _save_changes(self):
+        if self.hit_enter:
+            self.actions.send_keys(Keys.ENTER).perform() # should be just like clicking the Apply button
+        else:
+            self.functions_panel.find_element_by_class_name('btn-save').click()
 
-    def select_bulk_contact_disease(self, name, sleep=3):
-        target = self.selenium.find_element_by_id("id_bulk-direct_contact_spread")
-        Select(target).select_by_visible_text(name)
-        time.sleep(sleep)
+        # The blocking overlay will be up while the apply is perfomed
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, '#functions_panel .edit-button'))
+        )
 
-    def select_contact_disease(self, name, sleep=2):
-        select_selector = '.m2mtable > table > tbody > tr:first-of-type > td:first-of-type select'
-        target = self.selenium.find_element_by_css_selector(select_selector)
-        Select(target).select_by_visible_text(name)
-        time.sleep(sleep)
+    def set_hit_enter(self, hit_enter):
+        self.hit_enter = hit_enter
 
-    def get_bulk_production_types(self):
-        row_selector = '.m2mtable > table > tbody > tr'
-        source_selector = 'th:first-of-type span'
-        select_selector = 'thead td:nth-child(3) select'
-        rows = self.selenium.find_elements_by_css_selector(row_selector)
+    def set_points(self, points):
+        self._edit_with_overwrite()
 
-        production_types = []
-        for row in rows:
-            source = row.find_element_by_css_selector(source_selector)
-            select = Select(self.selenium.find_element_by_css_selector(select_selector))
-            production_type = {}
-            production_type['source'] = source.text
-            production_type['disease'] = select.first_selected_option.text
-            production_types.append(production_type)
+        # Type in the points by tabbing between the fields like a user would do.
+        self._move_to_row(0)
+        first_point = True
+        for x,y in points:
+            if first_point:
+                first_point = False
+            else:
+                # 2 tabs to go from Y -> Delete checkbox -> X on next row.
+                self.actions.send_keys(Keys.TAB).send_keys(Keys.TAB).perform()
+            self.actions.send_keys(str(x)).send_keys(Keys.TAB).send_keys(str(y)).perform()
 
-        return production_types
+        self._save_changes()
 
-    def get_interactions(self):
-        row_selector = 'form table > tbody > tr'
-        source_selector = 'select[id$="source_production_type"]'
-        destination_selector = 'select[id$="destination_production_type"]'
-        disease_selector = 'select[id$="-direct_contact_spread"]'
+    def change_point(self, point_idx, new_point):
+        self._edit_with_overwrite()
 
-        rows = self.selenium.find_elements_by_css_selector(row_selector)
+        self._move_to_row(point_idx)
+        x, y = new_point
+        if x is not None:
+            self.actions.send_keys(str(x)).perform()
+        if y is not None:
+            self.actions.send_keys(Keys.TAB).send_keys(str(y)).perform()
 
-        interactions = []
-        for row in rows:
-            source_select = Select(row.find_element_by_css_selector(source_selector))
-            destination_select = Select(row.find_element_by_css_selector(destination_selector))
-            disease_select = Select(row.find_element_by_css_selector(disease_selector))
-            interaction = {}
-            interaction['source'] = source_select.first_selected_option.text
-            interaction['destination'] = destination_select.first_selected_option.text
-            interaction['disease'] = disease_select.first_selected_option.text
-            interactions.append(interaction)
+        self._save_changes()
 
-        return interactions
+    def delete_point(self, point_idx):
+        self._edit_with_overwrite()
 
-    def get_selected_production_types(self, type_of_type='source'):
-        row_selector = '.m2mtable > table > tbody'
-        source_selector = 'th:first-of-type span.selected'
-        destination_selector = 'th:nth-of-type(2) span.selected'
+        self._move_to_row(point_idx)
+        # Tab twice to get to Delete checkbox, then hit space to check.
+        self.actions.send_keys(Keys.TAB).send_keys(Keys.TAB).send_keys(Keys.SPACE).perform()
 
-        rows = self.selenium.find_element_by_css_selector(row_selector)
-        if type_of_type == 'source':
-            return rows.find_elements_by_css_selector(source_selector)
-        elif type_of_type == 'destination':
-            return rows.find_elements_by_css_selector(destination_selector)
+        self._save_changes()
 
+    def select_relational_function(self, function_name):
+        # Click the Relational button at the top of the functions panel
+        self.functions_panel.find_element_by_xpath(".//*[contains(@class,'list-button') and @data-target='#relational-options']").click()
+        # The list animates open. Wait for the item we want to be clickable.
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.element_to_be_clickable((By.XPATH, "//*[@id='relational-options']//a[contains(text(),'" + function_name + "')]"))
+        ).click()
+        # Wait for list to collapse
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.invisibility_of_element_located((By.ID, 'relational-options'))
+        )
 
-
-class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
+class FunctionalTests(StaticLiveServerTestCase):
     multi_db = True
+    default_timeout = 10 # seconds
+    tolerance = 1E-6 # small tolerance for floating-point comparison error
 
     @classmethod
     def setUpClass(cls):
@@ -205,11 +205,20 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             max_distance=3)
         zone = Zone.objects.create(name="Medium", radius=10)
 
-    def query(self, selector):
+    def click_navbar_element(self, name, sleep=1):
+        target = WebDriverWait(self.selenium, self.default_timeout).until(
+            EC.visibility_of_element_located((By.TAG_NAME, 'nav'))
+        )
+        target.find_element_by_link_text(name).click()
+        time.sleep(sleep)
+
+    def find(self, selector):
         return self.selenium.find_element_by_css_selector(selector)
 
-    def select_option(self, element_id, visible_text):
-        target = self.selenium.find_element_by_id(element_id)
+    def select_option(self, element_id, visible_text, timeout=10):
+        target = WebDriverWait(self.selenium, timeout).until(
+            EC.presence_of_element_located((By.ID, element_id))
+        )
         Select(target).select_by_visible_text(visible_text)
         time.sleep(2)  # wait for panel loading
 
@@ -232,47 +241,32 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         DiseaseProgressionAssignment.objects.create(production_type=cattle, progression=disease_progression)
 
         self.click_navbar_element('Disease Progression')
-        self.query('#left-panel').find_element_by_class_name('glyphicon-pencil').click()
+        self.selenium.find_element_by_partial_link_text('Rename Test').click()
         time.sleep(3)
-        self.query('#center-panel').find_element_by_css_selector('select').click()
+        self.find('#center-panel').find_element_by_css_selector('select').click()
         time.sleep(1)
-        self.query('.edit-button').click()
+        self.find('.edit-button').click()
         time.sleep(1)
-        self.query('.overwrite-button').click()
+        self.find('.overwrite-button').click()
 
-        self.query('#id_equation_type')  # just making sure it's there
-        pdf_panel = self.query('#functions_panel')
+        self.find('#id_equation_type')  # just making sure it's there
+        pdf_panel = self.find('#functions_panel')
         pdf_panel.find_element_by_id('id_name').send_keys(' edited')
         time.sleep(1)
 
         pdf_panel.find_element_by_css_selector('.btn-save').click()
         time.sleep(1)  # there's a reload here
-        self.query('#functions_panel .edit-button').click()
+        self.find('#functions_panel .edit-button').click()
         time.sleep(1)  # animate
-        self.query('#functions_panel .btn-cancel').click()
+        self.find('#functions_panel .edit-button-holder .btn-cancel').click()
         time.sleep(1)
 
         with self.assertRaises(NoSuchElementException):
-            self.query('#id_equation_type')  # make sure it's gone
+            self.find('#id_equation_type')  # make sure it's gone
 
         pdf_updated = ProbabilityFunction.objects.get(pk=lp_cattle.pk)
         self.assertEqual(pdf_updated.name, "Renaming Test - cattle edited")
 
-    def test_launch_add_new_modal_when_nothing_selected(self):
-        self.setup_scenario()
-
-        self.click_navbar_element("Disease Progression")
-
-        target = self.query('#id_form-0-progression')
-        Select(target).select_by_visible_text(u'---------')
-        time.sleep(1)
-
-        self.selenium.find_element_by_class_name('glyphicon-pencil').click()
-        time.sleep(2)
-
-        center_panel = self.query('#center-panel')
-
-        self.assertIn("Latent period", center_panel.text)
 
     @skip("https://github.com/NAVADMC/ADSM/issues/605")
     def test_upload_population_file(self):
@@ -282,7 +276,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         for i in range(5):  # a slow population load
             time.sleep(5) # may need to be adjusted for slow computers or if the file grows
             try:
-                self.assertIn('Population File:', self.query('section').text)
+                self.assertIn('Population File:', self.find('section').text)
                 break
             except: pass  # keep trying
 
@@ -293,10 +287,10 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.selenium.find_element_by_link_text('blank.sqlite3').click()
         time.sleep(5) # may need to be adjusted for slow computers or if the file grows
 
-        section = self.query('section')
+        section = self.find('section')
         self.assertIn('Load a Population', section.text)
 
-        alert = self.query('.alert')
+        alert = self.find('.alert')
         self.assertIn('Error: No Production Types found in the target scenario.', alert.text)
 
     def test_delete_population(self):
@@ -305,7 +299,7 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.click_navbar_element('Population', 2)
 
         # javascript is attaching to this event
-        self.query('[data-delete-link]').click()
+        self.find('[data-delete-link]').click()
         time.sleep(2)
 
         modal = self.selenium.find_element_by_class_name('bootstrap-dialog')
@@ -320,214 +314,49 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
         time.sleep(2)
 
-        section = self.query('section')
+        section = self.find('section')
         self.assertIn('Load a Population', section.text)
 
-    def old_test_assign_disease_spread_layout(self):
-        self.setup_scenario()
-
-        self.query('nav').find_element_by_link_text('Assign Disease Spread').click()
-        time.sleep(2)
-
-        m2m_widget = self.query('.m2mtable > table')
-
-        # check that the buttons are present
-        buttons = m2m_widget.find_elements_by_tag_name('button')
-        self.assertEqual(len([b for b in buttons if b.text == "Select All"]), 2)
-        self.assertEqual(len([b for b in buttons if b.text == "Deselect All"]), 2)
-
-        # and production type labels
-        self.assertEqual(m2m_widget.text.count("Free Range Cows"), 2)
-        self.assertEqual(m2m_widget.text.count("Dairy Cows"), 2)
-        self.assertEqual(m2m_widget.text.count("Angus Cattle"), 2)
-        self.assertEqual(m2m_widget.text.count("Blue Horn"), 2)
-
-        # and selects
-        selects = m2m_widget.find_elements_by_tag_name('select')
-        self.assertEqual(len(selects), 3)
-
-    def old_test_assign_disease_spread_bulk_operator_default(self):
-        """
-            bulk operator applies disease spreads to interactions
-            with the same production type for source and destination
-        """
-        self.setup_scenario()
-        self.click_navbar_element("Assign Disease Spread")
-
-        self.select_bulk_contact_disease(str(self.dc_ds1))
-
-        # verify bulk selector for each destination production type were updated
-        types = self.get_bulk_production_types()
-        for production_type in types:
-            self.assertEqual(production_type['disease'], str(self.dc_ds1))
-
-        # verify interactions are set correctly
-        interactions = self.get_interactions()
-        for interaction in interactions:
-            if interaction['source'] == interaction['destination']:
-                self.assertEqual(interaction['disease'], str(self.dc_ds1))
-            else:
-                self.assertEqual(interaction['disease'], u'---------')
-
-    def old_test_assign_disease_spread_bulk_operator_single_source_selected(self):
-        """
-            bulk operator applies disease spreads to all interactions
-            with the same source production type for source selected
-        """
-        self.setup_scenario()
-        self.click_navbar_element("Assign Disease Spread")
-
-        self.click_production_type("Free Range Cows")
-        self.select_bulk_contact_disease(str(self.dc_ds1))
-
-        # verify bulk selector for each destination production type were updated
-        types = self.get_bulk_production_types()
-        for production_type in types:
-            self.assertEqual(production_type['disease'], str(self.dc_ds1))
-
-        interactions = self.get_interactions()
-        for interaction in interactions:
-            if interaction['source'] == 'Free Range Cows':
-                self.assertEqual(interaction['disease'], str(self.dc_ds1))
-            else:
-                self.assertEqual(interaction['disease'], u"---------")
-
-    def old_test_assign_disease_spread_bulk_operator_multiple_sources_selected(self):
-        """
-            bulk operator applies disease spreads to interactions
-            with the same source production types for source selected
-        """
-        self.setup_scenario()
-        self.click_navbar_element("Assign Disease Spread")
-
-        self.click_production_type("Free Range Cows")
-        self.click_production_type("Dairy Cows")
-        self.select_bulk_contact_disease(str(self.dc_ds1))
-
-        # verify bulk selector for each destination production type were updated
-        types = self.get_bulk_production_types()
-        for production_type in types:
-            self.assertEqual(production_type['disease'], str(self.dc_ds1))
-
-        interactions = self.get_interactions()
-        for interaction in interactions:
-            if (interaction['source'] == 'Free Range Cows' or
-                    interaction['source'] == 'Dairy Cows'):
-                self.assertEqual(interaction['disease'], str(self.dc_ds1))
-            else:
-                self.assertEqual(interaction['disease'], u"---------")
-
-    def old_test_assign_disease_spread_bulk_operator_multiple_sources_and_destinations_selected(self):
-        """
-            bulk operator applies disease spreads to interactions
-            with the same source production types and destination types
-            for source selected
-        """
-        self.setup_scenario()
-        self.click_navbar_element("Assign Disease Spread")
-
-        self.click_production_type("Free Range Cows")
-        self.click_production_type("Dairy Cows")
-        self.click_production_type("Free Range Cows", "destination")
-        self.click_production_type("Dairy Cows", "destination")
-        self.select_bulk_contact_disease(str(self.dc_ds1))
-
-        # verify bulk selector for each destination production type were updated
-        types = self.get_bulk_production_types()
-        for production_type in types:
-            if (production_type['source'] == "Free Range Cows" or
-                production_type['source'] == "Dairy Cows"):
-                # only the sources selected should have updated
-                self.assertEqual(production_type['disease'], str(self.dc_ds1))
-            else:
-                self.assertEqual(production_type['disease'], u"---------")
-
-        interactions = self.get_interactions()
-        for interaction in interactions:
-            i = interaction
-            if ((i['source'] == 'Free Range Cows' or i['source'] == 'Dairy Cows') and
-                (i['destination'] == 'Free Range Cows' or i['destination'] == 'Dairy Cows')):
-                # both the source and destination type were selected
-                self.assertEqual(interaction['disease'], str(self.dc_ds1))
-            else:
-                self.assertEqual(interaction['disease'], u"---------")
-
-    def old_test_assign_disease_spread_select_all_button_source(self):
-        """
-            clicking the select all button for sources in the m2m widget
-            will cause all production types to be selected
-        """
-        self.setup_scenario()
-        self.click_navbar_element("Assign Disease Spread")
-
-        self.click_button("Select All")
-
-        source_types = self.get_selected_production_types()
-        self.assertEqual(len(source_types), 4)
-
-    def old_test_assign_disease_spread_select_all_button_destination(self):
-        """
-            clicking the select all button for destinations in the m2m widget
-            will cause all production types to be selected
-        """
-        self.setup_scenario()
-        self.click_navbar_element("Assign Disease Spread")
-
-        self.click_button("Select All", "destination")
-
-        selected_types = self.get_selected_production_types("destination")
-        self.assertEqual(len(selected_types), 4)
-
-    def test_assign_disease_spread_deselect_all_button_source(self):
-        self.setup_scenario()
-        self.click_navbar_element("Assign Disease Spread")
-        self.click_production_type("Free Range Cows")
-        self.click_production_type("Dairy Cows")
-        self.click_production_type("Angus Cattle")
-        self.click_production_type("Blue Horn")
-
-        self.click_button("Deselect All")
-
-        source_types = self.get_selected_production_types()
-        self.assertEqual(len(source_types), 0)
-
-    def test_assign_disease_spread_deselect_all_button_destination(self):
-        self.setup_scenario()
-        self.click_navbar_element("Assign Disease Spread")
-        self.click_production_type("Free Range Cows", "destination")
-        self.click_production_type("Dairy Cows", "destination")
-        self.click_production_type("Angus Cattle", "destination")
-        self.click_production_type("Blue Horn", "destination")
-
-        self.click_button("Deselect All", "destination")
-
-        source_types = self.get_selected_production_types("destination")
-        self.assertEqual(len(source_types), 0)
 
     def test_deepest_modal_edit_and_file_upload(self):
         self.setup_scenario()
         self.click_navbar_element("Disease Progression")
-        
-        self.select_option('id_form-0-progression', 'Add...')
-        self.select_option('id_disease_latent_period','Add...')
-        self.query('#functions_panel .edit-button').click()
+
+        self.selenium.find_element_by_partial_link_text("Cattle Reaction").click()
+        # The panel that comes up has id="-setup-DiseaseProgression-1-" when this test is run in isolation, but
+        # id="-setup-DiseaseProgression-2-" when the whole series of tests is run. Weird, but we get around it by
+        # doing a partial id match using XPath.
+        WebDriverWait(self.selenium, timeout=10).until(
+            EC.presence_of_element_located((By.XPATH, "//*[starts-with(@id, '-setup-DiseaseProgression-')]"))
+        )
+        self.select_option('id_disease_latent_period','Subclinical period - cattle')
+        WebDriverWait(self.selenium, timeout=10).until(
+            EC.visibility_of_element_located((By.ID, 'functions_panel'))
+        )
+        self.find('#functions_panel .edit-button').click()
         time.sleep(1)
-        self.query('.overwrite-button').click()
+        self.find('.overwrite-button').click()
         self.select_option('id_equation_type','Histogram')
         time.sleep(1)
         self.select_option('id_graph','Add...')
 
         time.sleep(1)
 
-        modal = self.query('div.modal')
+        relational_form = self.find('#-setup-RelationalFunction-new-')
 
-        self.assertIn("Import Points from File", modal.text)
+        self.assertIn("Import Points from File", relational_form.text)
 
         #check and see if you can build a Rel from file upload
-        self.submit_relational_form_with_file(modal)
-        self.query('#functions_panel').find_element_by_class_name('glyphicon-pencil').click()
-        time.sleep(2)
-        modal = self.query('div.modal')
+        relational_form.find_element_by_id("file").send_keys(
+            os.path.join(settings.BASE_DIR, "ScenarioCreator","tests","population_fixtures","points.csv"))  # this is sensitive to the starting directory
+        relational_form.find_element_by_id('id_name').send_keys('imported from file')
+        # Do a "submit" instead of clicking the Apply button. On shorter screens, the Apply button may not be visible,
+        # causing the click to fail, and none of the suggested solutions I found for scrolling the button into view
+        # worked.
+        relational_form.submit()
+        time.sleep(3)
+        self.select_option('id_graph', 'Add...')
+        modal = self.find('div.modal')
         self.assertEqual("123.1", modal.find_element_by_id('id_relationalpoint_set-3-x').get_attribute('value'))
 
 
@@ -535,18 +364,22 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.setup_scenario()
         self.click_navbar_element("Zone Effects", 2)
         
-        self.select_option('id_form-0-effect', 'Add...')
+        self.find('.addNew a').click()
+        WebDriverWait(self.selenium, timeout=10).until(
+            EC.presence_of_element_located((By.ID, '-setup-ZoneEffect-new-'))
+        )
         self.select_option('id_zone_indirect_movement', 'Add...')
         
-        right_panel = self.query('#functions_panel')
+        right_panel = self.find('#functions_panel')
 
-        self.query('.edit-button').click()
-        time.sleep(1)
-        self.query('.overwrite-button').click()
+        #EDIT click not needed because this is a new form
+        # self.find('.edit-button').click()
+        # time.sleep(1)
+        # self.find('.overwrite-button').click()
 
         self.submit_relational_form_with_file(right_panel)
-        right_panel = self.query('#functions_panel')
-        self.assertEqual("123.1", self.query('#id_relationalpoint_set-3-x').get_attribute('value'))
+        right_panel = self.find('#functions_panel')
+        self.assertEqual("123.1", self.find('#id_relationalpoint_set-3-x').get_attribute('value'))
 
 
     def submit_relational_form_with_file(self, container):
@@ -563,15 +396,15 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         self.setup_scenario()
         self.click_navbar_element("Disease Progression")
 
-        target = self.selenium.find_element_by_class_name('glyphicon-pencil').click()
+        target = self.find('.defined_name').click()
         time.sleep(2)
 
-        self.query('#center-panel').find_element_by_css_selector('select').click()
+        self.find('#center-panel').find_element_by_css_selector('select').click()
         time.sleep(2)
 
-        right_panel = self.query('#functions_panel')
+        right_panel = self.find('#functions_panel')
 
-        mean_field = right_panel.find_element_by_id("div_id_mean")
+        mean_field = right_panel.find_element_by_css_selector("#div_id_mean")
 
         self.assertIn("none", mean_field.value_of_css_property("display"))
 
@@ -593,7 +426,8 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             else:
                 self.assertEqual(element.get_attribute("disabled"), "true")
 
-        setup_menu = self.selenium.find_element_by_id("setupMenu")
+        time.sleep(1)
+        setup_menu = self.find("#setupMenu")
 
         hidden_menu_items = [
             "Control Protocol",
@@ -646,10 +480,10 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
         filename_field = self.save_scenario_as()
         try:
             filename_field.send_keys('./\\ 123.1&% AZ')
-            self.query('.modal.in .btn-primary').click()
+            self.find('.modal.in .btn-primary').click()
             time.sleep(1)
 
-            alert = self.query('.alert-danger')  # this works fine in the actual program.
+            alert = self.find('.alert-danger')  # this works fine in the actual program.
             
             self.assertIn("Error", alert.text)
         finally:
@@ -660,27 +494,27 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
 
     def save_scenario_as(self):
         self.cause_unsaved_edit()
-        self.query('#TB_file').click()
+        self.find('#TB_file').click()
         time.sleep(1)
-        self.query('.current .copy-icon').click()
+        self.find('.current .copy-icon').click()
         time.sleep(1)
-        self.query('.btn-dont-save').click()
+        self.find('.btn-dont-save').click()
         time.sleep(1)
-        filename_field = self.query('#new_name')
+        filename_field = self.find('#new_name')
         return filename_field
 
     def cause_unsaved_edit(self):
-        self.query('#id_description').send_keys('--edited--')
-        self.query('#submit-id-submit').click()
+        self.find('#id_description').send_keys('--edited--')
+        self.find('#submit-id-submit').click()
         time.sleep(1)
 
     def test_save_scenario_success(self):
         filename_field = self.save_scenario_as()
         try:
             filename_field.send_keys('123.1 AZ')
-            self.query('.modal.in .btn-primary').click()
+            self.find('.modal.in .btn-primary').click()
             time.sleep(3)
-            status = self.query('.scenario-status')
+            status = self.find('.scenario-status')
             self.assertNotIn('unsaved', status.get_attribute('class'))
         finally:
             try:
@@ -688,3 +522,251 @@ class FunctionalTests(StaticLiveServerTestCase, M2mDSL):
             except:
                 pass
 
+    def use_within_unit_prevalence(self, enable_prevalence, timeout=None):
+        """Enables or disables use of within-unit prevalence."""
+        if timeout is None:
+            timeout = self.default_timeout
+
+        self.click_navbar_element('Disease')
+        # Wait for the checkbox to appear
+        checkbox = WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.NAME, 'use_within_unit_prevalence'))
+        )
+        # If enable_prevalence==True and the checkbox is not checked, click it to check.
+        # If enable_prevalence==False and the checkbox is checked, click it to un-check.
+        if enable_prevalence != checkbox.is_selected():
+            checkbox.click()
+
+        # Save the changes we just made.
+        self.find('.btn-save').click()
+        return
+
+    def setup_prevalence_chart(self, disease_progression_name, points, timeout=None):
+        """Sets up the prevalence chart for the given Disease Progression. Returns the name of the relational function
+        that contains the prevalence chart."""
+        if timeout is None:
+            timeout = self.default_timeout
+
+        self.click_navbar_element('Disease Progression')
+        # Once the Disease Progression choices come up, click the desired one
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.LINK_TEXT, disease_progression_name))
+        ).click()
+
+        # Once the latent period, etc. options come up, click to bring up the prevalence chart
+        prevalence_options = WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.ID, 'id_disease_prevalence'))
+        )
+        prevalence_name = Select(prevalence_options).first_selected_option.text # remember its name
+        prevalence_options.click()
+
+        # Once the prevalence chart comes up, overwrite the old points with the new ones.
+        FunctionsPanel(
+            WebDriverWait(self.selenium, timeout=timeout).until(
+                EC.visibility_of_element_located((By.ID, 'functions_panel'))
+            )
+        ).set_points(points)
+
+        return prevalence_name
+
+    def test_overwrite_points_in_relational_function(self):
+        """This test checks that the correct number of points are present after overwriting a relational function. See
+        the comment "When I went back, I have many rows that must have been saving as I was tinkering around with
+        things" in https://github.com/NAVADMC/ADSM/issues/678."""
+        self.setup_scenario()
+
+        self.use_within_unit_prevalence(True)
+        # Pick the first DiseaseProgression
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        self.setup_prevalence_chart(disease_progression.name, points)
+
+        # Verify that the prevalence chart now has the correct number of points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        self.assertEqual(
+            len(current_prevalence_points), len(points),
+            'there are %i points (should be %i)' % (len(current_prevalence_points), len(points))
+        )
+
+    def test_change_one_point_in_relational_function(self):
+        """This test checks that the correct number of points are present after editing one point in a relational
+         function and that the changed point has the correct value. See https://github.com/NAVADMC/ADSM/issues/678."""
+        timeout = self.default_timeout
+        self.setup_scenario()
+
+        # Set up a prevalence chart, just like in the test above
+        self.use_within_unit_prevalence(True)
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        self.setup_prevalence_chart(disease_progression.name, points)
+
+        # Exit the relational function dialog, then navigate back to it
+        self.click_navbar_element('Scenario Description')
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.ID, 'id_description'))
+        )
+        self.click_navbar_element('Disease Progression')
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.LINK_TEXT, disease_progression.name))
+        ).click()
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.ID, 'id_disease_prevalence'))
+        ).click()
+
+        # Now reduce the peak from 0.9 to 0.8
+        peak_idx = 2
+        new_peak = 0.8
+        FunctionsPanel(
+            WebDriverWait(self.selenium, timeout=timeout).until(
+                EC.visibility_of_element_located((By.ID, 'functions_panel'))
+            )
+        ).change_point(peak_idx, (None, new_peak))
+
+        # Verify that the chart still has the same number of points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        self.assertEqual(
+            len(current_prevalence_points), len(points),
+            'there are %i points (should be %i)' % (len(current_prevalence_points), len(points))
+        )
+        # Check that the changed value is what we set it to
+        changed_point = current_prevalence_points[peak_idx]
+        self.assertTrue(
+            abs(changed_point.y - new_peak) < self.tolerance,
+            'the y-value of point #%i is %g (should be %g)' % (peak_idx+1, changed_point.y, new_peak)
+        )
+
+    def test_change_one_point_in_relational_function_without_closing_functions_panel(self):
+        """Like the test above, but don't leave the functions panel. Instead simulate a user who fills in a relational
+        function, clicks Apply, then notices a mistake in one point and fixes it.
+        https://github.com/NAVADMC/ADSM/issues/678."""
+        self.setup_scenario()
+
+        # Set up a prevalence chart, just like in the test above
+        self.use_within_unit_prevalence(True)
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        self.setup_prevalence_chart(disease_progression.name, points)
+
+        # The functions panel should still be open
+        functions_panel = FunctionsPanel(self.find('#functions_panel'))
+        # Reduce the peak from 0.9 to 0.8
+        peak_idx = 2
+        new_peak = 0.8
+        functions_panel.change_point(peak_idx, (None, new_peak))
+
+        # Verify that the chart still has the same number of points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        self.assertEqual(
+            len(current_prevalence_points), len(points),
+            'there are %i points (should be %i)' % (len(current_prevalence_points), len(points))
+        )
+        # Check that the changed value is what we set it to
+        changed_point = current_prevalence_points[peak_idx]
+        self.assertTrue(
+            abs(changed_point.y - new_peak) < self.tolerance,
+            'the y-value of point #%i is %g (should be %g)' % (peak_idx+1, changed_point.y, new_peak)
+        )
+
+    def test_delete_one_point_in_relational_function(self):
+        """This test checks that the correct number of points are present after deleting one point in a relational
+         function and that the correct point was deleted. See https://github.com/NAVADMC/ADSM/issues/678."""
+        timeout = self.default_timeout
+        self.setup_scenario()
+
+        # Set up a prevalence chart, just like in the test above
+        self.use_within_unit_prevalence(True)
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        self.setup_prevalence_chart(disease_progression.name, points)
+
+        # Now delete the point with x-value 4
+        FunctionsPanel(
+            WebDriverWait(self.selenium, timeout=timeout).until(
+                EC.visibility_of_element_located((By.ID, 'functions_panel'))
+            )
+        ).delete_point(3)
+
+        # Verify that the chart has one fewer points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        self.assertEqual(
+            len(current_prevalence_points), len(points)-1,
+            'there are %i points (should be %i after deletion)' % (len(current_prevalence_points), len(points)-1)
+        )
+        # Check that there is no point with x-value 4
+        self.assertFalse(
+            any([abs(point.x - 4) < self.tolerance for point in current_prevalence_points]),
+            'there is still a point with x-value==4 after deletion'
+        )
+
+    def test_delete_one_point_in_relational_function_with_manual_refresh_before_delete(self):
+        """This test checks that the correct number of points are present after deleting one point in a relational
+        function and that the correct point was deleted. This test differs from the one above in that it manually
+        refreshes the points data before doing the delete. See https://github.com/NAVADMC/ADSM/issues/678."""
+        timeout = self.default_timeout
+        self.setup_scenario()
+
+        # Set up a prevalence chart, just like in the test above
+        self.use_within_unit_prevalence(True)
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        prevalence_name = self.setup_prevalence_chart(disease_progression.name, points)
+
+        # Force a reload of the points data
+        functions_panel = FunctionsPanel(
+            WebDriverWait(self.selenium, timeout=timeout).until(
+                EC.visibility_of_element_located((By.ID, 'functions_panel'))
+            )
+        )
+        functions_panel.select_relational_function(prevalence_name)
+
+        # Now delete the point with x-value 4
+        functions_panel.delete_point(3)
+
+        # Verify that the chart has one fewer points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        self.assertEqual(
+            len(current_prevalence_points), len(points)-1,
+            'there are %i points (should be %i after deleting one)' % (len(current_prevalence_points), len(points)-1)
+        )
+        # Check that there is no point with x-value 4
+        self.assertFalse(
+            any([abs(point.x - 4) < self.tolerance for point in current_prevalence_points]),
+            'there is still a point with x-value==4 after deletion'
+        )
+
+    def test_delete_one_point_in_relational_function_with_manual_refresh_before_delete_hit_enter(self):
+        """This test checks that the correct number of points are present after deleting one point in a relational
+        function and that the correct point was deleted. This test differs from the one above in that it hits the Enter
+        key instead of clicking the Apply button to save changes."""
+        timeout = self.default_timeout
+        self.setup_scenario()
+
+        # Set up a prevalence chart, just like in the test above
+        self.use_within_unit_prevalence(True)
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        prevalence_name = self.setup_prevalence_chart(disease_progression.name, points)
+
+        # Force a reload of the points data
+        functions_panel = FunctionsPanel(
+            WebDriverWait(self.selenium, timeout=timeout).until(
+                EC.visibility_of_element_located((By.ID, 'functions_panel'))
+            )
+        )
+        functions_panel.select_relational_function(prevalence_name)
+
+        # Now delete the point with x-value 4
+        functions_panel.set_hit_enter(True)
+        functions_panel.delete_point(3)
+
+        # Verify that the chart has one fewer points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        self.assertEqual(
+            len(current_prevalence_points), len(points)-1,
+            'there are %i points (should be %i after deleting one)' % (len(current_prevalence_points), len(points)-1)
+        )
+        # Check that there is no point with x-value 4
+        self.assertFalse(
+            any([abs(point.x - 4) < self.tolerance for point in current_prevalence_points]),
+            'there is still a point with x-value==4 after deletion'
+        )

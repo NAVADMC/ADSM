@@ -1,0 +1,9 @@
+{% extends 'ScenarioCreator/LayoutContainer.html' %}
+
+{% block main_layout %}
+        <section id="main-panel" class="layout-panel col-xs-8">
+            {% if base_page %}
+                {% include base_page %}
+            {% endif %}
+        </section>
+{% endblock %}

@@ -17,12 +17,13 @@
 </head>
 <body>
 <!-- {#	<div>{{ loading_url }}</div>#} -->
-	<div></div>
+	<div id="layout-container"> {# Necessary for $(form_html).find('#layout-container') #}
 
-   <script type="text/javascript">
-        (function(){
-            window.location = '{{ loading_url }}';
-        })();
-    </script>
+       <script type="text/javascript">
+            (function(){
+                window.location = '{{ loading_url }}';
+            })();
+        </script>
+    </div>
 </body>
 </html>

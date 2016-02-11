@@ -898,6 +898,8 @@ class VaccinationTrigger(BaseModel):
     class Meta(object):
         abstract = True
 
+    def title(self):
+        return self.__str__().replace('<strong>', '').replace('</strong>', '')
 
 class FilteredVaccinationTrigger(VaccinationTrigger):
     trigger_group = models.ManyToManyField(ProductionType, )
@@ -909,8 +911,7 @@ class DiseaseDetection(FilteredVaccinationTrigger):
     number_of_units = models.PositiveIntegerField()
     def __str__(self):
         bold_values = tuple(bold(str(x)) for x in [self.number_of_units, ', '.join(pt.name for pt in self.trigger_group.all())])
-        s = format_html("{0} infected units detected in {1}", *bold_values)
-        return s
+        return format_html("{0} infected units detected in {1}", *bold_values)
 
 
 class RateOfNewDetections(FilteredVaccinationTrigger):
@@ -934,7 +935,7 @@ class TimeFromFirstDetection(FilteredVaccinationTrigger):
     def __str__(self):
         bold_values = tuple(bold(str(x)) for x in [self.days, ', '.join(pt.name for pt in self.trigger_group.all())])
         return format_html("{0} days elapsed since First Detection in {1}", *bold_values)
-    
+
     
 class DestructionWaitTime(FilteredVaccinationTrigger):
     days = models.PositiveIntegerField(help_text='Maximum number of days an infected premise should have to wait until destroyed.  The intention of this trigger is to initiate a vaccination program when destruction resources appear to be overwhelmed.')

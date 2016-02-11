@@ -4,13 +4,7 @@ from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Uni
     DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
     ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment, SpreadBetweenGroups, \
     DestructionWaitTime, TimeFromFirstDetection, DisseminationRate, RateOfNewDetections, DiseaseDetection, ProductionGroup, VaccinationRingRule
-from ScenarioCreator.utils import whole_scenario_validation
 from Results.models import outputs_exist
-
-
-def simulation_ready_to_run(context):
-    status_lights = [ready for name, ready in context['missing_values'].items()]  # The value here is a tuple which includes the name see basic_context()
-    return all(status_lights) and len(context['whole_scenario_warnings']) == 0  # All green status_lights  (It's a metaphor)
 
 
 def js(var):
@@ -28,6 +22,8 @@ def singular(name):
 
 def basic_context(request):
     context = {'request': request}
+    if request.path and request.path != '/' and '/LoadingScreen/' not in request.path:  # #635 this needs to run even in AJAX
+        context['outputs_exist'] = outputs_exist()  # I don't want this triggering on LoadingScreen
 
     if not request.is_ajax() and 'setup/' in request.path:  # inputs specific context not filled from ajax requests
         pt_count = ProductionType.objects.count()
@@ -61,8 +57,6 @@ def basic_context(request):
                'ProbabilityFunctions': ProbabilityFunction.objects.count(),
                'RelationalFunctions': RelationalFunction.objects.count(),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
-               'outputs_exist': outputs_exist(),
-               'whole_scenario_warnings': whole_scenario_validation(),
                })
 
         validation_models = {'Scenario': 'Scenario/1/', 
@@ -81,7 +75,7 @@ def basic_context(request):
                              'ZoneEffects': 'ZoneEffect/',
                              'ZoneEffectAssignments': 'AssignZoneEffects/'}
         context['missing_values'] = {singular(name): validation_models[name] for name in validation_models if not context[name]}
-        context['Simulation_ready'] = simulation_ready_to_run(context)
+        context['Simulation_ready'] = not len(context['missing_values'])
         disease = Disease.objects.get()
         context['javascript_variables'] = {'use_within_unit_prevalence':      js(disease.use_within_unit_prevalence),
                                            'use_airborne_exponential_decay':  js(disease.use_airborne_exponential_decay),
@@ -90,7 +84,6 @@ def basic_context(request):
                                            'include_airborne_spread':         js(disease.include_airborne_spread),
                                            'outputs_exist':                   js(outputs_exist()),
                                            'controls_enabled':                js(context['controls_enabled']),
-        }
-        
+                                           }
         
     return context

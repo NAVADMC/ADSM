@@ -1,4 +1,4 @@
-{% extends 'ScenarioCreator/navigationPane.html' %}
+{% extends 'ScenarioCreator/LayoutContainer.html' %}
 {% load floppyforms %}
 {% load crispy_forms_tags  %}
 {% load db_status_tags %}
@@ -8,7 +8,7 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/population.js"></script>
 
 {% if not Population %}
-<section id="main-panel" class="layout-panel col-xs-8 center-block">
+<section id="main-panel" class="layout-panel col-xs-8">
     <h1 id="title">Load a Population</h1>
     <div id="load_population_widget">
         <form id="pop-upload" method="post" action="/setup/UploadPopulation/" enctype="multipart/form-data">

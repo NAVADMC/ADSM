@@ -34,4 +34,5 @@ class Command(BaseCommand):
         command_path = os.path.join('.', 'node_modules', '.bin', 'webpack')
         command = command_path + ' --config %s' % config_file
         webpack = subprocess.Popen(command, cwd=os.path.join(settings.BASE_DIR), shell=True)
+        webpack.communicate()  # Wait for webpack to finish compile
         call_command('collectstatic')

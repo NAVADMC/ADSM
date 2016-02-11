@@ -18,7 +18,7 @@
                     <h3><a href="/setup/DiseaseSpread/" class="{{"DiseaseSpread"|active:active_link}}">
                         <span class="pull-right {{DirectSpreads|completed}}"> </span>Disease Spread</a>
                          <h4><a href="/setup/AssignSpreads/" class="{{"AssignSpreads"|active:active_link}}">
-                            <span class="pull-right {{AssignSpreads|completed}}"> </span>Assign Disease Spread</a></h4> </h3>
+                            <span class="pull-right {{AssignSpreads|completed}}"> </span>Review Disease Spread</a></h4> </h3>
                  </h2>
             <h2><a href="/setup/ControlMasterPlan/1/" class="{{"ControlMasterPlan"|active:active_link}}">
 
@@ -63,17 +63,11 @@
     </nav>
     <span id="setupMenu-after"></span>
 
-    {% block main_layout %}
-        <section id="main-panel" class="layout-panel col-xs-8 center-block">
-            {% block content %}
-    
-            {% endblock %}
-            {% if base_page %}
-                {% include base_page %}
-            {% endif %}
-        </section>
+
+    {% block layout_container %}
+        {% include 'ScenarioCreator/MainPanel.html' %}
     {% endblock %}
-    
+
     {% if outputs_exist %}
         {% include "Results/SimulationProgressBar.html" %}
     {% endif %}

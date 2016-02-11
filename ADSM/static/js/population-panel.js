@@ -1,55 +1,48 @@
 /** Created by Josiah on 2/18/2015. */
 
 function toggle(element, attribute){
-    if($(element).attr(attribute)) {
+    if($(element).prop(attribute) || $(element).attr(attribute)) {
+        $(element).prop(attribute, false);
         $(element).removeAttr(attribute, false);
     } else {
+        $(element).prop(attribute, true);
         $(element).attr(attribute, attribute);
     }
+
 }
 
-function check_empty_status(self) {
-    var $self = $(self)
-    if($self.find('option[selected]').length == 0) { //empty
-        $self.addClass('empty')
-    } else {
-        $self.removeClass('empty')
+function toggle_added_state(text) {
+    $('#ProductionTypes li').filter(function () {
+        return $(this).find('.pt-name').text() == text;  // must be an exact match NOT :contains()
+    }).toggleClass('pt-added');  // for styling rows that have already been added
+}
+
+function select_production_type(text) {
+    var selectors = ['.productiontypelist option', '.grouplist option'];
+    $.each(selectors, function(index, selector){
+        $(selector).each(function() {
+            if ($(this).text() == text) {
+                toggle(this, 'selected')
+                $(this).closest('.layout-panel').find('.btn-save').removeAttr('disabled') //unsaved changes
+            }
+        })
+    });
+    toggle_added_state(text);
+}
+
+$(document).on('mousedown', '#ProductionTypes li, #ProductionGroups li, .productiontypelist option', function(event){
+    //It's really critical this is mousedown and not click.  the default mousedown event behavior deselects all the other options
+    event.preventDefault()
+    var text = $(this).text();
+    if(this.tagName == 'LI'){  // I want the click target to be the whole row, but the name is defined in pt-name
+        text = $(this).find('.pt-name, .pt-group-name').text();
     }
-}
+    select_production_type(text)
+})
 
-function select_production_type(text, selector) { 
-    $(selector).each(function() {
-        if ($(this).text() == text) {
-            toggle(this, 'selected')
-        }
+$('.productiontypelist, .grouplist').livequery(function(){
+    $('#ProductionTypes li').removeClass('pt-added')  // clears old data
+    $(this).find('option[selected]').each(function(index, element){
+        toggle_added_state($(element).text())
     })
-    check_empty_status($(selector).first().closest('.productiontypelist'));
-    $(selector).closest('.layout-panel').find('.btn-save').removeAttr('disabled')
-
-}
-
-//child has selected attr, then remove .empty  has .productiontypelist
-//on load have .empty
-//editing existing 
-
-$(document).on('load', '.productiontypelist, .grouplist', function(event){
-    check_empty_status(this)
-})
-
-$(document).on('focus', '.productiontypelist', function(event){
-    production_type_list_last_clicked = '#' + $(this).attr('id')
-})
-
-$(document).on('click', '#population_panel #ProductionTypes a, .productiontypelist option', function(event){
-    event.preventDefault()
-    if($('.productiontypelist').length > 1 && typeof production_type_list_last_clicked !== 'undefined'){
-        select_production_type($(this).text(), production_type_list_last_clicked + ' option')
-    }else{
-        select_production_type($(this).text(), '.productiontypelist option')
-    }
-})
-
-$(document).on('click', '#population_panel #ProductionGroups a, .productiontypelist option', function(event){
-    event.preventDefault()
-    select_production_type($(this).text(), '.grouplist option')
 })

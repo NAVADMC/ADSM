@@ -3,6 +3,16 @@ $(function(){
     open_panel_if_needed();
     check_disabled_controls();
 
+    // All of the actions to handle forms are tied to Click events on Apply
+    // buttons. However, the browser will also try to submit forms if you hit
+    // the Enter key, which bypasses the actions the Click event. This
+    // instruction disables the Enter key inside forms.
+    $(document).on('keypress', 'form.ajax', function(event){
+        if (event.charCode == 13) {
+        	event.preventDefault();
+        }
+    })
+
     $(document).on('click', 'form.ajax .btn-cancel, .btn-cancel[form]', function(){
         var form = $(this).closest('form');
         var attachment = $(this).attr('form');
@@ -155,9 +165,7 @@ $(function(){
     $(document).on('change focus', '[data-new-item-url]', function(event){
         //this needs to ignore the event if it's in the right panel, since that will open a modal
         //#422 "Edits" in the far right will open a modal, since we've run out of space
-        if($(this).val() == 'data-add-new' || $(this).closest('.layout-panel').attr('id') != 'functions_panel'){
-            populate_pdf_panel(this);
-        }
+        populate_pdf_panel(this);
     });
     
     $(document).on('click', '[data-new-item-url] + a i', function(event) {
@@ -427,7 +435,7 @@ safe_save = function(url, data, new_link){
 function load_target_link(callback){
         var selector = $(this).attr('load-target')
 
-        //Wait until a problem comes up betwee 'active' and ':focus' to fix this
+        //Wait until a problem comes up between 'active' and ':focus' to fix this
         //$input.closest('.layout-panel').find('.defined').removeClass('focused')
         //$(this).closest('.defined').addClass('focused');//?????????????????????????????????
 
@@ -444,11 +452,15 @@ function load_target_link(callback){
         
     }
 
+function open_population_panel() {
+    var pop = $('#population_panel');
+    pop.removeClass('TB_panel_closed')
+    pop.addClass('add-pt')
+}
+
 function open_panel_if_needed() {
     $('.productiontypelist, .grouplist').each(function () {
-        var pop = $('#population_panel');
-        pop.removeClass('TB_panel_closed')
-        pop.addClass('add-pt')
+        open_population_panel();
     })
     check_if_TB_panel_form_mask_needed()
 }
@@ -594,6 +606,9 @@ function contains_errors(html) {
 
 function add_model_option_to_selects(html, selectInput) {
     var action = $(html).find('form').first().attr('action');
+    if(!action) { //sometimes this gets called for things that aren't a model option
+        return;
+    }
     var pk = action.split('/')[3]; //the edit action URL has the pk in it
     var model_link = action.replace(pk, 'new'); //for targetting other selects
     var title = 'Newest Entry';
@@ -649,12 +664,11 @@ var modelModal = {
     },
 
     populate_modal_body: function($newForm, modal) {
-        var $form = $newForm.find('form').first();
-        $form.find('.buttonHolder').remove();
-        modal.find('.modal-body').html($form);
+        //$form.find('.buttonHolder').remove();
         modal.find('.modal-title').html($newForm.find('#title').html());
+        modal.find('.modal-body').html($newForm.find('form').first());
+        //modal.find('.modal-footer').html($newForm.find(".buttonHolder"))
         $('body').append(modal);
-        return $form;
     },
 
     validation_error: function(modal) {
@@ -689,7 +703,7 @@ var modelModal = {
         },
     
     template: $('<div class="modal fade">\
-                  <div class="modal-dialog">\
+                  <div class="modal-dialog layout-panel">\
                     <div class="modal-content">\
                       <div class="modal-header">\
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\
@@ -720,8 +734,9 @@ function reload_model_list($form) { //TODO: change this to expect a fragment
     $('#left-panel').load(window.location + " #left-panel>*, script");
     if(typeof $form !== 'undefined'  && $form.length){
         var action = $form[0]['action']; //.attr('action');
-        if(action.indexOf('ProductionGroup') != -1 || action.indexOf('ProductionType') != -1){
-            $('#population_panel').load("/setup/OutputSettings/1/ #population_panel>*")
+        if(action.indexOf('ProductionGroup') != -1){
+            $('#production_group_container').load("/setup/PopulationPanel/ #production_group_container>*")  //new address for ajax loading
+            //#707 Fix by loading only the production group section dynamically
         }
     }
 }
@@ -830,12 +845,22 @@ function ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, l
             $('.scenario-status').addClass('unsaved')
             // Here we replace the form, for the
             if ($self.closest('#main-panel').length) { //in the main panel, just reload the page
-                if($(form_html).find('#main_panel').length ){
-                    $('#main-panel').html($(form_html).find('#main_panel')[0])
+                if($(form_html).find('#main-panel').length ){
+                    $('#main-panel').replaceWith($(form_html).find('#main-panel')[0])
                 }else {
-                    var matches = form_html.match(/(<body.*>[\S\s]*<\/body>)/i);//multiline match
-                    var content = $(matches[1]);
-                    $('body').html(content);
+                    var contents = $(form_html).find('#layout-container');
+                    if( !contents.length ){
+                        contents = $('<div/>').html(form_html).find('#layout-container');
+                        if( !contents.length ){ // double redundant backup in case someone doesn't define layout-container
+                            var matches = form_html.match(/(<body.*>[\S\s]*<\/body>)/i);//multiline match
+                            if(matches){
+                                var content = $(matches[1]);
+                                $('body').html(content);
+                                return; // this method doesn't play well with others
+                            }
+                        }
+                    }
+                    $('#layout-container').replaceWith(contents[0]);
                 }
             } else {
                 var parent_panel = $self.closest('.layout-panel').attr('id');
@@ -886,11 +911,15 @@ function make_function_panel_editable() {
     $('.edit-button-holder a, .edit-button-holder button').removeClass('reveal') //collapse the edit buttons, possibly hide
     $('.edit-button-holder').css('display', 'none')
 
-    $('#functions_panel .buttonHolder').removeAttr('hidden')
-    $('#functions_panel, #functions_panel input').addClass('editable')
-    $('#functions_panel :input').addClass('editable')
+    var base = $('#functions_panel');
+    var $modal = $('.modal-body');
+    if($modal.length > 0) base = $modal
+    base.find('.buttonHolder').removeAttr('hidden')
+    base.addClass('editable')
+    base.find('input').addClass('editable')
+    base.find(':input').addClass('editable')
     //$('#tb_mask').css('visibility', 'visible')
-    $('#functions_panel').css('pointer-events', 'all')
+    base.css('pointer-events', 'all')
 }
 
 function statusChecker(){

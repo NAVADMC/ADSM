@@ -95,7 +95,7 @@ def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated
                                    zorder=2000))
         if destroyed[i] > 0:
             ax.add_patch(Rectangle(xy=(longitude[i] + width * .5, latitude[i] - half),
-                                   color=(0.3, 0.27, 0.27),
+                                   color=(234/255, 125/255, 48/255),
                                    width=width,
                                    height= marker_km * (destroyed[i] / total_iterations),
                                    zorder=2000))
