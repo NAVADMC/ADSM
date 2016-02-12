@@ -955,7 +955,7 @@ ul {
     border-top:1px solid #eeeeee;
 }
 
-.tab-list {
+#setupMenu h2, #setupMenu h3, #setupMenu h4 {
     margin-top: 0;
     margin-bottom: 0; /* These are meant to stack */
     overflow: hidden;
@@ -964,7 +964,7 @@ ul {
     /*width:170px;*/
 }
 
-.tab-list a,
+#setupMenu a,
 #priorities li {
     color: #606060;
     display:block;
@@ -979,7 +979,7 @@ ul {
     direction: ltr;
 }
 
-.tab-list a:before {
+#setupMenu a:before {
     content:"";
     display:block;
     width:100%;
@@ -990,11 +990,11 @@ ul {
     left:-5px;
 }
 
-.tab-list:hover{
+#setupMenu a:hover{
     background-color:#eeeeee;
 }
 
-.tab-list.active:hover{
+#setupMenu a.active:hover{
     background-color:#606060;
 }
 
@@ -1002,7 +1002,7 @@ ul {
     padding-left:30px;
 }
 
-.tab-list a.active {
+#setupMenu a.active {
     background-color: #606060;
     margin-left:0;
     color:white;
@@ -1012,13 +1012,15 @@ ul {
     margin-right: 0;
 }
 
-.tab-list span {
+#setupMenu span {
     width: 5px;
     height: 35px;
     -webkit-border-radius:0 2px 2px 0;
 }
 /*--------- right border on results nav menu -----*/
-.tab-list:before {
+#setupMenu h2:before,
+#setupMenu h3:before,
+#setupMenu h4:before {
     content: "";
     width: 5px;
     height: 37px;
@@ -1032,14 +1034,14 @@ ul {
     border-radius: 0 2px 2px 0;
 }
 
-.incomplete {
+#setupMenu .incomplete {
     font-weight: 600;
     font-style: italic;
     color: #999;
     background-color: #f6da40;
 }
 
-.completed {
+#setupMenu .completed, .completed {
     background-color: #68be5e;
 }
 
@@ -2251,7 +2253,6 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
     padding: 10px 20px;
 }
-
 .productiontypelist option, .grouplist option  {
     display:none;
     background-color: transparent;
