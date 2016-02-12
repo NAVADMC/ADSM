@@ -760,3 +760,15 @@ def validate_scenario(request):
                'whole_scenario_warnings': whole_scenario_validation(),
                'base_page': 'ScenarioCreator/Validation.html'}
     return render(request, 'ScenarioCreator/MainPanel.html', context)
+
+
+def vaccination_priorities(request):
+    initialized_form = VaccinationMasterForm(request.POST or None, instance=ControlMasterPlan.objects.get())
+    context = {
+        'base_page': 'ScenarioCreator/VaccinationPriorities.html',
+        'title': 'Vaccination Priorities',
+        'ordering': ['Production Type', 'Days Holding', 'Reason for Vaccination', 'Direction', 'Size'],
+        'form': initialized_form
+    }
+
+    return render(request, 'ScenarioCreator/3Panels.html', context)
