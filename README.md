@@ -41,7 +41,7 @@ Create Virtual Environment:
 
   - Windows: `/path/to/py3.4/python -m venv /path/to/adsm_venv`
     - Activate with `/path/to/adsm_venv/Scripts/activate.bat`
-    - Install Git so it is properly on the command line
+    - Install [Git](https://git-scm.com/download/win) so it is properly on the command line
     - install Visual Studio 2010: http://download.cnet.com/Microsoft-Visual-Studio-2010-Professional/3000-2212_4-10618634.html (Note: Installing the trial is fine as all we need is the compiler. Where VS the GUI App may stop working after 30 days, the CLI compiler should continue to be valid)
     - modify file `\path\to\py3.4\Lib\distutils\msvc9compiler.py` (Note: This is not in your venv, but your base python 3.4 install)
       - after `ld_args.append('/MANIFESTFILE:' + temp_manifest)` add `ld_args.append('/MANIFEST')` at the same indentation level
