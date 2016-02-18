@@ -9,7 +9,7 @@ defined for the ADSM project for all object creation."""
 import xml.etree.ElementTree as ET
 import warnings
 from pyproj import Proj
-from math import exp, sqrt
+from math import exp, sqrt, modf
 from collections import OrderedDict
 import json
 
@@ -416,6 +416,21 @@ def required_text(element, tag):
         raise AttributeError("Missing required value " + str(tag) + " in " + str(element).replace('<',''))
 
 
+def int_dz(text):
+    """Like int(), but tolerates having a fractional part as long it it's
+    all zeroes. (The _dz stands for "dot zero".) This is to accommodate
+    programatically-produced NAADSM files that may use generic number output
+    formats that put a .0 on the end of parameters we expect to be integers."""
+    try:
+        num = int(text)
+    except ValueError:
+        frac_part, whole_part = modf(float(text))
+        if frac_part != 0:
+            raise
+        num = int(whole_part)
+    return num
+
+
 def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     status("Reading parameters file: " + parameterFileName)
     fp = open( parameterFileName, 'rb' )
@@ -816,7 +831,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             assert (direction == 'in' or direction == 'out')
         except KeyError:
             direction = 'both'
-        tracePeriod = int( required_text(el, './trace-period/value' ) )
+        tracePeriod = int_dz( required_text(el, './trace-period/value' ) )
 
         typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
         for typeName in typeNames:
@@ -1006,7 +1021,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     status("Building Vaccination")
     productionTypesWithVaccineEffectsDefined = set()
     for el in xml.findall( './/vaccine-model' ):
-        delay = int( required_text(el, './delay/value' ) )
+        delay = int_dz( required_text(el, './delay/value' ) )
         immunityPeriod = getPdf( el.find( './immunity-period' ), pdfNameSequence )
 
         typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
@@ -1055,7 +1070,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             rings_needed[radius] = set(fromTypeNames)
 
         priority = int( required_text(el, './priority' ) )
-        minTimeBetweenVaccinations = int( required_text(el, './min-time-between-vaccinations/value' ) )
+        minTimeBetweenVaccinations = int_dz( required_text(el, './min-time-between-vaccinations/value' ) )
         try:
             vaccinateDetectedUnits = getBool( el.find( './vaccinate-detected-units' ) )
         except AttributeError:
@@ -1110,7 +1125,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # Enable trace forward/out from all production types.
         contactType = el.attrib['contact-type']
         assert (contactType == 'direct' or contactType == 'indirect')
-        tracePeriod = int( required_text(el, './trace-period/value' ) )
+        tracePeriod = int_dz( required_text(el, './trace-period/value' ) )
         traceSuccess = float( required_text(el, './trace-success' ) )
         for typeName in productionTypeNames:
             # If a ControlProtocol object has already been assigned to this
@@ -1312,7 +1327,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
     for el in xml.findall( './/resources-and-implementation-of-controls-model' ):
         if useDestruction:
-            plan.destruction_program_delay = int( required_text(el, './destruction-program-delay/value' ) )
+            plan.destruction_program_delay = int_dz( required_text(el, './destruction-program-delay/value' ) )
             plan.destruction_capacity = getRelChart( el.find( './destruction-capacity' ), relChartNameSequence )
             try:
                 order = required_text(el, './destruction-priority-order' ).strip()
@@ -1353,7 +1368,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
         if useVaccination:
             try:
-                unitsDetectedBeforeTriggeringVaccination = max( 1, int( el.find( './vaccination-program-delay' ).text ))
+                unitsDetectedBeforeTriggeringVaccination = max( 1, int_dz( el.find( './vaccination-program-delay' ).text ))
             except AttributeError:
                 unitsDetectedBeforeTriggeringVaccination = 1 # default
             trigger = DiseaseDetection(
@@ -1406,7 +1421,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         except AttributeError:
             vaccinationExtra = None
         try:
-            baselineCapacity = int( el.find( './baseline-vaccination-capacity' ).text )
+            baselineCapacity = int_dz( el.find( './baseline-vaccination-capacity' ).text )
         except AttributeError:
             baselineCapacity = None
 
