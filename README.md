@@ -73,7 +73,8 @@ Using the pip in your new Virtual Environment (confirm Virtual Environment Activ
   - install psutil: `pip install psutil-2.2.1-cp34-none-win_amd64.whl`
                 
 ###React Setup
-Install Node (please x64 version). Restart your command prompt so that `npm` and `node` will be on your path.  
+Install Node (please x64 version). Choose the “Latest Features” download, not the “Mature and Dependable” one.  
+Restart your command prompt so that `npm` and `node` will be on your path.  
 cd BASE_DIR (Not an actual command. Go into the root of the project)  
 `npm install`
 
