@@ -3,7 +3,7 @@
 the new SQLite3 format.
 
 Call it as:
-python3.3 change_all_test_files.py CEngine/modules/test/"""
+python change_all_test_files.py CEngine/modules/test/"""
 
 
 
@@ -59,7 +59,7 @@ def main():
 				if os.path.isfile( dbFilePath ):
 					os.remove( dbFilePath )
 
-				cmd = ['python3.4', 'xml2sqlite.py', populationFilePath,
+				cmd = ['python', 'xml2sqlite.py', populationFilePath,
 				  parameterFilePath, dbFilePath ]
 				print( ' '.join(cmd) )
 				subprocess.check_call(cmd)
