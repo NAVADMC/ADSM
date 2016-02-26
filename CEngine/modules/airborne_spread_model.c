@@ -228,7 +228,7 @@ build_size_factor_list (UNT_unit_list_t * units)
       #endif
 
       /* Build a histogram. */
-      histogram = gsl_histogram_alloc (MIN(200,max_size));
+      histogram = gsl_histogram_alloc (max_size);
       g_assert (histogram != NULL);
       gsl_histogram_set_ranges_uniform (histogram, 0.5, (double) max_size + 0.5);
       for (i = 0; i < nunits; i++)
