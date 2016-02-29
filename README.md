@@ -176,16 +176,16 @@ Updating the Distributable
 ----------
 When releaseing a Beta compile:
 
-  - Bump the version in `ADSM/__init__.py` and in `package.json`
+  - Bump the version in `ADSM/__init__.py` and in `package.json`. See the [Version Guide](https://github.com/NAVADMC/ADSM/wiki/Version-Guide) for the meaning of the four parts of the version number.
   - Build (with sourced python) `python setup.py build`
-  - Push the Update `cd build` `npu.exe --create_update --program=ADSM_Beta --program_id=PROGRAM_ID --password=PASSWORD`
+  - Push the Update `cd build` `npu.exe --create_update --program=ADSM_Beta --program_id=PROGRAM_ID --password=PASSWORD` You can find the program name, program ID, and password by logging into the Newline Program Updater (everyone authorized to create releases will have a login).
   - Update the latest pre-release with a new tag (don't change the release title)
   
 When releasing a Production compile:
 
-  - Bump the version in `ADSM/__init__.py`, in `package.json` and in `installer_windows.nsi`
+  - Bump the version in `ADSM/__init__.py`, in `package.json` and in `installer_windows.nsi`. See the [Version Guide](https://github.com/NAVADMC/ADSM/wiki/Version-Guide) for the meaning of the four parts of the version number.
   - Build (with sourced python) `python setup.py build`
-  - Push the Update `cd build` `npu.exe --create_update --program=ADSM --program_id=PROGRAM_ID --password=PASSWORD` 
+  - Push the Update `cd build` `npu.exe --create_update --program=ADSM --program_id=PROGRAM_ID --password=PASSWORD` You can find the program name, program ID, and password by logging into the Newline Program Updater (everyone authorized to create releases will have a login). 
   - Update the latest release with a new tag (don't change the release title)
   - Run the nsi script and upload the output to the release
   
