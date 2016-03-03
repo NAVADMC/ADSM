@@ -1677,6 +1677,13 @@ vaccinate_by_priority (struct adsm_module_t_ *self, int day,
                 i--;
             }
           g_hash_table_destroy (ring_count);
+          /* Make sure we didn't just leave current_vaccination_ring past the
+           * end of the array */
+          if (local_data->active_vaccination_rings->len > 0
+              && local_data->current_vaccination_ring >= local_data->active_vaccination_rings->len)
+            {
+              local_data->current_vaccination_ring = 0;
+            }
         } /* end of deleting expired vaccination rings */
 
     } /* end of if vaccination capacity > 0 */
