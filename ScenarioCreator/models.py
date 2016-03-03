@@ -361,7 +361,7 @@ class ControlMasterPlan(InputSingleton):
         help_text='Relational function used to define the daily vaccination capacity.', )
     restart_vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Define if the daily vaccination capacity will be different if started a second time.', )
-    vaccination_priority_order = models.TextField(default='{"Days Holding":["Oldest", "Newest"], "Production Type":["A", "C", "B"], "Reason":["Basic", "Trace fwd direct", "Trace fwd indirect", "Trace back direct", "Trace back indirect", "Ring"], "Direction":["Outside-in", "Inside-out"], "Size":["Largest", "Smallest"]}',
+    vaccination_priority_order = models.TextField(default='{"Days Holding":["Oldest", "Newest"], "Production Type":[], "Reason":["Basic", "Trace fwd direct", "Trace fwd indirect", "Trace back direct", "Trace back indirect", "Ring"], "Direction":["Outside-in", "Inside-out"], "Size":["Largest", "Smallest"]}',
         help_text='The priority criteria for order of vaccinations.',)
     vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True, default=0,
         help_text='Once a vaccination program starts, this number determines how many days previous to the start of the vaccination program a detection will trigger vaccination.', )
