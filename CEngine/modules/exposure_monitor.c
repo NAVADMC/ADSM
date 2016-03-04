@@ -176,7 +176,7 @@ handle_exposure_event (struct adsm_module_t_ *self, EVT_exposure_event_t * event
             break;      
           default:
             /* If this condition occurs, someone forgot something. */
-            g_error( "An unrecognized exposure mechanism (%s) occurred in handle_exposure_event", cause );
+            g_error( "An unrecognized exposure mechanism (%i) occurred in handle_exposure_event", cause );
             update.exposure_method = 0;     
         }
 

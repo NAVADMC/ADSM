@@ -454,11 +454,13 @@ const char *ADSM_detection_reason_abbrev[] = {
 const char *ADSM_control_reason_name[] = {
   "Unspecified", "Ring", "Trace fwd direct", "Trace fwd indirect",
   "Trace back direct", "Trace back indirect", "Basic", "Initial state",
+  "Suppressive Ring", "Protective Ring",
   NULL
 };
 
 const char *ADSM_control_reason_abbrev[] = {
-  "Unsp", "Ring", "DirFwd", "IndFwd", "DirBack", "IndBack", "Det", "Ini", NULL
+  "Unsp", "Ring", "DirFwd", "IndFwd", "DirBack", "IndBack", "Det", "Ini",
+  "SuppRing", "ProtRing", NULL
 };
 
 /*---------------------------------------------------------------------------*/

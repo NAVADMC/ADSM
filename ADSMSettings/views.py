@@ -41,7 +41,7 @@ def update_adsm_from_git(request):
     """This sets the update_on_startup flag for the next program start."""
     if 'GET' in request.method:
         try:
-            npu = os.path.join(settings.BASE_DIR, 'npu.exe')  # TODO Windows specific
+            npu = os.path.join(settings.BASE_DIR, 'npu'+settings.EXTENSION)
             launch_external_program_and_exit(npu, close_self=False, )#cmd_args=['--silent'])  # NPU will force close this
             return HttpResponse("success")
         except:
@@ -109,7 +109,7 @@ def import_naadsm_scenario(request):
             # go on to serve the form normally with Error messages attached
     else:
         context['form_errors'] = initialized_form.errors
-    return render(request, 'ScenarioCreator/navigationPane.html', context)  # render in validation error messages
+    return render(request, 'ScenarioCreator/MainPanel.html', context)  # render in validation error messages
 
 
 def upload_scenario(request):
@@ -176,7 +176,9 @@ def save_scenario(request=None):
             return render(request, 'ScenarioName.html', {"failure_message": save_error})
 
     if request is not None and request.is_ajax():
-        return render(request, 'ScenarioName.html', {"success_message": "File saved to " + target})
+        return render(request, 'ScenarioName.html', {"success_message": "File saved to " + target,
+                                                     "filename": scenario_filename(),
+                                                     'unsaved_changes': unsaved_changes()})
     else:
         return redirect('/setup/Scenario/1/')
 
@@ -219,3 +221,13 @@ def backend(request):
     user.backend = 'django.contrib.auth.backends.ModelBackend'
     login(request, user)
     return redirect('/admin/')
+
+
+def show_help_text_json(request):
+    if 'POST' in request.method:
+        new_value = request.POST['show_help_text']
+        set_to = new_value == 'true'
+        SmSession.objects.all().update(show_help_text=set_to)
+        return JsonResponse({'status':'success'})
+    else:  # GET
+        return JsonResponse({'show_help_text': SmSession.objects.get().show_help_text})

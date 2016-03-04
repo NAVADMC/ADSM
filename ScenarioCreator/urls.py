@@ -1,23 +1,36 @@
 """URLs is entirely procedural based on the contents of models.py. This has the advantage that urls automatically update as the models change or are renamed."""
 
+
+"""NEVER MODIFY THIS FILE
+Instead, modify the 'makescenariocreatorurls' management command."""
+
 from django.conf.urls import patterns, url
 
 urlpatterns = patterns('', url('^AssignSpreads/$', 'ScenarioCreator.views.assign_disease_spread'),
          url('^AssignProtocols/$', 'ScenarioCreator.views.assign_protocols'),
          url('^AssignProgressions/$', 'ScenarioCreator.views.assign_progressions'),
          url('^AssignZoneEffects/$', 'ScenarioCreator.views.zone_effects'),
+         url('^Protocols.json/$', 'ScenarioCreator.views.protocols_json'),
+         url('^ControlProtocol/$', 'ScenarioCreator.views.control_protocol_list'),
+         url('^ControlProtocol/(?P<primary_key>\d+)/(?P<field>use_\w+)/', 'ScenarioCreator.views.update_protocol_enabled'),
          url('^Populations/$', 'ScenarioCreator.views.population'),
          url('^Population/new/$', 'ScenarioCreator.views.population'),
          url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population'),
-         url('^VaccinationPriorities/$', 'ScenarioCreator.views.vaccination_priorities'),
          url('^OpenPopulation/(?P<target>.+)$', 'ScenarioCreator.views.open_population'),
+         url('^PopulationPanel/$', 'ScenarioCreator.views.population_panel_only'),
          url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario'),
          url('^ProductionTypeList.json/$', 'ScenarioCreator.views.production_type_list_json'),
+         url('^PopulationPanelStatus.json/$', 'ScenarioCreator.views.population_panel_status_json'),
          url('^DisableAllControls.json/$', 'ScenarioCreator.views.disable_all_controls_json'),
+         url('^VaccinationPriorities/$', 'ScenarioCreator.views.vaccination_priorities'),
          url('^ProbabilityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph'),
          url('^RelationalFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.relational_graph'),
          url('^ProbabilityFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph'),
          url('^RelationalFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph'),
+         url('^SpreadOptions.json/$', 'ScenarioCreator.views.spread_options_json'),
+         url('^SpreadInputs.json/$', 'ScenarioCreator.views.spread_inputs_json'),
+         url('^DiseaseSpreadAssignments.json/$', 'ScenarioCreator.views.disease_spread_assignments_json'),
+         url('^ModifySpreadAssignments/$', 'ScenarioCreator.views.modify_spread_assignments'),
          url('^BaseModel/$',                      'ScenarioCreator.views.model_list'),
          url('^BaseModel/new/$',                  'ScenarioCreator.views.new_entry'),
          url('^BaseModel/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),

@@ -100,9 +100,9 @@ $(function(){
     $(document).on('submit', '#pop-upload', function(e){
         e.preventDefault();
         var filename = $('#pop-upload').find('input').val().split('\\')[2]
-        var optionTexts = []
-        var form = this
-        $('#file_list').find('li').each(function() { optionTexts.push( $.trim($(this).text())) })
+        var optionTexts = [];
+        var form = this;
+        $('#load_population_widget').find('.file_list').find('li').each(function() { optionTexts.push( $.trim($(this).text())) })
         if($.inArray(filename, optionTexts) != -1) { //ask user if it's okay to overwrite
              prompt_for_overwrite(submit_population_upload, form);
         }
@@ -210,7 +210,6 @@ function update_population_filter_and_sort(sort_by) {
     var new_url = '?' + population_filter_string();//build URL
 
     var mask_visible = $('#edit-mask').is(':visible');
-    console.log(mask_visible)
     var form_editable = mask_visible ? '' : '&readonly=readonly'
 
     new_url = new_url + sorting + form_editable;
@@ -277,7 +276,6 @@ $(document).on('click', '#edit_population', function(){
 
 function check_edit_population_state(){
     var mask_visibility = $('#edit-mask').is(':visible');
-    console.log(mask_visibility)
     if(mask_visibility) {
         $('.population-buttons').removeAttr('hidden')
         $('#edit_population').css('display', 'none')

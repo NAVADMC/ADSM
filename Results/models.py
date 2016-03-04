@@ -15,7 +15,6 @@ import re
 from ast import literal_eval
 from django.db import models
 
-from ADSMSettings.models import SingletonManager
 from ScenarioCreator.models import ProductionType, Zone, Unit
 from Results.output_grammar import explain
 
@@ -321,8 +320,8 @@ class DailyByZone(OutputBaseModel):
     zone = models.ForeignKey(Zone, blank=True, null=True, verbose_name=printable_name('zone'),
         help_text='The identifier of the zone that these outputs apply to.', )
 
-    zoneArea            = models.FloatField(blank=True, null=True, verbose_name=printable_name('zoneArea'))
-    zonePerimeter       = models.FloatField(blank=True, null=True, verbose_name=printable_name('zonePerimeter'))
+    zoneArea          = models.FloatField(blank=True, null=True, verbose_name=printable_name('zoneArea'))
+    zonePerimeter     = models.FloatField(blank=True, null=True, verbose_name=printable_name('zonePerimeter'))
     numSeparateAreas  = models.IntegerField(blank=True, null=True, verbose_name=printable_name('number of separate areas'))
 
 
@@ -389,12 +388,15 @@ class ResultsVersion(OutputBaseModel):
     versionMinor = models.CharField(max_length=255, null=True, blank=True)
     versionRelease = models.CharField(max_length=255, null=True, blank=True)
     
-    ## Singleton code
-    objects = SingletonManager()
-    
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.id=1
         return super(ResultsVersion, self).save(force_insert, force_update, using, update_fields)
+
+    def __str__(self):
+        if all(x is not None for x in [self.versionMajor, self.versionMinor, self.versionRelease]):
+            return '.'.join([self.versionMajor, self.versionMinor, self.versionRelease])
+        else:
+            return 'No simulation version stored in this result set'
 
 
 def outputs_exist():

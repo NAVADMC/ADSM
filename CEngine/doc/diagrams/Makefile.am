@@ -41,6 +41,7 @@ dist_noinst_DATA = state-transition.png \
   negbinomial.png \
   pareto.png pareto_log.png \
   binomial.png \
+  bernoulli.png \
   discrete_uniform.png \
   hypergeometric.png \
   inverse_gaussian.png \
@@ -105,11 +106,18 @@ dist_noinst_DATA = state-transition.png \
   8units_2rows_4.png \
   9units.png \
   9units_2_zone_holes.png \
+  10units_2cols.png \
+  12units_2rings_largesmall_plus2infected.png \
+  14units_2rings_overlap.png \
+  15units_line.png \
+  15units_2rings.png \
   units_circle.png \
   units_circle2.png \
   16units_square.png \
   16units_2rings.png \
   20units_2rings.png \
+  21units_3rings_overlap.png \
+  24units_2rings_plus2infected.png \
   no_rtree_lat0.png \
   rtree_lat0.png \
   no_rtree_lat45.png \
@@ -188,6 +196,16 @@ dist_noinst_DATA = state-transition.png \
   4units_line_5_zones_not_merged_2.png \
   4units_line_5_zones_merged_2.png \
   4units_line_5_zones_merged_3.png \
+  vaccpriority_1ring.png \
+  vaccpriority_2rings.png \
+  vaccpriority_2cols_rings_same_size.png \
+  vaccpriority_2cols_rings_size_5_3.png \
+  vaccpriority_2cols_rings_size_2-5_1-3.png \
+  14units_2rings_overlap_thin_rings.png \
+  14units_2rings_overlap_1thin_1thick.png \
+  15units_1ring_s_p.png \
+  15units_2rings_s_p_overlap.png \
+  21units_3rings_overlap_thin_rings.png \
   clock_24_hour.png
 
 state_transition_png_SOURCES = state-transition.dia
@@ -335,6 +353,16 @@ priority_queues_png_SOURCES = priority_queues.dia
 
 9units_png_SOURCES = $(top_srcdir)/models/test/9units.xml
 
+10units_2cols_png_SOURCES = $(top_srcdir)/models/test/10units_2cols.xml
+
+12units_2rings_largesmall_plus2infected_png_SOURCES = $(top_srcdir)/modules/test/12units_2rings_largesmall_plus2infected.xml
+
+14units_2rings_overlap_png_SOURCES = $(top_srcdir)/models/test/14units_2rings_overlap.xml
+
+15units_line_png_SOURCES = $(top_srcdir)/models/test/15units_line.xml
+
+15units_2rings_png_SOURCES = $(top_srcdir)/models/test/15units_2rings.xml
+
 units_circle_png_SOURCES = $(top_srcdir)/models/test/units_circle.xml
 
 units_circle2_png_SOURCES = $(top_srcdir)/models/test/units_circle2.xml
@@ -344,6 +372,10 @@ units_circle2_png_SOURCES = $(top_srcdir)/models/test/units_circle2.xml
 16units_2rings_png_SOURCES = $(top_srcdir)/models/test/16units_2rings.xml
 
 20units_2rings_png_SOURCES = $(top_srcdir)/models/test/20units_2rings.xml
+
+21units_3rings_overlap_png_SOURCES = $(top_srcdir)/models/test/21units_3rings_overlap.xml
+
+24units_2rings_plus2infected_png_SOURCES = $(top_srcdir)/models/test/24units_2rings_plus2infected.xml
 
 no_rtree_lat0_png_SOURCES = $(top_srcdir)/models/test/no_rtree_lat0.xml
 
@@ -460,5 +492,25 @@ prevalence_day4_png_SOURCES = prevalence_day4.gnuplot
 3units_cycle_png_SOURCES = 3units_cycle.gnuplot
 
 direct_indirect_in_out_png_SOURCES = direct_indirect_in_out.gnuplot
+
+vaccpriority_1ring_png_SOURCES = vaccpriority_1ring.gnuplot
+
+vaccpriority_2rings_png_SOURCES = vaccpriority_2rings.gnuplot
+
+vaccpriority_2cols_rings_same_size_png_SOURCES = vaccpriority_2cols_rings_same_size.gnuplot
+
+vaccpriority_2cols_rings_size_5_3_png_SOURCES = vaccpriority_2cols_rings_size_5_3.gnuplot
+
+vaccpriority_2cols_rings_size_2_5_1_3_png_SOURCES = vaccpriority_2cols_rings_size_2-5_1-3.gnuplot
+
+14units_2rings_overlap_thin_rings_png_SOURCES = 14units_2rings_overlap_thin_rings.gnuplot
+
+14units_2rings_overlap_1thin_1thick_png_SOURCES = 14units_2rings_overlap_1thin_1thick.gnuplot
+
+15units_1ring_s_p_png_SOURCES = 15units_1ring_s_p.gnuplot
+
+15units_2rings_s_p_overlap_png_SOURCES = 15units_2rings_s_p_overlap.gnuplot
+
+21units_3rings_overlap_thin_rings_png_SOURCES = 21units_3rings_overlap_thin_rings.gnuplot
 
 clock_24_hour_png_SOURCES = clock_24_hour.dia

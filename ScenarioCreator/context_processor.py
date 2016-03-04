@@ -4,13 +4,7 @@ from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Uni
     DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
     ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment, SpreadBetweenGroups, \
     DestructionWaitTime, TimeFromFirstDetection, DisseminationRate, RateOfNewDetections, DiseaseDetection, ProductionGroup, VaccinationRingRule
-from ScenarioCreator.utils import whole_scenario_validation
 from Results.models import outputs_exist
-
-
-def simulation_ready_to_run(context):
-    status_lights = [ready for name, ready in context['missing_values'].items()]  # The value here is a tuple which includes the name see basic_context()
-    return all(status_lights) and len(context['whole_scenario_warnings']) == 0  # All green status_lights  (It's a metaphor)
 
 
 def js(var):
@@ -27,9 +21,11 @@ def singular(name):
 
 
 def basic_context(request):
-    context = {}
-    
-    if 'setup/' in request.path:  # inputs specific context
+    context = {'request': request}
+    if request.path and request.path != '/' and '/LoadingScreen/' not in request.path:  # #635 this needs to run even in AJAX
+        context['outputs_exist'] = outputs_exist()  # I don't want this triggering on LoadingScreen
+
+    if not request.is_ajax() and 'setup/' in request.path:  # inputs specific context not filled from ajax requests
         pt_count = ProductionType.objects.count()
 
         context.update({
@@ -40,15 +36,15 @@ def basic_context(request):
                'ProductionGroups': ProductionGroup.objects.all(),
                'Farms': Unit.objects.count(),
                'Disease': Disease.objects.all().exclude(name='').count(),
-               'Progressions': DiseaseProgression.objects.count() 
-                               and pt_count 
-                               and DiseaseProgressionAssignment.objects.filter(progression__isnull=False).count() == pt_count,
+               'Progressions': DiseaseProgression.objects.count() and pt_count,
+               'ProgressionAssignment': pt_count and DiseaseProgressionAssignment.objects.filter(progression__isnull=False).count() == pt_count,
                'DirectSpreads': DirectSpread.objects.count(),
                'AssignSpreads': pt_count and
-                                DiseaseSpreadAssignment.objects.filter(
-                                    source_production_type=F('destination_production_type'),
-                                    direct_contact_spread__isnull=False
-                                ).count() >= pt_count,
+                                DiseaseSpreadAssignment.objects.filter(  #completely empty assignments
+                                    direct_contact_spread__isnull=True,
+                                    indirect_contact_spread__isnull=True,
+                                    airborne_spread__isnull=True
+                                ).count() < pt_count ** 2,  # all possible assignments == pt_count^2
                'ControlMasterPlan': ControlMasterPlan.objects.count(),
                'VaccinationTrigger': any([m.objects.count() for m in 
                                           [DiseaseDetection,RateOfNewDetections,DisseminationRate,TimeFromFirstDetection,DestructionWaitTime,SpreadBetweenGroups]]),
@@ -56,14 +52,11 @@ def basic_context(request):
                'Protocols': ControlProtocol.objects.count(),
                'ProtocolAssignments': ProtocolAssignment.objects.count(),
                'Zones': Zone.objects.count(),
-               'ZoneEffects': ZoneEffect.objects.count() 
-                              and ZoneEffectAssignment.objects.filter(effect__isnull=False).count() >= Zone.objects.count() 
-                              and Zone.objects.count(),
+               'ZoneEffects': ZoneEffect.objects.count(),
+               'ZoneEffectAssignments': ZoneEffectAssignment.objects.filter(effect__isnull=False).count() >= Zone.objects.count() and Zone.objects.count(),
                'ProbabilityFunctions': ProbabilityFunction.objects.count(),
                'RelationalFunctions': RelationalFunction.objects.count(),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
-               'outputs_exist': outputs_exist(),
-               'whole_scenario_warnings': whole_scenario_validation(),
                })
 
         validation_models = {'Scenario': 'Scenario/1/', 
@@ -79,9 +72,10 @@ def basic_context(request):
                              'Protocols': 'ControlProtocol/', 
                              'ProtocolAssignments': 'AssignProtocols/', 
                              'Zones': 'Zone/', 
-                             'ZoneEffects': 'AssignZoneEffects/'}
+                             'ZoneEffects': 'ZoneEffect/',
+                             'ZoneEffectAssignments': 'AssignZoneEffects/'}
         context['missing_values'] = {singular(name): validation_models[name] for name in validation_models if not context[name]}
-        context['Simulation_ready'] = simulation_ready_to_run(context)
+        context['Simulation_ready'] = not len(context['missing_values'])
         disease = Disease.objects.get()
         context['javascript_variables'] = {'use_within_unit_prevalence':      js(disease.use_within_unit_prevalence),
                                            'use_airborne_exponential_decay':  js(disease.use_airborne_exponential_decay),
@@ -90,7 +84,6 @@ def basic_context(request):
                                            'include_airborne_spread':         js(disease.include_airborne_spread),
                                            'outputs_exist':                   js(outputs_exist()),
                                            'controls_enabled':                js(context['controls_enabled']),
-        }
-        
+                                           }
         
     return context

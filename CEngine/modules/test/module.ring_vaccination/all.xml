@@ -8288,3 +8288,515 @@
     <tr><td>0</td> <td>0</td> <td>0</td></tr>
   </output>
 </variable-test>
+
+<deterministic-test>
+  <category>ring_vaccination</category>
+  <short-name>vaccination circle 3 km, ring 2-4 km</short-name>
+
+  <description>
+    This is one of a set of tests to check that vaccination can be specified
+    either with just a radius, or a separate inner and outer radius.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>6 May 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>10units_2cols</population-file>
+
+  <parameter-file>circle3_ring2-4</parameter-file>
+
+  <parameter-description>
+    Units of type “A” and “F” are latent for 1 day, clinical for 1 day, then
+    immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A
+    vaccination circle 3 km in radius is created around a detected “A” unit.
+    A vaccination ring with inner radius 2 km and outer radius 4 km is created
+    around a detected “F” unit.  There is capacity to vaccinate 100 units per
+    day.
+
+    What should happen:
+     - On day 1 units A and F will be Latent.
+     - On day 2 units A and F will be Infectious Clinical. They will be
+       detected and a vaccination program will be initiated.
+     - On day 3, all units within 3 km of unit A will be vaccinated (namely,
+       units B and C). All units within 2-4 km of unit F will be vaccinated
+       (namely, units H and J). Their state will show as Vaccine Immune on day
+       4.
+     - On day 4, nothing new happens: all of the units that need to be
+       vaccinated have been vaccinated.  This will be the last simulation day.
+  </parameter-description>
+
+  <output>
+    <!--    A B-E  F G-K        -->
+    <tr><td>L SSSS L SSSS</td></tr>
+    <tr><td>C SSSS C SSSS</td></tr>
+    <tr><td>N SSSS N SSSS</td></tr>
+    <tr><td>N VVSS N SVVS</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_vaccination</category>
+  <short-name>vaccination ring 3-4 km, ring 1-2 km</short-name>
+
+  <description>
+    This is one of a set of tests to check that vaccination can be specified
+    either with just a radius, or a separate inner and outer radius.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>6 May 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>10units_2cols</population-file>
+
+  <parameter-file>ring3-4_ring1-2</parameter-file>
+
+  <parameter-description>
+    Units of type “A” and “F” are latent for 1 day, clinical for 1 day, then
+    immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A
+    vaccination ring with inner radius 3 km and outer radius 4 km is created
+    around a detected “A” unit.  A vaccination ring with inner radius 1 km and
+    outer radius 2 km is created around a detected “F” unit.  There is capacity
+    to vaccinate 100 units per day.
+
+    What should happen:
+     - On day 1 units A and F will be Latent.
+     - On day 2 units A and F will be Infectious Clinical. They will be
+       detected and a vaccination program will be initiated.
+     - On day 3, all units within 3-4 km of unit A will be vaccinated (namely,
+       unit D). All units within 2-4 km of unit F will be vaccinated
+       (namely, unit G). Their state will show as Vaccine Immune on day
+       4.
+     - On day 4, nothing new happens: all of the units that need to be
+       vaccinated have been vaccinated.  This will be the last simulation day.
+  </parameter-description>
+
+  <output>
+    <!--    A B-E  F G-K        -->
+    <tr><td>L SSSS L SSSS</td></tr>
+    <tr><td>C SSSS C SSSS</td></tr>
+    <tr><td>N SSSS N SSSS</td></tr>
+    <tr><td>N SSVS N VSSS</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_vaccination</category>
+  <short-name>protective rings punch holes 1</short-name>
+
+  <description>
+    This is one of a set of tests to check that protective vaccination rings
+    punch holes in each other. In this test, 2 overlapping rings are created
+    on the same day.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>15 May 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>14units_2rings_overlap</population-file>
+
+  <parameter-file>prot_ring_punch_holes_1</parameter-file>
+
+  <parameter-description>
+    Units of type “A” and “B” are latent for 1 day, clinical for 1 day, then
+    immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A
+    vaccination ring with inner radius 7/8 km and outer radius 1 1/8 km is
+    created around a detected unit.  There is capacity to vaccinate 100 units
+    per day.
+
+    What should happen:
+     - On day 1 units A and B will be Latent.
+     - On day 2 units A and B will be Infectious Clinical. They will be
+       detected and a vaccination program will be initiated.
+     - On day 3, units 1, 4, 5, and 6 from the left ring and units 7, 8, 9, and
+       10 from the right ring should be vaccinated. (Their state will show as
+       Vaccine Immune on day 4.)  Units 2, 3, 11, and 12 should not be
+       vaccinated.
+     - On day 4, nothing new happens: all of the units that need to be
+       vaccinated have been vaccinated.  This will be the last simulation day.
+  </parameter-description>
+
+  <diagram>14units_2rings_overlap_thin_rings</diagram>
+
+  <output>
+    <!--    A B 1-6    7-12         -->
+    <tr><td>L L SSSSSS SSSSSS</td></tr>
+    <tr><td>C C SSSSSS SSSSSS</td></tr>
+    <tr><td>N N SSSSSS SSSSSS</td></tr>
+    <tr><td>N N VSSVVV VVVVSS</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_vaccination</category>
+  <short-name>protective rings punch holes 2</short-name>
+
+  <description>
+    This is one of a set of tests to check that protective vaccination rings
+    punch holes in each other. In this test, one ring is partially complete
+    when a new, overlapping ring appears.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>21 May 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>14units_2rings_overlap</population-file>
+
+  <parameter-file>prot_ring_punch_holes_2</parameter-file>
+
+  <parameter-description>
+    Units of type “B” are latent for 1 day, clinical for 1 day, then immune.
+    Units of type “A” are latent for 4 days, clinical for 1 day, then immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A
+    vaccination ring with inner radius 7/8 km and outer radius 1 1/8 km is
+    created around a detected unit.  There is capacity to vaccinate 100 units
+    per day. Vaccination is prioritized by time waiting (oldest requests first),
+    then by size (largest first).
+
+    What should happen:
+     - On day 1 units A and B will be Latent.
+     - On day 2 unit B will be Infectious Clinical. It will be detected, a
+       vaccination program will be initiated, and all of the units in the right
+       ring will be queued for vaccination.
+     - Starting on day 3, one unit can be vaccinated each day. Going by unit
+       size, the right ring will be vaccinated in this order: 7, 8, 9, 10, 11,
+       12.  On day 3, unit 7 is vaccinated (its state will show as Vaccine
+       Immune on day 4).
+     - On day 4, vaccination of the right ring will continue with unit 8.
+     - On day 5, unit A will be Infectious Clinical. It will be detected and
+       the units in the left ring will be queued for vaccination. Vaccination
+       of the right ring will continue with unit 9.
+     - On day 6, there are quite a few units in the vaccination queue. Because
+       time waiting (oldest first) has top priority, a unit from the right ring
+       will be picked, and because size (largest first) has second priority,
+       unit 10 will be picked.
+     - On day 7, vaccinating in largest-first order around the right ring would
+       bring us to unit 11. But since the overlapping vaccination ring was
+       created around unit A, units 11 and 12 are now in the hole punched out
+       of the right ring. Unit 1 will be vaccinated (the largest unit in the
+       left ring).
+     - On day 8, vaccinating in largest-first order around the left ring would
+       bring us to unit 2. But units 2 and 3 are in the hole punched out of the
+       left ring. So unit 4 will be vaccinated.
+     - On day 9, vaccination of the left ring will continue with unit 5.
+     - On day 10, vaccination of the left ring will continue with unit 6.
+     - On day 11, nothing new happens: all the units that need to be vaccinated
+       have been. This will be the last simulation day.
+  </parameter-description>
+
+  <diagram>14units_2rings_overlap_thin_rings</diagram>
+
+  <output>
+    <!--    A B 1-6    7-12         -->
+    <tr><td>L L SSSSSS SSSSSS</td></tr>
+    <tr><td>L C SSSSSS SSSSSS</td></tr>
+    <tr><td>L N SSSSSS SSSSSS</td></tr>
+    <tr><td>L N SSSSSS VSSSSS</td></tr>
+    <tr><td>C N SSSSSS VVSSSS</td></tr>
+    <tr><td>N N SSSSSS VVVSSS</td></tr>
+    <tr><td>N N SSSSSS VVVVSS</td></tr>
+    <tr><td>N N VSSSSS VVVVSS</td></tr>
+    <tr><td>N N VSSVSS VVVVSS</td></tr>
+    <tr><td>N N VSSVVS VVVVSS</td></tr>
+    <tr><td>N N VSSVVV VVVVSS</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_vaccination</category>
+  <short-name>protective rings punch holes 3 with ring expiry</short-name>
+
+  <description>
+    This is one of a set of tests to check that protective vaccination rings
+    punch holes in each other. In this test, one ring is partially complete
+    when a new, overlapping ring appears.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>22 May 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>21units_3rings_overlap</population-file>
+
+  <parameter-file>prot_ring_punch_holes_3_expiry</parameter-file>
+
+  <parameter-description>
+    Units of type “B” are latent for 1 day, clinical for 1 day, then immune.
+    Units of type “A” are latent for 3 days, clinical for 1 day, then immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A
+    vaccination ring with inner radius 7/8 km and outer radius 1 1/8 km is
+    created around a detected unit.  There is capacity to vaccinate 100 units
+    per day. Vaccination is prioritized by time waiting (oldest requests first),
+    then by size (largest first).
+
+    What should happen:
+     - On day 1 units A, B, and C will be Latent.
+     - On day 2 unit B will be Infectious Clinical. It will be detected, a
+       vaccination program will be initiated, and all of the units in the middle
+       ring will be queued for vaccination.
+     - Starting on day 3, two units can be vaccinated each day. Going by unit
+       size, units 7 and 8 will be vaccinated (their state will show as Vaccine
+       Immune on day 4).
+     - On day 4, vaccination of the right ring will continue with units 9 and 10.
+       Unit A will be Infectious Clinical. It will be detected and the units
+       in the left ring will be queued for vaccination.
+     - On day 5, vaccination will continue with units 1 and 4 (skipping over
+       units 11, 12, 2, and 3, which are in the hole punched out of the middle
+       ring).  Unit C will be Infectious Clinical. It will be detected and
+       the units in the right ring will be queued for vaccination.
+     - On day 6, vaccination of the left ring will complete with units 5 and 6.
+     - On days 7-9, the right ring will be vaccinated, going two units at a time
+       in largest-to-smallest order.  Units 17 and 18 will *not* be skipped
+       because the middle ring was already complete (expired) when the right
+       ring was created.
+     - On day 9, vaccination of the left ring will continue with unit 5.
+     - On day 10, vaccination of the left ring will continue with unit 6.
+     - On day 11, nothing new happens: all the units that need to be vaccinated
+       have been. This will be the last simulation day.
+  </parameter-description>
+
+  <diagram>21units_3rings_overlap_thin_rings</diagram>
+
+  <output>
+    <!--    A B C 1-6    7-12   13-18        -->
+    <tr><td>L L L SSSSSS SSSSSS SSSSSS</td></tr>
+    <tr><td>L C L SSSSSS SSSSSS SSSSSS</td></tr>
+    <tr><td>L N L SSSSSS SSSSSS SSSSSS</td></tr>
+    <tr><td>C N L SSSSSS VVSSSS SSSSSS</td></tr>
+    <tr><td>N N C SSSSSS VVVVSS SSSSSS</td></tr>
+    <tr><td>N N N VSSVSS VVVVSS SSSSSS</td></tr>
+    <tr><td>N N N VSSVVV VVVVSS SSSSSS</td></tr>
+    <tr><td>N N N VSSVVV VVVVSS VVSSSS</td></tr>
+    <tr><td>N N N VSSVVV VVVVSS VVVVSS</td></tr>
+    <tr><td>N N N VSSVVV VVVVSS VVVVVV</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_vaccination</category>
+  <short-name>protective and suppressive rings</short-name>
+
+  <description>
+    This test checks that both protective and suppressive vaccination rings can
+    be created around a detection.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>9 July 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>15units_line</population-file>
+
+  <parameter-file>prot_and_supp_rings</parameter-file>
+
+  <parameter-description>
+    Diseased units of production type “A” are latent for 1 day, clinical for 1
+    day, then immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A suppressive
+    vaccination ring of radius 3 1/3 km and a protective vaccination ring with
+    inner radius 4.5 km and outer radius 6.5 km is created around a detected
+    unit of production type “A”.
+    
+    There is capacity to vaccinate 100 units per day.
+
+    What should happen:
+     - On day 1 unit 7 will be Latent.
+     - On day 2 unit 7 will be Infectious Clinical. It will be detected, a
+       vaccination program will be initiated, and suppressive and protective
+       vaccination rings will be set up as shown in the diagram below.
+     - On day 3 units 1, 2, 12, and 13 will be vaccinated because they are in
+       the protective ring.  Units 4, 5, 6, 8, 9, and 10 will be vaccinated
+       because they are in the suppressive ring.  (Their states will appear as
+       Vaccine Immune on day 4.)
+     - On day 4, there is nothing new to do.  This will be the last simulation
+       day.
+  </parameter-description>
+
+  <diagram>15units_1ring_s_p</diagram>
+
+  <output>
+    <!--            *     *            -->
+    <tr><td>SS S SSSLSSS SSS S S</td></tr>
+    <tr><td>SS S SSSCSSS SSS S S</td></tr>
+    <tr><td>SS S SSSNSSS SSS S S</td></tr>
+    <tr><td>VV S VVVNVVV SVV S S</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_vaccination</category>
+  <short-name>protective rings do not punch holes in suppressive rings</short-name>
+
+  <description>
+    This test checks that protective vaccination rings do not punch holes in
+    suppressive vaccination rings.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>8 July 2013</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>15units_line</population-file>
+
+  <parameter-file>prot_ring_not_punch_holes_in_supp_ring</parameter-file>
+
+  <parameter-description>
+    Diseased units are latent for 1 day, clinical for 1 day, then immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A suppressive
+    vaccination ring of radius 3 1/3 km and a protective vaccination ring with
+    inner radius 4.5 km and outer radius 6.5 km is created around a detected
+    unit of production type “A”.  A suppressive vaccination ring of radius 1
+    1/3 km and a protective vaccination ring with inner radius 2.5 km and outer
+    radius 3.5 km is created around a detected unit of type “B”.
+    
+    There is capacity to vaccinate 100 units per day. Vaccination is
+    prioritized by time waiting (oldest requests first).
+
+    What should happen:
+     - On day 1 units 7 and 12 will be Latent.
+     - On day 2 units 7 and 12 will be Infectious Clinical. They will be
+       detected, a vaccination program will be initiated, and suppressive and
+       protective vaccination rings will be set up as shown in the diagrams
+       below.
+     - Looking at each unit and what should happen to it:
+     - Units 1 and 2 are in the protective ring around unit 7: they will be
+       vaccinated.
+     - Unit 3 is in the gap between the protective and suppressive rings around
+       unit 7: it will not be vaccinated.
+     - Units 4, 5, 6, and 8 are in the suppressive ring around unit 7: they
+       will be vaccinated.
+     - Unit 9 is in the suppressive ring around unit 7 and the protective ring
+       around unit 12: it will be vaccinated.
+     - Unit 10 is in the gap between the protective and suppressive rings
+       around unit 12, but it is also in the suppressive ring around unit 7: it
+       will be vaccinated.
+     - Unit 11 is in the gap between the protective and suppressive rings
+       around unit 7, but it is also in the suppressive ring around unit 12: it
+       will be vaccinated.
+     - Unit 13 is in the suppressive ring around unit 12 and the protective
+       ring around unit 7: it will be vaccinated.
+     - Unit 14 is in the gap between the protective and suppressive rings
+       around unit 12: it will not be vaccinated.
+     - Unit 15 is in the protective ring around unit 12: it will be vaccinated.
+     - On day 4, the units noted above will show as Vaccine Immune.  This will
+       be the last simulation day.
+  </parameter-description>
+
+  <diagram>15units_2rings_s_p_overlap</diagram>
+
+  <output>
+    <!--            *     *            -->
+    <tr><td>SS S SSSLSSS SLS S S</td></tr>
+    <tr><td>SS S SSSCSSS SCS S S</td></tr>
+    <tr><td>SS S SSSNSSS SNS S S</td></tr>
+    <tr><td>VV S VVVNVVV VNV S V</td></tr>
+  </output>
+</deterministic-test>
+
+<deterministic-test>
+  <category>ring_vaccination</category>
+  <short-name>vaccinated and re-added same day</short-name>
+
+  <description>
+    Test to verify a bug fix. In this test, a unit is vaccinated on the same
+    day that it is marked for vaccination as part of a newly created ring.
+  </description>
+
+  <author>nharve01@uoguelph.ca</author>
+  <creation-date>5 May 2014</creation-date>
+  <model-version>3.3</model-version>
+
+  <population-file>14units_2rings_overlap</population-file>
+
+  <parameter-file>vacc_readded_same_day</parameter-file>
+
+  <parameter-description>
+    Units of type “A” are latent for 1 day, clinical for 1 day, then immune.
+    Units of type “B” are latent for 4 days, clinical for 1 day, then immune.
+
+    There is no disease spread.
+
+    Diseased units are detected on the first day showing clinical signs.
+
+    Vaccination is initiated after detection of 1 diseased unit.  A
+    vaccination ring with inner radius 7/8 km and outer radius 1 1/8 km is
+    created around a detected “A” unit.  A vaccination ring with inner radius
+    1/2 km and outer radius 1 1/8 km is created around a detected “B” unit.
+    Round-robin priority is turned on, then vaccination is prioritized by size,
+    with smaller units being vaccinated first.  There is capacity to vaccinate
+    2 units per day.  The minimum time between re-vaccinations is 31 days.
+
+    What should happen:
+     - On day 1 units A and B will be Latent.
+     - On day 2 unit A will be Infectious Clinical. It will be detected and a
+       vaccination program will be initiated.
+     - On day 3, the two smallest units, 5 and 6, should be vaccinated. (Their
+       state will show as Vaccine Immune on day 4.)
+     - On day 4, units 3 and 4 should be vaccinated.
+     - On day 5, units 2 and 1 should be vaccinated, completing the vaccination
+       ring around unit A. Also on this day, unit B will be Infectious Clinical.
+       It will be detected and a vaccination ring will be created.
+     - Over the next several days, units 12 and 11 should be vaccinated, then
+       10 and 9, then 8 and 7.  Units 2 and 3 will not be re-vaccinated because
+       of the minimum time between re-vaccinations.  If the bug is present,
+       however, then the program will crash when it considers unit 2 for
+       vaccination (that is the unit that was re-added to the vaccination queue
+       the same day it was vaccinated).
+  </parameter-description>
+
+  <diagram>14units_2rings_overlap_1thin_1thick</diagram>
+
+  <output>
+    <!--    A B 1-6    7-12         -->
+    <tr><td>L L SSSSSS SSSSSS</td></tr>
+    <tr><td>C L SSSSSS SSSSSS</td></tr>
+    <tr><td>N L SSSSSS SSSSSS</td></tr>
+    <tr><td>N L SSSSVV SSSSSS</td></tr>
+    <tr><td>N C SSVVVV SSSSSS</td></tr>
+    <tr><td>N N VVVVVV SSSSSS</td></tr>
+    <tr><td>N N VVVVVV SSSSVV</td></tr>
+    <tr><td>N N VVVVVV SSVVVV</td></tr>
+    <tr><td>N N VVVVVV VVVVVV</td></tr>
+  </output>
+</deterministic-test>

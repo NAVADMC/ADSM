@@ -16,6 +16,7 @@ from ScenarioCreator.population_parser import lowercase_header
 
 
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
+from ScenarioCreator.utils import whole_scenario_validation
 
 singletons = ['Scenario', 'Population', 'Disease', 'ControlMasterPlan', 'OutputSettings']
 abstract_models = {
@@ -28,6 +29,9 @@ abstract_models = {
          ('AirborneSpread', AirborneSpread)],
 }
 
+spread_types = {'DirectSpread': (DirectSpread, 'direct_contact_spread'),
+                'IndirectSpread': (IndirectSpread, 'indirect_contact_spread'),
+                'AirborneSpread': (AirborneSpread, 'airborne_spread')}
 
 def spaces_for_camel_case(text):
     return re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
@@ -43,19 +47,129 @@ def add_breadcrumb_context(context, model_name, primary_key=None):
         context['title'] = 'Edit the ' + spaces_for_camel_case(model_name)
 
 
+def population_panel_only(request):
+    """#707 Fix by loading the production group section dynamically
+    When creating new Production Type Groups, the population panel needs to be loaded asynchronously, but
+    the contents depends on the context processor, which is normally only run on non-ajax requests.  This function
+    collects the context in Ajax calls"""
+    context = {'ProductionGroups': ProductionGroup.objects.all()}
+    return render(request, 'population_panel.html', context)
+
+
 def production_type_list_json(request):
     msg = list(ProductionType.objects.values_list('name', 'id'))
     return JsonResponse(msg, safe=False)  # necessary to serialize a list object
 
 
+def jsonify(string_list):
+    """Returns the name of the specific assignment or None"""
+    if string_list:
+        return string_list[0]
+    else:
+        return None
+
+
+def population_panel_status_json(request):
+    response = []
+
+    for pt in ProductionType.objects.all():
+        response.append({'name': pt.name,
+                         'pk': pt.id,
+                         'unit_count': Unit.objects.filter(production_type=pt).count(),
+                         'spread': DiseaseSpreadAssignment.objects.filter(destination_production_type=pt).filter(
+                             Q(direct_contact_spread__isnull=False,) |
+                             Q(indirect_contact_spread__isnull=False) |
+                             Q(airborne_spread__isnull=False)).count(),
+                         'control': jsonify(ProtocolAssignment.objects.filter(control_protocol__isnull=False, production_type=pt).values_list('control_protocol__name', flat=True)),
+                         'progression': jsonify(DiseaseProgressionAssignment.objects.filter(progression__isnull=False, production_type=pt).values_list('progression__name', flat=True)),
+                         'zone': jsonify(ZoneEffectAssignment.objects.filter(effect__isnull=False, production_type=pt).values_list('zone__name', flat=True)),
+                         })
+
+    return JsonResponse(response, safe=False)
+
+
+def spread_options_json(request):  # list of DiseaseSpreads by Type
+    options = {
+        'DirectSpread': {d.id: {'name': d.name, 'pk': d.id} for d in DirectSpread.objects.all()},
+        'IndirectSpread': {d.id: {'name': d.name, 'pk': d.id} for d in IndirectSpread.objects.all()},
+        'AirborneSpread': {d.id: {'name': d.name, 'pk': d.id} for d in AirborneSpread.objects.all()}
+    }
+    return JsonResponse(options)
+
+
+def spread_inputs_json(request):
+    options = {}
+    for class_name, meta in spread_types.items():
+        model, field_name = meta
+        options[class_name] = {}
+        for spread in model.objects.all():
+            inputs = []
+            for source in ProductionType.objects.all():
+                query = DiseaseSpreadAssignment.objects.filter(**{'source_production_type': source, field_name: spread})
+                if query.exists():
+                    one_source = {'source': source.id,
+                                  'destinations': [pair.destination_production_type.id for pair in query]}
+                    inputs.append(one_source)
+
+            options[class_name][spread.id] = inputs
+    return JsonResponse(options)
+
+
+def modify_spread_assignments(request):
+    destinations = [int(x) for x in request.POST.getlist('destinations[]')]
+    if 'destinations[]' in request.POST.keys() and request.POST['source']:  # when a user selects ----- there's no PK at all
+        data = request.POST.dict()
+        if 'POST' == data['action']:
+            for destination_pk in destinations:
+                assignment = DiseaseSpreadAssignment.objects.filter(**{'source_production_type_id': int(data['source']),
+                                                                       'destination_production_type_id': int(destination_pk)})
+                parameter_class, field = spread_types[data['spread_type']]
+                assignment.update(**{field: parameter_class.objects.get(id=int(data['pk']))})  # saves immediately
+                # Debug output:
+                source = ProductionType.objects.get(id= int(data['source'])).name
+                destination = ProductionType.objects.get(id=int(destination_pk)).name
+                print("ADD", field, "SOURCE:", source, "DESTINATION:", destination)
+
+        if 'DELETE' == data['action']:  # Django doesn't allow you to parametrize DELETE http_method
+            for destination_pk in destinations:
+                assignment = DiseaseSpreadAssignment.objects.filter(**{'source_production_type_id': int(data['source']),
+                                                                       'destination_production_type_id': int(destination_pk)})
+                parameter_class, field = spread_types[data['spread_type']]
+                assignment.update(**{field: None})  # saves immediately
+                # Debug output:
+                source = ProductionType.objects.get(id= int(data['source'])).name
+                destination = ProductionType.objects.get(id=int(destination_pk)).name
+                print("DEL", field, "SOURCE:", source, "DESTINATION:", destination)
+
+    return spread_inputs_json(request)
+
+
+def disease_spread_assignments_json(request):
+    source_rows = {}
+    for source in ProductionType.objects.all().order_by('name'):
+        one_row = {'name': source.name, 'pk': source.id, 'destinations': {}}
+        for destination in ProductionType.objects.all().order_by('name'):
+            assignment = {'name': destination.name, 'pk': destination.id, 'DirectSpread': None, 'IndirectSpread': None,
+                          'AirborneSpread': None}
+            query = DiseaseSpreadAssignment.objects.filter(source_production_type=source,
+                                                           destination_production_type=destination)
+            if query.exists():
+                assignment['DirectSpread'] = query.first().direct_contact_spread_id
+                assignment['IndirectSpread'] = query.first().indirect_contact_spread_id
+                assignment['AirborneSpread'] = query.first().airborne_spread_id
+            one_row['destinations'][destination.name] = assignment
+        source_rows[source.name] = one_row
+    return JsonResponse(source_rows, safe=False)
+
+
 def disable_all_controls_json(request):
     if 'POST' in request.method:
         new_value = request.POST['use_controls']
-        set_to = new_value == 'false'  #logical inversion because of use_controls vs disable_controls
+        set_to = new_value == 'false'  # logical inversion because of use_controls vs disable_controls
         controls = ControlMasterPlan.objects.get()
         controls.disable_all_controls = set_to
         controls.save()
-        return JsonResponse({'status':'success'})
+        return JsonResponse({'status': 'success'})
     else:
         return JsonResponse({'disable_all_controls': ControlMasterPlan.objects.get().disable_all_controls})
     
@@ -72,22 +186,8 @@ def initialize_spread_assignments():
 def assign_disease_spread(request):
     initialize_spread_assignments()
 
-    SpreadSet = modelformset_factory(DiseaseSpreadAssignment, extra=0, form=DiseaseSpreadAssignmentForm)
-    include_spread_form = DiseaseIncludeSpreadForm(request.POST or None, instance=Disease.objects.get())
-    try:
-        initialized_formset = SpreadSet(request.POST, request.FILES, queryset=DiseaseSpreadAssignment.objects.all())
-        if initialized_formset.is_valid():
-            instances = initialized_formset.save()
-            if include_spread_form.is_valid():
-                include_spread_form.save()
-            return redirect(request.path)
-
-    except ValidationError:
-        initialized_formset = SpreadSet(queryset=DiseaseSpreadAssignment.objects.all())
-    context = {'formset': initialized_formset,
-               'include_spread_form': include_spread_form,
-               'title': 'How does Disease spread from one Production Type to another?'}
-    return render(request, 'ScenarioCreator/AssignSpread.html', context)
+    context = {'base_page': 'ScenarioCreator/AssignSpread.html'}
+    return render(request, 'ScenarioCreator/MainPanel.html', context)
 
 
 def zone_effects(request):
@@ -107,7 +207,8 @@ def zone_effects(request):
         context['formset_grouped'] = {k: sorted(v, key=lambda x: x.instance.zone.id) 
                                         for k,v in forms_grouped_by_pt}
         context['base_page'] = 'ScenarioCreator/FormSet2D.html'
-        return render(request, 'ScenarioCreator/3Panels.html', context)
+
+        return render(request, 'ScenarioCreator/MainPanel.html', context)
 
 
 def save_formset_succeeded(MyFormSet, TargetModel, context, request):
@@ -115,7 +216,6 @@ def save_formset_succeeded(MyFormSet, TargetModel, context, request):
         initialized_formset = MyFormSet(request.POST, request.FILES, queryset=TargetModel.objects.all())
         if initialized_formset.is_valid():
             instances = initialized_formset.save()
-            print(instances)
             context['formset'] = initialized_formset
             return True
         return False
@@ -123,7 +223,8 @@ def save_formset_succeeded(MyFormSet, TargetModel, context, request):
         return False
 
 
-def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request, template='ScenarioCreator/3Panels.html'):
+def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, missing, request, template='ScenarioCreator/3Panels.html',
+                                           html='ScenarioCreator/AssignmentList.html'):
     """FormSet is pre-populated with existing assignments and it detects and fills in missing
     assignments with a blank form with production type filled in."""
     if save_formset_succeeded(MyFormSet, TargetModel, context, request):
@@ -134,7 +235,7 @@ def populate_forms_matching_ProductionType(MyFormSet, TargetModel, context, miss
             index += TargetModel.objects.count()
             forms[index].fields['production_type'].initial = pt.id
         context['formset'] = forms
-        context['base_page'] = 'ScenarioCreator/FormSet.html'
+        context['base_page'] = html
         return render(request, template, context)
 
 
@@ -142,7 +243,9 @@ def assign_protocols(request):
     missing = ProductionType.objects.filter(protocolassignment__isnull=True)
     ProtocolSet = modelformset_factory(ProtocolAssignment, extra=len(missing), form=ProtocolAssignmentForm)
     context = {'title': 'Assign a Control Protocol to each Production Type'}
-    return populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request, template='ScenarioCreator/navigationPane.html')
+    return populate_forms_matching_ProductionType(ProtocolSet, ProtocolAssignment, context, missing, request,
+                                                  template='ScenarioCreator/MainPanel.html',
+                                                  html='ScenarioCreator/FormSet.html')
 
 
 def assign_progressions(request):
@@ -152,16 +255,50 @@ def assign_progressions(request):
     ProgressionSet = modelformset_factory(DiseaseProgressionAssignment,
                                           extra=len(missing),
                                           form=DiseaseProgressionAssignmentForm)
-    context = {'title': 'Disease Progressions'}
-    return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request)
+    context = {'title': 'Assign Disease Progressions'}
+    return populate_forms_matching_ProductionType(ProgressionSet, DiseaseProgressionAssignment, context, missing, request,
+                                                  template='ScenarioCreator/MainPanel.html')
 
+
+def protocols_json(request):
+    data = []
+    for protocol in ControlProtocol.objects.all():
+        entry = {'name': str(protocol.name),
+                 'pk': protocol.id,
+                 'tabs': [
+                     {'name':'Detection', 'enabled':bool(protocol.use_detection), 'field':'use_detection', 'valid': protocol.tab_is_valid('use_detection')},
+                     {'name':'Tracing', 'enabled':bool(protocol.use_tracing), 'field':'use_tracing', 'valid': protocol.tab_is_valid('use_tracing')},
+                     {'name':'Testing', 'enabled':bool(protocol.use_testing), 'field':'use_testing', 'valid': protocol.tab_is_valid('use_testing')},
+                     {'name':'Exams', 'enabled':bool(protocol.use_exams), 'field':'use_exams', 'valid': protocol.tab_is_valid('use_exams')},
+                     {'name':'Destruction', 'enabled':bool(protocol.use_destruction), 'field':'use_destruction', 'valid': protocol.tab_is_valid(
+                         'use_destruction')},
+                     {'name':'Vaccination', 'enabled':bool(protocol.use_vaccination), 'field':'use_vaccination', 'valid': protocol.tab_is_valid(
+                         'use_vaccination')},
+                     {'name':'Cost Accounting', 'enabled':bool(protocol.use_cost_accounting), 'field':'use_cost_accounting', 'valid': protocol.tab_is_valid(
+                         'use_cost_accounting')},
+                     ]}
+        data.append(entry)
+    return JsonResponse(data, safe=False)
+
+
+def update_protocol_enabled(request, primary_key, field):
+    """Does nothing but save the `field` value to the database.  Ex: use_detection use_tracing use_destruction
+    use_vaccination use_exams use_testing use_cost_accounting"""
+    #data = json.loads(request.POST.content.decode())
+    value = request.POST.get('value') == 'true'  #False otherwise
+    ControlProtocol.objects.filter(id=int(primary_key)).update(**{field: value})  # specifically the value of field, not the word 'field'
+    return JsonResponse({})
 
 def collect_backlinks(model_instance):
+    """:param model_instance: Django Model Instance
+    :return: A dict of Models that reference the current
+    Useful for determining if an instance can be deleted.  Includes hyperlinks to the related models
+    """
     from django.contrib.admin.utils import NestedObjects
     collector = NestedObjects(using='scenario_db')  # or specific database
     collector.collect([model_instance])  # https://docs.djangoproject.com/en/1.7/releases/1.7/#remove-and-clear-methods-of-related-managers
     dependants = collector.nested()  # fun fact: spelling differs between America and Brittain
-    print("Found related models:", dependants)
+    #print("Found related models:", dependants)
     links = {}
     if len(dependants[1:]):
         for direct_reference in dependants[1:][0]:  # only iterates over the top level
@@ -171,7 +308,7 @@ def collect_backlinks(model_instance):
                     links[str(direct_reference)] = '/setup/%s/%i/' % (name, direct_reference.pk)
                 except:
                     links['%s:%i' % (name, direct_reference.pk)] = '/setup/%s/%i/' % (name, direct_reference.pk)
-    print(links)
+    #print(links)
     return links
 
 
@@ -197,10 +334,15 @@ def deepcopy_points(request, primary_key, created_instance):
         point.save()  # This assumes that things in the database are already valid, so doesn't call is_valid()
     queryset = RelationalPoint.objects.filter(relational_function_id=created_instance.id)
     formset = PointFormSet(queryset=queryset) # this queryset does not include anything the user typed in, during the copy operation
+    # formset = PointFormSet(request.POST or None, instance=created_instance)
     return formset
 
 
 def initialize_points_from_csv(request):
+    """ Uses a file upload to create a series of points and add them to the request
+    :param request: request that contains the file upload
+    :return: request with initial_values set
+    """
     file_path = handle_file_upload(request, is_temp_file=True, overwrite_ok=True)
     with open(file_path) as csvfile:
         dialect = csv.Sniffer().sniff(csvfile.read(1024))  # is this necessary?
@@ -240,26 +382,52 @@ def relational_function(request, primary_key=None, doCopy=False):
 
     It is possible to integrate this code back into the standard new / edit / copy views by checking for
     context['formset'].  The extra logic for formsets could be kicked in only when one or more formsets are present. At
-    the moment integration looks like a bad idea because it would mangle the happy path for the sake of one edge case."""
+    the moment integration looks like a bad idea because it would mangle the happy path for the sake of one edge case.
+    :param request:
+    :param primary_key: None or a number if editing
+    :param doCopy: copying will clear old primary keys so django will create new entries"""
     context = initialize_relational_form({}, primary_key, request)
     context['action'] = request.path
     if 'file' in request.FILES:  # data file is present
         request = initialize_points_from_csv(request)
-    context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
     if context['form'].is_valid():
+        created_instance = None
         if doCopy:
-            context['form'].instance.pk = None  # This will cause a new instance to be created
-            created_instance = context['form'].save()
-            context['formset'] = deepcopy_points(request, primary_key, created_instance)
-        else:
-            created_instance = context['form'].save()
+            created_instance = context['form'].instance
+            created_instance.pk = None  # This will cause a new instance to be created
+            created_instance.save()
             context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
+        else:
+            created_instance = context['form'].instance
+            created_instance.save()
+            context['formset'] = PointFormSet(request.POST or None, instance=created_instance)
+
         context['action'] = '/setup/RelationalFunction/%i/' % created_instance.id
 
-        if context['formset'].is_valid():
-            context['formset'].save()
-        else:
-            pass #Delete partial RelationalFunction???
+        if created_instance:
+            if context['formset'].is_valid():  # We need to run this to ensure that the data in the formset is populated
+                pass
+            if doCopy:
+                # If the user clicked the +f() Variant button, then all of the rows that have data filled in will count
+                # as changed. The points started as exact copies of the points from another relational function, so we
+                # need to (1) erase their primary keys so they count as new objects, and (2) make this new relational
+                # function their parent.
+                for point in context['formset'].forms:
+                    if point.changed_data:
+                        point.instance.pk = None
+                        point.instance.relational_function = created_instance
+                        point.instance.save()
+            else:
+                # If the user clicked the Overwrite button, all we want is a delete() on any points for which the
+                # Delete checkbox was checked, and a save() on any points that have changed.
+                for point in context['formset'].forms:
+                    if point.changed_data:
+                        if point.cleaned_data['DELETE']:
+                            point.instance.delete()
+                        else:
+                            point.instance.save()
+    else:
+        context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
 
     context['title'] = "Create a Relational Function"
     add_breadcrumb_context(context, "RelationalFunction")
@@ -283,8 +451,10 @@ def new_form(request, initialized_form, context):
     model_name, model = get_model_name_and_model(request)
     context['model_name'] = model_name
     if model_name in singletons:  # they could have their own special page: e.g. Population
-        context['base_page'] = 'ScenarioCreator/Crispy-Singleton-Form.html' # #422 Singleton models now load in a fragment to be refreshed the same way that other forms are loaded dynamically
-        return render(request, 'ScenarioCreator/navigationPane.html', context)
+        context['base_page'] = 'ScenarioCreator/Crispy-Singleton-Form.html'
+        # #422 Singleton models now load in a fragment to be refreshed the same way that other forms
+        #  are loaded dynamically
+        return render(request, 'ScenarioCreator/MainPanel.html', context)
     if model_name == 'ProbabilityFunction':
         return render(request, 'ScenarioCreator/ProbabilityFunctionForm.html', context)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages
@@ -419,7 +589,7 @@ def trigger_list(request):
                               {'name':'Stop Triggers',
                                'models':[list_per_model(x) for x in layout['Stop Triggers']]
                               },
-                              {'name':'Restart Triggers',
+                              {'name':'Restart Triggers',  # This exact name is used in the template VaccinationTriggerList.html
                                'models':[filtered_list_per_model(x, True) for x in layout['Restart Triggers']]
                               }
                           ]
@@ -454,7 +624,11 @@ def functions_panel(request, form=None):
     return render(request, 'functions_panel.html', context)  # no 3 panel layout
 
 
-def model_list(request):
+def control_protocol_list(request):
+    return model_list(request, 'ScenarioCreator/ControlProtocolList.html')
+
+
+def model_list(request, base_page='ScenarioCreator/ModelList.html'):
     model_name, model = get_model_name_and_model(request)
     model_name = promote_to_abstract_parent(model_name)
     if model_name in 'Function RelationalFunction ProbabilityFunction'.split():
@@ -463,7 +637,7 @@ def model_list(request):
         context = trigger_list(request)
     else:
         context = {'title': "Create " + spaces_for_camel_case(model_name) + "s",
-                   'base_page': 'ScenarioCreator/ModelList.html',
+                   'base_page': base_page,
                    'models': []}
         if model_name in abstract_models.keys():
             for local_name, local_model in abstract_models[model_name]:
@@ -471,6 +645,7 @@ def model_list(request):
         else:
             context['models'].append(list_per_model(model))
     context['load_target'] = '#center-panel'
+    context['load_next'] = request.GET.get('next', '')  # #704 Ability to load the center panel URL with a ?next=/setup/DirectSpread/1/ argument
     return render(request, 'ScenarioCreator/3Panels.html', context)
 
 # Utility Views was moved to the ADSMSettings/connection_handler.py
@@ -564,6 +739,8 @@ def population(request):
         context['deletable'] = '/setup/Population/1/delete/'
         context['editable'] = request.GET.get('readonly', 'editable')
         context['population_file'] = os.path.basename(Population.objects.get().source_file)
+        context['Population'] = Unit.objects.count()
+        context['Farms'] = Unit.objects.count()
     else:
         context['xml_files'] = file_list([".sqlite3"])
     return render(request, 'ScenarioCreator/Population.html', context)
@@ -579,8 +756,10 @@ def validate_scenario(request):
     simulation.wait()  # simulation will process db then exit
     print("C Engine Exit Code:", simulation.returncode)
     context = {'dry_run_passed': simulation.returncode == 0 and not stderr,
-               'sim_output': stdout.decode() + stderr.decode(),}
-    return render(request, 'ScenarioCreator/Validation.html', context)
+               'sim_output': stdout.decode() + stderr.decode(),
+               'whole_scenario_warnings': whole_scenario_validation(),
+               'base_page': 'ScenarioCreator/Validation.html'}
+    return render(request, 'ScenarioCreator/MainPanel.html', context)
 
 
 def vaccination_priorities(request):

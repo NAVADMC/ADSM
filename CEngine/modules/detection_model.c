@@ -302,7 +302,7 @@ check_and_detect (gpointer key, gpointer value, gpointer user_data)
        * on clinical signs or mortality.  This is multiplied with the probability
        * of reporting from awareness. */
       #if DEBUG
-        g_debug ("using chart value for day %hu in current state", unit->days_in_state);
+        g_debug ("using chart value for day %i in current state", unit->days_in_state);
       #endif
       prod_type = unit->production_type;
       param_block = local_data->param_block[prod_type];

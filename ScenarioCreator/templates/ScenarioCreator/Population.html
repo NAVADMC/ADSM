@@ -1,4 +1,4 @@
-{% extends 'ScenarioCreator/navigationPane.html' %}
+{% extends 'ScenarioCreator/LayoutContainer.html' %}
 {% load floppyforms %}
 {% load crispy_forms_tags  %}
 {% load db_status_tags %}
@@ -8,7 +8,7 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/population.js"></script>
 
 {% if not Population %}
-<section id="main-panel" class="layout-panel col-xs-8 center-block">
+<section id="main-panel" class="layout-panel col-xs-8">
     <h1 id="title">Load a Population</h1>
     <div id="load_population_widget">
         <form id="pop-upload" method="post" action="/setup/UploadPopulation/" enctype="multipart/form-data">
@@ -18,7 +18,7 @@
         </form>
 
         <h3>Available Population Files:</h3>
-        <ul id="file_list">
+        <ul class="file_list">
             {% for file in xml_files %}
                 <li><a href="/setup/OpenPopulation/{{ file }}" class="ajax-post">{{ file }}</a>
                     <a href="#" class="delete-icon ajax-post" data-delete-link="/app/DeleteFile/{{ file }}"></a>
@@ -41,6 +41,7 @@
 
         <div id="population_map_container" class="col-xs-4">
             <img id="unit_map" src="/results/Population.png" alt="Unit Locations"/>
+            <p class="map-fine-print">The map displays a representative sampling of population data</p>
         </div>
 
         <p></p>

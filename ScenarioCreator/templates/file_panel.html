@@ -4,7 +4,7 @@
         {% include 'ScenarioName.html' %}
     </div>
     <h2>Available Scenarios</h2>
-    <ul id="file_list">
+    <ul class="file_list">
         {% for file in db_files %}
             <li><div class="ellipsis-title"><a class="open_scenario" href="/LoadingScreen/?loading_url=/app/OpenScenario/{{ file }}/">{{ file }}</a></div>
                 <div class="buttonHolder file-buttons">
@@ -16,7 +16,7 @@
                 </li>
         {% endfor %}
     </ul>
-    <div class="center-block text-center">
+    <div class="text-center">
         <a id="new_scenario" href="#" data-copy-link="/LoadingScreen/?loading_url=/app/NewScenario/" class="btn btn-success">Create New</a>
         <a href="/app/ImportScenario/" class="btn btn-info">Import NAADSM Legacy Scenario</a>
     </div>

@@ -9,7 +9,9 @@ defined for the ADSM project for all object creation."""
 import xml.etree.ElementTree as ET
 import warnings
 from pyproj import Proj
-from math import exp, sqrt
+from math import exp, sqrt, modf
+from collections import OrderedDict
+import json
 
 import ADSMSettings.models
 from ScenarioCreator.models import *
@@ -28,12 +30,43 @@ def status(message):
 def create_no_duplicates(ModelClass, suggested_name, **kwargs):
     instance, created = ModelClass.objects.get_or_create(**kwargs)
     if suggested_name is not None:  # TODO: use Django _meta to check for a field called "name"
+        # Remove comma from suggested_name because we use commas as a separator
+        suggested_name = suggested_name.replace(',','')
+        # Limit the length of the name.
+        name_length_limit = 255
+        continuation = '...'
         if created:
-            instance.name = suggested_name
+            if len(suggested_name) <= name_length_limit:
+                instance.name = suggested_name
+            else:
+                instance.name = suggested_name[:name_length_limit-len(continuation)] + continuation
+            instance.save()
         else:
-            if instance.name != suggested_name:
-                instance.name += ', ' + suggested_name
-        instance.save()
+            # When multiple elements in the original XML produce are combined
+            # into just one entity in the database, take the suggested names
+            # for those elements and combine them into a comma-separated list.
+
+            # If the name already ends with the continuation string, then it's
+            # already long enough.
+            if not instance.name.endswith(continuation):
+                current_name_parts = set(instance.name.split(', '))
+                # If the suggested name is already in the comma-separated list,
+                # then we don't need to do anything.
+                if suggested_name not in current_name_parts:
+                    name_parts = instance.name.split(', ') + [suggested_name]
+                    truncated = False
+                    while True:
+                        if truncated:
+                            instance.name = ', '.join(name_parts + [continuation])
+                        else:
+                            instance.name = ', '.join(name_parts)
+                        if len(instance.name) > name_length_limit:
+                            del(name_parts[-1]) # remove the last name_part
+                            truncated = True
+                        else:
+                            break
+                    # end of loop to truncate name to desired length
+                    instance.save()
     return instance, created
 
 
@@ -90,7 +123,9 @@ def getPdf( xml, nameGenerator ):
 
     args = {'equation_type': pdfType.capitalize(), }
 
-    if pdfType == 'beta':
+    if pdfType == 'bernoulli':
+        args['p'] = float( required_text(firstChild, './p' ) )
+    elif pdfType == 'beta':
         args['alpha'] = float( required_text(firstChild, './alpha' ) )
         args['alpha2'] = float( required_text(firstChild, './beta' ) )
         args['min'] = float( required_text(firstChild, './location' ) )
@@ -154,7 +189,10 @@ def getPdf( xml, nameGenerator ):
         zeta = float( required_text(firstChild, './zeta' ) )
         sigma = float( required_text(firstChild, './sigma' ) )
         sigma_sq = sigma*sigma
-        args['mean'] = exp( zeta + sigma_sq/2 )
+        try:
+	        args['mean'] = exp( zeta + sigma_sq/2 )
+        except OverflowError:
+            raise OverflowError('mean of lognormal with zeta=%g, sigma=%g' % (zeta,sigma))
         variance = exp( 2*zeta + sigma_sq ) * (exp(sigma_sq) - 1)
         args['std_dev'] = sqrt(variance)
     elif pdfType == 'negative-binomial':
@@ -378,6 +416,21 @@ def required_text(element, tag):
         raise AttributeError("Missing required value " + str(tag) + " in " + str(element).replace('<',''))
 
 
+def int_dz(text):
+    """Like int(), but tolerates having a fractional part as long it it's
+    all zeroes. (The _dz stands for "dot zero".) This is to accommodate
+    programatically-produced NAADSM files that may use generic number output
+    formats that put a .0 on the end of parameters we expect to be integers."""
+    try:
+        num = int(text)
+    except ValueError:
+        frac_part, whole_part = modf(float(text))
+        if frac_part != 0:
+            raise
+        num = int(whole_part)
+    return num
+
+
 def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     status("Reading parameters file: " + parameterFileName)
     fp = open( parameterFileName, 'rb' )
@@ -540,7 +593,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             zone, created = create_no_duplicates(Zone, suggested_name=name, radius=radius )
     # end of loop over <zone-model> elements
 
-    status("Reading Contact Spread Models...")
+    status("Building Contact Spread Models")
     for el in xml.findall( './/contact-spread-model' ):
         if 'zone' in el.attrib:
             continue
@@ -597,7 +650,6 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     disease.include_indirect_contact_spread = True
                 else:
                     assert False
-                disease.save()
 
                 pairing, created = DiseaseSpreadAssignment.objects.get_or_create(
                     source_production_type = ProductionType.objects.get( name=fromTypeName ),
@@ -611,8 +663,9 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             # end of loop over to-production-types covered by this <contact-spread-model> element
         # end of loop over from-production-types covered by this <contact-spread-model> element
     # end of loop over <contact-spread-model> elements without a "zone" attribute
+    disease.save()
 
-    status("Building Contact Spread Model")
+    status("Building In-Zone Movement Controls")
     for el in xml.findall( './/contact-spread-model' ):
         if 'zone' not in el.attrib:
             continue
@@ -778,7 +831,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             assert (direction == 'in' or direction == 'out')
         except KeyError:
             direction = 'both'
-        tracePeriod = int( required_text(el, './trace-period/value' ) )
+        tracePeriod = int_dz( required_text(el, './trace-period/value' ) )
 
         typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
         for typeName in typeNames:
@@ -968,7 +1021,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     status("Building Vaccination")
     productionTypesWithVaccineEffectsDefined = set()
     for el in xml.findall( './/vaccine-model' ):
-        delay = int( required_text(el, './delay/value' ) )
+        delay = int_dz( required_text(el, './delay/value' ) )
         immunityPeriod = getPdf( el.find( './immunity-period' ), pdfNameSequence )
 
         typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
@@ -996,6 +1049,10 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     # end of loop over <vaccine-model> elements
 
     productionTypesThatAreVaccinated = set()
+    # Create a dictionary where key=radius and value=set of ProductionTypes
+    # that trigger a ring with that radius. This will tell us how many
+    # VaccinationRingRule objects are needed.
+    rings_needed = {}
     for el in xml.findall( './/ring-vaccination-model' ):
         # Older XML files allowed just a "production-type" attribute and an
         # implied "from-any" functionality.
@@ -1007,29 +1064,13 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             toTypeNames = getProductionTypes( el, 'to-production-type', productionTypeNames )
 
         radius = float( required_text(el, './radius/value' ) )
-        for fromTypeName in fromTypeNames:
-            # If a ControlProtocol object has already been assigned to this
-            # production type, retrieve it; otherwise, create a new one.
-            try:
-                assignment = ProtocolAssignment.objects.get( production_type__name=fromTypeName )
-                protocol = assignment.control_protocol
-            except ProtocolAssignment.DoesNotExist:
-                protocol = ControlProtocol(
-                    use_detection = False
-                )
-                protocol.save()
-                assignment = ProtocolAssignment(
-                    production_type = ProductionType.objects.get( name=fromTypeName ),
-                    control_protocol = protocol
-                )
-                assignment.save()
-            protocol.trigger_vaccination_ring = True
-            protocol.vaccination_ring_radius = radius
-            protocol.save()
-        # end of loop over from-production-types covered by this <ring-vaccination-model> element
+        try:
+            rings_needed[radius].update(fromTypeNames)
+        except KeyError:
+            rings_needed[radius] = set(fromTypeNames)
 
         priority = int( required_text(el, './priority' ) )
-        minTimeBetweenVaccinations = int( required_text(el, './min-time-between-vaccinations/value' ) )
+        minTimeBetweenVaccinations = int_dz( required_text(el, './min-time-between-vaccinations/value' ) )
         try:
             vaccinateDetectedUnits = getBool( el.find( './vaccinate-detected-units' ) )
         except AttributeError:
@@ -1050,7 +1091,6 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     control_protocol = protocol
                 )
                 assignment.save()
-            protocol.use_vaccination = True
             protocol.minimum_time_between_vaccinations = minTimeBetweenVaccinations
             protocol.vaccinate_detected_units = vaccinateDetectedUnits
             protocol.save()
@@ -1058,6 +1098,14 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             productionTypesThatAreVaccinated.add( toTypeName )
         # end of loop over to-production-types covered by this <ring-vaccination-model> element
     # end of loop over <ring-vaccination-model> elements
+
+    # Create the VaccinationRingRules
+    for radius, trigger_production_types in rings_needed.items():
+        rule = VaccinationRingRule(outer_radius=radius)
+        rule.save()
+        rule.trigger_group.add(*ProductionType.objects.filter(name__in=trigger_production_types))
+        rule.target_group.add(*ProductionType.objects.filter(name__in=productionTypesThatAreVaccinated))
+    # end of loop to create rules
 
     if len( productionTypesThatAreVaccinated - productionTypesWithVaccineEffectsDefined ) > 0:
         raise Exception( 'some production types that are vaccinated do not have vaccine effects defined' )
@@ -1077,7 +1125,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # Enable trace forward/out from all production types.
         contactType = el.attrib['contact-type']
         assert (contactType == 'direct' or contactType == 'indirect')
-        tracePeriod = int( required_text(el, './trace-period/value' ) )
+        tracePeriod = int_dz( required_text(el, './trace-period/value' ) )
         traceSuccess = float( required_text(el, './trace-success' ) )
         for typeName in productionTypeNames:
             # If a ControlProtocol object has already been assigned to this
@@ -1279,7 +1327,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
     for el in xml.findall( './/resources-and-implementation-of-controls-model' ):
         if useDestruction:
-            plan.destruction_program_delay = int( required_text(el, './destruction-program-delay/value' ) )
+            plan.destruction_program_delay = int_dz( required_text(el, './destruction-program-delay/value' ) )
             plan.destruction_capacity = getRelChart( el.find( './destruction-capacity' ), relChartNameSequence )
             try:
                 order = required_text(el, './destruction-priority-order' ).strip()
@@ -1320,7 +1368,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
         if useVaccination:
             try:
-                unitsDetectedBeforeTriggeringVaccination = max( 1, int( el.find( './vaccination-program-delay' ).text ))
+                unitsDetectedBeforeTriggeringVaccination = max( 1, int_dz( el.find( './vaccination-program-delay' ).text ))
             except AttributeError:
                 unitsDetectedBeforeTriggeringVaccination = 1 # default
             trigger = DiseaseDetection(
@@ -1330,11 +1378,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             for productionType in ProductionType.objects.all():
                 trigger.trigger_group.add( productionType )
             plan.vaccination_capacity = getRelChart( el.find( './vaccination-capacity' ), relChartNameSequence )
-            order = required_text(el, './vaccination-priority-order' ).strip()
-            # The XML did not put spaces after the commas, but the Django
-            # model does.
-            order = ', '.join( order.split( ',' ) )
-            plan.vaccination_priority_order = order
+            order = required_text(el, './vaccination-priority-order' ).strip().lower().split(',')
 
             # Create a new version of vaccinationProductionTypeOrder where a)
             # only the minimum priority number attached to each production type
@@ -1345,13 +1389,18 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 newVaccinationProductionTypeOrder.append( (minPriority, typeName) )
             newVaccinationProductionTypeOrder.sort()
             newVaccinationProductionTypeOrder = [item[1] for item in newVaccinationProductionTypeOrder]
-            priority = 1
-            for typeName in newVaccinationProductionTypeOrder:
-                assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
-                protocol = assignment.control_protocol
-                protocol.vaccination_priority = priority
-                protocol.save()
-                priority += 1
+
+            tmp = OrderedDict()
+            for criterion in order:
+                if criterion == 'production type':
+                    tmp['Production Type'] = newVaccinationProductionTypeOrder
+                elif criterion == 'reason':
+                    tmp['Reason'] = ['Ring']
+                elif criterion == 'time waiting':
+                    tmp['Days Holding'] = ['Oldest', 'Newest']
+            tmp['Size'] = ['Largest', 'Smallest']
+            tmp['Direction'] = ['Outside-in', 'Inside-out']
+            plan.vaccination_priority_order = json.dumps(tmp)
 
             plan.save()
         # end of if useVaccination==True
@@ -1372,7 +1421,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         except AttributeError:
             vaccinationExtra = None
         try:
-            baselineCapacity = int( el.find( './baseline-vaccination-capacity' ).text )
+            baselineCapacity = int_dz( el.find( './baseline-vaccination-capacity' ).text )
         except AttributeError:
             baselineCapacity = None
 

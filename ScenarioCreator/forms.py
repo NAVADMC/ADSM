@@ -6,7 +6,7 @@ All forms now have their "submit" button restored and you can choose custom layo
 
 from floppyforms.__future__ import ModelForm
 from django.forms.models import inlineformset_factory
-from crispy_forms.bootstrap import TabHolder, Tab, AppendedText, AppendedPrependedText, PrependedAppendedText, PrependedText
+from crispy_forms.bootstrap import TabHolder, Tab, AppendedText, PrependedAppendedText, PrependedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
 from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple, CheckboxInput, TextInput
@@ -16,6 +16,9 @@ import os
 
 class FloatInput(NumberInput):
     template_name = 'floppyforms/number.html'
+
+class HiddenCheckbox(CheckboxInput):
+    template_name = 'floppyforms/HiddenCheckbox.html'
 
 
 class AddOrSelect(Select):
@@ -46,19 +49,17 @@ def submit_button():
     </ul>
     {% endif %}
 
-    <div class="buttonHolder">
-        {% if outputs_exist %}
-            <button type="submit" class="btn btn-danger btn-save" id="submit-id-submit">Delete Results and Apply changes</button>
-        {% else %}
-            <button type="button" class="btn btn-default btn-cancel" id="id-cancel">Cancel</button>
-            <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled>Apply</button>
-        {% endif %}
-        {% if backlinks %}
-            <button type="submit" disabled class="btn btn-danger">Remove References before Deleting</button>
-        {% elif deletable %}
-            <a href="#" data-delete-link="{{deletable}}" class="btn btn-danger">Delete</a>
-        {% endif %}
-    </div>
+    {% if outputs_exist %}
+        <button type="submit" class="btn btn-danger btn-save" formnovalidate id="submit-id-submit">Delete Results and Apply changes</button>
+    {% else %}
+        <button type="button" class="btn btn-default btn-cancel" id="id-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-save" formnovalidate id="submit-id-submit" disabled>Apply</button>
+    {% endif %}
+    {% if backlinks %}
+        <button type="submit" disabled class="btn btn-danger">Remove References before Deleting</button>
+    {% elif deletable %}
+        <a href="#" data-delete-link="{{deletable}}" class="btn btn-danger">Delete</a>
+    {% endif %}
     """
     return ButtonHolder(HTML(edit_buttons))
 
@@ -108,6 +109,15 @@ class ProbabilityFunctionForm(BaseForm):
         exclude = []
         widgets = {'graph': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
+    def clean(self):
+        cleaned_data = super(ProbabilityFunctionForm, self).clean()
+        for field in ProbabilityFunction._meta.fields:
+            used_in = re.split(r": |, |\.", field.help_text)  # It's important that "Gaussian" doesn't match "Inverse Gaussian"
+            mentioned = cleaned_data.get('equation_type') in used_in
+            empty = cleaned_data.get(field.name) is None
+            if mentioned and empty:
+                self.add_error(field.name, ValidationError("The field " + str(field.verbose_name) + " is required."))
+
 
 class RelationalPointForm(BaseForm):
     class Meta(object):
@@ -137,6 +147,26 @@ class RelationalFunctionForm(BaseForm):
 
 
 class ControlMasterPlanForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            'name',
+            HTML(r"<h2>Global Destruction settings</h2>"),
+            HTML(r"<p>Parameters are not used if Destruction is turned off in the control protocol</p>"),
+            'destruction_program_delay',
+            'destruction_capacity',
+            'destruction_priority_order',
+            'destruction_reason_order',
+            HTML(r"<h2>Global Vaccination settings</h2>"),
+            HTML(r"<p>Parameters are not used if Vaccination is turned off in the control protocol</p>"),
+            'vaccination_capacity',
+            'restart_vaccination_capacity',
+            'vaccination_priority_order',
+            'vaccinate_retrospective_days',
+        )
+        super(ControlMasterPlanForm, self).__init__(*args, **kwargs)
+
+
     class Meta(object):
         model = ControlMasterPlan
         fields = 'name destruction_program_delay destruction_capacity destruction_priority_order destruction_reason_order'.split()
@@ -170,7 +200,7 @@ class DiseaseProgressionAssignmentForm(BaseForm):
         model = DiseaseProgressionAssignment
         exclude = []
         widgets = {'production_type': FixedSelect(),
-                   'progression': AddOrSelect(attrs={'data-new-item-url': '/setup/DiseaseProgression/new/'})}
+                   } #progression should NOT be an AddOrSelect
 
 
 class ControlProtocolForm(BaseForm):
@@ -181,7 +211,7 @@ class ControlProtocolForm(BaseForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.layout = Layout(
             'name',
-            HTML('<script src="{{ STATIC_URL }}js/control-protocol.js"></script>'),
+            # HTML('<script src="{{ STATIC_URL }}js/control-protocol.js"></script>'),
             TabHolder(
                 Tab('Detection',
                     'use_detection',
@@ -256,82 +286,12 @@ class ControlProtocolForm(BaseForm):
                     'cost_of_vaccination_baseline_per_animal',
                     'vaccination_demand_threshold',
                     'cost_of_vaccination_additional_per_animal',
-                    )
+                    ),
             )
         )
         super(ControlProtocolForm, self).__init__(*args, **kwargs)
-        
-    def clean(self):
-        cleaned_data = super(ControlProtocolForm, self).clean()
-        #TODO: remove this duplication (above) by building both behaviors off the same list
-        sections = {'use_detection': ['detection_probability_for_observed_time_in_clinical',
-                                      'detection_probability_report_vs_first_detection',
-                                      'detection_is_a_zone_trigger',
-                                      ],
-                    'use_tracing': ['trace_direct_forward',
-                                    'trace_direct_back',
-                                    'direct_trace_success_rate',
-                                    'direct_trace_period',
-                                    'trace_indirect_forward',
-                                    'trace_indirect_back',
-                                    'indirect_trace_success',
-                                    'indirect_trace_period',
-                                    'trace_result_delay',
-                                    'direct_trace_is_a_zone_trigger',
-                                    'indirect_trace_is_a_zone_trigger',
-                                    ],
-                    'use_testing': ['test_direct_forward_traces',
-                                    'test_indirect_forward_traces',
-                                    'test_direct_back_traces',
-                                    'test_indirect_back_traces',
-                                    'test_specificity',
-                                    'test_sensitivity',
-                                    'test_delay',
-                                    ],
-                    'use_exams': ['examine_direct_forward_traces',
-                                  'exam_direct_forward_success_multiplier',
-                                  'examine_indirect_forward_traces',
-                                  'exam_indirect_forward_success_multiplier',
-                                  'examine_direct_back_traces',
-                                  'exam_direct_back_success_multiplier',
-                                  'examine_indirect_back_traces',
-                                  'examine_indirect_back_success_multiplier',
-                                  ],
-                    'use_destruction': ['destruction_is_a_ring_trigger',
-                                        'destruction_ring_radius',
-                                        'destruction_is_a_ring_target',
-                                        'destroy_direct_forward_traces',
-                                        'destroy_indirect_forward_traces',
-                                        'destroy_direct_back_traces',
-                                        'destroy_indirect_back_traces',
-                                        'destruction_priority',
-                                        ],
-                    'use_vaccination': ['vaccinate_detected_units',
-                                        'minimum_time_between_vaccinations',
-                                        'days_to_immunity',
-                                        'vaccine_immune_period',
-                                        'trigger_vaccination_ring',
-                                        'vaccination_ring_radius',
-                                        'vaccination_priority',
-                                        ],
-                    'use_cost_accounting': ['cost_of_destruction_appraisal_per_unit',
-                                            'cost_of_destruction_cleaning_per_unit',
-                                            'cost_of_euthanasia_per_animal',
-                                            'cost_of_indemnification_per_animal',
-                                            'cost_of_carcass_disposal_per_animal',
-                                            'cost_of_vaccination_setup_per_unit',
-                                            'cost_of_vaccination_baseline_per_animal',
-                                            'vaccination_demand_threshold',
-                                            'cost_of_vaccination_additional_per_animal',
-                                            ],
-                    'use_': [],
-                    }
-        for trigger_switch, fields in sections.items():
-            if cleaned_data.get(trigger_switch):
-                for field in fields:
-                    if cleaned_data.get(field) is None:
-                        self.add_error(field, ValidationError(field + " must not be blank!"))
-        
+
+
     class Meta(object):
         model = ControlProtocol
         exclude = []
@@ -348,6 +308,13 @@ class ControlProtocolForm(BaseForm):
                    'examine_indirect_back_success_multiplier': FloatInput(),
                    'test_specificity': FloatInput(),
                    'test_sensitivity': FloatInput(),
+                   'use_detection': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_tracing': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_testing': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_exams': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_destruction': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_vaccination': HiddenCheckbox(attrs={'hidden':'hidden'}),
+                   'use_cost_accounting': HiddenCheckbox(attrs={'hidden':'hidden'}),
                    }
 
 
@@ -386,14 +353,13 @@ class IndirectSpreadForm(BaseForm):
             'movement_control',
         )
         super(IndirectSpreadForm, self).__init__(*args, **kwargs)
+        self.fields['subclinical_animals_can_infect_others'].label = 'Subclinical units can infect others'
 
     class Meta(object):
         model = IndirectSpread
         exclude = ['_disease']
         widgets = {'contact_rate': FloatInput(),
-                   'infection_probability': NumberInput(attrs={'data-visibility-context': 'use_within_unit_prevalence',
-                                                               'data-visibility-flipped': 'true',
-                                                               'step': 'any'}),
+                   'infection_probability': FloatInput(),  # visibility settings acts differently from DirectSpread.infection_probability
                    'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
@@ -416,6 +382,8 @@ class DirectSpreadForm(BaseForm):
             'movement_control',
         )
         super(DirectSpreadForm, self).__init__(*args, **kwargs)
+        self.fields['latent_animals_can_infect_others'].label = 'Latent units can infect others'
+        self.fields['subclinical_animals_can_infect_others'].label = 'Subclinical units can infect others'
         if not Disease.objects.get().use_within_unit_prevalence:
             self.fields['infection_probability'].widget.attrs['required'] = 'required'  # only required when the field is visible, enforced by browser
 
@@ -472,11 +440,11 @@ class OutputSettingsForm(BaseForm):
             'iterations',
             'stop_criteria',
             'days',
-            HTML(r"<h4>Cost Tracking</h4>"),
+            HTML(r"<h2>Cost Tracking</h2>"),
             'cost_track_destruction',
             'cost_track_vaccination',
             'cost_track_zone_surveillance',
-            HTML(r"<h4>Supplemental Outputs</h4>"),
+            HTML(r"<h2>Supplemental Outputs</h2>"),
             'save_daily_unit_states',
             'save_daily_events',
             'save_daily_exposures',
@@ -541,7 +509,7 @@ class ZoneEffectAssignmentForm(BaseForm):
         exclude = ['zone', 'production_type']
         widgets = {'zone': HiddenInput(),
                    'production_type': HiddenInput(),
-                   'effect': AddOrSelect(attrs={'data-new-item-url': '/setup/ZoneEffect/new/'})}
+                   }  # 'effect' should NOT be an AddOrSelect
 
 
 ## V3.3 Vaccination Triggers ##

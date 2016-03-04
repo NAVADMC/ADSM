@@ -1,9 +1,9 @@
 import os
 import shutil
 import zipfile
+import psutil
 
 from django.shortcuts import redirect
-import psutil
 
 from ADSMSettings.models import SimulationProcessRecord, SmSession
 from ADSMSettings.utils import workspace_path, supplemental_folder_has_contents, scenario_filename
@@ -83,4 +83,3 @@ def delete_all_outputs():
     for model in [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]:
         model.objects.all().delete()
     SmSession.objects.all().update(iteration_text = '', simulation_has_started=False)  # This is also reset from open_scenario
-

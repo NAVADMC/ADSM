@@ -96,4 +96,12 @@ EXTRA_DIST = radius_0.xml radius_0_w_vars.xml radius_0point5.xml radius_1.xml \
  triggerfirstonly_2detect_16units_2rings.sqlite3 \
  triggerrestartonly_2detect_16units_2rings.sqlite3 \
  triggerfirst_2detect_triggerrestart_1detect_16units_2rings.sqlite3 \
- vacc_request_from_exam_cancellation_from_test.xml
+ vacc_request_from_exam_cancellation_from_test.xml \
+ circle3_ring2-4_10units_2cols.sqlite3 \
+ ring3-4_ring1-2_10units_2cols.sqlite3 \
+ prot_ring_punch_holes_1_14units_2rings_overlap.sqlite3 \
+ prot_ring_punch_holes_2_14units_2rings_overlap.sqlite3 \
+ prot_ring_punch_holes_3_expiry_21units_3rings_overlap.sqlite3 \
+ prot_and_supp_rings_15units_line.sqlite3 \
+ prot_ring_not_punch_holes_in_supp_ring_15units_line.sqlite3 \
+ vacc_readded_same_day_14units_2rings_overlap.sqlite3

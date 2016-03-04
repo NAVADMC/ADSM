@@ -1,5 +1,9 @@
 """URLs is entirely procedural based on the contents of models.py. This has the advantage that urls automatically update as the models change or are renamed."""
 
+
+"""NEVER MODIFY THIS FILE
+Instead, modify the 'makeresultsurls' management command."""
+
 from django.conf.urls import patterns, url
 
 urlpatterns = patterns('', url('^$', 'Results.views.results_home'),
@@ -13,6 +17,7 @@ urlpatterns = patterns('', url('^$', 'Results.views.results_home'),
          url('^Inputs/$', 'Results.views.back_to_inputs'),
          url('^simulation_status.json$', 'Results.views.simulation_status'),
          url('^abort_simulation$', 'Results.utils.abort_simulation'),
+         url('^SummaryCSV/$', 'Results.views.summary_csv'),
          url('^OutputBaseModel/$',                          'Results.views.model_list'),
          url('^OutputBaseModel/prefix/(?P<prefix>\w{1,4})/$',  'Results.views.filtered_list'),
          url('^DailyReport/$',                          'Results.views.model_list'),

@@ -4,7 +4,7 @@ from math import sqrt
 from ScenarioCreator.views import filtering_params
 from ScenarioCreator.function_graphs import HttpFigure, rstyle
 
-
+import random
 from time import time
 from matplotlib import gridspec
 from itertools import chain
@@ -18,6 +18,7 @@ from matplotlib.figure import Figure
 from ScenarioCreator.models import Zone, ProductionType, Unit
 from Results.summary import list_of_iterations
 from Results.models import DailyControls, DailyByProductionType, DailyByZone, DailyByZoneAndProductionType
+from Results.inferno import inferno_r
 
 
 # def matplotd3(request):
@@ -52,27 +53,44 @@ def population_png(request, width_inches=8, height_inches=8):
     params = filtering_params(request)
     for key, value in params.items():  # loops through params and stacks filters in an AND fashion
         query_filter = query_filter & Q(**{key: value})
-    
+
     start_time = time()
     #dark_and_light = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928', ]
-    dark_colors = ['#1f78b4', '#33a02c','#e31a1c', '#ff7f00','#6a3d9a', '#b15928']
+    # dark_colors = ['#1f78b4', '#33a02c','#e31a1c', '#ff7f00','#6a3d9a', '#b15928']
     light_colors = ['#a6cee3', '#b2df8a', '#fb9a99', '#fdbf6f', '#cab2d6'] # , '#ffff99']
     fig = Figure(figsize=(width_inches, height_inches), frameon=True, tight_layout=True)  # Issue #168 aspect ratio doesn't adjust currently
     ax = fig.add_subplot(1, 1, 1, axisbg='#FFFFFF')
-    size = min(100, 3000 / sqrt(Unit.objects.count()))
-    for index, production_type in enumerate(ProductionType.objects.all()):
-        if 'production_type__name' not in params or params['production_type__name'] == production_type.name:
-            units = Unit.objects.filter(Q(production_type=production_type) & query_filter)
-            if units.count(): # there needs to be at least some matching units
-                longitude, latitude = zip(*[(u.latitude, u.longitude) for u in units])
-                ax.scatter(latitude,
-                           longitude,
-                           marker='s',
-                           linewidths=0.005,  # for some reason won't draw if linewidths = 0
-                           s=size,
-                           color=light_colors[index % len(light_colors)],
-                           label=production_type.name)
-        
+    unit_count = Unit.objects.count()
+    size = min(100, 3000 / sqrt(unit_count))
+
+    max_query_size = 900  # IMPORTANT: number of ids filtered cannot exceed 1,000 in SQLlite
+    sample_size = 10000  # number I actually want
+    sample = Q()
+    minimum_id = Unit.objects.all().aggregate(Min('id'))['id__min']
+
+    # This outer loop is a fix for max_query_size SQLite limitations
+    for number_of_samples_processed in range(0, min(sample_size, unit_count), max_query_size):
+        if unit_count > sample_size:
+            winning_numbers = [random.randint(minimum_id, minimum_id + unit_count - 1) for rnd in range(max_query_size)]
+            sample = Q(id__in=winning_numbers)
+
+        for index, production_type in enumerate(ProductionType.objects.all()):
+            if 'production_type__name' not in params or params['production_type__name'] == production_type.name:
+                units = Unit.objects.filter(Q(production_type=production_type) & query_filter & sample).values('latitude', 'longitude')
+                if units.count():  # there needs to be at least some matching units
+                    longitude, latitude = zip(*[(u['latitude'], u['longitude']) for u in units])
+                    options = {'marker': 's',
+                               'linewidths': 0.005,  # for some reason won't draw if linewidths = 0
+                               's': size,
+                               'color': light_colors[index % len(light_colors)],
+                               'label': production_type.name
+                               }
+                    if number_of_samples_processed > 0:
+                        del options['label']  # prevents repeated label legend
+                    ax.scatter(latitude,
+                               longitude,
+                               **options)
+
     infected = Unit.objects.all().exclude(initial_state='S')
     if infected:
         longitude, latitude = zip(*[(u.latitude, u.longitude) for u in infected])
@@ -218,6 +236,9 @@ def single_iteration_line_graph(iteration, field_name, model_name, model, time_s
 
     if iteration is None:
         time_graph.legend().remove()
+    else:
+        time_graph.legend(loc=(-.55,-.14), fontsize=10)
+
     
     # Manually scale zone graphs based on the Max for any zone (universal value)
     if "Zone" in model_name:
@@ -236,15 +257,14 @@ def TwoD_histogram(fig, gs, time_graph, time_series):
     days = list(range(1, len(time_series[0]) + 1))  # Start with day index
     x = days * len(time_series)  # repeat day series for each set of data (1 per iteration)
     y = list(chain(*time_series))
-    hot = plt.get_cmap('hot')
     norm = LogNorm()
     time_graph.hist2d(x, y,
                       bins=[len(days), max(5, min(max(*y), 300))],
                       # 300 should really be the number of pixels in the draw area (I don't know how to fetch that)
                       norm=norm,
-                      cmap=hot)
+                      cmap=inferno_r)
     color_bar = fig.add_subplot(gs[0], )
-    ColorbarBase(cmap=hot, ax=color_bar, norm=norm)
+    ColorbarBase(cmap=inferno_r, ax=color_bar, norm=norm)
     return HttpFigure(fig)
 
 
@@ -257,17 +277,9 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
     
     explanation, title = construct_title(field_name, iteration, model, zone)
 
-    fig = plt.figure(figsize=(7, 4), dpi=100, tight_layout=True, facecolor='w')
-    matplotlib.rcParams.update({'font.size': 10})
-    gs = gridspec.GridSpec(1, 3, width_ratios=[.2, 6, 1])
-    time_graph = fig.add_subplot(gs[1], title=title)
-    time_graph.set_xlabel('Days')
-    boxplot_graph = fig.add_subplot(gs[2], sharey=time_graph, )  # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
-    # boxplot_graph.locator_params(nbins=4)  # limiting the number of y-axis ticks was causing an intermittent crash.  try/except this if you want it
-    plt.setp(boxplot_graph.get_yticklabels(), visible=False)
-    for axis in [time_graph, boxplot_graph]:
-        rstyle(axis)
-    time_graph.grid(False)
+    use_legend = bool(iteration)
+
+    boxplot_graph, fig, gs, time_graph = create_figure_with_boxplot(title, use_legend)
 
     boxplot_raw = collect_boxplot_data(time_series, explanation)  # This has already been padded
     boxplot_data = pd.DataFrame(pd.Series(boxplot_raw), columns=['Last Day'] if field_is_cumulative(explanation) else ['Distribution'])
@@ -280,4 +292,23 @@ def graph_field_png(request, model_name, field_name, iteration='', zone=''):
         return single_iteration_line_graph(iteration, field_name, model_name, model, time_series, columns, time_graph, boxplot_graph, fig)
 
     return TwoD_histogram(fig, gs, time_graph, time_series)
+
+
+def create_figure_with_boxplot(title, use_legend):
+    fig = plt.figure(figsize=(7 + 3 * use_legend, 4), dpi=100, tight_layout=True, facecolor='w')
+    matplotlib.rcParams.update({'font.size': 10})
+    gs = gridspec.GridSpec(1, 3, width_ratios=[3 if use_legend else .2, 6, 1])
+    # gs = gridspec.GridSpec(1, 3, width_ratios=[.2, 6, 1])
+    time_graph = fig.add_subplot(gs[1], title=title, axisbg='#EEEEEE')
+    time_graph.set_xlabel('Days')
+    boxplot_graph = fig.add_subplot(gs[2],
+                                    sharey=time_graph, axisbg='#EEEEEE')
+    # http://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one
+    # boxplot_graph.locator_params(nbins=4)  # limiting the number of y-axis ticks was causing an intermittent crash.
+    # try/except this if you want it
+    plt.setp(boxplot_graph.get_yticklabels(), visible=False)
+    for axis in [time_graph, boxplot_graph]:
+        rstyle(axis)
+    time_graph.grid(False)
+    return boxplot_graph, fig, gs, time_graph
 

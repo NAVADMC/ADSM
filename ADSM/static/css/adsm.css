@@ -5,7 +5,8 @@
     background-color:white;
 }*/
 
-.row {
+.row,
+.full-width {
     width: 100%;
 }
 
@@ -83,6 +84,7 @@ select {
     padding-right: 20px;
     padding-left: 5px;
     background-color: #fff;
+    max-width:  100%;
 }
 select:required, input:required, textarea:required {
     background-color: rgba(244, 230, 0, .2);
@@ -121,8 +123,14 @@ input[type="number"], input[type="text"] {
     height:20px;
     padding: 0 0 0 5px;
 }
+input[type="number"]{
+    max-width: 130px;
+}
 input[type="number"]:hover {
     padding: 1px 0 0 6px;
+}
+input[type="number"]:required:hover {
+    padding: 0 0 0 4px;
 }
 input[type="text"]:hover {
     padding-left: 6px;
@@ -145,12 +153,19 @@ input[type="file"]:focus {
 }
 textarea {
     padding: 5px 10px;
+    width: 100%;
+    height: 70px;
+    max-width: 500px;
 }
 textarea:hover {
     padding-left: 10px;
 }
 input[type="checkbox"] {
     margin-top: 1px;
+}
+.checkbox {
+    margin-bottom: 18px;
+    margin-left: 20px;
 }
 /*-------------------------------------------------------------*/
 /*-----readonly form styling-----*/
@@ -189,10 +204,18 @@ form.editable input{
     pointer-events: all;
 }
 .help-block {  
-    font-weight: 400;
+    font-weight: 200;
     display: block;
     height: auto;
     overflow: hidden; /* check boxes are bold from mixins.less and I think it looks better with definitions*/
+}
+
+.hide-help-text .help-block {
+    display: none;
+}
+
+.probability-form .help-block { /*Fixes #663 by hiding all help blocks under probability functions*/
+    display: none;
 }
 
 .hide-help {
@@ -305,7 +328,7 @@ header .filename {
     margin-top: 1px;
 }
 .scenario-status p{
-    font-size: 12px;
+    font-size: 18px;
     font-style: italic;
     font-weight: 300;
 }
@@ -316,8 +339,14 @@ header .filename {
     color: white;
     position: fixed;
     top: 25px;
-    left: 83%;
+    right: 3%;
     z-index: 130;
+    /* font-size: 18px !important; */
+}
+
+input#save_scenario {
+    font-size: 18px;
+    color: #9BD9D6;
 }
 
 header .buttonHolder{
@@ -400,9 +429,11 @@ body>nav {
 /*-----3-column layout-----*/
 /*-------------------------------------------------------------*/
 #main-panel {
-    /* float:none; */
-    margin-left: 238px;
-    width: calc(100vw - 324px);
+    width: calc(100vw - 200px - 50px);
+    padding-left: 0;
+    margin-right: 0;
+    margin-left: 200px;
+    z-index: 0;
 }
 
 .layout-panel {
@@ -411,7 +442,7 @@ body>nav {
     height: calc(100vh - 75px);
     overflow-y: auto;
     overflow-x: visible;
-    padding: 0;
+    padding: 0 0 61px 0; /*Fix for #693 and progress bar blocking people's view*/
     position: relative;
 }
 #center-panel,
@@ -435,11 +466,12 @@ body>nav {
     width: 100%;
     margin-left: 0;
     margin-right: 0;
-    max-width: 400px;
+    max-width: 500px;
 }
 #left-panel {
-    width:calc(16.667vw + 25px);
+    width: calc(33.333vw - 200px + 25px);
     padding-right: 25px;
+    margin-left:  200px;
 }
 #left-panel .fragment h1:first-of-type,
 section#left-panel h1:first-of-type,
@@ -471,14 +503,21 @@ ul {
     list-style: none;
 }
 
+
 /*---- 2nd-to-3rd-column linking ----*/
 
 #center-panel .control-group {
     position:relative;
 }
-#center-panel .active {
+#center-panel .active:not(.tab-pane) {
     border: 2px solid #cec7c0;
 }
+
+.nav > li > a {
+    padding: 10px 10px;
+    border: 1px solid #E7E7E7;
+}
+
 #center-panel .active_linking:after { /*--- right-linking line inside container --*/
     content:"";
     position: absolute;
@@ -643,7 +682,7 @@ ul {
 /*-------------------------------------------------------------*/
 /*-----file panel-----*/
 /*-------------------------------------------------------------*/
-#file_panel, #file_panel #file_list a{
+#file_panel, #file_panel .file_list a{
     background-color: #606060;
     color: rgb(236, 236, 236);
     padding: 1px;
@@ -690,6 +729,19 @@ ul {
 /*-----settings panel-----*/
 /*-------------------------------------------------------------*/
 #settings_panel{}
+#settings_panel hr{
+    margin: 15px 0 15px 0;
+}
+#settings_panel hr:last-of-type {
+    margin-top: 0;
+}
+#settings_panel input[type="checkbox"]{
+    margin-right: 5px;
+    margin-bottom: 15px;
+}
+#settings_panel .btn {
+
+}
 
 /*-------------------------------------------------------------*/
 /*-----population panel-----*/
@@ -712,28 +764,42 @@ ul {
     overflow:hidden;
     padding: 4px 0 0 10px;
 }
-#population_panel ul li:hover {
+#population_panel li:hover {
     background-color: #ebebeb;
+}
+#population_panel.add-pt ul li:hover, #population_panel.add-pt ul li a:hover {
     cursor: url("../icons/add_cursor.png"), auto;
 }
-#population_panel ul li:hover, #population_panel ul li a:hover {
-    cursor: url("../icons/add_cursor.png"), auto;
+.productiontypelist option {
+    cursor: url("../icons/remove_cursor.png"), auto;
+}
+.pt-added {
+    color: darkgray;
+    cursor: url("../icons/remove_cursor.png"), auto !important;
 }
 #population_panel a:focus {
     background-color: transparent;
     border: none;
     outline: 0;
 }
-#population_panel ul li a, #population_panel ul li span:first-of-type {
-    width: 25%;
-    min-width: 95px;
+.population-super-column {
+    width: calc(100% - 130px);
+    /* min-width: 95px; */
     display: inline-block;
     padding-right: 10px;
     overflow:hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    color: #606060;
-    text-decoration: none;
+    text-align: right;
+}
+.population-super-column * {
+    display: inline-block;
+}
+.unit-count {
+    width: 80px;
+    margin-left: 20px;
+    float: none;
+    display: inline-block;
 }
 #population_panel input {
     background-color: rgba(244, 230, 0, .2);
@@ -811,6 +877,12 @@ ul {
     width: 100%;
     height: 42px;
 }
+
+.modal-body .button-footer {
+    bottom: -50px;
+    right: 0;
+}
+
 .edit-button-holder{
     position: relative;
     left: 0px;
@@ -828,12 +900,15 @@ ul {
     transition: bottom .4s ease;
 }
 .edit-button-holder .overwrite-button.reveal {
+    /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 1);
 }
 .edit-button-holder .copy-button.reveal {
+    /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 2);
 }
 .edit-button-holder .btn-cancel.reveal {
+    /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 3);
 }
 
@@ -849,6 +924,7 @@ ul {
     max-height: calc(100vh - 126px);
     overflow-y: auto;
     direction: rtl;
+    z-index: 1;
 }
 #setupMenu-before {
     content:"";
@@ -879,7 +955,7 @@ ul {
     border-top:1px solid #eeeeee;
 }
 
-.tab-list {
+#setupMenu h2, #setupMenu h3, #setupMenu h4 {
     margin-top: 0;
     margin-bottom: 0; /* These are meant to stack */
     overflow: hidden;
@@ -888,7 +964,7 @@ ul {
     /*width:170px;*/
 }
 
-.tab-list a,
+#setupMenu a,
 #priorities li {
     color: #606060;
     display:block;
@@ -903,7 +979,7 @@ ul {
     direction: ltr;
 }
 
-.tab-list a:before {
+#setupMenu a:before {
     content:"";
     display:block;
     width:100%;
@@ -914,11 +990,11 @@ ul {
     left:-5px;
 }
 
-.tab-list:hover{
+#setupMenu a:hover{
     background-color:#eeeeee;
 }
 
-.tab-list.active:hover{
+#setupMenu a.active:hover{
     background-color:#606060;
     color: white !important; /*ID selector was more specific*/
 }
@@ -927,7 +1003,7 @@ ul {
     padding-left:30px;
 }
 
-.tab-list a.active {
+#setupMenu a.active {
     background-color: #606060;
     margin-left:0;
     color:white;
@@ -937,13 +1013,15 @@ ul {
     margin-right: 0;
 }
 
-.tab-list span {
+#setupMenu span {
     width: 5px;
     height: 35px;
     -webkit-border-radius:0 2px 2px 0;
 }
 /*--------- right border on results nav menu -----*/
-.tab-list:before {
+#setupMenu h2:before,
+#setupMenu h3:before,
+#setupMenu h4:before {
     content: "";
     width: 5px;
     height: 37px;
@@ -957,14 +1035,14 @@ ul {
     border-radius: 0 2px 2px 0;
 }
 
-.incomplete {
+#setupMenu .incomplete {
     font-weight: 600;
     font-style: italic;
     color: #999;
     background-color: #f6da40;
 }
 
-.completed {
+#setupMenu .completed, .completed {
     background-color: #68be5e;
 }
 
@@ -1174,7 +1252,7 @@ ul {
 
 .btn-primary,
 .btn-unsaved {
-    background-color: #3577b1;
+    background-color: #3577b1 !important;
     transition: all .2s ease;
     min-width: 80px;
 }
@@ -1207,11 +1285,6 @@ section .btn-primary:focus,
 
 .btn-danger:hover{
     background-color:#e0383e;
-}
-
-textarea {
-    width: 400px;
-    height: 70px;
 }
 
 #id_description {
@@ -1296,6 +1369,14 @@ select {
     opacity: .3;
     -webkit-animation: Placeholder-wash .98s infinite;
 }
+.placeholder#monitor {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid #ebebeb;
+    padding-bottom: 15px;
+}
 
 @-webkit-keyframes Placeholder-wash {
     0% {left: 119px;
@@ -1305,7 +1386,7 @@ select {
 }
 /**********************/
 
-#file_list li {
+.file_list li {
     font-size: 13px;
     line-height:27px;
     text-decoration: none;
@@ -1313,20 +1394,20 @@ select {
     position: relative;
 }
 
-#file_list {
+.file_list.compact li {
+    line-height: 18px;
+}
+
+.file_list {
     list-style: none;
     margin-bottom: 15px;
     max-width: 600px;
     position: relative;
 }
 
-#file_list a {
+.file_list a {
     color: #404040;
     text-decoration: none;
-}
-
-#file_list a:hover {
-    color: #7cb9ff;
 }
 
 .file-buttons {
@@ -1335,7 +1416,7 @@ select {
     top: 0;
 }
 
-#file_list .icon {
+.file_list .icon {
     margin-top: 5px;
     margin-left: 15px;
 }
@@ -1343,7 +1424,7 @@ select {
 .copy-icon,
 .open-button {
     margin-top: 5px;
-    width: 15px;
+    width: 15px !important; /*It isn't a valid animation without this width*/
     height: 18px;
     margin-right: 10px;
     display:block;
@@ -1360,8 +1441,8 @@ select {
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
 .copy-icon:hover,
 .copy-icon:focus {
-    background-position: 15px  0;
-    background-image: url('../icons/copy_sprite.png');
+    background-position: 15px  0 !important;
+    background-image: url('../icons/copy_sprite.png') !important; /*It's not an icon without this background*/
     outline: none;
     background-color: transparent;
 }
@@ -1372,21 +1453,95 @@ select {
     /*background-position: 0 0;*/
 }
 
+.warning-icon {
+    background-image: url('../icons/warning-triangle.png') !important;/*It's not an icon without this background*/
+    background-size: 17px 15px;
+    margin-top: 3px;
+    margin-bottom: 0px;
+    width: 17px !important;
+    height: 15px;
+    margin-right: 10px;
+    display: inline-block;
+    /*float:right;*/
+    opacity: 1;
+}
+
 /*noinspection CssOptimizeSimilarProperties,CssOptimizeSimilarProperties, CssUnknownTarget*/
 .delete-icon {
     background-image: url('../icons/delete_sprite.png');
     background-repeat-y: no-repeat;
-    background-position: 0 2px;
+    background-position: 0 0;
 }
 .delete-icon:hover,
 .delete-icon:focus {
-    background-position: 15px 2px ;
-    background-image: url('../icons/delete_sprite.png');
+    background-position: 15px 0 !important;
+    background-image: url('../icons/delete_sprite.png') !important; /*It's not an icon without this background*/
     background-repeat-y: no-repeat;
     outline: none;
     background-color: transparent;
 }
 
+.productiontypes-header {
+    height: 18px;
+    width: 20px;
+    margin-left: 10px;
+    display:  inline-block;
+}
+
+.green-dot {
+	display: inline-block;
+	border: 2px solid rgba(102, 102, 102, 0.39);
+	border-radius: 50%;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
+	filter: alpha(opacity=60);
+	opacity: 1;
+	-webkit-box-shadow: 0 0 1px 0px rgb( 255, 255, 255);
+	box-shadow: 0 0 1px 0px rgb( 255, 255, 255);
+	width: 12px;
+	height: 12px;
+	z-index: 86;
+	-webkit-transition: background-color .5s ease-in-out;
+	-moz-transition: background-color .5s ease-in-out;
+	-o-transition: background-color .5s ease-in-out;
+	-ms-transition: background-color .5s ease-in-out;
+	transition: background-color .5s ease-in-out;
+	padding-left: 0px;
+}
+
+.green-dot.filled {
+	background-color: #66bc5d;
+}
+
+.progression-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position-x: -2px;
+    background-image: url('../icons/progression-icon.png')
+}
+.spread-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position-x: 0px;
+    background-image: url('../icons/spread-icon.png')
+}
+.control-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position-x: -1px;
+    background-image: url('../icons/control-icon.png')
+}
+.zone-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position-x: -2px;
+    background-image: url('../icons/zone-icon.png')
+}
+
+
+
+
+
+/**********************/
 input[type=file], button {
     display: inline;
 }
@@ -1395,36 +1550,24 @@ input[type=file], button {
     min-width: 400px;
 }*/
 
-#file_list .addNew {
-    border-bottom: none;
-}
 
-#file_list .addNew a{
-    color: #3577b1;
-    opacity: .8;
-    transition: opacity .2s ease;
-}
-
-#file_list .addNew a:hover {
-    opacity: 1;
-}
-#file_list .defined{
+.file_list .defined{
     border-radius: 2px;
     margin-bottom: 2px;
 }
-#file_list .defined:hover {
+.file_list .defined:hover {
     background: rgba(206, 199, 192, .25);
 }
-#file_list li.focused {
+.file_list li.focused {
     background: rgba(206,199,192,.5);
     box-shadow: inset 0 0 0 1px #cec7c0;
     border-bottom: 1px solid transparent;
     position:relative;
 }
-#file_list li.focused:hover {
+.file_list li.focused:hover {
     background: rgba(206,199,192,.5);
 }
-#file_list .defined.focused:after {
+.file_list .defined.focused:after {
     content:"";
     width: 25px;
     height: 2px;
@@ -1434,35 +1577,37 @@ input[type=file], button {
     display: block;
     background-color: #cec7c0;
 }
-#file_list li.focused a{
+.file_list li.focused a{
     opacity: 1;
     color: black;
 }
-#file_list .defined a.defined_name:hover {
+.file_list .defined a.defined_name:hover {
     color: black;
 }
-#file_list .defined a.defined_name:focus,
-#file_list .defined a.defined_name:active {
+.file_list .defined a.defined_name:focus,
+.file_list .defined a.defined_name:active {
     background: transparent !important;
     border:none !important;
     outline:none !important;
 }
-#file_list .defined_wrapper {
+.file_list .defined_wrapper {
     white-space: nowrap;
     padding-right: 45px;
     position:relative;
 }
 .defined_name {
-    display: block;
+    display: inline-block;
     padding-left: 5px;
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* line-height: 20px; */
+    padding-top: 4px;
 }
 .defined_name:hover {
     cursor: default;
 }
-#file_list li:hover a{
+.file_list li:hover a{
     opacity: 1;
 }
 
@@ -1471,14 +1616,25 @@ input[type=file], button {
     top: 0;
     right: 0;
     margin-right: 5px;
-    opacity: .3;
+    opacity: .6;
 }
 .defined_wrapper .copy-icon {
     position: absolute;
     top: 0;
     right: 20px;
     margin-right: 5px;
-    opacity: .3;
+    opacity: 0.6;
+}
+
+.fat_checkbox,
+.defined_wrapper input[type="checkbox"].fat_checkbox {/*A little ridiculous overriding bootstrap*/
+    display: inline-block;
+    margin-left: 1px;
+    margin-right: 9px;
+}
+
+.nav-tabs { /*Hides the crispy forms tabs from the TabHolder*/
+    display: none;
 }
 /*-------------------------------------------------------------*/
 /*-----population.html-----*/
@@ -1527,6 +1683,9 @@ section#population_main_panel h1:first-of-type {
     float: left;
     margin-left: -15px;
     margin-top: -6px;
+}
+.map-fine-print {
+    font-size: 12px;
 }
 #refresh_map {
     position: absolute;
@@ -1590,7 +1749,7 @@ section#population_main_panel h1:first-of-type {
 
 #farm_list tbody{
     display: inline-block;
-    height: calc(100vh - 218px);
+    height: calc(100vh - 232px);
     overflow-y: auto;
     width: 100%;
     position: relative;
@@ -1716,10 +1875,10 @@ section#population_main_panel h1:first-of-type {
 }
 #farm_filter select {
     margin: 0;
-    width: 98px;
+    width: 129px;
 }
 #farm_filter input {
-    width: 60px;
+    width: 87px;
     height: 21px;
 }
 #farm_filter #production_type__name td:nth-child(2),
@@ -1819,7 +1978,7 @@ section#population_main_panel h1:first-of-type {
 }
 #edit_population {
     position: absolute;
-    top: calc(100vh - 172px);
+    top: calc(100vh - 187px);
     right: 25px;
     transition: opacity .2s ease
 }
@@ -1951,7 +2110,7 @@ th:hover .sortControls{
     color:#404040;
     font-weight: 600;
     display:block;
-    width: 100%;
+    width: calc(100% - 30px);
     padding-left: 5px;
 }
 
@@ -1961,6 +2120,7 @@ th:hover .sortControls{
     border: none;
     outline: 0;
     background: transparent;
+    background-repeat-y: no-repeat;
 }
 #left-panel .panel-group:not(:first-of-type) {
     border-top: 1px solid #ccc;
@@ -1982,11 +2142,6 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     cursor: pointer;
 }
 
-.relevant .selected, .highlight { /*column is relevant and user has selected the row for many-to many-widget.js*/
-    font-weight: 600;
-    background-color: #d7f5ff;
-}
-
 /*Disabled control fields: include text labels*/
 [disabled] {
     opacity: .5;
@@ -1996,49 +2151,99 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     opacity: .5;
     pointer-events: none;
 }
-
+/*-------------------------------------------------------------*/
+/*----- simulation progress bar -----*/
+/*-------------------------------------------------------------*/
 #sim_progress_and_button {
     position: fixed;
-    bottom: 0 ;
-    display: table;
-    margin-left: 280px;
+    bottom: 10px;
+    margin-left: 212px;
+    display: block;
+    height: 51px;
+    width: calc(100% - 212px);
+    border-top: 2px solid #606060;
+    border-bottom: 2px solid #606060;
+    z-index: 1;
+    background-color: white;
+}
+#running_message {
+    float: left;
+    display: block;
+    width: 175px;
+    background-color: #606060;
+    height: 100%;
+    color: white;
+    font-size: 18px;
+    font-style: italic;
+    font-weight: 300;
+    line-height: 50px;
+    padding-left: 10px;
 }
 
 #sim_progress_and_button .btn, #sim_progress_and_button .progress {
-    display: table-cell;
-    vertical-align: middle;
-    /*top: 50%;*/
-    /*transform: translateY(-50%);*/
 }
 
 #sim_progress_and_button .btn {
-    /*display: inline-block;*/
     width: 80px;
-    /*line-height: 20px;*/
     padding: 0;
-    margin: 0 5px 0 0;
     background-color: #ba3e44;
     color: white;
     font-size: 15px ;
-    /*font-family: Source Sans Semibold, sans-serif;*/
+    line-height: 50px;
     font-style: italic;
+    height: 100%;
+    margin: 0;
+    float:left;
 }
 
 #sim_progress_and_button .progress {
-    /*display: inline-block;*/
-    width: 923px;
+    width: 60%;
     margin: 0px;
+    float:left;
+    border-left: 2px solid #606060;
+    border-right: 2px solid #606060;
+    height: 100%;
+    border-radius: 0;
+    position: relative;
+}
+#sim_progress_and_button .progress:after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    box-shadow: inset 0 0 5px 0 rgba(0,0,0,.3);
+    position: absolute;
+}
+.simulation-progress {
+    background-color: #68be5e;
 }
 #iteration_text {
-    max-height: 20px;
+    height: 47px;
     overflow: auto;
-    width: 130px;
+    /* width: 30%; */
+    background: rgba(255, 255, 255, .9);
+    font-style: italic;
+    color: #606060;
+    line-height: 15px;
+    padding: 0 10px;
+}
+#iteration_text li {
+    margin-bottom: 3px;
 }
 
 .spacer {
     height: 100px;
 }
-
+@media screen and (max-width: 1200px) {
+    #running_message {
+        width: 140px;
+        font-size: 13px;
+        font-weight: 400;
+    }
+    #iteration_text {
+        width: calc(40vw - 220px);
+    }
+}
 
 /*-------------------------------------------------------------*/
 /*-----vaccination triggers-----*/
@@ -2049,7 +2254,6 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     box-shadow: inset 0 0 10px 0 rgba(0, 0, 0, .2);
     padding: 10px 20px;
 }
-
 .productiontypelist option, .grouplist option  {
     display:none;
     background-color: transparent;
@@ -2079,7 +2283,7 @@ select[multiple] {}
     padding: 5px 10px;
 }
 .productiontypelist:after {
-    content:"To add production types to the trigger click on a Type or Group f"
+    content:"To add production types to the trigger click on a Type in the Population Panel";
     white-space: pre-wrap;
     font-style: italic;
     color: #808080;
@@ -2105,23 +2309,239 @@ select[multiple] {}
 /*----------------------------------------------------*/
 /*----- Assign Disease Spread -----*/
 /*----------------------------------------------------*/
-.intro_text, #assign_spread_wrapper{
+.spread-grid-table {
+    margin-top: 87px;
+}
+.intro_text {
     padding: 0;
 }
 .intro_text, .intro_text p {
     color: #606060;
 }
-.m2mtable select, #all-interactions select {
-    max-width: 260px;
+.spread-grid-table span {
+    width: 67px;
+    height: 18px;
+    /* margin: 5px 0; */
+    /* background-color: #BDBDBD; */
 }
-#all-interactions {
-    width: calc(100% - 0px);}
+
+span.IndirectSpread {
+    margin: 3px 0;
+}
+
+.DirectSpread.assigned {
+    background-color: rgb(161, 134, 87);
+}
+
+.IndirectSpread.assigned {
+    background-color: rgb(146, 203, 170);
+}
+
+.AirborneSpread.assigned {
+    background-color: rgb(52, 192, 209);
+}
+
+.spread-cell {
+    border: solid 1px #B6B6B6;
+    margin: 0px;
+}
+
+.spread-grid-table td {
+    padding: 3px;
+}
+
+.spread-destinations {
+    white-space: nowrap;
+    /* overflow: hidden; */
+    /* text-overflow: ellipsis; */
+    max-width: 75px;/* Safari */
+    -webkit-transform: rotate(-56deg);/* Firefox */
+    -moz-transform: rotate(-45deg);
+    padding-left: 25px;
+    padding-top: 23px;
+}
+
+.spread-source {
+    text-align: right;
+}
+
+.spread-display-selector * {
+    display: inline-block;
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+.spread-display-selector input {
+    width: 26px;
+    height: 17px;
+    margin-top: 16px;
+    background: white;
+}
+/*-------------------------------------------------------------*/
+/*-----left aligned scrollbars-----*/
+/*-------------------------------------------------------------*/
+#center-panel>.fragment, #left-panel {
+    direction: rtl; /*TODO this really really needs to change because it affects decedents. The desire here was to
+    put the scrollbars on the left hand side, which should really be done with a scrollbar meta property.*/
+}
+#center-panel .fragment form,
+#center-panel .fragment div,
+#left-panel h1,
+#left-panel div {
+    direction: ltr;
+}
+::-webkit-scrollbar-thumb {
+    box-shadow: none !important;
+}
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.15) !important;
+}
+/*-------------------------------------------------------------*/
+/*-----output settings-----*/
+/*-------------------------------------------------------------*/
+.inline_h2 {
+    margin-bottom: 10px;
+}
+/*----------------------------------------------------*/
+/*----- map key -----*/
+/*----------------------------------------------------*/
+#legend {
+    display:block;
+    position: absolute;
+    bottom: 13px; 
+    left: 15px;
+    width: 146px;
+    height: 110px;
+    font-size: 10px;
+    color: #606060;
+    padding-left: 5px;
+    padding-top: 5px;
+    background-color: rgba(255, 255, 255, .3);
+    border-radius: 3px;
+}
+#legend-left, #legend-right {
+    padding-right: 10px;
+    display:block;
+    float: left;
+    position: relative;
+    height: 100%;
+
+}
+#legend-left {
+    padding-right: 15px;
+    width: 60px;
+    height: 68px;
+}
+.legend-label {
+    display:block;
+    height: 20px;
+}
+#legend-left .legend-label {
+    text-align: right;
+    line-height: 12px;
+}
+#legend-right .legend-label {
+    padding-top: 11px;
+}
+
+.legend-values {
+    position: absolute;
+    display:block;
+    width: 100%;
+    height: 100%;
+
+}
+#legend-left span:first-child {
+    position:absolute;
+    top: 0;
+}
+#legend-left span:last-child {
+    position:absolute;
+    bottom: 0;
+}
+#legend-left .legend-values:after {
+    content: "";
+    width: 15px;
+    height: 100%;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#0b326c), color-stop(16%,#0b326c), color-stop(17%,#335484), color-stop(33%,#335484), color-stop(34%,#59749a), color-stop(50%,#59749a), color-stop(51%,#7289aa), color-stop(66%,#7289aa), color-stop(67%,#c5cedc), color-stop(83%,#c5cedc), color-stop(84%,#ffffff), color-stop(100%,#ffffff)); 
+    position: absolute;
+    top: 0;
+    left: 33px;
+}
+#legend-right {
+    width: 70px;
+}
+#legend-right ul {
+    margin-left: 0;
+    padding-left: 0;
+} 
+#legend-right li {
+    display: block;
+    height: 20px;
+    border-left: 20px solid #68be5e;
+    margin-left: 0;
+    margin-bottom: 4px;
+    line-height: 20px;
+    padding-left: 5px;
+}
+#legend-right li:first-child {
+    border-color: #ba3e44;
+}
+#legend-right li:last-child {
+    border-color: rgb(234, 125, 48);
+}
+@media screen and (max-height: 800px){
+    #legend {
+        transform: scale(.8);
+        bottom: -3px;
+        left: -3px;
+        background-color: rgba(255,255,255,.4);
+    }
+}
+/*----------------------------------------------------*/
+/*----- results home -----*/
+/*----------------------------------------------------*/
+#summaryData th:first-child {
+    width: 70%;
+}
+#summaryData td {
+    vertical-align: top;
+}
+#summaryData tr td:nth-child(2) {
+    padding-left: 10px;
+}
+#summaryData tr td{
+    border-bottom: 1px solid #ebebeb;
+}
+#summaryData th {
+    padding-bottom: 3px;
+    padding-top: 10px;
+}
+#summaryData tr:first-of-type th{
+    padding-top: 0;
+}
+#summaryData td {
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+@media screen and (max-width: 1200px){
+    #summaryData th {
+        font-size: 13px;
+        padding-bottom: 0;
+    }
+    #summaryData td {
+        font-size: 12px;
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+}
+
 /*----------------------------------------------------*/
 /*----- global overrides -----*/
 /*----------------------------------------------------*/
-.action_link {
-    background: transparent;
-    color: #62d7fd;
+.action_link, .addNew a {
+    background: transparent !important;
+    color: #00bbef !important;
     border: none !important;
     outline: none !important;
     font-size: 13px;
@@ -2138,14 +2558,15 @@ select[multiple] {}
 .action_link:hover,
 .action_link:active,
 .action_link:focus,
-.action_link:visited  {
-    opacity: 1;
+.action_link:visited,
+.addNew a:hover  {
     background: transparent;
-    color: #62d7fd !important;
+    color: #00bbef !important;
     font-weight: 300;
     border: none !important;
     outline: none !important;
     box-shadow: none;
+    text-decoration: underline;
 }
 
 /**********Priority Widget***********************/
@@ -2184,6 +2605,13 @@ select[multiple] {}
     #setupMenu h3,
     #setupMenu h4 {
         width: 140px;
+    }
+
+    #left-panel, #main-panel {
+        margin-left: 165px;
+    }
+    #left-panel {
+        width: calc(33.333vw - 165px + 25px);
     }
     #setupMenu a {
         padding-left: 15px;
@@ -2273,7 +2701,101 @@ select[multiple] {}
         background-position: 2px 5px;
     }
 }
+/*#sim_progress_and_button {*/
+    /*visibility: hidden;*/
+/*}*/
 
+#summaryData {
+    margin-left:20px;
+    float: left;
+    width: 25vw;
+    padding-bottom: 80px;
+}
 
+/*//credit: http://jsfiddle.net/AndrewDryga/zcX4h/1/*/
+.spinner {
+  display: inline-block;
+  opacity: 0;
+  width: 0;
 
+  -webkit-transition: opacity 0.25s, width 0.25s;
+  -moz-transition: opacity 0.25s, width 0.25s;
+  -o-transition: opacity 0.25s, width 0.25s;
+  transition: opacity 0.25s, width 0.25s;
+}
 
+.has-spinner.active {
+  cursor:progress;
+}
+
+.has-spinner.active .spinner {
+  opacity: 1;
+  width: auto; /* This doesn't work, just fix for unkown width elements */
+}
+
+.has-spinner.btn-mini.active .spinner {
+    width: 30px;
+}
+
+/*** Icon Spin taken from font-awesome.css  "Font Awesome by Dave Gandy - http://fortawesome.github.com/Font-Awesome" ***/
+.icon-spin {
+    display: inline-block;
+    -moz-animation: spin 2s infinite linear;
+    -o-animation: spin 2s infinite linear;
+    -webkit-animation: spin 2s infinite linear;
+    animation: spin 2s infinite linear
+}
+
+@-moz-keyframes spin {
+    0% {
+        -moz-transform: rotate(0deg)
+    }
+    100% {
+        -moz-transform: rotate(359deg)
+    }
+}
+
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg)
+    }
+    100% {
+        -webkit-transform: rotate(359deg)
+    }
+}
+
+@-o-keyframes spin {
+    0% {
+        -o-transform: rotate(0deg)
+    }
+    100% {
+        -o-transform: rotate(359deg)
+    }
+}
+
+@-ms-keyframes spin {
+    0% {
+        -ms-transform: rotate(0deg)
+    }
+    100% {
+        -ms-transform: rotate(359deg)
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg)
+    }
+    100% {
+        transform: rotate(359deg)
+    }
+}
+
+@-moz-document url-prefix() {
+    .icon-spin {
+        height: .9em
+    }
+    .btn .icon-spin {
+        height: auto
+    }
+}

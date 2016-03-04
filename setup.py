@@ -1,7 +1,9 @@
 import sys
 import os
+import stat
 import pip
 import shutil
+import subprocess
 
 from cx_Freeze import setup, Executable, build_exe
 from importlib import import_module
@@ -15,10 +17,19 @@ from django.core import management
 from ADSM import __version__
 
 
+def is_exe(file_path):
+    access_mode = os.F_OK | os.X_OK
+    if os.path.isfile(file_path) and not file_path.endswith('.bat') and not file_path.endswith('.sh') and os.access(file_path, access_mode):
+        filemode = os.stat(file_path).st_mode
+        ret = bool(filemode & stat.S_IXUSR or filemode & stat.S_IXGRP or filemode & stat.S_IXOTH)
+        return ret
+
+
 build_exe_options = {
     'build_exe': 'build',
     'optimize': 2,
     'excludes': [
+        'PyInstaller',
         # CHANGE ME for any python packages in your project that you want excluded
         'development_scripts',
     ],
@@ -32,14 +43,14 @@ build_exe_options = {
         'shutil',
     ],
     'replace_paths': [('*', '')],
-    'compressed': False,
     'include_files': [
         # Standard Django items to bring in
         ('static', 'static'),
         ('media', 'media'),
         ('bin', 'bin'),
-        ('Viewer', 'Viewer'),  # Newline's View application for Django Desktop Core
-        ('npu.exe', 'npu.exe'),  # Newline's Program Updater application  # TODO: This is windows specific
+        (os.path.join('Viewer', settings.OS_DIR), os.path.join('Viewer', settings.OS_DIR)),  # Newline's View application for Django Desktop Core
+        ('npu.exe' if sys.platform == 'win32' else 'npu', 'npu.exe' if sys.platform == 'win32' else 'npu'),  # Newline's Updater application for Django Desktop Core
+        ('README.md', 'README.md'),
 
         # CHANGE ME for any files/folders you want included with your project
         ('Sample Scenarios', 'Sample Scenarios'),
@@ -47,6 +58,11 @@ build_exe_options = {
     ],
     'include_msvcr': True  # CHANGE ME depending on if your project has licensing that is compatible with Microsoft's redistributable license
 }
+files = (file for file in os.listdir(settings.BASE_DIR) if os.path.isfile(os.path.join(settings.BASE_DIR, file)))
+for file in files:
+    # We need to check for the npu here instead of just including it as it would come up as an exe in the is_exe check
+    if [file for part in ['.so', '.dll', '.url', 'webpack-stats.json'] if part.lower().split(' ')[0] in file.lower()] or is_exe(os.path.join(settings.BASE_DIR, file)) and 'npu' not in file:
+        build_exe_options['include_files'].append((file, file))
 
 
 def query_yes_no(question, default='yes'):
@@ -113,6 +129,73 @@ def remove_empty_folders(path):
         os.rmdir(path)
 
 
+def parse_requirements_and_links(requirements_file, existing_requirements=None, existing_links=None):
+    """
+    Proper Git lines from Requirements.txt:
+        git+https://git.myproject.org/MyProject.git
+        git+https://git.myproject.org/MyProject.git@v1.0.1
+
+    Proper Mercurial lines from Requirements.txt:
+        hg+https://hg.myproject.org/MyProject/
+        hg+https://hg.myproject.org/MyProject/#egg=MyProject
+        hg+https://hg.myproject.org/MyProject/@v1.0.1#egg=MyProject
+    """
+    if not existing_requirements:
+        existing_requirements = []
+    if not existing_links:
+        existing_links = []
+
+    with open(requirements_file, 'r') as requirements:
+        for line in requirements:
+            line = line.strip()
+
+            version = None
+            package = None
+            link = None
+
+            if line.startswith('git+'):
+                parts = line.split('@')
+                if parts.__len__() > 1:
+                    version = parts[1]
+
+                url_parts = parts[0].split('/')
+                package = url_parts[-1].split('.git')[0] if '.git' in url_parts[-1] else None
+
+                if version:
+                    link = line + "#egg=" + package + "-" + version
+                    if package:
+                        package = package + '==' + version
+                else:
+                    link = line
+            elif line.startswith('hg+'):
+                line = line.split('#egg=')[0]
+
+                parts = line.split('@')
+                url_parts = parts[0].split('/')
+                package = url_parts[-1]
+                if parts.__len__() > 1:
+                    version = parts[1]
+
+                if version:
+                    link = line + '#egg=' + package + '-' + version
+                    if package:
+                        package = package + '==' + version
+                else:
+                    link = line
+            else:
+                if line:
+                    package = line
+
+            if package:
+                existing_requirements.append(package)
+                if link:
+                    existing_links.append(link)
+
+    return existing_requirements, existing_links
+
+
+# TODO: This build doesn't quite work in Linux. The files don't end up in the proper location.
+# Currently you must manually move files around after the build finishes to get it to work in Linux.
 class BuildADSM(build_exe):
     def run(self):
         print("\nYou should only run this build script if you are a CLEAN VirtualEnv!\n"
@@ -123,6 +206,15 @@ class BuildADSM(build_exe):
 
         if not os.path.exists(os.path.join(settings.BASE_DIR, 'static')):
             os.makedirs(os.path.join(settings.BASE_DIR, 'static'))
+
+        print("Preparing to pack client files...")
+        webpack_command_path = os.path.join('.', 'node_modules', '.bin', 'webpack')
+        webpack_command = webpack_command_path + ' --config webpack.config.js'
+        webpack = subprocess.Popen(webpack_command, cwd=os.path.join(settings.BASE_DIR), shell=True)
+        print("Packing client files...")
+        outs, errs = webpack.communicate()  # TODO: Possible error checking
+        print("Done packing.")
+
         management.call_command('collectstatic', interactive=False, clear=True)
         if not os.path.exists(os.path.join(settings.BASE_DIR, 'media')):
             os.makedirs(os.path.join(settings.BASE_DIR, 'media'))
@@ -137,8 +229,7 @@ class BuildADSM(build_exe):
         self.packages.extend(get_installed_packages())
         self.packages.extend(get_local_packages())
         # Cleanup packages to account for any excludes
-        self.packages = [package for package in self.packages
-                                         if package not in self.excludes]
+        self.packages = [package for package in self.packages if package not in self.excludes]
 
         # Grab any templates or translation files for installed apps and copy those
         for app_name in settings.INSTALLED_APPS:
@@ -151,7 +242,7 @@ class BuildADSM(build_exe):
                     target = str(template_dir).replace(settings.BASE_DIR, '')
                     if target.startswith(os.path.sep):
                         target = str(target).replace(os.path.sep, '', 1)
-                    self.include_files.extend([(template_dir, target), ])
+                    self.include_files.extend([(template_dir, os.path.join('templates', target)), ])
             # TODO: Do we need to grab translation files for apps not listed in settings.py?
             # TODO: Django still doesn't properly find translation for domain 'django' after collecting everything
             # if os.path.exists(os.path.join(app.__path__[0], 'locale')):
@@ -170,29 +261,84 @@ class BuildADSM(build_exe):
 
         build_exe.run(self)
 
+        # Cleanup the build dir
+        if sys.platform != 'win32':  # If we are on a unix type system
+            lib_files = os.listdir(os.path.join(settings.BASE_DIR, self.build_exe, 'lib'))
+            for file in lib_files:
+                if "python" not in str(file).lower():
+                    shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, 'lib', file), os.path.join(settings.BASE_DIR, self.build_exe, file))
+            if os.path.exists(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env')):
+                env_files = os.listdir(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
+                for file in env_files:
+                    shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file), os.path.join(settings.BASE_DIR, self.build_exe, file))  
+
+        # move binary dependencies into bin/env
         files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, self.build_exe)) if os.path.isfile(os.path.join(settings.BASE_DIR, self.build_exe, file)))
         os.makedirs(os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env'))
         for file in files:
-            if file not in ['ADSM.exe', 'ADSM_Beta.exe', 'library.zip', 'python34.dll', 'MSVCR100.dll', 'npu.exe']:  # TODO: This line is ADSM specific
+            # TODO: Check for linux python.so files
+            if not [file for part in ['library.zip', 'README.md', 'python34.dll', 'MSVCR100.dll', 'npu', '.url', 'webpack-stats.json'] if part.lower().split(' ')[0] in file.lower()] and not is_exe(os.path.join(settings.BASE_DIR, self.build_exe, file)):  #NOTE: The split here could cause issues and is speculative
                 shutil.move(os.path.join(settings.BASE_DIR, self.build_exe, file),
                             os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', file))
-        shutil.copy(os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', 'Viewer.exe'), os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', 'ADSM_Viewer.exe'))
+
+        # Find the Viewer application and make sure it is packaged
+        viewer = None
+        possible_viewer_files = (file for file in os.listdir(os.path.join(settings.BASE_DIR, 'Viewer', settings.OS_DIR)) if os.path.isfile(os.path.join(settings.BASE_DIR, 'Viewer', settings.OS_DIR, file)))
+        for possible_viewer in possible_viewer_files:
+            if 'viewer' in possible_viewer.lower() and is_exe(os.path.join(settings.BASE_DIR, 'Viewer', settings.OS_DIR, possible_viewer)):
+                viewer = possible_viewer
+                break
+        if viewer:
+            shutil.copy(os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', settings.OS_DIR, viewer), os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', settings.OS_DIR, viewer.replace('Viewer', 'ADSM_Viewer')))
+
+        # Look for any DLLs that the included packages may have and copy them into bin/env as well
+        for package in self.packages:
+            try:
+                package = import_module(package)
+                location = os.path.dirname(package.__file__)
+                for root, dirnames, filenames in os.walk(location):
+                    for filename in filenames:
+                        if filename.lower().split('.')[-1] in 'dll so'.split():
+                            shutil.copy(os.path.join(root, filename), os.path.join(settings.BASE_DIR, self.build_exe, 'bin', 'env', filename))
+            except:
+                continue
+
+        # Cleanup the webpack-stats file so it doesn't have full path info
+        if os.path.exists(os.path.join(settings.BASE_DIR, self.build_exe, 'webpack-stats.json')):
+            f = open(os.path.join(settings.BASE_DIR, self.build_exe, 'webpack-stats.json'), 'r')
+            filedata = f.read()
+            f.close()
+
+            newdata = filedata.replace('\\\\', '\\')  # A slash dance is required for string matching vs file writing
+            newdata = newdata.replace(settings.BASE_DIR, '.')
+            newdata = newdata.replace('\\', '\\\\')
+
+            f = open(os.path.join(settings.BASE_DIR, self.build_exe, 'webpack-stats.json'), 'w')
+            f.write(newdata)
+            f.close()
 
 
 base = None
+requirements, urls = parse_requirements_and_links(os.path.join(settings.BASE_DIR, 'Requirements.txt'))
 if sys.platform == 'win32':
-    base = 'Console'  # TODO: Change to Win32GUI and so on for each OS
+    base = 'Console'
+    requirements, urls = parse_requirements_and_links(os.path.join(settings.BASE_DIR, 'Requirements-Windows.txt'), existing_requirements=requirements, existing_links=urls)
+else:
+    base = 'Console'
+    requirements, urls = parse_requirements_and_links(os.path.join(settings.BASE_DIR, 'Requirements-Nix.txt'), existing_requirements=requirements, existing_links=urls)
 
 cmdclass = {"build_exe": BuildADSM, }
 
-setup(name='ADSM Beta',
+setup(name='ADSM_Vaccination_Rings',
       version=__version__,
-      description='ADSM Beta Application',
+      description='ADSM Vaccination Rings Application',
       options={'build_exe': build_exe_options,
                'install_exe': {'build_dir': build_exe_options['build_exe']}},
-      executables=[Executable('ADSM.py', base=base, targetName='ADSM_Beta.exe'), ],  # TODO: Icon goes in Executable
+      executables=[Executable('ADSM.py', base=base, icon='favicon.ico', targetName='ADSM_Vaccination_Rings'+settings.EXTENSION), ],
       cmdclass=cmdclass,
-      )  # TODO: install_requires should read in the requirements files per os
+      install_requires=requirements,
+      dependency_links=urls
+      )
 
 # Cleanup step after any sort of setup operation
 # TODO: See if this causes issues at the end of an 'install' command.

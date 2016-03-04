@@ -74,4 +74,26 @@ EXTRA_DIST = delay_0.xml delay_1.xml delay_3.xml \
  priority_prodtype_reason_time_firstdestr.xml \
  vacc_priority_time_prodtype_firstvacc.xml \
  trace_enable_only_direct_in.xml trace_enable_only_indirect_in.xml \
- trace_in_out_which_first.xml
+ trace_in_out_which_first.xml \
+ vacc_priority_1ring_prodtypeA-F_24units_ring_plus2infected.sqlite3 \
+ vacc_priority_1ring_prodtypeA-F_largest_24units_ring_plus2infected.sqlite3 \
+ vacc_priority_1ring_prodtypeF-A_smallest_24units_ring_plus2infected.sqlite3 \
+ vacc_priority_1ring_outin_24units_ring_plus2infected.sqlite3 \
+ vacc_priority_1ring_inout_24units_ring_plus2infected.sqlite3 \
+ vacc_priority_1ring_newold_prodtypeA-F_24units_ring_plus2infected.sqlite3 \
+ vacc_priority_1ring_oldnew_prodtypeA-F_24units_ring_plus2infected.sqlite3 \
+ vacc_priority_2rings_same_size_outin_10units_2cols.sqlite3 \
+ vacc_priority_2rings_same_size_inout_10units_2cols.sqlite3 \
+ vacc_priority_2rings_size_5_3_outin_10units_2cols.sqlite3 \
+ vacc_priority_2rings_size_5_3_inout_10units_2cols.sqlite3 \
+ vacc_priority_2rings_size_2-5_1-3_outin_10units_2cols.sqlite3 \
+ vacc_priority_2rings_size_2-5_1-3_inout_10units_2cols.sqlite3 \
+ vacc_priority_2rings_roundrobin_prodtypeC-D_16units_2rings.sqlite3 \
+ vacc_priority_2rings_roundrobin_prodtypeC-D_1perday_16units_2rings.sqlite3 \
+ vacc_priority_2rings_roundrobin_prodtypeD-C_1perday_15units_2rings.sqlite3 \
+ vacc_priority_2rings_size_2-5_1-3later_rr_10units_2cols.sqlite3 \
+ vacc_priority_2rings_supp_prot_largest_15units_line.sqlite3 \
+ vacc_priority_2rings_supp_prot_outin_15units_line.sqlite3 \
+ vacc_priority_2circles_overlap_inout_24units_2rings_plus2infected.sqlite3 \
+ vacc_priority_2rings_overlap_inout_24units_2rings_plus2infected.sqlite3 \
+ vacc_priority_2circles_diff_sizes_rr_largest_12units_2rings_largesmall_plus2infected.sqlite3

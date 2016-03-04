@@ -17,7 +17,7 @@ AM_CPPFLAGS = -I$(top_srcdir) \
 if USE_SC_GUILIB
   AM_CPPFLAGS +=  -I$(top_srcdir)/sc_guilib 
 endif
-AM_CPPFLAGS += @GLIB_CFLAGS@ @GSL_CFLAGS@ 
+AM_CPPFLAGS += @GLIB_CFLAGS@ @GSL_CFLAGS@ @JSON_GLIB_CFLAGS@
 
 include_HEADERS = adsm.h
 lib_LIBRARIES = libadsm.a
@@ -29,6 +29,7 @@ libadsm_a_SOURCES = main_loop.c module_loader.c module_loader.h \
   $(top_srcdir)/replace/replace.c $(top_srcdir)/replace/replace.h \
   $(top_srcdir)/general/general.c $(top_srcdir)/general/general.h \
   $(top_srcdir)/unit/unit.c $(top_srcdir)/unit/unit.h \
+  $(top_srcdir)/unit/scorecard.c $(top_srcdir)/unit/scorecard.h \
   $(top_srcdir)/event/event.c $(top_srcdir)/event/event.h \
   $(top_srcdir)/prob_dist/prob_dist.c $(top_srcdir)/prob_dist/prob_dist.h \
   $(top_srcdir)/rel_chart/rel_chart.c $(top_srcdir)/rel_chart/rel_chart.h \
@@ -101,4 +102,4 @@ endif
 
 bin_PROGRAMS = adsm
 adsm_SOURCES = cli.c
-adsm_LDADD = libadsm.a @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@
+adsm_LDADD = libadsm.a @GLIB_LIBS@ @GSL_LIBS@ @SQLITE_LIBS@ @JSON_GLIB_LIBS@

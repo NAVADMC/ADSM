@@ -900,22 +900,26 @@ char *EVT_vaccination_initiated_event_to_string (EVT_vaccination_initiated_event
  */
 EVT_event_t *
 EVT_new_request_for_vaccination_event (UNT_unit_t * unit,
+                                       UNT_unit_t * focus_unit,
                                        int day,
                                        ADSM_control_reason reason,
-                                       int priority,
-                                       gboolean cancel_on_detection,
-                                       int min_days_before_next)
+                                       double distance_from_ring_center,
+                                       double supp_radius,
+                                       double prot_inner_radius,
+                                       double prot_outer_radius)
 {
   EVT_event_t *event;
 
   event = g_new (EVT_event_t, 1);
   event->type = EVT_RequestForVaccination;
   event->u.request_for_vaccination.unit = unit;
+  event->u.request_for_vaccination.focus_unit = focus_unit;
   event->u.request_for_vaccination.day = day;
   event->u.request_for_vaccination.reason = reason;
-  event->u.request_for_vaccination.priority = priority;
-  event->u.request_for_vaccination.cancel_on_detection = cancel_on_detection;
-  event->u.request_for_vaccination.min_days_before_next = min_days_before_next;
+  event->u.request_for_vaccination.distance_from_ring_center = distance_from_ring_center;
+  event->u.request_for_vaccination.supp_radius = supp_radius;
+  event->u.request_for_vaccination.prot_inner_radius = prot_inner_radius;
+  event->u.request_for_vaccination.prot_outer_radius = prot_outer_radius;
   event->u.request_for_vaccination.day_commitment_made = 0; /* default */
   return event;
 }
@@ -934,9 +938,8 @@ char *EVT_request_for_vaccination_event_to_string (EVT_request_for_vaccination_e
   char *chararray;
 
   s = g_string_new (NULL);
-  g_string_sprintf (s, "<Request for vaccination event unit=\"%s\" day=%i priority=%i cancel on detection=%s>",
-                    event->unit->official_id, event->day, event->priority,
-                    event->cancel_on_detection ? "yes" : "no");
+  g_string_sprintf (s, "<Request for vaccination event unit=\"%s\" day=%i>",
+                    event->unit->official_id, event->day);
   /* don't return the wrapper object */
   chararray = s->str;
   g_string_free (s, FALSE);
@@ -1692,10 +1695,13 @@ EVT_clone_event (EVT_event_t * event)
       {
         EVT_request_for_vaccination_event_t *e;
         e = &(event->u.request_for_vaccination);
-        clone = EVT_new_request_for_vaccination_event (e->unit, e->day,
-                                                       e->reason, e->priority,
-                                                       e->cancel_on_detection,
-                                                       e->min_days_before_next);
+        clone = EVT_new_request_for_vaccination_event (e->unit, e->focus_unit,
+                                                       e->day, e->reason,
+                                                       e->distance_from_ring_center,
+                                                       e->supp_radius,
+                                                       e->prot_inner_radius,
+                                                       e->prot_outer_radius);
+        clone->u.request_for_vaccination.day_commitment_made = e->day_commitment_made;
         break;
       }
     case EVT_Vaccination:

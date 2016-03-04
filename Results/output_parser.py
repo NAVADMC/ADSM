@@ -7,6 +7,7 @@ def camel_case_spaces(name_with_spaces):
     r = re.sub(r' +(\w)', lambda match: match.group(1).upper(), name_with_spaces).strip()  # upper case first letter of any word
     if r:
         r = r[0].upper() + r[1:]  # upper case first letter
+    r = r.replace(' ', '')
     return r
 
 
@@ -160,14 +161,19 @@ class DailyParser(object):
                     version.versionMajor = sparse_values['versionMajor']
                     version.versionMinor = sparse_values['versionMinor']
                     version.versionRelease = sparse_values['versionRelease']
+                    version.id = 1
                     results.extend([version])
-                    create_version_entry = False  # only run once
                 results.extend(self.populate_db_from_daily_report(sparse_values, last_line))
         return results
 
     @staticmethod
     def parse_unit_stats_string(cmd_string):
-        values = cmd_string.split(',')
+        values = []
+        for substring in cmd_string.split(','):
+            try:
+                values.append(int(substring))
+            except ValueError:
+                values.append(0)
         if len(values) == 5 and (values[1] or values[2] or values[3] or values[4]):
             unit = values[0]
             was_infected, was_zone_focus, was_vaccinated, was_destroyed = values[1], values[2], values[3], values[4]
@@ -176,7 +182,7 @@ class DailyParser(object):
                       ' cumulative_zone_focus=cumulative_zone_focus+%i,' \
                       ' cumulative_vaccinated=cumulative_vaccinated+%i,' \
                       ' cumulative_destroyed=cumulative_destroyed+%i' \
-                      ' WHERE unit_id=%s' % (1 if was_infected else 0, 1 if was_zone_focus else 0, 1 if was_vaccinated else 0, 1 if was_destroyed else 0, unit)
+                      ' WHERE unit_id=%i' % (1 if was_infected else 0, 1 if was_zone_focus else 0, 1 if was_vaccinated else 0, 1 if was_destroyed else 0, unit)
             try:
                 cursor = connections['scenario_db'].cursor()
                 cursor.execute(command)

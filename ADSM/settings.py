@@ -49,13 +49,24 @@ if not WORKSPACE_PATH:
         except:
             WORKSPACE_PATH = None
     if not WORKSPACE_PATH:
-        WORKSPACE_PATH = os.path.join(os.path.expanduser("~"), "Documents")
+        WORKSPACE_PATH = os.path.join(os.path.expanduser("~"), "Documents", "ADSM Workspace")
 if not DB_BASE_DIR:
     DB_BASE_DIR = os.path.join(WORKSPACE_PATH, "settings")
 if not os.path.exists(WORKSPACE_PATH):
     os.makedirs(WORKSPACE_PATH, exist_ok=True)
 if not os.path.exists(DB_BASE_DIR):
     os.makedirs(DB_BASE_DIR, exist_ok=True)
+
+if sys.platform == 'win32':
+    OS_DIR = 'windows'
+    EXTENSION = '.exe'
+    SCRIPT = '.cmd'
+else:
+    OS_DIR = 'linux'
+    EXTENSION = ''
+    SCRIPT = ''
+
+INTERNAL_IPS = ('127.0.0.1', '::1')
 
 INSTALLED_APPS = (
     'ScenarioCreator',
@@ -71,9 +82,13 @@ INSTALLED_APPS = (
     'floppyforms',
     'crispy_forms',
     'productionserver',
+    'webpack_loader',
+    # 'debug_toolbar',
+    # 'pympler',
 )
 
 MIDDLEWARE_CLASSES = (
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
@@ -167,6 +182,8 @@ if getattr(sys, 'frozen', False):
     for app_name in INSTALLED_APPS:
         if os.path.exists(os.path.join(BASE_DIR, 'templates', app_name)):
             TEMPLATES[0]['DIRS'].extend([os.path.join(BASE_DIR, 'templates', app_name), ])
+    if os.path.exists(os.path.join(BASE_DIR, 'templates', 'ADSM', 'templates')):  # TODO: Figure out how to find name of base app (doesn't work nicely when frozen)
+        TEMPLATES[0]['DIRS'].extend([os.path.join(BASE_DIR, 'templates', 'ADSM', 'templates'), ])
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
@@ -181,6 +198,13 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'ADSM', 'static'),
 )
 
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles/',
+        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
+    }
+}
+
 LOGIN_REDIRECT_URL = '/'
 
 LOCALE_PATHS = ()
@@ -188,3 +212,28 @@ if getattr(sys, 'frozen', False):
     for app_name in INSTALLED_APPS:
         if os.path.exists(os.path.join(BASE_DIR, 'locale', app_name)):
             LOCALE_PATHS += (os.path.join(BASE_DIR, 'locale', app_name), )
+
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
+
+DEBUG_TOOLBAR_PANELS = [
+    # 'debug_toolbar.panels.versions.VersionsPanel',
+    # 'debug_toolbar.panels.timer.TimerPanel',
+    # 'debug_toolbar.panels.settings.SettingsPanel',
+    # 'debug_toolbar.panels.headers.HeadersPanel',
+    # 'debug_toolbar.panels.request.RequestPanel',
+    # 'debug_toolbar.panels.sql.SQLPanel',
+    # 'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    # 'debug_toolbar.panels.templates.TemplatesPanel',
+    # 'debug_toolbar.panels.cache.CachePanel',
+    # 'debug_toolbar.panels.signals.SignalsPanel',
+    # 'debug_toolbar.panels.logging.LoggingPanel',
+    # 'debug_toolbar.panels.redirects.RedirectsPanel',
+    # 'pympler.panels.MemoryPanel',
+    # 'debug_toolbar.panels.profiling.ProfilingPanel',
+    # 'ddt_request_history.panels.request_history.RequestHistoryPanel',
+]
+
+DEBUG_TOOLBAR_CONFIG = {
+    'JQUERY_URL': '',
+    'SHOW_TOOLBAR_CALLBACK': 'ddt_request_history.panels.request_history.allow_ajax',
+}

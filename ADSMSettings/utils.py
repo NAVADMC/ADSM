@@ -175,7 +175,7 @@ def graceful_startup():
         x = SmSession.objects.get().scenario_filename  # this should be in the initial migration
         print(x)
     except OperationalError:
-        reset_db('default')  # TODO: Create blank settings database and move both blanks into another folder
+        reset_db('default')
 
     if not os.path.isfile(os.path.join(settings.DB_BASE_DIR, 'activeSession.sqlite3')) or os.stat(os.path.join(settings.DB_BASE_DIR, 'activeSession.sqlite3')).st_size < 10000:
         copy_blank_to_session()
@@ -283,6 +283,7 @@ def launch_external_program_and_exit(launch, code=0, close_self=True, cmd_args=N
     if cmd_args:
         for cmd_arg in cmd_args:
             launch.append(cmd_arg)
+    launch = ' '.join(launch)
     if sys.platform == 'win32':  # Yes, this is also x64.
         CREATE_NEW_PROCESS_GROUP = 0x00000200
         DETACHED_PROCESS = 0x00000008
@@ -301,10 +302,17 @@ def check_simulation_version():
     version = None
     try:
         executable = adsm_executable_command()[0]
-        process = subprocess.Popen([executable, "--version"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output, error = process.communicate()
-        exit_code = process.wait(timeout=200)
-        process.kill()
+        process = subprocess.Popen(executable + " --version --silent", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            output, error = process.communicate(timeout=200)
+            exit_code = process.returncode
+        except:
+            exit_code = 1
+            output = None
+        try:
+            process.kill()
+        except:
+            pass
 
         if exit_code == 0:
             version = output.splitlines()[-1].decode()
@@ -322,11 +330,18 @@ def check_simulation_version():
 def npu_update_info():
     new_version = None
     try:
-        npu = os.path.join(settings.BASE_DIR, 'npu.exe')  # TODO: This is OS Specific
-        process = subprocess.Popen([npu, "--check_update", "--silent"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output, error = process.communicate()
-        exit_code = process.wait(timeout=60000)
-        process.kill()
+        npu = os.path.join(settings.BASE_DIR, 'npu'+settings.EXTENSION)
+        process = subprocess.Popen(npu + " --check_update --silent", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            output, error = process.communicate(timeout=60000)
+            exit_code = process.returncode
+        except:
+            exit_code = 1
+            output = None
+        try:
+            process.kill()
+        except:
+            pass
 
         if output:
             new_version = output.splitlines()[-1].decode().strip()

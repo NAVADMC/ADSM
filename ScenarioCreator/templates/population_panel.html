@@ -1,20 +1,21 @@
+{% load render_bundle from webpack_loader %}
 <div class="TB_panel TB_panel_closed layout-panel" id="population_panel">
-    <h2><a href="/setup/ProductionType/">Population Production Types</a></h2> {# population panel headers links as a fall-back for copy/delete operations #}
-    <ul id="ProductionTypes">
-        {% for pt in ProductionTypes %}
-            <li><a href="#">{{ pt.name }}</a><span>({{ pt.unit_count }} units)</span><span>{{pt.description}}</span></li>
-        {% endfor %}
-    </ul>
-    <a href="/setup/ProductionType/">+ define new production type</a>
-    <h2><a href="/setup/ProductionGroup/">Production Type Groups</a></h2>
-    <ul id="ProductionGroups">
-        {% for group in ProductionGroups %}
-            <li><a href="#">{{ group.name }}</a><span>
-                {% for member in group.group.all %}
-                    {{ member.name }},&nbsp;
-                {% endfor %}</span></li>
-        {% endfor %}
-    </ul>
-    <div id="group-creator"></div> {#load target#} 
-    <a href='/setup/ProductionGroup/new' load-target='#group-creator'>+ define new group</a>
+    <div id="population_panel_status">
+        {% render_bundle 'commons.js' %}
+        {% render_bundle 'react_entry_point' %}
+    </div>
+
+    <div id="production_group_container">
+        <h2><a href="/setup/ProductionGroup/">Production Type Groups</a></h2>
+        <ul id="ProductionGroups">
+            {% for group in ProductionGroups %}
+                <li><a class="pt-group-name">{{ group.name }}</a><span>
+                    {% for member in group.group.all %}
+                        {{ member.name }},&nbsp;
+                    {% endfor %}</span></li>
+            {% endfor %}
+        </ul>
+        <div id="group-creator"></div> {#load target#}
+        <a href='/setup/ProductionGroup/new' load-target='#group-creator'>+ define new group</a>
+    </div>
 </div>

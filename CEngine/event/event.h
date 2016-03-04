@@ -336,14 +336,21 @@ EVT_vaccination_initiated_event_t;
 typedef struct
 {
   UNT_unit_t *unit;
+  UNT_unit_t *focus_unit; /**< The unit at the center of the ring */
   int day;
-  int priority;
   ADSM_control_reason reason; /**< why vaccination was requested */
-  gboolean cancel_on_detection; /**< whether to cancel the vaccination if the
-    unit is detected as diseased */
-  int min_days_before_next;
   int day_commitment_made; /**< the day on which a commitment to fulfil this
     request was made. */
+  double distance_from_ring_center;
+  double supp_radius; /**< the radius of the suppressive circle around the
+    focus unit, or -1 if no suppressive vaccination is done around the focus
+    unit **/
+  double prot_inner_radius; /**< the inner radius of the protective ring around
+    the focus herd, or -1 if no protective vaccination is done around the focus
+    herd **/
+  double prot_outer_radius; /**< the outer radius of the protective ring around
+    the focus herd, or -1 if no protective vaccination is done around the focus
+    herd **/
 }
 EVT_request_for_vaccination_event_t;
 
@@ -655,11 +662,13 @@ EVT_event_t *EVT_new_request_to_initiate_vaccination_event (int day,
 EVT_event_t *EVT_new_vaccination_initiated_event (int day,
                                                   guint trigger_id);
 EVT_event_t *EVT_new_request_for_vaccination_event (UNT_unit_t *,
+                                                    UNT_unit_t *focus_unit,
                                                     int day,
                                                     ADSM_control_reason,
-                                                    int priority,
-                                                    gboolean cancel_on_detection,
-                                                    int min_days_before_next);
+                                                    double distance_from_ring_center,
+                                                    double supp_radius,
+                                                    double prot_inner_radius,
+                                                    double prot_outer_radius);
 EVT_event_t *EVT_new_commitment_to_vaccinate_event (UNT_unit_t *, int day);
 EVT_event_t *EVT_new_vaccination_canceled_event (UNT_unit_t *, int day,
                                                  int day_commitment_made);
