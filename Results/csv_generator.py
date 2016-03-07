@@ -109,7 +109,11 @@ def std_dev(field, query):
     cursor = connections['scenario_db'].cursor()
     cursor.execute(sql_statement)
     row = cursor.fetchone()
-    answer = sqrt(float(row[0]))
+    variance = row[0]
+    if variance is None:
+        answer = None
+    else:
+        answer = sqrt(float(variance))
     return answer
 
 
