@@ -1,6 +1,7 @@
 import csv
 import subprocess
 import itertools
+import platform
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
@@ -748,7 +749,7 @@ def population(request):
 
 def validate_scenario(request):
     simulation = subprocess.Popen(adsm_executable_command() + ['--dry-run'],
-                                  shell=True,
+                                  shell=(platform.system() != 'Darwin'),
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE)
     stdout, stderr = simulation.communicate()  # still running while we work on python validation
