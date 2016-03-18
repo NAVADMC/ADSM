@@ -104,7 +104,7 @@ class SummaryCSVGenerator(multiprocessing.Process):
 def std_dev(field, query):
     """This is the __Population__ Standard Deviation formula translated into RAW SQL statement, specifically SQLite version."""
     table_name = query.model._meta.db_table
-    sql_statement = "SELECT AVG(({table}.{col} - sub.a) * ({table}.{col} - sub.a)) as var from {table}, (SELECT AVG({col}) AS a FROM {table}) AS sub;".format(table=table_name, col=field)
+    sql_statement = "SELECT AVG(({table}.{col} - sub.a) * ({table}.{col} - sub.a)) as var from {table}, (SELECT AVG({col}) AS a FROM {table} WHERE last_day<>0) AS sub WHERE last_day<>0;".format(table=table_name, col=field)
 
     cursor = connections['scenario_db'].cursor()
     cursor.execute(sql_statement)

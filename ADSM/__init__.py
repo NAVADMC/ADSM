@@ -1,1 +1,1 @@
-__version__ = '3.3.7.4'  # SimulationMajor.SimulationMinor.UIRelease.UIBug
+__version__ = '3.3.7.5'  # SimulationMajor.SimulationMinor.UIRelease.UIBug
