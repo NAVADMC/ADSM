@@ -78,6 +78,13 @@ Restart your command prompt so that `npm` and `node` will be on your path.
 cd BASE_DIR (Not an actual command. Go into the root of the project)  
 `npm install`
 
+###Chrome Setup
+If you are working on JavaScript and/or CSS files, you may find it useful to disable caching in Chrome. This will ensure that when you are testing ADSM in the browser, _as long as you leave the Developer Tools pane open_, Chrome will be using your latest saved version of the JS/CSS files, not an older cached version.
+
+![Screenshot showing Developer Tools pane open in Chrome. The ⋮ button has been pressed to open a menu and the “Settings” menu item is about to be clicked.](http://navadmc.github.io/ADSM/images/chrome_dev_tools_settings.png) 
+
+![Screenshot showing Developer Tools settings in Chrome. The “Disable cache (while DevTools is open)” checkbox has been checked.](http://navadmc.github.io/ADSM/images/chrome_dev_tools_disable_cache.png)
+
 ###Compile chain (optional)
 If you plan on compiling a distributable version of the project, then use the following instructions.
 
