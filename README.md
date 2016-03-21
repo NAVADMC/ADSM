@@ -149,6 +149,12 @@ Mac:
 
 Unzip the file and place it in the Scripts or bin folder of your new Virtual Environment (/path/to/adsm_venv/Scripts/ || /path/to/adsm_vent/bin/)
 
+To run the tests, go into the folder containing `manage.py` and type  
+`python manage.py test`  
+You can also be more specific: for example, to run just the ScenarioCreator tests you would type:  
+`python manage.py test ScenarioCreator`  
+or to run just a single test:  
+`python manage.py test ScenarioCreator.tests.test_functional.FunctionalTests.test_delete_one_point_in_relational_function`
 
 Development and Production Branches
 -----------
