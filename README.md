@@ -130,6 +130,8 @@ Windows:
   
         `pip install hg+https://bitbucket.org/BryanHurst/cx_freeze`
 
+    > Note: this currently does not work; instead, install cx_freeze 4.3.4 using pip, then manually apply [this patch](https://bitbucket.org/BryanHurst/cx_freeze/commits/eba6cb644d390f69f07adbf9fdcead71ec0feebf?at=default) and [this patch](https://bitbucket.org/BryanHurst/cx_freeze/commits/22d73fe6386d92834339bdea30b3786a3543b2de?at=default) to the cx_freeze files that pip installed in your site-packages folder.
+
 ###Selenium Tests
 To run the Selenium Tests, you will need Chrome or Chromium installed on your system plus the ChromeDriver v2.12.
 
