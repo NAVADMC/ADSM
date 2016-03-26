@@ -188,7 +188,7 @@ def getPdf( xml, nameGenerator ):
         sigma = float( required_text(firstChild, './sigma' ) )
         sigma_sq = sigma*sigma
         try:
-	        args['mean'] = exp( zeta + sigma_sq/2 )
+            args['mean'] = exp( zeta + sigma_sq/2 )
         except OverflowError:
             raise OverflowError('mean of lognormal with zeta=%g, sigma=%g' % (zeta,sigma))
         variance = exp( 2*zeta + sigma_sq ) * (exp(sigma_sq) - 1)
@@ -220,6 +220,7 @@ def getPdf( xml, nameGenerator ):
                 point.save()
             # end of loop over <value> elements
         else:
+            x = None
             atX = True
             for element in list( firstChild ):
                 if atX:
@@ -721,6 +722,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
     status("Building Detection Model")
     for el in xml.findall( './/detection-model' ):
+        typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
         # <detection-model> elements come in 2 forms. The first form, with a
         # production-type attribute, specifies the probability of observing
         # clinical signs of disease and the probability of reporting those
@@ -729,13 +731,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # observing clinical signs when inside a zone.
         if 'zone' in el.attrib:
             multiplier = float( required_text(el, './zone-prob-multiplier' ) )
-        else:
-            observing = getRelChart( el.find( './prob-report-vs-time-clinical' ), relChartNameSequence )
-            reporting = getRelChart( el.find( './prob-report-vs-time-since-outbreak' ), relChartNameSequence )
-
-        typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
-        for typeName in typeNames:
-            if 'zone' in el.attrib:
+            for typeName in typeNames:
                 zoneName = el.attrib['zone']
                 # If a ZoneEffect object has already been assigned to this
                 # combination of zone and production type, retrieve it; otherwise,
@@ -747,17 +743,21 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     )
                     effect = assignment.effect
                 except ZoneEffectAssignment.DoesNotExist:
-                    effect = ZoneEffect(name= zoneName + ' effect on ' + typeName)
+                    effect = ZoneEffect(name=zoneName + ' effect on ' + typeName)
                     effect.save()
                     assignment = ZoneEffectAssignment(
-                        zone = Zone.objects.get( name=zoneName ),
-                        production_type = ProductionType.objects.get( name=typeName ),
-                        effect = effect
+                        zone=Zone.objects.get(name=zoneName),
+                        production_type=ProductionType.objects.get(name=typeName),
+                        effect=effect
                     )
                     assignment.save()
                 effect.zone_detection_multiplier = multiplier
                 effect.save()
-            else:
+            # end of loop over production-types covered by this <detection-model> element
+        else:
+            observing = getRelChart( el.find( './prob-report-vs-time-clinical' ), relChartNameSequence )
+            reporting = getRelChart( el.find( './prob-report-vs-time-since-outbreak' ), relChartNameSequence )
+            for typeName in typeNames:
                 protocol = ControlProtocol(
                     name = typeName + " Protocol",
                     use_detection = True,
@@ -770,7 +770,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     control_protocol = protocol
                 )
                 assignment.save()
-        # end of loop over production-types covered by this <detection-model> element
+            # end of loop over production-types covered by this <detection-model> element
     # end of loop over <detection-model> elements
 
     status("Contact Recorder Model")
