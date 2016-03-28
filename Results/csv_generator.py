@@ -55,7 +55,7 @@ class SummaryCSVGenerator(multiprocessing.Process):
         layout and follows the column order.  This could be changed to an OrderedDict( OrderedDict<column, value> ) if you want more flexibility in storage
         and retrieval, but it's simplest to just calculate and store them in order."""
         from Results.models import DailyByProductionType
-        headers = ['Field Name', 'Explanation', 'Mean', 'StdDev', 'Low', 'High', 'p5', 'p25', 'p50', 'p75', 'p95']
+        headers = ['Field Name', 'Explanation', 'Mean', 'Low', 'High', 'p5', 'p25', 'p50', 'p75', 'p95']
         data = []  # 2D
 
         fields_of_interest = [field for field, val in DailyByProductionType() if 'Cumulative' in explain(field)]  # only cumulative, last day fields in DailyByProductionType for all production types
