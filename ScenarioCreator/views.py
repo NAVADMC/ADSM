@@ -2,7 +2,7 @@ import csv
 import subprocess
 import itertools
 import platform
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
 from django.db.models import Q, ObjectDoesNotExist
@@ -427,6 +427,7 @@ def relational_function(request, primary_key=None, doCopy=False):
                             point.instance.delete()
                         else:
                             point.instance.save()
+        return HttpResponseRedirect(context['action'])
     else:
         context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
 
