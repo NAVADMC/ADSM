@@ -8,7 +8,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
@@ -757,16 +757,9 @@ class FunctionalTests(StaticLiveServerTestCase):
 
         # Now delete the point with x-value 4
         functions_panel.set_hit_enter(True)
-        functions_panel.delete_point(3)
-
-        # Verify that the chart has one fewer points
-        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
-        self.assertEqual(
-            len(current_prevalence_points), len(points)-1,
-            'there are %i points (should be %i after deleting one)' % (len(current_prevalence_points), len(points)-1)
-        )
-        # Check that there is no point with x-value 4
-        self.assertFalse(
-            any([abs(point.x - 4) < self.tolerance for point in current_prevalence_points]),
-            'there is still a point with x-value==4 after deletion'
-        )
+        # Since we disabled use of the Enter key inside forms (issue #714),
+        # this test should now time out as the Enter key has no effect.
+        try:
+            functions_panel.delete_point(3)
+        except TimeoutException:
+            pass
