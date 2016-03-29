@@ -157,12 +157,12 @@ def getPdf( xml, nameGenerator ):
         # Make sure the upper x-bound of each bin equals the lower x-bound of
         # the next bin.
         assert x0s[1:] == x1s[:-1]
+        points = []
         for i in range( len( x0s ) ):
-            point = RelationalPoint( relational_function = graph, x = x0s[i], y = ps[i] )
-            point.save()
+            points.append( RelationalPoint( relational_function = graph, x = x0s[i], y = ps[i] ) )
         # Final point, y is always 0
-        point = RelationalPoint( relational_function = graph, x = x1s[-1], y = 0 )
-        point.save()
+        points.append( RelationalPoint( relational_function = graph, x = x1s[-1], y = 0 ) )
+        RelationalPoint.objects.bulk_create(points)
         args['graph'] = graph
     elif pdfType == 'hypergeometric':
         args['n'] = float( required_text(firstChild, './n' ) )
@@ -211,13 +211,13 @@ def getPdf( xml, nameGenerator ):
         # contained a sequence of <value> <p> <value> <p>... elements. The new
         # style contained a sequence of <value> elements each containing an <x>
         # and a <p> element.
+        points = []
         newStyle = firstChild.find( './/x' ) is not None
         if newStyle:
             for value in firstChild.findall( './value' ):
                 x = float( required_text(value, './x' ) )
                 p = float( required_text(value, './p' ) )
-                point = RelationalPoint( relational_function = graph, x = x, y = p )
-                point.save()
+                points.append( RelationalPoint( relational_function = graph, x = x, y = p ) )
             # end of loop over <value> elements
         else:
             x = None
@@ -228,10 +228,10 @@ def getPdf( xml, nameGenerator ):
                     atX = False
                 else:
                     p = float( element.text )
-                    point = RelationalPoint( relational_function = graph, x = x, y = p )
-                    point.save()
+                    points.append( RelationalPoint( relational_function = graph, x = x, y = p ) )
                     atX = True
             # end of loop over <value> and <p> elements
+        RelationalPoint.objects.bulk_create(points)
         args['graph'] = graph
     elif pdfType == 'point':
         args['equation_type'] = 'Fixed Value'
@@ -270,14 +270,15 @@ def getRelChart( xml, nameGenerator ):
         if created:
             # This is a new RelationalFunction: no RelationalFunction with this
             # name has been encountered in the XML so far.
+            points = []
             for xyPair in firstChild.findall( './value' ):
-                point = RelationalPoint(
+                points.append(RelationalPoint(
                     relational_function = relChart,
                     x = float( required_text(xyPair, './x' ) ),
                     y = float( required_text(xyPair, './y' ) )
-                )
-                point.save()
+                ))
             # end of loop over points
+            RelationalPoint.objects.bulk_create(points)
         else:
             # One or more RelationalFunctions with this name have already been
             # encountered in the XML.  Check whether this RelationalFunction
@@ -299,14 +300,15 @@ def getRelChart( xml, nameGenerator ):
                 # Give this chart a new, automatically-generated name.
                 relChart = RelationalFunction( name=next( nameGenerator ) )
                 relChart.save()
+                points = []
                 for xyPair in firstChild.findall( './value' ):
-                    point = RelationalPoint(
+                    points.append(RelationalPoint(
                         relational_function = relChart,
                         x = float( required_text(xyPair, './x' ) ),
                         y = float( required_text(xyPair, './y' ) )
-                    )
-                    point.save()
+                    ))
                 # end of loop over points
+                RelationalPoint.objects.bulk_create(points)
             # end of case where we create a new RelationalFunction
         # end of case where we are handling a "new-style" <relational-function>
         # element, that has a name attached to it.
@@ -314,15 +316,16 @@ def getRelChart( xml, nameGenerator ):
         # Old style
         relChart = RelationalFunction( name=next( nameGenerator ) )
         relChart.save()
+        points = []
         values = [float( el.text ) for el in xml.findall( './/value' )]
         while values:
-            point = RelationalPoint(
+            points.append(RelationalPoint(
                 relational_function = relChart,
                 x = values[0],
                 y = values[1]
-            )
-            point.save()
+            ))
             values = values[2:]
+        RelationalPoint.objects.bulk_create(points)
 
     return relChart
 
