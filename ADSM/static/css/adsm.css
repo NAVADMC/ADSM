@@ -951,11 +951,11 @@ ul {
     visibility: hidden;
 }
 
-#setupMenu h2:first-child a{
+#setupMenu h2:first-child a, #priorities li:first-child {
     border-top:1px solid #eeeeee;
 }
 
-#setupMenu h2, #setupMenu h3, #setupMenu h4 {
+#setupMenu h2, #setupMenu h3, #setupMenu h4, .tab-list {
     margin-top: 0;
     margin-bottom: 0; /* These are meant to stack */
     overflow: hidden;
@@ -979,7 +979,7 @@ ul {
     direction: ltr;
 }
 
-#setupMenu a:before {
+#setupMenu a:before, #priorities li:before {
     content:"";
     display:block;
     width:100%;
@@ -990,7 +990,7 @@ ul {
     left:-5px;
 }
 
-#setupMenu a:hover{
+#setupMenu a:hover, #priorities li:hover{
     background-color:#eeeeee;
 }
 
@@ -1013,7 +1013,7 @@ ul {
     margin-right: 0;
 }
 
-#setupMenu span {
+#setupMenu span, #priorities span {
     width: 5px;
     height: 35px;
     -webkit-border-radius:0 2px 2px 0;
