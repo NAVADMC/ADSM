@@ -69,19 +69,13 @@ class PopulationParser(object):
     def __parse_csv(self, filename):
         """Based on FLAPS example, and a NAADSM csv example"""
         possible_formats = [
-            {'productiontype': 'production_type',  # FLAPS Preferred Mapping
-             'longitude': 'longitude',
-             'latitude': 'latitude',
-             'population': 'initial_size', },
-            {'commoditytype': 'production_type',  # FLAPS Fallback Mapping
-             'longitude': 'longitude',
-             'latitude': 'latitude',
-             'population': 'initial_size', },
-            {'production-type': 'production_type',  # NAADSM CSV mapping
-             'longitude': 'longitude',
-             'latitude': 'latitude',
-             'size': 'initial_size',
-             'status': 'initial_state'},
+            {'productiontype': 'production_type',  # NAADSM CSV no HerdSize, with status and state timers
+             'unitsize': 'initial_size',
+             'lat': 'latitude',
+             'lon': 'longitude',
+             'status': 'initial_state',
+             'daysinstate': 'days_in_initial_state',
+             'daysleftinstate': 'days_left_in_initial_state'},
             {'productiontype': 'production_type',  # NAADSM CSV includes HerdSize synonym
              'lon': 'longitude',
              'lat': 'latitude',
@@ -89,16 +83,29 @@ class PopulationParser(object):
              'status': 'initial_state',
              'daysinstate': 'days_in_initial_state',
              'daysleftinstate': 'days_left_in_initial_state'},
+            {'production-type': 'production_type',  # NAADSM CSV mapping
+             'longitude': 'longitude',
+             'latitude': 'latitude',
+             'size': 'initial_size',
+             'status': 'initial_state'},
             {'productiontype': 'production_type',  # NAADSM CSV includes HerdSize synonym without state timers
              'lon': 'longitude',
              'lat': 'latitude',
              'herdsize': 'initial_size',
-             'status': 'initial_state',},
+             'status': 'initial_state'},
             {'productiontype': 'production_type',  # NAADSM CSV population export without state timers
              'lon': 'longitude',
              'lat': 'latitude',
              'unitsize': 'initial_size',
-             'status': 'initial_state'}
+             'status': 'initial_state'},
+            {'productiontype': 'production_type',  # FLAPS Preferred Mapping
+             'longitude': 'longitude',
+             'latitude': 'latitude',
+             'population': 'initial_size'},
+            {'commoditytype': 'production_type',  # FLAPS Fallback Mapping
+             'longitude': 'longitude',
+             'latitude': 'latitude',
+             'population': 'initial_size'},
         ]
         parsing_success = False
         for mapping in possible_formats:
