@@ -12,6 +12,7 @@ Install External Dependencies:
   - Visual Studio 2010: http://download.microsoft.com/download/D/B/C/DBC11267-9597-46FF-8377-E194A73970D6/vs_proweb.exe
     - Note: Installing the trial is fine as all we need is the compiler. Where VS the GUI App may stop working after 30 days, the CLI compiler should continue to be valid
   - Node LTS x64: https://nodejs.org/dist/v6.9.1/node-v6.9.1-x64.msi
+  - Nullsoft Scriptable Install System (version shouldn't matter): http://nsis.sourceforge.net/Download
 
 Once Python3.4 is installed, you will need to create a Virtual Environment for the ADSM Project.  
 This is important, especially if you plan on compiling a distributable version, as we will package the Virtual Environment to send off with the deployable.  
@@ -45,6 +46,7 @@ Create Virtual Environment:
   
 Development and Production Branches
 -----------
+
 List of Relevant Branches: master, Stable
 
 Development should be done in feature branches and merged into master. Master is the general development branch, and where Beta releases come from.
@@ -53,8 +55,20 @@ Stable is the branch we merge master into when we are ready to do a production r
 **Stable branch is what will be tagged in the GitHub Releases.**    
 Master is tagged in GitHub as pre-release.
 
+During Development
+----------
+During Development, it would be a pain to continually build the project just for testing.  
+Thankfully, this is a Python project and so does not actually need to be compiled to run if you have the Virtual Environment setup.
+
+Just like if you were to install ADSM on a server for hosting cloud services, you don't need a compiled distributable.
+
+To run ADSM locally in development mode, use `DRIVE\\path\to\adsm_venv\Scripts\python.exe manage.py devserver`.  
+This is slightly different from Django's normal `runserver` as it also launches a separate webpack process to compile any React client elements.
+
+
 Updating the Distributable
 ----------
+
 When releasing a Beta compile from Master Branch:
 
   - Bump the version in `ADSM/__init__.py` and in `package.json`. See the [Version Guide](https://github.com/NAVADMC/ADSM/wiki/Version-Guide) for the meaning of the four parts of the version number.
@@ -69,4 +83,4 @@ When releasing a Production compile from Stable Branch:
   - Build (with sourced python) `python setup.py build`
   - Push the Update `cd build` `npu.exe --create_update --program=ADSM --program_id=PROGRAM_ID --password=PASSWORD` You can find the program ID and password by logging into the Newline Program Updater (everyone authorized to create releases will have a login). 
   - Update the latest release with a new tag (don't change the release title)
-  - Run the nsi script and upload the output to the release
+  - Run the nsi script ('installer_windows.nsi') with the Nullsoft Scriptable Install System and upload the output to the releaseon GitHub
