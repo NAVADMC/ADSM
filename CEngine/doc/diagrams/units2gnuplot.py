@@ -10,10 +10,10 @@ __author__ = "Neil Harvey <nharve01@uoguelph.ca>"
 __date__ = "December 2003"
 
 import re
-import string
 import sys
 from math import pi, ceil, floor
-from xml.dom.minidom import parse
+import xml.etree.ElementTree as ET
+import codecs
 
 EARTH_RADIUS = 6378.137
 DEG2KM = EARTH_RADIUS * pi / 180
@@ -52,7 +52,7 @@ def getText (node):
 def main ():
 	units = []
 
-	doc = parse (sys.stdin)
+	doc = ET.parse(sys.stdin.detach()).getroot()  # detach means sys.stdin is treated as binary, not any specific encoding
 	statepats = [
 	  re.compile (r"0|S|Susceptible", re.I),
 	  re.compile (r"1|L|Latent", re.I),
@@ -65,24 +65,24 @@ def main ():
 
 	# Read the units.
 	count = 0
-	for unit in doc.getElementsByTagName ("herd"):
-		idtags = unit.getElementsByTagName ("id")
-		if len (idtags) > 0:
-			unit_id = getText (idtags[0])
+	for unit in doc.findall('.//herd'):
+		idtag = unit.find('./id')
+		if idtag is not None:
+			unit_id = idtag.text
 		else:
 			unit_id = str (count)
-		size = int (getText (unit.getElementsByTagName ("size")[0]))
+		size = int(unit.find('./size').text)
 		# Read either lat-lon or x-y (assumed to be in km).
-		lat_elements = unit.getElementsByTagName ("latitude")
-		if lat_elements:
-			lat = float (getText (lat_elements[0]))
-			lon = float (getText (unit.getElementsByTagName ("longitude")[0]))
+		lat_element = unit.find('.//latitude')
+		if lat_element is not None:
+			lat = float(lat_element.text)
+			lon = float(unit.find('.//longitude').text)
 			x = lon * DEG2KM
 			y = lat * DEG2KM
 		else:
-			x = float (getText (unit.getElementsByTagName ("x")[0]))
-			y = float (getText (unit.getElementsByTagName ("y")[0]))
-		state = getText (unit.getElementsByTagName ("status")[0])
+			x = float(unit.find('.//x').text)
+			y = float(unit.find('.//y').text)
+		state = unit.find('./status').text
 		for i in range (len(statepats)):
 			match = statepats[i].match (state)
 			if match:
@@ -100,7 +100,8 @@ def main ():
 
 	# Set an encoding that can handle letters with accents.  Gnuplot does not
 	# offer Unicode encodings.
-	print "set encoding iso_8859_1"
+	sys.stdout = codecs.getwriter('iso-8859-1')(sys.stdout.detach())
+	print("set encoding iso_8859_1")
 
 	# Set the x and y ranges.  First expand the bounding box to provide some
 	# space around the points.  Then force the plot to be a square.
@@ -121,19 +122,19 @@ def main ():
 		diff = diff / -2.0
 		bbox[0] -= diff
 		bbox[2] += diff
-	print "set xrange [%g:%g]" % (bbox[0], bbox[2])
-	print "set yrange [%g:%g]" % (bbox[1], bbox[3])
-	print """\
+	print("set xrange [%g:%g]" % (bbox[0], bbox[2]))
+	print("set yrange [%g:%g]" % (bbox[1], bbox[3]))
+	print("""\
 set size square
 set xlabel "km (E-W)"
 set ylabel "km (N-S)"\
-"""
+""")
 
 	# Draw equator and prime meridian.
-	print "set arrow from %g,%g to %g,%g nohead lt 0" \
-	  % (bbox[0], 0, bbox[2], 0)
-	print "set arrow from %g,%g to %g,%g nohead lt 0" \
-	  % (0, bbox[1], 0, bbox[3])
+	print("set arrow from %g,%g to %g,%g nohead lt 0"
+	  % (bbox[0], 0, bbox[2], 0))
+	print("set arrow from %g,%g to %g,%g nohead lt 0"
+	  % (0, bbox[1], 0, bbox[3]))
 
 	# Get the number of animals in the smallest and largest units.  If units
 	# have different sizes, the size range will be linearly mapped into
@@ -147,8 +148,9 @@ set ylabel "km (N-S)"\
 	# Write unit IDs near the points.
 	offset = min (bbox[2] - bbox[0], bbox[3] - bbox[1]) / 30.0
 	for unit in units:
-		print """set label "%s" at %g,%g left""" \
-		  % (unit.id.encode("iso-8859-1", "replace"), unit.x + offset, unit.y - offset)
+		sys.stdout.write('set label "')
+		sys.stdout.write(unit.id)
+		print('" at %g,%g left' % (unit.x + offset, unit.y - offset))
 
 	# Colour comes from the line type in gnuplot.  Create an array of line
 	# types for the colours in the unit state-transition diagram.
@@ -176,10 +178,10 @@ set ylabel "km (N-S)"\
 	#	command.append ("""%g title "%s" w l lt %i"""
 	#	  % (bbox[1] - 1, statename[state], linetype[state]))
 
-	command = "plot " + string.join (command, ", \\\n")
-	print command
+	command = "plot " + ", \\\n".join(command)
+	print(command)
 	for unit in units:
-		print "%g %g\ne" % (unit.x, unit.y)
+		print("%g %g\ne" % (unit.x, unit.y))
 
 
 

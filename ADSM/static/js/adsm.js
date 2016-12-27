@@ -3,6 +3,16 @@ $(function(){
     open_panel_if_needed();
     check_disabled_controls();
 
+    // All of the actions to handle forms are tied to Click events on Apply
+    // buttons. However, the browser will also try to submit forms if you hit
+    // the Enter key, which bypasses the actions the Click event. This
+    // instruction disables the Enter key inside forms.
+    $(document).on('keypress', 'form.ajax', function(event){
+        if (event.charCode == 13) {
+        	event.preventDefault();
+        }
+    })
+
     $(document).on('click', 'form.ajax .btn-cancel, .btn-cancel[form]', function(){
         var form = $(this).closest('form');
         var attachment = $(this).attr('form');
@@ -44,8 +54,17 @@ $(function(){
         }
     })
 
-    $('form[action="/setup/RelationalFunction/new/"]').livequery(function(){
-        make_function_panel_editable(); //new forms should come in editable
+    $('form[action^="/setup/RelationalFunction"]').livequery(function(){
+        var action = $(this).attr('action');
+        // The last part of the action URL is either "/new/" or a numeric ID of
+        // an existing function to edit.
+        if (action.indexOf('/new/', action.length-5) != -1) { // does action end with "new"?
+            make_function_panel_editable(); //new forms should come in editable
+        } else {
+            // Existing functions should not be editable until the Edit button
+            // is used.
+            $('#functions_panel input').prop('disabled', true);
+        };
     })
 
     $('form[action="/setup/ProbabilityFunction/new/"]').livequery(function(){
@@ -905,7 +924,7 @@ function make_function_panel_editable() {
     if($modal.length > 0) base = $modal
     base.find('.buttonHolder').removeAttr('hidden')
     base.addClass('editable')
-    base.find('input').addClass('editable')
+    base.find('input').addClass('editable').removeAttr('disabled')
     base.find(':input').addClass('editable')
     //$('#tb_mask').css('visibility', 'visible')
     base.css('pointer-events', 'all')

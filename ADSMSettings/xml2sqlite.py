@@ -9,7 +9,7 @@ defined for the ADSM project for all object creation."""
 import xml.etree.ElementTree as ET
 import warnings
 from pyproj import Proj
-from math import exp, sqrt
+from math import exp, sqrt, modf
 
 import ADSMSettings.models
 from ScenarioCreator.models import *
@@ -157,12 +157,12 @@ def getPdf( xml, nameGenerator ):
         # Make sure the upper x-bound of each bin equals the lower x-bound of
         # the next bin.
         assert x0s[1:] == x1s[:-1]
+        points = []
         for i in range( len( x0s ) ):
-            point = RelationalPoint( relational_function = graph, x = x0s[i], y = ps[i] )
-            point.save()
+            points.append( RelationalPoint( relational_function = graph, x = x0s[i], y = ps[i] ) )
         # Final point, y is always 0
-        point = RelationalPoint( relational_function = graph, x = x1s[-1], y = 0 )
-        point.save()
+        points.append( RelationalPoint( relational_function = graph, x = x1s[-1], y = 0 ) )
+        RelationalPoint.objects.bulk_create(points)
         args['graph'] = graph
     elif pdfType == 'hypergeometric':
         args['n'] = float( required_text(firstChild, './n' ) )
@@ -188,7 +188,7 @@ def getPdf( xml, nameGenerator ):
         sigma = float( required_text(firstChild, './sigma' ) )
         sigma_sq = sigma*sigma
         try:
-	        args['mean'] = exp( zeta + sigma_sq/2 )
+            args['mean'] = exp( zeta + sigma_sq/2 )
         except OverflowError:
             raise OverflowError('mean of lognormal with zeta=%g, sigma=%g' % (zeta,sigma))
         variance = exp( 2*zeta + sigma_sq ) * (exp(sigma_sq) - 1)
@@ -211,15 +211,16 @@ def getPdf( xml, nameGenerator ):
         # contained a sequence of <value> <p> <value> <p>... elements. The new
         # style contained a sequence of <value> elements each containing an <x>
         # and a <p> element.
+        points = []
         newStyle = firstChild.find( './/x' ) is not None
         if newStyle:
             for value in firstChild.findall( './value' ):
                 x = float( required_text(value, './x' ) )
                 p = float( required_text(value, './p' ) )
-                point = RelationalPoint( relational_function = graph, x = x, y = p )
-                point.save()
+                points.append( RelationalPoint( relational_function = graph, x = x, y = p ) )
             # end of loop over <value> elements
         else:
+            x = None
             atX = True
             for element in list( firstChild ):
                 if atX:
@@ -227,10 +228,10 @@ def getPdf( xml, nameGenerator ):
                     atX = False
                 else:
                     p = float( element.text )
-                    point = RelationalPoint( relational_function = graph, x = x, y = p )
-                    point.save()
+                    points.append( RelationalPoint( relational_function = graph, x = x, y = p ) )
                     atX = True
             # end of loop over <value> and <p> elements
+        RelationalPoint.objects.bulk_create(points)
         args['graph'] = graph
     elif pdfType == 'point':
         args['equation_type'] = 'Fixed Value'
@@ -269,14 +270,15 @@ def getRelChart( xml, nameGenerator ):
         if created:
             # This is a new RelationalFunction: no RelationalFunction with this
             # name has been encountered in the XML so far.
+            points = []
             for xyPair in firstChild.findall( './value' ):
-                point = RelationalPoint(
+                points.append(RelationalPoint(
                     relational_function = relChart,
                     x = float( required_text(xyPair, './x' ) ),
                     y = float( required_text(xyPair, './y' ) )
-                )
-                point.save()
+                ))
             # end of loop over points
+            RelationalPoint.objects.bulk_create(points)
         else:
             # One or more RelationalFunctions with this name have already been
             # encountered in the XML.  Check whether this RelationalFunction
@@ -298,14 +300,15 @@ def getRelChart( xml, nameGenerator ):
                 # Give this chart a new, automatically-generated name.
                 relChart = RelationalFunction( name=next( nameGenerator ) )
                 relChart.save()
+                points = []
                 for xyPair in firstChild.findall( './value' ):
-                    point = RelationalPoint(
+                    points.append(RelationalPoint(
                         relational_function = relChart,
                         x = float( required_text(xyPair, './x' ) ),
                         y = float( required_text(xyPair, './y' ) )
-                    )
-                    point.save()
+                    ))
                 # end of loop over points
+                RelationalPoint.objects.bulk_create(points)
             # end of case where we create a new RelationalFunction
         # end of case where we are handling a "new-style" <relational-function>
         # element, that has a name attached to it.
@@ -313,15 +316,16 @@ def getRelChart( xml, nameGenerator ):
         # Old style
         relChart = RelationalFunction( name=next( nameGenerator ) )
         relChart.save()
+        points = []
         values = [float( el.text ) for el in xml.findall( './/value' )]
         while values:
-            point = RelationalPoint(
+            points.append(RelationalPoint(
                 relational_function = relChart,
                 x = values[0],
                 y = values[1]
-            )
-            point.save()
+            ))
             values = values[2:]
+        RelationalPoint.objects.bulk_create(points)
 
     return relChart
 
@@ -412,6 +416,21 @@ def required_text(element, tag):
         return child.text
     except (AttributeError, Exception) as e:
         raise AttributeError("Missing required value " + str(tag) + " in " + str(element).replace('<',''))
+
+
+def int_dz(text):
+    """Like int(), but tolerates having a fractional part as long it it's
+    all zeroes. (The _dz stands for "dot zero".) This is to accommodate
+    programatically-produced NAADSM files that may use generic number output
+    formats that put a .0 on the end of parameters we expect to be integers."""
+    try:
+        num = int(text)
+    except ValueError:
+        frac_part, whole_part = modf(float(text))
+        if frac_part != 0:
+            raise
+        num = int(whole_part)
+    return num
 
 
 def readParameters( parameterFileName, saveIterationOutputsForUnits ):
@@ -706,6 +725,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
     status("Building Detection Model")
     for el in xml.findall( './/detection-model' ):
+        typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
         # <detection-model> elements come in 2 forms. The first form, with a
         # production-type attribute, specifies the probability of observing
         # clinical signs of disease and the probability of reporting those
@@ -714,13 +734,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # observing clinical signs when inside a zone.
         if 'zone' in el.attrib:
             multiplier = float( required_text(el, './zone-prob-multiplier' ) )
-        else:
-            observing = getRelChart( el.find( './prob-report-vs-time-clinical' ), relChartNameSequence )
-            reporting = getRelChart( el.find( './prob-report-vs-time-since-outbreak' ), relChartNameSequence )
-
-        typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
-        for typeName in typeNames:
-            if 'zone' in el.attrib:
+            for typeName in typeNames:
                 zoneName = el.attrib['zone']
                 # If a ZoneEffect object has already been assigned to this
                 # combination of zone and production type, retrieve it; otherwise,
@@ -732,17 +746,21 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     )
                     effect = assignment.effect
                 except ZoneEffectAssignment.DoesNotExist:
-                    effect = ZoneEffect(name= zoneName + ' effect on ' + typeName)
+                    effect = ZoneEffect(name=zoneName + ' effect on ' + typeName)
                     effect.save()
                     assignment = ZoneEffectAssignment(
-                        zone = Zone.objects.get( name=zoneName ),
-                        production_type = ProductionType.objects.get( name=typeName ),
-                        effect = effect
+                        zone=Zone.objects.get(name=zoneName),
+                        production_type=ProductionType.objects.get(name=typeName),
+                        effect=effect
                     )
                     assignment.save()
                 effect.zone_detection_multiplier = multiplier
                 effect.save()
-            else:
+            # end of loop over production-types covered by this <detection-model> element
+        else:
+            observing = getRelChart( el.find( './prob-report-vs-time-clinical' ), relChartNameSequence )
+            reporting = getRelChart( el.find( './prob-report-vs-time-since-outbreak' ), relChartNameSequence )
+            for typeName in typeNames:
                 protocol = ControlProtocol(
                     name = typeName + " Protocol",
                     use_detection = True,
@@ -755,7 +773,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     control_protocol = protocol
                 )
                 assignment.save()
-        # end of loop over production-types covered by this <detection-model> element
+            # end of loop over production-types covered by this <detection-model> element
     # end of loop over <detection-model> elements
 
     status("Contact Recorder Model")
@@ -814,7 +832,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             assert (direction == 'in' or direction == 'out')
         except KeyError:
             direction = 'both'
-        tracePeriod = int( required_text(el, './trace-period/value' ) )
+        tracePeriod = int_dz( required_text(el, './trace-period/value' ) )
 
         typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
         for typeName in typeNames:
@@ -1004,7 +1022,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     status("Building Vaccination")
     productionTypesWithVaccineEffectsDefined = set()
     for el in xml.findall( './/vaccine-model' ):
-        delay = int( required_text(el, './delay/value' ) )
+        delay = int_dz( required_text(el, './delay/value' ) )
         immunityPeriod = getPdf( el.find( './immunity-period' ), pdfNameSequence )
 
         typeNames = getProductionTypes( el, 'production-type', productionTypeNames )
@@ -1065,7 +1083,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # end of loop over from-production-types covered by this <ring-vaccination-model> element
 
         priority = int( required_text(el, './priority' ) )
-        minTimeBetweenVaccinations = int( required_text(el, './min-time-between-vaccinations/value' ) )
+        minTimeBetweenVaccinations = int_dz( required_text(el, './min-time-between-vaccinations/value' ) )
         try:
             vaccinateDetectedUnits = getBool( el.find( './vaccinate-detected-units' ) )
         except AttributeError:
@@ -1113,7 +1131,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         # Enable trace forward/out from all production types.
         contactType = el.attrib['contact-type']
         assert (contactType == 'direct' or contactType == 'indirect')
-        tracePeriod = int( required_text(el, './trace-period/value' ) )
+        tracePeriod = int_dz( required_text(el, './trace-period/value' ) )
         traceSuccess = float( required_text(el, './trace-success' ) )
         for typeName in productionTypeNames:
             # If a ControlProtocol object has already been assigned to this
@@ -1315,7 +1333,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
     for el in xml.findall( './/resources-and-implementation-of-controls-model' ):
         if useDestruction:
-            plan.destruction_program_delay = int( required_text(el, './destruction-program-delay/value' ) )
+            plan.destruction_program_delay = int_dz( required_text(el, './destruction-program-delay/value' ) )
             plan.destruction_capacity = getRelChart( el.find( './destruction-capacity' ), relChartNameSequence )
             try:
                 order = required_text(el, './destruction-priority-order' ).strip()
@@ -1356,7 +1374,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
         if useVaccination:
             try:
-                unitsDetectedBeforeTriggeringVaccination = max( 1, int( el.find( './vaccination-program-delay' ).text ))
+                unitsDetectedBeforeTriggeringVaccination = max( 1, int_dz( el.find( './vaccination-program-delay' ).text ))
             except AttributeError:
                 unitsDetectedBeforeTriggeringVaccination = 1 # default
             trigger = DiseaseDetection(
@@ -1408,7 +1426,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
         except AttributeError:
             vaccinationExtra = None
         try:
-            baselineCapacity = int( el.find( './baseline-vaccination-capacity' ).text )
+            baselineCapacity = int_dz( el.find( './baseline-vaccination-capacity' ).text )
         except AttributeError:
             baselineCapacity = None
 

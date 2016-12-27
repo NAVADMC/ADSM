@@ -238,7 +238,12 @@ class Unit(BaseModel):
             elif key in ('latitude', 'longitude'):
                 kwargs[key] = float(kwargs[key])
             elif key == 'initial_size':
-                kwargs[key] = int(kwargs[key])
+                try:
+                    kwargs[key] = int(kwargs[key])
+                except ValueError as e:
+                    # attempt float
+                    kwargs[key] = int(float(kwargs[key]))
+
             elif key == 'initial_state':
                 if len(kwargs[key]) > 1:
                     new_val = choice_char_from_value(kwargs[key], Unit._meta.get_field_by_name('initial_state')[0]._choices)

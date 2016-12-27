@@ -41,7 +41,7 @@ Create Virtual Environment:
 
   - Windows: `/path/to/py3.4/python -m venv /path/to/adsm_venv`
     - Activate with `/path/to/adsm_venv/Scripts/activate.bat`
-    - Install Git so it is properly on the command line
+    - Install [Git](https://git-scm.com/download/win) so it is properly on the command line
     - install Visual Studio 2010: http://download.cnet.com/Microsoft-Visual-Studio-2010-Professional/3000-2212_4-10618634.html (Note: Installing the trial is fine as all we need is the compiler. Where VS the GUI App may stop working after 30 days, the CLI compiler should continue to be valid)
     - modify file `\path\to\py3.4\Lib\distutils\msvc9compiler.py` (Note: This is not in your venv, but your base python 3.4 install)
       - after `ld_args.append('/MANIFESTFILE:' + temp_manifest)` add `ld_args.append('/MANIFEST')` at the same indentation level
@@ -73,9 +73,17 @@ Using the pip in your new Virtual Environment (confirm Virtual Environment Activ
   - install psutil: `pip install psutil-2.2.1-cp34-none-win_amd64.whl`
                 
 ###React Setup
-Install Node (please x64 version)
-cd BASE_DIR (Not an actual command. Go into the root of the project)
-npm install
+Install Node (please x64 version). Choose the “Latest Features” download, not the “Mature and Dependable” one.  
+Restart your command prompt so that `npm` and `node` will be on your path.  
+cd BASE_DIR (Not an actual command. Go into the root of the project)  
+`npm install`
+
+###Chrome Setup
+If you are working on JavaScript and/or CSS files, you may find it useful to disable caching in Chrome. This will ensure that when you are testing ADSM in the browser, _as long as you leave the Developer Tools pane open_, Chrome will be using your latest saved version of the JS/CSS files, not an older cached version.
+
+![Screenshot showing Developer Tools pane open in Chrome. The ⋮ button has been pressed to open a menu and the “Settings” menu item is about to be clicked.](http://navadmc.github.io/ADSM/images/chrome_dev_tools_settings.png) 
+
+![Screenshot showing Developer Tools settings in Chrome. The “Disable cache (while DevTools is open)” checkbox has been checked.](http://navadmc.github.io/ADSM/images/chrome_dev_tools_disable_cache.png)
 
 ###Compile chain (optional)
 If you plan on compiling a distributable version of the project, then use the following instructions.
@@ -129,6 +137,8 @@ Windows:
   
         `pip install hg+https://bitbucket.org/BryanHurst/cx_freeze`
 
+    > Note: this currently does not work; instead, install cx_freeze 4.3.4 using pip, then manually apply [this patch](https://bitbucket.org/BryanHurst/cx_freeze/commits/eba6cb644d390f69f07adbf9fdcead71ec0feebf?at=default) and [this patch](https://bitbucket.org/BryanHurst/cx_freeze/commits/22d73fe6386d92834339bdea30b3786a3543b2de?at=default) to the cx_freeze files that pip installed in your site-packages folder.
+
 ###Selenium Tests
 To run the Selenium Tests, you will need Chrome or Chromium installed on your system plus the ChromeDriver v2.12.
 
@@ -146,6 +156,12 @@ Mac:
 
 Unzip the file and place it in the Scripts or bin folder of your new Virtual Environment (/path/to/adsm_venv/Scripts/ || /path/to/adsm_vent/bin/)
 
+To run the tests, go into the folder containing `manage.py` and type  
+`python manage.py test`  
+You can also be more specific: for example, to run just the ScenarioCreator tests you would type:  
+`python manage.py test ScenarioCreator`  
+or to run just a single test:  
+`python manage.py test ScenarioCreator.tests.test_functional.FunctionalTests.test_delete_one_point_in_relational_function`
 
 Development and Production Branches
 -----------
@@ -175,16 +191,16 @@ Updating the Distributable
 ----------
 When releaseing a Beta compile:
 
-  - Bump the version in `ADSM/__init__.py` and in `package.json`
+  - Bump the version in `ADSM/__init__.py` and in `package.json`. See the [Version Guide](https://github.com/NAVADMC/ADSM/wiki/Version-Guide) for the meaning of the four parts of the version number.
   - Build (with sourced python) `python setup.py build`
-  - Push the Update `cd build` `npu.exe --create_update --program=ADSM_Beta --program_id=PROGRAM_ID --password=PASSWORD`
+  - Push the Update `cd build` `npu.exe --create_update --program=ADSM_Beta --program_id=PROGRAM_ID --password=PASSWORD` You can find the program ID and password by logging into the Newline Program Updater (everyone authorized to create releases will have a login).
   - Update the latest pre-release with a new tag (don't change the release title)
   
 When releasing a Production compile:
 
-  - Bump the version in `ADSM/__init__.py`, in `package.json` and in `installer_windows.nsi`
+  - Bump the version in `ADSM/__init__.py`, in `package.json` and in `installer_windows.nsi`. See the [Version Guide](https://github.com/NAVADMC/ADSM/wiki/Version-Guide) for the meaning of the four parts of the version number.
   - Build (with sourced python) `python setup.py build`
-  - Push the Update `cd build` `npu.exe --create_update --program=ADSM --program_id=PROGRAM_ID --password=PASSWORD` 
+  - Push the Update `cd build` `npu.exe --create_update --program=ADSM --program_id=PROGRAM_ID --password=PASSWORD` You can find the program ID and password by logging into the Newline Program Updater (everyone authorized to create releases will have a login). 
   - Update the latest release with a new tag (don't change the release title)
   - Run the nsi script and upload the output to the release
   

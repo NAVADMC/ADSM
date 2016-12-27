@@ -30,6 +30,7 @@ build_exe_options = {
     'optimize': 2,
     'excludes': [
         'PyInstaller',
+        'tkinter',
         # CHANGE ME for any python packages in your project that you want excluded
         'development_scripts',
     ],
@@ -289,7 +290,7 @@ class BuildADSM(build_exe):
                 viewer = possible_viewer
                 break
         if viewer:
-            shutil.copy(os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', settings.OS_DIR, viewer), os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', settings.OS_DIR, viewer.replace('Viewer', 'ADSM_Viewer')))
+            shutil.copy(os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', settings.OS_DIR, viewer), os.path.join(settings.BASE_DIR, self.build_exe, 'Viewer', settings.OS_DIR, viewer.replace('Viewer', 'ADSM_Beta_Viewer')))
 
         # Look for any DLLs that the included packages may have and copy them into bin/env as well
         for package in self.packages:

@@ -8,9 +8,11 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 
 from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
     ProbabilityFunction, RelationalFunction, RelationalPoint, Population, \
@@ -24,8 +26,105 @@ def parent_of(webElement):
     return webElement.find_element_by_xpath('..')
     
 
+class FunctionsPanel(object):
+    """This class wraps the "#functions_panel" WebElement and adds some convenience methods. Kind of like Selenium's
+    Select class that wraps drop-downs and adds convenience methods for selecting options."""
+    def __init__(self, web_element, timeout=10):
+        self.functions_panel = web_element
+        # The parent of the WebElement object will be the WebDriver
+        self.driver = web_element.parent
+        self.actions = ActionChains(self.driver)
+        self.timeout = timeout
+        self.hit_enter = False # if True, hits Enter key to save changes; if False, clicks Apply button
+
+    def _edit_with_overwrite(self):
+        """Click the appropriate buttons to edit with overwrite."""
+        WebDriverWait(self.functions_panel, timeout=self.timeout).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, 'edit-button'))
+        ).click()
+        # You can get an "Other element would receive the click" exception if you try to click the Overwrite button
+        # while the buttons are still animating into place. The animation takes 0.4 seconds (search for
+        # .edit-button-holder in adsm.css).
+        time.sleep(0.4)
+        WebDriverWait(self.functions_panel, timeout=self.timeout).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, 'overwrite-button'))
+        ).click()
+
+    def _move_to_row(self, row):
+        """Puts the focus on the x-point in the given row."""
+        # We actually start on the y-point in that row, and tab backwards to get to the first x-point. That puts focus
+        # on the x-point *and* selects whatever is currently filled in there, so that when we start typing, we'll
+        # overwrite it.
+        y_values = self.functions_panel.find_elements_by_xpath(".//input[starts-with(@name,'relationalpoint') and contains(@name,'-y')]")
+        self.actions.move_to_element(y_values[row]).click().key_down(Keys.SHIFT).send_keys(Keys.TAB).key_up(Keys.SHIFT).perform()
+
+    def _save_changes(self):
+        if self.hit_enter:
+            self.actions.send_keys(Keys.ENTER).perform() # should be just like clicking the Apply button
+        else:
+            self.functions_panel.find_element_by_class_name('btn-save').click()
+
+        # The blocking overlay will be up while the apply is perfomed
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, '#functions_panel .edit-button'))
+        )
+
+    def set_hit_enter(self, hit_enter):
+        self.hit_enter = hit_enter
+
+    def set_points(self, points):
+        self._edit_with_overwrite()
+
+        # Type in the points by tabbing between the fields like a user would do.
+        self._move_to_row(0)
+        first_point = True
+        for x,y in points:
+            if first_point:
+                first_point = False
+            else:
+                # 2 tabs to go from Y -> Delete checkbox -> X on next row.
+                self.actions.send_keys(Keys.TAB).send_keys(Keys.TAB).perform()
+            self.actions.send_keys(str(x)).send_keys(Keys.TAB).send_keys(str(y)).perform()
+
+        self._save_changes()
+
+    def change_point(self, point_idx, new_point):
+        self._edit_with_overwrite()
+
+        self._move_to_row(point_idx)
+        x, y = new_point
+        if x is not None:
+            self.actions.send_keys(str(x)).perform()
+        if y is not None:
+            self.actions.send_keys(Keys.TAB).send_keys(str(y)).perform()
+
+        self._save_changes()
+
+    def delete_point(self, point_idx):
+        self._edit_with_overwrite()
+
+        self._move_to_row(point_idx)
+        # Tab twice to get to Delete checkbox, then hit space to check.
+        self.actions.send_keys(Keys.TAB).send_keys(Keys.TAB).send_keys(Keys.SPACE).perform()
+
+        self._save_changes()
+
+    def select_relational_function(self, function_name):
+        # Click the Relational button at the top of the functions panel
+        self.functions_panel.find_element_by_xpath(".//*[contains(@class,'list-button') and @data-target='#relational-options']").click()
+        # The list animates open. Wait for the item we want to be clickable.
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.element_to_be_clickable((By.XPATH, "//*[@id='relational-options']//a[contains(text(),'" + function_name + "')]"))
+        ).click()
+        # Wait for list to collapse
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.invisibility_of_element_located((By.ID, 'relational-options'))
+        )
+
 class FunctionalTests(StaticLiveServerTestCase):
     multi_db = True
+    default_timeout = 10 # seconds
+    tolerance = 1E-6 # small tolerance for floating-point comparison error
 
     @classmethod
     def setUpClass(cls):
@@ -107,7 +206,9 @@ class FunctionalTests(StaticLiveServerTestCase):
         zone = Zone.objects.create(name="Medium", radius=10)
 
     def click_navbar_element(self, name, sleep=1):
-        target = self.selenium.find_element_by_tag_name('nav')
+        target = WebDriverWait(self.selenium, self.default_timeout).until(
+            EC.visibility_of_element_located((By.TAG_NAME, 'nav'))
+        )
         target.find_element_by_link_text(name).click()
         time.sleep(sleep)
 
@@ -116,7 +217,7 @@ class FunctionalTests(StaticLiveServerTestCase):
 
     def select_option(self, element_id, visible_text, timeout=10):
         target = WebDriverWait(self.selenium, timeout).until(
-            expected_conditions.presence_of_element_located((By.ID, element_id))
+            EC.presence_of_element_located((By.ID, element_id))
         )
         Select(target).select_by_visible_text(visible_text)
         time.sleep(2)  # wait for panel loading
@@ -226,11 +327,11 @@ class FunctionalTests(StaticLiveServerTestCase):
         # id="-setup-DiseaseProgression-2-" when the whole series of tests is run. Weird, but we get around it by
         # doing a partial id match using XPath.
         WebDriverWait(self.selenium, timeout=10).until(
-            expected_conditions.presence_of_element_located((By.XPATH, "//*[starts-with(@id, '-setup-DiseaseProgression-')]"))
+            EC.presence_of_element_located((By.XPATH, "//*[starts-with(@id, '-setup-DiseaseProgression-')]"))
         )
         self.select_option('id_disease_latent_period','Subclinical period - cattle')
         WebDriverWait(self.selenium, timeout=10).until(
-            expected_conditions.visibility_of_element_located((By.ID, 'functions_panel'))
+            EC.visibility_of_element_located((By.ID, 'functions_panel'))
         )
         self.find('#functions_panel .edit-button').click()
         time.sleep(1)
@@ -265,7 +366,7 @@ class FunctionalTests(StaticLiveServerTestCase):
         
         self.find('.addNew a').click()
         WebDriverWait(self.selenium, timeout=10).until(
-            expected_conditions.presence_of_element_located((By.ID, '-setup-ZoneEffect-new-'))
+            EC.presence_of_element_located((By.ID, '-setup-ZoneEffect-new-'))
         )
         self.select_option('id_zone_indirect_movement', 'Add...')
         
@@ -421,3 +522,244 @@ class FunctionalTests(StaticLiveServerTestCase):
             except:
                 pass
 
+    def use_within_unit_prevalence(self, enable_prevalence, timeout=None):
+        """Enables or disables use of within-unit prevalence."""
+        if timeout is None:
+            timeout = self.default_timeout
+
+        self.click_navbar_element('Disease')
+        # Wait for the checkbox to appear
+        checkbox = WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.NAME, 'use_within_unit_prevalence'))
+        )
+        # If enable_prevalence==True and the checkbox is not checked, click it to check.
+        # If enable_prevalence==False and the checkbox is checked, click it to un-check.
+        if enable_prevalence != checkbox.is_selected():
+            checkbox.click()
+
+        # Save the changes we just made.
+        self.find('.btn-save').click()
+        return
+
+    def setup_prevalence_chart(self, disease_progression_name, points, timeout=None):
+        """Sets up the prevalence chart for the given Disease Progression. Returns the name of the relational function
+        that contains the prevalence chart."""
+        if timeout is None:
+            timeout = self.default_timeout
+
+        self.click_navbar_element('Disease Progression')
+        # Once the Disease Progression choices come up, click the desired one
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.LINK_TEXT, disease_progression_name))
+        ).click()
+
+        # Once the latent period, etc. options come up, click to bring up the prevalence chart
+        prevalence_options = WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.ID, 'id_disease_prevalence'))
+        )
+        prevalence_name = Select(prevalence_options).first_selected_option.text # remember its name
+        prevalence_options.click()
+
+        # Once the prevalence chart comes up, overwrite the old points with the new ones.
+        FunctionsPanel(
+            WebDriverWait(self.selenium, timeout=timeout).until(
+                EC.visibility_of_element_located((By.ID, 'functions_panel'))
+            )
+        ).set_points(points)
+
+        return prevalence_name
+
+    def test_overwrite_points_in_relational_function(self):
+        """This test checks that the correct number of points are present after overwriting a relational function. See
+        the comment "When I went back, I have many rows that must have been saving as I was tinkering around with
+        things" in https://github.com/NAVADMC/ADSM/issues/678."""
+        self.setup_scenario()
+
+        self.use_within_unit_prevalence(True)
+        # Pick the first DiseaseProgression
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        self.setup_prevalence_chart(disease_progression.name, points)
+
+        # Verify that the prevalence chart now has the correct number of points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        self.assertEqual(
+            len(current_prevalence_points), len(points),
+            'there are %i points (should be %i)' % (len(current_prevalence_points), len(points))
+        )
+
+    def test_change_one_point_in_relational_function(self):
+        """This test checks that the correct number of points are present after editing one point in a relational
+         function and that the changed point has the correct value. See https://github.com/NAVADMC/ADSM/issues/678."""
+        timeout = self.default_timeout
+        self.setup_scenario()
+
+        # Set up a prevalence chart, just like in the test above
+        self.use_within_unit_prevalence(True)
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        self.setup_prevalence_chart(disease_progression.name, points)
+
+        # Exit the relational function dialog, then navigate back to it
+        self.click_navbar_element('Scenario Description')
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.ID, 'id_description'))
+        )
+        self.click_navbar_element('Disease Progression')
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.LINK_TEXT, disease_progression.name))
+        ).click()
+        WebDriverWait(self.selenium, timeout=timeout).until(
+            EC.visibility_of_element_located((By.ID, 'id_disease_prevalence'))
+        ).click()
+
+        # Now reduce the peak from 0.9 to 0.8
+        peak_idx = 2
+        new_peak = 0.8
+        FunctionsPanel(
+            WebDriverWait(self.selenium, timeout=timeout).until(
+                EC.visibility_of_element_located((By.ID, 'functions_panel'))
+            )
+        ).change_point(peak_idx, (None, new_peak))
+
+        # Verify that the chart still has the same number of points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        self.assertEqual(
+            len(current_prevalence_points), len(points),
+            'there are %i points (should be %i)' % (len(current_prevalence_points), len(points))
+        )
+        # Check that the changed value is what we set it to
+        changed_point = current_prevalence_points[peak_idx]
+        self.assertTrue(
+            abs(changed_point.y - new_peak) < self.tolerance,
+            'the y-value of point #%i is %g (should be %g)' % (peak_idx+1, changed_point.y, new_peak)
+        )
+
+    def test_change_one_point_in_relational_function_without_closing_functions_panel(self):
+        """Like the test above, but don't leave the functions panel. Instead simulate a user who fills in a relational
+        function, clicks Apply, then notices a mistake in one point and fixes it.
+        https://github.com/NAVADMC/ADSM/issues/678."""
+        self.setup_scenario()
+
+        # Set up a prevalence chart, just like in the test above
+        self.use_within_unit_prevalence(True)
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        self.setup_prevalence_chart(disease_progression.name, points)
+
+        # The functions panel should still be open
+        functions_panel = FunctionsPanel(self.find('#functions_panel'))
+        # Reduce the peak from 0.9 to 0.8
+        peak_idx = 2
+        new_peak = 0.8
+        functions_panel.change_point(peak_idx, (None, new_peak))
+
+        # Verify that the chart still has the same number of points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        self.assertEqual(
+            len(current_prevalence_points), len(points),
+            'there are %i points (should be %i)' % (len(current_prevalence_points), len(points))
+        )
+        # Check that the changed value is what we set it to
+        changed_point = current_prevalence_points[peak_idx]
+        self.assertTrue(
+            abs(changed_point.y - new_peak) < self.tolerance,
+            'the y-value of point #%i is %g (should be %g)' % (peak_idx+1, changed_point.y, new_peak)
+        )
+
+    def test_delete_one_point_in_relational_function(self):
+        """This test checks that the correct number of points are present after deleting one point in a relational
+         function and that the correct point was deleted. See https://github.com/NAVADMC/ADSM/issues/678."""
+        timeout = self.default_timeout
+        self.setup_scenario()
+
+        # Set up a prevalence chart, just like in the test above
+        self.use_within_unit_prevalence(True)
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        self.setup_prevalence_chart(disease_progression.name, points)
+
+        # Now delete the point with x-value 4
+        FunctionsPanel(
+            WebDriverWait(self.selenium, timeout=timeout).until(
+                EC.visibility_of_element_located((By.ID, 'functions_panel'))
+            )
+        ).delete_point(3)
+
+        # Verify that the chart has one fewer points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        self.assertEqual(
+            len(current_prevalence_points), len(points)-1,
+            'there are %i points (should be %i after deletion)' % (len(current_prevalence_points), len(points)-1)
+        )
+        # Check that there is no point with x-value 4
+        self.assertFalse(
+            any([abs(point.x - 4) < self.tolerance for point in current_prevalence_points]),
+            'there is still a point with x-value==4 after deletion'
+        )
+
+    def test_delete_one_point_in_relational_function_with_manual_refresh_before_delete(self):
+        """This test checks that the correct number of points are present after deleting one point in a relational
+        function and that the correct point was deleted. This test differs from the one above in that it manually
+        refreshes the points data before doing the delete. See https://github.com/NAVADMC/ADSM/issues/678."""
+        timeout = self.default_timeout
+        self.setup_scenario()
+
+        # Set up a prevalence chart, just like in the test above
+        self.use_within_unit_prevalence(True)
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        prevalence_name = self.setup_prevalence_chart(disease_progression.name, points)
+
+        # Force a reload of the points data
+        functions_panel = FunctionsPanel(
+            WebDriverWait(self.selenium, timeout=timeout).until(
+                EC.visibility_of_element_located((By.ID, 'functions_panel'))
+            )
+        )
+        functions_panel.select_relational_function(prevalence_name)
+
+        # Now delete the point with x-value 4
+        functions_panel.delete_point(3)
+
+        # Verify that the chart has one fewer points
+        current_prevalence_points = RelationalPoint.objects.filter(relational_function=disease_progression.disease_prevalence)
+        self.assertEqual(
+            len(current_prevalence_points), len(points)-1,
+            'there are %i points (should be %i after deleting one)' % (len(current_prevalence_points), len(points)-1)
+        )
+        # Check that there is no point with x-value 4
+        self.assertFalse(
+            any([abs(point.x - 4) < self.tolerance for point in current_prevalence_points]),
+            'there is still a point with x-value==4 after deletion'
+        )
+
+    def test_delete_one_point_in_relational_function_with_manual_refresh_before_delete_hit_enter(self):
+        """This test checks that the correct number of points are present after deleting one point in a relational
+        function and that the correct point was deleted. This test differs from the one above in that it hits the Enter
+        key instead of clicking the Apply button to save changes."""
+        timeout = self.default_timeout
+        self.setup_scenario()
+
+        # Set up a prevalence chart, just like in the test above
+        self.use_within_unit_prevalence(True)
+        disease_progression = DiseaseProgression.objects.all().first()
+        points = [(0,0), (1,0.1), (2,0.9), (4,0.2), (10,0)]
+        prevalence_name = self.setup_prevalence_chart(disease_progression.name, points)
+
+        # Force a reload of the points data
+        functions_panel = FunctionsPanel(
+            WebDriverWait(self.selenium, timeout=timeout).until(
+                EC.visibility_of_element_located((By.ID, 'functions_panel'))
+            )
+        )
+        functions_panel.select_relational_function(prevalence_name)
+
+        # Now delete the point with x-value 4
+        functions_panel.set_hit_enter(True)
+        # Since we disabled use of the Enter key inside forms (issue #714),
+        # this test should now time out as the Enter key has no effect.
+        try:
+            functions_panel.delete_point(3)
+        except TimeoutException:
+            pass

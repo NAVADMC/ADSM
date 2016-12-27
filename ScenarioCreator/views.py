@@ -1,7 +1,8 @@
 import csv
 import subprocess
 import itertools
-from django.http import JsonResponse
+import platform
+from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
 from django.db.models import Q, ObjectDoesNotExist
@@ -418,10 +419,15 @@ def relational_function(request, primary_key=None, doCopy=False):
                         point.instance.relational_function = created_instance
                         point.instance.save()
             else:
-                # If the user clicked the Overwrite button, all we want is a save() on any points that have changed.
+                # If the user clicked the Overwrite button, all we want is a delete() on any points for which the
+                # Delete checkbox was checked, and a save() on any points that have changed.
                 for point in context['formset'].forms:
                     if point.changed_data:
-                        point.instance.save()
+                        if point.cleaned_data['DELETE']:
+                            point.instance.delete()
+                        else:
+                            point.instance.save()
+        return HttpResponseRedirect(context['action'])
     else:
         context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
 
@@ -744,7 +750,7 @@ def population(request):
 
 def validate_scenario(request):
     simulation = subprocess.Popen(adsm_executable_command() + ['--dry-run'],
-                                  shell=True,
+                                  shell=(platform.system() != 'Darwin'),
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE)
     stdout, stderr = simulation.communicate()  # still running while we work on python validation

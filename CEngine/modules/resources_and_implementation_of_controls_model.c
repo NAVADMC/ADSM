@@ -416,7 +416,7 @@ cancel_vaccination (UNT_unit_t * unit, int day,
           link = (GList *) g_queue_peek_head (locations_in_queue);
           request = (EVT_event_t *) (link->data);
           details = &(request->u.request_for_vaccination);
-          if ((day - details->day_commitment_made) <= older_than)
+          if (older_than != 0 && ((day - details->day_commitment_made) <= older_than))
             break;
           g_queue_pop_head (locations_in_queue);
           /* Delete both the RequestForVaccination structure and the GQueue link
