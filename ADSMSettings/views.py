@@ -62,29 +62,37 @@ def import_status(request):
     return JsonResponse(json_response)
 
 
-def run_importer(request):
+def run_importer(request, new_name=None):
     param_path = handle_file_upload(request, 'parameters_xml', is_temp_file=True, overwrite_ok=True)  # we don't want param XMLs stored next to population XMLs
     popul_path = handle_file_upload(request, 'population_xml', is_temp_file=True, overwrite_ok=True)
-    import_legacy_scenario(param_path, popul_path)
+    import_legacy_scenario(param_path, popul_path, new_name=new_name)
 
 
-def import_legacy_scenario(param_path, popul_path):
-    names_without_extensions = tuple(os.path.splitext(os.path.basename(x))[0] for x in [param_path, popul_path])  # stupid generators...
-    new_scenario()  # I realized this was WAY simpler than creating a new database connection
+def import_legacy_scenario(param_path, popul_path, new_name=None):
+    if new_name:
+        names_without_extensions = new_name
+    else:
+        names_without_extensions = tuple(
+            os.path.splitext(os.path.basename(x))[0] for x in [param_path, popul_path])  # stupid generators...
+        names_without_extensions = '%s with %s' % names_without_extensions
+
     import_naadsm_xml(popul_path, param_path)  # puts all the data in activeSession
-    scenario_filename('%s with %s' % names_without_extensions, check_duplicates=True)
+    scenario_filename(names_without_extensions, check_duplicates=True)
     return save_scenario(None)  # This will overwrite a file of the same name without prompting
     # except BaseException as error:
     #     print("Import process crashed\n", error)
     #     return redirect("/app/ImportScenario/")
     #this could be displayed as a more detailed status screen
-        
-    
-def import_naadsm_scenario(request):
+
+
+def import_naadsm_scenario(request, new_name=None):
     if 'POST' in request.method:
         initialized_form = ImportForm(request.POST, request.FILES)
     else:  # GET page for the first time
         initialized_form = ImportForm()
+        close_old_connections()  # close old session
+        new_scenario(new_name=new_name)  # add a scenario to session
+
     context = {'form': initialized_form,
                'title': "Import Legacy NAADSM Scenario in XML format",
                'loading_message': "Please wait as we import your file...",
@@ -94,7 +102,7 @@ def import_naadsm_scenario(request):
 
     if initialized_form.is_valid():
         try:
-            run_importer(request)
+            run_importer(request, new_name=new_name)
             return loading_screen(request)
         except Exception as e:
             import sys
