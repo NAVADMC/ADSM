@@ -176,7 +176,8 @@ Master is tagged in GitHub as pre-release.
 Updating the adsm_simulation Executable
 ----------
 
-    cd ADSM
+    clone the ADSM-CEngine repo
+    cd ADSM-CEngine
     git pull
     cd CEngine
     sh bootstrap
@@ -185,7 +186,7 @@ Updating the adsm_simulation Executable
 
 `make` will will fail on a `dia: command not found` error when it gets to the ADSM/CEngine/doc/diagrams directory.  That’s OK: at this point, the executable is built, and you are done.
 
-Copy the executable into the `bin` folder and commit it after testing.
+Copy the compiled executable into the `bin` folder in the ADSM Repo and commit it after testing.
 
 Updating the Distributable
 ----------
