@@ -163,16 +163,6 @@ You can also be more specific: for example, to run just the ScenarioCreator test
 or to run just a single test:  
 `python manage.py test ScenarioCreator.tests.test_functional.FunctionalTests.test_delete_one_point_in_relational_function`
 
-Development and Production Branches
------------
-List of Relevant Branches: master, Stable
-
-Development should be done in feature branches and merged into master. Master is the general development branch, and where Beta releases come from.
-
-Stable is the branch we merge master into when we are ready to do a production release.  
-**Stable branch is what will be tagged in the GitHub Releases.**    
-Master is tagged in GitHub as pre-release.
-
 Updating the adsm_simulation Executable
 ----------
 
@@ -188,22 +178,50 @@ Updating the adsm_simulation Executable
 
 Copy the compiled executable into the `bin` folder in the ADSM Repo and commit it after testing.
 
+Development and Production Branches
+-----------
+List of Relevant Branches: master, Stable
+
+Development should be done in feature branches and merged into master. Master is the general development branch, and where Beta releases come from.  
+**Master branch is what will be tagged in GitHub Pre-Release (Beta) Releases.**
+
+Stable is the branch we merge master into when we are ready to do a production release.  
+**Stable branch is what will be tagged in the GitHub Releases.**    
+
 Updating the Distributable
 ----------
+Version Guide:  
+The version number is broken into four parts by periods SimulationMajor.SimulationMinor.UIRelease.UIMinor/Beta.
+
+  1. Simulation Major Version is only ever changed when there is a fundamental difference in what the simulation is modeling.
+  1. Simulation Minor Version changes when there is a new feature available in the simulation, such as Vaccination Triggers, Vaccination Rings, or Within Unit Prevalence.
+  1. UI Release Version changes when there is an update to the UI, offering easier user interaction that is still compatible with older simulation files without any change. Each Release Version has a download available on the GitHub Release page.
+  1. UI Minor/Beta Version is the last digit and offers minor updates as the development process continues to fix UI quirks, release bug fixes or change UI layout.
+  
+Note that this does mean that the first two digits can advance without resetting the last two digits.  
+A progression could be 3.3.4.5 -> 3.4.4.5.
+
+The Master/Beta Branch will always be the first into a new UIRelease version.  
+After pushing a Stable release, the next set of new feature work will bump the UIRelease version and reset the UIMinor version in the master branch (3.3.4.5 -> 3.3.5.0).  
+Once work in master is deemed ready for release, Stable is bumped to the latest UIRelease.UIMinor version that we have been working on in master; meaning Stable won't see 3.3.5.1, 3.3.5.2... and so on but go directly to the current state of Master (3.3.5.8?).
+
 When releaseing a Beta compile:
 
-  - Bump the version in `ADSM/__init__.py` and in `package.json`. See the [Version Guide](https://github.com/NAVADMC/ADSM/wiki/Version-Guide) for the meaning of the four parts of the version number.
+  - Bump the version in `ADSM/__init__.py` and in `package.json`.
   - Build (with sourced python) `python setup.py build`
-  - Push the Update `cd build` `npu.exe --create_update --program=ADSM_Beta --program_id=PROGRAM_ID --password=PASSWORD` You can find the program ID and password by logging into the Newline Program Updater (everyone authorized to create releases will have a login).
-  - Update the latest pre-release with a new tag (don't change the release title)
+  - If this is work on a new set of features after a Stable release, then this is a new UIRelease and you need to make a GitHub release marked as "pre-release". The title of this release should be x.x.x.0, with the UIMinor always being a zero. Also create a beta tag on master. In the description, the ADSM version number should reflect the version in the title.
+    - Create a zip file of your clean `build` directory and attach it to this new release.
+  - If this is Minor work on a current UIRelease, then edit the GitHub release for the current UIRelease and update the ADSM Beta number in the description to the latest UIMinor number and create a new beta tag on master with this number. Do not update the release title, and do not update the attached zip file (people can pull changes via update).
+  - Push the Update `cd build` `npu.exe --create_update --program=ADSM_Beta --program_id=PROGRAM_ID --password=PASSWORD`.
   
 When releasing a Production compile:
 
-  - Bump the version in `ADSM/__init__.py`, in `package.json` and in `installer_windows.nsi`. See the [Version Guide](https://github.com/NAVADMC/ADSM/wiki/Version-Guide) for the meaning of the four parts of the version number.
+  - Bump the version in `ADSM/__init__.py`, in `package.json` and in `installer_windows.nsi`.
   - Build (with sourced python) `python setup.py build`
-  - Push the Update `cd build` `npu.exe --create_update --program=ADSM --program_id=PROGRAM_ID --password=PASSWORD` You can find the program ID and password by logging into the Newline Program Updater (everyone authorized to create releases will have a login). 
-  - Update the latest release with a new tag (don't change the release title)
-  - Run the nsi script and upload the output to the release
+  - If this is a new Stable release for a UIRelease version, then you need to make a new GitHub release. The title of this release should be x.x.x.0 matching exactly the title of the current Beta (minus "Beta"), with the UIMinor always being a zero. Also create a tab on Stable. In the description, the ADSM version number should reflect the latest version in master (x.x.x.x).
+    - Run the nsi script and attach the output to the release
+  - If this is a big fix to a current release, then edit the GitHub release for the current UIRelease and update the ADSM version  number in the description to the latest UIMinor number and create a new tag on Stable with this number. Do not update the release title, and do not update the attached installer file (people can pull changes via update).
+  - Push the Update `cd build` `npu.exe --create_update --program=ADSM --program_id=PROGRAM_ID --password=PASSWORD`. 
   
 # Credits
 * Project Owner - Missy Schoenbaum, USDA:APHIS:VS:CEAH Modeling Team
