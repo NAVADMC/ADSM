@@ -637,6 +637,9 @@ ul {
 #TB_settings {
     background-image: url("../icons/TB_settings_btn.png");
 }
+#TB_documentation {
+    background-image: url("../icons/TB_documentation_btn.png");
+}
 #TB_population {
     background-image: url("../icons/TB_population_btn.png");
 }
@@ -740,6 +743,20 @@ ul {
     margin-bottom: 15px;
 }
 #settings_panel .btn {
+
+}
+
+/*-------------------------------------------------------------*/
+/*-----Documentation panel-----*/
+/*-------------------------------------------------------------*/
+#documentation_panel{}
+#documentation_panel hr{
+    margin: 15px 0 15px 0;
+}
+#documentation_panel hr:last-of-type {
+    margin-top: 0;
+}
+#documentation_panel .btn {
 
 }
 
