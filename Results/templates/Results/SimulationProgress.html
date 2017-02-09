@@ -85,14 +85,14 @@
                             Calculate Summary CSV
                         </button>
                         <div class="summary-download hidden"><a href="/app/Download/?target={{ summary_file_name }}">{{ summary_file_name }}</a>
-                            <a href="#" class="icon delete-icon" data-delete-link="{{ summary_file_name }}"></a>
+                            <a href="#" class="icon delete-icon" data-delete-link="/app/DeleteFile/{{ summary_file_name }}/"></a>
                             <a href="/app/Download/?target={{ summary_file_name }}"><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
                         </div>
                     </li>
 
                     {% for file in supplemental_files %}
                         <li><a href="/app/Download/?target={{ file }}" >{{ file }}</a>
-                            <a href="#" class="icon delete-icon" data-delete-link="{{ file }}"></a>
+                            <a href="#" class="icon delete-icon" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
                             <a href="/app/Download/?target={{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
                             </li>
                     {% endfor %}
