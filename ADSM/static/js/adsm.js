@@ -64,6 +64,7 @@ $(function(){
             // Existing functions should not be editable until the Edit button
             // is used.
             $('#functions_panel input').prop('disabled', true);
+            $('#functions_panel select').prop('disabled', true);
         };
     })
 
@@ -77,6 +78,7 @@ $(function(){
             // Existing functions should not be editable until the Edit button
             // is used.
             $('#functions_panel input').prop('disabled', true);
+            $('#functions_panel select').prop('disabled', true);
         };
     })
 
@@ -934,6 +936,7 @@ function make_function_panel_editable() {
     base.find('.buttonHolder').removeAttr('hidden')
     base.addClass('editable')
     base.find('input').addClass('editable').removeAttr('disabled')
+    base.find('select').addClass('editable').removeAttr('disabled')
     base.find(':input').addClass('editable')
     //$('#tb_mask').css('visibility', 'visible')
     base.css('pointer-events', 'all')
