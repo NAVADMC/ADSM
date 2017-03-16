@@ -110,7 +110,7 @@ class PopulationParser(object):
                 except KeyError:
                     parsing_success = False
         if not parsing_success:
-            raise ET.ParseError("Unrecognized csv header format! Please refer to the wiki for help.")
+            raise ET.ParseError('Unrecognized csv header format! Please refer to the <a href="https://github.com/NAVADMC/ADSM/wiki/Population-File-Requirements" class="wiki" target="_blank">wiki</a> for help.')
 
 
 
