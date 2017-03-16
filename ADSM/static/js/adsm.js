@@ -67,8 +67,17 @@ $(function(){
         };
     })
 
-    $('form[action="/setup/ProbabilityFunction/new/"]').livequery(function(){
-        make_function_panel_editable(); //new forms should come in editable
+    $('form[action^="/setup/ProbabilityFunction"]').livequery(function(){
+        var action = $(this).attr('action');
+        // The last part of the action URL is either "/new/" or a numeric ID of
+        // an existing function to edit.
+        if (action.indexOf('/new/', action.length-5) != -1) {  // does action end with "new"?
+            make_function_panel_editable(); //new forms should come in editable
+        } else {
+            // Existing functions should not be editable until the Edit button
+            // is used.
+            $('#functions_panel input').prop('disabled', true);
+        };
     })
 
 
