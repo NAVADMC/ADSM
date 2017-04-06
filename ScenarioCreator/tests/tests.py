@@ -59,7 +59,7 @@ class ModelUtilsTest(TestCase):
 
     def test_choice_char_from_value(self):
         choices = Unit._meta.get_field_by_name('initial_state')[0]._choices
-        tests = ['Vaccine immune', 'destroyed', '  Latent', 'Infectious SubClinical', 'kittens']
+        tests = ['Vaccine immune', 'destroyed', '  Latent', 'SubClinical', 'kittens']
         results = [choice_char_from_value(x, choices) for x in tests]
         self.assertListEqual(results, ['V','D','L','B',None])
 

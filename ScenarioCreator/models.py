@@ -214,8 +214,8 @@ class Unit(BaseModel):
         help_text='The longitude used to georeference this ' + wiki("Unit") + '.', )
     initial_state_choices = (('S', 'Susceptible'),  # order matters because this is read by population_parser.convert_numeric_status_codes
                ('L', 'Latent'),
-               ('B', 'Infectious Subclinical'),
-               ('C', 'Infectious Clinical'),
+               ('B', 'Subclinical'),
+               ('C', 'Clinical'),
                ('N', 'Naturally Immune'),
                ('V', 'Vaccine Immune'),
                ('D', 'Destroyed'))
