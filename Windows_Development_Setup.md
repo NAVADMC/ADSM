@@ -68,7 +68,7 @@ This is slightly different from Django's normal `runserver` as it also launches 
 Updating the Distributable
 ----------
 Version Guide:  
-The version number is broken into four parts by periods SimulationMajor.SimulationMinor.UIRelease.UIMinor/Beta.
+The version number is broken into four parts by periods: SimulationMajor.SimulationMinor.UIRelease.UIMinor/Beta.
 
   1. Simulation Major Version is only ever changed when there is a fundamental difference in what the simulation is modeling.
   1. Simulation Minor Version changes when there is a new feature available in the simulation, such as Vaccination Triggers, Vaccination Rings, or Within Unit Prevalence.

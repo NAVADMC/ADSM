@@ -1,6 +1,6 @@
 # ADSM (Animal Disease Spread Model)
-An application with Desktop and Web Based GUI for creating a simulation model to assist decision making and education in evaluating animal disease incursions.  
-This repo is the primary repo for the ADSM project and houses the main GUI that users will be interacting with.  
+A Frontend application with Desktop and Web Based GUI for creating a simulation model to assist decision making and education in evaluating animal disease incursions.  
+This repo is the primary repo for the ADSM project and houses the main Frontend that users will be interacting with.  
 It creates scenarios by storing their parameters in a SQLite file and displays results after running a simulation.  
 A more detailed breakdown of this application will follow.
 
@@ -67,7 +67,7 @@ ADSM has a bundled update program which can handle updating and fixing corrupted
 This update process works in both Production and Beta releases.
 
 ### Updating From Within ADSM
-You can update ADSM from within the frontend GUI.
+You can update ADSM from within the Frontend GUI.
 
 1. Launch the application.
 1. Open the "Settings Panel" with the cog button on the right.
@@ -111,7 +111,7 @@ There are two main applications to the ADSM project and three support applicatio
 Scenario parameters are sent to the CEngine via a Scenario SQLite file.  
 Results are written directly back to the same SQLite file, and supplemental result files are written to a directory alongside the SQLite scenario file.
 
-**ADSM** ( https://github.com/NAVADMC/ADSM ) is the main GUI that users will be interacting with. It creates scenarios by storing their parameters in a SQLite file and displays results after running a simulation.  
+**ADSM** ( https://github.com/NAVADMC/ADSM ) is the main Frontend GUI that users will be interacting with. It creates scenarios by storing their parameters in a SQLite file and displays results after running a simulation.  
 A more detailed breakdown of this application will follow.
 
 **Django-ProductionServer** ( https://github.com/BryanHurst/django-productionserver ) is a cross-platform local application server utilizing CherryPy and Nginx for hosting Django projects locally on a desktop environment. 
@@ -121,7 +121,7 @@ A more detailed breakdown of this application will follow.
 **NPU**, or Newline Program Updater, is an application created by Newline Technical Innovations with an endpoint server hosted by Newline for getting updates to the installed ADSM application. NPU will also detect and attempt to repair a bad/corrupt installation.
 
 ### ADSM Breakdown
-The ADSM GUI Application is written in Python and utilizes a modified copy of the Django Web Framework.
+The ADSM Frontend Application is written in Python and utilizes a modified copy of the Django Web Framework.
 
 ## Installing ADSM For Development
 
