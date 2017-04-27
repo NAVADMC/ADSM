@@ -353,7 +353,7 @@ The ADSM releases are:
   
 ### When releasing a Production compile
 
-1. The 'stable' branch is setup specifically to compile Production releases, so checkout stable.
+1. The 'stable' branch is setup specifically to compile Production releases, so checkout Stable and merge master in when ready.
 1. Bump the version in `ADSM/__init__.py`, in `package.json` and in `installer_windows.nsi`
 1. Build (with sourced python) `python setup.py build`
 1. If this is a new Stable release for a UIRelease version, then you need to make a new GitHub release. The title of this release should be x.x.x.0 matching exactly the title of the current Beta (minus "Beta"), with the UIMinor always being a zero. Also create a tab on Stable. In the description, the ADSM version number should reflect the latest version in master (x.x.x.x).
