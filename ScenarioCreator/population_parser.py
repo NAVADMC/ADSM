@@ -67,7 +67,9 @@ class PopulationParser(object):
                 self.population.append(entry)
 
     def __parse_csv(self, filename):
-        """Based on FLAPS example, and a NAADSM csv example"""
+        """Make sure that formats with more keys are at the top and formats with fewer keys are at the bottom.
+        This is because a format that has fewer options, but same names will match to a format that has more options
+        containing all the options of the smaller one. This case will end up throwing an error for missing columns."""
         possible_formats = [
             {'productiontype': 'production_type',  # NAADSM CSV no HerdSize, with status and state timers
              'unitsize': 'initial_size',
@@ -98,14 +100,6 @@ class PopulationParser(object):
              'lat': 'latitude',
              'unitsize': 'initial_size',
              'status': 'initial_state'},
-            {'productiontype': 'production_type',  # FLAPS Preferred Mapping
-             'longitude': 'longitude',
-             'latitude': 'latitude',
-             'population': 'initial_size'},
-            {'commoditytype': 'production_type',  # FLAPS Fallback Mapping
-             'longitude': 'longitude',
-             'latitude': 'latitude',
-             'population': 'initial_size'},
         ]
         parsing_success = False
         for mapping in possible_formats:
@@ -116,8 +110,7 @@ class PopulationParser(object):
                 except KeyError:
                     parsing_success = False
         if not parsing_success:
-            raise ET.ParseError("Unrecognized csv header format. Please use: " + ','.join(list(possible_formats[-1].keys())) +
-                                '.  Export initial states as character codes.')
+            raise ET.ParseError('Unrecognized csv header format! Please refer to the <a href="https://github.com/NAVADMC/ADSM/wiki/Population-File-Requirements" class="wiki" target="_blank">wiki</a> for help.')
 
 
 

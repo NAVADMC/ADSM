@@ -26,6 +26,7 @@ def parent_of(webElement):
     return webElement.find_element_by_xpath('..')
     
 
+@skip("Selenium Tests Not Up-To-Date!")
 class FunctionsPanel(object):
     """This class wraps the "#functions_panel" WebElement and adds some convenience methods. Kind of like Selenium's
     Select class that wraps drop-downs and adds convenience methods for selecting options."""
@@ -121,6 +122,8 @@ class FunctionsPanel(object):
             EC.invisibility_of_element_located((By.ID, 'relational-options'))
         )
 
+
+@skip("Selenium Tests Not Up-To-Date!")
 class FunctionalTests(StaticLiveServerTestCase):
     multi_db = True
     default_timeout = 10 # seconds
