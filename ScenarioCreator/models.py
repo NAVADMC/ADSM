@@ -282,6 +282,7 @@ class ProbabilityFunction(Function):
 
         for field in ProbabilityFunction._meta.fields:
             print(re.split(r": |, |\.", field.help_text))"""
+    wiki_link = "https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#probability-density-function"
     equation_type = models.CharField(max_length=255,
         help_text='For probability density functions identifies the type of function.',
         default="Triangular",
@@ -331,6 +332,7 @@ class ProbabilityFunction(Function):
 
 
 class RelationalFunction(Function):
+    wiki_link = "https://github.com/NAVADMC/ADSM/wiki/Relational-functions"
     y_axis_units = models.CharField(max_length=255, blank=True,
         help_text='Specifies the descriptive units for the x axis in relational functions.', )
 

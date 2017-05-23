@@ -2124,7 +2124,6 @@ th:hover .sortControls{
 .model-banner a{
     color:#404040;
     font-weight: 600;
-    display:block;
     width: calc(100% - 30px);
     padding-left: 5px;
 }

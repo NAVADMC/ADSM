@@ -610,7 +610,8 @@ def list_per_model(model_class):
     model_name = model_class.__name__
     context = {'entries': model_class.objects.all(),
                'class': model_name,
-               'name': spaces_for_camel_case(model_name)}
+               'name': spaces_for_camel_case(model_name),
+               'wiki_link': getattr(model_class, 'wiki_link', None)}
     return context
 
 
