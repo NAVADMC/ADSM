@@ -83,19 +83,19 @@ def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated
     for i in range(len(infected)):
         if infected[i] > 0:
             ax.add_patch(Rectangle(xy=(longitude[i] - half, latitude[i] - half),
-                                   color = (0.89, 0.102, 0.11),
+                                   color = ("#FF0000"),
                                    width = width,
                                    height= marker_km * (infected[i] / total_iterations),
                                    zorder=2000))
         if vaccinated[i] > 0:
             ax.add_patch(Rectangle(xy=(longitude[i] - width *.5, latitude[i] - half),
-                                   color=(0.2549, 0.6706, 0.3647),
+                                   color=("#00FF00"),
                                    width= width,
                                    height= marker_km * (vaccinated[i] / total_iterations),
                                    zorder=2000))
         if destroyed[i] > 0:
             ax.add_patch(Rectangle(xy=(longitude[i] + width * .5, latitude[i] - half),
-                                   color=(234/255, 125/255, 48/255),
+                                   color=("#EA7D30"),
                                    width=width,
                                    height= marker_km * (destroyed[i] / total_iterations),
                                    zorder=2000))

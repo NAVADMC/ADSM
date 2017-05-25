@@ -637,6 +637,9 @@ ul {
 #TB_settings {
     background-image: url("../icons/TB_settings_btn.png");
 }
+#TB_documentation {
+    background-image: url("../icons/TB_documentation_btn.png");
+}
 #TB_population {
     background-image: url("../icons/TB_population_btn.png");
 }
@@ -740,6 +743,20 @@ ul {
     margin-bottom: 15px;
 }
 #settings_panel .btn {
+
+}
+
+/*-------------------------------------------------------------*/
+/*-----Documentation panel-----*/
+/*-------------------------------------------------------------*/
+#documentation_panel{}
+#documentation_panel hr{
+    margin: 15px 0 15px 0;
+}
+#documentation_panel hr:last-of-type {
+    margin-top: 0;
+}
+#documentation_panel .btn {
 
 }
 
@@ -1874,7 +1891,7 @@ section#population_main_panel h1:first-of-type {
 }
 #farm_filter select {
     margin: 0;
-    width: 129px;
+    width: 225px;
 }
 #farm_filter input {
     width: 87px;
@@ -1904,7 +1921,7 @@ section#population_main_panel h1:first-of-type {
         width: 100%;
     }
     #farm_filter select {
-        width: 200px;
+        width: 260px;
     }
 }
 @media screen and (max-width: 1100px) {
@@ -2108,7 +2125,6 @@ th:hover .sortControls{
 .model-banner a{
     color:#404040;
     font-weight: 600;
-    display:block;
     width: calc(100% - 30px);
     padding-left: 5px;
 }
@@ -2477,17 +2493,17 @@ span.IndirectSpread {
 #legend-right li {
     display: block;
     height: 20px;
-    border-left: 20px solid #68be5e;
+    border-left: 20px solid #00FF00;
     margin-left: 0;
     margin-bottom: 4px;
     line-height: 20px;
     padding-left: 5px;
 }
 #legend-right li:first-child {
-    border-color: #ba3e44;
+    border-color: #FF0000;
 }
 #legend-right li:last-child {
-    border-color: rgb(234, 125, 48);
+    border-color: #EA7D30;
 }
 @media screen and (max-height: 800px){
     #legend {

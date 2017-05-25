@@ -216,8 +216,8 @@ class Unit(BaseModel):
         help_text='The longitude used to georeference this ' + wiki("Unit") + '.', )
     initial_state_choices = (('S', 'Susceptible'),  # order matters because this is read by population_parser.convert_numeric_status_codes
                ('L', 'Latent'),
-               ('B', 'Infectious Subclinical'),
-               ('C', 'Infectious Clinical'),
+               ('B', 'Subclinical'),
+               ('C', 'Clinical'),
                ('N', 'Naturally Immune'),
                ('V', 'Vaccine Immune'),
                ('D', 'Destroyed'))
@@ -240,7 +240,12 @@ class Unit(BaseModel):
             elif key in ('latitude', 'longitude'):
                 kwargs[key] = float(kwargs[key])
             elif key == 'initial_size':
-                kwargs[key] = int(kwargs[key])
+                try:
+                    kwargs[key] = int(kwargs[key])
+                except ValueError as e:
+                    # attempt float
+                    kwargs[key] = int(float(kwargs[key]))
+
             elif key == 'initial_state':
                 if len(kwargs[key]) > 1:
                     new_val = choice_char_from_value(kwargs[key], Unit._meta.get_field_by_name('initial_state')[0]._choices)
@@ -279,6 +284,7 @@ class ProbabilityFunction(Function):
 
         for field in ProbabilityFunction._meta.fields:
             print(re.split(r": |, |\.", field.help_text))"""
+    wiki_link = "https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#probability-density-function"
     equation_type = models.CharField(max_length=255,
         help_text='For probability density functions identifies the type of function.',
         default="Triangular",
@@ -328,6 +334,7 @@ class ProbabilityFunction(Function):
 
 
 class RelationalFunction(Function):
+    wiki_link = "https://github.com/NAVADMC/ADSM/wiki/Relational-functions"
     y_axis_units = models.CharField(max_length=255, blank=True,
         help_text='Specifies the descriptive units for the x axis in relational functions.', )
 

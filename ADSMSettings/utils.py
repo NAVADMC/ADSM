@@ -96,7 +96,8 @@ def adsm_executable_command():
     executables = defaultdict(lambda: 'adsm_simulation', executables)
     system_executable = os.path.join(settings.BASE_DIR, 'bin', executables[platform.system()])
     output_args = prepare_supplemental_output_directory()
-    return [system_executable, db_path('scenario_db')] + output_args
+    ret = [system_executable, db_path('scenario_db')] + output_args
+    return ret
 
 
 def check_for_updates():

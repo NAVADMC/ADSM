@@ -1,7 +1,8 @@
 import csv
 import subprocess
 import itertools
-from django.http import JsonResponse
+import platform
+from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
 from django.db.models import Q, ObjectDoesNotExist
@@ -426,6 +427,7 @@ def relational_function(request, primary_key=None, doCopy=False):
                             point.instance.delete()
                         else:
                             point.instance.save()
+        return HttpResponseRedirect(context['action'])
     else:
         context['formset'] = PointFormSet(request.POST or None, instance=context['model'])
 
@@ -608,7 +610,8 @@ def list_per_model(model_class):
     model_name = model_class.__name__
     context = {'entries': model_class.objects.all(),
                'class': model_name,
-               'name': spaces_for_camel_case(model_name)}
+               'name': spaces_for_camel_case(model_name),
+               'wiki_link': getattr(model_class, 'wiki_link', None)}
     return context
 
 
@@ -748,7 +751,7 @@ def population(request):
 
 def validate_scenario(request):
     simulation = subprocess.Popen(adsm_executable_command() + ['--dry-run'],
-                                  shell=True,
+                                  shell=(platform.system() != 'Darwin'),
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE)
     stdout, stderr = simulation.communicate()  # still running while we work on python validation

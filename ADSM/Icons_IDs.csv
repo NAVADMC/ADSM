@@ -33,8 +33,8 @@ Icon ID,Concept,Image Notes
 6912,State Transition,
 4607,Susceptible,Open hand = receive
 7176,Latent,
-30244,Infectious Subclinical,
-30243,Infectious Clinical,
+30244,Subclinical,
+30243,Clinical,
 27844,Natural Immune,Antibody
 ,Vaccine Immune,Antibody+Vaccine
 16394,Graphs,
