@@ -22,7 +22,7 @@ urlpatterns = patterns('', url('^AssignSpreads/$', 'ScenarioCreator.views.assign
          url('^ProductionTypeList.json/$', 'ScenarioCreator.views.production_type_list_json'),
          url('^PopulationPanelStatus.json/$', 'ScenarioCreator.views.population_panel_status_json'),
          url('^DisableAllControls.json/$', 'ScenarioCreator.views.disable_all_controls_json'),
-         url('^VaccinationPriorities/$', 'ScenarioCreator.views.vaccination_priorities'),
+         url('^VaccinationGlobal/$', 'ScenarioCreator.views.vaccination_global'),
          url('^ProbabilityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph'),
          url('^RelationalFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.relational_graph'),
          url('^ProbabilityFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph'),

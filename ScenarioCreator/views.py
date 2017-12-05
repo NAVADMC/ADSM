@@ -765,11 +765,11 @@ def validate_scenario(request):
     return render(request, 'ScenarioCreator/MainPanel.html', context)
 
 
-def vaccination_priorities(request):
+def vaccination_global(request):
     initialized_form = VaccinationMasterForm(request.POST or None, instance=ControlMasterPlan.objects.get())
     context = {
-        'base_page': 'ScenarioCreator/VaccinationPriorities.html',
-        'title': 'Vaccination Priorities',
+        'base_page': 'ScenarioCreator/VaccinationGlobal.html',
+        'title': 'Vaccination Global',
         'ordering': ['Production Type', 'Days Holding', 'Reason for Vaccination', 'Direction', 'Size'],
         'form': initialized_form
     }
