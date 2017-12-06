@@ -15,17 +15,16 @@
         });
 	</script>
 
-    <h1 id="title"> {{ title }}</h1>
+    <h1 id="title">{{ title }}</h1>
 
     <ul id="priorities" class="ui-sortable">
         {% for item in ordering %}
-            <li class="ui-state-default ui-sortable-handle tab-list"><span class="pull-right completed"></span>{{item}}</li>
+            <li class="ui-state-default ui-sortable-handle tab-list" title="Drag to change Vaccination Priority"><span class="pull-right completed"></span><img src="/static/icons/draggable.png">{{item}}</li>
         {% endfor %}
     </ul>
 
     <form class="ajax">
         {% crispy form %}
     </form>
-
 
 {% endblock %}

@@ -2587,7 +2587,7 @@ span.IndirectSpread {
 .ui-sortable-handle:hover {
     cursor: move;
 }
-
+/*NOTE: I wanted to do list-style-image for the sortable lists to add a little grab icon, but just couldn't get it to work.*/
 
 @media screen and (max-width: 1200px) {
 /*------------- navigation ----------------*/
