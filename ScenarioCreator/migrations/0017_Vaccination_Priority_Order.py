@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ScenarioCreator', '0014_VaccinationRingRule_and_OneToOneFields'),
+        ('ScenarioCreator', '0016_VaccinationRingRule_and_OneToOneFields'),
     ]
 
     operations = [
