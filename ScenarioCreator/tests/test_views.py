@@ -152,7 +152,7 @@ class RelationalFunctionTestCase(TestCase):
         }
         function = RelationalFunction.objects.create(name="Test Function")
 
-        r = self.client.post('/setup/RelationalFunction/%d/copy/' % function.pk, form_data)
+        r = self.client.post('/setup/RelationalFunction/%d/copy/' % function.pk, form_data, follow=True)
 
         self.assertEqual(RelationalFunction.objects.count(), 2)
         qs = RelationalFunction.objects.filter(name='Test Function')
@@ -177,7 +177,7 @@ class RelationalFunctionTestCase(TestCase):
         function = RelationalFunction.objects.create(name="Test Function")
         point = RelationalPoint.objects.create(x=0.0, y=1.0, relational_function=function)
 
-        r = self.client.post('/setup/RelationalFunction/%d/copy/' % function.pk, form_data)
+        r = self.client.post('/setup/RelationalFunction/%d/copy/' % function.pk, form_data, follow=True)
 
         self.assertEqual(RelationalFunction.objects.count(), 2)
         qs = RelationalFunction.objects.filter(name='Test Function')

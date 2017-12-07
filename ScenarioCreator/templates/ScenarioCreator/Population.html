@@ -21,7 +21,7 @@
         <ul class="file_list">
             {% for file in xml_files %}
                 <li><a href="/setup/OpenPopulation/{{ file }}" class="ajax-post">{{ file }}</a>
-                    <a href="#" class="delete-icon ajax-post" data-delete-link="/app/DeleteFile/{{ file }}"></a>
+                    <a href="#" class="delete-icon ajax-post" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
                     <a href="/app/Download/?target={{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
                     </li>
             {% endfor %}

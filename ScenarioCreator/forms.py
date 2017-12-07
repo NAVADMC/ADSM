@@ -181,7 +181,8 @@ class VaccinationMasterForm(BaseForm):
         model = ControlMasterPlan
         fields = 'vaccination_capacity restart_vaccination_capacity vaccination_priority_order vaccinate_retrospective_days'.split()
         widgets = {
-            'vaccination_priority_order': TextInput(attrs={'hidden':'hidden'}),
+            # 'vaccination_priority_order': TextInput(attrs={'hidden':'hidden'}),
+            'vaccination_priority_order': HiddenInput(),
             'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
             'restart_vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
         }

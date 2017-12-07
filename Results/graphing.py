@@ -60,7 +60,7 @@ def population_png(request, width_inches=8, height_inches=8):
     light_colors = ['#a6cee3', '#b2df8a', '#fb9a99', '#fdbf6f', '#cab2d6'] # , '#ffff99']
     fig = Figure(figsize=(width_inches, height_inches), frameon=True, tight_layout=True)  # Issue #168 aspect ratio doesn't adjust currently
     ax = fig.add_subplot(1, 1, 1, axisbg='#FFFFFF')
-    unit_count = Unit.objects.count()
+    unit_count = Unit.objects.filter(**params).count()
     size = min(100, 3000 / sqrt(unit_count))
 
     max_query_size = 900  # IMPORTANT: number of ids filtered cannot exceed 1,000 in SQLlite

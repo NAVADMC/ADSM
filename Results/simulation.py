@@ -2,6 +2,7 @@ import os
 from collections import defaultdict
 import multiprocessing
 import time
+import platform
 import subprocess
 from django.db import transaction, close_old_connections
 from django.conf import settings
@@ -47,7 +48,7 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones, test
     # profiler.enable()
     
     simulation = subprocess.Popen(adsm_cmd,
-                                  shell=True,
+                                  shell=(platform.system() != 'Darwin'),
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
                                   bufsize=1)
