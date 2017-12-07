@@ -13,10 +13,10 @@
 
     <ul id="priorities" class="ui-sortable">
         {% for key, value in ordering.items %}
-            <li class="ui-state-default ui-sortable-handle tab-list" title="Drag to change Vaccination Priority"><span class="pull-right completed"></span><img src="/static/icons/draggable.png"> {{key}}
+            <li class="ui-state-default ui-sortable-handle tab-list" title="Drag to change Vaccination Priority"><span class="pull-right completed"></span>{{key}}
                 <ul class="sub-priorities ui-sortable">
                 {% for sub_priority in value %}
-                    <li class="ui-state-default ui-sortable-handle tab-list sub-priority"><span class="pull-right completed"></span>{{sub_priority}}</li>
+                    <li class="ui-state-default ui-sortable-handle tab-list sub-priority" title="Drag to change Vaccination Priority"><span class="pull-right completed"></span>{{sub_priority}}</li>
                 {% endfor %}
                 </ul>
             </li>
