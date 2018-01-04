@@ -2,6 +2,9 @@ import csv
 import subprocess
 import itertools
 import platform
+
+from collections import OrderedDict
+
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
@@ -770,12 +773,11 @@ def vaccination_global(request):
     initialized_form = VaccinationMasterForm(request.POST or None, instance=instance)
     if request.method == "POST":
         if initialized_form.is_valid():
-            initialized_form.save()
-            instance = ControlMasterPlan.objects.get()
+            instance = initialized_form.save(commit=True)
     context = {
         'base_page': 'ScenarioCreator/VaccinationGlobal.html',
         'title': 'Vaccination Global',
-        'ordering': json.loads(instance.vaccination_priority_order),
+        'ordering': json.loads(instance.vaccination_priority_order, object_pairs_hook=OrderedDict),
         'form': initialized_form
     }
 

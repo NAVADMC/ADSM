@@ -49,7 +49,9 @@
                 for (var v = 1; v < priority.length; ++v) {
                     priorityString += "\"" + priority[v] + "\", ";
                 }
-                priorityString = priorityString.slice(0, priorityString.length - 2);
+                if (priority.length > 1) {
+                    priorityString = priorityString.slice(0, priorityString.length - 2);
+                }
                 priorityString += "], "
             }
             priorityString = priorityString.slice(0, priorityString.length - 2);
