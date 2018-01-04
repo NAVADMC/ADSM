@@ -768,6 +768,10 @@ def validate_scenario(request):
 def vaccination_global(request):
     instance = ControlMasterPlan.objects.get()
     initialized_form = VaccinationMasterForm(request.POST or None, instance=instance)
+    if request.method == "POST":
+        if initialized_form.is_valid():
+            initialized_form.save()
+            instance = ControlMasterPlan.objects.get()
     context = {
         'base_page': 'ScenarioCreator/VaccinationGlobal.html',
         'title': 'Vaccination Global',

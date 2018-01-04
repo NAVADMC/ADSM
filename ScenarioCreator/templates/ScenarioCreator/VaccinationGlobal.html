@@ -14,7 +14,7 @@
     <label>Vaccination Priorities</label>
     <ul id="priorities" class="ui-sortable">
         {% for key, value in ordering.items %}
-            <li class="ui-state-default ui-sortable-handle tab-list" title="Drag to change Vaccination Priority"><span class="pull-right completed"></span>{{key}}
+            <li class="ui-state-default ui-sortable-handle tab-list top-level-priority" title="Drag to change Vaccination Priority"><span class="pull-right completed"></span>{{key}}
                 <ul class="sub-priorities ui-sortable">
                 {% for sub_priority in value %}
                     <li class="ui-state-default ui-sortable-handle tab-list sub-priority" title="Drag to change Vaccination Priority"><span class="pull-right completed"></span>{{sub_priority}}</li>
@@ -24,14 +24,47 @@
         {% endfor %}
     </ul>
 
-    <form class="ajax">
+    <form class="ajax" method="post" action="" id="vaccination-global-form">
         {% crispy form %}
+        {% if form_errors %}
+            <div id='form-errors'>{{ form_errors }}</div>
+        {% endif %}
     </form>
 
-
     <script>
+        function submitVaccinationGlobalForm() {
+            var priorityString = "{";
+            var priorityList = document.getElementById("priorities");
+            var topLevelItems = priorityList.getElementsByClassName("top-level-priority");
+
+            for (var i = 0; i < topLevelItems.length; ++i) {
+                var priority = topLevelItems[i].textContent.split('\n');
+                for (var v = 0; v < priority.length; ++v) {
+                    priority[v] = priority[v].trim();
+                }
+                priority = priority.filter(function(x) { return Boolean(x); });
+
+                priorityString += "\"" + priority[0] + "\": [";
+
+                for (var v = 1; v < priority.length; ++v) {
+                    priorityString += "\"" + priority[v] + "\", ";
+                }
+                priorityString = priorityString.slice(0, priorityString.length - 2);
+                priorityString += "], "
+            }
+            priorityString = priorityString.slice(0, priorityString.length - 2);
+            priorityString += "}";
+            document.getElementById("id_vaccination_priority_order").value = priorityString;
+
+            document.getElementById("vaccination-global-form").submit();
+        }
+
         $(function() {
-            $( ".ui-sortable" ).sortable();
+            $( ".ui-sortable" ).sortable({
+                update: function(event, ui) {
+                    $('#submit-id-submit').removeAttr('disabled').addClass('unsaved');
+                }
+            });
             $( ".ui-sortable" ).disableSelection();
 
             $('#priorities>.ui-sortable-handle').mouseenter(function(){
@@ -43,4 +76,9 @@
             })
         });
 	</script>
+
+    <div class="buttonHolder" style="position:absolute; bottom:0;">
+        <button type="button" class="btn btn-default btn-cancel" id="id-cancel" onclick="window.location.reload();">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled onclick="submitVaccinationGlobalForm();">Apply</button>
+    </div>
 {% endblock %}
