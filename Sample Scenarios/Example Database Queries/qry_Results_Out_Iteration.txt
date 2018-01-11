@@ -1,0 +1,44 @@
+-----------------------------------------------------------------------------------------------
+--    Sample Query: qry_Results_Out_Iteration
+--    Date:         12/18/2017
+--    By:           Schoenbaum, Missy
+--
+--     Notes: This query is close to the OutIteration table that is in NAADSM
+--                where clause 1=1 allows for easy editing of subsequent clauses
+--            -- allows for line to be commented  (omitted)
+--             outbreakDuration = -1 means end didn't depend on control activities but on days or infection
+----------------------------------------------------------------------------------------
+
+Select 
+DC.iteration,  
+detectionlastday, 
+day, -- last_day,
+diseaseduration, 
+outbreakduration, 
+diseaseended,  
+zonefocicreated,
+deswUMax, 
+deswUMaxDay,
+deswUTimeMax, 
+deswUTimeAvg,
+deswUDaysInQueue, 
+deswAMax,
+deswAMaxDay, 
+deswATimeMax,
+deswATimeAvg , 
+deswADaysInQueue
+FROM results_dailycontrols DC
+JOIN
+(SELECT iteration, MAX(last_day) as diseaseended, MAX(lastdetection) AS detectionlastday
+FROM results_dailybyproductiontype
+WHERE production_type_id IS NULL
+GROUP BY iteration
+) AS D ON DC.iteration = D.iteration
+LEFT JOIN
+(Select  iteration, CASE WHEN SUM(zonearea) IS 0  THEN  0 ELSE  1 END as zonefocicreated
+FROM results_dailybyzone WHERE last_day = 1 GROUP BY iteration
+) AS z
+ON DC.iteration = Z.iteration
+WHERE last_day = 1 -- THIS NEEDS TO STAY IN PLACE, ADD AN AND IF YOU WANT TO LIMIT TO ONE ITERATION
+-- AND iteration  = 1
+ORDER BY 1

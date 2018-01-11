@@ -1,0 +1,15 @@
+-----------------------------------------------------------------------------------------------
+--    Sample Query: Results_Epidemic_Curve_All_iterations
+--    Date:         12/18/2017
+--    By:           Schoenbaum, Missy
+--
+--    If you want to compare this scenario to another, here is the grouped epi curve
+--    by day, using this in the R code
+----------------------------------------------------------------------------------------
+SELECT day, Sum(infnU), Sum(detnU)
+FROM  Results_dailybyproductiontype r
+WHERE 1=1 
+AND production_type_id is null
+and last_day < 1
+group by day
+order by 1, 2
