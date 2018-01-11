@@ -1,0 +1,31 @@
+-----------------------------------------------------------------------------------------------
+--    Sample Query: Results_Out_Epidemic_Curve
+--    Date:         12/18/2017
+--    By:           Schoenbaum, Missy
+--
+--    Notes: where clause 1=1 allows for easy editing of subsequent clauses
+--
+--     Similar to outEpidemicCurve, missing count of infectious units and animals
+--     I can't get to the workings that count through how many days a unit has
+--     been infected by what mechanism of spread and what pdf they are using to move through
+--     the day, so can't recreate.
+----------------------------------------------------------------------------------------
+SELECT 
+iteration,
+day,
+CASE WHEN name IS NULL  THEN "ALL" ELSE  name END as productiontype,
+last_day,
+infnU AS InfectedUnits,
+infnA AS InfectedAnimals,
+infnUIni AS InitiallyInfectedUnits,
+infnAIni AS InitiallyInfectedAnimals,
+detnU AS DetectedUnits,
+detnA AS DetectedAnimals
+FROM  Results_dailybyproductiontype r
+Left join    -- left join here because the NULL production type indcates ALL, note case statement to manage this
+ScenarioCreator_productiontype pt
+ on r.production_type_id = pt.id
+ -- Example of WHERE clause
+WHERE 1=1
+AND production_type_id is not null  -- you can switch back to all if needed
+order by 1,2

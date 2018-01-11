@@ -1,0 +1,90 @@
+-----------------------------------------------------------------------------------------------
+--	Sample Query: qry_OutIterationbyZone
+--	Date:         5/19/2016
+--	Update:	      12/12/2017, confirmed minperimeterday was working	
+--      By:           Schoenbaum, Missy
+--
+--      Notes: This query duplicates the outIterationbyZone  table that is in NAADSM
+--	       Where clause 1=1 allows for easy editing of subsequent clauses
+--             
+--             -- allows for line to be commented  (omitted)
+--      This took almost 9 minutes against 500 iterations on my PC, so be patient
+----------------------------------------------------------------------------------------
+SELECT DZ.iteration,  
+name||' ' ||radius as zone_name, --concatenation allows me to build a custom name
+DZ.zone_id,  
+MZA.maxzonearea_K2, 
+FZA.finalzonearea_K2,
+MZAD.MaxZoneAreaMinDay, 
+MZPD.MaxZonePeriMinDay , 
+MZP.max_zone_perimeter_K, 
+FZP.finalzoneperimeter
+FROM  results_dailybyzone DZ  --Dailyzone
+JOIN scenarioCreator_zone z 
+ON dz.zone_id = z.id    -- picks up name and radius from parameter table, just a nice bit of info
+JOIN  -- this goes and calculates all your mins and maxs
+(SELECT 
+	DZ2.iteration, 
+	DZ2. zone_id,  
+	max(zonearea) as maxzonearea_K2 
+	FROM  results_dailybyzone DZ2 
+	GROUP BY DZ2.iteration, DZ2.zone_id)  as MZA -- alias to MaxZoneArea
+	ON  DZ.zone_id = MZA.zone_id AND DZ.iteration = MZA.iteration
+	JOIN 
+		(SELECT iteration,  
+		zone_id,  
+		zonearea as finalzonearea_K2  
+		FROM results_dailybyzone dz1 
+		WHERE last_day = 1) as FZA -- FinalZone area 
+		ON dz.zone_id = FZA.zone_id AND dz.iteration = FZA.iteration
+		JOIN 
+		(SELECT iteration, 
+		zone_id,   
+		min(day) as MaxZoneAreaMinDay 
+		FROM  results_dailybyzone d  
+		JOIN 
+		(SELECT id, 
+		max(zonearea) 
+		FROM results_dailybyzone 
+		GROUP BY iteration, zone_id) as MZA1 
+		ON D.id  = MZA1.id 
+		GROUP BY iteration, zone_id)  as MZAD -- MaxZoneareaDayMinDay 
+	on dz.zone_id = MZAD.zone_id  and dz.iteration = MZAD.iteration
+JOIN  
+	(SELECT d1.iteration, 
+	d1.zone_id,   
+	min(day) as MaxZonePeriMinDay 
+	FROM  results_dailybyzone d1       
+	JOIN 
+	(SELECT z.id, 
+	max(zoneperimeter) 
+	FROM results_dailybyzone z 
+	GROUP BY iteration, zone_id) as MZP1 
+	ON D1.id  = MZP1.id 
+	GROUP BY iteration, zone_id
+	) as MZPD -- MaxZonePerimeterDayMinDay
+	ON dz.zone_id = MZPD.zone_id  AND dz.iteration = MZPD.iteration -- MaxZonePerimeterDayMinDay  -- tested 12/12/2017
+JOIN 
+	(SELECT iteration,  
+	zone_id,  
+	Max(zoneperimeter) as max_zone_perimeter_K 
+	FROM 
+		(SELECT iteration,  
+		zone_id,  
+		zoneperimeter 
+		FROM  results_dailybyzone d 
+			JOIN scenarioCreator_zone z 
+		ON d.zone_id = z.id  ) 
+		GROUP BY iteration, zone_id) as MZP   -- MaxZone Perimeter
+		ON dz.iteration = MZP.iteration AND dz.zone_id = MZP.zone_id
+		JOIN ( SELECT 	dfz.iteration,  
+			dfz.zone_id,  
+			dfz.zoneperimeter as finalzoneperimeter 
+			FROM  results_dailybyzone dfz 
+		JOIN scenarioCreator_zone zfz 
+		ON dfz.zone_id = zfz.id 
+		WHERE 1=1 and last_day = 1) as FZP
+		ON dz.iteration = FZP.iteration AND dz.zone_id = FZP.zone_id  -- FinalZone perimeter
+WHERE 1=1 
+--and DZ.iteration = 1
+GROUP BY DZ.iteration, DZ.zone_id
