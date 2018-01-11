@@ -152,7 +152,7 @@ else:
         # TODO: Find a way to close the browser if it is still alive.
         sys.exit(1)
 
-    browser = threading.Timer(1, launch_viewer, [server_port, ])
+    browser = threading.Timer(2, launch_viewer, [server_port, ])
     browser.start()
 
     print("\nLaunching server...")
@@ -162,5 +162,8 @@ else:
             raise RuntimeError("Error launching Django Production Server!")
     except:
         if browser.is_alive():
-            print("It appears that the Django Production Server Application is either missing or not compatible with this system!\nWe will launch using the debug server instead.\nMake sure your settings are set to development settings and debug=True.\n")
-            management.call_command('runserver', addrport="127.0.0.1:%s" % server_port, use_reloader=False)
+            browser.cancel()
+            print("It appears that the Django Production Server Application is either missing or not compatible with this system!\nADSM cannot run without a local server.\nPlease repair your installation.\n")
+            print("\nPress any key to exit...")
+            input()
+            sys.exit(1)
