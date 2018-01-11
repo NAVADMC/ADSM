@@ -39,17 +39,18 @@
 
             for (var i = 0; i < topLevelItems.length; ++i) {
                 var priority = topLevelItems[i].textContent.split('\n');
-                for (var v = 0; v < priority.length; ++v) {
-                    priority[v] = priority[v].trim();
-                }
-                priority = priority.filter(function(x) { return Boolean(x); });
 
-                priorityString += "\"" + priority[0] + "\": [";
+                priorityString += "\"" + priority[0].trim() + "\": [";
 
-                for (var v = 1; v < priority.length; ++v) {
-                    priorityString += "\"" + priority[v] + "\", ";
+                var subLevelItems = topLevelItems[i].getElementsByClassName("sub-priority");
+
+                for (var k = 0; k < subLevelItems.length; ++k) {
+                    var temp = subLevelItems[k].textContent.trim();
+                    if (temp) {
+                        priorityString += "\"" + temp + "\", ";
+                    }
                 }
-                if (priority.length > 1) {
+                if (priority.length > 1) {  // This is checking that there are actually sub elements that were added. Skip if there is only a dict key.
                     priorityString = priorityString.slice(0, priorityString.length - 2);
                 }
                 priorityString += "], "
