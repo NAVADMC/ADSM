@@ -777,7 +777,7 @@ function prompt_for_new_file_name(link) {
     var dialog = new BootstrapDialog.show({
         title: 'Scenario Save As...',
         type: BootstrapDialog.TYPE_PRIMARY,
-        message: 'Enter the name of the new scenario: <input type="text" id="new_name">',
+        message: '<div>Enter the name of the new scenario: <input type="text" id="new_name"></div><div>WARNING: Supplying a name of a Scenario that already exists in your ADSM Workspace will OVERWRITE the existing Scenario!</div>',
         buttons: [
             {
                 label: 'Cancel',
