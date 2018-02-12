@@ -440,7 +440,6 @@ protocol_substructure = {'use_detection': ['detection_probability_for_observed_t
                                              'vaccine_immune_period',
                                              'trigger_vaccination_ring',
                                              'vaccination_ring_radius',
-                                             'vaccination_priority',
                                              ],
                          'use_cost_accounting': ['cost_of_destruction_appraisal_per_unit',
                                                  'cost_of_destruction_cleaning_per_unit',
@@ -523,8 +522,6 @@ class ControlProtocol(BaseModel):
         help_text='Indicates if detection of a unit of this type will trigger a vaccination ring.', )
     vaccination_ring_radius = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Radius in kilometers of the vaccination ring.', )
-    vaccination_priority = models.PositiveIntegerField(default=5, blank=True, null=True,
-        help_text='The vaccination priority of this production type relative to other production types.  A lower number indicates a higher priority.', )
     vaccination_demand_threshold = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of animals of this type that can be vaccinated before the cost of vaccination increases.', )
     cost_of_vaccination_additional_per_animal = MoneyField(default=0.0,

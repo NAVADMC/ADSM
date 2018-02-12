@@ -274,7 +274,6 @@ class ControlProtocolForm(BaseForm):
                     'vaccine_immune_period',
                     'trigger_vaccination_ring',
                     'vaccination_ring_radius',
-                    'vaccination_priority',
                     ),
                 Tab('Cost Accounting',
                     'use_cost_accounting',
