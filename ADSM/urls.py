@@ -8,6 +8,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     # Examples:
+    url(r'^explorer/', include('explorer.urls')),
     url(r'^setup/', include('ScenarioCreator.urls')),
     url(r'^results/', include('Results.urls')),
     url(r'^app/', include('ADSMSettings.urls')),

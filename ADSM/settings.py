@@ -68,43 +68,6 @@ else:
 
 INTERNAL_IPS = ('127.0.0.1', '::1')
 
-INSTALLED_APPS = (
-    'ScenarioCreator',
-    'Results',
-    'ADSMSettings',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.humanize',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'floppyforms',
-    'crispy_forms',
-    'productionserver',
-    'webpack_loader',
-    # 'debug_toolbar',
-    # 'pympler',
-)
-
-MIDDLEWARE_CLASSES = (
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'ADSMSettings.disable.DisableCSRF',  # TODO: This needs to be fixed before we do a cloud deployment!
-    # TODO: Add in the django.middleware.security.SecurityMiddleware
-)
-
-if DEBUG:
-    MIDDLEWARE_CLASSES += (
-        # 'ADSMSettings.debug.HotshotProfileMiddleware',
-        # 'ADSMSettings.debug.cProfileMiddleware',
-    )
-
 ROOT_URLCONF = 'ADSM.urls'
 
 WSGI_APPLICATION = 'ADSM.wsgi.application'
@@ -131,6 +94,10 @@ DATABASES.update({
     }
 })
 
+EXPLORER_CONNECTIONS = {'scenario_db': 'scenario_db', }  # Mapping of friendly_name:db_alias. For now, just keeping the same on both sides.
+EXPLORER_DEFAULT_CONNECTION = 'scenario_db'
+EXPLORER_CONNECTION_NAME = 'scenario_db'
+
 DATABASE_ROUTERS = ['ScenarioCreator.router.ScenarioRouter', ]
 
 # Internationalization
@@ -145,6 +112,44 @@ USE_I18N = False
 USE_L10N = True
 
 USE_TZ = True
+
+INSTALLED_APPS = (
+    'ScenarioCreator',
+    'Results',
+    'ADSMSettings',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.humanize',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'floppyforms',
+    'crispy_forms',
+    'productionserver',
+    'webpack_loader',
+    'explorer',
+    # 'debug_toolbar',
+    # 'pympler',
+)
+
+MIDDLEWARE_CLASSES = (
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'ADSMSettings.disable.DisableCSRF',  # TODO: This needs to be fixed before we do a cloud deployment!
+    # TODO: Add in the django.middleware.security.SecurityMiddleware
+)
+
+if DEBUG:
+    MIDDLEWARE_CLASSES += (
+        # 'ADSMSettings.debug.HotshotProfileMiddleware',
+        # 'ADSMSettings.debug.cProfileMiddleware',
+    )
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
@@ -237,3 +242,4 @@ DEBUG_TOOLBAR_CONFIG = {
     'JQUERY_URL': '',
     'SHOW_TOOLBAR_CALLBACK': 'ddt_request_history.panels.request_history.allow_ajax',
 }
+
