@@ -272,8 +272,6 @@ class ControlProtocolForm(BaseForm):
                     'minimum_time_between_vaccinations',
                     'days_to_immunity',
                     'vaccine_immune_period',
-                    'trigger_vaccination_ring',
-                    'vaccination_ring_radius',
                     ),
                 Tab('Cost Accounting',
                     'use_cost_accounting',

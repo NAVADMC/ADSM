@@ -438,8 +438,6 @@ protocol_substructure = {'use_detection': ['detection_probability_for_observed_t
                                              'minimum_time_between_vaccinations',
                                              'days_to_immunity',
                                              'vaccine_immune_period',
-                                             'trigger_vaccination_ring',
-                                             'vaccination_ring_radius',
                                              ],
                          'use_cost_accounting': ['cost_of_destruction_appraisal_per_unit',
                                                  'cost_of_destruction_cleaning_per_unit',
@@ -518,10 +516,6 @@ class ControlProtocol(BaseModel):
         help_text='The minimum time in days between vaccination for units of this ' + wiki("production type") + '.', )
     vaccine_immune_period = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
         help_text='Defines the ' + wiki("vaccine immune") + ' period for units of this ' + wiki("production type") + '.', )
-    trigger_vaccination_ring = models.BooleanField(default=False,
-        help_text='Indicates if detection of a unit of this type will trigger a vaccination ring.', )
-    vaccination_ring_radius = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='Radius in kilometers of the vaccination ring.', )
     vaccination_demand_threshold = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of animals of this type that can be vaccinated before the cost of vaccination increases.', )
     cost_of_vaccination_additional_per_animal = MoneyField(default=0.0,
