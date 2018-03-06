@@ -289,7 +289,6 @@ class ControlProtocolForm(BaseForm):
         )
         super(ControlProtocolForm, self).__init__(*args, **kwargs)
 
-
     class Meta(object):
         model = ControlProtocol
         exclude = []
