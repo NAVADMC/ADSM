@@ -29,6 +29,7 @@ switch_tabs = function(element){
     if(!current_is_active(element)){
         //activate the correct protocol rather than navigating
         load_target_link.call(get_parent_title(element), function(){active_tab(element)});
+
     }else{
         active_tab(element);
     }

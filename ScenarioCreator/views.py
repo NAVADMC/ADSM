@@ -527,6 +527,9 @@ def edit_entry(request, primary_key):
         context['backlinks'] = collect_backlinks(initialized_form.instance)
         context['deletable'] = '/setup/ProbabilityFunction/%s/delete/' % primary_key
 
+    if hasattr(initialized_form, 'soft_clean'):
+        initialized_form.soft_clean(request.method)
+
     return new_form(request, initialized_form, context)
 
 

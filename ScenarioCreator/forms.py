@@ -204,7 +204,28 @@ class DiseaseProgressionAssignmentForm(BaseForm):
                    } #progression should NOT be an AddOrSelect
 
 
-class ControlProtocolForm(BaseForm):
+class SoftCleanForm(BaseForm):
+    def soft_clean(self, request_method):
+        errors = None
+        if hasattr(self.instance, 'soft_clean'):
+            errors = self.instance.soft_clean()
+        if errors:
+            if request_method == "GET":
+                errors = errors.error_dict
+
+                for field, error_list in errors.items():
+                    if field not in self.errors:
+                        if field != '__all__' and field not in self.fields:
+                            raise ValueError(
+                                "'%s' has no field named '%s'." % (self.__class__.__name__, field))
+                        if field == '__all__':
+                            self._errors[field] = self.error_class(error_class='nonfield')
+                        else:
+                            self._errors[field] = self.error_class()
+                    self._errors[field].extend(error_list)
+
+
+class ControlProtocolForm(SoftCleanForm):
     """https://speakerdeck.com/maraujop/advanced-django-forms-usage slide 47
     http://stackoverflow.com/questions/19625211/bootstrap-linking-to-a-tab-with-an-url"""
     def __init__(self, *args, **kwargs):

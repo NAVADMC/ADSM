@@ -586,6 +586,20 @@ class ControlProtocol(BaseModel):
                 return False
         return True
 
+    def soft_clean(self):
+        errors = {}
+        # for trigger_switch, fields in protocol_substructure.items():
+        #     if self.__getattribute__(trigger_switch):
+        #         if not self.tab_is_valid(trigger_switch, fields):
+        #             errors[trigger_switch] = ValidationError(trigger_switch + " is enabled but the section is not filled in completely.")
+        for trigger_switch, fields in protocol_substructure.items():
+            if self.__getattribute__(trigger_switch):
+                for field in fields:
+                    if self.__getattribute__(field) is None:
+                        errors[field] = ValidationError("This field cannot be blank!")
+        if errors:
+            return ValidationError(errors)
+
     def is_valid(self):
         for trigger_switch, fields in protocol_substructure.items():
             if self.__getattribute__(trigger_switch):
