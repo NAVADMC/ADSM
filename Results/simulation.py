@@ -36,7 +36,7 @@ def set_pragma(setting, value, connection='default'):
     cursor.execute(raw_sql)
 
 
-def simulation_process(iteration_number, adsm_cmd, production_types, zones, testing=False):
+def simulation_process(iteration_number, adsm_cmd, production_types, zones, log_path, testing=False):
     start = time.time()
 
     if testing:
@@ -46,39 +46,52 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones, test
     # import cProfile, pstats
     # profiler = cProfile.Profile()
     # profiler.enable()
-    
-    simulation = subprocess.Popen(adsm_cmd,
-                                  shell=(platform.system() != 'Darwin'),
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE,
-                                  bufsize=1)
-    headers = simulation.stdout.readline().decode()
-    from Results.output_parser import DailyParser
-    p = DailyParser(headers, production_types, zones)
-    adsm_result = []
-    prev_line = ''
-    while True:
-        line = simulation.stdout.readline()  # TODO: Has the potential to lock up if CEngine crashes (blocking io)
-        line = line.decode().strip()
-        if not line:
-            break
-        parse_result = p.parse_daily_strings(prev_line, False)
-        adsm_result.extend(parse_result)
-        prev_line = line
-    adsm_result.extend(p.parse_daily_strings(prev_line, last_line=True, create_version_entry=iteration_number==1))
 
-    with transaction.atomic(using='scenario_db'):
+    # Start logging
+    with open(os.path.join(log_path, 'iteration%s.log' % iteration_number), 'w') as log_file:
+        simulation = subprocess.Popen(adsm_cmd,
+                                      shell=(platform.system() != 'Darwin'),
+                                      stdout=subprocess.PIPE,
+                                      stderr=subprocess.PIPE,
+                                      bufsize=1)
+        headers = simulation.stdout.readline().decode()
+        log_file.write("LOG: HEADERS:\n")
+        log_file.write("%s\n" % headers)
+        from Results.output_parser import DailyParser
+        p = DailyParser(headers, production_types, zones)
+        adsm_result = []
         prev_line = ''
-        unit_stats_headers = simulation.stdout.readline().decode()  # TODO: Currently we don't use the headers to find which row to insert into.
-        for line in simulation.stdout.readlines():
+        while True:
+            line = simulation.stdout.readline()  # TODO: Has the potential to lock up if CEngine crashes (blocking io)
             line = line.decode().strip()
-            p.parse_unit_stats_string(prev_line)
+            if not line:
+                break
+            log_file.write("%s\n" % line)
+            parse_result = p.parse_daily_strings(prev_line, False)
+            adsm_result.extend(parse_result)
             prev_line = line
-        p.parse_unit_stats_string(prev_line)
+        adsm_result.extend(p.parse_daily_strings(prev_line, last_line=True, create_version_entry=iteration_number==1))
 
-    outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
-    if errors:  # this will only print out error messages after the simulation has halted
-        print(errors)
+        with transaction.atomic(using='scenario_db'):
+            prev_line = ''
+            unit_stats_headers = simulation.stdout.readline().decode()  # TODO: Currently we don't use the headers to find which row to insert into.
+            log_file.write("LOG: UNIT STAT HEADERS:\n")
+            log_file.write("%s\n" % unit_stats_headers)
+            for line in simulation.stdout.readlines():
+                line = line.decode().strip()
+                log_file.write(line)
+                p.parse_unit_stats_string(prev_line)
+                prev_line = line
+            p.parse_unit_stats_string(prev_line)
+
+        outs, errors = simulation.communicate()  # close p.stdout, wait for the subprocess to exit
+        log_file.write("LOG: FINAL OUTS:\n")
+        log_file.write("%s\n" % outs)
+        if errors:  # this will only print out error messages after the simulation has halted
+            log_file.write("LOG: FINAL ERRORS:\n")
+            log_file.write("%s\n" % errors)
+            print(errors)
+    # End logging
     
     sorted_results = defaultdict(lambda: [] )
     for result in adsm_result:
@@ -137,6 +150,12 @@ class Simulation(multiprocessing.Process):
 
             simRecord.save()
 
+            # Clean out previous iteration logs
+            log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'logs')
+            logs_to_delete = [f for f in os.listdir(log_path) if f.startswith('iteration') and os.path.isfile(os.path.join(log_path, f))]
+            for f in logs_to_delete:
+                os.remove(os.path.join(log_path, f))
+
             num_cores = multiprocessing.cpu_count()
             if num_cores > 2:
                 num_cores -= 1
@@ -145,7 +164,7 @@ class Simulation(multiprocessing.Process):
             pool = multiprocessing.Pool(num_cores)
             for iteration in range(1, self.max_iteration + 1):
                 adsm_cmd = executable_cmd + ['-i', str(iteration)]
-                res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, self.production_types, self.zones, self.testing))
+                res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, self.production_types, self.zones, log_path, self.testing))
                 statuses.append(res)
 
             pool.close()
