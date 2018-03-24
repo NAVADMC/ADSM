@@ -436,6 +436,10 @@ body>nav {
     z-index: 0;
 }
 
+.fragment {
+    position: relative;
+}
+
 .layout-panel {
     margin-top: 65px;
     display: block;
@@ -2173,10 +2177,10 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 #sim_progress_and_button {
     position: fixed;
     bottom: 10px;
-    margin-left: 212px;
+    margin-left: 200px;
     display: block;
     height: 51px;
-    width: calc(100% - 212px);
+    width: calc(100% - 250px);
     border-top: 2px solid #606060;
     border-bottom: 2px solid #606060;
     z-index: 1;
@@ -2213,7 +2217,7 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 }
 
 #sim_progress_and_button .progress {
-    width: 60%;
+    width: 100%;
     margin: 0px;
     float:left;
     border-left: 2px solid #606060;
