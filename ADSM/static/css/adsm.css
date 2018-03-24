@@ -2183,6 +2183,7 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     width: calc(100% - 250px);
     border-top: 2px solid #606060;
     border-bottom: 2px solid #606060;
+    border-right: 2px solid #606060;
     z-index: 1;
     background-color: white;
 }
@@ -2217,7 +2218,7 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 }
 
 #sim_progress_and_button .progress {
-    width: 100%;
+    width: 57.5%;
     margin: 0px;
     float:left;
     border-left: 2px solid #606060;
@@ -2225,6 +2226,10 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     height: 100%;
     border-radius: 0;
     position: relative;
+}
+#sim_progress_and_button .progress-done {
+    width: 100%;
+    border-right: none;
 }
 #sim_progress_and_button .progress:after {
     content: "";
