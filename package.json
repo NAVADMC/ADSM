@@ -1,6 +1,6 @@
 {
   "name": "adsm",
-  "version": "9.4.0",
+  "version": "9.5.0",
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
