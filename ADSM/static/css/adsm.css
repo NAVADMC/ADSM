@@ -1686,6 +1686,7 @@ section#population_main_panel h1:first-of-type {
     margin-left: 190px;
     width: calc(100vw - 250px);
     padding: 10px;
+    padding-bottom: 61px;
     background: white;
     position: relative;
     display: block;
