@@ -1,6 +1,6 @@
 {% load db_status_tags %}
 
-<div class="buttonHolder" style="position:absolute; bottom:72px;">
+<div class="buttonHolder" style="position:absolute; right:25px; bottom:72px;">
     {% if outputs_exist %}
         <button type="submit" class="btn btn-danger btn-save" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} id="submit-id-submit">Delete Results and Apply changes</button>
     {% else %}
