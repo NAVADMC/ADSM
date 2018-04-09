@@ -445,6 +445,8 @@ def save_new_instance(initialized_form, request, context):
     context['model_name'] = model_name
     if model_name in singletons:  #they could have their own special page: e.g. Population
         return redirect('/setup/%s/1/' % model_name)
+    if request.is_ajax():
+        return HttpResponseRedirect('/setup/%s/%s' % (model_name, model_instance.id))
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
