@@ -152,6 +152,7 @@ class Simulation(multiprocessing.Process):
 
             # Clean out previous iteration logs
             log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'logs')
+            os.makedirs(log_path, exist_ok=True)
             logs_to_delete = [f for f in os.listdir(log_path) if f.startswith('iteration') and os.path.isfile(os.path.join(log_path, f))]
             for f in logs_to_delete:
                 os.remove(os.path.join(log_path, f))
