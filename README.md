@@ -365,7 +365,7 @@ The ADSM releases are:
 ## Credits
 Project Members:
 
-* Project Owner - Missy Schoenbaum, USDA:APHIS:VS:CEAH Modeling Team
+* Project Owner - Missy Schoenbaum, USDA:APHIS:VS:CEAH Modeling Team contact melissa.schoenbaum@aphis.usda.gov
 * ADSM Technical Lead - Josiah Seaman
 * Simulation Creator / Maintainer - Neil Harvey
 * Dev Ops - Bryan Hurst
