@@ -253,3 +253,92 @@ class OutputSettingsTestCase(TestCase):
         result = OutputSettings.objects.get()
         self.assertEqual(OutputSettings.objects.count(), 1)
         self.assertEqual(result.pk, 1)
+
+ 
+'''
+Testing all of the functions from db_status_tags.py.
+Tests present in this class = 8
+'''
+class StatusTags(TestCase):
+    multi_db = True
+
+    #takes in an expected "target_address" and a "url" and tests if they are equal while ignoring case-sensitive characters.
+    #returns "active " for good match and "" for bad.
+    def test_active(self):
+        #expected URL
+        target_address = "@@@.My test url.###"
+
+        #two test cases, one for a good match and one for bad.
+        self.assertEqual("active ", db_status_tags.active(target_address, "@@@.my Test Url.###"))
+        self.assertEqual("", db_status_tags.active(target_address, "Invalid URL"))
+
+    #complete takes a boolean type parameter and returns "completed " for True and "incomplete" for false
+    def test_complete(self):
+
+        #two test cases, one for true and one for false
+        self.assertEqual("completed ", db_status_tags.completed(True))
+        self.assertEqual("incomplete", db_status_tags.completed(False))
+
+    #parent_link() function is present in db_status_tags but currently has no uses in program, no testing required.
+    def test_parent_link(self):
+        return
+
+
+    #action_id() takes a given string and replaces '/' with '-'
+    def test_action_id(self):
+        #test text
+        text = "Testing/This/Text"
+        #running the text through the action_id() function
+        formatted = db_status_tags.action_id(text)
+
+        self.assertEqual("Testing-This-Text", formatted)
+
+    #takes string and optional url and returns a django SafeString HTML link with the works linked to a url
+    def test_wiki(self):
+        test_string = "My Test String"
+        test_url = "@@@.MyFakeURL.###"
+
+        #three test, one for each of the folling cases:
+            #url is not provided
+            #url == "/"
+            #url is provided
+        #the following list cooriponds to the above cases and marks what the URL is parsed out to be without the HTML
+            #https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#my-test-string
+            #https://github.com/NAVADMC/ADSM/wiki/
+            #https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#@@@.MyFakeURL.###
+
+        #case 1
+        self.assertEqual('<a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#my-test-string" class="wiki" target="_blank">My Test String</a>',
+                         db_status_tags.wiki(test_string))
+        #case 2
+        self.assertEqual('<a href="https://github.com/NAVADMC/ADSM/wiki/" class="wiki" target="_blank">My Test String</a>',
+                         db_status_tags.wiki(test_string, url = "/"))
+        #case 3
+        self.assertEqual('<a href="https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#@@@.MyFakeURL.###" class="wiki" target="_blank">My Test String</a>',
+                         db_status_tags.wiki(test_string, url = test_url))
+
+    #bold() takes an input string ("words") and returns a django SafeString surrounded by HTML <strong> tags.
+    def test_bold(self):
+        #starting text
+        to_bold = "Test Text"
+        #bold the text
+        bolded = db_status_tags.bold(to_bold)
+
+        #test against expected return
+        self.assertEqual("<strong>Test Text</strong>", bolded)
+
+    #link() takes in words and a url link and returns a django SafeString HTML link with the words linked to the text
+    def test_link(self):
+        #test url
+        url = "@@@.fakelink.###"
+        #test text
+        words = "Test Link"
+        #combining the two using the link() function
+        html = db_status_tags.link(words, url)
+
+        #test against expected return
+        self.assertEqual('<a href="@@@.fakelink.###" class="wiki" target="_blank">Test Link</a>',html)
+
+    #form_completed() function is present in db_status_tags but currently has no uses in program, no testing required.
+    def test_form_completed(self):
+        return
