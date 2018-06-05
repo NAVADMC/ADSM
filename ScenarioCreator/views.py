@@ -23,7 +23,7 @@ singletons = ['Scenario', 'Population', 'Disease', 'ControlMasterPlan', 'OutputS
 abstract_models = {
     'Function':
         [('RelationalFunction', RelationalFunction),
-         ('ProbabilityFunction', ProbabilityFunction)],
+         ('ProbabilityDensityFunction', ProbabilityFunction)],
     'DiseaseSpread':
         [('DirectSpread', DirectSpread),
          ('IndirectSpread', IndirectSpread),
@@ -606,24 +606,47 @@ def filtered_list_per_model(model_class, restart_trigger):
                'name': spaces_for_camel_case(model_name)}
     return context
 
-def list_per_model(model_class):
+
+
+'''
+Takes a model object and display name and returns a context variable.
+Used for "Relational Function" and "Probabiltiy Density Function" on the functions panel
+'''
+def list_per_model(model_class, local_name):
+    #model name is the object name
     model_name = model_class.__name__
+                #entires are the user functions
     context = {'entries': model_class.objects.all(),
+               #class is either "RelationalFunction" or "ProbabiltyFunction", its just a distiguisher between the two.
                'class': model_name,
-               'name': spaces_for_camel_case(model_name),
+               #takes the given name and formats it for display
+               'name': spaces_for_camel_case(local_name),
+               #gets the wiki link for the [?] box
                'wiki_link': getattr(model_class, 'wiki_link', None)}
+    #return the context variable for rendering
     return context
 
 
+'''
+builds the values to display the functions panel.
+Possible HTML files effected by this function:
+    functions_panel.html
+    ModelList.html
+    RelationalFunction.html
+'''
 def functions_panel(request, form=None):
     """Panel on the right that lists both Relational and Probability Functions with a graphic depiction"""
+    #base context values, more data appended in later int he function
     context = {'models': [],
                'load_target': '#current-function',
                }
     if form is not None:
         context['form'] = form
+    #for each of the function types
     for local_name, local_model in abstract_models['Function']:
-        context['models'].append(list_per_model(local_model))
+        #add to the context all of the functions from the function type (and get display name)
+        context['models'].append(list_per_model(local_model, local_name))
+    #render the page
     return render(request, 'functions_panel.html', context)  # no 3 panel layout
 
 
