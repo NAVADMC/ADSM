@@ -589,7 +589,7 @@ def trigger_list(request):
                                'models':[filtered_list_per_model(x, False) for x in layout['Start Triggers']]
                               }, 
                               {'name':'Stop Triggers',
-                               'models':[list_per_model(x) for x in layout['Stop Triggers']]
+                               'models':[list_per_model(x, x) for x in layout['Stop Triggers']]
                               },
                               {'name':'Restart Triggers',  # This exact name is used in the template VaccinationTriggerList.html
                                'models':[filtered_list_per_model(x, True) for x in layout['Restart Triggers']]
@@ -667,9 +667,9 @@ def model_list(request, base_page='ScenarioCreator/ModelList.html'):
                    'models': []}
         if model_name in abstract_models.keys():
             for local_name, local_model in abstract_models[model_name]:
-                context['models'].append(list_per_model(local_model))
+                context['models'].append(list_per_model(local_model, local_name))
         else:
-            context['models'].append(list_per_model(model))
+            context['models'].append(list_per_model(model, model.__name__))
     context['load_target'] = '#center-panel'
     context['load_next'] = request.GET.get('next', '')  # #704 Ability to load the center panel URL with a ?next=/setup/DirectSpread/1/ argument
     return render(request, 'ScenarioCreator/3Panels.html', context)
