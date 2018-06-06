@@ -589,7 +589,7 @@ def trigger_list(request):
                                'models':[filtered_list_per_model(x, False) for x in layout['Start Triggers']]
                               }, 
                               {'name':'Stop Triggers',
-                               'models':[list_per_model(x, x) for x in layout['Stop Triggers']]
+                               'models':[list_per_model(x, str(x)) for x in layout['Stop Triggers']]
                               },
                               {'name':'Restart Triggers',  # This exact name is used in the template VaccinationTriggerList.html
                                'models':[filtered_list_per_model(x, True) for x in layout['Restart Triggers']]
