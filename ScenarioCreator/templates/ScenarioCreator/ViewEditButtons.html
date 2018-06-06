@@ -14,10 +14,16 @@
         20% is significantly darker */
         filter: brightness(90%);
     }
+  
+    .btn-save:hover {
+        /* note: 100% is baseline so 85% is slightly darker,
+        20% is significantly darker */
+        filter: brightness(80%);
+    }
 </style>
 <div class="button-footer">
     <div class="buttonHolder" hidden>
-        <button type="submit" class="btn btn-primary btn-save" formnovalidate id="submit-id-submit" disabled {% if action %}form="{{ action|action_id }}"{% endif %} >Apply</button>
+        <button type="submit" class="btn btn-primary btn-save" formnovalidate id="submit-id-submit" {% if action %}form="{{ action|action_id }}"{% endif %} >Apply</button>
         <button type="button" class="btn btn-default btn-cancel" id="id-cancel" {% if action %}form="{{ action|action_id }}"{% endif %} >Cancel</button>
         {% if backlinks %}
             <button type="button"  class="btn btn-danger delete-button" disabled {% if action %}form="{{ action|action_id }}"{% endif %} >Delete Disabled</button>
