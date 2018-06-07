@@ -928,7 +928,9 @@ function hide_unneeded_probability_fields() {
 
 function make_function_panel_editable() {
     $('.edit-button-holder a, .edit-button-holder button').removeClass('reveal') //collapse the edit buttons, possibly hide
+    $('.back-button button').removeClass('reveal') //Hide the "Bacck" button
     $('.edit-button-holder').css('display', 'none')
+    $('.back-button').css('display', 'none')
 
     var base = $('#functions_panel');
     var $modal = $('.modal-body');
