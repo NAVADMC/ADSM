@@ -52,7 +52,7 @@ def submit_button():
     {% if outputs_exist %}
         <button type="submit" class="btn btn-danger btn-save" formnovalidate id="submit-id-submit">Delete Results and Apply changes</button>
     {% else %}
-        <button type="button" class="btn btn-default btn-cancel" id="id-cancel">Cancel</button>
+        <a href="/setup/Scenario/1/"><button type="button" class="btn btn-default btn-cancel" id="id-cancel">Cancel</button></a>
         <button type="submit" class="btn btn-primary btn-save" formnovalidate id="submit-id-submit" disabled>Apply</button>
     {% endif %}
     {% if backlinks %}
