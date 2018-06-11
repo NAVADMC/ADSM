@@ -65,6 +65,7 @@ $(function(){
             // is used.
             $('#functions_panel input').prop('disabled', true);
             $('#functions_panel select').prop('disabled', true);
+            $('#functions_panel textarea').prop('disabled', true);
         };
     })
 
@@ -79,6 +80,7 @@ $(function(){
             // is used.
             $('#functions_panel input').prop('disabled', true);
             $('#functions_panel select').prop('disabled', true);
+            $('#functions_panel textarea').prop('disabled', true);
         };
     })
 
@@ -938,6 +940,7 @@ function make_function_panel_editable() {
     base.addClass('editable')
     base.find('input').addClass('editable').removeAttr('disabled')
     base.find('select').addClass('editable').removeAttr('disabled')
+    base.find('textarea').addClass('editable').removeAttr('disabled')
     base.find(':input').addClass('editable')
     //$('#tb_mask').css('visibility', 'visible')
     base.css('pointer-events', 'all')
