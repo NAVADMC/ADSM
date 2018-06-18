@@ -39,6 +39,10 @@ class FixedSelect(Select):
 
 
 def submit_button():
+    """
+    NOTE: This submit button is currently only used in the NonModelForm class which is only used in the ImportForm.
+    ALSO NOTE: When cancel is selected, the page is sent back to the base scenario setup page.
+    """
     edit_buttons = """
     {% if backlinks %}
     <h3>Referenced by:</h3>
