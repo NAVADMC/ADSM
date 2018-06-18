@@ -32,7 +32,7 @@
         {% endif %}
     </div>
     
-    <a href="#" title="Functions Panel" tb-target="#functions_panel"><button type="button" class="btn btn-primary btn-cancel back-button visible" id="id-cancel" style = "float:left;" {% if action %}form="{{ action|action_id }}"{% endif %} >Back</button></a>
+    <a href="#" title="Functions Panel" tb-target="#functions_panel"><button type="button" class="btn btn-primary btn-cancel back-button visible" id="id-cancel" {% if action %}form="{{ action|action_id }}"{% endif %} >Back</button></a>
     <div class="edit-button-holder">
     <!--Reverse z-index order -->
         <button type="button" class="btn btn-default btn-cancel" id="id-cancel" {% if action %}form="{{ action|action_id }}"{% endif %} >Cancel</button>
