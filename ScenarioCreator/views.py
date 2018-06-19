@@ -23,7 +23,7 @@ singletons = ['Scenario', 'Population', 'Disease', 'ControlMasterPlan', 'OutputS
 abstract_models = {
     'Function':
         [('RelationalFunction', RelationalFunction),
-         ('ProbabilityDensityFunction', ProbabilityFunction)],
+         ('ProbabilityFunction', ProbabilityFunction)],
     'DiseaseSpread':
         [('DirectSpread', DirectSpread),
          ('IndirectSpread', IndirectSpread),
@@ -589,7 +589,7 @@ def trigger_list(request):
                                'models':[filtered_list_per_model(x, False) for x in layout['Start Triggers']]
                               }, 
                               {'name':'Stop Triggers',
-                               'models':[list_per_model(x, str(x)) for x in layout['Stop Triggers']]
+                               'models':[list_per_model(x) for x in layout['Stop Triggers']]
                               },
                               {'name':'Restart Triggers',  # This exact name is used in the template VaccinationTriggerList.html
                                'models':[filtered_list_per_model(x, True) for x in layout['Restart Triggers']]
@@ -608,45 +608,23 @@ def filtered_list_per_model(model_class, restart_trigger):
 
 
 
-'''
-Takes a model object and display name and returns a context variable.
-Used for "Relational Function" and "Probabiltiy Density Function" on the functions panel
-'''
-def list_per_model(model_class, local_name):
-    #model name is the object name
+def list_per_model(model_class):
     model_name = model_class.__name__
-                #entires are the user functions
     context = {'entries': model_class.objects.all(),
-               #class is either "RelationalFunction" or "ProbabiltyFunction", its just a distiguisher between the two.
                'class': model_name,
-               #takes the given name and formats it for display
-               'name': spaces_for_camel_case(local_name),
-               #gets the wiki link for the [?] box
+               'name': spaces_for_camel_case(model_name),
                'wiki_link': getattr(model_class, 'wiki_link', None)}
-    #return the context variable for rendering
     return context
 
-
-'''
-builds the values to display the functions panel.
-Possible HTML files effected by this function:
-    functions_panel.html
-    ModelList.html
-    RelationalFunction.html
-'''
 def functions_panel(request, form=None):
     """Panel on the right that lists both Relational and Probability Functions with a graphic depiction"""
-    #base context values, more data appended in later int he function
     context = {'models': [],
                'load_target': '#current-function',
                }
     if form is not None:
         context['form'] = form
-    #for each of the function types
     for local_name, local_model in abstract_models['Function']:
-        #add to the context all of the functions from the function type (and get display name)
-        context['models'].append(list_per_model(local_model, local_name))
-    #render the page
+        context['models'].append(list_per_model(local_model))
     return render(request, 'functions_panel.html', context)  # no 3 panel layout
 
 
@@ -667,9 +645,9 @@ def model_list(request, base_page='ScenarioCreator/ModelList.html'):
                    'models': []}
         if model_name in abstract_models.keys():
             for local_name, local_model in abstract_models[model_name]:
-                context['models'].append(list_per_model(local_model, local_name))
+                context['models'].append(list_per_model(local_model))
         else:
-            context['models'].append(list_per_model(model, model.__name__))
+            context['models'].append(list_per_model(model))
     context['load_target'] = '#center-panel'
     context['load_next'] = request.GET.get('next', '')  # #704 Ability to load the center panel URL with a ?next=/setup/DirectSpread/1/ argument
     return render(request, 'ScenarioCreator/3Panels.html', context)
