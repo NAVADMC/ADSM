@@ -75,7 +75,7 @@ def probability_graph(request, primary_key):
 
 def existing_probability_graph(primary_key):
     import ScenarioCreator.models
-    m = ScenarioCreator.models.ProbabilityFunction.objects.get(id=primary_key)
+    m = ScenarioCreator.models.ProbabilityDensityFunction.objects.get(id=primary_key)
     #TODO: filler to avoid NaNs
     for field in m._meta.fields:
         if getattr(m, field.name) is None and isinstance(field, (IntegerField, FloatField)):

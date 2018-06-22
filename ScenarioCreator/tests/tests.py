@@ -5,7 +5,7 @@ from ADSMSettings.utils import workspace_path
 
 from ScenarioCreator.models import (Scenario, choice_char_from_value, squish_name,
                                     Unit, Population, ProductionType, IndirectSpread,
-                                    ProbabilityFunction, RelationalFunction, Disease,
+                                    ProbabilityDensityFunction, RelationalFunction, Disease,
                                     ControlMasterPlan, OutputSettings)
 from ScenarioCreator.population_parser import PopulationParser
 from ScenarioCreator.forms import IndirectSpreadForm
@@ -101,7 +101,7 @@ class IndirectSpreadFormTestCase(TestCase):
     multi_db = True
 
     def setUp(self):
-        self.p_f = ProbabilityFunction.objects.create(name="Test PF", equation_type="Triangular")
+        self.p_f = ProbabilityDensityFunction.objects.create(name="Test PF", equation_type="Triangular")
         self.r_f = RelationalFunction.objects.create(name="Test RF")
 
         self.form_data = {

@@ -6,8 +6,8 @@ import tempfile
 from django.test import TestCase
 
 from ScenarioCreator.models import (AirborneSpread, RelationalFunction,
-        RelationalPoint, ProbabilityFunction, DiseaseProgression,
-        ProductionType, Zone, ZoneEffect, ZoneEffectAssignment)
+                                    RelationalPoint, ProbabilityDensityFunction, DiseaseProgression,
+                                    ProductionType, Zone, ZoneEffect, ZoneEffectAssignment)
 from ADSMSettings.utils import workspace_path
 from ADSM import settings
 
@@ -225,7 +225,7 @@ class RelationalFunctionTestCase(TestCase):
 
     def test_related_objects_exist(self):
         relational_function = RelationalFunction.objects.create(name="Test Function")
-        probability_function = ProbabilityFunction.objects.create(name="Test Probability Function")
+        probability_function = ProbabilityDensityFunction.objects.create(name="Test Probability Function")
         disease_progression = DiseaseProgression.objects.create(
             name="Test Progression",
             disease_latent_period=probability_function,

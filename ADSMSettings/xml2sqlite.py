@@ -106,7 +106,7 @@ def sequence( tag ):
 
 
 def getPdf( xml, nameGenerator ):
-    """Returns a ProbabilityFunction object corresponding to the XML."""
+    """Returns a ProbabilityDensityFunction object corresponding to the XML."""
     assert isinstance( xml, ET.Element )
     firstChild = list( xml )[0]
     if firstChild.tag == 'probability-density-function':
@@ -253,7 +253,7 @@ def getPdf( xml, nameGenerator ):
     else:
         raise NotImplementedError( pdfType )
 
-    pdf, created = create_no_duplicates(ProbabilityFunction, name, **args)
+    pdf, created = create_no_duplicates(ProbabilityDensityFunction, name, **args)
     return pdf
 
 

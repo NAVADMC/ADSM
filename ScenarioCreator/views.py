@@ -26,7 +26,7 @@ singletons = ['Scenario', 'Population', 'Disease', 'ControlMasterPlan', 'OutputS
 abstract_models = {
     'Function':
         [('RelationalFunction', RelationalFunction),
-         ('ProbabilityFunction', ProbabilityFunction)],
+         ('ProbabilityDensityFunction', ProbabilityDensityFunction)],
     'DiseaseSpread':
         [('DirectSpread', DirectSpread),
          ('IndirectSpread', IndirectSpread),
@@ -462,8 +462,8 @@ def new_form(request, initialized_form, context):
         # #422 Singleton models now load in a fragment to be refreshed the same way that other forms
         #  are loaded dynamically
         return render(request, 'ScenarioCreator/MainPanel.html', context)
-    if model_name == 'ProbabilityFunction':
-        return render(request, 'ScenarioCreator/ProbabilityFunctionForm.html', context)
+    if model_name == 'ProbabilityDensityFunction':
+        return render(request, 'ScenarioCreator/ProbabilityDensityFunctionForm.html', context)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages
 
 
@@ -525,9 +525,9 @@ def edit_entry(request, primary_key):
                'action': request.path}
     add_breadcrumb_context(context, model_name, primary_key)
 
-    if model_name == 'ProbabilityFunction':
+    if model_name == 'ProbabilityDensityFunction':
         context['backlinks'] = collect_backlinks(initialized_form.instance)
-        context['deletable'] = '/setup/ProbabilityFunction/%s/delete/' % primary_key
+        context['deletable'] = '/setup/ProbabilityDensityFunction/%s/delete/' % primary_key
 
     if hasattr(initialized_form, 'soft_clean'):
         initialized_form.soft_clean(request.method)
@@ -643,7 +643,7 @@ def control_protocol_list(request):
 def model_list(request, base_page='ScenarioCreator/ModelList.html'):
     model_name, model = get_model_name_and_model(request)
     model_name = promote_to_abstract_parent(model_name)
-    if model_name in 'Function RelationalFunction ProbabilityFunction'.split():
+    if model_name in 'Function RelationalFunction ProbabilityDensityFunction'.split():
         return functions_panel(request)
     if model_name == 'VaccinationTrigger':  # special case
         context = trigger_list(request)

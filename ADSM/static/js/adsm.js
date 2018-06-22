@@ -69,7 +69,7 @@ $(function(){
         };
     })
 
-    $('form[action^="/setup/ProbabilityFunction"]').livequery(function(){
+    $('form[action^="/setup/ProbabilityDensityFunction"]').livequery(function(){
         var action = $(this).attr('action');
         // The last part of the action URL is either "/new/" or a numeric ID of
         // an existing function to edit.
@@ -495,7 +495,7 @@ function populate_pdf_panel(select) {
     var load_target = '#functions_panel #current-function'
     var origin = $input.closest('.layout-panel').attr('id');
 
-    if(origin == 'left-panel' && (url.indexOf('RelationalFunction') == -1 && url.indexOf('ProbabilityFunction') == -1)) { //use the center-panel if this is from left and not a function
+    if(origin == 'left-panel' && (url.indexOf('RelationalFunction') == -1 && url.indexOf('ProbabilityDensityFunction') == -1)) { //use the center-panel if this is from left and not a function
         load_target = '#center-panel'
         $('#center-panel').addClass('reveal') //allows toggle of box shadow on :before pseudo element
     }

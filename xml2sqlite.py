@@ -9,10 +9,10 @@ import shutil
 def count_model_entries():
     from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Population, Disease, DiseaseProgression, \
         DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
-        ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
-    models = [ProductionType, Scenario, OutputSettings, Population, Disease, DiseaseProgression, 
-              DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, 
-              ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
+        ProtocolAssignment, Zone, ZoneEffect, ProbabilityDensityFunction, RelationalFunction, ZoneEffectAssignment
+    models = [ProductionType, Scenario, OutputSettings, Population, Disease, DiseaseProgression,
+              DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol,
+              ProtocolAssignment, Zone, ZoneEffect, ProbabilityDensityFunction, RelationalFunction, ZoneEffectAssignment
               ]
     print("Total model entries:", sum(model.objects.count() for model in models))
 

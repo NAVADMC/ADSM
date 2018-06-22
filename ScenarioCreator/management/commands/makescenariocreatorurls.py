@@ -56,9 +56,9 @@ class Command(BaseCommand):
              "url('^DisableAllControls.json/$', 'ScenarioCreator.views.disable_all_controls_json')",
              "url('^VaccinationGlobal/$', 'ScenarioCreator.views.vaccination_global')",
 
-             "url('^ProbabilityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph')",
+             "url('^ProbabilityDensityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph')",
              "url('^RelationalFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.relational_graph')",
-             "url('^ProbabilityFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph')",
+             "url('^ProbabilityDensityFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph')",
              "url('^RelationalFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph')",
 
              "url('^SpreadOptions.json/$', 'ScenarioCreator.views.spread_options_json')",

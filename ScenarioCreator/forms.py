@@ -107,15 +107,15 @@ class UnitFormAbbreviated(BaseForm):
         #'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'})
 
 
-class ProbabilityFunctionForm(BaseForm):
+class ProbabilityDensityFunctionForm(BaseForm):
     class Meta(object):
-        model = ProbabilityFunction
+        model = ProbabilityDensityFunction
         exclude = []
         widgets = {'graph': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
     def clean(self):
-        cleaned_data = super(ProbabilityFunctionForm, self).clean()
-        for field in ProbabilityFunction._meta.fields:
+        cleaned_data = super(ProbabilityDensityFunctionForm, self).clean()
+        for field in ProbabilityDensityFunction._meta.fields:
             used_in = re.split(r": |, |\.", field.help_text)  # It's important that "Gaussian" doesn't match "Inverse Gaussian"
             mentioned = cleaned_data.get('equation_type') in used_in
             empty = cleaned_data.get(field.name) is None
@@ -319,9 +319,9 @@ class ControlProtocolForm(SoftCleanForm):
         exclude = []
         widgets = {'detection_probability_for_observed_time_in_clinical': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'detection_probability_report_vs_first_detection': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'trace_result_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'vaccine_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'test_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'trace_result_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
+                   'vaccine_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
+                   'test_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
                    'destruction_ring_radius': FloatInput(),
                    'vaccination_ring_radius': FloatInput(),
                    'exam_direct_forward_success_multiplier': FloatInput(),
@@ -351,10 +351,10 @@ class DiseaseProgressionForm(BaseForm):
         model = DiseaseProgression
         exclude = ['_disease']
         widgets = {
-                   'disease_latent_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'disease_subclinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'disease_clinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'disease_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'disease_latent_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
+                   'disease_subclinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
+                   'disease_clinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
+                   'disease_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
                    'disease_prevalence': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/',
                                                             'data-visibility-context': 'use_within_unit_prevalence'})
         }
@@ -382,9 +382,9 @@ class IndirectSpreadForm(BaseForm):
         exclude = ['_disease']
         widgets = {'contact_rate': FloatInput(),
                    'infection_probability': FloatInput(),  # visibility settings acts differently from DirectSpread.infection_probability
-                   'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
+                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/',
                                                          'data-visibility-controller': 'transport_delay',
                                                          'data-disabled-value': ''})}  # should lock itself invisible if null
 
@@ -415,9 +415,9 @@ class DirectSpreadForm(BaseForm):
         widgets = {'contact_rate': FloatInput(),
                    'infection_probability': NumberInput(attrs={'data-visibility-context': 'use_within_unit_prevalence',
                                                                'data-visibility-flipped': 'true', 'step': 'any'}),
-                   'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
+                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/',
                                                          'data-visibility-controller': 'transport_delay',
                                                          'data-disabled-value': ''})}  # should lock itself invisible if null
 
@@ -444,7 +444,7 @@ class AirborneSpreadForm(BaseForm):
                                                       'data-visibility-flipped': 'true',
                                                       'step': 'any'}),  # only visible when exponential is false
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
+                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/',
                                                          'data-visibility-controller': 'transport_delay',
                                                          'data-disabled-value': ''})}  # should lock itself invisible if null
 

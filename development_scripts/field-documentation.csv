@@ -34,7 +34,7 @@ name, CharField, User-assigned name for each function.
 x_axis_units, CharField, Specifies the descriptive units for the x axis in relational functions.
 notes, TextField, ', )  # Why is this hid
 
-class ProbabilityFunction(Function):
+class ProbabilityDensityFunction(Function):
 
 equation_type, CharField, For probability density functions identifies the type of functio
 mean, FloatField, The mean for probability density function types Gaussian Lognormal Possoin and Exponential.

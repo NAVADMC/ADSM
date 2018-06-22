@@ -1,0 +1,13 @@
+{% extends 'ScenarioCreator/Fragment.html' %}
+{% load floppyforms %}
+{% load crispy_forms_tags  %}
+{% load db_status_tags %}
+
+{% block content %}
+    <form id="{{ action|action_id }}" class="ajax probability-form" action="{{ action }}">
+        <img id="function-graph" src="{{action}}graph.png" class="img-responsive">
+
+        {% crispy form %}
+        {% include "ScenarioCreator/ViewEditButtons.html" %}
+    </form>
+{% endblock %}
