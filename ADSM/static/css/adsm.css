@@ -912,6 +912,12 @@ ul {
 /*.edit-button-holder .edit-button {*/
     /*z-index: 20;*/
 /*}*/
+
+.back-button{
+    float:left;
+    display: unset;
+}
+
 .edit-button-holder button,
 .edit-button-holder a {
     position: absolute;

@@ -614,6 +614,8 @@ def filtered_list_per_model(model_class, restart_trigger):
                'name': spaces_for_camel_case(model_name)}
     return context
 
+
+
 def list_per_model(model_class):
     model_name = model_class.__name__
     context = {'entries': model_class.objects.all(),
@@ -621,7 +623,6 @@ def list_per_model(model_class):
                'name': spaces_for_camel_case(model_name),
                'wiki_link': getattr(model_class, 'wiki_link', None)}
     return context
-
 
 def functions_panel(request, form=None):
     """Panel on the right that lists both Relational and Probability Functions with a graphic depiction"""
