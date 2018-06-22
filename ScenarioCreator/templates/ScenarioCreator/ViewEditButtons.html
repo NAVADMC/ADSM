@@ -8,17 +8,32 @@
         {% endfor %}
     </ul>    
 {% endif %}
+<style>
+    .btn-success.reveal {
+        /* note: 100% is baseline so 85% is slightly darker,
+        20% is significantly darker */
+        filter: brightness(90%);
+    }
+  
+    .btn-save:hover {
+        /* note: 100% is baseline so 85% is slightly darker,
+        20% is significantly darker */
+        filter: brightness(80%);
+    }
+</style>
 <div class="button-footer">
     <div class="buttonHolder" hidden>
-        <button type="submit" class="btn btn-primary btn-save" formnovalidate id="submit-id-submit" disabled {% if action %}form="{{ action|action_id }}"{% endif %} >Apply</button>
-        <button type="button" class="btn btn-default btn-cancel" id="id-cancel" {% if action %}form="{{ action|action_id }}"{% endif %} >Cancel</button>
+        <button type="submit" class="btn btn-primary btn-save" formnovalidate id="submit-id-submit" {% if action %}form="{{ action|action_id }}"{% endif %} >Apply</button>
+        <a href="#" title="Functions Panel" tb-target="#functions_panel"><button type="button" class="btn btn-default btn-cancel" id="id-cancel" {% if action %}form="{{ action|action_id }}"{% endif %} >Cancel</button></a>
         {% if backlinks %}
             <button type="button"  class="btn btn-danger delete-button" disabled {% if action %}form="{{ action|action_id }}"{% endif %} >Delete Disabled</button>
         {% elif deletable %}
             <a href="#"  class="btn btn-danger delete-button" data-delete-link="{{deletable}}" {% if action %}form="{{ action|action_id }}"{% endif %} >Delete</a>
         {% endif %}
     </div>
-
+    
+    <!-- Only used on the Relational Function screen and the Probability Density Function screen. Button links back to the functions panel -->
+    <a href="#" title="Functions Panel" tb-target="#functions_panel"><button type="button" class="btn btn-primary btn-cancel back-button visible" id="id-cancel" {% if action %}form="{{ action|action_id }}"{% endif %} >Back</button></a>
     <div class="edit-button-holder">
     <!--Reverse z-index order -->
         <button type="button" class="btn btn-default btn-cancel" id="id-cancel" {% if action %}form="{{ action|action_id }}"{% endif %} >Cancel</button>
