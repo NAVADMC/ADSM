@@ -13,6 +13,7 @@ urlpatterns = patterns('', url('^AssignSpreads/$', 'ScenarioCreator.views.assign
          url('^Protocols.json/$', 'ScenarioCreator.views.protocols_json'),
          url('^ControlProtocol/$', 'ScenarioCreator.views.control_protocol_list'),
          url('^ControlProtocol/(?P<primary_key>\d+)/(?P<field>use_\w+)/', 'ScenarioCreator.views.update_protocol_enabled'),
+         url('^DestructionGlobal/$', 'ScenarioCreator.views.destruction_global'),
          url('^Populations/$', 'ScenarioCreator.views.population'),
          url('^Population/new/$', 'ScenarioCreator.views.population'),
          url('^UploadPopulation/$', 'ScenarioCreator.views.upload_population'),

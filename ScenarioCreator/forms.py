@@ -155,25 +155,28 @@ class ControlMasterPlanForm(BaseForm):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'name',
-            HTML(r"<h2>Global Destruction settings</h2>"),
-            HTML(r"<p>Parameters are not used if Destruction is turned off in the control protocol</p>"),
-            'destruction_program_delay',
-            'destruction_capacity',
-            'destruction_priority_order',
-            'destruction_reason_order',
-            HTML(r"<h2>Global Vaccination settings</h2>"),
-            HTML(r"<p>Parameters are not used if Vaccination is turned off in the control protocol</p>"),
-            'vaccination_capacity',
-            'restart_vaccination_capacity',
-            'vaccination_priority_order',
-            'vaccinate_retrospective_days',
         )
         super(ControlMasterPlanForm, self).__init__(*args, **kwargs)
+
+        '''
+        HTML(r"<h2>Global Vaccination settings</h2>"),
+        HTML(r"<p>Parameters are not used if Vaccination is turned off in the control protocol</p>"),
+        'vaccination_capacity',
+        'restart_vaccination_capacity',
+        'vaccination_priority_order',
+        'vaccinate_retrospective_days',
+        HTML(r"<h2>Global Destruction settings</h2>"),
+        HTML(r"<p>Parameters are not used if Destruction is turned off in the control protocol</p>"),
+        'destruction_program_delay',
+        'destruction_capacity',
+        'destruction_priority_order',
+        'destruction_reason_order',
+        '''
 
 
     class Meta(object):
         model = ControlMasterPlan
-        fields = 'name destruction_program_delay destruction_capacity destruction_priority_order destruction_reason_order'.split()
+        fields = 'name'.split()
         widgets = {
                  # 'disable_all_controls': CheckboxInput(attrs={'hidden':'hidden'}),
                    'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
@@ -191,6 +194,15 @@ class VaccinationMasterForm(BaseForm):
             'restart_vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
         }
 
+class DestructionMasterForm(BaseForm):
+    class Meta(object):
+        model = ControlMasterPlan
+        fields = 'destruction_program_delay destruction_capacity destruction_priority_order destruction_reason_order'.split()
+        widgets = {
+                    'destruction_reason_order': HiddenInput(),
+                    'destruction_priority_order': HiddenInput(),
+                    'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                    }
 
 
 class ProtocolAssignmentForm(BaseForm):

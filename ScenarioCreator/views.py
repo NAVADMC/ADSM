@@ -788,3 +788,18 @@ def vaccination_global(request):
     }
 
     return render(request, 'ScenarioCreator/navigationPane.html', context)
+
+def destruction_global(request):
+
+    instance = ControlMasterPlan.objects.get()
+    initialized_form = DestructionMasterForm(None, instance=instance)
+
+    context = {
+        'base_page': 'ScenarioCreator/DestructionGlobal.html',
+        'title': 'Destruction Global',
+        'reasons': instance.destruction_reason_order.split(","),
+        'priorities': instance.destruction_priority_order.split(","),
+        'form': initialized_form,
+    }
+
+    return render(request, 'ScenarioCreator/navigationPane.html', context)
