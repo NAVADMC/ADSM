@@ -792,8 +792,10 @@ def vaccination_global(request):
 def destruction_global(request):
 
     instance = ControlMasterPlan.objects.get()
-    initialized_form = DestructionMasterForm(None, instance=instance)
-
+    initialized_form = DestructionMasterForm(request.POST or None, instance=instance)
+    if request.method == "POST":
+        if initialized_form.is_valid():
+            instance = initialized_form.save(commit=True)
     context = {
         'base_page': 'ScenarioCreator/DestructionGlobal.html',
         'title': 'Destruction Global',

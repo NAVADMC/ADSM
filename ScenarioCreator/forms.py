@@ -177,10 +177,7 @@ class ControlMasterPlanForm(BaseForm):
     class Meta(object):
         model = ControlMasterPlan
         fields = 'name'.split()
-        widgets = {
-                 # 'disable_all_controls': CheckboxInput(attrs={'hidden':'hidden'}),
-                   'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   }
+        widgets = {}
 
 
 class VaccinationMasterForm(BaseForm):
