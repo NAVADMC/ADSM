@@ -378,6 +378,10 @@ $(function(){
         $('.edit-button-holder a, .edit-button-holder button').addClass('reveal')
     })
 
+    $(document).on('click', '.cancel-button', function() {
+        $('.edit-button-holder a, .edit-button-holder button').removeClass('reveal')
+    })
+
     $(document).on('click', '.overwrite-button', function () {
         make_function_panel_editable()
     })

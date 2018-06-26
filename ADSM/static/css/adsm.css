@@ -934,7 +934,7 @@ ul {
     /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 2);
 }
-.edit-button-holder .btn-cancel.reveal {
+.edit-button-holder .cancel-button.reveal {
     /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 3);
 }
