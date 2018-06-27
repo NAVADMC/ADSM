@@ -25,7 +25,10 @@ def move_to_new_vaccination_priority_order(apps, schema_editor):
             if production_type.name not in production_type_names:
             	production_type_names.append(production_type.name)
 
-        plan = ControlMasterPlan.objects.get()
+        try:
+            plan = ControlMasterPlan.objects.get()
+        except ControlMasterPlan.DoesNotExist:
+            return
         if (plan.vaccination_priority_order is None
             or plan.vaccination_priority_order == ''):
             # If vaccination_priority_order is null or blank, set it to the

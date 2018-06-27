@@ -483,7 +483,7 @@ class ControlProtocol(BaseModel):
     indirect_trace_period = models.PositiveIntegerField(blank=True, null=True,
         help_text='Days before detection  (critical period) for tracing of '+wiki("indirect contact")+'s.', )
     trace_result_delay = models.ForeignKey(ProbabilityDensityFunction, related_name='+', blank=True, null=True,
-                                           help_text='Delay for carrying out trace investigation result (days).', )
+        help_text='Delay for carrying out trace investigation result (days).', )
     direct_trace_is_a_zone_trigger = models.BooleanField(default=False,
         help_text='Indicator if direct tracing of infected units of this ' + wiki("production type") + ' will trigger a '+wiki("Zone")+' focus.', )
     indirect_trace_is_a_zone_trigger = models.BooleanField(default=False,
@@ -515,7 +515,7 @@ class ControlProtocol(BaseModel):
     minimum_time_between_vaccinations = models.PositiveIntegerField(blank=True, null=True,
         help_text='The minimum time in days between vaccination for units of this ' + wiki("production type") + '.', )
     vaccine_immune_period = models.ForeignKey(ProbabilityDensityFunction, related_name='+', blank=True, null=True,
-                                              help_text='Defines the ' + wiki("vaccine immune") + ' period for units of this ' + wiki("production type") + '.', )
+        help_text='Defines the ' + wiki("vaccine immune") + ' period for units of this ' + wiki("production type") + '.', )
     vaccination_demand_threshold = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of animals of this type that can be vaccinated before the cost of vaccination increases.', )
     cost_of_vaccination_additional_per_animal = MoneyField(default=0.0,
@@ -559,7 +559,7 @@ class ControlProtocol(BaseModel):
     test_sensitivity = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text=link("Test Sensitivity", "http://en.wikipedia.org/wiki/Sensitivity_and_specificity") + ' for units of this production type', )
     test_delay = models.ForeignKey(ProbabilityDensityFunction, related_name='+', blank=True, null=True,
-                                   help_text='Function that describes the delay in obtaining test results.', )
+        help_text='Function that describes the delay in obtaining test results.', )
     use_cost_accounting = models.BooleanField(default=False, )
     cost_of_destruction_appraisal_per_unit = MoneyField(default=0.0,
         help_text='The cost associated with appraisal for each destroyed unit of this type.', )
@@ -654,17 +654,17 @@ class DiseaseProgression(BaseModel):
         help_text="Examples: Severe Progression, FMD Long Incubation")
     _disease = models.ForeignKey('Disease')
     disease_latent_period = models.ForeignKey(ProbabilityDensityFunction, related_name='+',
-                                              verbose_name='Latent period',
-                                              help_text='Defines the ' + wiki('latent period',"latent-state") + ' for units of this ' + wiki("production type") + '.', )
+        verbose_name='Latent period',
+        help_text='Defines the ' + wiki('latent period',"latent-state") + ' for units of this ' + wiki("production type") + '.', )
     disease_subclinical_period = models.ForeignKey(ProbabilityDensityFunction, related_name='+',
-                                                   verbose_name='Subclinical period',
-                                                   help_text='Defines the ' + wiki("Subclinical", "subclinically-infectious") + ' period for units of this ' + wiki("production type") + '.', )
+        verbose_name='Subclinical period',
+        help_text='Defines the ' + wiki("Subclinical", "subclinically-infectious") + ' period for units of this ' + wiki("production type") + '.', )
     disease_clinical_period = models.ForeignKey(ProbabilityDensityFunction, related_name='+',
-                                                verbose_name='Clinical period',
-                                                help_text='Defines the ' + wiki("clinical", "clinically-infectious") + ' period for units of this ' + wiki("production type") + '.', )
+        verbose_name='Clinical period',
+        help_text='Defines the ' + wiki("clinical", "clinically-infectious") + ' period for units of this ' + wiki("production type") + '.', )
     disease_immune_period = models.ForeignKey(ProbabilityDensityFunction, related_name='+',
-                                              verbose_name='Immune period',
-                                              help_text='Defines the natural ' + wiki('immune') + ' period for units of this ' + wiki("production type") + '.', )
+        verbose_name='Immune period',
+        help_text='Defines the natural ' + wiki('immune') + ' period for units of this ' + wiki("production type") + '.', )
     disease_prevalence = models.ForeignKey(RelationalFunction, related_name='+',
         verbose_name='Prevalence',
         blank=True, null=True,
@@ -692,7 +692,7 @@ class DiseaseSpread(BaseModel):
     _disease = models.ForeignKey('Disease', help_text='Parent disease whose spreading characteristics this describes.')
         # This is in Disease because of simulation restrictions
     transport_delay = models.ForeignKey(ProbabilityDensityFunction, related_name='+', blank=True, null=True,  # This will be hidden if it's defaulted
-                                        help_text='WARNING: THIS FIELD IS NOT RECOMMENDED BY ADSM and will be removed in later versions. Consider setting this to "-----".', )
+        help_text='WARNING: THIS FIELD IS NOT RECOMMENDED BY ADSM and will be removed in later versions. Consider setting this to "-----".', )
     class Meta(object):
         abstract = True
 
@@ -710,7 +710,7 @@ class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indire
     use_fixed_contact_rate = models.BooleanField(default=False,
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
     distance_distribution = models.ForeignKey(ProbabilityDensityFunction, related_name='+',
-                                              help_text='Defines the shipment distances for ' + wiki("direct", "direct-contact") + ' or '+
+        help_text='Defines the shipment distances for ' + wiki("direct", "direct-contact") + ' or '+
                   wiki("indirect contact") + ' models.', )
     movement_control = models.ForeignKey(RelationalFunction, related_name='+',
         help_text=wiki("Relational function","/Relational-functions") + ' used to define movement control effects for the indicated ' +
