@@ -49,12 +49,12 @@ class Command(BaseCommand):
              "url('^OpenPopulation/(?P<target>.+)$', 'ScenarioCreator.views.open_population')",
              "url('^PopulationPanel/$', 'ScenarioCreator.views.population_panel_only')",  # for async updates
 
-
              "url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario')",
              "url('^ProductionTypeList.json/$', 'ScenarioCreator.views.production_type_list_json')",
              "url('^PopulationPanelStatus.json/$', 'ScenarioCreator.views.population_panel_status_json')",
              "url('^DisableAllControls.json/$', 'ScenarioCreator.views.disable_all_controls_json')",
              "url('^VaccinationGlobal/$', 'ScenarioCreator.views.vaccination_global')",
+             "url('^DestructionGlobal/$', 'ScenarioCreator.views.destruction_global')",
 
              "url('^ProbabilityDensityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph')",
              "url('^RelationalFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.relational_graph')",
