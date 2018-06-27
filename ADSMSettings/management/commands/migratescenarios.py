@@ -34,7 +34,7 @@ class Command(BaseCommand):
 
         graceful_startup()
 
-        locations = [os.path.join(settings.BASE_DIR, 'ScenarioCreator', 'tests', 'population_fixtures'), os.path.join(settings.BASE_DIR, 'Sample Scenarios'), ]
+        locations = [os.path.join(settings.BASE_DIR, 'ScenarioCreator', 'tests', 'population_fixtures'), os.path.join(settings.BASE_DIR, 'Sample Scenarios'), os.path.join(settings.BASE_DIR, 'Database Templates')]
         if not options['skip_workspace']:
             locations.append(workspace_path())
             print("\nIncluding User's Workspace folder.")
