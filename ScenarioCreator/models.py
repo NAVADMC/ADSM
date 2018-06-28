@@ -265,8 +265,8 @@ class Function(BaseModel):
  a relational function (relid) depending on which child class is used.  """
     name = models.CharField(max_length=255,
         help_text='User-assigned name for each function.', )
-    x_axis_units = models.CharField(max_length=255, default="Days",
-        help_text='Specifies the descriptive units for the x axis in relational functions.', )
+    x_axis_units = models.CharField(max_length=255, default="Time Step Units",
+        help_text='The x-axis is the time step unit that corresponds to the time unit used for parameterizing the model.  For example, infectious diseases are commonly parameterized in a daily time step, so the x-axis would be “Days”.', )
     notes = models.TextField(blank=True, null=True, help_text='', )
     class Meta(object):
         abstract = True

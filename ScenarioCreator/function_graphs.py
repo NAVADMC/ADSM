@@ -158,7 +158,7 @@ def pdf_graph(x_label, function, kwargs_dict):
 
 
 def empty_graph(request=None):
-    return line_graph('Days', [], [])  # empty graph
+    return line_graph('Time Step Error', [], [])  # empty graph
 
 
 def relational_graph_update(request, primary_key):
@@ -178,7 +178,7 @@ def relational_graph_update(request, primary_key):
         #         http://stackoverflow.com/questions/8483348/django-return-image-data-from-a-view
         # https://en.wikipedia.org/wiki/Data_URI_scheme
         # http://stackoverflow.com/questions/10802312/display-png-image-as-response-to-jquery-ajax-request
-        return line_graph('Days', x, y)
+        return line_graph('Time Step Units', x, y)
     else:
         return existing_relational_graph(primary_key)
 
