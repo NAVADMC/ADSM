@@ -158,7 +158,7 @@ def pdf_graph(x_label, function, kwargs_dict):
 
 
 def empty_graph(request=None):
-    return line_graph('Time Step Error', [], [])  # empty graph
+    return line_graph('Time Step Units', [], [])  # empty graph
 
 
 def relational_graph_update(request, primary_key):
