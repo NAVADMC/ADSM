@@ -22,7 +22,7 @@ from ScenarioCreator.population_parser import lowercase_header
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
 from ScenarioCreator.utils import whole_scenario_validation
 
-singletons = ['Scenario', 'Population', 'Disease', 'ControlMasterPlan', 'OutputSettings']
+singletons = ['Scenario', 'Population', 'Disease', 'ControlMasterPlan', 'OutputSettings', "DestructionGlobal"]
 abstract_models = {
     'Function':
         [('RelationalFunction', RelationalFunction),
@@ -791,7 +791,7 @@ def vaccination_global(request):
 
 def destruction_global(request):
 
-    instance = ControlMasterPlan.objects.get()
+    instance = DestructionGlobal.objects.get()
     initialized_form = DestructionMasterForm(request.POST or None, instance=instance)
     if request.method == "POST":
         if initialized_form.is_valid():

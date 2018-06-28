@@ -193,7 +193,7 @@ class VaccinationMasterForm(BaseForm):
 
 class DestructionMasterForm(BaseForm):
     class Meta(object):
-        model = ControlMasterPlan
+        model = DestructionGlobal
         fields = 'destruction_program_delay destruction_capacity destruction_priority_order destruction_reason_order'.split()
         widgets = {
                     'destruction_reason_order': HiddenInput(),

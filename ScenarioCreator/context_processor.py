@@ -3,7 +3,8 @@ from django.db.models import F, Count
 from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Unit, Disease, DiseaseProgression, \
     DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
     ProtocolAssignment, Zone, ZoneEffect, ProbabilityDensityFunction, RelationalFunction, ZoneEffectAssignment, SpreadBetweenGroups, \
-    DestructionWaitTime, TimeFromFirstDetection, DisseminationRate, RateOfNewDetections, DiseaseDetection, ProductionGroup, VaccinationRingRule
+    DestructionWaitTime, TimeFromFirstDetection, DisseminationRate, RateOfNewDetections, DiseaseDetection, ProductionGroup, VaccinationRingRule, \
+    DestructionGlobal
 from Results.models import outputs_exist
 
 
@@ -49,6 +50,7 @@ def basic_context(request):
                'VaccinationTrigger': any([m.objects.count() for m in 
                                           [DiseaseDetection,RateOfNewDetections,DisseminationRate,TimeFromFirstDetection,DestructionWaitTime,SpreadBetweenGroups]]),
                'VaccinationRingRule': VaccinationRingRule.objects.count(),
+               'DestructionGlobal': DestructionGlobal.objects.get(id=0).validate(),
                'Protocols': ControlProtocol.objects.count(),
                'ProtocolAssignments': ProtocolAssignment.objects.count(),
                'Zones': Zone.objects.count(),
