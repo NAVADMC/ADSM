@@ -352,18 +352,6 @@ class ControlMasterPlan(InputSingleton):
     disable_all_controls = models.BooleanField(default=False,
         help_text='Disable all ' + wiki("Control activities", "control-measures") +
                   ' for this simulation run.  Normally used temporarily to test uncontrolled disease spread.')
-    destruction_program_delay = models.PositiveIntegerField(blank=True, null=True,
-        help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
-    destruction_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
-        help_text="The relational function used to define the daily destruction capacity.", )
-    destruction_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
-        help_text='The primary priority order for destruction.',
-        choices=priority_choices(), )
-    destruction_reason_order = models.CharField(max_length=255,
-        default='Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring',
-        # old DB: 'basic,direct-forward,ring,indirect-forward,direct-back,indirect-back'
-        # old UI: Detected, Trace forward of direct contact, Ring, Trace forward of indirect contact, Trace back of direct contact, Trace back of indirect contact
-        help_text='The secondary priority order for destruction.', )
     vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the daily vaccination capacity.', )
     restart_vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
@@ -391,6 +379,25 @@ class ControlMasterPlan(InputSingleton):
 
     def __str__(self):
         return str(self.name)
+
+
+class DestructionGlobal(InputSingleton):
+    destruction_program_delay = models.PositiveIntegerField(blank=True, null=True,
+                                                            help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
+    destruction_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
+                                             help_text="The relational function used to define the daily destruction capacity.", )
+    destruction_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
+                                                  help_text='The primary priority order for destruction.',
+                                                  choices=priority_choices(), )
+    destruction_reason_order = models.CharField(max_length=255,
+                                                default='Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring',
+                                                # old DB: 'basic,direct-forward,ring,indirect-forward,direct-back,indirect-back'
+                                                # old UI: Detected, Trace forward of direct contact, Ring, Trace forward of indirect contact, Trace back of direct contact, Trace back of indirect contact
+                                                help_text='The secondary priority level for destruction. All options shown, but only enabled options are used.', )
+
+    def validate(self):
+        return True if self.destruction_program_delay != None and self.destruction_capacity != None else False;
+
 
 protocol_substructure = {'use_detection': ['detection_probability_for_observed_time_in_clinical',
                                            'detection_probability_report_vs_first_detection',
