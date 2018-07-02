@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations, OperationalError
-import json
-from collections import OrderedDict
-import re
-
+from django.db import migrations, OperationalError
 
 
 def move_to_new_destruction_global(apps, schema_editor):
@@ -13,7 +9,10 @@ def move_to_new_destruction_global(apps, schema_editor):
     DestructionGlobal = apps.get_model("ScenarioCreator", "DestructionGlobal")
 
     try:
-        control_master_plan = ControlMasterPlan.objects.get()
+        try:
+            control_master_plan = ControlMasterPlan.objects.get()
+        except ControlMasterPlan.DoesNotExist:
+            return
 
         try:
             destruction_global = DestructionGlobal.objects.get()
@@ -35,8 +34,15 @@ def backwards(apps, schema_editor):
     DestructionGlobal = apps.get_model("ScenarioCreator", "DestructionGlobal")
 
     try:
-        control_master_plan = ControlMasterPlan.objects.get()
-        destruction_global = DestructionGlobal.objects.get()
+        try:
+            destruction_global = DestructionGlobal.objects.get()
+        except DestructionGlobal.DoesNotExist:
+            return
+
+        try:
+            control_master_plan = ControlMasterPlan.objects.get()
+        except ControlMasterPlan.DoesNotExist:
+            control_master_plan = ControlMasterPlan()
 
         control_master_plan.destruction_program_delay = destruction_global.destruction_program_delay
         control_master_plan.destruction_capacity = destruction_global.destruction_capacity
