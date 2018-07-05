@@ -98,7 +98,7 @@ def existing_probability_graph(primary_key):
             "Beta": [scipy.stats.beta, {'a': m.alpha, 'b': m.alpha2, 'loc': m.min, 'scale': m.max - m.min}],
             "BetaPERT": [scipy.stats.beta, {'a': a, 'b': b, 'loc': m.min, 'scale': m.max - m.min}],
             "Binomial": [scipy.stats.binom, [m.s, m.p]],
-            "Discrete Uniform": [scipy.stats.randint, [m.min, m.max]],
+            "Discrete Uniform": [scipy.stats.randint, [m.min, m.max + 2]],
             "Exponential": [scipy.stats.expon, {'scale': m.mean}],
             "Fixed Value": [fixed_value, [m.mode]],  # custom
             "Gamma": [scipy.stats.gamma, {'a': m.alpha, 'scale': m.beta, 'loc': 0}],
@@ -135,6 +135,7 @@ def discrete_graph(x_label, x_values, y_values):
 
 
 def pdf_graph(x_label, function, kwargs_dict):
+    print("\t\tFUNCTION:", str(function))
     if isinstance(kwargs_dict, dict):
         dist = function(**kwargs_dict)
     else:
@@ -152,7 +153,7 @@ def pdf_graph(x_label, function, kwargs_dict):
         return fig
     else:  # scipy discrete functions
         x = np.arange(dist.ppf(0.01),
-              dist.ppf(0.99) + 2, 1)
+                        dist.ppf(0.99) + (0 if "scipy.stats._discrete_distns.randint_gen" in str(function) else 2), 1)
         return discrete_graph(x_label, x, dist.pmf(x))
 
 
