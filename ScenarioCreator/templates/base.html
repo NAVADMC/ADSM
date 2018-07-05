@@ -1,5 +1,21 @@
 <!DOCTYPE html>
 <html>
+<script>
+    function toggleOverlayVisibility(){
+        document.getElementById('overlay').classList.toggle('hidden');
+        sessionStorage.setItem('overlayVisibilityState', !document.getElementById('overlay').classList.contains("hidden"));
+    };
+    onload = function() {
+        if(sessionStorage.getItem('overlayVisibilityState') == "true"){
+            document.getElementById('overlay').classList.remove("hidden");
+        } else if(sessionStorage.getItem('overlayVisibilityState') == "false"){
+            document.getElementById('overlay').classList.add("hidden");
+        } else {
+            sessionStorage.setItem('overlayVisibilityState', "true");
+            document.getElementById('overlay').classList.remove("hidden");
+        }
+    };
+</script>
 <head>
     <title>ADSM - Animal Disease Spread Model</title>
     {#Javascript context variables#}
@@ -32,12 +48,19 @@
                     {{ filename }}
                 </h1>
             </div>
+            <a href="#" onclick="toggleOverlayVisibility();"><img src="/static/icons/overlay.jpg" class="info-overlay"></a>
         </div>
 </header>
 
     {% block main %}
 
     {% endblock %}
+    <div id="overlay" class="hidden">
+        <p style="background-color:white; position:absolute; top:0; left:0; width:100%; height:100%"></p>
+        <img src="/static/overlays/main-upper-left.png" style="position:absolute; top:50px; left:180px;">
+        <img src="/static/overlays/main-lower-left.png" style="position:absolute; bottom:60px; left:40px;">
+        <img src="/static/overlays/main-upper-right.png" style="position:absolute; top:50px; right:30px;">
+    </div>
 <div class="col-xs-4 TB_panel TB_panel_closed layout-panel" id="functions_panel">
     <script>
         $(function(){

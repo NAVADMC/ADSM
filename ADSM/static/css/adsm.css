@@ -297,6 +297,14 @@ header .header_logo{
     background-repeat: no-repeat;
     min-width: 190px;
 }
+header .info-overlay {
+    height: 30px;
+    width: 30px;
+    display: block;
+    margin: 10px 40px 0px auto;
+    min-width: 33px;
+    align: right;
+}
 header .col-xs-8 {
     height: 42px;
 }
