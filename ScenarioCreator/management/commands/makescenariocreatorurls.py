@@ -15,7 +15,7 @@ class Command(BaseCommand):
     @staticmethod
     def generate_urls_from_models(input_file, extra_urls=()):
         assert hasattr(extra_urls, '__getitem__')
-        lines = open(input_file, 'r').readlines()
+        lines = open(input_file, 'r', encoding='utf8').readlines()
         model_strings = extra_urls  # extra_urls is placed first so that they take precedence over auto-urls
         for line in lines:
             if 'class' in line[:5]:
