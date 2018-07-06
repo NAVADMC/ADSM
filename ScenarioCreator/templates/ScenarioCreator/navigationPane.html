@@ -53,11 +53,11 @@
 
             <h2 id="RunSimulationIn">
                 {% if outputs_exist %}
-                    <a href="/results/" class="completed ">
+                    <a href="/results/" class="completed " onclick="disableOverlay();">
                     View Results </a>
                 {% else %}
                     {% if dry_run_passed %}
-                        <a href="/LoadingScreen/?loading_url=/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
+                        <a href="/LoadingScreen/?loading_url=/results/RunSimulation/" class=" {{Simulation_ready|completed}}" onclick="disableOverlay();">
                         Run Simulation </a>
                     {% else %}
                         <a href="/setup/ValidateScenario/" class=" {{Simulation_ready|completed}}">

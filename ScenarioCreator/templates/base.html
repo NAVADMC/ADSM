@@ -1,19 +1,36 @@
 <!DOCTYPE html>
 <html>
 <script>
+    //function runs when the overlay toggle button is pressed - it switches the visibility state of the overlay and stores
+    //that state in the sessionStorage for the onload function to use.
     function toggleOverlayVisibility(){
-        document.getElementById('overlay').classList.toggle('hidden');
-        sessionStorage.setItem('overlayVisibilityState', !document.getElementById('overlay').classList.contains("hidden"));
-    };
-    onload = function() {
-        if(sessionStorage.getItem('overlayVisibilityState') == "true"){
-            document.getElementById('overlay').classList.remove("hidden");
-        } else if(sessionStorage.getItem('overlayVisibilityState') == "false"){
-            document.getElementById('overlay').classList.add("hidden");
-        } else {
-            sessionStorage.setItem('overlayVisibilityState', "true");
-            document.getElementById('overlay').classList.remove("hidden");
+        if(sessionStorage.getItem("overrideOverlayVisibilityState") != "true"){
+            document.getElementById('overlay').classList.toggle('hidden');
+            sessionStorage.setItem('overlayVisibilityState', !document.getElementById('overlay').classList.contains("hidden"));
         }
+    };
+    //function runs when a page is loaded and determines if the overlay should be shown or not based on what is stored
+    //in sessionStorage.
+    onload = function() {
+        if(sessionStorage.getItem("overrideOverlayVisibilityState") == "true"){
+            document.getElementById('overlay').classList.add("hidden");
+            document.getElementById('info-overlay').classList.add("hidden");
+        } else {
+            if(sessionStorage.getItem('overlayVisibilityState') == "true"){
+                document.getElementById('overlay').classList.remove("hidden");
+            } else if(sessionStorage.getItem('overlayVisibilityState') == "false"){
+                document.getElementById('overlay').classList.add("hidden");
+            } else {
+                sessionStorage.setItem('overlayVisibilityState', "true");
+                document.getElementById('overlay').classList.remove("hidden");
+                document.getElementById('info-overlay').classList.remove("hidden");
+            }
+        }
+    };
+    //this function runs when the "run simulation" button is pressed, it both hides the overlay if still visible and
+    //removes the users ability to display the overlay (so it does not display on the results screen).
+    function disableOverlay(){
+        sessionStorage.setItem("overrideOverlayVisibilityState", "true");
     };
 </script>
 <head>
@@ -49,7 +66,7 @@
                 </h1>
             </div>
         </div>
-        <a href="#" onclick="toggleOverlayVisibility();"><img src="/static/icons/overlay.jpg" class="info-overlay"></a>
+        <a href="#" onclick="toggleOverlayVisibility();"><img src="/static/icons/overlay.jpg" class="info-overlay" id="info-overlay"></a>
 </header>
 
     {% block main %}
