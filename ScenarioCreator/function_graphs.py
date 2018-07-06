@@ -135,7 +135,6 @@ def discrete_graph(x_label, x_values, y_values):
 
 
 def pdf_graph(x_label, function, kwargs_dict):
-    print("\t\tFUNCTION:", str(function))
     if isinstance(kwargs_dict, dict):
         dist = function(**kwargs_dict)
     else:
