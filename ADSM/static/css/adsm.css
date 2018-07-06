@@ -301,9 +301,10 @@ header .info-overlay {
     height: 30px;
     width: 30px;
     display: block;
-    margin: 10px 40px 0px auto;
+    margin: 10px 7px 0px auto;
     min-width: 33px;
-    align: right;
+    position: absolute;
+    right: 0;
 }
 header .col-xs-8 {
     height: 42px;
