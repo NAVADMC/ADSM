@@ -1,4 +1,5 @@
 import multiprocessing
+import math
 import csv
 
 from django.conf import settings
@@ -103,22 +104,50 @@ class SummaryCSVGenerator(multiprocessing.Process):
 
 def std_dev(field, query):
     """This is the __Population__ Standard Deviation formula translated into RAW SQL statement, specifically SQLite version."""
+    #get next table name based on given query
     table_name = query.model._meta.db_table
-    sql_statement = "SELECT AVG(({table}.{col} - sub.a) * ({table}.{col} - sub.a)) as var from {table}, (SELECT AVG({col}) AS a FROM {table} WHERE last_day<>0) AS sub WHERE last_day<>0;".format(table=table_name, col=field)
 
-    cursor = connections['scenario_db'].cursor()
-    cursor.execute(sql_statement)
-    row = cursor.fetchone()
-    variance = row[0]
-    if variance is None:
-        answer = None
-    else:
-        answer = sqrt(float(variance))
-    return answer
+    #two statements, one is for tables that have production_type_id and one for tables that dont
+    id_sql_statement = "SELECT {col}, production_type_id FROM {table} WHERE last_day<>0".format(table=table_name, col=field)
+    nid_sql_statement = "SELECT {col} FROM {table} WHERE last_day<>0".format(table=table_name, col=field)
 
+    #connect to the database
+    cursor = connections["scenario_db"].cursor()
 
+    #try and use the query for tables with production_type_id, if that fails use the other query
+    try:
+        cursor.execute(id_sql_statement)
+    except Exception: #django.db.utils.OperationalError
+        cursor.execute(nid_sql_statement)
 
+    #get the data from the database
+    row = cursor.fetchall()
 
+    next_values = []
+    #append every value in the query return that is an integer to a list, these are the values used in calculation
+    for element in row:
+        if isinstance(element[0], int):
+            next_values.append(element[0])
 
+    #try to find the average of the values, fails if there are no values
+    try:
+        mean = sum(next_values)/len(next_values)
+    except ZeroDivisionError:
+        return None
 
+    #if the mean works out to 0, set it to 1 (avoids ZeroDivisionError)
+    if mean == 0:
+        return None
 
+    #for each element, subtract the average and square it
+    for index in range(len(next_values)):
+        next_values[index] = math.pow((next_values[index] - mean), 2)
+
+    #find the average of the new numbers
+    mean = sum(next_values)/len(next_values)
+
+    #square root of that average is standard deviation
+    answer = sqrt(mean)
+
+    #return the standard deviation
+    return round(answer, 2)
