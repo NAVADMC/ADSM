@@ -515,11 +515,11 @@ class ControlProtocol(BaseModel):
     use_destruction = models.BooleanField(default=False,
         help_text='Indicates if detected units of this ' + wiki("production type") + ' will be destroyed.', )
     destruction_is_a_ring_trigger = models.BooleanField(default=False,
-        help_text='Indicates if detection of a unit of this ' + wiki("production type") + ' will trigger the formation of a destruction ring.', )
+        help_text='Indicates if detection of a unit of this ' + wiki("production type") + ' will trigger the formation of a destruction ring.', verbose_name="Detection is a ring trigger")
     destruction_ring_radius = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text='Radius in kilometers of the destruction ring.', default=0, )
     destruction_is_a_ring_target = models.BooleanField(default=False,
-        help_text='Indicates if unit of this ' + wiki("production type") + ' will be subject to preemptive ring destruction.', )
+        help_text='Indicates if unit of this ' + wiki("production type") + ' will be subject to preemptive ring destruction.', verbose_name="In the event of a trace, Destruction is a ring target")
     destroy_direct_forward_traces = models.BooleanField(default=False,
         help_text='Indicates if units of this type identified by '+wiki("trace forward")+' of '+wiki("direct contact")+'s will be subject to preemptive destruction.', )
     destroy_indirect_forward_traces = models.BooleanField(default=False,
