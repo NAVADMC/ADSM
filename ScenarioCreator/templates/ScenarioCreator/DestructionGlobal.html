@@ -7,7 +7,8 @@
 
 {% block content %}
 
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery-ui.min.css" />
+    <!--suppress ALL -->
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery-ui.min.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery-ui.structure.min.css" />
     <script src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
 
@@ -15,10 +16,15 @@
 
 
     <label>Destruction Priority Order</label>
-    <ul id="priorities" class="ui-sortable" style="text-transform: capitalize;">
-        {% for value in priorities %}
-            <li class="ui-state-default ui-sortable-handle tab-list top-level-priority priorities" title="Drag to change Vaccination Priority"><span class="pull-right completed"></span>
-                {{  value }}
+   <ul id="priorities" class="ui-sortable" style="text-transform: capitalize;">
+        {% for key, value in priorities.items %}
+            <li class="ui-state-default ui-sortable-handle tab-list top-level-priority priorities" title="Drag to change Destruction Priority"><span class="pull-right completed"></span>
+            {{  key }}
+                <ul class="sub-priorities ui-sortable">
+                    {% for sub_priority in value %}
+                        <li class="ui-state-default ui-sortable-handle tab-list sub-priority" title="Drag to change Destruction Priority"><span class="pull-right completed"></span>{{sub_priority}}</li>
+                    {% endfor %}
+                </ul>
             </li>
         {% endfor %}
     </ul>
@@ -36,8 +42,12 @@
     <label>Destruction Reason Order</label>
     <ul id="priorities" class="ui-sortable" style="text-transform: capitalize;">
         {% for value in reasons %}
-            <li class="ui-state-default ui-sortable-handle tab-list top-level-priority reasons" title="Drag to change Vaccination Priority"><span class="pull-right completed"></span>
-                {{  value }}
+            <li class="ui-state-default ui-sortable-handle tab-list top-level-priority ui-disabled reasons" title="Drag to change Destruction Reason"><span class="pull-right completed"></span>
+                {% if value == "Basic" %}
+                    Detection
+                {% else %}
+                    {{  value }}
+                {% endif %}
             </li>
         {% endfor %}
     </ul>
@@ -50,7 +60,11 @@
                 var topLevelItems = document.getElementsByClassName("reasons");
 
                 for (var i = 0; i < topLevelItems.length; ++i) {
-                    var priority = topLevelItems[i].textContent.split(',')[0].split("\n")[1].trim();
+                    var priority = topLevelItems[i].textContent.split(',')[0].split("\n")[2].trim();
+
+                    if(priority == "Detection"){
+                        priority = "Basic"
+                    }
 
                     priorityString += priority.toTitleCase() + ", ";
 
@@ -63,16 +77,33 @@
             }
 
             function submitDestructionPriorityOrder() {
-                var priorityString = "";
-                var topLevelItems = document.getElementsByClassName("priorities");
+                var priorityString = "{";
+                var priorityList = document.getElementById("priorities");
+                var topLevelItems = priorityList.getElementsByClassName("priorities");
 
                 for (var i = 0; i < topLevelItems.length; ++i) {
-                    var priority = topLevelItems[i].textContent.split(',')[0].split("\n")[1].trim();
+                    var priority = topLevelItems[i].textContent.split(',');
+                    priority = priority[0].split("\n");
 
-                    priorityString += priority + ", ";
+                    priorityString += "\"" + priority[1].trim() + "\": [";
+
+                    var subLevelItems = topLevelItems[i].getElementsByClassName("sub-priority");
+
+                    for (var k = 0; k < subLevelItems.length; ++k) {
+                        var temp = subLevelItems[k].textContent.trim();
+                        if (temp) {
+                            priorityString += "\"" + temp + "\", ";
+                        }
+                    }
+
+                    if (priority.length > 1) {  // This is checking that there are actually sub elements that were added. Skip if there is only a dict key.
+                        priorityString = priorityString.slice(0, priorityString.length - 2);
+                    }
+                    priorityString += "], "
 
                 }
                 priorityString = priorityString.slice(0, priorityString.length - 2);
+                priorityString += "}";
 
                 document.getElementById("id_destruction_priority_order").value = priorityString;
 
@@ -103,7 +134,7 @@
 
         <div class="buttonHolder" style="position:absolute; bottom:72px;">
             <button type="button" class="btn btn-default btn-cancel" id="id-cancel" onclick="window.location.reload();">Cancel</button>
-            <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled onclick="submitDestructionGlobalForm(); submitDestructionPriorityOrder();">Apply</button>
+            <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled onclick="submitDestructionPriorityOrder(); submitDestructionGlobalForm();">Apply</button>
         </div>
 
 {% endblock %}

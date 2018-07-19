@@ -789,6 +789,7 @@ def vaccination_global(request):
 
     return render(request, 'ScenarioCreator/navigationPane.html', context)
 
+
 def destruction_global(request):
 
     instance = DestructionGlobal.objects.get()
@@ -796,12 +797,60 @@ def destruction_global(request):
     if request.method == "POST":
         if initialized_form.is_valid():
             instance = initialized_form.save(commit=True)
+
     context = {
         'base_page': 'ScenarioCreator/DestructionGlobal.html',
         'title': 'Destruction Global',
-        'reasons': instance.destruction_reason_order.split(","),
-        'priorities': instance.destruction_priority_order.split(","),
+        'reasons': CSUtils.match_data(instance.destruction_reason_order, "Basic, Trace Fwd Direct, Trace Fwd Indirect, Trace Back Direct, Trace Back Indirect, Ring").split(","),
+        'priorities': json.loads(json.dumps(CSUtils.match_data(str(instance.destruction_priority_order), '{"Days Holding":["Oldest", "Newest"], "Production Type":[], "Size":["Largest", "Smallest"]}')), object_pairs_hook=OrderedDict),
         'form': initialized_form,
     }
 
     return render(request, 'ScenarioCreator/navigationPane.html', context)
+
+
+def match_data(current, all_data):
+
+    def try_dict(current_dict, all_data_dict):
+        if "{" in current_dict and "{" in all_data_dict:
+            try:
+                try:
+                    all_data_dict = json.loads(all_data_dict, object_pairs_hook=OrderedDict)
+                except ValueError:
+                    return None
+                except SyntaxError:
+                    return current_dict
+                try:
+                    current_dict = json.loads(current_dict, object_pairs_hook=OrderedDict)
+                except ValueError:
+                    return None
+                except SyntaxError:
+                    return all_data_dict
+                if isinstance(current_dict, dict):
+                    for key in all_data_dict:
+                        current_dict.setdefault(key, all_data_dict[key])
+                    return current_dict
+            except ValueError:
+                return None
+
+    dict_return = try_dict(current, all_data)
+    if dict_return is not None:
+        return dict_return
+
+    was_string = False
+    if isinstance(current, str):
+        was_string = True
+        current = current.replace(", ", ",").split(",")
+        all_data = all_data.replace(", ", ",").split(",")
+
+    for element in all_data:
+        if element not in current:
+            current.append(element)
+    for element in current:
+        if element not in all_data:
+            current.remove(element)
+
+    if was_string:
+        current = ",".join(current)
+
+    return current
