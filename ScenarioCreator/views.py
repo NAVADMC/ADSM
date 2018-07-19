@@ -801,8 +801,8 @@ def destruction_global(request):
     context = {
         'base_page': 'ScenarioCreator/DestructionGlobal.html',
         'title': 'Destruction Global',
-        'reasons': CSUtils.match_data(instance.destruction_reason_order, "Basic, Trace Fwd Direct, Trace Fwd Indirect, Trace Back Direct, Trace Back Indirect, Ring").split(","),
-        'priorities': json.loads(json.dumps(CSUtils.match_data(str(instance.destruction_priority_order), '{"Days Holding":["Oldest", "Newest"], "Production Type":[], "Size":["Largest", "Smallest"]}')), object_pairs_hook=OrderedDict),
+        'reasons': match_data(instance.destruction_reason_order, "Basic, Trace Fwd Direct, Trace Fwd Indirect, Trace Back Direct, Trace Back Indirect, Ring").split(","),
+        'priorities': json.loads(json.dumps(match_data(str(instance.destruction_priority_order), '{"Days Holding":["Oldest", "Newest"], "Production Type":[], "Size":["Largest", "Smallest"]}')), object_pairs_hook=OrderedDict),
         'form': initialized_form,
     }
 
