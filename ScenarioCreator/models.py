@@ -536,8 +536,8 @@ class ControlProtocol(BaseModel):
         help_text='Indicates if detection in units of this ' + wiki("production type") + ' will trigger vaccination.', )
     days_to_immunity = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of days required for the onset of ' + wiki("vaccine immunity", "vaccine-immune") + ' in a newly vaccinated unit of this type.', )
-    minimum_time_between_vaccinations = models.PositiveIntegerField(blank=True, null=True,
-        help_text='The minimum time in days between vaccination for units of this ' + wiki("production type") + '.', )
+    minimum_time_between_vaccinations = models.PositiveIntegerField(blank=True, null=True, default=99999,
+        help_text='The minimum time in days between vaccination for units of this ' + wiki("production type") + '. Default value set to 99999 to stop duplicate vaccinations.', )
     vaccine_immune_period = models.ForeignKey(ProbabilityDensityFunction, related_name='+', blank=True, null=True,
         help_text='Defines the ' + wiki("vaccine immune") + ' period for units of this ' + wiki("production type") + '.', )
     vaccination_demand_threshold = models.PositiveIntegerField(blank=True, null=True,
