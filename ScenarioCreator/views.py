@@ -801,7 +801,7 @@ def destruction_global(request):
     context = {
         'base_page': 'ScenarioCreator/DestructionGlobal.html',
         'title': 'Destruction Global',
-        'reasons': match_data(instance.destruction_reason_order, "Basic, Trace Fwd Direct, Trace Fwd Indirect, Trace Back Direct, Trace Back Indirect, Ring").split(","),
+        'reasons': match_data(instance.destruction_reason_order, "Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring").split(","),
         'priorities': instance.destruction_priority_order.split(","),
         'form': initialized_form,
     }

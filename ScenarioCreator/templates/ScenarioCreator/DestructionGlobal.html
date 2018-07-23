@@ -76,7 +76,7 @@
                         priority = "Basic"
                     }
 
-                    priorityString += priority.toTitleCase() + ", ";
+                    priorityString += priority + ", ";
 
                 }
                 priorityString = priorityString.slice(0, priorityString.length - 2);
@@ -137,10 +137,6 @@
 
                 document.getElementById("destruction-global-form").submit();
             }
-
-            String.prototype.toTitleCase = function () {
-                return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-            };
 
             $(function() {
                 $( ".ui-sortable" ).sortable({
