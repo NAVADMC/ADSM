@@ -386,14 +386,28 @@ class DestructionGlobal(InputSingleton):
                                                             help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
     destruction_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
                                              help_text="The relational function used to define the daily destruction capacity.", )
+    '''
+    #Destruction Priority Secondary Priority
     destruction_priority_order = models.CharField(default='{"Days Holding":["Oldest", "Newest"], "Production Type":[], "Size":["Largest", "Smallest"]}', max_length=255,
                                                   help_text='The primary priority order for destruction.', )
+    
     destruction_reason_order = models.CharField(max_length=255,
                                                 default='Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace ack indirect, Ring',
                                                 # old DB: 'basic,direct-forward,ring,indirect-forward,direct-back,indirect-back'
                                                 # old UI: Detected, Trace forward of direct contact, Ring, Trace forward of indirect contact, Trace back of direct contact, Trace back of indirect contact
                                                 help_text='The secondary priority level for destruction. All options shown, but only enabled options are used.', )
+    '''
+    destruction_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
+                                                  help_text = 'The primary priority order for destruction.',
+                                                  choices = priority_choices(), )
+    destruction_reason_order = models.CharField(max_length=255,
+                                                default='Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring',
+                                                # old DB: 'basic,direct-forward,ring,indirect-forward,direct-back,indirect-back'
+                                                # old UI: Detected, Trace forward of direct contact, Ring, Trace forward of indirect contact, Trace back of direct contact, Trace back of indirect contact
+                                                help_text='The secondary priority level for destruction. All options shown, but only enabled options are used.', )
 
+    '''
+    #Destruction Priority Secondary Priority
     def update_production_type_listing(self):
         #try catches
         try:
@@ -411,9 +425,14 @@ class DestructionGlobal(InputSingleton):
     def save(self, *args, **kwargs): # after the data migration
         self.update_production_type_listing()
         super(DestructionGlobal, self).save(*args, **kwargs)
+    '''
 
     def validate(self):
+        '''
+        #Destruction Priority Secondary Priority
         return True if self.destruction_program_delay is not None and self.destruction_capacity is not None else False;
+        '''
+        return True if self.destruction_program_delay != None and self.destruction_capacity != None else False;
 
 
 protocol_substructure = {'use_detection': ['detection_probability_for_observed_time_in_clinical',
