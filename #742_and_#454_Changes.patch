@@ -1,0 +1,654 @@
+Index: Results/simulation.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Results/simulation.py	(revision 7f0dd45295d743bfa3f202726f67d292cd27543a)
++++ Results/simulation.py	(date 1532980297741)
+@@ -12,7 +12,7 @@
+ from ADSMSettings.views import save_scenario
+ from ADSMSettings.utils import adsm_executable_command
+ from ADSMSettings.models import SimulationProcessRecord, SmSession
+-from Results.models import DailyReport, DailyControls, DailyByZoneAndProductionType, DailyByProductionType, DailyByZone, ResultsVersion
++from Results.models import DailyReport, DailyControls, DailyByZoneAndProductionType, DailyByProductionType, DailyByZone, ResultsVersion, DailyCostsByProductionType
+ from Results.utils import zip_map_directory_if_it_exists
+ from ScenarioCreator.models import ProductionType, Zone
+ 
+@@ -101,11 +101,13 @@
+     set_pragma("synchronous", "OFF", connection='scenario_db')
+     set_pragma("journal_mode", "MEMORY", connection='scenario_db')
+ 
++    ''' This block actually adds the data form each Results model into the database '''
+     DailyReport.objects.bulk_create(sorted_results['DailyReport'])
+     DailyControls.objects.bulk_create(sorted_results['DailyControls'])
+     DailyByZoneAndProductionType.objects.bulk_create(sorted_results['DailyByZoneAndProductionType'])
+     DailyByProductionType.objects.bulk_create(sorted_results['DailyByProductionType'])
+     DailyByZone.objects.bulk_create(sorted_results['DailyByZone'])
++    DailyCostsByProductionType.objects.bulk_create(sorted_results["DailyCostsByProductionType"])
+     try:
+         ResultsVersion.objects.bulk_create(sorted_results['ResultsVersion'])
+     except KeyError:
+Index: Results/utils.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Results/utils.py	(revision 7f0dd45295d743bfa3f202726f67d292cd27543a)
++++ Results/utils.py	(date 1532535064199)
+@@ -76,10 +76,10 @@
+ 
+ 
+ def delete_all_outputs():
+-    from Results.models import DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion
++    from Results.models import DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion, DailyCostsByProductionType
+     abort_simulation()
+     if DailyControls.objects.count() > 0:
+         print("DELETING ALL OUTPUTS")
+-    for model in [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]:
++    for model in [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion, DailyCostsByProductionType]:
+         model.objects.all().delete()
+     SmSession.objects.all().update(iteration_text = '', simulation_has_started=False)  # This is also reset from open_scenario
+Index: Results/models.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Results/models.py	(revision 7f0dd45295d743bfa3f202726f67d292cd27543a)
++++ Results/models.py	(date 1532968666544)
+@@ -303,6 +303,8 @@
+     zone = models.ForeignKey(Zone, blank=True, null=True, verbose_name=printable_name('zone'),
+         help_text='The identifier of the zone that these outputs apply to.', )
+ 
++    costSurveillance = models.FloatField(blank=True, null=True, verbose_name='Surveillance Cost')
++
+     unitsInZone      = models.IntegerField(blank=True, null=True, verbose_name=printable_name('unitsInZone'))
+     unitDaysInZone   = models.IntegerField(blank=True, null=True, verbose_name=printable_name('unitDaysInZone'))
+     animalDaysInZone = models.IntegerField(blank=True, null=True, verbose_name=printable_name('animalDaysInZone'))
+@@ -311,6 +313,29 @@
+         return "%i, %i: %s and %s" % (self.iteration, self.day, self.production_type or "All Types", self.zone or "Background")
+ 
+ 
++class DailyCostsByProductionType(OutputBaseModel):
++    iteration = models.IntegerField(blank=True, null=True, verbose_name=printable_name('iteration'),
++        help_text="The iteration during which the outputs in this records where generated.", )
++    day = models.IntegerField(blank=True, null=True, verbose_name=printable_name('day'),
++        help_text="The day in this iteration during which the outputs in this records where generated.", )
++    last_day = models.BooleanField(default=False, help_text="Flag that is only set on the last day of an iteration.", )
++    production_type = models.ForeignKey(ProductionType, blank=True, null=True, verbose_name=printable_name('production_type'),
++        help_text='The identifier of the production type that these outputs apply to.', )
++    vaccSetup = models.FloatField(blank=True, null=True, verbose_name='Vaccination Site Setup Cost')
++    vaccVaccination = models.FloatField(blank=True, null=True, verbose_name='Cost of Vaccine')
++    vaccSubtotal = models.FloatField(blank=True, null=True, verbose_name='Vaccination Subtotal')
++    destrAppraisal = models.FloatField(blank=True, null=True, verbose_name="Appraisal Cost")
++    destrEuthanasia = models.FloatField(blank=True, null=True, verbose_name='Euthanasia Cost')
++    destrIndemnification = models.FloatField(blank=True, null=True, verbose_name='Indemnification Cost')
++    destrDisposal = models.FloatField(blank=True, null=True, verbose_name='Carcass Disposal Cost')
++    destrCleaning = models.FloatField(blank=True, null=True, verbose_name='Cleaning and Disinfection Cost')
++    destrSubtotal = models.FloatField(blank=True, null=True, verbose_name='Depopulation Subtotal Cost')
++    costsTotal = models.FloatField(blank=True, null=True, verbose_name=printable_name('costsTotal'))
++
++    def __str__(self):
++        return "%i, %i: %s" % (self.iteration, self.day, self.production_type or "All Types")
++
++
+ class DailyByZone(OutputBaseModel):
+     iteration = models.IntegerField(blank=True, null=True, verbose_name=printable_name('iteration'),
+         help_text='The iteration during which the outputs in this records where generated.', )
+@@ -332,18 +357,6 @@
+         help_text='The day in this iteration during which the outputs in this records where generated.', )
+     last_day = models.BooleanField(default=False, help_text="Flag that is only set on the last day of an iteration.")
+ 
+-    costSurveillance = models.FloatField(blank=True, null=True, verbose_name='Surveillance Cost')
+-    vaccSetup = models.FloatField(blank=True, null=True, verbose_name='Vaccination Site Setup Cost')
+-    vaccVaccination = models.FloatField(blank=True, null=True, verbose_name='Cost of Vaccine')
+-    vaccSubtotal = models.FloatField(blank=True, null=True, verbose_name='Vaccination Subtotal')
+-    destrAppraisal = models.FloatField(blank=True, null=True, verbose_name="Appraisal Cost")
+-    destrEuthanasia = models.FloatField(blank=True, null=True, verbose_name='Euthanasia Cost')
+-    destrIndemnification = models.FloatField(blank=True, null=True, verbose_name='Indemnification Cost')
+-    destrDisposal = models.FloatField(blank=True, null=True, verbose_name='Carcass Disposal Cost')
+-    destrCleaning = models.FloatField(blank=True, null=True, verbose_name='Cleaning and Disinfection Cost')
+-    destrSubtotal = models.FloatField(blank=True, null=True, verbose_name='Depopulation Subtotal Cost')
+-    costsTotal = models.FloatField(blank=True, null=True, verbose_name=printable_name('costsTotal'))
+-
+     deswUMax = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Units Max")
+     deswUMaxDay = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Units Day with Max")
+     deswUTimeMax = models.IntegerField(blank=True, null=True, verbose_name="Destruction Wait Time Units Max Time")
+@@ -393,7 +406,7 @@
+ 
+     def __str__(self):
+         if all(x is not None for x in [self.versionMajor, self.versionMinor, self.versionRelease]):
+-            return '.'.join([self.versionMajor, self.versionMinor, self.versionRelease])
++            return '.'.join([str(self.versionMajor), str(self.versionMinor), str(self.versionRelease)])
+         else:
+             return 'No simulation version stored in this result set'
+ 
+Index: Results/migrations/0005_auto_20180724_1553.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Results/migrations/0005_auto_20180724_1553.py	(date 1532469225952)
++++ Results/migrations/0005_auto_20180724_1553.py	(date 1532469225952)
+@@ -0,0 +1,87 @@
++# -*- coding: utf-8 -*-
++from __future__ import unicode_literals
++
++from django.db import models, migrations
++
++
++class Migration(migrations.Migration):
++
++    dependencies = [
++        ('ScenarioCreator', '0039_auto_20180723_0856'),
++        ('Results', '0004_remove_dailycontrols_detcuq'),
++    ]
++
++    operations = [
++        migrations.CreateModel(
++            name='DailyCostsByProductionType',
++            fields=[
++                ('id', models.AutoField(auto_created=True, primary_key=True, verbose_name='ID', serialize=False)),
++                ('iteration', models.IntegerField(blank=True, help_text='The iteration during which the outputs in this records where generated.', verbose_name='Iteration', null=True)),
++                ('day', models.IntegerField(blank=True, help_text='The day in this iteration during which the outputs in this records where generated.', verbose_name='Day', null=True)),
++                ('last_day', models.BooleanField(default=False, help_text='Flag that is only set on the last day of an iteration.')),
++                ('vaccSetup', models.FloatField(blank=True, null=True, verbose_name='Vaccination Site Setup Cost')),
++                ('vaccVaccination', models.FloatField(blank=True, null=True, verbose_name='Cost of Vaccine')),
++                ('vaccSubtotal', models.FloatField(blank=True, null=True, verbose_name='Vaccination Subtotal')),
++                ('destrAppraisal', models.FloatField(blank=True, null=True, verbose_name='Appraisal Cost')),
++                ('destrEuthanasia', models.FloatField(blank=True, null=True, verbose_name='Euthanasia Cost')),
++                ('destrIndemnification', models.FloatField(blank=True, null=True, verbose_name='Indemnification Cost')),
++                ('destrDisposal', models.FloatField(blank=True, null=True, verbose_name='Carcass Disposal Cost')),
++                ('destrCleaning', models.FloatField(blank=True, null=True, verbose_name='Cleaning and Disinfection Cost')),
++                ('destrSubtotal', models.FloatField(blank=True, null=True, verbose_name='Depopulation Subtotal Cost')),
++                ('costsTotal', models.FloatField(blank=True, null=True, verbose_name='Costs Total')),
++                ('production_type', models.ForeignKey(blank=True, null=True, to='ScenarioCreator.ProductionType', help_text='The identifier of the production type that these outputs apply to.', verbose_name='Production Type')),
++            ],
++            options={
++                'abstract': False,
++            },
++        ),
++        migrations.RemoveField(
++            model_name='dailycontrols',
++            name='costSurveillance',
++        ),
++        migrations.RemoveField(
++            model_name='dailycontrols',
++            name='costsTotal',
++        ),
++        migrations.RemoveField(
++            model_name='dailycontrols',
++            name='destrAppraisal',
++        ),
++        migrations.RemoveField(
++            model_name='dailycontrols',
++            name='destrCleaning',
++        ),
++        migrations.RemoveField(
++            model_name='dailycontrols',
++            name='destrDisposal',
++        ),
++        migrations.RemoveField(
++            model_name='dailycontrols',
++            name='destrEuthanasia',
++        ),
++        migrations.RemoveField(
++            model_name='dailycontrols',
++            name='destrIndemnification',
++        ),
++        migrations.RemoveField(
++            model_name='dailycontrols',
++            name='destrSubtotal',
++        ),
++        migrations.RemoveField(
++            model_name='dailycontrols',
++            name='vaccSetup',
++        ),
++        migrations.RemoveField(
++            model_name='dailycontrols',
++            name='vaccSubtotal',
++        ),
++        migrations.RemoveField(
++            model_name='dailycontrols',
++            name='vaccVaccination',
++        ),
++        migrations.AddField(
++            model_name='dailybyzoneandproductiontype',
++            name='costSurveillance',
++            field=models.FloatField(blank=True, null=True, verbose_name='Surveillance Cost'),
++        ),
++    ]
+Index: Results/output_parser.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Results/output_parser.py	(revision 7f0dd45295d743bfa3f202726f67d292cd27543a)
++++ Results/output_parser.py	(date 1532980297724)
+@@ -64,8 +64,9 @@
+                     pass  # It's okay for the model to specify a field that the C Engine doesn't output.  No harm done
+             if not instance_needed:
+                 keys_to_delete.append(suffix_key)
+-        for suffix_key in keys_to_delete:
+-            del instance_dict[suffix_key] 
++        if model_class_name != "DailyCostsByProductionType":
++            for suffix_key in keys_to_delete:
++                del instance_dict[suffix_key]
+         return [instance for key, instance in instance_dict.items()]
+ 
+     def construct_combinatorial_instances(self, day, iteration, last_line):
+@@ -73,14 +74,15 @@
+         to the appropriate Django query settings to grab the matching model instance.  For 'BackgroundCattle' the query
+         should be `DailyByZoneAndProductionType(production_type__name=Cattle, zone=None, ...`.
+         This handles the special blank case for both "All ProductionType" = '' and "Background Zone" = None.
+-        
++
+         It returns a dict which is the collection of all the model instances which will need to be populated each day:
+         1 DailyControls
+         1*pt DailyByProductionType
+         zones*pt DailyByZoneAndProductionType
+         zones*1 DailyByZone
++        1*pt DailyCostsByProductionType
+         """
+-        daily_instances = {table_name:{} for table_name in ["DailyByProductionType", "DailyByZone", "DailyByZoneAndProductionType", "DailyControls"]}
++        daily_instances = {table_name:{} for table_name in ["DailyByProductionType", "DailyByZone", "DailyByZoneAndProductionType", "DailyControls", "DailyCostsByProductionType"]}
+ 
+         daily_by_pt = daily_instances["DailyByProductionType"]
+         for pt_name in self.possible_pts:
+@@ -91,7 +93,7 @@
+             daily_by_pt[camel_case_spaces(pt_name)] = \
+                 Results.models.DailyByProductionType(production_type_id=pt, iteration=iteration, day=day, last_day=last_line)
+ 
+-        daily_instances["DailyByZone"] = {}
++        daily_instances["DailyByZone"] = {}  # Marker, this statement is redundant as the "DailyByZone" index is already a blank dictionary.
+         for zone_name in self.possible_zones:
+             try:
+                 zone = [x[0] for x in self.zones if x[1] == zone_name][0]
+@@ -115,6 +117,15 @@
+                     Results.models.DailyByZoneAndProductionType(production_type_id=pt, zone_id=zone, iteration=iteration, day=day, last_day=last_line)
+ 
+         daily_instances["DailyControls"] = {'': Results.models.DailyControls(iteration=iteration, day=day, last_day=last_line)}  # there's only one of these
++
++        costs_by_pt = daily_instances["DailyCostsByProductionType"]
++        for pt_name in self.possible_pts:  # for production type name in possible production types
++            try:
++                pt = [x[0] for x in self.production_types if x[1] == pt_name][0]  # production type = self.production_type[index] if id and name are equal in both fields
++            except IndexError:  # no possible production type
++                pt = None
++            costs_by_pt[camel_case_spaces(pt_name)] = \
++                Results.models.DailyCostsByProductionType(production_type_id=pt, iteration=iteration, day=day, last_day=last_line)
+         return daily_instances
+ 
+     def populate_db_from_daily_report(self, sparse_info, last_line):
+diff --git Database Templates/blank.sqlite3 Database Templates/blank.sqlite3
+index 736609b299b70eba5a6cac18bd2c85d540230ca2..bc570646fca9f35950405b14695301e487e43efe
+GIT binary patch
+literal 210944
+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
+DU9+jJ
+
