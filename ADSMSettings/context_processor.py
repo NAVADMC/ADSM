@@ -20,9 +20,8 @@ def adsm_context(request):
                    'update_version': version if version and version != 'False' and version != '0' else '',
                    'workspace_path': workspace_path(),
                    'db_files': (file_list(".sqlite3")),
-                   'show_help_text': session.show_help_text
+                   'show_help_text': session.show_help_text,
+                   'show_help_overlay': session.show_help_overlay
         }
 
     return context
-
-

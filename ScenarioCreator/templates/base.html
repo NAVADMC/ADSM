@@ -8,10 +8,13 @@
             document.getElementById('overlay').classList.toggle('hidden');
             sessionStorage.setItem('overlayVisibilityState', !document.getElementById('overlay').classList.contains("hidden"));
         }
-    };
+    }
     //function runs when a page is loaded and determines if the overlay should be shown or not based on what is stored
     //in sessionStorage.
     onload = function() {
+        // Pull initial state from the DB
+        sessionStorage.setItem('overlayVisibilityState', {{ show_help_overlay|yesno:"true,false" }});
+
         if(sessionStorage.getItem("overrideOverlayVisibilityState") == "true"){
             document.getElementById('overlay').classList.add("hidden");
             document.getElementById('info-overlay').classList.add("hidden");
@@ -31,7 +34,7 @@
     //removes the users ability to display the overlay (so it does not display on the results screen).
     function disableOverlay(){
         sessionStorage.setItem("overrideOverlayVisibilityState", "true");
-    };
+    }
 </script>
 <head>
     <title>ADSM - Animal Disease Spread Model</title>
