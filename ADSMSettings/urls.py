@@ -11,6 +11,7 @@ urlpatterns = patterns('',
     url('^Workspace/$', 'ADSMSettings.views.file_dialog'),
     url('^Backend/$', 'ADSMSettings.views.backend'),
     url('^ShowHelpText.json/$', 'ADSMSettings.views.show_help_text_json'),
+    url('^ShowHelpOverlay.json/$', 'ADSMSettings.views.show_help_overlay_json'),
 
     url(r'^ImportScenario/(?P<new_name>.*)$', 'ADSMSettings.views.import_naadsm_scenario'),
     url(r'^ImportStatus/$', 'ADSMSettings.views.import_status'),

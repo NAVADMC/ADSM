@@ -239,3 +239,13 @@ def show_help_text_json(request):
         return JsonResponse({'status':'success'})
     else:  # GET
         return JsonResponse({'show_help_text': SmSession.objects.get().show_help_text})
+
+
+def show_help_overlay_json(request):
+    if 'POST' in request.method:
+        new_value = request.POST['show_help_overlay']
+        set_to = new_value == 'true'
+        SmSession.objects.all().update(show_help_overlay=set_to)
+        return JsonResponse({'status':'success'})
+    else:  # GET
+        return JsonResponse({'show_help_overlay': SmSession.objects.get().show_help_overlay})
