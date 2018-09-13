@@ -3,8 +3,6 @@
 
 The Animal Disease Spread Model (ADSM) is a software application that simulates the spread of highly contagious animal diseases in a susceptible population. Applied control measures can influence the disease outbreak. ADSM features upgraded technology and a redesigned user interface combined with the trusted logic of NAADSM.
 
-![Results](ADSM/gh-pages/images/ResultsOverview_Map.jpg)
-
 ## Applications
 
 •	Evaluate proposed disease control strategies for planning and policy decisions.
