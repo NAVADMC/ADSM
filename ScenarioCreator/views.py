@@ -120,10 +120,19 @@ def spread_inputs_json(request):
 
 
 def modify_spread_assignments(request):
+    """
+    called when a request to change the spread assignements is made. This function is called for all three spread assignment types
+    :param request:
+    :return: json summary of the request
+    """
+    # destinations is a list of integer ids
     destinations = [int(x) for x in request.POST.getlist('destinations[]')]
+    # if a non-blank selection was made
     if 'destinations[]' in request.POST.keys() and request.POST['source']:  # when a user selects ----- there's no PK at all
         data = request.POST.dict()
+        # if a spread assignment is being CREATED
         if 'POST' == data['action']:
+            # for each destination
             for destination_pk in destinations:
                 assignment = DiseaseSpreadAssignment.objects.filter(**{'source_production_type_id': int(data['source']),
                                                                        'destination_production_type_id': int(destination_pk)})
@@ -134,7 +143,9 @@ def modify_spread_assignments(request):
                 destination = ProductionType.objects.get(id=int(destination_pk)).name
                 print("ADD", field, "SOURCE:", source, "DESTINATION:", destination)
 
+        # if a spread assignment is being DELETED
         if 'DELETE' == data['action']:  # Django doesn't allow you to parametrize DELETE http_method
+            # for each destination
             for destination_pk in destinations:
                 assignment = DiseaseSpreadAssignment.objects.filter(**{'source_production_type_id': int(data['source']),
                                                                        'destination_production_type_id': int(destination_pk)})

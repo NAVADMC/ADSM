@@ -19,12 +19,14 @@ export class SpreadWidget extends Component {
         this.props.dispatch(refresh_spread_inputs_from_server())
     }
 
+    // render function is called twice when a Disease Spread is selected.
     render() {
         var url = $('#center-panel form').first().attr('action').split('/');
         var spread_type = url[2]
         var pk = url[3]
         var {spread_inputs, population} = this.props
         var inputs = []
+        // this conditional DOES NOT run on the first pass. Fills in the type combinations
         if(pk in spread_inputs[spread_type] && typeof population !== 'undefined') {
             inputs = spread_inputs[spread_type][pk].map(function(input_state, index){
                 return (<SpreadAssigner population={population}
@@ -35,6 +37,7 @@ export class SpreadWidget extends Component {
                                         key={index} />);
             });
         }
+        // the return of the first pass, sets up the actual space for the type combinations to go
         return (
             <div className="spread-widget-contents">
                 <hr/>
