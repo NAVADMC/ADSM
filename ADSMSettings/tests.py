@@ -19,7 +19,7 @@ class ScenarioTestCase(TestCase):
             print("Failed to delete", file_path)
 
     def test_post_success(self):
-        file_name = 'Test Scenario 123 AZ.sqlite3'
+        file_name = 'Test Scenario 123 AZ.db'
         file_path = workspace_path(file_name)
 
         self.remove_test_file(file_path)
@@ -35,7 +35,7 @@ class ScenarioTestCase(TestCase):
 
     def test_post_failure_ajax(self):
         file_name = 'Test \/ Scenario 123 AZ' # this should break Windows and Linux
-        file_path = workspace_path(file_name) + '.sqlite3'
+        file_path = workspace_path(file_name) + '.db'
 
         self.remove_test_file(file_path)
 

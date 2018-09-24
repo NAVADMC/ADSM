@@ -50,7 +50,7 @@ def update_adsm_from_git(request):
 
 
 def file_dialog(request):
-    context = {'db_files': (file_list(".sqlite3")),
+    context = {'db_files': (file_list(".db")),
                'title': 'Select a new Scenario to Open'}
     return render(request, 'ScenarioCreator/workspace.html', context)
 
@@ -167,7 +167,7 @@ def save_scenario(request=None):
     else:
         target = scenario_filename()
     target = strip_tags(target)
-    full_path = workspace_path(target) + ('.sqlite3' if not target.endswith('.sqlite3') else '')
+    full_path = workspace_path(target) + ('.db' if not target.endswith('.db') else '')
     try:
         if '\\' in target or '/' in target:  # this validation has to be outside of scenario_filename in order for open_test_scenario to work
             raise ValueError("Slashes are not allowed: " + target)
@@ -199,10 +199,10 @@ def delete_file(request, target):
 
 
 def copy_file(request, target, destination):
-    if target.replace('.sqlite3', '') == scenario_filename():  # copying the active scenario
+    if target.replace('.db', '') == scenario_filename():  # copying the active scenario
         return save_scenario(request)
-    if not destination.endswith('.sqlite3'):
-        destination += ".sqlite3"
+    if not destination.endswith('.db'):
+        destination += ".db"
     print("Copying", target, "to", destination, ". This could take several minutes...")
     shutil.copy(workspace_path(target), workspace_path(destination))
     print("Done copying", target)

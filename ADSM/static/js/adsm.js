@@ -354,7 +354,7 @@ $(function(){
     
     $('#file-upload').on('submit',function(event){
         var filename = $(this).find('input[type=file]').val()
-        var valid_extensions = {"application/x-sqlite3": '.sqlite3',
+        var valid_extensions = {"application/x-sqlite3": '.db',
                                 "application/xml": '.xml'}
         var file_extension = valid_extensions[$(this).find('input[type=file]').attr('accept')]
         if( typeof file_extension !== 'undefined' && filename.indexOf(file_extension) == -1) {

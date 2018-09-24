@@ -153,7 +153,7 @@ There are a few things to note about the settings of this project.
 Application used to store user settings and track simulation progress. This is mostly behind the scenes data storage.
 
 #### Database Templates
-These are the blank state databases for a scenario (blanks.sqlite3) and the ADSMSettings app (settings.sqlite3).  
+These are the blank state databases for a scenario (blanks.db) and the ADSMSettings app (settings.db).  
 Blank state databases are required to help the program startup faster so the database doesn't have to be created from the schema each time.
  
 #### Results

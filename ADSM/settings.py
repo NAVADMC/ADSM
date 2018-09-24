@@ -80,14 +80,14 @@ CRISPY_TEMPLATE_PACK = 'bootstrap'
 
 DATABASES.update({
     'default': {
-        'NAME': os.path.join(DB_BASE_DIR, 'settings.sqlite3'),
+        'NAME': os.path.join(DB_BASE_DIR, 'settings.db'),
         'ENGINE': 'django.db.backends.sqlite3',
-        'TEST': {'NAME': os.path.join(DB_BASE_DIR, 'test_settings.sqlite3')},
+        'TEST': {'NAME': os.path.join(DB_BASE_DIR, 'test_settings.db')},
     },
     'scenario_db': {
-        'NAME': os.path.join(DB_BASE_DIR, 'activeSession.sqlite3'),
+        'NAME': os.path.join(DB_BASE_DIR, 'activeSession.db'),
         'ENGINE': 'django.db.backends.sqlite3',
-        'TEST': {'NAME': os.path.join(DB_BASE_DIR, 'test_activeSession.sqlite3')},
+        'TEST': {'NAME': os.path.join(DB_BASE_DIR, 'test_activeSession.db')},
         'OPTIONS': {
             'timeout': 300,
         }

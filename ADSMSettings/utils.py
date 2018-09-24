@@ -84,7 +84,7 @@ def handle_file_upload(request, field_name='file', is_temp_file=False, overwrite
 
 def prepare_supplemental_output_directory():
     """Creates a directory with the same name as the Scenario and directs the Simulation to store supplemental files in the new directory"""
-    output_dir = workspace_path(scenario_filename())  # this does not have the .sqlite3 suffix
+    output_dir = workspace_path(scenario_filename())  # this does not have the .db suffix
     output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm_simulation.exe
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -125,7 +125,7 @@ def copy_db_template(template, destination):
 
 def copy_blank_to_session():
     try:  # just copy blank then update version
-        copy_db_template('blank.sqlite3', os.path.join(settings.DB_BASE_DIR, 'activeSession.sqlite3'))
+        copy_db_template('blank.db', os.path.join(settings.DB_BASE_DIR, 'activeSession.db'))
         SmSession.objects.all().update(unsaved_changes=True)
     except BaseException as err:
         print("Copying from blank scenario template failed!\nResetting database.")
@@ -135,7 +135,7 @@ def copy_blank_to_session():
 
 def copy_blank_to_settings():
     try:
-        copy_db_template('settings.sqlite3', os.path.join(settings.DB_BASE_DIR, 'settings.sqlite3'))
+        copy_db_template('settings.db', os.path.join(settings.DB_BASE_DIR, 'settings.db'))
     except BaseException as e:
         print("Copying from blank settings template failed!\nResetting database.")
         print(e)
@@ -152,6 +152,17 @@ def graceful_startup():
     if not os.path.exists(settings.DB_BASE_DIR):
         print("Creating DB Directory...")
         os.makedirs(settings.DB_BASE_DIR, exist_ok=True)
+
+    print("Migrating all .sqlite3 files to .db...")
+    connections.close_all()
+    close_old_connections()
+    for dirpath, dirnames, files in os.walk(workspace_path()):
+        for file in files:
+            if file.lower().endswith(".sqlite3"):
+                file_path = os.path.join(dirpath, file)
+                new_file_path = os.path.splitext(file_path)[0] + '.db'
+                shutil.copy(file_path, new_file_path)
+                os.remove(file_path)
     
     print("Copying Sample Scenarios...")
     samples_dir = os.path.join(settings.BASE_DIR, "Sample Scenarios")
@@ -170,7 +181,7 @@ def graceful_startup():
                 print(e)
 
     print("Checking database state...")
-    if not os.path.isfile(os.path.join(settings.DB_BASE_DIR, 'settings.sqlite3')) or os.stat(os.path.join(settings.DB_BASE_DIR, 'settings.sqlite3')).st_size < 10000:
+    if not os.path.isfile(os.path.join(settings.DB_BASE_DIR, 'settings.db')) or os.stat(os.path.join(settings.DB_BASE_DIR, 'settings.db')).st_size < 10000:
         copy_blank_to_settings()
     try:
         x = SmSession.objects.get().scenario_filename  # this should be in the initial migration
@@ -178,7 +189,7 @@ def graceful_startup():
     except OperationalError:
         reset_db('default')
 
-    if not os.path.isfile(os.path.join(settings.DB_BASE_DIR, 'activeSession.sqlite3')) or os.stat(os.path.join(settings.DB_BASE_DIR, 'activeSession.sqlite3')).st_size < 10000:
+    if not os.path.isfile(os.path.join(settings.DB_BASE_DIR, 'activeSession.db')) or os.stat(os.path.join(settings.DB_BASE_DIR, 'activeSession.db')).st_size < 10000:
         copy_blank_to_session()
     try:
         from ScenarioCreator.models import ZoneEffect
@@ -258,12 +269,12 @@ def supplemental_folder_has_contents(subfolder=''):
 def scenario_filename(new_value=None, check_duplicates=False):
     session = SmSession.objects.get()  # This keeps track of the state for all views and is used by basic_context
     if new_value:
-        new_value = new_value.replace('.sqlite3', '')
+        new_value = new_value.replace('.db', '')
         if re.search(r'[^\w\d\- \\/_\(\)\.,]', new_value):  # negative set, list of allowed characters
             raise ValueError("Special characters are not allowed: " + new_value)
         if check_duplicates:
             counter = 1
-            while os.path.exists(workspace_path(new_value + '.sqlite3')):
+            while os.path.exists(workspace_path(new_value + '.db')):
                 if counter == 1:
                     new_value = new_value + " (" + str(counter) + ")"
                 else:

@@ -275,7 +275,7 @@ class FunctionalTests(StaticLiveServerTestCase):
     def test_upload_population_file(self):
         self.click_navbar_element('Population')
 
-        self.selenium.find_element_by_link_text('SampleScenario.sqlite3').click()
+        self.selenium.find_element_by_link_text('SampleScenario.db').click()
         for i in range(5):  # a slow population load
             time.sleep(5) # may need to be adjusted for slow computers or if the file grows
             try:
@@ -287,7 +287,7 @@ class FunctionalTests(StaticLiveServerTestCase):
     def test_upload_blank_population_file(self):
         self.click_navbar_element('Population')
 
-        self.selenium.find_element_by_link_text('blank.sqlite3').click()
+        self.selenium.find_element_by_link_text('blank.db').click()
         time.sleep(5) # may need to be adjusted for slow computers or if the file grows
 
         section = self.find('section')
@@ -412,7 +412,7 @@ class FunctionalTests(StaticLiveServerTestCase):
         self.assertIn("none", mean_field.value_of_css_property("display"))
 
     def test_disable_control_master_plan(self):
-        self.client.get('/app/OpenTestScenario/ScenarioCreator/tests/population_fixtures/Roundtrip.sqlite3/')
+        self.client.get('/app/OpenTestScenario/ScenarioCreator/tests/population_fixtures/Roundtrip.db/')
         delete_all_outputs()
 
         self.click_navbar_element("Controls") 
@@ -491,7 +491,7 @@ class FunctionalTests(StaticLiveServerTestCase):
             self.assertIn("Error", alert.text)
         finally:
             try:
-                os.remove(workspace_path('Untitled Scenario./\\ 123.1&% AZ.sqlite3'))
+                os.remove(workspace_path('Untitled Scenario./\\ 123.1&% AZ.db'))
             except:
                 pass
 
@@ -521,7 +521,7 @@ class FunctionalTests(StaticLiveServerTestCase):
             self.assertNotIn('unsaved', status.get_attribute('class'))
         finally:
             try:
-                os.remove(workspace_path('Untitled Scenario123.1 AZ.sqlite3'))
+                os.remove(workspace_path('Untitled Scenario123.1 AZ.db'))
             except:
                 pass
 

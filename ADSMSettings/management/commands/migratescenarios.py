@@ -47,7 +47,7 @@ class Command(BaseCommand):
         for location in locations:
             for root, dirs, files in os.walk(location):
                 for file in files:
-                    if file.endswith(".sqlite3") and file != "settings.sqlite3":
+                    if file.endswith(".db") and file != "settings.db":
                         print("\nMigrating", file, "in", root + "...")
                         try:
                             open_test_scenario(request=None, target=os.path.join(root, file))

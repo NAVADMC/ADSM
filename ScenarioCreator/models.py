@@ -129,7 +129,7 @@ class Population(InputSingleton):
     def save(self, *args, **kwargs):
         super(Population, self).save(*args, **kwargs)
         if self.source_file:
-            if self.source_file.endswith('.sqlite3'):
+            if self.source_file.endswith('.db'):
                 self.import_population_from_sqlite()
             else:
                 self.import_population()  # Population must be saved to db so that it can be foreignkeyed
