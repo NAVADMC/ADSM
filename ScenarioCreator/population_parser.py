@@ -30,7 +30,7 @@ def convert_numeric_status_codes(entry):
 
 class PopulationParser(object):
     model_labels = ['user_notes', 'production_type', 'latitude', 'longitude', 'initial_state', 'initial_size']
-    xml_fields   = ['id',             'production-type', 'latitude', 'longitude', 'status',        'size']
+    xml_fields = ['id',           'production-type', 'latitude', 'longitude', 'status',        'size']
     text_fields = list(zip(model_labels, xml_fields))
 
     def __init__(self, filename):
@@ -64,6 +64,7 @@ class PopulationParser(object):
                 entry = convert_numeric_status_codes(entry)
                 # preserve the information from any colulmns I didn't use
                 entry['user_notes'] = ', '.join(["%s=%s" % (key, value) for key, value in unit.items() if key not in mapping])
+                print("\t\tIMPORTED USER_NOTES:", entry['user_notes'])
                 self.population.append(entry)
 
     def __parse_csv(self, filename):
@@ -71,6 +72,14 @@ class PopulationParser(object):
         This is because a format that has fewer options, but same names will match to a format that has more options
         containing all the options of the smaller one. This case will end up throwing an error for missing columns."""
         possible_formats = [
+            {'unitid': 'unit_id', # NAADSM CSV no HerdSize, with status and state timers, and with unitid
+             'productiontype': 'production_type',
+             'unitsize': 'initial_size',
+             'lat': 'latitude',
+             'lon': 'longitude',
+             'status': 'initial_state',
+             'daysinstate': 'days_in_initial_state',
+             'daysleftinstate': 'days_left_in_initial_state'},
             {'productiontype': 'production_type',  # NAADSM CSV no HerdSize, with status and state timers
              'unitsize': 'initial_size',
              'lat': 'latitude',
@@ -132,5 +141,5 @@ class PopulationParser(object):
         except:
             raise IOError("Couldn't find '%s' label in xml" % xml_name)
         if xml_name == 'id' and text:
-            text = (b'UnitID=' + text.encode()).decode()
+             field_name = "unit_id"
         self.population[-1][field_name] = text

@@ -231,6 +231,7 @@ class Unit(BaseModel):
     initial_size = models.PositiveIntegerField(validators=[MinValueValidator(1)],
         help_text='The number of animals in the ' + wiki("Unit") + '.', )
     user_notes = models.CharField(max_length=255, blank=True, null=True)  # as long as possible
+    unit_id = models.CharField(max_length=50, blank=True, null=True)
 
     @classmethod
     def create(cls, **kwargs):
@@ -255,6 +256,9 @@ class Unit(BaseModel):
         unit = cls(**kwargs)
         unit.full_clean()
         return unit
+
+    def get_id(self):
+        return self.unit_id
 
     def __str__(self):
         return "Unit(%s: (%s, %s)" % (self.production_type, self.latitude, self.longitude)
