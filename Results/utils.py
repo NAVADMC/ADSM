@@ -76,10 +76,10 @@ def abort_simulation(request=None):
 
 
 def delete_all_outputs():
-    from Results.models import DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion
+    from Results.models import DailyControls, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion
     abort_simulation()
     if DailyControls.objects.count() > 0:
         print("DELETING ALL OUTPUTS")
-    for model in [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]:
+    for model in [DailyControls, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]:
         model.objects.all().delete()
     SmSession.objects.all().update(iteration_text = '', simulation_has_started=False)  # This is also reset from open_scenario

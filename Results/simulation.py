@@ -12,7 +12,7 @@ from Results.interactive_graphing import population_zoom_png
 from ADSMSettings.views import save_scenario
 from ADSMSettings.utils import adsm_executable_command
 from ADSMSettings.models import SimulationProcessRecord, SmSession
-from Results.models import DailyReport, DailyControls, DailyByZoneAndProductionType, DailyByProductionType, DailyByZone, ResultsVersion
+from Results.models import DailyControls, DailyByZoneAndProductionType, DailyByProductionType, DailyByZone, ResultsVersion
 from Results.utils import zip_map_directory_if_it_exists
 from ScenarioCreator.models import ProductionType, Zone
 
@@ -101,7 +101,6 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones, log_
     set_pragma("synchronous", "OFF", connection='scenario_db')
     set_pragma("journal_mode", "MEMORY", connection='scenario_db')
 
-    DailyReport.objects.bulk_create(sorted_results['DailyReport'])
     DailyControls.objects.bulk_create(sorted_results['DailyControls'])
     DailyByZoneAndProductionType.objects.bulk_create(sorted_results['DailyByZoneAndProductionType'])
     DailyByProductionType.objects.bulk_create(sorted_results['DailyByProductionType'])
