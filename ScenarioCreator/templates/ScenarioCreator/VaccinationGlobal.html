@@ -80,8 +80,12 @@
         });
 	</script>
 
-    <div class="buttonHolder" style="position:absolute; bottom:72px;">
-        <button type="button" class="btn btn-default btn-cancel" id="id-cancel" onclick="window.location.reload();">Cancel</button>
-        <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled onclick="submitVaccinationGlobalForm();">Apply</button>
+    <div class="buttonHolder" style="position:absolute; right:25px; bottom:72px;">
+        {% if outputs_exist %}
+            <button type="submit" class="btn btn-danger btn-save" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} id="submit-id-submit" onclick="submitVaccinationGlobalForm();">Delete Results and Apply changes</button>
+        {% else %}
+            <button type="button" class="btn btn-default btn-cancel" id="id-cancel" onclick="window.location.reload();">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled onclick="submitVaccinationGlobalForm();">Apply</button>
+        {% endif %}
     </div>
 {% endblock %}
