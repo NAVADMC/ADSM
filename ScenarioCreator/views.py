@@ -748,14 +748,23 @@ def population(request):
     if save_formset_succeeded(FarmSet, Unit, context, request):
         return redirect(request.path)
     if Population.objects.filter(id=1, ).exists():
+
         if not Unit.objects.count(): # #571 no units were imported: error, blank files
             Population.objects.all().delete()
             return population(request)  # delete blank and try again
+
         sort_type = request.GET.get('sort_by', 'initial_state')
         query_filter = Q()
         params = filtering_params(request)
         for key, value in params.items():  # loops through params and stacks filters in an AND fashion
             query_filter = query_filter & Q(**{key: value})
+
+        units = Unit.objects.all()
+        for unit in units:
+            unit_id_search = re.search(".*?unit_id=([0-9]+)", unit.user_notes)
+            if unit_id_search is not None:
+                unit.unit_id = unit_id_search.group(1)
+
         initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:100])
         context['formset'] = initialized_formset
         context['filter_info'] = filter_info(request, params)
