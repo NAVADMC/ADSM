@@ -347,7 +347,13 @@ def readPopulation( populationFileName ):
 
     # Create a dictionary to remap long state names to one-letter codes.
     stateCodes = {}
-    for code, fullName in Unit.initial_state_choices:
+    legacy_state_choices = (
+        ('L', 'Incubating'),
+        ('B', 'Inapparent Shedding'),
+        ('B', 'Infectious Subclinical'),
+        ('C', 'Infectious Clinical')
+    )
+    for code, fullName in Unit.initial_state_choices + legacy_state_choices:
         stateCodes[fullName] = code
         stateCodes[fullName.replace( ' ', '' )] = code
 
