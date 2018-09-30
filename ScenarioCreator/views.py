@@ -762,8 +762,9 @@ def population(request):
         units = Unit.objects.all()
         for unit in units:
             unit_id_search = re.search(".*?unit_id=([0-9]+)", unit.user_notes)
-            if unit_id_search is not None:
+            if unit_id_search is not None and unit.unit_id is None:
                 unit.unit_id = unit_id_search.group(1)
+                unit.save()
 
         initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:100])
         context['formset'] = initialized_formset
