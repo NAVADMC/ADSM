@@ -32,7 +32,8 @@ if OVERRIDE_DEBUG:
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
 
-# Look for any settings to import from the installer
+# Look for any settings to import from the installer.
+# Installer settings are to be used globally across all users.
 if os.path.isfile(os.path.join(BASE_DIR, 'settings.ini')):
     from importlib import machinery
     install_settings = machinery.SourceFileLoader('install_settings', os.path.join(BASE_DIR, 'settings.ini')).load_module()
@@ -45,11 +46,11 @@ if not WORKSPACE_PATH:
             SHGFP_TYPE_CURRENT = 0
             buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
             ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_PERSONAL, 0, SHGFP_TYPE_CURRENT, buf)
-            WORKSPACE_PATH = os.path.join(buf.value, "ADSM Workspace")
+            WORKSPACE_PATH = os.path.join(buf.value, "ADSM Vaccination Rings Workspace")
         except:
             WORKSPACE_PATH = None
     if not WORKSPACE_PATH:
-        WORKSPACE_PATH = os.path.join(os.path.expanduser("~"), "Documents", "ADSM Workspace")
+        WORKSPACE_PATH = os.path.join(os.path.expanduser("~"), "Documents", "ADSM Vaccination Rings Workspace")
 if not DB_BASE_DIR:
     DB_BASE_DIR = os.path.join(WORKSPACE_PATH, "settings")
 if not os.path.exists(WORKSPACE_PATH):
