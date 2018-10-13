@@ -121,7 +121,7 @@ def import_naadsm_scenario(request, new_name=None):
 
 
 def upload_scenario(request):
-    if '.sqlite' in request.FILES['file']._name:
+    if '.sqlite' in request.FILES['file']._name or '.db' in request.FILES['file']._name:
         handle_file_upload(request)  #TODO: This can throw an error, but this method isn't used currently
         return redirect('/app/Workspace/')
     else:
