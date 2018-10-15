@@ -45,7 +45,7 @@ class SummaryCSVGenerator(multiprocessing.Process):
             for database in settings.DATABASES:
                 settings.DATABASES[database]['NAME'] = settings.DATABASES[database]['TEST']['NAME'] if 'TEST' in settings.DATABASES[database] else settings.DATABASES[database]['TEST_NAME']
 
-        location = workspace_path(scenario_filename() + '/' + SUMMARY_FILE_NAME)  # Note: scenario_filename uses the database
+        location = workspace_path(scenario_filename() + '/' + "Supplemental Output Files" + '/' + SUMMARY_FILE_NAME)  # Note: scenario_filename uses the database
         headers, data = self.get_summary_data_table()
 
         create_csv_file(location, headers, data)

@@ -11,7 +11,7 @@ from django.utils.safestring import mark_safe
 from ADSMSettings.models import SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
-from ADSMSettings.utils import update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup, scenario_filename, \
+from ADSMSettings.utils import update_db_version, db_path, workspace_path, db_list, handle_file_upload, graceful_startup, scenario_filename, \
     copy_blank_to_session, create_super_user
 from Results.models import outputs_exist
 
@@ -50,7 +50,7 @@ def update_adsm_from_git(request):
 
 
 def file_dialog(request):
-    context = {'db_files': (file_list(".db")),
+    context = {'db_files': (db_list()),
                'title': 'Select a new Scenario to Open'}
     return render(request, 'ScenarioCreator/workspace.html', context)
 
@@ -129,8 +129,10 @@ def upload_scenario(request):
 
 
 def open_scenario(request, target, wrap_target=True):
+    if not target.lower().endswith('.db'):
+        target = target + ".db"
     if wrap_target:
-        target = workspace_path(target)
+        target = os.path.join(workspace_path(os.path.splitext(target)[0]), target)
     print("Copying ", target, "to", db_path(), ". This could take several minutes...")
     close_old_connections()
     shutil.copy(target, db_path(name='scenario_db'))
@@ -162,18 +164,20 @@ def new_scenario(request=None, new_name=None):
 def save_scenario(request=None):
     """Save to the existing session of a new file name if target is provided
     """
-    if request is not None and 'filename' in request.POST:
+    if request is not None and 'filename' in request.POST and request.POST['filename']:
         target = request.POST['filename']
     else:
         target = scenario_filename()
     target = strip_tags(target)
-    full_path = workspace_path(target) + ('.db' if not target.endswith('.db') else '')
+    full_path = workspace_path(target + "/" + target + ('.db' if not target.endswith('.db') else ''))
     try:
         if '\\' in target or '/' in target:  # this validation has to be outside of scenario_filename in order for open_test_scenario to work
             raise ValueError("Slashes are not allowed: " + target)
         scenario_filename(target)
         print('Copying database to', target)
 
+        if not os.path.exists(os.path.dirname(full_path)):
+            os.makedirs(os.path.dirname(full_path))
         shutil.copy(db_path(), full_path)
         unsaved_changes(False)  # File is now in sync
         print('Done Copying database to', full_path)
@@ -193,7 +197,11 @@ def save_scenario(request=None):
 
 def delete_file(request, target):
     print("Deleting", target)
-    os.remove(workspace_path(target))
+    if "\\" not in target and os.path.splitext(target)[1].lower() in ['.db', '.sqlite', '.sqlite3']:
+        target = os.path.splitext(target)[0]
+        shutil.rmtree(workspace_path(target))
+    else:
+        os.remove(workspace_path(target))
     print("Done")
     return HttpResponse()
 
@@ -201,10 +209,14 @@ def delete_file(request, target):
 def copy_file(request, target, destination):
     if target.replace('.db', '') == scenario_filename():  # copying the active scenario
         return save_scenario(request)
+    print("Copying", target, "to", destination, ". This could take several minutes...")
+    target = workspace_path(os.path.splitext(target)[0] + "/" + target)
+    destination = workspace_path(os.path.splitext(destination)[0] + "/" + destination)
     if not destination.endswith('.db'):
         destination += ".db"
-    print("Copying", target, "to", destination, ". This could take several minutes...")
-    shutil.copy(workspace_path(target), workspace_path(destination))
+    if not os.path.exists(os.path.dirname(destination)):
+        os.makedirs(os.path.dirname(destination))
+    shutil.copy(target, destination)
     print("Done copying", target)
     return redirect('/')
 
@@ -212,7 +224,10 @@ def copy_file(request, target, destination):
 def download_file(request):
     target = request.GET['target']
     target = target if target[-1] not in r'/\\' else target[:-1]  # shouldn't be a trailing slash
-    file_path = workspace_path(target)
+    if "\\" not in target and os.path.splitext(target)[1].lower() in ['.db', '.sqlite', '.sqlite3']:
+        file_path = workspace_path(os.path.splitext(target)[0] + "/" + target)
+    else:
+        file_path = workspace_path(target)
     f = open(file_path, "rb")
     response = HttpResponse(f, content_type="application/x-sqlite")  # TODO: generic content type
     response['Content-Disposition'] = 'attachment; filename="' + target

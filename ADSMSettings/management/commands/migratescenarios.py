@@ -36,7 +36,12 @@ class Command(BaseCommand):
 
         locations = [os.path.join(settings.BASE_DIR, 'ScenarioCreator', 'tests', 'population_fixtures'), os.path.join(settings.BASE_DIR, 'Sample Scenarios'), os.path.join(settings.BASE_DIR, 'Database Templates')]
         if not options['skip_workspace']:
-            locations.append(workspace_path())
+            for root, dirs, files in os.walk(workspace_path()):
+                for dir in dirs:
+                    for file in os.listdir(os.path.join(root, dir)):
+                        if os.path.splitext(file)[1].lower() in ['.db', '.sqlite', '.sqlite3']:
+                            locations.append(os.path.join(root, dir))
+                            break  # No need to add a folder more than once if multiple db files exist.
             print("\nIncluding User's Workspace folder.")
         else:
             print("\nExcluding User's Workspace folder.")
@@ -47,7 +52,7 @@ class Command(BaseCommand):
         for location in locations:
             for root, dirs, files in os.walk(location):
                 for file in files:
-                    if file.endswith(".db") and file != "settings.db":
+                    if os.path.splitext(file)[1].lower() in ['.db', '.sqlite', '.sqlite3'] and file not in ["settings.db", "settings.sqlite", "settings.sqlite3"]:
                         print("\nMigrating", file, "in", root + "...")
                         try:
                             open_test_scenario(request=None, target=os.path.join(root, file))

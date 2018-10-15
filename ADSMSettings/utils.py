@@ -28,23 +28,7 @@ def db_path(name='scenario_db'):
 
 
 def workspace_path(target=None):
-    if not hasattr(settings, 'WORKSPACE_PATH') or not settings.WORKSPACE_PATH:
-        home = None
-        if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.
-            try:
-                CSIDL_PERSONAL = 5
-                SHGFP_TYPE_CURRENT = 0
-                buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-                ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_PERSONAL, 0, SHGFP_TYPE_CURRENT, buf)
-                home = buf.value
-            except:
-                home = None
-        if not home:
-            home = os.path.join(os.path.expanduser("~"), "Documents")
-
-        path = os.path.join(home, "ADSM Workspace")
-    else:
-        path = settings.WORKSPACE_PATH
+    path = settings.WORKSPACE_PATH
 
     if target is None:
         return path
@@ -52,9 +36,23 @@ def workspace_path(target=None):
         parts = re.split(r'[/\\]+', target)  # the slashes here are coming in from URL so they probably don't match os.path.split()
         path = os.path.join(path, *parts)
         return path
-    else: 
+    else:
         path = os.path.join(path, target)
-        return path  # shlex.quote(path) if you want security
+        return path  # TODO: shlex.quote(path) if you want security
+
+
+def db_list():
+    dbs = []
+    for root, dirs, files in os.walk(workspace_path()):
+        for dir in dirs:
+            if dir not in ['Example Database Queries', 'Example R Code', 'settings']:
+                dir_files = os.listdir(os.path.join(workspace_path(), dir))
+                for file in dir_files:
+                    if file.endswith('.db'):
+                        dbs.append(file)
+                        break  # Don't add a directory more than once
+        break  # only look at the top level for folders that may contain DBs
+    return sorted(dbs)
 
 
 def file_list(extensions=[]):
@@ -71,6 +69,10 @@ def handle_file_upload(request, field_name='file', is_temp_file=False, overwrite
     prefix = ''
     if is_temp_file:
         prefix = 'temp/'
+    if os.path.splitext(uploaded_file._name)[1].lower() in ['.db', '.sqlite', '.sqlite3']:
+        if not is_temp_file:
+            prefix = os.path.splitext(uploaded_file._name)[0]
+        uploaded_file._name = os.path.splitext(uploaded_file._name)[0] + '.db'
     os.makedirs(workspace_path(prefix), exist_ok=True)
     file_path = workspace_path(prefix + uploaded_file._name)
     if os.path.exists(file_path) and not (is_temp_file or overwrite_ok):
@@ -84,7 +86,7 @@ def handle_file_upload(request, field_name='file', is_temp_file=False, overwrite
 
 def prepare_supplemental_output_directory():
     """Creates a directory with the same name as the Scenario and directs the Simulation to store supplemental files in the new directory"""
-    output_dir = workspace_path(scenario_filename())  # this does not have the .db suffix
+    output_dir = workspace_path('%s/%s' % (scenario_filename(), "Supplemental Output Files"))  # this does not have the .db suffix
     output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm_simulation.exe
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -153,18 +155,7 @@ def graceful_startup():
         print("Creating DB Directory...")
         os.makedirs(settings.DB_BASE_DIR, exist_ok=True)
 
-    print("Migrating all .sqlite3 files to .db...")
-    connections.close_all()
-    close_old_connections()
-    for dirpath, dirnames, files in os.walk(workspace_path()):
-        for file in files:
-            if file.lower().endswith(".sqlite3"):
-                file_path = os.path.join(dirpath, file)
-                new_file_path = os.path.splitext(file_path)[0] + '.db'
-                shutil.copy(file_path, new_file_path)
-                os.remove(file_path)
-    
-    print("Copying Sample Scenarios...")
+    print("Copying Sample Scenarios and Example Queries and Code...")
     samples_dir = os.path.join(settings.BASE_DIR, "Sample Scenarios")
     for dirpath, dirnames, files in os.walk(samples_dir):
         [os.makedirs(workspace_path(sub), exist_ok=True) for sub in dirnames]
@@ -179,6 +170,27 @@ def graceful_startup():
                 shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), subdir, file))
             except Exception as e:
                 print(e)
+
+    print("Migrating all .sqlite3 files to .db...")
+    connections.close_all()
+    close_old_connections()
+    for dirpath, dirnames, files in os.walk(workspace_path()):
+        for file in files:
+            if os.path.splitext(file)[1].lower() in ['.sqlite', '.sqlite3']:
+                file_path = os.path.join(dirpath, file)
+                new_file_path = os.path.splitext(file_path)[0] + '.db'
+                shutil.copy(file_path, new_file_path)
+                os.remove(file_path)
+
+    print("Moving all DBs to their own folders...")
+    for dirpath, dirnames, files in os.walk(workspace_path()):
+        for file in files:
+            if os.path.splitext(file)[1].lower() in ['.db', '.sqlite', '.sqlite3']:
+                file_path = os.path.join(dirpath, file)
+                new_file_path = os.path.join(dirpath, os.path.splitext(file)[0], file)
+                shutil.copy(file_path, new_file_path)
+                os.remove(file_path)
+        break  # only walk over top level folder where DB files used to be saved
 
     print("Checking database state...")
     if not os.path.isfile(os.path.join(settings.DB_BASE_DIR, 'settings.db')) or os.stat(os.path.join(settings.DB_BASE_DIR, 'settings.db')).st_size < 10000:
@@ -263,7 +275,7 @@ def update_db_version():
 def supplemental_folder_has_contents(subfolder=''):
     """Doesn't currently include Map subdirectory.  Instead it checks for the map zip file.  TODO: This could be a page load slow down given that
     we're checking the file system every page."""
-    return len(list(chain(*[glob(workspace_path(scenario_filename() + subfolder + "/*." + ext)) for ext in ['csv', 'shp', 'shx', 'dbf', 'zip']]))) > 0
+    return len(list(chain(*[glob(workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + "/" + subfolder + "/*." + ext)) for ext in ['csv', 'shp', 'shx', 'dbf', 'zip']]))) > 0
 
 
 def scenario_filename(new_value=None, check_duplicates=False):
@@ -274,7 +286,7 @@ def scenario_filename(new_value=None, check_duplicates=False):
             raise ValueError("Special characters are not allowed: " + new_value)
         if check_duplicates:
             counter = 1
-            while os.path.exists(workspace_path(new_value + '.db')):
+            while os.path.exists(workspace_path(new_value)):
                 if counter == 1:
                     new_value = new_value + " (" + str(counter) + ")"
                 else:

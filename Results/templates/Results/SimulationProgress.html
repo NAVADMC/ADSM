@@ -84,10 +84,6 @@
                             <span class="spinner"><i class="icon-spin glyphicon glyphicon-refresh"></i></span>
                             Calculate Summary CSV
                         </button>
-                        <div class="summary-download hidden"><a href="/app/Download/?target={{ summary_file_name }}">{{ summary_file_name }}</a>
-                            <a href="#" class="icon delete-icon ajax-post" data-delete-link="/app/DeleteFile/{{ summary_file_name }}/"></a>
-                            <a href="/app/Download/?target={{ summary_file_name }}"><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
-                        </div>
                     </li>
 
                     {% for file in supplemental_files %}

@@ -6,6 +6,7 @@ $(function(){
     var $summaryCsv = $('#summary_csv');
     var endpoint = '/results/SummaryCSV/';
     var pollingTask;
+    var requested = false;
 
     function check_summary_status(){
         $.get(endpoint, function(data, textStatus, xhr){
@@ -15,6 +16,9 @@ $(function(){
                     $summaryCsv.find('button').addClass('hidden')
                     $summaryCsv.find('.summary-download').removeClass('hidden')
                     stop_poll()
+                    if (requested) {
+                        location.reload();
+                    }
                     return
                 }
                 case 202: {  // already started, but not done
@@ -48,6 +52,7 @@ $(function(){
     };
 
     $summaryCsv.find('button').click(function(event){
+        requested = true;
         //start polling if it hasn't already started
         if(typeof pollingTask === 'undefined'){
             $.post(endpoint, {})  // post to endpoint

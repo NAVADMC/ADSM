@@ -775,7 +775,7 @@ def population(request):
         context['Population'] = Unit.objects.count()
         context['Farms'] = Unit.objects.count()
     else:
-        context['xml_files'] = file_list([".db"])
+        context['xml_files'] = file_list([".xml", ".csv"])
     return render(request, 'ScenarioCreator/Population.html', context)
 
 

@@ -275,7 +275,7 @@ class FunctionalTests(StaticLiveServerTestCase):
     def test_upload_population_file(self):
         self.click_navbar_element('Population')
 
-        self.selenium.find_element_by_link_text('SampleScenario.db').click()
+        self.selenium.find_element_by_link_text('Sample Scenario.db').click()
         for i in range(5):  # a slow population load
             time.sleep(5) # may need to be adjusted for slow computers or if the file grows
             try:
