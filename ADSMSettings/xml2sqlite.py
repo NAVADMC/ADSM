@@ -738,6 +738,9 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     if useDetection or useTracing or useVaccination or useDestruction:
         plan = ControlMasterPlan()
         plan.save()
+    
+    if useDestruction:
+        destructionGlobal = DestructionGlobal()
 
     status("Building Detection Model")
     for el in xml.findall( './/detection-model' ):
@@ -1344,8 +1347,8 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
     for el in xml.findall( './/resources-and-implementation-of-controls-model' ):
         if useDestruction:
-            plan.destruction_program_delay = int_dz( required_text(el, './destruction-program-delay/value' ) )
-            plan.destruction_capacity = getRelChart( el.find( './destruction-capacity' ), relChartNameSequence )
+            destructionGlobal.destruction_program_delay = int_dz( required_text(el, './destruction-program-delay/value' ) )
+            destructionGlobal.destruction_capacity = getRelChart( el.find( './destruction-capacity' ), relChartNameSequence )
             try:
                 order = required_text(el, './destruction-priority-order' ).strip()
             except AttributeError:
@@ -1353,7 +1356,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             # The XML did not put spaces after the commas, but the Django
             # model does.
             order = ', '.join( order.split( ',' ) )
-            plan.destruction_priority_order = order
+            destructionGlobal.destruction_priority_order = order
 
             # Create a new version of destructionReasonOrder where a) only the
             # minimum priority number attached to each reason is preserved and
@@ -1363,7 +1366,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 minPriority = min( [item[0] for item in filter( lambda item: item[1]==reason, destructionReasonOrder )] )
                 newDestructionReasonOrder.append( (minPriority, reason) )
             newDestructionReasonOrder.sort()
-            plan.destruction_reason_order = ', '.join( [item[1] for item in newDestructionReasonOrder] )
+            destructionGlobal.destruction_reason_order = ', '.join( [item[1] for item in newDestructionReasonOrder] )
 
             # Similar process for destructionProductionTypeOrder.
             newDestructionProductionTypeOrder = []
@@ -1380,7 +1383,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol.save()
                 priority += 1
 
-            plan.save()
+            destructionGlobal.save()
         # end of if useDestruction==True
 
         if useVaccination:
