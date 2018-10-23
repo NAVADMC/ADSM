@@ -108,8 +108,8 @@ def std_dev(field, query):
     table_name = query.model._meta.db_table
 
     #two statements, one is for tables that have production_type_id and one for tables that dont
-    id_sql_statement = "SELECT {col}, production_type_id FROM {table} WHERE last_day<>0".format(table=table_name, col=field)
-    nid_sql_statement = "SELECT {col} FROM {table} WHERE last_day<>0".format(table=table_name, col=field)
+    id_sql_statement = "SELECT {col}, production_type_id FROM {table} WHERE last_day = 0".format(table=table_name, col=field)
+    nid_sql_statement = "SELECT {col} FROM {table} WHERE last_day = 0".format(table=table_name, col=field)
 
     #connect to the database
     cursor = connections["scenario_db"].cursor()
