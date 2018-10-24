@@ -188,6 +188,7 @@ def graceful_startup():
             if os.path.splitext(file)[1].lower() in ['.db', '.sqlite', '.sqlite3']:
                 file_path = os.path.join(dirpath, file)
                 new_file_path = os.path.join(dirpath, os.path.splitext(file)[0], file)
+                os.makedirs(os.path.join(dirpath, os.path.splitext(file)[0]))
                 shutil.copy(file_path, new_file_path)
                 os.remove(file_path)
         break  # only walk over top level folder where DB files used to be saved
