@@ -373,6 +373,8 @@ Project Members:
 * USDA Subject Matter Experts - Kelly Patyk, Amy Delgado, Columb Rigney, Kim Forde-Folle, Ann Seitzinger
 * University of Minnesota Center for Food Protection Subject Matter Expert Tim Boyer
 * Custom compiling Python libraries - Christoph Gohlke,  University of California, Irvine
+* Student Externs: Conrad Selig, South Dakota School of Mines, Erin Campbell, University of Rochester
+* R Collaborators: Karla Moreno-Torres, USDA ORISE Fellow, Matt Branan, USDA:APHIS:VS:CEAH
 
 Noun Project Icons:
 
