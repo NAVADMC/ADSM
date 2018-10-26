@@ -246,13 +246,18 @@ class Unit(BaseModel):
                 except ValueError as e:
                     # attempt float
                     kwargs[key] = int(float(kwargs[key]))
-
             elif key == 'initial_state':
                 if len(kwargs[key]) > 1:
                     new_val = choice_char_from_value(kwargs[key], Unit._meta.get_field_by_name('initial_state')[0]._choices)
                     if new_val is None:
                         raise ValidationError(kwargs[key] + " is not a valid state")
                     kwargs[key] = new_val
+            elif key == 'days_in_initial_state':
+                if kwargs[key] == '':
+                    kwargs[key] = None
+            elif key == 'days_left_in_initial_state':
+                if kwargs[key] == '':
+                    kwargs[key] = None
         unit = cls(**kwargs)
         unit.full_clean()
         return unit
