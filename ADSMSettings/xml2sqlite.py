@@ -371,15 +371,10 @@ def readPopulation( populationFileName ):
         description = el.find( './id' )
         if description is None:
             description = ''
+            id = ""
         else:
             description = 'id=' + description.text
-        try:
-            id_re = re.search("^.*?(herdid=(.*?)) .*$", description)
-            id = id_re.group(2)
-            description = description.replace(id_re.group(1), "")
-        except AttributeError:
-            id = ""
-        print("\t\tPARSED ID: " + id)
+            id = description.text
         typeName = required_text(el, './production-type' )
         productionType = ProductionType.objects.get_or_create( name=typeName )[0]
         size = int( required_text(el, './size' ) )
@@ -413,7 +408,7 @@ def readPopulation( populationFileName ):
             days_in_initial_state = daysInState,
             days_left_in_initial_state = daysLeftInState,
             initial_size = size,
-            user_id = id,
+            unit_id = id,
             user_notes = description
         ))
         if len( bulkUnits ) >= CREATE_AT_A_TIME:
