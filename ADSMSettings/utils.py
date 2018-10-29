@@ -48,7 +48,7 @@ def db_list():
             if dir not in ['Example Database Queries', 'Example R Code', 'settings']:
                 dir_files = os.listdir(os.path.join(workspace_path(), dir))
                 for file in dir_files:
-                    if file.endswith('.db'):
+                    if file.endswith('.db') and file.replace('.db', '') != scenario_filename():
                         dbs.append(file)
                         break  # Don't add a directory more than once
         break  # only look at the top level for folders that may contain DBs
