@@ -78,7 +78,7 @@ build_protocols_list = function(){
                             '<input type="checkbox" name="'+ tab['field'] + '" ' + //used in endpoint url
                             (tab['enabled'] ? "checked" : "") +  //initial checked state
                             ' data-proxy="#id_'+ tab['field'] +
-                            '" class="checkboxinput fat_checkbox">' +
+                            '" class="checkboxinput fat_checkbox" ' + (tab['can_select'] ? "" : "disabled") + '>' +
                             '<div class="defined_name" onClick="switch_tabs(this);">'+
                             tab['name'] +
                                 //only include an element if it's not valid.  only show that element if it's invalid and enabled

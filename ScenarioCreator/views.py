@@ -282,15 +282,15 @@ def protocols_json(request):
         entry = {'name': str(protocol.name),
                  'pk': protocol.id,
                  'tabs': [
-                     {'name':'Detection', 'enabled':bool(protocol.use_detection), 'field':'use_detection', 'valid': protocol.tab_is_valid('use_detection')},
-                     {'name':'Tracing', 'enabled':bool(protocol.use_tracing), 'field':'use_tracing', 'valid': protocol.tab_is_valid('use_tracing')},
-                     {'name':'Testing', 'enabled':bool(protocol.use_testing), 'field':'use_testing', 'valid': protocol.tab_is_valid('use_testing')},
-                     {'name':'Exams', 'enabled':bool(protocol.use_exams), 'field':'use_exams', 'valid': protocol.tab_is_valid('use_exams')},
-                     {'name':'Destruction', 'enabled':bool(protocol.use_destruction), 'field':'use_destruction', 'valid': protocol.tab_is_valid(
+                     {'name':'Detection', 'can_select': True, 'enabled':bool(protocol.use_detection), 'field':'use_detection', 'valid': protocol.tab_is_valid('use_detection')},
+                     {'name':'Tracing', 'can_select': True, 'enabled':bool(protocol.use_tracing), 'field':'use_tracing', 'valid': protocol.tab_is_valid('use_tracing')},
+                     {'name':'Testing', 'can_select': True, 'enabled':bool(protocol.use_testing), 'field':'use_testing', 'valid': protocol.tab_is_valid('use_testing')},
+                     {'name':'Exams', 'can_select': True, 'enabled':bool(protocol.use_exams), 'field':'use_exams', 'valid': protocol.tab_is_valid('use_exams')},
+                     {'name':'Destruction', 'can_select': True, 'enabled':bool(protocol.use_destruction), 'field':'use_destruction', 'valid': protocol.tab_is_valid(
                          'use_destruction')},
-                     {'name':'Vaccination', 'enabled':bool(protocol.use_vaccination), 'field':'use_vaccination', 'valid': protocol.tab_is_valid(
+                     {'name':'Vaccination', 'can_select': False, 'enabled':bool(protocol.use_vaccination), 'field':'use_vaccination', 'valid': protocol.tab_is_valid(
                          'use_vaccination')},
-                     {'name':'Cost Accounting', 'enabled':bool(protocol.use_cost_accounting), 'field':'use_cost_accounting', 'valid': protocol.tab_is_valid(
+                     {'name':'Cost Accounting', 'can_select': True, 'enabled':bool(protocol.use_cost_accounting), 'field':'use_cost_accounting', 'valid': protocol.tab_is_valid(
                          'use_cost_accounting')},
                      ]}
         data.append(entry)
