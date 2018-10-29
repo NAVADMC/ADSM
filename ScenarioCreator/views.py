@@ -288,7 +288,7 @@ def protocols_json(request):
                      {'name':'Exams', 'can_select': True, 'enabled':bool(protocol.use_exams), 'field':'use_exams', 'valid': protocol.tab_is_valid('use_exams')},
                      {'name':'Destruction', 'can_select': True, 'enabled':bool(protocol.use_destruction), 'field':'use_destruction', 'valid': protocol.tab_is_valid(
                          'use_destruction')},
-                     {'name':'Vaccination', 'can_select': False, 'enabled':bool(protocol.use_vaccination), 'field':'use_vaccination', 'valid': protocol.tab_is_valid(
+                     {'name':'Vaccination', 'can_select': False, 'enabled':vaccination_trigger_in_use(), 'field':'use_vaccination', 'valid': protocol.tab_is_valid(
                          'use_vaccination')},
                      {'name':'Cost Accounting', 'can_select': True, 'enabled':bool(protocol.use_cost_accounting), 'field':'use_cost_accounting', 'valid': protocol.tab_is_valid(
                          'use_cost_accounting')},
@@ -618,6 +618,19 @@ def trigger_list(request):
                }
     
     return context
+
+
+def vaccination_trigger_in_use():
+    vaccination_triggers = trigger_list({})
+
+    for category in vaccination_triggers['categories']:
+        if category['name'] == "Start Triggers":
+            for model in category['models']:
+                if model['entries'] and len(model['entries']) > 0:
+                    return True
+
+    return False
+
 
 def filtered_list_per_model(model_class, restart_trigger):
     model_name = model_class.__name__
