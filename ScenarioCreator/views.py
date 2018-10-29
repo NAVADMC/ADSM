@@ -266,6 +266,7 @@ def assign_protocols(request):
 def assign_progressions(request):
     """FormSet is pre-populated with existing assignments and it detects and fills in missing
     assignments with a blank form with production type filled in."""
+    initialize_spread_assignments()
     missing = ProductionType.objects.filter(diseaseprogressionassignment__isnull=True)
     ProgressionSet = modelformset_factory(DiseaseProgressionAssignment,
                                           extra=len(missing),
