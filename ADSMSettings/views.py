@@ -234,16 +234,22 @@ def download_file(request):
     return response
 
 
-def backend(request):
+def backend(request, url):
     from django.contrib.auth import login
     from django.contrib.auth.models import User
-    user = User.objects.filter(is_staff=True).first()
+    user = User.objects.filter(username="ADSM").first()
     if user is None:
         user = create_super_user()
     print(user, user.username)
+    if not user.is_superuser:
+        user.is_superuser = True
+        user.save()
+    if not user.is_staff:
+        user.is_staff = True
+        user.save()
     user.backend = 'django.contrib.auth.backends.ModelBackend'
     login(request, user)
-    return redirect('/admin/')
+    return redirect(url)
 
 
 def show_help_text_json(request):
