@@ -9,7 +9,7 @@ django-debug-toolbar==1.4
 django-extras==0.3
 django-floppyforms==1.2.0
 django-webpack-loader==0.2.2
-django-sql-explorer==1.1.1
+django-sql-explorer==1.1.2
 futures==2.2.0
 Pympler==0.4.2
 pyparsing==2.0.3
