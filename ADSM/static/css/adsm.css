@@ -653,6 +653,9 @@ ul {
 #TB_documentation {
     background-image: url("../icons/TB_documentation_btn.png");
 }
+#TB_sqlexplorer {
+    background-image: url("../icons/TB_sqlexplorer_btn.png");
+}
 #TB_population {
     background-image: url("../icons/TB_population_btn.png");
 }
