@@ -98,6 +98,8 @@ DATABASES.update({
 EXPLORER_CONNECTIONS = {'scenario_db': 'scenario_db', }  # Mapping of friendly_name:db_alias. For now, just keeping the same on both sides.
 EXPLORER_DEFAULT_CONNECTION = 'scenario_db'
 EXPLORER_CONNECTION_NAME = 'scenario_db'
+EXPLORER_SCHEMA_EXCLUDE_TABLE_PREFIXES = ('auth_', 'django_', 'south_migrationhistory', 'sqlite_master', 'sqlite_sequence')
+EXPLORER_SQL_BLACKLIST = ('ALTER', 'RENAME', 'DROP', 'TRUNCATE')
 
 DATABASE_ROUTERS = ['ScenarioCreator.router.ScenarioRouter', ]
 
