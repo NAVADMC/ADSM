@@ -216,13 +216,13 @@ class BuildADSM(build_exe):
         outs, errs = webpack.communicate()  # TODO: Possible error checking
         print("Done packing.")
 
-        # management.call_command('collectstatic', interactive=False, clear=True)
-        # if not os.path.exists(os.path.join(settings.BASE_DIR, 'media')):
-        #     os.makedirs(os.path.join(settings.BASE_DIR, 'media'))
-        #
-        # management.call_command('migratescenarios', skip_workspace=True)
-        # management.call_command('makeresultsurls')
-        # management.call_command('makescenariocreatorurls')
+        management.call_command('collectstatic', interactive=False, clear=True)
+        if not os.path.exists(os.path.join(settings.BASE_DIR, 'media')):
+            os.makedirs(os.path.join(settings.BASE_DIR, 'media'))
+
+        management.call_command('migratescenarios', skip_workspace=True)
+        management.call_command('makeresultsurls')
+        management.call_command('makescenariocreatorurls')
 
         shutil.rmtree(os.path.join(settings.BASE_DIR, self.build_exe), ignore_errors=True)
 
