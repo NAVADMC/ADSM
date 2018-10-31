@@ -804,6 +804,7 @@ function prompt_for_new_file_name(link) {
                         ajax_submit_complex_form_and_replaceWith(link, new FormData($self[0]), $self, $self, undefined, function () {
                             $('h1.filename').text($('.filename input').val()) //match major title with form value
                         });
+                        location.reload();
                     } else {
                         //TODO: need FormData from form that is to be added in #NewScenario
                         //ajax_submit_complex_form_and_replaceWith(link, new FormData($self[0]), $self, $self, undefined);
