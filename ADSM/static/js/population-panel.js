@@ -18,7 +18,7 @@ function toggle_added_state(text) {
 }
 
 function select_production_type(text) {
-    var selectors = ['.productiontypelist option', '.grouplist option'];
+    var selectors = ['.productiontypelist.focus option', '.grouplist option'];
     $.each(selectors, function(index, selector){
         $(selector).each(function() {
             if ($(this).text() == text) {
@@ -41,8 +41,24 @@ $(document).on('mousedown', '#ProductionTypes li, #ProductionGroups li, .product
 })
 
 $('.productiontypelist, .grouplist').livequery(function(){
-    $('#ProductionTypes li').removeClass('pt-added')  // clears old data
-    $(this).find('option[selected]').each(function(index, element){
-        toggle_added_state($(element).text())
-    })
+    // clears old data
+    $('#ProductionTypes li').removeClass('pt-added');
+    $('.productiontypelist').removeClass('focus');
 })
+
+$(document).on('focus', '.productiontypelist', function (event) {
+    $('.productiontypelist.focus').removeClass('focus');
+    $(this).addClass('focus');
+
+    $('#ProductionTypes li').removeClass('pt-added');
+    $(this).find('option[selected]').each(function (index, element) {
+        $('#ProductionTypes li').filter(function () {
+            return $(this).find('.pt-name').text() == $(element).text();  // must be an exact match NOT :contains()
+        }).addClass('pt-added');  // for styling rows that have already been added
+    })
+});
+
+$(document).on('blur', '.productiontypelist', function (event) {
+    $('.productiontypelist.focus').removeClass('focus');
+    $('#ProductionTypes li').removeClass('pt-added');
+});
