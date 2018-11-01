@@ -555,7 +555,6 @@ class ProductionTypeList(SelectMultiple):
 
     def get_context(self, name, value, attrs=None, choices=()):
         context = super(SelectMultiple, self).get_context(name, value, attrs)
-        # context['help_text'] = mark_safe("To add production types to the trigger click on a Type or Group from the <em>Population Panel</em>")
         return context
 
 

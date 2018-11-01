@@ -2327,7 +2327,7 @@ select[multiple] {}
     padding: 5px 10px;
 }
 .productiontypelist:after {
-    content:"To add production types to the trigger click on a Type in the Population Panel";
+    content:"To add Production Types to this list,\A click in this box then click on a Type in the Population Panel";
     white-space: pre-wrap;
     font-style: italic;
     color: #808080;
