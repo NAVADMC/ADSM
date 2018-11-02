@@ -1,5 +1,4 @@
 import csv
-import datetime
 import subprocess
 import itertools
 import platform
@@ -780,19 +779,14 @@ def population(request):
         for key, value in params.items():  # loops through params and stacks filters in an AND fashion
             query_filter = query_filter & Q(**{key: value})
 
-        with transaction.atomic():
-            start_time = datetime.datetime.now()
-            units = Unit.objects.all()
-            updated_units = []
-            for unit in units:
-                unit_id_search = re.search(".*?unit_id=([0-9]+)", unit.user_notes)
-                if unit_id_search is not None and unit.unit_id in (None, ''):
-                    unit.unit_id = unit_id_search.group(1)
-                    updated_units.append(unit)
-                    # unit.save()
-            Unit.objects.bulk_update(updated_units, ['unit_id'])
-            end_time = datetime.datetime.now()
-            print("Converting unit_id took: %s" % (end_time - start_time))
+        units = Unit.objects.all()
+        updated_units = []
+        for unit in units:
+            unit_id_search = re.search(".*?unit_id=([0-9]+)", str(unit.user_notes))  # Note that on None user_notes, we are actually regexing "None" which is fine for now.
+            if unit_id_search is not None and unit.unit_id in (None, ''):
+                unit.unit_id = unit_id_search.group(1)
+                updated_units.append(unit)
+        Unit.objects.bulk_update(updated_units, ['unit_id'])
 
         initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:100])
         context['formset'] = initialized_formset
