@@ -783,11 +783,14 @@ def population(request):
         with transaction.atomic():
             start_time = datetime.datetime.now()
             units = Unit.objects.all()
+            updated_units = []
             for unit in units:
                 unit_id_search = re.search(".*?unit_id=([0-9]+)", unit.user_notes)
                 if unit_id_search is not None and unit.unit_id in (None, ''):
                     unit.unit_id = unit_id_search.group(1)
-                    unit.save()
+                    updated_units.append(unit)
+                    # unit.save()
+            Unit.objects.bulk_update(updated_units, ['unit_id'])
             end_time = datetime.datetime.now()
             print("Converting unit_id took: %s" % (end_time - start_time))
 

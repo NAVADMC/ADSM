@@ -42,7 +42,7 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django_extras.db.models import LatitudeField, LongitudeField, MoneyField
 
-from ADSMSettings.models import SingletonManager
+from ADSMSettings.models import SingletonManager, BulkUpdateManager
 from ScenarioCreator.custom_fields import PercentField
 from ScenarioCreator.templatetags.db_status_tags import wiki, link, bold
 import ScenarioCreator.population_parser
@@ -203,10 +203,6 @@ class Population(InputSingleton):
 
 
 class Unit(BaseModel):
-    def save(self, *args, **kwargs):
-        self._population = Population.objects.get()
-        super(Unit, self).save(*args, **kwargs)
-
     _population = models.ForeignKey(Population)
     production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
@@ -232,6 +228,12 @@ class Unit(BaseModel):
         help_text='The number of animals in the ' + wiki("Unit") + '.', )
     user_notes = models.CharField(max_length=255, blank=True, null=True)  # as long as possible
     unit_id = models.CharField(max_length=50, blank=True, null=True)
+
+    objects = BulkUpdateManager()
+
+    def save(self, *args, **kwargs):
+        self._population = Population.objects.get()
+        super(Unit, self).save(*args, **kwargs)
 
     @classmethod
     def create(cls, **kwargs):
