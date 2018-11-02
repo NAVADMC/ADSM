@@ -3,7 +3,7 @@ import math
 import csv
 
 from django.conf import settings
-from django.db import connections
+from django.db import connections, OperationalError
 from django.db.models import Avg, Min, Max
 from math import sqrt
 from statistics import pstdev
@@ -112,14 +112,21 @@ def std_dev(field, query):
     cursor = connections["scenario_db"].cursor()
 
     #two statements, one is for tables that have production_type_id and one for tables that dont
-    last_day_vals = "SELECT {field} FROM {table} WHERE last_day = 1 and production_type_id is null".format(table=table_name, field=field)
+    # try and use the query for tables with production_type_id, if that fails use the other query
+    try:
+        last_day_vals = "SELECT {field} FROM {table} WHERE last_day = 1 and production_type_id is null".format(table=table_name, field=field)
+        cursor.execute(last_day_vals)
+    except OperationalError:
+        last_day_vals = "SELECT {field} FROM {table} WHERE last_day = 1".format(table=table_name, field=field)
+        cursor.execute(last_day_vals)
 
-    #try and use the query for tables with production_type_id, if that fails use the other query
-    cursor.execute(last_day_vals)
     row = cursor.fetchall()
 
     #every value in the query return that is an integer to a list, these are the values used in calculation
     values = [element[0] for element in row if isinstance(element[0], int)]
 
-    #return the standard deviation
-    return round(pstdev(values), 2)
+    if values:
+        #return the standard deviation
+        return round(pstdev(values), 2)
+    else:
+        return 0
