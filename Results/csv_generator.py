@@ -117,8 +117,11 @@ def std_dev(field, query):
         last_day_vals = "SELECT {field} FROM {table} WHERE last_day = 1 and production_type_id is null".format(table=table_name, field=field)
         cursor.execute(last_day_vals)
     except OperationalError:
-        last_day_vals = "SELECT {field} FROM {table} WHERE last_day = 1".format(table=table_name, field=field)
-        cursor.execute(last_day_vals)
+        try:
+            last_day_vals = "SELECT {field} FROM {table} WHERE last_day = 1".format(table=table_name, field=field)
+            cursor.execute(last_day_vals)
+        except OperationalError:
+            return "N/A"
 
     row = cursor.fetchall()
 
@@ -129,4 +132,4 @@ def std_dev(field, query):
         #return the standard deviation
         return round(pstdev(values), 2)
     else:
-        return 0
+        return "N/A"
