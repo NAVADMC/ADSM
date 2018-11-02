@@ -1,4 +1,5 @@
 import csv
+import datetime
 import subprocess
 import itertools
 import platform
@@ -9,7 +10,7 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
 from django.db.models import Q, ObjectDoesNotExist
-from django.db import OperationalError
+from django.db import OperationalError, transaction
 
 from Results.models import *  # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.models import *  # This is absolutely necessary for dynamic form loading
@@ -779,12 +780,16 @@ def population(request):
         for key, value in params.items():  # loops through params and stacks filters in an AND fashion
             query_filter = query_filter & Q(**{key: value})
 
-        units = Unit.objects.all()
-        for unit in units:
-            unit_id_search = re.search(".*?unit_id=([0-9]+)", unit.user_notes)
-            if unit_id_search is not None and unit.unit_id is None:
-                unit.unit_id = unit_id_search.group(1)
-                unit.save()
+        with transaction.atomic():
+            start_time = datetime.datetime.now()
+            units = Unit.objects.all()
+            for unit in units:
+                unit_id_search = re.search(".*?unit_id=([0-9]+)", unit.user_notes)
+                if unit_id_search is not None and unit.unit_id in (None, ''):
+                    unit.unit_id = unit_id_search.group(1)
+                    unit.save()
+            end_time = datetime.datetime.now()
+            print("Converting unit_id took: %s" % (end_time - start_time))
 
         initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:100])
         context['formset'] = initialized_formset
