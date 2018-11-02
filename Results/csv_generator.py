@@ -105,7 +105,6 @@ class SummaryCSVGenerator(multiprocessing.Process):
 
 def std_dev(field, query):
     """This is the __Population__ Standard Deviation formula translated into RAW SQL statement, specifically SQLite version."""
-    #TODO: try/except for whole column
 
     #get next table name based on given query
     table_name = query.model._meta.db_table
