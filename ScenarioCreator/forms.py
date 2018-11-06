@@ -408,6 +408,7 @@ class DirectSpreadForm(BaseForm):
             'use_fixed_contact_rate',
             'contact_rate',
             AppendedText('infection_probability', 'example: 0.37 = 37%'),
+            HTML('<p class="help-block">Probability of infection transfer is determined by within unit prevalence.</p>'),
             'distance_distribution',
             'transport_delay',
             'movement_control',

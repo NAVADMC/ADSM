@@ -370,7 +370,7 @@ class ControlMasterPlan(InputSingleton):
     vaccination_priority_order = models.TextField(default='{"Days Holding":["Oldest", "Newest"], "Production Type":[], "Reason":["Basic", "Trace fwd direct", "Trace fwd indirect", "Trace back direct", "Trace back indirect", "Ring"], "Direction":["Outside-in", "Inside-out"], "Size":["Largest", "Smallest"]}',
         help_text='The priority criteria for order of vaccinations.',)
     vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True, default=0,
-        help_text='Once a vaccination program starts, this number determines how many days previous to the start of the vaccination program a detection will trigger vaccination.', )
+        help_text='Once a trigger has been activated, detected units prior to the trigger day can be retrospectively included in the vaccination strategy. This number defines how many days before the trigger to step back, and incorporate detected units.', )
 
     def update_production_type_listing(self):
         data = json.loads(self.vaccination_priority_order, object_pairs_hook=OrderedDict)  # preserve priority ordering is important
@@ -566,7 +566,7 @@ class ControlProtocol(BaseModel):
         help_text='Indicates if detection in units of this ' + wiki("production type") + ' will trigger vaccination.', )
     days_to_immunity = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of days required for the onset of ' + wiki("vaccine immunity", "vaccine-immune") + ' in a newly vaccinated unit of this type.', )
-    minimum_time_between_vaccinations = models.PositiveIntegerField(blank=True, null=True, default=99999,
+    minimum_time_between_vaccinations = models.PositiveIntegerField(blank=False, null=False, default=99999,
         help_text='The minimum time in days between vaccination for units of this ' + wiki("production type") + '. Default value set to 99999 to stop duplicate vaccinations.', )
     vaccine_immune_period = models.ForeignKey(ProbabilityDensityFunction, related_name='+', blank=True, null=True,
         help_text='Defines the ' + wiki("vaccine immune") + ' period for units of this ' + wiki("production type") + '.', )
