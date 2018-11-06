@@ -1,5 +1,7 @@
 import json
-from django.db.models import Q
+import re
+
+from django.db.models import Q, Count
 
 from ScenarioCreator.models import ProductionType, DiseaseProgressionAssignment, DiseaseSpreadAssignment, Disease, Unit, DirectSpread, DiseaseProgression, \
     ControlProtocol
@@ -59,3 +61,15 @@ def whole_scenario_validation():
             break
 
     return warnings
+
+
+def convert_user_notes_to_unit_id():
+    print("Converting any existing user_notes to unit_id as needed...")
+    units = Unit.objects.filter(Q(user_notes__isnull=False) | ~Q(user_notes=''), Q(unit_id__isnull=True) | Q(unit_id=''))
+    updated_units = []
+    for unit in units:
+        unit_id_search = re.search(".*?unit_id=([0-9]+)", str(unit.user_notes))  # Note that on None user_notes, we are actually regexing "None" which is fine for now.
+        if unit_id_search is not None and unit.unit_id in (None, ''):  # The unit_id being none check isn't needed with the new filter above, but we'll keep it for future safety
+            unit.unit_id = unit_id_search.group(1)
+            updated_units.append(unit)
+    Unit.objects.bulk_update(updated_units, ['unit_id'])

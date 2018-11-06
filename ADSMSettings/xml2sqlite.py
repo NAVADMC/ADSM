@@ -371,10 +371,12 @@ def readPopulation( populationFileName ):
         description = el.find( './id' )
         try:
             description = 'unit_id=' + description.text
-            id = description.text
+            try:
+                id = description.text
+            except (Exception, BaseException):
+                id = None
         except (Exception, BaseException):
             description = ""
-            id = ""
         typeName = required_text(el, './production-type' )
         productionType = ProductionType.objects.get_or_create( name=typeName )[0]
         size = int( required_text(el, './size' ) )

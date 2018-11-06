@@ -17,6 +17,7 @@ from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic 
 from ADSMSettings.models import unsaved_changes
 from ADSMSettings.utils import graceful_startup, file_list, handle_file_upload, workspace_path, adsm_executable_command
 from ScenarioCreator.population_parser import lowercase_header
+from ScenarioCreator.utils import convert_user_notes_to_unit_id
 
 
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
@@ -732,6 +733,7 @@ def parse_population(file_path, session):
         return JsonResponse({"status": "failed", "message": message + str(error)})  # make sure to cast errors to string first
     # wait for Population parsing (up to 5 minutes)
     session.reset_population_upload_status()
+    convert_user_notes_to_unit_id()
     return JsonResponse({"status": "complete", "redirect": "/setup/Populations/"})
 
 
@@ -778,15 +780,6 @@ def population(request):
         params = filtering_params(request)
         for key, value in params.items():  # loops through params and stacks filters in an AND fashion
             query_filter = query_filter & Q(**{key: value})
-
-        units = Unit.objects.all()
-        updated_units = []
-        for unit in units:
-            unit_id_search = re.search(".*?unit_id=([0-9]+)", str(unit.user_notes))  # Note that on None user_notes, we are actually regexing "None" which is fine for now.
-            if unit_id_search is not None and unit.unit_id in (None, ''):
-                unit.unit_id = unit_id_search.group(1)
-                updated_units.append(unit)
-        Unit.objects.bulk_update(updated_units, ['unit_id'])
 
         initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:100])
         context['formset'] = initialized_formset

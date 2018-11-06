@@ -14,6 +14,7 @@ from ADSMSettings.xml2sqlite import import_naadsm_xml
 from ADSMSettings.utils import update_db_version, db_path, workspace_path, db_list, handle_file_upload, graceful_startup, scenario_filename, \
     copy_blank_to_session, create_super_user
 from Results.models import outputs_exist
+from ScenarioCreator.utils import convert_user_notes_to_unit_id
 
 
 def home(request):
@@ -77,6 +78,7 @@ def import_legacy_scenario(param_path, popul_path, new_name=None):
         names_without_extensions = '%s with %s' % names_without_extensions
 
     import_naadsm_xml(popul_path, param_path)  # puts all the data in activeSession
+    convert_user_notes_to_unit_id()
     scenario_filename(names_without_extensions, check_duplicates=True)
     return save_scenario(None)  # This will overwrite a file of the same name without prompting
     # except BaseException as error:
@@ -139,6 +141,7 @@ def open_scenario(request, target, wrap_target=True):
     scenario_filename(os.path.basename(target))
     print('Sessions overwritten with ', target)
     update_db_version()
+    convert_user_notes_to_unit_id()
     unsaved_changes(False)  # File is now in sync
     SmSession.objects.all().update(iteration_text = '', simulation_has_started=outputs_exist())  # This is also reset from delete_all_outputs
     # else:
