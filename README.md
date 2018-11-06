@@ -337,7 +337,7 @@ Each release line of ADSM has a "Program_id" and "Password" associated with it o
 
 The ADSM releases are:
 
-* ADSM (with is the Production release)
+* ADSM (which is the Production release)
 * ADSM_Beta
 * ADSM_Vaccination_Rings
 
