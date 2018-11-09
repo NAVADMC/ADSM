@@ -42,23 +42,6 @@ def whole_scenario_validation():
             warnings.append(protocol.name + " Protocol has a section enabled but not completely filled in.  Either disable the section or fill in the details of the invalid section.")
 
     # # checking for unique user ids
-    # # create list of unit ids
-    # unit_ids = [unit.get_id() for unit in Unit.objects.all()]
-    # # create a version of the list with only one listing of each element
-    # set_unit_ids = list(set(unit_ids))
-    # # for every item in the original list
-    # for index in range(len(unit_ids)):
-    #     # try catches populations that were not traditionally imported (the sample scenarios)
-    #     try:
-    #         # if the sorted indexes of both lists do not match, there are duplicate elements
-    #         if sorted(unit_ids)[index] != sorted(set_unit_ids)[index]:
-    #             # validation message provided by Missy Schoenbaum
-    #             warnings.append("Validation indicated that your unit identifiers are not unique identifiers. Supplemental files use this identifier in creating the output. Joining output for post-processing will not be advisable.")
-    #             # break, only one non-unique id is required for this warning.
-    #             break
-    #     except TypeError:
-    #         # break for sample scenarios, it is safe to assume their user ids are unique
-    #         break
     if Unit.objects.filter(~Q(unit_id=''), unit_id__isnull=False).values('unit_id').annotate(Count('id')).filter(id__count__gt=1).exists():
         warnings.append("Validation indicated that your unit identifiers are not unique identifiers. Supplemental files use this identifier in creating the output. Joining output for post-processing will not be advisable.")
 
