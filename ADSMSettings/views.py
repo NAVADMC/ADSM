@@ -180,7 +180,7 @@ def save_scenario(request=None):
         print('Copying database to', target)
 
         if not os.path.exists(os.path.dirname(full_path)):
-            os.makedirs(os.path.dirname(full_path))
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
         shutil.copy(db_path(), full_path)
         unsaved_changes(False)  # File is now in sync
         print('Done Copying database to', full_path)
@@ -218,7 +218,7 @@ def copy_file(request, target, destination):
     if not destination.endswith('.db'):
         destination += ".db"
     if not os.path.exists(os.path.dirname(destination)):
-        os.makedirs(os.path.dirname(destination))
+        os.makedirs(os.path.dirname(destination), exist_ok=True)
     shutil.copy(target, destination)
     print("Done copying", target)
     return redirect('/')

@@ -89,7 +89,7 @@ def prepare_supplemental_output_directory():
     output_dir = workspace_path('%s/%s' % (scenario_filename(), "Supplemental Output Files"))  # this does not have the .db suffix
     output_args = ['--output-dir', output_dir]  # to be returned and passed to adsm_simulation.exe
     if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
     return output_args
 
 
@@ -164,7 +164,7 @@ def graceful_startup():
             subdir = subdir.replace(os.path.sep, '', 1)
         if subdir.strip():
             if not os.path.exists(os.path.join(workspace_path(), subdir)):
-                os.makedirs(os.path.join(workspace_path(), subdir))
+                os.makedirs(os.path.join(workspace_path(), subdir), exist_ok=True)
         for file in files:
             try:
                 shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), subdir, file))
@@ -188,7 +188,7 @@ def graceful_startup():
             if os.path.splitext(file)[1].lower() in ['.db', '.sqlite', '.sqlite3']:
                 file_path = os.path.join(dirpath, file)
                 new_file_path = os.path.join(dirpath, os.path.splitext(file)[0], file)
-                os.makedirs(os.path.join(dirpath, os.path.splitext(file)[0]))
+                os.makedirs(os.path.join(dirpath, os.path.splitext(file)[0]), exist_ok=True)
                 shutil.copy(file_path, new_file_path)
                 os.remove(file_path)
         break  # only walk over top level folder where DB files used to be saved
