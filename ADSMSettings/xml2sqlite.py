@@ -370,13 +370,19 @@ def readPopulation( populationFileName ):
     for el in xml.findall( './/herd' ):
         description = el.find( './id' )
         try:
-            description = 'unit_id=' + description.text
+            description = description.text
+        except:
+            description = el.find( './unitid' )
             try:
-                id = description.text
-            except (Exception, BaseException):
-                id = None
-        except (Exception, BaseException):
+                description = description.text
+            except:
+                description = None
+        if description is not None and description != '':
+            id = description
+            description = 'unit_id=' + description
+        else:
             description = ""
+            id = None
         typeName = required_text(el, './production-type' )
         productionType = ProductionType.objects.get_or_create( name=typeName )[0]
         size = int( required_text(el, './size' ) )

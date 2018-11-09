@@ -71,6 +71,14 @@ class PopulationParser(object):
         This is because a format that has fewer options, but same names will match to a format that has more options
         containing all the options of the smaller one. This case will end up throwing an error for missing columns."""
         possible_formats = [
+            {'id': 'unit_id',  # NAADSM CSV no HerdSize, with status and state timers, and with unitid
+             'productiontype': 'production_type',
+             'unitsize': 'initial_size',
+             'lat': 'latitude',
+             'lon': 'longitude',
+             'status': 'initial_state',
+             'daysinstate': 'days_in_initial_state',
+             'daysleftinstate': 'days_left_in_initial_state'},
             {'unitid': 'unit_id', # NAADSM CSV no HerdSize, with status and state timers, and with unitid
              'productiontype': 'production_type',
              'unitsize': 'initial_size',
@@ -139,6 +147,6 @@ class PopulationParser(object):
             text = gettext(element)
         except:
             raise IOError("Couldn't find '%s' label in xml" % xml_name)
-        if xml_name == 'id' and text:
+        if str(xml_name).lower() in ('id', 'unitid') and text:
              field_name = "unit_id"
         self.population[-1][field_name] = text
